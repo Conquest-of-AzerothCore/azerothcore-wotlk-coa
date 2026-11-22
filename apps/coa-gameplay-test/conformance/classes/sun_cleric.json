@@ -1383,7 +1383,7 @@
       "setup_actor_aura": 807749,
       "target": "dummy",
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "metric": "armor_reduced_damage",
       "fields": {
         "spell": 800626,
@@ -1392,7 +1392,8 @@
       "before_expected": 913,
       "expected": 929,
       "tolerance": 1,
-      "observe_source": "Vindicator 707773 Effect[0] aura 107 SPELLMOD_FLAT, MiscValue 12 (SPELLMOD_EFFECT2 in SpellDefines.h:88; the effective behaviour comes from the contract that rewrites it to SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT, AscensionSunClericRadiance.cpp:73-85) on Glorious Execution 800626, BasePoints -21 (-20 as read), applied only while Vow of the Valkyr 807749 is active (AscensionSunClericRadiance.cpp:41-81). Glorious Execution 800626 is read with the engine's own Unit::CalcArmorReducedDamage (armor_reduced_damage, damage left of 1000 after armor) against the harness dummy; Vow of the Valkyr is raised by set_aura in both phases as a precondition fixture (the claim's subject is the armor ignore, not the Vow). The dummy's armor is not in the data, so the before read (913, the control without 707773) fixes it: damage left = 1/(1+t), t = 0.1 x armor / (8.5 x 64.5 + 40) at attacker level 60 (Unit.cpp:2536-2542), armor 557-564. Ignoring 20% leaves armor 446-451 and 929-930 of 1000; 15% would read 925 and 25% 933, outside the tolerance of 1. Reference search: coa-history 800626 has 219 casts in 2 logs and 800691 / 802566 3417 / 3362 damage events; bindmysoul 704938 text reads \"-10%\" (the older state, ours is 20% from Spell.dbc); nothing found that fixes the dummy armor."
+      "observe_source": "Vindicator 707773 Effect[0] aura 107 SPELLMOD_FLAT, MiscValue 12 (SPELLMOD_EFFECT2 in SpellDefines.h:88; the effective behaviour comes from the contract that rewrites it to SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT, AscensionSunClericRadiance.cpp:73-85) on Glorious Execution 800626, BasePoints -21 (-20 as read), applied only while Vow of the Valkyr 807749 is active (AscensionSunClericRadiance.cpp:41-81). Glorious Execution 800626 is read with the engine's own Unit::CalcArmorReducedDamage (armor_reduced_damage, damage left of 1000 after armor) against the harness dummy; Vow of the Valkyr is raised by set_aura in both phases as a precondition fixture (the claim's subject is the armor ignore, not the Vow). The dummy's armor is not in the data, so the before read (913, the control without 707773) fixes it: damage left = 1/(1+t), t = 0.1 x armor / (8.5 x 64.5 + 40) at attacker level 60 (Unit.cpp:2536-2542), armor 557-564. Ignoring 20% leaves armor 446-451 and 929-930 of 1000; 15% would read 925 and 25% 933, outside the tolerance of 1. Reference search: coa-history 800626 has 219 casts in 2 logs and 800691 / 802566 3417 / 3362 damage events; bindmysoul 704938 text reads \"-10%\" (the older state, ours is 20% from Spell.dbc); nothing found that fixes the dummy armor. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 680618,
@@ -2645,7 +2646,7 @@
       "trigger_spell": 805301,
       "target": "caster",
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "name": "Swift Justice (spell haste)",
       "variant": "spell_haste",
       "label_suffix": "spell_haste",
@@ -2654,7 +2655,8 @@
       "tolerance": 0.0001,
       "metric": "cast_speed_multiplier",
       "fields": {},
-      "observe_source": "300322 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS +3 ($s1), TARGET_UNIT_CASTER. A spell haste of 3% casts 3% faster: the caster's cast speed multiplier reads 1 before the learn (control) and 1 / 1.03 around a Holy Form 805301 cast."
+      "observe_source": "300322 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS +3 ($s1), TARGET_UNIT_CASTER. A spell haste of 3% casts 3% faster: the caster's cast speed multiplier reads 1 before the learn (control) and 1 / 1.03 around a Holy Form 805301 cast. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 300322,
@@ -2663,7 +2665,7 @@
       "trigger_spell": 805301,
       "target": "caster",
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "name": "Swift Justice (melee haste)",
       "variant": "melee_haste",
       "label_suffix": "melee_haste",
@@ -2675,7 +2677,8 @@
       "fields": {
         "hand": 0
       },
-      "observe_source": "300322 Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE +3 ($s1). The main-hand base attack time (Seraphim one-hand, item 2524, 2500 ms) is read before and after the learn; with +3% haste the ratio is 1/1.03."
+      "observe_source": "300322 Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE +3 ($s1). The main-hand base attack time (Seraphim one-hand, item 2524, 2500 ms) is read before and after the learn; with +3% haste the ratio is 1/1.03. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 680645,
@@ -2970,8 +2973,9 @@
       "before_expected": 0,
       "expected_gain": 357,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "301345 Effect[1] aura 328 SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT, EffectBasePoints 299 + 1 = 300 ($s2), EffectMiscValueB 3 (Intellect, stat index 3). Reference Intellect 119 (class file stat 3): 300% x 119 = 357 added to the maximum mana. Maximum mana read before and after the learn; expected_gain judges the difference, control = reading before the learn."
+      "expire_ms": 1100,
+      "observe_source": "301345 Effect[1] aura 328 SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT, EffectBasePoints 299 + 1 = 300 ($s2), EffectMiscValueB 3 (Intellect, stat index 3). Reference Intellect 119 (class file stat 3): 300% x 119 = 357 added to the maximum mana. Maximum mana read before and after the learn; expected_gain judges the difference, control = reading before the learn. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 301345,
@@ -5163,7 +5167,7 @@
       "kind": "metric_delta",
       "trigger_spell": 805301,
       "target": "caster",
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "name": "Ancient Rites 301817 (maximum mana)",
       "quote": "Increases your mana by $s2% of your Intellect,",
       "variant": "max_mana",
@@ -5177,7 +5181,8 @@
       "expected_gain": 535.5,
       "tolerance": 1,
       "wait_ms": 500,
-      "observe_source": "301817 Effect[1] aura 328 SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT, EffectBasePoints 449 + 1 = 450 ($s2), EffectMiscValueB 3 (Intellect, stat index 3). Reference Intellect 119: 450% x 119 = 535.5 added to the maximum mana, judged to one point for the integer rounding of the stat. Maximum mana read before and after the learn; expected_gain judges the difference, control = the reading before the learn. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries Ancient Rites 300351 in an older rank state (\"Increases your Intellect by 2% ... 1% of your maximum mana every 20 sec\"), a different figure that does not override the server DBC (older reference, guide section 4); nothing else found."
+      "observe_source": "301817 Effect[1] aura 328 SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT, EffectBasePoints 449 + 1 = 450 ($s2), EffectMiscValueB 3 (Intellect, stat index 3). Reference Intellect 119: 450% x 119 = 535.5 added to the maximum mana, judged to one point for the integer rounding of the stat. Maximum mana read before and after the learn; expected_gain judges the difference, control = the reading before the learn. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries Ancient Rites 300351 in an older rank state (\"Increases your Intellect by 2% ... 1% of your maximum mana every 20 sec\"), a different figure that does not override the server DBC (older reference, guide section 4); nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 301817,
@@ -5242,7 +5247,7 @@
       "kind": "metric_delta",
       "trigger_spell": 805301,
       "target": "caster",
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "name": "Ancient Rites 300351 (maximum mana)",
       "quote": "Increases your mana by $s2% of your Intellect,",
       "variant": "max_mana",
@@ -5256,7 +5261,8 @@
       "expected_gain": 178.5,
       "tolerance": 1,
       "wait_ms": 500,
-      "observe_source": "300351 Effect[1] aura 328 SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT, EffectBasePoints 149 + 1 = 150 ($s2), EffectMiscValueB 3 (Intellect, stat index 3). Reference Intellect 119: 150% x 119 = 178.5 added to the maximum mana, judged to one point for the integer rounding of the stat. Maximum mana read before and after the learn; expected_gain judges the difference, control = the reading before the learn. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries Ancient Rites 300351 in an older rank state (\"Increases your Intellect by 2% ... 1% of your maximum mana every 20 sec\"), a different figure that does not override the server DBC (older reference, guide section 4); nothing else found."
+      "observe_source": "300351 Effect[1] aura 328 SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT, EffectBasePoints 149 + 1 = 150 ($s2), EffectMiscValueB 3 (Intellect, stat index 3). Reference Intellect 119: 150% x 119 = 178.5 added to the maximum mana, judged to one point for the integer rounding of the stat. Maximum mana read before and after the learn; expected_gain judges the difference, control = the reading before the learn. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries Ancient Rites 300351 in an older rank state (\"Increases your Intellect by 2% ... 1% of your maximum mana every 20 sec\"), a different figure that does not override the server DBC (older reference, guide section 4); nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 300351,
@@ -5339,7 +5345,7 @@
       "quote": "Increases your Holy critical strike chance by $s1%",
       "trigger_spell": 805301,
       "target": "caster",
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "wait_ms": 500,
       "metric": "spell_crit_chance",
       "fields": {
@@ -5349,7 +5355,8 @@
       "expected": 4,
       "expected_gain": 4,
       "tolerance": 0.0001,
-      "observe_source": "681470 Effect[0] aura 71 SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, MiscValue 2 (Holy), BasePoints 3 + 1 = 4 ($s1), TARGET_UNIT_CASTER. No CoA code names 681470. The caster live Holy (school index 1) spell crit percentage around a Holy Form 805301 cast, before the passive is learned (control) and after: gain 4 points. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the rank 1 state (2% Holy critical strike chance, 50% less pushback) for An'she's Guidance 681064, an older rank figure that does not override the DBC; nothing else found."
+      "observe_source": "681470 Effect[0] aura 71 SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, MiscValue 2 (Holy), BasePoints 3 + 1 = 4 ($s1), TARGET_UNIT_CASTER. No CoA code names 681470. The caster live Holy (school index 1) spell crit percentage around a Holy Form 805301 cast, before the passive is learned (control) and after: gain 4 points. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the rank 1 state (2% Holy critical strike chance, 50% less pushback) for An'she's Guidance 681064, an older rank figure that does not override the DBC; nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 300321,
@@ -5670,7 +5677,7 @@
       "quote": "Increases the critical strike chance of Dawnbreak by $s2%",
       "trigger_spell": 805301,
       "target": "caster",
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "wait_ms": 500,
       "metric": "spell_done_crit_chance",
       "fields": {
@@ -5681,7 +5688,8 @@
       "expected": 20,
       "expected_gain": 20,
       "tolerance": 0.0001,
-      "observe_source": "681468 Effect[1] aura 107 ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 (flattened index 4) = 1073741824 = Dawnbreak 800654 SpellFamilyFlags[1]. The caster's crit chance for a Dawnbreak 800654 hit on the dummy (Unit::SpellDoneCritChance, the engine function used at hit time) around a Holy Form 805301 cast, before the passive is learned (control) and after: gain 20 points. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the rank 1 state of Paying The Tithe 680647 (10% Dawnbreak critical strike chance, 2 additional blocks), an older rank figure that does not override the DBC; nothing else found."
+      "observe_source": "681468 Effect[1] aura 107 ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 (flattened index 4) = 1073741824 = Dawnbreak 800654 SpellFamilyFlags[1]. The caster's crit chance for a Dawnbreak 800654 hit on the dummy (Unit::SpellDoneCritChance, the engine function used at hit time) around a Holy Form 805301 cast, before the passive is learned (control) and after: gain 20 points. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the rank 1 state of Paying The Tithe 680647 (10% Dawnbreak critical strike chance, 2 additional blocks), an older rank figure that does not override the DBC; nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 681468,
@@ -7775,8 +7783,9 @@
       "expected_gain": 6,
       "tolerance": 0.01,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "301343 Wrath of God Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 5 + 1 = 6 ($s1), EffectSpellClassMask word 1 = 258 (Dawnsear 500146 SpellFamilyFlags[1] 2, Sunflare 800231 SpellFamilyFlags[1] 256), Effect[1] aura 149 SPELL_AURA_REDUCE_PUSHBACK BasePoints 99 + 1 = 100 ($s2). The caster's own critical strike chance for Sunflare 800231 against the dummy (live Player::SpellDoneCritChance, spell_done_crit_chance) around a Radiant Flame 806060 cast, before and after a real learn of 301343; the reading before is the control. The gain is read as the difference, expected 6 within 0.01. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "expire_ms": 1100,
+      "observe_source": "301343 Wrath of God Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 5 + 1 = 6 ($s1), EffectSpellClassMask word 1 = 258 (Dawnsear 500146 SpellFamilyFlags[1] 2, Sunflare 800231 SpellFamilyFlags[1] 256), Effect[1] aura 149 SPELL_AURA_REDUCE_PUSHBACK BasePoints 99 + 1 = 100 ($s2). The caster's own critical strike chance for Sunflare 800231 against the dummy (live Player::SpellDoneCritChance, spell_done_crit_chance) around a Radiant Flame 806060 cast, before and after a real learn of 301343; the reading before is the control. The gain is read as the difference, expected 6 within 0.01. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4). void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 301343,
@@ -7797,8 +7806,9 @@
       "expected_gain": 6,
       "tolerance": 0.01,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "301343 Wrath of God Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 5 + 1 = 6 ($s1), EffectSpellClassMask word 1 = 258 (Dawnsear 500146 SpellFamilyFlags[1] 2, Sunflare 800231 SpellFamilyFlags[1] 256), Effect[1] aura 149 SPELL_AURA_REDUCE_PUSHBACK BasePoints 99 + 1 = 100 ($s2). The caster's own critical strike chance for Dawnsear 500146 against the dummy (live Player::SpellDoneCritChance, spell_done_crit_chance) around a Radiant Flame 806060 cast, before and after a real learn of 301343; the reading before is the control. The gain is read as the difference, expected 6 within 0.01. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "expire_ms": 1100,
+      "observe_source": "301343 Wrath of God Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 5 + 1 = 6 ($s1), EffectSpellClassMask word 1 = 258 (Dawnsear 500146 SpellFamilyFlags[1] 2, Sunflare 800231 SpellFamilyFlags[1] 256), Effect[1] aura 149 SPELL_AURA_REDUCE_PUSHBACK BasePoints 99 + 1 = 100 ($s2). The caster's own critical strike chance for Dawnsear 500146 against the dummy (live Player::SpellDoneCritChance, spell_done_crit_chance) around a Radiant Flame 806060 cast, before and after a real learn of 301343; the reading before is the control. The gain is read as the difference, expected 6 within 0.01. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4). void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 301343,
@@ -7819,8 +7829,9 @@
       "expected_gain": 0,
       "tolerance": 0.01,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "301343 Wrath of God Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 5 + 1 = 6 ($s1), EffectSpellClassMask word 1 = 258 (Dawnsear 500146 SpellFamilyFlags[1] 2, Sunflare 800231 SpellFamilyFlags[1] 256), Effect[1] aura 149 SPELL_AURA_REDUCE_PUSHBACK BasePoints 99 + 1 = 100 ($s2). The caster's own critical strike chance for Horusath Blast, outside the mask 500154 against the dummy (live Player::SpellDoneCritChance, spell_done_crit_chance) around a Radiant Flame 806060 cast, before and after a real learn of 301343; the reading before is the control. The gain is read as the difference, expected 0 within 0.01. The control spell Horusath Blast 500154 (SpellFamilyFlags[1] 64, outside the mask) must gain 0. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "expire_ms": 1100,
+      "observe_source": "301343 Wrath of God Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 5 + 1 = 6 ($s1), EffectSpellClassMask word 1 = 258 (Dawnsear 500146 SpellFamilyFlags[1] 2, Sunflare 800231 SpellFamilyFlags[1] 256), Effect[1] aura 149 SPELL_AURA_REDUCE_PUSHBACK BasePoints 99 + 1 = 100 ($s2). The caster's own critical strike chance for Horusath Blast, outside the mask 500154 against the dummy (live Player::SpellDoneCritChance, spell_done_crit_chance) around a Radiant Flame 806060 cast, before and after a real learn of 301343; the reading before is the control. The gain is read as the difference, expected 0 within 0.01. The control spell Horusath Blast 500154 (SpellFamilyFlags[1] 64, outside the mask) must gain 0. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4). void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 301343,
@@ -8227,9 +8238,14 @@
       "before_expected": 0,
       "expected": 5,
       "wait_ms": 2600,
-      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned from the start and the phase before casts nothing (a baseline reading, not a control): the talent gate is measured by block_one and stack_one (learned between the phases) and by the control_stacks and control_fulfilled siblings (704562 never learned). Six fulfilments (five setup heals and the trigger heal, each at least 1 s apart under the ten charges of one Dawn): the stacks read 5, not 6 (the stated cap). Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4). The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned from the start and the phase before casts nothing (a baseline reading, not a control): the talent gate is measured by block_one and stack_one (learned between the phases) and by the control_stacks and control_fulfilled siblings (704562 never learned). Six fulfilments (five setup heals and the trigger heal, each at least 1 s apart under the ten charges of one Dawn): the stacks read 5, not 6 (the stated cap). Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4). The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6). void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). refill_power_after_setup_casts (round rc): the mana is set to 1363 again after every setup cast (Illumination 500143 costs 30% and Radiant Flame 806060 25% of the pool, Spell.dbc ManaCostPercentage, so the chain of setup casts exhausted it and the last cast was refused with NO_POWER, reason 85, in pair 12); the claim is not about mana.",
       "cast_in_before": false,
-      "setup_only_after": true
+      "setup_only_after": true,
+      "void_on_cast_failure": true,
+      "cast_power": 1363,
+      "refill_power_after_setup_casts": {
+        "power": 0
+      }
     },
     {
       "spell": 704562,
@@ -8281,9 +8297,14 @@
       "expected_gain": 10,
       "tolerance": 0.05,
       "wait_ms": 2600,
-      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned from the start and the phase before casts nothing (a baseline reading, not a control): the talent gate is measured by block_one and stack_one (learned between the phases) and by the control_stacks and control_fulfilled siblings (704562 never learned). Six fulfilments leave 5 stacks of +2%: the block chance gain is 10 within 0.05. Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4). The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned from the start and the phase before casts nothing (a baseline reading, not a control): the talent gate is measured by block_one and stack_one (learned between the phases) and by the control_stacks and control_fulfilled siblings (704562 never learned). Six fulfilments leave 5 stacks of +2%: the block chance gain is 10 within 0.05. Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4). The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6). void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). refill_power_after_setup_casts (round rc): the mana is set to 1363 again after every setup cast (Illumination 500143 costs 30% and Radiant Flame 806060 25% of the pool, Spell.dbc ManaCostPercentage, so the chain of setup casts exhausted it and the last cast was refused with NO_POWER, reason 85, in pair 12); the claim is not about mana.",
       "cast_in_before": false,
-      "setup_only_after": true
+      "setup_only_after": true,
+      "void_on_cast_failure": true,
+      "cast_power": 1363,
+      "refill_power_after_setup_casts": {
+        "power": 0
+      }
     },
     {
       "spell": 704562,
@@ -8664,7 +8685,7 @@
       "quote": "Increases your Holy critical strike chance by $s1%",
       "trigger_spell": 805301,
       "target": "caster",
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "wait_ms": 500,
       "metric": "spell_crit_chance",
       "fields": {
@@ -8674,7 +8695,8 @@
       "expected": 2,
       "expected_gain": 2,
       "tolerance": 0.0001,
-      "observe_source": "681064 Effect[0] aura 71 SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, MiscValue 2 (Holy), BasePoints 1 + 1 = 2 ($s1), TARGET_UNIT_CASTER. The caster live Holy (school index 1) spell crit percentage around a Holy Form 805301 cast, before the passive is learned (control) and after: gain 2 points. Reference search 2026-11-22: coa-history spell 681064: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 681064: #4516 only (native handlers at data level), nothing else; bindmysoul talents snapshot (fetched 2026-07-22) carries rank 1 of An'she's Guidance: 2% Holy critical strike chance, 50% less pushback, the same figures."
+      "observe_source": "681064 Effect[0] aura 71 SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, MiscValue 2 (Holy), BasePoints 1 + 1 = 2 ($s1), TARGET_UNIT_CASTER. The caster live Holy (school index 1) spell crit percentage around a Holy Form 805301 cast, before the passive is learned (control) and after: gain 2 points. Reference search 2026-11-22: coa-history spell 681064: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 681064: #4516 only (native handlers at data level), nothing else; bindmysoul talents snapshot (fetched 2026-07-22) carries rank 1 of An'she's Guidance: 2% Holy critical strike chance, 50% less pushback, the same figures. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 681064,
@@ -8858,8 +8880,9 @@
       "expected_gain": -375,
       "tolerance": 1,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "Radiant Cascade 500141 has a 2500 ms cast time (CastingTimeIndex 19, SpellCastTimes.dbc 19 CastTime 2500). 807874 Sunbeams Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -16 + 1 = -15 ($s1): 2500 x 0.85 = 2125 ms. The cast time of Radiant Cascade is read (the spell's own cast time function for the caster) before and after a real learn of 807874 (the reading before is the control). Reference search 2026-11-22: coa-history spell 807874: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 807874: #4516 only (native handlers at data level), nothing else; bindmysoul talents snapshot (fetched 2026-07-22) has no entry for it."
+      "expire_ms": 1100,
+      "observe_source": "Radiant Cascade 500141 has a 2500 ms cast time (CastingTimeIndex 19, SpellCastTimes.dbc 19 CastTime 2500). 807874 Sunbeams Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -16 + 1 = -15 ($s1): 2500 x 0.85 = 2125 ms. The cast time of Radiant Cascade is read (the spell's own cast time function for the caster) before and after a real learn of 807874 (the reading before is the control). Reference search 2026-11-22: coa-history spell 807874: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 807874: #4516 only (native handlers at data level), nothing else; bindmysoul talents snapshot (fetched 2026-07-22) has no entry for it. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 806159,
@@ -9052,13 +9075,15 @@
       "fields": {
         "spell": 800626
       },
-      "before_expected": 7500,
+      "before_expected": 5900,
       "expected": 0,
       "tolerance": 1500,
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "cast_power": 1363,
-      "observe_source": "560111 Blessed Magic Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL (706870, which triggers 2414058); the reset is scripted: OnSpellCast of Horusath Blast with the aura calls Reduce(player, 800626, INT32_MAX) (AscensionSunClericAbilities.cpp:236-241). Glorious Execution 800626 has RecoveryTime 8000 ms. It is cast, then Horusath Blast 500154 is cast at the dummy: its remaining cooldown is read (about 7500 ms without the talent, the control: RecoveryTime 8000 less the 500 ms wait, within 1500) and 0 after a real learn of 560111 (within 1500, excludes any remaining cooldown above 1500)."
+      "observe_source": "560111 Blessed Magic Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL (706870, which triggers 2414058); the reset is scripted: OnSpellCast of Horusath Blast with the aura calls Reduce(player, 800626, INT32_MAX) (AscensionSunClericAbilities.cpp:236-241). Glorious Execution 800626 has RecoveryTime 8000 ms. It is cast, then Horusath Blast 500154 is cast at the dummy: its remaining cooldown is read (about 7500 ms without the talent, the control: RecoveryTime 8000 less the 500 ms wait, within 1500) and 0 after a real learn of 560111 (within 1500, excludes any remaining cooldown above 1500). void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): Horusath Blast 500154 and Glorious Execution 800626 share the global cooldown (StartRecoveryCategory 133, StartRecoveryTime 1500 ms, Spell.dbc), so the setup cast waits 1600 ms before the trigger cast and the after phase starts 1600 ms after the before trigger (pair 12 refused both casts with NOT_READY, reason 67). Glorious Execution RecoveryTime 8000 ms: the cooldown read 500 ms after the trigger leaves 8000 - 1600 - 500 = 5900 ms before the talent (it read 7500 with no spacing).",
+      "void_on_cast_failure": true,
+      "setup_wait_ms": 1600
     },
     {
       "spell": 704935,
@@ -9439,9 +9464,14 @@
       "before_expected": 0,
       "expected": 5,
       "wait_ms": 2600,
-      "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). Six fulfilments (five setup heals and the trigger heal) read 5 stacks, the stated cap. Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
+      "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). Six fulfilments (five setup heals and the trigger heal) read 5 stacks, the stated cap. Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). refill_power_after_setup_casts (round rc): the mana is set to 1363 again after every setup cast (Illumination 500143 costs 30% and Radiant Flame 806060 25% of the pool, Spell.dbc ManaCostPercentage, so the chain of setup casts exhausted it and the last cast was refused with NO_POWER, reason 85, in pair 12); the claim is not about mana.",
       "cast_in_before": false,
-      "setup_only_after": true
+      "setup_only_after": true,
+      "void_on_cast_failure": true,
+      "cast_power": 1363,
+      "refill_power_after_setup_casts": {
+        "power": 0
+      }
     },
     {
       "spell": 680622,
@@ -9610,7 +9640,7 @@
       "expected_gain": 15,
       "tolerance": 0.01,
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "phase_auras": [
         [
           800601,
@@ -9619,7 +9649,8 @@
           "caster"
         ]
       ],
-      "observe_source": "707613 Radiant Power Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2), EffectSpellClassMask word 0 = 128 (Sunwalker 800601, whose Effect[1] is the flat critical chance modifier of Shine), BasePoints 14 + 1 = 15 ($s1). Sunwalker 800601 StackAmount 5 is set on the caster with the stated stacks as a harness precondition fixture in both phases (its generation by melee hits is the subject of 704934, not of this clause). The caster's critical strike chance of Shine 800357 (healing the caster) is read before the learn (control) and after: the gain is 15 per stack. Gain 15 points with 1 stack(s); the one-stack and three-stack entries are the contrast of each other. Reference search 2026-11-22: coa-history spell 707613: 0 events in 186 logs; git log origin/main --grep 707613: #4516 only (native handlers at data level); the reference snapshots list the tooltip only; nothing else found."
+      "observe_source": "707613 Radiant Power Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2), EffectSpellClassMask word 0 = 128 (Sunwalker 800601, whose Effect[1] is the flat critical chance modifier of Shine), BasePoints 14 + 1 = 15 ($s1). Sunwalker 800601 StackAmount 5 is set on the caster with the stated stacks as a harness precondition fixture in both phases (its generation by melee hits is the subject of 704934, not of this clause). The caster's critical strike chance of Shine 800357 (healing the caster) is read before the learn (control) and after: the gain is 15 per stack. Gain 15 points with 1 stack(s); the one-stack and three-stack entries are the contrast of each other. Reference search 2026-11-22: coa-history spell 707613: 0 events in 186 logs; git log origin/main --grep 707613: #4516 only (native handlers at data level); the reference snapshots list the tooltip only; nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 707613,
@@ -9641,7 +9672,7 @@
       "expected_gain": 45,
       "tolerance": 0.01,
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "phase_auras": [
         [
           800601,
@@ -9650,7 +9681,8 @@
           "caster"
         ]
       ],
-      "observe_source": "707613 Radiant Power Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2), EffectSpellClassMask word 0 = 128 (Sunwalker 800601, whose Effect[1] is the flat critical chance modifier of Shine), BasePoints 14 + 1 = 15 ($s1). Sunwalker 800601 StackAmount 5 is set on the caster with the stated stacks as a harness precondition fixture in both phases (its generation by melee hits is the subject of 704934, not of this clause). The caster's critical strike chance of Shine 800357 (healing the caster) is read before the learn (control) and after: the gain is 15 per stack. Gain 45 points with 3 stack(s); the one-stack and three-stack entries are the contrast of each other. Reference search 2026-11-22: coa-history spell 707613: 0 events in 186 logs; git log origin/main --grep 707613: #4516 only (native handlers at data level); the reference snapshots list the tooltip only; nothing else found."
+      "observe_source": "707613 Radiant Power Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2), EffectSpellClassMask word 0 = 128 (Sunwalker 800601, whose Effect[1] is the flat critical chance modifier of Shine), BasePoints 14 + 1 = 15 ($s1). Sunwalker 800601 StackAmount 5 is set on the caster with the stated stacks as a harness precondition fixture in both phases (its generation by melee hits is the subject of 704934, not of this clause). The caster's critical strike chance of Shine 800357 (healing the caster) is read before the learn (control) and after: the gain is 15 per stack. Gain 45 points with 3 stack(s); the one-stack and three-stack entries are the contrast of each other. Reference search 2026-11-22: coa-history spell 707613: 0 events in 186 logs; git log origin/main --grep 707613: #4516 only (native handlers at data level); the reference snapshots list the tooltip only; nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 804253,
@@ -12950,7 +12982,7 @@
       "quote": "Increases the critical strike chance of Dawnbreak by $s2%",
       "trigger_spell": 805301,
       "target": "caster",
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "wait_ms": 500,
       "metric": "spell_done_crit_chance",
       "fields": {
@@ -12961,7 +12993,8 @@
       "expected": 10,
       "expected_gain": 10,
       "tolerance": 0.0001,
-      "observe_source": "680647 Effect[1] aura 107 ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9 + 1 = 10 ($s2), EffectSpellClassMask word 1 (flattened index 4) = 1073741824 = Dawnbreak 800654 SpellFamilyFlags[1]. The caster's crit chance for a Dawnbreak 800654 hit on the dummy (Unit::SpellDoneCritChance, the engine function used at hit time) around a Holy Form 805301 cast, before the passive is learned (control) and after: gain 10 points. Reference search 2026-11-22: coa-history spell 680647: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Increases the critical strike chance of Dawnbreak by 10% and your Seraphic Bulwark now lasts for 2 additional blocks.\" (same figures); nothing else found."
+      "observe_source": "680647 Effect[1] aura 107 ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9 + 1 = 10 ($s2), EffectSpellClassMask word 1 (flattened index 4) = 1073741824 = Dawnbreak 800654 SpellFamilyFlags[1]. The caster's crit chance for a Dawnbreak 800654 hit on the dummy (Unit::SpellDoneCritChance, the engine function used at hit time) around a Holy Form 805301 cast, before the passive is learned (control) and after: gain 10 points. Reference search 2026-11-22: coa-history spell 680647: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Increases the critical strike chance of Dawnbreak by 10% and your Seraphic Bulwark now lasts for 2 additional blocks.\" (same figures); nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 680647,
@@ -13147,8 +13180,9 @@
       "expected": 2500,
       "tolerance": 1,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "300365 Sunburn Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -501 (-500 ms, $/1000;S1 = 0.5 s); Rapture 806477 has CastingTimeIndex 14 = 3000 ms (SpellCastTimes.dbc), so 2500 ms with the passive. The engine cast time of Rapture on the caster is read before the passive is learned (control, 3000) and after (2500), within 1 ms. Reference search 2026-11-22: coa-history spell 300365: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Rapture by -0.5 sec.\" (same figure); nothing else found."
+      "expire_ms": 1100,
+      "observe_source": "300365 Sunburn Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -501 (-500 ms, $/1000;S1 = 0.5 s); Rapture 806477 has CastingTimeIndex 14 = 3000 ms (SpellCastTimes.dbc), so 2500 ms with the passive. The engine cast time of Rapture on the caster is read before the passive is learned (control, 3000) and after (2500), within 1 ms. Reference search 2026-11-22: coa-history spell 300365: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the cast time of Rapture by -0.5 sec.\" (same figure); nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 300365,
@@ -14078,8 +14112,9 @@
       "expected_gain": 5,
       "tolerance": 0.01,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Gavel of Light 800611 SpellFamilyFlags[1] 32 is in the mask; its done crit chance reads 0 without the passive and 5 with it after a real learn (spell_done_crit_chance, a learned contrast, ADR 0691). Shape 1 of 4 covered spells (G-23): a weapon-percent Gavel."
+      "expire_ms": 1100,
+      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Gavel of Light 800611 SpellFamilyFlags[1] 32 is in the mask; its done crit chance reads 0 without the passive and 5 with it after a real learn (spell_done_crit_chance, a learned contrast, ADR 0691). Shape 1 of 4 covered spells (G-23): a weapon-percent Gavel. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 800039,
@@ -14100,8 +14135,9 @@
       "expected_gain": 5,
       "tolerance": 0.01,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Gavel of Wrath 802561 SpellFamilyFlags[1] 32 is in the mask. Shape 2: the Gavel whose class flags also carry word 2 (4) and whose third effect is a dispel (38)."
+      "expire_ms": 1100,
+      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Gavel of Wrath 802561 SpellFamilyFlags[1] 32 is in the mask. Shape 2: the Gavel whose class flags also carry word 2 (4) and whose third effect is a dispel (38). void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 800039,
@@ -14122,8 +14158,9 @@
       "expected_gain": 5,
       "tolerance": 0.01,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Gavel of Grace 807987 SpellFamilyFlags[1] 32 is in the mask. Shape 3: the Gavel whose third effect is a trigger-spell effect (142)."
+      "expire_ms": 1100,
+      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Gavel of Grace 807987 SpellFamilyFlags[1] 32 is in the mask. Shape 3: the Gavel whose third effect is a trigger-spell effect (142). void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 800039,
@@ -14144,8 +14181,9 @@
       "expected_gain": 5,
       "tolerance": 0.01,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Dawnbreak 504580 SpellFamilyFlags[1] 1073741824 is in the mask. Shape 4: the area Dawnbreak."
+      "expire_ms": 1100,
+      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Dawnbreak 504580 SpellFamilyFlags[1] 1073741824 is in the mask. Shape 4: the area Dawnbreak. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 800039,
@@ -14166,8 +14204,9 @@
       "expected_gain": 0,
       "tolerance": 0.01,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Control arm: Dawnsear 500146 carries none of the three mask bits in its SpellFamilyFlags[1]; the tooltip names Gavels and Dawnbreak only, so its done crit chance must stay 0 after the learn (zero expected gain)."
+      "expire_ms": 1100,
+      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Control arm: Dawnsear 500146 carries none of the three mask bits in its SpellFamilyFlags[1]; the tooltip names Gavels and Dawnbreak only, so its done crit chance must stay 0 after the learn (zero expected gain). void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 572801,
@@ -16454,8 +16493,9 @@
       "expected_gain": 3,
       "tolerance": 0.01,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "301267 Wrath of God Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 2 + 1 = 3 ($s1), EffectSpellClassMask word 1 = 258 (Dawnsear 500146 SpellFamilyFlags[1] 2, Sunflare 800231 SpellFamilyFlags[1] 256), Effect[1] aura 149 SPELL_AURA_REDUCE_PUSHBACK BasePoints 49 + 1 = 50 ($s2). The caster's own critical strike chance for Sunflare 800231 against the dummy (live Player::SpellDoneCritChance, spell_done_crit_chance) around a Radiant Flame 806060 cast, before and after a real learn of 301267; the reading before is the control. The gain is read as the difference, expected 3 within 0.01. Reference search 2026-11-22: coa-history spell 301267: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found."
+      "expire_ms": 1100,
+      "observe_source": "301267 Wrath of God Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 2 + 1 = 3 ($s1), EffectSpellClassMask word 1 = 258 (Dawnsear 500146 SpellFamilyFlags[1] 2, Sunflare 800231 SpellFamilyFlags[1] 256), Effect[1] aura 149 SPELL_AURA_REDUCE_PUSHBACK BasePoints 49 + 1 = 50 ($s2). The caster's own critical strike chance for Sunflare 800231 against the dummy (live Player::SpellDoneCritChance, spell_done_crit_chance) around a Radiant Flame 806060 cast, before and after a real learn of 301267; the reading before is the control. The gain is read as the difference, expected 3 within 0.01. Reference search 2026-11-22: coa-history spell 301267: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 301267,
@@ -16476,8 +16516,9 @@
       "expected_gain": 3,
       "tolerance": 0.01,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "301267 Wrath of God Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 2 + 1 = 3 ($s1), EffectSpellClassMask word 1 = 258 (Dawnsear 500146 SpellFamilyFlags[1] 2, Sunflare 800231 SpellFamilyFlags[1] 256), Effect[1] aura 149 SPELL_AURA_REDUCE_PUSHBACK BasePoints 49 + 1 = 50 ($s2). The caster's own critical strike chance for Dawnsear 500146 against the dummy (live Player::SpellDoneCritChance, spell_done_crit_chance) around a Radiant Flame 806060 cast, before and after a real learn of 301267; the reading before is the control. The gain is read as the difference, expected 3 within 0.01. Reference search 2026-11-22: coa-history spell 301267: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found."
+      "expire_ms": 1100,
+      "observe_source": "301267 Wrath of God Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 2 + 1 = 3 ($s1), EffectSpellClassMask word 1 = 258 (Dawnsear 500146 SpellFamilyFlags[1] 2, Sunflare 800231 SpellFamilyFlags[1] 256), Effect[1] aura 149 SPELL_AURA_REDUCE_PUSHBACK BasePoints 49 + 1 = 50 ($s2). The caster's own critical strike chance for Dawnsear 500146 against the dummy (live Player::SpellDoneCritChance, spell_done_crit_chance) around a Radiant Flame 806060 cast, before and after a real learn of 301267; the reading before is the control. The gain is read as the difference, expected 3 within 0.01. Reference search 2026-11-22: coa-history spell 301267: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 301267,
@@ -16498,8 +16539,9 @@
       "expected_gain": 0,
       "tolerance": 0.01,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "301267 Wrath of God Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 2 + 1 = 3 ($s1), EffectSpellClassMask word 1 = 258 (Dawnsear 500146 SpellFamilyFlags[1] 2, Sunflare 800231 SpellFamilyFlags[1] 256), Effect[1] aura 149 SPELL_AURA_REDUCE_PUSHBACK BasePoints 49 + 1 = 50 ($s2). The caster's own critical strike chance for Horusath Blast, outside the mask 500154 against the dummy (live Player::SpellDoneCritChance, spell_done_crit_chance) around a Radiant Flame 806060 cast, before and after a real learn of 301267; the reading before is the control. The gain is read as the difference, expected 0 within 0.01. The control spell Horusath Blast 500154 (SpellFamilyFlags[1] 64, outside the mask) must gain 0. Reference search 2026-11-22: coa-history spell 301267: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found."
+      "expire_ms": 1100,
+      "observe_source": "301267 Wrath of God Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 2 + 1 = 3 ($s1), EffectSpellClassMask word 1 = 258 (Dawnsear 500146 SpellFamilyFlags[1] 2, Sunflare 800231 SpellFamilyFlags[1] 256), Effect[1] aura 149 SPELL_AURA_REDUCE_PUSHBACK BasePoints 49 + 1 = 50 ($s2). The caster's own critical strike chance for Horusath Blast, outside the mask 500154 against the dummy (live Player::SpellDoneCritChance, spell_done_crit_chance) around a Radiant Flame 806060 cast, before and after a real learn of 301267; the reading before is the control. The gain is read as the difference, expected 0 within 0.01. The control spell Horusath Blast 500154 (SpellFamilyFlags[1] 64, outside the mask) must gain 0. Reference search 2026-11-22: coa-history spell 301267: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 301267,
@@ -16879,9 +16921,10 @@
       "expected_gain": 2,
       "tolerance": 0.05,
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "target_entry": 201,
-      "observe_source": "704909 Sintorcher Effect[1] aura 169 SPELL_AURA_MOD_CRIT_PERCENT_VERSUS (MiscValue 32 = Undead), BasePoints 1 + 1 = 2 ($s2); the script reads it as a bonus of the scripted crit chance (AscensionSunClericAbilities.cpp:199-200, type == CREATURE_TYPE_UNDEAD, Amount(704909, 1)) and the contract turns the effect into a dummy (AscensionSunClericContracts.cpp:204). The caster's own critical strike chance for Horusath Blast 500154 (the engine SpellDoneCritChance plus the script hook) is read before and after a real learn of 704909; the gain is judged, within 0.05 (the 2-point band holds 0, so the reading must exclude the control gain 0: the control is the same read against a Humanoid). Target Brittlebones Skeleton 201 (type 6 Undead, as in the Calm entries). Reference search 2026-11-22: coa-history spell 704909: 0 events in 186 logs (a passive leaves no event); the bindmysoul talents snapshot in ~/CoaServer/reference carries \"Increases your damage and healing done by 3% and your critical strike chance against Undead by 2%.\" (same figures); nothing else found."
+      "observe_source": "704909 Sintorcher Effect[1] aura 169 SPELL_AURA_MOD_CRIT_PERCENT_VERSUS (MiscValue 32 = Undead), BasePoints 1 + 1 = 2 ($s2); the script reads it as a bonus of the scripted crit chance (AscensionSunClericAbilities.cpp:199-200, type == CREATURE_TYPE_UNDEAD, Amount(704909, 1)) and the contract turns the effect into a dummy (AscensionSunClericContracts.cpp:204). The caster's own critical strike chance for Horusath Blast 500154 (the engine SpellDoneCritChance plus the script hook) is read before and after a real learn of 704909; the gain is judged, within 0.05 (the 2-point band holds 0, so the reading must exclude the control gain 0: the control is the same read against a Humanoid). Target Brittlebones Skeleton 201 (type 6 Undead, as in the Calm entries). Reference search 2026-11-22: coa-history spell 704909: 0 events in 186 logs (a passive leaves no event); the bindmysoul talents snapshot in ~/CoaServer/reference carries \"Increases your damage and healing done by 3% and your critical strike chance against Undead by 2%.\" (same figures); nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 704909,
@@ -16902,9 +16945,10 @@
       "expected_gain": 0,
       "tolerance": 0.05,
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "target_entry": 6,
-      "observe_source": "704909 Sintorcher Effect[1] aura 169 SPELL_AURA_MOD_CRIT_PERCENT_VERSUS (MiscValue 32 = Undead), BasePoints 1 + 1 = 2 ($s2); the script reads it as a bonus of the scripted crit chance (AscensionSunClericAbilities.cpp:199-200, type == CREATURE_TYPE_UNDEAD, Amount(704909, 1)) and the contract turns the effect into a dummy (AscensionSunClericContracts.cpp:204). The caster's own critical strike chance for Horusath Blast 500154 (the engine SpellDoneCritChance plus the script hook) is read before and after a real learn of 704909; the gain is judged, within 0.05 (the 2-point band holds 0, so the reading must exclude the control gain 0: the control is the same read against a Humanoid). Control target Kobold Vermin 6 (type 7 Humanoid, as in the Calm entries): gain 0. Reference search 2026-11-22: coa-history spell 704909: 0 events in 186 logs (a passive leaves no event); the bindmysoul talents snapshot in ~/CoaServer/reference carries \"Increases your damage and healing done by 3% and your critical strike chance against Undead by 2%.\" (same figures); nothing else found."
+      "observe_source": "704909 Sintorcher Effect[1] aura 169 SPELL_AURA_MOD_CRIT_PERCENT_VERSUS (MiscValue 32 = Undead), BasePoints 1 + 1 = 2 ($s2); the script reads it as a bonus of the scripted crit chance (AscensionSunClericAbilities.cpp:199-200, type == CREATURE_TYPE_UNDEAD, Amount(704909, 1)) and the contract turns the effect into a dummy (AscensionSunClericContracts.cpp:204). The caster's own critical strike chance for Horusath Blast 500154 (the engine SpellDoneCritChance plus the script hook) is read before and after a real learn of 704909; the gain is judged, within 0.05 (the 2-point band holds 0, so the reading must exclude the control gain 0: the control is the same read against a Humanoid). Control target Kobold Vermin 6 (type 7 Humanoid, as in the Calm entries): gain 0. Reference search 2026-11-22: coa-history spell 704909: 0 events in 186 logs (a passive leaves no event); the bindmysoul talents snapshot in ~/CoaServer/reference carries \"Increases your damage and healing done by 3% and your critical strike chance against Undead by 2%.\" (same figures); nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 802935,
@@ -16950,8 +16994,9 @@
       "expected_gain": 20,
       "tolerance": 0.01,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "Touch of Light 572885 Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 32 (SpellFamilyFlags[1] bit 32, the Gavels). Gavel of Light 800611 SpellFamilyFlags[1] 32 is in the mask; its done crit chance is read before and after a real learn of 572885 (spell_done_crit_chance, a learned contrast); the control is Horusath Blast 500154 outside the mask (gain 0). The gain is judged, 20 within 0.01. Reference search 2026-11-22: coa-history spell 572885: 0 events in 186 logs (a passive); the bindmysoul snapshot text lacks the Gavel sentence (an older state of the tooltip); nothing else found."
+      "expire_ms": 1100,
+      "observe_source": "Touch of Light 572885 Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 32 (SpellFamilyFlags[1] bit 32, the Gavels). Gavel of Light 800611 SpellFamilyFlags[1] 32 is in the mask; its done crit chance is read before and after a real learn of 572885 (spell_done_crit_chance, a learned contrast); the control is Horusath Blast 500154 outside the mask (gain 0). The gain is judged, 20 within 0.01. Reference search 2026-11-22: coa-history spell 572885: 0 events in 186 logs (a passive); the bindmysoul snapshot text lacks the Gavel sentence (an older state of the tooltip); nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 572885,
@@ -16972,8 +17017,9 @@
       "expected_gain": 20,
       "tolerance": 0.01,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "Touch of Light 572885 Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 32 (SpellFamilyFlags[1] bit 32, the Gavels). Gavel of Wrath 802561 SpellFamilyFlags[1] 32 is in the mask; its done crit chance is read before and after a real learn of 572885 (spell_done_crit_chance, a learned contrast); the control is Horusath Blast 500154 outside the mask (gain 0). The gain is judged, 20 within 0.01. Reference search 2026-11-22: coa-history spell 572885: 0 events in 186 logs (a passive); the bindmysoul snapshot text lacks the Gavel sentence (an older state of the tooltip); nothing else found."
+      "expire_ms": 1100,
+      "observe_source": "Touch of Light 572885 Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 32 (SpellFamilyFlags[1] bit 32, the Gavels). Gavel of Wrath 802561 SpellFamilyFlags[1] 32 is in the mask; its done crit chance is read before and after a real learn of 572885 (spell_done_crit_chance, a learned contrast); the control is Horusath Blast 500154 outside the mask (gain 0). The gain is judged, 20 within 0.01. Reference search 2026-11-22: coa-history spell 572885: 0 events in 186 logs (a passive); the bindmysoul snapshot text lacks the Gavel sentence (an older state of the tooltip); nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 572885,
@@ -16994,8 +17040,9 @@
       "expected_gain": 20,
       "tolerance": 0.01,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "Touch of Light 572885 Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 32 (SpellFamilyFlags[1] bit 32, the Gavels). Gavel of Grace 807987 SpellFamilyFlags[1] 32 is in the mask; its done crit chance is read before and after a real learn of 572885 (spell_done_crit_chance, a learned contrast); the control is Horusath Blast 500154 outside the mask (gain 0). The gain is judged, 20 within 0.01. Reference search 2026-11-22: coa-history spell 572885: 0 events in 186 logs (a passive); the bindmysoul snapshot text lacks the Gavel sentence (an older state of the tooltip); nothing else found."
+      "expire_ms": 1100,
+      "observe_source": "Touch of Light 572885 Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 32 (SpellFamilyFlags[1] bit 32, the Gavels). Gavel of Grace 807987 SpellFamilyFlags[1] 32 is in the mask; its done crit chance is read before and after a real learn of 572885 (spell_done_crit_chance, a learned contrast); the control is Horusath Blast 500154 outside the mask (gain 0). The gain is judged, 20 within 0.01. Reference search 2026-11-22: coa-history spell 572885: 0 events in 186 logs (a passive); the bindmysoul snapshot text lacks the Gavel sentence (an older state of the tooltip); nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 572885,
@@ -17016,8 +17063,9 @@
       "expected_gain": 0,
       "tolerance": 0.01,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "Control of the Gavel entries: Horusath Blast 500154 (SpellFamilyFlags[1] without bit 32) gains 0 critical strike chance with 572885 learned (mask word 1 = 32). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
+      "expire_ms": 1100,
+      "observe_source": "Control of the Gavel entries: Horusath Blast 500154 (SpellFamilyFlags[1] without bit 32) gains 0 critical strike chance with 572885 learned (mask word 1 = 32). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 572885,
@@ -19509,9 +19557,10 @@
       "expected_gain": 100,
       "tolerance": 0.05,
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "target_entry": 201,
-      "observe_source": "680645 Judgement: \"they are now guaranteed to critically strike against Undead enemies\": a guaranteed critical strike is a critical strike chance of 100 for Gavel of Light 800611 against an Undead target. The use-time function SpellDoneCritChance with its scripted part is read for 800611 on the dummy (creature type Undead, entry 201) before and after 680645 is learned: gain 100 against the Undead; the same read against a Humanoid is the control (gain 0). The three scripted Gavels 800611, 800614 and 800617 share SpellFamilyFlags[1] 32 and are each read (G-23). The hit-level proof of the critical damage part is the existing crit_damage entries. Reference search 2026-11-22: nothing found beyond the tooltip. Limit: the read is a probe of SpellDoneCritChance and the hook, done side only (it omits SpellTakenCritChance, Spell.cpp:8663-8666), and the hook reads only a caster aura and the creature type (AscensionSunClericAbilities.cpp:197-213), no per-cast state: a readback, not a hit."
+      "observe_source": "680645 Judgement: \"they are now guaranteed to critically strike against Undead enemies\": a guaranteed critical strike is a critical strike chance of 100 for Gavel of Light 800611 against an Undead target. The use-time function SpellDoneCritChance with its scripted part is read for 800611 on the dummy (creature type Undead, entry 201) before and after 680645 is learned: gain 100 against the Undead; the same read against a Humanoid is the control (gain 0). The three scripted Gavels 800611, 800614 and 800617 share SpellFamilyFlags[1] 32 and are each read (G-23). The hit-level proof of the critical damage part is the existing crit_damage entries. Reference search 2026-11-22: nothing found beyond the tooltip. Limit: the read is a probe of SpellDoneCritChance and the hook, done side only (it omits SpellTakenCritChance, Spell.cpp:8663-8666), and the hook reads only a caster aura and the creature type (AscensionSunClericAbilities.cpp:197-213), no per-cast state: a readback, not a hit. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 680645,
@@ -19532,9 +19581,10 @@
       "expected_gain": 0,
       "tolerance": 0.05,
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "target_entry": 6,
-      "observe_source": "680645 Judgement: \"they are now guaranteed to critically strike against Undead enemies\": a guaranteed critical strike is a critical strike chance of 100 for Gavel of Light 800611 against an Undead target. The use-time function SpellDoneCritChance with its scripted part is read for 800611 on the dummy (creature type Humanoid, entry 6) before and after 680645 is learned: gain 0 is the control of the Undead read (gain 100). The three scripted Gavels 800611, 800614 and 800617 share SpellFamilyFlags[1] 32 and are each read (G-23). The hit-level proof of the critical damage part is the existing crit_damage entries. Reference search 2026-11-22: nothing found beyond the tooltip."
+      "observe_source": "680645 Judgement: \"they are now guaranteed to critically strike against Undead enemies\": a guaranteed critical strike is a critical strike chance of 100 for Gavel of Light 800611 against an Undead target. The use-time function SpellDoneCritChance with its scripted part is read for 800611 on the dummy (creature type Humanoid, entry 6) before and after 680645 is learned: gain 0 is the control of the Undead read (gain 100). The three scripted Gavels 800611, 800614 and 800617 share SpellFamilyFlags[1] 32 and are each read (G-23). The hit-level proof of the critical damage part is the existing crit_damage entries. Reference search 2026-11-22: nothing found beyond the tooltip. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 680645,
@@ -19555,9 +19605,10 @@
       "expected_gain": 100,
       "tolerance": 0.05,
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "target_entry": 201,
-      "observe_source": "680645 Judgement: \"they are now guaranteed to critically strike against Undead enemies\": a guaranteed critical strike is a critical strike chance of 100 for Gavel of Grace 800614 against an Undead target. The use-time function SpellDoneCritChance with its scripted part is read for 800614 on the dummy (creature type Undead, entry 201) before and after 680645 is learned: gain 100 against the Undead; the same read against a Humanoid is the control (gain 0). The three scripted Gavels 800611, 800614 and 800617 share SpellFamilyFlags[1] 32 and are each read (G-23). The hit-level proof of the critical damage part is the existing crit_damage entries. Reference search 2026-11-22: nothing found beyond the tooltip. Limit: the read is a probe of SpellDoneCritChance and the hook, done side only (it omits SpellTakenCritChance, Spell.cpp:8663-8666), and the hook reads only a caster aura and the creature type (AscensionSunClericAbilities.cpp:197-213), no per-cast state: a readback, not a hit."
+      "observe_source": "680645 Judgement: \"they are now guaranteed to critically strike against Undead enemies\": a guaranteed critical strike is a critical strike chance of 100 for Gavel of Grace 800614 against an Undead target. The use-time function SpellDoneCritChance with its scripted part is read for 800614 on the dummy (creature type Undead, entry 201) before and after 680645 is learned: gain 100 against the Undead; the same read against a Humanoid is the control (gain 0). The three scripted Gavels 800611, 800614 and 800617 share SpellFamilyFlags[1] 32 and are each read (G-23). The hit-level proof of the critical damage part is the existing crit_damage entries. Reference search 2026-11-22: nothing found beyond the tooltip. Limit: the read is a probe of SpellDoneCritChance and the hook, done side only (it omits SpellTakenCritChance, Spell.cpp:8663-8666), and the hook reads only a caster aura and the creature type (AscensionSunClericAbilities.cpp:197-213), no per-cast state: a readback, not a hit. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 680645,
@@ -19578,9 +19629,10 @@
       "expected_gain": 0,
       "tolerance": 0.05,
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "target_entry": 6,
-      "observe_source": "680645 Judgement: \"they are now guaranteed to critically strike against Undead enemies\": a guaranteed critical strike is a critical strike chance of 100 for Gavel of Grace 800614 against an Undead target. The use-time function SpellDoneCritChance with its scripted part is read for 800614 on the dummy (creature type Humanoid, entry 6) before and after 680645 is learned: gain 0 is the control of the Undead read (gain 100). The three scripted Gavels 800611, 800614 and 800617 share SpellFamilyFlags[1] 32 and are each read (G-23). The hit-level proof of the critical damage part is the existing crit_damage entries. Reference search 2026-11-22: nothing found beyond the tooltip."
+      "observe_source": "680645 Judgement: \"they are now guaranteed to critically strike against Undead enemies\": a guaranteed critical strike is a critical strike chance of 100 for Gavel of Grace 800614 against an Undead target. The use-time function SpellDoneCritChance with its scripted part is read for 800614 on the dummy (creature type Humanoid, entry 6) before and after 680645 is learned: gain 0 is the control of the Undead read (gain 100). The three scripted Gavels 800611, 800614 and 800617 share SpellFamilyFlags[1] 32 and are each read (G-23). The hit-level proof of the critical damage part is the existing crit_damage entries. Reference search 2026-11-22: nothing found beyond the tooltip. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 680645,
@@ -19601,9 +19653,10 @@
       "expected_gain": 100,
       "tolerance": 0.05,
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "target_entry": 201,
-      "observe_source": "680645 Judgement: \"they are now guaranteed to critically strike against Undead enemies\": a guaranteed critical strike is a critical strike chance of 100 for Gavel of Wrath 800617 against an Undead target. The use-time function SpellDoneCritChance with its scripted part is read for 800617 on the dummy (creature type Undead, entry 201) before and after 680645 is learned: gain 100 against the Undead; the same read against a Humanoid is the control (gain 0). The three scripted Gavels 800611, 800614 and 800617 share SpellFamilyFlags[1] 32 and are each read (G-23). The hit-level proof of the critical damage part is the existing crit_damage entries. Reference search 2026-11-22: nothing found beyond the tooltip. Limit: the read is a probe of SpellDoneCritChance and the hook, done side only (it omits SpellTakenCritChance, Spell.cpp:8663-8666), and the hook reads only a caster aura and the creature type (AscensionSunClericAbilities.cpp:197-213), no per-cast state: a readback, not a hit."
+      "observe_source": "680645 Judgement: \"they are now guaranteed to critically strike against Undead enemies\": a guaranteed critical strike is a critical strike chance of 100 for Gavel of Wrath 800617 against an Undead target. The use-time function SpellDoneCritChance with its scripted part is read for 800617 on the dummy (creature type Undead, entry 201) before and after 680645 is learned: gain 100 against the Undead; the same read against a Humanoid is the control (gain 0). The three scripted Gavels 800611, 800614 and 800617 share SpellFamilyFlags[1] 32 and are each read (G-23). The hit-level proof of the critical damage part is the existing crit_damage entries. Reference search 2026-11-22: nothing found beyond the tooltip. Limit: the read is a probe of SpellDoneCritChance and the hook, done side only (it omits SpellTakenCritChance, Spell.cpp:8663-8666), and the hook reads only a caster aura and the creature type (AscensionSunClericAbilities.cpp:197-213), no per-cast state: a readback, not a hit. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 680645,
@@ -19624,9 +19677,10 @@
       "expected_gain": 0,
       "tolerance": 0.05,
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "target_entry": 6,
-      "observe_source": "680645 Judgement: \"they are now guaranteed to critically strike against Undead enemies\": a guaranteed critical strike is a critical strike chance of 100 for Gavel of Wrath 800617 against an Undead target. The use-time function SpellDoneCritChance with its scripted part is read for 800617 on the dummy (creature type Humanoid, entry 6) before and after 680645 is learned: gain 0 is the control of the Undead read (gain 100). The three scripted Gavels 800611, 800614 and 800617 share SpellFamilyFlags[1] 32 and are each read (G-23). The hit-level proof of the critical damage part is the existing crit_damage entries. Reference search 2026-11-22: nothing found beyond the tooltip."
+      "observe_source": "680645 Judgement: \"they are now guaranteed to critically strike against Undead enemies\": a guaranteed critical strike is a critical strike chance of 100 for Gavel of Wrath 800617 against an Undead target. The use-time function SpellDoneCritChance with its scripted part is read for 800617 on the dummy (creature type Humanoid, entry 6) before and after 680645 is learned: gain 0 is the control of the Undead read (gain 100). The three scripted Gavels 800611, 800614 and 800617 share SpellFamilyFlags[1] 32 and are each read (G-23). The hit-level proof of the critical damage part is the existing crit_damage entries. Reference search 2026-11-22: nothing found beyond the tooltip. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 806024,
@@ -19648,9 +19702,6 @@
         "casts": [
           806060,
           806060,
-          806060,
-          806060,
-          806060,
           806060
         ]
       },
@@ -19664,9 +19715,6 @@
         "casts": [
           806060,
           806060,
-          806060,
-          806060,
-          806060,
           806060
         ],
         "learn": [
@@ -19674,11 +19722,11 @@
         ]
       },
       "trials": 20,
-      "cast_power": 1000,
+      "cast_power": 1363,
       "fixture": {
         "spell_power": 10000
       },
-      "expected_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 five times (SPELL_ATTR5_EXTRA_INITIAL_PERIOD, an extra tick on apply). Eight stacks of 1% = +8% (band 2 points, G-19: the larger of 5% of 8 and 2 points; the interval excludes the control 1.0 and a 2% or 0.5% per stack aura). Holy damage: Horusath Blast 500154 (SchoolMask 2 Holy) is read per arm after six Radiant Flame casts at about 1.5 s intervals (at least nine ticks, the stack cap is 8). Fixtures: spell penetration 823764 on the caster (precondition fixture, never the subject); Radiant Flame 806060 is cast for real six times before every observed cast in both arms (the real Purgation stacks are the subject, no set_aura of 806025); the control arm makes the same six casts without 806024 learned. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found. Sizing (round 3): base pair 8 ran 10 trials per arm (9 treatment hits in the second run) and read +7.679% with a 99% half-width of 1.07 points, above the 1 point (half the 2-point band) the judge requires; the first run passed it. 20 trials per arm are the most one scenario holds (the 30 trials first tried exceed the 23 allowed, MAX_SCENARIO_MS 600000). The scaled projection 1.07 x sqrt(9/18) = 0.76 points is not what the residual rests on (at 0.76 the chance of a half-width above 1 is about 3% per run); it rests on the measured half-widths of four 20-trial runs on two pairs (0.46, 0.43, 0.42 and 0.48), under normal theory with about 16 degrees of freedom a half-width above 1 is about 2e-8 per run, and the estimate edge lies about 11 standard errors away, so the residual failure probability of a pair is far below the 0.1% limit on the measured spread. The sizing uses only the spread of base pair 8 and the pilot, never a mean as an expected value."
+      "expected_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 five times (SPELL_ATTR5_EXTRA_INITIAL_PERIOD, an extra tick on apply). Eight stacks of 1% = +8% (band 2 points, G-19: the larger of 5% of 8 and 2 points; the interval excludes the control 1.0 and a 2% or 0.5% per stack aura). Holy damage: Horusath Blast 500154 (SchoolMask 2 Holy) is read per arm after three Radiant Flame casts 1600 ms apart (the stack cap is 8). Fixtures: spell penetration 823764 on the caster (precondition fixture, never the subject); Radiant Flame 806060 is cast for real three times before every observed cast in both arms (the real Purgation stacks are the subject, no set_aura of 806025); the control arm makes the same three casts without 806024 learned. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found. Sizing (round 3): base pair 8 ran 10 trials per arm (9 treatment hits in the second run) and read +7.679% with a 99% half-width of 1.07 points, above the 1 point (half the 2-point band) the judge requires; the first run passed it. 20 trials per arm are the most one scenario holds (the 30 trials first tried exceed the 23 allowed, MAX_SCENARIO_MS 600000). The scaled projection 1.07 x sqrt(9/18) = 0.76 points is not what the residual rests on (at 0.76 the chance of a half-width above 1 is about 3% per run); it rests on the measured half-widths of four 20-trial runs on two pairs (0.46, 0.43, 0.42 and 0.48), under normal theory with about 16 degrees of freedom a half-width above 1 is about 2e-8 per run, and the estimate edge lies about 11 standard errors away, so the residual failure probability of a pair is far below the 0.1% limit on the measured spread. The sizing uses only the spread of base pair 8 and the pilot, never a mean as an expected value. Power (round rc): Radiant Flame 806060 costs 25% of the 1363 mana pool (Spell.dbc ManaCostPercentage 25), so only two casts fitted after the observed cast of the previous trial and the other casts of each trial were refused with NO_POWER (reason 85, pair 12). Three casts now fit (3 x 25% = 75% of the pool) and the pool is set to 1363 before every observed cast."
     },
     {
       "spell": 806024,
@@ -19700,8 +19748,6 @@
         "casts": [
           806060,
           806060,
-          806060,
-          806060,
           806060
         ],
         "learn": [
@@ -19718,8 +19764,6 @@
         "casts": [
           806060,
           806060,
-          806060,
-          806060,
           806060
         ],
         "learn": [
@@ -19728,11 +19772,11 @@
         ]
       },
       "trials": 10,
-      "cast_power": 1000,
+      "cast_power": 1363,
       "fixture": {
         "spell_power": 10000
       },
-      "expected_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 five times (SPELL_ATTR5_EXTRA_INITIAL_PERIOD, an extra tick on apply). Eight stacks of 1% = +8% (band 2 points, G-19: the larger of 5% of 8 and 2 points; the interval excludes the control 1.0 and a 2% or 0.5% per stack aura). Fire damage: Dawnsear 500146 (SchoolMask 4 Fire, SpellFamilyName 33, learned by the harness for both arms) is read per arm after five Radiant Flame casts at about 1.5 s intervals, the 3500 ms Dawnsear cast landing about 11 s after the first cast, when at least nine ticks have landed (the stack cap is 8). Fixtures: spell penetration 823764 on the caster (precondition fixture, never the subject); Radiant Flame 806060 is cast for real five times before every observed cast in both arms (the real Purgation stacks are the subject, no set_aura of 806025); the control arm makes the same five casts without 806024 learned. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found. Design note: a first design with the stock Fire Blast 2136 read +0.05% and +0.28% because the engine filters SPELL_AURA_MOD_DAMAGE_FROM_CASTER by the MiscValue school mask (Holy|Fire, SpellAuraEffects.cpp:1218-1220, added by e94d29e22b) and then by SpellFamilyName 33 and the class mask (:1223, IsAffectedOnSpell called from Unit.cpp:10113); Fire Blast is Fire but family 3, so the family check excludes it. The claim is read on a class Fire spell (Dawnsear, family 33); Fire damage of the caster outside family 33 is an open expectation, not measured."
+      "expected_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 five times (SPELL_ATTR5_EXTRA_INITIAL_PERIOD, an extra tick on apply). Eight stacks of 1% = +8% (band 2 points, G-19: the larger of 5% of 8 and 2 points; the interval excludes the control 1.0 and a 2% or 0.5% per stack aura). Fire damage: Dawnsear 500146 (SchoolMask 4 Fire, SpellFamilyName 33, learned by the harness for both arms) is read per arm after three Radiant Flame casts 1600 ms apart, the 3500 ms Dawnsear cast landing after them (the stack cap is 8). Fixtures: spell penetration 823764 on the caster (precondition fixture, never the subject); Radiant Flame 806060 is cast for real three times before every observed cast in both arms (the real Purgation stacks are the subject, no set_aura of 806025); the control arm makes the same three casts without 806024 learned. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found. Design note: a first design with the stock Fire Blast 2136 read +0.05% and +0.28% because the engine filters SPELL_AURA_MOD_DAMAGE_FROM_CASTER by the MiscValue school mask (Holy|Fire, SpellAuraEffects.cpp:1218-1220, added by e94d29e22b) and then by SpellFamilyName 33 and the class mask (:1223, IsAffectedOnSpell called from Unit.cpp:10113); Fire Blast is Fire but family 3, so the family check excludes it. The claim is read on a class Fire spell (Dawnsear, family 33); Fire damage of the caster outside family 33 is an open expectation, not measured. Power (round rc): Radiant Flame 806060 costs 25% of the 1363 mana pool (Spell.dbc ManaCostPercentage 25), so only two casts fitted after the observed cast of the previous trial and the other casts of each trial were refused with NO_POWER (reason 85, pair 12). Three casts now fit (3 x 25% = 75% of the pool) and the pool is set to 1363 before every observed cast."
     },
     {
       "spell": 806024,
@@ -19766,7 +19810,7 @@
       "trigger_spell": 806060,
       "target": "dummy",
       "measure_actor": "dummy",
-      "cast_power": 1000,
+      "cast_power": 1363,
       "metric": "aura_stacks",
       "fields": {
         "spell": 806025
@@ -19782,7 +19826,11 @@
       "setup_wait_ms": 3300,
       "wait_ms": 4700,
       "expire_ms": 9000,
-      "observe_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 five times (SPELL_ATTR5_EXTRA_INITIAL_PERIOD, an extra tick on apply). Four real Radiant Flame casts 3300 ms apart tick at least seventeen times (four ticks per gap plus five after the last cast), above the StackAmount 8 of 806025; the stacks are read 4700 ms after the last cast on the dummy and must read 8, not more. Control: the phase before 806024 is learned, with the same four casts, reads 0. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found."
+      "observe_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 five times (SPELL_ATTR5_EXTRA_INITIAL_PERIOD, an extra tick on apply). Four real Radiant Flame casts 3300 ms apart tick at least seventeen times (four ticks per gap plus five after the last cast), above the StackAmount 8 of 806025; the stacks are read 4700 ms after the last cast on the dummy and must read 8, not more. Control: the phase before 806024 is learned, with the same four casts, reads 0. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). refill_power_after_setup_casts (round rc): the mana is set to 1363 again after every setup cast (Illumination 500143 costs 30% and Radiant Flame 806060 25% of the pool, Spell.dbc ManaCostPercentage, so the chain of setup casts exhausted it and the last cast was refused with NO_POWER, reason 85, in pair 12); the claim is not about mana.",
+      "void_on_cast_failure": true,
+      "refill_power_after_setup_casts": {
+        "power": 0
+      }
     },
     {
       "spell": 806024,
@@ -23610,7 +23658,7 @@
       "trigger_spell": 805301,
       "target": "caster",
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 1100,
       "metric": "attack_time_ms",
       "fields": {
         "hand": 0
@@ -23619,7 +23667,8 @@
       "expected": 2173.913,
       "expected_ratio": 0.869565,
       "tolerance": 0.001,
-      "observe_source": "680643 Effect[0] aura 138 SPELL_AURA_MOD_MELEE_HASTE, EffectBasePoints 14 + 1 = 15 ($s1). attack_time_ms reads UNIT_FIELD_BASEATTACKTIME (hand 0), the hasted swing time: the Seraphim main hand 2524 swings in 2500 ms (class file weapon set Seraphim, spell_weapon_sets 680643), 2500 / 1.15 = 2173.913 ms with the passive and 2500 before it is learned (control; the harness trigger Holy Form 805301 is cast in both phases and the before reading shows it adds no haste). The ratio 0.869565 within 0.001 excludes 14% (0.87719) and 16% (0.86207), and 13.5% and 16.5%, the 10% either side of the 15% claim, (0.88106 and 0.85837). Deterministic stat read, judged to the rounding. Reference search 2026-11-22: coa-history spell 680643: 0 events in 186 logs (a passive); bindmysoul talents snapshot (fetched 2026-07-22) reads 'Increases your melee attack speed by 15% and your first auto attack on a target hits twice.'; the same Swift Justice 300322 entry reads the melee haste of another passive with the same metric; nothing else found."
+      "observe_source": "680643 Effect[0] aura 138 SPELL_AURA_MOD_MELEE_HASTE, EffectBasePoints 14 + 1 = 15 ($s1). attack_time_ms reads UNIT_FIELD_BASEATTACKTIME (hand 0), the hasted swing time: the Seraphim main hand 2524 swings in 2500 ms (class file weapon set Seraphim, spell_weapon_sets 680643), 2500 / 1.15 = 2173.913 ms with the passive and 2500 before it is learned (control; the harness trigger Holy Form 805301 is cast in both phases and the before reading shows it adds no haste). The ratio 0.869565 within 0.001 excludes 14% (0.87719) and 16% (0.86207), and 13.5% and 16.5%, the 10% either side of the 15% claim, (0.88106 and 0.85837). Deterministic stat read, judged to the rounding. Reference search 2026-11-22: coa-history spell 680643: 0 events in 186 logs (a passive); bindmysoul talents snapshot (fetched 2026-07-22) reads 'Increases your melee attack speed by 15% and your first auto attack on a target hits twice.'; the same Swift Justice 300322 entry reads the melee haste of another passive with the same metric; nothing else found. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Spacing (round rc): the after-arm cast is submitted 1600 ms after the before-arm cast (wait_ms + expire_ms), the global cooldown (StartRecoveryTime 1500 ms, Spell.dbc) plus 100 ms; pair 12 submitted it 1000 ms after and it was refused with NOT_READY (reason 67).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 680643,
@@ -27543,7 +27592,8 @@
       "expected": 0,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "704585 Gleaming Vigil Effect[1] aura 23 PERIODIC_TRIGGER_SPELL 707769 every 500 ms; AscensionSunCleric.cpp:361-373 keeps the helper 707769 while the state healthyAbove80 holds: set above 80%, cleared at 75% or below, held between (set by b2ad6f76d6 for #5763/#5783, read with git log -L). The state is updated by the 500 ms refresh whatever the talent, so each phase first sets the health to 70% (caster_health [7000, 10000], below 75%) and waits 1600 ms (setup cast of Holy Form 805301, past the global cooldown), then sets 79% and casts Holy Form 805301 as the trigger; the helper aura 707769 is read 1500 ms later. Holy Form is a precondition (a heal-free cast that keeps the phases identical). The rise from 70% stops at 79%, which is not above 80%: the helper stays absent (the arm at 81% is the contrast, same pre-step). Reference search 2026-11-22: coa-history spell 704585: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces your Physical damage taken by -5%, plus an additional 5% while above 80% health.\" (agrees)."
+      "observe_source": "704585 Gleaming Vigil Effect[1] aura 23 PERIODIC_TRIGGER_SPELL 707769 every 500 ms; AscensionSunCleric.cpp:361-373 keeps the helper 707769 while the state healthyAbove80 holds: set above 80%, cleared at 75% or below, held between (set by b2ad6f76d6 for #5763/#5783, read with git log -L). The state is updated by the 500 ms refresh whatever the talent, so each phase first sets the health to 70% (caster_health [7000, 10000], below 75%) and waits 1600 ms (setup cast of Holy Form 805301, past the global cooldown), then sets 79% and casts Holy Form 805301 as the trigger; the helper aura 707769 is read 1500 ms later. Holy Form is a precondition (a heal-free cast that keeps the phases identical). The rise from 70% stops at 79%, which is not above 80%: the helper stays absent (the arm at 81% is the contrast, same pre-step). Reference search 2026-11-22: coa-history spell 704585: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces your Physical damage taken by -5%, plus an additional 5% while above 80% health.\" (agrees). void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 704585,
@@ -27573,7 +27623,8 @@
       "expected": 1,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "704585 Gleaming Vigil Effect[1] aura 23 PERIODIC_TRIGGER_SPELL 707769 every 500 ms; AscensionSunCleric.cpp:361-373 keeps the helper 707769 while the state healthyAbove80 holds: set above 80%, cleared at 75% or below, held between (set by b2ad6f76d6 for #5763/#5783, read with git log -L). The state is updated by the 500 ms refresh whatever the talent, so each phase first sets the health to 70% (caster_health [7000, 10000], below 75%) and waits 1600 ms (setup cast of Holy Form 805301, past the global cooldown), then sets 81% and casts Holy Form 805301 as the trigger; the helper aura 707769 is read 1500 ms later. Holy Form is a precondition (a heal-free cast that keeps the phases identical). The rise from 70% reaches 81%, above 80%: the helper appears, where the same sequence at 79% leaves it absent. Reference search 2026-11-22: coa-history spell 704585: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces your Physical damage taken by -5%, plus an additional 5% while above 80% health.\" (agrees)."
+      "observe_source": "704585 Gleaming Vigil Effect[1] aura 23 PERIODIC_TRIGGER_SPELL 707769 every 500 ms; AscensionSunCleric.cpp:361-373 keeps the helper 707769 while the state healthyAbove80 holds: set above 80%, cleared at 75% or below, held between (set by b2ad6f76d6 for #5763/#5783, read with git log -L). The state is updated by the 500 ms refresh whatever the talent, so each phase first sets the health to 70% (caster_health [7000, 10000], below 75%) and waits 1600 ms (setup cast of Holy Form 805301, past the global cooldown), then sets 81% and casts Holy Form 805301 as the trigger; the helper aura 707769 is read 1500 ms later. Holy Form is a precondition (a heal-free cast that keeps the phases identical). The rise from 70% reaches 81%, above 80%: the helper appears, where the same sequence at 79% leaves it absent. Reference search 2026-11-22: coa-history spell 704585: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces your Physical damage taken by -5%, plus an additional 5% while above 80% health.\" (agrees). void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 800602,
@@ -28075,7 +28126,7 @@
       "caster_health_pct": 81,
       "before_expected": 1500,
       "expected": 0,
-      "observe_source": "Hysteresis pre-step: the caster is first set to 70% health (7000 of 10000) and Holy Form 805301 is cast with a 1600 ms wait, so the health state of AscensionSunCleric.cpp:366-371 (on above 80%, off at or below 75%) is cleared below 75% before the read; the caster is then set to 81% and Glare 807870 (CastingTimeIndex 16, SpellCastTimes 16 = 1500 ms, read before the learn as the control) is read after 1600 ms: 0 ms, the helper 561396 Effect[0] ADD_PCT_MODIFIER MiscValue 10 BasePoints -101 on the Glare family flag is kept above 80% health. Tooltip: 'while above 80% health'. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state shows b2ad6f76d6 (#5963) set the hysteresis; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22.",
+      "observe_source": "Hysteresis pre-step: the caster is first set to 70% health (7000 of 10000) and Holy Form 805301 is cast with a 1600 ms wait, so the health state of AscensionSunCleric.cpp:366-371 (on above 80%, off at or below 75%) is cleared below 75% before the read; the caster is then set to 81% and Glare 807870 (CastingTimeIndex 16, SpellCastTimes 16 = 1500 ms, read before the learn as the control) is read after 1600 ms: 0 ms, the helper 561396 Effect[0] ADD_PCT_MODIFIER MiscValue 10 BasePoints -101 on the Glare family flag is kept above 80% health. Tooltip: 'while above 80% health'. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state shows b2ad6f76d6 (#5963) set the hysteresis; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
       "caster_health": [
         7000,
         10000
@@ -28099,6 +28150,15 @@
           "spell": 807440,
           "expected": 0
         }
+      ],
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
       ]
     },
     {
@@ -28121,7 +28181,7 @@
       "caster_health_pct": 80,
       "before_expected": 1500,
       "expected": 1500,
-      "observe_source": "Hysteresis pre-step: the caster is first set to 70% health (7000 of 10000) and Holy Form 805301 is cast with a 1600 ms wait, so the health state of AscensionSunCleric.cpp:366-371 (on above 80%, off at or below 75%) is cleared below 75% before the read; the caster is then set to 80% and Glare 807870 (CastingTimeIndex 16, SpellCastTimes 16 = 1500 ms, read before the learn as the control) is read after 1600 ms: 1500 ms, the cast time stays because the health is not above 80%. Tooltip: 'while above 80% health'. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state shows b2ad6f76d6 (#5963) set the hysteresis; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22.",
+      "observe_source": "Hysteresis pre-step: the caster is first set to 70% health (7000 of 10000) and Holy Form 805301 is cast with a 1600 ms wait, so the health state of AscensionSunCleric.cpp:366-371 (on above 80%, off at or below 75%) is cleared below 75% before the read; the caster is then set to 80% and Glare 807870 (CastingTimeIndex 16, SpellCastTimes 16 = 1500 ms, read before the learn as the control) is read after 1600 ms: 1500 ms, the cast time stays because the health is not above 80%. Tooltip: 'while above 80% health'. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state shows b2ad6f76d6 (#5963) set the hysteresis; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
       "caster_health": [
         7000,
         10000
@@ -28145,6 +28205,15 @@
           "spell": 807440,
           "expected": 0
         }
+      ],
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
       ]
     },
     {
@@ -28167,7 +28236,7 @@
       "caster_health_pct": 79,
       "before_expected": 1500,
       "expected": 1500,
-      "observe_source": "Hysteresis pre-step: the caster is first set to 70% health (7000 of 10000) and Holy Form 805301 is cast with a 1600 ms wait, so the health state of AscensionSunCleric.cpp:366-371 (on above 80%, off at or below 75%) is cleared below 75% before the read; the caster is then set to 79% and Glare 807870 (CastingTimeIndex 16, SpellCastTimes 16 = 1500 ms, read before the learn as the control) is read after 1600 ms: 1500 ms, the cast time stays because the health is not above 80%. Tooltip: 'while above 80% health'. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state shows b2ad6f76d6 (#5963) set the hysteresis; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22.",
+      "observe_source": "Hysteresis pre-step: the caster is first set to 70% health (7000 of 10000) and Holy Form 805301 is cast with a 1600 ms wait, so the health state of AscensionSunCleric.cpp:366-371 (on above 80%, off at or below 75%) is cleared below 75% before the read; the caster is then set to 79% and Glare 807870 (CastingTimeIndex 16, SpellCastTimes 16 = 1500 ms, read before the learn as the control) is read after 1600 ms: 1500 ms, the cast time stays because the health is not above 80%. Tooltip: 'while above 80% health'. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state shows b2ad6f76d6 (#5963) set the hysteresis; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
       "caster_health": [
         7000,
         10000
@@ -28191,6 +28260,15 @@
           "spell": 807440,
           "expected": 0
         }
+      ],
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
       ]
     },
     {
@@ -29796,7 +29874,7 @@
       ],
       "gate_spell": 681436,
       "trigger_spell": 554406,
-      "target": "caster",
+      "target": "dummy",
       "cast_in_before": false,
       "cast_power": 1363,
       "metric": "spell_power_cost",
@@ -29809,7 +29887,8 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% with EffectSpellClassMask[0..2] = 262144 / 128 / 524288 (the SpellFamilyFlags of Solar Invocation: Resplendence 806159 and Revelation 503651 in word 0, Ascension 500152 in word 1, Conquest 800764 in word 2). The cost is read by the engine's own use-time function, SpellInfo::CalcPowerCost of the caster (ADR 1024, use_time_contrast), with the passive learned between the phases: the learned read minus the unlearned read is the gain. Costs are ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60, Spell.dbc). Arms of this clause, all in the same pair: cost_use_resplendence, cost_use_revelation, cost_use_conquest, cost_use_ascension (each gains minus its whole cost) and cost_use_control (Dawnsear 554406, outside the class mask, gain 0). The clause is not the plain use-time sentence, so the zero arm is required. The consumption of a charge is not a claim of this passive (no charges). Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); bindmysoul snapshot not consulted for a value; nothing else found. This arm: Dawnsear 554406 costs 15% of 1363 = 204.45 (read as a whole number) before and after, gain 0, band 1: the passive does not touch a spell outside its mask."
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% with EffectSpellClassMask[0..2] = 262144 / 128 / 524288 (the SpellFamilyFlags of Solar Invocation: Resplendence 806159 and Revelation 503651 in word 0, Ascension 500152 in word 1, Conquest 800764 in word 2). The cost is read by the engine's own use-time function, SpellInfo::CalcPowerCost of the caster (ADR 1024, use_time_contrast), with the passive learned between the phases: the learned read minus the unlearned read is the gain. Costs are ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60, Spell.dbc). Arms of this clause, all in the same pair: cost_use_resplendence, cost_use_revelation, cost_use_conquest, cost_use_ascension (each gains minus its whole cost) and cost_use_control (Dawnsear 554406, outside the class mask, gain 0). The clause is not the plain use-time sentence, so the zero arm is required. The consumption of a charge is not a claim of this passive (no charges). Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); bindmysoul snapshot not consulted for a value; nothing else found. This arm: Dawnsear 554406 costs 15% of 1363 = 204.45 (read as a whole number) before and after, gain 0, band 1: the passive does not touch a spell outside its mask. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Target (round rc): the control casts Dawnsear 554406, a harmful spell, so it targets the dummy; at the caster it was refused with BAD_TARGETS (reason 12) in pair 12.",
+      "void_on_cast_failure": true
     },
     {
       "spell": 800054,
@@ -31915,7 +31994,7 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 2000,
-      "observe_source": "Dawnsear 554406 costs ManaCostPercentage 15 of BaseMana 1363 (player_class_stats class 27 level 60) = 204 before the learn (the reading before is the control). 561329 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -21 (-20, $s1), EffectSpellClassMask word 1 = 1282 (bits 2, 256, 1024) which holds the Dawnsear family flag 2 (SpellFamilyFlags[1] of 554406): 204 x 0.8 = 163.2, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 554406: Dawnsear 74 SPELL_DAMAGE events in 1 log, no cost reading; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22.",
+      "observe_source": "Dawnsear 554406 costs ManaCostPercentage 15 of BaseMana 1363 (player_class_stats class 27 level 60) = 204 before the learn (the reading before is the control). 561329 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -21 (-20, $s1), EffectSpellClassMask word 1 = 1282 (bits 2, 256, 1024) which holds the Dawnsear family flag 2 (SpellFamilyFlags[1] of 554406): 204 x 0.8 = 163.2, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 554406: Dawnsear 74 SPELL_DAMAGE events in 1 log, no cost reading; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
       "use_time_contrast": [
         "dawnsear_cost",
         "sunflare_cost",
@@ -31935,6 +32014,15 @@
           "spell": 807440,
           "expected": 0
         }
+      ],
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
       ]
     },
     {
@@ -31956,7 +32044,7 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 2000,
-      "observe_source": "Sunflare 800231 costs ManaCostPercentage 10 of BaseMana 1363 = 136 before the learn (the reading before is the control). 561329 Effect[1] SPELLMOD_COST -20% with class mask word 1 = 1282, which holds the family flag 256 of 800231: 136 x 0.8 = 108.8: the engine truncates the cost to an integer, so 108 or 109 is read within 1 of 108.8, and 110 (a -19% modifier) is excluded. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 800231: 0 events in 186 logs; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22.",
+      "observe_source": "Sunflare 800231 costs ManaCostPercentage 10 of BaseMana 1363 = 136 before the learn (the reading before is the control). 561329 Effect[1] SPELLMOD_COST -20% with class mask word 1 = 1282, which holds the family flag 256 of 800231: 136 x 0.8 = 108.8: the engine truncates the cost to an integer, so 108 or 109 is read within 1 of 108.8, and 110 (a -19% modifier) is excluded. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 800231: 0 events in 186 logs; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
       "use_time_contrast": [
         "dawnsear_cost",
         "sunflare_cost",
@@ -31976,6 +32064,15 @@
           "spell": 807440,
           "expected": 0
         }
+      ],
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
       ]
     },
     {
@@ -31997,7 +32094,7 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 2000,
-      "observe_source": "Sunflare 800231 has a 2000 ms cast time (CastingTimeIndex 5, SpellCastTimes.dbc 5 CastTime 2000), read before the learn as the control. 561329 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME) BasePoints -21 (-20, $s1), class mask word 1 = 1282 holding the family flag 256 of 800231: 2000 x 0.8 = 1600 ms, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 800231: 0 events in 186 logs; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22.",
+      "observe_source": "Sunflare 800231 has a 2000 ms cast time (CastingTimeIndex 5, SpellCastTimes.dbc 5 CastTime 2000), read before the learn as the control. 561329 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME) BasePoints -21 (-20, $s1), class mask word 1 = 1282 holding the family flag 256 of 800231: 2000 x 0.8 = 1600 ms, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 800231: 0 events in 186 logs; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
       "use_time_contrast": [
         "dawnsear_cast_time",
         "sunflare_cast_time",
@@ -32017,6 +32114,15 @@
           "spell": 807440,
           "expected": 0
         }
+      ],
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
       ]
     },
     {
@@ -32038,7 +32144,7 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 2000,
-      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimeIndex 22, SpellCastTimes.dbc 22 CastTime 3500), read before the learn as the control. 561329 Effect[0] SPELLMOD_CASTING_TIME -20% with class mask word 1 = 1282 holding the family flag 2 of 554406: 3500 x 0.8 = 2800 ms, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 554406: Dawnsear 74 SPELL_DAMAGE events in 1 log, no cast-time reading; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22.",
+      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimeIndex 22, SpellCastTimes.dbc 22 CastTime 3500), read before the learn as the control. 561329 Effect[0] SPELLMOD_CASTING_TIME -20% with class mask word 1 = 1282 holding the family flag 2 of 554406: 3500 x 0.8 = 2800 ms, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 554406: Dawnsear 74 SPELL_DAMAGE events in 1 log, no cast-time reading; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
       "use_time_contrast": [
         "dawnsear_cast_time",
         "sunflare_cast_time",
@@ -32058,6 +32164,15 @@
           "spell": 807440,
           "expected": 0
         }
+      ],
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
       ]
     },
     {
@@ -32079,7 +32194,7 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 2000,
-      "observe_source": "Zero arm of the use-time contrast (ADR 1024): Radiant Cascade 500141 (SpellFamilyFlags[0] 32768, [1] 0) is outside the class mask of 561329 (EffectSpellClassMask word 1 = 1282 = 2 + 256 + 1024, words 0 and 2 = 0), so the same learn must change nothing. Radiant Cascade has a 2500 ms cast time (CastingTimeIndex 19, SpellCastTimes.dbc 19), read before and after the real learn: 2500 both times. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 561329 / 500141: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22.",
+      "observe_source": "Zero arm of the use-time contrast (ADR 1024): Radiant Cascade 500141 (SpellFamilyFlags[0] 32768, [1] 0) is outside the class mask of 561329 (EffectSpellClassMask word 1 = 1282 = 2 + 256 + 1024, words 0 and 2 = 0), so the same learn must change nothing. Radiant Cascade has a 2500 ms cast time (CastingTimeIndex 19, SpellCastTimes.dbc 19), read before and after the real learn: 2500 both times. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 561329 / 500141: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
       "use_time_contrast": [
         "dawnsear_cast_time",
         "sunflare_cast_time",
@@ -32099,6 +32214,15 @@
           "spell": 807440,
           "expected": 0
         }
+      ],
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
       ]
     },
     {
@@ -32120,7 +32244,7 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 2000,
-      "observe_source": "Zero arm of the use-time contrast (ADR 1024): Radiant Cascade 500141 (SpellFamilyFlags[0] 32768, [1] 0) is outside the class mask of 561329 (EffectSpellClassMask word 1 = 1282 = 2 + 256 + 1024, words 0 and 2 = 0), so the same learn must change nothing. Radiant Cascade costs ManaCostPercentage 31 of BaseMana 1363 (player_class_stats class 27 level 60) = 422 (int32 of 422.53, as 204 for 15% and 136 for 10%), read before and after the real learn: 422 both times. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 561329 / 500141: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22.",
+      "observe_source": "Zero arm of the use-time contrast (ADR 1024): Radiant Cascade 500141 (SpellFamilyFlags[0] 32768, [1] 0) is outside the class mask of 561329 (EffectSpellClassMask word 1 = 1282 = 2 + 256 + 1024, words 0 and 2 = 0), so the same learn must change nothing. Radiant Cascade costs ManaCostPercentage 31 of BaseMana 1363 (player_class_stats class 27 level 60) = 422 (int32 of 422.53, as 204 for 15% and 136 for 10%), read before and after the real learn: 422 both times. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 561329 / 500141: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
       "use_time_contrast": [
         "dawnsear_cost",
         "sunflare_cost",
@@ -32140,6 +32264,15 @@
           "spell": 807440,
           "expected": 0
         }
+      ],
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
       ]
     },
     {
@@ -32979,7 +33112,7 @@
       "caster_health_pct": 90,
       "before_expected": 1500,
       "expected": 0,
-      "observe_source": "Glare 807870 (highest rank usable at level 60, SpellLevel 58) has a 1500 ms cast time (CastingTimeIndex 16, SpellCastTimes.dbc 16 CastTime 1500), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (Effect[0] ADD_PCT_MODIFIER MiscValue 10 SPELLMOD_CASTING_TIME BasePoints -101, class mask word 1 = 8388608 = the family flag of Glare) up while the caster is above 80% health, so the cast time is 0 ms. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive), spell 807870 Glare: 43 SPELL_DAMAGE events in 5 logs, no cast-time reading; git log -L on the health state (AscensionSunCleric.cpp) shows b2ad6f76d6 (#5963) set a hysteresis, on above 80%, off at or below 75%; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22.",
+      "observe_source": "Glare 807870 (highest rank usable at level 60, SpellLevel 58) has a 1500 ms cast time (CastingTimeIndex 16, SpellCastTimes.dbc 16 CastTime 1500), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (Effect[0] ADD_PCT_MODIFIER MiscValue 10 SPELLMOD_CASTING_TIME BasePoints -101, class mask word 1 = 8388608 = the family flag of Glare) up while the caster is above 80% health, so the cast time is 0 ms. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive), spell 807870 Glare: 43 SPELL_DAMAGE events in 5 logs, no cast-time reading; git log -L on the health state (AscensionSunCleric.cpp) shows b2ad6f76d6 (#5963) set a hysteresis, on above 80%, off at or below 75%; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
       "use_time_contrast": [
         "glare_healthy",
         "glare_wounded"
@@ -32998,6 +33131,15 @@
           "spell": 807440,
           "expected": 0
         }
+      ],
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
       ]
     },
     {
@@ -33020,7 +33162,7 @@
       "caster_health_pct": 50,
       "before_expected": 1500,
       "expected": 1500,
-      "observe_source": "Control arm of glare_healthy: the caster is held at 50% health, below 80%, so the helper is not kept and Glare keeps its 1500 ms cast time after the learn (CastingTimeIndex 16, CastTime 1500). Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive), spell 807870 Glare: 43 SPELL_DAMAGE events in 5 logs, no cast-time reading; git log -L on the health state (AscensionSunCleric.cpp) shows b2ad6f76d6 (#5963) set a hysteresis, on above 80%, off at or below 75%; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22.",
+      "observe_source": "Control arm of glare_healthy: the caster is held at 50% health, below 80%, so the helper is not kept and Glare keeps its 1500 ms cast time after the learn (CastingTimeIndex 16, CastTime 1500). Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive), spell 807870 Glare: 43 SPELL_DAMAGE events in 5 logs, no cast-time reading; git log -L on the health state (AscensionSunCleric.cpp) shows b2ad6f76d6 (#5963) set a hysteresis, on above 80%, off at or below 75%; nothing else found. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
       "use_time_contrast": [
         "glare_healthy",
         "glare_wounded"
@@ -33039,6 +33181,15 @@
           "spell": 807440,
           "expected": 0
         }
+      ],
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
       ]
     },
     {
@@ -33061,7 +33212,7 @@
       "caster_health_pct": 81,
       "before_expected": 1500,
       "expected": 0,
-      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 50% and read at 81%: 0 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157). Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22.",
+      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 50% and read at 81%: 0 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157). Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
       "caster_health_from": 50,
       "disable_regeneration": true,
       "use_time_contrast": [
@@ -33084,6 +33235,15 @@
           "spell": 807440,
           "expected": 0
         }
+      ],
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
       ]
     },
     {
@@ -33106,7 +33266,7 @@
       "caster_health_pct": 79,
       "before_expected": 1500,
       "expected": 1500,
-      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 90% and read at 79%: 1500 ms. Measured in the pilot: entered from 90% the helper aura stays (the script's 75-80% band keeps it), but its effect is off: the helper carries CasterAuraState 28 (ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT, set by HealthAbovePct(80) each update, Unit.cpp:766, 3f8e071750) and ModifyAuraState unapplies the effects of owned auras with that state (Unit.cpp:8541-8553). Mentor D-157: the tooltip literal 'while above 80% health' holds, off at 79% from either side. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22.",
+      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 90% and read at 79%: 1500 ms. Measured in the pilot: entered from 90% the helper aura stays (the script's 75-80% band keeps it), but its effect is off: the helper carries CasterAuraState 28 (ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT, set by HealthAbovePct(80) each update, Unit.cpp:766, 3f8e071750) and ModifyAuraState unapplies the effects of owned auras with that state (Unit.cpp:8541-8553). Mentor D-157: the tooltip literal 'while above 80% health' holds, off at 79% from either side. Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
       "caster_health_from": 90,
       "disable_regeneration": true,
       "use_time_contrast": [
@@ -33129,6 +33289,15 @@
           "spell": 807440,
           "expected": 0
         }
+      ],
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
       ]
     },
     {
@@ -33151,7 +33320,7 @@
       "caster_health_pct": 75,
       "before_expected": 1500,
       "expected": 1500,
-      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 90% and read at 75%: 1500 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157). Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22.",
+      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 90% and read at 75%: 1500 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157). Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
       "caster_health_from": 90,
       "disable_regeneration": true,
       "use_time_contrast": [
@@ -33174,6 +33343,15 @@
           "spell": 807440,
           "expected": 0
         }
+      ],
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
       ]
     },
     {
@@ -33196,7 +33374,7 @@
       "caster_health_pct": 79,
       "before_expected": 1500,
       "expected": 1500,
-      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 50% and read at 79%: 1500 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157). Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22.",
+      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 50% and read at 79%: 1500 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157). Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured), round rc (D-204, ADR 1038). Dawn (round rc): Dawn 804584 needs the helper aura 704396 (Spell.dbc CasterAuraSpell), which the class script holds only while Solar Power 500149 has 20 stacks and Dawn is down (AscensionSunCleric.cpp:261, :365); the entry set 704396 alone and the cast was refused in both phases (CASTER_AURASTATE 22, pair 12). Solar Power 500149 at 20 stacks is now a named precondition fixture in both phases (set_aura, not the subject), Dawn removed first in the after phase.",
       "caster_health_from": 50,
       "disable_regeneration": true,
       "use_time_contrast": [
@@ -33219,6 +33397,15 @@
           "spell": 807440,
           "expected": 0
         }
+      ],
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
       ]
     },
     {
@@ -36964,8 +37151,8 @@
       "arm_ms": 1200000,
       "cycle_ms": 8000,
       "settle_ms": 8000,
-      "parts": 20,
-      "observe_source": "Solar Flare 807175 Effect[0] aura 54 SPELL_AURA_MOD_HIT_CHANCE BasePoints -3 ($s1 = 3), DurationIndex 10000 ms ($d), launched at the Dawnsear target by the Herald of Dawn route (AscensionSunClericAbilities.cpp:213-214 casts 804631 when a Rapture 806477 cast completes with 804630 known, :353-356 casts Solar Flare 807175 when a Dawnsear 500146 hit finds the marker): each treatment cycle casts Rapture then Dawnsear at the one attacker (pre_cast, tool ADR 1029), and the aura from the caster is read on the attacker at every cycle end (a cycle without it makes the verdict unmeasured, never a miss sample). The attacker is one aggressive stationary Harvest Golem 36 at the class level melee-ing the caster; the control arm counts its swings and misses with no cast. Expected: the miss share rises by 3 points (the stated 3% of the DBC amount, never from a run), judged with the 99% interval of the difference and the band of 2 points. reset_cooldown and set_power are named precondition fixtures (G-21 point 6). The same aura is proven by the Sun Down entry attacker_miss of 572752; this entry proves the Herald route. Reference search 2026-11-22: coa-history has 0 events for 804630, 804631 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs; bindmysoul has no Herald of Dawn entry; nothing found for the miss share. Precondition fixture named in the verdict: An'she's Guidance 681470 is learned in both arms (Effect[2] aura 149 REDUCE_PUSHBACK, BasePoints 99 + 1 = 100% of the pushback, so the attackers' hits do not delay the 3000 ms Rapture or the 3500 ms Dawnsear; the pushback_reduction entry of 681470 reads the same 100% in game time); it adds a Holy critical strike chance and changes no hit chance, the subject of this entry. The first design (b11d7, no pushback fixture) read unmeasured: Dawnsear refused with SPELL_IN_PROGRESS.",
+      "parts": 24,
+      "observe_source": "Solar Flare 807175 Effect[0] aura 54 SPELL_AURA_MOD_HIT_CHANCE BasePoints -3 ($s1 = 3), DurationIndex 10000 ms ($d), launched at the Dawnsear target by the Herald of Dawn route (AscensionSunClericAbilities.cpp:213-214 casts 804631 when a Rapture 806477 cast completes with 804630 known, :353-356 casts Solar Flare 807175 when a Dawnsear 500146 hit finds the marker): each treatment cycle casts Rapture then Dawnsear at the one attacker (pre_cast, tool ADR 1029), and the aura from the caster is read on the attacker at every cycle end (a cycle without it makes the verdict unmeasured, never a miss sample). The attacker is one aggressive stationary Harvest Golem 36 at the class level melee-ing the caster; the control arm counts its swings and misses with no cast. Expected: the miss share rises by 3 points (the stated 3% of the DBC amount, never from a run), judged with the 99% interval of the difference and the band of 2 points. reset_cooldown and set_power are named precondition fixtures (G-21 point 6). The same aura is proven by the Sun Down entry attacker_miss of 572752; this entry proves the Herald route. Reference search 2026-11-22: coa-history has 0 events for 804630, 804631 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs; bindmysoul has no Herald of Dawn entry; nothing found for the miss share. Precondition fixture named in the verdict: An'she's Guidance 681470 is learned in both arms (Effect[2] aura 149 REDUCE_PUSHBACK, BasePoints 99 + 1 = 100% of the pushback, so the attackers' hits do not delay the 3000 ms Rapture or the 3500 ms Dawnsear; the pushback_reduction entry of 681470 reads the same 100% in game time); it adds a Holy critical strike chance and changes no hit chance, the subject of this entry. The first design (b11d7, no pushback fixture) read unmeasured: Dawnsear refused with SPELL_IN_PROGRESS. Sizing (round rc): 24 parts pooled instead of 20, so the 99% half-width of the difference falls from 0.858 to about 0.78 and a correct server leaves the 2-point band with under 1e-4 per pair.",
       "quote_spell": 807175
     },
     {
