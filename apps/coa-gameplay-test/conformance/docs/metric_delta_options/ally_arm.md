@@ -7,8 +7,15 @@
   `fields.target` may name them. The harness `group` step converts a full party to a raid
   (`CoAGameplayTest.cpp` `action == "group"`), and a raid member joins the first subgroup with fewer than five
   (`Group::AddMember`): from `ally5` on, the allies stand in raid subgroup 2, outside the caster's party (code
-  reading only). Seven allies and the caster fill the scenario schema 1 cap of 8 players (`run.py` `MAX_PLAYERS`),
-  so a scenario that adds another player, such as an enemy player, is refused at validation.
+  reading only), where a party-scoped spell (`TARGET_CHECK_PARTY`, `IsInPartyWith`, `GetPartyMembers`) reads 0.
+  Seven allies and the caster fill the scenario schema 1 cap of 8 players (`run.py` `MAX_PLAYERS`), so a scenario
+  that adds another player, such as an enemy player, is refused at validation.
+- `reach_source`: text, required on the option when the main reading's `measure_actor` or `fields.target` is
+  `ally5`, `ally6` or `ally7`, and refused otherwise. It cites the code or data line that makes the spell reach raid
+  subgroup 2 (for example a script filter by `IsInRaidWith`, or a DBC implicit target checked by `TARGET_CHECK_ALLY`),
+  never a run's reading. The contract states it. On each use, the reviewer opens the cited lines and checks that the
+  spell's whole target selection (DBC implicit targets and every script filter) reaches the raid, not only the party
+  (mentor D-56).
 - `ally_health`: `[value, maximum]`, set on every ally in both phases, ahead of the trigger.
 - `ally_casts`: spells the caster casts at `ally` in both phases ahead of the trigger, 2000 ms after each (global
   cooldown). Each spell must be in the entry's `learn` and must not be its trigger or a setup cast; a cast time above
@@ -33,11 +40,14 @@
   Each arm reads as its after sum less its before sum, and the ratio `numerator / denominator` is judged
   `|ratio - expected| <= tolerance`; `expected` is above 0 and stated with its `source`. A denominator arm that did not
   move makes the ratio off, never ok. Each arm keeps its own absolute expectation.
-- `arms`: a list of `{actors, metric, fields?, before_expected, expected, tolerance, source}`. Each arm reads `metric`
-  on every unit of `actors` (the caster, the allies, the dummy when the scenario has it) with the arm's `fields`,
-  right after the main before and after readings, and judges the sums: `|sum - expected| <= tolerance`. Every value
-  is a finite number stated with its `source`; no default tolerance. The metric needs a `METRIC_EVIDENCE` row that is
-  not a readback.
+- `arms`: a list of `{actors, metric, fields?, before_expected, expected, tolerance, source, reach_source?}`. Each
+  arm reads `metric` on every unit of `actors` (the caster, the allies, the dummy when the scenario has it) with the
+  arm's `fields`, right after the main before and after readings, and judges the sums:
+  `|sum - expected| <= tolerance`. Every value is a finite number stated with its `source`; no default tolerance. The
+  metric needs a `METRIC_EVIDENCE` row that is not a readback. An arm whose `actors` or `fields.target` name `ally5`,
+  `ally6` or `ally7` states its own `reach_source`, as the option's main reading does, with the same review duty; on
+  any other arm it is refused. A ratio reads two arms, so a ratio over such an arm rests on that arm's
+  `reach_source`.
 
 Heal and energize totals (`spell_heal_count`, `spell_heal_total`, `spell_effective_heal_total`,
 `spell_energize_count`, `spell_energize_total`), and the spell damage, log and count reads (`spell_damage_count`,

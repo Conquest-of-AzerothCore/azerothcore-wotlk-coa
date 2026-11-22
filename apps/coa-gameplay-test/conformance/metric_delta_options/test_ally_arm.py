@@ -3,6 +3,7 @@ import unittest
 from behaviours import behaviour_scenario
 from compare import judge_behaviour
 from coverage import READBACK, metric_evidence
+from metric_delta_options.ally_arm import parse
 from profile import DBC_DIR, load_fixture_class_file
 import run
 from test_behaviours import FakeRun, base_verdict
@@ -22,6 +23,7 @@ COPY_ARM = {'actors': ['ally'], 'metric': 'health', 'before_expected': 5000, 'ex
             'source': 'a seeded copy heal'}
 PRIMARY_ARM = {'actors': ['ally2'], 'metric': 'health', 'before_expected': 5000, 'expected': 6000, 'tolerance': 1000,
                'source': 'a seeded primary heal'}
+REACH = 'a seeded Allies() filter by IsInRaidWith'
 RATIO = {'numerator': 0, 'denominator': 1, 'expected': 0.75, 'tolerance': 0.01, 'source': 'a seeded 75% copy'}
 
 
@@ -153,12 +155,47 @@ class AllyArmScenarioTests(unittest.TestCase):
 
     def test_seven_allies_are_grouped_players(self):
         scenario, [expectation] = self.scenario(steed_entry(
-            ally_arm={'allies': 7, 'arms': [{**HEALTH_ARM, 'actors': ['ally6', 'ally7']}]}))
+            ally_arm={'allies': 7, 'arms': [{**HEALTH_ARM, 'actors': ['ally6', 'ally7'], 'reach_source': REACH}]}))
         run.validate(scenario)
         allies = ['ally', 'ally2', 'ally3', 'ally4', 'ally5', 'ally6', 'ally7']
         self.assertEqual([player['id'] for player in scenario['players']], ['caster', *allies])
         self.assertEqual([step['target'] for step in scenario['steps'] if step['action'] == 'group'], allies)
         self.assertEqual(expectation.model['ally_arm']['allies'], allies)
+
+    def test_a_read_in_raid_subgroup_two_without_its_reach_source_is_refused(self):
+        heal = {'actors': ['caster'], 'metric': 'spell_heal_total', 'fields': {'spell': SPELL, 'target': 'ally5'},
+                'before_expected': 0, 'expected': 0, 'tolerance': 0, 'source': 'a seeded cap of four allies'}
+        refused = [steed_entry(ally_arm={'allies': 5, 'arms': [{**HEALTH_ARM, 'actors': ['ally', 'ally5']}]}),
+                   steed_entry(ally_arm={'allies': 7, 'arms': [heal]}),
+                   steed_entry(measure_actor='ally7', ally_arm={'allies': 7}),
+                   steed_entry(fields={'target': 'ally6'}, ally_arm={'allies': 7})]
+        for entry in refused:
+            with self.subTest(entry=entry), self.assertRaisesRegex(ValueError, 'raid subgroup 2, outside'):
+                self.scenario(entry)
+        for option in ({'allies': 4, 'reach_source': REACH}, {'arms': [{**HEALTH_ARM, 'reach_source': REACH}]},
+                       {'allies': 5, 'reach_source': ' '},
+                       {'allies': 5, 'arms': [{**HEALTH_ARM, 'actors': ['ally5'], 'reach_source': ''}]}):
+            with self.subTest(option=option), self.assertRaisesRegex(ValueError, 'reach_source'):
+                self.scenario(steed_entry(ally_arm=option))
+
+    def test_a_read_in_raid_subgroup_two_with_its_reach_source_is_accepted(self):
+        heal = {'actors': ['caster'], 'metric': 'spell_heal_total', 'fields': {'spell': SPELL, 'target': 'ally5'},
+                'before_expected': 0, 'expected': 0, 'tolerance': 0, 'source': 'a seeded cap', 'reach_source': REACH}
+        scenario, [expectation] = self.scenario(steed_entry(measure_actor='ally7', ally_arm={
+            'allies': 7, 'reach_source': 'the main seeded reach', 'arms': [HEALTH_ARM, heal]}))
+        run.validate(scenario)
+        self.assertIn('The main reading reaches raid subgroup 2 (the main seeded reach).', scenario['contract'])
+        self.assertIn(f'Arm 1 reaches raid subgroup 2 ({REACH}).', scenario['contract'])
+        self.assertNotIn('Arm 0 reaches', scenario['contract'])
+        self.assertNotIn('reach_source', expectation.model['ally_arm']['arms'][1])
+
+    def test_mutant_a_party_scoped_zero_on_an_unstated_subgroup_two_ally_is_refused(self):
+        zero = {'actors': ['ally4', 'ally5'], 'metric': 'aura', 'fields': {'spell': SPELL}, 'before_expected': 0,
+                'expected': 0, 'tolerance': 0, 'source': 'a seeded "does not affect" clause'}
+        scenario, _ = self.scenario(steed_entry(ally_arm={'allies': 5, 'arms': [{**zero, 'actors': ['ally4']}]}))
+        run.validate(scenario)
+        with self.assertRaisesRegex(ValueError, r"arm 0 reads \['ally5'\] in raid subgroup 2"):
+            self.scenario(steed_entry(ally_arm={'allies': 5, 'arms': [zero]}))
 
     def test_the_timed_control_needs_an_uncast_before_phase(self):
         for changes in ({'cast_in_before': True}, {'gate_timing': 'start'}):
@@ -201,6 +238,10 @@ class AllyArmScenarioTests(unittest.TestCase):
         self.assertEqual(proofs, [2, 4, 6, 8])
         self.assertIn(f'Each {ALLY_SPELL} cast at ally counts 2 SPELL_GO ({TWICE["source"]}).', scenario['contract'])
         run.check_report(ran_report(scenario), 'r', scenario, 0)
+
+    def test_a_stated_spell_go_count_stays_with_its_own_spell(self):
+        ally = parse({'ally_casts': [TWICE, SLOW_SPELL]})
+        self.assertEqual((ally.spell_go_per_cast(ALLY_SPELL), ally.spell_go_per_cast(SLOW_SPELL)), (2, 1))
 
     def test_mutant_a_wrong_spell_go_count_fails_the_scenario(self):
         stated, _ = self.scenario({**ally_entry(ally_casts=[TWICE]), 'learn': [ALLY_SPELL]})
@@ -335,6 +376,11 @@ class AllyArmVerdictTests(unittest.TestCase):
         self.assertEqual(verdict.status, 'ok')
         self.assertIn('ally ratio arm 0 / arm 1: 750 / 1000 = 0.75 (expected 0.75 within 0.01): ok',
                       verdict.explanation)
+
+    def test_a_held_ratio_keeps_a_failing_main_verdict(self):
+        verdict = self.judged(ratio_entry(), self.ratio_values(), main=(1.0, 1.0))
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('= 0.75 (expected 0.75 within 0.01): ok', verdict.explanation)
 
     def test_mutant_a_ratio_off_alerts_while_both_arms_hold(self):
         verdict = self.judged(ratio_entry(), self.ratio_values(copy_after=6000))

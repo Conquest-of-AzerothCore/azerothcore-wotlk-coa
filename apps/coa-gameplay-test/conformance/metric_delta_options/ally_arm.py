@@ -4,6 +4,7 @@ import math
 NAME = 'ally_arm'
 ORDER = 24
 ALLY_IDS = ('ally', 'ally2', 'ally3', 'ally4', 'ally5', 'ally6', 'ally7')
+RAID_SUBGROUP_TWO = ALLY_IDS[4:]
 ALLY_CAST_SETTLE_MS = 2000
 ALLY_CAST_PROOF_METRIC = 'spell_go_count'
 CASTER_SCOPED_METRICS = {'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',
@@ -13,8 +14,8 @@ CASTER_SCOPED_METRICS = {'spell_heal_count', 'spell_heal_total', 'spell_effectiv
 CASTER_ENTRY_METRICS = {'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total'}
 CONTROL_LABEL = 'timed no-cast control'
 EXPIRE_LABEL = 'let the first effect fully expire'
-KEYS = {'allies', 'ally_health', 'ally_casts', 'control_wait', 'arms', 'ratios'}
-ARM_KEYS = {'actors', 'metric', 'fields', 'before_expected', 'expected', 'tolerance', 'source'}
+KEYS = {'allies', 'ally_health', 'ally_casts', 'control_wait', 'arms', 'ratios', 'reach_source'}
+ARM_KEYS = {'actors', 'metric', 'fields', 'before_expected', 'expected', 'tolerance', 'source', 'reach_source'}
 ALLY_CAST_KEYS = {'spell', 'spell_go_per_cast', 'source'}
 RATIO_KEYS = {'numerator', 'denominator', 'expected', 'tolerance', 'source'}
 
@@ -28,6 +29,7 @@ class Arm:
     expected: float
     tolerance: float
     source: str
+    reach_source: str = ''
 
 
 @dataclass(frozen=True)
@@ -48,6 +50,7 @@ class AllyArm:
     arms: tuple[Arm, ...]
     go_per_cast: tuple[tuple[int, int, str], ...] = ()
     ratios: tuple[Ratio, ...] = ()
+    reach_source: str = ''
 
     @property
     def ally_ids(self) -> tuple[str, ...]:
@@ -61,20 +64,25 @@ def number(value) -> bool:
     return type(value) in (int, float) and math.isfinite(value)
 
 
+def stated_text(value) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
 def parse_arm(raw) -> Arm:
-    if not isinstance(raw, dict) or not ARM_KEYS - {'fields'} <= set(raw) <= ARM_KEYS \
+    if not isinstance(raw, dict) or not ARM_KEYS - {'fields', 'reach_source'} <= set(raw) <= ARM_KEYS \
             or not isinstance(raw['actors'], list) or not raw['actors'] \
             or not all(isinstance(actor, str) and actor for actor in raw['actors']) \
             or len(set(raw['actors'])) != len(raw['actors']) \
             or not isinstance(raw['metric'], str) or not raw['metric'] \
             or not isinstance(raw.get('fields', {}), dict) \
             or not all(number(raw[key]) for key in ('before_expected', 'expected', 'tolerance')) \
-            or raw['tolerance'] < 0 or not isinstance(raw['source'], str) or not raw['source'].strip():
+            or raw['tolerance'] < 0 or not stated_text(raw['source']) \
+            or ('reach_source' in raw and not stated_text(raw['reach_source'])):
         raise ValueError(f'an ally_arm arm is {{actors: [unit, ...], metric, fields?, before_expected, expected, '
-                         f'tolerance >= 0, source: text}}, finite numbers, every expectation stated with its source, '
-                         f'not {raw!r}')
+                         f'tolerance >= 0, source: text, reach_source?: text}}, finite numbers, every expectation '
+                         f'stated with its source, not {raw!r}')
     return Arm(tuple(raw['actors']), raw['metric'], dict(raw.get('fields', {})), float(raw['before_expected']),
-               float(raw['expected']), float(raw['tolerance']), raw['source'])
+               float(raw['expected']), float(raw['tolerance']), raw['source'], raw.get('reach_source', ''))
 
 
 def parse_ally_cast(raw) -> tuple[int, int, str]:
@@ -119,6 +127,9 @@ def parse(raw) -> AllyArm:
         if any(other == spell and (other_count, other_source) != (count, source)
                for other, other_count, other_source in stated):
             raise ValueError(f'ally_arm ally_casts states {spell} with different SPELL_GO counts or sources')
+    if 'reach_source' in raw and not stated_text(raw['reach_source']):
+        raise ValueError(f'ally_arm reach_source is text citing the code or data line that reaches raid subgroup 2, '
+                         f'not {raw["reach_source"]!r}')
     if raw.get('control_wait', True) is not True:
         raise ValueError(f'ally_arm control_wait is true, not {raw["control_wait"]!r}')
     arms = raw.get('arms', [])
@@ -130,7 +141,7 @@ def parse(raw) -> AllyArm:
     return AllyArm(allies, tuple(health) if health is not None else None, tuple(spell for spell, _, _ in stated),
                    'control_wait' in raw, tuple(parse_arm(arm) for arm in arms),
                    tuple(dict.fromkeys(cast for cast in stated if cast[1] > 1)),
-                   tuple(parse_ratio(ratio, len(arms)) for ratio in ratios))
+                   tuple(parse_ratio(ratio, len(arms)) for ratio in ratios), raw.get('reach_source', ''))
 
 
 def check(spec, ally):
@@ -151,6 +162,7 @@ def check(spec, ally):
             raise ValueError(f'{spec.spell} ally_arm metric {arm.metric!r} needs a METRIC_EVIDENCE row that is not '
                              f'a readback, found {evidence!r}')
         reads += [(actor, arm.metric, arm.fields, f'arm {index}') for actor in arm.actors]
+    reach_check(spec, ally)
     for actor, metric, fields, read in reads:
         if actor != CASTER and metric in CASTER_SCOPED_METRICS \
                 and not (metric in CASTER_ENTRY_METRICS and 'caster_entry' in fields):
@@ -174,6 +186,24 @@ def check(spec, ally):
                               or spec.target_casts):
         raise ValueError(f'{spec.spell} ally_arm control_wait reads the uncast control at the treatment\'s interval '
                          f'only without after-phase-only acts: no setup_wait_ms, enemy, helper or target casts')
+
+
+def subgroup_two_units(actors, fields: dict) -> list[str]:
+    return sorted(set(RAID_SUBGROUP_TWO) & {*actors, fields.get('target')})
+
+
+def reach_check(spec, ally: AllyArm):
+    reads = [(subgroup_two_units([spec.measure_actor], spec.fields), ally.reach_source, 'its main reading')]
+    reads += [(subgroup_two_units(arm.actors, arm.fields), arm.reach_source, f'arm {index}')
+              for index, arm in enumerate(ally.arms)]
+    for units, reach, read in reads:
+        if units and not reach:
+            raise ValueError(f'{spec.spell} ally_arm {read} reads {units} in raid subgroup 2, outside the caster\'s '
+                             f'party: state its reach_source, the code or data line that makes the spell reach raid '
+                             f'subgroup 2 (for example IsInRaidWith or TARGET_CHECK_ALLY), never a run\'s reading')
+        if reach and not units:
+            raise ValueError(f'{spec.spell} ally_arm {read} states a reach_source but reads no unit of raid '
+                             f'subgroup 2 {list(RAID_SUBGROUP_TWO)}')
 
 
 def ally_cast_label(spell: int, moment: str, index: int) -> str:
@@ -287,10 +317,14 @@ def fixtures(class_file: dict, spec, ally: AllyArm, scenario: dict):
     if ally.control_wait:
         contract += (f' The uncast before phase waits {spec.wait_ms} ms, the after phase\'s wait, before its '
                      f'reading (timed no-cast control).')
+    if ally.reach_source:
+        contract += f' The main reading reaches raid subgroup 2 ({ally.reach_source}).'
     for index, arm in enumerate(ally.arms):
         contract += (f' Arm {index}: {arm.metric} {arm.fields} summed over {list(arm.actors)}, read right after each '
                      f'main reading, expected {arm.before_expected:g} then {arm.expected:g} within '
                      f'{arm.tolerance:g} ({arm.source}).')
+        if arm.reach_source:
+            contract += f' Arm {index} reaches raid subgroup 2 ({arm.reach_source}).'
     for ratio in ally.ratios:
         contract += (f' Ratio: arm {ratio.numerator} over arm {ratio.denominator}, each read as its after sum less '
                      f'its before sum, expected {ratio.expected:g} within {ratio.tolerance:g} ({ratio.source}).')
