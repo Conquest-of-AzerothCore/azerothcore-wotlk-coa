@@ -215,6 +215,8 @@ class aura_ascension_sun_cleric_lifecycle : public AuraScript
         {
             PreventDefaultAction();
             uint32 percent = std::max(0,effect->GetAmount());
+            if (player->HasAura(300357))
+                percent *= 2;
             Copy(player,target,707522,CalculatePct(target->GetMaxHealth(),percent));
             if (target == player)
             {

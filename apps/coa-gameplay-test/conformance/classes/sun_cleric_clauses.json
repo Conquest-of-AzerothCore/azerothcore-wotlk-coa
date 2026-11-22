@@ -538,7 +538,7 @@
         ]
       }
     ],
-    "reason": "Pair 20261122-070213 / 20261122-070253, build of server commit 8126dd813259, no flip. Mana half: Bless on the caster reads the mana after one tick (mana_tick_lead, both runs ok, control = before the learn). Healing half: ALERT in both runs, the health after one tick reads 5500 before and 5500 after the learn against 6000 expected: 300357 does not double the Bless heal (AscensionSunClericAuras.cpp:217-218 copies the heal without a 300357 term and only the mana branch doubles, :221-224). Lead, not a verdict: fix note in the report (clause 39). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    "reason": "Pair 20261122-074047 / 20261122-074311, build of class head 94d4f2ebbb plus the Bless heal fix (ADR 0021), worldserver sha256 04e942f4b520, no flip, control arm in every entry (the before phase, 300357 not learned). Healing half: health_tick_lead reads 5500 before the learn and 6000 after in both runs (expected 5500 and 6000 from the tooltip percent of 5 and the doubling, exact read, tolerance 1e-5); the earlier pair 20261122-070213 / 20261122-070253 read 5500 and 5500 before the fix. Mana half: mana_tick_lead reads 1234 before and 1377 after in both runs (expected from 5% of the maximum mana 2868 doubled). mana_tick reads 1234 in both runs (O-4, 5%). No probabilistic check. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
   },
   {
     "spell": 300360,
