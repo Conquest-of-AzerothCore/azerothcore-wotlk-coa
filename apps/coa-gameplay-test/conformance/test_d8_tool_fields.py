@@ -203,6 +203,41 @@ class OnlyArmTests(unittest.TestCase):
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class PrimingArmExpectedTests(unittest.TestCase):
+    def scenario(self, **changes):
+        entry = entry_of(560861, 'dawnfall_gate')
+        return behaviour_scenario(CLASS_FILE, {**entry, **changes})
+
+    def priming(self, expectations) -> dict:
+        return {e.model['arm']: e for e in expectations if ' priming ' in e.label}
+
+    def test_the_unset_arm_expects_dawn_absent_and_the_others_present(self):
+        _, expectations = self.scenario()
+        arms = self.priming(expectations)
+        self.assertEqual({arm: e.displayed for arm, e in arms.items()},
+                         {'without': '1', 'with': '1', 'unset': '0'})
+
+    def test_a_mutant_with_dawn_up_in_the_unset_arm_is_not_ok(self):
+        _, expectations = self.scenario()
+        unset = self.priming(expectations)['unset']
+        self.assertEqual(judged(unset, {unset.label: 0.0}), 'ok')
+        self.assertNotEqual(judged(unset, {unset.label: 1.0}), 'ok')
+        with_arm = self.priming(expectations)['with']
+        self.assertEqual(judged(with_arm, {with_arm.label: 1.0}), 'ok')
+        self.assertNotEqual(judged(with_arm, {with_arm.label: 0.0}), 'ok')
+
+    def test_without_arm_expected_every_arm_keeps_one_state(self):
+        reads = [{'spell': 807440, 'expected': 1}]
+        _, expectations = self.scenario(priming_reads=reads)
+        self.assertEqual({e.displayed for e in self.priming(expectations).values()}, {'1'})
+
+    def test_arm_expected_refuses_an_unknown_arm_or_a_state_other_than_0_or_1(self):
+        for bad in ({'nowhere': 0}, {'unset': 2}, {'unset': True}, [0]):
+            with self.assertRaisesRegex(ValueError, 'arm_expected'):
+                self.scenario(priming_reads=[{'spell': 807440, 'expected': 1, 'arm_expected': bad}])
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
 class ThreatSlopeFieldTests(unittest.TestCase):
     def sunflare(self, **changes) -> dict:
         entry = {**entry_of(504734, 'threat_slope_sunflare'), **changes}

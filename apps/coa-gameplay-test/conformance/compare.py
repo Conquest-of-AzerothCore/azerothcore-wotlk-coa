@@ -1326,6 +1326,23 @@ def judge_proc_per_trigger(manifest: dict, parts: list[ProcPart], tooltips: Tool
                                f'{expectation.displayed} shows {chance:g}%; {expectation.rule}')
 
 
+def miss_exclusion_judgement(exclusion: dict, totals: dict, trials: float, judgement: tuple,
+                             expected: float) -> tuple:
+    status, low, high, why = judgement
+    missed = totals[exclusion['missed']]
+    share = missed / trials if trials > 0 else 0.0
+    read = f'miss share {share:.4f} ({missed:g} of {trials:g} swings)'
+    if share < exclusion['min_share']:
+        return ('unmeasured', None, None, f'{why}; {read} is under the {exclusion["min_share"]:g} the entry fixes, '
+                                            f'too few misses to separate a server that ignores them')
+    alternative = expected * (1 - share)
+    if low <= alternative:
+        return ('alert', low, high, f'{why}; {read}: the rate of a server that ignores misses, {alternative:.4f} '
+                                    f'(= {expected:g} x (1 - share)), is not excluded by the interval')
+    return (status, low, high, f'{why}; {read}: the rate of a server that ignores misses, {alternative:.4f} '
+                               f'(= {expected:g} x (1 - share)), lies below the interval')
+
+
 def proc_part_counts(per_part: list[tuple[dict[str, float], float]], model: dict, event_labels: list[str],
                      reading: dict) -> list[tuple[float, float]]:
     counts = []
@@ -1536,6 +1553,9 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
             status, low, high, why = banded_rate(status, low, high, expected, why)
         if residual and low is not None:
             why += residual_note(residual, expected, reading_trials)
+        if model.get('miss_exclusion') and low is not None:
+            status, low, high, why = miss_exclusion_judgement(model['miss_exclusion'], totals, reading_trials,
+                                                              (status, low, high, why), expected)
         judged.append((status, procs / reading_trials if reading_trials > 0 else None, low, high,
                        f'{reading["name"]}: {procs:g} procs in {reading_trials:g} trials, {why}: {status}',
                        reading_trials))

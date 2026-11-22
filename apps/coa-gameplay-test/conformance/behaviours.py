@@ -4218,6 +4218,7 @@ class CostGateSpec:
     extra_reads: tuple[tuple[str, int | None, str | None, int | None], ...] = ()
     only_arm: str | None = None
     priming_reads: tuple[tuple[int, int], ...] = ()
+    priming_arm_states: tuple[tuple[int, str, int], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -4552,7 +4553,8 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                                                 spec.spell, None, str(NO_CAST_FAILURE), rule,
                                                 {**model, 'arm': arm.name, 'reading': 'after_cast'}))
         expectations += [Expectation(f'{label} priming {aura}', BEHAVIOUR_CAST_CONDITION, spec.spell, aura, None,
-                                     str(state), rule, {**model, 'arm': arm.name, 'reading': 'aura'})
+                                     str(priming_state(spec, aura, state, arm.name)), rule,
+                                     {**model, 'arm': arm.name, 'reading': 'aura'})
                          for aura, state in spec.priming_reads]
         expectations.append(Expectation(label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.gated_spell, None,
                                         str(arm.result), rule,
@@ -4627,6 +4629,8 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                     + (f' Before the priming cast of {spec.gated_spell}, the auras {[aura for aura, _ in spec.priming_reads]} '
                        f'are read on the caster and judged against {[state for _, state in spec.priming_reads]}: a '
                        f'precondition check, so a mismatch voids the arm.' if spec.priming_reads else '')
+                    + (f' Per-arm priming states (arm_expected): {[list(item) for item in spec.priming_arm_states]} '
+                       f'as [aura, arm, state].' if spec.priming_arm_states else '')
                     + (f' In the without and with arms, {len(spec.extra_reads)} diagnostic reads (after the attempt or around an '
                        f'after cast) are recorded in the result and never judged.' if spec.extra_reads else '')
                     + (f' A forcing fixture raises the roll of {spec.forced_roll} by {FORCED_CHANCE_PERCENT}% (a '
@@ -4672,7 +4676,8 @@ def cost_gate_spec(entry: dict) -> CostGateSpec:
                         metric_delta_strike(entry.get('strike')),
                         tuple((int(aura), int(stacks)) for aura, stacks in entry.get('strike_victim_auras', ())),
                         entry.get('caster_health_pct'), bool(entry.get('refused_with', False)),
-                        cost_gate_extra_reads(entry), entry.get('only_arm'), cost_gate_priming_reads(entry))
+                        cost_gate_extra_reads(entry), entry.get('only_arm'), cost_gate_priming_reads(entry),
+                        cost_gate_priming_arm_states(entry))
 
 
 def cost_gate_priming_reads(entry: dict) -> tuple[tuple[int, int], ...]:
@@ -4681,6 +4686,26 @@ def cost_gate_priming_reads(entry: dict) -> tuple[tuple[int, int], ...]:
         raise ValueError(f'{entry["spell"]} cost_gate priming_reads are {{spell, expected 0 or 1}} aura presence reads '
                          f'of a cooldown gate')
     return reads
+
+
+COST_GATE_ARM_NAMES = ('without', 'with', 'next', 'unset', 'base', 'beyond', 'held', 'expired')
+
+
+def cost_gate_priming_arm_states(entry: dict) -> tuple[tuple[int, str, int], ...]:
+    found = []
+    for read in entry.get('priming_reads', ()):
+        states = read.get('arm_expected', {})
+        if not isinstance(states, dict) or any(arm not in COST_GATE_ARM_NAMES or isinstance(state, bool)
+                                               or state not in (0, 1) for arm, state in states.items()):
+            raise ValueError(f'{entry["spell"]} cost_gate priming_reads arm_expected maps arm names '
+                             f'{list(COST_GATE_ARM_NAMES)} to 0 or 1')
+        found += [(int(read['spell']), arm, state) for arm, state in states.items()]
+    return tuple(found)
+
+
+def priming_state(spec, aura: int, state: int, arm: str) -> int:
+    return next((arm_state for spell, name, arm_state in spec.priming_arm_states if spell == aura and name == arm),
+                state)
 
 
 def cost_gate_extra_reads(entry: dict) -> tuple[tuple[str, int | None, str | None, int | None], ...]:

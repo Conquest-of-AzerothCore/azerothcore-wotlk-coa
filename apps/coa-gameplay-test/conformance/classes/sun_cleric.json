@@ -366,7 +366,10 @@
           62531,
           2116852
         ],
-        "count_misses": true
+        "count_misses": true,
+        "miss_exclusion": {
+          "min_share": 0.04
+        }
       },
       "residual_target": 0.001,
       "min_detectable": 4,
@@ -25793,6 +25796,15 @@
         }
       ],
       "observe_source": "560861 The Coming Dawn Effect[0] aura 42 PROC_TRIGGER_SPELL 560860 (Effect[0] and Effect[1] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN 165, BasePoints -1001, so 1000 ms each, $/1000;560860S1 = 1 sec, MiscValue 806118 Dawnfall and 301266 Solar Concord). The class code (AscensionSunClericEvents.cpp:116, :263-272) reduces both cooldowns by 1000 ms on every own damage hit of Radiant Flame's tick 807058 while Dawn 807440 is on the caster. Radiant Flame 806060 lasts 4000 ms with EffectAmplitude 1000 and SPELL_ATTR5_EXTRA_INITIAL_PERIOD (AttributesEx5 0x200), so one cast ticks 807058 five times (4000 / 1000 + 1, as the flame_hits entry of 806024 derives and measures), 5 x 1000 = 5000 ms in all. Route: Solar Concord 301266 (30000 ms cooldown, Spell.dbc RecoveryTime) is cast, Radiant Flame is cast at the dummy 1600 ms later with Dawn up (Dawn 804584 cast for real as the setup cast, Solar Power fixture 500149), and Solar Concord 301266 is attempted again 25250 ms after its cast (25000 ms plus 250 ms): refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, refused again at 24750 ms (beyond), so the five-tick cut lies in [4750, 5250] ms, which excludes 4500 and 5500 ms (10% off on both sides). The unset arm keeps the passive learned and skips the Dawn setup cast: Radiant Flame ticks without Dawn and the attempt is refused, the control of the clause 'While Dawn is active'. Each arm waits 40000 ms more before it starts (arm_wait_ms): the arms of this 30000 ms cooldown would otherwise be about 27000 ms apart, and a Dawn cast over a Dawn still up (807440 lasts 60000 ms) switches it off, which a first exploratory run measured (807440 read 0 after the second Dawn cast, the cut missing in the with arm); at 67000 ms between arms the Dawn of the earlier arm is gone before the next one. Reference search 2026-11-22: coa-history spell 560861: 0 events in 186 logs (a passive); nothing found beyond the tooltip and the DBC.",
+      "priming_reads": [
+        {
+          "spell": 807440,
+          "expected": 1,
+          "arm_expected": {
+            "unset": 0
+          }
+        }
+      ],
       "unset_arm": true,
       "arm_wait_ms": 40000
     },
@@ -37939,6 +37951,15 @@
       "after_wait_ms": 1600,
       "margin_ms": 250,
       "cast_power": 1363,
+      "priming_reads": [
+        {
+          "spell": 807440,
+          "expected": 1,
+          "arm_expected": {
+            "unset": 0
+          }
+        }
+      ],
       "unset_arm": true,
       "cast_auras": [
         {

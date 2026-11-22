@@ -271,6 +271,49 @@ class AvoidedProcMissesTest(unittest.TestCase):
         self.assertEqual(verdict.status, 'alert')
         self.assertLess(verdict.measured, 0.06)
 
+    def test_the_miss_exclusion_is_off_by_default_and_validated(self):
+        _, [expectation] = proc_scenario(self.class_file, self.entry, 0)
+        self.assertNotIn('miss_exclusion', expectation.model)
+        trigger = self.entry['trigger']
+        for bad in ({'min_share': 0}, {'min_share': 0.5}, {'min_share': True}, {'share': 0.04}, 0.04):
+            with self.assertRaises(ValueError):
+                proc_plan(self.class_file, {**self.entry, 'trigger': {**trigger, 'miss_exclusion': bad}})
+        with self.assertRaises(ValueError):
+            proc_plan(self.class_file, {**self.entry, 'trigger': {k: v for k, v in
+                                                                 {**trigger, 'miss_exclusion': {'min_share': 0.04}}.items()
+                                                                 if k != 'count_misses'}})
+        self.entry['trigger']['miss_exclusion'] = {'min_share': 0.04}
+        _, [expectation] = proc_scenario(self.class_file, self.entry, 0)
+        self.assertEqual(expectation.model['miss_exclusion'],
+                         {'min_share': 0.04, 'missed': f'{VENGEFUL_INTENT} proc trials missed'})
+
+    def test_a_miss_share_that_separates_the_alternative_stays_ok(self):
+        self.entry['trigger']['miss_exclusion'] = {'min_share': 0.04}
+        verdict = self.verdict(2400, 2400, 3200, 800)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('miss share 0.4000', verdict.explanation)
+        self.assertIn('lies below the interval', verdict.explanation)
+
+    def test_a_miss_share_under_the_threshold_is_unmeasured(self):
+        self.entry['trigger']['miss_exclusion'] = {'min_share': 0.08}
+        verdict = self.verdict(3800, 3800, 400, 800)
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('under the 0.08', verdict.explanation)
+
+    def test_a_server_that_ignores_misses_alerts_even_inside_the_band(self):
+        from compare import miss_exclusion_judgement
+        exclusion = {'min_share': 0.04, 'missed': 'missed'}
+        trials, missed = 87829.0, 4507.0
+        rate = 0.25 * (1 - missed / trials)
+        half = 0.005
+        status, low, high, why = miss_exclusion_judgement(exclusion, {'missed': missed}, trials,
+                                                          ('ok', rate - half, rate + half, 'inside the band'), 0.25)
+        self.assertEqual(status, 'alert')
+        self.assertIn('is not excluded by the interval', why)
+        status, *_ = miss_exclusion_judgement(exclusion, {'missed': missed}, trials,
+                                              ('ok', 0.2449, 0.2550, 'inside the band'), 0.25)
+        self.assertEqual(status, 'ok')
+
     def test_an_attack_outside_the_three_outcomes_voids_the_part(self):
         verdict = self.verdict(3800, 3800, 400, 800, extra_attacks=1)
         self.assertEqual(verdict.status, 'unmeasured')

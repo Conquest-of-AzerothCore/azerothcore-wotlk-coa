@@ -1078,11 +1078,14 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
                 added_trials_label(aura, term): baseline_trigger_label(aura, term['spell'])
                 for term in trigger_spell_terms(entry)}
     if avoided:
-        from proc_avoided import ATTACK_BALANCE, attack_balance, avoided_baseline_model, counts_misses, reading
+        from proc_avoided import (ATTACK_BALANCE, attack_balance, avoided_baseline_model, counts_misses,
+                                  miss_exclusion_model, reading)
         model['readings'] = [reading(labels['trials'], counts_misses(entry))]
         model['baseline'] = avoided_baseline_model(entry, plan, part)
         if counts_misses(entry):
             model[ATTACK_BALANCE] = attack_balance(labels['trials'], labels['attempts'])
+        if miss_exclusion_model(entry, labels['trials']):
+            model['miss_exclusion'] = miss_exclusion_model(entry, labels['trials'])
     if control:
         model['baseline'] = {**baseline_labels(aura), 'attempts': baseline_attempts(plan.chance_pct),
                              CONTROL_WEAPON: entry[CONTROL_WEAPON], 'control_item': control['item'],
