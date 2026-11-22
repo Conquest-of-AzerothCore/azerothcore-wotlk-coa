@@ -30078,8 +30078,8 @@
         ]
       },
       "trials": 100,
-      "parts": 20,
-      "expected_source": "707773 Vindicator: Effect[0] ADD_FLAT_MODIFIER MiscValue 12 (SPELLMOD_EFFECT2) on Glorious Execution (class mask word 2 bit 4, SpellFamilyFlags[1] 4096 / [2] 4 as 800626), BasePoints -21 (-20 read as $s1 = 20); the server rewrites it to SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT kept at 0 unless Vow of the Valkyr 807749 is on the caster (AscensionSunClericRadiance.cpp:41-88, as the 704938 entry ignores_armor). Glorious Execution 800626 is cast and its main-hand strike 800691 (800626 Effect[0] EffectTriggerSpell) is observed on the dummy, each hit non-critical, in two arms. Lesser Armor 673 (Effect[0] aura 22 SPELL_AURA_MOD_RESISTANCE) is set on the dummy with its effect 0 amount changed to 5000 in both arms (a fixture size, not a claimed value), so the dummy armor reads 5528 (528 pinned reference armor plus 5000) in both. Classic combat armor mitigation at caster level 60: damage kept = K / (armor + K), K = 85 x 60 + 400 = 5500 (Unit.cpp ClassicPlusCombat::ArmorConstant, as the 704938 and Witch Hunter Stake entries). Treatment arm: 707773 learned and Vow of the Valkyr 807749 on the caster (a precondition fixture by harness set_aura, the condition of the clause, not its subject); control arm: Vow active, 707773 not learned. Ignoring 20% of 5528 armor leaves 4422.4: the mean hit ratio is (5528 + 5500) / (4422.4 + 5500) = 1.1114 (+11.14%). The band is that of the stated 20% (G-19: the larger of 5% of it and 2 points, 18% to 22%) mapped through the same formula: 18% gives 1.0992 and 22% gives 1.1240, so the judged band is +-1.2 points on +11.14% (the smaller side 1.22), and a server ignoring 10% (+5.28%) or 25% (+14.33%) lies outside it. The expected value comes from the DBC amount and the armor formula, never from a run. Sizing: the 704938 entry measured a 99% half-width of 0.87 points at 498 trials per arm; the 0.8 x half-band target of 0.49 needs about 1570 trials per arm, so 20 parts of 100 (2000 per arm, 1.27 times), checked against the judge's own sized_trials in the pair. Reference search 2026-11-22: bindmysoul 704938 text reads -10% (the older state, ours is 20% from Spell.dbc); coa-history 800626 has 219 casts in 2 logs and 800691 3417 damage events, no armor figure; nothing found that fixes the dummy armor beyond the tooltip and the DBC.",
+      "parts": 52,
+      "expected_source": "707773 Vindicator: Effect[0] ADD_FLAT_MODIFIER MiscValue 12 (SPELLMOD_EFFECT2) on Glorious Execution (class mask word 2 bit 4, SpellFamilyFlags[1] 4096 / [2] 4 as 800626), BasePoints -21 (-20 read as $s1 = 20); the server rewrites it to SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT kept at 0 unless Vow of the Valkyr 807749 is on the caster (AscensionSunClericRadiance.cpp:41-88, as the 704938 entry ignores_armor). Glorious Execution 800626 is cast and its main-hand strike 800691 (800626 Effect[0] EffectTriggerSpell) is observed on the dummy, each hit non-critical, in two arms. Lesser Armor 673 (Effect[0] aura 22 SPELL_AURA_MOD_RESISTANCE) is set on the dummy with its effect 0 amount changed to 5000 in both arms (a fixture size, not a claimed value), so the dummy armor reads 5528 (528 pinned reference armor plus 5000) in both. Classic combat armor mitigation at caster level 60: damage kept = K / (armor + K), K = 85 x 60 + 400 = 5500 (Unit.cpp ClassicPlusCombat::ArmorConstant, as the 704938 and Witch Hunter Stake entries). Treatment arm: 707773 learned and Vow of the Valkyr 807749 on the caster (a precondition fixture by harness set_aura, the condition of the clause, not its subject); control arm: Vow active, 707773 not learned. Ignoring 20% of 5528 armor leaves 4422.4: the mean hit ratio is (5528 + 5500) / (4422.4 + 5500) = 1.1114 (+11.14%). The band is that of the stated 20% (G-19: the larger of 5% of it and 2 points, 18% to 22%) mapped through the same formula: 18% gives 1.0992 and 22% gives 1.1240, so the judged band is +-1.2 points on +11.14% (the smaller side 1.22), and a server ignoring 10% (+5.28%) or 25% (+14.33%) lies outside it. The expected value comes from the DBC amount and the armor formula, never from a run. Sizing: the 704938 entry measured a 99% half-width of 0.87 points at 498 trials per arm; the 0.8 x half-band target of 0.49 needs about 1570 trials per arm, so 52 parts of 100 (5200 per arm): the first run (20 parts, 2000 per arm) read 11.14% with a 99% half-width of 0.73 points against the 0.6 the judge requires and sized 4625 trials per arm, so 5200 is 1.12 times that. Reference search 2026-11-22: bindmysoul 704938 text reads -10% (the older state, ours is 20% from Spell.dbc); coa-history 800626 has 219 casts in 2 logs and 800691 3417 damage events, no armor figure; nothing found that fixes the dummy armor beyond the tooltip and the DBC.",
       "band_points": 1.2
     },
     {
@@ -30455,6 +30455,99 @@
         "cost_control"
       ],
       "observe_source": "806159 Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) +100% is limited to EffectSpellClassMask word 2 = 512; Radiant Cascade 500141 has SpellFamilyFlags[2] 0 and costs 31% of base mana (ManaCostPercentage 31; 1363 x 0.31 = 422.5), so a real cast of 806159 leaves it at 422.5: gain 0, the zero arm of the cost contrast. Reference search 2026-11-22: nothing found beyond the DBC and the tooltip."
+    },
+    {
+      "spell": 520647,
+      "name": "Circle of Valor (circle lasts 15 sec)",
+      "kind": "metric_delta",
+      "variant": "circle_presence",
+      "label_suffix": "circle_presence",
+      "quote": "Place a $a1 yd holy circle at target location for $d.",
+      "trigger_spell": 520647,
+      "target": "caster",
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "metric": "aura",
+      "fields": {
+        "spell": 520647
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 13700,
+      "expiry_wait_ms": 2400,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          13600,
+          13950
+        ],
+        "expired": [
+          16050,
+          16450
+        ]
+      },
+      "observe_source": "520647 Effect[0] PERSISTENT_AREA_AURA, DurationIndex 8 = 15000 ms ($d, the tooltip resolves 15000). One real cast at the caster's own position (the caster stands inside the circle and holds its area aura 520647, as the radius_in entry): the aura is present when read 13600..13950 ms of game time after the cast and gone when read 16050..16450 ms after it. Present at 13600 excludes a circle of 13500 ms (10% below 15000) and gone by 16450 excludes one of 16500 ms (10% above), on both sides, as the Resplendence duration entry. Control (before): no cast, no aura, 0. The earlier aura_duration_ms read (circle_duration) is a readback and stays as data. Reference search 2026-11-22: coa-history spells 520647, 520648 and 560347: 0 events in 186 logs; bindmysoul snapshot (fetched 2026-07-22) reads 'for 15 seconds'; nothing else found."
+    },
+    {
+      "spell": 560276,
+      "name": "Sun's Hope (the debuffed target is struck critically 3 points more often)",
+      "kind": "hit_ratio",
+      "variant": "crit_taken_rate",
+      "label_suffix": "crit_taken_rate",
+      "quote": "and increase the targets chance to be critically struck by spells by $706733s1%",
+      "expected": 1.0,
+      "observe_spell": 807175,
+      "control": {},
+      "treatment": {
+        "learn": [
+          560276
+        ]
+      },
+      "rate": "critical",
+      "expected_points": 3,
+      "trials": 166,
+      "parts": 80,
+      "expected_source": "560276 Sun's Hope Effect[1] PROC_TRIGGER_SPELL 706733; HandleAscensionClassMechanics26To32Hit (AscensionClassMechanics26To32.cpp:63-72) casts 706733 on a damaging Solar Flare 807175 hit of a caster that holds 560276. 706733 Effect[0] aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, EffectBasePoints 2 + 1 = 3 ($706733s1), MiscValue 126 (every magic school, Solar Flare 807175 is SchoolMask 6), DurationIndex 31 = 8000 ms. Solar Flare 807175 (instant, no cost, no cooldown) is cast at the dummy once per trial, 166 trials per part (the 600000 ms of one scenario hold 166) and 80 parts per arm, and every landed hit is counted with its critical flag. Treatment: 560276 learned, so each Flare hit puts the debuff on the dummy and the next Flare (1600 ms later, inside the 8000 ms) is rolled against a crit chance 3 points higher (SpellTakenCritChance, Spell.cpp:8664-8666); the first Flare of the arm is undebuffed, 1 of 13280 (0.0002 of the 3 points, negligible). Control: the same Flares without 560276, the natural crit chance. The 3 points are the stated amount of 706733 (DBC), never a run; the judge takes the difference of the critical shares (treatment minus control) against 3 +- 2 points (the larger of 5% of 3 and 2 points), so a debuff of 0 or 6 points is excluded and the interval excludes the control (0 is outside 1..5). The Solar Power 500149 that 560276 also grants has its Effect[1] rewritten to a dummy (AscensionSunClericContracts.cpp:108-109), so it does not change the crit chance, and no fixture touches the crit chance of either arm. Sizing: the natural spell crit chance read on the reference character is about 4.7% (Illumination base, 806159 guaranteed_crit entry), so each part's difference has a standard deviation of about 2.6 points at 166 casts; 80 parts give a 99% half-width of about 0.8 points (between-part t interval), under the 1 point (half the band) the judge requires, checked against the judge's own sized_trials in the pair. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence ('increase the targets chance to be critically struck by spells by 3% for 8 seconds'); nothing else found."
+    },
+    {
+      "spell": 560276,
+      "name": "Sun's Hope (the crit debuff lasts 8 sec)",
+      "kind": "metric_delta",
+      "variant": "debuff_presence",
+      "label_suffix": "debuff_presence",
+      "quote": "and increase the targets chance to be critically struck by spells by $706733s1%",
+      "trigger_spell": 807175,
+      "gate_spell": 560276,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 706733,
+        "caster": "caster"
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7600,
+      "expiry_wait_ms": 950,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7500,
+          7960
+        ],
+        "expired": [
+          8390,
+          8850
+        ]
+      },
+      "observe_source": "560276 Sun's Hope with the passive learned throughout: a real Solar Flare 807175 cast at the dummy 5 yd away (missile speed 25, lands about 200 ms in) makes the Sun Cleric hit hook cast 706733 on the dummy; 706733 DurationIndex 31 = 8000 ms ($706733d). The aura 706733 of the caster is read ON THE DUMMY (not the caster): present when read 7500..7960 ms of game time after the cast, gone when read 8390..8850 ms after it. A duration 10% short (7200 ms, expiring about 7400 ms after the cast) is gone before the first read and one 10% long (8800 ms, expiring about 9000 ms after the cast) is still there at the second, so both are excluded. Control (before): no cast, no aura, 0. The aura_duration_ms read of debuff_remaining stays as data. Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries the same sentence; nothing else found."
     }
   ],
   "player_observations": [],
