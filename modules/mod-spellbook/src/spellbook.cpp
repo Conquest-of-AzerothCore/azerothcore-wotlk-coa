@@ -947,28 +947,33 @@ public:
             RememberLearned(player, spellId);
     }
 
+    static uint8 SpecsHolding(Player const *player, uint32 spellId)
+    {
+        PlayerSpellMap const &spells = player->GetSpellMap();
+        auto const itr = spells.find(spellId);
+        if (itr == spells.end() || itr->second->State == PLAYERSPELL_REMOVED)
+            return 0;
+        return itr->second->specMask;
+    }
+
     // The ranks in SpellbookRankData.h have no spell_ranks rows, so Player::removeSpell's
     // chain walk does not take them with the rank they require. They are remembered first,
-    // so the book gives them back for free once that rank returns.
+    // so the book gives them back for free once that rank returns. Only the specs that no
+    // longer hold the required rank lose them.
     void OnPlayerForgotSpell(Player *player, uint32 spellId) override
     {
         if (!player || !IsAscensionClass(player->getClass()))
             return;
-        PlayerSpellMap const &spells = player->GetSpellMap();
-        auto const prerequisite = spells.find(spellId);
-        uint8 const retainedSpecs = prerequisite != spells.end() && prerequisite->second->State != PLAYERSPELL_REMOVED
-            ? prerequisite->second->specMask : 0;
+        uint8 const lostSpecs = uint8(SPEC_MASK_ALL & ~SpecsHolding(player, spellId));
+        if (!lostSpecs)
+            return;
 
         for (SpellbookRankData::Rank const &rank : SpellbookRankData::Ranks)
         {
             if (rank.ClassId != player->getClass() || rank.RequiredSpellId != spellId)
                 continue;
 
-            auto const dependent = spells.find(rank.SpellId);
-            if (dependent == spells.end() || dependent->second->State == PLAYERSPELL_REMOVED)
-                continue;
-
-            uint8 const affectedSpecs = dependent->second->specMask & ~retainedSpecs;
+            uint8 const affectedSpecs = SpecsHolding(player, rank.SpellId) & lostSpecs;
             if (!affectedSpecs)
                 continue;
 
