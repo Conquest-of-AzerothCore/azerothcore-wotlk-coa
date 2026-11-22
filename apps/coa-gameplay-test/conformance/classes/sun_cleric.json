@@ -23489,6 +23489,186 @@
           "caster"
         ]
       ]
+    },
+    {
+      "spell": 800764,
+      "name": "Solar Invocation: Conquest (a cast of Ascension is refused after it)",
+      "kind": "metric_delta",
+      "variant": "shared_refused",
+      "label_suffix": "shared_refused",
+      "quote": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
+      "trigger_spell": 500152,
+      "target": "caster",
+      "cast_power": 1363,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 500152
+      },
+      "before_expected": 0,
+      "expected": 67,
+      "observe_source": "800764 and Ascension 500152 carry Category 767 with CategoryRecoveryTime 30000 (Spell.dbc). The harness resets the cooldown of Ascension, then makes a real Conquest cast (setup, after phase only), then casts Ascension at once: the refusal reason read is 67 (SPELL_FAILED_NOT_READY, SharedDefines.h:1117) after Conquest, and 0 (cast accepted) in the before phase, the control, where Ascension is cast alone. Tooltip and DBC settle the value; the references add nothing for it."
+    },
+    {
+      "spell": 503651,
+      "name": "Solar Invocation: Revelation (a cast of Ascension is refused after it)",
+      "kind": "metric_delta",
+      "variant": "shared_refused",
+      "label_suffix": "shared_refused",
+      "quote": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
+      "trigger_spell": 500152,
+      "target": "caster",
+      "cast_power": 1363,
+      "setup_casts": [
+        503651
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 500152
+      },
+      "before_expected": 0,
+      "expected": 67,
+      "observe_source": "503651 and Ascension 500152 carry Category 767 with CategoryRecoveryTime 30000 (Spell.dbc). The harness resets the cooldown of Ascension, then makes a real Revelation cast at the caster (setup, after phase only), then casts Ascension at once: the refusal reason read is 67 (SPELL_FAILED_NOT_READY, SharedDefines.h:1117) after Revelation, and 0 (cast accepted) in the before phase, the control, where Ascension is cast alone. Tooltip and DBC settle the value; the references add nothing for it."
+    },
+    {
+      "spell": 681252,
+      "name": "Radiant Halberd (Champion of the Sun is held to 29.6 s and gone by 30.4 s)",
+      "kind": "metric_delta",
+      "variant": "champion_held",
+      "label_suffix": "champion_held",
+      "quote": "Increases the duration of Champion of the Sun and Chains of Light by $/1000;s2 sec.",
+      "trigger_spell": 800612,
+      "gate_spell": 681252,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 800612
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 29750,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          29600,
+          29900
+        ],
+        "expired": [
+          30100,
+          30400
+        ]
+      },
+      "observe_source": "681252 Radiant Halberd Effect[1] aura 107 ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 4999 (+1 = 5000 ms, $/1000;s2 = 5 s), class mask word 0 16416 = Champion of the Sun 800612 (32) + Chains of Light 806697 (16384). 800612 DurationIndex 63 = 25000 ms. One real Champion cast with 681252 learned: the aura is present when read 29600..29900 ms after the cast (game time) and gone when read 30100..30400 ms after it, so the duration lies in (29600, 30400), which excludes 29500 and 30500 (10% off the 5000 ms increase on both sides). Reference search: nothing found beyond the tooltip and the DBC.",
+      "expiry_wait_ms": 500,
+      "after_expiry_expected": 0,
+      "cast_power": 1363
+    },
+    {
+      "spell": 681252,
+      "name": "Radiant Halberd (control: Champion of the Sun without 681252 is gone at 29.6 s)",
+      "kind": "metric_delta",
+      "variant": "champion_control",
+      "label_suffix": "champion_control",
+      "quote": "Increases the duration of Champion of the Sun and Chains of Light by $/1000;s2 sec.",
+      "trigger_spell": 800612,
+      "gate_spell": 704582,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 800612
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 29750,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          29600,
+          29900
+        ]
+      },
+      "observe_source": "681252 Radiant Halberd Effect[1] aura 107 ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 4999 (+1 = 5000 ms, $/1000;s2 = 5 s), class mask word 0 16416 = Champion of the Sun 800612 (32) + Chains of Light 806697 (16384). The same cast with 704582 learned instead of 681252 (the control of the champion_duration entry): the aura of 25000 ms is gone when read 29600..29900 ms after the cast (game time). Reference search: nothing found beyond the tooltip and the DBC.",
+      "cast_power": 1363
+    },
+    {
+      "spell": 681252,
+      "name": "Radiant Halberd (Chains of Light is held to 19.6 s and gone by 20.4 s)",
+      "kind": "metric_delta",
+      "variant": "chains_held",
+      "label_suffix": "chains_held",
+      "quote": "Increases the duration of Champion of the Sun and Chains of Light by $/1000;s2 sec.",
+      "trigger_spell": 801524,
+      "gate_spell": 681252,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 806697
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 19750,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          19600,
+          19900
+        ],
+        "expired": [
+          20100,
+          20400
+        ]
+      },
+      "observe_source": "681252 Radiant Halberd Effect[1] aura 107 ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 4999 (+1 = 5000 ms, $/1000;s2 = 5 s), class mask word 0 16416 = Champion of the Sun 800612 (32) + Chains of Light 806697 (16384). 806697 DurationIndex 8 = 15000 ms. One real Chains of Light cast 801524 at the dummy with 681252 learned: the aura is present on the dummy when read 19600..19900 ms after the cast (game time) and gone when read 20100..20400 ms after it, so the duration lies in (19600, 20400), which excludes 19500 and 20500. Reference search: nothing found beyond the tooltip and the DBC.",
+      "expiry_wait_ms": 500,
+      "after_expiry_expected": 0,
+      "measure_actor": "dummy"
+    },
+    {
+      "spell": 681252,
+      "name": "Radiant Halberd (control: Chains of Light without 681252 is gone at 19.6 s)",
+      "kind": "metric_delta",
+      "variant": "chains_control",
+      "label_suffix": "chains_control",
+      "quote": "Increases the duration of Champion of the Sun and Chains of Light by $/1000;s2 sec.",
+      "trigger_spell": 801524,
+      "gate_spell": 704582,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 806697
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 19750,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          19600,
+          19900
+        ]
+      },
+      "observe_source": "681252 Radiant Halberd Effect[1] aura 107 ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 4999 (+1 = 5000 ms, $/1000;s2 = 5 s), class mask word 0 16416 = Champion of the Sun 800612 (32) + Chains of Light 806697 (16384). The same cast with 704582 learned instead of 681252: the aura of 15000 ms is gone from the dummy when read 19600..19900 ms after the cast (game time). Reference search: nothing found beyond the tooltip and the DBC.",
+      "measure_actor": "dummy"
     }
   ],
   "player_observations": [],

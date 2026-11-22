@@ -1260,7 +1260,8 @@
     "labels": [
       "503651 behaviour_metric_delta shared_ascension",
       "503651 behaviour_metric_delta shared_conquest",
-      "503651 behaviour_metric_delta shared_resplendence"
+      "503651 behaviour_metric_delta shared_resplendence",
+      "503651 behaviour_metric_delta shared_refused"
     ]
   },
   {
@@ -3159,13 +3160,17 @@
         "labels": [
           "681252 effect_value e1 #1",
           "681252 behaviour_metric_delta champion_duration",
-          "681252 behaviour_metric_delta champion_duration_control"
+          "681252 behaviour_metric_delta champion_duration_control",
+          "681252 behaviour_metric_delta champion_held",
+          "681252 behaviour_metric_delta champion_control"
         ]
       },
       {
         "claim": "and Chains of Light by $/1000;s2 sec",
         "labels": [
-          "681252 behaviour_metric_delta chains_duration"
+          "681252 behaviour_metric_delta chains_duration",
+          "681252 behaviour_metric_delta chains_held",
+          "681252 behaviour_metric_delta chains_control"
         ]
       }
     ],
@@ -4716,7 +4721,8 @@
     "spell": 800764,
     "clause": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
     "labels": [
-      "800764 behaviour_metric_delta shared_cooldown"
+      "800764 behaviour_metric_delta shared_cooldown",
+      "800764 behaviour_metric_delta shared_refused"
     ],
     "kind": "claim"
   },
