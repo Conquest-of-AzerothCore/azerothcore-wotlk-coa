@@ -14512,8 +14512,8 @@
         8
       ],
       "expected": 24900,
-      "tolerance": 300,
-      "observe_source": "Solar Nova 681433 Effect[0] SCHOOL_DAMAGE on the enemies within 8 yd; 524858 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165) BasePoints -1001 on 800764 Conquest, 503651 Revelation and 806159 Resplendence ($/1000;524858s1 = 1 s each; the class code HandleAscensionClassMechanics26To32Hit casts 524858 per target). Solar Invocation: Conquest 800764 (cooldown 30000 ms, Category 767) is cast, 1600 ms later Solar Nova strikes the primary dummy and two more within 8 yd, and the cooldown of 800764 is read 500 ms after: 30000 - 3 x 1000 - 2100 ms elapsed = 24900, tolerance 300 (excludes the 1000 ms steps of 2 or 4 targets). Control: cd_refund_none (no target in range) reads 30000 - 2100. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+      "tolerance": 100,
+      "observe_source": "Solar Nova 681433 Effect[0] SCHOOL_DAMAGE on the enemies within 8 yd; 524858 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165) BasePoints -1001 on 800764 Conquest, 503651 Revelation and 806159 Resplendence ($/1000;524858s1 = 1 s each; the class code HandleAscensionClassMechanics26To32Hit casts 524858 per target). Solar Invocation: Conquest 800764 (cooldown 30000 ms, Category 767) is cast, 1600 ms later Solar Nova strikes the primary dummy and two more within 8 yd, and the cooldown of 800764 is read 500 ms after: 30000 - 3 x 1000 - 2100 ms elapsed = 24900, tolerance 100 (excludes the 1000 ms steps of 2 or 4 targets). Control: cd_refund_none (no target in range) reads 30000 - 2100. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found. A reduction 10% off (900 or 1100 ms per target) moves the read by 300 ms; the tolerance is 100 ms, so both are excluded."
     },
     {
       "spell": 681433,
@@ -14541,8 +14541,8 @@
       "label_suffix": "cd_refund_one",
       "dummy_distance": 3,
       "expected": 26900,
-      "tolerance": 300,
-      "observe_source": "Same as cd_refund_three with only the primary dummy at 3 yd, inside the 8 yd radius: one target struck, 30000 - 1000 - 2100 ms elapsed = 26900, tolerance 300 (excludes 0 and 2 targets). Control: cd_refund_none. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+      "tolerance": 50,
+      "observe_source": "Same as cd_refund_three with only the primary dummy at 3 yd, inside the 8 yd radius: one target struck, 30000 - 1000 - 2100 ms elapsed = 26900, tolerance 300 (excludes 0 and 2 targets). Control: cd_refund_none. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found. A reduction 10% off (900 or 1100 ms) moves the read by 100 ms; the tolerance is 50 ms, so both are excluded."
     },
     {
       "spell": 681433,
