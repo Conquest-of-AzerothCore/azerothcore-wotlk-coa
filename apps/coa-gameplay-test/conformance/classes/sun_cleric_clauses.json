@@ -802,18 +802,31 @@
   {
     "spell": 301267,
     "clause": "Increases the critical strike chance of Sunflare and Dawnsear by $s1%",
-    "labels": [
-      "301267 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the critical strike chance of Sunflare by $s1%",
+        "labels": [
+          "301267 behaviour_metric_delta crit_sunflare"
+        ]
+      },
+      {
+        "claim": "Increases the critical strike chance of Dawnsear by $s1%",
+        "labels": [
+          "301267 behaviour_metric_delta crit_dawnsear"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Control arm = the reading before the learn, plus Horusath Blast 500154 outside the class mask (gain 0, entry crit_control). Sunflare and Dawnsear read 4.6781 before and 7.6781 after, a gain of 3.00 (expected 3 = BasePoints 2 + 1, within 0.01), both runs. Reference search 2026-11-22: coa-history spell 301267: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found. Pair 20261122-042851 / 20261122-042945, build b3e613641105, server commit 68e7af248b64+, no flip, 21/21 ok in both runs."
   },
   {
     "spell": 301267,
     "clause": "and reduces spell pushback suffered from damaging attacks by $s2%.",
     "labels": [
-      "301267 effect_value e1 #1"
+      "301267 behaviour_metric_delta pushback_game_time"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the unhit and reduced_unhit casts (cast ends 2004 ms) and the hit cast before the learn (2499 ms). The pushback falls by 50.53% (99% interval 50.47 to 50.59) in run 1 and 50.48% (50.42 to 50.54) in run 2 against the stated 50% (BasePoints 49 + 1), inside the 47.5 to 52.5 band, 8 casts of each kind, strikes 1012 to 1018 ms into their casts; the reduced hit ends 2249 ms after the start against 2499 ms unreduced. Reference search 2026-11-22: coa-history spell 301267: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found. Pair 20261122-042851 / 20261122-042945, build b3e613641105, server commit 68e7af248b64+, no flip, 21/21 ok in both runs."
   },
   {
     "spell": 301295,
@@ -1590,15 +1603,23 @@
     "spell": 560534,
     "clause": "Increases the all damage dealt by party and raid members by $s1%.",
     "labels": [
-      "560534 effect_value e0 #0"
+      "560534 effect_value e0 #0",
+      "560534 behaviour_party_stat_ratio",
+      "560534 behaviour_hit_ratio party_damage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the same grouped ally hits without 560534 learned on the caster. Gavel of Wrath 802561 (attack power 20000): +3.071% and +3.012% (99% intervals +2.845 to +3.297 and +2.752 to +3.273, 20 trials per arm, pilot-sized) inside the 2-point band around +3; the band edge lies about 19 standard errors from the reading, so the residual failure probability is far below 0.1% per pair. Ally spell_damage_done reads 1000 before and 1030 after (ratio 1.03). Reference search 2026-11-22: coa-history spell 560534: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found. Pair 20261122-042851 / 20261122-042945, build b3e613641105, server commit 68e7af248b64+, no flip, 21/21 ok in both runs."
   },
   {
     "spell": 560534,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "560534 behaviour_group_stack_cap",
+      "560534 behaviour_hit_ratio partner_alone",
+      "560534 behaviour_hit_ratio stack_cap"
+    ],
+    "kind": "claim",
+    "reason": "Control arm = the ally without either source; the partner 300944 alone reads +3.066% / +2.972%, 560534 with 300944 reads +3.100% / +2.970% (summed it would read +6.09%), inside the 2-point band around +3, spell_group 2000184 stack_rule 3. The stack cap reads 1030 for the own passive alone and 1030 with the partner. Reference search 2026-11-22: coa-history spell 560534: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found. Pair 20261122-042851 / 20261122-042945, build b3e613641105, server commit 68e7af248b64+, no flip, 21/21 ok in both runs."
   },
   {
     "spell": 560534,
@@ -2775,19 +2796,33 @@
   {
     "spell": 704579,
     "clause": "Applying Vow of the Eclipse now blinds enemies struck, increasing their chance to miss their next attack by $505342s1% for $505342d,",
-    "labels": [
-      "704579 effect_value 505342e0 #0",
-      "704579 spell_duration 505342 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing their chance to miss their next attack by $505342s1%",
+        "labels": [
+          "704579 effect_value 505342e0 #0"
+        ]
+      },
+      {
+        "claim": "for $505342d",
+        "labels": [
+          "704579 spell_duration 505342 #1",
+          "704579 behaviour_metric_delta blind_duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Duration claim: Blinded 505342 on the dummy reads 0 before the learn (control) and 5561 / 5550 ms after, 2509 ms into the cast, within 250 ms of 6000 - 500 = 5500, which excludes a duration 10% off on both sides. The miss-share claim stays data only: no existing kind drives Vow of the Eclipse 807435 into attacker_miss_share (tool need in the report). Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found. Pair 20261122-042851 / 20261122-042945, build b3e613641105, server commit 68e7af248b64+, no flip, 21/21 ok in both runs."
   },
   {
     "spell": 704579,
     "clause": "stacking $505342u times.",
     "labels": [
-      "704579 max_stacks 505342 #2"
+      "704579 max_stacks 505342 #2",
+      "704579 behaviour_metric_delta blind_stacks"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the read before the learn (0 stacks). Six Sunflare hits at the dummy with Vow of the Eclipse 807435 up read 5 stacks of 505342 after the learn in both runs, the sixth hit not raising them past StackAmount 5. Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found. Pair 20261122-042851 / 20261122-042945, build b3e613641105, server commit 68e7af248b64+, no flip, 21/21 ok in both runs."
   },
   {
     "spell": 704579,
@@ -3968,9 +4003,19 @@
     "spell": 804032,
     "clause": "Reduces the cooldown of Solar Invocation spells by $/1000;s1 sec.",
     "labels": [
-      "804032 effect_value e0 #0"
+      "804032 cost_gate 503651 cd_revelation without",
+      "804032 cost_gate 503651 cd_revelation with",
+      "804032 cost_gate 503651 cd_revelation beyond",
+      "804032 cost_gate 800764 cd_conquest without",
+      "804032 cost_gate 800764 cd_conquest with",
+      "804032 cost_gate 800764 cd_conquest beyond",
+      "804032 cost_gate 806159 cd_resplendence without",
+      "804032 cost_gate 806159 cd_resplendence with",
+      "804032 cost_gate 806159 cd_resplendence beyond",
+      "804032 behaviour_metric_delta cd_ascension"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Solar Invocation spells: 4 in family 33 (Revelation and Resplendence share mask word 0), all four are tested (G-23). Control arm = refused without the passive (SPELL_FAILED_NOT_READY 67) and the cooldown read before the learn (29509 and 29510 ms). Revelation, Conquest and Resplendence are accepted 20000 ms plus 400 ms after the cast and refused 400 ms before 20000 ms; Ascension (2500 ms cast, cooldown from completion) reads 19512 and 19506 ms 3009 ms into the cast, within 400 ms of 19500 = 30000 - 10000 - 500, which excludes a cut of 9000 or 11000 ms. Reference search 2026-11-22: coa-history spell 804032: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found. Pair 20261122-042851 / 20261122-042945, build b3e613641105, server commit 68e7af248b64+, no flip, 21/21 ok in both runs."
   },
   {
     "spell": 804057,

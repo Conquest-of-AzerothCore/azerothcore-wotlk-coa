@@ -14983,6 +14983,366 @@
       "wait_ms": 3500,
       "expire_ms": 5000,
       "observe_source": "807963 Improved Radiant Cascade (server DBC set) Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -16 + 1 = -15% ($s1) and Effect[1] aura 108 MiscValue 0 (SPELLMOD_DAMAGE, which scales healing) BasePoints 14 + 1 = +15%, both on EffectSpellClassMask[0] 32768 (Radiant Cascade 500141, ManaCostPercentage 31, SpellFamilyFlags[0] 32768). The caster's mana is set to 1000 before each cast (regeneration off) and read after a real cast of Radiant Cascade 500141 at the caster: ManaCostPercentage 31 of base mana 1363 = 422 (int), 1000 - 422 = 578 without the passive; -15% gives 422 x 0.85 = 358.7, so 641 or 642 left (truncation or rounding of the cost). Control = the phase before the learn (full cost, 578). Tolerance 1 for the engine's integer handling of the cost; a cost cut of 10% or 20% reads 21 or more off. Reference search 2026-11-22: coa-history spell 807963: 0 events in 186 logs (a passive leaves no event); sidekick snapshot (talent id 12351) carries 'Increases the healing done and reduces the mana cost of Radiant Cascade by -15%.' (same figure); nothing else found."
+    },
+    {
+      "spell": 301267,
+      "name": "Wrath of God (Sunflare critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "crit_sunflare",
+      "label_suffix": "crit_sunflare",
+      "quote": "Increases the critical strike chance of",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 800231,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "301267 Wrath of God Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 2 + 1 = 3 ($s1), EffectSpellClassMask word 1 = 258 (Dawnsear 500146 SpellFamilyFlags[1] 2, Sunflare 800231 SpellFamilyFlags[1] 256), Effect[1] aura 149 SPELL_AURA_REDUCE_PUSHBACK BasePoints 49 + 1 = 50 ($s2). The caster's own critical strike chance for Sunflare 800231 against the dummy (live Player::SpellDoneCritChance, spell_done_crit_chance) around a Radiant Flame 806060 cast, before and after a real learn of 301267; the reading before is the control. The gain is read as the difference, expected 3 within 0.01. Reference search 2026-11-22: coa-history spell 301267: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found."
+    },
+    {
+      "spell": 301267,
+      "name": "Wrath of God (Dawnsear critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "crit_dawnsear",
+      "label_suffix": "crit_dawnsear",
+      "quote": "Increases the critical strike chance of",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 500146,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "301267 Wrath of God Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 2 + 1 = 3 ($s1), EffectSpellClassMask word 1 = 258 (Dawnsear 500146 SpellFamilyFlags[1] 2, Sunflare 800231 SpellFamilyFlags[1] 256), Effect[1] aura 149 SPELL_AURA_REDUCE_PUSHBACK BasePoints 49 + 1 = 50 ($s2). The caster's own critical strike chance for Dawnsear 500146 against the dummy (live Player::SpellDoneCritChance, spell_done_crit_chance) around a Radiant Flame 806060 cast, before and after a real learn of 301267; the reading before is the control. The gain is read as the difference, expected 3 within 0.01. Reference search 2026-11-22: coa-history spell 301267: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found."
+    },
+    {
+      "spell": 301267,
+      "name": "Wrath of God (Horusath Blast, outside the mask critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "crit_control",
+      "label_suffix": "crit_control",
+      "quote": "Increases the critical strike chance of",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 500154,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "301267 Wrath of God Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 2 + 1 = 3 ($s1), EffectSpellClassMask word 1 = 258 (Dawnsear 500146 SpellFamilyFlags[1] 2, Sunflare 800231 SpellFamilyFlags[1] 256), Effect[1] aura 149 SPELL_AURA_REDUCE_PUSHBACK BasePoints 49 + 1 = 50 ($s2). The caster's own critical strike chance for Horusath Blast, outside the mask 500154 against the dummy (live Player::SpellDoneCritChance, spell_done_crit_chance) around a Radiant Flame 806060 cast, before and after a real learn of 301267; the reading before is the control. The gain is read as the difference, expected 0 within 0.01. The control spell Horusath Blast 500154 (SpellFamilyFlags[1] 64, outside the mask) must gain 0. Reference search 2026-11-22: coa-history spell 301267: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found."
+    },
+    {
+      "spell": 301267,
+      "name": "Wrath of God (pushback reduction, game time)",
+      "kind": "pushback_reduction",
+      "label_suffix": "pushback_game_time",
+      "quote": "and reduces spell pushback suffered from damaging attacks by $s2%.",
+      "cast_spell": 800231,
+      "cast_power": 1363,
+      "reducer_spell": 301267,
+      "reducer_learn": true,
+      "reducer_wait_ms": 500,
+      "strike_spell": 41394,
+      "strike_at_ms": 1000,
+      "windows": [
+        [
+          1940,
+          1990
+        ],
+        [
+          2440,
+          2490
+        ],
+        [
+          1940,
+          1990
+        ],
+        [
+          2190,
+          2240
+        ]
+      ],
+      "expected_pct": 50,
+      "repeats": 8,
+      "observe_source": "301267 Wrath of God Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 2 + 1 = 3 ($s1), EffectSpellClassMask word 1 = 258 (Dawnsear 500146 SpellFamilyFlags[1] 2, Sunflare 800231 SpellFamilyFlags[1] 256), Effect[1] aura 149 SPELL_AURA_REDUCE_PUSHBACK BasePoints 49 + 1 = 50 ($s2). Stock pushback (Spell::Delayed) delays a cast per damaging hit, less the REDUCE_PUSHBACK percent. Four Sunflare 800231 casts (CastingTimeIndex 5 = 2000 ms) at the dummy in one scenario, as the Necromancer Lich Essence entry: unhit and hit once by the striker's Light of the Naaru 41394 1000 ms into the cast without the passive, then the passive learned (a real learn) and again unhit and hit; every cast start, strike and casting poll is stamped with game_time_ms. Reduction = 1 - (reduced hit end - reduced unhit end) / (hit end - unhit end), judged in the G-19 band around 50; the pushback delay is 500 ms, so the reduced hit ends about 250 ms after the unhit one (windows 2190..2240 against 1940..1990). Reference search 2026-11-22: coa-history spell 301267: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found."
+    },
+    {
+      "spell": 804032,
+      "name": "Blessed Hammer (Revelation cooldown)",
+      "kind": "cost_gate",
+      "variant": "cd_revelation",
+      "label_suffix": "cd_revelation",
+      "quote": "Reduces the cooldown of Solar Invocation spells by $/1000;s1 sec.",
+      "gated_spell": 503651,
+      "resource": "cooldown",
+      "reduction": 10000,
+      "target": "caster",
+      "margin_ms": 400,
+      "observe_source": "804032 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -10001 (-10000 ms, $/1000;s1 = 10 s), class mask 294912 / 128 / 524290. Revelation 503651 is one of the Solar Invocation spells (30000 ms cooldown, shared category 767); the four spells carry one mask word each (Revelation and Resplendence word 0 bit 262144, Ascension word 1 bit 128, Conquest word 2 bit 524288), so Revelation, Ascension and Conquest are tested for their three mask words and Resplendence shares Revelation's. The spell is cast and attempted again 20000 ms plus 400 ms after the cast: refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again 400 ms before 20000 ms, so the cut lies within 400 ms of 10000 ms, excluding 9000 and 11000 ms. Reference search 2026-11-22: coa-history spell 804032: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found."
+    },
+    {
+      "spell": 804032,
+      "name": "Blessed Hammer (Conquest cooldown)",
+      "kind": "cost_gate",
+      "variant": "cd_conquest",
+      "label_suffix": "cd_conquest",
+      "quote": "Reduces the cooldown of Solar Invocation spells by $/1000;s1 sec.",
+      "gated_spell": 800764,
+      "resource": "cooldown",
+      "reduction": 10000,
+      "target": "caster",
+      "margin_ms": 400,
+      "observe_source": "804032 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -10001 (-10000 ms, $/1000;s1 = 10 s), class mask 294912 / 128 / 524290. Conquest 800764 is one of the Solar Invocation spells (30000 ms cooldown, shared category 767); the four spells carry one mask word each (Revelation and Resplendence word 0 bit 262144, Ascension word 1 bit 128, Conquest word 2 bit 524288), so Revelation, Ascension and Conquest are tested for their three mask words and Resplendence shares Revelation's. The spell is cast and attempted again 20000 ms plus 400 ms after the cast: refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again 400 ms before 20000 ms, so the cut lies within 400 ms of 10000 ms, excluding 9000 and 11000 ms. Reference search 2026-11-22: coa-history spell 804032: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found."
+    },
+    {
+      "spell": 804032,
+      "name": "Blessed Hammer (Resplendence cooldown)",
+      "kind": "cost_gate",
+      "variant": "cd_resplendence",
+      "label_suffix": "cd_resplendence",
+      "quote": "Reduces the cooldown of Solar Invocation spells by $/1000;s1 sec.",
+      "gated_spell": 806159,
+      "resource": "cooldown",
+      "reduction": 10000,
+      "target": "caster",
+      "margin_ms": 400,
+      "observe_source": "804032 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -10001 (-10000 ms, $/1000;s1 = 10 s), class mask 294912 / 128 / 524290. Resplendence 806159 is one of the Solar Invocation spells (30000 ms cooldown, shared category 767); the four spells carry one mask word each (Revelation and Resplendence word 0 bit 262144, Ascension word 1 bit 128, Conquest word 2 bit 524288), so Revelation, Ascension and Conquest are tested for their three mask words and Resplendence shares Revelation's. The spell is cast and attempted again 20000 ms plus 400 ms after the cast: refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again 400 ms before 20000 ms, so the cut lies within 400 ms of 10000 ms, excluding 9000 and 11000 ms. Reference search 2026-11-22: coa-history spell 804032: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found."
+    },
+    {
+      "spell": 804032,
+      "name": "Blessed Hammer (Ascension cooldown left after its cast)",
+      "kind": "metric_delta",
+      "variant": "cd_ascension",
+      "label_suffix": "cd_ascension",
+      "quote": "Reduces the cooldown of Solar Invocation spells by $/1000;s1 sec.",
+      "trigger_spell": 500152,
+      "gate_spell": 804032,
+      "target": "caster",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 500152
+      },
+      "before_expected": 29500,
+      "expected": 19500,
+      "tolerance": 400,
+      "wait_ms": 3000,
+      "expire_ms": 30500,
+      "game_time": {
+        "after": [
+          2950,
+          3050
+        ]
+      },
+      "observe_source": "804032 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -10001 (-10000 ms, $/1000;s1 = 10 s), class mask word 1 = 128 = Solar Invocation: Ascension 500152's SpellFamilyFlags[1] (CategoryRecoveryTime 30000, RecoveryTime 0). Ascension has CastingTimeIndex 19 = 2500 ms (SpellCastTimes) and Spell::cast, which calls SendSpellCooldown (Spell.cpp:4036), runs when the cast completes, so the cooldown starts 2500 ms after the cast starts: the cost_gate attempt of the first run (25400 ms after the cast started, 22900 ms into the cooldown) was refused for that reason (an incorrect test, not a defect; the instant Solar Invocation spells passed). This entry reads the remaining cooldown of 500152 3000 ms after the cast started (game time 2950..3050 ms), 500 ms into the cooldown: 29500 before the learn (control) and 19500 after it, within 400 ms, which excludes a cut of 9000 or 11000 ms (reads of 20500 and 18500 ms). Reference search 2026-11-22: coa-history spell 804032: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found."
+    },
+    {
+      "spell": 560534,
+      "name": "March of the Valkyr (party damage, ally read)",
+      "kind": "party_stat_ratio",
+      "quote": "Increases the all damage dealt by party and raid members by $s1%.",
+      "expected": 1.03,
+      "metric": "spell_damage_done",
+      "metric_fields": {
+        "spell": 800231
+      },
+      "needs_dummy_target": true,
+      "radius_reason": "560534 March of the Valkyr Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127 (all schools), EffectBasePoints 2 + 1 = 3 ($s1), radius index 287; Effect[1] aura 47 SPELL_AURA_MOD_PARRY_PERCENT BasePoints 4 + 1 = 5 ($s2). spell_damage_done with reference spell 800231 (Sunflare) is read on a grouped, non-caster ally before and after the learn (the reading before is the control). Reference search 2026-11-22: coa-history spell 560534: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found."
+    },
+    {
+      "spell": 560534,
+      "name": "March of the Valkyr group stack cap",
+      "kind": "group_stack_cap",
+      "quote": "Does not stack with similar effects.",
+      "effect": 0,
+      "partner": 300944,
+      "partner_effect": 0,
+      "metric": "spell_damage_done",
+      "fields": {
+        "target": "dummy",
+        "spell": 133
+      },
+      "observe_source": "data/sql/updates/pending_db_world/rev_20260922_27_raid_damage_percent_group.sql spell_group 2000184, stack_rule 3 (SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT) lists 300929 alongside 300944/300961/300963/503738/520371/560528/560534/560545, all SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79) at effect index 0, Effect=65 (SPELL_EFFECT_APPLY_AREA_AURA_RAID), EffectMiscValue[0]=127 (all schools); this is the area-aura effect SpellMgr::IsEffectInSameEffectStackGroup admits into the group (SpellMgr.cpp:814-819). 300929 EffectBasePoints[0]=2 (3%), 300944 EffectBasePoints[0]=2 (3%, confirmed via DBC); 300929's other effect (index 1, spell-cost reduction, a different stat) does not touch melee_damage_done. Stock Unit::GetHighestExclusiveSameEffectSpellGroupValue (Unit.cpp:5297-5320) caps same-group same-effect auras at the single highest magnitude rather than summing them; no CoA script overrides this for either spell. The metric is spell_damage_done against Fireball (133, Fire school, SchoolMask 4), not melee_damage_done: Unit::MeleeDamageBonusDone (Unit.cpp:11470) explicitly skips GetTotalAuraMultiplier(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE) whenever the queried damageSchoolMask includes SPELL_SCHOOL_MASK_NORMAL ('mods for SPELL_SCHOOL_MASK_NORMAL are already factored in base melee damage calculation', a different code path this synthetic base-1000 query never reaches), so a melee_damage_done read against this aura always comes back unchanged regardless of whether the server is conformant -- confirmed by an exploratory run with melee_damage_done that measured baseline==own==combined even after the area-aura wait below, which this change replaced with a Fire-school spell_damage_done read that does take the GetTotalAuraMultiplier branch. Verified via two independent gameplay runs of conformance-templar-behaviour-300929: spell_damage_done against a dummy with spell 133 (base 1000) read baseline, then (after a 300 ms wait for the area aura's own Aura::UpdateOwner target-map rescan, SpellAuras.cpp, to reach the caster) after learning 300929 alone, then after additionally learning 300944 (a Death Knight talent, learned onto the Templar fixture purely as test harness setup via the 'learn' action's unconditional player->learnSpell, not a production change); the combined reading matched the 3% single-effect cap, not a summed 6%, in both runs."
+    },
+    {
+      "spell": 560534,
+      "name": "March of the Valkyr (party damage)",
+      "kind": "hit_ratio",
+      "variant": "party_damage",
+      "label_suffix": "party_damage",
+      "quote": "Increases the all damage dealt by party and raid members by",
+      "expected": 1.03,
+      "observe_spell": 802561,
+      "caster": "ally",
+      "ally_distance": 0,
+      "control": {},
+      "treatment": {
+        "learn": [
+          560534
+        ]
+      },
+      "critical": false,
+      "trials": 40,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "cast_power": 1360,
+      "expected_source": "560534 March of the Valkyr Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127 (all schools), EffectBasePoints 2 + 1 = 3 ($s1), radius index 287; Effect[1] aura 47 SPELL_AURA_MOD_PARRY_PERCENT BasePoints 4 + 1 = 5 ($s2). Treatment: 560534 learned on the Sun Cleric; control: not learned. The grouped ally (ally_distance 0, on the caster's spot, so it faces the dummy as the caster does; a first run with the ally 5 yd aside failed every cast with SPELL_FAILED_UNIT_NOT_INFRONT) casts Gavel of Wrath 802561 (Physical, Effect[0] 121 normalized weapon damage plus Effect[1] 31 weapon percent damage, instant, category cooldown reset before every cast; attack power 20000 so the weapon roll's spread is small) at the dummy; the Physical hit takes the aura through the main-hand damage modifier as the Templar Serendipity 300929 entries read it (a first run with Sunflare 800231 sized 1500 to 2800 trials per arm against a limit of 74); the raid area aura effect 0 of 560534 reaches the grouped ally. Only the non-critical hits of 802561 are read. Expected ratio 1.03 from $s1 = 3. Reference search 2026-11-22: coa-history spell 560534: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found."
+    },
+    {
+      "spell": 560534,
+      "name": "March of the Valkyr (partner alone)",
+      "kind": "hit_ratio",
+      "variant": "partner_alone",
+      "label_suffix": "partner_alone",
+      "quote": "Does not stack with similar effects.",
+      "expected": 1.03,
+      "observe_spell": 802561,
+      "caster": "ally",
+      "ally_distance": 0,
+      "control": {},
+      "treatment": {
+        "auras": [
+          [
+            300944,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 40,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "cast_power": 1360,
+      "expected_source": "The partner alone, so the stack-cap arm has two working sources: 300944 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 79, MiscValue 127, EffectBasePoints 2 + 1 = 3%, set on the caster as a precondition fixture. data/sql/updates/pending_db_world/rev_20260922_27_raid_damage_percent_group.sql: spell_group 2000184, stack_rule 3 (SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT) lists 560534 with 300929, 300944 and the other raid damage-percent spells. The grouped ally (ally_distance 0, on the caster's spot, so it faces the dummy as the caster does; a first run with the ally 5 yd aside failed every cast with SPELL_FAILED_UNIT_NOT_INFRONT) casts Gavel of Wrath 802561 (Physical, Effect[0] 121 normalized weapon damage plus Effect[1] 31 weapon percent damage, instant, category cooldown reset before every cast; attack power 20000 so the weapon roll's spread is small) at the dummy; the Physical hit takes the aura through the main-hand damage modifier as the Templar Serendipity 300929 entries read it (a first run with Sunflare 800231 sized 1500 to 2800 trials per arm against a limit of 74); the raid area aura effect 0 of 560534 reaches the grouped ally. Only the non-critical hits of 802561 are read."
+    },
+    {
+      "spell": 560534,
+      "name": "March of the Valkyr (stack cap)",
+      "kind": "hit_ratio",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "quote": "Does not stack with similar effects.",
+      "expected": 1.03,
+      "observe_spell": 802561,
+      "caster": "ally",
+      "ally_distance": 0,
+      "control": {},
+      "treatment": {
+        "learn": [
+          560534
+        ],
+        "auras": [
+          [
+            300944,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 40,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "cast_power": 1360,
+      "expected_source": "560534 learned together with 300944 set on the caster (both 3%, raid area aura 79 at effect 0, one spell_group with stack_rule 3, Unit::GetHighestExclusiveSameEffectSpellGroupValue): the ally's hit grows by the single 3%, 1.03; summed it would read 1.0609. data/sql/updates/pending_db_world/rev_20260922_27_raid_damage_percent_group.sql: spell_group 2000184, stack_rule 3 (SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT) lists 560534 with 300929, 300944 and the other raid damage-percent spells. The grouped ally (ally_distance 0, on the caster's spot, so it faces the dummy as the caster does; a first run with the ally 5 yd aside failed every cast with SPELL_FAILED_UNIT_NOT_INFRONT) casts Gavel of Wrath 802561 (Physical, Effect[0] 121 normalized weapon damage plus Effect[1] 31 weapon percent damage, instant, category cooldown reset before every cast; attack power 20000 so the weapon roll's spread is small) at the dummy; the Physical hit takes the aura through the main-hand damage modifier as the Templar Serendipity 300929 entries read it (a first run with Sunflare 800231 sized 1500 to 2800 trials per arm against a limit of 74); the raid area aura effect 0 of 560534 reaches the grouped ally. Only the non-critical hits of 802561 are read."
+    },
+    {
+      "spell": 704579,
+      "name": "Twilight (Blinded stacks to five)",
+      "kind": "metric_delta",
+      "variant": "blind_stacks",
+      "label_suffix": "blind_stacks",
+      "quote": "stacking $505342u times.",
+      "gate_spell": 704579,
+      "trigger_spell": 800231,
+      "target": "dummy",
+      "setup_casts": [
+        800231,
+        800231,
+        800231,
+        800231,
+        800231
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2400,
+      "phase_auras": [
+        [
+          807435,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "metric": "aura_stacks",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 505342,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "observe_source": "704579 Twilight Effect[0] aura 42 PROC_TRIGGER_SPELL 506637 (Blind), which triggers Blinded 505342 (DurationIndex 32 = 6000 ms, StackAmount 5, Effect[0] aura 54 MOD_HIT_CHANCE BasePoints -11 + 1 = -10); the class code casts 505342 at the target of every direct own damage hit while Vow of the Eclipse 807435 is up, Twilight is known and the target is not a dungeon boss (AscensionSunCleric.cpp:304-312, AscensionSunClericEvents.cpp, vow 807435 proc rule direct && (damage || healing)). Vow of the Eclipse 807435 is set on the caster in both phases (set_aura, a named precondition fixture of both phases, never the subject); 704579 is learned between the phases and the reading before is the control. Six Sunflare 800231 hits (five setup casts and the trigger, 2400 ms apart, CastingTimeIndex 5 = 2000 ms) at the dummy: the stacks of 505342 on the dummy read 0 before the learn (control) and 5 after it, the sixth hit not raising them past StackAmount 5. Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found."
+    },
+    {
+      "spell": 704579,
+      "name": "Twilight (Blinded duration)",
+      "kind": "metric_delta",
+      "variant": "blind_duration",
+      "label_suffix": "blind_duration",
+      "quote": "for $505342d,",
+      "gate_spell": 704579,
+      "trigger_spell": 800231,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          807435,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "metric": "aura_duration_ms",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 505342,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 5500,
+      "tolerance": 250,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          2450,
+          2550
+        ]
+      },
+      "observe_source": "704579 Twilight Effect[0] aura 42 PROC_TRIGGER_SPELL 506637 (Blind), which triggers Blinded 505342 (DurationIndex 32 = 6000 ms, StackAmount 5, Effect[0] aura 54 MOD_HIT_CHANCE BasePoints -11 + 1 = -10); the class code casts 505342 at the target of every direct own damage hit while Vow of the Eclipse 807435 is up, Twilight is known and the target is not a dungeon boss (AscensionSunCleric.cpp:304-312, AscensionSunClericEvents.cpp, vow 807435 proc rule direct && (damage || healing)). Vow of the Eclipse 807435 is set on the caster in both phases (set_aura, a named precondition fixture of both phases, never the subject); 704579 is learned between the phases and the reading before is the control. One Sunflare 800231 hit at the dummy (CastingTimeIndex 5 = 2000 ms) read 2500 ms after the cast started (game time 2450..2550 ms), about 500 ms into the aura: the remaining duration of 505342 is 0 before the learn (control) and 6000 - 500 = 5500 ms after it, within 250 ms, which excludes a duration 10% (600 ms) off on both sides (5400 and 6600 ms give reads near 4900 and 6100). Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found."
     }
   ],
   "player_observations": [],
