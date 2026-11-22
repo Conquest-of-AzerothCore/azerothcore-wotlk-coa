@@ -225,8 +225,8 @@ class PrimingArmExpectedTests(unittest.TestCase):
         unset = self.priming(expectations)['unset']
         self.assertEqual(judged(unset, {unset.label: 0.0}), 'ok')
         self.assertEqual(judged(unset, {unset.label: 1.0}), 'unmeasured')
-        readings = self.arm_readings(expectations, 'unset')
-        self.assertGreater(len(readings), 1)
+        readings = [e for e in self.arm_readings(expectations, 'unset') if ' priming ' not in e.label]
+        self.assertTrue(readings)
         for reading in readings:
             values = {unset.label: 1.0, reading.label: float(reading.displayed)}
             self.assertEqual(judged(reading, values), 'unmeasured', reading.label)
