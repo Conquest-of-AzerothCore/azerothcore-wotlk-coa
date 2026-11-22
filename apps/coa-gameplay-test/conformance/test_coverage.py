@@ -17,6 +17,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
 from compare import DATA_ONLY, NOT_MEASURED, Verdict, evaluate, judge_behaviour, observed, read_verdicts, write_verdicts
 from conformance import DIFF_EXIT, main
 from coverage import (BEHAVIOUR, BY_METRIC, CONSUMED, CONTRAST_PROOF, COVERAGE_FILE, DATA, EFFECTIVENESS_OF, EVENT, EVIDENCE, K3,
+                      PARTNERED_CONTRASTS, conditional_text,
                       METRIC_EVIDENCE, NOT_CONSUMED, READBACK, STATE, STATE_PROMISES, UNPROVEN, Consumption,
                       KIND_ROW_OVERRIDES, EvidenceError, acting, kind_row_overrides,
                       clause_coverage, clause_coverage_lines, coverage, TOOL_GAP, TOOL_GAP_ACCEPTED, TOOL_GAP_PENDING,
@@ -689,11 +690,11 @@ class EvidenceStatusTest(unittest.TestCase):
                 self.assertEqual(evidence_of(clauses, [read])[0], [DATA])
         self.assertEqual(METRIC_EVIDENCE['spell_absorb_total'], EVENT)
 
-    def test_the_armor_script_melee_and_scripted_crit_probes_are_readbacks(self):
+    def test_the_armor_and_script_melee_probes_are_readbacks(self):
         label = '1 behaviour_metric_delta probe'
         cases = {'armor_reduced_damage': "Glorious Execution ignores 25% of the target's armor",
-                 'script_melee_damage_dealt': 'increases your melee damage done by 10%',
-                 'spell_done_crit_chance_scripted': 'increases the critical strike chance of Gift of the Sun by 50%'}
+                 'script_melee_damage_dealt': 'increases your melee damage done by 10%'}
+        self.assertEqual(METRIC_EVIDENCE['spell_done_crit_chance_scripted'], READBACK)
         for metric, text in cases.items():
             with self.subTest(metric=metric):
                 self.assertEqual(METRIC_EVIDENCE[metric], READBACK)
@@ -1667,6 +1668,73 @@ class BonusTermProofTest(unittest.TestCase):
             self.assertEqual(self.evidence([self.VALUE, self.HIT], [self.bonus(0.45), hit(ARGENT_BLADE)]),
                              [BEHAVIOUR])
         self.assertEqual(self.evidence([self.VALUE], [self.bonus(0.0)]), [UNPROVEN])
+
+
+class ScriptedCritPartnerTest(unittest.TestCase):
+    METRIC = 'spell_done_crit_chance_scripted'
+    GIFT = ('Increases your critical strike chance with Holy spells and abilities by $s1% on enemies above 80% '
+            'health.')
+    PLAIN = 'Increases the critical strike chance of Horusath Blast by $s1%.'
+    ABOVE = '680618 behaviour_metric_delta above'
+    BELOW = '680618 behaviour_metric_delta below'
+
+    def arm(self, label, gain, contrast=LEARNED_CONTRAST, metric=METRIC, status='ok'):
+        return replace(judged(label, BEHAVIOUR_METRIC_DELTA, metric, status=status, contrast=contrast),
+                       expected=gain)
+
+    def evidence(self, text, *verdicts):
+        return evidence_of([claim(text, *(verdict.label for verdict in verdicts))], list(verdicts))[0]
+
+    def test_the_row_proves_a_conditional_crit_clause_with_both_arms(self):
+        self.assertEqual(CONTRAST_PROOF[self.METRIC], LEARNED_CONTRAST)
+        self.assertEqual(STATE_PROMISES[self.METRIC], STATE_PROMISES['spell_done_crit_chance'])
+        self.assertIn(self.METRIC, PARTNERED_CONTRASTS)
+        self.assertEqual(self.evidence(self.GIFT, self.arm(self.ABOVE, 50), self.arm(self.BELOW, 0)), [BEHAVIOUR])
+
+    def test_a_conditional_clause_with_the_non_zero_arm_only_stays_data(self):
+        self.assertEqual(self.evidence(self.GIFT, self.arm(self.ABOVE, 50)), [DATA])
+
+    def test_a_zero_gain_arm_alone_stays_data(self):
+        self.assertEqual(self.evidence(self.GIFT, self.arm(self.BELOW, 0)), [DATA])
+        self.assertEqual(self.evidence(self.PLAIN, self.arm(self.BELOW, 0)), [DATA])
+
+    def test_an_unconditional_crit_clause_needs_the_non_zero_arm_only(self):
+        self.assertEqual(self.evidence(self.PLAIN, self.arm(self.ABOVE, 10)), [BEHAVIOUR])
+
+    def test_a_condition_contrast_stays_data(self):
+        self.assertEqual(self.evidence(self.GIFT, self.arm(self.ABOVE, 50, CONDITION_CONTRAST),
+                                       self.arm(self.BELOW, 0, CONDITION_CONTRAST)), [DATA])
+
+    def test_a_clause_that_does_not_promise_crit_stays_data(self):
+        damage = 'Increases the damage of Holy spells by $s1% on enemies above 80% health.'
+        self.assertEqual(self.evidence(damage, self.arm(self.ABOVE, 50), self.arm(self.BELOW, 0)), [DATA])
+
+    def test_a_partner_of_another_metric_does_not_count(self):
+        other = self.arm(self.BELOW, 0, metric='spell_done_crit_chance')
+        self.assertEqual(self.evidence(self.GIFT, self.arm(self.ABOVE, 50), other), [DATA])
+
+    def test_the_partner_arm_may_sit_in_another_claim_of_the_same_row(self):
+        clauses = [declared(self.GIFT, ('Increases your critical strike chance with Holy spells', self.ABOVE),
+                            ('on enemies above 80% health', self.BELOW))]
+        verdicts = [self.arm(self.ABOVE, 50), self.arm(self.BELOW, 0)]
+        self.assertEqual(evidence_of(clauses, verdicts)[1].claim_evidence[0][0], BEHAVIOUR)
+
+    def test_mutant_without_the_partner_gate_passes_the_one_arm_row(self):
+        with mock.patch('coverage.partners_hold', lambda verdict, text, partners: True):
+            self.assertEqual(self.evidence(self.GIFT, self.arm(self.ABOVE, 50)), [BEHAVIOUR])
+
+    def test_mutant_without_the_row_keeps_the_paired_arms_at_data(self):
+        with mock.patch.dict(CONTRAST_PROOF):
+            del CONTRAST_PROOF[self.METRIC]
+            self.assertEqual(self.evidence(self.GIFT, self.arm(self.ABOVE, 50), self.arm(self.BELOW, 0)), [DATA])
+
+    def test_the_conditional_words_mark_every_hook_clause_of_the_sun_cleric(self):
+        for text in (self.GIFT, 'Increases your critical strike chance on targets below 20% health by $s1%.',
+                     'and your critical strike chance against Undead by $s2%.',
+                     'Radiant Cascade is now guaranteed to critically strike on allies affected by Bless.'):
+            with self.subTest(text=text):
+                self.assertTrue(conditional_text(text))
+        self.assertFalse(conditional_text(self.PLAIN))
 
 
 if __name__ == '__main__':

@@ -291,7 +291,12 @@ not in the table fails the whole run (`EvidenceError`, no default):
   row's contrast, whatever the claim words say (ADR 0616), unless the metric also has a `STATE_PROMISES` row: then the
   clause or its row must use those words. A readback metric has such a row only to gate its contrast proof, as
   `spell_done_crit_chance` does with the crit words (ADR 0691), and `spell_taken_crit_chance`, the target-side
-  chance with the attacker's conditional rules, the same way (ADR 0800). A `behaviour_group_stack_cap` state read
+  chance with the attacker's conditional rules, the same way (ADR 0800). `spell_done_crit_chance_scripted`, the done
+  chance passed through the CoA crit hook (`ScriptMgr::OnSpellCritChance`), takes the same row and crit words plus a
+  partner gate (`coverage.PARTNERED_CONTRASTS`, ADR 1017): its learned verdict is behaviour only when the ledger row's
+  conformant learned verdicts of the metric hold a non-zero expected gain and, when the claim or row text is
+  conditional (`coverage.CONDITIONAL_WORDS`), also a zero gain whose fixture breaks the condition. A conditional clause
+  the words miss is a review finding. A `behaviour_group_stack_cap` state read
   is behaviour for a no-stack clause ("does not stack", `coverage.NO_STACK_WORDS`, ADR 0424): it reads the consumed
   value after the spell alone and after the similar spell too, and only equal readings (`compare.STACKED_SAME`,
   ADR 0446) prove the clause. A `setup_only_after` condition contrast (a state read without and with the condition

@@ -4,6 +4,7 @@ from pathlib import Path
 import shutil
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest import mock
 
@@ -74,6 +75,7 @@ from mitigation import armor_reduction
 from passives import BEHAVIOUR_LABELS
 from procs import cast_interval
 from behaviours import forced_chance_of
+from behaviours import require_scripted_crit_probe
 from profile import (CASTER, DBC_DIR, base_steps, control_entries, for_entry, load_class_file,
                      load_fixture_class_file)
 from tooltip import Records
@@ -13432,6 +13434,50 @@ class HitRatioOwnedAurasTests(unittest.TestCase):
                         {'caster_entry': None}):
             with self.subTest(changes=changes), self.assertRaises(ValueError):
                 behaviour_scenario(load_class_file(15), hound_entry(**changes))
+
+
+class ScriptedCritProbeRefusalTests(unittest.TestCase):
+    PROBED = 500154
+
+    def entry(self, **changes):
+        return {'spell': 680618, 'name': 'Gift of the Sun', 'kind': 'metric_delta', 'quote': 'by $s1%',
+                'trigger_spell': self.PROBED, 'metric': 'spell_done_crit_chance_scripted',
+                'fields': {'spell': self.PROBED, 'target': 'dummy'}, 'before_expected': 0, 'expected': 50,
+                'expected_gain': 50, 'target': 'dummy', **changes}
+
+    def records(self, damage_class=1, attributes2=0, attributes3=0):
+        fields = {'DmgClass': damage_class, 'AttributesEx2': attributes2, 'AttributesEx3': attributes3}
+        return SimpleNamespace(field=lambda table, spell, name: fields[name] if spell == self.PROBED else 0)
+
+    def test_a_melee_holy_probe_with_its_gain_is_generated(self):
+        require_scripted_crit_probe(self.records(), metric_delta_spec(self.entry()))
+
+    def test_a_ranged_spell_is_refused(self):
+        with self.assertRaises(NotModelled):
+            require_scripted_crit_probe(self.records(damage_class=3), metric_delta_spec(self.entry()))
+
+    def test_an_auto_repeat_wand_spell_is_refused(self):
+        with self.assertRaises(NotModelled):
+            require_scripted_crit_probe(self.records(damage_class=0, attributes2=0x20),
+                                        metric_delta_spec(self.entry()))
+
+    def test_an_off_hand_spell_is_refused(self):
+        with self.assertRaises(NotModelled):
+            require_scripted_crit_probe(self.records(attributes3=0x01000000), metric_delta_spec(self.entry()))
+
+    def test_a_read_on_another_actor_than_the_player_is_refused(self):
+        with self.assertRaises(NotModelled):
+            require_scripted_crit_probe(self.records(), metric_delta_spec(self.entry(measure_actor='pet')))
+
+    def test_an_arm_without_its_expected_gain_is_refused(self):
+        entry = self.entry()
+        del entry['expected_gain']
+        with self.assertRaises(NotModelled):
+            require_scripted_crit_probe(self.records(), metric_delta_spec(entry))
+
+    def test_another_metric_is_left_alone(self):
+        require_scripted_crit_probe(self.records(damage_class=3),
+                                    metric_delta_spec(self.entry(metric='spell_done_crit_chance')))
 
 
 if __name__ == '__main__':
