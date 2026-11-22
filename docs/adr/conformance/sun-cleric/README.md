@@ -25,3 +25,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0019](0019-sunsworn-logs-its-mana-as-energize-3-percent.md) | Sunsworn logs its auto attack mana as Energize 3% |
 | [0020](0020-five-mana-restores-log-under-their-own-spell.md) | Five Sun Cleric mana restores log under their own spell, not Vow of Grace |
 | [0021](0021-a-triggered-strike-takes-its-cast-spells-weapon-set.md) | A triggered strike takes its cast spell's weapon set |
+| [0024](0024-valiance-first-auto-attack-is-the-dbc-extra-swing.md) | Valiance's first auto attack on a target is the DBC extra attack, gated by its debuff |

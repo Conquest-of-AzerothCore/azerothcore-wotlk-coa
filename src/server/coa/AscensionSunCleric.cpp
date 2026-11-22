@@ -415,8 +415,6 @@ void Refresh(Player* player)
         if (converted)
             player->removeSpell(RadiantConversion, SPEC_MASK_ALL, true);
     }
-    if (!player->IsInCombat())
-        state.firstAttacks.clear();
     state.refreshing = false;
 }
 }

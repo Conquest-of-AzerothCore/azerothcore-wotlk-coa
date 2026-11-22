@@ -2631,13 +2631,31 @@
         ]
       },
       {
-        "claim": "your first auto attack on a target hits twice",
+        "claim": "your first auto attack gets the extra attack once, in the first swing interval, and no Vow of the Valkyr strike",
         "labels": [
-          "680643 behaviour_metric_delta first_extra"
+          "680643 behaviour_metric_delta first_extra",
+          "680643 behaviour_metric_delta first_marker",
+          "680643 behaviour_metric_delta first_interval",
+          "680643 behaviour_metric_delta no_vow_strike"
+        ]
+      },
+      {
+        "claim": "on a target: a second target gets its own extra attack, and the extra attack lands as a second white swing",
+        "labels": [
+          "680643 behaviour_metric_delta second_target"
         ]
       }
     ],
-    "reason": "Haste: the main-hand attack time (Seraphim 2027, 2300 ms) reads 2300 before the learn (control) and 2000 after, ratio 0.869565 within 0.001, which excludes 14% and 16% and 13.5% and 16.5%. First hit: over 3 swing intervals at the dummy the caster's strikes of 506824 read 0 before the learn (control) and exactly 1 after, one second hit for the first landed auto attack and none for the later two; the class file ratings leave no miss. Pair 20261122-075442 / 20261122-075522, build 81028c380373, server commit c0716cc8aa6a+, no flip (both runs the same statuses), 12 of 12 scenarios passed natively in each run. A melee_damage_count arm (no further white swing) was tried and dropped: its before reading was 4 in one probe and 3 in two runs, the swing at the 6900 ms boundary lands or not, so the count is not deterministic. Reference search 2026-11-22: coa-history spell 681472 Valiance: SPELL_EXTRA_ATTACKS 36 events in 1 log (2026-08-22, one Sun Cleric player, self-target). Each extra attack is followed at the same millisecond by a second SWING_DAMAGE on the same target (an extra white swing that can glance and takes the swing table), and a SPELL_AURA_APPLIED 681531 DEBUFF on the target about 300 ms later (35 events); that player has 0 events of 506824 in all 186 logs, and the 1388 SPELL_DAMAGE events of 506824 come from four other players, not from a Valiance user. Lead, not support: our server suppresses the DBC proc 681472 (Effect[0] 19 ADD_EXTRA_ATTACKS, Effect[1] 183 delayed 681531) and casts the 506824 strike instead (AscensionSunClericEvents.cpp:133, :146, :322; code from e36bc50aad), a special strike with no extra white swing and no debuff. The mechanism differs from the live log; the damage impact is not measured. The first_extra entry reads one 506824 strike over three swing intervals; it does not measure 'first' or 'on a target' (review I3), and the 680643 entries are redone by the Valiance fix. 680643 0 events; bindmysoul reads the tooltip figure 15%; nothing else found."
+    "reason": "Haste: the main-hand attack time (Seraphim 2027, 2300 ms) reads 2300 before the learn (control) and 2000 after, ratio 0.869565 within 0.001, which excludes 14% and 16% and 13.5% and 16.5%. Extra attack (ADR 0024): the DBC proc runs again. 680643 Effect[1] aura 42 PROC_TRIGGER_SPELL casts 681472 (Effect[0] 19 ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531, ExcludeTargetAuraSpell 681531); 681531 is the per-target marker (Effect[0] aura 4 DUMMY on the enemy, duration index 6 = 600000 ms), and a cast of 681472 at a target holding it is refused (SpellInfo::CheckTarget), which replaces the earlier per-GUID set. Over 3 swing intervals at the dummy the caster's casts of 681472 read 0 before the learn (control) and exactly 1 after (not one per swing), the dummy holds 681531 after the learn and not before, the cast is already there after 1 swing interval, and casts of 506824 read 0 in both phases (the strike the code cast before ADR 0024). Pair 20261122-083906 / 20261122-083941, build 138707765c08, server commit 8045c0550b87+, no flip (both runs the same statuses), 5 of 5 scenarios ok in each run; the class file ratings leave no miss, dodge or parry, residual failure probability 0 per pair. Not measured, tool_gap: a second target gets its own extra attack (autos are driven at the dummy only), and the extra attack lands as a second white swing (melee_attack_count and melee_damage_count change with the swing at the interval boundary, tried and dropped in the b8d1 pass); the first_interval read does not separate the first from the second hasted swing of the interval, only the marker gates. The damage of the first exchange (white swing against the 506824 strike) is not measured: no entry reads it deterministically and the pre-fix tree is not rebuilt. Reference search 2026-11-22: coa-history log 161 (2026-08-22, one Sun Cleric player): SPELL_EXTRA_ATTACKS 681472 36 events (self-target), each followed in the same millisecond by a second SWING_DAMAGE on the same target, and SPELL_AURA_APPLIED 681531 DEBUFF on the target about 300 ms later, 35 events on 35 distinct target GUIDs (none twice); that player has 0 events of 506824 in all 186 logs, the 1388 SPELL_DAMAGE events of 506824 come from four other players; 680643 0 events (a passive); bindmysoul reads the tooltip figure 15%; nothing else found.",
+    "tool_gap": {
+      "reason": "autos are driven at the dummy only (attack_swings requires target dummy), so no second target can be attacked and the landing white swing has no deterministic count (melee_attack_count and melee_damage_count change with the swing at the interval boundary)",
+      "attempts": [
+        {
+          "agent": "fix-valiance",
+          "report": ".agents/plans/fix-valiance/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 680645,

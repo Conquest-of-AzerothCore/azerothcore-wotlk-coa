@@ -130,7 +130,7 @@ class aura_ascension_sun_cleric_event : public AuraScript
             case 806058: return damage && (Named(info,520359) || idIsJustice(info)) && Chance(player,id);
             case 301266: return damage && ((Named(info,500154) && player->HasAura(Sunrise)) ||
                 (Named(info,806477) && player->HasAura(Sunset)));
-            case 680643: return damage && automatic && State(player).firstAttacks.insert(event.GetActionTarget()->GetGUID()).second;
+            case 680643: return damage && automatic;
             case 300371: return direct && damage && event.GetActionTarget()->HasAura(806697, player->GetGUID()) && Chance(player,id,1000);
             case 704920: return healing && direct && Any(info,{500141,500143});
             case 534267: return healing && (Any(info,{500143,800357,500147}) || (info && info->Id == 807994));
@@ -143,6 +143,8 @@ class aura_ascension_sun_cleric_event : public AuraScript
     }
     void Proc(ProcEventInfo& event)
     {
+        if (GetId() == 680643)
+            return;
         PreventDefaultAction();
         Player* player = Caster();
         if (!player)
@@ -319,7 +321,6 @@ class aura_ascension_sun_cleric_event : public AuraScript
             case 804629: Cast(player,player,807299); break;
             case 707077: Cast(player,target,804405); break;
             case 802935: Mana(player,CalculatePct(player->GetMaxPower(POWER_MANA),Amount(504619)),504619); break;
-            case 680643: Cast(player,target,506824); break;
             case 547214: Cast(player,target,547217); break;
             case 561327:
                 Reduce(player,804751,std::abs(Amount(680671)));

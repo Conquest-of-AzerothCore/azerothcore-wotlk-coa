@@ -19937,22 +19937,80 @@
     },
     {
       "spell": 680643,
-      "name": "Valiance (first auto attack hits a second time)",
+      "name": "Valiance (first auto attack gets the DBC extra attack)",
       "kind": "metric_delta",
       "variant": "first_extra",
       "label_suffix": "first_extra",
       "quote": "your first auto attack on a target hits twice",
       "attack_swings": 3,
       "target": "dummy",
-      "trigger_spell": 506824,
-      "metric": "spell_damage_count",
+      "trigger_spell": 681472,
+      "metric": "spell_cast_count",
       "fields": {
-        "spell": 506824
+        "spell": 681472
       },
       "before_expected": 0,
       "expected": 1,
       "expire_ms": 500,
-      "observe_source": "680643 Effect[1] aura 42 PROC_TRIGGER_SPELL 681472 (Effect[0] SPELL_EFFECT_ADD_EXTRA_ATTACKS, Effect[1] a delayed trigger of 681531). AscensionSunClericEvents.cpp:133 gates 680643 on an own damaging automatic attack on a target whose GUID is not yet in the caster's firstAttacks set (insert().second) and :322 casts 506824 (Vow of the Valkyr (Mainhand), a main-hand weapon strike) at that target. Each phase attacks the dummy for 3 swing intervals (6900 ms of the Seraphim main hand 2300 ms) with no spell cast: 0 strikes of 506824 without the passive (control: the before phase) and exactly 1 with it learned, one second hit for the first landed auto attack and none for the later two, so the count 1 over 3 swings reads 'first' and 'twice' (the swing and its second hit). The counter is cumulative and the before reading is 0. Class file ratings (hit and expertise 10000) leave no miss, dodge or parry, so the first auto lands: residual failure probability 0 per pair. Reference search 2026-11-22: coa-history spell 681472 Valiance: SPELL_EXTRA_ATTACKS 36 events in 1 log (an extra attack of the reference server, no strike count read), 506824 SPELL_DAMAGE 1388 events in 11 logs; 680643 0 events; the extra white swing is read in the first_melee entry."
+      "observe_source": "681472 (Valiance Trigger): Effect[0] 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531 (EffectBasePoints 199, 200 ms), ExcludeTargetAuraSpell 681531; 681531 (Valiance Debuff): Effect[0] aura 4 SPELL_AURA_DUMMY on the enemy target, DurationIndex 6 = 600000 ms. 680643 Effect[1] aura 42 PROC_TRIGGER_SPELL 681472. AscensionSunClericEvents.cpp lets the default action run for 680643 and gates it on an own damaging automatic attack; the per-target 'first' is the marker: a cast of 681472 at a target holding 681531 is refused by SpellInfo::CheckTarget (ExcludeTargetAuraSpell). Each phase attacks the dummy for 3 reference swing intervals (6900 ms of the Seraphim main hand, 2300 ms) with no spell cast, the gate learned between the phases (control: before). Class file ratings (hit and expertise 10000) leave no miss, dodge or parry: residual failure probability 0 per pair. The caster's casts of 681472 read 0 without the passive and exactly 1 with it over 3 swing intervals (3 or 4 swings of the hasted main hand): one extra attack, not one per swing. Reference search 2026-11-22: coa-history log 161 (2026-08-22, one Sun Cleric player): SPELL_EXTRA_ATTACKS 681472 36 events (self-target), each followed in the same millisecond by a second SWING_DAMAGE on the same target, and SPELL_AURA_APPLIED 681531 DEBUFF on the target about 300 ms later 35 events on 35 distinct target GUIDs (none twice), removed with the mob's death or later; that player has 0 events of 506824 in all 186 logs; 680643 0 events (a passive)."
+    },
+    {
+      "spell": 680643,
+      "name": "Valiance (first auto attack marks the target)",
+      "kind": "metric_delta",
+      "variant": "first_marker",
+      "label_suffix": "first_marker",
+      "quote": "your first auto attack on a target hits twice",
+      "attack_swings": 3,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "trigger_spell": 681472,
+      "metric": "aura",
+      "fields": {
+        "spell": 681531
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "observe_source": "681472 (Valiance Trigger): Effect[0] 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531 (EffectBasePoints 199, 200 ms), ExcludeTargetAuraSpell 681531; 681531 (Valiance Debuff): Effect[0] aura 4 SPELL_AURA_DUMMY on the enemy target, DurationIndex 6 = 600000 ms. 680643 Effect[1] aura 42 PROC_TRIGGER_SPELL 681472. AscensionSunClericEvents.cpp lets the default action run for 680643 and gates it on an own damaging automatic attack; the per-target 'first' is the marker: a cast of 681472 at a target holding 681531 is refused by SpellInfo::CheckTarget (ExcludeTargetAuraSpell). Each phase attacks the dummy for 3 reference swing intervals (6900 ms of the Seraphim main hand, 2300 ms) with no spell cast, the gate learned between the phases (control: before). Class file ratings (hit and expertise 10000) leave no miss, dodge or parry: residual failure probability 0 per pair. The dummy holds 681531 read 0 without the passive and 1 with it after 3 swing intervals: the marker lands on the target and its 600000 ms duration outlives the phase, so the later swings are refused. Reference search 2026-11-22: coa-history log 161 (2026-08-22, one Sun Cleric player): SPELL_EXTRA_ATTACKS 681472 36 events (self-target), each followed in the same millisecond by a second SWING_DAMAGE on the same target, and SPELL_AURA_APPLIED 681531 DEBUFF on the target about 300 ms later 35 events on 35 distinct target GUIDs (none twice), removed with the mob's death or later; that player has 0 events of 506824 in all 186 logs; 680643 0 events (a passive)."
+    },
+    {
+      "spell": 680643,
+      "name": "Valiance (the extra attack comes in the first swing interval)",
+      "kind": "metric_delta",
+      "variant": "first_interval",
+      "label_suffix": "first_interval",
+      "quote": "your first auto attack on a target hits twice",
+      "attack_swings": 1,
+      "target": "dummy",
+      "trigger_spell": 681472,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 681472
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "observe_source": "681472 (Valiance Trigger): Effect[0] 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531 (EffectBasePoints 199, 200 ms), ExcludeTargetAuraSpell 681531; 681531 (Valiance Debuff): Effect[0] aura 4 SPELL_AURA_DUMMY on the enemy target, DurationIndex 6 = 600000 ms. 680643 Effect[1] aura 42 PROC_TRIGGER_SPELL 681472. AscensionSunClericEvents.cpp lets the default action run for 680643 and gates it on an own damaging automatic attack; the per-target 'first' is the marker: a cast of 681472 at a target holding 681531 is refused by SpellInfo::CheckTarget (ExcludeTargetAuraSpell). Each phase attacks the dummy for 3 reference swing intervals (6900 ms of the Seraphim main hand, 2300 ms) with no spell cast, the gate learned between the phases (control: before). Class file ratings (hit and expertise 10000) leave no miss, dodge or parry: residual failure probability 0 per pair. Same read after 1 swing interval (2300 ms): 0 without the passive and 1 with it, so the single extra attack of the 3-interval entry has already come in the first interval and none comes after. One interval holds one or two hasted swings (2000 ms), so this entry does not separate the first from the second swing; the DBC marker is the only gate and no code counts swings. Reference search 2026-11-22: coa-history log 161 (2026-08-22, one Sun Cleric player): SPELL_EXTRA_ATTACKS 681472 36 events (self-target), each followed in the same millisecond by a second SWING_DAMAGE on the same target, and SPELL_AURA_APPLIED 681531 DEBUFF on the target about 300 ms later 35 events on 35 distinct target GUIDs (none twice), removed with the mob's death or later; that player has 0 events of 506824 in all 186 logs; 680643 0 events (a passive)."
+    },
+    {
+      "spell": 680643,
+      "name": "Valiance (no Vow of the Valkyr strike)",
+      "kind": "metric_delta",
+      "variant": "no_vow_strike",
+      "label_suffix": "no_vow_strike",
+      "quote": "your first auto attack on a target hits twice",
+      "attack_swings": 3,
+      "target": "dummy",
+      "trigger_spell": 681472,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 506824
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expire_ms": 500,
+      "observe_source": "681472 (Valiance Trigger): Effect[0] 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531 (EffectBasePoints 199, 200 ms), ExcludeTargetAuraSpell 681531; 681531 (Valiance Debuff): Effect[0] aura 4 SPELL_AURA_DUMMY on the enemy target, DurationIndex 6 = 600000 ms. 680643 Effect[1] aura 42 PROC_TRIGGER_SPELL 681472. AscensionSunClericEvents.cpp lets the default action run for 680643 and gates it on an own damaging automatic attack; the per-target 'first' is the marker: a cast of 681472 at a target holding 681531 is refused by SpellInfo::CheckTarget (ExcludeTargetAuraSpell). Each phase attacks the dummy for 3 reference swing intervals (6900 ms of the Seraphim main hand, 2300 ms) with no spell cast, the gate learned between the phases (control: before). Class file ratings (hit and expertise 10000) leave no miss, dodge or parry: residual failure probability 0 per pair. The caster's casts of 506824 (Vow of the Valkyr (Mainhand), the strike the code cast before ADR 0024) read 0 without the passive (control) and 0 with it over 3 swing intervals. Positive control: coa-history 506824 SPELL_DAMAGE 1388 events in 11 logs, none from the Valiance player. Reference search 2026-11-22: coa-history log 161 (2026-08-22, one Sun Cleric player): SPELL_EXTRA_ATTACKS 681472 36 events (self-target), each followed in the same millisecond by a second SWING_DAMAGE on the same target, and SPELL_AURA_APPLIED 681531 DEBUFF on the target about 300 ms later 35 events on 35 distinct target GUIDs (none twice), removed with the mob's death or later; that player has 0 events of 506824 in all 186 logs; 680643 0 events (a passive)."
     },
     {
       "spell": 803913,
