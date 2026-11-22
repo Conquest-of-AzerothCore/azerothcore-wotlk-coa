@@ -600,7 +600,9 @@
     "spell": 300367,
     "clause": "Horusath Blast or Rapture now have a $h% chance to not incur a cooldown on cast.",
     "labels": [
-      "300367 effect_value #0"
+      "300367 effect_value #0",
+      "300367 behaviour_metric_delta horusath_reset_rate",
+      "300367 behaviour_metric_delta rapture_reset_rate"
     ],
     "kind": "claim"
   },
@@ -2690,7 +2692,9 @@
     "claims": [
       {
         "claim": "Your Horusath Blast now deals additional damage scaling with your attack power",
-        "labels": []
+        "labels": [
+          "680656 behaviour_metric_delta power_direction"
+        ]
       },
       {
         "claim": "and grants allies Replenishment",
@@ -3364,7 +3368,8 @@
     "clause": "Effectively healing with Radiant Cascade has a $h% chance to increase the healing of your next Illumination by $301293s1%.",
     "labels": [
       "704920 effect_value #0",
-      "704920 effect_value 301293e0 #1"
+      "704920 effect_value 301293e0 #1",
+      "704920 proc_rate 301293"
     ],
     "kind": "claim"
   },
@@ -3373,7 +3378,8 @@
     "clause": "Effectively healing with Illumination has a $707520h% chance to increase the healing of your next Radiant Cascade by $300354s1%.",
     "labels": [
       "704920 effect_value #2",
-      "704920 effect_value 300354e0 #3"
+      "704920 effect_value 300354e0 #3",
+      "704920 proc_rate 300354"
     ],
     "kind": "claim"
   },
@@ -5513,7 +5519,8 @@
     "spell": 806699,
     "clause": "Melee attacks now have a $h% chance to reset the cooldown of Glorious Execution.",
     "labels": [
-      "806699 effect_value #0"
+      "806699 effect_value #0",
+      "806699 behaviour_metric_delta swing_reset_rate"
     ],
     "kind": "claim",
     "tool_gap": {
