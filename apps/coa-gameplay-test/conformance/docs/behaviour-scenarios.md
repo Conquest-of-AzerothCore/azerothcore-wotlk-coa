@@ -2204,6 +2204,8 @@ Options with a module:
 
 - [`after_start_reads`](metric_delta_options/after_start_reads.md): a caster aura read at the start of the after phase,
   a mismatch is `unmeasured` (ADR 1039)
+- [`after_setup_reads`](metric_delta_options/after_setup_reads.md): a caster aura read after the last setup cast of
+  each phase, a mismatch is `unmeasured` (ADR 1058)
 - [`corpse`](metric_delta_options/corpse.md): a creature corpse a real setup cast kills in the treatment phase (ADR
   0493)
 - [`player_spell_power`](metric_delta_options/player_spell_power.md): the caster's spell-power fixture (ADR 0364)
