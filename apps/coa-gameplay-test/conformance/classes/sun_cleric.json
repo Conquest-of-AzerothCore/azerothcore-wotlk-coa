@@ -30063,7 +30063,14 @@
           "reason": "823764 removes the dummy's resists and 984954 removes the caster's natural spell crit chance, set before every Horusath Blast cast as in the cd entry: precondition fixtures, the claim measured is the cooldown cut."
         }
       ],
-      "observe_source": "707528 Final Vows Effect[0] aura 107 BasePoints 9 (+1 = 10) and Effect[2] aura 107 carry no cooldown percent; the 10% is applied by the class code (AscensionSunClericAbilities.cpp:264-265: after a Horusath Blast cast made after a Dawn fulfilment with Vow of Grace 803719 and Final Vows on the caster, ReducePercent(player, id, |Amount(707528)|)). Horusath Blast 500154 has RecoveryTime 25000 ms, so 10% is 2500 ms. Route: the cooldown cost_gate (guide section 2, Lorescribe), a cast the server accepts or refuses, not a cooldown readback. Vow of Grace 803719 and Dawn 804584 (20 Solar Power) are cast in every arm before the priming Horusath Blast, 707528 is learned in the arms with it. The gated cast is attempted 22500 + 150 ms after the priming cast (accepted with it, refused without it) and 22500 - 150 ms after it (refused): a cut of 9% (2250 ms) or 11% (2750 ms) would make the beyond arm accepted or the with arm refused. Reference search 2026-11-22: coa-history spell 707528: 0 events in 186 logs (a passive); the ascension-data snapshot rows carry the acquisition and no value; nothing found beyond the tooltip and the DBC for the 10%."
+      "observe_source": "707528 Final Vows Effect[0] aura 107 BasePoints 9 (+1 = 10) and Effect[2] aura 107 carry no cooldown percent; the 10% is applied by the class code (AscensionSunClericAbilities.cpp:264-265: after a Horusath Blast cast made after a Dawn fulfilment with Vow of Grace 803719 and Final Vows on the caster, ReducePercent(player, id, |Amount(707528)|)). Horusath Blast 500154 has RecoveryTime 25000 ms, so 10% is 2500 ms. Route: the cooldown cost_gate (guide section 2, Lorescribe), a cast the server accepts or refuses, not a cooldown readback. Vow of Grace 803719 and Dawn 804584 (20 Solar Power) are cast in every arm before the priming Horusath Blast, 707528 is learned in the arms with it. The gated cast is attempted 22500 + 150 ms after the priming cast (accepted with it, refused without it) and 22500 - 150 ms after it (refused): a cut of 9% (2250 ms) or 11% (2750 ms) would make the beyond arm accepted or the with arm refused. Reference search 2026-11-22: coa-history spell 707528: 0 events in 186 logs (a passive); the ascension-data snapshot rows carry the acquisition and no value; nothing found beyond the tooltip and the DBC for the 10%. Dawn arm hygiene: Dawn 804584 toggles (cast with the Dawn state present it cancels it, AscensionSunClericAbilities.cpp:515-520), so every arm casts it once before the priming Horusath Blast (activation, the fulfilment) and once 1600 ms after it (cancel), leaving no Dawn state for the next arm; a first pair read the with arm refused 22650 ms after the cast, with the Dawn state left over from the without arm.",
+      "after_casts": [
+        [
+          804584,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 1600
     },
     {
       "spell": 520024,
@@ -30078,7 +30085,7 @@
       "before_expected": 0,
       "cast_power": 1363,
       "expire_ms": 500,
-      "wait_ms": 3200,
+      "wait_ms": 5000,
       "phase_auras": [
         [
           984954,
@@ -30100,7 +30107,7 @@
       },
       "expected": 497.6,
       "tolerance": 25,
-      "observe_source": "Base arm: 427.6 + 70 x 1 + 0 = 497.6, band 5% (25): [472.6, 522.6]. 520024 Valkyr's Calling Effect[0] SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED (1999 ms) triggers 520026 (Effect[1] aura 193 -> 570034 after 499 ms); 570034 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, EffectBasePoints 123 (+1 = 124 as read), EffectRealPointsPerLevel 6.6 x (level 60 - BaseLevel 14) = 303.6, SchoolMask 2 (Holy), DmgClass 1 (magic). Tooltip ${$570034m1+$570034ppl1+$AP*1+$SP*.225}: 124 + 303.6 = 427.6 plus attack power x 1 plus spell power x 0.225 (the packet token reads 497.6 at the reference attack power 70, spell power 0). One real cast of 520024 at the dummy, the damage events of 570034 on the dummy read 3200 ms after the cast. Fixtures: 984954 removes the caster's natural spell crit chance (Effect[1] aura 57 -1000) so the Holy hit is never critical, 823764 removes the dummy's resists: precondition fixtures, the claim is the hit. The four arms are one pair: charge_hit (real chain, attack power 70, spell power 0), charge_hit_ap (real chain, attack power 10070), charge_cast (570034 cast directly, spell power 0) and charge_cast_sp (570034 cast directly, spell power 20000 at the hit, recorded by the hit arm). Control: no cast before, 0 damage. Reference search 2026-11-22: coa-history spell 520024 (41 casts) and 570034 logged as linked events; nothing found beyond the tooltip and the DBC for the per-hit terms."
+      "observe_source": "Base arm: 427.6 + 70 x 1 + 0 = 497.6, band 5% (25): [472.6, 522.6]. 520024 Valkyr's Calling Effect[0] SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED (1999 ms) triggers 520026 (Effect[1] aura 193 -> 570034 after 499 ms); 570034 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, EffectBasePoints 123 (+1 = 124 as read), EffectRealPointsPerLevel 6.6 x (level 60 - BaseLevel 14) = 303.6, SchoolMask 2 (Holy), DmgClass 1 (magic). Tooltip ${$570034m1+$570034ppl1+$AP*1+$SP*.225}: 124 + 303.6 = 427.6 plus attack power x 1 plus spell power x 0.225 (the packet token reads 497.6 at the reference attack power 70, spell power 0). One real cast of 520024 at the dummy, the damage events of 570034 on the dummy read 5000 ms after the cast. Fixtures: 984954 removes the caster's natural spell crit chance (Effect[1] aura 57 -1000) so the Holy hit is never critical, 823764 removes the dummy's resists: precondition fixtures, the claim is the hit. The four arms are one pair: charge_hit (real chain, attack power 70, spell power 0), charge_hit_ap (real chain, attack power 10070), charge_cast (570034 cast directly, spell power 0) and charge_cast_sp (570034 cast directly, spell power 20000 at the hit, recorded by the hit arm). Control: no cast before, 0 damage. Reference search 2026-11-22: coa-history spell 520024 (41 casts) and 570034 logged as linked events; nothing found beyond the tooltip and the DBC for the per-hit terms."
     },
     {
       "spell": 520024,
@@ -30115,7 +30122,7 @@
       "before_expected": 0,
       "cast_power": 1363,
       "expire_ms": 500,
-      "wait_ms": 3200,
+      "wait_ms": 5000,
       "phase_auras": [
         [
           984954,
@@ -30138,7 +30145,7 @@
       "expected": 10497.6,
       "tolerance": 525,
       "player_attack_power": 10000,
-      "observe_source": "Attack power arm: 427.6 + 10070 x 1 = 10497.6, band 5% (525): [9972.6, 11022.6], which excludes a coefficient 0.9 (9490) and 1.1 (11504). 520024 Valkyr's Calling Effect[0] SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED (1999 ms) triggers 520026 (Effect[1] aura 193 -> 570034 after 499 ms); 570034 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, EffectBasePoints 123 (+1 = 124 as read), EffectRealPointsPerLevel 6.6 x (level 60 - BaseLevel 14) = 303.6, SchoolMask 2 (Holy), DmgClass 1 (magic). Tooltip ${$570034m1+$570034ppl1+$AP*1+$SP*.225}: 124 + 303.6 = 427.6 plus attack power x 1 plus spell power x 0.225 (the packet token reads 497.6 at the reference attack power 70, spell power 0). One real cast of 520024 at the dummy, the damage events of 570034 on the dummy read 3200 ms after the cast. Fixtures: 984954 removes the caster's natural spell crit chance (Effect[1] aura 57 -1000) so the Holy hit is never critical, 823764 removes the dummy's resists: precondition fixtures, the claim is the hit. The four arms are one pair: charge_hit (real chain, attack power 70, spell power 0), charge_hit_ap (real chain, attack power 10070), charge_cast (570034 cast directly, spell power 0) and charge_cast_sp (570034 cast directly, spell power 20000 at the hit, recorded by the hit arm). Control: no cast before, 0 damage. Reference search 2026-11-22: coa-history spell 520024 (41 casts) and 570034 logged as linked events; nothing found beyond the tooltip and the DBC for the per-hit terms."
+      "observe_source": "Attack power arm: 427.6 + 10070 x 1 = 10497.6, band 5% (525): [9972.6, 11022.6], which excludes a coefficient 0.9 (9490) and 1.1 (11504). 520024 Valkyr's Calling Effect[0] SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED (1999 ms) triggers 520026 (Effect[1] aura 193 -> 570034 after 499 ms); 570034 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, EffectBasePoints 123 (+1 = 124 as read), EffectRealPointsPerLevel 6.6 x (level 60 - BaseLevel 14) = 303.6, SchoolMask 2 (Holy), DmgClass 1 (magic). Tooltip ${$570034m1+$570034ppl1+$AP*1+$SP*.225}: 124 + 303.6 = 427.6 plus attack power x 1 plus spell power x 0.225 (the packet token reads 497.6 at the reference attack power 70, spell power 0). One real cast of 520024 at the dummy, the damage events of 570034 on the dummy read 5000 ms after the cast. Fixtures: 984954 removes the caster's natural spell crit chance (Effect[1] aura 57 -1000) so the Holy hit is never critical, 823764 removes the dummy's resists: precondition fixtures, the claim is the hit. The four arms are one pair: charge_hit (real chain, attack power 70, spell power 0), charge_hit_ap (real chain, attack power 10070), charge_cast (570034 cast directly, spell power 0) and charge_cast_sp (570034 cast directly, spell power 20000 at the hit, recorded by the hit arm). Control: no cast before, 0 damage. Reference search 2026-11-22: coa-history spell 520024 (41 casts) and 570034 logged as linked events; nothing found beyond the tooltip and the DBC for the per-hit terms."
     },
     {
       "spell": 520024,
@@ -30151,7 +30158,6 @@
       "target": "dummy",
       "cast_in_before": false,
       "before_expected": 0,
-      "cast_power": 1363,
       "expire_ms": 500,
       "wait_ms": 3200,
       "phase_auras": [
@@ -30188,7 +30194,6 @@
       "target": "dummy",
       "cast_in_before": false,
       "before_expected": 0,
-      "cast_power": 1363,
       "expire_ms": 500,
       "wait_ms": 3200,
       "phase_auras": [
