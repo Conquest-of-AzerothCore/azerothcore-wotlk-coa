@@ -171,6 +171,35 @@
       "base_mana_per_attempt": true
     },
     {
+      "aura": 806021,
+      "name": "Searing Light",
+      "min_parts": 10,
+      "tooltip": "Casting |cffffffffDawnsear|r and |cffffffffSunflare|r now have a $h% chance to grant |cffffffffScorch Marks|r for $807059d.@s:807059:0@",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 500146
+      },
+      "trigger_text": "Casting Dawnsear and Sunflare",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 807059,
+      "proc_spell_source": "Cast(player, player, 807059) (AscensionSunClericAbilities.cpp:200-201, OnSpellCast for 500146/800231 with Chance(player, 806021)); Sunflare 502396 is a rank of 800231 (AscensionSpellProgressionData.h)",
+      "events_per_proc": 1,
+      "handler": "AscensionSunClericAbilities.cpp:200-201: a non-triggered cast of Dawnsear or Sunflare with Chance(player, 806021) (ProcChance 40, no internal cooldown) casts Scorch Marks 807059 on the caster. Trigger: Dawnsear 500146, the other of the two casts, the one with the longer cast time. Residual failure probability of the pooled proof at most 0.1% per pair.",
+      "dbc": {
+        "806021": {
+          "ProcChance": 40,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0,
+      "base_mana_per_attempt": true
+    },
+    {
       "aura": 804629,
       "name": "Spears of Glory",
       "min_parts": 36,
@@ -19655,6 +19684,691 @@
       "leeway": true,
       "reach_source": "the dummy entry 36 combat reach 1.275 yd (creature_model_info CombatReach of display 367, world DB; read 1.275 in the Templar 1161 aggro_redirect edge run 20261112-053731), added for a player-controlled caster against a non-player target (Spell.cpp:9434-9442); the caster's own size is not a term; the judge reads each reach again and refuses a layout that does not bracket the edge",
       "observe_source": "807870 Effect[0] aura 12 SPELL_AURA_MOD_STUN, TargetA 22 SRC_CASTER, TargetB 15 TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 14 = 8 yd ($a1, the tooltip resolves 8; SpellEffectInfo::CalcRadius, SpellInfo.cpp:624-639, no SPELLMOD_RADIUS here). Effective radius (guide section 5, G-29): the area search measures from the caster, centre to centre, against 8 yd + the player caster's leeway 2.66 yd (Spell.cpp:1388-1394 for TargetB 15; Object.cpp:1787-1808, LEEWAY_BONUS_RANGE for a run speed above LEEWAY_MIN_MOVE_SPEED 4.97, ObjectDefines.h:50-51, a standing player in run mode at 7.0 yd/s) + the dummy's combat reach 1.275 yd (Spell.cpp:9434-9442) = 11.935 yd, computed by the kind's leeway option from the engine rule and the caster's run speed rate read in the run (ADR 1020), not from a measured edge; earlier diagnostic reads (stunned at about 11.4 yd, not at 12.5 yd, Sun Cleric b7a review I4) agree. The leeway is this core's inherited rule, not evidence about the original server. The primary dummy stands 0.1 yd from the caster and the inside and outside dummies 0.5 yd either side of 11.935 yd. Control arm: the cast is refused before 807870 is learned (gate = cast spell, learned between the arms), no stun on any dummy; treatment: one cast after the learn (120 s cooldown, so one repeat), the stun read per dummy: on the primary and the inside dummy, not on the outside one. Reference search 2026-11-22: coa-history spell 807870: 43 damage events (54 to 425, mean 295, live levels and spell power unknown), 42 aura applications in 5 logs, no amount that isolates a coefficient; bindmysoul snapshot (spell 805583, fetched 2026-07-22) reads \"20 + 27.41% SP Holy damage ... stuns enemies within 8 yds for 5 seconds\" (the radius, duration and coefficient agree, the flat 20 is an older state against Spell.dbc 807870 BasePoints 57 plus 17.7 per level above 58, G-9); nothing else found."
+    },
+    {
+      "spell": 534267,
+      "name": "Heat Wave (at most 5 of the lowest health allies)",
+      "kind": "metric_delta",
+      "variant": "nearby_allies_cap",
+      "label_suffix": "nearby_allies_cap",
+      "quote": "additionally heals up to $801215i of the target's lowest health nearby allies for $s1% of the value.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 801215
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 3500,
+      "observe_source": "Heat Wave 801215 MaxAffectedTargets 5 (Spell.dbc, \"up to $801215i\" = 5) and the code AscensionSunClericEvents.cpp:344-354 (Allies sorted by health percent then GUID, the target removed, the first MaxAffectedTargets 5 copied at 75%). Illumination 500143 is cast at ally in both phases (534267 learned between them) with six grouped allies besides the cast target at 5000 of 10000 health and the caster at full health: seven candidates once the target is removed (the six others and the caster), two more than the cap. The six allies at 50% sort before the caster at 100%, so five of them are healed once each and the caster, the seventh candidate, is not: the total of 801215 heals read on the caster is 5 and the caster is not among the recipients (arm 0 reads 0). Control: the phase before 534267 is learned reads 0. The five-of-six split among equal-health allies is the GUID tie order and is not asserted per ally. Reference search 2026-11-22: coa-history spell 801215: 10475 SPELL_HEAL events in 17 logs, 2034 crits, no recipient order or count per cast can be read from them; nothing found that states the figure.",
+      "ally_arm": {
+        "allies": 7,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 801215,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "the caster is the seventh candidate by health percent (100 against 50), beyond the cap of 5, so it is never healed by Heat Wave (AscensionSunClericEvents.cpp:344-354)"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 534267,
+      "name": "Heat Wave (copy heals for 75% of the heal)",
+      "kind": "metric_delta",
+      "variant": "nearby_allies_amount",
+      "label_suffix": "nearby_allies_amount",
+      "quote": "additionally heals up to $801215i of the target's lowest health nearby allies for $s1% of the value.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 801215,
+        "target": "ally2"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3500,
+      "observe_source": "534267 Effect[0] aura 354, BasePoints 74 + 1 = 75 ($s1), trigger 801215; the code AscensionSunClericEvents.cpp:344-354 (Allies sorted by health percent then GUID, the target removed, the first MaxAffectedTargets 5 copied at 75%) copies the source heal at 75%. Illumination 500143 (Effect[0] SPELL_EFFECT_HEAL, BasePoints 38, DieSides 3, RealPointsPerLevel 3.264, coefficient $bh*1.05; spell power 0, class tuning 887015 -20% healing done) heals the ally 38 to 40 at level 60 with spell power 0, as in the 704936 shield_base entry (11..12 = 30% of it). Two grouped allies at 5000 of 10000 health; the heal 801215 on ally2 is arm 0 (75% of 38..40 truncated: 28 to 30, 29 within 1) and the Illumination heal on ally is arm 1 (38..40 before, 76..80 cumulative after: 39 then 78 within 2). The ratio is arm 0 over arm 1, each as its after sum less its before sum (the second cast alone): 28/38, 29/39 and 30/40 read 0.737, 0.744 and 0.750, expected 0.75 within 0.03, which excludes 0.675 and 0.825 (-10% and +10%). Control: the phase before 534267 is learned has no copy (arm 0 before 0). Reference search 2026-11-22: coa-history spell 801215: 10475 SPELL_HEAL events, mean 629, crits 2034 (a live copy could crit; ours copies the heal flat); the per-cast ratio cannot be read from the aggregate; nothing found that states the figure.",
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 801215,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 29,
+            "tolerance": 1,
+            "source": "CalculatePct(heal, 75) of an Illumination heal of 38..40 (AscensionSunClericEvents.cpp:350-353): 28 to 30"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 500143,
+              "target": "ally"
+            },
+            "before_expected": 39,
+            "expected": 78,
+            "tolerance": 2,
+            "source": "Illumination 500143 heals the ally 38..40 at spell power 0 under the class tuning: 39 for the first cast, 78 cumulative for two (precondition of the ratio, not the claim)"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 0.75,
+            "tolerance": 0.03,
+            "source": "Heat Wave 534267 BasePoints 74 + 1 = 75 ($s1): the copy is 75% of the source heal, the ratio of the second cast alone"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Conquest grants the Illumination window)",
+      "kind": "metric_delta",
+      "variant": "grant_800764",
+      "label_suffix": "grant_800764",
+      "quote": "Your Solar Invocation spells now causes your Illumination to heal an additional nearby ally at 70% effectiveness for $681506d.",
+      "trigger_spell": 800764,
+      "target": "caster",
+      "cast_power": 2868,
+      "metric": "aura",
+      "fields": {
+        "spell": 681506
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "681253 Effect[0] aura 42 trigger 681506 (Together In Conquest, DurationIndex 1 = 10000 ms, $681506d; Effect[0] flat modifier MiscValue 17, rewritten to a dummy by AscensionSunClericContracts.cpp:164). AscensionSunClericAbilities.cpp:233-236 (a non-triggered cast of one of the four Solar Invocation spells 800764, 500152, 503651 and 806159 with 681253 known casts 681506 on the caster) and :391-396 (a non-triggered Illumination heal while 681506 is on the caster copies 70% of the heal as 803816 to the first of the other allies within 10 yd by health percent). A real cast of Conquest 800764 at the caster, then 681506 on the caster read 3000 ms after the cast started (the Ascension cast takes 2500 ms): 1 after 681253 is learned, 0 before it (control: the same cast without the passive). The four Solar Invocation spells are the four casts the code names, so each is tested (the script list is not covered by a class mask). Reference search 2026-11-22: coa-history spell 681506: 0 events in 186 logs (an internal passive aura); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Ascension grants the Illumination window)",
+      "kind": "metric_delta",
+      "variant": "grant_500152",
+      "label_suffix": "grant_500152",
+      "quote": "Your Solar Invocation spells now causes your Illumination to heal an additional nearby ally at 70% effectiveness for $681506d.",
+      "trigger_spell": 500152,
+      "target": "caster",
+      "cast_power": 2868,
+      "metric": "aura",
+      "fields": {
+        "spell": 681506
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "681253 Effect[0] aura 42 trigger 681506 (Together In Conquest, DurationIndex 1 = 10000 ms, $681506d; Effect[0] flat modifier MiscValue 17, rewritten to a dummy by AscensionSunClericContracts.cpp:164). AscensionSunClericAbilities.cpp:233-236 (a non-triggered cast of one of the four Solar Invocation spells 800764, 500152, 503651 and 806159 with 681253 known casts 681506 on the caster) and :391-396 (a non-triggered Illumination heal while 681506 is on the caster copies 70% of the heal as 803816 to the first of the other allies within 10 yd by health percent). A real cast of Ascension 500152 at the caster, then 681506 on the caster read 3000 ms after the cast started (the Ascension cast takes 2500 ms): 1 after 681253 is learned, 0 before it (control: the same cast without the passive). The four Solar Invocation spells are the four casts the code names, so each is tested (the script list is not covered by a class mask). Reference search 2026-11-22: coa-history spell 681506: 0 events in 186 logs (an internal passive aura); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Revelation grants the Illumination window)",
+      "kind": "metric_delta",
+      "variant": "grant_503651",
+      "label_suffix": "grant_503651",
+      "quote": "Your Solar Invocation spells now causes your Illumination to heal an additional nearby ally at 70% effectiveness for $681506d.",
+      "trigger_spell": 503651,
+      "target": "caster",
+      "cast_power": 2868,
+      "metric": "aura",
+      "fields": {
+        "spell": 681506
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "681253 Effect[0] aura 42 trigger 681506 (Together In Conquest, DurationIndex 1 = 10000 ms, $681506d; Effect[0] flat modifier MiscValue 17, rewritten to a dummy by AscensionSunClericContracts.cpp:164). AscensionSunClericAbilities.cpp:233-236 (a non-triggered cast of one of the four Solar Invocation spells 800764, 500152, 503651 and 806159 with 681253 known casts 681506 on the caster) and :391-396 (a non-triggered Illumination heal while 681506 is on the caster copies 70% of the heal as 803816 to the first of the other allies within 10 yd by health percent). A real cast of Revelation 503651 at the caster, then 681506 on the caster read 3000 ms after the cast started (the Ascension cast takes 2500 ms): 1 after 681253 is learned, 0 before it (control: the same cast without the passive). The four Solar Invocation spells are the four casts the code names, so each is tested (the script list is not covered by a class mask). Reference search 2026-11-22: coa-history spell 681506: 0 events in 186 logs (an internal passive aura); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Resplendence grants the Illumination window)",
+      "kind": "metric_delta",
+      "variant": "grant_806159",
+      "label_suffix": "grant_806159",
+      "quote": "Your Solar Invocation spells now causes your Illumination to heal an additional nearby ally at 70% effectiveness for $681506d.",
+      "trigger_spell": 806159,
+      "target": "caster",
+      "cast_power": 2868,
+      "metric": "aura",
+      "fields": {
+        "spell": 681506
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "681253 Effect[0] aura 42 trigger 681506 (Together In Conquest, DurationIndex 1 = 10000 ms, $681506d; Effect[0] flat modifier MiscValue 17, rewritten to a dummy by AscensionSunClericContracts.cpp:164). AscensionSunClericAbilities.cpp:233-236 (a non-triggered cast of one of the four Solar Invocation spells 800764, 500152, 503651 and 806159 with 681253 known casts 681506 on the caster) and :391-396 (a non-triggered Illumination heal while 681506 is on the caster copies 70% of the heal as 803816 to the first of the other allies within 10 yd by health percent). A real cast of Resplendence 806159 at the caster, then 681506 on the caster read 3000 ms after the cast started (the Ascension cast takes 2500 ms): 1 after 681253 is learned, 0 before it (control: the same cast without the passive). The four Solar Invocation spells are the four casts the code names, so each is tested (the script list is not covered by a class mask). Reference search 2026-11-22: coa-history spell 681506: 0 events in 186 logs (an internal passive aura); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "kind": "metric_delta",
+      "quote": "Your Solar Invocation spells now causes your Illumination to heal an additional nearby ally at 70% effectiveness for $681506d.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 803816,
+        "target": "ally2"
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "name": "Together In Conquest (a heal landing 9.1 s after the Invocation cast still copies)",
+      "variant": "window_held",
+      "label_suffix": "window_held",
+      "setup_wait_ms": 7100,
+      "expected": 1,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 803816,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "only one additional ally is healed: the caster, at full health, is the second candidate and gets no copy (AscensionSunClericAbilities.cpp:393-396, allies.front())"
+          }
+        ]
+      },
+      "observe_source": "681506 DurationIndex 1 = 10000 ms ($681506d). AscensionSunClericAbilities.cpp:233-236 (a non-triggered cast of one of the four Solar Invocation spells 800764, 500152, 503651 and 806159 with 681253 known casts 681506 on the caster) and :391-396 (a non-triggered Illumination heal while 681506 is on the caster copies 70% of the heal as 803816 to the first of the other allies within 10 yd by health percent). Conquest 800764 is cast at the caster; Illumination 500143 is cast at ally 7100 ms later and its 2000 ms cast lands at 9100 ms, inside the 10 s window and beyond 9000 ms (-10%): the copy 803816 heals ally2 once (1) after 681253 is learned, 0 before (control: the same casts without the passive). Reference search 2026-11-22: coa-history spell 803816: 12520 SPELL_HEAL events in 19 logs for Vow of Radiance, the 70% copy of Illumination, no timing relation to the Invocation cast can be read from them; nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "kind": "metric_delta",
+      "quote": "Your Solar Invocation spells now causes your Illumination to heal an additional nearby ally at 70% effectiveness for $681506d.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 803816,
+        "target": "ally2"
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "name": "Together In Conquest (a heal landing 10.9 s after the Invocation cast no longer copies)",
+      "variant": "window_gone",
+      "label_suffix": "window_gone",
+      "setup_wait_ms": 8900,
+      "expected": 0,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 803816,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "only one additional ally is healed: the caster, at full health, is the second candidate and gets no copy (AscensionSunClericAbilities.cpp:393-396, allies.front())"
+          }
+        ]
+      },
+      "observe_source": "681506 DurationIndex 1 = 10000 ms ($681506d). AscensionSunClericAbilities.cpp:233-236 (a non-triggered cast of one of the four Solar Invocation spells 800764, 500152, 503651 and 806159 with 681253 known casts 681506 on the caster) and :391-396 (a non-triggered Illumination heal while 681506 is on the caster copies 70% of the heal as 803816 to the first of the other allies within 10 yd by health percent). Same as window_held with Illumination cast 8900 ms after Conquest, landing at 10900 ms, beyond the 10 s window and below 11000 ms (+10%): no copy is read (0 after, 0 before). The held entry is the contrast that shows the route works. Reference search 2026-11-22: coa-history spell 803816: 12520 SPELL_HEAL events in 19 logs for Vow of Radiance, the 70% copy of Illumination, no timing relation to the Invocation cast can be read from them; nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "kind": "metric_delta",
+      "quote": "Your Solar Invocation spells now causes your Illumination to heal an additional nearby ally at 70% effectiveness for $681506d.",
+      "trigger_spell": 500143,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 803816,
+        "target": "ally2"
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "name": "Together In Conquest (the extra heal is 70% of the Illumination heal)",
+      "variant": "extra_amount",
+      "label_suffix": "extra_amount",
+      "setup_wait_ms": 1600,
+      "expected": 1,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 803816,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 27,
+            "tolerance": 1,
+            "source": "CalculatePct(heal, 70) of an Illumination heal of 38..40 (AscensionSunClericAbilities.cpp:396): 26 to 28"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 500143,
+              "target": "ally"
+            },
+            "before_expected": 39,
+            "expected": 78,
+            "tolerance": 2,
+            "source": "Illumination 500143 heals the ally 38..40 at spell power 0 under the class tuning: 39 then 78 cumulative (precondition of the ratio, not the claim)"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 0.7,
+            "tolerance": 0.03,
+            "source": "the tooltip states 70% effectiveness: the copy is 70% of the source heal, the ratio of the second cast alone"
+          }
+        ]
+      },
+      "observe_source": "AscensionSunClericAbilities.cpp:233-236 (a non-triggered cast of one of the four Solar Invocation spells 800764, 500152, 503651 and 806159 with 681253 known casts 681506 on the caster) and :391-396 (a non-triggered Illumination heal while 681506 is on the caster copies 70% of the heal as 803816 to the first of the other allies within 10 yd by health percent). Illumination heals the ally 38..40 (level 60, spell power 0, class tuning 887015; as the 704936 shield_base entry). Conquest cast, Illumination 1600 ms later (past the global cooldown) at ally, two grouped allies at 5000 of 10000: the copy 803816 on ally2 is arm 0 (70% of 38..40 truncated: 26 to 28), the Illumination heal on ally is arm 1 (39 then 78); the ratio arm 0 / arm 1 of the second cast alone reads 26/38 = 0.684, 27/39 = 0.692 or 28/40 = 0.700, expected 0.70 within 0.03 (excludes 0.63 and 0.77). Control: the phase before 681253 is learned has no copy. Reference search 2026-11-22: coa-history spell 803816: 12520 SPELL_HEAL events, mean 687, max 4006, no crits; the per-cast ratio cannot be read from the aggregate; nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Illumination cuts Conquest by 1 s)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_800764",
+      "label_suffix": "cd_cut_800764",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gate_spell": 681253,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 2868,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800764
+      },
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "expected": 24800,
+      "tolerance": 50,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known calls ReduceInvocations by |681789 Effect[0] BasePoints -1001 + 1| = 1000 ms; AscensionSunCleric.cpp:213-217 reduces the four Solar Invocation roots 800764, 500152, 503651 and 806159). Conquest 800764 (RecoveryTime/CategoryRecoveryTime 30000 ms, shared category) is cast at the caster, Illumination 500143 1600 ms later, and the cooldown of 800764 is read 2600 ms after the Illumination cast started: the cooldown starts at the cast, elapsed 1600 + 2600 = 4200 ms, remaining 30000 - 4200 - 1000 = 24800 with 681253 learned, within 50 ms (a cut of 0.9 s reads 24900 and one of 1.1 s 24700, outside the band).Reference search 2026-11-22: coa-history spell 681789: 0 events in 186 logs (an internal trigger effect); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (control: Illumination without it, Conquest)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_control_800764",
+      "label_suffix": "cd_cut_control_800764",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gate_spell": 300321,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 2868,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800764
+      },
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "expected": 25800,
+      "tolerance": 50,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known calls ReduceInvocations by |681789 Effect[0] BasePoints -1001 + 1| = 1000 ms; AscensionSunCleric.cpp:213-217 reduces the four Solar Invocation roots 800764, 500152, 503651 and 806159). Conquest 800764 (RecoveryTime/CategoryRecoveryTime 30000 ms, shared category) is cast at the caster, Illumination 500143 1600 ms later, and the cooldown of 800764 is read 2600 ms after the Illumination cast started: the cooldown starts at the cast, elapsed 1600 + 2600 = 4200 ms, remaining 30000 - 4200 - 1000 = 24800 with Solar Conduit 300321 learned in place (control, an unrelated passive): 25800, 1000 ms more. Same design as the 300349 Hope cd_cut entries. Reference search 2026-11-22: coa-history spell 681789: 0 events in 186 logs (an internal trigger effect); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Illumination cuts Ascension by 1 s)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_500152",
+      "label_suffix": "cd_cut_500152",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gate_spell": 681253,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        500152
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "cast_power": 2868,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 500152
+      },
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "expected": 25900,
+      "tolerance": 50,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known calls ReduceInvocations by |681789 Effect[0] BasePoints -1001 + 1| = 1000 ms; AscensionSunCleric.cpp:213-217 reduces the four Solar Invocation roots 800764, 500152, 503651 and 806159). Ascension 500152 (RecoveryTime/CategoryRecoveryTime 30000 ms, shared category) is cast at the caster, Illumination 500143 3000 ms later, and the cooldown of 500152 is read 2600 ms after the Illumination cast started: the Ascension cast takes 2500 ms and its cooldown starts when it completes, so the elapsed cooldown time is 3000 + 2600 - 2500 = 3100 ms and the remaining cooldown is 30000 - 3100 - 1000 = 25900 with 681253 learned, within 50 ms (a cut of 0.9 s reads 26000 and one of 1.1 s 25800, outside the band).Reference search 2026-11-22: coa-history spell 681789: 0 events in 186 logs (an internal trigger effect); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (control: Illumination without it, Ascension)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_control_500152",
+      "label_suffix": "cd_cut_control_500152",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gate_spell": 300321,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        500152
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "cast_power": 2868,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 500152
+      },
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "expected": 26900,
+      "tolerance": 50,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known calls ReduceInvocations by |681789 Effect[0] BasePoints -1001 + 1| = 1000 ms; AscensionSunCleric.cpp:213-217 reduces the four Solar Invocation roots 800764, 500152, 503651 and 806159). Ascension 500152 (RecoveryTime/CategoryRecoveryTime 30000 ms, shared category) is cast at the caster, Illumination 500143 3000 ms later, and the cooldown of 500152 is read 2600 ms after the Illumination cast started: the Ascension cast takes 2500 ms and its cooldown starts when it completes, so the elapsed cooldown time is 3000 + 2600 - 2500 = 3100 ms and the remaining cooldown is 30000 - 3100 - 1000 = 25900 with Solar Conduit 300321 learned in place (control, an unrelated passive): 26900, 1000 ms more. Same design as the 300349 Hope cd_cut entries. Reference search 2026-11-22: coa-history spell 681789: 0 events in 186 logs (an internal trigger effect); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Illumination cuts Revelation by 1 s)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_503651",
+      "label_suffix": "cd_cut_503651",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gate_spell": 681253,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        503651
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 2868,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 503651
+      },
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "expected": 24800,
+      "tolerance": 50,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known calls ReduceInvocations by |681789 Effect[0] BasePoints -1001 + 1| = 1000 ms; AscensionSunCleric.cpp:213-217 reduces the four Solar Invocation roots 800764, 500152, 503651 and 806159). Revelation 503651 (RecoveryTime/CategoryRecoveryTime 30000 ms, shared category) is cast at the caster, Illumination 500143 1600 ms later, and the cooldown of 503651 is read 2600 ms after the Illumination cast started: the cooldown starts at the cast, elapsed 1600 + 2600 = 4200 ms, remaining 30000 - 4200 - 1000 = 24800 with 681253 learned, within 50 ms (a cut of 0.9 s reads 24900 and one of 1.1 s 24700, outside the band).Reference search 2026-11-22: coa-history spell 681789: 0 events in 186 logs (an internal trigger effect); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (control: Illumination without it, Revelation)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_control_503651",
+      "label_suffix": "cd_cut_control_503651",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gate_spell": 300321,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        503651
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 2868,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 503651
+      },
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "expected": 25800,
+      "tolerance": 50,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known calls ReduceInvocations by |681789 Effect[0] BasePoints -1001 + 1| = 1000 ms; AscensionSunCleric.cpp:213-217 reduces the four Solar Invocation roots 800764, 500152, 503651 and 806159). Revelation 503651 (RecoveryTime/CategoryRecoveryTime 30000 ms, shared category) is cast at the caster, Illumination 500143 1600 ms later, and the cooldown of 503651 is read 2600 ms after the Illumination cast started: the cooldown starts at the cast, elapsed 1600 + 2600 = 4200 ms, remaining 30000 - 4200 - 1000 = 24800 with Solar Conduit 300321 learned in place (control, an unrelated passive): 25800, 1000 ms more. Same design as the 300349 Hope cd_cut entries. Reference search 2026-11-22: coa-history spell 681789: 0 events in 186 logs (an internal trigger effect); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (Illumination cuts Resplendence by 1 s)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_806159",
+      "label_suffix": "cd_cut_806159",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gate_spell": 681253,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        806159
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 2868,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 806159
+      },
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "expected": 24800,
+      "tolerance": 50,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known calls ReduceInvocations by |681789 Effect[0] BasePoints -1001 + 1| = 1000 ms; AscensionSunCleric.cpp:213-217 reduces the four Solar Invocation roots 800764, 500152, 503651 and 806159). Resplendence 806159 (RecoveryTime/CategoryRecoveryTime 30000 ms, shared category) is cast at the caster, Illumination 500143 1600 ms later, and the cooldown of 806159 is read 2600 ms after the Illumination cast started: the cooldown starts at the cast, elapsed 1600 + 2600 = 4200 ms, remaining 30000 - 4200 - 1000 = 24800 with 681253 learned, within 50 ms (a cut of 0.9 s reads 24900 and one of 1.1 s 24700, outside the band).Reference search 2026-11-22: coa-history spell 681789: 0 events in 186 logs (an internal trigger effect); nothing found that states the figure."
+    },
+    {
+      "spell": 681253,
+      "name": "Together In Conquest (control: Illumination without it, Resplendence)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_control_806159",
+      "label_suffix": "cd_cut_control_806159",
+      "quote": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
+      "gate_spell": 300321,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        806159
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 2868,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 806159
+      },
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "expected": 25800,
+      "tolerance": 50,
+      "observe_source": "681789 Effect[0] SPELL_EFFECT_TRIGGER_SPELL BasePoints -1001 ($/1000;681789s1 = 1 s). AscensionSunClericAbilities.cpp:238-239 (a non-triggered Illumination 500143 cast with 681253 known calls ReduceInvocations by |681789 Effect[0] BasePoints -1001 + 1| = 1000 ms; AscensionSunCleric.cpp:213-217 reduces the four Solar Invocation roots 800764, 500152, 503651 and 806159). Resplendence 806159 (RecoveryTime/CategoryRecoveryTime 30000 ms, shared category) is cast at the caster, Illumination 500143 1600 ms later, and the cooldown of 806159 is read 2600 ms after the Illumination cast started: the cooldown starts at the cast, elapsed 1600 + 2600 = 4200 ms, remaining 30000 - 4200 - 1000 = 24800 with Solar Conduit 300321 learned in place (control, an unrelated passive): 25800, 1000 ms more. Same design as the 300349 Hope cd_cut entries. Reference search 2026-11-22: coa-history spell 681789: 0 events in 186 logs (an internal trigger effect); nothing found that states the figure."
     }
   ],
   "player_observations": [],
