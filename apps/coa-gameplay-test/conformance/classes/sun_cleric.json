@@ -16363,6 +16363,27 @@
         804247
       ],
       "expected_ratio": 0.8
+    },
+    {
+      "spell": 807870,
+      "name": "Glare (stun radius)",
+      "kind": "radius_edge",
+      "label_suffix": "radius_edge_stun",
+      "quote": "and stuns enemies within $a1 yds",
+      "gate_spell": 807870,
+      "cast_spell": 807870,
+      "cast_at": "caster",
+      "hit_spell": 807870,
+      "hit_metric": "aura",
+      "power": 1360,
+      "radius": 8,
+      "dummy_reach": 1.275,
+      "primary_yd": 0.1,
+      "repeats": 1,
+      "settle_ms": 2500,
+      "leeway": true,
+      "reach_source": "the dummy entry 36 combat reach 1.275 yd (creature_model_info CombatReach of display 367, world DB; read 1.275 in the Templar 1161 aggro_redirect edge run 20261112-053731), added for a player-controlled caster against a non-player target (Spell.cpp:9434-9442); the caster's own size is not a term; the judge reads each reach again and refuses a layout that does not bracket the edge",
+      "observe_source": "807870 Effect[0] aura 12 SPELL_AURA_MOD_STUN, TargetA 22 SRC_CASTER, TargetB 15 TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 14 = 8 yd ($a1, the tooltip resolves 8; SpellEffectInfo::CalcRadius, SpellInfo.cpp:624-639, no SPELLMOD_RADIUS here). Effective radius (guide section 5, G-29): the area search measures from the caster, centre to centre, against 8 yd + the player caster's leeway 2.66 yd (Spell.cpp:1388-1394 for TargetB 15; Object.cpp:1787-1808, LEEWAY_BONUS_RANGE for a run speed above LEEWAY_MIN_MOVE_SPEED 4.97, ObjectDefines.h:50-51, a standing player in run mode at 7.0 yd/s) + the dummy's combat reach 1.275 yd (Spell.cpp:9434-9442) = 11.935 yd, computed by the kind's leeway option from the engine rule and the caster's run speed rate read in the run (ADR 1020), not from a measured edge; earlier diagnostic reads (stunned at about 11.4 yd, not at 12.5 yd, Sun Cleric b7a review I4) agree. The leeway is this core's inherited rule, not evidence about the original server. The primary dummy stands 0.1 yd from the caster and the inside and outside dummies 0.5 yd either side of 11.935 yd. Control arm: the cast is refused before 807870 is learned (gate = cast spell, learned between the arms), no stun on any dummy; treatment: one cast after the learn (120 s cooldown, so one repeat), the stun read per dummy: on the primary and the inside dummy, not on the outside one. Reference search 2026-11-22: coa-history spell 807870: 43 damage events (54 to 425, mean 295, live levels and spell power unknown), 42 aura applications in 5 logs, no amount that isolates a coefficient; bindmysoul snapshot (spell 805583, fetched 2026-07-22) reads \"20 + 27.41% SP Holy damage ... stuns enemies within 8 yds for 5 seconds\" (the radius, duration and coefficient agree, the flat 20 is an older state against Spell.dbc 807870 BasePoints 57 plus 17.7 per level above 58, G-9); nothing else found."
     }
   ],
   "player_observations": [],
