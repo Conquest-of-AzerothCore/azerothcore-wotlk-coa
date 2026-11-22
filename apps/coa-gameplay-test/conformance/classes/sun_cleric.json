@@ -22258,6 +22258,57 @@
       "after_at_most": 150
     },
     {
+      "spell": 301266,
+      "name": "Solar Concord (Solar Flare damage from Rapture in Sunset at +5000 spell power)",
+      "kind": "metric_delta",
+      "variant": "flare_damage_rapture_sp",
+      "label_suffix": "flare_damage_rapture_sp",
+      "quote": "and causes their damage dealt to launch a Solar Flare.",
+      "trigger_spell": 807372,
+      "target": "dummy",
+      "setup_casts": [
+        301266
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500511,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807175,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "observe_source": "Out-of-sample arm (mentor D-260): a spell power and phase combination never run before, its value predicted and committed before its first run. Setup as flare_damage_rapture: Solar Concord 301266 cast for real in the second phase only (setup_only_after), Rapture rank 4 807372 the trigger in both phases (AscensionSunClericEvents.cpp:132-133 procs Solar Flare 807175 on a damaging Rapture 806477 hit while the caster has Sunset 500511), Sunset 500511, 984954 (no critical strike) and 823764 (no resistance) set in both phases as precondition fixtures, the control phase reads 0. Prediction from the tooltip and the DBC (/srv/coa/server-data/dbc) at +5000 spell power (the player fixture, both phases): Solar Flare 807175 tooltip ${$m2+$ppl2+$SP*0.26}; Effect[1] BasePoints 50, RealPointsPerLevel 1.9, DieSides 1, BaseLevel 15, so the engine base is 50 + int32(45 x 1.9 = 85.5) = 85, plus the 1..1 roll: 136 (SpellEffectInfo::CalcValue, SpellInfo.cpp:496-518, integer before the roll); the spell power term is int32(5000 x 0.26) = 1300 (Unit::SpellDamageBonusDone, Unit.cpp:9967, level penalty 1 with MaxLevel 0); Sunset 500511 Effect[1] aura 79 MOD_DAMAGE_PERCENT_DONE MiscValue 4 (Fire), BasePoints 9 + 1 = +10%, and Solar Flare SchoolMask 6 (Holy and Fire) carries Fire, so (136 + 1300) x 1.10 = 1579.6, truncated to 1579 (Unit.cpp:9970 and :9982); the band 1579..1580 also admits the tooltip reading (136.5 + 1300) x 1.10 = 1580.15. Sunset Effect[0] aura 71 (+20% Fire spell critical chance) is held off by 984954. A refused cast voids the trial (void_on_cast_failure).",
+      "expected": 1579.6,
+      "after_at_least": 1579,
+      "after_at_most": 1580,
+      "player_spell_power": 5000,
+      "void_on_cast_failure": true
+    },
+    {
       "spell": 560547,
       "name": "Sun Disc (does not stack with Tree of Life, ally healing)",
       "kind": "hit_ratio",
