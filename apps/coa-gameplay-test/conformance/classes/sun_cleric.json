@@ -30283,122 +30283,6 @@
       "observe_source": "807523 Light of Absolution DurationIndex 1 = 10000 ms ($807523d), granted to the caster when a damaging Horusath Blast 572801 hit lands (AscensionSunClericEvents.cpp:125 and :298); the aura starts at the hit, 100 to 450 ms after the cast (dummy 5 yd away, missile speed 20 yd/s). One real Horusath Blast with 807343 learned: the aura is present when read 9500..9800 ms after the cast (game time) and gone when read 10700..11000 ms after it. The aura started at the hit, at most 450 ms after the cast, so a present read at 9500 or later excludes a duration of 9000 (10% under 10000) and a gone read at 11000 or earlier, with a hit at least 100 ms after the cast, excludes 11000 (10% over). A true duration of 10000 ends between 10100 and 10450 ms after the cast, inside neither window. Control: the without-passive phase of light_granted reads 0 for the same cast. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries 'grants you Light of Absolution for 10 seconds'; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value."
     },
     {
-      "spell": 92136,
-      "kind": "metric_delta",
-      "quote": "Fulfilling your Vow now unleashes Sunlight restoring ${$704911m1+$BH*0.15} health to up to $704911i allies within $704911a1 yds, prioritizing the lowest health allies.",
-      "trigger_spell": 500143,
-      "gate_spell": 92136,
-      "target": "caster",
-      "setup_casts": [
-        803489,
-        804584
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 1600,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ],
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "caster_health_pct": 50,
-      "metric": "spell_heal_count",
-      "fields": {
-        "spell": 704911,
-        "target": "ally"
-      },
-      "before_expected": 0,
-      "wait_ms": 1500,
-      "expire_ms": 500,
-      "name": "Sunlight (ally at 42.5 yd healed, ally at 43.5 yd not: 40 yd plus both combat reaches)",
-      "variant": "radius_edge",
-      "label_suffix": "radius_edge",
-      "expected": 1,
-      "tolerance": 0,
-      "ally_arm": {
-        "allies": 2,
-        "ally_health": [
-          5000,
-          10000
-        ],
-        "arms": [
-          {
-            "actors": [
-              "caster"
-            ],
-            "metric": "spell_heal_count",
-            "fields": {
-              "spell": 704911,
-              "target": "ally2"
-            },
-            "before_expected": 0,
-            "expected": 0,
-            "tolerance": 0,
-            "source": "ally2 stands 43.5 yd from the caster, 0.5 yd beyond the engine edge of 43.0 yd (40 + 1.5 + 1.5); it is at 50% health, among the lowest, so it would be healed if the edge reached it"
-          },
-          {
-            "actors": [
-              "ally"
-            ],
-            "metric": "distance_2d",
-            "fields": {
-              "target": "caster"
-            },
-            "before_expected": 42.5,
-            "expected": 42.5,
-            "tolerance": 0.25,
-            "source": "ally_offsets moves ally 42.5 yd along x from the shared spawn, dz 0; the caster stays"
-          },
-          {
-            "actors": [
-              "ally2"
-            ],
-            "metric": "distance_2d",
-            "fields": {
-              "target": "caster"
-            },
-            "before_expected": 43.5,
-            "expected": 43.5,
-            "tolerance": 0.25,
-            "source": "ally_offsets moves ally2 43.5 yd along x from the shared spawn, dz 0; the caster stays"
-          },
-          {
-            "actors": [
-              "caster"
-            ],
-            "metric": "spell_heal_count",
-            "fields": {
-              "spell": 704911,
-              "target": "caster"
-            },
-            "before_expected": 0,
-            "expected": 1,
-            "tolerance": 0,
-            "source": "the heal fired: the caster at 50% health is among the lowest and heals once (positive control of the arm of ally2)"
-          }
-        ]
-      },
-      "ally_offsets": {
-        "ally": 42.5,
-        "ally2": 43.5
-      },
-      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; Fulfill (AscensionSunCleric.cpp:298-300) heals the allies of Allies(player, player, Radius(704911), MaxAffectedTargets): Nearby(center, range) uses AnyUnitInObjectRangeCheck -> IsWithinDistInMap(u, range) (GridNotifiers.h:1065-1067), whose defaults add both object sizes (Object.h:550, _IsWithinDist adds GetObjectSize() of each unit, = combat reach, Object.cpp:2898-2901). 704911 EffectRadiusIndex 23 = 40 yd (SpellRadius 23 RadiusMin = RadiusMax = 40; the blocker table's 9/11 yd does not match the DBC). Engine edge between two players: 40 + 1.5 + 1.5 = 43.0 yd (known engine behaviour, guide section 5 effective radius; there is no player leeway here, the radius comes from Radius(), not from a SRC_AREA target). Run 1 (pair-less exploratory run 20261122-154829) with allies at 39 and 41 yd healed the 41 yd ally: the lead that showed the reach term; the arms are now 42.5 and 43.5 yd, 0.5 yd on each side. Same casts as the sunlight_heal entry (Dawn 804584 with 20 Solar Power 500149 set as a precondition fixture, Vow of Radiance 803489, Illumination 500143 on the caster at 50% health, 92136 learned between the phases). Expected: 1 Sunlight heal on the ally at 42.5 yd, 0 on the ally at 43.5 yd, 1 on the caster; the cap of five is not reached. The combat reach terms (1.5 each, Player.h:1110 and ObjectDefines.h:45) are cited from the code, not read, and no stock area spell control is run: the ally_arm option rejects the combat_reach metric (it has no METRIC_EVIDENCE row), so the edge rests on an unread term and the radius claim stays open until a read of both reaches exists (design note to the controller). The arms measure distance_2d on flat ground; IsWithinDistInMap is 3D, immaterial for a 10% shift. Control: before the learn, no Sunlight heal. Reference search 2026-11-22: coa-history spell 92136: a passive, no events; nothing beyond the tooltip and the DBC."
-    },
-    {
       "spell": 300315,
       "name": "Judgement of the Valkyrie (Judgement Day cooldown gate)",
       "kind": "cost_gate",
@@ -31773,6 +31657,155 @@
       "observe_source": "807749 Effect[1] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS BasePoints 9 (+1 = 10, $s2): the Vow adds 10% to the auto attack damage the caster deals (AscensionSunClericContracts.cpp:354-355, AddPct(damage, Amount(807749, 1))). Behaviour: each phase auto attacks the dummy for 5 reference swing intervals with both Valkyr weapons (10 landed hits, as the swings entry reads), the first phase without the Vow (control), the second after a real cast of the Vow (gate_cast, no set_aura of the Vow), and melee_damage_total is cumulative over the scenario, so the after reading over the before reading is 1 + 1.10 = 2.10 for a bonus of 10%; the band is 2 points on the +10% (the larger of 5% of 10 and 2 points, G-19): 2.08 to 2.12. The attack power fixture 100000 makes the attack power part of a hit (about 20000 per main-hand swing) dominate the weapon roll of 73 to 103, so the per-hit spread is below 0.1% and the 2% band is excluded with a residual failure probability far below 0.1% per pair; force_crit melee (ADR 0692) sets the forced melee crit rating on the caster, so every hit of both phases is a critical strike alike, a precondition fixture that cancels in the ratio. The confound it removes: the contract remaps 807749 Effect[2] to SPELL_AURA_MOD_CRIT_PCT (+5%, AscensionSunClericContracts.cpp:119-124), which would raise the crit rate of the after phase alone; with every hit forced to crit in both phases that term cannot move the ratio, and the +10% (AddPct on all caster melee damage, :362-364) is isolated. Misses would change the hit count between phases: a miss only alerts, never passes, because a different count moves the ratio outside the band (this entry does not read the hit count; the swings entry reads it in its own scenario). Reference search 2026-11-22: coa-history spell 807749 (138 casts in 11 logs), 506823 and 506824 (1391 and 1388 Vow auto attack events); bindmysoul text identical to the streamed one; nothing found beyond the tooltip and the DBC for the +10% value.",
       "expected": 210000,
       "force_crit": "melee"
+    },
+    {
+      "spell": 92136,
+      "kind": "metric_delta",
+      "quote": "Fulfilling your Vow now unleashes Sunlight restoring ${$704911m1+$BH*0.15} health to up to $704911i allies within $704911a1 yds, prioritizing the lowest health allies.",
+      "trigger_spell": 500143,
+      "gate_spell": 92136,
+      "target": "caster",
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "caster_health_pct": 50,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 704911,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sunlight (ally at 42.5 yd healed, ally at 43.5 yd not: 40 yd plus both combat reaches)",
+      "variant": "radius_edge",
+      "label_suffix": "radius_edge",
+      "expected": 1,
+      "tolerance": 0,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 704911,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally2 stands 43.5 yd from the caster, 0.5 yd beyond the computed edge = 704911 EffectRadiusIndex 23 = SpellRadius 23 RadiusMax 40 yd (server DBC set) plus the caster's and the ally's object sizes, both added by IsWithinDistInMap (Object.h:550 defaults, _IsWithinDist Object.cpp:1257-1264; GetObjectSize = UNIT_FIELD_COMBATREACH, Object.cpp:2898-2901), 1.5 each as the class file player (Player.h:1110), read by the three precondition arms: 43.0 yd; it is at 50% health, among the lowest, so it would be healed if the edge reached it; a radius 10% larger (44 yd, edge 47.0) would heal it"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 42.5,
+            "expected": 42.5,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally 42.5 yd along x from the shared spawn, dz 0; the caster stays"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 43.5,
+            "expected": 43.5,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally2 43.5 yd along x from the shared spawn, dz 0; the caster stays"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 704911,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the heal fired: the caster at 50% health is among the lowest and heals once (positive control of the arm of ally2)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 1.5,
+            "expected": 1.5,
+            "tolerance": 0.01,
+            "precondition": true,
+            "source": "the caster's combat reach, the object size term of the edge (GetObjectSize = UNIT_FIELD_COMBATREACH, Object.cpp:2898-2901): 1.5 for the class file player (Player.h:1110); a read off 1.5 voids the trial (mentor D-169), it is not judged"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 1.5,
+            "expected": 1.5,
+            "tolerance": 0.01,
+            "precondition": true,
+            "source": "the ally's combat reach, the object size term of the edge (GetObjectSize = UNIT_FIELD_COMBATREACH, Object.cpp:2898-2901): 1.5 for the class file player (Player.h:1110); a read off 1.5 voids the trial (mentor D-169), it is not judged"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 1.5,
+            "expected": 1.5,
+            "tolerance": 0.01,
+            "precondition": true,
+            "source": "the ally2's combat reach, the object size term of the edge (GetObjectSize = UNIT_FIELD_COMBATREACH, Object.cpp:2898-2901): 1.5 for the class file player (Player.h:1110); a read off 1.5 voids the trial (mentor D-169), it is not judged"
+          }
+        ]
+      },
+      "ally_offsets": {
+        "ally": 42.5,
+        "ally2": 43.5
+      },
+      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; Fulfill (AscensionSunCleric.cpp:298-300) heals the allies of Allies(player, player, Radius(704911), MaxAffectedTargets): Nearby(center, range) uses AnyUnitInObjectRangeCheck -> IsWithinDistInMap(u, range) (GridNotifiers.h:1065-1067), whose defaults add both object sizes (Object.h:550, _IsWithinDist adds GetObjectSize() of each unit, = combat reach, Object.cpp:2898-2901). 704911 EffectRadiusIndex 23 = 40 yd (SpellRadius 23 RadiusMin = RadiusMax = 40; the blocker table's 9/11 yd does not match the DBC). Engine edge between two players: 40 + 1.5 + 1.5 = 43.0 yd (known engine behaviour, guide section 5 effective radius; there is no player leeway here, the radius comes from Radius(), not from a SRC_AREA target). Run 1 (pair-less exploratory run 20261122-154829) with allies at 39 and 41 yd healed the 41 yd ally: the lead that showed the reach term; the arms are now 42.5 and 43.5 yd, 0.5 yd on each side of the computed edge, so a radius 10% smaller (36 yd, edge 39.0) or larger (44 yd, edge 47.0) fails one arm. Same casts as the sunlight_heal entry (Dawn 804584 with 20 Solar Power 500149 set as a precondition fixture, Vow of Radiance 803489, Illumination 500143 on the caster at 50% health, 92136 learned between the phases). Expected: 1 Sunlight heal on the ally at 42.5 yd, 0 on the ally at 43.5 yd, 1 on the caster; the cap of five is not reached. The combat reach terms (1.5 each, Player.h:1110 and ObjectDefines.h:45) are read on the caster, the ally and ally2 by three ally_arm precondition arms (combat_reach, 1.5 within 0.01, before and after; mentor D-169): a read off 1.5 voids the trial (unmeasured), it never judges the radius; the edge itself is computed from the DBC radius and the cited rule, never from a measured distance. The arms measure distance_2d on flat ground; IsWithinDistInMap is 3D, immaterial for a 10% shift. Control: before the learn, no Sunlight heal. Reference search 2026-11-22: coa-history spell 92136: a passive, no events; nothing beyond the tooltip and the DBC."
     }
   ],
   "player_observations": [],
