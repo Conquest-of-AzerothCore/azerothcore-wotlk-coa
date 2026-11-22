@@ -569,6 +569,20 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertIs(run.validate(scenario), scenario)
 
+    def test_ground_effect_radius_and_size_are_caster_reads_of_a_spell(self):
+        for metric in ('dynamic_object_radius', 'dynamic_object_size'):
+            valid = copy.deepcopy(self.scenario)
+            valid['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': metric, 'spell': 502329,
+                                   'min': 0, 'max': 100})
+            with self.subTest(metric=metric):
+                self.assertIs(run.validate(valid), valid)
+            for step in ({'action': 'assert', 'actor': 'target', 'metric': metric, 'spell': 502329, 'equals': 1},
+                         {'action': 'assert', 'actor': 'caster', 'metric': metric, 'equals': 1}):
+                invalid = copy.deepcopy(self.scenario)
+                invalid['steps'].append(step)
+                with self.subTest(metric=metric, step=step), self.assertRaises(ValueError):
+                    run.validate(invalid)
+
     def test_hour_is_an_optional_realm_local_hour(self):
         for hour in (0, 12, 23):
             scenario = copy.deepcopy(self.scenario)

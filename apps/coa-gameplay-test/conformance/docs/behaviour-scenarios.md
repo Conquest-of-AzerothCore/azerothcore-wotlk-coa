@@ -798,6 +798,10 @@ must read 1, the proof that the cast route lands at all (ADR 0134; the shape of 
 the immune window, not before it, because a landed creature fear raises the player's diminishing-returns level and
 would shorten later fears for a reason unrelated to the immunity. A named word without a fixture stays an unproven
 claim of the ledger entry. Judged exactly (`compare.behaviour_immunity_verdict`).
+An optional `cast_target: "dummy"` (ADR 1027, with `aura` and the caster as subject) casts `spell` at the dummy, an
+enemy target, for a spell that puts its immunity `aura` on the caster (Valkyr's Calling 520024 -> 520025); the
+carrier is read with no extra settle, and an immune window (the cast read plus the dummy's casts) longer than the
+carrier's DBC duration is refused as not modelled.
 `target: "ally"` (ADR 0204) makes the grouped ally the subject: the ally player is added and grouped, the fixtures are
 set on and cast at the ally, `spell` is cast at the ally and every reading is the ally's (Testament of Will 801455,
 TARGET_UNIT_TARGET_ALLY: a slow 35317 and a root 47021).
@@ -1010,7 +1014,9 @@ the same cast refused without the group. Judged exactly (`compare.behaviour_cast
 "Reduces the Energy cost of X by 5" and "Reduces the cooldown of X by 5 sec" state a reduction that decides whether
 a cast goes through. `cost_gate_scenario` attempts `gated_spell` at the reduced level: `resource: "power"` sets the
 caster's power to the reduced cost (rounded up; regeneration is off), `resource: "cooldown"` attempts it
-`reduction` less than its cooldown plus `margin_ms` (500) after a priming cast. Arms, each with its own
+`reduction` less than its cooldown plus `margin_ms` (500) after a priming cast. An optional `caster_health_pct`
+(ADR 1027, 1-99, with `after_casts`) sets the caster to that percent of the health fixture before every arm's after
+casts, so a heal among them is effective (a proc on an effective heal, Hope 300349). Arms, each with its own
 `cast_failure` reading `<spell> cost_gate <gated>[ <label_suffix>] <arm>`. An optional `target_entry` (ADR 0737, dummy
 target only) replaces the dummy's creature entry, for a gated spell that only some creature types accept (Brand of
 the Unworthy 501380 on Kobold Vermin 6, a Humanoid); the steps and the judge are unchanged:
@@ -1381,7 +1387,9 @@ the caster) casts `strike_spell` at the caster `strikes` times per trial
 (an arm may set its own `strikes`), `trials` trials per arm. `arms` lists named arms, the first the control; each
 sets its `auras` on the caster, makes its `casts` (`[spell, target]`) before the strikes and its `after_casts`
 after them, every trial. `caster_health_pct` with `caster_max_health` sets the caster's health, and maximum, at
-the arm start and before every trial. After every trial the scenario reads the strike's `spell_damage_total` and
+the arm start and before every trial. An optional `caster_health_from_pct` (ADR 1027, another percent) opens each arm
+at that percent instead, waits 1000 ms, sets `caster_health_pct`, waits 1000 ms again and turns health regeneration
+off, so a health state kept with hysteresis is entered from above or below. After every trial the scenario reads the strike's `spell_damage_total` and
 `spell_damage_count` (caster `striker`, target the caster), its `spell_absorb_total` and its `spell_log_count`:
 a trial with fewer logs than strikes did not land and is left out; each arm needs half its trials landed.
 

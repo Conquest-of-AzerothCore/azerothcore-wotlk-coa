@@ -430,6 +430,14 @@ handler must accept off-hand swings only. Absent or `0`, the main hand stays the
 Off The Dusk 681329 (10%) and 681488 (20%), each proc counted by its single Replenishment 1257670 cast (claims 214.0,
 228.0).
 
+### Both-hand trials of an attack proc (ADR 1027)
+
+`trial_hand: "both"` on an `attack` proc without `most_procs_per_trigger` counts the trials and attempts of both hands
+together (`melee_damage_count` and `melee_attack_count` with no hand, the harness's sum of both) and spaces the plan
+by the combined swing rate, `main * off // (main + off)`, the off hand read from the entry's weapon set (required). It
+is the trial for a handler that rolls on every auto attack, either hand: Sun Cleric Sunsworn 802935 with two
+2529 swords.
+
 ### Avoided-swing trials (ADR 0900)
 
 `{"action": "avoided", "striker_entry": <entry>, "swing_ms": <ms>, "dodge": <pct>, "parry": <pct>, "strikers": <n>}`
