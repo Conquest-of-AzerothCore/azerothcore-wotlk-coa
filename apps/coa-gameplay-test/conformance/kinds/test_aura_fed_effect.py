@@ -1,3 +1,4 @@
+import random
 import unittest
 
 from behaviours import behaviour_scenario
@@ -16,7 +17,9 @@ HEAL = {'spell': 704920, 'name': 'Cultivate Divinity (Illumination)', 'kind': 'a
         'label_suffix': 'fed_heal', 'quote': 'to increase the healing of your next Illumination',
         'feed_spell': 500141, 'aura': 301293, 'effect_spell': 500143, 'every_ms': 3500, 'residual_target': 0.001,
         'feed_power': 1363, 'effect_power': 1363, 'expected': 1.2, 'trials': 4}
+SIZED_HEAL = {**HEAL, 'trials': 12, 'fixture': {'spell_power': 20000}}
 CONTROL_HIT = 8800.0
+SEED = 704920
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
@@ -45,15 +48,16 @@ class AuraFedEffectTests(unittest.TestCase):
                 values.update({trial['aura']: aura, trial['hits']: count, trial['damage']: total})
         return values
 
-    def heal_values(self, factor, again=1.0, fed_aura=1.0):
-        _, expectation = self.generated(HEAL)
+    def heal_values(self, factor, again=1.0, fed_aura=1.0, entry=HEAL, spread=0.0):
+        _, expectation = self.generated(entry)
+        draw = random.Random(SEED)
         values, count, total = {}, 0.0, 0.0
         for arm, hit, aura in (('control', CONTROL_HIT, 0.0), ('treatment', CONTROL_HIT * factor, fed_aura)):
             for trial in expectation.model['reads'][arm]:
-                count, total = count + 1, total + hit
+                count, total = count + 1, total + hit * (1 + draw.gauss(0, spread))
                 values.update({trial['aura']: aura, trial['hits']: count, trial['heal']: total})
                 if arm == 'treatment':
-                    count, total = count + 1, total + CONTROL_HIT * again
+                    count, total = count + 1, total + CONTROL_HIT * again * (1 + draw.gauss(0, spread))
                     values.update({trial['next_hits']: count, trial['next_heal']: total})
         return values
 
@@ -62,7 +66,8 @@ class AuraFedEffectTests(unittest.TestCase):
         run.validate(scenario, run.SIMULATED_CLOCK)
         steps = scenario['steps']
         feeds = [step for step in steps if step['action'] == 'cast_until_aura']
-        self.assertEqual([(step['spell'], step['aura'], step['target']) for step in feeds], [(500141, 301293, 'ally')] * 4)
+        self.assertEqual([(step['spell'], step['aura'], step['target']) for step in feeds],
+                         [(500141, 301293, 'ally')] * 4)
         self.assertFalse(any(step['action'] == 'set_aura' and step['spell'] == 301293 for step in steps))
         casts = [step for step in steps if step['action'] == 'cast' and step['spell'] == 500143]
         self.assertEqual(len(casts), 4 + 4 * 2)
@@ -74,6 +79,23 @@ class AuraFedEffectTests(unittest.TestCase):
         self.assertEqual(self.judged(HEAL, self.heal_values(1.0)), 'alert')
         self.assertEqual(self.judged(HEAL, self.heal_values(1.2, again=1.2)), 'alert')
         self.assertEqual(self.judged(HEAL, self.heal_values(1.2, fed_aura=0.0)), 'unmeasured')
+
+    def test_the_sized_heal_interval_must_lie_inside_the_figure_band(self):
+        for factor, status in ((1.2, 'ok'), (1.1, 'alert'), (1.17, 'alert'), (1.23, 'alert'), (1.0, 'alert')):
+            with self.subTest(factor=factor):
+                self.assertEqual(self.judged(SIZED_HEAL, self.heal_values(factor, entry=SIZED_HEAL, spread=0.0025)),
+                                 status)
+
+    def test_a_heal_interval_too_wide_for_the_band_alerts(self):
+        self.assertEqual(self.judged(SIZED_HEAL, self.heal_values(1.2, entry=SIZED_HEAL, spread=0.03)), 'alert')
+
+    def test_the_heal_figure_comes_from_the_aura_and_multiplies_the_whole_heal(self):
+        scenario, expectation = self.generated(SIZED_HEAL)
+        self.assertAlmostEqual(expectation.model['figure'], 0.2)
+        self.assertIn('spell power part included (Unit::SpellHealingBonusDone, Unit.cpp:10932)', scenario['contract'])
+        self.assertIn('1.18 to 1.22', scenario['contract'])
+        with self.assertRaises(ValueError):
+            self.generated({**SIZED_HEAL, 'expected': 1.25})
 
     def test_the_feed_is_a_real_cast_step_sized_from_the_dbc(self):
         scenario, _ = self.generated(INSTANT)

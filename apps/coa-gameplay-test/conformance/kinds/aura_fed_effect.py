@@ -2,8 +2,9 @@ from dataclasses import dataclass, replace
 import math
 from pathlib import Path
 
-from behaviours import (BEHAVIOUR_METRIC_DELTA, ally_group_steps, ally_players, behaviour_entry, dummy_fixture, dummy_id,
-                        prose_rule, waited_ms)
+from behaviours import (BEHAVIOUR_METRIC_DELTA, ally_group_steps, ally_players, behaviour_entry, dummy_fixture,
+                        dummy_id, prose_rule, waited_ms)
+from bonus import bonus_of, per_event_sample
 from compare import FLOAT_EPSILON, Run, Verdict, missing_measurement
 from hits import MAX_ACCELERATED_SCENARIO_MS, MAX_SCENARIO_MS, timed
 from procs import HEAL_POOL
@@ -18,6 +19,10 @@ ARMS = ('control', 'treatment')
 EXTRA_INITIAL_PERIOD = 0x200
 CASTING_READ_MS = 300
 PAIR_RUNS = 2
+ADD_PCT_MODIFIER = 108
+SPELLMOD_DAMAGE = 0
+FIGURE_BAND = 0.1
+HEAL_MULTIPLIED_AT = 'Unit::SpellHealingBonusDone, Unit.cpp:10932'
 
 
 @dataclass(frozen=True)
@@ -85,8 +90,22 @@ def feed_casts(records: Records, spec: AuraFedSpec) -> tuple[int, float]:
     return math.ceil(math.log(per_feed) / math.log(miss)), miss
 
 
+def heal_figure(records: Records, spec: AuraFedSpec) -> float:
+    aura = (records.field('Spell', spec.aura, 'EffectApplyAuraName[0]'),
+            records.field('Spell', spec.aura, 'EffectMiscValue[0]'))
+    if aura != (ADD_PCT_MODIFIER, SPELLMOD_DAMAGE):
+        raise ValueError(f'{spec.spell} {KIND} heal needs {spec.aura} Effect[0] aura {ADD_PCT_MODIFIER} on '
+                         f'SPELLMOD_DAMAGE, read {aura}')
+    figure = records.single_value(spec.aura, 0) / 100
+    if abs(spec.expected - (1 + figure)) > FLOAT_EPSILON:
+        raise ValueError(f'{spec.spell} {KIND} heal expects {spec.expected:g}, but {spec.aura} Effect[0] gives '
+                         f'{1 + figure:g}')
+    return figure
+
+
 def aura_fed_scenario(class_file: dict, spec: AuraFedSpec) -> tuple[dict, list[Expectation]]:
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    figure = heal_figure(records, spec) if spec.family == 'heal' else None
     entry = behaviour_entry(records, spec.spell, spec.name, KIND, spec.quote, spec.expected)
     max_casts, miss = feed_casts(records, spec)
     channel_ms = (facts_of(records, spec.feed_spell).cast_time_ms if spec.family == 'heal'
@@ -178,8 +197,12 @@ def aura_fed_scenario(class_file: dict, spec: AuraFedSpec) -> tuple[dict, list[E
     expected_text = (f'casting reads 1 in the control and 0 in the treatment, and each judged {spec.effect_spell} '
                      f'cast must go off (spell_go_count +1 per trial)' if spec.variant == 'instant' else
                      f'the mean non-critical {spec.effect_spell} heal on the ally of the treatment is '
-                     f'{spec.expected:g} times the control mean, and a second {spec.effect_spell} cast right after it '
-                     f'is back at the control mean (the aura is consumed once), within the DBC dice spread'
+                     f'{spec.expected:g} times the control mean: {spec.aura} Effect[0] adds {figure:.4g} on '
+                     f'SPELLMOD_DAMAGE, which multiplies the whole heal, spell power part included '
+                     f'({HEAL_MULTIPLIED_AT}); the 99% interval of the ratio must lie inside '
+                     f'{1 + figure * (1 - FIGURE_BAND):.4g} to {1 + figure * (1 + FIGURE_BAND):.4g} (the figure '
+                     f'+-{FIGURE_BAND:.0%}, G-19); a second {spec.effect_spell} cast right after it is back at the '
+                     f'control mean within the DBC dice spread (the aura is consumed once)'
                      if heal else
                      f'the mean non-critical {spec.effect_spell} hit of the treatment is {spec.expected:g} times the '
                      f'control mean within the DBC dice spread')
@@ -189,7 +212,8 @@ def aura_fed_scenario(class_file: dict, spec: AuraFedSpec) -> tuple[dict, list[E
         'contract': (f'{spec.spell} is learned. Control trials cancel {spec.aura} and cast {spec.effect_spell}; '
                      f'treatment trials cast {spec.feed_spell} every {spec.every_ms} ms (cast_until_aura, at most '
                      f'{max_casts} casts: miss chance per cast {miss:.4f} from ProcChance and '
-                     f'{feed_ticks(records, spec.feed_spell, spec.family)} ticks, residual target {spec.residual_target:g} per '
+                     f'{feed_ticks(records, spec.feed_spell, spec.family)} ticks, residual target '
+                     f'{spec.residual_target:g} per '
                      f'pair) until {spec.aura} is on the caster, then cast {spec.effect_spell}; the aura is never '
                      f'set by the harness. Each trial reads {spec.aura} right before the judged cast; a trial whose '
                      f'read disagrees with its arm makes the run unmeasured. {expected_text}.'),
@@ -202,6 +226,8 @@ def aura_fed_scenario(class_file: dict, spec: AuraFedSpec) -> tuple[dict, list[E
              'reads': reads}
     if spec.family in ('damage', 'heal'):
         model['dice'] = float(records.field('Spell', spec.effect_spell, 'EffectDieSides[0]'))
+    if heal:
+        model['figure'] = figure
     expectation = Expectation(mark(spec, '').rstrip(), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.effect_spell, None,
                               f'{spec.expected:g}', prose_rule(entry.quote, spec.spell), model)
     return (timed(scenario, waited_ms(steps) + windows, MAX_ACCELERATED_SCENARIO_MS if heal else MAX_SCENARIO_MS),
@@ -254,26 +280,37 @@ def aura_fed_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     if not hits[ARMS[0]] or not hits[ARMS[1]]:
         return replace(base, status='unmeasured', explanation=f'no usable non-critical hit: {hits}')
     means = [sum(hits[arm]) / len(hits[arm]) for arm in ARMS]
+    if heal:
+        return heal_verdict(base, model, hits, next_hits, means)
     ratio = means[1] / means[0]
     spread = model['expected'] * model['dice'] / means[0]
     low, high = model['expected'] - spread, model['expected'] + spread
     status = 'ok' if low - FLOAT_EPSILON <= ratio <= high + FLOAT_EPSILON else 'alert'
-    if heal:
-        if not next_hits:
-            return replace(base, status='unmeasured', explanation=f'no usable non-critical second heal: {next_hits}')
-        again = sum(next_hits) / len(next_hits) / means[0]
-        consumed_spread = model['dice'] / means[0]
-        if abs(again - 1) > consumed_spread + FLOAT_EPSILON:
-            status = 'alert'
-        return replace(base, status=status, measured=ratio, expected=model['expected'], low=low, high=high,
-                       explanation=f'mean heal {means[1]:g} fed against {means[0]:g} control ({len(hits[ARMS[1]])} '
-                                   f'and {len(hits[ARMS[0]])} non-critical heals), band from the {model["dice"]:g} die '
-                                   f'sides; the second cast after it reads {again:.3f} times the control mean '
-                                   f'({len(next_hits)} heals), within {1 - consumed_spread:.3f} to '
-                                   f'{1 + consumed_spread:.3f} when the aura is consumed once')
     return replace(base, status=status, measured=ratio, expected=model['expected'], low=low, high=high,
                    explanation=f'mean hit {means[1]:g} fed against {means[0]:g} control ({len(hits[ARMS[1]])} and '
                                f'{len(hits[ARMS[0]])} non-critical hits), band from the {model["dice"]:g} die sides')
+
+
+def heal_verdict(base: Verdict, model: dict, hits: dict, next_hits: list[float], means: list[float]) -> Verdict:
+    if not next_hits:
+        return replace(base, status='unmeasured', explanation=f'no usable non-critical second heal: {next_hits}')
+    if min(len(hits[arm]) for arm in ARMS) < 2:
+        return replace(base, status='unmeasured', explanation=f'an arm has fewer than two non-critical heals: {hits}')
+    figure = 100 * model['figure']
+    low, high = figure * (1 - FIGURE_BAND), figure * (1 + FIGURE_BAND)
+    bonus = bonus_of(*(per_event_sample(hits[arm], [1.0] * len(hits[arm])) for arm in reversed(ARMS)), figure)
+    inside = math.isfinite(bonus.half) and low - FLOAT_EPSILON <= bonus.low and bonus.high <= high + FLOAT_EPSILON
+    again = sum(next_hits) / len(next_hits) / means[0]
+    consumed_spread = model['dice'] / means[0]
+    consumed = abs(again - 1) <= consumed_spread + FLOAT_EPSILON
+    return replace(base, status='ok' if inside and consumed else 'alert', measured=1 + bonus.measured / 100,
+                   expected=model['expected'], low=1 + low / 100, high=1 + high / 100,
+                   explanation=f'mean heal {means[1]:g} fed against {means[0]:g} control ({len(hits[ARMS[1]])} and '
+                               f'{len(hits[ARMS[0]])} non-critical heals): bonus {bonus.measured:+.4g}%, 99% interval '
+                               f'{bonus.low:+.4g}% to {bonus.high:+.4g}%, which must lie inside {low:+.4g}% to '
+                               f'{high:+.4g}% (the DBC figure {figure:g}% +-{FIGURE_BAND:.0%}); the second cast after '
+                               f'it reads {again:.4f} times the control mean ({len(next_hits)} heals), within '
+                               f'{1 - consumed_spread:.4f} to {1 + consumed_spread:.4f} when the aura is consumed once')
 
 
 def scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
