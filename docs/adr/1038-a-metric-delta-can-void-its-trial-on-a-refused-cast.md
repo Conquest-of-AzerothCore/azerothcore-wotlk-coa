@@ -25,3 +25,13 @@ An opt-in `void_on_cast_failure` in `metric_delta_options`: its option verdict h
 - Absent by default: no entry of an existing class writes it; the finished classes regenerate byte-identical.
 - Seeded test: a refused setup cast gives `unmeasured`, a clean run is judged, the mutant without the flag judges the
   refused run.
+
+## Addendum 2026-11-22: power refill between setup casts (mentor D-206)
+
+The first counted pair of Learning Light 300360 showed a second cause: Illumination 500143 costs 30% of the mana pool
+(Spell.dbc ManaCostPercentage 30) and the harness sets the pool once before the setup casts, so the fourth Illumination
+was refused with NO_POWER (85); `void_on_cast_failure` voided the trial instead of alerting. An opt-in
+`refill_power_after_setup_casts` (`{"power": type}`) sets the power to `cast_power` after every setup cast, with the
+existing `set_power` step, through the `setup_cast_steps` point. The builder refuses it for a power metric or a quote
+about mana, cost or a resource (a refill would feed the measured thing), and the contract says it is used. Absent by
+default; the finished classes regenerate byte-identical.

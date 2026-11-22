@@ -2236,6 +2236,8 @@ Options with a module:
   strike (ADR 0735)
 - [`expiry_below_after`](metric_delta_options/expiry_below_after.md): the expired reading judged below the after
   reading and at or above its floor, for a decay without a stated rate (ADR 0738)
+- [`refill_power_after_setup_casts`](metric_delta_options/refill_power_after_setup_casts.md): the caster's power set to
+  `cast_power` after every setup cast, refused for a claim about a resource (ADR 1038)
 - [`void_on_cast_failure`](metric_delta_options/void_on_cast_failure.md): the verdict `unmeasured` when a setup, step
   or trigger cast was refused (ADR 1038)
 - [`displacement`](metric_delta_options/displacement.md): the judged readings replaced by the caster's 2D
