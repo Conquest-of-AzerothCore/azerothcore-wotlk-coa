@@ -145,3 +145,108 @@ class CooldownResetRatePooledTests(unittest.TestCase):
         self.assertNotIn('yd from the caster', plain['contract'])
         with self.assertRaises(ValueError):
             behaviour_scenario(load_fixture_class_file(23), {**ENTRY, 'dummy_distance': 0})
+
+
+BASE_MANA = {'power': 0, 'value': 1500, 'source': 'seeded base mana'}
+RESIDUAL = {'residual_target': 0.001, 'min_detectable': 5}
+
+
+def with_base_mana():
+    return {**load_fixture_class_file(23), 'base_mana': BASE_MANA}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class CooldownResetRateResidualTests(unittest.TestCase):
+    def judged(self, resets: float, entry: dict):
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
+        reads = expectation.model['reads']
+        values = {reads['control hits']: 200.0, reads['control resets']: 0.0,
+                  reads['treatment hits']: 3500.0, reads['treatment resets']: resets}
+        return expectation, judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+    def test_the_residual_judges_at_its_confidence_and_states_its_probabilities(self):
+        expectation, verdict = self.judged(165.0, {**ENTRY, **RESIDUAL})
+        self.assertEqual(expectation.model['residual']['confidence'], 0.9995)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('Wilson 0.9995 interval', verdict.explanation)
+        self.assertIn('residual_target 0.001 per pair', verdict.explanation)
+
+    def test_a_rate_five_points_off_alerts_under_the_residual(self):
+        self.assertEqual(self.judged(330.0, {**ENTRY, **RESIDUAL})[1].status, 'alert')
+
+    def test_without_the_residual_fields_the_model_and_text_are_unchanged(self):
+        expectation, verdict = self.judged(165.0, ENTRY)
+        self.assertNotIn('residual', expectation.model)
+        self.assertIn('Wilson 99% interval', verdict.explanation)
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), ENTRY)
+        self.assertNotIn('residual_target', scenario['contract'])
+
+    def test_a_min_detectable_inside_the_band_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**ENTRY, 'residual_target': 0.001, 'min_detectable': 1})
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class CooldownResetRateFixtureResetTests(unittest.TestCase):
+    SELF_RESET = {**ENTRY, 'reset_spell': 500237, 'casts': 3200, 'control_casts': 10, 'reset_between_attempts': True,
+                  'trial_casts': True}
+    PERCENT_COST = {**ENTRY, 'trigger_spell': PERCENT_COST_TRIGGER, 'reset_spell': PERCENT_COST_TRIGGER,
+                    'casts': 1600, 'control_casts': 10, 'parts': 2, 'reset_between_attempts': True,
+                    'base_mana_per_attempt': True}
+
+    def judged(self, control_packets: float, treatment_packets: float):
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), self.SELF_RESET)
+        reads = expectation.model['reads']
+        values = {reads['control hits']: 10.0, reads['control resets']: control_packets,
+                  reads['treatment hits']: 3210.0, reads['treatment resets']: control_packets + treatment_packets}
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+    def test_each_cast_is_preceded_by_a_cooldown_reset_and_casts_are_the_trials(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), self.SELF_RESET)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        self.assertEqual(len(casts), 3210)
+        self.assertTrue(all(steps[index - 1] == {'action': 'reset_cooldown', 'actor': 'caster', 'spell': 500237}
+                            for index in casts))
+        trials = [step for step in steps if step.get('label', '').endswith(' hits')]
+        self.assertEqual({step['metric'] for step in trials}, {'spell_cast_count'})
+        self.assertEqual(expectation.model['fixture_resets'], {'control': 10, 'treatment': 3200})
+        self.assertIn('exactly one packet per fixture reset', scenario['contract'])
+
+    def test_base_mana_is_set_before_every_cast_of_a_percent_cost_trigger(self):
+        scenario, _ = behaviour_scenario(with_base_mana(), self.PERCENT_COST)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        self.assertEqual(len(casts), 1610)
+        self.assertTrue(all(steps[index - 2] == {'action': 'set_power', 'actor': 'caster', 'power': 0, 'value': 1500}
+                            and steps[index - 1]['action'] == 'reset_cooldown' for index in casts))
+        self.assertIn('set to the base mana before each cast', scenario['contract'])
+
+    def test_the_fixture_packets_are_subtracted_from_the_resets(self):
+        verdict = self.judged(10.0, 3200.0 + 160.0)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual((verdict.detail['resets'], verdict.detail['hits']), (160.0, 3200.0))
+
+    def test_mutant_a_reset_rate_off_the_band_alerts(self):
+        self.assertEqual(self.judged(10.0, 3200.0 + 640.0).status, 'alert')
+
+    def test_a_control_without_one_packet_per_fixture_alerts(self):
+        for control in (0.0, 9.0, 11.0):
+            with self.subTest(control=control):
+                verdict = self.judged(control, 3200.0 + 160.0)
+                self.assertEqual(verdict.status, 'alert')
+                self.assertIn('not 1:1', verdict.explanation)
+
+    def test_base_mana_is_refused_on_a_trigger_without_a_percent_cost(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(with_base_mana(), {**ENTRY, 'base_mana_per_attempt': True})
+
+    def test_a_percent_cost_trigger_without_base_mana_stays_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(with_base_mana(), {**self.PERCENT_COST, 'base_mana_per_attempt': False})
+
+    def test_a_reset_of_another_spell_than_the_counted_row_is_no_offset(self):
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), {**self.SELF_RESET, 'reset_spell': 533236})
+        self.assertNotIn('fixture_resets', expectation.model)

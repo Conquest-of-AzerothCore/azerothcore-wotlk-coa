@@ -629,9 +629,11 @@
     "spell": 300367,
     "clause": "Horusath Blast or Rapture now have a $h% chance to not incur a cooldown on cast.",
     "labels": [
-      "300367 effect_value #0"
+      "300367 behaviour_metric_delta horusath_reset_rate",
+      "300367 behaviour_metric_delta rapture_reset_rate"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Judged by cooldown_reset_rate with reset_between_attempts, base_mana_per_attempt, trial_casts and residual_target 0.001 / min_detectable 4, twice the 2-point band, so the false alert at the chance and the false pass of a 4-point deviation are each at most 0.1% per pair (ADR 1022, provisional): Horusath Blast 572801 0.1966 / 0.2003 over 20900 casts (11 parts, false alert 3.57e-04 per pair), Rapture 806477 0.2005 / 0.1990 over 19950 casts (19 parts, 6.83e-04), each control exactly one clear-cooldown packet per fixture reset. The chance value label 300367 effect_value #0 is unmodelled and points at the rate, so it is dropped: the rate labels measure the stated $h. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-080523 / 20261122-081232, build 614be08400d8, server commit d043cfebbc4f, no flip."
   },
   {
     "spell": 300369,
@@ -2888,7 +2890,9 @@
     "claims": [
       {
         "claim": "Your Horusath Blast now deals additional damage scaling with your attack power",
-        "labels": []
+        "labels": [
+          "680656 behaviour_metric_delta power_direction"
+        ]
       },
       {
         "claim": "and grants allies Replenishment",
@@ -2898,7 +2902,7 @@
         ]
       }
     ],
-    "reason": "Open, target status 1 (review b7c I2, not status 5). The server adds .25 x attack power to Horusath Blast 500154 effect 0 while 680656 is known (AscensionSunClericContracts.cpp:309-310); the line arrived in e36bc50aad (bulk restore of five classes) with no source for 0.25, and the tooltip, DBC (681471 carries no value), bindmysoul, ascension-data and coa-history give no coefficient. The clause states none, so the claim is that the damage gain exists and grows with attack power. Route: hits learned against not learned at two attack power levels, the AP contrast arm in the same pair. Tool need: no existing judge states 'gain above the control and growing with AP' without an expected figure, and the figure may not come from the code or the run."
+    "reason": "Direction proven, figure not stated by the tooltip, server value 0.25 unsourced (mentor D-106; power_term_direction, ADR 1022, provisional). Horusath Blast 572801 at attack power 70 and 1050 (fixture: Attack Power 980 35785 set by harness set_aura), with and without 680656: interaction 235.4 / 227.6 at z 16.47 / 15.98 against 3.09, control growth -4.46 / 11.99 (z -0.43 / 1.19), control check false alert 0.4% per pair under the normal law; the 0.25 x AP at AscensionSunClericContracts.cpp:309-310 stays an owner observation. Reference search 2026-11-22: the tooltip, the DBC (681471 carries no value), the bindmysoul snapshot (fetched 2026-07-22, the same sentence with no coefficient), ascension-data and coa-history give no coefficient. Pair 20261122-080523 / 20261122-081232, build 614be08400d8, server commit d043cfebbc4f, no flip."
   },
   {
     "spell": 680656,
@@ -3611,20 +3615,42 @@
   {
     "spell": 704920,
     "clause": "Effectively healing with Radiant Cascade has a $h% chance to increase the healing of your next Illumination by $301293s1%.",
-    "labels": [
-      "704920 effect_value #0",
-      "704920 effect_value 301293e0 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Effectively healing with Radiant Cascade has a $h% chance",
+        "labels": [
+          "704920 proc_rate 301293"
+        ]
+      },
+      {
+        "claim": "to increase the healing of your next Illumination by $301293s1%",
+        "labels": [
+          "704920 effect_value 301293e0 #1"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Chance claim: rate judged on effective heals of Radiant Cascade 500141 on the ally only (proc trial effective_heal, ADR 1022, provisional): 0.1977 / 0.1984 over 29140 heals (188 parts), residual_target 0.001 / min_detectable 4, twice the 2-point band, so the false alert at the chance and the false pass of a 4-point deviation are each at most 0.1% per pair, false alert at the chance below 1e-6 per pair at these trials, no event in the baseline without 704920, no ally overheal and no caster effective heal. The chance value label is unmodelled and points at the rate, so it is dropped. Increase claim open: the rate proves the chance, not the healing increase of the next Illumination; 704920 effect_value 301293e0 #1 reads the stated value only, not a heal, and no heal proof was built. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-080523 / 20261122-081232, build 614be08400d8, server commit d043cfebbc4f, no flip."
   },
   {
     "spell": 704920,
     "clause": "Effectively healing with Illumination has a $707520h% chance to increase the healing of your next Radiant Cascade by $300354s1%.",
-    "labels": [
-      "704920 effect_value #2",
-      "704920 effect_value 300354e0 #3"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Effectively healing with Illumination has a $707520h% chance",
+        "labels": [
+          "704920 proc_rate 300354"
+        ]
+      },
+      {
+        "claim": "to increase the healing of your next Radiant Cascade by $300354s1%",
+        "labels": [
+          "704920 effect_value 300354e0 #3"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Chance claim: rate judged on effective heals of Illumination 500143 on the ally only (proc trial effective_heal, ADR 1022, provisional): 0.4031 / 0.3954 over 43700 heals (230 parts), $707520h = ProcChance 40, residual_target 0.001 / min_detectable 4, twice the 2-point band, so the false alert at the chance and the false pass of a 4-point deviation are each at most 0.1% per pair, false alert at the chance below 1e-6 per pair at these trials, no event in the baseline without 704920, no ally overheal and no caster effective heal. The chance value label is unmodelled and points at the rate, so it is dropped. Increase claim open: the rate proves the chance, not the healing increase of the next Radiant Cascade; 704920 effect_value 300354e0 #3 reads the stated value only, not a heal, and no heal proof was built. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-080523 / 20261122-081232, build 614be08400d8, server commit d043cfebbc4f, no flip."
   },
   {
     "spell": 704928,
@@ -5818,18 +5844,10 @@
     "spell": 806699,
     "clause": "Melee attacks now have a $h% chance to reset the cooldown of Glorious Execution.",
     "labels": [
-      "806699 effect_value #0"
+      "806699 behaviour_metric_delta swing_reset_rate"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The proc is rolled only on a landed automatic melee hit (AscensionSunClericEvents.cpp:124, damage && automatic && Chance) and its only effect is RemoveSpellCooldown of Glorious Execution, so the only behaviour read is whether a cast of Glorious Execution goes through before its cooldown has run. Tried: a procs entry counting the marker 806700 over 170 landed swings read 0 casts (the marker is never cast); proc_reset is refused (NotModelled: no plain power cost to read, no cost modifier on 806700); cooldown_reset_rate rolls its proc on a cast, not on an automatic hit. Not built: a swing-driven cooldown read of the shape cooldown_clear_time already has for minion events: cast Glorious Execution, let one automatic hit land (the harness counts melee_damage_count), attempt Glorious Execution once and read cast_failure (a cast goes through only after a reset, the arm without the talent is refused every time), repeated about 300 cycles per arm (G-20, $h = ProcChance 20). It needs a new kind and its seeded tests; this is a tool gap, not a final status.",
-      "attempts": [
-        {
-          "agent": "sc-b2b (class 27 batch 2 chunk 2 author)",
-          "report": ".agents/plans/sun-cleric-b2b/report.md#806699"
-        }
-      ]
-    }
+    "reason": "The earlier tool gap (sc-b2b, .agents/plans/sun-cleric-b2b/report.md#806699) is closed by swing_reset_rate (ADR 1017) with residual_target 0.001 / min_detectable 4, twice the 2-point band, so the false alert at the chance and the false pass of a 4-point deviation are each at most 0.1% per pair (ADR 1022, provisional): 0.2004 / 0.2013 over 33992 landed auto-attack hits (14 parts, Valkyr set, false alert 1.92e-08 per pair), no reset in the control. The chance value label 806699 effect_value #0 is unmodelled and points at the rate, so it is dropped: the rate label measures the stated $h. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-082433 / 20261122-082531, build b9a881db0cfb, server commit 5fb28e465107, no flip."
   },
   {
     "spell": 806980,

@@ -38,6 +38,7 @@ A `procs` entry of the class file describes one proc aura:
 | `spell_proc` | the `spell_proc` row of each spell, `{}` without one |
 | `internal_cooldown_ms` | the `spell_proc` `Cooldown`, the internal cooldown between procs |
 | `base_mana_per_attempt` | `true` sets the caster's mana to the class file's `base_mana` before every attempt of a `cast` trigger that costs a percentage of base mana (`hits.base_mana_steps`), the baseline casts included; refused for a trigger without such a cost (ADR 0700) |
+| `trial` | `"effective_heal"` for a `cast` trigger at the ally whose handler rolls on an effective heal: the trials are the trigger's heals on the ally (`spell_heal_count`, target ally), the ally set to 1 health of a 2000000000 maximum before every cast and the caster left at full health; an overheal on the ally or an effective heal of the caster by the trigger, read at the end of each part, makes the rate unmeasured; a chain heal trigger is accepted only with it (ADR 1022) |
 | `control_weapon` | the name of a class-file weapon set with a one-handed main hand, for an `attack` trigger whose own |
 | | set wields a two-handed one: part 1 first swings that main hand with the aura learned, then re-equips the own |
 | | weapon; any event in the control hits alerts, fewer landed hits than the baseline attempts are not judged (ADR 0751) |

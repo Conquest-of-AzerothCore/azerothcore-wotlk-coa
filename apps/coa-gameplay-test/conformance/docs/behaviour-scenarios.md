@@ -2126,6 +2126,8 @@ every module imports, names its kind and has a test file); its page is `docs/kin
   0384)
 - [`parried_restore`](kinds/parried_restore.md): a restore of a percent of the missing health and Rage per
   parried swing, one swing per cycle at a set state (ADR 0801; judged window ADR 0850)
+- [`power_term_direction`](kinds/power_term_direction.md): the direction of a power term without a figure, from four
+  arms crossing the passive with two attack power levels (ADR 1022, provisional)
 - [`pulse_targets`](kinds/pulse_targets.md): the targets of each area pulse of one creature, against the stated cap (ADR
   0550)
 - [`pushback_reduction`](kinds/pushback_reduction.md): the share of spell pushback a talent removes, from game-time cast

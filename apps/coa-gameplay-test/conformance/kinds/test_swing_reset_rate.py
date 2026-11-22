@@ -166,3 +166,31 @@ class SwingResetRateCompareTests(unittest.TestCase):
         missing = self.verdict(PARTS - 1)
         self.assertEqual(missing.status, 'unmeasured')
         self.assertIn(f'{PARTS - 1} of {PARTS} pooled parts ran', missing.explanation)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class SwingResetRateResidualTests(unittest.TestCase):
+    RESIDUAL = {**ENTRY, 'residual_target': 0.001, 'min_detectable': 5}
+
+    def judged(self, resets: float, entry: dict):
+        built, [expectation] = behaviour_scenario(templar(), entry)
+        values = harness_values(built, counters(resets))
+        return expectation, judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+    def test_the_residual_judges_at_its_confidence_and_keeps_the_band_minimum(self):
+        expectation, verdict = self.judged(2124.0, self.RESIDUAL)
+        self.assertEqual(expectation.model['residual']['trials'], 8616)
+        self.assertEqual(expectation.model['minimum_trials'], 10618)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('Wilson 0.9995 interval', verdict.explanation)
+        self.assertIn('residual_target 0.001 per pair', verdict.explanation)
+
+    def test_mutant_a_rate_five_points_off_alerts_under_the_residual(self):
+        self.assertEqual(self.judged(2655.0, self.RESIDUAL)[1].status, 'alert')
+
+    def test_without_the_residual_fields_the_scenario_is_unchanged(self):
+        plain, [expectation] = behaviour_scenario(templar(), ENTRY)
+        self.assertNotIn('residual', expectation.model)
+        self.assertNotIn('residual_target', plain['contract'])
+        residual, _ = behaviour_scenario(templar(), self.RESIDUAL)
+        self.assertIn('residual_target 0.001 per pair', residual['contract'])
