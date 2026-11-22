@@ -775,15 +775,20 @@
     "spell": 300723,
     "clause": "Increases your Holy and Fire spell damage by $s3%",
     "labels": [
-      "300723 effect_value e2 #0"
+      "300723 effect_value e2 #0",
+      "300723 behaviour_metric_delta holy_damage",
+      "300723 behaviour_metric_delta holy_damage_control",
+      "300723 behaviour_hit_ratio fire_damage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "HELD, not status 1: uncertain expectation sent to the mentor (no server change). Full tooltip: Increases your Holy and Fire spell damage by $s3% and your spell hit rating by $s1% of your Intellect. HELD, uncertain expectation sent to the mentor: the value has three readings and no source picks one. (1) Tooltip text with ruling G-13 ('spell damage' names the spell power stat): spell power x 1.30, which adds 0 at the reference spell power 0 and +3000 at a 10000 spell power fixture (Justicar's Wrath 806980, spell power coefficient 0.55: +1650 on 6036, +27%). (2) DBC 300723 Effect[2] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, BasePoints 29 (+1 = 30), MiscValue 6 (Holy|Fire), MiscValueB 3 (Intellect): 30% of the reference Intellect 119 = 35.7 spell power (x 0.55 = +19.6 on the 536 hit, +3.7%). (3) Server rewrite at load: AscensionSunClericContracts.cpp:185-186 replaces Effect[2] with aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire (commit e36bc50aad, which gives no source): 536 x 1.30 = 696.8 (+160.8, +30%). This arm measures reading 3 only, so it shows what the server does, not what the tooltip or the DBC say. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found for the value."
   },
   {
     "spell": 300723,
     "clause": "and your spell hit rating by $s1% of your Intellect.",
     "labels": [
-      "300723 effect_value e0 #1"
+      "300723 effect_value e0 #1",
+      "300723 behaviour_metric_delta hit_rating"
     ],
     "kind": "claim"
   },
@@ -1275,20 +1280,44 @@
   {
     "spell": 503651,
     "clause": "Invoke An'she to root an enemy for $680702d with holy shackles or heal an ally for ${$680701m1+$680701ppl1}% maximum health",
-    "labels": [
-      "503651 spell_duration 680702 #0",
-      "503651 effect_value 680701e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "root an enemy for $680702d with holy shackles",
+        "labels": [
+          "503651 spell_duration 680702 #0",
+          "503651 behaviour_metric_delta root_held"
+        ]
+      },
+      {
+        "claim": "heal an ally for ${$680701m1+$680701ppl1}% maximum health",
+        "labels": [
+          "503651 effect_value 680701e0 #1",
+          "503651 behaviour_metric_delta heal_pct"
+        ]
+      }
+    ]
   },
   {
     "spell": 503651,
     "clause": "and increase their movement speed by $680701s2% for $680701d.",
-    "labels": [
-      "503651 effect_value 680701e1 #2",
-      "503651 spell_duration 680701 #3"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increase their movement speed by $680701s2%",
+        "labels": [
+          "503651 effect_value 680701e1 #2",
+          "503651 behaviour_metric_delta speed"
+        ]
+      },
+      {
+        "claim": "for $680701d",
+        "labels": [
+          "503651 spell_duration 680701 #3",
+          "503651 behaviour_metric_delta speed_held"
+        ]
+      }
+    ]
   },
   {
     "spell": 503651,
@@ -1297,7 +1326,8 @@
     "labels": [
       "503651 behaviour_metric_delta shared_ascension",
       "503651 behaviour_metric_delta shared_conquest",
-      "503651 behaviour_metric_delta shared_resplendence"
+      "503651 behaviour_metric_delta shared_resplendence",
+      "503651 behaviour_metric_delta shared_refused"
     ]
   },
   {
@@ -1969,7 +1999,8 @@
     "spell": 560534,
     "clause": "In addition, your chance to parry is increased by $s2%.",
     "labels": [
-      "560534 effect_value e1 #1"
+      "560534 effect_value e1 #1",
+      "560534 behaviour_metric_delta parry"
     ],
     "kind": "claim"
   },
@@ -2114,7 +2145,8 @@
     "spell": 561159,
     "clause": "Increases your spell power by $s2% of your Strength.",
     "labels": [
-      "561159 effect_value e1 #0"
+      "561159 effect_value e1 #0",
+      "561159 behaviour_metric_delta spell_power"
     ],
     "kind": "claim"
   },
@@ -3228,13 +3260,17 @@
         "labels": [
           "681252 effect_value e1 #1",
           "681252 behaviour_metric_delta champion_duration",
-          "681252 behaviour_metric_delta champion_duration_control"
+          "681252 behaviour_metric_delta champion_duration_control",
+          "681252 behaviour_metric_delta champion_held",
+          "681252 behaviour_metric_delta champion_control"
         ]
       },
       {
         "claim": "and Chains of Light by $/1000;s2 sec",
         "labels": [
-          "681252 behaviour_metric_delta chains_duration"
+          "681252 behaviour_metric_delta chains_duration",
+          "681252 behaviour_metric_delta chains_held",
+          "681252 behaviour_metric_delta chains_control"
         ]
       }
     ],
@@ -3956,11 +3992,23 @@
   {
     "spell": 704932,
     "clause": "Your Solar Eclipse now reduces the enemies chance to hit by $704931s1% for $/1000;s1 sec.",
-    "labels": [
-      "704932 effect_value 704931e0 #0",
-      "704932 effect_value e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reduces the enemies chance to hit by $704931s1%",
+        "labels": [
+          "704932 effect_value 704931e0 #0"
+        ]
+      },
+      {
+        "claim": "for $/1000;s1 sec",
+        "labels": [
+          "704932 effect_value e0 #1",
+          "704932 behaviour_metric_delta duration_held",
+          "704932 behaviour_metric_delta duration_control"
+        ]
+      }
+    ]
   },
   {
     "spell": 704934,
@@ -4275,10 +4323,28 @@
   {
     "spell": 707081,
     "clause": "Fulfilling your Vow now unleashes a chain of light at your target, dealing ${$657125m1+$657125ppl1+$sph*0.23+$AP*.1} Holy damage",
-    "labels": [
-      "707081 effect_value 657125e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$657125m1+$657125ppl1} Holy damage (the base)",
+        "labels": [
+          "707081 effect_value 657125e0 #0",
+          "707081 behaviour_metric_delta strike_0"
+        ]
+      },
+      {
+        "claim": "$sph*0.23 (spell power term)",
+        "labels": [
+          "707081 behaviour_metric_delta strike_0_sp"
+        ]
+      },
+      {
+        "claim": "$AP*.1 (attack power term)",
+        "labels": [
+          "707081 behaviour_metric_delta strike_0_ap"
+        ]
+      }
+    ]
   },
   {
     "spell": 707081,
@@ -4795,7 +4861,8 @@
     "spell": 800764,
     "clause": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
     "labels": [
-      "800764 behaviour_metric_delta shared_cooldown"
+      "800764 behaviour_metric_delta shared_cooldown",
+      "800764 behaviour_metric_delta shared_refused"
     ],
     "kind": "claim"
   },
@@ -5229,7 +5296,8 @@
     "clause": "and your spell hit rating by $s2% of your Strength.",
     "labels": [
       "804339 effect_value e1 #1",
-      "804339 e1 combat_rating 7"
+      "804339 e1 combat_rating 7",
+      "804339 behaviour_metric_delta hit_rating"
     ],
     "kind": "claim"
   },

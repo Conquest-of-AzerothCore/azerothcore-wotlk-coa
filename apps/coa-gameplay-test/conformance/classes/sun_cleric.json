@@ -23785,6 +23785,723 @@
       ],
       "poll_ms": 25,
       "observe_source": "800054 Radiance Effect[0] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 2000 ($/1000;t1 = 2 sec), triggers 800038 (Effect[1] SCHOOL_DAMAGE on enemies within its radius), DurationIndex 1 (10000 ms). One real cast at the dummy; the damage hits of 800038 on the dummy are polled with game-time stamps and (last - first) / (hits - 1) must read 2000 ms inside the G-19 band; a hit before the cast alerts. Resistance fixture 823764 on the caster. Reference search 2026-11-22: coa-history spell 800054 has 257 casts; bindmysoul and the tooltip give 2 sec; nothing else found."
+    },
+    {
+      "spell": 707081,
+      "kind": "metric_delta",
+      "gate_spell": 707081,
+      "quote": "Fulfilling your Vow now unleashes a chain of light at your target, dealing ${$657125m1+$657125ppl1+$sph*0.23+$AP*.1} Holy damage",
+      "trigger_spell": 500154,
+      "target": "dummy",
+      "dummy_distance": 6,
+      "area_dummies": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "setup_casts": [
+        803719,
+        804584
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "name": "Solar Empowerment (primary strike damage at +10000 spell power)",
+      "variant": "strike_0_sp",
+      "label_suffix": "strike_0_sp",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 657125,
+        "target": "dummy"
+      },
+      "expected": 2398,
+      "tolerance": 120,
+      "observe_source": "Contrast arm of the spell power term $sph*0.23: +10000 spell power (player_spell_power hit_arm, harness rating). 657125 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE Holy, BasePoints 80 + DieSides 1 (the roll adds 1: m1 = 81), RealPointsPerLevel 5.0 x (60 - BaseLevel 58) = 10 ($657125ppl1), so the base is 91 at level 60. The caster's Holy damage read is the base entry strike_0 (spell power 0, attack power 70: 91 + int(0.1 x 70) = 98), the contrast arm in the same pair. Crit and resist fixtures 984954 and 823764 and the fulfilment setup are those of strike_0. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the value (the strike_0 search). Residual failure probability of a correct server per pair: 0 (crit removed by 984954, spell_hit_rating 10000, one strike read, the 5% band against a damage roll of width 1). Expected 91 + int(0.1 x 70) + int(0.23 x 10000) = 91 + 7 + 2300 = 2398, tolerance 120 (5%, G-19); a coefficient of 0.20 gives 2098 and a dropped term 98, both outside the band.",
+      "cast_in_before": false,
+      "setup_only_after": true,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      }
+    },
+    {
+      "spell": 707081,
+      "kind": "metric_delta",
+      "gate_spell": 707081,
+      "quote": "Fulfilling your Vow now unleashes a chain of light at your target, dealing ${$657125m1+$657125ppl1+$sph*0.23+$AP*.1} Holy damage",
+      "trigger_spell": 500154,
+      "target": "dummy",
+      "dummy_distance": 6,
+      "area_dummies": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "setup_casts": [
+        803719,
+        804584
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "name": "Solar Empowerment (primary strike damage at +20000 attack power)",
+      "variant": "strike_0_ap",
+      "label_suffix": "strike_0_ap",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 657125,
+        "target": "dummy"
+      },
+      "expected": 2098,
+      "tolerance": 105,
+      "observe_source": "Contrast arm of the attack power term $AP*.1: +20000 attack power (player_attack_power, harness rating). 657125 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE Holy, BasePoints 80 + DieSides 1 (the roll adds 1: m1 = 81), RealPointsPerLevel 5.0 x (60 - BaseLevel 58) = 10 ($657125ppl1), so the base is 91 at level 60. The caster's Holy damage read is the base entry strike_0 (spell power 0, attack power 70: 91 + int(0.1 x 70) = 98), the contrast arm in the same pair. Crit and resist fixtures 984954 and 823764 and the fulfilment setup are those of strike_0. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the value (the strike_0 search). Residual failure probability of a correct server per pair: 0 (crit removed by 984954, spell_hit_rating 10000, one strike read, the 5% band against a damage roll of width 1). Expected 91 + int(0.1 x (70 + 20000)) = 91 + 2007 = 2098, tolerance 105 (5%, G-19); a coefficient of 0.05 gives 1094 and a dropped term 98, both outside the band.",
+      "cast_in_before": false,
+      "setup_only_after": true,
+      "player_attack_power": 20000
+    },
+    {
+      "spell": 560534,
+      "name": "March of the Valkyr (parry chance)",
+      "kind": "metric_delta",
+      "variant": "parry",
+      "label_suffix": "parry",
+      "quote": "In addition, your chance to parry is increased by $s2%.",
+      "trigger_spell": 804247,
+      "gate_spell": 560534,
+      "target": "caster",
+      "metric": "parry_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560534 Effect[1] aura 47 SPELL_AURA_MOD_PARRY_PERCENT, BasePoints 4 + 1 = 5 ($s2), TARGET_UNIT_CASTER. The caster's live parry chance (STATE read) before and after a real learn of 560534; the before reading is the control: gain 5 points. Tooltip and DBC settle the value; the references add nothing for it (guide section 4: nothing found beyond them).",
+      "expected_gain": 5
+    },
+    {
+      "spell": 561159,
+      "name": "Holy Strength (spell power from Strength)",
+      "kind": "metric_delta",
+      "variant": "spell_power",
+      "label_suffix": "spell_power",
+      "quote": "Increases your spell power by $s2% of your Strength.",
+      "trigger_spell": 804247,
+      "gate_spell": 561159,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 1
+      },
+      "before_expected": 0,
+      "expected": 2040,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "561159 Effect[1] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, MiscValue 126 (all magic schools), BasePoints 99 + 1 = 100 ($s2). Strength 8118 (aura 29, effect 0 set to 2000 by phase_aura_amounts) is a harness precondition fixture in both phases (not the subject); the reference Strength 40 (class file reference_stats) becomes 2040. Holy spell power read before the learn (control, 0) and after a real learn of 561159: 100% of 2040 = 2040, within 1. Tooltip and DBC settle the value; the references add nothing for it (guide section 4: nothing found beyond them).",
+      "phase_auras": [
+        [
+          8118,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          8118,
+          0,
+          2000
+        ]
+      ]
+    },
+    {
+      "spell": 300723,
+      "name": "Struck by the Sun (spell hit rating from Intellect)",
+      "kind": "metric_delta",
+      "variant": "hit_rating",
+      "label_suffix": "hit_rating",
+      "quote": "and your spell hit rating by $s1% of your Intellect.",
+      "trigger_spell": 804247,
+      "gate_spell": 300723,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 7
+      },
+      "before_expected": 10000,
+      "expected": 10010.02,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "300723 Effect[0] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 128 (1 << 7, CR_HIT_SPELL), MiscValueB 3 (Intellect), BasePoints 5 + 1 = 6 ($s1). Intellect 48100 is a harness precondition fixture in both phases (167). Combat rating 7 reads 10000 before the learn (control, the class file spell_hit_rating fixture) and after a real learn of 300723: 10000 + 6% of 167 = 10010.02, within 0.5 for the integer rating. Tooltip and DBC settle the value; the references add nothing for it (guide section 4: nothing found beyond them).",
+      "phase_auras": [
+        [
+          48100,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 804339,
+      "name": "Valorous Champion (spell hit rating from Strength)",
+      "kind": "metric_delta",
+      "variant": "hit_rating",
+      "label_suffix": "hit_rating",
+      "quote": "and your spell hit rating by $s2% of your Strength.",
+      "trigger_spell": 804247,
+      "gate_spell": 804339,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 7
+      },
+      "before_expected": 10000,
+      "expected": 10102,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "804339 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 128 (1 << 7, CR_HIT_SPELL), BasePoints 4 + 1 = 5 ($s2); no MiscValueB, so the stat is Strength (index 0). Strength 8118 (effect 0 set to 2000 by phase_aura_amounts) is a harness precondition fixture in both phases: 40 + 2000 = 2040. Combat rating 7 reads 10000 before the learn (control, the class file spell_hit_rating fixture) and after a real learn of 804339: 10000 + 5% of 2040 = 10102, within 1. Tooltip and DBC settle the value; the references add nothing for it (guide section 4: nothing found beyond them).",
+      "phase_auras": [
+        [
+          8118,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          8118,
+          0,
+          2000
+        ]
+      ]
+    },
+    {
+      "spell": 800764,
+      "name": "Solar Invocation: Conquest (a cast of Ascension is refused after it)",
+      "kind": "metric_delta",
+      "variant": "shared_refused",
+      "label_suffix": "shared_refused",
+      "quote": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
+      "trigger_spell": 500152,
+      "target": "caster",
+      "cast_power": 1363,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 500152
+      },
+      "before_expected": 0,
+      "expected": 67,
+      "observe_source": "800764 and Ascension 500152 carry Category 767 with CategoryRecoveryTime 30000 (Spell.dbc). The harness resets the cooldown of Ascension, then makes a real Conquest cast (setup, after phase only), then casts Ascension at once: the refusal reason read is 67 (SPELL_FAILED_NOT_READY, SharedDefines.h:1117) after Conquest, and 0 (cast accepted) in the before phase, the control, where Ascension is cast alone. Reference search 2026-11-22 (guide section 4, the search of the sibling entries of this spell): nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 503651,
+      "name": "Solar Invocation: Revelation (a cast of Ascension is refused after it)",
+      "kind": "metric_delta",
+      "variant": "shared_refused",
+      "label_suffix": "shared_refused",
+      "quote": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
+      "trigger_spell": 500152,
+      "target": "caster",
+      "cast_power": 1363,
+      "setup_casts": [
+        503651
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 500152
+      },
+      "before_expected": 0,
+      "expected": 67,
+      "observe_source": "503651 and Ascension 500152 carry Category 767 with CategoryRecoveryTime 30000 (Spell.dbc). The harness resets the cooldown of Ascension, then makes a real Revelation cast at the caster (setup, after phase only), then casts Ascension at once: the refusal reason read is 67 (SPELL_FAILED_NOT_READY, SharedDefines.h:1117) after Revelation, and 0 (cast accepted) in the before phase, the control, where Ascension is cast alone. Reference search 2026-11-22 (guide section 4, the search of the sibling entries of this spell): nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681252,
+      "name": "Radiant Halberd (Champion of the Sun is held to 29.6 s and gone by 30.4 s)",
+      "kind": "metric_delta",
+      "variant": "champion_held",
+      "label_suffix": "champion_held",
+      "quote": "Increases the duration of Champion of the Sun and Chains of Light by $/1000;s2 sec.",
+      "trigger_spell": 800612,
+      "gate_spell": 681252,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 800612
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 29750,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          29600,
+          29900
+        ],
+        "expired": [
+          30100,
+          30400
+        ]
+      },
+      "observe_source": "681252 Radiant Halberd Effect[1] aura 107 ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 4999 (+1 = 5000 ms, $/1000;s2 = 5 s), class mask word 0 16416 = Champion of the Sun 800612 (32) + Chains of Light 806697 (16384). 800612 DurationIndex 63 = 25000 ms. One real Champion cast with 681252 learned: the aura is present when read 29600..29900 ms after the cast (game time) and gone when read 30100..30400 ms after it, so the duration lies in (29600, 30400), which excludes 29500 and 30500 (10% off the 5000 ms increase on both sides). Reference search: nothing found beyond the tooltip and the DBC.",
+      "expiry_wait_ms": 500,
+      "after_expiry_expected": 0,
+      "cast_power": 1363
+    },
+    {
+      "spell": 681252,
+      "name": "Radiant Halberd (control: Champion of the Sun without 681252 is gone at 29.6 s)",
+      "kind": "metric_delta",
+      "variant": "champion_control",
+      "label_suffix": "champion_control",
+      "quote": "Increases the duration of Champion of the Sun and Chains of Light by $/1000;s2 sec.",
+      "trigger_spell": 800612,
+      "gate_spell": 704582,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 800612
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 29750,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          29600,
+          29900
+        ]
+      },
+      "observe_source": "681252 Radiant Halberd Effect[1] aura 107 ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 4999 (+1 = 5000 ms, $/1000;s2 = 5 s), class mask word 0 16416 = Champion of the Sun 800612 (32) + Chains of Light 806697 (16384). The same cast with 704582 learned instead of 681252 (the control of the champion_duration entry): the aura of 25000 ms is gone when read 29600..29900 ms after the cast (game time). Reference search: nothing found beyond the tooltip and the DBC.",
+      "cast_power": 1363
+    },
+    {
+      "spell": 681252,
+      "name": "Radiant Halberd (Chains of Light is held to 19.6 s and gone by 20.4 s)",
+      "kind": "metric_delta",
+      "variant": "chains_held",
+      "label_suffix": "chains_held",
+      "quote": "Increases the duration of Champion of the Sun and Chains of Light by $/1000;s2 sec.",
+      "trigger_spell": 801524,
+      "gate_spell": 681252,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 806697
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 19750,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          19600,
+          19900
+        ],
+        "expired": [
+          20100,
+          20400
+        ]
+      },
+      "observe_source": "681252 Radiant Halberd Effect[1] aura 107 ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 4999 (+1 = 5000 ms, $/1000;s2 = 5 s), class mask word 0 16416 = Champion of the Sun 800612 (32) + Chains of Light 806697 (16384). 806697 DurationIndex 8 = 15000 ms. One real Chains of Light cast 801524 at the dummy with 681252 learned: the aura is present on the dummy when read 19600..19900 ms after the cast (game time) and gone when read 20100..20400 ms after it, so the duration lies in (19600, 20400), which excludes 19500 and 20500. Reference search: nothing found beyond the tooltip and the DBC.",
+      "expiry_wait_ms": 500,
+      "after_expiry_expected": 0,
+      "measure_actor": "dummy"
+    },
+    {
+      "spell": 681252,
+      "name": "Radiant Halberd (control: Chains of Light without 681252 is gone at 19.6 s)",
+      "kind": "metric_delta",
+      "variant": "chains_control",
+      "label_suffix": "chains_control",
+      "quote": "Increases the duration of Champion of the Sun and Chains of Light by $/1000;s2 sec.",
+      "trigger_spell": 801524,
+      "gate_spell": 704582,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 806697
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 19750,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          19600,
+          19900
+        ]
+      },
+      "observe_source": "681252 Radiant Halberd Effect[1] aura 107 ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 4999 (+1 = 5000 ms, $/1000;s2 = 5 s), class mask word 0 16416 = Champion of the Sun 800612 (32) + Chains of Light 806697 (16384). The same cast with 704582 learned instead of 681252: the aura of 15000 ms is gone from the dummy when read 19600..19900 ms after the cast (game time). Reference search: nothing found beyond the tooltip and the DBC.",
+      "measure_actor": "dummy"
+    },
+    {
+      "spell": 300723,
+      "name": "Struck by the Sun (Holy damage +30%)",
+      "kind": "metric_delta",
+      "variant": "holy_damage",
+      "label_suffix": "holy_damage",
+      "quote": "Increases your Holy and Fire spell damage by $s3%",
+      "trigger_spell": 806980,
+      "gate_spell": 300723,
+      "target": "dummy",
+      "cast_power": 1363,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806980,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 697,
+      "after_at_least": 689,
+      "after_at_most": 705,
+      "observe_source": "300723 Effect[2] is rewritten at load to aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30 (the $s3), MiscValue Holy|Fire (AscensionSunClericContracts.cpp:185-186), reading 3 of the three readings below. Justicar's Wrath 806980 (Holy) is read as its existing damage entry reads it (unmodified 531..541 at the reference stats, dummy Holy resistance removed by 823764). The hit is read after a real learn of 300723: 531..541 x 1.30 = 690..703, inside [689, 705], which lies within the 2-point band (28% to 32%: 680..714) and excludes +25% (664..676) and +35% (717..730). HELD, uncertain expectation sent to the mentor: the value has three readings and no source picks one. (1) Tooltip text with ruling G-13 ('spell damage' names the spell power stat): spell power x 1.30, which adds 0 at the reference spell power 0 and +3000 at a 10000 spell power fixture (Justicar's Wrath 806980, spell power coefficient 0.55: +1650 on 6036, +27%). (2) DBC 300723 Effect[2] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, BasePoints 29 (+1 = 30), MiscValue 6 (Holy|Fire), MiscValueB 3 (Intellect): 30% of the reference Intellect 119 = 35.7 spell power (x 0.55 = +19.6 on the 536 hit, +3.7%). (3) Server rewrite at load: AscensionSunClericContracts.cpp:185-186 replaces Effect[2] with aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire (commit e36bc50aad, which gives no source): 536 x 1.30 = 696.8 (+160.8, +30%). This arm measures reading 3 only, so it shows what the server does, not what the tooltip or the DBC say. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found for the value. Residual failure probability of a correct server per pair: not quantified. A crit roll reads 0 under fields critical false and alerts (a false alert, never a false pass); the caster's Holy crit chance at the reference stats is not read, and adding the spell crit fixture 984954 made the read 0 in both runs of the first fix pair (cause not investigated), so it is not used. spell_hit_rating is 10000 in the class ratings; the hit 515..523 plus 17 attack power, x 1.30, lies in 690..703 by arithmetic, inside [689, 705]. The claim is held, so no status 1 rests on this figure."
+    },
+    {
+      "spell": 300723,
+      "name": "Struck by the Sun (control: the same Holy hit without 300723)",
+      "kind": "metric_delta",
+      "variant": "holy_damage_control",
+      "label_suffix": "holy_damage_control",
+      "quote": "Increases your Holy and Fire spell damage by $s3%",
+      "trigger_spell": 806980,
+      "gate_spell": 704582,
+      "target": "dummy",
+      "cast_power": 1363,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806980,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 536,
+      "after_at_least": 531,
+      "after_at_most": 541,
+      "observe_source": "300723 Effect[2] is rewritten at load to aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30 (the $s3), MiscValue Holy|Fire (AscensionSunClericContracts.cpp:185-186), reading 3 of the three readings below. Justicar's Wrath 806980 (Holy) is read as its existing damage entry reads it (unmodified 531..541 at the reference stats, dummy Holy resistance removed by 823764). Control: the same hit with 704582 learned instead of 300723 reads 531..541. HELD, uncertain expectation sent to the mentor: the value has three readings and no source picks one. (1) Tooltip text with ruling G-13 ('spell damage' names the spell power stat): spell power x 1.30, which adds 0 at the reference spell power 0 and +3000 at a 10000 spell power fixture (Justicar's Wrath 806980, spell power coefficient 0.55: +1650 on 6036, +27%). (2) DBC 300723 Effect[2] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, BasePoints 29 (+1 = 30), MiscValue 6 (Holy|Fire), MiscValueB 3 (Intellect): 30% of the reference Intellect 119 = 35.7 spell power (x 0.55 = +19.6 on the 536 hit, +3.7%). (3) Server rewrite at load: AscensionSunClericContracts.cpp:185-186 replaces Effect[2] with aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire (commit e36bc50aad, which gives no source): 536 x 1.30 = 696.8 (+160.8, +30%). This arm measures reading 3 only, so it shows what the server does, not what the tooltip or the DBC say. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found for the value. The same fixtures as holy_damage; control arm, same unquantified crit residual (a crit alerts), 531..541 by arithmetic."
+    },
+    {
+      "spell": 704932,
+      "name": "Heat Death (the Solar Eclipse debuff is held to 13.6 s and gone by 16.4 s)",
+      "kind": "metric_delta",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "Your Solar Eclipse now reduces the enemies chance to hit by $704931s1% for $/1000;s1 sec.",
+      "trigger_spell": 800654,
+      "gate_spell": 704932,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        704929
+      ],
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 704931
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          13600,
+          14400
+        ],
+        "expired": [
+          16000,
+          16400
+        ]
+      },
+      "observe_source": "704932 Effect[0] aura 107 SPELLMOD_DURATION, BasePoints 14999 (+1 = 15000 ms, $/1000;s1 = 15 s); Solar Eclipse 704931 carries no DurationIndex. Dawnbreak 800654 is cast at the dummy with 704929 learned (the Solar Eclipse passive). With 704932 learned the aura 704931 is present on the dummy when read 13600..14400 ms after the cast (game time) and gone when read 16000..16400 ms after it, so the duration lies in (13600, 16400), excluding 13500 and 16500 (10% off 15000 on both sides). Reference search 2026-11-22 (guide section 4, the search of the sibling entries of this spell): nothing found beyond the tooltip and the DBC for the value.",
+      "expiry_wait_ms": 2300,
+      "after_expiry_expected": 0
+    },
+    {
+      "spell": 704932,
+      "name": "Heat Death (control: the Solar Eclipse leaves no debuff without 704932)",
+      "kind": "metric_delta",
+      "variant": "duration_control",
+      "label_suffix": "duration_control",
+      "quote": "Your Solar Eclipse now reduces the enemies chance to hit by $704931s1% for $/1000;s1 sec.",
+      "trigger_spell": 800654,
+      "gate_spell": 704582,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        704929
+      ],
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 704931
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 14000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          13600,
+          14400
+        ]
+      },
+      "observe_source": "704932 Effect[0] aura 107 SPELLMOD_DURATION, BasePoints 14999 (+1 = 15000 ms, $/1000;s1 = 15 s); Solar Eclipse 704931 carries no DurationIndex. Dawnbreak 800654 is cast at the dummy with 704929 learned (the Solar Eclipse passive). Control: 704582 is learned instead of 704932, and the aura is absent on the dummy at the same read (no duration, no debuff). Reference search 2026-11-22 (guide section 4, the search of the sibling entries of this spell): nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 503651,
+      "name": "Solar Invocation: Revelation (the root on an enemy is held to 3.65 s and gone by 4.35 s)",
+      "kind": "metric_delta",
+      "variant": "root_held",
+      "label_suffix": "root_held",
+      "quote": "Invoke An'she to root an enemy for $680702d with holy shackles or heal an ally for ${$680701m1+$680701ppl1}% maximum health",
+      "trigger_spell": 503651,
+      "target": "dummy",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 680702
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3800,
+      "expire_ms": 500,
+      "observe_source": "503651 Revelation Effect[0] and Effect[1] trigger 680702 (root, aura 26, DurationIndex 35 = 4000 ms) and 680701 (Effect[0] HEAL_PCT BasePoints 9 + 1 = 10, Effect[1] aura 31 MOD_INCREASE_SPEED BasePoints 49 + 1 = 50, DurationIndex 35 = 4000 ms). One real cast at the dummy: the root aura 680702 is present on the dummy when read 3650..3950 ms after the cast (game time) and gone when read 4050..4350 ms after it, so the duration lies in (3650, 4350), excluding 3600 and 4400 (10% off 4000 on both sides). Control: the before phase casts nothing and reads no root. Reference search 2026-11-22 (guide section 4, the search of the sibling entries of this spell): nothing found beyond the tooltip and the DBC for the value.",
+      "measure_actor": "dummy",
+      "trigger_only_after": true,
+      "gate_timing": "start",
+      "expiry_wait_ms": 450,
+      "after_expiry_expected": 0,
+      "game_time": {
+        "after": [
+          3650,
+          3950
+        ],
+        "expired": [
+          4050,
+          4350
+        ]
+      }
+    },
+    {
+      "spell": 503651,
+      "name": "Solar Invocation: Revelation (heals 10% of maximum health)",
+      "kind": "metric_delta",
+      "variant": "heal_pct",
+      "label_suffix": "heal_pct",
+      "quote": "Invoke An'she to root an enemy for $680702d with holy shackles or heal an ally for ${$680701m1+$680701ppl1}% maximum health",
+      "trigger_spell": 503651,
+      "target": "caster",
+      "cast_power": 1363,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 680701,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1000,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "503651 Revelation Effect[0] and Effect[1] trigger 680702 (root, aura 26, DurationIndex 35 = 4000 ms) and 680701 (Effect[0] HEAL_PCT BasePoints 9 + 1 = 10, Effect[1] aura 31 MOD_INCREASE_SPEED BasePoints 49 + 1 = 50, DurationIndex 35 = 4000 ms). One real cast at the caster held at 50% of its 10000 health fixture (caster_health_pct): the heal of 680701 lands for 10% of 10000 = 1000, within 50 (0.5 point; excludes 800 and 1200 and the 10% off figures 900 and 1100). Control: the before phase casts nothing and reads 0. Reference search 2026-11-22 (guide section 4, the search of the sibling entries of this spell): nothing found beyond the tooltip and the DBC for the value.",
+      "cast_in_before": false,
+      "tolerance": 50,
+      "caster_health_pct": 50
+    },
+    {
+      "spell": 503651,
+      "name": "Solar Invocation: Revelation (movement speed +50%)",
+      "kind": "metric_delta",
+      "variant": "speed",
+      "label_suffix": "speed",
+      "quote": "and increase their movement speed by $680701s2% for $680701d.",
+      "trigger_spell": 503651,
+      "target": "caster",
+      "cast_power": 1363,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "503651 Revelation Effect[0] and Effect[1] trigger 680702 (root, aura 26, DurationIndex 35 = 4000 ms) and 680701 (Effect[0] HEAL_PCT BasePoints 9 + 1 = 10, Effect[1] aura 31 MOD_INCREASE_SPEED BasePoints 49 + 1 = 50, DurationIndex 35 = 4000 ms). The caster's run speed rate (STATE read, Unit::GetSpeedRate) is 1 in the before phase (nothing cast, the control) and 1.5 after a real cast at the caster, within 0.001 (excludes 1.45 and 1.55, 10% off the 50% on both sides). Reference search 2026-11-22 (guide section 4, the search of the sibling entries of this spell): nothing found beyond the tooltip and the DBC for the value.",
+      "cast_in_before": false,
+      "tolerance": 0.001
+    },
+    {
+      "spell": 503651,
+      "name": "Solar Invocation: Revelation (the speed aura is held to 3.65 s and gone by 4.35 s)",
+      "kind": "metric_delta",
+      "variant": "speed_held",
+      "label_suffix": "speed_held",
+      "quote": "and increase their movement speed by $680701s2% for $680701d.",
+      "trigger_spell": 503651,
+      "target": "caster",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 680701
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3800,
+      "expire_ms": 500,
+      "observe_source": "503651 Revelation Effect[0] and Effect[1] trigger 680702 (root, aura 26, DurationIndex 35 = 4000 ms) and 680701 (Effect[0] HEAL_PCT BasePoints 9 + 1 = 10, Effect[1] aura 31 MOD_INCREASE_SPEED BasePoints 49 + 1 = 50, DurationIndex 35 = 4000 ms). One real cast at the caster: the aura 680701 is present when read 3650..3950 ms after the cast (game time) and gone when read 4050..4350 ms after it, so the duration lies in (3650, 4350), excluding 3600 and 4400. Control: the before phase casts nothing and reads no aura. Reference search 2026-11-22 (guide section 4, the search of the sibling entries of this spell): nothing found beyond the tooltip and the DBC for the value.",
+      "trigger_only_after": true,
+      "gate_timing": "start",
+      "expiry_wait_ms": 450,
+      "after_expiry_expected": 0,
+      "game_time": {
+        "after": [
+          3650,
+          3950
+        ],
+        "expired": [
+          4050,
+          4350
+        ]
+      }
+    },
+    {
+      "spell": 300723,
+      "name": "Struck by the Sun (Fire damage +30%)",
+      "kind": "hit_ratio",
+      "variant": "fire_damage",
+      "label_suffix": "fire_damage",
+      "quote": "Increases your Holy and Fire spell damage by $s3%",
+      "expected": 1.3,
+      "observe_spell": 500146,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          300723
+        ]
+      },
+      "critical": false,
+      "trials": 40,
+      "cast_power": 1363,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "expected_source": "Reading 3: 300723 Effect[2] is rewritten at load to aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30 (the $s3), MiscValue Holy|Fire (AscensionSunClericContracts.cpp:185-186). Dawnsear 500146 (Fire, SchoolMask 4) is cast at the dummy 40 times without and 40 times with 300723 learned, non-critical hits at 10000 spell power, the dummy's magic resistance removed by 823764 in both arms (precondition fixture, as the Flames of the Father entry): the mean ratio is 1.30 within the 2-point band (G-19), the control arm being the casts without the passive. A first design that read one cumulative total over both phases read 2.30 (10099 then 23230): the second read included the first hit, a fault of the design, not of the server. HELD, uncertain expectation sent to the mentor: the value has three readings and no source picks one. (1) Tooltip text with ruling G-13 ('spell damage' names the spell power stat): spell power x 1.30, which adds 0 at the reference spell power 0 and +3000 at a 10000 spell power fixture (Justicar's Wrath 806980, spell power coefficient 0.55: +1650 on 6036, +27%). (2) DBC 300723 Effect[2] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, BasePoints 29 (+1 = 30), MiscValue 6 (Holy|Fire), MiscValueB 3 (Intellect): 30% of the reference Intellect 119 = 35.7 spell power (x 0.55 = +19.6 on the 536 hit, +3.7%). (3) Server rewrite at load: AscensionSunClericContracts.cpp:185-186 replaces Effect[2] with aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire (commit e36bc50aad, which gives no source): 536 x 1.30 = 696.8 (+160.8, +30%). This arm measures reading 3 only, so it shows what the server does, not what the tooltip or the DBC say. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found for the value. Residual failure probability of a correct server per pair: below 1e-9 (the 99% interval of the measured ratio is +29.94..+30.02 on 40 non-critical trials per arm, 0.04 points wide against the band of 2, so the band lies 50 interval half-widths away; normal approximation)."
     }
   ],
   "player_observations": [],
