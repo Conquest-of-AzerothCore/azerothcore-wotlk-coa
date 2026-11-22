@@ -150,7 +150,10 @@ class AuditTest(unittest.TestCase):
 
     def test_a_replacing_rule_only_link_closes_again_over_a_kept_conformant_label(self):
         link = f'unmodelled: checked by triggers entry "Hit" (verdict "{HIT}" (status unmeasured))'
-        base = self.results('base', [replace(verdict(HIT), runs=['b1'], selected=True)])
+        base = self.results('base', [
+            replace(verdict(VALUE, 'closed', 'unmodelled', explanation=link.replace('unmeasured', 'ok'),
+                            detail={LINKED_FROM: 'unmodelled'}), runs=[], selected=True),
+            replace(verdict(HIT), runs=['b1'], selected=True)])
         latest = self.results('latest', [
             replace(verdict(VALUE, 'unmodelled', 'unmodelled', explanation=link, detail={LINKED_FROM: 'unmodelled'}),
                     runs=[], selected=True),
@@ -158,6 +161,10 @@ class AuditTest(unittest.TestCase):
         document = audit_document(23, self.ledger, [latest], base_results=base)
         self.assertEqual((document['statuses'][HIT], document['statuses'][VALUE]), ('ok', 'closed'))
         self.assertEqual(document['results_replaced'], [VALUE])
+        self.assertEqual(document['results_not_selected'], [HIT])
+        with mock.patch('audit.relinked', lambda merged: [verdict for _, verdict in merged]):
+            self.assertEqual(audit_document(23, self.ledger, [latest], base_results=base)['statuses'][VALUE],
+                             'unmodelled')
 
     def test_a_label_added_by_one_layer_is_also_listed_as_not_selected_by_a_later_one(self):
         latest = [self.results(name, [replace(verdict(PASSIVE, 'unmeasured', spell=OTHER_SPELL), runs=[],
