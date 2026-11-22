@@ -211,7 +211,8 @@ class aura_ascension_sun_cleric_event : public AuraScript
             }
             if (id == 803719)
             {
-                uint32 mana = CalculatePct(player->GetMaxPower(POWER_MANA) - player->GetPower(POWER_MANA), Amount(504775)) +
+                uint32 mana = CalculatePct(player->GetMaxPower(POWER_MANA) - player->GetPower(POWER_MANA),
+                    Amount(504775, 0, player)) +
                     std::max(0, Amount(504877,0,player));
                 Mana(player, mana);
             }

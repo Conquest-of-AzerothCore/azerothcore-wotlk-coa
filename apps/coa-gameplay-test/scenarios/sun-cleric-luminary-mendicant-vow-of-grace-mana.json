@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Sun Cleric: Luminary Mendicant adds 100% to the Vow of Grace mana once",
-  "contract": "Luminary Mendicant 547214: 'Increases the mana restored by Vow of Grace by $s1%' ($s1 = 100, Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8 on 504877's class mask). Vow of Grace 803719 restores 5% of the missing mana (504775) plus 504877 effect 0 read with the caster on a direct ability hit (AscensionSunClericEvents.cpp); the script no longer adds a second +100% (Sun Cleric ADR 0011). Each arm casts Vow of Grace and one Horusath Blast 500154 with the same starting mana, learns its spell, does it again, and reads the second energize of 504877 as a ratio of the first. Control arm: nothing learned, ratio 1. Luminary Mendicant arm: ratio 2 by the tooltip; the double application measured 926 against 285 (ratio 3.25). Bands of 0.05.",
+  "contract": "Luminary Mendicant 547214: 'Increases the mana restored by Vow of Grace by $s1%' ($s1 = 100, Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8 on 504877's class mask). Vow of Grace 803719 restores 504775 effect 0 (5%) of the missing mana plus 504877 effect 0, both read with the caster so Luminary Mendicant's modifier raises each once, on a direct ability hit (AscensionSunClericEvents.cpp); the script no longer adds a second +100% (Sun Cleric ADR 0011). Each arm casts Vow of Grace and one Horusath Blast 500154 with the same starting mana, learns its spell, does it again, and reads the second energize of 504877 as a ratio of the first. Control arm: nothing learned, ratio 1. Luminary Mendicant arm: ratio 2 by the tooltip; the double application measured 926 against 285 (ratio 3.25). Bands of 0.05.",
   "timeout_ms": 60000,
   "players": [
     {
