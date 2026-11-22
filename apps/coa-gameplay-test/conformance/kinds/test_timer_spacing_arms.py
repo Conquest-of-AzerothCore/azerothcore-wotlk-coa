@@ -5,6 +5,7 @@ from compare import judge_behaviour
 from profile import DBC_DIR, load_fixture_class_file
 import run
 from test_behaviours import FakeRun, base_verdict
+from values import GCD_WAIT_MS
 
 COOLDOWN = {'spell': 300349, 'name': 'Hope (once per sec)', 'kind': 'timer_spacing_arms', 'variant': 'cooldown_cut',
             'label_suffix': 'icd_spacing', 'quote': 'Can occur only once per sec.', 'timer_ms': 1000,
@@ -29,7 +30,7 @@ class TimerSpacingArmsTests(unittest.TestCase):
         scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
         return scenario, expectation
 
-    def cooldown_run(self, cuts, spacings=(950.0, 1060.0), crits=(2, 2)):
+    def cooldown_run(self, cuts, spacings=(950.0, 1060.0), crits=(2, 2), opened=2.0):
         scenario, expectation = self.generated(COOLDOWN)
         reads, values, steps = expectation.model['reads'], {}, []
         planned = dict(zip(('blocked', 'allowed'), zip(cuts, spacings, crits)))
@@ -46,6 +47,8 @@ class TimerSpacingArmsTests(unittest.TestCase):
                     values[label] = 30000 - elapsed - 1000 * cut
                 if label == reads[name]['spacing']:
                     values[label] = spacing
+                if label == reads[name]['opened']:
+                    values[label] = 1.0 if name == 'blocked' else opened
                 if label in reads[name]['start']:
                     values[label] = 0.0
                 if label in reads[name]['end']:
@@ -62,6 +65,7 @@ class TimerSpacingArmsTests(unittest.TestCase):
             for index, label in enumerate(reads[name]['end']):
                 values[label] = 1.0 if index < held + gained else 0.0
             values[reads[name]['spacing']] = spacing
+            values[reads[name]['opened']] = 1.0 if name == 'blocked' else 2.0
             held += gained
         return judge_behaviour(base_verdict(expectation), FakeRun(values, STEP_MS), expectation)
 
@@ -89,6 +93,17 @@ class TimerSpacingArmsTests(unittest.TestCase):
     def test_a_spacing_outside_its_band_is_unmeasured(self):
         self.assertEqual(self.cooldown_run((1, 2), spacings=(1001.0, 1060.0)).status, 'unmeasured')
         self.assertEqual(self.cooldown_run((1, 2), spacings=(950.0, 1101.0)).status, 'unmeasured')
+
+    def test_a_refused_opening_cast_is_unmeasured(self):
+        self.assertEqual(self.cooldown_run((1, 2), opened=1.0).status, 'unmeasured')
+
+    def test_the_next_arm_opens_after_the_global_cooldown_of_the_second_hit(self):
+        for entry in (COOLDOWN, CHAIN):
+            with self.subTest(variant=entry['variant']):
+                scenario, _ = self.generated(entry)
+                waits = [step['ms'] for step in scenario['steps']
+                         if step['action'] == 'wait' and step.get('label', '').endswith(' hits')]
+                self.assertTrue(waits and all(wait >= GCD_WAIT_MS for wait in waits))
 
     def test_a_non_critical_heal_is_unmeasured(self):
         self.assertEqual(self.cooldown_run((1, 2), crits=(1, 2)).status, 'unmeasured')

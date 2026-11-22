@@ -123,6 +123,9 @@ def timer_spacing_scenario(class_file: dict, spec: TimerSpacingSpec) -> tuple[di
         return measurement(mark(spec, f'{arm} spacing'), CASTER, 'event_interval_min_ms', stream=stream,
                            since_spell=since, **fields)
 
+    def opened_read(name: str) -> dict:
+        return measurement(mark(spec, f'{name} opened'), CASTER, 'spell_go_count', spell=since)
+
     def arm(name: str, gap: int) -> list[dict]:
         if chain:
             opening = cast(records, spec.seed_spell, dummy_id(0), spec.cast_power) + [
@@ -136,11 +139,12 @@ def timer_spacing_scenario(class_file: dict, spec: TimerSpacingSpec) -> tuple[di
         steps = (opening + effect_reads(name, 'start') + health() + cast(records, spec.hit_spell, target, spec.cast_power)
                  + [{'action': 'wait', 'label': mark(spec, f'{name} gap'), 'ms': gap}] + health()
                  + cast(records, spec.hit_spell, target, spec.cast_power, ignore_gcd=True)
-                 + [{'action': 'wait', 'label': f'{name} hits', 'ms': travel_ms + hit.cast_time_ms + READ_WAIT_MS}])
+                 + [{'action': 'wait', 'label': f'{name} hits',
+                     'ms': max(travel_ms + hit.cast_time_ms + READ_WAIT_MS, GCD_WAIT_MS)}])
         if not chain:
             steps.append(measurement(mark(spec, f'{name} cooldown'), CASTER, 'cooldown_ms',
                                      spell=spec.cooldown_spell))
-        return steps + effect_reads(name, 'end') + [hits_read(name)]
+        return steps + effect_reads(name, 'end') + [hits_read(name), opened_read(name)]
 
     learned = (spec.seed_spell, spec.hit_spell) if chain else (spec.cooldown_spell, spec.hit_spell)
     steps = (base_steps(class_file)
@@ -169,7 +173,7 @@ def timer_spacing_scenario(class_file: dict, spec: TimerSpacingSpec) -> tuple[di
     model = {'kind': KIND, 'variant': spec.variant, 'metric': 'event_interval_min_ms', 'quote': entry.quote,
              'expected': expected_effects(spec), 'bands': {ARMS[0]: [blocked_low, blocked_high],
                                                            ARMS[1]: [allowed_low, allowed_high]},
-             'reads': {name: {'spacing': mark(spec, f'{name} spacing'),
+             'reads': {name: {'spacing': mark(spec, f'{name} spacing'), 'opened': mark(spec, f'{name} opened'),
                               'start': [read['label'] for read in effect_reads(name, 'start')],
                               'end': [read['label'] for read in effect_reads(name, 'end')]} for name in ARMS}}
     if not chain:
@@ -217,8 +221,12 @@ def timer_spacing_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     if missing is not None:
         return replace(base, status='unmeasured', explanation=missing_measurement(run, missing))
     notes, effects = [], {}
-    for name in ARMS:
+    for count, name in enumerate(ARMS, 1):
         reads = model['reads'][name]
+        if run.values[reads['opened']] != count:
+            return replace(base, status='unmeasured',
+                           explanation=f'{name}: {run.values[reads["opened"]]:g} opening casts by its end, {count} '
+                                       f'needed, so its spacing and cooldown reads are not its own')
         spacing = run.values[reads['spacing']]
         low, high = model['bands'][name]
         inside = low <= spacing < high if name == ARMS[0] else low < spacing <= high
