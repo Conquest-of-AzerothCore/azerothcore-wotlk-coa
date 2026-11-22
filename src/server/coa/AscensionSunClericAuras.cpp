@@ -342,7 +342,7 @@ class aura_ascension_sun_cleric_mercy : public AuraScript
 {
     PrepareAuraScript(aura_ascension_sun_cleric_mercy);
 
-    void Period(AuraEffect const* /*effect*/, bool& /*periodic*/, int32& amplitude)
+    void Period(AuraEffect const*, bool&, int32& amplitude)
     {
         Unit* caster = GetCaster();
         Player* owner = caster ? caster->GetSpellModOwner() : nullptr;
