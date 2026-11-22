@@ -1,0 +1,275 @@
+from dataclasses import dataclass, replace
+import math
+from pathlib import Path
+
+from behaviours import (BEHAVIOUR_METRIC_DELTA, STRIKER_DISTANCE, STRIKER_HEALTH, TAKEN_OUTCOME_ATTACKERS,
+                        TAKEN_OUTCOME_ENGAGE_MS, TAKEN_OUTCOME_HEALTH, TAKEN_OUTCOME_SWING_MARGIN_MS,
+                        behaviour_entry, cleaned_tooltip, hit_ratio_cast, prose_rule, waited_ms)
+from bonus import Bonus, bonus_detail, bonus_status
+from hits import MAX_ACCELERATED_SCENARIO_MS, Z_99, base_mana_steps, timed
+from procs import swing_interval
+from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
+from tooltip import Records
+from values import DUMMY_ENTRY, Expectation, dataset, facts_of
+
+KIND = 'attacker_miss_share'
+ORDER = 46
+
+ATTACKER_MISS_METRIC = 'melee_attacks_taken'
+MISS_VICTIM_STATE = 0
+MOD_HIT_CHANCE_AURA = 54
+MELEE_MISS_CLAMP = (0.0, 60.0)
+MINIMUM_SWINGS = 100
+MAX_STEPS = 10000
+ARMS = ('control', 'treatment')
+READ_KEYS = ('swings', 'misses')
+MOMENTS = ('start', 'end')
+
+
+@dataclass(frozen=True)
+class AttackerMissShareSpec:
+    spell: int
+    name: str
+    quote: str
+    cast_spell: int
+    aura: int
+    aura_effect: int
+    expected: float
+    arm_ms: int
+    cycle_ms: int
+    settle_ms: int
+    attackers: int = TAKEN_OUTCOME_ATTACKERS
+    attacker_entry: int = DUMMY_ENTRY
+    learn: tuple[int, ...] = ()
+    label_suffix: str = 'attacker_miss'
+    quote_spell: int | None = None
+
+
+def attacker_miss_share_spec(entry: dict) -> AttackerMissShareSpec:
+    spec = AttackerMissShareSpec(int(entry['spell']), entry['name'], entry['quote'], int(entry['cast_spell']),
+                                 int(entry['aura']), int(entry.get('aura_effect', 0)), float(entry['expected']),
+                                 int(entry['arm_ms']), int(entry['cycle_ms']), int(entry['settle_ms']),
+                                 int(entry.get('attackers', TAKEN_OUTCOME_ATTACKERS)),
+                                 int(entry.get('attacker_entry', DUMMY_ENTRY)),
+                                 tuple(int(spell) for spell in entry.get('learn', [])),
+                                 entry.get('label_suffix', 'attacker_miss'),
+                                 int(entry['quote_spell']) if 'quote_spell' in entry else None)
+    if not 1 <= spec.attackers <= TAKEN_OUTCOME_ATTACKERS:
+        raise ValueError(f'{spec.spell} attacker_miss_share needs 1 to {TAKEN_OUTCOME_ATTACKERS} attackers')
+    if spec.cycle_ms <= 0 or spec.arm_ms < spec.cycle_ms or spec.arm_ms % spec.cycle_ms:
+        raise ValueError(f'{spec.spell} attacker_miss_share needs arms of whole, positive cast cycles')
+    if spec.expected == 0:
+        raise ValueError(f'{spec.spell} attacker_miss_share needs a stated, nonzero change of the miss share')
+    return spec
+
+
+def stated_points(records: Records, spec: AttackerMissShareSpec) -> float:
+    effect = spec.aura_effect
+    aura_name = int(records.field('Spell', spec.aura, f'EffectApplyAuraName[{effect}]'))
+    if aura_name != MOD_HIT_CHANCE_AURA:
+        raise ValueError(f'{spec.spell} attacker_miss_share reads aura {spec.aura} effect {effect}, aura '
+                         f'{aura_name}, not SPELL_AURA_MOD_HIT_CHANCE {MOD_HIT_CHANCE_AURA}')
+    amount = (int(records.field('Spell', spec.aura, f'EffectBasePoints[{effect}]'))
+              + int(records.field('Spell', spec.aura, f'EffectDieSides[{effect}]')))
+    return float(-amount)
+
+
+def quoted_spell(records: Records, spec: AttackerMissShareSpec) -> int:
+    if spec.quote_spell is None or spec.quote_spell == spec.spell:
+        return spec.spell
+    if f'@s:{spec.quote_spell}:' not in cleaned_tooltip(records, spec.spell):
+        raise ValueError(f'{spec.spell} attacker_miss_share quotes {spec.quote_spell}, whose tooltip the '
+                         f'{spec.spell} tooltip does not embed (@s:{spec.quote_spell}:N@)')
+    return spec.quote_spell
+
+
+def aura_duration_ms(records: Records, aura: int) -> int:
+    index = int(records.field('Spell', aura, 'DurationIndex'))
+    return int(records.field('SpellDuration', index, 'Duration')) if index else 0
+
+
+def share_label(spec: AttackerMissShareSpec) -> str:
+    return f'{spec.spell} {BEHAVIOUR_METRIC_DELTA} {spec.label_suffix}'
+
+
+def attacker_id(index: int) -> str:
+    return f'attacker{index + 1}'
+
+
+def read_labels(spec: AttackerMissShareSpec, arm: str) -> dict[str, str]:
+    return {f'{moment} {key}': f'{share_label(spec)} {arm} {moment} {key}' for moment in MOMENTS for key in READ_KEYS}
+
+
+def count_reads(spec: AttackerMissShareSpec, arm: str, moment: str) -> list[dict]:
+    labels = read_labels(spec, arm)
+    return [measurement(labels[f'{moment} swings'], CASTER, ATTACKER_MISS_METRIC),
+            measurement(labels[f'{moment} misses'], CASTER, ATTACKER_MISS_METRIC, victim_state=MISS_VICTIM_STATE)]
+
+
+def aura_reads(spec: AttackerMissShareSpec, arm: str, moment: str) -> list[dict]:
+    return [measurement(f'{share_label(spec)} {arm} aura {moment} {attacker_id(index)}', attacker_id(index), 'aura',
+                        spell=spec.aura, caster=CASTER) for index in range(spec.attackers)]
+
+
+def attacker_miss_share_scenario(class_file: dict, spec: AttackerMissShareSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    expected = stated_points(records, spec)
+    if abs(expected - spec.expected) > 1e-9:
+        raise ValueError(f'{spec.spell} attacker_miss_share states {spec.expected:g} points but aura {spec.aura} '
+                         f'effect {spec.aura_effect} changes the attackers\' miss share by {expected:g} points')
+    duration = aura_duration_ms(records, spec.aura)
+    if duration <= 0 or spec.cycle_ms >= duration:
+        raise ValueError(f'{spec.spell} attacker_miss_share casts every {spec.cycle_ms} ms; the cycle must stay '
+                         f'under the {duration} ms duration of aura {spec.aura}')
+    facts = facts_of(records, spec.cast_spell)
+    if spec.settle_ms < facts.cast_time_ms:
+        raise ValueError(f'{spec.spell} attacker_miss_share settles {spec.settle_ms} ms, under the '
+                         f'{facts.cast_time_ms} ms cast of {spec.cast_spell}')
+    power = base_mana_steps(class_file, facts)
+    if facts.mana_cost_percentage and not power:
+        raise ValueError(f'{spec.spell} attacker_miss_share casts {spec.cast_spell}, whose cost is a percentage of '
+                         f'base mana, from a class file without base_mana')
+    entry = behaviour_entry(records, quoted_spell(records, spec), spec.name, KIND, spec.quote, expected)
+    attackers = [attacker_id(index) for index in range(spec.attackers)]
+    health = {'action': 'set_health', 'actor': CASTER, 'value': TAKEN_OUTCOME_HEALTH, 'maximum': TAKEN_OUTCOME_HEALTH}
+    cast = power + [step for step in hit_ratio_cast(records, spec.cast_spell, CASTER, attackers[0])
+                    if step['action'] != 'wait']
+    swing_ms = swing_interval(class_file) + TAKEN_OUTCOME_SWING_MARGIN_MS
+    steps = [{'action': 'learn', 'actor': CASTER, 'spell': spell}
+             for spell in dict.fromkeys((*spec.learn, spec.cast_spell))] + [health]
+    for attacker in attackers:
+        steps += [{'action': 'attack', 'actor': CASTER, 'target': attacker},
+                  {'action': 'wait', 'label': f'engage {attacker}', 'ms': swing_ms}, health]
+    steps += [{'action': 'stop_attack', 'actor': CASTER},
+              {'action': 'wait', 'label': 'engage', 'ms': TAKEN_OUTCOME_ENGAGE_MS}]
+    cycles = spec.arm_ms // spec.cycle_ms
+    steps += count_reads(spec, 'control', 'start')
+    for cycle in range(1, cycles + 1):
+        steps += ([health, {'action': 'wait', 'label': f'control swings {cycle}', 'ms': spec.cycle_ms}]
+                  + aura_reads(spec, 'control', str(cycle)))
+    steps += count_reads(spec, 'control', 'end')
+    steps += ([health] + cast + [{'action': 'wait', 'label': 'treatment settle', 'ms': spec.settle_ms}]
+              + aura_reads(spec, 'treatment', 'ready') + count_reads(spec, 'treatment', 'start'))
+    for cycle in range(1, cycles + 1):
+        steps += ([health] + cast + [{'action': 'wait', 'label': f'treatment swings {cycle}', 'ms': spec.cycle_ms}]
+                  + aura_reads(spec, 'treatment', str(cycle)))
+    steps += count_reads(spec, 'treatment', 'end')
+    steps = base_steps(class_file) + steps
+    if len(steps) > MAX_STEPS:
+        raise ValueError(f'{spec.spell} attacker_miss_share needs {len(steps)} steps, over the {MAX_STEPS} step cap')
+    creatures = [{'id': attacker, 'owner': CASTER, 'entry': spec.attacker_entry, 'level': class_file['level'],
+                  'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 2, 'stationary': True}
+                 for attacker in attackers]
+    moments = [str(cycle) for cycle in range(1, cycles + 1)]
+    auras = {'control': [step['label'] for moment in moments for step in aura_reads(spec, 'control', moment)],
+             'treatment': [step['label'] for moment in ('ready', *moments)
+                           for step in aura_reads(spec, 'treatment', moment)]}
+    fixture = (f'reset_cooldown {spec.cast_spell} before every cast (RecoveryTime {facts.recast_ms} ms), a named '
+               f'precondition fixture, not the subject (G-21 point 6)')
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour attacker miss share',
+        'contract': (f'{spec.attackers} aggressive, stationary attackers (creature entry {spec.attacker_entry}, level '
+                     f'{class_file["level"]}) melee the caster after one engaging swing each. The control arm counts '
+                     f'the swings the caster takes and those with victim state {MISS_VICTIM_STATE} (a miss) over '
+                     f'{spec.arm_ms} ms with no cast; the caster\'s health is set every {spec.cycle_ms} ms and aura '
+                     f'{spec.aura} is read on every attacker at each cycle end. The treatment arm casts '
+                     f'{spec.cast_spell} at {attackers[0]} every {spec.cycle_ms} ms ({fixture}); counting starts '
+                     f'{spec.settle_ms} ms after the first cast, once aura {spec.aura} from the caster is read on '
+                     f'every attacker, and the aura is read again on every attacker at each cycle end. The miss '
+                     f'shares of the two arms are compared against the stated {expected:+g} points with the '
+                     f'taken-outcome 99% interval; a lapsed treatment aura, a control aura or a control share '
+                     f'within {abs(expected):g} points of the {MELEE_MISS_CLAMP[0]:g} to {MELEE_MISS_CLAMP[1]:g}% '
+                     f'miss clamp is unmeasured.'),
+        'players': [player_fixture(class_file)],
+        'creatures': creatures,
+        'steps': steps}
+    model = {'kind': KIND, 'metric': ATTACKER_MISS_METRIC, 'quote': entry.quote, 'expected': expected,
+             'victim_state': MISS_VICTIM_STATE, 'reads': {arm: read_labels(spec, arm) for arm in ARMS},
+             'auras': auras, 'clamp': list(MELEE_MISS_CLAMP), 'fixture': fixture}
+    expectation = Expectation(share_label(spec), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.aura, None, f'{expected:g}',
+                              prose_rule(entry.quote, spec.spell), model)
+    return timed(scenario, waited_ms(steps), MAX_ACCELERATED_SCENARIO_MS), [expectation]
+
+
+def run_failure(base, run, model: dict, prefix: str):
+    from compare import missing_measurement
+    labels = [label for arm in ARMS for label in model['reads'][arm].values()]
+    labels += [label for arm in ARMS for label in model['auras'][arm]]
+    missing = next((label for label in labels if run.values.get(label) is None), None)
+    if missing is not None:
+        return replace(base, explanation=f'{prefix}{missing_measurement(run, missing)}')
+    for arm, wanted in (('control', 0), ('treatment', 1)):
+        wrong = next((label for label in model['auras'][arm] if run.values[label] != wanted), None)
+        if wrong is not None:
+            return replace(base, status='unmeasured', explanation=f'{prefix}not judged: {wrong} read '
+                                                                  f'{run.values[wrong]:g}, not {wanted}')
+    return None
+
+
+def arm_counts(runs: list, model: dict, arm: str) -> tuple[float, float]:
+    reads = model['reads'][arm]
+    swings = sum(run.values[reads['end swings']] - run.values[reads['start swings']] for run in runs)
+    misses = sum(run.values[reads['end misses']] - run.values[reads['start misses']] for run in runs)
+    return swings, misses
+
+
+def share_judgement(base, runs: list, model: dict, note: str = ''):
+    parts = model.get('parts', 1)
+    if len(runs) != parts:
+        return replace(base, status='unmeasured', explanation=f'{len(runs)} of {parts} pooled parts ran')
+    for run in runs:
+        unusable = run_failure(base, run, model, f'{run.key}: ' if parts > 1 else '')
+        if unusable is not None:
+            return unusable
+    shares = {}
+    for arm in ARMS:
+        swings, misses = arm_counts(runs, model, arm)
+        if swings < MINIMUM_SWINGS or not 0 <= misses <= swings:
+            return replace(base, status='unmeasured',
+                           explanation=f'{arm} arm: {misses:g} misses over {swings:g} swings taken; each arm needs '
+                                       f'at least {MINIMUM_SWINGS} swings')
+        shares[arm] = (misses / swings, swings, misses)
+    (control, control_swings, control_misses), (treated, treated_swings, treated_misses) = \
+        shares['control'], shares['treatment']
+    expected = float(model['expected'])
+    low_clamp, high_clamp = model['clamp']
+    if not low_clamp + abs(expected) <= control * 100 <= high_clamp - abs(expected):
+        return replace(base, status='unmeasured',
+                       explanation=f'control miss share {control:.2%} lies within {abs(expected):g} points of the '
+                                   f'{low_clamp:g} to {high_clamp:g}% miss clamp, which could hide the change')
+    spread = control * (1 - control) / control_swings + treated * (1 - treated) / treated_swings
+    bonus = Bonus((treated - control) * 100, Z_99 * math.sqrt(spread) * 100, expected,
+                  int(min(control_swings, treated_swings)))
+    status, reason, needed = bonus_status(bonus)
+    low, high = bonus.excluded
+    return replace(base, status=status, measured=bonus.measured, expected=bonus.expected,
+                   low=bonus.expected - bonus.band, high=bonus.expected + bonus.band,
+                   detail={'bonus': bonus_detail(bonus), 'swings_needed': needed, 'parts': parts,
+                           'fixture': model['fixture']},
+                   explanation=f'{control_misses:g} misses of {control_swings:g} swings taken in the control arm '
+                               f'({control:.2%}), {treated_misses:g} of {treated_swings:g} with the aura held '
+                               f'({treated:.2%}); difference {bonus.measured:+.4g} points (99% interval '
+                               f'{bonus.low:+.4g} to {bonus.high:+.4g}) against the stated {expected:+g} points, '
+                               f'band +-{bonus.band:.3g}; excludes below {low:+.4g} or above {high:+.4g} points; '
+                               f'{reason}; {model["fixture"]}{note}')
+
+
+def attacker_miss_share_verdict(base, run, model: dict):
+    return share_judgement(base, [run], model)
+
+
+def attacker_miss_share_pooled_verdict(base, runs: list, model: dict):
+    return share_judgement(base, runs, model, f'; {len(runs)} parts pooled, the swings of every part summed per arm')
+
+
+def scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
+    return attacker_miss_share_scenario(class_file, attacker_miss_share_spec(entry))
+
+
+def label(entry: dict) -> list[str]:
+    return [f"{entry['spell']} behaviour_metric_delta {entry.get('label_suffix', 'attacker_miss')}"]
+
+
+JUDGES = {BEHAVIOUR_METRIC_DELTA: attacker_miss_share_verdict}
+POOLED_JUDGE = attacker_miss_share_pooled_verdict
