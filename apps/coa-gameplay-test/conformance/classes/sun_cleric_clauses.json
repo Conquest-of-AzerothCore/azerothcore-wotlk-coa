@@ -2219,6 +2219,13 @@
         "labels": [
           "704562 behaviour_metric_delta stack_cap"
         ]
+      },
+      {
+        "claim": "control: a fulfilled Vow without 704562 gives no stack",
+        "labels": [
+          "704562 behaviour_metric_delta control_stacks",
+          "704562 behaviour_metric_delta control_fulfilled"
+        ]
       }
     ]
   },
@@ -2474,6 +2481,14 @@
         "labels": [
           "704928 behaviour_metric_delta mana_sp"
         ]
+      },
+      {
+        "claim": "Critical strikes now bless you: a non-critical hit does not",
+        "labels": [
+          "704928 behaviour_metric_delta no_crit_mana",
+          "704928 behaviour_metric_delta no_crit_aura",
+          "704928 behaviour_metric_delta no_crit_hit"
+        ]
       }
     ]
   },
@@ -2483,12 +2498,32 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "increasing all of your primary stats by $704926s1%",
+        "claim": "increasing all of your primary stats by $704926s1%: your Strength by 10%",
         "labels": [
-          "704928 behaviour_metric_delta strength",
-          "704928 behaviour_metric_delta agility",
-          "704928 behaviour_metric_delta stamina",
-          "704928 behaviour_metric_delta intellect",
+          "704928 behaviour_metric_delta strength"
+        ]
+      },
+      {
+        "claim": "increasing all of your primary stats by $704926s1%: your Agility by 10%",
+        "labels": [
+          "704928 behaviour_metric_delta agility"
+        ]
+      },
+      {
+        "claim": "increasing all of your primary stats by $704926s1%: your Stamina by 10%",
+        "labels": [
+          "704928 behaviour_metric_delta stamina"
+        ]
+      },
+      {
+        "claim": "increasing all of your primary stats by $704926s1%: your Intellect by 10%",
+        "labels": [
+          "704928 behaviour_metric_delta intellect"
+        ]
+      },
+      {
+        "claim": "increasing all of your primary stats by $704926s1%: your Spirit by 10%",
+        "labels": [
           "704928 behaviour_metric_delta spirit"
         ]
       },
@@ -3581,6 +3616,18 @@
     "kind": "claim",
     "claims": [
       {
+        "claim": "Increases the effectiveness of Gavels (Gavel of Light)",
+        "labels": [
+          "805628 behaviour_hit_ratio effect_gavel_light"
+        ]
+      },
+      {
+        "claim": "Increases the effectiveness of Gavels (Gavel of Grace)",
+        "labels": [
+          "805628 behaviour_hit_ratio effect_gavel_grace"
+        ]
+      },
+      {
         "claim": "Increases the effectiveness of Gavels (Gavel of Wrath)",
         "labels": [
           "805628 behaviour_hit_ratio effect_gavel"
@@ -3593,8 +3640,9 @@
         ]
       },
       {
-        "claim": "reduces the mana cost of Gavels by $s2%",
+        "claim": "reduces the mana cost of Gavels by $s2% (Gavel of Light and Gavel of Wrath; Gavel of Grace has no mana cost)",
         "labels": [
+          "805628 behaviour_metric_delta cost_gavel_light",
           "805628 behaviour_metric_delta cost_gavel"
         ]
       },

@@ -3588,17 +3588,17 @@
       "trigger_spell": 804247,
       "gate_spell": 704916,
       "target": "caster",
-      "metric": "stat",
+      "metric": "stat_exact",
       "fields": {
         "stat": 0
       },
       "before_expected": 40,
       "expected": 42.0,
       "expected_ratio": 1.05,
-      "tolerance": 0.005,
+      "tolerance": 0.002,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "704916 Solar Might Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (MiscValue 0, Strength) and Effect[1] the same with MiscValue 3 (Intellect), BasePoints 4 + 1 = 5 ($s1). The caster's Strength is read before and after a real learn of 704916 (the reading before is the control without it); the judge compares the after over the before reading, expected 1.05 within 0.005, so +4% (x1.04) and +6% are excluded. Reference stat 0 = 40 (class file reference_stats). Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); 570120 is the same passive at 10% and is proven the same way."
+      "observe_source": "704916 Solar Might Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (MiscValue 0, Strength) and Effect[1] the same with MiscValue 3 (Intellect), BasePoints 4 + 1 = 5 ($s1). The caster's Strength is read before and after a real learn of 704916 (the reading before is the control without it); the judge compares the after over the before reading, expected 1.05 within 0.002. Reference stat 0 = 40 (class file reference_stats). Reference search: coa-history spell 704916 and 570120: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep and gh pr list --search (704916, Solar Might): only merged PR #4516, whose scenario sun-cleric-solar-might checks the native handlers at data level and reads no Strength gain; nothing else (guide section 4); 570120 is the same passive at 10% and is proven the same way. Read with stat_exact (the unrounded Player::GetExactStatValue): the integer stat read truncates, so 40 x 1.06 = 42.4 and 40 x 1.07 = 42.8 both read 42 and cannot be told from +5%; the exact value 40 x 1.0499999523 = 41.99999809 excludes +4% (41.6), +6% (42.4) and +7% (42.8) by more than the 0.08 tolerance (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
     },
     {
       "spell": 704916,
@@ -3620,7 +3620,7 @@
       "tolerance": 0.002,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "704916 Solar Might Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (MiscValue 0, Strength) and Effect[1] the same with MiscValue 3 (Intellect), BasePoints 4 + 1 = 5 ($s1). The caster's Intellect is read before and after a real learn of 704916 (the reading before is the control without it); the judge compares the after over the before reading, expected 1.05 within 0.005, so +4% (x1.04) and +6% are excluded. Reference stat 3 = 119 (class file reference_stats). Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); 570120 is the same passive at 10% and is proven the same way. Read with stat_exact (the unrounded Player::GetExactStatValue): the integer stat read truncates 119 x 1.0499999523 = 124.95 to 124 (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160), so the exact value is what the percent acts on."
+      "observe_source": "704916 Solar Might Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (MiscValue 0, Strength) and Effect[1] the same with MiscValue 3 (Intellect), BasePoints 4 + 1 = 5 ($s1). The caster's Intellect is read before and after a real learn of 704916 (the reading before is the control without it); the judge compares the after over the before reading, expected 1.05 within 0.005, so +4% (x1.04) and +6% are excluded. Reference stat 3 = 119 (class file reference_stats). Reference search: coa-history spell 704916 and 570120: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep and gh pr list --search (704916, Solar Might): only merged PR #4516, whose scenario sun-cleric-solar-might checks the native handlers at data level and reads no Strength gain; nothing else (guide section 4); 570120 is the same passive at 10% and is proven the same way. Read with stat_exact (the unrounded Player::GetExactStatValue): the integer stat read truncates 119 x 1.0499999523 = 124.95 to 124 (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160), so the exact value is what the percent acts on."
     },
     {
       "spell": 704942,
@@ -3632,17 +3632,17 @@
       "trigger_spell": 804247,
       "gate_spell": 704942,
       "target": "caster",
-      "metric": "stat",
+      "metric": "stat_exact",
       "fields": {
         "stat": 0
       },
       "before_expected": 40,
       "expected": 42.0,
       "expected_ratio": 1.05,
-      "tolerance": 0.005,
+      "tolerance": 0.002,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "704942 Impartial Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (MiscValue 0, Strength), BasePoints 4 + 1 = 5 ($s1), Effect[1] aura 240 SPELL_AURA_MOD_EXPERTISE BasePoints 4 + 1 = 5 ($s2), Effect[2] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT (MiscValue 0, mana) BasePoints 4 + 1 = 5. The caster's Strength is read (reference 40, ratio 1.05 within 0.005, which excludes +4% and +6%). Read before and after a real learn of 704942 (the reading before is the control without it). Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "observe_source": "704942 Impartial Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (MiscValue 0, Strength), BasePoints 4 + 1 = 5 ($s1), Effect[1] aura 240 SPELL_AURA_MOD_EXPERTISE BasePoints 4 + 1 = 5 ($s2), Effect[2] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT (MiscValue 0, mana) BasePoints 4 + 1 = 5. The caster's Strength is read (reference 40, ratio 1.05 within 0.002). Read before and after a real learn of 704942 (the reading before is the control without it). Reference search: coa-history spell 704942: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep and gh pr list --search (704942, Impartial): only merged PR #4516, whose scenario sun-cleric-impartial checks the native handlers at data level; nothing else (guide section 4). Read with stat_exact (the unrounded Player::GetExactStatValue): the integer stat read truncates, so 40 x 1.06 = 42.4 and 40 x 1.07 = 42.8 both read 42 and cannot be told from +5%; the exact value 40 x 1.0499999523 = 41.99999809 excludes +4% (41.6), +6% (42.4) and +7% (42.8) by more than the 0.08 tolerance (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
     },
     {
       "spell": 704942,
@@ -3664,7 +3664,7 @@
       "tolerance": 0.002,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "704942 Impartial Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (MiscValue 0, Strength), BasePoints 4 + 1 = 5 ($s1), Effect[1] aura 240 SPELL_AURA_MOD_EXPERTISE BasePoints 4 + 1 = 5 ($s2), Effect[2] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT (MiscValue 0, mana) BasePoints 4 + 1 = 5. The maximum mana is read (power 0); the reference character's maximum mana is 2868 (BaseMana 1363 + 20 + (119 - 20) x 15, StatSystem.cpp:421-429, as recorded for 301345 in this class file), ratio 1.05 within 0.002, which excludes +4% (x1.04). Read before and after a real learn of 704942 (the reading before is the control without it). Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "observe_source": "704942 Impartial Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (MiscValue 0, Strength), BasePoints 4 + 1 = 5 ($s1), Effect[1] aura 240 SPELL_AURA_MOD_EXPERTISE BasePoints 4 + 1 = 5 ($s2), Effect[2] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT (MiscValue 0, mana) BasePoints 4 + 1 = 5. The maximum mana is read (power 0); the reference character's maximum mana is 2868 (BaseMana 1363 + 20 + (119 - 20) x 15, StatSystem.cpp:421-429, as recorded for 301345 in this class file), ratio 1.05 within 0.002, which excludes +4% (x1.04). Read before and after a real learn of 704942 (the reading before is the control without it). Reference search: coa-history spell 704942: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep and gh pr list --search (704942, Impartial): only merged PR #4516, whose scenario sun-cleric-impartial checks the native handlers at data level; nothing else (guide section 4)."
     },
     {
       "spell": 704942,
@@ -3684,7 +3684,7 @@
       "tolerance": 0.5,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "704942 Impartial Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (MiscValue 0, Strength), BasePoints 4 + 1 = 5 ($s1), Effect[1] aura 240 SPELL_AURA_MOD_EXPERTISE BasePoints 4 + 1 = 5 ($s2), Effect[2] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT (MiscValue 0, mana) BasePoints 4 + 1 = 5. The caster's expertise (PLAYER_EXPERTISE) is read; the gain must be 5 within 0.5, which excludes 4 and 6. The reference character carries expertise rating 10000 (class file ratings), so the reading before is the rating's own value and the judge compares the difference. Read before and after a real learn of 704942 (the reading before is the control without it). Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "observe_source": "704942 Impartial Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (MiscValue 0, Strength), BasePoints 4 + 1 = 5 ($s1), Effect[1] aura 240 SPELL_AURA_MOD_EXPERTISE BasePoints 4 + 1 = 5 ($s2), Effect[2] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT (MiscValue 0, mana) BasePoints 4 + 1 = 5. The caster's expertise (PLAYER_EXPERTISE) is read; the gain must be 5 within 0.5, which excludes 4 and 6. The reference character carries expertise rating 10000 (class file ratings), so the reading before is the rating's own value and the judge compares the difference. Read before and after a real learn of 704942 (the reading before is the control without it). Reference search: coa-history spell 704942: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep and gh pr list --search (704942, Impartial): only merged PR #4516, whose scenario sun-cleric-impartial checks the native handlers at data level; nothing else (guide section 4)."
     },
     {
       "spell": 805628,
@@ -3707,7 +3707,7 @@
       "tolerance": 1,
       "wait_ms": 300,
       "expire_ms": 5000,
-      "observe_source": "805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word 2 = 96 (Gavels, Horusath Blast). The caster's mana is set to 1000 before each cast (regeneration off) and read after a real cast of Horusath Blast 500154: ManaCostPercentage 33 of base mana 1363 = 449 (int), 1000 - 449 = 551 without the passive; -20% gives 449 x 0.8 = 359, so 641 left. Control = the phase before the learn (full cost). Tolerance 1 for the engine's integer truncation of the cost (CalculatePct, then ApplySpellMod on the int cost); a cost cut of 10% or 30% reads 9 or more off. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "observe_source": "805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The caster's mana is set to 1000 before each cast (regeneration off) and read after a real cast of Horusath Blast 500154: ManaCostPercentage 33 of base mana 1363 = 449 (int), 1000 - 449 = 551 without the passive; -20% gives 449 x 0.8 = 359, so 641 left. Control = the phase before the learn (full cost). Tolerance 1 for the engine's integer truncation of the cost (CalculatePct, then ApplySpellMod on the int cost); a cost cut of 10% or 30% reads 9 or more off. Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4)."
     },
     {
       "spell": 805628,
@@ -3730,7 +3730,7 @@
       "tolerance": 1,
       "wait_ms": 300,
       "expire_ms": 5000,
-      "observe_source": "805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word 2 = 96 (Gavels, Horusath Blast). The caster's mana is set to 1000 before each cast (regeneration off) and read after a real cast of Gavel of Wrath 800617: ManaCost 3 + ManaCostPercentage 10 of base mana 1363 = 3 + 136 = 139, 1000 - 139 = 861 without the passive; -20% gives int(139 x 0.8) = 111, so 889 left. Control = the phase before the learn (full cost). Tolerance 1 for the engine's integer truncation of the cost (CalculatePct, then ApplySpellMod on the int cost); a cost cut of 10% or 30% reads 9 or more off. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4).",
+      "observe_source": "805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The caster's mana is set to 1000 before each cast (regeneration off) and read after a real cast of Gavel of Wrath 800617: ManaCost 3 + ManaCostPercentage 10 of base mana 1363 = 3 + 136 = 139, 1000 - 139 = 861 without the passive; -20% gives int(139 x 0.8) = 111, so 889 left. Control = the phase before the learn (full cost). Tolerance 1 for the engine's integer truncation of the cost (CalculatePct, then ApplySpellMod on the int cost); a cost cut of 10% or 30% reads 9 or more off. Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4).",
       "dummy_distance": 5
     },
     {
@@ -3754,7 +3754,7 @@
       "trials": 100,
       "parts": 14,
       "cast_power": 1363,
-      "expected_source": "805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word 2 = 96 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Horusath Blast 500154 is expected at x1.2 of the control arm (band 2 points, G-19: the larger of 5% of 20 and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "expected_source": "805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Horusath Blast 500154 is expected at x1.2 of the control arm (band 2 points, G-19: the larger of 5% of 20 and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4)."
     },
     {
       "spell": 805628,
@@ -3777,7 +3777,7 @@
       "trials": 100,
       "parts": 3,
       "cast_power": 1363,
-      "expected_source": "805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word 2 = 96 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Gavel of Wrath 800617 is expected at x1.2 of the control arm (band 2 points, G-19: the larger of 5% of 20 and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "expected_source": "805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Gavel of Wrath 800617 is expected at x1.2 of the control arm (band 2 points, G-19: the larger of 5% of 20 and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Cause of a bonus above +20% (Spell::EffectWeaponDmg, SpellEffects.cpp:4676 and :4681): SPELLMOD_ALL_EFFECTS (+20%) is applied by CalculateSpellDamage to the flat effect 0 and to the weapon percent effect 1, and the loop at :4729-4741 adds the flat value before it applies the percent, in DBC order. The treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, which is +20% plus 0.24 x B x (1 - r) / C (C = the control mean hit, r = the armor reduction, B = the flat value). B comes from the DBC (Gavel of Wrath 800617: BasePoints 44, DieSides 11 = 45..55, mean 50; Gavel of Grace 800614: BasePoints 22, DieSides 4 = 23..26, mean 24.5; Gavel of Light 800611: BasePoints 11 + 1 = 12, the per-level term 0.1505 x (MaxLevel 8 - SpellLevel 4) = 0.6 truncated to 0). r = x / (1 + x) with x = armor / (85 x 60 + 400) = 528 / 5500 (Unit::CalcArmorReducedDamage, classic branch, ClassicPlusCombat::ArmorConstant), so r = 8.76%; the dummy armor 528 is read by the dummy_armor entry (creature_classlevelstats basearmor 528 at level 11, class 1, ArmorModifier 1). The model is stated before the pair and holds no fitted term. Governing precedent: docs/adr/0010-argent-blade-flat-bonus-after-weapon-percent.md (SpellInfo::AscensionFlatAfterWeaponPercent, SpellEffects.cpp:4724, set for Templar 804929 and Xoroth 800340; its Consequences: each class needs its own Ascension evidence before the flag is used elsewhere). The Sun Cleric weapon_percent_before_flat list is empty. Status 5: the owner question is in the batch 3c fix report."
     },
     {
       "spell": 301343,
@@ -3901,7 +3901,7 @@
       "expected_ratio": 1.1,
       "tolerance": 0.002,
       "wait_ms": 3000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Strength (stat 0, reference 40) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Strength (stat 0, reference 40) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
     },
     {
       "spell": 704928,
@@ -3924,7 +3924,7 @@
       "expected_ratio": 1.1,
       "tolerance": 0.002,
       "wait_ms": 3000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Agility (stat 1, reference 35) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Agility (stat 1, reference 35) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
     },
     {
       "spell": 704928,
@@ -3947,7 +3947,7 @@
       "expected_ratio": 1.1,
       "tolerance": 0.002,
       "wait_ms": 3000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Stamina (stat 2, reference 56) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Stamina (stat 2, reference 56) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
     },
     {
       "spell": 704928,
@@ -3970,7 +3970,7 @@
       "expected_ratio": 1.1,
       "tolerance": 0.002,
       "wait_ms": 3000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Intellect (stat 3, reference 119) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Intellect (stat 3, reference 119) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
     },
     {
       "spell": 704928,
@@ -3993,7 +3993,7 @@
       "expected_ratio": 1.1,
       "tolerance": 0.002,
       "wait_ms": 3000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Spirit (stat 4, reference 128) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). A real Sunflare 800231 cast at the dummy with forced spell crits (harness crit rating fixture) before and after a real learn of 704928; the caster's Spirit (stat 4, reference 128) is read about 1 s after the hit. The reading before is the control (the same critical hit without the passive: no bless). Ratio 1.10 within 0.005 excludes +9% and +11%. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4). Read with stat_exact (Player::GetExactStatValue, unrounded): the integer stat read truncates the float product (Unit::GetTotalStatValue then SetStat(int32(value)), StatSystem.cpp:157-160)."
     },
     {
       "spell": 704928,
@@ -4015,7 +4015,7 @@
       "expected": 40.5,
       "tolerance": 1,
       "wait_ms": 3000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). The energize events of 504877 are summed from the start of the scenario: 0 before the learn (control), then the mana of one blessed critical hit. Expected ${$704926m2+$704926ppl2+$SP*.15} = 40.5 with no spell power (reference_stats spell_power 0), tolerance 1 for the engine's integer. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). The energize events of 504877 are summed from the start of the scenario: 0 before the learn (control), then the mana of one blessed critical hit. Expected ${$704926m2+$704926ppl2+$SP*.15} = 40.5 with no spell power (reference_stats spell_power 0), tolerance 1 for the engine's integer. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4)."
     },
     {
       "spell": 704928,
@@ -4038,7 +4038,7 @@
       "tolerance": 1.5,
       "wait_ms": 3000,
       "player_spell_power": 20000,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). The contrast of mana_flat on the same pair: with 20000 more Holy spell power the same hit regenerates 40.5 + 0.15 x 20000 = 3040.5 ($SP*.15), so the spell power term is measured as its own difference. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). The contrast of mana_flat on the same pair: with 20000 more Holy spell power the same hit regenerates 40.5 + 0.15 x 20000 = 3040.5 ($SP*.15), so the spell power term is measured as its own difference. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4)."
     },
     {
       "spell": 704928,
@@ -4059,7 +4059,7 @@
       "before_expected": 0,
       "expected": 1,
       "wait_ms": 6700,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). 704926 is on the caster 4700 ms after the hit (the Sunflare cast time is 2000 ms, SpellCastTimes 5, plus about 70 ms of flight at 70 yd/s from 5 yd): its duration is above 4.6 s, which excludes 4.5 s (-10% of 5 s). Control: absent before the learn. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). 704926 is on the caster 4700 ms after the hit (the Sunflare cast time is 2000 ms, SpellCastTimes 5, plus about 70 ms of flight at 70 yd/s from 5 yd): its duration is above 4.6 s, which excludes 4.5 s (-10% of 5 s). Control: absent before the learn. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4)."
     },
     {
       "spell": 704928,
@@ -4080,7 +4080,7 @@
       "before_expected": 0,
       "expected": 0,
       "wait_ms": 7300,
-      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). 704926 is gone 5300 ms after the hit: its duration is below 5.3 s, which excludes 5.5 s (+10%). With duration_held it lies in (4.6, 5.3) s around 5 s. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926 (ProcChance 100, no cooldown); AscensionSunClericEvents.cpp:117 accepts an own direct or periodic damage or healing critical strike, :292-296 casts 704926 on the caster and gives it the mana of Amount(704926, 1) + 0.15 x Holy spell power through Mana() (EnergizeBySpell source 504877, AscensionSunCleric.h:52). 704926 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue -1 (all stats), BasePoints 9 + 1 = 10 ($704926s1), Effect[1] ENERGIZE BasePoints 14 (m2), DurationIndex 28 = 5000 ms ($704926d). 704926 is gone 5300 ms after the hit: its duration is below 5.3 s, which excludes 5.5 s (+10%). With duration_held it lies in (4.6, 5.3) s around 5 s. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4)."
     },
     {
       "spell": 704562,
@@ -4127,9 +4127,8 @@
       "expected_gain": 2,
       "tolerance": 0.05,
       "wait_ms": 2600,
-      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). The caster's block chance (PLAYER_BLOCK_PERCENTAGE) is read after the heal lands (wait 2600 ms from the cast start): the gain must be 2 within 0.05, which excludes 1 and 3. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC. The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
-      "cast_in_before": false,
-      "setup_only_after": true
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases and the Vow, Dawn and heal run once, after the learn (a second Dawn sequence in the same scenario does not fulfil again with 704562 learned: batch 3c diagnostic d1, block and stacks unchanged at 0 after the learn). The control without the talent is the sibling scenario of the entries control_stacks and control_fulfilled: the same Vow, Dawn and heal with 704562 never learned, where the Vow is fulfilled (Sunlight heals) and no Dawnguard stack appears; the talent gate is therefore measured, not read from the code (AscensionSunCleric.cpp:296-297).  The caster's block chance (PLAYER_BLOCK_PERCENTAGE) is read after the heal lands (wait 2600 ms from the cast start): the gain must be 2 within 0.05, which excludes 1 and 3. Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4).",
+      "cast_in_before": false
     },
     {
       "spell": 704562,
@@ -4176,9 +4175,8 @@
       "before_expected": 0,
       "expected": 1,
       "wait_ms": 2600,
-      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). One fulfilment: 1 stack of 680672. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC. The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
-      "cast_in_before": false,
-      "setup_only_after": true
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases and the Vow, Dawn and heal run once, after the learn (a second Dawn sequence in the same scenario does not fulfil again with 704562 learned: batch 3c diagnostic d1, block and stacks unchanged at 0 after the learn). The control without the talent is the sibling scenario of the entries control_stacks and control_fulfilled: the same Vow, Dawn and heal with 704562 never learned, where the Vow is fulfilled (Sunlight heals) and no Dawnguard stack appears; the talent gate is therefore measured, not read from the code (AscensionSunCleric.cpp:296-297).  One fulfilment: 1 stack of 680672. Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4).",
+      "cast_in_before": false
     },
     {
       "spell": 704562,
@@ -4230,7 +4228,7 @@
       "before_expected": 0,
       "expected": 5,
       "wait_ms": 2600,
-      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). Six fulfilments (five setup heals and the trigger heal, each at least 1 s apart under the ten charges of one Dawn): the stacks read 5, not 6 (the stated cap). Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC. The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned from the start and the phase before casts nothing (a baseline reading, not a control): the talent gate is measured by block_one and stack_one (learned between the phases) and by the control_stacks and control_fulfilled siblings (704562 never learned). Six fulfilments (five setup heals and the trigger heal, each at least 1 s apart under the ten charges of one Dawn): the stacks read 5, not 6 (the stated cap). Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4). The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
       "cast_in_before": false,
       "setup_only_after": true
     },
@@ -4284,7 +4282,7 @@
       "expected_gain": 10,
       "tolerance": 0.05,
       "wait_ms": 2600,
-      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). Six fulfilments leave 5 stacks of +2%: the block chance gain is 10 within 0.05. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC. The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned from the start and the phase before casts nothing (a baseline reading, not a control): the talent gate is measured by block_one and stack_one (learned between the phases) and by the control_stacks and control_fulfilled siblings (704562 never learned). Six fulfilments leave 5 stacks of +2%: the block chance gain is 10 within 0.05. Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4). The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
       "cast_in_before": false,
       "setup_only_after": true
     },
@@ -4333,7 +4331,7 @@
       "before_expected": 0,
       "expected": 1,
       "wait_ms": 16600,
-      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). 680672 is on the caster 14600 ms after the fulfilling heal landed (2000 ms cast + 14600): its duration is above 14.6 s, which excludes 13.5 s (-10% of 15 s). Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC. The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned from the start and the phase before casts nothing (a baseline reading, not a control): the talent gate is measured by block_one and stack_one (learned between the phases) and by the control_stacks and control_fulfilled siblings (704562 never learned). 680672 is on the caster 14600 ms after the fulfilling heal landed (2000 ms cast + 14600): its duration is above 14.6 s, which excludes 13.5 s (-10% of 15 s). Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4). The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
       "cast_in_before": false,
       "setup_only_after": true
     },
@@ -4382,7 +4380,7 @@
       "before_expected": 0,
       "expected": 0,
       "wait_ms": 18400,
-      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned between the phases; the phase before is the control (the same Vow, Dawn and heal without it). 680672 is gone 16400 ms after the heal landed: its duration is below 16.4 s, which excludes 16.5 s (+10%). With duration_held it lies in (14.6, 16.4) s around 15 s. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4); coa-history spell 704562 / 680672 not queried beyond the DBC. The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
+      "observe_source": "704562 Dawnguard Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:296-297 (Fulfill) casts Dawnguard 680672 on the caster when a Vow is fulfilled: a damaging or healing spell cast under Dawn 807440 (ProcCharges 10, 'Can only occur once per sec', ScriptValue Dawn) with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584. 680672 Effect[0] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT BasePoints 1 + 1 = 2 ($680672s1), DurationIndex 8 = 15000 ms ($680672d), StackAmount 5 ($680672u). Dawn is cast with 20 Solar Power 500149 set on the caster in every phase (harness precondition fixture, the condition of the clause, not its subject); Illumination 500143 (CastingTimeIndex 5 = 2000 ms, a direct heal) on the caster at 50% health is the fulfilling cast. 704562 is learned from the start and the phase before casts nothing (a baseline reading, not a control): the talent gate is measured by block_one and stack_one (learned between the phases) and by the control_stacks and control_fulfilled siblings (704562 never learned). 680672 is gone 16400 ms after the heal landed: its duration is below 16.4 s, which excludes 16.5 s (+10%). With duration_held its end lies in (14.6, 16.4) s. Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4). The before phase casts nothing (control: absent / unchanged); the after phase learns 704562 and then casts the Vow, Dawn and the heals, because a second Dawn sequence in one scenario does not fulfil again (diagnostics p5/p6).",
       "cast_in_before": false,
       "setup_only_after": true
     },
@@ -4862,6 +4860,287 @@
         ]
       ],
       "observe_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The same hits counted 7250 ms after the cast starts, 3.25 s after the ground aura starts: exactly one, so the period is at most 3.25 s (excludes 3.3 s, +10%). With period_held it lies in (2.75, 3.25] s around 3 s. Control (the phase before the learn): no cast, 0. Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4).Median interval between the damage events of Solar Flare 807175 on the dummy since the last cast of Sun Down (three ticks of the ground aura, two intervals), as the Searing Light faster_ticks entry: 3000 ms within 250 ms, which excludes 2.7 s and 3.3 s (+-10% of 3 s). Sun Down is an active spell, so both phases cast it and each reads its own events; the two phases are replicates. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+    },
+    {
+      "spell": 704928,
+      "kind": "metric_delta",
+      "quote": "Critical strikes now bless you, regenerating ${$704926m2+$704926ppl2+$SP*.15} mana",
+      "trigger_spell": 800231,
+      "target": "dummy",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "wait_ms": 3000,
+      "before_expected": 0,
+      "expected": 0,
+      "name": "Bastion of Hope (no mana from a non-critical hit)",
+      "variant": "no_crit_mana",
+      "label_suffix": "no_crit_mana",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 504877
+      },
+      "tolerance": 0.5,
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926; AscensionSunClericEvents.cpp:117 accepts an own damage or healing hit only when it is a critical strike. Contrast arm of the crit-gated entries (mana_flat, strength..spirit): the same real Sunflare 800231 cast at the dummy, 704928 learned, with no forced crit and Reg's Test Aura 984954 on the caster in both phases (DBC: Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE -1000, so the Holy hit cannot crit; Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT is a weapon-crit term that a spell hit ignores). A server that blessed on every hit would read 40 mana and the aura here. Energize events of 504877 summed from the start: 0 expected after the learn. Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4)."
+    },
+    {
+      "spell": 704928,
+      "kind": "metric_delta",
+      "quote": "Critical strikes now bless you, regenerating ${$704926m2+$704926ppl2+$SP*.15} mana",
+      "trigger_spell": 800231,
+      "target": "dummy",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "wait_ms": 3000,
+      "before_expected": 0,
+      "expected": 0,
+      "name": "Bastion of Hope (no blessing from a non-critical hit)",
+      "variant": "no_crit_aura",
+      "label_suffix": "no_crit_aura",
+      "metric": "aura",
+      "fields": {
+        "spell": 704926
+      },
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926; AscensionSunClericEvents.cpp:117 accepts an own damage or healing hit only when it is a critical strike. Contrast arm of the crit-gated entries (mana_flat, strength..spirit): the same real Sunflare 800231 cast at the dummy, 704928 learned, with no forced crit and Reg's Test Aura 984954 on the caster in both phases (DBC: Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE -1000, so the Holy hit cannot crit; Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT is a weapon-crit term that a spell hit ignores). A server that blessed on every hit would read 40 mana and the aura here. The blessing 704926 on the caster 3 s after the hit: absent (0). Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4)."
+    },
+    {
+      "spell": 704928,
+      "kind": "metric_delta",
+      "quote": "Critical strikes now bless you, regenerating ${$704926m2+$704926ppl2+$SP*.15} mana",
+      "trigger_spell": 800231,
+      "target": "dummy",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "wait_ms": 3000,
+      "before_expected": 1,
+      "expected": 2,
+      "name": "Bastion of Hope (the non-critical hit landed)",
+      "variant": "no_crit_hit",
+      "label_suffix": "no_crit_hit",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800231,
+        "target": "dummy",
+        "critical": false
+      },
+      "expected_gain": 1,
+      "tolerance": 0.5,
+      "observe_source": "704928 Bastion of Hope Effect[0] aura 42 PROC_TRIGGER_SPELL 704926; AscensionSunClericEvents.cpp:117 accepts an own damage or healing hit only when it is a critical strike. Contrast arm of the crit-gated entries (mana_flat, strength..spirit): the same real Sunflare 800231 cast at the dummy, 704928 learned, with no forced crit and Reg's Test Aura 984954 on the caster in both phases (DBC: Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE -1000, so the Holy hit cannot crit; Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT is a weapon-crit term that a spell hit ignores). A server that blessed on every hit would read 40 mana and the aura here. Positive control of the two entries above: the Sunflare hits counted with critical=false, one per phase, so the hit landed and was not a critical strike (gain 1). Reference search: coa-history spell 704928: 0 events (a passive); Bastion of Hope 704926: 1,863 SPELL_ENERGIZE (min 41, max 191, mean 120), 447 SPELL_AURA_APPLIED and 454 SPELL_AURA_REMOVED in 5 logs, so the blessing and its energize exist in the old logs; the minimum 41 is consistent with 40.5 + 0.15 x spell power at any spell power above 3, the logs carry no spell power, so they neither confirm nor contradict the 40 read at spell power 0; git log origin/main --grep and gh pr list --search (704928, 704926, Bastion of Hope): nothing (guide section 4)."
+    },
+    {
+      "spell": 805628,
+      "name": "Fanaticism (Gavel of Light effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel_light",
+      "label_suffix": "effect_gavel_light",
+      "quote": "Increases the effectiveness of",
+      "expected": 1.2,
+      "observe_spell": 800611,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          805628
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 8,
+      "cast_power": 1363,
+      "expected_source": "805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Gavel of Light 800611 is expected at x1.2 of the control arm (band 2 points, G-19: the larger of 5% of 20 and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Cause of a bonus above +20% (Spell::EffectWeaponDmg, SpellEffects.cpp:4676 and :4681): SPELLMOD_ALL_EFFECTS (+20%) is applied by CalculateSpellDamage to the flat effect 0 and to the weapon percent effect 1, and the loop at :4729-4741 adds the flat value before it applies the percent, in DBC order. The treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, which is +20% plus 0.24 x B x (1 - r) / C (C = the control mean hit, r = the armor reduction, B = the flat value). B comes from the DBC (Gavel of Wrath 800617: BasePoints 44, DieSides 11 = 45..55, mean 50; Gavel of Grace 800614: BasePoints 22, DieSides 4 = 23..26, mean 24.5; Gavel of Light 800611: BasePoints 11 + 1 = 12, the per-level term 0.1505 x (MaxLevel 8 - SpellLevel 4) = 0.6 truncated to 0). r = x / (1 + x) with x = armor / (85 x 60 + 400) = 528 / 5500 (Unit::CalcArmorReducedDamage, classic branch, ClassicPlusCombat::ArmorConstant), so r = 8.76%; the dummy armor 528 is read by the dummy_armor entry (creature_classlevelstats basearmor 528 at level 11, class 1, ArmorModifier 1). The model is stated before the pair and holds no fitted term. Governing precedent: docs/adr/0010-argent-blade-flat-bonus-after-weapon-percent.md (SpellInfo::AscensionFlatAfterWeaponPercent, SpellEffects.cpp:4724, set for Templar 804929 and Xoroth 800340; its Consequences: each class needs its own Ascension evidence before the flag is used elsewhere). The Sun Cleric weapon_percent_before_flat list is empty. Status 5: the owner question is in the batch 3c fix report."
+    },
+    {
+      "spell": 805628,
+      "name": "Fanaticism (Gavel of Grace effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel_grace",
+      "label_suffix": "effect_gavel_grace",
+      "quote": "Increases the effectiveness of",
+      "expected": 1.2,
+      "observe_spell": 800614,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          805628
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 3,
+      "cast_power": 1363,
+      "expected_source": "805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Gavel of Grace 800614 is expected at x1.2 of the control arm (band 2 points, G-19: the larger of 5% of 20 and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Cause of a bonus above +20% (Spell::EffectWeaponDmg, SpellEffects.cpp:4676 and :4681): SPELLMOD_ALL_EFFECTS (+20%) is applied by CalculateSpellDamage to the flat effect 0 and to the weapon percent effect 1, and the loop at :4729-4741 adds the flat value before it applies the percent, in DBC order. The treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, which is +20% plus 0.24 x B x (1 - r) / C (C = the control mean hit, r = the armor reduction, B = the flat value). B comes from the DBC (Gavel of Wrath 800617: BasePoints 44, DieSides 11 = 45..55, mean 50; Gavel of Grace 800614: BasePoints 22, DieSides 4 = 23..26, mean 24.5; Gavel of Light 800611: BasePoints 11 + 1 = 12, the per-level term 0.1505 x (MaxLevel 8 - SpellLevel 4) = 0.6 truncated to 0). r = x / (1 + x) with x = armor / (85 x 60 + 400) = 528 / 5500 (Unit::CalcArmorReducedDamage, classic branch, ClassicPlusCombat::ArmorConstant), so r = 8.76%; the dummy armor 528 is read by the dummy_armor entry (creature_classlevelstats basearmor 528 at level 11, class 1, ArmorModifier 1). The model is stated before the pair and holds no fitted term. Governing precedent: docs/adr/0010-argent-blade-flat-bonus-after-weapon-percent.md (SpellInfo::AscensionFlatAfterWeaponPercent, SpellEffects.cpp:4724, set for Templar 804929 and Xoroth 800340; its Consequences: each class needs its own Ascension evidence before the flag is used elsewhere). The Sun Cleric weapon_percent_before_flat list is empty. Status 5: the owner question is in the batch 3c fix report."
+    },
+    {
+      "spell": 805628,
+      "name": "Fanaticism (Gavel of Light mana cost)",
+      "kind": "metric_delta",
+      "variant": "cost_gavel_light",
+      "label_suffix": "cost_gavel_light",
+      "quote": "and reduces their mana cost by $s2%.",
+      "trigger_spell": 800611,
+      "gate_spell": 805628,
+      "target": "dummy",
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "before_expected": 929,
+      "expected": 944,
+      "tolerance": 1,
+      "wait_ms": 300,
+      "expire_ms": 5000,
+      "observe_source": "805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The caster's mana is set to 1000 before each cast (regeneration off) and read after a real cast of Gavel of Light 800611: ManaCost 3 + ManaCostPercentage 5 of base mana 1363 = 3 + 68 = 71, 1000 - 71 = 929 without the passive; -20% gives int(71 x 0.8) = 56, so 944 left. Gavel of Grace 800614 has ManaCost 0 and no ManaCostPercentage in the DBC, so there is no cost to reduce and no cost entry for it (the three Gavels differ in shape: Light and Wrath have a cost, Grace has none). Control = the phase before the learn (full cost). Tolerance 1 for the engine's integer truncation of the cost (CalculatePct, then ApplySpellMod on the int cost); a cost cut of 10% or 30% reads 8 or more off (int(71 x 0.9) = 63 and int(71 x 0.7) = 49). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4).",
+      "dummy_distance": 5
+    },
+    {
+      "spell": 805628,
+      "name": "Fanaticism (diagnostic: the dummy armor of the Gavel hit entries)",
+      "kind": "metric_delta",
+      "variant": "dummy_armor",
+      "label_suffix": "dummy_armor",
+      "quote": "and reduces their mana cost by $s2%.",
+      "trigger_spell": 800617,
+      "gate_spell": 805628,
+      "target": "dummy",
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 528,
+      "expected": 528,
+      "tolerance": 0.5,
+      "wait_ms": 300,
+      "expire_ms": 5000,
+      "observe_source": "Diagnostic, no claim: the armor of the fixture dummy (creature 36, min_level_armor) read from the live unit. Expected 528 = creature_classlevelstats basearmor at the lowest level of entry 36 (11) for its unit_class 1, times ArmorModifier 1 (CoAGameplayTest.cpp:3492-3497, CreatureBaseStats::GenerateArmor); it explains the +27.4% / +27.2% of the Gavel of Wrath entry (see the 805628 owner question).",
+      "dummy_distance": 5,
+      "measure_actor": "dummy"
+    },
+    {
+      "spell": 704562,
+      "name": "Dawnguard (control: a fulfilled Vow without the talent, no stack)",
+      "kind": "metric_delta",
+      "variant": "control_stacks",
+      "label_suffix": "control_stacks",
+      "quote": "stacking $680672u times.",
+      "trigger_spell": 500143,
+      "gate_spell": 92136,
+      "target": "caster",
+      "setup_target": "caster",
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680672
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 2600,
+      "observe_source": "Control without 704562 for block_one, stack_one and the stack entries: 704562 is never learned; the gate learned from the start is Sunlight 92136 (a passive that acts on the same Vow fulfilment, observed by control_fulfilled). The same Vow of Radiance 803489, Dawn 804584 (20 Solar Power 500149 set as in the other entries) and Illumination 500143 heal at 50% health, run once. Dawnguard 680672 stacks on the caster: 0 expected, because AscensionSunCleric.cpp:296-297 casts it only with 704562. Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4).",
+      "cast_in_before": false,
+      "setup_only_after": true
+    },
+    {
+      "spell": 704562,
+      "name": "Dawnguard (control: the Vow is fulfilled without the talent)",
+      "kind": "metric_delta",
+      "variant": "control_fulfilled",
+      "label_suffix": "control_fulfilled",
+      "quote": "stacking $680672u times.",
+      "trigger_spell": 500143,
+      "gate_spell": 92136,
+      "target": "caster",
+      "setup_target": "caster",
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 704911,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 62,
+      "wait_ms": 2600,
+      "observe_source": "Positive control of control_stacks (the identical scenario, 704562 never learned): the fulfilled Vow is observed through Sunlight 92136, which Fulfill (AscensionSunCleric.cpp:298-300) casts on up to its MaxAffectedTargets allies at every fulfilment: Sunlight 704911 heals the caster (50% health) for the DBC value x 0.8, 60..64, the same range as the Sunlight entry (92136, sunlight_heal). Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4).",
+      "cast_in_before": false,
+      "setup_only_after": true,
+      "after_at_least": 60,
+      "after_at_most": 64
     }
   ],
   "player_observations": [],
