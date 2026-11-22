@@ -291,13 +291,17 @@
         ]
       },
       {
-        "claim": "Increases the effectiveness of Sunset by $s1% (Fire damage; the critical strike chance part is open)",
+        "claim": "Increases the effectiveness of Sunset Fire damage by $s1%",
         "labels": [
           "300323 behaviour_hit_ratio effect_sunset"
         ]
+      },
+      {
+        "claim": "Increases the effectiveness of Sunset critical strike chance by $s1%",
+        "labels": []
       }
     ],
-    "reason": "Pair 20261122-165027 / 20261122-165216 (prove, build 70eef6b19c8a, server e745c250f2af), no flip, no alert. Sunrise: Holy damage bonus read as +20.0% of the stated 20 (99% interval inside the band), i.e. 24% with the passive; Sunset: Fire damage part 12 against the stated 10 x 1.2 = 12 (11.9 / 11.8, interval inside 11.4 to 12.6). The Sunset critical strike chance part (20% x 1.2) is not measured by these entries. Reference search 2026-11-22: coa-history 300323: 0 events in 186 logs (a passive); nothing else found."
+    "reason": "Pair 20261122-165027 / 20261122-165216 (prove, build 70eef6b19c8a, server e745c250f2af), no flip, no alert. Sunrise: Holy damage bonus read as +20.0% of the stated 20 (99% interval inside the band), i.e. 24% with the passive; Sunset: Fire damage part 12 against the stated 10 x 1.2 = 12 (11.9 / 11.8, interval inside 11.4 to 12.6). The Sunset critical strike chance part (500511 Effect[0] aura 71, the same $s1: 20% x 1.2) is not measured by these entries: its claim has no label and the row stays open until a crit entry exists. Reference search 2026-11-22: coa-history 300323: 0 events in 186 logs (a passive); nothing else found."
   },
   {
     "spell": 300324,
@@ -3812,7 +3816,7 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "Radiant Cascade heals 4 allies without the passive (control)",
+        "claim": "Radiant Cascade heals 5 units without the passive (control)",
         "labels": [
           "704565 behaviour_metric_delta bounce_count"
         ]
@@ -5605,7 +5609,7 @@
         ]
       }
     ],
-    "reason": "Pair 20261122-165027 / 20261122-165216 (prove, build 70eef6b19c8a, server e745c250f2af), no flip, no alert. Strikes land twice with no Blessing (cumulative 2 damage events of Grave Coil 47632 on the caster), 4 when the Blessing is cast without Bless (both land), 3 with Bless then the Blessing (one deflected, one landed); the aura 680888 is present 55.5 s after the cast and gone by 64.5 s (60000 ms, game time). Control and treatment read on the caster as its own Blessed ally (strike spells can only target the caster in this tool; an ally struck by the striker is not available), see the entries."
+    "reason": "Pair 20261122-165027 / 20261122-165216 (prove, build 70eef6b19c8a, server e745c250f2af), no flip, no alert. Strikes land twice with no Blessing (cumulative 2 damage events of Grave Coil 47632 on the caster), 4 when the Blessing is cast without Bless (both land), 3 with Bless then the Blessing (one deflected, one landed); the aura 680888 is present 55.5 s after the cast and gone by 64.5 s (60000 ms, 680888 DurationIndex 3, game time). Control and treatment read on the caster as its own Blessed ally (strike spells can only target the caster in this tool; an ally struck by the striker is not available). By code reading the measured parts do not depend on who holds the aura: AscensionSunClericAbilities.cpp:539-553 casts 680888 on GetHitUnit() when it has Bless from the player, the deflect roll is the victim's aura total (Unit.cpp:3815), removal compares ActionTarget with the aura holder (AscensionSunClericEvents.cpp:74, :86). What stays unmeasured is the targeting of another unit (TARGET_UNIT_TARGET_ALLY, range, the Bless check on another unit): no stated value, no claim. Reference search 2026-11-22: coa-history spells 804254 and 680888: 0 events in 186 logs; nothing else found."
   },
   {
     "spell": 804254,
@@ -5871,7 +5875,7 @@
         ]
       }
     ],
-    "reason": "Pair 20261122-165027 / 20261122-165216 (prove, build 70eef6b19c8a, server e745c250f2af), no flip, no alert. Solar Flare damage on the dummy 136 with no added spell power and 2736 at 10000 spell power (136.5 + 0.26 x 10000 = 2736.5, band 5%). "
+    "reason": "Pair 20261122-165027 / 20261122-165216 (prove, build 70eef6b19c8a, server e745c250f2af), no flip, no alert. Solar Flare damage on the dummy 136 with no added spell power and 2736 at 10000 spell power (136.5 + 0.26 x 10000 = 2736.5, band 5%). Fixture 984954 carries two effects: Effect[0] aura 52 weapon crit +101% (no effect on the magic Solar Flare, reads non-crit in both runs) and Effect[1] aura 57 spell crit -1001. Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher), 807175 Solar Flare: 15499 SPELL_DAMAGE (3 to 3191, mean 520, with spell power and crits) in 29 logs; nothing else found."
   },
   {
     "spell": 804632,
@@ -5891,7 +5895,7 @@
         ]
       }
     ],
-    "reason": "Pair 20261122-165027 / 20261122-165216 (prove, build 70eef6b19c8a, server e745c250f2af), no flip, no alert. Attackers' miss share +2.9 / +2.4 points over 9400 swings per arm (stated +3, band +-2, 99% interval excludes 0); Solar Flare cast directly lasts between 9.1 and 10.9 s (read at 9509 and 10518 ms). Window attempt through Horusath Blast alone was not judged: it read the aura still held at 10518 ms because of the two flights."
+    "reason": "Pair 20261122-165027 / 20261122-165216 (prove, build 70eef6b19c8a, server e745c250f2af), no flip, no alert. Attackers' miss share +2.69 (99% +1.79 to +3.60, 9395 / 9424 swings) and +2.61 (+1.70 to +3.53, 9407 / 9449) points (stated +3 from 807175 Effect[0] BasePoints -4 + 1, band 1 to 5, 99% interval excludes 0). Residual failure probability: half-width 0.90 gives sigma 0.35, so a null effect reaches an estimate of 1 or more with z 2.86 (0.21%) in one run, both runs about 4.4e-6 per pair, below 0.1%; Solar Flare cast directly lasts between 9.1 and 10.9 s (read at 9509 and 10518 ms). Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher), 807175 Solar Flare: 2442 SPELL_AURA_APPLIED and 2416 SPELL_AURA_REMOVED in 29 logs without a duration, no hit chance readable; nothing else found. Window attempt through Horusath Blast alone was not judged: it read the aura still held at 10518 ms because of the two flights."
   },
   {
     "spell": 804751,
