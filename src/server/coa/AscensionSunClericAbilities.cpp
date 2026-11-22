@@ -230,7 +230,8 @@ public:
         if (Invocation(info))
         {
             if (player->HasAura(681436))
-                Mana(player, CalculatePct(player->GetMaxPower(POWER_MANA) - player->GetPower(POWER_MANA), Amount(504679)));
+                Mana(player, CalculatePct(player->GetMaxPower(POWER_MANA) - player->GetPower(POWER_MANA),
+                    Amount(504679)), 504679);
             if (player->HasAura(681253))
                 Cast(player, player, 681506);
         }
@@ -365,7 +366,7 @@ public:
             !spell->IsTriggered() && !spell->GetScriptValue(300344))
         {
             spell->SetScriptValue(300344, 1);
-            Mana(player, CalculatePct(std::max(0, spell->GetPowerCost()), Amount(300344, 1)));
+            Mana(player, CalculatePct(std::max(0, spell->GetPowerCost()), Amount(300344, 1)), 300345);
         }
         if (healing && player->HasAura(HolyForm) && player->GetMaxPower(POWER_MANA) &&
             player->GetPower(POWER_MANA) * 100u >= player->GetMaxPower(POWER_MANA) * 30u)

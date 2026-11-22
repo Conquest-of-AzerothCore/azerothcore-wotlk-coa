@@ -357,10 +357,11 @@
     "labels": [
       "300344 effect_value e1 #0",
       "300344 behaviour_metric_delta refund_bless",
-      "300344 behaviour_metric_delta refund_no_bless"
+      "300344 behaviour_metric_delta refund_no_bless",
+      "300344 behaviour_metric_delta refund_bless_not_vow"
     ],
     "kind": "claim",
-    "reason": "Counted pair 20261122-054853 / 20261122-054927, one build (server commit 5279c3b1e64c), no flip, 13 of 13 entries ok in both runs. Daybreak 503624 on the Blessed caster (Bless 804247 cast for real) refunds 88 mana in both runs (expected 25% of 26% of base mana 1363 = 88.6, judged within 1), 0 before 300344 is learned; control: the same heal with 300344 learned and no Bless refunds 0. Observed only: the live logs carry the energize as spell 300345 where this server's Mana() uses source 504877, no amount difference. Reference search 2026-11-22: coa-history 300345 has 13,775 energize events in 20 logs (no figure decides)."
+    "reason": "Counted pair 20261122-054853 / 20261122-054927, one build (server commit 5279c3b1e64c), no flip, 13 of 13 entries ok in both runs. Daybreak 503624 on the Blessed caster (Bless 804247 cast for real) refunds 88 mana in both runs (expected 25% of 26% of base mana 1363 = 88.6, judged within 1), 0 before 300344 is learned; control: the same heal with 300344 learned and no Bless refunds 0. Energize source fixed (Sun Cleric ADR 0020, mentor D-99/D-100): the refund is logged as Sanctified 300345, threat-free, no longer as Vow of Grace 504877; refund_bless and refund_no_bless read 300345 and refund_bless_not_vow reads no 504877 (amount unchanged). Reference search 2026-11-22: coa-history 300345 has 13,775 energize events in 20 logs (no figure decides)."
   },
   {
     "spell": 300347,
@@ -790,7 +791,11 @@
       },
       {
         "claim": "and mana",
-        "labels": []
+        "labels": [
+          "301239 behaviour_metric_delta mana_missing",
+          "301239 behaviour_metric_delta mana_missing_control",
+          "301239 behaviour_metric_delta mana_missing_not_vow"
+        ]
       }
     ]
   },
@@ -3361,7 +3366,8 @@
       {
         "claim": "Critical strikes now bless you, regenerating ${$704926m2+$704926ppl2} mana",
         "labels": [
-          "704928 behaviour_metric_delta mana_flat"
+          "704928 behaviour_metric_delta mana_flat",
+          "704928 behaviour_metric_delta mana_flat_not_vow"
         ]
       },
       {
@@ -4441,7 +4447,9 @@
       {
         "claim": "restores 5% of your maximum mana per tick",
         "labels": [
-          "804247 behaviour_metric_delta mana_tick"
+          "804247 behaviour_metric_delta mana_tick",
+          "804247 behaviour_metric_delta mana_tick_source",
+          "804247 behaviour_metric_delta mana_tick_not_vow"
         ]
       },
       {

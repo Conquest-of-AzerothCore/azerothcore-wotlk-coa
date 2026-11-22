@@ -252,7 +252,8 @@ class aura_ascension_sun_cleric_event : public AuraScript
             case 92137: Cast(player,player,800722); break;
             case 300943: Cast(player,player,1257670); break;
             case 301239:
-                Mana(player,CalculatePct(player->GetMaxPower(POWER_MANA)-player->GetPower(POWER_MANA),Amount(302896)));
+                Mana(player,CalculatePct(player->GetMaxPower(POWER_MANA)-player->GetPower(POWER_MANA),Amount(302896)),
+                    302896);
                 Copy(player,player,707522,CalculatePct(player->GetMaxHealth()-player->GetHealth(),Amount(302896)));
                 break;
             case 300336: Cast(player,target,300337); break;
@@ -291,7 +292,7 @@ class aura_ascension_sun_cleric_event : public AuraScript
             case 704928:
                 Cast(player,player,704926);
                 Mana(player,uint32(std::max(0.0f, Amount(704926,1,player) +
-                    .15f * player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY))));
+                    .15f * player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY))),704926);
                 break;
             case 704941: Cast(player,player,707843); break;
             case 807343: Cast(player,player,807523); break;
