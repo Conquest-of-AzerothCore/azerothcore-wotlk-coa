@@ -197,9 +197,11 @@
     "spell": 300324,
     "clause": "Allows Dawn to affect $s1 additional casts.",
     "labels": [
-      "300324 effect_value e0 #0"
+      "300324 effect_value e0 #0",
+      "300324 behaviour_metric_delta dawn_casts"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the Dawn state aura charges before the learn (10). After the learn 13 against 10 + 3 from Effect[0] ADD_FLAT_MODIFIER MiscValue 4 BasePoints 2 + 1 on 807440. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
   },
   {
     "spell": 300325,
@@ -238,17 +240,21 @@
     "spell": 300329,
     "clause": "Allows Dawn to affect $s1 additional casts.",
     "labels": [
-      "300329 effect_value e0 #0"
+      "300329 effect_value e0 #0",
+      "300329 behaviour_metric_delta dawn_casts"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the Dawn state aura charges before the learn (10). After the learn 15 against 10 + 5 from Effect[0] ADD_FLAT_MODIFIER MiscValue 4 BasePoints 4 + 1 on 807440. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
   },
   {
     "spell": 300331,
     "clause": "Your Vow of Light now heals for an additional $s1% of damage taken or direct healing done by you.",
     "labels": [
-      "300331 effect_value e0 #0"
+      "300331 effect_value e0 #0",
+      "300331 behaviour_metric_delta vow_heal"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the first phase without the passive (110 healed); 275 cumulative after: ratio 2.5 within 0.025 = H + 1.5 H from Effect[0] ADD_FLAT_MODIFIER EFFECT1 BasePoints 4 + 1 on Vow of Light 807750 (10 to 15). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
   },
   {
     "spell": 300334,
@@ -603,17 +609,22 @@
     "spell": 300626,
     "clause": "Increases your spell haste by $s1%,",
     "labels": [
-      "300626 effect_value e0 #0"
+      "300626 effect_value e0 #0",
+      "300626 behaviour_metric_delta night_haste"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the cast speed read before the learn (1). Night (hour 0) 0.917431 after against 1/1.09 from Effect[0] aura 216 BasePoints 8 + 1, within 0.002. The bindmysoul snapshot's 3% + 1% belongs to the older spell 300363; our DBC and tooltip state 9% and 3%. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
   },
   {
     "spell": 300626,
     "clause": "plus an additional $s2% during the day.",
     "labels": [
-      "300626 effect_value e1 #1"
+      "300626 effect_value e1 #1",
+      "300626 behaviour_metric_delta day_haste",
+      "300626 behaviour_metric_delta night_haste"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the night arm (0.917431) and the read before the learn (1). Day (hour 12) 0.890710 after against 1/(1.09 x 1.03) within 0.002, which excludes 2% and 4% (0.899442, 0.882145). Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
   },
   {
     "spell": 300723,
@@ -829,10 +840,23 @@
   {
     "spell": 301313,
     "clause": "While Vow of Grace is active, your Glorious Execution now regenerates an additional $807446s3% mana equal to the damage dealt.",
-    "labels": [
-      "301313 effect_value 807446e2 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "While Vow of Grace is active, your Glorious Execution now regenerates an additional mana equal to the damage dealt",
+        "labels": [
+          "301313 behaviour_metric_delta ge_mana_vow",
+          "301313 behaviour_metric_delta ge_mana_no_vow"
+        ]
+      },
+      {
+        "claim": "$807446s3% (the additional percent)",
+        "labels": [
+          "301313 effect_value 807446e2 #0"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Alert (lead): Arbiter adds no mana: ratio 1.9985 / 1.9970 against the 5.0 of base 5% plus 15%, and the control without Vow reads 2.0 / 2.0. Fix note: .agents/plans/sun-cleric-b6b/fix-note-301313.md. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
   },
   {
     "spell": 301343,
@@ -2164,8 +2188,22 @@
   {
     "spell": 680630,
     "clause": "Activate your pendant of the sun, refreshing the duration and all charges of Dawn.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Activate your pendant of the sun, refreshing the duration of Dawn",
+        "labels": [
+          "680630 behaviour_metric_delta pendant_duration"
+        ]
+      },
+      {
+        "claim": "and all charges of Dawn",
+        "labels": [
+          "680630 behaviour_metric_delta pendant_charges"
+        ]
+      }
+    ],
+    "reason": "Control readings of the same scenario: the Dawn state aura 807440 (harness phase_auras fixture, the condition Pendant needs, not the subject) read after two heals and 20 s with no Pendant: 8 charges, 39979 ms; after the Pendant cast 10 charges, 59494 ms against 60000 - 500, within 2000, excludes 54000 and 66000. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
   },
   {
     "spell": 680631,
@@ -2441,17 +2479,21 @@
     "spell": 680670,
     "clause": "Increases your chance to block by $s2%",
     "labels": [
-      "680670 effect_value e1 #0"
+      "680670 effect_value e1 #0",
+      "680670 behaviour_metric_delta block"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the reading before the learn (block chance 5). Block chance 5 before and 10 after: gain 5 within 0.05 from Spell.dbc 680670 Effect[1] aura 51 BasePoints 4 + 1. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
   },
   {
     "spell": 680670,
     "clause": "and reduces the duration of movement slowing effects by $s1%.",
     "labels": [
-      "680670 effect_value e0 #1"
+      "680670 effect_value e0 #1",
+      "680670 behaviour_duration_ratio"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the Hamstring 1715 duration before the learn (14494 ms remaining, read about 500 ms after the last landing). After the learn 11494 ms: a cut of exactly 3000 ms in both runs, 20.0% of the 15000 ms duration from Effect[0] aura 232 MiscValue 11 BasePoints -21 + 1 (18% and 22% would cut 2700 and 3300 ms, 300 ms away; the reads agree to the ms across the two runs). The judge's own margin is 525 ms, wider than the 10% rule: stated as a tool limit (the margin is not an entry field). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence with -20%; nothing else found. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
   },
   {
     "spell": 680700,
@@ -2544,10 +2586,24 @@
   {
     "spell": 681252,
     "clause": "Increases the duration of Champion of the Sun and Chains of Light by $/1000;s2 sec.",
-    "labels": [
-      "681252 effect_value e1 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the duration of Champion of the Sun by $/1000;s2 sec",
+        "labels": [
+          "681252 effect_value e1 #1",
+          "681252 behaviour_metric_delta champion_duration",
+          "681252 behaviour_metric_delta champion_duration_control"
+        ]
+      },
+      {
+        "claim": "and Chains of Light by $/1000;s2 sec",
+        "labels": [
+          "681252 behaviour_metric_delta chains_duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Control arms = Champion of the Sun without 681252 (24494 ms read 500 ms after the cast) and Chains of Light before the learn (14496). With it 29494 against 29500 and 19496 against 19500 within 250: +5000 ms from Effect[1] aura 107 MiscValue 1 BasePoints 4999 + 1, excludes 4500 and 5500 ms. The cooldown clause 206 is not covered. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
   },
   {
     "spell": 681253,
@@ -2802,9 +2858,11 @@
     "spell": 704581,
     "clause": "Reduces the duration of stun effects on you by $s2%.",
     "labels": [
-      "704581 effect_value e1 #0"
+      "704581 effect_value e1 #0",
+      "704581 behaviour_duration_ratio"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Not closed. Hammer-of-Justice-style vehicle Stun 2880 (10000 ms) read 1994 ms before and 1494 ms after the learn (ratio 0.749 against 0.8); the harness lands the stun three times 500 ms apart, so the aura read is a diminished re-application, and the judge's 525 ms margin does not exclude 10% off (450 and 550 ms around the stated 500 ms delta). The 10% rule is not met; a single-landing or exact-total design is needed (tool need, returned). Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
   },
   {
     "spell": 704582,
@@ -4314,17 +4372,21 @@
     "spell": 804628,
     "clause": "Your Judgement Day now applies Suncharged to the target every $807080t2 sec,",
     "labels": [
-      "804628 aura_amplitude_ms #0"
+      "804628 aura_amplitude_ms #0",
+      "804628 behaviour_metric_delta suncharge_period"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the phase before the learn (0 stacks). Read 4500-4900 ms after the cast: 9 stacks, which excludes the 10 of a 0.45 s period and the 8 of a 0.55 s period (stated 0.5 s from 807080 Effect[1] EffectAmplitude 500; the bindmysoul 1 sec is an older state). Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
   },
   {
     "spell": 804628,
     "clause": "stacking $807080u times.",
     "labels": [
-      "804628 max_stacks 807080 #1"
+      "804628 max_stacks 807080 #1",
+      "804628 behaviour_metric_delta suncharge_cap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the phase before the learn (0 stacks). Read 5500-6500 ms after the cast: 10 stacks, the cap, against 11 to 13 ticks elapsed. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
   },
   {
     "spell": 804628,
@@ -4533,9 +4595,12 @@
     "spell": 805581,
     "clause": "Fulfilling a Vow now reduces the cooldown of Horusath Blast by $/1000;807445s1 sec.",
     "labels": [
-      "805581 effect_value 807445e0 #0"
+      "805581 effect_value 807445e0 #0",
+      "805581 behaviour_metric_delta cd",
+      "805581 behaviour_metric_delta cd_control"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arms = the plain cast without fulfilment (23994) and the same fulfilment without 805581 (23991). With it 21991 against 22000 within 150: cut 2000 ms from 807445 BasePoints -2001, excludes 1800 and 2200 ms (10% off both sides). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
   },
   {
     "spell": 807870,
