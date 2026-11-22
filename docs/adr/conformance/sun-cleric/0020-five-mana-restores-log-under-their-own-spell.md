@@ -16,6 +16,20 @@ The D-100 sweep looked at every default-source call and the live combat logs (co
 players). Five callers restore mana that live logs credit to another id. The table gives the events, logs, players
 and first and last day under that id:
 
+The counts come from this query, run on 2026-11-22 against the combat log index (`coa-history sql`):
+
+```sql
+SELECT e.spell_id, COUNT(DISTINCT e.log_id), COUNT(DISTINCT e.source), SUM(e.events), MIN(l.day), MAX(l.day)
+FROM spell_events e JOIN logs l ON l.id = e.log_id
+WHERE e.spell_id IN (300345, 302896, 504679, 704926, 805360)
+  AND e.event = 'SPELL_ENERGIZE' AND e.source_kind = 'player'
+GROUP BY e.spell_id;
+```
+
+An earlier lookup for Sanctified read 13,775 events in 20 logs. Its query was not recorded, so the table keeps the
+figures of the query above.
+
+
 Sites are in `AscensionSunCleric<File>.cpp`. NT means the live id carries `SPELL_ATTR1_NO_THREAT`.
 
 | Site | Spell and trigger | Live id | Events / logs / players, dates | NT |
