@@ -737,7 +737,7 @@
         ]
       },
       {
-        "claim": "the $s1% stays on during the day (the day read is 1/(1.09 x 1.03), not 1/1.03)",
+        "claim": "the day read (1/(1.09 x 1.03), not 1/1.03): data only, the clause does not state that the $s1% stays on during the day",
         "labels": [
           "300626 behaviour_metric_delta day_haste"
         ]
@@ -1735,13 +1735,14 @@
         ]
       },
       {
-        "claim": "increasing your block value by $s1% (100%: the block value doubles, 45 to 90)",
+        "claim": "increasing your block value by $s1% (100%: the block value doubles, 42 to 85 as read)",
         "labels": [
           "560095 behaviour_metric_delta block_value",
           "560095 aura_amount e0 #0"
         ]
       }
-    ]
+    ],
+    "reason": "The aura_amount e0 #0 label is not emitted by the pair of this branch and resolves on the next base pair. The clause is behaviour only through the block_value STATE read (coverage.py:782-795): aura_amount is a READBACK (coverage.py:418-428), it adds no behaviour content and closes nothing by itself."
   },
   {
     "spell": 560095,
@@ -3097,10 +3098,8 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "Avoiding an attack now has a $h1% (25%) chance to regenerate mana",
-        "labels": [
-          "680663 proc_rate avoided"
-        ]
+        "claim": "Avoiding an attack now has a $h1% (25%) chance to regenerate mana (held open: see reason)",
+        "labels": []
       },
       {
         "claim": "$504876s1% (5%) of your base mana (data read of the percent; the amount of the restore is not measured)",
@@ -3108,7 +3107,8 @@
           "680663 effect_value 504876e0 #1"
         ]
       }
-    ]
+    ],
+    "reason": "Held open (I-1 of the b9a review). The handler rolls the 25% on every avoided swing, miss, dodge or parry (AscensionSunClericEvents.cpp:72, PROC_HIT_MISS | PROC_HIT_DODGE | PROC_HIT_PARRY), while the avoided trigger counts dodge and parry only (proc_avoided.py TRIAL_STATES = dodged, parried) and no option puts the misses in the denominator or forces them to 0. The measured 21880 / 83444 = 0.2622 and 21932 / 83322 = 0.2632 sit above 0.25 by the structural factor 1 / (1 - m), m being the miss share, which the 2-point band hides. Tool need returned to the controller: count state 0 (miss) as a trial, or force the miss chance to 0 and guard it. Lead only, not a defect: the mana of the proc is energized under 504877 (Vow of Grace, AscensionSunCleric.h:51 default source) while the tooltip names 504876; coa-history spell 504876 has 0 events, so there is no live evidence and nothing is changed."
   },
   {
     "spell": 680670,
@@ -3586,18 +3586,17 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "plus an additional $s2% (5%, ratio 0.90 at 100% health)",
+        "claim": "plus an additional $s2% (5%, ratio 0.9025 = 0.95 x 0.95 at 82% health, the two aura 87 effects multiply)",
         "labels": [
           "704585 behaviour_hit_ratio taken_above"
         ]
       },
       {
-        "claim": "while above 80% health (at 70% health only the base 0.95)",
-        "labels": [
-          "704585 behaviour_hit_ratio taken_below"
-        ]
+        "claim": "while above 80% health (open: the server holds the helper through a 75% to 80% hysteresis band, so the 80% literal needs an arm that enters from below at 79% and 81%; the arms here are 74% and 82%)",
+        "labels": []
       }
-    ]
+    ],
+    "reason": "The 80% literal is held open (I-2 of the b9a review). A 78% arm cannot bracket it: AscensionSunCleric.cpp:366-370 (b2ad6f76d6, fixes #5763 and #5783) enters the helper above 80% and leaves it at or below 75%, so inside 75% to 80% the previous state holds, and a first attempt at 78% failed its own check (helper 707769 still present, aura check 1 of the treatment arm, both runs). Tool need returned to the controller: a taken_hit pre-step that sets the health below 75% and lets the helper clear before the health is raised to 79% and 81%."
   },
   {
     "spell": 704586,

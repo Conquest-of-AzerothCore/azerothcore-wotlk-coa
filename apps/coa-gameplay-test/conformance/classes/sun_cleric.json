@@ -360,7 +360,7 @@
       "proc_spell": 504877,
       "events_per_proc": 1,
       "proc_spell_source": "AscensionSunClericEvents.cpp:288: case 680663 calls Mana(player, CalculatePct(player->GetCreateMana(), Amount(504876))) with the default source 504877 (Vow of Grace energize, AscensionSunCleric.h:51), so the proc is the Energize events of 504877 on the caster, not of 504876 (a lead for the controller: the tooltip names Energize 504876; compare the 802935 source fix, ADR 0019).",
-      "handler": "aura_ascension_sun_cleric_event (spell_script_names row of 680663, rev_20260909_13_sun_cleric_completion.sql:245): AscensionSunClericEvents.cpp:98 returns avoided && Chance(player, 680663) for a received event; Chance (AscensionSunCleric.cpp:196-205) rolls roll_chance_i(ProcChance 25) once per avoided attack with no internal cooldown (spell_proc row of 680663: Chance 100, so the engine always passes the event on). Trigger: procs avoided trigger (ADR 0900), the 92137 Angelic Presence entry shape: ten aggressive stationary strikers with Self Root Forever 42716, Molten 62531 and Enrage 2116852, dodge 50 and parry 50 before every swing interval, every attempt avoided. Reference search 2026-11-22: coa-history spell 680663 and 504876: no log event of the passive roll; bindmysoul talents snapshot carries the same 25% and 5% figures (to be re-read); nothing else found.",
+      "handler": "aura_ascension_sun_cleric_event (spell_script_names row of 680663, rev_20260909_13_sun_cleric_completion.sql:245): AscensionSunClericEvents.cpp:98 returns avoided && Chance(player, 680663) for a received event; Chance (AscensionSunCleric.cpp:196-205) rolls roll_chance_i(ProcChance 25) once per avoided attack with no internal cooldown (spell_proc row of 680663: Chance 100, so the engine always passes the event on). Trigger: procs avoided trigger (ADR 0900), the 92137 Angelic Presence entry shape: ten aggressive stationary strikers with Self Root Forever 42716, Molten 62531 and Enrage 2116852, dodge 50 and parry 50 before every swing interval, every attempt avoided. Reference search 2026-11-22: coa-history spell 680663 and 504876: no log event of the passive roll; the bindmysoul talents snapshot was not re-read for this entry; nothing else found.",
       "dbc": {
         "680663": {
           "ProcChance": 25,
@@ -14645,7 +14645,7 @@
         "slot": 16,
         "rejected_before": false
       },
-      "observe_source": "560095 Effect[0] aura 150 SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT, BasePoints 99 + 1 = 100 ($s1): +100% of the block value. The caster's block value is read with shield 231296 equipped before the cast (control, no aura) and 500 ms after a real cast: ratio 2.0, tolerance 0.03 (excludes 1.97 and 2.03; the block value is an integer of at least 33 so a rounding of 0.5 is below 0.015). Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+      "observe_source": "560095 Effect[0] aura 150 SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT, BasePoints 99 + 1 = 100 ($s1): +100% of the block value. The caster's block value is read with shield 231296 equipped before the cast (control, no aura) and 500 ms after a real cast: ratio 2.0, tolerance 0.03 (excludes 1.97 and 2.03; the block value is an integer, and truncating a block value of 42.x gives 84 or 85: both pairs of the batch read 42 to 85, a deviation of 0.0238 from the stated 2.0). Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
     },
     {
       "spell": 560095,
@@ -23420,7 +23420,7 @@
       "fixture": {
         "spell_power": 10000
       },
-      "observe_source": "500477 Sunrise Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 2 (Holy), BasePoints 19 + 1 = 20 ($s1). Real path (AscensionSunClericAbilities.cpp SpendDawn): Dawn 807440 (harness precondition fixture) is spent by a Holy spell cast, which grants Sunrise when 92135 is known. Both arms set Dawn and cast Sunflare 502396 (Holy) before every Horusath Blast 500154 (Holy, read); only the treatment arm has 92135 learned, so only it holds Sunrise. Control arm: the same casts without 92135, no Sunrise. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
+      "observe_source": "500477 Sunrise Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 2 (Holy), BasePoints 19 + 1 = 20 ($s1). Real path (AscensionSunClericAbilities.cpp SpendDawn): Dawn 807440 (harness precondition fixture) is spent by a Holy spell cast, which grants Sunrise when 92135 is known. Both arms set Dawn and cast Sunflare 502396 (Holy) before every Horusath Blast 500154 (Holy, read); only the treatment arm has 92135 learned, so only it holds Sunrise. Control arm: the same casts without 92135, no Sunrise. Resistance fixture 823764 on the caster in both arms: Effect[0] aura MOD_TARGET_RESISTANCE -9999 MiscValue 126, Effect[1] ADD_PCT_MODIFIER MiscValue 3 +100% with class mask 0x20000000 in word 5 (DBC read); it sits in both arms, so it cancels in the ratio. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
     },
     {
       "spell": 92135,
@@ -23470,7 +23470,7 @@
       "fixture": {
         "spell_power": 10000
       },
-      "observe_source": "500511 Sunset Effect[1] aura 79 MOD_DAMAGE_PERCENT_DONE MiscValue 4 (Fire), BasePoints 9 + 1 = 10 ($s2). Real path (AscensionSunClericAbilities.cpp SpendDawn): Dawn 807440 (harness precondition fixture) is spent by a Holy spell cast, which grants Sunset when 92135 is known. Both arms set Dawn and cast Dawnsear 554406 (Fire) before every Dawnsear 500146 (Fire, read); only the treatment arm has 92135 learned, so only it holds Sunset. Control arm: the same casts without 92135, no Sunset. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
+      "observe_source": "500511 Sunset Effect[1] aura 79 MOD_DAMAGE_PERCENT_DONE MiscValue 4 (Fire), BasePoints 9 + 1 = 10 ($s2). Real path (AscensionSunClericAbilities.cpp SpendDawn): Dawn 807440 (harness precondition fixture) is spent by a Holy spell cast, which grants Sunset when 92135 is known. Both arms set Dawn and cast Dawnsear 554406 (Fire) before every Dawnsear 500146 (Fire, read); only the treatment arm has 92135 learned, so only it holds Sunset. Control arm: the same casts without 92135, no Sunset. Resistance fixture 823764 on the caster in both arms: Effect[0] aura MOD_TARGET_RESISTANCE -9999 MiscValue 126, Effect[1] ADD_PCT_MODIFIER MiscValue 3 +100% with class mask 0x20000000 in word 5 (DBC read); it sits in both arms, so it cancels in the ratio. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
     },
     {
       "spell": 92135,
@@ -23532,7 +23532,7 @@
       "wait_ms": 4000,
       "expire_ms": 500,
       "cast_power": 1363,
-      "observe_source": "Control of sunset_crit: the same Sunset-granting Dawnsear cast, read on Horusath Blast 500154 (Holy), which the Fire-school aura 71 must not change."
+      "observe_source": "Control of sunset_crit: the same Sunset-granting Dawnsear cast, read on Horusath Blast 500154 (Holy), which the Fire-school aura 71 must not change. Reference search: a control arm of sunset_crit, nothing found beyond the tooltip and Spell.dbc."
     },
     {
       "spell": 92135,
@@ -23659,7 +23659,7 @@
     },
     {
       "spell": 704585,
-      "name": "Gleaming Vigil (Physical damage taken at 70% health, the base 5% only)",
+      "name": "Gleaming Vigil (Physical damage taken at 74% health, the base 5% only)",
       "kind": "taken_hit",
       "variant": "taken_below",
       "label_suffix": "taken_below",
@@ -23667,7 +23667,7 @@
       "expected": 0.95,
       "quote": "Reduces your Physical damage taken by $s1%,",
       "strike_spell": 92559,
-      "caster_health_pct": 70,
+      "caster_health_pct": 74,
       "caster_max_health": 100000,
       "trials": 20,
       "arms": [
@@ -23708,19 +23708,19 @@
           ]
         }
       ],
-      "observe_source": "704585 Gleaming Vigil Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 1 (Physical), BasePoints -6 (-5 as read, $s1); Effect[1] aura 23 PERIODIC_TRIGGER_SPELL 707769 every 500 ms (aura 87 MiscValue 1, BasePoints -6, -5, $s2), the helper aura kept on the caster only while it is above 80% health (the Gleaming Armor 805267 pattern). Void Zone 92559 (1000 Physical direct damage, no cooldown, no cost) strikes the caster in a control arm (passive unlearned) and in an arm with 704585 learned; the ratio of the damage taken is judged against the stated value. Reference search 2026-11-22: coa-history spell 704585 has no cast event (a passive); nothing found beyond the tooltip and Spell.dbc."
+      "observe_source": "704585 Gleaming Vigil Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 1 (Physical), BasePoints -6 (-5 as read, $s1); Effect[1] aura 23 PERIODIC_TRIGGER_SPELL 707769 every 500 ms (aura 87 MiscValue 1, BasePoints -6, -5, $s2), the helper aura kept on the caster only while it is above 80% health (the Gleaming Armor 805267 pattern). Void Zone 92559 (1000 Physical direct damage, no cooldown, no cost) strikes the caster in a control arm (passive unlearned) and in an arm with 704585 learned; the caster health is set to 74% (below) or 82% (above) before every trial (the helper aura 707769 is checked absent at 74% and present at 82%). The server keeps the helper through a 75% to 80% hysteresis band by design (AscensionSunCleric.cpp:366-370, b2ad6f76d6, #5763 and #5783: enter above 80%, leave at or below 75%), so 74% is the nearest arm outside the band; the literal 80% itself is not pinned by these arms. The two aura 87 effects multiply, so the expected ratio at 82% is 0.95 x 0.95 = 0.9025, not their sum; the ratio of the damage taken is judged against the stated value. Reference search 2026-11-22: coa-history spell 704585 has no cast event (a passive); nothing found beyond the tooltip and Spell.dbc."
     },
     {
       "spell": 704585,
-      "name": "Gleaming Vigil (Physical damage taken at 100% health, 5% plus 5%)",
+      "name": "Gleaming Vigil (Physical damage taken at 82% health, 5% plus 5%)",
       "kind": "taken_hit",
       "variant": "taken_above",
       "label_suffix": "taken_above",
       "judge": "damage_ratio",
-      "expected": 0.9,
+      "expected": 0.9025,
       "quote": "plus an additional $s2% while above 80% health.",
       "strike_spell": 92559,
-      "caster_health_pct": 100,
+      "caster_health_pct": 82,
       "caster_max_health": 100000,
       "trials": 20,
       "arms": [
@@ -23761,7 +23761,7 @@
           ]
         }
       ],
-      "observe_source": "704585 Gleaming Vigil Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 1 (Physical), BasePoints -6 (-5 as read, $s1); Effect[1] aura 23 PERIODIC_TRIGGER_SPELL 707769 every 500 ms (aura 87 MiscValue 1, BasePoints -6, -5, $s2), the helper aura kept on the caster only while it is above 80% health (the Gleaming Armor 805267 pattern). Void Zone 92559 (1000 Physical direct damage, no cooldown, no cost) strikes the caster in a control arm (passive unlearned) and in an arm with 704585 learned; the ratio of the damage taken is judged against the stated value. Reference search 2026-11-22: coa-history spell 704585 has no cast event (a passive); nothing found beyond the tooltip and Spell.dbc."
+      "observe_source": "704585 Gleaming Vigil Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 1 (Physical), BasePoints -6 (-5 as read, $s1); Effect[1] aura 23 PERIODIC_TRIGGER_SPELL 707769 every 500 ms (aura 87 MiscValue 1, BasePoints -6, -5, $s2), the helper aura kept on the caster only while it is above 80% health (the Gleaming Armor 805267 pattern). Void Zone 92559 (1000 Physical direct damage, no cooldown, no cost) strikes the caster in a control arm (passive unlearned) and in an arm with 704585 learned; the caster health is set to 74% (below) or 82% (above) before every trial (the helper aura 707769 is checked absent at 74% and present at 82%). The server keeps the helper through a 75% to 80% hysteresis band by design (AscensionSunCleric.cpp:366-370, b2ad6f76d6, #5763 and #5783: enter above 80%, leave at or below 75%), so 74% is the nearest arm outside the band; the literal 80% itself is not pinned by these arms. The two aura 87 effects multiply, so the expected ratio at 82% is 0.95 x 0.95 = 0.9025, not their sum; the ratio of the damage taken is judged against the stated value. Reference search 2026-11-22: coa-history spell 704585 has no cast event (a passive); nothing found beyond the tooltip and Spell.dbc."
     },
     {
       "spell": 800054,
