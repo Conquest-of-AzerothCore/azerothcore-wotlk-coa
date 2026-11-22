@@ -21,28 +21,49 @@
   {
     "spell": 92135,
     "clause": "Increases all Holy Damage dealt by $s1% for $d.",
-    "labels": [
-      "92135 effect_value 500477e0 #0",
-      "92135 spell_duration 500477 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases all Holy Damage dealt by $s1% (20%)",
+        "labels": [
+          "92135 behaviour_hit_ratio sunrise_holy_damage"
+        ]
+      },
+      {
+        "claim": "for $d (120 s)",
+        "labels": [
+          "92135 behaviour_metric_delta sunrise_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 92135,
     "clause": "Increases your critical strike chance with Fire spells by $s1%",
     "labels": [
-      "92135 effect_value 500511e0 #2"
+      "92135 behaviour_metric_delta sunset_crit",
+      "92135 behaviour_metric_delta sunset_crit_holy_control"
     ],
     "kind": "claim"
   },
   {
     "spell": 92135,
     "clause": "and Fire Damage by $s2% for $d.",
-    "labels": [
-      "92135 effect_value 500511e1 #3",
-      "92135 spell_duration 500511 #4"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Fire Damage by $s2% (10%)",
+        "labels": [
+          "92135 behaviour_hit_ratio sunset_fire_damage"
+        ]
+      },
+      {
+        "claim": "for $d (120 s)",
+        "labels": [
+          "92135 behaviour_metric_delta sunset_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 92136,
@@ -706,23 +727,42 @@
   {
     "spell": 300626,
     "clause": "Increases your spell haste by $s1%,",
-    "labels": [
-      "300626 effect_value e0 #0",
-      "300626 behaviour_metric_delta night_haste"
-    ],
     "kind": "claim",
-    "reason": "Control arm = the cast speed read before the learn (1). Night (hour 0) 0.917431 after against 1/1.09 from Effect[0] aura 216 BasePoints 8 + 1, within 0.002. The bindmysoul snapshot's 3% + 1% belongs to the older spell 300363; our DBC and tooltip state 9% and 3%. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
+    "reason": "Control arm = the cast speed read before the learn (1). Night (hour 0) 0.917431 after against 1/1.09 from Effect[0] aura 216 BasePoints 8 + 1, within 0.002. The bindmysoul snapshot's 3% + 1% belongs to the older spell 300363; our DBC and tooltip state 9% and 3%. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip.",
+    "claims": [
+      {
+        "claim": "Increases your spell haste by $s1% (9%, read at night where no day bonus exists)",
+        "labels": [
+          "300626 behaviour_metric_delta night_haste"
+        ]
+      },
+      {
+        "claim": "the day read (1/(1.09 x 1.03), not 1/1.03): data only, the clause does not state that the $s1% stays on during the day",
+        "labels": [
+          "300626 behaviour_metric_delta day_haste"
+        ]
+      }
+    ]
   },
   {
     "spell": 300626,
     "clause": "plus an additional $s2% during the day.",
-    "labels": [
-      "300626 effect_value e1 #1",
-      "300626 behaviour_metric_delta day_haste",
-      "300626 behaviour_metric_delta night_haste"
-    ],
     "kind": "claim",
-    "reason": "Control arm = the night arm (0.917431) and the read before the learn (1). Day (hour 12) 0.890710 after against 1/(1.09 x 1.03) within 0.002, which excludes 2% and 4% (0.899442, 0.882145). Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
+    "reason": "Control arm = the night arm (0.917431) and the read before the learn (1). Day (hour 12) 0.890710 after against 1/(1.09 x 1.03) within 0.002, which excludes 2% and 4% (0.899442, 0.882145). Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip.",
+    "claims": [
+      {
+        "claim": "plus an additional $s2% (3%)",
+        "labels": [
+          "300626 behaviour_metric_delta day_haste"
+        ]
+      },
+      {
+        "claim": "during the day only (the night read has no 3%)",
+        "labels": [
+          "300626 behaviour_metric_delta night_haste"
+        ]
+      }
+    ]
   },
   {
     "spell": 300723,
@@ -1432,10 +1472,24 @@
   {
     "spell": 520024,
     "clause": "Target an enemy and leap into the air, becoming immune to all physical attacks and spells for $d.",
-    "labels": [
-      "520024 aura_duration_ms #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "for $d (2 s)",
+        "labels": [
+          "520024 behaviour_metric_delta immunity_duration"
+        ]
+      },
+      {
+        "claim": "becoming immune to all physical attacks and spells (no landing of a physical and a magic fixture during the window)",
+        "labels": []
+      },
+      {
+        "claim": "leap into the air (client-acknowledged knockback, not observable on the server)",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Duration measured by the 520025 aura held / gone pair. The immunity claim needs the immunity kind with an enemy-target cast: its self_cast_attempt casts the spell on the subject, and Valkyr's Calling targets an enemy (tool need, returned to the controller). The leap is a status 4 candidate (client acknowledgement)."
   },
   {
     "spell": 520024,
@@ -1672,12 +1726,23 @@
   {
     "spell": 560095,
     "clause": "Raise your blessed shield, increasing your block value by $s1%.",
-    "labels": [
-      "560095 effect_value e0 #0",
-      "560095 aura_amount e0 #0",
-      "560095 behaviour_metric_delta block_value"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Raise your blessed shield (the aura is applied and lasts, held at 9.5 s)",
+        "labels": [
+          "560095 behaviour_metric_delta duration_held"
+        ]
+      },
+      {
+        "claim": "increasing your block value by $s1% (100%: the block value doubles, 42 to 85 as read)",
+        "labels": [
+          "560095 behaviour_metric_delta block_value",
+          "560095 aura_amount e0 #0"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The aura_amount e0 #0 label is not emitted by the pair of this branch and resolves on the next base pair. The clause is behaviour only through the block_value STATE read (coverage.py:782-795): aura_amount is a READBACK (coverage.py:418-428), it adds no behaviour content and closes nothing by itself."
   },
   {
     "spell": 560095,
@@ -3030,11 +3095,20 @@
   {
     "spell": 680663,
     "clause": "Avoiding an attack now has a $h1% chance to regenerate $504876s1% of your base mana.",
-    "labels": [
-      "680663 effect_value #0",
-      "680663 effect_value 504876e0 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Avoiding an attack now has a $h1% (25%) chance to regenerate mana (held open: see reason)",
+        "labels": []
+      },
+      {
+        "claim": "$504876s1% (5%) of your base mana (data read of the percent; the amount of the restore is not measured)",
+        "labels": [
+          "680663 effect_value 504876e0 #1"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Held open (I-1 of the b9a review). The handler rolls the 25% on every avoided swing, miss, dodge or parry (AscensionSunClericEvents.cpp:72, PROC_HIT_MISS | PROC_HIT_DODGE | PROC_HIT_PARRY), while the avoided trigger counts dodge and parry only (proc_avoided.py TRIAL_STATES = dodged, parried) and no option puts the misses in the denominator or forces them to 0. The measured 21880 / 83444 = 0.2622 and 21932 / 83322 = 0.2632 sit above 0.25 by the structural factor 1 / (1 - m), m being the miss share, which the 2-point band hides. Tool need returned to the controller: count state 0 (miss) as a trial, or force the miss chance to 0 and guard it. Lead only, not a defect: the mana of the proc is energized under 504877 (Vow of Grace, AscensionSunCleric.h:51 default source) while the tooltip names 504876; coa-history spell 504876 has 0 events, so there is no live evidence and nothing is changed."
   },
   {
     "spell": 680670,
@@ -3502,17 +3576,27 @@
     "spell": 704585,
     "clause": "Reduces your Physical damage taken by $s1%,",
     "labels": [
-      "704585 effect_value e0 #0"
+      "704585 behaviour_hit_ratio taken_below"
     ],
     "kind": "claim"
   },
   {
     "spell": 704585,
     "clause": "plus an additional $s2% while above 80% health.",
-    "labels": [
-      "704585 effect_value e1 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "plus an additional $s2% (5%, ratio 0.9025 = 0.95 x 0.95 at 82% health, the two aura 87 effects multiply)",
+        "labels": [
+          "704585 behaviour_hit_ratio taken_above"
+        ]
+      },
+      {
+        "claim": "while above 80% health (open: the server holds the helper through a 75% to 80% hysteresis band, so the 80% literal needs an arm that enters from below at 79% and 81%; the arms here are 74% and 82%)",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "The 80% literal is held open (I-2 of the b9a review). A 78% arm cannot bracket it: AscensionSunCleric.cpp:366-370 (b2ad6f76d6, fixes #5763 and #5783) enters the helper above 80% and leaves it at or below 75%, so inside 75% to 80% the previous state holds, and a first attempt at 78% failed its own check (helper 707769 still present, aura check 1 of the treatment arm, both runs). Tool need returned to the controller: a taken_hit pre-step that sets the health below 75% and lets the helper clear before the health is raised to 79% and 81%."
   },
   {
     "spell": 704586,
@@ -4544,7 +4628,7 @@
     "spell": 800054,
     "clause": "Every $/1000;t1 sec you burst with light,",
     "labels": [
-      "800054 effect_value #3"
+      "800054 behaviour_metric_delta burst_period"
     ],
     "kind": "claim"
   },
@@ -4738,10 +4822,26 @@
   {
     "spell": 802161,
     "clause": "This leaves behind a Sun Gate for $d that allies can interact with to blink themselves the same distance forward.",
-    "labels": [
-      "802161 aura_duration_ms #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "This leaves behind a Sun Gate (the gate creature is owned after the cast)",
+        "labels": [
+          "802161 behaviour_metric_delta gate_held"
+        ]
+      },
+      {
+        "claim": "for $d (15 s: present at 13.6 s, gone at 16.4 s)",
+        "labels": [
+          "802161 behaviour_metric_delta gate_held",
+          "802161 behaviour_metric_delta gate_gone"
+        ]
+      },
+      {
+        "claim": "that allies can interact with to blink themselves the same distance forward",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 802161,
@@ -5165,12 +5265,22 @@
   {
     "spell": 804628,
     "clause": "Your Judgement Day now applies Suncharged to the target every $807080t2 sec,",
-    "labels": [
-      "804628 aura_amplitude_ms #0",
-      "804628 behaviour_metric_delta suncharge_period"
-    ],
     "kind": "claim",
-    "reason": "Control arm = the phase before the learn (0 stacks). Read 4500-4900 ms after the cast: 9 stacks, which excludes the 10 of a 0.45 s period and the 8 of a 0.55 s period (stated 0.5 s from 807080 Effect[1] EffectAmplitude 500; the bindmysoul 1 sec is an older state). Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
+    "reason": "Control arm = the phase before the learn (0 stacks). Read 4500-4900 ms after the cast: 9 stacks, which excludes the 10 of a 0.45 s period and the 8 of a 0.55 s period (stated 0.5 s from 807080 Effect[1] EffectAmplitude 500; the bindmysoul 1 sec is an older state). Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip.",
+    "claims": [
+      {
+        "claim": "Your Judgement Day now applies Suncharged to the target",
+        "labels": [
+          "804628 behaviour_metric_delta suncharge_period"
+        ]
+      },
+      {
+        "claim": "every $807080t2 sec (0.5 s: 9 stacks read 4.5 to 4.9 s after the cast, which excludes 8 and 10)",
+        "labels": [
+          "804628 behaviour_metric_delta suncharge_period"
+        ]
+      }
+    ]
   },
   {
     "spell": 804628,
