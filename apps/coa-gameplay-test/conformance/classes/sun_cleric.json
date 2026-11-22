@@ -444,6 +444,46 @@
         }
       ],
       "trial_hand": "both"
+    },
+    {
+      "aura": 805647,
+      "name": "Knight of Dawn",
+      "tooltip": "Your |cFFFFFFFFGlorious Execution|r now has a $h% chance to strike 1 additional time.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 803913
+      },
+      "trigger_text": "Your Glorious Execution",
+      "trial_casts": true,
+      "trial_readings": [
+        {
+          "name": "player casts only",
+          "minus_events": true
+        }
+      ],
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "trials_per_attempt": 1,
+      "min_parts": 121,
+      "event_metric": "spell_cast_count",
+      "events_exclude_trigger_casts": true,
+      "proc_spell": 803913,
+      "proc_spell_source": "AscensionSunClericEvents.cpp:309: case 805647 casts Highest(player, 800626) at the target; Highest (AscensionSunCleric.cpp:94-102) returns the known rank of the 800626 chain with the highest SpellLevel, 803913 (Glorious Execution Rank 6, SpellLevel 60, spell_ranks rev_20260831_01_local_spell_progression.sql:823) for the level 60 caster that learned it, so the events are the casts of 803913 less the completed player casts; the tooltip says Glorious Execution strikes 1 additional time.",
+      "events_per_proc": 1,
+      "handler": "aura_ascension_sun_cleric_event (spell_script_names and spell_proc rows of 805647, rev_20260909_13_sun_cleric_completion.sql:48 and :349, spell_proc Chance 100, AttributesMask 2 triggered-can-proc): Check case 805647 (AscensionSunClericEvents.cpp:128) accepts a damage event of 800691, the main-hand strike that 803913 Effect[0] 142 casts (Spell.dbc), and rolls Chance(player, 805647) (ProcChance 20, AscensionSunCleric.cpp:197-206); Proc sets State(player).event (:163) before the cast at :309, and the extra cast is instant (CastingTimeIndex 1, Speed 0 for 803913 and 800691), so its own 800691 strike reaches Check while State(player).event is set and returns false at :46: an extra strike never rolls and never chains. A trial is one completed player cast of 803913 (its one 800691 strike), read as the completed casts less the events. Diagnostic run 20261122-212422 (4 parts, trigger rank 1 800626): 1174 casts of 800626 counted in total, 21 baseline and 968 player casts with the aura, so 185 extra casts in 968 player casts (19.1%); the earlier '0 extra' read compared the cast count with itself. Reference search 2026-11-22: coa-history spell 805647 and Glorious Execution casts not read for a rate; nothing found beyond the tooltip and Spell.dbc.",
+      "dbc": {
+        "805647": {
+          "ProcChance": 20,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0,
+      "base_mana_per_attempt": true
     }
   ],
   "triggers": [],
