@@ -8,7 +8,11 @@
     "separate Holyfire instance, so the original hit is unchanged: 803490 deals 25% of a direct hit and 803816",
     "heals 25% of a direct heal's effective healing. A heal under Dawn 807440 fulfills the Vow and doubles the",
     "copy to 50%. Ratios allow truncation of the percentage to whole points, so the probes are a spell-power",
-    "scaled heal and Frostbolt rank 42842, whose amounts make that truncation smaller than 0.2%."
+    "scaled heal and Frostbolt rank 42842, whose amounts make that truncation smaller than 0.2%. The damage copy",
+    "is computed from the landed hit, then the engine's monster resistance rolls a partial resist on the copy",
+    "itself (Holyfire is resistible), as on live: archived combat logs hold 509 resisted 803490 events of 5302.",
+    "The copy is therefore read as landed plus resisted (spell_damage_with_resist_total), the amount the Vow",
+    "computed, against the landed hit."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -171,7 +175,7 @@
       "action": "assert",
       "label": "Vow of Radiance deals an additional 25% of the direct hit as Holyfire damage",
       "actor": "cleric",
-      "metric": "spell_damage_total",
+      "metric": "spell_damage_with_resist_total",
       "spell": 803490,
       "target": "target",
       "ratio_to": "hit",
