@@ -8479,6 +8479,1226 @@
       "setup_only_after": true,
       "after_at_least": 60,
       "after_at_most": 64
+    },
+    {
+      "spell": 681064,
+      "name": "An'she's Guidance rank 1 (Holy critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "holy_crit",
+      "label_suffix": "holy_crit",
+      "quote": "Increases your Holy critical strike chance by $s1%",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "metric": "spell_crit_chance",
+      "fields": {
+        "school": 1
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "expected_gain": 2,
+      "tolerance": 0.0001,
+      "observe_source": "681064 Effect[0] aura 71 SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, MiscValue 2 (Holy), BasePoints 1 + 1 = 2 ($s1), TARGET_UNIT_CASTER. The caster live Holy (school index 1) spell crit percentage around a Holy Form 805301 cast, before the passive is learned (control) and after: gain 2 points. Reference search 2026-11-22: coa-history spell 681064: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 681064: #4516 only (native handlers at data level), nothing else; bindmysoul talents snapshot (fetched 2026-07-22) carries rank 1 of An'she's Guidance: 2% Holy critical strike chance, 50% less pushback, the same figures."
+    },
+    {
+      "spell": 681064,
+      "name": "An'she's Guidance rank 1 (pushback reduction, game time)",
+      "kind": "pushback_reduction",
+      "label_suffix": "pushback_game_time",
+      "quote": "and reduces spell pushback suffered from damaging attacks by $s3%.",
+      "cast_spell": 554406,
+      "cast_power": 1363,
+      "reducer_spell": 681064,
+      "reducer_learn": true,
+      "reducer_wait_ms": 500,
+      "strike_spell": 41394,
+      "strike_at_ms": 1000,
+      "windows": [
+        [
+          3440,
+          3480
+        ],
+        [
+          3930,
+          3970
+        ],
+        [
+          3440,
+          3480
+        ],
+        [
+          3690,
+          3730
+        ]
+      ],
+      "expected_pct": 50,
+      "repeats": 16,
+      "observe_source": "681064 Effect[2] aura 149 SPELL_AURA_REDUCE_PUSHBACK, BasePoints 49 + 1 = 50 ($s3). Same design as 681470 (ADR 0543, 0546): Dawnsear 554406 (3500 ms cast) is cast at the dummy four kinds of time, 16 repeats each: unhit and hit once by the passive striker Light of the Naaru 41394 1000 ms into the cast without the passive, then the passive learned (a real learn) and again unhit and hit. Every cast end is read in game time; reduction = 1 - (reduced hit end - reduced unhit end) / (hit end - unhit end), judged in the G-19 band 47.5..52.5 around 50 (5% of 50 is the larger than 2 points), no widening; the control is the hit cast without the passive. The reduced hit window is the unhit window plus half of the 500 ms pushback seen in the hit window (3930 - 3440). Reference search 2026-11-22: coa-history spell 681064: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 681064: #4516 only (native handlers at data level), nothing else; bindmysoul talents snapshot (fetched 2026-07-22) carries 50% less pushback for rank 1."
+    },
+    {
+      "spell": 707772,
+      "name": "Impartial rank 2 (strength)",
+      "kind": "metric_delta",
+      "variant": "strength",
+      "label_suffix": "strength",
+      "quote": "Increases your Strength and maximum mana by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 707772,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 0
+      },
+      "before_expected": 40,
+      "expected": 44.0,
+      "expected_ratio": 1.1,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707772 Impartial Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (MiscValue 0, Strength), BasePoints 9 + 1 = 10 ($s1). The reference Strength is 40 (reference_stats stat 0); read before and after a real learn of 707772 (the reading before is the control), ratio 1.10 within 0.002, which excludes +9% and +11%. Reference search 2026-11-22: coa-history spell 707772: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 707772: #4516 only (native handlers at data level), nothing else; bindmysoul talents snapshot (fetched 2026-07-22) has no entry for it."
+    },
+    {
+      "spell": 707772,
+      "name": "Impartial rank 2 (maximum mana)",
+      "kind": "metric_delta",
+      "variant": "max_mana",
+      "label_suffix": "max_mana",
+      "quote": "Increases your Strength and maximum mana by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 707772,
+      "target": "caster",
+      "metric": "max_power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 2868,
+      "expected": 3154.8,
+      "expected_ratio": 1.1,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707772 Impartial Effect[2] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT (MiscValue 0, mana), BasePoints 9 + 1 = 10. The maximum mana is read (power 0); the reference character's maximum mana is 2868 (BaseMana 1363 + 20 + (119 - 20) x 15, StatSystem.cpp:421-429, as recorded for 704942 in this class file), ratio 1.10 within 0.002, which excludes +9% and +11%. Read before and after a real learn of 707772 (the reading before is the control). Reference search 2026-11-22: coa-history spell 707772: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 707772: #4516 only (native handlers at data level), nothing else; bindmysoul talents snapshot (fetched 2026-07-22) has no entry for it."
+    },
+    {
+      "spell": 707772,
+      "name": "Impartial rank 2 (expertise)",
+      "kind": "metric_delta",
+      "variant": "expertise",
+      "label_suffix": "expertise",
+      "quote": "and your expertise by $s2.",
+      "trigger_spell": 804247,
+      "gate_spell": 707772,
+      "target": "caster",
+      "metric": "expertise",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 10,
+      "expected_gain": 10,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707772 Impartial Effect[1] aura 240 SPELL_AURA_MOD_EXPERTISE, BasePoints 9 + 1 = 10 ($s2). The caster's expertise is read before and after a real learn of 707772 (the reading before is the control), gain 10. Reference search 2026-11-22: coa-history spell 707772: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 707772: #4516 only (native handlers at data level), nothing else; bindmysoul talents snapshot (fetched 2026-07-22) has no entry for it."
+    },
+    {
+      "spell": 681469,
+      "name": "Divine Right (critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "melee_crit",
+      "label_suffix": "melee_crit",
+      "quote": "Increases your chance to critically strike and to parry attacks by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 681469,
+      "target": "caster",
+      "metric": "melee_crit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 4,
+      "expected_gain": 4,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "681469 Divine Right Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 3 + 1 = 4 ($s1), TARGET_UNIT_CASTER. The caster's live critical strike chance is read before and after a real learn of 681469 (the reading before is the control): gain 4 points. Reference search 2026-11-22: coa-history spell 681469: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 681469: #4516 only (native handlers at data level), nothing else; bindmysoul talents snapshot (fetched 2026-07-22) has no entry for it. The crit field is refreshed (Player::UpdateCritPercentage) before each reading (crit_field_refresh, ADR 0678): the first pair read 0 before and 9.05 after because the field stays unset after login until the learn refreshes it.",
+      "crit_field_refresh": true
+    },
+    {
+      "spell": 681469,
+      "name": "Divine Right (parry chance)",
+      "kind": "metric_delta",
+      "variant": "parry",
+      "label_suffix": "parry",
+      "quote": "Increases your chance to critically strike and to parry attacks by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 681469,
+      "target": "caster",
+      "metric": "parry_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 4,
+      "expected_gain": 4,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "681469 Divine Right Effect[1] aura 47 SPELL_AURA_MOD_PARRY_PERCENT, BasePoints 3 + 1 = 4 ($s1), TARGET_UNIT_CASTER. The caster's live parry chance is read before and after a real learn of 681469 (the reading before is the control): gain 4 points. Reference search 2026-11-22: coa-history spell 681469: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 681469: #4516 only (native handlers at data level), nothing else; bindmysoul talents snapshot (fetched 2026-07-22) has no entry for it."
+    },
+    {
+      "spell": 681469,
+      "name": "Divine Right (spell hit chance)",
+      "kind": "metric_delta",
+      "variant": "spell_hit",
+      "label_suffix": "spell_hit",
+      "quote": "and your spell hit chance by $s3%.",
+      "trigger_spell": 804247,
+      "gate_spell": 681469,
+      "target": "caster",
+      "metric": "spell_hit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 10,
+      "expected_gain": 10,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "681469 Divine Right Effect[2] aura 55 SPELL_AURA_MOD_SPELL_HIT_CHANCE, BasePoints 9 + 1 = 10 ($s3). The caster's live spell hit chance is read before and after a real learn of 681469 (the reading before is the control): gain 10 points. Reference search 2026-11-22: coa-history spell 681469: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 681469: #4516 only (native handlers at data level), nothing else; bindmysoul talents snapshot (fetched 2026-07-22) has no entry for it."
+    },
+    {
+      "spell": 807874,
+      "name": "Sunbeams (Radiant Cascade cast time)",
+      "kind": "metric_delta",
+      "variant": "cast_time",
+      "label_suffix": "cast_time",
+      "quote": "Reduces the cast time of Radiant Cascade by $s1%.",
+      "trigger_spell": 805301,
+      "gate_spell": 807874,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 500141
+      },
+      "before_expected": 2500,
+      "expected": 2125,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Radiant Cascade 500141 has a 2500 ms cast time (CastingTimeIndex 19, SpellCastTimes.dbc 19 CastTime 2500). 807874 Sunbeams Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -16 + 1 = -15 ($s1): 2500 x 0.85 = 2125 ms. The cast time of Radiant Cascade is read (the spell's own cast time function for the caster) before and after a real learn of 807874 (the reading before is the control). Reference search 2026-11-22: coa-history spell 807874: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 807874: #4516 only (native handlers at data level), nothing else; bindmysoul talents snapshot (fetched 2026-07-22) has no entry for it."
+    },
+    {
+      "spell": 806159,
+      "name": "Solar Invocation: Resplendence (shared cooldown with Ascension)",
+      "kind": "metric_delta",
+      "variant": "shared_cooldown",
+      "label_suffix": "shared_cooldown",
+      "quote": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
+      "trigger_spell": 806159,
+      "target": "caster",
+      "cast_in_before": false,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 500152
+      },
+      "before_expected": 0,
+      "expected": 29500,
+      "tolerance": 1500,
+      "observe_source": "806159 and Solar Invocation: Ascension 500152 both carry Category 767 with CategoryRecoveryTime 30000 (Spell.dbc). One cast of 806159 is followed 500 ms later by a read of the remaining cooldown of 500152, which was never cast: 0 before the cast (control) and 30000 less the elapsed time after it, expected 29500 within 1500 (the same shape as 800764 in this class file)."
+    },
+    {
+      "spell": 806159,
+      "name": "Solar Invocation: Resplendence (Illumination instant cast)",
+      "kind": "metric_delta",
+      "variant": "instant_cast",
+      "label_suffix": "instant_cast",
+      "quote": "causing your llluminations to be instant cast and guaranteed to critically strike, but cost $s3% more mana.",
+      "trigger_spell": 806159,
+      "target": "caster",
+      "cast_in_before": false,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 500143
+      },
+      "before_expected": 2000,
+      "expected": 0,
+      "tolerance": 1,
+      "observe_source": "806159 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -101 + 1 = -100, EffectSpellClassMask word 2 = 512; Illumination 500143 has SpellFamilyFlags[2] 512 and a 2000 ms cast time (CastingTimeIndex 5, SpellCastTimes.dbc 5). The cast time of Illumination for the caster is read before (control) and 500 ms after a real cast of 806159: 2000 then 0 ms."
+    },
+    {
+      "spell": 806159,
+      "name": "Solar Invocation: Resplendence (Illumination guaranteed critical strike)",
+      "kind": "metric_delta",
+      "variant": "guaranteed_crit",
+      "label_suffix": "guaranteed_crit",
+      "quote": "causing your llluminations to be instant cast and guaranteed to critically strike, but cost $s3% more mana.",
+      "trigger_spell": 806159,
+      "target": "caster",
+      "cast_in_before": false,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 500143,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 10000,
+      "observe_source": "806159 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9999 + 1 = 10000, EffectSpellClassMask word 2 = 512 (Illumination 500143). The caster's critical strike chance of Illumination is read before (control) and after a real cast of 806159: the gain is 10000 points (the flat modifier), far above the 100 a guarantee needs; the base value before (about 4.7) is not stated, only the gain.",
+      "expected_gain": 10000,
+      "tolerance": 0.01
+    },
+    {
+      "spell": 806159,
+      "name": "Solar Invocation: Resplendence (Illumination costs 100% more mana)",
+      "kind": "metric_delta",
+      "variant": "cost",
+      "label_suffix": "cost",
+      "quote": "causing your llluminations to be instant cast and guaranteed to critically strike, but cost $s3% more mana.",
+      "trigger_spell": 806159,
+      "target": "caster",
+      "cast_in_before": false,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 500143
+      },
+      "before_expected": 408.9,
+      "expected": 817.8,
+      "tolerance": 2,
+      "observe_source": "806159 Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 14 (SPELLMOD_COST), BasePoints 99 + 1 = 100 ($s3), EffectSpellClassMask word 2 = 512. Illumination 500143 costs 30% of base mana (ManaCostPercentage 30) and the reference base mana is 1363 (BaseMana 1363, as recorded in this class file): 408.9 before the cast (control) and 817.8 after it, within 2 (excludes +90% and +110%)."
+    },
+    {
+      "spell": 806159,
+      "name": "Solar Invocation: Resplendence (lasts 8 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Invoke the grace of An'she for $d,",
+      "trigger_spell": 806159,
+      "target": "caster",
+      "cast_power": 1360,
+      "metric": "aura",
+      "fields": {
+        "spell": 806159
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7400,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          7300,
+          7760
+        ],
+        "expired": [
+          8240,
+          8700
+        ]
+      },
+      "observe_source": "806159 DurationIndex 31 (8000 ms, $d). One real cast of 806159 on the caster: its aura is present when read 7300..7760 ms of game time after the cast (G-19 band, 10% below 8000 excluded) and gone when read 8240..8700 ms after it (10% above excluded); no cast, no aura (control)."
+    },
+    {
+      "spell": 707767,
+      "name": "Devotee (Devotion of Dawn attack power)",
+      "kind": "metric_delta",
+      "variant": "dawn_ap",
+      "label_suffix": "dawn_ap",
+      "quote": "Increases the effectiveness of your Devotions by $s2%.",
+      "trigger_spell": 572384,
+      "gate_spell": 707767,
+      "target": "ally",
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 70,
+      "expected": 112,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707767 Devotee Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 32768, the SpellFamilyFlags[1] of every Devotion (24 spells); Effect[0] is made a dummy at load (AscensionSunClericContracts.cpp:174-175). Devotion of Dawn 572384 Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, BasePoints 34 + 1 = 35. The grouped ally's attack power is 70 (reference_stats) before any cast (the control); after a real learn of 707767 and a real cast of 572384 at the ally it is 70 + 35 x 1.20 = 112, a gain of 42 within 0.5, which excludes the 35 of an unchanged Devotion. One of three tested shapes of the 24 Devotions (G-23): attack power here, spell power and cost reduction in their own entries, every one a distinct aura type under the one mask.",
+      "measure_actor": "ally",
+      "disable_regeneration": true,
+      "ally_arm": {
+        "allies": 1
+      },
+      "cast_in_before": false,
+      "expected_gain": 42
+    },
+    {
+      "spell": 707767,
+      "name": "Devotee (Devotion of Radiance spell power)",
+      "kind": "metric_delta",
+      "variant": "radiance_sp",
+      "label_suffix": "radiance_sp",
+      "quote": "Increases the effectiveness of your Devotions by $s2%.",
+      "trigger_spell": 575040,
+      "gate_spell": 707767,
+      "target": "ally",
+      "metric": "spell_power",
+      "fields": {
+        "school": 1
+      },
+      "before_expected": 0,
+      "expected": 33.6,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707767 Devotee Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 32768, the SpellFamilyFlags[1] of every Devotion (24 spells); Effect[0] is made a dummy at load (AscensionSunClericContracts.cpp:174-175). Devotion of Radiance 575040 Effect[0] aura 345, BasePoints 27 + 1 = 28 (spell power). The grouped ally's Holy spell power is 0 before any cast (the control) and 28 x 1.20 = 33.6 after a real learn of 707767 and a real cast of 575040 at the ally, within 1 (excludes the 28 of an unchanged Devotion).",
+      "measure_actor": "ally",
+      "disable_regeneration": true,
+      "ally_arm": {
+        "allies": 1
+      },
+      "cast_in_before": false,
+      "expected_gain": 33.6
+    },
+    {
+      "spell": 300621,
+      "name": "Photosynthetic (spell haste at night)",
+      "kind": "metric_delta",
+      "variant": "night_haste",
+      "label_suffix": "night_haste",
+      "quote": "Increases your spell haste by $s1%,",
+      "trigger_spell": 805301,
+      "gate_spell": 300621,
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0.943396,
+      "tolerance": 0.002,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "hour": 0,
+      "observe_source": "300621 Photosynthetic Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 5 + 1 = 6 ($s1); Effect[1] aura 227 periodic trigger with value of 300364 (aura 216, amount set to $s2 = 2 by the script during the day, AscensionSunCleric.cpp:378-382). Realm-local hour 0. The caster's cast speed multiplier is 1 before the learn (control) and 1/1.06 = 0.943396 after it, within 0.002 (excludes 4% and 8%)."
+    },
+    {
+      "spell": 300621,
+      "name": "Photosynthetic (additional spell haste during the day)",
+      "kind": "metric_delta",
+      "variant": "day_haste",
+      "label_suffix": "day_haste",
+      "quote": "plus an additional $s2% during the day.",
+      "trigger_spell": 805301,
+      "gate_spell": 300621,
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0.924883,
+      "tolerance": 0.002,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "hour": 12,
+      "observe_source": "300621 Photosynthetic Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 5 + 1 = 6 ($s1); Effect[1] aura 227 periodic trigger with value of 300364 (aura 216, amount set to $s2 = 2 by the script during the day, AscensionSunCleric.cpp:378-382). Realm-local hour 12. The caster's cast speed multiplier is 1 before the learn (control) and 1/(1.06 x 1.02) = 0.924883 after it (the night arm night_haste reads 1/1.06 = 0.943396, the control of the 2% part), within 0.002 (excludes the night value and +4% day)."
+    },
+    {
+      "spell": 560111,
+      "name": "Blessed Magic (Horusath Blast resets Glorious Execution)",
+      "kind": "metric_delta",
+      "variant": "ge_reset",
+      "label_suffix": "ge_reset",
+      "quote": "Casting Horusath Blast now resets the cooldown of Glorious Execution.",
+      "trigger_spell": 500154,
+      "gate_spell": 560111,
+      "setup_casts": [
+        800626
+      ],
+      "target": "dummy",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800626
+      },
+      "before_expected": 7500,
+      "expected": 0,
+      "tolerance": 1500,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "cast_power": 1363,
+      "observe_source": "560111 Blessed Magic Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL (706870, which triggers 2414058); the reset is scripted: OnSpellCast of Horusath Blast with the aura calls Reduce(player, 800626, INT32_MAX) (AscensionSunClericAbilities.cpp:236-241). Glorious Execution 800626 has RecoveryTime 8000 ms. It is cast, then Horusath Blast 500154 is cast at the dummy: its remaining cooldown is read (about 7500 ms without the talent, the control: RecoveryTime 8000 less the 500 ms wait, within 1500) and 0 after a real learn of 560111 (within 1500, excludes any remaining cooldown above 1500)."
+    },
+    {
+      "spell": 704935,
+      "name": "Clarity of the Heavens (block value from Intellect)",
+      "kind": "metric_delta",
+      "variant": "block_value",
+      "label_suffix": "block_value",
+      "quote": "Increases your block value by 100% of your Intellect.",
+      "trigger_spell": 805301,
+      "gate_spell": 704935,
+      "target": "caster",
+      "metric": "block_value",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 119,
+      "expected_gain": 119,
+      "tolerance": 1,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "704935 Clarity of the Heavens Effect[0] aura 23 periodic trigger of Miraculous 707776 (BasePoints 19 + 1 = 20 is unused; the script makes 707776 a MOD_SHIELD_BLOCKVALUE aura whose amount is the caster's Intellect: AscensionSunCleric.cpp:385-386, AscensionSunClericContracts.cpp:187-190). The tooltip's 100% of the Intellect is the reference Intellect 119 (reference_stats stat 3): the block value is read before the learn (control) and after, gain 119 within 1."
+    },
+    {
+      "spell": 707517,
+      "name": "Sun Strength (Radiant Cascade critical strike on a Blessed ally)",
+      "kind": "metric_delta",
+      "variant": "bless_ally",
+      "label_suffix": "bless_ally",
+      "quote": "Radiant Cascade is now guaranteed to critically strike on allies affected by Bless.",
+      "trigger_spell": 805301,
+      "gate_spell": 707517,
+      "target": "ally",
+      "cast_in_before": false,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "learn": [
+        804247
+      ],
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 500141,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 100,
+      "expected_gain": 100,
+      "tolerance": 0.05,
+      "ally_arm": {
+        "allies": 1,
+        "ally_casts": [
+          804247
+        ],
+        "control_wait": true
+      },
+      "observe_source": "AscensionSunClericAbilities.cpp:203-204: with 707517 known, a Radiant Cascade (named 500141) on a target carrying the caster's Bless sets the crit chance to 100. Bless 804247 is cast at the grouped ally in both phases (a real cast); the scripted crit chance of Radiant Cascade on that ally is read before the learn (control, 0) and after (100)."
+    },
+    {
+      "spell": 707517,
+      "name": "Sun Strength (control: an ally without Bless)",
+      "kind": "metric_delta",
+      "variant": "no_bless",
+      "label_suffix": "no_bless",
+      "quote": "Radiant Cascade is now guaranteed to critically strike on allies affected by Bless.",
+      "trigger_spell": 805301,
+      "gate_spell": 707517,
+      "target": "ally",
+      "cast_in_before": false,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 500141,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.05,
+      "ally_arm": {
+        "allies": 1,
+        "control_wait": true
+      },
+      "observe_source": "Control of bless_ally: the same scenario without the Bless cast on the ally; the scripted crit chance stays 0 after the learn (AscensionSunClericAbilities.cpp:203-204 needs the caster's Bless on the target)."
+    },
+    {
+      "spell": 560123,
+      "name": "Sunwell (party pulse dispel)",
+      "kind": "periodic_dispel",
+      "quote": "that periodically dispels fear, sleep, and charm effects every $560124T1 sec from allies within $853225a1 yds.",
+      "debuffs": [
+        65931,
+        9159,
+        6358
+      ],
+      "period_ms": 3000,
+      "margin_ms": 100,
+      "party_pulse": {
+        "radius_spell": 853225,
+        "pulses": 2,
+        "near_distance": 38.0,
+        "far_margin": 2.0,
+        "near_limit": 40.0,
+        "note": "Spell.dbc 853225 SpellRadius 23 = 40 yd ($853225a1). Target type TARGET_UNIT_SRC_AREA_PARTY, both members are players: the target's combat reach is added only for a target that is not player-controlled (Spell.cpp:9439-9441) and the leeway only for SRC_AREA_ENEMY, CASTER_AREA_PARTY and CASTER_AREA_RAID (Spell.cpp:1391-1394), so the edge is 40.0 yd. The near member at 38 yd excludes a 36 yd radius (-10%), the far member at 42 yd excludes a 44 yd radius (+10%)."
+      },
+      "observe_source": "560123 Sunwell Effect[0] aura 4 dummy; 560124 Sun Well EffectAmplitude[0] 3000 ms ($560124T1) periodic trigger of 853225, whose three SPELL_EFFECT_DISPEL_MECHANIC effects (TARGET_UNIT_SRC_AREA_PARTY, SpellRadius 23 = 40 yd) name mechanics 1 charm, 5 fear and 10 sleep. Fear 65931, Sleep 9159 and Seduction 6358 on a party member are all present without the cast (control), gone 100 ms after the cast and after each 3000 ms period, present 100 ms before each period; a member beyond the radius keeps all three. Same shape as Witching Idol 804051 (Witch Hunter, pair 20261116-183539)."
+    },
+    {
+      "spell": 560123,
+      "name": "Sunwell (lasts 30 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Become an embodiment of the sun for $d",
+      "trigger_spell": 560123,
+      "target": "caster",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 560123
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 28000,
+      "expiry_wait_ms": 3200,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          27500,
+          29000
+        ],
+        "expired": [
+          31000,
+          32500
+        ]
+      },
+      "observe_source": "560123 DurationIndex 9 (30000 ms, $d). One real cast of 560123 on the caster: its aura is present when read 27500..29000 ms of game time after the cast (G-19 band, 10% below 30000 excluded) and gone when read 31000..32500 ms after it (10% above excluded); no cast, no aura (control)."
+    },
+    {
+      "spell": 800612,
+      "name": "Champion of the Sun (lasts 25 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Lasts $d.",
+      "trigger_spell": 800612,
+      "target": "caster",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 800612
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 23500,
+      "expiry_wait_ms": 2700,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          23000,
+          24300
+        ],
+        "expired": [
+          25700,
+          27000
+        ]
+      },
+      "observe_source": "800612 DurationIndex 63 (25000 ms, $d). One real cast of 800612 on the caster: its aura is present when read 23000..24300 ms of game time after the cast (10% below 25000 excluded) and gone when read 25700..27000 ms after it (10% above excluded); no cast, no aura (control)."
+    },
+    {
+      "spell": 800612,
+      "name": "Champion of the Sun (Holy strikes appear on auto attacks)",
+      "kind": "metric_delta",
+      "variant": "holy_strikes",
+      "label_suffix": "holy_strikes",
+      "quote": "causing your melee auto attacks to deal an additional $s1% of the damage dealt as Holy damage.",
+      "target": "dummy",
+      "expire_ms": 500,
+      "attack_swings": 5,
+      "gate_spell": 800612,
+      "gate_cast": true,
+      "trigger_spell": 800612,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 807853,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "observe_source": "800612 Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT, EffectTriggerSpell 807853 (SCHOOL_DAMAGE at the target), the event 'damage && automatic' (AscensionSunClericEvents.cpp:136). Spec Valkyr (two one-hand 2800 ms weapons): each phase attacks for 5 swing intervals with both hands, about 10 damaging auto attacks. The count of 807853 damage events is 0 in the phase without the aura (control) and at least 1 in the phase with it. This entry proves only that Holy strikes follow auto attacks under the aura, not one per swing: the swings of the same window are not read by any kind, so no count is expected (tool need, returned). Residual: a proc rate of 50% or more leaves at least 1 strike in about 10 swings with probability 1 - 0.5^10 = 0.999; the control phase reads 0 by construction (no aura, no 807853 source).",
+      "after_at_least": 1
+    },
+    {
+      "spell": 706735,
+      "name": "Divine Vision (Holy damage)",
+      "kind": "hit_ratio",
+      "variant": "holy_damage",
+      "label_suffix": "holy_damage",
+      "quote": "Increases your Holy and Physical damage and healing done by $s1%.",
+      "expected": 1.04,
+      "critical": false,
+      "observe_spell": 500154,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          706735
+        ]
+      },
+      "trials": 100,
+      "parts": 3,
+      "cast_power": 1000,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "expected_source": "706735 Divine Vision Effect[0] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT and Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (MiscValue 3, Physical and Holy), BasePoints 3 + 1 = 4 ($s1). Horusath Blast 500154 (Holy, SchoolMask 2) is read in a control arm and an arm with 706735 learned: the mean hit ratio is 1.04 (band 2 points, G-19: the larger of 5% of 4 and 2 points)."
+    },
+    {
+      "spell": 706735,
+      "name": "Divine Vision (Physical damage)",
+      "kind": "hit_ratio",
+      "variant": "physical_damage",
+      "label_suffix": "physical_damage",
+      "quote": "Increases your Holy and Physical damage and healing done by $s1%.",
+      "expected": 1.04,
+      "critical": false,
+      "observe_spell": 800691,
+      "cast_spell": 803913,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "auras": [],
+        "learn": [
+          706735
+        ]
+      },
+      "trials": 100,
+      "parts": 3,
+      "cast_power": 1363,
+      "expected_source": "706735 Divine Vision Effect[0] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT and Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (MiscValue 3, Physical and Holy), BasePoints 3 + 1 = 4 ($s1). Glorious Execution 803913 is cast and its main-hand strike 800691 (Physical, SchoolMask 1) is read in a control arm and an arm with 706735 learned: the mean hit ratio is 1.04 (band 2 points)."
+    },
+    {
+      "spell": 706735,
+      "name": "Divine Vision (healing)",
+      "kind": "hit_ratio",
+      "variant": "healing",
+      "label_suffix": "healing",
+      "quote": "Increases your Holy and Physical damage and healing done by $s1%.",
+      "expected": 1.04,
+      "critical": false,
+      "metric": "spell_heal_total",
+      "observe_spell": 704911,
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "control": {},
+      "treatment": {
+        "learn": [
+          706735
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1360,
+      "ally_distance": 5,
+      "expected_source": "706735 Divine Vision Effect[0] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT and Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (MiscValue 3, Physical and Holy), BasePoints 3 + 1 = 4 ($s1). The grouped ally's Sunlight 704911 heals (Holy) are read without and with 706735 learned on the caster, the ally held at 50% health: the mean ratio is 1.04 (band 2 points)."
+    },
+    {
+      "spell": 554406,
+      "name": "Dawnsear (damage at 0 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Blast an enemy with burning light, dealing ${$m1+0+$spfi*0.765222} Fire damage.",
+      "expected": 708.5,
+      "after_at_least": 669,
+      "after_at_most": 748,
+      "player_spell_power": 0,
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 554406,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 5000,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "554406 Dawnsear Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, EffectBasePoints 668 + EffectDieSides 80: $m1 = 669..748, no per-level term at level 60; the school is Fire (SchoolMask 4). The spell damage of one real cast on the dummy (spell penetration 823764 and a -1000% spell crit aura 984954 as harness precondition fixtures: no resist and no critical strike) at 0 spell power lies in [669, 748]."
+    },
+    {
+      "spell": 554406,
+      "name": "Dawnsear (damage at 20000 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Blast an enemy with burning light, dealing ${$m1+0+$spfi*0.765222} Fire damage.",
+      "expected": 16012.9,
+      "after_at_least": 15973,
+      "after_at_most": 16053,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 554406,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 5000,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Contrast arm of damage_base in the same pair: the spell power coefficient 0.765222 ($spfi) x 20000 = 15304.44 added to [669, 748] gives [15973.44, 16052.44]; the entry reads one real cast at 20000 spell power on the dummy (same fixtures), which excludes a coefficient 10% off (+-1530)."
+    },
+    {
+      "spell": 680622,
+      "name": "Fervor of the Sun (one stack after one fulfilled Vow)",
+      "kind": "metric_delta",
+      "variant": "stack_one",
+      "label_suffix": "stack_one",
+      "quote": "Fulfilling a Vow now increases the damage of your Sunslam by $680623s1% for $680623d,",
+      "trigger_spell": 500143,
+      "gate_spell": 680622,
+      "target": "caster",
+      "setup_target": "caster",
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680623
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2600,
+      "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). One fulfilment reads 1 stack. Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
+      "cast_in_before": false
+    },
+    {
+      "spell": 680622,
+      "name": "Fervor of the Sun (stacks after six fulfilled Vows)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "quote": "stacking $680623u times.",
+      "trigger_spell": 500143,
+      "gate_spell": 680622,
+      "target": "caster",
+      "setup_target": "caster",
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "setup_casts": [
+        803489,
+        804584,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143
+      ],
+      "setup_wait_ms": 2600,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680623
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 2600,
+      "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). Six fulfilments (five setup heals and the trigger heal) read 5 stacks, the stated cap. Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
+      "cast_in_before": false,
+      "setup_only_after": true
+    },
+    {
+      "spell": 680622,
+      "name": "Fervor of the Sun (control: the Vow is fulfilled without the talent)",
+      "kind": "metric_delta",
+      "variant": "control_stacks",
+      "label_suffix": "control_stacks",
+      "quote": "Fulfilling a Vow now increases the damage of your Sunslam by $680623s1% for $680623d,",
+      "trigger_spell": 500143,
+      "gate_spell": 92136,
+      "target": "caster",
+      "setup_target": "caster",
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680623
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 2600,
+      "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). The control without the talent: 0 stacks (the Vow is fulfilled, 680622 never learned; Sunlight 92136 is learned as the fulfilling talent, as in the Dawnguard control). Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
+      "cast_in_before": false,
+      "setup_only_after": true
+    },
+    {
+      "spell": 680622,
+      "name": "Fervor of the Sun (still active at 54.6 s)",
+      "kind": "metric_delta",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "Fulfilling a Vow now increases the damage of your Sunslam by $680623s1% for $680623d,",
+      "trigger_spell": 500143,
+      "gate_spell": 680622,
+      "target": "caster",
+      "setup_target": "caster",
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "aura",
+      "fields": {
+        "spell": 680623
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 56600,
+      "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). 680623 is on the caster 54600 ms after the fulfilling heal (wait 2000 ms cast + 54600): its duration is above 54.6 s, which excludes 54 s (-10% of 60 s). Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
+      "cast_in_before": false,
+      "setup_only_after": true
+    },
+    {
+      "spell": 680622,
+      "name": "Fervor of the Sun (gone at 65.4 s)",
+      "kind": "metric_delta",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "quote": "Fulfilling a Vow now increases the damage of your Sunslam by $680623s1% for $680623d,",
+      "trigger_spell": 500143,
+      "gate_spell": 680622,
+      "target": "caster",
+      "setup_target": "caster",
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "aura",
+      "fields": {
+        "spell": 680623
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 67400,
+      "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). 680623 is gone 65400 ms after the fulfilling heal (wait 2000 ms cast + 65400): its duration is below 65.4 s, which excludes 66 s (+10% of 60 s). Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
+      "cast_in_before": false,
+      "setup_only_after": true
+    },
+    {
+      "spell": 707613,
+      "name": "Radiant Power (1 stack of Sunwalker, Shine critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "stacks_1",
+      "label_suffix": "stacks_1",
+      "quote": "Each stack of Sunwalker now increases the critical strike chance of Shine by $s1%.",
+      "trigger_spell": 805301,
+      "gate_spell": 707613,
+      "target": "caster",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 800357,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 15,
+      "expected_gain": 15,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800601,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "707613 Radiant Power Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2), EffectSpellClassMask word 0 = 128 (Sunwalker 800601, whose Effect[1] is the flat critical chance modifier of Shine), BasePoints 14 + 1 = 15 ($s1). Sunwalker 800601 StackAmount 5 is set on the caster with the stated stacks as a harness precondition fixture in both phases (its generation by melee hits is the subject of 704934, not of this clause). The caster's critical strike chance of Shine 800357 (healing the caster) is read before the learn (control) and after: the gain is 15 per stack. Gain 15 points with 1 stack(s); the one-stack and three-stack entries are the contrast of each other. Reference search 2026-11-22: coa-history spell 707613: 0 events in 186 logs; git log origin/main --grep 707613: #4516 only (native handlers at data level); the reference snapshots list the tooltip only; nothing else found."
+    },
+    {
+      "spell": 707613,
+      "name": "Radiant Power (3 stacks of Sunwalker, Shine critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "stacks_3",
+      "label_suffix": "stacks_3",
+      "quote": "Each stack of Sunwalker now increases the critical strike chance of Shine by $s1%.",
+      "trigger_spell": 805301,
+      "gate_spell": 707613,
+      "target": "caster",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 800357,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 45,
+      "expected_gain": 45,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800601,
+          3,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "707613 Radiant Power Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2), EffectSpellClassMask word 0 = 128 (Sunwalker 800601, whose Effect[1] is the flat critical chance modifier of Shine), BasePoints 14 + 1 = 15 ($s1). Sunwalker 800601 StackAmount 5 is set on the caster with the stated stacks as a harness precondition fixture in both phases (its generation by melee hits is the subject of 704934, not of this clause). The caster's critical strike chance of Shine 800357 (healing the caster) is read before the learn (control) and after: the gain is 15 per stack. Gain 45 points with 3 stack(s); the one-stack and three-stack entries are the contrast of each other. Reference search 2026-11-22: coa-history spell 707613: 0 events in 186 logs; git log origin/main --grep 707613: #4516 only (native handlers at data level); the reference snapshots list the tooltip only; nothing else found."
+    },
+    {
+      "spell": 804253,
+      "name": "Blessing of Purity (immunity aura lasts 6 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Protect a Blessed ally, making them immune to all damage for $680889d.",
+      "trigger_spell": 804253,
+      "target": "caster",
+      "setup_casts": [
+        804247
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "setup_only_after": false,
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 680889
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 5700,
+      "expiry_wait_ms": 700,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          5450,
+          5900
+        ],
+        "expired": [
+          6150,
+          6550
+        ]
+      },
+      "observe_source": "804253 Blessing of Purity Effect[0] SPELL_EFFECT_TRIGGER_SPELL 680889, whose aura 40 SPELL_AURA_DAMAGE_IMMUNITY (MiscValue 127, all schools) lasts 6000 ms (DurationIndex 32, $680889d); Spell.dbc TargetAuraSpell 804247 (Bless); the script casts it only on a target carrying the caster's own Bless (AscensionSunClericAbilities.cpp:478-492). The caster is blessed by a real cast of Bless 804247 on itself (Bless always blesses the caster), then 804253 is cast on the caster. The immunity aura 680889 is present when read 5450..5900 ms of game time after the cast (above 5400 ms, -10% excluded) and gone when read 6150..6550 ms after it (below 6600 ms, +10% excluded); no cast, no aura (control). Reference search 2026-11-22: coa-history spell 804253: 11 casts in 5 logs, no aura events; git log origin/main --grep 804253: nothing; the reference snapshots list the tooltip only; nothing else found."
+    },
+    {
+      "spell": 804253,
+      "name": "Blessing of Purity (control: no immunity on a target without Bless)",
+      "kind": "metric_delta",
+      "variant": "no_bless",
+      "label_suffix": "no_bless",
+      "quote": "@ext:Only usable on your ally with Bless active.:ext@",
+      "trigger_spell": 804253,
+      "target": "caster",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 680889
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "observe_source": "804253 Blessing of Purity Effect[0] SPELL_EFFECT_TRIGGER_SPELL 680889, whose aura 40 SPELL_AURA_DAMAGE_IMMUNITY (MiscValue 127, all schools) lasts 6000 ms (DurationIndex 32, $680889d); Spell.dbc TargetAuraSpell 804247 (Bless); the script casts it only on a target carrying the caster's own Bless (AscensionSunClericAbilities.cpp:478-492). Bless is not cast. Control of the duration entry: 804253 cast at a caster without Bless leaves no 680889 (the script returns when the target lacks the caster's Bless); the duration entry shows the aura present with Bless. Reference search as the duration entry."
+    },
+    {
+      "spell": 804253,
+      "name": "Blessing of Purity (immune to all damage)",
+      "kind": "metric_delta",
+      "variant": "immune_strike",
+      "label_suffix": "immune_strike",
+      "quote": "Protect a Blessed ally, making them immune to all damage for $680889d.",
+      "trigger_spell": 804253,
+      "setup_casts": [
+        804247
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "strike": {
+        "spell": 47632,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 1500
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 47632,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "680889 aura 40 SPELL_AURA_DAMAGE_IMMUNITY, MiscValue 127 (every school), 6000 ms. Grave Coil 47632 (600 Shadow, DmgClass 1) is cast by a creature striker (spell hit bonus 100) at the caster. Before phase (control): the strike lands on the caster without 804253 and the cumulative count of 47632 damage events on the caster reads 1. After phase: the caster is blessed by a real Bless 804247 on itself, casts 804253 on itself (mana set), and 1500 ms later the same strike is cast: the count still reads 1, so the strike dealt no damage under the immunity (immunity lasts 6000 ms, the strike is inside it). The struck unit is the Blessed caster, not a second ally: a taken_hit strike at an ally is available only to the absorb judge, and the damage_ratio judge refuses an arm with no landed hit (tool need, returned). Reference search 2026-11-22: coa-history spell 804253: 11 casts in 5 logs, no aura events; git log origin/main --grep 804253: nothing; Snapshot coabuildhub (spells_master_index.json, local copy dated 2026-09-18, context) reads \"for 4 sec but reducing their damage and healing done by 25%\" against the installed DBC 6 s and no reduction; the installed DBC governs. "
     }
   ],
   "player_observations": [],

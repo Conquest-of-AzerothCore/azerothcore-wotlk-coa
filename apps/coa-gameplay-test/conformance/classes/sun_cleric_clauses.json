@@ -555,17 +555,20 @@
     "spell": 300621,
     "clause": "Increases your spell haste by $s1%,",
     "labels": [
-      "300621 effect_value e0 #0"
+      "300621 behaviour_metric_delta night_haste"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the reading before the learn (cast speed 1). Realm-local hour 0: 1/1.06 = 0.943396 within 0.002 from Spell.dbc 300621 effect 0 aura 216 BasePoints 5 + 1; the night arm shows the 2% day part absent. Reference search 2026-11-22: coa-history spell 300621: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 300621 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 300621,
     "clause": "plus an additional $s2% during the day.",
     "labels": [
-      "300621 effect_value e1 #1"
+      "300621 behaviour_metric_delta day_haste",
+      "300621 behaviour_metric_delta night_haste"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the night entry at hour 0 (0.943396) and the reading before the learn (1). Realm-local hour 12: 1/(1.06 x 1.02) = 0.924883 within 0.002, which excludes the night value; the 2% comes from 300364 whose amount the script sets to $s2 = 2 in the day (AscensionSunCleric.cpp:378-382). Reference search 2026-11-22: coa-history spell 300621: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 300621 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 300626,
@@ -905,10 +908,22 @@
   {
     "spell": 554406,
     "clause": "Blast an enemy with burning light, dealing ${$m1+0+$spfi*0.765222} Fire damage.",
-    "labels": [
-      "554406 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing $m1 Fire damage (the base roll)",
+        "labels": [
+          "554406 behaviour_metric_delta damage_base"
+        ]
+      },
+      {
+        "claim": "plus the spell power coefficient 0.765222",
+        "labels": [
+          "554406 behaviour_metric_delta damage_sp"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Base roll 669..748 measured 676 and 691 at 0 spell power (ok). The spell power term is an alert: 1.0 x 20000 measured against 0.765222 x 20000, so the coefficient part is not conformant; fix note fix-note-554406.md (row { 554406, 0, 1.0 } in AscensionSunClericData.h:81). Control = the 0 spell power arm of the same pair. Reference search 2026-11-22: coa-history spell 554406: 74 SPELL_DAMAGE events in 1 log (Dawnsear 1385..7550, mean 3551 on crits, a different spell power); git log origin/main --grep 554406: #13027 (Dawn charge), #5345, #4516, none about the coefficient; the reference snapshots under ~/CoaServer/reference list the tooltip only; nothing else found. Snapshot coabuildhub (spells_master_index.json, local copy dated 2026-09-18, README trust level context) reads: rank 1 (500146) \"88 + 100% fire SP\" and rank 2 (502366) \"114+0+FireP*1\" against the installed DBC $spfi*0.765222 (500146 to 554406); the snapshot matches the server's 1.0, the installed DBC tooltip governs, and the case is with the mentor (G-37 criterion 1 in doubt); no server change. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 503624,
@@ -1244,8 +1259,11 @@
   {
     "spell": 560111,
     "clause": "Casting Horusath Blast now resets the cooldown of Glorious Execution.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "560111 behaviour_metric_delta ge_reset"
+    ],
+    "kind": "claim",
+    "reason": "Control arm = the same cast sequence before the learn: Glorious Execution 800626 cast, then Horusath Blast, remaining cooldown 7491 ms; after the learn 0. Scripted reset (AscensionSunClericAbilities.cpp:236-241). Spell chain read: 560111 -> 706870 (aura) -> 2414058 (delayed CDR payload, effect 165), the reset itself is the script. Reference search 2026-11-22: coa-history spell 560111: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 560111 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 560113,
@@ -1267,18 +1285,46 @@
     "spell": 560123,
     "clause": "Become an embodiment of the sun for $d that periodically dispels fear,",
     "labels": [
-      "560123 aura_duration_ms #0"
+      "560123 behaviour_metric_delta duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = no cast, no aura. Present 27500..29000 ms after a real cast, gone 31000..32500 ms (30000 ms, DurationIndex 9, 10% on both sides excluded). Reference search 2026-11-22: coa-history spell 560123: 0 events in 186 logs; git log origin/main --grep 560123 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 560123,
     "clause": "sleep, and charm effects every $560124T1 sec from allies within $853225a1 yds.",
-    "labels": [
-      "560123 aura_amplitude_ms #1",
-      "560123 effect_radius 853225e0 #2"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "periodically dispels fear, sleep and charm effects from allies",
+        "labels": [
+          "560123 periodic_dispel control",
+          "560123 periodic_dispel after_0",
+          "560123 periodic_dispel before_1",
+          "560123 periodic_dispel after_1",
+          "560123 periodic_dispel before_2",
+          "560123 periodic_dispel after_2"
+        ]
+      },
+      {
+        "claim": "every 3 sec",
+        "labels": [
+          "560123 periodic_dispel before_1",
+          "560123 periodic_dispel after_1",
+          "560123 periodic_dispel before_2",
+          "560123 periodic_dispel after_2"
+        ]
+      },
+      {
+        "claim": "from allies within 40 yds",
+        "labels": [
+          "560123 periodic_dispel after_0",
+          "560123 periodic_dispel far_control",
+          "560123 periodic_dispel far_after_2"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Control arms: no cast keeps all three debuffs on a party member at 38 yd and at 42 yd (control, far_control); the member at 42 yd keeps them after two pulses (far_after_2). Fear 65931, Sleep 9159 and Seduction 6358 on the member at 38 yd are all gone 100 ms after the cast and after each pulse, present 100 ms before each (period within 2800..3100 ms, excludes 10% off 3000). Radius 40 yd ($853225a1, SpellRadius 23): members at 38 and 42 yd bracket it by 5% below and 5% above; the edge is 40.0 yd (no combat reach for a player-controlled target, Spell.cpp:9439-9441; no leeway for SRC_AREA_PARTY, Spell.cpp:1391-1394), so a radius of 36 or 44 yd fails. Same shape as Witching Idol 804051. Reference search 2026-11-22: coa-history spell 560123: 0 events in 186 logs; git log origin/main --grep 560123 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 560276,
@@ -1885,19 +1931,33 @@
   {
     "spell": 680622,
     "clause": "Fulfilling a Vow now increases the damage of your Sunslam by $680623s1% for $680623d,",
-    "labels": [
-      "680622 effect_value 680623e0 #0",
-      "680622 spell_duration 680623 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Fulfilling a Vow now increases the damage of your Sunslam by 10%",
+        "labels": []
+      },
+      {
+        "claim": "for 60 s",
+        "labels": [
+          "680622 behaviour_metric_delta duration_held",
+          "680622 behaviour_metric_delta duration_gone",
+          "680622 behaviour_metric_delta control_stacks"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Duration part: control = the Vow fulfilled without the talent (Sunlight 92136 learned instead): 0 stacks. Fervor 680623 is present 54.6 s after the fulfilling heal and gone 65.4 s after it (60000 ms, DurationIndex 3, 10% on both sides excluded). The 10% damage of Sunslam part has no check: the effect is a flat modifier EFFECT1 (+9 + 1) on mask word 1 = 2097152 (Sunslam strike 807447, weapon-percent effect 31) and no entry measures Sunslam's hit under Fervor stacks; it stays unproven in this pass (needs a Vow fulfilment, Dawn, then a Sunslam hit ratio across stacks). Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs; git log origin/main --grep 680622: nothing; the reference snapshots under ~/CoaServer/reference list the tooltip only; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 680622,
     "clause": "stacking $680623u times.",
     "labels": [
-      "680622 max_stacks 680623 #2"
+      "680622 behaviour_metric_delta stack_one",
+      "680622 behaviour_metric_delta stack_cap",
+      "680622 behaviour_metric_delta control_stacks"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the Vow fulfilled without the talent: 0 stacks. One fulfilment gives 1 stack and six fulfilments give 5, the stated cap (StackAmount 5). Same Fulfill call as Dawnguard 680672. Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs; git log origin/main --grep 680622: nothing; the reference snapshots under ~/CoaServer/reference list the tooltip only; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 680624,
@@ -2246,17 +2306,19 @@
     "spell": 681064,
     "clause": "Increases your Holy critical strike chance by $s1%",
     "labels": [
-      "681064 effect_value e0 #0"
+      "681064 behaviour_metric_delta holy_crit"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the reading before the learn. Gain 2 points of Holy spell crit from Spell.dbc 681064 effect 0 (BasePoints 1 + 1). Reference search: coa-history spell 681064: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 681064: #4516 only (native handlers at data level); bindmysoul and other reference snapshots under ~/CoaServer/reference list the spell without a figure that differs; nothing else found. The bindmysoul snapshot carries rank 1 (2%, 50% less pushback), the same figures. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 681064,
     "clause": "and reduces spell pushback suffered from damaging attacks by $s3%.",
     "labels": [
-      "681064 effect_value e2 #1"
+      "681064 behaviour_metric_delta pushback_game_time"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the hit cast without the passive (it is pushed back 495 ms), compared with the hit cast after the learn. Spell.dbc 681064 effect 2 REDUCE_PUSHBACK BasePoints 49 + 1 = 50%. Measured 50.5% (16 casts of each kind), judged in the G-19 band 47.5..52.5. Reference search: coa-history spell 681064: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 681064: #4516 only (native handlers at data level); bindmysoul and other reference snapshots under ~/CoaServer/reference list the spell without a figure that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 681066,
@@ -2364,18 +2426,31 @@
   {
     "spell": 681469,
     "clause": "Increases your chance to critically strike and to parry attacks by $s1%",
-    "labels": [
-      "681469 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your chance to critically strike by 4%",
+        "labels": [
+          "681469 behaviour_metric_delta melee_crit"
+        ]
+      },
+      {
+        "claim": "and to parry attacks by 4%",
+        "labels": [
+          "681469 behaviour_metric_delta parry"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Control arm in each entry = the reading before the learn (melee crit 5.05 after the field refresh, parry 5). Gain 4 points from Spell.dbc 681469 effect 0 aura 290 and effect 1 aura 47, BasePoints 3 + 1. Reference search 2026-11-22: coa-history spell 681469: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 681469 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 681469,
     "clause": "and your spell hit chance by $s3%.",
     "labels": [
-      "681469 effect_value e2 #1"
+      "681469 behaviour_metric_delta spell_hit"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the reading before the learn (1250 then 1260): gain 10 from Spell.dbc 681469 effect 2 aura 55 BasePoints 9 + 1. Reference search: coa-history spell 681469: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 681469: #4516 only (native handlers at data level); bindmysoul and other reference snapshots under ~/CoaServer/reference list the spell without a figure that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 681470,
@@ -2860,8 +2935,11 @@
   {
     "spell": 704935,
     "clause": "Increases your block value by 100% of your Intellect.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "704935 behaviour_metric_delta block_value"
+    ],
+    "kind": "claim",
+    "reason": "Control arm = the reading before the learn (block value 11). After the learn 130: gain 119 = the reference Intellect (reference_stats stat 3), within 1; the 100% is the Intellect itself (AscensionSunCleric.cpp:385-386). Reference search 2026-11-22: coa-history spell 704935: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 704935 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only; nothing else found. Snapshot coabuildhub (spells_master_index.json, local copy dated 2026-09-18, README trust level context) reads: \"50% of your Intellect\" against the installed DBC 100%; the installed DBC governs (older reference). The 100% is read at one Intellect value (a flat +119 is not separated from a scaling term). Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 704936,
@@ -2948,16 +3026,25 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "Increases your Holy and Physical damage by $s1%",
-        "labels": []
+        "claim": "Increases your Holy damage by 4%",
+        "labels": [
+          "706735 behaviour_hit_ratio holy_damage"
+        ]
       },
       {
-        "claim": "and healing done by $s1%",
+        "claim": "and Physical damage by 4%",
         "labels": [
-          "706735 effect_value e0 #0"
+          "706735 behaviour_hit_ratio physical_damage"
+        ]
+      },
+      {
+        "claim": "and healing done by 4%",
+        "labels": [
+          "706735 behaviour_hit_ratio healing"
         ]
       }
-    ]
+    ],
+    "reason": "Control arm in each entry = the same hits without the passive. Holy (Horusath Blast) +3.995% and +3.989% (99% interval 3.98..4.01, 180 trials per arm), Physical (Glorious Execution strike 800691) +4.03% and +4.20% (interval 3.50..4.73, 498 trials), healing (Sunlight 704911) +3.98% and +4.01% (20 trials), all inside the 2-point band around +4% (Spell.dbc 706735 effect 0 aura 136 and effect 1 aura 79, BasePoints 3 + 1). Reference search 2026-11-22: coa-history spell 706735: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 706735 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only; nothing else found. Snapshot coabuildhub (spells_master_index.json, local copy dated 2026-09-18, README trust level context) reads: \"Increases your Holy damage and healing done by 4%\" (no Physical) against the installed DBC Holy and Physical (effects 0 and 1); the installed DBC governs (older reference), and the Physical part is measured. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 707072,
@@ -3081,10 +3168,22 @@
   {
     "spell": 707613,
     "clause": "Each stack of Sunwalker now increases the critical strike chance of Shine by $s1%.",
-    "labels": [
-      "707613 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "one stack of Sunwalker increases the critical strike chance of Shine by 15%",
+        "labels": [
+          "707613 behaviour_metric_delta stacks_1"
+        ]
+      },
+      {
+        "claim": "each further stack adds 15% (three stacks 45%)",
+        "labels": [
+          "707613 behaviour_metric_delta stacks_3"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Control arm in each entry = the reading before the learn with the same Sunwalker stacks (Sunwalker set by harness set_aura as a precondition fixture, the generation of stacks is 704934's). Gain 15 with 1 stack and 45 with 3 (Spell.dbc 707613 effect 0 flat modifier EFFECT2 on mask 128, BasePoints 14 + 1). Reference search 2026-11-22: coa-history spell 707613: 0 events in 186 logs; git log origin/main --grep 707613: #4516 only (native handlers at data level); the reference snapshots under ~/CoaServer/reference list the tooltip only; nothing else found. Snapshot coabuildhub (spells_master_index.json, local copy dated 2026-09-18, README trust level context) reads: \"by 3%\" against the installed DBC 15% (BasePoints 14 + 1); the installed DBC governs (older reference). Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 707629,
@@ -3108,10 +3207,22 @@
   {
     "spell": 707767,
     "clause": "Increases the effectiveness of your Devotions by $s2%.",
-    "labels": [
-      "707767 effect_value e1 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the effectiveness of your Devotions by 20% (attack power Devotion)",
+        "labels": [
+          "707767 behaviour_metric_delta dawn_ap"
+        ]
+      },
+      {
+        "claim": "Increases the effectiveness of your Devotions by 20% (spell power Devotion)",
+        "labels": [
+          "707767 behaviour_metric_delta radiance_sp"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Control arm = the ally's reading before the learn and before any Devotion (attack power 70, spell power 0). 2 of the 24 Devotions in game (G-23: one effect and one class mask 32768 cover them; the two differ in shape, attack power aura 99 and spell power aura 345; the only scripted part, effect 0, is a dummy at load): Devotion of Dawn 572384 gives 42 = 35 x 1.20 (gain 42 within 0.5, which excludes 35), Devotion of Radiance 575040 gives 33 against 33.6 (28 x 1.20) within 1, which excludes 28 and 30.8. Cost-reduction Devotions are not tested separately. Reference search 2026-11-22: coa-history spell 707767: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 707767 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 707770,
@@ -3141,18 +3252,31 @@
   {
     "spell": 707772,
     "clause": "Increases your Strength and maximum mana by $s1%",
-    "labels": [
-      "707772 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your Strength by 10%",
+        "labels": [
+          "707772 behaviour_metric_delta strength"
+        ]
+      },
+      {
+        "claim": "and maximum mana by 10%",
+        "labels": [
+          "707772 behaviour_metric_delta max_mana"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Control arm in each entry = the reading before the learn (Strength 40 then 44; maximum mana 2868 then 3154, ratio 1.0997 within 0.002 of 1.10). Expected from Spell.dbc 707772 effect 0 aura 137 and effect 2 aura 132, BasePoints 9 + 1 = 10. Reference search: coa-history spell 707772: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 707772: none; bindmysoul and other reference snapshots under ~/CoaServer/reference list the spell without a figure that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 707772,
     "clause": "and your expertise by $s2.",
     "labels": [
-      "707772 effect_value e1 #1"
+      "707772 behaviour_metric_delta expertise"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the reading before the learn (4003, the expertise rating fixture), then 4013: gain 10 from Spell.dbc 707772 effect 1 aura 240 BasePoints 9 + 1. Reference search: coa-history spell 707772: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 707772: none; bindmysoul and other reference snapshots under ~/CoaServer/reference list the spell without a figure that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 707773,
@@ -3288,19 +3412,29 @@
   {
     "spell": 800612,
     "clause": "Become a champion of An'she, causing your melee auto attacks to deal an additional $s1% of the damage dealt as Holy damage.",
-    "labels": [
-      "800612 effect_value e0 #0",
-      "800612 aura_amount e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "causing your melee auto attacks to deal an additional Holy hit (Holy strikes of 807853 appear under the aura and not without it; not shown to be one per swing)",
+        "labels": [
+          "800612 behaviour_metric_delta holy_strikes"
+        ]
+      },
+      {
+        "claim": "of 100% of the damage dealt as Holy damage",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Part 1: the control phase reads 0 Holy strikes of 807853 and the phase with the aura at least 1 over 5 swing intervals with two weapons; one strike per swing is not shown, because no kind reads the swings of the same window and compares (tool need, returned), so the count is not stated and the clause is not status 1. Part 2, the amount (100% of the damage dealt), has no check: no kind compares the extra Holy hit with the swing that caused it (tool need, returned). coa-history: 807853 SPELL_DAMAGE 2114 events in 11 logs, 800612 refreshes 1440 and casts 105 (counts only, no swing link). Snapshot coabuildhub (spells_master_index.json, local copy dated 2026-09-18, README trust level context) reads: \"additional 50% of the damage dealt as Holy damage\" and \"Lasts 20 seconds\" against the installed DBC 100% and 25 s; the installed DBC governs (older reference, guide section 4). Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 800612,
     "clause": "Lasts $d.",
     "labels": [
-      "800612 aura_duration_ms #1"
+      "800612 behaviour_metric_delta duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = no cast, no aura. Present 23000..24300 ms after a real cast, gone 25700..27000 ms (25000 ms, DurationIndex 63, 10% on both sides excluded). Reference search 2026-11-22: coa-history spell 800612: SPELL_AURA_APPLIED 104, SPELL_AURA_REMOVED 103, casts 105 in 11 logs; git log origin/main --grep 800612 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only; nothing else found. Snapshot coabuildhub (spells_master_index.json, local copy dated 2026-09-18, README trust level context) reads: \"Lasts 20 seconds\" against the installed DBC 25 s (DurationIndex 63); the installed DBC governs (older reference). Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 803913,
@@ -3585,18 +3719,32 @@
   {
     "spell": 804253,
     "clause": "Protect a Blessed ally, making them immune to all damage for $680889d.",
-    "labels": [
-      "804253 spell_duration 680889 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Protect a Blessed ally, making them immune to all damage (a Grave Coil strike on the Blessed caster takes no damage)",
+        "labels": [
+          "804253 behaviour_metric_delta immune_strike"
+        ]
+      },
+      {
+        "claim": "for 6 s",
+        "labels": [
+          "804253 behaviour_metric_delta duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Control arm = no cast, no aura (0 before). The aura 680889 (aura 40 DAMAGE_IMMUNITY, all schools) is present 5450..5900 ms after a real cast on a caster blessed by a real Bless, gone 6150..6550 ms (6000 ms, 10% on both sides excluded). The immunity itself is read from a Grave Coil 47632 strike on the caster: the before phase (no 804253) takes it (count 1), the after phase, 1500 ms after a real 804253 on the Blessed caster, takes no second one (count stays 1). The struck unit is the Blessed caster, not a second ally: the ally-struck taken_hit needs the absorb judge (tool need, returned). Reference search 2026-11-22: coa-history spell 804253: 11 casts in 5 logs, no aura events; git log origin/main --grep 804253: nothing; the reference snapshots list the tooltip only; nothing else found. Snapshot coabuildhub (spells_master_index.json, local copy dated 2026-09-18, README trust level context) reads: \"immune to all damage for 4 sec but reducing their damage and healing done by 25%\" against the installed DBC 6 s and no reduction; the installed DBC governs (older reference). Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 804253,
     "clause": "@ext:Only usable on your ally with Bless active.:ext@",
     "labels": [
-      "804253 effect_value #1"
+      "804253 behaviour_metric_delta no_bless",
+      "804253 behaviour_metric_delta duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm in this entry: a cast at a caster without Bless leaves no 680889 (0 and 0); with Bless the duration entry reads the aura present. The script returns when the target lacks the caster's Bless (AscensionSunClericAbilities.cpp:478-481). Reference search 2026-11-22: coa-history spell 804253: 11 casts in 5 logs, no aura events; git log origin/main --grep 804253: nothing; the reference snapshots list the tooltip only; nothing else found. Snapshot coabuildhub (spells_master_index.json, local copy dated 2026-09-18, README trust level context) reads: \"Only usable on your ally with Bless active.\" (same as the DBC). Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 804254,
@@ -4262,26 +4410,45 @@
     "spell": 806159,
     "clause": "Invoke the grace of An'she for $d,",
     "labels": [
-      "806159 aura_duration_ms #0"
+      "806159 behaviour_metric_delta duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = no cast, no aura. Present 7200..7760 ms after a real cast, gone 8240..8800 ms (8000 ms, DurationIndex 31, 10% on both sides excluded). Reference search 2026-11-22: coa-history spell 806159: 6 casts and 6 applications in 2 logs; git log origin/main --grep 806159 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 806159,
     "clause": "causing your llluminations to be instant cast and guaranteed to critically strike, but cost $s3% more mana.",
-    "labels": [
-      "806159 effect_value e2 #1",
-      "806159 aura_amount e2 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "causing your Illuminations to be instant cast",
+        "labels": [
+          "806159 behaviour_metric_delta instant_cast"
+        ]
+      },
+      {
+        "claim": "and guaranteed to critically strike",
+        "labels": [
+          "806159 behaviour_metric_delta guaranteed_crit"
+        ]
+      },
+      {
+        "claim": "but cost 100% more mana",
+        "labels": [
+          "806159 behaviour_metric_delta cost"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Control arm in each entry = the reading before the cast. Illumination 500143: cast time 2000 then 0 ms; critical strike chance gain 10000 points (flat modifier 9999 + 1; base 4.68 before, 10004.7 after); mana cost 408 then 816 (30% of base mana 1363 = 408.9, doubled), within 2. Reference search 2026-11-22: coa-history spell 806159: 6 casts and 6 applications in 2 logs; git log origin/main --grep 806159 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 806159,
     "clause": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
     "labels": [
-      "806159 effect_value #2"
+      "806159 behaviour_metric_delta shared_cooldown"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the cooldown of Solar Invocation: Ascension 500152 read before any cast (0); 500 ms after one cast of 806159 it reads 29494 ms (Category 767, CategoryRecoveryTime 30000, within 1500). Reference search 2026-11-22: coa-history spell 806159: 6 casts and 6 applications in 2 logs; git log origin/main --grep 806159 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 806458,
@@ -4526,9 +4693,10 @@
     "spell": 807874,
     "clause": "Reduces the cast time of Radiant Cascade by $s1%.",
     "labels": [
-      "807874 effect_value e0 #0"
+      "807874 behaviour_metric_delta cast_time"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the cast time before the learn: Radiant Cascade 2500 ms (SpellCastTimes 19), 2125 ms after (-15% from Spell.dbc 807874 effect 0, BasePoints -16 + 1). Reference search: coa-history spell 807874: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 807874: #4516 only (native handlers at data level); bindmysoul and other reference snapshots under ~/CoaServer/reference list the spell without a figure that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 807963,
