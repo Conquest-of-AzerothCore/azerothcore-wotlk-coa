@@ -197,10 +197,12 @@ constexpr uint32 SpawnMaskAllDifficulties = 7;
 constexpr float TrapCommandReach = 10.0f;
 constexpr float TrapListReach = 600.0f;
 constexpr float ToxicExpulsionReach = 100.0f;
-constexpr float TrapReach = 14.0f;
+constexpr float TrapReach = 8.0f;
+constexpr float TrapHalfWidth = 3.0f;
+constexpr float TrapMaxDrop = 8.0f;
+constexpr float TrapMaxRise = 1.0f;
 constexpr float TrapMouthOffset = 1.5f;
-constexpr float TrapChestHeight = 1.0f;
-constexpr float TrapHalfAngle = float(M_PI) / 9.0f;
+constexpr float TrapDamagePct = 15.0f;
 
 uint8 DifficultyBit(Map const* map)
 {
@@ -341,8 +343,9 @@ private:
 
 struct BreathCheck
 {
-    float distance;
-    float offDegrees;
+    float ahead;
+    float side;
+    float drop;
     bool sight;
     bool inside;
 };
@@ -351,20 +354,18 @@ BreathCheck CheckTrapBreath(Creature const* trap, Player const* player)
 {
     Position const mouth = trap->GetHomePosition();
     float const yaw = mouth.GetOrientation();
-    float const pitch = TrapTilts[TrapTiltIndex.load()].pitch;
-    float const dirX = std::cos(pitch) * std::cos(yaw);
-    float const dirY = std::cos(pitch) * std::sin(yaw);
-    float const dirZ = std::sin(pitch);
+    float const dirX = std::cos(yaw);
+    float const dirY = std::sin(yaw);
     float const dx = player->GetPositionX() - mouth.GetPositionX();
     float const dy = player->GetPositionY() - mouth.GetPositionY();
-    float const dz = player->GetPositionZ() + TrapChestHeight - mouth.GetPositionZ();
-    float const distance = std::sqrt(dx * dx + dy * dy + dz * dz);
-    float const cosine = distance > 0.01f ? (dx * dirX + dy * dirY + dz * dirZ) / distance : 1.0f;
-    float const off = std::acos(std::clamp(cosine, -1.0f, 1.0f));
+    float const ahead = dx * dirX + dy * dirY;
+    float const side = std::fabs(dy * dirX - dx * dirY);
+    float const drop = mouth.GetPositionZ() - player->GetPositionZ();
     bool const sight = player->IsWithinLOS(mouth.GetPositionX() + TrapMouthOffset * dirX,
-        mouth.GetPositionY() + TrapMouthOffset * dirY,
-        mouth.GetPositionZ() + TrapMouthOffset * dirZ, VMAP::ModelIgnoreFlags::M2);
-    return { distance, off * 180.0f / float(M_PI), sight, distance <= TrapReach && off <= TrapHalfAngle && sight };
+        mouth.GetPositionY() + TrapMouthOffset * dirY, mouth.GetPositionZ(), VMAP::ModelIgnoreFlags::M2);
+    bool const inside = ahead >= 0.0f && ahead <= TrapReach && side <= TrapHalfWidth
+        && drop <= TrapMaxDrop && drop >= -TrapMaxRise && sight;
+    return { ahead, side, drop, sight, inside };
 }
 
 bool InTrapBreath(Creature const* trap, Player const* player)
@@ -388,11 +389,10 @@ void TrapBreathDamage(Creature* trap, Player* player)
     SpellInfo const* venom = sSpellMgr->GetSpellInfo(SPELL_VENOM_TRAP);
     if (!venom || player->IsImmunedToDamage(trap, venom))
         return;
-    int32 const base = std::max(0, venom->Effects[EFFECT_0].CalcValue(trap));
-    uint32 const done = trap->SpellDamageBonusDone(player, venom, uint32(base), SPELL_DIRECT_DAMAGE, EFFECT_0);
-    uint32 const taken = player->SpellDamageBonusTaken(trap, venom, done, SPELL_DIRECT_DAMAGE);
+    int32 const amount = int32(CoAOtherSide::Unscaled(trap, player,
+        float(player->CountPctFromMaxHealth(TrapDamagePct)), venom));
     SpellNonMeleeDamage damage(trap, player, venom, venom->GetSchoolMask());
-    trap->CalculateSpellDamageTaken(&damage, int32(taken), venom);
+    trap->CalculateSpellDamageTaken(&damage, amount, venom);
     Unit::DealDamageMods(player, damage.damage, &damage.absorb);
     trap->DealSpellDamage(&damage, true);
     trap->SendSpellNonMeleeDamageLog(&damage);
@@ -731,9 +731,9 @@ public:
         BreathCheck const check = CheckTrapBreath(trap, player);
         if (check.inside && !player->IsGameMaster())
             TrapBreathDamage(trap, player);
-        handler->PSendSysMessage("Trap {}: {:.1f} yd from the mouth (max {:.0f}), "
-            "{:.0f} degrees off the breath (max {:.0f}), sight {}; you are {}{}.",
-            trap->GetSpawnId(), check.distance, TrapReach, check.offDegrees, TrapHalfAngle * 180.0f / float(M_PI),
+        handler->PSendSysMessage("Trap {}: {:.1f} yd ahead of the mouth (max {:.0f}), {:.1f} yd to the side (max {:.0f}), "
+            "{:.1f} yd below it ({:.0f} to {:.0f}), sight {}; you are {}{}.",
+            trap->GetSpawnId(), check.ahead, TrapReach, check.side, TrapHalfWidth, check.drop, -TrapMaxRise, TrapMaxDrop,
             check.sight ? "yes" : "no",
             check.inside ? "inside" : "outside", player->IsGameMaster() ? " (GM mode: no damage)" : "");
         return true;

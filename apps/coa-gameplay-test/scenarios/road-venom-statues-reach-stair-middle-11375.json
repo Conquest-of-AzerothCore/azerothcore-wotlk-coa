@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "name": "Road to De Other Side: the venom statues on the stairs breathe to the middle of the stairs for 15% of max health",
+  "contract": "Issues #11375 and #10285: the venom statues along the stairs to the Chimeric Embryo (162975, placed in pairs facing each other about 14.7 yd apart) hit nobody in the middle of the stairs, and only for about 130 per tick at level 60. On Ascension they dealt about a third of a player's health. Expected (project owner decision): the breath reaches 8 yd ahead of the mouth, which overlaps the facing statue's breath in the middle of the stairs, 3 yd to either side, and each 0.5 s tick takes 15% of the target's maximum health; the fel flame visual and the breathing cycle stay.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the statues are spawned",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "label": "p stands in the middle of the first stair flight, 7 yd in front of statue 9370601",
+      "actor": "p",
+      "map": 937,
+      "x": 423.4,
+      "y": 50.78,
+      "z": 269.15,
+      "ignore_access": true
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: p is in Road to De Other Side",
+      "actor": "p",
+      "metric": "map_id",
+      "equals": 937,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: within one breathing cycle the breath reaches the middle of the stairs and a tick takes 15% of max health",
+      "actor": "p",
+      "metric": "health",
+      "min": 1,
+      "max": 86500,
+      "within_ms": 15000
+    },
+    {
+      "action": "teleport",
+      "label": "p steps 4.5 yd aside, out of the breath",
+      "actor": "p",
+      "map": 937,
+      "x": 423.49,
+      "y": 55.71,
+      "z": 269.15,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "wait",
+      "label": "a full breathing cycle passes",
+      "ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "beside the breath no tick lands (other damage nearby stays far below 15%)",
+      "actor": "p",
+      "metric": "health",
+      "min": 90000
+    }
+  ]
+}
