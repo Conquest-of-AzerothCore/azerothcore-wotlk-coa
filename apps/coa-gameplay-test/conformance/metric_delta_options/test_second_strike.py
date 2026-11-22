@@ -44,6 +44,7 @@ class SecondStrikeTests(unittest.TestCase):
         self.assertLess(present, seconds[1])
         self.assertLess(seconds[1], labels.index(expectation.model['after_label']))
         self.assertEqual(labels.index(model['log_label']), labels.index(expectation.model['after_label']) + 1)
+        self.assertEqual(labels.index(model['log_before_label']), labels.index(expectation.model['before_label']) + 1)
         read = steps[labels.index(model['log_label'])]
         self.assertEqual((read['metric'], read['spell'], read['caster']), ('spell_log_count', 23583, STRIKER))
 
@@ -67,20 +68,26 @@ class SecondStrikeTests(unittest.TestCase):
         model = expectation.model
         strike = model['second_strike']
 
-        def judged(after: float, present: float | None, logs: float | None) -> str:
+        def judged(after: float, present: float | None, logs: float | None, before_logs: float | None = 1) -> str:
             values = {model['before_label']: 0, model['after_label']: after}
             if present is not None:
                 values[strike['present_label']] = present
+            if before_logs is not None:
+                values[strike['log_before_label']] = before_logs
             if logs is not None:
                 values[strike['log_label']] = logs
             return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
 
-        self.assertEqual(judged(0, 30, 1), 'ok')
-        self.assertEqual(judged(30, 30, 1), 'alert')
-        self.assertEqual(judged(0, 0, 1), 'unmeasured')
-        self.assertEqual(judged(0, None, 1), 'unmeasured')
-        self.assertEqual(judged(0, 30, 0), 'unmeasured')
+        self.assertEqual(judged(0, 30, 2), 'ok')
+        self.assertEqual(judged(30, 30, 2), 'alert')
+        self.assertEqual(judged(0, 0, 2), 'unmeasured')
+        self.assertEqual(judged(0, None, 2), 'unmeasured')
+        self.assertEqual(judged(0, 30, 1), 'unmeasured')
         self.assertEqual(judged(0, 30, None), 'unmeasured')
+        self.assertEqual(judged(0, 30, 2, 0), 'unmeasured')
+        self.assertEqual(judged(0, 30, 2, None), 'unmeasured')
+        self.assertEqual(judged(0, 30, 3), 'unmeasured')
+        self.assertEqual(judged(0, 30, 2, 2), 'unmeasured')
 
 
 if __name__ == '__main__':

@@ -7,8 +7,9 @@
 - the caster's dodge and parry are set to 0% (the `caster_avoidance` step before that cast is replaced);
 - the striker casts `spell` at the caster and the scenario waits `wait_ms`, then the entry's own wait to its reading.
 
-Right after the after reading, the damage logs of `spell` (`spell_log_count`, the striker as caster) are counted. A
-present read other than `present`, or no landed second strike, makes the verdict `unmeasured`. Otherwise the verdict is
+Right after the before reading and right after the after reading, the damage logs of `spell` (`spell_log_count`, the
+striker as caster) are counted. A present read other than `present`, or a phase without exactly one landed second
+strike (1 after the before phase, 2 in total after the after phase), makes the verdict `unmeasured`. Otherwise the verdict is
 the plain `metric_delta` verdict, so a state the second strike did not consume alerts against an `expected` of 0.
 
 Named points: `after_trigger_steps` (the read and the strike), `fixtures` (the avoidance and the log read), `verdict`.

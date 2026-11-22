@@ -36647,6 +36647,9 @@
       "quote": "Your Gavels can no longer be missed, dodged, or parried",
       "name": "Heaven's Appraisal (a Gavel of Wrath is not dodged by a 100% dodge dummy)",
       "variant": "gavel_undodged",
+      "player_ratings": {
+        "expertise_rating": 0
+      },
       "label_suffix": "gavel_undodged",
       "phase_auras": [
         [
@@ -36662,46 +36665,7 @@
           "dummy"
         ]
       ],
-      "observe_source": "300353 Heaven's Appraisal: Spell.dbc Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 16 (SPELLMOD_RESIST_MISS_CHANCE) BasePoints 999 on class mask word 1 = 32; Effects 1 and 2 are rewritten at load to SPELL_AURA_IGNORE_COMBAT_RESULT MELEE_HIT_DODGE and MELEE_HIT_PARRY with class mask word 1 = 32 (AscensionSunClericContracts.cpp:184-189); Gavel of Wrath 800617 carries SpellFamilyFlags[1] = 32 and Effect[0] 121 NORMALIZED_WEAPON_DMG (the melee spell table, Unit::MeleeSpellHitResult, whose IGNORE_COMBAT_RESULT loop clears canDodge / canParry). The class code sets no Holy Form condition on the avoidance part (no HasAura(HolyForm) on these effects); Holy Form 805301 is set on the caster in both phases (harness set_aura, a precondition fixture) so the entry holds under both readings of 'when under Holy Form'. QA Test 100% Dodge 10020 (Effect[0] aura 49 SPELL_AURA_MOD_DODGE_PERCENT BasePoints 99 + 1 = 100) is set on the dummy in both phases, a named precondition fixture (the subject is the Gavel's table, not the fixture). One Gavel of Wrath per phase at the dummy, the damage events (spell_damage_count, a dodged spell logs none) of 800617 on the dummy are counted: control without 300353 dodged, 0; with 300353 learned, 1. A control reading above 0 shows the fixture did not dodge (the entry then proves nothing and is unmeasured by review). Reference search 2026-11-22: bindmysoul snapshot (2026-07-22) carries the same tooltip for 300353; nothing else found. The phases are 1600 ms apart (wait_ms 1000 + expire_ms 600), past the 1500 ms global cooldown (StartRecoveryTime 1500)."
-    },
-    {
-      "spell": 300353,
-      "kind": "metric_delta",
-      "gate_spell": 300353,
-      "trigger_spell": 800617,
-      "target": "dummy",
-      "dummy_distance": 3,
-      "cast_power": 1363,
-      "before_expected": 0,
-      "wait_ms": 1000,
-      "expire_ms": 600,
-      "metric": "spell_damage_count",
-      "fields": {
-        "spell": 800617,
-        "target": "dummy"
-      },
-      "expected": 1,
-      "tolerance": 0,
-      "void_on_cast_failure": true,
-      "quote": "Your Gavels can no longer be missed, dodged, or parried",
-      "name": "Heaven's Appraisal (a Gavel of Wrath is not parried by a 100% parry dummy)",
-      "variant": "gavel_unparried",
-      "label_suffix": "gavel_unparried",
-      "phase_auras": [
-        [
-          805301,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          10019,
-          1,
-          "dummy",
-          "dummy"
-        ]
-      ],
-      "observe_source": "300353 Heaven's Appraisal: Spell.dbc Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 16 (SPELLMOD_RESIST_MISS_CHANCE) BasePoints 999 on class mask word 1 = 32; Effects 1 and 2 are rewritten at load to SPELL_AURA_IGNORE_COMBAT_RESULT MELEE_HIT_DODGE and MELEE_HIT_PARRY with class mask word 1 = 32 (AscensionSunClericContracts.cpp:184-189); Gavel of Wrath 800617 carries SpellFamilyFlags[1] = 32 and Effect[0] 121 NORMALIZED_WEAPON_DMG (the melee spell table, Unit::MeleeSpellHitResult, whose IGNORE_COMBAT_RESULT loop clears canDodge / canParry). The class code sets no Holy Form condition on the avoidance part (no HasAura(HolyForm) on these effects); Holy Form 805301 is set on the caster in both phases (harness set_aura, a precondition fixture) so the entry holds under both readings of 'when under Holy Form'. QA Test 100% Parry 10019 (Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT BasePoints 99 + 1 = 100) is set on the dummy in both phases, a named precondition fixture. A parry needs the dummy to face the caster (MeleeSpellHitResult: HasInArc(M_PI) else canParry false); the control phase reads it: without 300353 the Gavel is parried, 0 damage events of 800617 on the dummy; with 300353 learned, 1. A control reading above 0 shows the dummy did not parry (facing or flags_extra NO_PARRY) and the entry proves nothing. Reference search 2026-11-22: bindmysoul snapshot (2026-07-22) carries the same tooltip for 300353; nothing else found. The phases are 1600 ms apart (wait_ms 1000 + expire_ms 600), past the 1500 ms global cooldown (StartRecoveryTime 1500)."
+      "observe_source": "300353 Heaven's Appraisal: Spell.dbc Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 16 (SPELLMOD_RESIST_MISS_CHANCE) BasePoints 999 on class mask word 1 = 32; Effects 1 and 2 are rewritten at load to SPELL_AURA_IGNORE_COMBAT_RESULT MELEE_HIT_DODGE and MELEE_HIT_PARRY with class mask word 1 = 32 (AscensionSunClericContracts.cpp:184-189); Gavel of Wrath 800617 carries SpellFamilyFlags[1] = 32 and Effect[0] 121 NORMALIZED_WEAPON_DMG (the melee spell table, Unit::MeleeSpellHitResult, whose IGNORE_COMBAT_RESULT loop clears canDodge / canParry). The class code sets no Holy Form condition on the avoidance part (no HasAura(HolyForm) on these effects); Holy Form 805301 is set on the caster in both phases (harness set_aura, a precondition fixture) so the entry holds under both readings of 'when under Holy Form'. QA Test 100% Dodge 10020 (Effect[0] aura 49 SPELL_AURA_MOD_DODGE_PERCENT BasePoints 99 + 1 = 100) is set on the dummy in both phases, a named precondition fixture (the subject is the Gavel's table, not the fixture). One Gavel of Wrath per phase at the dummy, the damage events (spell_damage_count, a dodged spell logs none) of 800617 on the dummy are counted: control without 300353 dodged, 0; with 300353 learned, 1. A control reading above 0 shows the fixture did not dodge (the entry then proves nothing and is unmeasured by review). Reference search 2026-11-22: bindmysoul snapshot (2026-07-22) carries the same tooltip for 300353; nothing else found. The phases are 1600 ms apart (wait_ms 1000 + expire_ms 600), past the 1500 ms global cooldown (StartRecoveryTime 1500). Design 3 (2026-11-22): the class file ratings give the caster expertise_rating 10000, which removes the dummy's dodge and parry chance before any aura is read (a lead from the first pair, where the control Gavel landed with the fixture on the dummy), so this entry sets expertise_rating 0 on the caster (player_ratings); the control phase, the same Gavel without 300353, must then be dodged (0 damage events) and the learned phase lands."
     },
     {
       "spell": 300353,

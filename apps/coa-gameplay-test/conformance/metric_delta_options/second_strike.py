@@ -30,6 +30,10 @@ def log_label(spec, strike: SecondStrike) -> str:
     return f'{spec.spell} second_strike {strike.spell} damage logs'
 
 
+def log_before_label(spec, strike: SecondStrike) -> str:
+    return f'{log_label(spec, strike)} before'
+
+
 def check(spec, strike):
     if strike is None:
         return
@@ -57,6 +61,9 @@ def fixtures(class_file: dict, spec, strike: SecondStrike, scenario: dict):
                 steps.pop()
             steps.append({'action': 'set_combat_avoidance', 'actor': CASTER, 'dodge': 0.0, 'parry': 0.0})
         steps.append(step)
+    before = next(index for index, step in enumerate(steps) if step.get('label') == metric_delta_label(spec, 'before'))
+    steps.insert(before + 1, measurement(log_before_label(spec, strike), CASTER, 'spell_log_count',
+                                         spell=strike.spell, caster=STRIKER))
     after = next(index for index, step in enumerate(steps) if step.get('label') == metric_delta_label(spec, 'after'))
     read = measurement(log_label(spec, strike), CASTER, 'spell_log_count', spell=strike.spell, caster=STRIKER)
     scenario['steps'] = steps[:after + 1] + [read] + steps[after + 1:]
@@ -64,13 +71,14 @@ def fixtures(class_file: dict, spec, strike: SecondStrike, scenario: dict):
                              f'caster\'s dodge and parry set to 0%, {strike.wait_ms} ms before the wait to the '
                              f'reading; in the treatment phase the reading is taken once right before that second '
                              f'strike and must be {strike.present:g}, and the second strike\'s damage logs are '
-                             f'counted after the after reading: a missing state or no landed second strike makes the '
-                             f'trial unmeasured.')
+                             f'counted after each reading: a missing state, or a phase without exactly one landed second '
+                             f'strike, makes the trial unmeasured.')
 
 
 def model(spec, strike: SecondStrike) -> dict:
     return {NAME: {'spell': strike.spell, 'present': strike.present, 'present_label': present_label(spec),
-                   'log_label': log_label(spec, strike)}}
+                   'log_label': log_label(spec, strike),
+                   'log_before_label': log_before_label(spec, strike)}}
 
 
 def verdict(verdict, run, strike: dict):
@@ -79,10 +87,12 @@ def verdict(verdict, run, strike: dict):
         return replace(verdict, status='unmeasured',
                        explanation=f'{verdict.explanation}; the reading before the second strike is {present}, not '
                                    f'{strike["present"]:g}, so the second strike did not meet the state it tests')
-    logs = run.values.get(strike['log_label'])
-    if logs is None or logs < 1:
+    before = run.values.get(strike['log_before_label'])
+    total = run.values.get(strike['log_label'])
+    if before is None or total is None or before != 1 or total - before != 1:
         return replace(verdict, status='unmeasured',
-                       explanation=f'{verdict.explanation}; no {strike["spell"]} second strike landed ({logs} damage '
-                                   f'logs), so the reading is not its effect')
-    return replace(verdict, explanation=f'{verdict.explanation}; read {present:g} before the second strike, '
-                                        f'{logs:g} {strike["spell"]} second strikes landed')
+                       explanation=f'{verdict.explanation}; {strike["spell"]} second strikes landed {before} times '
+                                   f'in the control phase and {None if before is None or total is None else total - before} '
+                                   f'in the treatment phase, not once in each, so the reading is not its effect')
+    return replace(verdict, explanation=f'{verdict.explanation}; read {present:g} before the second strike, one '
+                                        f'{strike["spell"]} second strike landed in each phase')

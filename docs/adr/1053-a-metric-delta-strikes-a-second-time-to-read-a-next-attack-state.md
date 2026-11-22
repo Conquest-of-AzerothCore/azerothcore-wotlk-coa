@@ -22,7 +22,8 @@ default off, on an entry with a `strike`, its spell other than the strike's. Thr
 `after_trigger_steps`, after each trigger cast it reads the entry's metric in the treatment phase (must equal
 `present`), then sets the caster's dodge and parry to 0% (replacing the `caster_avoidance` step before that cast) and
 the striker casts `spell` at the caster. Its damage logs (`spell_log_count`, the striker as caster) are read right
-after the after reading. A present read other than `present`, or no landed second strike, makes the verdict
+after the before reading and right after the after reading. A present read other than `present`, or a phase without
+exactly one landed second strike, makes the verdict
 `unmeasured`; it never produces `ok` or `alert` and adds no counted label.
 
 ## Consequences
