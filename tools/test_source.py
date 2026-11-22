@@ -114,6 +114,12 @@ class SourceSelectionTests(unittest.TestCase):
         result = check_source.select([path], mechanic_sources=[path])
         self.assertEqual(result['checks'], ['mechanics'])
 
+    def test_class_buff_audit_changes_run_its_tests(self):
+        for path in ['tools/coa_class_buffs.py', 'tools/test_coa_class_buffs.py']:
+            with self.subTest(path=path):
+                self.assertIn('class-buffs', check_source.select([path])['checks'])
+        self.assertEqual(check_source.SUITES['class-buffs']['commands'], [['tools/test_coa_class_buffs.py']])
+
     def test_test_selection_changes_run_all_fast_suites(self):
         for path in check_source.CONTROL_FILES:
             result = check_source.select([path])
