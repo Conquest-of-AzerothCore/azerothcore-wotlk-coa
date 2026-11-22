@@ -36,7 +36,14 @@ effect's reach written term by term (520647), and a boss gate (704579, entries o
   shorter than the amplitude holds at most one tick, seen as a drop beyond the time elapsed, and for it
   `r2 = (1 - p)(r1 - a) - (D - a)` for an unknown offset `a` in `[0, D]`, so `1 - (r2 + D) / r1` and
   `1 - r2 / (r1 - D)` bracket the cut `p` with no epoch; every bracket must lie inside the G-19 band and the tick
-  count must match the span over the amplitude. A first design read exactly one amplitude apart: the pilot measured
+  count must match the span over the amplitude. The count alone does not prove the period: over 3108 ms a 900 ms
+  period gives 3 or 4 ticks and an 1100 ms one 3 in most phases, both allowed (t9 review I-1). The period is
+  judged on its own bracket instead: tick `j` falls in its read interval `[s_j, e_j]`, so the period lies between
+  `(s_j - e_i) / (j - i)` and `(e_j - s_i) / (j - i)` for every pair of ticks. That bracket must lie inside the
+  amplitude +- 5%; one wholly outside or empty alerts, so a period 10% off on either side never passes. Its width
+  is `2 * step / (ticks - 1)`, so the reads default to 61 at 100 ms (about 6.5 s, 6 or 7 ticks, width about 44 ms
+  with the 109 ms measured intervals), and a layout whose width cannot stay below 5% of the amplitude is refused.
+  A first design read exactly one amplitude apart: the pilot measured
   1009 ms intervals (the read steps take game time), so an interval could hold 0 or 2 ticks. The derived metric
   `cooldown_tick_cut_pct` is an event: it is the tick handler observed acting on the cooldown over time, not a
   stored value read back. 301176 Effect[1] is BasePoints 9 + DieSides 1 = 10%.

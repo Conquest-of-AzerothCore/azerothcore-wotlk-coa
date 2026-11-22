@@ -14,9 +14,10 @@ ORDER = 48
 TICK_CUT_METRIC = 'cooldown_tick_cut_pct'
 PHASE_SETTLE_MS = 500
 MIN_READS = 3
-MAX_READS = 40
+MAX_READS = 80
 MIN_READ_STEP_MS = 100
 TICK_EXCESS_MS = 50
+PERIOD_BAND = 0.05
 
 
 @dataclass(frozen=True)
@@ -27,8 +28,8 @@ class CooldownTickCutSpec:
     cooled_spell: int
     phase_aura: int
     expected_pct: float
-    reads: int = 13
-    read_step_ms: int = 250
+    reads: int = 61
+    read_step_ms: int = 100
     amplitude_effect: int = 0
     cast_power: int | None = None
     label_suffix: str = 'tick_cut'
@@ -36,8 +37,8 @@ class CooldownTickCutSpec:
 
 def cooldown_tick_cut_spec(entry: dict) -> CooldownTickCutSpec:
     spec = CooldownTickCutSpec(int(entry['spell']), entry['name'], entry['quote'], int(entry['cooled_spell']),
-                               int(entry['phase_aura']), float(entry['expected_pct']), int(entry.get('reads', 13)),
-                               int(entry.get('read_step_ms', 250)), int(entry.get('amplitude_effect', 0)),
+                               int(entry['phase_aura']), float(entry['expected_pct']), int(entry.get('reads', 61)),
+                               int(entry.get('read_step_ms', 100)), int(entry.get('amplitude_effect', 0)),
                                entry.get('cast_power'), entry.get('label_suffix', 'tick_cut'))
     if (not MIN_READS <= spec.reads <= MAX_READS or spec.amplitude_effect not in (0, 1, 2)
             or spec.read_step_ms < MIN_READ_STEP_MS):
@@ -64,9 +65,10 @@ def cooldown_tick_cut_scenario(class_file: dict, spec: CooldownTickCutSpec) -> t
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, KIND, spec.quote, spec.expected_pct)
     amplitude = amplitude_ms(records, spec)
-    if spec.read_step_ms >= amplitude or (spec.reads - 1) * spec.read_step_ms < 2 * amplitude:
+    ticks = (spec.reads - 1) * spec.read_step_ms // amplitude
+    if spec.read_step_ms >= amplitude or ticks < 2 or spec.read_step_ms >= PERIOD_BAND * amplitude * (ticks - 1) / 2:
         raise ValueError(f'{spec.spell} cooldown_tick_cut reads more often than the {amplitude} ms amplitude and over '
-                         f'at least two amplitudes')
+                         f'enough amplitudes that the period bracket is narrower than {PERIOD_BAND:.0%} of it')
     steps = (base_steps(class_file)
              + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in (spec.cooled_spell, spec.spell)]
              + [{'action': 'set_aura', 'actor': CASTER, 'spell': spec.phase_aura, 'stacks': 1},
@@ -90,7 +92,9 @@ def cooldown_tick_cut_scenario(class_file: dict, spec: CooldownTickCutSpec) -> t
                      f'{TICK_EXCESS_MS} ms beyond the time elapsed; its cut is bracketed by 1 - (r2 + D) / r1 and '
                      f'1 - r2 / (r1 - D) with no tick epoch. Every tick bracket must lie inside the G-19 band of '
                      f'{spec.expected_pct:g}%, and the ticks found must number the elapsed time over the amplitude, '
-                     f'rounded down or up (none when 0% is expected).'),
+                     f'rounded down or up (none when 0% is expected). The period lies between (s_j - e_i) / (j - i) '
+                     f'and (e_j - s_i) / (j - i) over every pair of tick intervals [s, e]; that bracket must lie inside '
+                     f'{amplitude} ms +- {PERIOD_BAND:.0%}, and one wholly outside it, or empty, alerts.'),
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
@@ -107,6 +111,12 @@ def interval_bracket(first: float, second: float, elapsed: float) -> tuple[float
     return min(ends), max(ends)
 
 
+def period_bracket(ticks: list[tuple[float, float]]) -> tuple[float, float]:
+    pairs = [(ticks[j][0] - ticks[i][1], ticks[j][1] - ticks[i][0], j - i)
+             for i in range(len(ticks)) for j in range(i + 1, len(ticks))]
+    return max(low / step for low, _, step in pairs), min(high / step for _, high, step in pairs)
+
+
 def cooldown_tick_cut_verdict(base, run, model: dict):
     from compare import missing_measurement
     labels = [label for pair in model['reads'] for label in pair]
@@ -115,7 +125,7 @@ def cooldown_tick_cut_verdict(base, run, model: dict):
         return replace(base, explanation=missing_measurement(run, missing))
     rows = [[run.values[label] for label in pair] for pair in model['reads']]
     amplitude = float(model['amplitude_ms'])
-    brackets = []
+    brackets, ticks = [], []
     for (time1, first), (time2, second) in zip(rows, rows[1:]):
         elapsed = time2 - time1
         if not 0 < elapsed < amplitude:
@@ -127,20 +137,30 @@ def cooldown_tick_cut_verdict(base, run, model: dict):
                            explanation=f'the cooldown ran out during the reads ({first:g} then {second:g} ms)')
         if first - elapsed - second > TICK_EXCESS_MS:
             brackets.append(interval_bracket(first, second, elapsed))
+            ticks.append((time1, time2))
     expected = float(model['expected'])
     band = bonus_band(expected)
     span = rows[-1][0] - rows[0][0]
     allowed = (0, 0) if expected == 0 else (int(span // amplitude), int(-(-span // amplitude)))
     counted = allowed[0] <= len(brackets) <= allowed[1]
-    inside = counted and all(expected - band <= low and high <= expected + band for low, high in brackets)
-    outside = not counted or any(high < expected - band or low > expected + band for low, high in brackets)
+    period = period_bracket(ticks) if len(ticks) >= 2 else None
+    period_low, period_high = (1 - PERIOD_BAND) * amplitude, (1 + PERIOD_BAND) * amplitude
+    period_inside = period is None or period_low <= period[0] <= period[1] <= period_high
+    period_outside = period is not None and (period[0] > period[1] or period[1] < period_low
+                                             or period[0] > period_high)
+    inside = (counted and period_inside
+              and all(expected - band <= low and high <= expected + band for low, high in brackets))
+    outside = (not counted or period_outside
+               or any(high < expected - band or low > expected + band for low, high in brackets))
     status = 'ok' if inside else 'alert' if outside else 'unmeasured'
     measured = sum((low + high) / 2 for low, high in brackets) / len(brackets) if brackets else 0.0
     text = ', '.join(f'{low:.2f} to {high:.2f}' for low, high in brackets) or 'none'
+    period_text = ('' if period is None else f', period {period[0]:.1f} to {period[1]:.1f} ms against '
+                   f'{period_low:g} to {period_high:g}')
     return replace(base, status=status, measured=measured, expected=expected, low=expected - band,
                    high=expected + band,
                    explanation=f'{len(brackets)} ticks in {span:g} ms (allowed {allowed[0]} to {allowed[1]}), cut per '
-                               f'tick {text}% against {expected:g} +- {band:g}')
+                               f'tick {text}% against {expected:g} +- {band:g}{period_text}')
 
 
 def scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
