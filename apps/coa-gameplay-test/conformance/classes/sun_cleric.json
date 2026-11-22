@@ -1649,10 +1649,10 @@
       },
       "before_expected": 0,
       "expected": -3,
-      "wait_ms": 3900,
+      "wait_ms": 4000,
       "measure_actor": "dummy",
       "tolerance": 0.5,
-      "observe_source": "Herald of Dawn 804630 Effect[0] aura 42 triggers 804631; AscensionSunClericAbilities.cpp:213-214 casts 804631 (DurationIndex 1, 10000 ms) when a Rapture 806477 cast completes with 804630 known, and :353-356 recasts Dawnsear 500146 at the target and casts Solar Flare 807175 when a Dawnsear hit finds the marker. Each phase casts Rapture 806477 at the dummy (3000 ms cast), waits 3300 ms, casts Dawnsear 500146 (3500 ms cast) and reads the amount of effect 0 of the Solar Flare aura on the dummy; 804630 is learned between the phases. 984954 and 823764 are precondition fixtures: 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits); 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. Reference search: coa-history has 0 events for 804630, 804631, 804672 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs (mean 520, max 3191); bindmysoul has no Herald of Dawn entry; nothing found for the strike count."
+      "observe_source": "Herald of Dawn 804630 Effect[0] aura 42 triggers 804631; AscensionSunClericAbilities.cpp:213-214 casts 804631 (DurationIndex 1, 10000 ms) when a Rapture 806477 cast completes with 804630 known, and :353-356 recasts Dawnsear 500146 at the target and casts Solar Flare 807175 when a Dawnsear hit finds the marker. Each phase casts Rapture 806477 at the dummy (3000 ms cast), waits 3300 ms, casts Dawnsear 500146 (3500 ms cast) and reads the amount of effect 0 of the Solar Flare aura on the dummy; 804630 is learned between the phases. 984954 and 823764 are precondition fixtures: 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits); 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. Reference search: coa-history has 0 events for 804630, 804631, 804672 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs (mean 520, max 3191); bindmysoul has no Herald of Dawn entry; nothing found for the strike count. Read 4000 ms after the trigger (was 3900): at 3900 ms the read raced the application of the Solar Flare in one pass of a pair (aura absent in run 1, 9969 ms in run 2: a flip of this readback with unchanged inputs); 100 ms later the remaining duration still reads within the tolerance of 400 ms."
     },
     {
       "spell": 804630,
@@ -1689,10 +1689,10 @@
       },
       "before_expected": 0,
       "expected": 10000,
-      "wait_ms": 3900,
+      "wait_ms": 4000,
       "measure_actor": "dummy",
       "tolerance": 400,
-      "observe_source": "Herald of Dawn 804630 Effect[0] aura 42 triggers 804631; AscensionSunClericAbilities.cpp:213-214 casts 804631 (DurationIndex 1, 10000 ms) when a Rapture 806477 cast completes with 804630 known, and :353-356 recasts Dawnsear 500146 at the target and casts Solar Flare 807175 when a Dawnsear hit finds the marker. Each phase casts Rapture 806477 at the dummy (3000 ms cast), waits 3300 ms, casts Dawnsear 500146 (3500 ms cast) and reads the remaining duration of the Solar Flare aura on the dummy (read 3900 ms after Dawnsear was cast; the marker makes it instant and the Solar Flare aura is read at 9963 to 10000 ms remaining, so its total duration is read at 10000 ms; 9000 and 11000 ms totals read at most 9000 and at least 10900 and are excluded by the tolerance of 400). Reference search: coa-history has 0 events for 804630, 804631, 804672 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs (mean 520, max 3191); bindmysoul has no Herald of Dawn entry; nothing found for the strike count."
+      "observe_source": "Herald of Dawn 804630 Effect[0] aura 42 triggers 804631; AscensionSunClericAbilities.cpp:213-214 casts 804631 (DurationIndex 1, 10000 ms) when a Rapture 806477 cast completes with 804630 known, and :353-356 recasts Dawnsear 500146 at the target and casts Solar Flare 807175 when a Dawnsear hit finds the marker. Each phase casts Rapture 806477 at the dummy (3000 ms cast), waits 3300 ms, casts Dawnsear 500146 (3500 ms cast) and reads the remaining duration of the Solar Flare aura on the dummy (read 3900 ms after Dawnsear was cast; the marker makes it instant and the Solar Flare aura is read at 9963 to 10000 ms remaining, so its total duration is read at 10000 ms; 9000 and 11000 ms totals read at most 9000 and at least 10900 and are excluded by the tolerance of 400). Reference search: coa-history has 0 events for 804630, 804631, 804672 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs (mean 520, max 3191); bindmysoul has no Herald of Dawn entry; nothing found for the strike count. Read 4000 ms after the trigger (was 3900): at 3900 ms the read raced the application of the Solar Flare in one pass of a pair (aura absent in run 1, 9969 ms in run 2: a flip of this readback with unchanged inputs); 100 ms later the remaining duration still reads within the tolerance of 400 ms."
     },
     {
       "spell": 804630,
@@ -35900,6 +35900,567 @@
       "trigger_only_after": true,
       "after_expiry_expected": 0,
       "expiry_wait_ms": 10000
+    },
+    {
+      "spell": 300323,
+      "name": "Holy Fervor (Sunset critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "sunset_crit",
+      "label_suffix": "sunset_crit",
+      "quote": "Increases the effectiveness of Sunrise and Sunset by $s1%.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "phase_auras": [
+        [
+          500511,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "metric": "spell_crit_chance",
+      "fields": {
+        "school": 2
+      },
+      "before_expected": 20,
+      "expected": 24,
+      "expected_gain": 4,
+      "tolerance": 0.0001,
+      "observe_source": "Sunset 500511 Effect[0] aura 71 SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL MiscValue 4 (Fire), BasePoints 19 + 1 = 20, and Holy Fervor 300323 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% ($s1): 20 x 1.2 = 24 (Spell.dbc). The caster live Fire (school index 2) spell crit percentage with Sunset set by harness set_aura on the caster in both phases (a precondition fixture, the subject is the passive's modification of the aura amount) around a Holy Form 805301 cast, before 300323 is learned (control, 20) and after (24). Reference search 2026-11-22: coa-history spell 300323: 0 events in 186 logs (a passive); nothing else found."
+    },
+    {
+      "spell": 804630,
+      "name": "Herald of Dawn (attackers swing under the Solar Flare)",
+      "kind": "attacker_miss_share",
+      "variant": "herald_miss",
+      "label_suffix": "herald_miss",
+      "quote": "reduces the target's chance to hit by",
+      "cast_spell": 500146,
+      "pre_cast": [
+        806477
+      ],
+      "learn": [
+        804630,
+        806477,
+        681470
+      ],
+      "aura": 807175,
+      "aura_effect": 0,
+      "expected": 3,
+      "attackers": 1,
+      "arm_ms": 1200000,
+      "cycle_ms": 8000,
+      "settle_ms": 8000,
+      "parts": 20,
+      "observe_source": "Solar Flare 807175 Effect[0] aura 54 SPELL_AURA_MOD_HIT_CHANCE BasePoints -3 ($s1 = 3), DurationIndex 10000 ms ($d), launched at the Dawnsear target by the Herald of Dawn route (AscensionSunClericAbilities.cpp:213-214 casts 804631 when a Rapture 806477 cast completes with 804630 known, :353-356 casts Solar Flare 807175 when a Dawnsear 500146 hit finds the marker): each treatment cycle casts Rapture then Dawnsear at the one attacker (pre_cast, tool ADR 1029), and the aura from the caster is read on the attacker at every cycle end (a cycle without it makes the verdict unmeasured, never a miss sample). The attacker is one aggressive stationary Harvest Golem 36 at the class level melee-ing the caster; the control arm counts its swings and misses with no cast. Expected: the miss share rises by 3 points (the stated 3% of the DBC amount, never from a run), judged with the 99% interval of the difference and the band of 2 points. reset_cooldown and set_power are named precondition fixtures (G-21 point 6). The same aura is proven by the Sun Down entry attacker_miss of 572752; this entry proves the Herald route. Reference search 2026-11-22: coa-history has 0 events for 804630, 804631 and 500146 (no recorded cast of them); Solar Flare 807175 has 15499 damage events in 29 logs; bindmysoul has no Herald of Dawn entry; nothing found for the miss share. Precondition fixture named in the verdict: An'she's Guidance 681470 is learned in both arms (Effect[2] aura 149 REDUCE_PUSHBACK, BasePoints 99 + 1 = 100% of the pushback, so the attackers' hits do not delay the 3000 ms Rapture or the 3500 ms Dawnsear; the pushback_reduction entry of 681470 reads the same 100% in game time); it adds a Holy critical strike chance and changes no hit chance, the subject of this entry. The first design (b11d7, no pushback fixture) read unmeasured: Dawnsear refused with SPELL_IN_PROGRESS.",
+      "quote_spell": 807175
+    },
+    {
+      "spell": 804628,
+      "kind": "metric_delta",
+      "gate_spell": 804628,
+      "trigger_spell": 806121,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807064,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expire_ms": 31000,
+      "quote": "At the end of the duration, or when Judgement Day ends, the enemy takes ${$807064m1*$<scalingbp>+$AP*.3+$sph*.5} Holy damage, increased for each stack on the target.",
+      "name": "Suncharged release (not before the end of the duration)",
+      "variant": "release_not_before",
+      "label_suffix": "release_not_before",
+      "expected": 0,
+      "wait_ms": 27500,
+      "game_time": {
+        "after": [
+          27450,
+          27650
+        ]
+      },
+      "observe_source": "Judgement Day 806121 lasts 30000 ms (settle_ms 32000 in the release entries; DurationIndex of 570125 read from Spell.dbc) and 804628 releases 807064 on the dummy when it ends. The release hit is read as the cumulative 807064 damage on the dummy, with 984954 (no critical strike) and 823764 (no resistance) set on the caster as precondition fixtures in both phases; the control phase is the same cast with 804628 not learned (0). Expected at 10 Suncharged stacks (cap, ledger row 360-361): $807064m1 base term 492.0 x (1 + 10 x 0.25) x 1.5 = 2583.0 (ledger reason of this clause, exact in the release entries); the read of a window off by 10% of 30000 ms in either direction: 27500 ms after the cast the release has not happened (0), which excludes an end of the duration 10% early (27000 ms). Reference search 2026-11-22: coa-history 807064 and 804628: nothing beyond the tooltip and the DBC found. The before phase casts no Judgement Day (cast_in_before false): a Judgement Day still running from the before phase when 804628 is learned would release at its end inside the after reading (the leak seen in the first pass, 1845 at 27509 ms); the release_by entry of the same pair shows the hit landing when the cast is made, so the 0 here is not a missing hit.",
+      "cast_in_before": false
+    },
+    {
+      "spell": 804628,
+      "kind": "metric_delta",
+      "gate_spell": 804628,
+      "trigger_spell": 806121,
+      "target": "dummy",
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807064,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expire_ms": 31000,
+      "quote": "At the end of the duration, or when Judgement Day ends, the enemy takes ${$807064m1*$<scalingbp>+$AP*.3+$sph*.5} Holy damage, increased for each stack on the target.",
+      "name": "Suncharged release (by the end of the duration)",
+      "variant": "release_by",
+      "label_suffix": "release_by",
+      "expected": 2583.0,
+      "after_at_least": 2450,
+      "after_at_most": 2716,
+      "wait_ms": 32500,
+      "game_time": {
+        "after": [
+          32450,
+          32650
+        ]
+      },
+      "observe_source": "Judgement Day 806121 lasts 30000 ms (settle_ms 32000 in the release entries; DurationIndex of 570125 read from Spell.dbc) and 804628 releases 807064 on the dummy when it ends. The release hit is read as the cumulative 807064 damage on the dummy, with 984954 (no critical strike) and 823764 (no resistance) set on the caster as precondition fixtures in both phases; the control phase is the same cast with 804628 not learned (0). Expected at 10 Suncharged stacks (cap, ledger row 360-361): $807064m1 base term 492.0 x (1 + 10 x 0.25) x 1.5 = 2583.0 (ledger reason of this clause, exact in the release entries); the read of a window off by 10% of 30000 ms in either direction: 32500 ms after the cast the release has happened (2583.0 within 5%), which excludes an end of the duration 10% late (33000 ms). Reference search 2026-11-22: coa-history 807064 and 804628: nothing beyond the tooltip and the DBC found."
+    },
+    {
+      "spell": 300324,
+      "name": "Guiding Glow (Dawn is still active after 12 casts)",
+      "kind": "metric_delta",
+      "variant": "consume_12",
+      "label_suffix": "consume_12",
+      "quote": "Allows Dawn to affect $s1 additional casts.",
+      "gate_spell": 300324,
+      "trigger_spell": 805301,
+      "target": "dummy",
+      "setup_target": "dummy",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 807440
+      },
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        804584,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987
+      ],
+      "setup_wait_ms": 3600,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 61000,
+      "observe_source": "300324 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 4 (SPELLMOD_CHARGES), BasePoints 2 (+1 = 3, $s1), class mask word 0 = 64 = the Dawn state aura 807440 (ProcCharges 10). Each Useful cast under Dawn spends one charge (SpendDawn, AscensionSunClericAbilities.cpp:105-118 and :212-214: a spell with a heal or damage effect other than Dawn itself and Radiant Flame), and the aura ends on the last. Real cast route: Dawn 804584 is cast for real with 20 Solar Power 500149 set first (precondition fixture, the condition of Dawn, not the claim's subject), then 12 Gavel of Wrath 800617 casts at the dummy; the aura 807440 is read 500 ms after the last cast. Both phases make the same casts; 300324 is learned between them (the harness waits 61000 ms so the first Dawn has expired and the second cast activates rather than cancels it). Control (before): without the passive Dawn holds 10 charges and ends on the 10th cast, so it is gone after 12 casts. With it Dawn holds 13 charges: after 12 casts one remains (aura present, 1), so the passive adds at least 2 casts and, with consume_13, exactly 3. Together the 12-cast and 13-cast entries give exactly 13 = 10 + 3 affected casts, one more than the base figure and not 14. Reference search 2026-11-22: bindmysoul talents snapshot carries 'Allows Dawn to affect 3 additional casts.' for rank 1; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value. Design 2: run 1 (20261122-154829) with Illumination 500143 read the aura present in both phases, so the casts were not all made (Illumination costs 30% of base mana, ManaCostPercentage 30, and the setup casts refill only flat costs); Gavel of Wrath costs a flat 3 mana (ManaCost 3), which each setup cast refills, and a Gavel is Useful for SpendDawn (Gavel(info), AscensionSunCleric.cpp:171-174). Dawn is cast at the dummy: its effects target the caster. Run 2 (20261122-155337): consume_12 read present and consume_13 present as well; the trigger Gavel is not preceded by a cooldown reset (only setup casts reset), so it fell inside the 5000 ms category cooldown and the count was one short. Now all 12 Gavels are setup casts (each resets its cooldown) and the trigger is Holy Form 805301 (no damage or heal effect, not Useful: no charge spent), the read-only closing cast. Arms: the Dawn application count and the Gavel SPELL_GO count separate a cast that did not go off or a Dawn applied again from a charge that was not spent. Diagnostic readbacks of the earlier pass (b11d1) with the passive learned: 5/10/11/12/13/14 Gavels left 8/3/2/1/1/2 charges. The first pass of this design (setup_wait_ms 2600, pair 20261122 prove2 of this round) read the Gavel SPELL_GO arm 25 after the after phase against 26: one of the 13 casts did not go off in the after phase, so a Dawn with one charge left was a test fault, not a server reading; the wait between the setup casts is now 3600 ms (13 casts, the last about 47 s into the 60 s Dawn). Second design of the casts: Gavel of Grace 807987 (ManaCost 0 and ManaCostPercentage 0 in Spell.dbc, effects 121 normalized weapon damage and 31 weapon percent, so Useful(), AscensionSunClericAbilities.cpp:57-64) replaces Gavel of Wrath 800617 (ManaCostPercentage 10): with 800617 the 13th cast of the after phase did not go off in two passes (SPELL_GO arm 25 of 26, wait 2600 and 3600 ms).",
+      "dummy_distance": 3,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 807440
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "one Dawn cast 804584 per phase applies the state aura 807440 once (Effect of 804584, AscensionSunCleric.cpp:264-268 ActivateDawn), so the application count reads 1 after the before phase and 2 after the after phase when nothing reapplies it"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_go_count",
+            "fields": {
+              "spell": 807987
+            },
+            "before_expected": 12,
+            "expected": 24,
+            "tolerance": 0,
+            "source": "12 Gavel of Grace 807987 setup casts per phase, each a SPELL_GO: 12 after the before phase and 24 after the after phase when every cast went off"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 300324,
+      "name": "Guiding Glow (Dawn is gone after the 13th cast)",
+      "kind": "metric_delta",
+      "variant": "consume_13",
+      "label_suffix": "consume_13",
+      "quote": "Allows Dawn to affect $s1 additional casts.",
+      "gate_spell": 300324,
+      "trigger_spell": 805301,
+      "target": "dummy",
+      "setup_target": "dummy",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 807440
+      },
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        804584,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987
+      ],
+      "setup_wait_ms": 3600,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 61000,
+      "observe_source": "300324 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 4 (SPELLMOD_CHARGES), BasePoints 2 (+1 = 3, $s1), class mask word 0 = 64 = the Dawn state aura 807440 (ProcCharges 10). Each Useful cast under Dawn spends one charge (SpendDawn, AscensionSunClericAbilities.cpp:105-118 and :212-214: a spell with a heal or damage effect other than Dawn itself and Radiant Flame), and the aura ends on the last. Real cast route: Dawn 804584 is cast for real with 20 Solar Power 500149 set first (precondition fixture, the condition of Dawn, not the claim's subject), then 13 Gavel of Wrath 800617 casts at the dummy; the aura 807440 is read 500 ms after the last cast. Both phases make the same casts; 300324 is learned between them (the harness waits 61000 ms so the first Dawn has expired and the second cast activates rather than cancels it). Control (before): without the passive Dawn holds 10 charges and ends on the 10th cast, so it is gone after 13 casts. With it Dawn holds 13 charges and ends on the 13th cast: gone after 13 casts (0), not still present as with 14 or more charges. Together the 12-cast and 13-cast entries give exactly 13 = 10 + 3 affected casts, one more than the base figure and not 14. Reference search 2026-11-22: bindmysoul talents snapshot carries 'Allows Dawn to affect 3 additional casts.' for rank 1; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value. Design 2: run 1 (20261122-154829) with Illumination 500143 read the aura present in both phases, so the casts were not all made (Illumination costs 30% of base mana, ManaCostPercentage 30, and the setup casts refill only flat costs); Gavel of Wrath costs a flat 3 mana (ManaCost 3), which each setup cast refills, and a Gavel is Useful for SpendDawn (Gavel(info), AscensionSunCleric.cpp:171-174). Dawn is cast at the dummy: its effects target the caster. Run 2 (20261122-155337): consume_12 read present and consume_13 present as well; the trigger Gavel is not preceded by a cooldown reset (only setup casts reset), so it fell inside the 5000 ms category cooldown and the count was one short. Now all 13 Gavels are setup casts (each resets its cooldown) and the trigger is Holy Form 805301 (no damage or heal effect, not Useful: no charge spent), the read-only closing cast. Arms: the Dawn application count and the Gavel SPELL_GO count separate a cast that did not go off or a Dawn applied again from a charge that was not spent. Diagnostic readbacks of the earlier pass (b11d1) with the passive learned: 5/10/11/12/13/14 Gavels left 8/3/2/1/1/2 charges. The first pass of this design (setup_wait_ms 2600, pair 20261122 prove2 of this round) read the Gavel SPELL_GO arm 25 after the after phase against 26: one of the 13 casts did not go off in the after phase, so a Dawn with one charge left was a test fault, not a server reading; the wait between the setup casts is now 3600 ms (13 casts, the last about 47 s into the 60 s Dawn). Second design of the casts: Gavel of Grace 807987 (ManaCost 0 and ManaCostPercentage 0 in Spell.dbc, effects 121 normalized weapon damage and 31 weapon percent, so Useful(), AscensionSunClericAbilities.cpp:57-64) replaces Gavel of Wrath 800617 (ManaCostPercentage 10): with 800617 the 13th cast of the after phase did not go off in two passes (SPELL_GO arm 25 of 26, wait 2600 and 3600 ms).",
+      "dummy_distance": 3,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 807440
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "one Dawn cast 804584 per phase applies the state aura 807440 once (Effect of 804584, AscensionSunCleric.cpp:264-268 ActivateDawn), so the application count reads 1 after the before phase and 2 after the after phase when nothing reapplies it"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_go_count",
+            "fields": {
+              "spell": 807987
+            },
+            "before_expected": 13,
+            "expected": 26,
+            "tolerance": 0,
+            "source": "13 Gavel of Grace 807987 setup casts per phase, each a SPELL_GO: 13 after the before phase and 26 after the after phase when every cast went off"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 300329,
+      "name": "Guiding Glow rank 2 (Dawn is still active after 14 casts)",
+      "kind": "metric_delta",
+      "variant": "consume_14",
+      "label_suffix": "consume_14",
+      "quote": "Allows Dawn to affect $s1 additional casts.",
+      "gate_spell": 300329,
+      "trigger_spell": 805301,
+      "target": "dummy",
+      "setup_target": "dummy",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 807440
+      },
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        804584,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987
+      ],
+      "setup_wait_ms": 3200,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 61000,
+      "observe_source": "300329 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 4 (SPELLMOD_CHARGES), BasePoints 4 (+1 = 5, $s1), class mask word 0 = 64 = the Dawn state aura 807440 (ProcCharges 10). Each Useful cast under Dawn spends one charge (SpendDawn, AscensionSunClericAbilities.cpp:105-118 and :212-214: a spell with a heal or damage effect other than Dawn itself and Radiant Flame), and the aura ends on the last. Real cast route: Dawn 804584 is cast for real with 20 Solar Power 500149 set first (precondition fixture, the condition of Dawn, not the claim's subject), then 12 Gavel of Wrath 800617 casts at the dummy; the aura 807440 is read 500 ms after the last cast. Both phases make the same casts; 300324 is learned between them (the harness waits 61000 ms so the first Dawn has expired and the second cast activates rather than cancels it). Control (before): without the passive Dawn holds 10 charges and ends on the 10th cast, so it is gone after 12 casts. With it Dawn holds 13 charges: after 12 casts one remains (aura present, 1), so the passive adds at least 2 casts and, with consume_13, exactly 3. Together the 12-cast and 13-cast entries give exactly 13 = 10 + 3 affected casts, one more than the base figure and not 14. Reference search 2026-11-22: bindmysoul talents snapshot carries 'Allows Dawn to affect 3 additional casts.' for rank 1; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value. Design 2: run 1 (20261122-154829) with Illumination 500143 read the aura present in both phases, so the casts were not all made (Illumination costs 30% of base mana, ManaCostPercentage 30, and the setup casts refill only flat costs); Gavel of Wrath costs a flat 3 mana (ManaCost 3), which each setup cast refills, and a Gavel is Useful for SpendDawn (Gavel(info), AscensionSunCleric.cpp:171-174). Dawn is cast at the dummy: its effects target the caster. Run 2 (20261122-155337): consume_12 read present and consume_13 present as well; the trigger Gavel is not preceded by a cooldown reset (only setup casts reset), so it fell inside the 5000 ms category cooldown and the count was one short. Now all 12 Gavels are setup casts (each resets its cooldown) and the trigger is Holy Form 805301 (no damage or heal effect, not Useful: no charge spent), the read-only closing cast. Arms: the Dawn application count and the Gavel SPELL_GO count separate a cast that did not go off or a Dawn applied again from a charge that was not spent. Diagnostic readbacks of the earlier pass (b11d1) with the passive learned: 5/10/11/12/13/14 Gavels left 8/3/2/1/1/2 charges. The first pass of this design (setup_wait_ms 2600, pair 20261122 prove2 of this round) read the Gavel SPELL_GO arm 25 after the after phase against 26: one of the 13 casts did not go off in the after phase, so a Dawn with one charge left was a test fault, not a server reading; the wait between the setup casts is now 3600 ms (13 casts, the last about 47 s into the 60 s Dawn). Second design of the casts: Gavel of Grace 807987 (ManaCost 0 and ManaCostPercentage 0 in Spell.dbc, effects 121 normalized weapon damage and 31 weapon percent, so Useful(), AscensionSunClericAbilities.cpp:57-64) replaces Gavel of Wrath 800617 (ManaCostPercentage 10): with 800617 the 13th cast of the after phase did not go off in two passes (SPELL_GO arm 25 of 26, wait 2600 and 3600 ms). Rank 2 300329: 10 + 5 = 15 casts: 14 Gavel of Grace casts leave Dawn with one charge; wait 3200 ms between the setup casts (14 casts, the last about 47 s into the 60 s Dawn). The control phase (300329 not learned) holds 10 charges: Dawn is gone after the 10th cast.",
+      "dummy_distance": 3,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 807440
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "one Dawn cast 804584 per phase applies the state aura 807440 once (Effect of 804584, AscensionSunCleric.cpp:264-268 ActivateDawn), so the application count reads 1 after the before phase and 2 after the after phase when nothing reapplies it"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_go_count",
+            "fields": {
+              "spell": 807987
+            },
+            "before_expected": 14,
+            "expected": 28,
+            "tolerance": 0,
+            "source": "14 Gavel of Grace 807987 setup casts per phase, each a SPELL_GO: 14 after the before phase and 28 after the after phase when every cast went off"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 300329,
+      "name": "Guiding Glow rank 2 (Dawn is gone after the 15th casts)",
+      "kind": "metric_delta",
+      "variant": "consume_15",
+      "label_suffix": "consume_15",
+      "quote": "Allows Dawn to affect $s1 additional casts.",
+      "gate_spell": 300329,
+      "trigger_spell": 805301,
+      "target": "dummy",
+      "setup_target": "dummy",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 807440
+      },
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        804584,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987,
+        807987
+      ],
+      "setup_wait_ms": 3200,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 61000,
+      "observe_source": "300329 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 4 (SPELLMOD_CHARGES), BasePoints 4 (+1 = 5, $s1), class mask word 0 = 64 = the Dawn state aura 807440 (ProcCharges 10). Each Useful cast under Dawn spends one charge (SpendDawn, AscensionSunClericAbilities.cpp:105-118 and :212-214: a spell with a heal or damage effect other than Dawn itself and Radiant Flame), and the aura ends on the last. Real cast route: Dawn 804584 is cast for real with 20 Solar Power 500149 set first (precondition fixture, the condition of Dawn, not the claim's subject), then 13 Gavel of Wrath 800617 casts at the dummy; the aura 807440 is read 500 ms after the last cast. Both phases make the same casts; 300324 is learned between them (the harness waits 61000 ms so the first Dawn has expired and the second cast activates rather than cancels it). Control (before): without the passive Dawn holds 10 charges and ends on the 10th cast, so it is gone after 13 casts. With it Dawn holds 13 charges and ends on the 13th cast: gone after 13 casts (0), not still present as with 14 or more charges. Together the 12-cast and 13-cast entries give exactly 13 = 10 + 3 affected casts, one more than the base figure and not 14. Reference search 2026-11-22: bindmysoul talents snapshot carries 'Allows Dawn to affect 3 additional casts.' for rank 1; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value. Design 2: run 1 (20261122-154829) with Illumination 500143 read the aura present in both phases, so the casts were not all made (Illumination costs 30% of base mana, ManaCostPercentage 30, and the setup casts refill only flat costs); Gavel of Wrath costs a flat 3 mana (ManaCost 3), which each setup cast refills, and a Gavel is Useful for SpendDawn (Gavel(info), AscensionSunCleric.cpp:171-174). Dawn is cast at the dummy: its effects target the caster. Run 2 (20261122-155337): consume_12 read present and consume_13 present as well; the trigger Gavel is not preceded by a cooldown reset (only setup casts reset), so it fell inside the 5000 ms category cooldown and the count was one short. Now all 13 Gavels are setup casts (each resets its cooldown) and the trigger is Holy Form 805301 (no damage or heal effect, not Useful: no charge spent), the read-only closing cast. Arms: the Dawn application count and the Gavel SPELL_GO count separate a cast that did not go off or a Dawn applied again from a charge that was not spent. Diagnostic readbacks of the earlier pass (b11d1) with the passive learned: 5/10/11/12/13/14 Gavels left 8/3/2/1/1/2 charges. The first pass of this design (setup_wait_ms 2600, pair 20261122 prove2 of this round) read the Gavel SPELL_GO arm 25 after the after phase against 26: one of the 13 casts did not go off in the after phase, so a Dawn with one charge left was a test fault, not a server reading; the wait between the setup casts is now 3600 ms (13 casts, the last about 47 s into the 60 s Dawn). Second design of the casts: Gavel of Grace 807987 (ManaCost 0 and ManaCostPercentage 0 in Spell.dbc, effects 121 normalized weapon damage and 31 weapon percent, so Useful(), AscensionSunClericAbilities.cpp:57-64) replaces Gavel of Wrath 800617 (ManaCostPercentage 10): with 800617 the 13th cast of the after phase did not go off in two passes (SPELL_GO arm 25 of 26, wait 2600 and 3600 ms). Rank 2 300329: 10 + 5 = 15 casts: 15 Gavel of Grace casts leave Dawn gone; wait 3200 ms between the setup casts (15 casts, the last about 50 s into the 60 s Dawn). The control phase (300329 not learned) holds 10 charges: Dawn is gone after the 10th cast.",
+      "dummy_distance": 3,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 807440
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "one Dawn cast 804584 per phase applies the state aura 807440 once (Effect of 804584, AscensionSunCleric.cpp:264-268 ActivateDawn), so the application count reads 1 after the before phase and 2 after the after phase when nothing reapplies it"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_go_count",
+            "fields": {
+              "spell": 807987
+            },
+            "before_expected": 15,
+            "expected": 30,
+            "tolerance": 0,
+            "source": "15 Gavel of Grace 807987 setup casts per phase, each a SPELL_GO: 15 after the before phase and 30 after the after phase when every cast went off"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 804630,
+      "kind": "metric_delta",
+      "gate_spell": 804630,
+      "trigger_spell": 500146,
+      "setup_casts": [
+        806477
+      ],
+      "setup_wait_ms": 3300,
+      "target": "dummy",
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "quote": "Casting Rapture now causes your next Dawnsear within $804631d to strike your target twice and launch a Solar Flare at the target.",
+      "before_expected": 0,
+      "measure_actor": "dummy",
+      "name": "Herald of Dawn (Solar Flare present at the stated duration bound)",
+      "variant": "flare_held",
+      "label_suffix": "flare_held",
+      "metric": "aura",
+      "fields": {
+        "spell": 807175,
+        "caster": "caster"
+      },
+      "expected": 1,
+      "wait_ms": 12950,
+      "game_time": {
+        "after": [
+          12900,
+          13050
+        ]
+      },
+      "observe_source": "Solar Flare 807175 lasts 10000 ms (DurationIndex 1, Spell.dbc), applied when the Dawnsear 500146 hit finds the Herald marker (AscensionSunClericAbilities.cpp:353-356). Same route as the flare_hit entry. The application lies between the end of the 3500 ms Dawnsear cast and the 4000 ms read of the flare_hit entry, where the aura is already on the dummy (both from Spell.dbc and that entry's presence read). Read 12950 ms after the trigger, at least 9050 ms and at most 9450 ms after the application: present excludes a duration of 9000 ms (10% short) or less. Control: before the learn the Solar Flare is absent (0 before in both entries). Reference search 2026-11-22: coa-history 807175: 2442 SPELL_AURA_APPLIED and 2416 SPELL_AURA_REMOVED in 29 logs, no per-cast duration readable; nothing else found."
+    },
+    {
+      "spell": 804630,
+      "kind": "metric_delta",
+      "gate_spell": 804630,
+      "trigger_spell": 500146,
+      "setup_casts": [
+        806477
+      ],
+      "setup_wait_ms": 3300,
+      "target": "dummy",
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "quote": "Casting Rapture now causes your next Dawnsear within $804631d to strike your target twice and launch a Solar Flare at the target.",
+      "before_expected": 0,
+      "measure_actor": "dummy",
+      "name": "Herald of Dawn (Solar Flare gone at the stated duration bound)",
+      "variant": "flare_gone",
+      "label_suffix": "flare_gone",
+      "metric": "aura",
+      "fields": {
+        "spell": 807175,
+        "caster": "caster"
+      },
+      "expected": 0,
+      "wait_ms": 14450,
+      "game_time": {
+        "after": [
+          14400,
+          14550
+        ]
+      },
+      "observe_source": "Solar Flare 807175 lasts 10000 ms (DurationIndex 1, Spell.dbc), applied when the Dawnsear 500146 hit finds the Herald marker (AscensionSunClericAbilities.cpp:353-356). Same route as the flare_hit entry. The application lies between the end of the 3500 ms Dawnsear cast and the 4000 ms read of the flare_hit entry, where the aura is already on the dummy (both from Spell.dbc and that entry's presence read). Read 14450 ms after the trigger, at least 10550 ms and at most 10950 ms after the application: gone excludes a duration of 11000 ms (10% long) or more, since the read is at most 10950 ms after the application, and a 10000 ms aura is gone from 10000 ms on. Control: before the learn the Solar Flare is absent (0 before in both entries). Reference search 2026-11-22: coa-history 807175: 2442 SPELL_AURA_APPLIED and 2416 SPELL_AURA_REMOVED in 29 logs, no per-cast duration readable; nothing else found."
     }
   ],
   "player_observations": [],
