@@ -1203,6 +1203,7 @@
       {
         "claim": "$807549s3% health equal to the damage dealt",
         "labels": [
+          "302914 behaviour_metric_delta gavel_heal_vow",
           "302914 effect_value 807549e2 #0"
         ]
       }
@@ -1762,13 +1763,17 @@
   {
     "spell": 560095,
     "clause": "2 Charges,",
-    "labels": [],
+    "labels": [
+      "560095 behaviour_charge_recharge"
+    ],
     "kind": "claim"
   },
   {
     "spell": 560095,
     "clause": "25 sec recharge",
-    "labels": [],
+    "labels": [
+      "560095 behaviour_charge_recharge"
+    ],
     "kind": "claim"
   },
   {
@@ -1800,8 +1805,7 @@
       {
         "claim": "Lasts for $n blocks",
         "labels": [
-          "560095 behaviour_metric_delta charges",
-          "560095 effect_value #2"
+          "560095 behaviour_metric_delta charges"
         ]
       },
       {
@@ -1812,7 +1816,8 @@
           "560095 aura_duration_ms #1"
         ]
       }
-    ]
+    ],
+    "reason": "The blocks part ($n) stays data: its only reading is the aura_charges readback of the charges entry. A behaviour proof needs the five blocks to be taken and the aura to end on the last, and the harness cannot force a block (set_combat_avoidance sets dodge and parry only): a tool need, returned in the b10c3 report. The effect_value #2 label is dropped because the token $n has no readable effect value."
   },
   {
     "spell": 560111,
@@ -2095,7 +2100,9 @@
         "claim": "for $560856d",
         "labels": [
           "560857 spell_duration 560856 #2",
-          "560857 behaviour_metric_delta magic_duration"
+          "560857 behaviour_metric_delta magic_duration",
+          "560857 behaviour_metric_delta magic_held",
+          "560857 behaviour_metric_delta magic_gone"
         ]
       }
     ]
@@ -3572,6 +3579,8 @@
         "claim": "Direct healing now increases the target's health by ${$704564m1+$704564ppl1}",
         "labels": [
           "704563 behaviour_metric_delta max_health",
+          "704563 behaviour_metric_delta health",
+          "704563 behaviour_metric_delta health_control",
           "704563 behaviour_metric_delta control"
         ]
       },
@@ -3579,7 +3588,9 @@
         "claim": "for $704564d",
         "labels": [
           "704563 behaviour_metric_delta held",
-          "704563 behaviour_metric_delta gone"
+          "704563 behaviour_metric_delta gone",
+          "704563 behaviour_metric_delta health_held",
+          "704563 behaviour_metric_delta health_gone"
         ]
       }
     ]
@@ -4786,6 +4797,8 @@
       {
         "claim": "by $s1%",
         "labels": [
+          "800039 behaviour_metric_delta crit_gavel_light",
+          "800039 behaviour_metric_delta crit_dawnsear_control",
           "800039 effect_value e0 #0"
         ]
       }
@@ -5354,7 +5367,8 @@
       "804257 behaviour_metric_delta ally_haste"
     ],
     "kind": "claim",
-    "reason": "Counts as data, not behaviour: ally_haste_cap reads cast_speed_multiplier, a state metric, and the clause carries none of its promise words (casting speed|cast speed|spell haste, coverage.py:439,471). The measurement is sound (Runes of Quickness alone reads 0.970874 on the grouped ally; learning Glaring Rays leaves it at 0.970874, a stack would read 0.942596; spell_group 2000182, stack_rule 3) and is kept as data evidence."
+    "promise_of": "Increases the spell haste of all party and raid members by $s1%",
+    "reason": "Behaviour by promise_of: the claim restricts the spell haste of the clause above it, so the cast_speed_multiplier read of ally_haste_cap carries its promise words from that clause. The measurement: Runes of Quickness alone reads 0.970874 on the grouped ally; learning Glaring Rays leaves it at 0.970874, a stack would read 0.942596; spell_group 2000182, stack_rule 3."
   },
   {
     "spell": 804269,

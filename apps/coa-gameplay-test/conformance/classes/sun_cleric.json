@@ -6230,6 +6230,72 @@
       "setup_only_after": true
     },
     {
+      "spell": 560857,
+      "kind": "metric_delta",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "setup_casts": [
+        504764
+      ],
+      "setup_wait_ms": 3000,
+      "expire_ms": 2000,
+      "name": "Burn The Heretics (Magic damage aura still active at 7.6 s)",
+      "variant": "magic_held",
+      "label_suffix": "magic_held",
+      "quote": "Additionally, when Scorch Marks are consumed you now gain $560856s1% increased Magic damage for $560856d.",
+      "metric": "aura",
+      "fields": {
+        "spell": 560856
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7600,
+      "observe_source": "$560856d = 8000 ms (560856 DurationIndex 31). Same setup as magic_duration (real Sun Ray in the after phase, real Radiant Flame consumption, passive learned between the phases). The presence of aura 560856 on the caster is read 7600 ms after the Radiant Flame cast (game time 7550..7700 ms): still active at 7.6 s: the duration is above 7.6 s, which excludes 7.2 s (-10%). With its twin it brackets 8000 ms by presence, the aura that the clause says lasts $560856d, not by a stored duration. Control: absent in the before phase (no Scorch Marks, no passive). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for this value (guide section 4; coa-history, bindmysoul snapshot and the b10 packet searched).",
+      "setup_only_after": true,
+      "measure_actor": "caster",
+      "game_time": {
+        "after": [
+          7550,
+          7700
+        ]
+      }
+    },
+    {
+      "spell": 560857,
+      "kind": "metric_delta",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "setup_casts": [
+        504764
+      ],
+      "setup_wait_ms": 3000,
+      "expire_ms": 2000,
+      "name": "Burn The Heretics (Magic damage aura gone at 8.4 s)",
+      "variant": "magic_gone",
+      "label_suffix": "magic_gone",
+      "quote": "Additionally, when Scorch Marks are consumed you now gain $560856s1% increased Magic damage for $560856d.",
+      "metric": "aura",
+      "fields": {
+        "spell": 560856
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 8400,
+      "observe_source": "$560856d = 8000 ms (560856 DurationIndex 31). Same setup as magic_duration (real Sun Ray in the after phase, real Radiant Flame consumption, passive learned between the phases). The presence of aura 560856 on the caster is read 8400 ms after the Radiant Flame cast (game time 8350..8500 ms): gone at 8.4 s: the duration is below 8.4 s, which excludes 8.8 s (+10%). With its twin it brackets 8000 ms by presence, the aura that the clause says lasts $560856d, not by a stored duration. Control: absent in the before phase (no Scorch Marks, no passive). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for this value (guide section 4; coa-history, bindmysoul snapshot and the b10 packet searched).",
+      "setup_only_after": true,
+      "measure_actor": "caster",
+      "game_time": {
+        "after": [
+          8350,
+          8500
+        ]
+      }
+    },
+    {
       "spell": 680700,
       "kind": "metric_delta",
       "trigger_spell": 680700,
@@ -10336,6 +10402,147 @@
         ]
       },
       "observe_source": "704563 Warmth Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704564; 704564 Effect[0] aura 34 SPELL_AURA_MOD_INCREASE_HEALTH, BasePoints 289 (+1 = 290 plus the level term, the tooltip's ${$704564m1+$704564ppl1} = 300 at level 60, read from the packet), target ally (TARGET_UNIT_TARGET_ALLY), DurationIndex 8 = 15000 ms ($704564d). The direct heal is Daybreak 503624 (instant, heal on an ally, Spell.dbc CastingTimeIndex 1) cast by the caster at the ally; the ally is the grouped reference ally (ally_arm), whose natural maximum health is read from the live unit with metric max_health: 1790 in the before phase (a baseline read, as in the Hulking Hordes 300748 own_health entry; an ally_health fixture is not used because the aura's stat recalculation discards it), and again after the cast. The read is taken 15600 ms after the heal (game time 15550..15700 ms): the maximum health is back at 1790, which excludes a duration 10% long (16500 ms). Reference search 2026-11-22: coa-history spell 704563: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 704563 and no value; merged-PR and git log search --grep 704563: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 704563,
+      "name": "Warmth (a direct heal raises the ally's health by 300)",
+      "kind": "metric_delta",
+      "variant": "health",
+      "label_suffix": "health",
+      "quote": "Direct healing now increases the target's health by ${$704564m1+$704564ppl1} for $704564d.",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "health",
+      "fields": {},
+      "before_expected": 1790,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 2090,
+      "tolerance": 1,
+      "observe_source": "704563 Warmth Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704564; 704564 Effect[0] aura 34 SPELL_AURA_MOD_INCREASE_HEALTH, BasePoints 289 (+1 = 290 plus the level term, the tooltip's ${$704564m1+$704564ppl1} = 300 at level 60, read from the packet), target ally (TARGET_UNIT_TARGET_ALLY), DurationIndex 8 = 15000 ms ($704564d). The direct heal is Daybreak 503624 (instant, heal on an ally, Spell.dbc CastingTimeIndex 1) cast by the caster at the ally; the ally is the grouped reference ally (ally_arm), whose natural current health is read from the live unit with metric health: 1790 in the before phase (a baseline read, as in the Hulking Hordes 300748 own_health entry; an ally_health fixture is not used because the aura's stat recalculation discards it), and again after the cast. Read 1500 ms after the heal: 1790 before (no heal) and 2090 = 1790 + 300 after, within 1 (judged to rounding). The control arm is the identical heal without 704563 (variant control). Reference search 2026-11-22: coa-history spell 704563: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 704563 and no value; merged-PR and git log search --grep 704563: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report). The read is the live current health of the ally (metric health, an event class read): Aura 34 raises the current health by its amount when it applies and lowers it when it ends (SpellAuraEffects.cpp HandleAuraModIncreaseHealth), and the ally starts at full health, so the clause's \"increases the target's health\" is read directly, with the same expected values as the maximum health arm of this clause."
+    },
+    {
+      "spell": 704563,
+      "name": "Warmth (control: the same direct heal without the passive leaves the health unchanged)",
+      "kind": "metric_delta",
+      "variant": "health_control",
+      "label_suffix": "health_control",
+      "quote": "Direct healing now increases the target's health by ${$704564m1+$704564ppl1} for $704564d.",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "health",
+      "fields": {},
+      "before_expected": 1790,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 1790,
+      "tolerance": 1,
+      "gate_spell": 704582,
+      "observe_source": "704563 Warmth Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704564; 704564 Effect[0] aura 34 SPELL_AURA_MOD_INCREASE_HEALTH, BasePoints 289 (+1 = 290 plus the level term, the tooltip's ${$704564m1+$704564ppl1} = 300 at level 60, read from the packet), target ally (TARGET_UNIT_TARGET_ALLY), DurationIndex 8 = 15000 ms ($704564d). The direct heal is Daybreak 503624 (instant, heal on an ally, Spell.dbc CastingTimeIndex 1) cast by the caster at the ally; the ally is the grouped reference ally (ally_arm), whose natural current health is read from the live unit with metric health: 1790 in the before phase (a baseline read, as in the Hulking Hordes 300748 own_health entry; an ally_health fixture is not used because the aura's stat recalculation discards it), and again after the cast. Control: 704563 is never learned (the learned gate is Angelic 704582, a passive that only changes Illumination's cast time); the same Daybreak heal leaves the current health at 1790. Reference search 2026-11-22: coa-history spell 704563: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 704563 and no value; merged-PR and git log search --grep 704563: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report). The read is the live current health of the ally (metric health, an event class read): Aura 34 raises the current health by its amount when it applies and lowers it when it ends (SpellAuraEffects.cpp HandleAuraModIncreaseHealth), and the ally starts at full health, so the clause's \"increases the target's health\" is read directly, with the same expected values as the maximum health arm of this clause."
+    },
+    {
+      "spell": 704563,
+      "name": "Warmth (the ally's health is still raised at 14.4 s)",
+      "kind": "metric_delta",
+      "variant": "health_held",
+      "label_suffix": "health_held",
+      "quote": "Direct healing now increases the target's health by ${$704564m1+$704564ppl1} for $704564d.",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "health",
+      "fields": {},
+      "before_expected": 1790,
+      "wait_ms": 14400,
+      "expire_ms": 500,
+      "expected": 2090,
+      "tolerance": 1,
+      "game_time": {
+        "after": [
+          14350,
+          14500
+        ]
+      },
+      "observe_source": "704563 Warmth Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704564; 704564 Effect[0] aura 34 SPELL_AURA_MOD_INCREASE_HEALTH, BasePoints 289 (+1 = 290 plus the level term, the tooltip's ${$704564m1+$704564ppl1} = 300 at level 60, read from the packet), target ally (TARGET_UNIT_TARGET_ALLY), DurationIndex 8 = 15000 ms ($704564d). The direct heal is Daybreak 503624 (instant, heal on an ally, Spell.dbc CastingTimeIndex 1) cast by the caster at the ally; the ally is the grouped reference ally (ally_arm), whose natural current health is read from the live unit with metric health: 1790 in the before phase (a baseline read, as in the Hulking Hordes 300748 own_health entry; an ally_health fixture is not used because the aura's stat recalculation discards it), and again after the cast. The read is taken 14400 ms after the heal (game time 14350..14500 ms): the 2090 (1790 + 300) is still held, which excludes a duration 10% short (13500 ms). Reference search 2026-11-22: coa-history spell 704563: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 704563 and no value; merged-PR and git log search --grep 704563: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report). The read is the live current health of the ally (metric health, an event class read): Aura 34 raises the current health by its amount when it applies and lowers it when it ends (SpellAuraEffects.cpp HandleAuraModIncreaseHealth), and the ally starts at full health, so the clause's \"increases the target's health\" is read directly, with the same expected values as the maximum health arm of this clause."
+    },
+    {
+      "spell": 704563,
+      "name": "Warmth (the ally's health is back at 15.6 s)",
+      "kind": "metric_delta",
+      "variant": "health_gone",
+      "label_suffix": "health_gone",
+      "quote": "Direct healing now increases the target's health by ${$704564m1+$704564ppl1} for $704564d.",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "health",
+      "fields": {},
+      "before_expected": 1790,
+      "wait_ms": 15600,
+      "expire_ms": 500,
+      "expected": 1790,
+      "tolerance": 1,
+      "game_time": {
+        "after": [
+          15550,
+          15700
+        ]
+      },
+      "observe_source": "704563 Warmth Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704564; 704564 Effect[0] aura 34 SPELL_AURA_MOD_INCREASE_HEALTH, BasePoints 289 (+1 = 290 plus the level term, the tooltip's ${$704564m1+$704564ppl1} = 300 at level 60, read from the packet), target ally (TARGET_UNIT_TARGET_ALLY), DurationIndex 8 = 15000 ms ($704564d). The direct heal is Daybreak 503624 (instant, heal on an ally, Spell.dbc CastingTimeIndex 1) cast by the caster at the ally; the ally is the grouped reference ally (ally_arm), whose natural current health is read from the live unit with metric health: 1790 in the before phase (a baseline read, as in the Hulking Hordes 300748 own_health entry; an ally_health fixture is not used because the aura's stat recalculation discards it), and again after the cast. The read is taken 15600 ms after the heal (game time 15550..15700 ms): the current health is back at 1790, which excludes a duration 10% long (16500 ms). Reference search 2026-11-22: coa-history spell 704563: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 704563 and no value; merged-PR and git log search --grep 704563: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report). The read is the live current health of the ally (metric health, an event class read): Aura 34 raises the current health by its amount when it applies and lowers it when it ends (SpellAuraEffects.cpp HandleAuraModIncreaseHealth), and the ally starts at full health, so the clause's \"increases the target's health\" is read directly, with the same expected values as the maximum health arm of this clause."
     },
     {
       "spell": 707528,
@@ -14638,6 +14845,16 @@
         "rejected_before": false
       },
       "observe_source": "Absent 10500 ms after the cast: the duration is below 10.5 s (excludes 11 s, +10%); no block was taken, so the aura ends by its duration. Control: absent before the cast. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 560095,
+      "name": "Seraphic Bulwark (2 charges, 25 second recharge)",
+      "kind": "charge_recharge",
+      "quote": "2 Charges, 25 sec recharge",
+      "max_charges": 2,
+      "recharge_ms": 25000,
+      "target": "caster",
+      "observe_source": "SpellCharges.dbc row Spell=560095 points at SpellChargesCategory.dbc row 59 (MaxCharges 2, RecoveryTime 25000 ms; coa-dbc-viewer record --table SpellCharges --id 560095, --table SpellChargesCategory --id 59); the cast needs a shield (EquippedItemClass 4, SubClassMask 64), which the Seraphim weapon set equips (off hand 2129). Both charges are spent by real casts, an over-cast is refused, and one charge returns between 23.75 s and 26.25 s (+-5%, excluding 10% either side). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for this value (guide section 4; coa-history, bindmysoul snapshot and the b10 packet searched)."
     },
     {
       "spell": 681433,
