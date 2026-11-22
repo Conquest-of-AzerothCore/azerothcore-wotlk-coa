@@ -45,7 +45,7 @@
    "aura": 805301,
    "every_ms": 1600,
    "max_casts": 3,
-   "cast_power": 9000,
+   "cast_power": 2000,
    "reset_cooldown": true
   },
   {
@@ -79,7 +79,7 @@
    "aura": 807299,
    "every_ms": 1600,
    "max_casts": 2,
-   "cast_power": 9000
+   "cast_power": 1360
   },
   {
    "action": "assert",
@@ -111,7 +111,7 @@
   {
    "action": "set_power",
    "actor": "caster",
-   "value": 9000
+   "value": 1360
   },
   {
    "action": "cast",
@@ -153,7 +153,7 @@
   {
    "action": "set_power",
    "actor": "caster",
-   "value": 9000
+   "value": 1360
   },
   {
    "action": "cast",

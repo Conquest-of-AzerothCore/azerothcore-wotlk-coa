@@ -25907,6 +25907,91 @@
       "expected": 3,
       "observe_source": "806159 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9999 + 1 = 10000 on Illumination 500143 (mask word 2 = 512). Three real Illumination casts on the caster (health held at 30%) are counted as critical heal events (spell_heal_count of 500143, critical true), 1600 ms apart with the unrelated passive Solar Conduit 300321 instead of 806159: all 3 heals land (spell_heal_count of 500143 without the critical filter, expected 3), so the control arm of crit_control counted real heals. Without Resplendence Illumination keeps its 2000 ms cast, so the casts are 2100 ms apart and the last heal is read 2600 ms after its cast. Reference search 2026-11-22: coa-history spell 806159 (6 casts in 2 logs) and the tooltip give nothing on the crit chance; nothing else found; this arm judges only that the heals landed.",
       "after_at_least": 3
+    },
+    {
+      "spell": 804629,
+      "name": "Spears of Glory (Dawnsear is instant cast, aura earned from Radiant Flame)",
+      "kind": "aura_fed_effect",
+      "variant": "instant",
+      "label_suffix": "fed_instant",
+      "quote": "chance to grant you Spears of Glory.",
+      "feed_spell": 806060,
+      "aura": 807299,
+      "effect_spell": 554406,
+      "every_ms": 4300,
+      "residual_target": 0.001,
+      "feed_power": 1000,
+      "effect_power": 1363,
+      "expected": 0,
+      "caster_auras": [
+        823764
+      ],
+      "observe_source": "807299 Effect[0] aura 108 SPELLMOD CASTING_TIME (MiscValue 10) -100% (BasePoints -101) on Dawnsear's SpellFamilyFlags[1] = 2, DurationIndex 1 (10000 ms); Dawnsear 554406 has a 3500 ms cast time. Control: 807299 cancelled, Dawnsear cast, casting reads 1 after 300 ms. Treatment: Radiant Flame 806060 (instant channel, DurationIndex 35 = 4000 ms, Effect[0] aura 227 amplitude 1000, AttributesEx5 0x200 SPELL_ATTR5_EXTRA_INITIAL_PERIOD: 4000 / 1000 + 1 = 5 ticks of 807058) is cast every 4300 ms by the harness step cast_until_aura (owner ruling O-17) until Spears of Glory 807299 is on the caster; AscensionSunClericEvents.cpp:115 rolls Chance(player, 804629) (ProcChance 15) once per landed 807058 tick and :319 casts 807299 on the player. The harness never sets 807299; its presence is read right before every judged Dawnsear and a fed trial without it (cap reached) makes the run unmeasured. The kind sizes max_casts from the DBC ProcChance and tick count for a residual of at most 0.1% per pair. 823764 removes the dummy's resistance so every tick lands. Dawnsear cast 4500 ms after the feed stops (channel over, aura still within its 10 s), casting reads 0 after 300 ms. Replaces the held set_aura entries (review b7c C1)."
+    },
+    {
+      "spell": 804629,
+      "name": "Spears of Glory (Dawnsear damage, aura earned from Radiant Flame)",
+      "kind": "aura_fed_effect",
+      "variant": "damage",
+      "label_suffix": "fed_damage",
+      "quote": "chance to grant you Spears of Glory.",
+      "feed_spell": 806060,
+      "aura": 807299,
+      "effect_spell": 554406,
+      "every_ms": 4300,
+      "residual_target": 0.001,
+      "feed_power": 1000,
+      "effect_power": 1363,
+      "expected": 1.25,
+      "trials": 6,
+      "caster_auras": [
+        823764
+      ],
+      "fixture": {
+        "spell_power": 10000
+      },
+      "observe_source": "807299 Effect[1] aura 108 SPELLMOD DAMAGE +25% (BasePoints 24 + 1, $s2) on Dawnsear's SpellFamilyFlags[1] = 2. Six control Dawnsear hits (807299 cancelled) and six fed hits, non-critical only, spell power fixture 10000; the mean fed hit is expected at 1.25 times the control mean within the band 1.25 x (1 +- EffectDieSides[0] / control mean). Treatment: Radiant Flame 806060 (instant channel, DurationIndex 35 = 4000 ms, Effect[0] aura 227 amplitude 1000, AttributesEx5 0x200 SPELL_ATTR5_EXTRA_INITIAL_PERIOD: 4000 / 1000 + 1 = 5 ticks of 807058) is cast every 4300 ms by the harness step cast_until_aura (owner ruling O-17) until Spears of Glory 807299 is on the caster; AscensionSunClericEvents.cpp:115 rolls Chance(player, 804629) (ProcChance 15) once per landed 807058 tick and :319 casts 807299 on the player. The harness never sets 807299; its presence is read right before every judged Dawnsear and a fed trial without it (cap reached) makes the run unmeasured. The kind sizes max_casts from the DBC ProcChance and tick count for a residual of at most 0.1% per pair. 823764 removes the dummy's resistance so every tick lands. Replaces the held set_aura entry (review b7c C1)."
+    },
+    {
+      "spell": 300349,
+      "name": "Hope (once per sec: critical heals 940 and 1050 ms apart)",
+      "kind": "timer_spacing_arms",
+      "variant": "cooldown_cut",
+      "label_suffix": "icd_spacing",
+      "quote": "Can occur only once per sec.",
+      "timer_ms": 1000,
+      "gaps": [
+        940,
+        1050
+      ],
+      "hit_spell": 503624,
+      "cooldown_spell": 800764,
+      "cut_spell": 804512,
+      "cut_effect": 0,
+      "caster_health_pct": 30,
+      "force_crit": "spell",
+      "cast_power": 1360,
+      "observe_source": "AscensionSunClericEvents.cpp:129 300349: healing && critical && Chance(player, id, 1000); AscensionSunCleric.cpp:196-205 Chance rolls ProcChance (100) then holds a 1000 ms timer; :302 cuts the Solar Invocation cooldowns by |804512 Effect[0] BasePoints -1001 + 1| = 1000 ms. Each arm casts Conquest 800764 (RecoveryTime 30000), then two forced-crit Daybreak 503624 heals on the caster at 30% health (instant, 2 charges restored), the second with ignore_gcd (owner ruling O-17) 940 ms (blocked arm) or 1050 ms (allowed arm) after the first. Expected: 1 cut in the blocked arm, 2 in the allowed arm, counted as the whole number of 1000 ms cuts in 30000 - read - elapsed, elapsed bounded by the summed step elapsed_ms plus max_step_ms per step. The measured spacing of the two critical heals must lie in [900, 1000) and (1000, 1100] ms (10% band, review b7a I3), and both heals must be critical events, or the run is unmeasured."
+    },
+    {
+      "spell": 300371,
+      "name": "Censure (once per sec: direct hits 940 and 1050 ms apart)",
+      "kind": "timer_spacing_arms",
+      "variant": "chain_copy",
+      "label_suffix": "icd_spacing",
+      "quote": "Can only occur once per sec.",
+      "timer_ms": 1000,
+      "gaps": [
+        940,
+        1050
+      ],
+      "hit_spell": 572801,
+      "seed_spell": 801524,
+      "aura_spell": 806697,
+      "spares": 6,
+      "radius": 10.0,
+      "cast_power": 1360,
+      "observe_source": "AscensionSunClericEvents.cpp:134 300371: direct && damage && the target carries the caster's 806697 && Chance(player, id, 1000) (ProcChance 100, a 1000 ms timer); :327-334 copies 806697 to the first other enemy within 10 yd without it. Each arm seeds Chains of Light 801524 (TRIGGER_SPELL 806697) on the primary dummy, then two Horusath Blast 572801 hits on it (instant, single target, missile speed 20, cooldown reset between them), the second cast with ignore_gcd (owner ruling O-17) 940 ms (blocked arm) or 1050 ms (allowed arm) after the first. Dawnbreak 502496 was not used: a cone (EffectImplicitTargetA 24) that would hit the spares, with a 6000 ms category cooldown. Expected new copies on the six spares: 1 in the blocked arm, 2 in the allowed arm. The measured spacing of the two damage events must lie in [900, 1000) and (1000, 1100] ms or the run is unmeasured."
     }
   ],
   "player_observations": [],
