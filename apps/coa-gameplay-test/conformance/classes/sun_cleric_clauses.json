@@ -3980,8 +3980,7 @@
       {
         "claim": "While at or above 30% mana",
         "labels": [
-          "805301 behaviour_metric_delta ally_bless_heal",
-          "805301 behaviour_metric_delta ally_bless_heal_low_mana"
+          "805301 behaviour_metric_delta ally_bless_heal"
         ]
       },
       {

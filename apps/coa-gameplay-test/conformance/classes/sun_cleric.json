@@ -8703,124 +8703,6 @@
       "observe_source": "504848 Mercy Effect[0] aura 23 periodic trigger of 503650, target 21 TARGET_UNIT_TARGET_ALLY, EffectChainTarget[0] 6, MaxAffectedTargets 6 (the target and up to 5 nearby allies). Mercy is cast at the grouped ally with four more allies grouped beside it (grouped allies are capped at 5); the Mercy aura is read on the target and, in one arm, summed over the four others: 0 in the uncast control, 1 on the target and 4 across the others after the cast. The cap of 5 nearby allies needs a seventh candidate and is not reachable with 5 grouped allies and the caster (tool need returned). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
     },
     {
-      "spell": 805301,
-      "name": "Holy Form (extra heal on the ally affected by Bless)",
-      "kind": "metric_delta",
-      "variant": "ally_bless_heal",
-      "label_suffix": "ally_bless_heal",
-      "quote": "While at or above 30% mana, you sacrifice additional mana with each heal, healing your ally affected by Bless.",
-      "trigger_spell": 503624,
-      "target": "ally2",
-      "measure_actor": "caster",
-      "learn": [
-        804247
-      ],
-      "setup_casts": [
-        805301
-      ],
-      "setup_target": "caster",
-      "setup_only_after": true,
-      "cast_power": 2868,
-      "expire_ms": 500,
-      "metric": "spell_heal_count",
-      "fields": {
-        "spell": 807994,
-        "target": "ally"
-      },
-      "before_expected": 0,
-      "expected": 1,
-      "wait_ms": 1500,
-      "ally_arm": {
-        "allies": 2,
-        "ally_casts": [
-          804247
-        ],
-        "arms": [
-          {
-            "actors": [
-              "caster"
-            ],
-            "metric": "spell_heal_count",
-            "fields": {
-              "spell": 807994,
-              "target": "ally2"
-            },
-            "before_expected": 0,
-            "expected": 0,
-            "tolerance": 0,
-            "source": "the extra heal goes only to the ally recorded by Bless (:357), never to the unblessed heal target ally2"
-          },
-          {
-            "actors": [
-              "caster"
-            ],
-            "metric": "spell_heal_count",
-            "fields": {
-              "spell": 503624,
-              "target": "ally2"
-            },
-            "before_expected": 1,
-            "expected": 1,
-            "tolerance": 0,
-            "source": "the Daybreak heal itself landed on ally2 in both phases, so the extra heal is not a miscount of it"
-          }
-        ]
-      },
-      "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY (BasePoints 49, $s2 = 50); AscensionSunClericAbilities.cpp:355-372: a heal with Holy Form on and at least 30% of maximum mana, with the ally recorded by Bless alive and holding Bless (:358-359), pays (extra + 3) / 4 mana and casts 807994 on that ally (Copy(player, ally, 807994, extra), :370). Bless 804247 is cast at ally in both phases; Holy Form is cast on the caster only in the treatment phase (control: no form); Daybreak 503624 heals ally2, an unblessed ally, so a heal on ally by 807994 is the extra heal, not Daybreak. The caster's mana is set to its maximum 2868 (BaseMana 1363 + 20 + (Intellect 119 - 20) x 15) before the Daybreak cast, which costs 26% of base mana (about 354) and leaves it far above 30% of 2868 (860). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
-    },
-    {
-      "spell": 805301,
-      "name": "Holy Form (no extra heal below 30% mana)",
-      "kind": "metric_delta",
-      "variant": "ally_bless_heal_low_mana",
-      "label_suffix": "ally_bless_heal_low_mana",
-      "quote": "While at or above 30% mana, you sacrifice additional mana with each heal, healing your ally affected by Bless.",
-      "trigger_spell": 503624,
-      "target": "ally2",
-      "measure_actor": "caster",
-      "learn": [
-        804247
-      ],
-      "setup_casts": [
-        805301
-      ],
-      "setup_target": "caster",
-      "setup_only_after": true,
-      "cast_power": 1100,
-      "expire_ms": 500,
-      "metric": "spell_heal_count",
-      "fields": {
-        "spell": 807994,
-        "target": "ally"
-      },
-      "before_expected": 0,
-      "expected": 0,
-      "wait_ms": 1500,
-      "ally_arm": {
-        "allies": 2,
-        "ally_casts": [
-          804247
-        ],
-        "arms": [
-          {
-            "actors": [
-              "caster"
-            ],
-            "metric": "spell_heal_count",
-            "fields": {
-              "spell": 503624,
-              "target": "ally2"
-            },
-            "before_expected": 1,
-            "expected": 1,
-            "tolerance": 0,
-            "source": "the Daybreak heal itself landed on ally2 in both phases"
-          }
-        ]
-      },
-      "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY (BasePoints 49, $s2 = 50); AscensionSunClericAbilities.cpp:355-372: a heal with Holy Form on and at least 30% of maximum mana, with the ally recorded by Bless alive and holding Bless (:358-359), pays (extra + 3) / 4 mana and casts 807994 on that ally (Copy(player, ally, 807994, extra), :370). Same fixture as the entry above, with the mana set to 1100 before the Daybreak cast: after its cost (26% of base mana 1363, about 354) 746 remain, 26% of the maximum 2868, below the 30% gate (860): no extra heal on the blessed ally with Holy Form on. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
-    },
-    {
       "spell": 534267,
       "name": "Heat Wave (nearby allies are healed too)",
       "kind": "metric_delta",
@@ -8983,6 +8865,59 @@
         ]
       },
       "observe_source": "680700 DurationIndex 39 = 2000 ms ($d). One real cast of 680700 on the caster: its aura is present when read 1810..1990 ms after the cast (game time) and gone when read 2050..2190 ms after it, so the duration lies between 1810 and 2190 ms, inside 10% of 2000 (1800..2200) on both sides. Control (before): no cast, absent. This replaces the aura_duration_ms readback as the measured duration. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (extra heal on the ally affected by Bless, mana gate)",
+      "kind": "metric_delta",
+      "variant": "ally_bless_heal",
+      "label_suffix": "ally_bless_heal",
+      "quote": "While at or above 30% mana, you sacrifice additional mana with each heal, healing your ally affected by Bless.",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "caster",
+      "learn": [
+        804247
+      ],
+      "setup_casts": [
+        804247,
+        805301
+      ],
+      "setup_wait_ms": 2000,
+      "phase_power": [
+        0,
+        1100,
+        2868
+      ],
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 807994,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the Daybreak heal itself landed on the blessed ally in both phases, so a missing extra heal is not a missing Daybreak"
+          }
+        ]
+      },
+      "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY (BasePoints 49, $s2 = 50); AscensionSunClericAbilities.cpp:355-372: a heal with Holy Form on and at least 30% of maximum mana, with the ally recorded by Bless alive and holding Bless (:358-359), pays (extra + 3) / 4 mana and casts 807994 on that ally (Copy(player, ally, 807994, extra), :370). In both phases Bless 804247 is cast at ally and Holy Form 805301 on the caster (setup casts, 2000 ms after each, past the global cooldown; Bless and Holy Form have no mana cost in the DBC), then Daybreak 503624 heals ally. The ally affected by Bless is the one recorded by AscensionSunClericAuras.cpp:67-74. The only difference between the phases is the caster's mana before the Daybreak cast, which costs 26% of base mana 1363 (353): 1100 in the before phase leaves 747, 26% of the maximum 2868 (BaseMana 1363 + 20 + (Intellect 119 - 20) x 15), below the 30% gate (860.4): no extra heal 807994 on the ally; 2868 in the after phase leaves 2515, above it: one extra heal. Control: the before phase. The extra heal is read as the heal events of 807994 given to ally, read on the caster with fields.target ally. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
     }
   ],
   "player_observations": [],
