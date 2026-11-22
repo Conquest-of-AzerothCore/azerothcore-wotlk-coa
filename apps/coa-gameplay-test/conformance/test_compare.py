@@ -664,6 +664,19 @@ class CompareTest(unittest.TestCase):
                     self.linked_hit(self.BASE_ROLL_CONTRAST, 'ok')]
         self.assertEqual(resolve_base_roll_links(verdicts)[0].status, 'ok')
 
+    def test_a_refused_base_roll_is_accepted_again_from_its_own_read_once_its_links_pass(self):
+        refused = self.base_roll_verdict()
+        self.assertEqual(refused.detail['base_roll_only']['read_status'], 'ok')
+        verdicts = [refused, self.linked_hit(self.BASE_ROLL_HIT, 'ok'), self.linked_hit(self.BASE_ROLL_CONTRAST, 'ok')]
+        accepted = resolve_base_roll_links(verdicts, {self.BASE_ROLL_LABEL})[0]
+        self.assertEqual(accepted.status, 'ok')
+        self.assertNotIn('not accepted', accepted.explanation)
+        verdicts[2] = self.linked_hit(self.BASE_ROLL_CONTRAST, 'alert')
+        again = resolve_base_roll_links(resolve_base_roll_links(verdicts))[0]
+        self.assertEqual(again.status, 'alert')
+        self.assertEqual(again.explanation.count('not accepted'), 1)
+        self.assertEqual(resolve_base_roll_links(verdicts, set())[0], refused)
+
     def test_a_base_roll_only_token_without_a_named_hit_label_is_an_alert(self):
         verdict = self.base_roll_verdict(links=False)
         self.assertEqual(verdict.status, 'alert')

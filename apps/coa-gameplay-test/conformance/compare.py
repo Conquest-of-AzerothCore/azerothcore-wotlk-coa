@@ -101,6 +101,8 @@ ORDINAL = re.compile(r'#(\d+)$')
 BASE_ROLL_ONLY = 'base_roll_only'
 POWER_TERM_LABEL = 'power_term_label'
 CONTRAST_LABEL = 'contrast_label'
+BASE_ROLL_READ_STATUS = 'read_status'
+BASE_ROLL_REFUSED = f'; {BASE_ROLL_ONLY} not accepted: '
 DIVIDED_TOKEN = re.compile(r'\$/(\d+);')
 PLAIN_TOKEN = re.compile(r'\$(?:/\d+;)?(?P<spell>\d*)(?P<letter>[sSmM])(?P<digit>[1-3])')
 TRUNCATED_READ = 1.0
@@ -979,14 +981,23 @@ def judge_base_roll(base: Verdict, expectation: Expectation, measured: float, to
         'full_value': full, 'power_term': term, 'judged_base': judged, **links}})
 
 
-def resolve_base_roll_links(verdicts: list[Verdict]) -> list[Verdict]:
+def base_roll_references(verdict: Verdict) -> list[str]:
+    roll = (verdict.detail or {}).get(BASE_ROLL_ONLY) or {}
+    return [roll[field] for field in (POWER_TERM_LABEL, CONTRAST_LABEL) if roll.get(field)]
+
+
+def resolve_base_roll_links(verdicts: list[Verdict], labels: set[str] | None = None) -> list[Verdict]:
     by_label = {verdict.label: verdict for verdict in verdicts}
     resolved = []
     for verdict in verdicts:
         roll = (verdict.detail or {}).get(BASE_ROLL_ONLY)
-        if roll is None:
+        if roll is None or (labels is not None and verdict.label not in labels):
             resolved.append(verdict)
             continue
+        own = roll.get(BASE_ROLL_READ_STATUS, verdict.status)
+        alone = verdict.explanation.split(BASE_ROLL_REFUSED)[0]
+        read = replace(verdict, status=own, explanation=alone,
+                       detail={**verdict.detail, BASE_ROLL_ONLY: {**roll, BASE_ROLL_READ_STATUS: own}})
         reasons = []
         for field in (POWER_TERM_LABEL, CONTRAST_LABEL):
             linked = by_label.get(roll[field])
@@ -997,12 +1008,11 @@ def resolve_base_roll_links(verdicts: list[Verdict]) -> list[Verdict]:
             elif linked.status not in CONFORMANT:
                 reasons.append(f'{field} "{roll[field]}" is {linked.status}')
         if not reasons:
-            resolved.append(verdict)
+            resolved.append(read)
             continue
-        resolved.append(replace(verdict, status='alert',
-                                explanation=f'{verdict.explanation}; {BASE_ROLL_ONLY} not accepted: '
-                                            f'{"; ".join(reasons)} (D-57, D-198; the base roll read alone would be '
-                                            f'{verdict.status})'))
+        resolved.append(replace(read, status='alert',
+                                explanation=f'{alone}{BASE_ROLL_REFUSED}{"; ".join(reasons)} (D-57, D-198; the base '
+                                            f'roll read alone would be {own})'))
     return resolved
 
 

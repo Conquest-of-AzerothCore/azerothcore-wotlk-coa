@@ -57,6 +57,12 @@ Option 4.
   link-closed verdict written before `linked_from` (status `closed`, rule not a `closed:` rule) is resolved from
   `unmodelled`, the status `compare` gives such an entry before its links resolve; an older value-link verdict an
   alert closed to `alert` stays `alert`. Links within one layer keep the status `compare` gave them.
+- `compare.resolve_base_roll_links` records a `base_roll_only` verdict's own read status in
+  `detail.base_roll_only.read_status` and accepts or refuses from it, so resolving twice gives the same result.
+  `audit.relinked` resolves it again, after the links above, when its `power_term_label` or `contrast_label` came from
+  another layer: a base-roll `ok` of an earlier layer turns `alert` over a later alert on its power term, and a later
+  refusal for a label absent from its own comparison is accepted again when the merged labels pass. A refused verdict
+  written before `read_status` resolves from `alert`, so it stays refused.
 - `results_disagree` compares only selected verdicts. `results_not_selected` lists the skipped labels; a label one
   directory added can also be listed there for a later directory.
 
@@ -71,4 +77,4 @@ Option 4.
   Cleric base 11) and the Necromancer layered audit are identical to the first fix. The Witch Hunter leech-focus
   layering keeps its figures and statuses; its `results_disagree` drops from 6 rows to none, all of them unselected
   verdicts. Generated scenarios of classes 15, 19 (with and without `--stack`) and 23 are byte-identical.
-- `resolve_base_roll_links` statuses are still frozen per layer; they are not re-resolved by this decision.
+- No recorded set holds a base-roll verdict, so the base-roll relink changes no audit figure.

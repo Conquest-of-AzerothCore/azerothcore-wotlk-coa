@@ -2,8 +2,8 @@ from dataclasses import replace
 import json
 from pathlib import Path
 
-from compare import (CLOSED, CONFORMANT, DATA_ONLY, LINKED_FROM, NOT_MEASURED, Verdict, linked_references, observed,
-                     read_verdicts, resolve_linked_statuses)
+from compare import (CLOSED, CONFORMANT, DATA_ONLY, LINKED_FROM, NOT_MEASURED, Verdict, base_roll_references,
+                     linked_references, observed, read_verdicts, resolve_base_roll_links, resolve_linked_statuses)
 from coverage import (BY_METRIC, EVIDENCE, ClauseCoverage, clause_coverage, clause_labels, load_clauses,
                       load_consumption, resolved_labels)
 from values import Expectation
@@ -70,14 +70,18 @@ def recorded_link_status(verdict: Verdict) -> Verdict:
     return replace(verdict, detail={**(verdict.detail or {}), LINKED_FROM: 'unmodelled'})
 
 
+def crossing_labels(verdicts: list[Verdict], origin: dict[str, int], references) -> set[str]:
+    return {verdict.label for verdict in verdicts
+            if any(origin.get(label, origin[verdict.label]) != origin[verdict.label] for label in references(verdict))}
+
+
 def relinked(merged: list[tuple[int, Verdict]]) -> list[Verdict]:
     origin = {verdict.label: index for index, verdict in merged}
     verdicts = [verdict for _, verdict in merged]
-    crossing = {verdict.label for verdict in verdicts
-                if any(origin.get(label, origin[verdict.label]) != origin[verdict.label]
-                       for label in linked_references(verdict))}
-    return resolve_linked_statuses([recorded_link_status(verdict) if verdict.label in crossing else verdict
-                                    for verdict in verdicts], crossing)
+    crossing = crossing_labels(verdicts, origin, linked_references)
+    linked = resolve_linked_statuses([recorded_link_status(verdict) if verdict.label in crossing else verdict
+                                      for verdict in verdicts], crossing)
+    return resolve_base_roll_links(linked, crossing_labels(linked, origin, base_roll_references))
 
 
 def layered_labels(layers: list[list[Verdict]]) -> tuple[set[str], set[str]]:

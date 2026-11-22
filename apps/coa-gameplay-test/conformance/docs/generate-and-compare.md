@@ -45,7 +45,8 @@ otherwise `compare` stops with exit 5 and no verdict. Every verdict, alerts incl
 `build` (the worldserver sha256) and `runs` (the run ids it was judged from, empty for a verdict decided by rule), in
 `verdicts.json` and as the last three `alerts.tsv` columns (ADR 0118). `verdicts.json` also carries `selected` per
 verdict (a scenario behind the label ran, or the label is judged by rule alone; ADR 1032) and, on a linking verdict,
-`detail.linked_from` (its status before its links were resolved).
+`detail.linked_from` (its status before its links were resolved); a `base_roll_only` verdict carries its base-roll
+read status in `detail.base_roll_only.read_status`.
 
 `alerts.tsv`
 (default: the manifest directory) has one row per verdict that is neither `ok`, `measured`, `closed` nor
@@ -381,7 +382,10 @@ or every manifest expectation of the label is judged from its rule alone (`close
 written before the marker counts as selected when its `runs` list is absent or not empty. After the merge, a linking
 verdict (`checked by ... "label" (status ...)`) whose referenced labels came from another layer is resolved again
 from its own status (`detail.linked_from`, or `unmodelled` for a link-closed verdict written before that field) and
-the merged statuses of those labels. Then it runs `coverage.clause_coverage` on the ledger. With no directory it runs
+the merged statuses of those labels. A `base_roll_only` verdict whose `power_term_label` or `contrast_label` came from
+another layer is accepted or refused again from its own read (`detail.base_roll_only.read_status`, or its status for
+a verdict written before that field) and the merged verdicts of those labels. Then it runs
+`coverage.clause_coverage` on the ledger. With no directory it runs
 on no verdicts, as for a new class: every claim comes out unproven. `--manifest` stamps the observed metric of a
 generated manifest on a metric verdict that carries none (verdicts written before the metric was stamped);
 `--hooked` turns the listed labels into `not_measured`; `--build` stamps one audit build on every merged verdict,

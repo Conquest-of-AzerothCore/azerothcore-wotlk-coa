@@ -6,7 +6,7 @@ import unittest
 from unittest import mock
 
 from audit import audit_document, hooked_labels, merged_verdicts
-from compare import LINKED_FROM, NOT_MEASURED, Verdict, write_verdicts
+from compare import BASE_ROLL_ONLY, LINKED_FROM, NOT_MEASURED, Verdict, write_verdicts
 from conformance import main
 from passives import PASSIVE_DELTA
 
@@ -18,6 +18,8 @@ OTHER_BUILD = 'd' * 64
 HIT = f'{SPELL} hit_mean'
 VALUE = f'{SPELL} effect_value #0'
 PASSIVE = f'{OTHER_SPELL} passive_delta #0'
+CONTRAST = f'{SPELL} hit_mean rap'
+ROLL = f'{SPELL} effect_value base #1'
 
 
 def verdict(label, status='ok', check='hit_mean', spell=SPELL, build=BUILD, explanation='', detail=None):
@@ -165,6 +167,29 @@ class AuditTest(unittest.TestCase):
         with mock.patch('audit.relinked', lambda merged: [verdict for _, verdict in merged]):
             self.assertEqual(audit_document(23, self.ledger, [latest], base_results=base)['statuses'][VALUE],
                              'unmodelled')
+
+    def roll_layers(self, roll, name):
+        base = self.results(f'base-{name}', [
+            roll, replace(verdict(HIT), runs=['b1'], selected=True),
+            replace(verdict(CONTRAST), runs=['b1'], selected=True)])
+        latest = self.results(f'latest-{name}', [
+            replace(verdict(ROLL, 'unmeasured', 'effect_value'), runs=[], selected=False),
+            replace(verdict(HIT, 'alert'), runs=['l1'], selected=True)])
+        return base, latest
+
+    def test_a_base_roll_accepted_by_the_base_turns_alert_over_a_later_alert_on_its_power_term(self):
+        links = {'power_term_label': HIT, 'contrast_label': CONTRAST}
+        for roll_detail in ({**links, 'read_status': 'ok'}, links):
+            with self.subTest(roll_detail=roll_detail):
+                roll = replace(verdict(ROLL, 'ok', 'effect_value', explanation='base roll only',
+                                       detail={BASE_ROLL_ONLY: roll_detail}), runs=['b1'], selected=True)
+                base, latest = self.roll_layers(roll, len(roll_detail))
+                document = audit_document(23, self.ledger, [latest], base_results=base)
+                self.assertEqual((document['statuses'][HIT], document['statuses'][ROLL]), ('alert', 'alert'))
+                self.assertEqual(document['results_not_selected'], [ROLL])
+                with mock.patch('audit.resolve_base_roll_links', lambda verdicts, labels=None: verdicts):
+                    self.assertEqual(audit_document(23, self.ledger, [latest], base_results=base)['statuses'][ROLL],
+                                     'ok')
 
     def test_a_label_added_by_one_layer_is_also_listed_as_not_selected_by_a_later_one(self):
         latest = [self.results(name, [replace(verdict(PASSIVE, 'unmeasured', spell=OTHER_SPELL), runs=[],
