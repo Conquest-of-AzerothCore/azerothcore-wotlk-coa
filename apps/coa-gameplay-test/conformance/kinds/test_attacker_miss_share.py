@@ -1,0 +1,142 @@
+import unittest
+from unittest import mock
+
+from behaviours import behaviour_scenario
+from compare import judge_behaviour
+from coverage import BEHAVIOUR, verdict_evidence
+import kinds.attacker_miss_share as share
+from profile import DBC_DIR, load_fixture_class_file
+import run
+from test_behaviours import FakeRun, base_verdict
+
+ENTRY = {'spell': 572752, 'name': 'Sun Down (attackers swing inside the scorched earth)', 'kind': 'attacker_miss_share',
+         'quote': "reduces the target's chance to hit by", 'quote_spell': 807175, 'cast_spell': 572752,
+         'aura': 807175, 'expected': 3,
+         'arm_ms': 64000, 'cycle_ms': 8000, 'settle_ms': 7500}
+BASE_MANA = {'power': 0, 'value': 1363, 'source': 'seeded test value'}
+
+
+def class_file() -> dict:
+    return {**load_fixture_class_file(23), 'base_mana': BASE_MANA}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class AttackerMissShareTests(unittest.TestCase):
+    def built(self, entry=None, parts: int = 1):
+        scenario, [expectation] = behaviour_scenario(class_file(), entry or ENTRY)
+        if parts > 1:
+            expectation.model['parts'] = parts
+        return scenario, expectation
+
+    def values(self, expectation, control: tuple[int, int], treated: tuple[int, int], held: dict | None = None):
+        model = expectation.model
+        values = {}
+        for arm, (misses, swings) in (('control', control), ('treatment', treated)):
+            reads = model['reads'][arm]
+            values[reads['start swings']], values[reads['start misses']] = 50.0, 5.0
+            values[reads['end swings']], values[reads['end misses']] = 50.0 + swings, 5.0 + misses
+            for label in model['auras'][arm]:
+                values[label] = 1.0 if arm == 'treatment' else 0.0
+        values.update(held or {})
+        return values
+
+    def pooled(self, control, treated, parts: int = 2, held: dict | None = None, ran: int | None = None):
+        _, expectation = self.built(parts=parts)
+        runs = []
+        for index in range(parts if ran is None else ran):
+            part = FakeRun(self.values(expectation, control, treated, held if index == 1 else None))
+            part.key = f'part-{index + 1}'
+            runs.append(part)
+        return share.POOLED_JUDGE(base_verdict(expectation), runs, expectation.model)
+
+    def test_the_treatment_casts_the_spell_and_never_sets_the_aura(self):
+        scenario, expectation = self.built()
+        run.validate(scenario)
+        actions = [step['action'] for step in scenario['steps']]
+        self.assertNotIn('set_aura', actions)
+        casts = [step for step in scenario['steps'] if step['action'] == 'cast']
+        self.assertEqual(len(casts), 1 + ENTRY['arm_ms'] // ENTRY['cycle_ms'])
+        self.assertTrue(all(step['spell'] == 572752 and step['target'] == 'attacker1' for step in casts))
+        self.assertEqual(actions.count('reset_cooldown'), len(casts))
+        powers = [step for step in scenario['steps'] if step['action'] == 'set_power']
+        self.assertEqual(len(powers), len(casts))
+        self.assertTrue(all(step['value'] == BASE_MANA['value'] for step in powers))
+        self.assertEqual(expectation.model['expected'], 3.0)
+        self.assertEqual(len(scenario['creatures']), 8)
+
+    def test_no_cast_lies_inside_the_control_arm(self):
+        scenario, expectation = self.built()
+        labels = [step.get('label') for step in scenario['steps']]
+        steps = scenario['steps']
+        control_end = labels.index(expectation.model['reads']['control']['end misses'])
+        self.assertFalse([step for step in steps[:control_end] if step['action'] == 'cast'])
+
+    def test_counting_starts_after_the_settle_and_the_aura_read_on_every_attacker(self):
+        scenario, expectation = self.built()
+        labels = [step.get('label') for step in scenario['steps']]
+        start = labels.index(expectation.model['reads']['treatment']['start swings'])
+        ready = [label for label in expectation.model['auras']['treatment'] if ' ready ' in label]
+        self.assertEqual(len(ready), 8)
+        self.assertTrue(all(labels.index(label) < start for label in ready))
+        self.assertEqual(labels.index('treatment settle'), start - len(ready) - 1)
+        reads = [step for step in scenario['steps'] if step.get('label') in ready]
+        self.assertTrue(all(step['metric'] == 'aura' and step['spell'] == 807175 and step['caster'] == 'caster'
+                            for step in reads))
+        misses = [step for step in scenario['steps'] if step.get('label', '').endswith(' misses')]
+        self.assertTrue(misses and all(step['victim_state'] == 0 for step in misses))
+
+    def test_the_stated_change_passes_over_two_parts(self):
+        verdict = self.pooled((400, 8000), (640, 8000))
+        self.assertEqual(verdict.status, 'ok', verdict.explanation)
+        self.assertAlmostEqual(verdict.measured, 3.0)
+        self.assertIn('2 parts pooled', verdict.explanation)
+        self.assertIn('reset_cooldown 572752', verdict.explanation)
+
+    def test_an_unresolved_change_is_not_judged_and_a_missing_or_reversed_one_alerts(self):
+        self.assertEqual(self.pooled((40, 800), (40, 800)).status, 'insufficient_trials')
+        self.assertEqual(self.pooled((300, 6000), (336, 6000)).status, 'insufficient_trials')
+        self.assertEqual(self.pooled((400, 8000), (400, 8000)).status, 'alert')
+        self.assertEqual(self.pooled((400, 8000), (160, 8000)).status, 'alert')
+
+    def test_a_lapsed_aura_a_clamped_control_or_a_missing_part_is_unmeasured(self):
+        _, expectation = self.built(parts=2)
+        lapsed = {expectation.model['auras']['treatment'][-1]: 0.0}
+        verdict = self.pooled((400, 8000), (640, 8000), held=lapsed)
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertTrue(verdict.explanation.startswith('part-2: '))
+        contaminated = {expectation.model['auras']['control'][0]: 1.0}
+        self.assertEqual(self.pooled((400, 8000), (640, 8000), held=contaminated).status, 'unmeasured')
+        self.assertEqual(self.pooled((160, 8000), (400, 8000)).status, 'unmeasured')
+        self.assertEqual(self.pooled((400, 8000), (640, 8000), ran=1).status, 'unmeasured')
+
+    def test_a_treatment_read_of_hits_instead_of_misses_alerts(self):
+        with mock.patch.object(share, 'MISS_VICTIM_STATE', 1):
+            scenario, expectation = self.built(parts=2)
+        reads = [step for step in scenario['steps'] if step.get('label') == expectation.model['reads']['treatment']
+                 ['end misses']]
+        self.assertEqual(reads[0]['victim_state'], 1)
+        hits_read_as_misses = self.pooled((400, 8000), (7200, 8000))
+        self.assertEqual(hits_read_as_misses.status, 'alert')
+
+    def test_the_single_part_judge_runs_through_compare(self):
+        _, expectation = self.built()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(self.values(expectation, (800, 16000),
+                                                                                 (1280, 16000))), expectation)
+        self.assertEqual(verdict.status, 'ok', verdict.explanation)
+        self.assertEqual(verdict_evidence(verdict, ENTRY['quote'], {}), BEHAVIOUR)
+
+    def test_entries_the_kind_cannot_measure_are_refused(self):
+        refused = [{**ENTRY, 'attackers': 9}, {**ENTRY, 'cycle_ms': 10000, 'arm_ms': 60000},
+                   {**ENTRY, 'arm_ms': 60000}, {**ENTRY, 'expected': -3}, {**ENTRY, 'settle_ms': 1000},
+                   {**ENTRY, 'aura': 572754}, {**ENTRY, 'cycle_ms': 1000, 'arm_ms': 1_000_000},
+                   {**ENTRY, 'cycle_ms': 9000, 'arm_ms': 3_600_000}, {**ENTRY, 'quote_spell': 572754},
+                   {key: value for key, value in ENTRY.items() if key != 'quote_spell'}]
+        for entry in refused:
+            with self.subTest(entry=entry), self.assertRaises(ValueError):
+                self.built(entry)
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), ENTRY)
+
+
+if __name__ == '__main__':
+    unittest.main()
