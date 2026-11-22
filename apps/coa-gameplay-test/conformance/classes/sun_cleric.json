@@ -23486,7 +23486,7 @@
           2200
         ]
       },
-      "observe_source": "520024 Effect[1] triggers 520025 on the caster: Effect[2] aura 39 SPELL_AURA_SCHOOL_IMMUNITY MiscValue 127 (all seven schools, physical included), DurationIndex 39 = 2000 ms ($d). One real cast of 520024 at the dummy: aura 520025 is present on the caster when read 1800..1950 ms after the cast (game time) and gone when read 2050..2200 ms after it, so the duration lies inside 10% of 2000 (1800..2200) on both sides. Control (before): no cast, absent. The leap itself (Effect[0] of 520025, SPELL_EFFECT_LEAP_BACK) is a knockback packet on a player that the client acknowledges: status 4 as for Norgannon's Wrath 524739 (guide section 2). Reference search: coa-history spell 520024 has 41 casts in the class map; nothing found on the immunity duration beyond the tooltip."
+      "observe_source": "520024 Effect[1] triggers 520025 on the caster: Effect[2] aura 39 SPELL_AURA_SCHOOL_IMMUNITY MiscValue 127 (all seven schools, physical included), DurationIndex 39 = 2000 ms ($d). One real cast of 520024 at the dummy: aura 520025 is present on the caster when read 1800..1950 ms after the cast (game time) and gone when read 2050..2200 ms after it, so the duration lies inside 10% of 2000 (1800..2200) on both sides. Control (before): no cast, absent. The leap itself (Effect[0] of 520025, SPELL_EFFECT_LEAP_BACK) is a knockback packet on a player that the client acknowledges: status 4 as for Norgannon's Wrath 524739 (guide section 2); a client-side check would cast 520024 in the lab client and read the position during and after the window, expecting a launch of 200 from 520025 Effect[0] (BasePoints 200, MiscValueB 200). Reference search: coa-history spell 520024 has 41 casts in the class map; nothing found on the immunity duration beyond the tooltip."
     },
     {
       "spell": 704585,
@@ -25967,8 +25967,8 @@
         "spell": 505197,
         "target": "caster"
       },
-      "before_expected": 50,
-      "expected": 150,
+      "before_expected": 110,
+      "expected": 330,
       "expected_ratio": 3.0,
       "tolerance": 0.05,
       "wait_ms": 1000,
@@ -26004,7 +26004,7 @@
       "expected": 1,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "520024 Valkyr's Calling Effect[1] triggers 520025 on the caster, whose Effect[2] is aura 39 SPELL_AURA_SCHOOL_IMMUNITY MiscValue 127 (all seven schools), DurationIndex 39 = 2000 ms ($d). 47632 (600 Shadow, DmgClass 1, school mask 32 Shadow) is cast at the caster by a creature striker. Before phase (control, no cast): the strike lands and the cumulative count of its damage events on the caster reads 1. After phase: 520024 is cast for real at the dummy (cooldown and mana set), and 800 ms later, inside the 2000 ms window, the same strike is cast: the count still reads 1, so it dealt no damage under the immunity. The leap itself (520025 Effect[0] LEAP_BACK) is a knockback packet the client acknowledges: status 4 as for Norgannon's Wrath 524739 (guide section 2), the leap claim of the ledger entry. Reference search 2026-11-22: coa-history 520025 (the aura): 37 SPELL_AURA_APPLIED and 37 SPELL_AURA_REMOVED events in 6 logs; coa-history 520024: 41 casts; nothing found beyond the tooltip and the server DBC."
+      "observe_source": "520024 Valkyr's Calling Effect[1] triggers 520025 on the caster, whose Effect[2] is aura 39 SPELL_AURA_SCHOOL_IMMUNITY MiscValue 127 (all seven schools), DurationIndex 39 = 2000 ms ($d). 47632 (600 Shadow, DmgClass 1, school mask 32 Shadow) is cast at the caster by a creature striker. Before phase (control, no cast): the strike lands and the cumulative count of its damage events on the caster reads 1. After phase: 520024 is cast for real at the dummy (cooldown and mana set), and 800 ms later, inside the 2000 ms window, the same strike is cast: the count still reads 1, so it dealt no damage under the immunity. The leap itself (520025 Effect[0] LEAP_BACK) is a knockback packet the client acknowledges: status 4 as for Norgannon's Wrath 524739 (guide section 2); a client-side check would cast 520024 in the lab client and read the position during and after the window, expecting a launch of 200 from 520025 Effect[0] (BasePoints 200, MiscValueB 200), the leap claim of the ledger entry. Reference search 2026-11-22: coa-history 520025 (the aura): 37 SPELL_AURA_APPLIED and 37 SPELL_AURA_REMOVED events in 6 logs; coa-history 520024: 41 casts; nothing found beyond the tooltip and the server DBC."
     },
     {
       "spell": 520024,
@@ -26035,7 +26035,7 @@
       "expected": 1,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "520024 Valkyr's Calling Effect[1] triggers 520025 on the caster, whose Effect[2] is aura 39 SPELL_AURA_SCHOOL_IMMUNITY MiscValue 127 (all seven schools), DurationIndex 39 = 2000 ms ($d). 32247 (1000 Physical, DmgClass 0, school mask 1 Physical) is cast at the caster by a creature striker. Before phase (control, no cast): the strike lands and the cumulative count of its damage events on the caster reads 1. After phase: 520024 is cast for real at the dummy (cooldown and mana set), and 800 ms later, inside the 2000 ms window, the same strike is cast: the count still reads 1, so it dealt no damage under the immunity. The leap itself (520025 Effect[0] LEAP_BACK) is a knockback packet the client acknowledges: status 4 as for Norgannon's Wrath 524739 (guide section 2), the leap claim of the ledger entry. Reference search 2026-11-22: coa-history 520025 (the aura): 37 SPELL_AURA_APPLIED and 37 SPELL_AURA_REMOVED events in 6 logs; coa-history 520024: 41 casts; nothing found beyond the tooltip and the server DBC."
+      "observe_source": "520024 Valkyr's Calling Effect[1] triggers 520025 on the caster, whose Effect[2] is aura 39 SPELL_AURA_SCHOOL_IMMUNITY MiscValue 127 (all seven schools), DurationIndex 39 = 2000 ms ($d). 32247 (1000 Physical, DmgClass 0, school mask 1 Physical) is cast at the caster by a creature striker. Before phase (control, no cast): the strike lands and the cumulative count of its damage events on the caster reads 1. After phase: 520024 is cast for real at the dummy (cooldown and mana set), and 800 ms later, inside the 2000 ms window, the same strike is cast: the count still reads 1, so it dealt no damage under the immunity. The leap itself (520025 Effect[0] LEAP_BACK) is a knockback packet the client acknowledges: status 4 as for Norgannon's Wrath 524739 (guide section 2); a client-side check would cast 520024 in the lab client and read the position during and after the window, expecting a launch of 200 from 520025 Effect[0] (BasePoints 200, MiscValueB 200), the leap claim of the ledger entry. Reference search 2026-11-22: coa-history 520025 (the aura): 37 SPELL_AURA_APPLIED and 37 SPELL_AURA_REMOVED events in 6 logs; coa-history 520024: 41 casts; nothing found beyond the tooltip and the server DBC."
     },
     {
       "spell": 503505,
@@ -26080,7 +26080,7 @@
         ],
         "control_wait": true
       },
-      "observe_source": "804252 Blessing of Absolution Effect[1] SPELL_EFFECT_THREAT BasePoints 14 + 1 = 15, the additional threat of the tooltip ('generating additional threat'; no number). CoA's Spell.dbc carries these effect 63 values as a percentage of the damage, which Ascension used and the server reproduces with a spell_threat row of pctMod 1 + 15 / 100 = 1.15 (data/sql/updates/pending_db_world/rev_20261026_20_coa_tank_ability_threat.sql, the owner's High Threat precedent of 2026-11-10 and 2026-11-12 for Justicar's Wrath 806980, whose flat effect 63 amount is kept). Threat of one hit is damage x 1.15 plus the flat effect amount 15, divided by the health the dummy lost: 1.15 + 15 / D. The cast is the 503505 cast at a Blessed ally (Bless 804247 cast at the ally in both phases), with 20000 spell power (fixture) so the Holy hit is 404..456 + int(1.5 x 20000) = 30404..30456 and the flat part moves the ratio by 0.0005 only: 1.1505. The band is 2 points of the 15 percent (G-19), 0.02: it excludes no additional threat (1.0, 1.0000 + the spell level 1 of 804252 over D) and a percentage of 13 or 17. The control of the claim is the threat_control entry of the same pair: an ordinary Holy hit reads about 1.0. Crit forced out by fixture 984954. Control (before): the same Bless without the 503505 cast, no damage and a ratio of 0. Interpretation noted for the mentor: the amount is read as a percentage, the convention the server already applies to every effect 63 spell of this table; the tooltip itself gives no number. Reference search 2026-11-22: coa-history spell 804252: 8 SPELL_DAMAGE events of 1015 in 1 log, no threat events are logged; the pending SQL above; nothing else found.",
+      "observe_source": "804252 Blessing of Absolution Effect[1] SPELL_EFFECT_THREAT BasePoints 14 + 1 = 15, the additional threat of the tooltip ('generating additional threat'; no number). CoA's Spell.dbc carries these effect 63 values as a percentage of the damage, which Ascension used and the server reproduces with a spell_threat row of pctMod 1 + 15 / 100 = 1.15 (data/sql/updates/pending_db_world/rev_20261026_20_coa_tank_ability_threat.sql, merged in PR #9382 for the other effect 63 spells; the High Threat ruling for Justicar's Wrath 806980 (threat x2) concerns another tooltip word and does not decide 'additional threat'; the flat effect 63 amount is kept). Threat of one hit is damage x 1.15 plus the flat effect amount 15, divided by the health the dummy lost: 1.15 + 15 / D. The cast is the 503505 cast at a Blessed ally (Bless 804247 cast at the ally in both phases), with 20000 spell power (fixture) so the Holy hit is 404..456 + int(1.5 x 20000) = 30404..30456 and the flat part moves the ratio by 0.0005 only: 1.1505. The band is 2 points of the 15 percent (G-19), 0.02: it excludes no additional threat (1.0, 1.0000 + the spell level 1 of 804252 over D) and a percentage of 13 or 17. The control of the claim is the threat_control entry of the same pair: an ordinary Holy hit reads about 1.0. Crit forced out by fixture 984954. Control (before): the same Bless without the 503505 cast, no damage and a ratio of 0. The tooltip gives no number: the qualitative claim 'additional threat' is proven by 1.1505 against the control 1.0056 (band 0.02); the 15 percent is the server convention (#9382), pinned here as a regression, not a ruling on the tooltip. Information for the mentor: the damage and the threat are credited to the Sun Cleric, not to the Blessed ally who 'unleashes' the burst. Reference search 2026-11-22: coa-history spell 804252: 8 SPELL_DAMAGE events of 1015 in 1 log, no threat events are logged; the pending SQL above; nothing else found.",
       "expected": 1.1505,
       "tolerance": 0.02,
       "player_spell_power": 20000
@@ -26224,7 +26224,7 @@
       },
       "area_sum": true,
       "expected": 6,
-      "observe_source": "300353 Heaven's Appraisal is learned between the phases and Gavel of Wrath 800617 (DmgClass melee, the weapon strike) is cast once at the dummy in the after phase only (cast_in_before false), with seven more dummies at 3.5 to 6.5 yd, every one within 8 yd of the primary at 3 yd; crit forced out by 984954 so the roll cannot move a count. The tooltip: 'Gavel of Wrath: Strikes 5 additional nearby enemies', under Holy Form 805301, applied by harness set_aura as a precondition fixture (the claim's subject is the Gavel effect of 300353, not Holy Form; the control arm is the same cast without it; area_dummies refuse a setup cast on the caster). spell_damage_count of 800617 on the dummy and every area dummy is summed (area_sum). Expected 6: the primary hit plus the 5 additional strikes of the tooltip, from seven nearby enemies (the cap is the claim: 7 candidates, 5 struck). Control: the wrath_extra_control entry, the same cast without Holy Form, expects the primary alone. Reference search 2026-11-22: coa-history spell 300353 and the Gavel roots 800611, 800614, 800617: 0 events (passives and Gavels leave no logged event, see the Fanaticism entries); nothing found beyond the tooltip and the server DBC.",
+      "observe_source": "300353 Heaven's Appraisal is learned between the phases and Gavel of Wrath 800617 (DmgClass melee, the weapon strike) is cast once at the dummy in the after phase only (cast_in_before false), with seven more dummies at 3.5 to 6.5 yd, every one within 8 yd of the primary at 3 yd; crit: 984954 removes spell crit (Effect[1] aura 57 -1001%) but raises weapon crit by 101% (Effect[0] aura 52, ADR 0742), so every Gavel of Wrath hit (800617, melee) is critical; a critical hit is still one damage event, so the roll cannot move a count; hit and expertise ratings of the class file exclude a miss, dodge or parry of the primary. The tooltip: 'Gavel of Wrath: Strikes 5 additional nearby enemies', under Holy Form 805301, applied by harness set_aura as a precondition fixture (the claim's subject is the Gavel effect of 300353, not Holy Form; the control arm is the same cast without it; area_dummies refuse a setup cast on the caster). spell_damage_count of 800617 on the dummy and every area dummy is summed (area_sum). Expected 6: the primary hit plus the 5 additional strikes of the tooltip, from seven nearby enemies (the cap is the claim: 7 candidates, 5 struck). Controls: wrath_extra_control, the same cast without Holy Form, expects the primary alone; wrath_extra_nolearn, Holy Form applied and the Gavel known but 300353 never learned, expects the primary alone, so the 5 additional strikes need 300353 and not Holy Form alone. Reference search 2026-11-22: coa-history spell 300353 and the Gavel roots 800611, 800614, 800617: 0 events (passives and Gavels leave no logged event, see the Fanaticism entries); nothing found beyond the tooltip and the server DBC.",
       "cast_in_before": false
     },
     {
@@ -26266,7 +26266,55 @@
       },
       "area_sum": true,
       "expected": 1,
-      "observe_source": "300353 Heaven's Appraisal is learned between the phases and Gavel of Wrath 800617 (DmgClass melee, the weapon strike) is cast once at the dummy in the after phase only (cast_in_before false), with seven more dummies at 3.5 to 6.5 yd, every one within 8 yd of the primary at 3 yd; crit forced out by 984954 so the roll cannot move a count. The tooltip: 'Gavel of Wrath: Strikes 5 additional nearby enemies', under Holy Form 805301 (cast for real on the caster before the Gavel: ManaCostPercentage 40, cooldown 10 s, Effect[0] aura +10, Effect[1] aura +50, Effect[2] aura 10 MOD_THREAT -50 percent). spell_damage_count of 800617 on the dummy and every area dummy is summed (area_sum). Control of wrath_extra: Heaven's Appraisal learned, no Holy Form on the caster, the same seven nearby dummies: only the primary is struck, 1 in total, so the 5 additional strikes need Holy Form. Reference search 2026-11-22: nothing found beyond the tooltip and the server DBC.",
+      "observe_source": "300353 Heaven's Appraisal is learned between the phases and Gavel of Wrath 800617 (DmgClass melee, the weapon strike) is cast once at the dummy in the after phase only (cast_in_before false), with seven more dummies at 3.5 to 6.5 yd, every one within 8 yd of the primary at 3 yd; crit: 984954 removes spell crit (Effect[1] aura 57 -1001%) but raises weapon crit by 101% (Effect[0] aura 52, ADR 0742), so every Gavel of Wrath hit (800617, melee) is critical; a critical hit is still one damage event, so the roll cannot move a count; hit and expertise ratings of the class file exclude a miss, dodge or parry of the primary. The tooltip: 'Gavel of Wrath: Strikes 5 additional nearby enemies', under Holy Form 805301, which this arm does not apply. spell_damage_count of 800617 on the dummy and every area dummy is summed (area_sum). Control of wrath_extra: Heaven's Appraisal learned, no Holy Form on the caster, the same seven nearby dummies: only the primary is struck, 1 in total, so the 5 additional strikes need Holy Form. Reference search 2026-11-22: nothing found beyond the tooltip and the server DBC.",
+      "cast_in_before": false
+    },
+    {
+      "spell": 300353,
+      "kind": "metric_delta",
+      "gate_spell": 800617,
+      "quote": "Gavel of Wrath: Strikes 5 additional nearby enemies.",
+      "trigger_spell": 800617,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "area_dummies": [
+        3.5,
+        4,
+        4.5,
+        5,
+        5.5,
+        6,
+        6.5
+      ],
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          805301,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "name": "Heaven's Appraisal (control: Gavel of Wrath under Holy Form without 300353 learned strikes the primary alone)",
+      "variant": "wrath_extra_nolearn",
+      "label_suffix": "wrath_extra_nolearn",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800617,
+        "target": "dummy"
+      },
+      "area_sum": true,
+      "expected": 1,
+      "observe_source": "Control of wrath_extra for the cause 300353: the same scenario (Holy Form 805301 by set_aura as a precondition fixture, 984954, seven nearby dummies at 3.5 to 6.5 yd, one Gavel of Wrath 800617 at the dummy in the after phase) except that the harness learns the Gavel 800617 as the gate and never learns 300353 Heaven's Appraisal. Expected 1: the primary alone, so Holy Form and the Gavel do not grant the 5 additional strikes without 300353. crit: 984954 removes spell crit (Effect[1] aura 57 -1001%) but raises weapon crit by 101% (Effect[0] aura 52, ADR 0742), so every Gavel of Wrath hit (800617, melee) is critical; a critical hit is still one damage event, so the roll cannot move a count; hit and expertise ratings of the class file exclude a miss, dodge or parry of the primary. Reference search 2026-11-22: nothing found beyond the tooltip and the server DBC.",
       "cast_in_before": false
     }
   ],
