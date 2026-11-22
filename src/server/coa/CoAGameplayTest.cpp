@@ -3800,6 +3800,14 @@ private:
             Require(item != nullptr, "LFG Need metric needs a known item");
             return player->CanRollForItemInLFG(item, player) == EQUIP_ERR_OK ? 1 : 0;
         }
+        if (metric == "item_usable")
+        {
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "Item usability metric needs a player");
+            ItemTemplate const* item = sObjectMgr->GetItemTemplate(step.get<uint32>("item"));
+            Require(item != nullptr, "Item usability metric needs a known item");
+            return player->CanUseItem(item) == EQUIP_ERR_OK ? 1 : 0;
+        }
         if (metric == "battleground_status")
         {
             Player* player = unit->ToPlayer();
