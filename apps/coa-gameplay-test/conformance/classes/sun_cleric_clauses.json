@@ -1136,12 +1136,10 @@
     "spell": 504734,
     "clause": "Increases the range of your Piety spells by $s1%",
     "labels": [
-      "504734 effect_value e0 #0",
-      "504734 behaviour_metric_delta range_in",
-      "504734 behaviour_metric_delta range_out"
+      "504734 effect_value e0 #0"
     ],
     "kind": "claim",
-    "reason": "Pair 20261122-040627 / 20261122-040658, build b3e613641105, server commit 68e7af248b64+, no flip. Horusath Blast 500154 (30 yd, RangeIndex 4) cast at a dummy: 38 yd refused (97) before the learn and cast (0) after, 40 yd refused (97) in both phases, so the range lies above 38 - 2.775 and below 40 - 2.775 yd with the combat reaches (dummy 1.275 from a recorded read, player 1.5 assumed from DEFAULT_COMBAT_REACH), excluding +-10% of the +20% claim. Control = the phase before the learn. Reference search: coa-history 0 events (passive), sidekick carries the tooltip only; nothing else found."
+    "reason": "ON HOLD, status not counted: the range labels range_in and range_out are withdrawn from this row until a redesign is run. Pair 20261122-040627 / 20261122-040658, build b3e613641105, server commit 68e7af248b64+, no flip: Horusath Blast 500154 (30 yd, RangeIndex 4) at a dummy was refused (97) at 38 yd before the learn and cast (0) after, and refused (97) at 40 yd in both phases. With the combat reaches (dummy 1.275 from a recorded read, player 1.5 assumed from DEFAULT_COMBAT_REACH, not read from the server) the effective range lies between 35.225 and 37.225 yd, a bonus of +17.4% to +24.1%. The arms at 38 and 40 yd do not exclude +-10% of the +20% claim (+18% = 35.4 yd and +22% = 36.6 yd both lie inside that bracket). Redesign carried to the next batch: arms near 38.5 yd (inside, excludes +18%) and 39.0 yd (outside, excludes +22%) around the predicted edge 36 + 2.775 = 38.775 yd. Subset: range tested on Horusath Blast 500154 only, no N-of-M split of the Piety spells yet (G-23). Reference search: coa-history 0 events (passive), sidekick carries the tooltip only; nothing else found."
   },
   {
     "spell": 504734,
@@ -1151,7 +1149,7 @@
       "504734 behaviour_metric_delta threat"
     ],
     "kind": "claim",
-    "reason": "Pair 20261122-040627 / 20261122-040658, build b3e613641105, server commit 68e7af248b64+, no flip. Dawnsear 554406 at spell power 10000: threat per damage 0.8056 and 0.8056 after the learn against 0.80718 expected (0.8 + 60/8360.7), control threat_base 1.0056 and 1.0056 against 1.00718 (the flat 60 initial threat is unmodified, as in Holy Form 805301). The first design read a cumulative ratio over two casts and alerted (0.9245, 0.9057); that was a test fault, fixed by one cast per entry. Reference search: coa-history 0 events (passive); nothing else found."
+    "reason": "Pair 20261122-040627 / 20261122-040658, build b3e613641105, server commit 68e7af248b64+, no flip. Dawnsear 554406 at spell power 10000: threat per damage 0.8056 and 0.8056 after the learn against 0.80718 expected (0.8 + 60/8360.7), control threat_base 1.0056 and 1.0056 against 1.00718 (the flat 60 initial threat is unmodified, as in Holy Form 805301). The first design read a cumulative ratio over two casts and alerted (0.9245, 0.9057); that was a test fault, fixed by one cast per entry. Reference search: coa-history 0 events (passive); nothing else found. Subset: threat tested on Dawnsear 554406 only, no N-of-M split of the Piety spells (G-23). Note: the control reads 1.0056, so the 60 flat term implies a damage of about 10.7k against the modelled mean 8360.7; the 0.01 tolerance absorbs it and a 10% or 30% cut would read 0.1 off."
   },
   {
     "spell": 504848,
@@ -2052,7 +2050,7 @@
     "spell": 572885,
     "clause": "In addition, increases the critical srtike chance of all Gavels by $s2%.",
     "kind": "claim",
-    "reason": "Control arm = the read before the learn plus Horusath Blast 500154 outside the Gavel mask (gain 0.0, entry crit_control). Gavel of Light 800611, Gavel of Wrath 802561 and Gavel of Grace 807987 each gain 20.0 (expected 20 = BasePoints 19 + 1, within 0.01), both runs; the 3 Gavel shapes cover the mask (G-23: one effect, one class mask). The bindmysoul snapshot text lacks the Gavel sentence (an older tooltip state). Reference search 2026-11-22: coa-history spell 572885: 0 events in 186 logs (a passive leaves no event). Pair 20261122-045517 / 20261122-045553, build b3e613641105, server commit 68e7af248b64+, no flip, 16/16 ok in both runs.",
+    "reason": "Counts as data, status not 1: the measurement is behavioural but the tooltip typo 'srtike' is kept in the clause, so coverage.py CRIT_WORDS does not match and the verdicts fall to data; a mentor or tool decision (typo-tolerant promise or text_source correction) is needed. Control arm = the read before the learn plus Horusath Blast 500154 outside the Gavel mask (gain 0.0, entry crit_control). Gavel of Light 800611, Gavel of Wrath 802561 and Gavel of Grace 807987 each gain 20.0 (expected 20 = BasePoints 19 + 1, within 0.01), both runs; the 3 Gavel shapes cover the mask (G-23: one effect, one class mask). The bindmysoul snapshot text lacks the Gavel sentence (an older tooltip state). Reference search 2026-11-22: coa-history spell 572885: 0 events in 186 logs (a passive leaves no event). Pair 20261122-045517 / 20261122-045553, build b3e613641105, server commit 68e7af248b64+, no flip, 16/16 ok in both runs.",
     "labels": [
       "572885 effect_value e1 #2",
       "572885 behaviour_metric_delta crit_gavel_light",
@@ -2831,7 +2829,7 @@
         ]
       }
     ],
-    "reason": "Duration claim: Blinded 505342 on the dummy reads 0 before the learn (control) and 5561 / 5550 ms after, 2509 ms into the cast, within 250 ms of 6000 - 500 = 5500, which excludes a duration 10% off on both sides. The miss-share claim stays data only: no existing kind drives Vow of the Eclipse 807435 into attacker_miss_share (tool need in the report). Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found. Pair 20261122-042851 / 20261122-042945, build b3e613641105, server commit 68e7af248b64+, no flip, 21/21 ok in both runs."
+    "reason": "Counts as data (blind_duration reads aura_duration_ms, a readback), not behaviour; the expectation is sound: Blinded 505342 on the dummy reads 0 before the learn (control) and 5561 / 5550 ms after, 2509 ms into the cast, within 250 ms of 6000 - 500 = 5500, which excludes a duration 10% off on both sides. The miss-share claim stays data only: no existing kind drives Vow of the Eclipse 807435 into attacker_miss_share (tool need in the report). Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found. Pair 20261122-042851 / 20261122-042945, build b3e613641105, server commit 68e7af248b64+, no flip, 21/21 ok in both runs. Re-route through a state-class duration read (aura present/absent windows) to count it as behaviour."
   },
   {
     "spell": 704579,
@@ -4052,7 +4050,7 @@
       "804032 behaviour_metric_delta cd_ascension"
     ],
     "kind": "claim",
-    "reason": "Solar Invocation spells: 4 in family 33 (Revelation and Resplendence share mask word 0), all four are tested (G-23). Control arm = refused without the passive (SPELL_FAILED_NOT_READY 67) and the cooldown read before the learn (29509 and 29510 ms). Revelation, Conquest and Resplendence are accepted 20000 ms plus 400 ms after the cast and refused 400 ms before 20000 ms; Ascension (2500 ms cast, cooldown from completion) reads 19512 and 19506 ms 3009 ms into the cast, within 400 ms of 19500 = 30000 - 10000 - 500, which excludes a cut of 9000 or 11000 ms. Reference search 2026-11-22: coa-history spell 804032: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found. Pair 20261122-042851 / 20261122-042945, build b3e613641105, server commit 68e7af248b64+, no flip, 21/21 ok in both runs."
+    "reason": "Solar Invocation spells: 4 in family 33 (Revelation and Resplendence share mask word 0), all four are tested (G-23). Control arm = refused without the passive (SPELL_FAILED_NOT_READY 67) and the cooldown read before the learn (29509 and 29510 ms). Revelation, Conquest and Resplendence are accepted 20000 ms plus 400 ms after the cast and refused 400 ms before 20000 ms; Ascension (2500 ms cast, cooldown from completion) reads 19512 and 19506 ms 3009 ms into the cast, within 400 ms of 19500 = 30000 - 10000 - 500, which excludes a cut of 9000 or 11000 ms. Reference search 2026-11-22: coa-history spell 804032: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found. Pair 20261122-042851 / 20261122-042945, build b3e613641105, server commit 68e7af248b64+, no flip, 21/21 ok in both runs. Note: the Ascension share rests on cooldown_ms, a readback (data); the row counts behaviour through the three cost_gate spells."
   },
   {
     "spell": 804057,
@@ -4224,9 +4222,8 @@
     "spell": 804250,
     "clause": "granting $680911s1% increased haste",
     "kind": "claim",
-    "reason": "Control arm = the ally's reading before the cast. Spell cast speed multiplier 1 to 0.8000 (1 / 1.25, within 0.0001) and main-hand swing time ratio 0.8 (after / before, within 0.001, the ally's own weapon speed is not a stated value), both runs. Reference search 2026-11-22: coa-history spell 804250: 0 events in 186 logs (a passive leaves no event); the bindmysoul snapshot under ~/CoaServer/reference carries \"Redeem a Blessed ally for 20 seconds, granting 25% increased...\" (same figures); nothing else found. Pair 20261122-045517 / 20261122-045553, build b3e613641105, server commit 68e7af248b64+, no flip, 16/16 ok in both runs.",
+    "reason": "Control arm = the ally's reading before the cast. Spell cast speed multiplier 1 to 0.8000 (1 / 1.25, within 0.0001) and main-hand swing time ratio 0.8 (after / before, within 0.001, the ally's own weapon speed is not a stated value), both runs. Reference search 2026-11-22: coa-history spell 804250: 0 events in 186 logs (a passive leaves no event); the bindmysoul snapshot under ~/CoaServer/reference carries \"Redeem a Blessed ally for 20 seconds, granting 25% increased...\" (same figures); nothing else found. Pair 20261122-045517 / 20261122-045553, build b3e613641105, server commit 68e7af248b64+, no flip, 16/16 ok in both runs. The effect_value label is dropped: the claim is judged by the two behaviour labels (spell_haste, melee_haste).",
     "labels": [
-      "804250 effect_value 680911e0 #1",
       "804250 behaviour_metric_delta spell_haste",
       "804250 behaviour_metric_delta melee_haste"
     ]
@@ -4251,9 +4248,9 @@
     "spell": 804250,
     "clause": "@ext:Only usable on your ally with Bless active.:ext@",
     "kind": "claim",
-    "reason": "Control and claim: the cast at an ally without Bless leaves no 680911 (0 in both runs), against 1 with Bless in the duration entry. Pair 20261122-045517 / 20261122-045553, build b3e613641105, server commit 68e7af248b64+, no flip, 16/16 ok in both runs.",
+    "reason": "Negative arm no_bless: the cast at an ally without Bless leaves no 680911 (0 in both runs), against 1 with Bless in the duration entry (positive arm, label duration). This is the absence of the aura, not a refused cast, so it is not a usability read; the unmodelled effect_value #4 label is dropped. Reference search 2026-11-22: coa-history spell 804250: 0 events in 186 logs (a passive leaves no event); the bindmysoul snapshot under ~/CoaServer/reference carries no Bless-condition sentence for this spell; nothing else found. Pair 20261122-045517 / 20261122-045553, build b3e613641105, server commit 68e7af248b64+, no flip, 16/16 ok in both runs.",
     "labels": [
-      "804250 effect_value #4",
+      "804250 behaviour_metric_delta duration",
       "804250 behaviour_metric_delta no_bless"
     ]
   },
@@ -5341,7 +5338,7 @@
         ]
       }
     ],
-    "reason": "Pair 20261122-040627 / 20261122-040658, build b3e613641105, server commit 68e7af248b64+, no flip. Healing: Radiant Cascade 500141 heals read at +14.94% and +15.02% with a control without the talent (expected +15, band 2 points); mana cost: 642 left from 1000 in both runs against 578 without the talent (422 x 0.85 = 358.7). Reference search: coa-history 0 events (passive); sidekick talent 12351 states the same -15% text; nothing else found."
+    "reason": "Pair 20261122-040627 / 20261122-040658, build b3e613641105, server commit 68e7af248b64+, no flip. Healing: Radiant Cascade 500141 heals read at +14.94% and +15.02% with a control without the talent (expected +15, band 2 points; 99% intervals +14.7 to +15.19 and +14.8 to +15.24, 20 trials per arm, band edges about 8 half-widths away, residual failure probability negligible); mana cost: 642 left from 1000 in both runs against 578 without the talent (422 x 0.85 = 358.7). Reference search: coa-history 0 events (passive); sidekick talent 12351 states the same -15% text; nothing else found."
   },
   {
     "spell": 807964,
