@@ -1,4 +1,4 @@
-# Ally arm (`metric_delta` `ally_arm`, ADR 1016, ADR 1029)
+# Ally arm (`metric_delta` `ally_arm`, ADR 1016, ADR 1029, ADR 1045, ADR 1046)
 
 `ally_arm` is an object of these keys, at least one:
 
@@ -29,6 +29,23 @@
   count, still asserted with `equals`, so a count too high or too low fails the scenario as a cast that did not go
   off does. Every item of one spell states the same count and source. On each use, the reviewer opens the cited
   lines and checks that they say what `source` claims (mentor D-57).
+- `ally_attacks` (ADR 1045, provisional): a non-empty list of `{spell, power, source}`. `ally` learns each spell
+  (right after the group steps) and casts it at the dummy after the trigger, after the option's other after-trigger
+  steps; in an uncast before phase (`cast_in_before` false or `trigger_only_after`) at the end of the phase steps, so
+  both phases carry the attacks. Before each cast the ally's mana (power 0) is set to `power` and the spell's cooldown
+  reset; after a 2000 ms settle an `assert` reads the ally's own `spell_go_count` of the spell at its running total,
+  so the scenario fails when an attack did not go off. Only with the dummy in the scenario (`select_dummy` or a read
+  of it), the default gate timing, no `setup_only_after` and no `control_wait`. An arm or the main reading may then
+  read a caster-scoped metric (`spell_damage_total`, `spell_damage_count`, ...) on `ally` when its `fields.spell` is
+  one of these attacks: the ally's own casts are the events meant. Every other caster-scoped read on an ally stays
+  refused.
+- `ally_strikes` (ADR 1046, provisional): `true`, on an entry with a `strike` that has `after_trigger_ms`, no
+  `owned_entry` and no `dx`. After the trigger and the caster's strikes (at the start of the phase steps in an uncast
+  before phase), each ally is set to the strike's `health` of `max_health` and struck `count` times by the striker's
+  spell, `wait_ms` apart. Around each ally's strikes the caster reads the striker's `spell_go_count` of the spell
+  (`caster: striker`); a count that did not grow by `count`, or a missing read, makes the verdict `unmeasured` (the
+  trial is void), before any other judgement. Not with `control_wait`. The harness creature cast takes any unit id as
+  its target (`CoAGameplayTest.cpp` creature `cast`, code reading only).
 - `control_wait`: `true`. The uncast before phase waits the entry's `wait_ms` before its reading (timed no-cast
   control). Only with `cast_in_before` false, the default gate timing and no strike, swings, `setup_only_after`,
   `setup_in_before`, `target_casts_before` or `enemy_casts_in_before`; and, since the before phase has no trigger,

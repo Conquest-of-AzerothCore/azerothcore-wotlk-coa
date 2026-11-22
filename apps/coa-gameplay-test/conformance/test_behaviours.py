@@ -13810,5 +13810,55 @@ class ScriptedCritProbeRefusalTests(unittest.TestCase):
             behaviour_scenario(load_class_file(27), unarmed)
 
 
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HitRatioArmCastTargetTests(unittest.TestCase):
+    def entry(self, casts):
+        return {'spell': 805409, 'name': 'Righteous Tempest', 'kind': 'hit_ratio', 'label_suffix': 'routed',
+                'quote': 'Consumes your Oaths, dealing additional damage for each consumed.', 'expected': 1.6,
+                'observe_spell': 570205, 'control': {}, 'treatment': {'casts': casts}, 'critical': False,
+                'trials': 2}
+
+    def casts(self, scenario, spell):
+        return [step for step in run.validate(scenario)['steps'] if step['action'] == 'cast' and step['spell'] == spell]
+
+    def test_bare_ids_and_dummy_items_without_power_make_the_same_steps(self):
+        bare, _ = behaviour_scenario(CLASS_FILE, self.entry([807274]))
+        routed, _ = behaviour_scenario(CLASS_FILE, self.entry([{'spell': 807274}]))
+        self.assertEqual(bare['steps'], routed['steps'])
+        self.assertNotIn('stated targets', bare['contract'])
+
+    def test_a_routed_cast_goes_to_its_target_with_its_power_set_first(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, self.entry([{'spell': 807274, 'target': CASTER, 'power': 900}]))
+        casts = self.casts(scenario, 807274)
+        self.assertEqual(len(casts), 2)
+        self.assertTrue(all(step['target'] == CASTER for step in casts))
+        steps = scenario['steps']
+        cast = steps.index(casts[0])
+        powered = [index for index, step in enumerate(steps[:cast]) if step['action'] == 'set_power']
+        self.assertEqual(steps[powered[-1]]['value'], 900)
+        self.assertIn('807274 at caster with its power set to 900', scenario['contract'])
+
+    def test_the_ally_is_a_cast_target_only_when_the_scenario_has_the_ally(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, self.entry([{'spell': 807274, 'target': ALLY}]))
+        scenario, _ = behaviour_scenario(CLASS_FILE, {**self.entry([{'spell': 807274, 'target': ALLY}]),
+                                                      'caster': ALLY})
+        self.assertTrue(all(step['target'] == ALLY for step in self.casts(scenario, 807274)))
+
+    def test_bad_cast_items_are_refused(self):
+        for bad in ({'spell': 807274, 'power': -1}, {'spell': 807274, 'whom': CASTER}, {'target': CASTER},
+                    {'spell': 807274, 'power': 1.5}):
+            with self.subTest(bad=bad):
+                with self.assertRaises(ValueError):
+                    behaviour_scenario(CLASS_FILE, self.entry([bad]))
+
+    def test_crit_rate_refuses_a_routed_cast(self):
+        entry = {**self.entry([{'spell': 807274, 'target': CASTER}]), 'kind': 'crit_rate', 'expected': 50}
+        entry.pop('critical')
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, entry)
+
+
 if __name__ == '__main__':
     unittest.main()

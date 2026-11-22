@@ -989,6 +989,11 @@ observed spell whose hits are its own periodic ticks (Blade of Faith 803880, eve
 `ally_distance` (ADR 0207) groups the ally with the caster and moves it that far before the trials, for an aura that
 reaches party members within a radius; the ally must be the caster or the target (Fortified Body 300515: a self heal
 of the ally at 30 yd and at 45 yd).
+An arm `casts` item may be `{spell, target?, power?}` instead of a spell id (ADR 1044, provisional): the caster makes
+that cast at `target` (`caster`, `dummy`, or `ally` when the ally is the scenario's caster or target; default the
+dummy), with its power set to `power` right before it when stated, so a percentage cost does not drain the pool over
+the trials. Bare ids and items without `target` and `power` generate the same steps; `crit_rate` refuses targeted
+items (Sun Cleric Sacred Vessel 680648: Illumination 500143, an ally-target heal, cast at the caster).
 
 The judge (`compare.behaviour_hit_ratio_verdict`, rules in `bonus.py`, ADR 0125) computes each arm's mean per hit
 and the variance of that mean from the trials (`bonus.per_event_sample`), the bonus `(treatment / control - 1) x
