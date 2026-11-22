@@ -172,7 +172,8 @@
       {
         "claim": "and free of cost",
         "labels": [
-          "92137 behaviour_metric_delta free"
+          "92137 behaviour_metric_delta free",
+          "92137 behaviour_metric_delta consumed_cost"
         ]
       },
       {
@@ -184,20 +185,12 @@
       {
         "claim": "within $d (15 s)",
         "labels": [
-          "92137 spell_duration 800722 #1"
+          "92137 behaviour_metric_delta window_held",
+          "92137 behaviour_metric_delta window_gone"
         ]
       }
     ],
-    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Instant cast 0 ms and free 0 mana against 2000 ms and 408.9 in the control, after 40 real parried strikes (0.8^40 = 1.3e-4 residual per run); the consumed entry reads 2000 after one Illumination. The 15 s window stays a data check (aura remaining time after a random last proc cannot be stated exactly): needs a design with a known proc time.",
-    "labels": [
-      "92137 behaviour_metric_delta instant",
-      "92137 behaviour_metric_delta free",
-      "92137 behaviour_metric_delta consumed",
-      "92137 behaviour_metric_delta consumed_cost",
-      "92137 behaviour_metric_delta window_held",
-      "92137 behaviour_metric_delta window_gone",
-      "92137 spell_duration 800722 #1"
-    ]
+    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Instant cast 0 ms and free 0 mana against 2000 ms and 408.9 in the control, after 40 real parried strikes (0.8^40 = 1.3e-4 residual per run); the consumed entry reads 2000 after one Illumination. Round 11 d2: the 15 s window is read by a real cast of 800722 (known start): Illumination still instant 13.6 s after, no longer 16.4 s after (window_held, window_gone, use_time_contrast arms); the cost is shown consumed by consumed_cost."
   },
   {
     "spell": 300314,
