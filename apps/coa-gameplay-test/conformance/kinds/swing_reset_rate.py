@@ -62,6 +62,8 @@ def reset_mark(spec: SwingResetRateSpec, mark: str) -> str:
 
 
 def swing_reset_rate_scenario(class_file: dict, spec: SwingResetRateSpec) -> tuple[dict, list[Expectation]]:
+    if 'weapon_sets' in class_file and 'weapon_set' not in class_file:
+        class_file = for_entry(class_file, spec.spell)
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, KIND, spec.quote, spec.chance_pct)
     speeds = melee_speeds(class_file, spec.spell)
