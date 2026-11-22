@@ -14634,37 +14634,6 @@
       "observe_source": "Horusath Blast 572801 applies 572050 to the target (AscensionSunClericAbilities.cpp:304): Effect[0] aura 344 SPELL_AURA_ASCENSION_MOD_ATTACK_POWER_FLAT, BasePoints -25 DieSides 1, RealPointsPerLevel -4.4 from SpellLevel 12 (Spell.dbc): at caster level 60, -25 + 1 - 4.4 x 48 = -235.2 (${-($572050m1+$572050ppl1)} = 235.2), so the dummy loses 235 or 236 (tolerance 1). The dummy (Harvest Golem 36 at level 60) carries AP Test 56412 (aura 99, +801 attack power, a precondition fixture by harness set_aura in both phases, so the floor of the metric cannot hide the reduction); the caster carries 823764 (spell penetration fixture). The reading before the learn-and-cast is the control (801, no Horusath Blast landed); after one real cast it reads 801 - 235. Same shape as Necromancer Bone Ward's attack_power entry. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
     },
     {
-      "spell": 572801,
-      "name": "Horusath Blast (attack power reduction duration)",
-      "kind": "metric_delta",
-      "variant": "ap_duration",
-      "label_suffix": "ap_duration",
-      "quote": "and reducing their attack power by ${-($572050m1+$572050ppl1)} for $572050d.",
-      "gate_spell": 572801,
-      "trigger_spell": 572801,
-      "target": "dummy",
-      "cast_in_before": false,
-      "measure_actor": "dummy",
-      "metric": "aura_duration_ms",
-      "fields": {
-        "spell": 572050
-      },
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "before_expected": 0,
-      "expected": 14500,
-      "tolerance": 500,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "572050 DurationIndex 8 (15000 ms, $572050d). The remaining duration of 572050 on the dummy is read 500 ms after one real Horusath Blast: 15000 - 500 = 14500, tolerance 500, an interval [14000, 15000] that excludes the 13500 and 16500 of a 10% error. Control: the reading before the cast is 0 (no aura). gate_spell 572801 is the spell itself, learned for the cast; the claim's subject is the duration of the aura it applies."
-    },
-    {
       "spell": 302914,
       "name": "Arbiter of Light (Vow of Light aura is up in the Vow arm)",
       "kind": "metric_delta",
@@ -16002,62 +15971,6 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "680630 Pendant of the Sun (RecoveryTime 60000, CasterAuraSpell 807440 so it needs Dawn) runs the class code AscensionSunClericAbilities.cpp:466-470: aura->SetCharges(aura->CalcMaxCharges()) and SetDuration(GetMaxDuration()) on the Dawn state aura 807440 (ProcCharges 10, DurationIndex 3 = 60000 ms). The Dawn state aura 807440 is set on the caster by the harness at the start of each phase (phase_auras) (a precondition fixture, the condition Pendant needs, not the subject); the setup casts of Illumination 500143 (a direct heal on the caster at 50% health) run in both phases, before the first reading, and the trigger cast is made in the after phase only. Each of the two heals expends one charge by the Dawn tooltip ('Each damaging or healing spell will expend a charge'): 10 - 2 = 8 charges, read before Pendant (the control reading of the same scenario: no Pendant cast, charges stay spent). Pendant is then cast and the charges are read 500 ms later: 10 with the refresh. Reference search 2026-11-22: coa-history spell 680630 shows 0 events in 186 logs; bindmysoul and merged-PR search give nothing beyond the tooltip and the DBC for this value.",
-      "setup_in_before": true
-    },
-    {
-      "spell": 680630,
-      "name": "Pendant of the Sun (refreshes the Dawn duration)",
-      "kind": "metric_delta",
-      "variant": "pendant_duration",
-      "label_suffix": "pendant_duration",
-      "quote": "Activate your pendant of the sun, refreshing the duration and all charges of Dawn.",
-      "trigger_spell": 680630,
-      "target": "caster",
-      "cast_in_before": false,
-      "setup_casts": [
-        500143,
-        500143
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 10000,
-      "cast_power": 1363,
-      "caster_health_pct": 50,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ],
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          807440,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "aura_duration_ms",
-      "fields": {
-        "spell": 807440
-      },
-      "before_expected": 40000,
-      "expected": 59500,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "680630 Pendant of the Sun (RecoveryTime 60000, CasterAuraSpell 807440 so it needs Dawn) runs the class code AscensionSunClericAbilities.cpp:466-470: aura->SetCharges(aura->CalcMaxCharges()) and SetDuration(GetMaxDuration()) on the Dawn state aura 807440 (ProcCharges 10, DurationIndex 3 = 60000 ms). The Dawn state aura 807440 is set on the caster by the harness at the start of each phase (phase_auras) (a precondition fixture, the condition Pendant needs, not the subject); the setup casts of Illumination 500143 (a direct heal on the caster at 50% health) run in both phases, before the first reading, and the trigger cast is made in the after phase only. The two heals are 10000 ms apart, so the remaining duration of 807440 is read about 20000 ms after the fixture: 60000 - 20000 = 40000 (the control reading of the same scenario: no Pendant cast, the duration keeps running, tolerance 2000). Pendant is then cast and the duration read 500 ms later: 60000 - 500 = 59500 with the refresh; 54000 and 66000 (10% off the full 60000 ms) are 5500 and 6500 away, and the 40000 of no refresh is 19500 away. Reference search 2026-11-22: coa-history spell 680630 shows 0 events in 186 logs; bindmysoul and merged-PR search give nothing beyond the tooltip and the DBC for this value.",
-      "tolerance": 2000,
       "setup_in_before": true
     },
     {
@@ -27411,6 +27324,217 @@
         }
       ],
       "observe_source": "301266 Solar Concord: its aura apply handler (AscensionSunClericAuras.cpp:101-106) calls Reduce(player, 500154, INT32_MAX) in Sunrise and Reduce(player, 806477, INT32_MAX) in Sunset; the installed DBC also resets both cooldowns on every cast with no phase gate: Effect[1] TRIGGER_SPELL 302899 and Effect[2] TRIGGER_SPELL 301268 (301268 Effect[0] 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN MiscValue 500154; 302899 Effect[0] 195 MiscValue 806477; neither has a CasterAuraSpell; handler SpellEffects.cpp:1103-1112). Rapture has RecoveryTime 20000 ms. The cooldown cost_gate (resets) casts Rapture as the priming cast, then Solar Concord 3200 ms later (the cast is made in the with arm only), then attempts Rapture again 1600 ms after that (past the global cooldown of the Solar Concord cast), inside its 20000 ms cooldown: refused without the Solar Concord cast (the control, SPELL_FAILED_NOT_READY), accepted with it. The accepted or refused cast is an event (cast_failure), not a cooldown readback. The without arm drops both the Solar Concord cast and the phase aura, so it proves the reset by the cast and not the words \"while in Sunset\": that phase condition stays open (tool need: a cost_gate arm with the cast in the other phase, expected refused)."
+    },
+    {
+      "spell": 572801,
+      "name": "Horusath Blast (attack power reduction lasts 15 s)",
+      "kind": "metric_delta",
+      "variant": "ap_duration",
+      "label_suffix": "ap_duration",
+      "quote": "and reducing their attack power by ${-($572050m1+$572050ppl1)} for $572050d.",
+      "gate_spell": 572801,
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "caster": "caster",
+        "spell": 572050
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14000,
+      "expire_ms": 500,
+      "observe_source": "572050 DurationIndex 8 (15000 ms, $572050d). The aura 572050 on the dummy after one real Horusath Blast 572801 is present when read 13.6 to 14.6 s after the cast started and gone when read 15.5 to 16.4 s after it: the duration lies between 13.6 s after the cast started (about 13.45 s after the aura landed, 150 ms of projectile flight) and 16.4 s, inside 10% of 15000 ms (13500..16500) on both sides. Control: the reading before the cast is 0 (no aura). gate_spell 572801 is the spell itself, learned for the cast; the claim's subject is the duration of the aura it applies. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC.",
+      "after_expiry_expected": 0,
+      "expiry_wait_ms": 1700,
+      "game_time": {
+        "after": [
+          13600,
+          14600
+        ],
+        "expired": [
+          15500,
+          16400
+        ]
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 680630,
+      "name": "Pendant of the Sun (Dawn still active past its original end)",
+      "kind": "metric_delta",
+      "variant": "pendant_duration",
+      "label_suffix": "pendant_duration",
+      "quote": "Activate your pendant of the sun, refreshing the duration and all charges of Dawn.",
+      "trigger_spell": 680630,
+      "target": "caster",
+      "setup_casts": [
+        500143,
+        500143
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 10000,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 807440
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 55200,
+      "expire_ms": 500,
+      "observe_source": "680630 Pendant of the Sun (CasterAuraSpell 807440 so it needs Dawn) refreshes the Dawn state aura 807440 (DurationIndex 3 = 60000 ms) (AscensionSunClericAbilities.cpp:480-487). The Dawn state aura is set on the caster by the harness at the start of each phase (phase_auras, a precondition fixture, the condition Pendant needs, not the subject). Two Illumination 500143 heals 10000 ms apart come first in the after phase only (setup_in_before is off); Pendant is cast in the after phase only, about 20 s after the fixture. Without the refresh the aura ends 60 s after the fixture, 40 s after Pendant (DurationIndex 3), so it would be gone when read 55 s after Pendant. With the refresh it is present when read 55.0 to 56.0 s after the Pendant cast started (excludes 54 s, 10% under 60 s) and gone when read 65 to 66 s after it (excludes 66 s, 10% over). The before reading (right after the fixture, no Pendant) is 1 and shows only that the fixture is present: no arm without Pendant is read at the same offset, so this entry is not a control-armed proof of the duration and the claim stays data. Reference search 2026-11-22: coa-history spell 680630 shows 0 events in 186 logs; bindmysoul and merged-PR search give nothing beyond the tooltip and the DBC.",
+      "game_time": {
+        "after": [
+          55000,
+          56000
+        ],
+        "expired": [
+          65000,
+          66000
+        ]
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "after_expiry_expected": 0,
+      "expiry_wait_ms": 10000
+    },
+    {
+      "spell": 300339,
+      "name": "The Redeemer (a critical heal is returned at 30% on the next damage taken)",
+      "kind": "metric_delta",
+      "variant": "crit_heal_return",
+      "label_suffix": "crit_heal_return",
+      "quote": "When you critically heal your target, they will be healed for 30% of the amount originally healed the next time they take damage.",
+      "gate_spell": 300339,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "force_crit": "spell",
+      "caster_health_pct": 30,
+      "strike": {
+        "spell": 47632,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 3200
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 301004,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 301004,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 17.5,
+            "tolerance": 1.5,
+            "source": "30% (BasePoints 29 + 1) of a forced-critical Illumination heal: 1.5 x 38..40 = 57..60 (class tuning at spell power 0, as the Heat Wave entry 534267), so 17.1 to 18.0 after one return, cumulative since only the treatment phase learns 300339"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 500143,
+              "target": "caster"
+            },
+            "before_expected": 58.5,
+            "expected": 117,
+            "tolerance": 3,
+            "source": "forced-critical Illumination heals on the caster: 1.5 x 38..40 = 57..60 each, 58.5 for the control cast and 117 cumulative for the two casts (precondition of the ratio, not the claim)"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 0.3,
+            "tolerance": 0.02,
+            "source": "300339 BasePoints 29 + 1 = 30 percent of the amount healed"
+          }
+        ]
+      },
+      "observe_source": "300339 The Redeemer Effect[0] aura 4 DUMMY BasePoints 29 (+1 = 30, the 30% of the tooltip); AscensionSunClericEvents.cpp:140 accepts a critical heal for 300339, AscensionSunClericEvents.cpp:373 casts 301005 on the target with CalculatePct(healing, 30), and 301005 ($301005d, see the duration row) casts the heal 301004 with that amount at its next received direct damage (AscensionSunClericEvents.cpp:76, :374-381). The caster heals itself with a forced-critical Illumination 500143 (spell crit rating fixture) at 30% health, then a striker hits it once; the heal 301004 on the caster is counted before the learn (control: same forced-crit heal and strike, 300339 not learned, 0) and after (1), and its total is judged as a ratio of the second cast's Illumination heal. Expected 0.30 from the DBC points, band 28 to 32% (guide 3.5). It proves the 30% and the return after a strike of a forced-critical heal; it does not show that a non-critical heal returns nothing (see crit_heal_return_nostrike for the strike). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 300339,
+      "name": "The Redeemer (no heal is returned before the target takes damage)",
+      "kind": "metric_delta",
+      "variant": "crit_heal_return_nostrike",
+      "label_suffix": "crit_heal_return_nostrike",
+      "quote": "When you critically heal your target, they will be healed for 30% of the amount originally healed the next time they take damage.",
+      "gate_spell": 300339,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "force_crit": "spell",
+      "caster_health_pct": 30,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 301004,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "observe_source": "300339 The Redeemer: same forced-critical Illumination 500143 on the caster at 30% health as crit_heal_return, 300339 learned in the treatment phase, but no striker: the caster takes no damage, so the 301005 proc never fires and the heal 301004 on the caster must stay at 0 over the same 4500 ms in which crit_heal_return reads 1 after its strike at 3200 ms (AscensionSunClericEvents.cpp:76, :374-381: 301005 heals on received direct damage). Contrast arm of the 'next time they take damage' part. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
     }
   ],
   "player_observations": [],
