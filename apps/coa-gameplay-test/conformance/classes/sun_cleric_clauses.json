@@ -1204,13 +1204,14 @@
       {
         "claim": "now additionally heals nearby allies",
         "labels": [
-          "534267 behaviour_metric_delta nearby_allies",
-          "534267 effect_value #0"
+          "534267 behaviour_metric_delta nearby_allies"
         ]
       },
       {
         "claim": "up to 5 of the target's lowest health nearby allies",
-        "labels": []
+        "labels": [
+          "534267 effect_value #0"
+        ]
       },
       {
         "claim": "for 75% of the value",
