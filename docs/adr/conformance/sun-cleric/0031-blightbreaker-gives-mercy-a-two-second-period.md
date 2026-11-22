@@ -44,6 +44,9 @@ modifiers stay as the DBC gives them.
   7 with it (9 with the stock 1500 ms period, by the same count).
 - The modifier query still reads the DBC -50% (1500 on base 3000): the period is set on the aura, not on the
   modifier. The mana cost stays doubled.
+- The client is unchanged: it reads the same DBC modifier, so a client display derived from the -50% period
+  modifier may show 1.5 sec instead of 2 sec. Whether the 3.3.5 client applies that spellmod to Mercy's
+  `$t1` was not checked.
 - No engine file changes. Only 707433 carries a `SPELLMOD_ACTIVATION_TIME` modifier on Mercy's class mask; the hook
   reads its amount, so a change of that value in the data moves the result with it.
 - Regression: `sun-cleric-blightbreaker-mercy` reads the period and counts the Mercy Proc 503650 ticks over the whole
