@@ -737,7 +737,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Counted pair 20261122-201141 / 20261122-201215, one build (worldserver 764e5d0be77f, server commit 4cc498eca10f+), no flip, 19 of 19 entries ok in both runs. Stalwart 300355 grants 301342 (DurationIndex 35 = 4000 ms) on a received melee critical hit with damage. A real Strike 11976 (melee) made critical by the Vulnerable 213 fixture (harness set_aura, not the subject) hits the caster; 300355 is learned between the phases, so the before phase is the control (aura absent). The aura is held at about 3.74 s after the critical hit and gone at about 4.24 s, so 4 s is neither 10% shorter (3.6 s) nor 10% longer (4.4 s). The reads are placed from a calibration run (aura_duration_ms, run 20261122-200519, readback used for placement only: 112 ms between the strike and the clock of the trigger cast). The 112 ms offset comes from that calibration run, not from the counted runs; with four Strikes under +10000% each re-granting 301342 (up to 60 ms later) the reads still absorb it (held 3.69 s or more after the last Strike, gone 4.19 s or less after the first), and the residual 2 p^4 leaves p unmeasured. A first pair read the held entry once ok and once alert (a missed strike); the entries then cast four Strikes 20 ms apart with dodge and parry 0, residual about 2 p^4 per pair (1.3e-5 at the 5% base miss chance, at most 0.1% for p up to 0.149; p not measured). The Vulnerable 213 fixture above (Effect[1] aura 197, +10000%) overrides the -1001% of 301342 Effect[0] (net +8999%), so these two entries show the grant and its duration only and each of the four Strikes re-grants the aura (up to 60 ms later, absorbed by the reads); the immunity half is proved by two further entries, counted pair 20261122-205822 / 20261122-205918, one build (worldserver 764e5d0be77f, server commit 4cc498eca10f+), no flip, 4 of 4 entries ok in both runs, cast_failures empty. immunity_no_regrant: fixture Vulnerable 425 (Effect[1] aura 197, EffectBasePoints 99 = +100%, harness set_aura, not the subject) makes the first Strike critical and sums with 301342 to -901%, so no later Strike of the eight (500 ms apart, the last at 3.5 s) is critical; the aura read about 5.4 s after the first Strike is gone (0 in both runs; a re-grant would keep it until at least 7.5 s). Control arm immunity_regrant_control: the same strikes under Vulnerable 213 (net +8999%) leave the aura present at the same read (1 in both runs), so the late read does see a re-grant when critical hits land; the before phase of both entries (300355 not learned) reads 0. Residual failure probability: the gone read fails only if the first three Strikes all miss, p^3 per run, 1.3e-4 at the 5% base miss chance and at most 0.1% for p up to 0.1 (p not measured), the control read fails only if all of Strikes 4 to 8 miss; the pairs' reads exclude a re-grant by more than 2 s. Fixture 425 carries a second effect (Effect[0] aura 325, BasePoints 29) that does not touch the critical chance. Reference search 2026-11-22: coa-history spells 300355 and 301342: no logged event (passive); nothing found beyond the tooltip and the DBC."
+    "reason": "Counted pair 20261122-201141 / 20261122-201215, one build (worldserver 764e5d0be77f, server commit 4cc498eca10f+), no flip, 19 of 19 entries ok in both runs. Stalwart 300355 grants 301342 (DurationIndex 35 = 4000 ms) on a received melee critical hit with damage. A real Strike 11976 (melee) made critical by the Vulnerable 213 fixture (harness set_aura, not the subject) hits the caster; 300355 is learned between the phases, so the before phase is the control (aura absent). The aura is held at 3.62 to 3.75 s after the clock cast and gone at 4.01 to 4.13 s, so 4 s is neither 10% shorter (3.6 s) nor 10% longer (4.4 s). The reads are placed from the DBC duration (4000 ms) and the 10% rule, not from a measured offset: the Strikes land before the clock cast by an offset d >= 0, a duration 10% short never reads held, and a duration 10% long is excluded by the gone read for any d below 270 ms; with four Strikes under +10000% each re-granting 301342 (up to 60 ms later) the residual 2 p^4 leaves p unmeasured. A first pair read the held entry once ok and once alert (a missed strike); the entries then cast four Strikes 20 ms apart with dodge and parry 0, residual about 2 p^4 per pair (1.3e-5 at the 5% base miss chance, at most 0.1% for p up to 0.149; p not measured). The Vulnerable 213 fixture above (Effect[1] aura 197, +10000%) overrides the -1001% of 301342 Effect[0] (net +8999%), so these two entries show the grant and its duration only and each of the four Strikes re-grants the aura (up to 60 ms later, absorbed by the reads); the immunity half is proved by two further entries, counted pair 20261122-205822 / 20261122-205918, one build (worldserver 764e5d0be77f, server commit 4cc498eca10f+), no flip, 4 of 4 entries ok in both runs, cast_failures empty. immunity_no_regrant: fixture Vulnerable 425 (Effect[1] aura 197, EffectBasePoints 99 = +100%, harness set_aura, not the subject) makes the first Strike critical and sums with 301342 to -901%, so no later Strike of the eight (500 ms apart, the last at 3.5 s) is critical; the aura read about 5.4 s after the first Strike is gone (0 in both runs; a re-grant would keep it until at least 7.5 s). Control arm immunity_regrant_control: the same strikes under Vulnerable 213 (net +8999%) leave the aura present at the same read (1 in both runs), so the late read does see a re-grant when critical hits land; the before phase of both entries (300355 not learned) reads 0. Residual failure probability: the gone read fails only if the first three Strikes all miss, p^3 per run, 1.3e-4 at the 5% base miss chance and at most 0.1% for p up to 0.1 (p not measured), the control read fails only if all of Strikes 4 to 8 miss; the pairs' reads exclude a re-grant by more than 2 s. Fixture 425 carries a second effect (Effect[0] aura 325, BasePoints 29) that does not touch the critical chance. Reference search 2026-11-22: coa-history spells 300355 and 301342: no logged event (passive); nothing found beyond the tooltip and the DBC. Placement re-derived from the DBC duration, windows held 3620 to 3750 ms and gone 4010 to 4130 ms after the clock cast: Pair 20261122-230808 / 20261122-230857 (recheck rc1 c1), build 7b299d888600, server commit 346b5c7dbe45+, no flip, 80 of 80 entries ok in both runs, cast_failures empty on every entry changed here."
   },
   {
     "spell": 300357,
@@ -1272,7 +1272,8 @@
           "301266 behaviour_metric_delta flare_damage_sp"
         ]
       }
-    ]
+    ],
+    "reason": "Pair 20261122-230808 / 20261122-230857 (recheck rc1 c1), build 7b299d888600, server commit 346b5c7dbe45+, no flip, 80 of 80 entries ok in both runs, cast_failures empty on every entry changed here. Expectations re-derived from the DBC only: Solar Flare 807175 Effect[1] 51 + 1.9 x (60 - 15) = 136.5, +0.26 x 10000 spell power; Sunrise 500477 +20% Holy (BasePoints 19 + 1, MiscValue 2) on a Holy and Fire school mask 6: 163.8 and 3283.8, read 163 and 3283 (Rapture in Sunset: Sunset 500511 Effect[1] +10% Fire, 150.15, read 149). The first expectations of these entries (136.5 and 2736.5, the tooltip value without the fixture's own modifier) were not a transcription error: the modifier was added after the first run read 163 and 3283; the re-derivation from the DBC alone gives the same figures."
   },
   {
     "spell": 301266,
@@ -2098,7 +2099,7 @@
     "spell": 547214,
     "clause": "and causes Horusath Blast to interrupt the target for $547217d.",
     "kind": "claim",
-    "reason": "Data, no status: the interrupt claim is a STATE metric read (casting) and the clause words do not carry the promise word cast, so the audit counts it as data (coverage.py:486, :689). Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. Interrupt: with the dummy channelling Evocation 12051, Horusath Blast 572801 without 547214 leaves casting 1 (control) and with it casting 0. Lockout ('for $547217d', ADR 1021): with the dummy channelling Evocation 12051 3 yd away, the Arcane school_prohibited read is held 3000 ms and free 3475 ms after the Horusath Blast cast (missile landing 250 ms after the cast), 0 before the learn; pair 20261122-065615 / 20261122-065914, lockout_held and lockout_free ok in both runs, no flip. Reference search 2026-11-22: coa-history 0 events (a passive); nothing else found.",
+    "reason": "Data, no status: the interrupt claim is a STATE metric read (casting) and the clause words do not carry the promise word cast, so the audit counts it as data (coverage.py:486, :689). Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. Interrupt: with the dummy channelling Evocation 12051, Horusath Blast 572801 without 547214 leaves casting 1 (control) and with it casting 0. Lockout ('for $547217d', ADR 1021): with the dummy channelling Evocation 12051 3 yd away, the Arcane school_prohibited read is held 3000 ms and free 3475 ms after the Horusath Blast cast (missile landing 250 ms after the cast), 0 before the learn; pair 20261122-065615 / 20261122-065914, lockout_held and lockout_free ok in both runs, no flip. Reference search 2026-11-22: coa-history 0 events (a passive); nothing else found. Lockout placement re-derived from Spell.dbc Speed 20.0 and Spell.cpp:2474-2476 (delay 250 ms, both exclusions hold for 200 to 275 ms): Pair 20261122-230808 / 20261122-230857 (recheck rc1 c1), build 7b299d888600, server commit 346b5c7dbe45+, no flip, 80 of 80 entries ok in both runs, cast_failures empty on every entry changed here.",
     "claims": [
       {
         "claim": "and causes Horusath Blast to interrupt the target",
@@ -3514,7 +3515,8 @@
       {
         "claim": "healed once (the caster)",
         "labels": [
-          "680646 behaviour_metric_delta heal_once"
+          "680646 behaviour_metric_delta heal_once",
+          "680646 behaviour_metric_delta heal_once_hits"
         ]
       },
       {
@@ -3522,7 +3524,7 @@
         "labels": []
       }
     ],
-    "reason": "Pair 20261122-080705 / 20261122-080744, build 22d8bd4d, class-file entries on server commit 0610a77c3b (no C++ change since the previous pair f7a4e43e), no flip, 26 of 26 ok in both runs. Control = the same strike without the Scroll (before phase): no heal. Caster at 3800 of 10000, Grave Coil takes it to 33.8% (below 35%): heal 681383 read 1500 = 15% of 10000, tolerance 15. Threshold bracket: heal at 33.8% excludes a threshold at or below 33.8% (31.5% included); no heal at 37.9% (start 4215, hit about 424) excludes a threshold above 37.9% (38.5% and 50%); start 6000 (55.8%): 0. So the threshold lies in (33.8%, 37.9%]. Five hits: the heal total stays 1500 (the five hits are computed from the measured hit, not read). One maximum health only (10000): a flat 1500 would also pass. All reads are on the caster; \"any ally\" and \"once for each ally\" stay open as a tool gap, with the shared once flag recorded as a lead. Reference search: as the previous clause; nothing else found.",
+    "reason": "Pair 20261122-080705 / 20261122-080744, build 22d8bd4d, class-file entries on server commit 0610a77c3b (no C++ change since the previous pair f7a4e43e), no flip, 26 of 26 ok in both runs. Control = the same strike without the Scroll (before phase): no heal. Caster at 3800 of 10000, Grave Coil takes it to 33.8% (below 35%): heal 681383 read 1500 = 15% of 10000, tolerance 15. Threshold bracket: heal at 33.8% excludes a threshold at or below 33.8% (31.5% included); no heal at 37.9% (start 4215, hit about 424) excludes a threshold above 37.9% (38.5% and 50%); start 6000 (55.8%): 0. So the threshold lies in (33.8%, 37.9%]. Five hits: the heal total stays 1500; that the five hits landed is read by heal_once_hits (spell_damage_count of Grave Coil 47632 by the striker on the caster, a gain of 5), and the second fall below 35% follows from the DBC hit of at least 420 (600 less 30%). One maximum health only (10000): a flat 1500 would also pass. All reads are on the caster; \"any ally\" and \"once for each ally\" stay open as a tool gap, with the shared once flag recorded as a lead. Reference search: as the previous clause; nothing else found. Pair 20261122-230808 / 20261122-230857 (recheck rc1 c1), build 7b299d888600, server commit 346b5c7dbe45+, no flip, 80 of 80 entries ok in both runs, cast_failures empty on every entry changed here. The once check now reads that five Grave Coil hits landed (heal_once_hits, gain 5) and derives the second fall below 35% from the DBC hit.",
     "tool_gap": {
       "reason": "The harness striker can only target the caster or a creature the caster owns (behaviours.py:1655-1662), so no read shows an ally falling below 35% and being healed, nor whether \"once\" is per ally. On this server the once flag is the script value of the shared area Aura (AscensionSunClericEvents.cpp:289, SpellAuras.cpp:664), so one heal per cast for the whole group is possible; a caster-only run reads 1500 either way. Lead only: the tooltip is ambiguous, no server change and no owner question yet.",
       "attempts": [
@@ -4107,6 +4109,7 @@
     "spell": 704563,
     "clause": "Direct healing now increases the target's health by ${$704564m1+$704564ppl1} for $704564d.",
     "kind": "claim",
+    "reason": "Pair 20261122-230808 / 20261122-230857 (recheck rc1 c1), build 7b299d888600, server commit 346b5c7dbe45+, no flip, 80 of 80 entries ok in both runs, cast_failures empty on every entry changed here. The expectations are gains from the DBC value 300 ($704564m1+$704564ppl1 = 289 + 1 die side + 5.0 x (60 - 58), Spell.dbc), never the ally's own absolute health: gain 300 after the heal, 0 in the control, held at 14.4 s, 0 again at 15.6 s, on the maximum and the current health.",
     "claims": [
       {
         "claim": "Direct healing now increases the target's health by ${$704564m1+$704564ppl1}",
@@ -4975,7 +4978,8 @@
           "707078 behaviour_metric_delta night_aura"
         ]
       }
-    ]
+    ],
+    "reason": "Pair 20261122-230808 / 20261122-230857 (recheck rc1 c1), build 7b299d888600, server commit 346b5c7dbe45+, no flip, 80 of 80 entries ok in both runs, cast_failures empty on every entry changed here. Expectations from the Description of 806980 (${$m1+0+$SP*.55+$AP*.25}) at the reference stats: 532..540 at night, times 1.10 by day. A ratio design (two casts, after over before 2.10 and 2.00) was tried first and alerted in both runs of pair 20261122-230235 / 20261122-230535 (day 532 then 646, night 534 then 590): the second Justicar's Wrath cast reads about 10% higher even at night, cause not established (lead: the passive 704903 handler reacts to damage of 806980, AscensionSunClericEvents.cpp:140)."
   },
   {
     "spell": 707078,
@@ -5850,6 +5854,7 @@
     "spell": 804247,
     "clause": "Bless yourself and an ally, restoring 5% of their maximum health",
     "kind": "claim",
+    "reason": "Pair 20261122-230808 / 20261122-230857 (recheck rc1 c1), build 7b299d888600, server commit 346b5c7dbe45+, no flip, 80 of 80 entries ok in both runs, cast_failures empty on every entry changed here. health_tick: the expectation is the tooltip's 5% of the 10000 maximum health (500, caster held at 5000), read 5500 in both runs, so the class tuning aura 887015 does not scale this heal.",
     "dbc_clause": "Bless yourself and an ally, restoring $s1% of their maximum health",
     "text_source": {
       "table": "coa_client_spell_description",
@@ -7311,9 +7316,19 @@
   {
     "spell": 807749,
     "clause": "Auto attacks generate 1 Solar Power",
-    "labels": [
-      "807749 behaviour_metric_delta solar_power",
-      "807749 behaviour_metric_delta swings"
+    "reason": "Pair 20261122-230808 / 20261122-230857 (recheck rc1 c1), build 7b299d888600, server commit 346b5c7dbe45+, no flip, 80 of 80 entries ok in both runs, cast_failures empty on every entry changed here. Direction part: Solar Power 500149 reads 0 before the Vow and 10 after against at least 1 expected from the tooltip; the earlier expected 10 leaned on the swings reading in the same pair and is withdrawn. swings is judged as an arm ratio (after over before 2.0 within 0.2, read 10 and 20). The count \"1 Solar Power per auto attack\" is open: it needs the stacks and the auto attacks landed read in the same arm (tool need, design note in the recheck report).",
+    "claims": [
+      {
+        "claim": "auto attacks generate Solar Power, none without the Vow",
+        "labels": [
+          "807749 behaviour_metric_delta solar_power",
+          "807749 behaviour_metric_delta swings"
+        ]
+      },
+      {
+        "claim": "1 Solar Power per auto attack",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
