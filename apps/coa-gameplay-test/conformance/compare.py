@@ -1377,6 +1377,8 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
     baseline_casts = 0.0
     control = None
     own_summons = model.get('events_baseline_per_attempt', 0)
+    no_hit = model.get('trigger_lands_no_hit', False)
+    trigger_hits: list[str] = []
     for _, run, part in parts:
         if trigger:
             reasons += failure_reasons(run, trigger)
@@ -1399,6 +1401,8 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
             counted.append(run.key)
             granted += len(grant_reads)
             part_totals = dict(zip(wanted[1:], values[1:]))
+            if no_hit and part_totals[labels['trials']] > 0:
+                trigger_hits.append(f'{run.key} ({part_totals[labels["trials"]]:g})')
             part_totals[labels['trials']] -= sum(excluded)
             if part_baseline:
                 control = part_baseline if part_baseline.get('control_weapon') else None
@@ -1410,12 +1414,18 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
                 for label, value in added_held.items():
                     if label in part_totals:
                         part_totals[label] -= value
+                if no_hit:
+                    baseline_trials += sum(added_held.values())
             part_totals[event_labels[0]] -= own_summons * part_totals[labels['trials']]
             for label, value in part_totals.items():
                 totals[label] += value
             offset = refund_offset(model, run) - player_casts(model, run, trigger)
             events += offset
             per_part.append((part_totals, offset))
+    if trigger_hits:
+        return replace(base, status='alert', expected=0.0,
+                       explanation=f'the trigger {trigger} landed hits of its own in {", ".join(trigger_hits)}, '
+                                   f'which its trigger_lands_no_hit source rules out: the proc rate is not judged')
     if ungranted:
         return replace(base, status='alert', expected=0.0,
                        explanation=f'minion aura absent after its real grant in {", ".join(ungranted)}: the proc rate '
@@ -1439,6 +1449,10 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
         if unexplained:
             return unexplained
         baseline_events = 0.0
+    if no_hit and baseline_trials is not None and not baseline_events and baseline_trials <= 0:
+        return replace(base, status='insufficient_trials', measured=0.0, expected=0.0,
+                       explanation='no landed hit of the added spells in the baseline arm, so its no-event control '
+                                   'proves nothing')
     if baseline_events:
         minus = f' beyond its {baseline_casts:g} completed player casts' if baseline_casts else ''
         return replace(base, measured=baseline_events, expected=0.0, low=0.0, high=0.0,
@@ -1446,7 +1460,7 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
                                    f'the passive')
     events += sum(totals[label] for label in event_labels)
     procs = events / model['events_per_proc']
-    trials = totals[labels['trials']]
+    trials = sum(totals[label] for label in readings[0]['labels']) if no_hit else totals[labels['trials']]
     notes = f'{len(counted)} of {model["parts"]} parts'
     if without_aura:
         notes += f'; aura {expectation.spell_id} absent in {", ".join(without_aura)}'
