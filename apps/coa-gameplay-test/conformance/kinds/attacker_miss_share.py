@@ -10,7 +10,7 @@ from hits import MAX_ACCELERATED_SCENARIO_MS, Z_99, base_mana_steps, timed
 from procs import swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
-from values import DUMMY_ENTRY, Expectation, dataset, facts_of
+from values import CAST_MARGIN_MS, DUMMY_ENTRY, Expectation, dataset, facts_of
 
 KIND = 'attacker_miss_share'
 ORDER = 46
@@ -43,6 +43,7 @@ class AttackerMissShareSpec:
     learn: tuple[int, ...] = ()
     label_suffix: str = 'attacker_miss'
     quote_spell: int | None = None
+    pre_cast: tuple[int, ...] = ()
 
 
 def attacker_miss_share_spec(entry: dict) -> AttackerMissShareSpec:
@@ -53,7 +54,8 @@ def attacker_miss_share_spec(entry: dict) -> AttackerMissShareSpec:
                                  int(entry.get('attacker_entry', DUMMY_ENTRY)),
                                  tuple(int(spell) for spell in entry.get('learn', [])),
                                  entry.get('label_suffix', 'attacker_miss'),
-                                 int(entry['quote_spell']) if 'quote_spell' in entry else None)
+                                 int(entry['quote_spell']) if 'quote_spell' in entry else None,
+                                 tuple(int(spell) for spell in entry.get('pre_cast', [])))
     if not 1 <= spec.attackers <= TAKEN_OUTCOME_ATTACKERS:
         raise ValueError(f'{spec.spell} attacker_miss_share needs 1 to {TAKEN_OUTCOME_ATTACKERS} attackers')
     if spec.cycle_ms <= 0 or spec.arm_ms < spec.cycle_ms or spec.arm_ms % spec.cycle_ms:
@@ -122,9 +124,14 @@ def attacker_miss_share_scenario(class_file: dict, spec: AttackerMissShareSpec) 
         raise ValueError(f'{spec.spell} attacker_miss_share casts every {spec.cycle_ms} ms; the cycle must stay '
                          f'under the {duration} ms duration of aura {spec.aura}')
     facts = facts_of(records, spec.cast_spell)
-    if spec.settle_ms < facts.cast_time_ms:
+    pre_facts = [facts_of(records, spell) for spell in spec.pre_cast]
+    sequence_ms = sum(pre.cast_time_ms + CAST_MARGIN_MS for pre in pre_facts) + facts.cast_time_ms
+    if spec.settle_ms < sequence_ms:
         raise ValueError(f'{spec.spell} attacker_miss_share settles {spec.settle_ms} ms, under the '
-                         f'{facts.cast_time_ms} ms cast of {spec.cast_spell}')
+                         f'{sequence_ms} ms of the casts of {(*spec.pre_cast, spec.cast_spell)}')
+    if pre_facts and spec.cycle_ms < sequence_ms:
+        raise ValueError(f'{spec.spell} attacker_miss_share recasts every {spec.cycle_ms} ms, under the '
+                         f'{sequence_ms} ms of its pre_cast sequence')
     power = base_mana_steps(class_file, facts)
     if facts.mana_cost_percentage and not power:
         raise ValueError(f'{spec.spell} attacker_miss_share casts {spec.cast_spell}, whose cost is a percentage of '
@@ -132,8 +139,17 @@ def attacker_miss_share_scenario(class_file: dict, spec: AttackerMissShareSpec) 
     entry = behaviour_entry(records, quoted_spell(records, spec), spec.name, KIND, spec.quote, expected)
     attackers = [attacker_id(index) for index in range(spec.attackers)]
     health = {'action': 'set_health', 'actor': CASTER, 'value': TAKEN_OUTCOME_HEALTH, 'maximum': TAKEN_OUTCOME_HEALTH}
-    cast = power + [step for step in hit_ratio_cast(records, spec.cast_spell, CASTER, attackers[0])
-                    if step['action'] != 'wait']
+    pre = []
+    for spell, pre_fact in zip(spec.pre_cast, pre_facts):
+        pre_power = base_mana_steps(class_file, pre_fact)
+        if pre_fact.mana_cost_percentage and not pre_power:
+            raise ValueError(f'{spec.spell} attacker_miss_share pre_casts {spell}, whose cost is a percentage of '
+                             f'base mana, from a class file without base_mana')
+        pre += (pre_power + [step for step in hit_ratio_cast(records, spell, CASTER, attackers[0])
+                             if step['action'] != 'wait']
+                + [{'action': 'wait', 'label': f'pre cast {spell}', 'ms': pre_fact.cast_time_ms + CAST_MARGIN_MS}])
+    cast = pre + power + [step for step in hit_ratio_cast(records, spec.cast_spell, CASTER, attackers[0])
+                          if step['action'] != 'wait']
     swing_ms = swing_interval(class_file) + TAKEN_OUTCOME_SWING_MARGIN_MS
     steps = [{'action': 'learn', 'actor': CASTER, 'spell': spell}
              for spell in dict.fromkeys((*spec.learn, spec.cast_spell))] + [health]
@@ -164,6 +180,7 @@ def attacker_miss_share_scenario(class_file: dict, spec: AttackerMissShareSpec) 
     auras = {'control': [step['label'] for moment in moments for step in aura_reads(spec, 'control', moment)],
              'treatment': [step['label'] for moment in ('ready', *moments)
                            for step in aura_reads(spec, 'treatment', moment)]}
+    pre_text = f' after {", ".join(str(spell) for spell in spec.pre_cast)}' if spec.pre_cast else ''
     fixture = (f'reset_cooldown {spec.cast_spell} before every cast (RecoveryTime {facts.recast_ms} ms), a named '
                f'precondition fixture, not the subject (G-21 point 6)')
     scenario = {
@@ -174,7 +191,7 @@ def attacker_miss_share_scenario(class_file: dict, spec: AttackerMissShareSpec) 
                      f'the swings the caster takes and those with victim state {MISS_VICTIM_STATE} (a miss) over '
                      f'{spec.arm_ms} ms with no cast; the caster\'s health is set every {spec.cycle_ms} ms and aura '
                      f'{spec.aura} is read on every attacker at each cycle end. The treatment arm casts '
-                     f'{spec.cast_spell} at {attackers[0]} every {spec.cycle_ms} ms ({fixture}); counting starts '
+                     f'{spec.cast_spell} at {attackers[0]}{pre_text} every {spec.cycle_ms} ms ({fixture}); counting starts '
                      f'{spec.settle_ms} ms after the first cast, once aura {spec.aura} from the caster is read on '
                      f'every attacker, and the aura is read again on every attacker at each cycle end. The miss '
                      f'shares of the two arms are compared against the stated {expected:+g} points with the '

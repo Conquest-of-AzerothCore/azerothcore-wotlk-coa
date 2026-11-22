@@ -12,6 +12,10 @@ INSTANT = {'spell': 804629, 'name': 'Spears of Glory (instant)', 'kind': 'aura_f
            'effect_power': 1363, 'expected': 0, 'caster_auras': [823764]}
 DAMAGE = {**INSTANT, 'name': 'Spears of Glory (damage)', 'variant': 'damage', 'label_suffix': 'fed_damage',
           'expected': 1.25, 'trials': 6, 'fixture': {'spell_power': 10000}}
+HEAL = {'spell': 704920, 'name': 'Cultivate Divinity (Illumination)', 'kind': 'aura_fed_effect', 'variant': 'heal',
+        'label_suffix': 'fed_heal', 'quote': 'to increase the healing of your next Illumination',
+        'feed_spell': 500141, 'aura': 301293, 'effect_spell': 500143, 'every_ms': 3500, 'residual_target': 0.001,
+        'feed_power': 1363, 'effect_power': 1363, 'expected': 1.2, 'trials': 4}
 CONTROL_HIT = 8800.0
 
 
@@ -40,6 +44,36 @@ class AuraFedEffectTests(unittest.TestCase):
                 count, total = count + 1, total + hit
                 values.update({trial['aura']: aura, trial['hits']: count, trial['damage']: total})
         return values
+
+    def heal_values(self, factor, again=1.0, fed_aura=1.0):
+        _, expectation = self.generated(HEAL)
+        values, count, total = {}, 0.0, 0.0
+        for arm, hit, aura in (('control', CONTROL_HIT, 0.0), ('treatment', CONTROL_HIT * factor, fed_aura)):
+            for trial in expectation.model['reads'][arm]:
+                count, total = count + 1, total + hit
+                values.update({trial['aura']: aura, trial['hits']: count, trial['heal']: total})
+                if arm == 'treatment':
+                    count, total = count + 1, total + CONTROL_HIT * again
+                    values.update({trial['next_hits']: count, trial['next_heal']: total})
+        return values
+
+    def test_the_heal_variant_feeds_and_heals_the_ally_with_a_second_cast(self):
+        scenario, expectation = self.generated(HEAL)
+        run.validate(scenario)
+        steps = scenario['steps']
+        feeds = [step for step in steps if step['action'] == 'cast_until_aura']
+        self.assertEqual([(step['spell'], step['aura'], step['target']) for step in feeds], [(500141, 301293, 'ally')] * 4)
+        self.assertFalse(any(step['action'] == 'set_aura' and step['spell'] == 301293 for step in steps))
+        casts = [step for step in steps if step['action'] == 'cast' and step['spell'] == 500143]
+        self.assertEqual(len(casts), 4 + 4 * 2)
+        self.assertTrue(all(step['target'] == 'ally' for step in casts))
+        self.assertEqual(expectation.model['metric'], 'spell_heal_total')
+
+    def test_heal_ratio_and_consumption(self):
+        self.assertEqual(self.judged(HEAL, self.heal_values(1.2)), 'ok')
+        self.assertEqual(self.judged(HEAL, self.heal_values(1.0)), 'alert')
+        self.assertEqual(self.judged(HEAL, self.heal_values(1.2, again=1.2)), 'alert')
+        self.assertEqual(self.judged(HEAL, self.heal_values(1.2, fed_aura=0.0)), 'unmeasured')
 
     def test_the_feed_is_a_real_cast_step_sized_from_the_dbc(self):
         scenario, _ = self.generated(INSTANT)
