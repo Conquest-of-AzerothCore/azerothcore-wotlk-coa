@@ -459,7 +459,10 @@ void MoveIntoInventory(CharacterDatabaseTransaction trans, Player* player, ItemP
     ObjectGuid const guid = item->GetGUID();
     player->MoveItemToInventory(dest, item, true);
     player->SaveInventoryAndGoldToDB(trans);
-    AscensionVanityOwnership::CollectItem(player, player->GetItemByGuid(guid));
+    Item* stored = player->GetItemByGuid(guid);
+    if (!stored && !dest.empty())
+        stored = player->GetItemByPos(dest.front().pos);
+    AscensionVanityOwnership::CollectItem(player, stored);
 }
 
 void DepositToBank(Player* player, OpenBank& bank, uint8 bag, uint8 slot, uint8 tab, uint8 bankSlot,
@@ -664,6 +667,7 @@ void WithdrawToPlayer(Player* player, OpenBank& bank, uint8 tab, uint8 bankSlot,
                 destItem->SetState(ITEM_CHANGED, player);
                 ReduceBankItem(trans, bank, tab, bankSlot, source, amount);
                 player->SaveInventoryAndGoldToDB(trans);
+                AscensionVanityOwnership::CollectItem(player, destItem);
                 finish(ObjectGuid::Empty, 0);
                 return;
             }

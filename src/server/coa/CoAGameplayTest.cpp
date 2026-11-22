@@ -7374,7 +7374,7 @@ private:
                 "Relogged character did not enter the world");
             Reach(actor, ActorStage::Ready);
         }
-        else if (action == "login_hooks" && !QueuedCharacterWorkDone())
+        else if ((action == "login_hooks" || action == "forget_vanity") && !QueuedCharacterWorkDone())
             return;
         else
             Act(step, record);
