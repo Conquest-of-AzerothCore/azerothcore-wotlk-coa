@@ -156,5 +156,72 @@ class AttackerMissShareTests(unittest.TestCase):
             behaviour_scenario(load_fixture_class_file(23), ENTRY)
 
 
+SPELL_CLAMP = {'spell': 300348, 'name': 'Sun Shield (attacker spell hit clamp)', 'kind': 'attacker_miss_share',
+               'variant': 'spell_clamp', 'label_suffix': 'spell_hit_taken',
+               'quote': 'Reduces your chance to be hit by spells by', 'attacker_spell': 585, 'expected': 3}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class SpellClampTests(unittest.TestCase):
+    def built(self, **changes):
+        return behaviour_scenario(load_fixture_class_file(23), {**SPELL_CLAMP, **changes})
+
+    def test_four_attackers_cast_at_the_clamp_and_one_point_under_it_around_the_learn(self):
+        scenario, [expectation] = self.built()
+        bonuses = [creature['spell_hit_bonus'] for creature in scenario['creatures']]
+        self.assertEqual(bonuses, [4, 3, 7, 6])
+        casts = share.spell_clamp_casts()
+        self.assertLessEqual(4 * 0.99 ** casts, share.SPELL_RESIDUAL)
+        self.assertGreater(4 * 0.99 ** (casts - 1), share.SPELL_RESIDUAL)
+        steps = scenario['steps']
+        per_attacker = {creature['id']: len([step for step in steps if step['action'] == 'cast'
+                                             and step['actor'] == creature['id'] and step['spell'] == 585])
+                        for creature in scenario['creatures']}
+        self.assertEqual(set(per_attacker.values()), {casts})
+        learn = next(index for index, step in enumerate(steps) if step['action'] == 'learn'
+                     and step['spell'] == 300348)
+        first_treatment = next(index for index, step in enumerate(steps) if step.get('actor') == 'attacker3')
+        last_control = max(index for index, step in enumerate(steps) if step.get('actor') == 'attacker2')
+        self.assertTrue(last_control < learn < first_treatment)
+        self.assertEqual(expectation.model['expected'], 3.0)
+        self.assertEqual(share.label(SPELL_CLAMP), [expectation.label])
+
+    def test_a_wrong_figure_a_non_magic_spell_or_another_aura_is_refused(self):
+        for changes in ({'expected': 4}, {'expected': 0}, {'attacker_spell': 6603},
+                        {'spell': 572752, 'quote': "reduces the target's chance to hit by"}):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                self.built(**changes)
+
+    def judged(self, misses: dict, casts=None, auras=(0.0, 1.0)):
+        _, [expectation] = self.built()
+        clamp = expectation.model['spell_clamp']
+        values = {clamp['auras']['control']: auras[0], clamp['auras']['treatment']: auras[1]}
+        for arm, reads in clamp['reads'].items():
+            count = clamp['casts'] if casts is None else casts
+            values.update({reads['start casts']: 0.0, reads['start landed']: 0.0, reads['end casts']: float(count),
+                           reads['end landed']: float(count - misses.get(arm, 0))})
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+    def test_a_three_point_reduction_passes_and_two_or_four_point_mutants_alert(self):
+        correct = {'control edge': 8, 'treatment edge': 9}
+        self.assertEqual(self.judged(correct).status, 'ok', self.judged(correct).explanation)
+        self.assertEqual(self.judged({**correct, 'treatment clamp': 7}).status, 'alert')
+        self.assertEqual(self.judged({'control edge': 8}).status, 'alert')
+
+    def test_a_control_off_the_base_or_a_short_arm_or_an_unread_aura_is_unmeasured(self):
+        correct = {'control edge': 8, 'treatment edge': 9}
+        for name, verdict in (('control clamp miss', self.judged({**correct, 'control clamp': 1})),
+                              ('missless control edge', self.judged({'treatment edge': 9})),
+                              ('short arms', self.judged(correct, casts=800)),
+                              ('treatment aura absent', self.judged(correct, auras=(0.0, 0.0))),
+                              ('control aura present', self.judged(correct, auras=(1.0, 1.0)))):
+            with self.subTest(name=name):
+                self.assertEqual(verdict.status, 'unmeasured', verdict.explanation)
+
+    def test_the_spell_variant_is_classed_behaviour_by_its_damage_log_metric(self):
+        verdict = self.judged({'control edge': 8, 'treatment edge': 9})
+        self.assertEqual(verdict_evidence(verdict, SPELL_CLAMP['quote'], {}), BEHAVIOUR)
+
+
 if __name__ == '__main__':
     unittest.main()
