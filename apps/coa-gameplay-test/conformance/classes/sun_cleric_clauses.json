@@ -746,17 +746,49 @@
   {
     "spell": 301256,
     "clause": "Casting Daybreak causes your next 2 casts of Shine,",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting Daybreak causes the next cast of Shine to have its cast time reduced",
+        "labels": [
+          "301256 behaviour_metric_delta shine_held",
+          "301256 behaviour_metric_delta shine_done"
+        ]
+      },
+      {
+        "claim": "your next 2 casts: the second cast is reduced and the third is not",
+        "labels": [
+          "301256 behaviour_metric_delta second_done",
+          "301256 behaviour_metric_delta third_held"
+        ]
+      }
+    ]
   },
   {
     "spell": 301256,
     "clause": "Illumination, Radiant Cascade, or Sunflare within $301242d to have a $301242s1% reduced cast time.",
-    "labels": [
-      "301256 spell_duration 301242 #0",
-      "301256 effect_value 301242e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Illumination, Radiant Cascade, or Sunflare have a $301242s1% reduced cast time",
+        "labels": [
+          "301256 behaviour_metric_delta illum_held",
+          "301256 behaviour_metric_delta illum_done",
+          "301256 behaviour_metric_delta cascade_held",
+          "301256 behaviour_metric_delta cascade_done",
+          "301256 behaviour_metric_delta sunflare_held",
+          "301256 behaviour_metric_delta sunflare_done"
+        ]
+      },
+      {
+        "claim": "within $301242d",
+        "labels": [
+          "301256 spell_duration 301242 #0",
+          "301256 behaviour_metric_delta aura_held",
+          "301256 behaviour_metric_delta aura_gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 301266,
@@ -2352,7 +2384,14 @@
       },
       {
         "claim": "Gavels are guaranteed to critically strike against Undead enemies",
-        "labels": []
+        "labels": [
+          "680645 behaviour_metric_delta crit_undead_light",
+          "680645 behaviour_metric_delta crit_humanoid_light",
+          "680645 behaviour_metric_delta crit_undead_grace",
+          "680645 behaviour_metric_delta crit_humanoid_grace",
+          "680645 behaviour_metric_delta crit_undead_wrath",
+          "680645 behaviour_metric_delta crit_humanoid_wrath"
+        ]
       }
     ],
     "reason": "Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip; control = passive not learned. Effect 1 is aura 108 SPELL_AURA_ADD_PCT_MODIFIER op 15 (crit damage bonus): +15% of the bonus part, whole-hit ratio 1.075 (+7.5%); the Undead guarantee has no entry (crit_guarantee fires by auto-attack swings, a Gavel is a cast). Reference search: bindmysoul snapshot has the sentence, no figure; nothing else found."
@@ -4355,7 +4394,8 @@
     "spell": 804254,
     "clause": "@ext:Only usable on your ally with Bless active.:ext@",
     "labels": [
-      "804254 effect_value #1"
+      "804254 behaviour_metric_delta bless_ally",
+      "804254 behaviour_metric_delta no_bless"
     ],
     "kind": "claim"
   },
@@ -4503,7 +4543,10 @@
     "claims": [
       {
         "claim": "Your next Dawnsear is instant cast",
-        "labels": []
+        "labels": [
+          "804629 behaviour_metric_delta instant",
+          "804629 behaviour_metric_delta instant_once"
+        ]
       },
       {
         "claim": "within $d",
@@ -4516,7 +4559,9 @@
   {
     "spell": 804629,
     "clause": "and deals $s2% increased damage.",
-    "labels": [],
+    "labels": [
+      "804629 behaviour_hit_ratio damage"
+    ],
     "kind": "claim"
   },
   {
