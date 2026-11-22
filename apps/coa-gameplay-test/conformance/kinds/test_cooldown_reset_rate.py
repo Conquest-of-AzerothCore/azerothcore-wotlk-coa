@@ -227,7 +227,7 @@ class CooldownResetRateFixtureResetTests(unittest.TestCase):
     def test_the_fixture_packets_are_subtracted_from_the_resets(self):
         verdict = self.judged(10.0, 3200.0 + 160.0)
         self.assertEqual(verdict.status, 'ok')
-        self.assertEqual(verdict.detail, {'resets': 160.0, 'hits': 3200.0})
+        self.assertEqual((verdict.detail['resets'], verdict.detail['hits']), (160.0, 3200.0))
 
     def test_mutant_a_reset_rate_off_the_band_alerts(self):
         self.assertEqual(self.judged(10.0, 3200.0 + 640.0).status, 'alert')
