@@ -8559,6 +8559,7 @@
       },
       "before_expected": 2500,
       "expected": 2125,
+      "expected_gain": -375,
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 500,

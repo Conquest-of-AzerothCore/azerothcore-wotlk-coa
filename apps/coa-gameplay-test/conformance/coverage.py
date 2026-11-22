@@ -728,15 +728,21 @@ def required_contrast(verdict: Verdict) -> str | None:
 def use_time_partners_hold(verdict: Verdict, text: str, partners: tuple[Verdict, ...]) -> bool:
     metric = verdict.detail[PASSIVE_METRIC]
     arms = verdict.detail[USE_TIME_CONTRAST].get('arms') or []
-    gains = {other.label: other.detail[USE_TIME_CONTRAST].get('gain') for other in partners
-             if other.label in arms and other.status in CONFORMANT and other.status != 'closed'
-             and other.check == verdict.check and opted_use_time(other)
-             and other.detail[PASSIVE_METRIC] == metric and other.detail.get(CONTRAST) == LEARNED_CONTRAST
-             and other.detail[USE_TIME_CONTRAST].get('gain') is not None}
-    if set(gains) != set(arms):
+    held = {other.label: other for other in partners
+            if other.label in arms and other.status in CONFORMANT and other.status != 'closed'
+            and other.check == verdict.check and opted_use_time(other)
+            and other.detail[PASSIVE_METRIC] == metric and other.detail.get(CONTRAST) == LEARNED_CONTRAST
+            and None not in (other.measured, other.expected, other.low, other.high)
+            and other.detail[USE_TIME_CONTRAST].get('gain') == other.expected}
+    if set(held) != set(arms):
+        return False
+    gains = [other.expected for other in held.values()]
+    moved = [abs(gain) for gain in gains if gain != 0]
+    if not moved or any(abs(other.measured - other.expected) > (other.high - other.low) / 2
+                        or (other.high - other.low) / 2 >= min(moved) / 2 for other in held.values()):
         return False
     conditional = PLAIN_USE_TIME_SENTENCE.fullmatch(text.strip()) is None
-    return any(gain != 0 for gain in gains.values()) and (not conditional or any(gain == 0 for gain in gains.values()))
+    return not conditional or any(gain == 0 for gain in gains)
 
 
 def judged_sentence(clause: str, sentence: str) -> str:

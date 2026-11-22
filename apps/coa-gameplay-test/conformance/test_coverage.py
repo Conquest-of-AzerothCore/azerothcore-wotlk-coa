@@ -1895,9 +1895,12 @@ class UseTimeContrastPartnerTest(unittest.TestCase):
     OFF = '92137 behaviour_metric_delta consumed'
     PLAIN_ARM = '807874 behaviour_metric_delta cast_time'
 
-    def arm(self, label, gain, arms, contrast=LEARNED_CONTRAST, metric=METRIC, status='ok'):
-        return judged(label, BEHAVIOUR_METRIC_DELTA, metric, status=status, contrast=contrast,
-                      use_time_contrast={'arms': list(arms), 'gain': gain})
+    def arm(self, label, gain, arms, contrast=LEARNED_CONTRAST, metric=METRIC, status='ok', measured=None,
+            tolerance=1):
+        stamped = judged(label, BEHAVIOUR_METRIC_DELTA, metric, status=status, contrast=contrast,
+                         use_time_contrast={'arms': list(arms), 'gain': gain})
+        return replace(stamped, measured=gain if measured is None else measured, expected=gain,
+                       low=gain - tolerance, high=gain + tolerance)
 
     def plain(self, label, contrast=LEARNED_CONTRAST, metric=METRIC):
         return judged(label, BEHAVIOUR_METRIC_DELTA, metric, contrast=contrast)
@@ -1965,6 +1968,36 @@ class UseTimeContrastPartnerTest(unittest.TestCase):
     def test_the_field_on_another_metric_changes_nothing(self):
         stamped = self.arm('1 behaviour_metric_delta cd', -1000, ('1 behaviour_metric_delta cd',), metric='cooldown_ms')
         self.assertEqual(self.evidence('Reduces the cooldown of Radiant Cascade by 1 sec.', stamped), [DATA])
+
+    def test_a_no_effect_read_inside_a_wide_band_stays_data(self):
+        self.assertEqual(self.evidence(self.PLAIN, self.arm(self.PLAIN_ARM, -375, (self.PLAIN_ARM,), measured=0,
+                                                            tolerance=400)), [DATA])
+
+    def test_a_band_of_half_the_gain_stays_data(self):
+        self.assertEqual(self.evidence(self.PLAIN, self.arm(self.PLAIN_ARM, -375, (self.PLAIN_ARM,),
+                                                            tolerance=187.5)), [DATA])
+
+    def test_a_wide_zero_arm_does_not_fake_the_consumption(self):
+        arms = (self.ARM, self.OFF)
+        wide = self.arm(self.OFF, 0, arms, measured=-1500, tolerance=1500)
+        self.assertEqual(self.evidence(self.NEXT, self.arm(self.ARM, -1500, arms), wide), [DATA])
+
+    def test_a_declared_gain_the_verdict_did_not_judge_stays_data(self):
+        absolute = replace(self.arm(self.PLAIN_ARM, -375, (self.PLAIN_ARM,)), measured=2500.0, expected=2125.0,
+                           low=2124.0, high=2126.0)
+        self.assertEqual(self.evidence(self.PLAIN, absolute), [DATA])
+
+    def test_a_measured_gain_outside_its_band_stays_data(self):
+        self.assertEqual(self.evidence(self.PLAIN, self.arm(self.PLAIN_ARM, -375, (self.PLAIN_ARM,), measured=0)),
+                         [DATA])
+
+    def test_mutant_trusting_the_declared_gain_passes_the_no_effect_read(self):
+        def declared_only(verdict, text, partners):
+            gains = [other.detail['use_time_contrast']['gain'] for other in partners]
+            return any(gain != 0 for gain in gains)
+        with mock.patch('coverage.use_time_partners_hold', declared_only):
+            self.assertEqual(self.evidence(self.PLAIN, self.arm(self.PLAIN_ARM, -375, (self.PLAIN_ARM,), measured=0,
+                                                                tolerance=400)), [BEHAVIOUR])
 
     def test_mutant_without_the_partner_gate_passes_the_one_arm_claim(self):
         with mock.patch('coverage.use_time_partners_hold', lambda verdict, text, partners: True):
