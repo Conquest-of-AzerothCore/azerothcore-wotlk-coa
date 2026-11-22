@@ -647,6 +647,24 @@ class OutputTests(unittest.TestCase):
                       section)
         self.assertNotIn('Spell 21 (21, family 30) |', section)
 
+    def test_review_lists_same_class_pairs_a_per_caster_group_decides(self):
+        state = self.state()
+        state.members[5] = {20, 21}
+        state.rules[5] = 2
+        plan = model.plan_categories(self.buffs(), state, {}, {}, {})
+        text = model.review_markdown(self.buffs(), plan, state, model.apply_plan(state, plan), {}, [])
+        section = text.split('## Decided by a lower group')[1].split('\n## ')[0]
+        self.assertIn('| 2110001 | Spell 20 (20, family 30) | Spell 21 (21, family 30) | per_caster 5 |', section)
+
+    def test_review_skips_ranks_of_one_chain_in_lower_group_pairs(self):
+        state = self.state()
+        state.members[5] = {20, 21}
+        state.rules[5] = 2
+        plan = model.plan_categories(self.buffs(), state, {}, {}, {})
+        text = model.review_markdown(self.buffs(), plan, state, model.apply_plan(state, plan), {21: 20}, [])
+        section = text.split('## Decided by a lower group')[1].split('\n## ')[0]
+        self.assertNotIn('Spell 21 (21, family 30) |', section)
+
     def test_migration_sql_shape(self):
         sql = model.migration_sql(self.plan(), self.state(), {})
         lines = sql.splitlines()

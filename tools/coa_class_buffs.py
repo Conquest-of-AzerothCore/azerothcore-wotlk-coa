@@ -672,9 +672,11 @@ def review_markdown(buffs, plan, before, after, first_rank, unclassified):
     for group_id in sorted(plan.categories):
         inside = sorted({buff.spell_id for buff in buffs if _contains(after, group_id, rank(buff.spell_id))})
         for a_id, b_id in combinations(inside, 2):
+            if rank(a_id) == rank(b_id):
+                continue
             a, b = by_id[a_id], by_id[b_id]
             decided = deciding_group(a_id, b_id, after, first_rank)
-            if a.family != b.family and decided and decided[0] != group_id:
+            if decided and decided[0] != group_id:
                 lines.append(f'| {group_id} | {_buff_label(a)} | {_buff_label(b)} | '
                              f'{RULE_OUTCOMES[decided[1]]} {decided[0]} |')
     lines.append('')
