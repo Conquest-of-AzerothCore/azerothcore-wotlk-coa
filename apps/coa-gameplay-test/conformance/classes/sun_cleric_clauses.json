@@ -1310,13 +1310,24 @@
   {
     "spell": 560857,
     "clause": "Additionally, when Scorch Marks are consumed you now gain $560856s1% increased Magic damage for $560856d.",
-    "labels": [
-      "560857 effect_value 560856e0 #1",
-      "560857 spell_duration 560856 #2",
-      "560857 behaviour_metric_delta magic_amount",
-      "560857 behaviour_metric_delta magic_duration"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "when Scorch Marks are consumed you now gain $560856s1% increased Magic damage",
+        "labels": [
+          "560857 effect_value 560856e0 #1",
+          "560857 behaviour_metric_delta magic_amount",
+          "560857 behaviour_hit_ratio magic_damage"
+        ]
+      },
+      {
+        "claim": "for $560856d",
+        "labels": [
+          "560857 spell_duration 560856 #2",
+          "560857 behaviour_metric_delta magic_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 560859,
@@ -1364,7 +1375,6 @@
       {
         "claim": "Increases your Armor by $s2% of your Strength and Intellect",
         "labels": [
-          "561023 effect_value e1 #0",
           "561023 behaviour_metric_delta armor"
         ]
       },
@@ -1943,23 +1953,38 @@
       },
       {
         "claim": "and grants allies Replenishment",
-        "labels": [
-          "680656 behaviour_metric_delta granted"
-        ]
+        "labels": []
       }
     ]
   },
   {
     "spell": 680656,
     "clause": "Replenishes $s1% of maximum mana per 5 sec for $1257669d.",
-    "labels": [
-      "680656 effect_value 1257670e0 #0",
-      "680656 spell_duration 1257669 #1",
-      "680656 behaviour_metric_delta tick",
-      "680656 behaviour_metric_delta held",
-      "680656 behaviour_metric_delta gone"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Replenishes $s1% of maximum mana",
+        "labels": [
+          "680656 effect_value 1257670e0 #0",
+          "680656 behaviour_metric_delta tick"
+        ]
+      },
+      {
+        "claim": "per 5 sec",
+        "labels": [
+          "680656 behaviour_metric_delta tick_low",
+          "680656 behaviour_metric_delta tick_high"
+        ]
+      },
+      {
+        "claim": "for $1257669d",
+        "labels": [
+          "680656 spell_duration 1257669 #1",
+          "680656 behaviour_metric_delta held",
+          "680656 behaviour_metric_delta gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 680663,
@@ -1990,7 +2015,6 @@
     "spell": 680700,
     "clause": "Increases your movement speed by $s2% for $d.",
     "labels": [
-      "680700 effect_value e1 #0",
       "680700 aura_amount e1 #0",
       "680700 aura_duration_ms #1",
       "680700 behaviour_metric_delta speed",
@@ -2007,14 +2031,16 @@
         "claim": "frees the caster from slows",
         "labels": [
           "680700 immunity slow 12323 with",
-          "680700 immunity slow 12323 control"
+          "680700 immunity slow 12323 control",
+          "680700 behaviour_metric_delta frees_slow"
         ]
       },
       {
         "claim": "and roots",
         "labels": [
           "680700 immunity root 47021 with",
-          "680700 immunity root 47021 control"
+          "680700 immunity root 47021 control",
+          "680700 behaviour_metric_delta frees_root"
         ]
       }
     ]
@@ -2827,7 +2853,9 @@
         "claim": "for the next $d",
         "labels": [
           "760379 aura_duration_ms #0",
-          "760379 behaviour_metric_delta duration"
+          "760379 behaviour_metric_delta duration",
+          "760379 behaviour_metric_delta duration_held",
+          "760379 behaviour_metric_delta duration_gone"
         ]
       },
       {
@@ -3367,19 +3395,24 @@
   {
     "spell": 804629,
     "clause": "Your next Dawnsear within $d is instant cast",
-    "labels": [
-      "804629 spell_duration 807299 #1",
-      "804629 behaviour_metric_delta instant"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Your next Dawnsear is instant cast",
+        "labels": []
+      },
+      {
+        "claim": "within $d",
+        "labels": [
+          "804629 spell_duration 807299 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 804629,
     "clause": "and deals $s2% increased damage.",
-    "labels": [
-      "804629 effect_value 807299e1 #2",
-      "804629 behaviour_hit_ratio damage"
-    ],
+    "labels": [],
     "kind": "claim"
   },
   {

@@ -120,7 +120,7 @@
         806060,
         807058
       ],
-      "trigger_spells_source": "Radiant Flame 806060 Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 1000, DurationIndex 35 (4000 ms), triggers the tick 807058 (SCHOOL_DAMAGE, Holy, DmgClass magic): the handler rolls only for a damage event of 807058 (AscensionSunClericEvents.cpp, case 804629: damage && info->Id == 807058 && Chance(player, 804629)), and the cast itself deals no direct damage. A trial is one landed 807058 tick on the dummy (806060 has no hit of its own). Residual failure probability of the pooled proof at most 0.1% per pair (the judge's residual_target).",
+      "trigger_spells_source": "Radiant Flame 806060 Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 1000, DurationIndex 35 (4000 ms), triggers the tick 807058 (SCHOOL_DAMAGE, Holy, DmgClass magic): the handler rolls only for a damage event of 807058 (AscensionSunClericEvents.cpp, case 804629: damage && info->Id == 807058 && Chance(player, 804629)), and the cast itself deals no direct damage. A trial is one landed 807058 tick on the dummy (806060 has no hit of its own). Residual failure probability of the pooled proof at most 0.1% per pair (the judge's residual_target). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries 15% / 10 seconds / 25% for Spears of Glory, equal to the DBC (ProcChance 15, DurationIndex 1 = 10 s, $s2 25); ascension-data advancement.tsv lists it as a Piety talent node; coa-history spells 804629 and 807299: 0 events in 186 logs; nothing found beyond the tooltip and the DBC for the values.",
       "event_metric": "spell_cast_count",
       "proc_spell": 807299,
       "proc_spell_source": "EffectTriggerSpell[0] of 804629; the handler casts it on the caster (Cast(player, player, 807299), AscensionSunClericEvents.cpp case 804629)",
@@ -3763,7 +3763,7 @@
     },
     {
       "spell": 560857,
-      "name": "Burn The Heretics (damage on a target at 30% health)",
+      "name": "Burn The Heretics (damage on a target at 32% health)",
       "kind": "hit_ratio",
       "variant": "damage_below35",
       "label_suffix": "damage_below35",
@@ -3780,7 +3780,7 @@
             1
           ]
         ],
-        "target_health_pct": 30
+        "target_health_pct": 32
       },
       "treatment": {
         "auras": [
@@ -3792,16 +3792,16 @@
         "learn": [
           560857
         ],
-        "target_health_pct": 30
+        "target_health_pct": 32
       },
       "fixture": {
         "spell_power": 10000
       },
-      "expected_source": "560857 Burn The Heretics Effect[0] aura 303 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE, MiscValue 13 (AURA_STATE_HEALTHLESS_35_PERCENT), BasePoints 9 + 1 = 10 ($s1); Effect[1] aura 360 SPELL_AURA_ASCENSION_MOD_HEALING_DONE_VERSUS_AURASTATE, MiscValue 13, BasePoints 9 + 1 = 10. The tooltip states +10% damage against targets below 35% health: the whole non-critical hit of Dawnsear 554406 on a dummy held at 30% of its health before every cast is expected at 1.10 times the control hit (the passive not learned, same target health), spell power fixture 10000 so the coefficient and the base part are both present. 823764 removes the dummy's magic resistance as in the Grace entries. Reference search 2026-11-22: server DBC 560857 and 560856 descriptions; bindmysoul snapshot (fetched 2026-07-22) and ascension-data advancement.tsv searched for 'Burn The Heretics': nothing found beyond the tooltip; coa-history spell 560856 Burn The Heretics: 22 SPELL_AURA_APPLIED events in 1 log (the aura exists in real play, no figure), 560857 0 events (a passive); nothing found beyond the tooltip and the DBC for the values."
+      "expected_source": "560857 Burn The Heretics Effect[0] aura 303 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE, MiscValue 13 (AURA_STATE_HEALTHLESS_35_PERCENT), BasePoints 9 + 1 = 10 ($s1); Effect[1] aura 360 SPELL_AURA_ASCENSION_MOD_HEALING_DONE_VERSUS_AURASTATE, MiscValue 13, BasePoints 9 + 1 = 10. The tooltip states +10% damage against targets below 35% health: the whole non-critical hit of Dawnsear 554406 on a dummy held at 32% of its health before every cast is expected at 1.10 times the control hit (the passive not learned, same target health), spell power fixture 10000 so the coefficient and the base part are both present. 823764 removes the dummy's magic resistance as in the Grace entries. Reference search 2026-11-22: server DBC 560857 and 560856 descriptions; bindmysoul snapshot (fetched 2026-07-22) and ascension-data advancement.tsv searched for 'Burn The Heretics': nothing found beyond the tooltip; coa-history spell 560856 Burn The Heretics: 22 SPELL_AURA_APPLIED events in 1 log (the aura exists in real play, no figure), 560857 0 events (a passive); nothing found beyond the tooltip and the DBC for the values."
     },
     {
       "spell": 560857,
-      "name": "Burn The Heretics (damage on a target above 35% health)",
+      "name": "Burn The Heretics (damage on a target at 38% health)",
       "kind": "hit_ratio",
       "variant": "damage_above35",
       "label_suffix": "damage_above35",
@@ -3817,7 +3817,8 @@
             823764,
             1
           ]
-        ]
+        ],
+        "target_health_pct": 38
       },
       "treatment": {
         "auras": [
@@ -3828,16 +3829,17 @@
         ],
         "learn": [
           560857
-        ]
+        ],
+        "target_health_pct": 38
       },
       "fixture": {
         "spell_power": 10000
       },
-      "expected_source": "560857 Burn The Heretics Effect[0] aura 303 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE, MiscValue 13 (AURA_STATE_HEALTHLESS_35_PERCENT), BasePoints 9 + 1 = 10 ($s1); Effect[1] aura 360 SPELL_AURA_ASCENSION_MOD_HEALING_DONE_VERSUS_AURASTATE, MiscValue 13, BasePoints 9 + 1 = 10. The same Dawnsear hits on the dummy at its full health (above 35%): the passive is learned in the treatment arm only and the hit is expected unchanged, ratio 1.00; this is the claim's 'below 35% health' limit, with the dummy at 30% in the entry damage_below35. Spell power fixture 10000, 823764 as in the Grace entries. Reference search 2026-11-22: server DBC 560857 and 560856 descriptions; bindmysoul snapshot (fetched 2026-07-22) and ascension-data advancement.tsv searched for 'Burn The Heretics': nothing found beyond the tooltip; coa-history spell 560856 Burn The Heretics: 22 SPELL_AURA_APPLIED events in 1 log (the aura exists in real play, no figure), 560857 0 events (a passive); nothing found beyond the tooltip and the DBC for the values."
+      "expected_source": "560857 Burn The Heretics Effect[0] aura 303 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE, MiscValue 13 (AURA_STATE_HEALTHLESS_35_PERCENT), BasePoints 9 + 1 = 10 ($s1); Effect[1] aura 360 SPELL_AURA_ASCENSION_MOD_HEALING_DONE_VERSUS_AURASTATE, MiscValue 13, BasePoints 9 + 1 = 10. The same Dawnsear hits on the dummy at its full health (above 35%): the passive is learned in the treatment arm only and the hit is expected unchanged, ratio 1.00; this is the claim's 'below 35% health' limit, with the dummy at 30% in the entry damage_below35. Spell power fixture 10000, 823764 as in the Grace entries. Reference search 2026-11-22: server DBC 560857 and 560856 descriptions; bindmysoul snapshot (fetched 2026-07-22) and ascension-data advancement.tsv searched for 'Burn The Heretics': nothing found beyond the tooltip; coa-history spell 560856 Burn The Heretics: 22 SPELL_AURA_APPLIED events in 1 log (the aura exists in real play, no figure), 560857 0 events (a passive); nothing found beyond the tooltip and the DBC for the values. Threshold bracket (stated 35%, +-10% = 31.5% and 38.5%): this entry holds the dummy at 38% before every cast, damage_below35 at 32%; a threshold below 32% or above 38% changes one of the two readings."
     },
     {
       "spell": 560857,
-      "name": "Burn The Heretics (healing on a target at 30% health)",
+      "name": "Burn The Heretics (healing on a target at 32% health)",
       "kind": "hit_ratio",
       "variant": "healing_below35",
       "label_suffix": "healing_below35",
@@ -3850,7 +3852,7 @@
       "metric": "spell_heal_total",
       "caster": "caster",
       "target": "ally",
-      "target_health_pct": 30,
+      "target_health_pct": 32,
       "control": {},
       "treatment": {
         "learn": [
@@ -3861,11 +3863,11 @@
         "spell_power": 20000
       },
       "ally_distance": 5,
-      "expected_source": "560857 Burn The Heretics Effect[0] aura 303 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE, MiscValue 13 (AURA_STATE_HEALTHLESS_35_PERCENT), BasePoints 9 + 1 = 10 ($s1); Effect[1] aura 360 SPELL_AURA_ASCENSION_MOD_HEALING_DONE_VERSUS_AURASTATE, MiscValue 13, BasePoints 9 + 1 = 10. The tooltip states +10% healing against targets below 35% health: Shine 800357 (Description ${$m1+0+$SP*0.294699}) on the ally held at 30% of its health before every cast, whole non-critical heal, expected at 1.10 times the control heal (passive not learned), spell power fixture 20000 and the class tuning aura 887015 present alike in both arms. Reference search 2026-11-22: server DBC 560857 and 560856 descriptions; bindmysoul snapshot (fetched 2026-07-22) and ascension-data advancement.tsv searched for 'Burn The Heretics': nothing found beyond the tooltip; coa-history spell 560856 Burn The Heretics: 22 SPELL_AURA_APPLIED events in 1 log (the aura exists in real play, no figure), 560857 0 events (a passive); nothing found beyond the tooltip and the DBC for the values."
+      "expected_source": "560857 Burn The Heretics Effect[0] aura 303 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE, MiscValue 13 (AURA_STATE_HEALTHLESS_35_PERCENT), BasePoints 9 + 1 = 10 ($s1); Effect[1] aura 360 SPELL_AURA_ASCENSION_MOD_HEALING_DONE_VERSUS_AURASTATE, MiscValue 13, BasePoints 9 + 1 = 10. The tooltip states +10% healing against targets below 35% health: Shine 800357 (Description ${$m1+0+$SP*0.294699}) on the ally held at 32% of its health before every cast, whole non-critical heal, expected at 1.10 times the control heal (passive not learned), spell power fixture 20000 and the class tuning aura 887015 present alike in both arms. Reference search 2026-11-22: server DBC 560857 and 560856 descriptions; bindmysoul snapshot (fetched 2026-07-22) and ascension-data advancement.tsv searched for 'Burn The Heretics': nothing found beyond the tooltip; coa-history spell 560856 Burn The Heretics: 22 SPELL_AURA_APPLIED events in 1 log (the aura exists in real play, no figure), 560857 0 events (a passive); nothing found beyond the tooltip and the DBC for the values."
     },
     {
       "spell": 560857,
-      "name": "Burn The Heretics (healing on a target above 35% health)",
+      "name": "Burn The Heretics (healing on a target at 38% health)",
       "kind": "hit_ratio",
       "variant": "healing_above35",
       "label_suffix": "healing_above35",
@@ -3878,7 +3880,7 @@
       "metric": "spell_heal_total",
       "caster": "caster",
       "target": "ally",
-      "target_health_pct": 70,
+      "target_health_pct": 38,
       "control": {},
       "treatment": {
         "learn": [
@@ -3889,7 +3891,51 @@
         "spell_power": 20000
       },
       "ally_distance": 5,
-      "expected_source": "560857 Burn The Heretics Effect[0] aura 303 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE, MiscValue 13 (AURA_STATE_HEALTHLESS_35_PERCENT), BasePoints 9 + 1 = 10 ($s1); Effect[1] aura 360 SPELL_AURA_ASCENSION_MOD_HEALING_DONE_VERSUS_AURASTATE, MiscValue 13, BasePoints 9 + 1 = 10. The same Shine 800357 heals on the ally held at 70% of its health (above 35%), the passive learned in the treatment arm only, expected unchanged, ratio 1.00: the limit of the claim 'against targets below 35% health'. Reference search 2026-11-22: server DBC 560857 and 560856 descriptions; bindmysoul snapshot (fetched 2026-07-22) and ascension-data advancement.tsv searched for 'Burn The Heretics': nothing found beyond the tooltip; coa-history spell 560856 Burn The Heretics: 22 SPELL_AURA_APPLIED events in 1 log (the aura exists in real play, no figure), 560857 0 events (a passive); nothing found beyond the tooltip and the DBC for the values."
+      "expected_source": "560857 Burn The Heretics Effect[0] aura 303 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE, MiscValue 13 (AURA_STATE_HEALTHLESS_35_PERCENT), BasePoints 9 + 1 = 10 ($s1); Effect[1] aura 360 SPELL_AURA_ASCENSION_MOD_HEALING_DONE_VERSUS_AURASTATE, MiscValue 13, BasePoints 9 + 1 = 10. The same Shine 800357 heals on the ally held at 70% of its health (above 35%), the passive learned in the treatment arm only, expected unchanged, ratio 1.00: the limit of the claim 'against targets below 35% health'. Reference search 2026-11-22: server DBC 560857 and 560856 descriptions; bindmysoul snapshot (fetched 2026-07-22) and ascension-data advancement.tsv searched for 'Burn The Heretics': nothing found beyond the tooltip; coa-history spell 560856 Burn The Heretics: 22 SPELL_AURA_APPLIED events in 1 log (the aura exists in real play, no figure), 560857 0 events (a passive); nothing found beyond the tooltip and the DBC for the values. Threshold bracket: the ally is held at 38% before every cast (healing_below35 at 32%)."
+    },
+    {
+      "spell": 560857,
+      "name": "Burn The Heretics (Magic damage after Scorch Marks are consumed)",
+      "kind": "hit_ratio",
+      "variant": "magic_damage",
+      "label_suffix": "magic_damage",
+      "quote": "Additionally, when Scorch Marks are consumed you now gain $560856s1% increased Magic damage for $560856d.",
+      "expected": 1.1,
+      "observe_spell": 554406,
+      "critical": false,
+      "trials": 30,
+      "cast_power": 1000,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          504764,
+          806060
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          504764,
+          806060
+        ],
+        "learn": [
+          560857
+        ]
+      },
+      "fixture": {
+        "spell_power": 10000
+      },
+      "expected_source": "560856 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 126 (the magic schools), BasePoints 9 + 1 = 10 ($560856s1): the tooltip states +10% Magic damage after Scorch Marks are consumed. Both arms cast a real Sun Ray 504764 (grants Scorch Marks 807059) and a real Radiant Flame 806060 (consumes it) before every observed cast of Dawnsear 554406 (a Holy hit, non-critical) at the dummy; only the treatment arm has learned 560857, so the hit is expected at 1.10 times the control hit (spell power fixture 10000, 823764 as in the Grace entries). The dummy stays at full health, so the below-35% clause is not involved. Reference search 2026-11-22: server DBC 560857 and 560856 descriptions; bindmysoul snapshot (fetched 2026-07-22) and ascension-data advancement.tsv searched for Burn The Heretics: nothing found beyond the tooltip; coa-history spell 560856: 22 SPELL_AURA_APPLIED events in 1 log (no figure); nothing found beyond the tooltip and the DBC for the values."
     },
     {
       "spell": 560857,
@@ -3965,6 +4011,64 @@
       "tolerance": 0.001,
       "wait_ms": 500,
       "observe_source": "680700 Sun Stride Effect[1] aura 31 SPELL_AURA_MOD_INCREASE_SPEED, BasePoints 149 + 1 = 150 ($s2), DurationIndex 39 = 2000 ms ($d). The caster's run speed rate (a float ratio of the unit's base speed) is read 0 ms before a cast (control, no cast in the before phase) and 500 ms after a real cast of 680700 on the caster; the tooltip's +150% gives 2.5 times the control reading (expected_ratio). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries 'Rush forward at a high speed for 2 seconds.' for 680700 (no figure for the speed); ascension-data advancement.tsv lists Sun Stride only as a node; coa-history spell 680700 Sun Stride: 382 SPELL_AURA_APPLIED events in 34 logs, no speed or duration reading; nothing found beyond the tooltip and the DBC for the values."
+    },
+    {
+      "spell": 680700,
+      "kind": "metric_delta",
+      "trigger_spell": 680700,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 9000,
+      "name": "Sun Stride (frees the caster from a slow)",
+      "variant": "frees_slow",
+      "label_suffix": "frees_slow",
+      "quote": "Also frees the caster from slows and roots.",
+      "metric": "aura",
+      "fields": {
+        "spell": 12323
+      },
+      "measure_actor": "caster",
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 300,
+      "strike": {
+        "spell": 12323,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "in_before": true
+      },
+      "observe_source": "680700 Sun Stride Effect[0] aura 77 MECHANIC_IMMUNITY MiscValue 7 (root) and Effect[2] aura 77 MiscValue 11 (snare). A real cast of Piercing Howl 12323 by the striker lands on the caster in both phases; the before phase (no Sun Stride cast, control) still shows the slow on the caster (read 1), the after phase casts Sun Stride on the caster 300 ms after the strike and reads the slow gone (0). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries \"Rush forward at a high speed for 2 seconds.\" and nothing on removal; coa-history spell 680700 382 SPELL_AURA_APPLIED events in 34 logs, no removal reading; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680700,
+      "kind": "metric_delta",
+      "trigger_spell": 680700,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 10000,
+      "name": "Sun Stride (frees the caster from a root)",
+      "variant": "frees_root",
+      "label_suffix": "frees_root",
+      "quote": "Also frees the caster from slows and roots.",
+      "metric": "aura",
+      "fields": {
+        "spell": 47021
+      },
+      "measure_actor": "caster",
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 300,
+      "strike": {
+        "spell": 47021,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "in_before": true
+      },
+      "observe_source": "680700 Sun Stride Effect[0] aura 77 MECHANIC_IMMUNITY MiscValue 7 (root) and Effect[2] aura 77 MiscValue 11 (snare). A real cast of Net 47021 by the striker lands on the caster in both phases; the before phase (no Sun Stride cast, control) still shows the root on the caster (read 1), the after phase casts Sun Stride on the caster 300 ms after the strike and reads the root gone (0). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries \"Rush forward at a high speed for 2 seconds.\" and nothing on removal; coa-history spell 680700 382 SPELL_AURA_APPLIED events in 34 logs, no removal reading; nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 680700,
@@ -4081,41 +4185,56 @@
       "observe_source": "760379 Sunstorm Effect[0] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 1000 ($t1 = 1 sec), EffectTriggerSpell 572848 (Justice, top rank), DurationIndex 32 ($d = 6000 ms); Effect[1] aura 147 SPELL_AURA_MECHANIC_IMMUNITY_MASK, MiscValue 1733; Effect[2] aura 263 SPELL_AURA_ALLOW_ONLY_ABILITY. The remaining duration of 760379 on the caster 50 ms after a real cast reads 5950 within 100 ms, which excludes 10% (600 ms) either side of 6000 ms; 0 before the cast (control). Reference search 2026-11-22: server DBC 760379 description; ascension-data advancement.tsv lists Sunstorm as a Valkyr talent node only; bindmysoul snapshot has no entry for 760379; coa-history spell 760379: 0 events in 186 logs, Justice 520359 123 SPELL_CAST_SUCCESS in 1 log (no Sunstorm sequence); nothing found beyond the tooltip and the DBC for the values."
     },
     {
-      "spell": 704947,
+      "spell": 760379,
       "kind": "metric_delta",
-      "trigger_spell": 807974,
-      "gate_spell": 704947,
-      "target": "dummy",
-      "measure_actor": "dummy",
+      "trigger_spell": 760379,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "name": "Sunstorm (still on at 5.5 s)",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "Instantly cast Justice and for the next $d you will cast Justice every $t1 sec.",
       "metric": "aura",
       "fields": {
-        "spell": 807974
+        "spell": 760379
       },
-      "phase_auras": [
-        [
-          807440,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "cast_power": 1363,
-      "disable_regeneration": true,
-      "expire_ms": 5000,
-      "before_expected": 1,
-      "quote": "Reduces the channel time of Sunslam by 1 sec.",
-      "name": "Radiant Marks (Sunslam channel still on at 2.75 s)",
-      "variant": "held",
-      "label_suffix": "held",
-      "wait_ms": 2750,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 5500,
+      "observe_source": "760379 DurationIndex 32 = 6000 ms (5950 as read, $d). The aura on the caster is read at about 5.5 s of game time after the cast (window 5480..5570 ms): present excludes a duration 10% short (5355 ms). Reference search 2026-11-22: server DBC 760379 description; ascension-data advancement.tsv lists Sunstorm as a Valkyr node only; bindmysoul snapshot has no entry; coa-history spell 760379 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
       "game_time": {
         "after": [
-          2720,
-          2830
+          5480,
+          5570
         ]
+      }
+    },
+    {
+      "spell": 760379,
+      "kind": "metric_delta",
+      "trigger_spell": 760379,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "name": "Sunstorm (gone by 6.4 s)",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "quote": "Instantly cast Justice and for the next $d you will cast Justice every $t1 sec.",
+      "metric": "aura",
+      "fields": {
+        "spell": 760379
       },
-      "expected": 1,
-      "observe_source": "704947 Radiant Marks Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints -1001 (-1000 ms), class mask word 2 = 16777216 = Sunslam's SpellFamilyFlags[2]; Sunslam 807974 (top rank) DurationIndex 35 = 4000 ms (SpellDuration 35), so 3000 ms with the passive. The channel's aura on the dummy (807974, applied at TARGET_UNIT_TARGET_ENEMY) is read; Sunslam needs the Dawn state aura 807440 on the caster (CasterAuraSpell), set before the cast as a named precondition fixture in both phases. Read 2750 ms of game time after the cast: the aura is present with and without the passive, so the reduced channel is longer than 2750 ms and excludes 2700 ms (10% below 3000 ms). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries 'Reduces the channel time of Sunslam by 1 sec.' for 704947 and no figure for the channel length; ascension-data advancement.tsv lists Radiant Marks as a Valkyr talent node; coa-history spell 704947 0 events in 186 logs (a passive), Sunslam 805629 83 SPELL_AURA_APPLIED events in 1 log with no duration reading; nothing found beyond the tooltip and the DBC for the values."
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 6400,
+      "observe_source": "760379 DurationIndex 32 = 6000 ms (5950 as read, $d). The aura on the caster is read at about 6.4 s of game time after the cast (window 6380..6470 ms): absent excludes a duration 10% long (6545 ms). Reference search 2026-11-22: server DBC 760379 description; ascension-data advancement.tsv lists Sunstorm as a Valkyr node only; bindmysoul snapshot has no entry; coa-history spell 760379 0 events in 186 logs; nothing found beyond the tooltip and the DBC.",
+      "game_time": {
+        "after": [
+          6380,
+          6470
+        ]
+      }
     },
     {
       "spell": 704947,
@@ -4141,18 +4260,55 @@
       "expire_ms": 5000,
       "before_expected": 1,
       "quote": "Reduces the channel time of Sunslam by 1 sec.",
-      "name": "Radiant Marks (Sunslam channel over by 3.3 s)",
-      "variant": "gone",
-      "label_suffix": "gone",
-      "wait_ms": 3300,
+      "name": "Radiant Marks (Sunslam channel still on at 2.93 s)",
+      "variant": "held",
+      "label_suffix": "held",
+      "wait_ms": 2930,
       "game_time": {
         "after": [
-          3290,
-          3400
+          2915,
+          2990
+        ]
+      },
+      "expected": 1,
+      "observe_source": "704947 Radiant Marks Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints -1001 (-1000 ms), class mask word 2 = 16777216 = Sunslam's SpellFamilyFlags[2]; Sunslam 807974 (top rank) DurationIndex 35 = 4000 ms (SpellDuration 35), so 3000 ms with the passive. The channel's aura on the dummy (807974, applied at TARGET_UNIT_TARGET_ENEMY) is read; Sunslam needs the Dawn state aura 807440 on the caster (CasterAuraSpell), set before the cast as a named precondition fixture in both phases. Read 2750 ms of game time after the cast: the aura is present with and without the passive, so the reduced channel is longer than 2750 ms and excludes 2700 ms (10% below 3000 ms). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries 'Reduces the channel time of Sunslam by 1 sec.' for 704947 and no figure for the channel length; ascension-data advancement.tsv lists Radiant Marks as a Valkyr talent node; coa-history spell 704947 0 events in 186 logs (a passive), Sunslam 805629 83 SPELL_AURA_APPLIED events in 1 log with no duration reading; nothing found beyond the tooltip and the DBC for the values. Bracket of the stated 1 sec (reduced channel 3000 ms): the held read at about 2.93 s of game time (window 2915..2990 ms) excludes a reduction of 1100 ms (channel 2900 ms) because that channel would be over."
+    },
+    {
+      "spell": 704947,
+      "kind": "metric_delta",
+      "trigger_spell": 807974,
+      "gate_spell": 704947,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 807974
+      },
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "expire_ms": 5000,
+      "before_expected": 1,
+      "quote": "Reduces the channel time of Sunslam by 1 sec.",
+      "name": "Radiant Marks (Sunslam channel over by 3.07 s)",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "wait_ms": 3070,
+      "game_time": {
+        "after": [
+          3040,
+          3095
         ]
       },
       "expected": 0,
-      "observe_source": "704947 Radiant Marks Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints -1001 (-1000 ms), class mask word 2 = 16777216 = Sunslam's SpellFamilyFlags[2]; Sunslam 807974 (top rank) DurationIndex 35 = 4000 ms (SpellDuration 35), so 3000 ms with the passive. The channel's aura on the dummy (807974, applied at TARGET_UNIT_TARGET_ENEMY) is read; Sunslam needs the Dawn state aura 807440 on the caster (CasterAuraSpell), set before the cast as a named precondition fixture in both phases. Read 3300 ms of game time after the cast: present without the passive (the 4000 ms control phase) and gone with it, so the reduced channel is at most 3300 ms (excludes 3300 ms and above, 10% above 3000 ms), and with held it lies in (2750, 3300) ms, 1000 ms under the control's 4000 ms. Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries 'Reduces the channel time of Sunslam by 1 sec.' for 704947 and no figure for the channel length; ascension-data advancement.tsv lists Radiant Marks as a Valkyr talent node; coa-history spell 704947 0 events in 186 logs (a passive), Sunslam 805629 83 SPELL_AURA_APPLIED events in 1 log with no duration reading; nothing found beyond the tooltip and the DBC for the values."
+      "observe_source": "704947 Radiant Marks Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints -1001 (-1000 ms), class mask word 2 = 16777216 = Sunslam's SpellFamilyFlags[2]; Sunslam 807974 (top rank) DurationIndex 35 = 4000 ms (SpellDuration 35), so 3000 ms with the passive. The channel's aura on the dummy (807974, applied at TARGET_UNIT_TARGET_ENEMY) is read; Sunslam needs the Dawn state aura 807440 on the caster (CasterAuraSpell), set before the cast as a named precondition fixture in both phases. Read 3300 ms of game time after the cast: present without the passive (the 4000 ms control phase) and gone with it, so the reduced channel is at most 3300 ms (excludes 3300 ms and above, 10% above 3000 ms), and with held it lies in (2750, 3300) ms, 1000 ms under the control's 4000 ms. Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries 'Reduces the channel time of Sunslam by 1 sec.' for 704947 and no figure for the channel length; ascension-data advancement.tsv lists Radiant Marks as a Valkyr talent node; coa-history spell 704947 0 events in 186 logs (a passive), Sunslam 805629 83 SPELL_AURA_APPLIED events in 1 log with no duration reading; nothing found beyond the tooltip and the DBC for the values. Bracket of the stated 1 sec (reduced channel 3000 ms): the gone read at about 3.07 s of game time (window 3040..3095 ms) excludes a reduction of 900 ms (channel 3100 ms) because that channel would still be on; the unreduced 4000 ms channel still reads on at that time (before reading 1)."
     },
     {
       "spell": 680700,
@@ -4231,7 +4387,7 @@
       "variant": "health",
       "label_suffix": "health",
       "quote": "and grants health equal to the base armor value provided by your shield.",
-      "metric": "max_health",
+      "metric": "health",
       "expected": 48,
       "expected_gain": 48,
       "tolerance": 1.0,
@@ -4304,7 +4460,7 @@
       "kind": "metric_delta",
       "variant": "instant",
       "label_suffix": "instant",
-      "quote": "chance to grant you Spears of Glory.",
+      "quote": "Your next Dawnsear within $d is instant cast",
       "expected": 0,
       "before_expected": 1,
       "trigger_spell": 554406,
@@ -4332,7 +4488,7 @@
       "kind": "hit_ratio",
       "variant": "damage",
       "label_suffix": "damage",
-      "quote": "chance to grant you Spears of Glory.",
+      "quote": "and deals $s2% increased damage.",
       "expected": 1.25,
       "observe_spell": 554406,
       "control": {
@@ -4455,6 +4611,62 @@
       "cast_power": 1363,
       "before_expected": 0,
       "expire_ms": 2000,
+      "name": "Sun's Gift (Replenishment ticks not yet at 4.7 s)",
+      "variant": "tick_low",
+      "label_suffix": "tick_low",
+      "quote": "grants allies Replenishment.",
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 1257670,
+        "power": 0,
+        "target": "caster"
+      },
+      "expected": 0,
+      "wait_ms": 4700,
+      "observe_source": "1257670 Effect[0] aura 24 PERIODIC_ENERGIZE EffectAmplitude 5000 ($t1 of the aura tooltip, \"per 5 sec\"). The energize events of 1257670 on the caster are counted at about 4.7 s of game time after the Horusath Blast cast (window 4680..4780 ms): 0 excludes a period of 4500 ms or less (the first tick would have landed). Together they bracket the stated 5 sec on both sides by 10%. Reference search 2026-11-22: server DBC 1257670 and 1257669 descriptions; bindmysoul and ascension-data searched for Sun's Gift: nothing found beyond the tooltip (the sidekick snapshot carries an older \"Restores 1% maximum mana every 5 sec\" state); nothing found beyond the tooltip and the DBC for the values.",
+      "game_time": {
+        "after": [
+          4680,
+          4780
+        ]
+      }
+    },
+    {
+      "spell": 680656,
+      "kind": "metric_delta",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "cast_power": 1363,
+      "before_expected": 0,
+      "expire_ms": 2000,
+      "name": "Sun's Gift (Replenishment ticks once by 5.3 s)",
+      "variant": "tick_high",
+      "label_suffix": "tick_high",
+      "quote": "grants allies Replenishment.",
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 1257670,
+        "power": 0,
+        "target": "caster"
+      },
+      "expected": 1,
+      "wait_ms": 5300,
+      "observe_source": "1257670 Effect[0] aura 24 PERIODIC_ENERGIZE EffectAmplitude 5000 ($t1 of the aura tooltip, \"per 5 sec\"). The energize events of 1257670 on the caster are counted at about 5.3 s of game time after the Horusath Blast cast (window 5280..5380 ms): exactly 1 excludes a period of 5500 ms (no tick yet) and one of 2650 ms or less (two ticks). Together they bracket the stated 5 sec on both sides by 10%. Reference search 2026-11-22: server DBC 1257670 and 1257669 descriptions; bindmysoul and ascension-data searched for Sun's Gift: nothing found beyond the tooltip (the sidekick snapshot carries an older \"Restores 1% maximum mana every 5 sec\" state); nothing found beyond the tooltip and the DBC for the values.",
+      "game_time": {
+        "after": [
+          5280,
+          5380
+        ]
+      }
+    },
+    {
+      "spell": 680656,
+      "kind": "metric_delta",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "cast_power": 1363,
+      "before_expected": 0,
+      "expire_ms": 2000,
       "name": "Sun's Gift (Replenishment granted by a Horusath Blast)",
       "variant": "granted",
       "label_suffix": "granted",
@@ -4481,14 +4693,14 @@
       "fields": {
         "spell": 1257670
       },
-      "name": "Sun's Gift (Replenishment still on at 13.6 s)",
+      "name": "Sun's Gift (Replenishment still on at 14.3 s)",
       "variant": "held",
       "label_suffix": "held",
-      "wait_ms": 13600,
+      "wait_ms": 14300,
       "game_time": {
         "after": [
-          13550,
-          13750
+          14280,
+          14380
         ]
       },
       "expected": 1,
@@ -4507,18 +4719,18 @@
       "fields": {
         "spell": 1257670
       },
-      "name": "Sun's Gift (Replenishment gone by 16.5 s)",
+      "name": "Sun's Gift (Replenishment gone by 15.6 s)",
       "variant": "gone",
       "label_suffix": "gone",
-      "wait_ms": 16500,
+      "wait_ms": 15600,
       "game_time": {
         "after": [
-          16450,
-          16650
+          15580,
+          15680
         ]
       },
       "expected": 0,
-      "observe_source": "680656 Sun's Gift Effect[1] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 1257670, class mask word 1 = 64 = Horusath Blast; 1257670 Replenishment DurationIndex 8 ($1257669d = 15000 ms). The aura on the caster is read with game-time stamps after a real Horusath Blast 572801 (680656 learned between the phases). Read 16500 ms of game time after the cast: gone, so the duration is below 16500 ms and excludes 16500 ms (10% above 15000 ms); with held it lies in (13.6, 16.5) s. The first design read the remaining duration 50 ms after the cast and got 14622 and 13123 ms in two runs: that read is not a stable function of the cast time. Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries 'Restores 1% maximum mana every 5 sec to allies within 100 yds for 15 seconds' (older state, our Spell.dbc reads 5%); coa-history spell 1257670 Replenishment: 90283 SPELL_PERIODIC_ENERGIZE events in 36 logs; nothing found beyond the tooltip and the DBC for the values."
+      "observe_source": "680656 Sun's Gift Effect[1] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 1257670, class mask word 1 = 64 = Horusath Blast; 1257670 Replenishment DurationIndex 8 ($1257669d = 15000 ms). The aura on the caster is read with game-time stamps after a real Horusath Blast 572801 (680656 learned between the phases). Read 16500 ms of game time after the cast: gone, so the duration is below 16500 ms and excludes 16500 ms (10% above 15000 ms); with held it lies in (13.6, 16.5) s. The first design read the remaining duration 50 ms after the cast and got 14622 and 13123 ms in two runs: that read is not a stable function of the cast time. Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries 'Restores 1% maximum mana every 5 sec to allies within 100 yds for 15 seconds' (older state, our Spell.dbc reads 5%); coa-history spell 1257670 Replenishment: 90283 SPELL_PERIODIC_ENERGIZE events in 36 logs; nothing found beyond the tooltip and the DBC for the values. Bracket of the 15000 ms duration (1257669 DurationIndex 8): held at about 14.3 s excludes a duration 10% short (13500 ms), gone at about 15.6 s excludes one 10% long (16500 ms)."
     }
   ],
   "player_observations": [],
