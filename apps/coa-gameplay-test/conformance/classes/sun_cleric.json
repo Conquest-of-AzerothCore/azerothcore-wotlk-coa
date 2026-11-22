@@ -27347,6 +27347,70 @@
       "expected": 1,
       "observe_source": "Control of wrath_extra for the cause 300353: the same scenario (Holy Form 805301 by set_aura as a precondition fixture, 984954, seven nearby dummies at 3.5 to 6.5 yd, one Gavel of Wrath 800617 at the dummy in the after phase) except that the harness learns the Gavel 800617 as the gate and never learns 300353 Heaven's Appraisal. Expected 1: the primary alone, so Holy Form and the Gavel do not grant the 5 additional strikes without 300353. crit: 984954 removes spell crit (Effect[1] aura 57 -1001%) but raises weapon crit by 101% (Effect[0] aura 52, ADR 0742), so every Gavel of Wrath hit (800617, melee) is critical; a critical hit is still one damage event, so the roll cannot move a count; hit and expertise ratings of the class file exclude a miss, dodge or parry of the primary. Reference search 2026-11-22: nothing found beyond the tooltip and the server DBC.",
       "cast_in_before": false
+    },
+    {
+      "spell": 301266,
+      "name": "Solar Concord (Horusath Blast recast in Sunrise)",
+      "kind": "cost_gate",
+      "variant": "reset_horusath",
+      "label_suffix": "reset_horusath",
+      "quote": "Resets the cooldown of Horusath Blast while in Sunrise and Rapture while in Sunset and causes their damage dealt to launch a Solar Flare.",
+      "gated_spell": 500154,
+      "resource": "cooldown",
+      "reduction": 0,
+      "resets": true,
+      "target": "dummy",
+      "margin_ms": 1600,
+      "after_casts": [
+        [
+          301266,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "cast_power": 1363,
+      "cast_auras": [
+        {
+          "spell": 301266,
+          "auras": [
+            500477
+          ],
+          "reason": "Sunrise 500477 and the Sunrise-or-Sunset checker 500643 (CasterAuraSpell of 301266) are set on the caster before the Solar Concord cast: named precondition fixtures; the claim measured is the cooldown reset the cast applies, not the phase condition."
+        }
+      ],
+      "observe_source": "301266 Solar Concord: its aura apply handler (AscensionSunClericAuras.cpp:101-106) calls Reduce(player, 500154, INT32_MAX) in Sunrise and Reduce(player, 806477, INT32_MAX) in Sunset; the installed DBC also resets both cooldowns on every cast with no phase gate: Effect[1] TRIGGER_SPELL 302899 and Effect[2] TRIGGER_SPELL 301268 (301268 Effect[0] 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN MiscValue 500154; 302899 Effect[0] 195 MiscValue 806477; neither has a CasterAuraSpell; handler SpellEffects.cpp:1103-1112). Horusath Blast has RecoveryTime 25000 ms. The cooldown cost_gate (resets) casts Horusath Blast as the priming cast, then Solar Concord 1600 ms later (the cast is made in the with arm only), then attempts Horusath Blast again 1600 ms after that (past the global cooldown of the Solar Concord cast), inside its 25000 ms cooldown: refused without the Solar Concord cast (the control, SPELL_FAILED_NOT_READY), accepted with it. The accepted or refused cast is an event (cast_failure), not a cooldown readback. The without arm drops both the Solar Concord cast and the phase aura, so it proves the reset by the cast and not the words \"while in Sunrise\": that phase condition stays open (tool need: a cost_gate arm with the cast in the other phase, expected refused)."
+    },
+    {
+      "spell": 301266,
+      "name": "Solar Concord (Rapture recast in Sunset)",
+      "kind": "cost_gate",
+      "variant": "reset_rapture",
+      "label_suffix": "reset_rapture",
+      "quote": "Resets the cooldown of Horusath Blast while in Sunrise and Rapture while in Sunset and causes their damage dealt to launch a Solar Flare.",
+      "gated_spell": 806477,
+      "resource": "cooldown",
+      "reduction": 0,
+      "resets": true,
+      "target": "dummy",
+      "margin_ms": 1600,
+      "after_casts": [
+        [
+          301266,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 3200,
+      "cast_power": 1363,
+      "cast_auras": [
+        {
+          "spell": 301266,
+          "auras": [
+            500511
+          ],
+          "reason": "Sunset 500511 and the Sunrise-or-Sunset checker 500643 (CasterAuraSpell of 301266) are set on the caster before the Solar Concord cast: named precondition fixtures; the claim measured is the cooldown reset the cast applies, not the phase condition."
+        }
+      ],
+      "observe_source": "301266 Solar Concord: its aura apply handler (AscensionSunClericAuras.cpp:101-106) calls Reduce(player, 500154, INT32_MAX) in Sunrise and Reduce(player, 806477, INT32_MAX) in Sunset; the installed DBC also resets both cooldowns on every cast with no phase gate: Effect[1] TRIGGER_SPELL 302899 and Effect[2] TRIGGER_SPELL 301268 (301268 Effect[0] 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN MiscValue 500154; 302899 Effect[0] 195 MiscValue 806477; neither has a CasterAuraSpell; handler SpellEffects.cpp:1103-1112). Rapture has RecoveryTime 20000 ms. The cooldown cost_gate (resets) casts Rapture as the priming cast, then Solar Concord 3200 ms later (the cast is made in the with arm only), then attempts Rapture again 1600 ms after that (past the global cooldown of the Solar Concord cast), inside its 20000 ms cooldown: refused without the Solar Concord cast (the control, SPELL_FAILED_NOT_READY), accepted with it. The accepted or refused cast is an event (cast_failure), not a cooldown readback. The without arm drops both the Solar Concord cast and the phase aura, so it proves the reset by the cast and not the words \"while in Sunset\": that phase condition stays open (tool need: a cost_gate arm with the cast in the other phase, expected refused)."
     }
   ],
   "player_observations": [],

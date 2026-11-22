@@ -982,7 +982,25 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "Resets the cooldown of Horusath Blast while in Sunrise and Rapture while in Sunset",
+        "claim": "Resets the cooldown of Horusath Blast",
+        "labels": [
+          "301266 cost_gate 500154 reset_horusath without",
+          "301266 cost_gate 500154 reset_horusath with"
+        ]
+      },
+      {
+        "claim": "while in Sunrise",
+        "labels": []
+      },
+      {
+        "claim": "and Rapture",
+        "labels": [
+          "301266 cost_gate 806477 reset_rapture without",
+          "301266 cost_gate 806477 reset_rapture with"
+        ]
+      },
+      {
+        "claim": "while in Sunset",
         "labels": []
       },
       {
@@ -992,7 +1010,8 @@
           "301266 behaviour_metric_delta flare_damage_rapture"
         ]
       }
-    ]
+    ],
+    "reason": "Reset arms: cost_gate resets, Solar Concord cast with the phase aura and the checker 500643 set as named precondition fixtures; control = the same sequence without the Solar Concord cast and without the phase aura. The DBC resets both cooldowns through 301268 / 302899 with no phase gate, so the arms prove the reset by the cast and not the words \"while in Sunrise\" / \"while in Sunset\", which stay open (tool need: a cost_gate arm with the cast in the other phase, expected refused; an accepted recast there would be a server finding for the owner). Reference search 2026-11-22: coa-history spell 301266 (88 casts, no cooldown event); nothing else found."
   },
   {
     "spell": 301266,
@@ -5078,12 +5097,20 @@
   {
     "spell": 802935,
     "clause": "and auto attacks now have a $h% chance to restore $504619s1% of your maximum mana.",
-    "labels": [
-      "802935 effect_value #1",
-      "802935 effect_value 504619e0 #2"
-    ],
     "kind": "claim",
-    "reason": "Energize source fixed (Sun Cleric ADR 0019, mentor D-93): the proc's mana is logged as Energize 3% 504619, threat-free, no longer as Vow of Grace 504877; regression sun-cleric-sunsworn-mana-source-504619.json (control without Sunsworn). Rate and amount not entered: the procs kind divides both hands' events by the main-hand trials (batch 6 chunk a3, tool need 1)."
+    "reason": "Energize source fixed (Sun Cleric ADR 0019, mentor D-93): the proc's mana is logged as Energize 3% 504619, threat-free, no longer as Vow of Grace 504877; regression sun-cleric-sunsworn-mana-source-504619.json (control without Sunsworn). Rate and amount stay open: a proc entry for 802935 was tried (pair 20261122-124700 / -125240) and removed: the character dual-wields 2529 in both hands (Titan's Grip), the procs kind divides both hands' events by the main-hand trials, proc_rate read 0.195 and 0.194 against 0.10 (alert in both runs, about twice the chance), and the energize amount (86 = floor(3% of max mana) in both runs, 3% from 504619 Effect[0] BasePoints 2 + 1) had no control arm in the pair (an attack trigger takes no baseline). Tool needs: per-hand trials for the procs kind (batch 6 group 5 item 4) and a baseline arm for an attack trigger. Reference search 2026-11-22: bindmysoul snapshot \"10% chance to restore 3% of your maximum mana\" (same figures); nothing else found.",
+    "claims": [
+      {
+        "claim": "auto attacks now have a $h% chance",
+        "labels": []
+      },
+      {
+        "claim": "to restore $504619s1% of your maximum mana",
+        "labels": [
+          "802935 effect_value 504619e0 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 804032,
