@@ -6224,7 +6224,24 @@
         "wait_ms": 300,
         "in_before": true
       },
-      "observe_source": "680700 Sun Stride Effect[0] aura 77 MECHANIC_IMMUNITY MiscValue 7 (root) and Effect[2] aura 77 MiscValue 11 (snare). A real cast of Piercing Howl 12323 by the striker lands on the caster in both phases; the before phase (no Sun Stride cast, control) still shows the slow on the caster (read 1), the after phase casts Sun Stride on the caster 300 ms after the strike and reads the slow gone (0). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries \"Rush forward at a high speed for 2 seconds.\" and nothing on removal; coa-history spell 680700 382 SPELL_AURA_APPLIED events in 34 logs, no removal reading; nothing found beyond the tooltip and the DBC."
+      "observe_source": "680700 Sun Stride Effect[0] aura 77 MECHANIC_IMMUNITY MiscValue 7 (root) and Effect[2] aura 77 MiscValue 11 (snare). A real cast of Piercing Howl 12323 by the striker lands on the caster in both phases; the before phase (no Sun Stride cast, control) still shows the slow on the caster (read 1), the after phase casts Sun Stride on the caster 300 ms after the strike and reads the slow gone (0). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries \"Rush forward at a high speed for 2 seconds.\" and nothing on removal; coa-history spell 680700 382 SPELL_AURA_APPLIED events in 34 logs, no removal reading; nothing found beyond the tooltip and the DBC. Landing proof: an aura_apply_count arm of 12323 on the caster reads 1 then 2 (one landed Piercing Howl per phase, counted before the removal read of the after phase and before Sun Stride, whose immunity refuses a later application); a miss or a refusal turns the verdict to alert, never to a pass on an absent slow. Residual false-alert probability 0: Piercing Howl rolls the magic table, where the striker's spell hit bonus 100 clamps the hit chance to 10000 (Unit.cpp:4036-4050).",
+      "ally_arm": {
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 12323
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "one Piercing Howl cast per phase: its application on the caster is counted (OnAuraApply, Unit.cpp:5466 and :5607), 1 after the before phase and 2 after the after phase; the Howl cannot miss (magic table, Unit.cpp:4025-4050 with the striker's spell_hit_bonus 100, behaviours.py striker_creature) and Sun Stride is cast after the strike, so the count shows the slow landed in the after phase before the cast, never a refused one"
+          }
+        ]
+      }
     },
     {
       "spell": 680700,
@@ -6253,7 +6270,24 @@
         "wait_ms": 300,
         "in_before": true
       },
-      "observe_source": "680700 Sun Stride Effect[0] aura 77 MECHANIC_IMMUNITY MiscValue 7 (root) and Effect[2] aura 77 MiscValue 11 (snare). A real cast of Net 47021 by the striker lands on the caster in both phases; the before phase (no Sun Stride cast, control) still shows the root on the caster (read 1), the after phase casts Sun Stride on the caster 300 ms after the strike and reads the root gone (0). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries \"Rush forward at a high speed for 2 seconds.\" and nothing on removal; coa-history spell 680700 382 SPELL_AURA_APPLIED events in 34 logs, no removal reading; nothing found beyond the tooltip and the DBC. Net can miss: the striker casts it three times 300 ms apart in each phase (a landed application is enough, the later ones refresh it), and the phases are 25000 ms apart so the diminishing returns of the root reset between them (first run of this entry: the before-phase Net did not land once in five observations)."
+      "observe_source": "680700 Sun Stride Effect[0] aura 77 MECHANIC_IMMUNITY MiscValue 7 (root) and Effect[2] aura 77 MiscValue 11 (snare). A real cast of Net 47021 by the striker lands on the caster in both phases; the before phase (no Sun Stride cast, control) still shows the root on the caster (read 1), the after phase casts Sun Stride on the caster 300 ms after the strike and reads the root gone (0). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries \"Rush forward at a high speed for 2 seconds.\" and nothing on removal; coa-history spell 680700 382 SPELL_AURA_APPLIED events in 34 logs, no removal reading; nothing found beyond the tooltip and the DBC. Net can miss: the striker casts it three times 300 ms apart in each phase (a landed application is enough, the later ones refresh it), and the phases are 25000 ms apart so the diminishing returns of the root reset between them (first run of this entry: the before-phase Net did not land once in five observations). Landing proof: an aura_apply_count arm of 47021 on the caster, judged as 3 +- 2 then 4 +- 2, which holds only if Net landed at least once in the before phase (1..3) and at least once more in the after phase (cumulative 2..6) before Sun Stride was cast. Net is a ranged-class spell that rolls the ranged attack table (Unit.cpp:3759-3760, 3782-3790): the miss chance is 5% (Unit.cpp:4350) plus the victim's defence term (not read: the reference character carries no defence rating in the class file) and cannot exceed 60% (Unit.cpp:16952-16957). A phase without a landed Net turns the verdict to alert, never to a pass. False-alert probability per pair, 4 phases of 3 casts at a miss chance of 5%: 4 x 0.05^3 = 5.0e-4, at most 0.1% while the miss chance is at most 6.3%.",
+      "ally_arm": {
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 47021
+            },
+            "before_expected": 3,
+            "expected": 4,
+            "tolerance": 2,
+            "source": "Net lands 1 to 3 times per phase (3 casts, each landed one counted by OnAuraApply, Unit.cpp:5466 and :5607): the cumulative count lies in 1..3 after the before phase and in 2..6 after the after phase, which 3 +- 2 and 4 +- 2 cover; the lower bounds (1, then 2) are the proof that the root landed in the after phase, before Sun Stride (whose immunity refuses a later application)"
+          }
+        ]
+      }
     },
     {
       "spell": 680700,
@@ -8872,6 +8906,83 @@
         ]
       },
       "observe_source": "534267 Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT, BasePoints 74 (+1 = 75), EffectTriggerSpell 801215; AscensionSunClericEvents.cpp:136 names Daybreak (root 500147, rank 503624) for a heal and :344-354 collects Allies(player, target, Radius(801215)), removes the target, and heals each of up to MaxAffectedTargets 5 with Copy(player, ally, 801215, 75% of the heal). Daybreak is cast at ally in both phases (534267 learned between them), the four other allies at 5000 of 10000 health; the heal events of 801215 are read on the caster per recipient. The 75% amount is not expressed: Daybreak rolls a 32-sided die, there is no arm-to-arm ratio in the option, and the cap and the lowest-health order need a sixth candidate (tool need returned). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 704908,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "gate_spell": 704908,
+      "trigger_spell": 800231,
+      "setup_casts": [
+        500154
+      ],
+      "setup_wait_ms": 1600,
+      "wait_ms": 6500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Burning Heat (Sun Ray damage at 10000 spell power)",
+      "variant": "sun_ray_sp",
+      "label_suffix": "sun_ray_sp",
+      "quote": "Casting Horusath Blast is now guaranteed to transform your next Sunflare into Sun Ray.",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504764,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 10808.5,
+      "tolerance": 541,
+      "observe_source": "Spell power arm of sun_ray_damage in the same pair: the streamed Sun Ray text ${$m1+0+$sph*1} with Sun Ray 504764 Effect[0] SCHOOL_DAMAGE BasePoints 772, DieSides 72 (a roll 773 to 844, mean 808.5) gives 808.5 at spell power 0 (the sun_ray_damage entry, band 36.5) and 808.5 + int32(1 x 10000) = 10808.5 at 10000 spell power (player_spell_power hit_arm, harness fixture; the Holy spell power read before the reading is recorded on the verdict as the spell power the hit ran at). Judged in the 5% band (541), which excludes a coefficient of 0.9 or 1.1; the contrast on the same build is the sun_ray_damage entry. The Sun Ray is produced as in variant sun_ray_damage. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      }
+    },
+    {
+      "spell": 680700,
+      "name": "Sun Stride (aura lasts 2 s)",
+      "kind": "metric_delta",
+      "variant": "duration_window",
+      "label_suffix": "duration_window",
+      "quote": "Increases your movement speed by $s2% for $d.",
+      "trigger_spell": 680700,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 680700
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1900,
+      "expiry_wait_ms": 200,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          1810,
+          1990
+        ],
+        "expired": [
+          2050,
+          2190
+        ]
+      },
+      "observe_source": "680700 DurationIndex 39 = 2000 ms ($d). One real cast of 680700 on the caster: its aura is present when read 1810..1990 ms after the cast (game time) and gone when read 2050..2190 ms after it, so the duration lies between 1810 and 2190 ms, inside 10% of 2000 (1800..2200) on both sides. Control (before): no cast, absent. This replaces the aura_duration_ms readback as the measured duration. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
     }
   ],
   "player_observations": [],

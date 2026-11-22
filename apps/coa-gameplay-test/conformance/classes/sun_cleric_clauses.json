@@ -2249,13 +2249,23 @@
   {
     "spell": 680700,
     "clause": "Increases your movement speed by $s2% for $d.",
-    "labels": [
-      "680700 aura_amount e1 #0",
-      "680700 aura_duration_ms #1",
-      "680700 behaviour_metric_delta speed",
-      "680700 behaviour_metric_delta duration"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your movement speed by 150%",
+        "labels": [
+          "680700 aura_amount e1 #0",
+          "680700 behaviour_metric_delta speed"
+        ]
+      },
+      {
+        "claim": "for 2 sec",
+        "labels": [
+          "680700 aura_duration_ms #1",
+          "680700 behaviour_metric_delta duration_window"
+        ]
+      }
+    ]
   },
   {
     "spell": 680700,
@@ -2627,12 +2637,28 @@
   {
     "spell": 704908,
     "clause": "Shine the light of the sun on an enemy, dealing ${$m1+0+$sph*1} Holy Damage and granting you Scorch Marks.",
-    "labels": [
-      "704908 behaviour_metric_delta sun_ray_damage",
-      "704908 behaviour_metric_delta scorch_granted",
-      "704908 behaviour_metric_delta scorch_granted_early"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing $m1 Holy Damage",
+        "labels": [
+          "704908 behaviour_metric_delta sun_ray_damage"
+        ]
+      },
+      {
+        "claim": "plus the $sph x 1 spell power term",
+        "labels": [
+          "704908 behaviour_metric_delta sun_ray_sp"
+        ]
+      },
+      {
+        "claim": "and granting you Scorch Marks",
+        "labels": [
+          "704908 behaviour_metric_delta scorch_granted",
+          "704908 behaviour_metric_delta scorch_granted_early"
+        ]
+      }
+    ]
   },
   {
     "spell": 704908,
