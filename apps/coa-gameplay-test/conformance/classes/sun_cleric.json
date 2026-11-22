@@ -15453,8 +15453,8 @@
       "expected": 44500,
       "tolerance": 1500,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "Judgement of the Valkyrie 300315 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -15001 (-15000 ms as read, $/1000;s1 = 15 sec), EffectSpellClassMask word 0 = 8 = SpellFamilyFlags[0] of Judgement Day 806121 (RecoveryTime 60000 ms, Spell.dbc). Judgement Day is cast for real on the dummy with and without 300315 learned between the phases, and the remaining cooldown of 806121 on the caster is read 500 ms after each cast: 59500 without the passive (control, band 1500 ms: 58000..61000) and 44500 with it, band 43000..46000, which excludes a 10% error (4500 ms) either side of the 45000 ms cooldown. Mana is set to the class base mana before the cast, regeneration off. Reference search 2026-11-22: coa-history spell 300315: 0 events (a passive); nothing found beyond the tooltip and the DBC."
+      "expire_ms": 2000,
+      "observe_source": "Judgement of the Valkyrie 300315 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -15001 (-15000 ms as read, $/1000;s1 = 15 sec), EffectSpellClassMask word 0 = 8 = SpellFamilyFlags[0] of Judgement Day 806121 (RecoveryTime 60000 ms, Spell.dbc). Judgement Day is cast for real on the dummy with and without 300315 learned between the phases, and the remaining cooldown of 806121 on the caster is read 500 ms after each cast: 59500 without the passive (control, band 1500 ms: 58000..61000) and 44500 with it, band 43000..46000, which excludes a 10% error (4500 ms) either side of the 45000 ms cooldown. Mana is set to the class base mana before the cast, regeneration off. Reference search 2026-11-22: coa-history spell 300315: 0 events (a passive); nothing found beyond the tooltip and the DBC. Diagnostic of the first attempt: the second Judgement Day cast, 1000 ms after the first, was refused by the 1500 ms global cooldown and the cooldown read 0, so expire_ms is now 2000 ms."
     },
     {
       "kind": "metric_delta",
