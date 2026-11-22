@@ -3330,9 +3330,15 @@
           1,
           "caster",
           "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
         ]
       ],
-      "observe_source": "504580 Effect[0] SCHOOL_DAMAGE, EffectBasePoints 204, EffectDieSides 34, EffectRealPointsPerLevel 1.34444 from BaseLevel 58: m1 = 204 + int(2 x 1.34444) + (1..34) = 207..240 at level 60 (rounding 3), the AP term 0.1 x 70 = 7, spell power 0, plus the block value 11 read in block_value at the server's coefficient 1.0 (the tooltip states none, see damage_block): [225, 258] for a non-critical hit. 823764 removes the dummy's magic resistance. Control: no cast, 0."
+      "observe_source": "504580 Effect[0] SCHOOL_DAMAGE, EffectBasePoints 204, EffectDieSides 34, EffectRealPointsPerLevel 1.34444 from BaseLevel 58: m1 = 204 + int(2 x 1.34444) + (1..34) = 207..240 at level 60 (rounding 3), the AP term 0.1 x 70 = 7, spell power 0, plus the block value 11 read in block_value at the server's coefficient 1.0 (the tooltip states none, see damage_block): [225, 258] for a non-critical hit. 823764 removes the dummy's magic resistance. Control: no cast, 0. Fixture 984954 keeps a critical strike out in both phases: the entry counts non-critical damage only (critical false), so a critical hit of the cast would read 0 (run 1 of base pair 7 read 0 after a completed cast; the other five runs read the expected damage)."
     },
     {
       "spell": 504580,
@@ -3365,13 +3371,19 @@
           "caster"
         ],
         [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
           8118,
           1,
           "caster",
           "caster"
         ]
       ],
-      "observe_source": "Strength 8118 effect 0 (aura 29, harness precondition fixture, amount 2000) takes Strength to 2040. Sun Cleric attack power = 2 x Strength - 10 = 4070 (StatSystem.cpp:532, reference 70 at Strength 40), block value = (1 + 2040 x 0.5 - 10) = 1011 (Player.cpp:5616). m1 = 207..240 (see damage), AP term 0.1 x 4070 = 407, spell power 0, and the block value at the coefficient the server uses, 1.0 (AscensionSunClericContracts.cpp:312): [207 + 407 + 1011, 240 + 407 + 1011] = [1625, 1658]. The tooltip gives no coefficient, so this entry measures that coefficient: 0 would read [614, 647]. Control: no cast, 0; the contrast on the same build is the damage entry at block value 11. The block values 11 and 1011 were read with the harness metric block_value (CoAGameplayTest.cpp:5114) in the counted pair 20261120-220241 / 20261120-220458 and equal these figures; the metric has no row in coverage.py METRIC_EVIDENCE (shared tool, source stage cross-class guard), so those two read entries are kept in the pair's archive only.",
+      "observe_source": "Strength 8118 effect 0 (aura 29, harness precondition fixture, amount 2000) takes Strength to 2040. Sun Cleric attack power = 2 x Strength - 10 = 4070 (StatSystem.cpp:532, reference 70 at Strength 40), block value = (1 + 2040 x 0.5 - 10) = 1011 (Player.cpp:5616). m1 = 207..240 (see damage), AP term 0.1 x 4070 = 407, spell power 0, and the block value at the coefficient the server uses, 1.0 (AscensionSunClericContracts.cpp:312): [207 + 407 + 1011, 240 + 407 + 1011] = [1625, 1658]. The tooltip gives no coefficient, so this entry measures that coefficient: 0 would read [614, 647]. Control: no cast, 0; the contrast on the same build is the damage entry at block value 11. The block values 11 and 1011 were read with the harness metric block_value (CoAGameplayTest.cpp:5114) in the counted pair 20261120-220241 / 20261120-220458 and equal these figures; the metric has no row in coverage.py METRIC_EVIDENCE (shared tool, source stage cross-class guard), so those two read entries are kept in the pair's archive only. Fixture 984954 keeps a critical strike out in both phases: the entry counts non-critical damage only (critical false), so a critical hit of the cast would read 0 (run 1 of base pair 7 read 0 after a completed cast; the other five runs read the expected damage).",
       "phase_aura_amounts": [
         [
           8118,
@@ -4563,7 +4575,7 @@
       "wait_ms": 3500,
       "expire_ms": 500,
       "expected": 11282.5,
-      "after_at_least": 11250,
+      "after_at_least": 11249,
       "after_at_most": 11315,
       "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. As damage at +10000 spell power (player fixture, both phases): + 1.03734 x 10000 = 10373.4, so 11250.1..11314.1, read as 11250..11315; the contrast that proves the $spfi*1.03734 term. Control: no cast, 0. Reference search 2026-11-20: bindmysoul Rapture text reads '111 + 200% fire SP Fire damage' against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; see the fix note in the report.",
       "player_spell_power": 10000
@@ -7566,7 +7578,7 @@
       "spares": 6,
       "radius": 10.0,
       "force_crit": "spell",
-      "observe_source": "300371 Censure Effect[0] aura 42 PROC_TRIGGER_SPELL 801582 (ProcChance 100); AscensionSunClericEvents.cpp:134 accepts an own direct damaging hit on an enemy that carries the caster's Chains of Light 806697 with Chance(player, 300371, 1000), a 1000 ms timer; :327-334 casts Chains of Light 806697 on the first other valid enemy within Nearby(target, 10) that does not carry it yet (a hardcoded radius, the tooltip says only 'a nearby enemy'). Chains of Light 806697 is applied by the ability 801524 (Effect[0] TRIGGER_SPELL 806697), which the arms cast for real on the primary dummy. Glare 807870 (Effect[1] SCHOOL_DAMAGE, a direct hit, with a 5 s aura) is cast at the primary dummy after the seed, with the spell crit fixture so that the hit is counted; six spare dummies stand within 10 yd of the primary one. Control: the same seed and Sunflare before 300371 is learned (no copy). Treatment: learned after the seed; exactly one new copy per hit while a spare stays free. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
+      "observe_source": "300371 Censure Effect[0] aura 42 PROC_TRIGGER_SPELL 801582 (ProcChance 100); AscensionSunClericEvents.cpp:134 accepts an own direct damaging hit on an enemy that carries the caster's Chains of Light 806697 with Chance(player, 300371, 1000), a 1000 ms timer; :327-334 casts Chains of Light 806697 on the first other valid enemy within Nearby(target, 10) that does not carry it yet (a hardcoded radius, the tooltip says only 'a nearby enemy'). Chains of Light 806697 is applied by the ability 801524 (Effect[0] TRIGGER_SPELL 806697), which the arms cast for real on the primary dummy. Glare 807870 (Effect[1] SCHOOL_DAMAGE, a direct hit, with a 5 s aura, but AttributesEx2 0x20000000 = SPELL_ATTR2_CANT_CRIT, so it can never be a critical strike: the cause of the 0 crits in both arms; the replacement Sunflare 800231 has DurationIndex 0 and kinds/spread_per_crit.py:58 raises Unreadable on it: tool need, see the report) is cast at the primary dummy after the seed, with the spell crit fixture so that the hit is counted as a critical strike; the earlier hit spell Glare 807870 carries AttributesEx2 0x20000000 (SPELL_ATTR2_CANT_CRIT), so no run could count a critical hit with it; six spare dummies stand within 10 yd of the primary one. Control: the same seed and Sunflare before 300371 is learned (no copy). Treatment: learned after the seed; exactly one new copy per hit while a spare stays free. Reference search: nothing found beyond the tooltip and the server DBC (guide section 4)."
     },
     {
       "spell": 704562,
@@ -7900,8 +7912,8 @@
         ]
       },
       "critical": false,
-      "trials": 20,
-      "parts": 50,
+      "trials": 36,
+      "parts": 66,
       "cast_power": 1363,
       "expected_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The stated +15% is $572754s2 = 15. Each trial casts Horusath Blast 500154 at the dummy after a filler Sunflare 800231 (2000 ms), in two arms: the treatment arm first casts Sun Down 572752 (2000 ms cast, 2000 ms aura), so the ground aura is up when the observed hit lands about 4.6 s after the cast; the control arm casts the filler only. Mean non-critical hit ratio expected 1.15 (band 2 points, the larger of 5% of 15 and 2 points). Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4)."
     },
@@ -7928,8 +7940,8 @@
         ]
       },
       "critical": false,
-      "trials": 20,
-      "parts": 72,
+      "trials": 24,
+      "parts": 90,
       "cast_power": 1363,
       "expected_source": "572752 Sun Down (CastingTimeIndex 5 = 2000 ms, RecoveryTime 30000): the contract sets its aura to SunDownDuration (DurationIndex 39, AscensionSunClericContracts.cpp:15,280) with a periodic dummy effect; on expiry AscensionSunClericAuras.cpp:179-182 casts Sun Down 572753 (Effect[0] SCHOOL_DAMAGE BasePoints 1779, DieSides 33, Speed 20) at the enemy and the ground aura 572754 (DurationIndex 105 = 9000 ms, Effect[0] aura 23 periodic trigger of Solar Flare 807175 every 3000 ms, Effect[1] aura 271 MOD_DAMAGE_FROM_CASTER BasePoints 14 + 1 = 15% on mask word 4 = 524352) at its position. The stated +15% is $572754s2 = 15. Each trial casts Rapture 806477 at the dummy after a filler Sunflare 800231 (2000 ms), in two arms: the treatment arm first casts Sun Down 572752 (2000 ms cast, 2000 ms aura), so the ground aura is up when the observed hit lands about 4.6 s after the cast; the control arm casts the filler only. Mean non-critical hit ratio expected 1.15 (band 2 points, the larger of 5% of 15 and 2 points). Reference search: coa-history spell 572752/572753/572754 (one log, 2026-08-01, 7 casts: Sun Down aura on the enemy 1.95 to 2.0 s, damage 0.4 to 1.2 s after it ends, ground aura ~4 s in three casts and 8.9 s in one); nothing else beyond the tooltip and the server DBC (guide section 4)."
     },
@@ -8756,11 +8768,15 @@
       "ally_arm": {
         "allies": 1,
         "ally_casts": [
-          804247
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "AscensionSunClericAuras.cpp:68-75 Bless recast on the caster"
+          }
         ],
         "control_wait": true
       },
-      "observe_source": "AscensionSunClericAbilities.cpp:203-204: with 707517 known, a Radiant Cascade (named 500141) on a target carrying the caster's Bless sets the crit chance to 100. Bless 804247 is cast at the grouped ally in both phases (a real cast); the scripted crit chance of Radiant Cascade on that ally is read before the learn (control, 0) and after (100)."
+      "observe_source": "AscensionSunClericAbilities.cpp:203-204: with 707517 known, a Radiant Cascade (named 500141) on a target carrying the caster's Bless sets the crit chance to 100. Bless 804247 is cast at the grouped ally in both phases (a real cast); the scripted crit chance of Radiant Cascade on that ally is read before the learn (control, 0) and after (100). The before reading is the engine's natural crit chance (4.6781 in two runs); fixture 984954 (-1001% spell crit) was tried and reads -995.322, not 0: a tool need (a before range), see the report."
     },
     {
       "spell": 707517,
@@ -8788,7 +8804,7 @@
         "allies": 1,
         "control_wait": true
       },
-      "observe_source": "Control of bless_ally: the same scenario without the Bless cast on the ally; the scripted crit chance stays 0 after the learn (AscensionSunClericAbilities.cpp:203-204 needs the caster's Bless on the target)."
+      "observe_source": "Control of bless_ally: the same scenario without the Bless cast on the ally; the scripted crit chance stays 0 after the learn (AscensionSunClericAbilities.cpp:203-204 needs the caster's Bless on the target). The before reading is the engine's natural crit chance (4.6781 in two runs); fixture 984954 (-1001% spell crit) was tried and reads -995.322, not 0: a tool need (a before range), see the report."
     },
     {
       "spell": 560123,
@@ -8992,87 +9008,6 @@
       "cast_power": 1360,
       "ally_distance": 5,
       "expected_source": "706735 Divine Vision Effect[0] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT and Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (MiscValue 3, Physical and Holy), BasePoints 3 + 1 = 4 ($s1). The grouped ally's Sunlight 704911 heals (Holy) are read without and with 706735 learned on the caster, the ally held at 50% health: the mean ratio is 1.04 (band 2 points)."
-    },
-    {
-      "spell": 554406,
-      "name": "Dawnsear (damage at 0 spell power)",
-      "kind": "metric_delta",
-      "variant": "damage_base",
-      "label_suffix": "damage_base",
-      "quote": "Blast an enemy with burning light, dealing ${$m1+0+$spfi*0.765222} Fire damage.",
-      "expected": 708.5,
-      "after_at_least": 669,
-      "after_at_most": 748,
-      "player_spell_power": 0,
-      "trigger_spell": 554406,
-      "target": "dummy",
-      "cast_in_before": false,
-      "cast_power": 1363,
-      "metric": "spell_damage_total",
-      "fields": {
-        "spell": 554406,
-        "target": "dummy"
-      },
-      "before_expected": 0,
-      "wait_ms": 5000,
-      "expire_ms": 500,
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "observe_source": "554406 Dawnsear Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, EffectBasePoints 668 + EffectDieSides 80: $m1 = 669..748, no per-level term at level 60; the school is Fire (SchoolMask 4). The spell damage of one real cast on the dummy (spell penetration 823764 and a -1000% spell crit aura 984954 as harness precondition fixtures: no resist and no critical strike) at 0 spell power lies in [669, 748]."
-    },
-    {
-      "spell": 554406,
-      "name": "Dawnsear (damage at 20000 spell power)",
-      "kind": "metric_delta",
-      "variant": "damage_sp",
-      "label_suffix": "damage_sp",
-      "quote": "Blast an enemy with burning light, dealing ${$m1+0+$spfi*0.765222} Fire damage.",
-      "expected": 16012.9,
-      "after_at_least": 15973,
-      "after_at_most": 16053,
-      "player_spell_power": {
-        "amount": 20000,
-        "hit_arm": true
-      },
-      "trigger_spell": 554406,
-      "target": "dummy",
-      "cast_in_before": false,
-      "cast_power": 1363,
-      "metric": "spell_damage_total",
-      "fields": {
-        "spell": 554406,
-        "target": "dummy"
-      },
-      "before_expected": 0,
-      "wait_ms": 5000,
-      "expire_ms": 500,
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "observe_source": "Contrast arm of damage_base in the same pair: the spell power coefficient 0.765222 ($spfi) x 20000 = 15304.44 added to [669, 748] gives [15973.44, 16052.44]; the entry reads one real cast at 20000 spell power on the dummy (same fixtures), which excludes a coefficient 10% off (+-1530)."
     },
     {
       "spell": 680622,
@@ -13170,8 +13105,8 @@
       "expected": 1200,
       "tolerance": 1,
       "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "504248 Holy Conquest Effect[0] aura 108 ADD_PCT_MODIFIER, MiscValue 14 (SPELLMOD_COST), BasePoints -51 (-50%, $s1), EffectSpellClassMask word 0 = 4104 = Chosen of the Light 800622 (SpellFamilyFlags[0] 4096) and Judgement Day 806121 (SpellFamilyFlags[0] 8), word 2 = 8388608 = Paragon 680639 (SpellFamilyFlags[2]). Cost = ManaCost + ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60), SpellInfo::CalcPowerCost (SpellInfo.cpp:3160-3225), then the SPELLMOD_COST percent mod. Judgement Day 806121: 24% of 1363 (327) = 327, 163 or 164 with -50%. Mana is set to 1363 before each real cast with regeneration off and read 500 ms after: 1036 before the learn (control) and 1200 after, within 1. Reference search 2026-11-22: coa-history spell 504248: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the mana cost of Paragon, Chosen of the Light, and Judgement Day by -50%.\" (same figure); nothing else found."
+      "expire_ms": 2100,
+      "observe_source": "504248 Holy Conquest Effect[0] aura 108 ADD_PCT_MODIFIER, MiscValue 14 (SPELLMOD_COST), BasePoints -51 (-50%, $s1), EffectSpellClassMask word 0 = 4104 = Chosen of the Light 800622 (SpellFamilyFlags[0] 4096) and Judgement Day 806121 (SpellFamilyFlags[0] 8), word 2 = 8388608 = Paragon 680639 (SpellFamilyFlags[2]). Cost = ManaCost + ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60), SpellInfo::CalcPowerCost (SpellInfo.cpp:3160-3225), then the SPELLMOD_COST percent mod. Judgement Day 806121: 24% of 1363 (327) = 327, 163 or 164 with -50%. Mana is set to 1363 before each real cast with regeneration off and read 500 ms after: 1036 before the learn (control) and 1200 after, within 1. Reference search 2026-11-22: coa-history spell 504248: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Reduces the mana cost of Paragon, Chosen of the Light, and Judgement Day by -50%.\" (same figure); nothing else found. Judgement Day carries StartRecoveryTime 1500 ms (Spell.dbc 806121), so the second cast waits 2100 ms after the first (500 ms read wait + 2100 ms expiry) to fall outside the global cooldown; Chosen of the Light 800622 and Paragon 680639 have none."
     },
     {
       "spell": 504248,
@@ -13539,8 +13474,8 @@
       "metric": "armor",
       "fields": {},
       "before_expected": 0,
-      "expected": 20.5,
-      "expected_gain": 20.5,
+      "expected": 24,
+      "expected_gain": 24,
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 2000,
@@ -13560,7 +13495,7 @@
           "caster"
         ]
       ],
-      "observe_source": "704586 Shining Shield Effect[0] aura 42 PROC_TRIGGER_SPELL 805265, cast by ActivateDawn when 704586 is known (AscensionSunCleric.cpp:271-272); 805265 (DurationIndex 3, 60000 ms = $805265d) Effect[0] aura 142 MOD_BASE_RESISTANCE_PCT misc 1 (armor), MiscValueB 64 (1<<ITEM_SUBCLASS_ARMOR_SHIELD), BasePoints 49 + 1 = 50 ($805265s1). The reference character wields the Seraphim set with the Large Round Shield 2129 (spell_weapon_sets 704586 = Seraphim), armor 41 (item_template read 2026-11-22 in the Sun-Touched Armor 561023 entry); StatSystem.cpp:390 adds the shield armor x (multiplier - 1) for a MiscValueB mask, so 41 x 0.5 = 20.5. The armor is read 500 ms after a real Dawn cast, before the learn (control) and after, judged by its gain, within 1 (a gain 10% off reads 18.45 or 22.55). Ledger clause 235 of 704586 (the streamed Shining Shield text); the quote field names the Spell.dbc sentence the entry hangs under. Reference search 2026-11-22: coa-history spell 704586: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Activating Dawn now grants Shining Shield for 8 seconds. ... Increases your Armor contribution from your shield by 50%.\" (the 50% agrees; the 8 s duration is an older state, the installed DBC and tooltip say 60 s and govern); nothing else found."
+      "observe_source": "704586 Shining Shield Effect[0] aura 42 PROC_TRIGGER_SPELL 805265, cast by ActivateDawn when 704586 is known (AscensionSunCleric.cpp:271-272); 805265 (DurationIndex 3, 60000 ms = $805265d) Effect[0] aura 142 MOD_BASE_RESISTANCE_PCT misc 1 (armor), MiscValueB 64 (1<<ITEM_SUBCLASS_ARMOR_SHIELD), BasePoints 49 + 1 = 50 ($805265s1). The reference character wields the Seraphim set with the Large Round Shield 2129 (spell_weapon_sets 704586 = Seraphim); its worn armor is the Reborn column, 48 (item_template armor is 41; LocalLevelScaling::WornArmorFor at Player.cpp:7347, the same 48 as the Sun-Touched Armor 561023 entry); StatSystem.cpp:390 adds the shield armor x (multiplier - 1) for a MiscValueB mask, so 48 x 0.5 = 24. The armor is read 500 ms after a real Dawn cast, before the learn (control) and after, judged by its gain, within 1 (a gain 10% off reads 21.6 or 26.4). Ledger clause 235 of 704586 (the streamed Shining Shield text); the quote field names the Spell.dbc sentence the entry hangs under. Reference search 2026-11-22: coa-history spell 704586: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Activating Dawn now grants Shining Shield for 8 seconds. ... Increases your Armor contribution from your shield by 50%.\" (the 50% agrees; the 8 s duration is an older state, the installed DBC and tooltip say 60 s and govern); nothing else found."
     },
     {
       "spell": 560547,
@@ -13674,6 +13609,7 @@
       "target": "caster",
       "measure_actor": "caster",
       "disable_regeneration": true,
+      "caster_health_pct": 50,
       "cast_power": 1363,
       "expire_ms": 4500,
       "name": "Light The Way (Shine heal raises the target run speed)",
@@ -13684,9 +13620,9 @@
       "fields": {},
       "before_expected": 1.0,
       "expected": 1.2,
-      "wait_ms": 1330,
+      "wait_ms": 1840,
       "tolerance": 0.001,
-      "observe_source": "300336 Light The Way Effect[0] aura 42 PROC_TRIGGER_SPELL 300337, cast by the script on the healed target after a Shine or Illumination heal (AscensionSunClericEvents.cpp:118, 259); 300337 (DurationIndex 27, 3000 ms = $300337d) Effect[0] aura 31 MOD_INCREASE_SPEED BasePoints 19 + 1 = 20 ($300337s1), so the run speed rate is 1.0 x 1.20. Shine 800357 (the Sunwalker entries read it finished at 1230 to 1245) is cast by the caster on itself at 50% health. The run speed rate of the caster is read about 90 ms after the heal lands: 1.0 before the learn (control, no 300337) and 1.2 after, within 0.001. Reference search 2026-11-22: coa-history spell 300336: 0 events in 186 logs (a passive); 300337 Light The Way as positive control: 4958 SPELL_AURA_APPLIED events on players in 20 logs; bindmysoul snapshot not consulted for a value; nothing else found."
+      "observe_source": "300336 Light The Way Effect[0] aura 42 PROC_TRIGGER_SPELL 300337, cast by the script on the healed target after a Shine or Illumination heal (AscensionSunClericEvents.cpp:118, 259); 300337 (DurationIndex 27, 3000 ms = $300337d) Effect[0] aura 31 MOD_INCREASE_SPEED BasePoints 19 + 1 = 20 ($300337s1), so the run speed rate is 1.0 x 1.20. Shine 800357 (the Sunwalker entries read it finished at 1230 to 1245) is cast by the caster on itself at 50% health. The run speed rate of the caster is read about 90 ms after the heal lands: 1.0 before the learn (control, no 300337) and 1.2 after, within 0.001. Reference search 2026-11-22: coa-history spell 300336: 0 events in 186 logs (a passive); 300337 Light The Way as positive control: 4958 SPELL_AURA_APPLIED events on players in 20 logs; bindmysoul snapshot not consulted for a value; nothing else found. The caster is held at 50% of the health fixture before each cast (caster_health_pct), the health Shine needs to heal, as the Illumination entries do. The speed is read 1840 ms after the cast like shine_duration, whose 300337 aura is present then; the 1330 ms read came before the heal's aura."
     },
     {
       "spell": 300336,
@@ -13696,6 +13632,7 @@
       "target": "caster",
       "measure_actor": "caster",
       "disable_regeneration": true,
+      "caster_health_pct": 50,
       "cast_power": 1363,
       "expire_ms": 4500,
       "name": "Light The Way (Shine heal, 3 sec)",
@@ -13708,9 +13645,9 @@
       },
       "before_expected": 0,
       "expected": 2400,
-      "wait_ms": 1840,
+      "wait_ms": 2100,
       "tolerance": 250,
-      "observe_source": "300336 Light The Way Effect[0] aura 42 PROC_TRIGGER_SPELL 300337, cast by the script on the healed target after a Shine or Illumination heal (AscensionSunClericEvents.cpp:118, 259); 300337 (DurationIndex 27, 3000 ms = $300337d) Effect[0] aura 31 MOD_INCREASE_SPEED BasePoints 19 + 1 = 20 ($300337s1), so the run speed rate is 1.0 x 1.20. The remaining duration of 300337 on the caster is read about 600 ms after the heal lands: 0 before the learn (control) and 2400 after, within 250, so a total 10% off (2700 or 3300 ms, reading 2100 or 2700) is excluded on both sides. Reference search 2026-11-22: coa-history spell 300336: 0 events in 186 logs (a passive); 300337 Light The Way as positive control: 4958 SPELL_AURA_APPLIED events on players in 20 logs; bindmysoul snapshot not consulted for a value; nothing else found."
+      "observe_source": "300336 Light The Way Effect[0] aura 42 PROC_TRIGGER_SPELL 300337, cast by the script on the healed target after a Shine or Illumination heal (AscensionSunClericEvents.cpp:118, 259); 300337 (DurationIndex 27, 3000 ms = $300337d) Effect[0] aura 31 MOD_INCREASE_SPEED BasePoints 19 + 1 = 20 ($300337s1), so the run speed rate is 1.0 x 1.20. The remaining duration of 300337 on the caster is read about 600 ms after the heal lands: 0 before the learn (control) and 2400 after, within 250, so a total 10% off (2700 or 3300 ms, reading 2100 or 2700) is excluded on both sides. Reference search 2026-11-22: coa-history spell 300336: 0 events in 186 logs (a passive); 300337 Light The Way as positive control: 4958 SPELL_AURA_APPLIED events on players in 20 logs; bindmysoul snapshot not consulted for a value; nothing else found. The caster is held at 50% of the health fixture before each cast (caster_health_pct), the health Shine needs to heal, as the Illumination entries do. Shine casts for 1500 ms (SpellCastTimes 16), so the read at 2100 ms is 600 ms after the heal."
     },
     {
       "spell": 681337,
@@ -13777,7 +13714,7 @@
       "trigger_spell": 503651,
       "target": "caster",
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 2100,
       "name": "Devoted to the Light (Revelation generates 5% of the missing mana)",
       "variant": "energize_revelation",
       "label_suffix": "energize_revelation",
@@ -13792,7 +13729,7 @@
       "cast_power": 1000,
       "disable_regeneration": true,
       "gate_spell": 681436,
-      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Revelation 503651 is cast with the mana set to 1000, regeneration off; the energize events of source 504877 on the caster are summed 500 ms later: 0 before the learn (control) and 5% of the missing mana, 5 x (2868 - 1000) / 100 = 93.4, truncated to 93 after, within 1.5. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found."
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Revelation 503651 is cast with the mana set to 1000, regeneration off; the energize events of source 504877 on the caster are summed 500 ms later: 0 before the learn (control) and 5% of the missing mana, 5 x (2868 - 1000) / 100 = 93.4, truncated to 93 after, within 1.5. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found. The trigger carries StartRecoveryTime 1500 ms (Spell.dbc), so the after-phase cast waits 500 + 2100 ms after the first to fall outside the global cooldown."
     },
     {
       "spell": 681436,
@@ -13800,7 +13737,7 @@
       "trigger_spell": 800764,
       "target": "caster",
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 2100,
       "name": "Devoted to the Light (Conquest generates 5% of the missing mana)",
       "variant": "energize_conquest",
       "label_suffix": "energize_conquest",
@@ -13815,14 +13752,14 @@
       "cast_power": 1000,
       "disable_regeneration": true,
       "gate_spell": 681436,
-      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Conquest 800764 is cast with the mana set to 1000, regeneration off; the energize events of source 504877 on the caster are summed 500 ms later: 0 before the learn (control) and 5% of the missing mana, 5 x (2868 - 1000) / 100 = 93.4, truncated to 93 after, within 1.5. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found."
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Conquest 800764 is cast with the mana set to 1000, regeneration off; the energize events of source 504877 on the caster are summed 500 ms later: 0 before the learn (control) and 5% of the missing mana, 5 x (2868 - 1000) / 100 = 93.4, truncated to 93 after, within 1.5. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found. The trigger carries StartRecoveryTime 1500 ms (Spell.dbc), so the after-phase cast waits 500 + 2100 ms after the first to fall outside the global cooldown."
     },
     {
       "spell": 681436,
       "kind": "metric_delta",
       "trigger_spell": 500152,
       "target": "caster",
-      "wait_ms": 500,
+      "wait_ms": 3000,
       "expire_ms": 500,
       "name": "Devoted to the Light (Ascension generates 5% of the missing mana)",
       "variant": "energize_ascension",
@@ -13838,7 +13775,7 @@
       "cast_power": 1000,
       "disable_regeneration": true,
       "gate_spell": 681436,
-      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Ascension 500152 is cast with the mana set to 1000, regeneration off; the energize events of source 504877 on the caster are summed 500 ms later: 0 before the learn (control) and 5% of the missing mana, 5 x (2868 - 1000) / 100 = 93.4, truncated to 93 after, within 1.5. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found."
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Ascension 500152 is cast with the mana set to 1000, regeneration off; the energize events of source 504877 on the caster are summed 500 ms later: 0 before the learn (control) and 5% of the missing mana, 5 x (2868 - 1000) / 100 = 93.4, truncated to 93 after, within 1.5. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found. Solar Invocation: Ascension 500152 casts for 2500 ms (SpellCastTimes 19) and has StartRecoveryTime 1500 ms (Spell.dbc), so each phase reads 3000 ms after its cast, when the cast has completed and spent its mana."
     },
     {
       "spell": 681436,
@@ -13869,7 +13806,7 @@
       "trigger_spell": 503651,
       "target": "caster",
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 2100,
       "name": "Devoted to the Light (Revelation costs no mana)",
       "variant": "cost_revelation",
       "label_suffix": "cost_revelation",
@@ -13884,14 +13821,14 @@
       "cast_power": 1000,
       "disable_regeneration": true,
       "gate_spell": 681436,
-      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Revelation 503651 is cast with the mana set to 1000, regeneration off, and the mana is read 500 ms later: 1000 - 190.82 = 809.18 before the learn (control, the cost is paid) and 1000 + 93.4 = 1093 after (no cost, 5% of the 1868 missing mana generated), within 2. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found."
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Revelation 503651 is cast with the mana set to 1000, regeneration off, and the mana is read 500 ms later: 1000 - 190.82 = 809.18 before the learn (control, the cost is paid) and 1000 + 93.4 = 1093 after (no cost, 5% of the 1868 missing mana generated), within 2. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found. The trigger carries StartRecoveryTime 1500 ms (Spell.dbc), so the after-phase cast waits 500 + 2100 ms after the first to fall outside the global cooldown."
     },
     {
       "spell": 681436,
       "kind": "metric_delta",
       "trigger_spell": 500152,
       "target": "caster",
-      "wait_ms": 500,
+      "wait_ms": 3000,
       "expire_ms": 500,
       "name": "Devoted to the Light (Ascension costs no mana)",
       "variant": "cost_ascension",
@@ -13907,7 +13844,7 @@
       "cast_power": 1000,
       "disable_regeneration": true,
       "gate_spell": 681436,
-      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Ascension 500152 is cast with the mana set to 1000, regeneration off, and the mana is read 500 ms later: 1000 - 477.05 = 522.95 before the learn (control, the cost is paid) and 1000 + 93.4 = 1093 after (no cost, 5% of the 1868 missing mana generated), within 2. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found."
+      "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Ascension 500152 is cast with the mana set to 1000, regeneration off, and the mana is read 500 ms later: 1000 - 477.05 = 522.95 before the learn (control, the cost is paid) and 1000 + 93.4 = 1093 after (no cost, 5% of the 1868 missing mana generated), within 2. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found. Solar Invocation: Ascension 500152 casts for 2500 ms (SpellCastTimes 19) and has StartRecoveryTime 1500 ms (Spell.dbc), so each phase reads 3000 ms after its cast, when the cast has completed and spent its mana."
     },
     {
       "spell": 302914,
@@ -14575,8 +14512,8 @@
         8
       ],
       "expected": 24900,
-      "tolerance": 300,
-      "observe_source": "Solar Nova 681433 Effect[0] SCHOOL_DAMAGE on the enemies within 8 yd; 524858 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165) BasePoints -1001 on 800764 Conquest, 503651 Revelation and 806159 Resplendence ($/1000;524858s1 = 1 s each; the class code HandleAscensionClassMechanics26To32Hit casts 524858 per target). Solar Invocation: Conquest 800764 (cooldown 30000 ms, Category 767) is cast, 1600 ms later Solar Nova strikes the primary dummy and two more within 8 yd, and the cooldown of 800764 is read 500 ms after: 30000 - 3 x 1000 - 2100 ms elapsed = 24900, tolerance 300 (excludes the 1000 ms steps of 2 or 4 targets). Control: cd_refund_none (no target in range) reads 30000 - 2100. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+      "tolerance": 100,
+      "observe_source": "Solar Nova 681433 Effect[0] SCHOOL_DAMAGE on the enemies within 8 yd; 524858 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165) BasePoints -1001 on 800764 Conquest, 503651 Revelation and 806159 Resplendence ($/1000;524858s1 = 1 s each; the class code HandleAscensionClassMechanics26To32Hit casts 524858 per target). Solar Invocation: Conquest 800764 (cooldown 30000 ms, Category 767) is cast, 1600 ms later Solar Nova strikes the primary dummy and two more within 8 yd, and the cooldown of 800764 is read 500 ms after: 30000 - 3 x 1000 - 2100 ms elapsed = 24900, tolerance 100 (excludes the 1000 ms steps of 2 or 4 targets). Control: cd_refund_none (no target in range) reads 30000 - 2100. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found. A reduction 10% off (900 or 1100 ms per target) moves the read by 300 ms; the tolerance is 100 ms, so both are excluded."
     },
     {
       "spell": 681433,
@@ -14604,8 +14541,8 @@
       "label_suffix": "cd_refund_one",
       "dummy_distance": 3,
       "expected": 26900,
-      "tolerance": 300,
-      "observe_source": "Same as cd_refund_three with only the primary dummy at 3 yd, inside the 8 yd radius: one target struck, 30000 - 1000 - 2100 ms elapsed = 26900, tolerance 300 (excludes 0 and 2 targets). Control: cd_refund_none. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+      "tolerance": 50,
+      "observe_source": "Same as cd_refund_three with only the primary dummy at 3 yd, inside the 8 yd radius: one target struck, 30000 - 1000 - 2100 ms elapsed = 26900, tolerance 300 (excludes 0 and 2 targets). Control: cd_refund_none. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found. A reduction 10% off (900 or 1100 ms) moves the read by 100 ms; the tolerance is 50 ms, so both are excluded."
     },
     {
       "spell": 681433,
