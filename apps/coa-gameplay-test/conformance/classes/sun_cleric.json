@@ -23364,7 +23364,7 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "561159 Effect[1] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, MiscValue 126 (all magic schools), BasePoints 99 + 1 = 100 ($s2). Strength 8118 (aura 29, 2000) is a harness precondition fixture in both phases (not the subject); the reference Strength 40 (class file reference_stats) becomes 2040. Holy spell power read before the learn (control, 0) and after a real learn of 561159: 100% of 2040 = 2040, within 1. Tooltip and DBC settle the value; the references add nothing for it (guide section 4: nothing found beyond them).",
+      "observe_source": "561159 Effect[1] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, MiscValue 126 (all magic schools), BasePoints 99 + 1 = 100 ($s2). Strength 8118 (aura 29, effect 0 set to 2000 by phase_aura_amounts) is a harness precondition fixture in both phases (not the subject); the reference Strength 40 (class file reference_stats) becomes 2040. Holy spell power read before the learn (control, 0) and after a real learn of 561159: 100% of 2040 = 2040, within 1. Tooltip and DBC settle the value; the references add nothing for it (guide section 4: nothing found beyond them).",
       "phase_auras": [
         [
           8118,
@@ -23372,63 +23372,12 @@
           "caster",
           "caster"
         ]
-      ]
-    },
-    {
-      "spell": 300723,
-      "name": "Struck by the Sun (Holy spell power from Intellect)",
-      "kind": "metric_delta",
-      "variant": "holy_spell_power",
-      "label_suffix": "holy_spell_power",
-      "quote": "Increases your Holy and Fire spell damage by $s3%",
-      "trigger_spell": 804247,
-      "gate_spell": 300723,
-      "target": "caster",
-      "metric": "spell_power",
-      "fields": {
-        "school": 1
-      },
-      "before_expected": 0,
-      "expected": 50.1,
-      "tolerance": 1,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "300723 Effect[2] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, MiscValue 6 (Holy 2 | Fire 4), MiscValueB 3 (Intellect), BasePoints 29 + 1 = 30 ($s3). Intellect 48100 (aura 29, 48) is a harness precondition fixture in both phases (not the subject): 119 + 48 = 167. Holy spell power read before the learn (control, 0) and after a real learn of 300723: 30% of 167 = 50.1, within 1. Tooltip and DBC settle the value; the references add nothing for it (guide section 4: nothing found beyond them).",
-      "phase_auras": [
+      ],
+      "phase_aura_amounts": [
         [
-          48100,
-          1,
-          "caster",
-          "caster"
-        ]
-      ]
-    },
-    {
-      "spell": 300723,
-      "name": "Struck by the Sun (Fire spell power from Intellect)",
-      "kind": "metric_delta",
-      "variant": "fire_spell_power",
-      "label_suffix": "fire_spell_power",
-      "quote": "Increases your Holy and Fire spell damage by $s3%",
-      "trigger_spell": 804247,
-      "gate_spell": 300723,
-      "target": "caster",
-      "metric": "spell_power",
-      "fields": {
-        "school": 2
-      },
-      "before_expected": 0,
-      "expected": 50.1,
-      "tolerance": 1,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "As the Holy entry, for school 2 (Fire, mask bit 4 of MiscValue 6). Fixture Intellect 48100 in both phases; the reading before the learn is the control (0). Tooltip and DBC settle the value; the references add nothing for it (guide section 4: nothing found beyond them).",
-      "phase_auras": [
-        [
-          48100,
-          1,
-          "caster",
-          "caster"
+          8118,
+          0,
+          2000
         ]
       ]
     },
@@ -23446,12 +23395,12 @@
       "fields": {
         "rating": 7
       },
-      "before_expected": 0,
-      "expected": 10.02,
+      "before_expected": 10000,
+      "expected": 10010.02,
       "tolerance": 0.5,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "300723 Effect[0] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 128 (1 << 7, CR_HIT_SPELL), MiscValueB 3 (Intellect), BasePoints 5 + 1 = 6 ($s1). Intellect 48100 is a harness precondition fixture in both phases (167). Combat rating 7 read before the learn (control, 0) and after a real learn of 300723: 6% of 167 = 10.02, within 0.5 for the integer rating. Tooltip and DBC settle the value; the references add nothing for it (guide section 4: nothing found beyond them).",
+      "observe_source": "300723 Effect[0] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 128 (1 << 7, CR_HIT_SPELL), MiscValueB 3 (Intellect), BasePoints 5 + 1 = 6 ($s1). Intellect 48100 is a harness precondition fixture in both phases (167). Combat rating 7 reads 10000 before the learn (control, the class file spell_hit_rating fixture) and after a real learn of 300723: 10000 + 6% of 167 = 10010.02, within 0.5 for the integer rating. Tooltip and DBC settle the value; the references add nothing for it (guide section 4: nothing found beyond them).",
       "phase_auras": [
         [
           48100,
@@ -23475,18 +23424,25 @@
       "fields": {
         "rating": 7
       },
-      "before_expected": 0,
-      "expected": 102,
+      "before_expected": 10000,
+      "expected": 10102,
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "804339 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 128 (1 << 7, CR_HIT_SPELL), BasePoints 4 + 1 = 5 ($s2); no MiscValueB, so the stat is Strength (index 0). Strength 8118 (2000) is a harness precondition fixture in both phases: 40 + 2000 = 2040. Combat rating 7 read before the learn (control, 0) and after a real learn of 804339: 5% of 2040 = 102, within 1. Tooltip and DBC settle the value; the references add nothing for it (guide section 4: nothing found beyond them).",
+      "observe_source": "804339 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 128 (1 << 7, CR_HIT_SPELL), BasePoints 4 + 1 = 5 ($s2); no MiscValueB, so the stat is Strength (index 0). Strength 8118 (effect 0 set to 2000 by phase_aura_amounts) is a harness precondition fixture in both phases: 40 + 2000 = 2040. Combat rating 7 reads 10000 before the learn (control, the class file spell_hit_rating fixture) and after a real learn of 804339: 10000 + 5% of 2040 = 10102, within 1. Tooltip and DBC settle the value; the references add nothing for it (guide section 4: nothing found beyond them).",
       "phase_auras": [
         [
           8118,
           1,
           "caster",
           "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          8118,
+          0,
+          2000
         ]
       ]
     },
@@ -23669,6 +23625,222 @@
       },
       "observe_source": "681252 Radiant Halberd Effect[1] aura 107 ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 4999 (+1 = 5000 ms, $/1000;s2 = 5 s), class mask word 0 16416 = Champion of the Sun 800612 (32) + Chains of Light 806697 (16384). The same cast with 704582 learned instead of 681252: the aura of 15000 ms is gone from the dummy when read 19600..19900 ms after the cast (game time). Reference search: nothing found beyond the tooltip and the DBC.",
       "measure_actor": "dummy"
+    },
+    {
+      "spell": 300723,
+      "name": "Struck by the Sun (Holy damage +30%)",
+      "kind": "metric_delta",
+      "variant": "holy_damage",
+      "label_suffix": "holy_damage",
+      "quote": "Increases your Holy and Fire spell damage by $s3%",
+      "trigger_spell": 806980,
+      "gate_spell": 300723,
+      "target": "dummy",
+      "cast_power": 1363,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806980,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 697,
+      "after_at_least": 689,
+      "after_at_most": 705,
+      "observe_source": "300723 Effect[2] is rewritten at load to aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30 (the $s3), MiscValue Holy|Fire (AscensionSunClericContracts.cpp:185-186), so the 30% is a damage percent, not a share of Intellect. Justicar's Wrath 806980 (Holy) is read as its existing damage entry reads it (unmodified 531..541 at the reference stats, dummy Holy resistance removed by 823764). The hit is read after a real learn of 300723: 531..541 x 1.30 = 690..703, inside [689, 705], which lies within the 2-point band (28% to 32%: 680..714) and excludes +25% (664..676) and +35% (717..730). Tooltip and DBC settle the value; the references add nothing for it."
+    },
+    {
+      "spell": 300723,
+      "name": "Struck by the Sun (control: the same Holy hit without 300723)",
+      "kind": "metric_delta",
+      "variant": "holy_damage_control",
+      "label_suffix": "holy_damage_control",
+      "quote": "Increases your Holy and Fire spell damage by $s3%",
+      "trigger_spell": 806980,
+      "gate_spell": 704582,
+      "target": "dummy",
+      "cast_power": 1363,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806980,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 536,
+      "after_at_least": 531,
+      "after_at_most": 541,
+      "observe_source": "300723 Effect[2] is rewritten at load to aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30 (the $s3), MiscValue Holy|Fire (AscensionSunClericContracts.cpp:185-186), so the 30% is a damage percent, not a share of Intellect. Justicar's Wrath 806980 (Holy) is read as its existing damage entry reads it (unmodified 531..541 at the reference stats, dummy Holy resistance removed by 823764). Control: the same hit with 704582 learned instead of 300723 reads 531..541. Tooltip and DBC settle the value; the references add nothing for it."
+    },
+    {
+      "spell": 300723,
+      "name": "Struck by the Sun (Fire damage +30%)",
+      "kind": "metric_delta",
+      "variant": "fire_damage",
+      "label_suffix": "fire_damage",
+      "quote": "Increases your Holy and Fire spell damage by $s3%",
+      "trigger_spell": 500146,
+      "gate_spell": 300723,
+      "target": "dummy",
+      "cast_power": 1363,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 500146,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 10150,
+      "after_at_least": 10100,
+      "after_at_most": 10200,
+      "observe_source": "300723 Effect[2] is rewritten at load to aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30 (the $s3), MiscValue Holy|Fire (AscensionSunClericContracts.cpp:185-186), so the 30% is a damage percent, not a share of Intellect. Dawnsear 500146 (Fire, SchoolMask 4): m1 = 87 + (1..12) + int(1.32 x 49) = 152..163, plus Fire spell power x 0.765222 = 7652 at 10000 spell power: 7804..7815 unmodified. After a real learn of 300723: 7804..7815 x 1.30 = 10145..10159, inside [10100, 10200], within the 28% to 32% band (9989..10316) and excluding +25% (9755..9769) and +35% (10535..10550). Spell power 10000 is the harness fixture (player_spell_power), so the roll spread is under 0.2%. Tooltip and DBC settle the value; the references add nothing for it.",
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      }
+    },
+    {
+      "spell": 300723,
+      "name": "Struck by the Sun (control: the same Fire hit without 300723)",
+      "kind": "metric_delta",
+      "variant": "fire_damage_control",
+      "label_suffix": "fire_damage_control",
+      "quote": "Increases your Holy and Fire spell damage by $s3%",
+      "trigger_spell": 500146,
+      "gate_spell": 704582,
+      "target": "dummy",
+      "cast_power": 1363,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 500146,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 7810,
+      "after_at_least": 7800,
+      "after_at_most": 7820,
+      "observe_source": "300723 Effect[2] is rewritten at load to aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30 (the $s3), MiscValue Holy|Fire (AscensionSunClericContracts.cpp:185-186), so the 30% is a damage percent, not a share of Intellect. Dawnsear 500146 (Fire, SchoolMask 4): m1 = 87 + (1..12) + int(1.32 x 49) = 152..163, plus Fire spell power x 0.765222 = 7652 at 10000 spell power: 7804..7815 unmodified. Control: 704582 learned instead of 300723 reads 7804..7815. Tooltip and DBC settle the value; the references add nothing for it.",
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      }
+    },
+    {
+      "spell": 704932,
+      "name": "Heat Death (the Solar Eclipse debuff is held to 13.6 s and gone by 16.4 s)",
+      "kind": "metric_delta",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "Your Solar Eclipse now reduces the enemies chance to hit by $704931s1% for $/1000;s1 sec.",
+      "trigger_spell": 800654,
+      "gate_spell": 704932,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        704929
+      ],
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 704931
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          13600,
+          14400
+        ],
+        "expired": [
+          16000,
+          16400
+        ]
+      },
+      "observe_source": "704932 Effect[0] aura 107 SPELLMOD_DURATION, BasePoints 14999 (+1 = 15000 ms, $/1000;s1 = 15 s); Solar Eclipse 704931 carries no DurationIndex. Dawnbreak 800654 is cast at the dummy with 704929 learned (the Solar Eclipse passive). With 704932 learned the aura 704931 is present on the dummy when read 13600..14400 ms after the cast (game time) and gone when read 16000..16400 ms after it, so the duration lies in (13600, 16400), excluding 13500 and 16500 (10% off 15000 on both sides). Tooltip and DBC settle the value; the references add nothing for it.",
+      "expiry_wait_ms": 2300,
+      "after_expiry_expected": 0
+    },
+    {
+      "spell": 704932,
+      "name": "Heat Death (control: the Solar Eclipse leaves no debuff without 704932)",
+      "kind": "metric_delta",
+      "variant": "duration_control",
+      "label_suffix": "duration_control",
+      "quote": "Your Solar Eclipse now reduces the enemies chance to hit by $704931s1% for $/1000;s1 sec.",
+      "trigger_spell": 800654,
+      "gate_spell": 704582,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        704929
+      ],
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 704931
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 14000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          13600,
+          14400
+        ]
+      },
+      "observe_source": "704932 Effect[0] aura 107 SPELLMOD_DURATION, BasePoints 14999 (+1 = 15000 ms, $/1000;s1 = 15 s); Solar Eclipse 704931 carries no DurationIndex. Dawnbreak 800654 is cast at the dummy with 704929 learned (the Solar Eclipse passive). Control: 704582 is learned instead of 704932, and the aura is absent on the dummy at the same read (no duration, no debuff). Tooltip and DBC settle the value; the references add nothing for it."
     }
   ],
   "player_observations": [],

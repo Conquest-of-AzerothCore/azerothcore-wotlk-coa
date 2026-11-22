@@ -736,8 +736,10 @@
     "clause": "Increases your Holy and Fire spell damage by $s3%",
     "labels": [
       "300723 effect_value e2 #0",
-      "300723 behaviour_metric_delta holy_spell_power",
-      "300723 behaviour_metric_delta fire_spell_power"
+      "300723 behaviour_metric_delta holy_damage",
+      "300723 behaviour_metric_delta holy_damage_control",
+      "300723 behaviour_metric_delta fire_damage",
+      "300723 behaviour_metric_delta fire_damage_control"
     ],
     "kind": "claim"
   },
@@ -3882,11 +3884,23 @@
   {
     "spell": 704932,
     "clause": "Your Solar Eclipse now reduces the enemies chance to hit by $704931s1% for $/1000;s1 sec.",
-    "labels": [
-      "704932 effect_value 704931e0 #0",
-      "704932 effect_value e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reduces the enemies chance to hit by $704931s1%",
+        "labels": [
+          "704932 effect_value 704931e0 #0"
+        ]
+      },
+      {
+        "claim": "for $/1000;s1 sec",
+        "labels": [
+          "704932 effect_value e0 #1",
+          "704932 behaviour_metric_delta duration_held",
+          "704932 behaviour_metric_delta duration_control"
+        ]
+      }
+    ]
   },
   {
     "spell": 704934,
