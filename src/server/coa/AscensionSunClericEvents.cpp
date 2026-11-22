@@ -130,7 +130,9 @@ class aura_ascension_sun_cleric_event : public AuraScript
             case 806058: return damage && (Named(info,520359) || idIsJustice(info)) && Chance(player,id);
             case 301266: return damage && ((Named(info,500154) && player->HasAura(Sunrise)) ||
                 (Named(info,806477) && player->HasAura(Sunset)));
-            case 680643: return damage && automatic;
+            case 680643:
+                return damage && automatic &&
+                    !event.GetActionTarget()->HasAura(ValianceMarker, player->GetGUID());
             case 300371: return direct && damage && event.GetActionTarget()->HasAura(806697, player->GetGUID()) && Chance(player,id,1000);
             case 704920: return healing && direct && Any(info,{500141,500143});
             case 534267: return healing && (Any(info,{500143,800357,500147}) || (info && info->Id == 807994));
