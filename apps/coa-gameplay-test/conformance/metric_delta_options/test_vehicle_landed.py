@@ -57,7 +57,8 @@ class VehicleLandedTests(unittest.TestCase):
         self.assertEqual(casts, {'before': 1, 'after': 1})
 
     def test_the_option_is_true_and_needs_a_strike_at_the_caster(self):
-        for raw in ({'spell': STUN}, 1, False):
+        for raw in ({'spell': STUN}, 1, False, {'max_step_ms': 0}, {'max_step_ms': 25.0}, {'max_step_ms': True},
+                    {'max_step_ms': 25, 'spell': STUN}):
             with self.assertRaises(ValueError):
                 generated(stun_entry(vehicle_landed=raw))
         with self.assertRaises(ValueError):
@@ -98,6 +99,48 @@ class VehicleLandedTests(unittest.TestCase):
             module.verdict = original
         real = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
         self.assertEqual((mutant, real), ('alert', 'unmeasured'))
+
+    def bounded(self):
+        _, expectation = generated(stun_entry(vehicle_landed={'max_step_ms': 25}))
+        model = expectation.model
+        reads = model['vehicle_landed']['labels']
+        values = {model['before_label']: 1, model['after_label']: float(stun_entry()['expected']),
+                  reads['start']: 0, reads['before']: 1, reads['after']: 2}
+        return expectation, values
+
+    def test_the_step_bound_is_carried_and_stated(self):
+        scenario, expectation = generated(stun_entry(vehicle_landed={'max_step_ms': 25}))
+        self.assertEqual(expectation.model['vehicle_landed']['max_step_ms'], 25)
+        self.assertIn('bounds one world step by 25 ms', scenario['contract'])
+        plain, unbounded = generated(stun_entry())
+        self.assertNotIn('max_step_ms', unbounded.model['vehicle_landed'])
+        self.assertEqual([step for step in scenario['steps']], plain['steps'])
+
+    def test_a_run_whose_step_exceeds_the_bound_is_unmeasured(self):
+        expectation, values = self.bounded()
+
+        def judged(max_step_ms) -> str:
+            return judge_behaviour(base_verdict(expectation), FakeRun(values, max_step_ms), expectation).status
+
+        self.assertEqual(judged(25), 'ok')
+        self.assertEqual(judged(10), 'ok')
+        self.assertEqual(judged(26), 'unmeasured')
+        self.assertEqual(judged(None), 'unmeasured')
+        unbounded = generated(stun_entry())[1]
+        self.assertEqual(judge_behaviour(base_verdict(unbounded), FakeRun(values, 26), unbounded).status, 'ok')
+
+    def test_a_mutant_that_ignores_the_step_bound_is_caught(self):
+        import metric_delta_options.vehicle_landed as module
+        expectation, values = self.bounded()
+        original = module.verdict
+        try:
+            module.verdict = lambda verdict, run, landed: original(
+                verdict, run, {key: value for key, value in landed.items() if key != 'max_step_ms'})
+            mutant = judge_behaviour(base_verdict(expectation), FakeRun(values, 40), expectation).status
+        finally:
+            module.verdict = original
+        real = judge_behaviour(base_verdict(expectation), FakeRun(values, 40), expectation).status
+        self.assertEqual((mutant, real), ('ok', 'unmeasured'))
 
 
 if __name__ == '__main__':

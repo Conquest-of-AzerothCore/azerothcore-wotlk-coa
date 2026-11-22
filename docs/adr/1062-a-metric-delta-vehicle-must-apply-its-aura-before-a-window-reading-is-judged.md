@@ -28,9 +28,15 @@ reading, and after the last treatment reading (the expired reading when there is
 applications as it has vehicle casts, else the trial is `unmeasured`; otherwise the verdict is unchanged. The reads sit
 outside every interval between a strike and a timed reading, so no game-time stamp or reading moves.
 
+`{"max_step_ms": N}` in place of `true` (mentor D-271) adds a bound: a reading whose bracket relies on one world step
+of at most N ms is `unmeasured` when the run's recorded `max_step_ms` is missing or above N. The gone arm needs it
+(age at most the stamped gap less the trigger-to-strike wait plus one step), and so does a held arm whose strike
+follows the trigger (age at least the stamped gap less the trigger-to-strike steps).
+
 ## Consequences
 
 - A window arm whose vehicle did not land is unmeasured instead of alert or a false ok.
 - No harness change and no new metric: `aura_apply_count` and its evidence row exist. Opt-in; Witch Hunter (15),
   Templar (19, and `--stack`) and Necromancer (23) `generate` are byte-identical to c4ec2c2ccd.
 - A strike at an owned creature is refused; extending it needs a read on that creature.
+- A gone bound no longer rests only on the step lengths seen in earlier runs: a slower run is void, not judged.

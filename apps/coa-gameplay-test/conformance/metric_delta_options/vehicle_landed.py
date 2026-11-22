@@ -1,4 +1,5 @@
 from dataclasses import replace
+from typing import NamedTuple
 
 NAME = 'vehicle_landed'
 ORDER = 30
@@ -6,10 +7,17 @@ PHASES = ('start', 'before', 'after')
 _CASTS: dict[int, dict] = {}
 
 
-def parse(raw) -> bool:
-    if raw is not True:
-        raise ValueError(f'vehicle_landed is true or absent, not {raw!r}')
-    return True
+class Landed(NamedTuple):
+    max_step_ms: int | None
+
+
+def parse(raw) -> Landed:
+    if raw is True:
+        return Landed(None)
+    bound = raw.get('max_step_ms') if isinstance(raw, dict) and set(raw) == {'max_step_ms'} else None
+    if type(bound) is not int or bound <= 0:
+        raise ValueError(f'vehicle_landed is true, {{"max_step_ms": <positive ms>}} or absent, not {raw!r}')
+    return Landed(bound)
 
 
 def label(spec, moment: str) -> str:
@@ -27,7 +35,7 @@ def vehicle_casts(spec, steps: list[dict]) -> int:
                and step.get('spell') == spec.strike.spell)
 
 
-def fixtures(class_file: dict, spec, landed: bool, scenario: dict):
+def fixtures(class_file: dict, spec, landed: Landed, scenario: dict):
     from behaviours import metric_delta_label
     from profile import CASTER, measurement
     steps = scenario['steps']
@@ -45,11 +53,15 @@ def fixtures(class_file: dict, spec, landed: bool, scenario: dict):
                              f'lands, are counted at the start, right after the before reading and after the last '
                              f'treatment reading, so no timed reading moves: a phase whose vehicle casts did not '
                              f'all apply their aura is unmeasured, never judged.')
+    if landed.max_step_ms is not None:
+        scenario['contract'] += (f' The reading bounds one world step by {landed.max_step_ms} ms: a run whose '
+                                 f'max_step_ms is unrecorded or above it is unmeasured, never judged.')
 
 
-def model(spec, landed: bool) -> dict:
+def model(spec, landed: Landed) -> dict:
+    bound = {} if landed.max_step_ms is None else {'max_step_ms': landed.max_step_ms}
     return {NAME: {'spell': spec.strike.spell, 'casts': _CASTS.pop(id(spec)),
-                   'labels': {moment: label(spec, moment) for moment in PHASES}}}
+                   'labels': {moment: label(spec, moment) for moment in PHASES}, **bound}}
 
 
 def verdict(verdict, run, landed: dict):
@@ -65,5 +77,11 @@ def verdict(verdict, run, landed: dict):
         return replace(verdict, status='unmeasured',
                        explanation=f'{verdict.explanation}; the vehicle {landed["spell"]} did not land '
                                    f'({", ".join(short)} applications), so the reading is not the effect')
+    bound = landed.get('max_step_ms')
+    if bound is not None and (run.max_step_ms is None or run.max_step_ms > bound):
+        return replace(verdict, status='unmeasured',
+                       explanation=f'{verdict.explanation}; the run\'s max_step_ms {run.max_step_ms} exceeds the '
+                                   f'{bound} ms step bound the reading relies on')
+    stepped = '' if bound is None else f', max_step_ms {run.max_step_ms:g} within {bound} ms'
     return replace(verdict, explanation=f'{verdict.explanation}; the vehicle {landed["spell"]} landed '
-                                        f'({applied["before"]:g} and {applied["after"]:g} applications)')
+                                        f'({applied["before"]:g} and {applied["after"]:g} applications){stepped}')
