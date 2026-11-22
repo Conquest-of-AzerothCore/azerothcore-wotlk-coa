@@ -39,14 +39,16 @@
         "claim": "Entering Sunrise or Sunset prevents you from entering the other",
         "labels": [
           "92135 behaviour_metric_delta excl_sunset_blocked",
-          "92135 behaviour_metric_delta excl_sunrise_kept"
+          "92135 behaviour_metric_delta excl_sunrise_kept",
+          "92135 behaviour_metric_delta excl_fire_landed"
         ]
       },
       {
         "claim": "until you enter the next",
         "labels": [
           "92135 behaviour_metric_delta excl_next_dawn_sunset",
-          "92135 behaviour_metric_delta excl_next_dawn_sunrise_gone"
+          "92135 behaviour_metric_delta excl_next_dawn_sunrise_gone",
+          "92135 behaviour_metric_delta excl_next_fire_landed"
         ]
       }
     ],

@@ -15038,7 +15038,7 @@
       "setup_casts": [
         806121
       ],
-      "setup_target": "caster",
+      "setup_target": "dummy",
       "setup_wait_ms": 1600,
       "setup_only_after": true,
       "cast_power": 1363,
@@ -15066,7 +15066,7 @@
       "setup_casts": [
         806121
       ],
-      "setup_target": "caster",
+      "setup_target": "dummy",
       "setup_wait_ms": 1600,
       "setup_only_after": true,
       "cast_power": 1363,
@@ -23781,7 +23781,7 @@
         500154
       ],
       "setup_target": "dummy",
-      "setup_wait_ms": 600,
+      "setup_wait_ms": 1600,
       "observe_source": "Sunset 500511 on the caster reads absent (0) after the Fire cast. Dawn 807440 (10 charges, Spell.dbc ProcCharges) set as the precondition fixture, effect 0 amount 1 (AscensionSunClericAuras.cpp:118-121); a real Horusath Blast 500154 (Holy) first grants Sunrise 500477 and clears the choice (AscensionSunClericAbilities.cpp:106-117), then a real Dawnsear 554406 (Fire) is cast under the same Dawn. Contrast: sunset_duration, where the Fire cast is the first under Dawn and Sunset is present (1); the same Fire cast is landed by fixture 823764. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
     },
     {
@@ -23822,7 +23822,7 @@
         500154
       ],
       "setup_target": "dummy",
-      "setup_wait_ms": 600,
+      "setup_wait_ms": 1600,
       "observe_source": "Sunrise 500477 on the caster still reads present (1) after the Fire cast, so the Fire cast did not enter Sunset in its place (a Sunset entry would remove it, AscensionSunClericAbilities.cpp:112-113). Dawn 807440 (10 charges, Spell.dbc ProcCharges) set as the precondition fixture, effect 0 amount 1 (AscensionSunClericAuras.cpp:118-121); a real Horusath Blast 500154 (Holy) first grants Sunrise 500477 and clears the choice (AscensionSunClericAbilities.cpp:106-117), then a real Dawnsear 554406 (Fire) is cast under the same Dawn. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
     },
     {
@@ -23867,10 +23867,11 @@
       "label_suffix": "excl_next_dawn_sunset",
       "setup_casts": [
         500154,
+        804584,
         804584
       ],
       "setup_target": "dummy",
-      "setup_wait_ms": 600,
+      "setup_wait_ms": 1600,
       "observe_source": "Sunset 500511 on the caster reads present (1): once the next Dawn is entered the other state can be entered. Sunrise is entered by a real Horusath Blast 500154 (Holy), then the next Dawn is entered by a real Dawn cast 804584 (ActivateDawn spends 20 Solar Power 500149, fixture of 20 stacks, and re-arms the choice, AscensionSunCleric.cpp:263-271), then a real Dawnsear 554406 (Fire) is cast. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
     },
     {
@@ -23915,11 +23916,103 @@
       "label_suffix": "excl_next_dawn_sunrise_gone",
       "setup_casts": [
         500154,
+        804584,
         804584
       ],
       "setup_target": "dummy",
-      "setup_wait_ms": 600,
+      "setup_wait_ms": 1600,
       "observe_source": "Sunrise 500477 on the caster reads absent (0) once Sunset is entered after the next Dawn (Sunrise is removed when Sunset is granted, AscensionSunClericAbilities.cpp:112-113). Sunrise is entered by a real Horusath Blast 500154 (Holy), then the next Dawn is entered by a real Dawn cast 804584 (ActivateDawn spends 20 Solar Power 500149, fixture of 20 stacks, and re-arms the choice, AscensionSunCleric.cpp:263-271), then a real Dawnsear 554406 (Fire) is cast. Reference search 2026-11-22: coa-history spell 92135 has 0 casts (passive); nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 92135,
+      "kind": "metric_delta",
+      "quote": "Entering Sunrise or Sunset prevents you from entering the other until you enter the next.",
+      "trigger_spell": 554406,
+      "gate_spell": 92135,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 554406,
+        "target": "dummy"
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "cast_power": 1363,
+      "wait_ms": 4200,
+      "expire_ms": 500,
+      "name": "Sunrise and Sunset (the blocked Fire cast lands)",
+      "variant": "excl_fire_landed",
+      "label_suffix": "excl_fire_landed",
+      "setup_casts": [
+        500154
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "observe_source": "Landing proof of the exclusivity arms: the same setup and Dawnsear 554406 cast, its damage events on the dummy counted, 1 before the learn and one more after it, so the Fire cast was not blocked by a failed cast. Reference search 2026-11-22: nothing found beyond the tooltip and Spell.dbc.",
+      "expected_gain": 1
+    },
+    {
+      "spell": 92135,
+      "kind": "metric_delta",
+      "quote": "Entering Sunrise or Sunset prevents you from entering the other until you enter the next.",
+      "trigger_spell": 554406,
+      "gate_spell": 92135,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 554406,
+        "target": "dummy"
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "cast_power": 1363,
+      "wait_ms": 4200,
+      "expire_ms": 500,
+      "name": "Sunrise and Sunset (the Fire cast after the next Dawn lands)",
+      "variant": "excl_next_fire_landed",
+      "label_suffix": "excl_next_fire_landed",
+      "setup_casts": [
+        500154,
+        804584
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "observe_source": "Landing proof of the exclusivity arms: the same setup and Dawnsear 554406 cast, its damage events on the dummy counted, 1 before the learn and one more after it, so the Fire cast was not blocked by a failed cast. Reference search 2026-11-22: nothing found beyond the tooltip and Spell.dbc.",
+      "expected_gain": 1
     },
     {
       "spell": 520024,
@@ -25352,7 +25445,8 @@
         805301
       ],
       "setup_target": "caster",
-      "setup_wait_ms": 1600
+      "setup_wait_ms": 1600,
+      "disable_regeneration": true
     },
     {
       "spell": 561328,
@@ -25383,7 +25477,8 @@
         805301
       ],
       "setup_target": "caster",
-      "setup_wait_ms": 1600
+      "setup_wait_ms": 1600,
+      "disable_regeneration": true
     },
     {
       "spell": 561328,
@@ -25414,7 +25509,8 @@
         805301
       ],
       "setup_target": "caster",
-      "setup_wait_ms": 1600
+      "setup_wait_ms": 1600,
+      "disable_regeneration": true
     },
     {
       "spell": 560547,
