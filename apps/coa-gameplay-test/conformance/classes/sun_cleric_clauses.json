@@ -1677,7 +1677,15 @@
       "504734 behaviour_metric_delta range_in",
       "504734 behaviour_metric_delta range_out",
       "504734 behaviour_metric_delta range_channel_in",
-      "504734 behaviour_metric_delta range_channel_out"
+      "504734 behaviour_metric_delta range_channel_out",
+      "504734 behaviour_metric_delta range_in_dawnsear",
+      "504734 behaviour_metric_delta range_out_dawnsear",
+      "504734 behaviour_metric_delta range_in_sunflare",
+      "504734 behaviour_metric_delta range_out_sunflare",
+      "504734 behaviour_metric_delta range_in_rapture",
+      "504734 behaviour_metric_delta range_out_rapture",
+      "504734 behaviour_metric_delta range_in_sundown",
+      "504734 behaviour_metric_delta range_out_sundown"
     ],
     "kind": "claim",
     "reason": "Redesigned arms (b6a review I-1). Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. Horusath Blast 500154 (30 yd, RangeIndex 4) at a dummy: refused (97) before the learn and cast (0) after at 38.5 yd (range_in), refused (97) in both phases at 39.0 yd (range_out). With the combat reaches (dummy 1.275 from a recorded read, player 1.5 assumed from DEFAULT_COMBAT_REACH, not read from the server) the effective range lies between 38.5 - 2.775 = 35.725 and 39.0 - 2.775 = 36.225 yd, a bonus of +19.1% to +20.75%, which excludes -10% and +10% of the +20% claim (+18% = 35.4 yd, +22% = 36.6 yd). Control arm: the same cast before the learn is refused at 38.5 yd (32.775 yd boundary without the talent). Round 3 pair 20261122-065848 / 20261122-065950, build 534132905680, server commit d26954d5cf31, no flip, 18 of 18 entries ok in both runs. Second covered spell of a different shape (G-23): Radiant Flame 560867, a channel (RangeIndex 4 = 30 yd) whose aura keeps its own range check and the only covered spell the class code touches for range (the sphere 807058, outside the mask): refused (97) before the learn and started (0) after at 38.5 yd (range_channel_in), refused (97) in both phases at 39.0 yd (range_channel_out), the same boundary as Horusath Blast, so the effective range lies between 35.725 and 36.225 yd on both shapes. HELD, no final status: G-23 is not met (review I-1). 2 of the 49 spells of the mask are tested (Horusath Blast, Radiant Flame; the 9 spell names are Dawnsear, Sunflare, Sun Down, Rapture, Sunset, Vow of the Valkyr and Glorious Execution Mana Passive besides). One effect and one class mask cover them, but the scripted spells Sun Down 572752 (AscensionSunClericContracts.cpp:266-280), Sunflare 800231 and Rapture 806477 are untested, and the tested spells share one path: both are instant and unit-targeted, so the Radiant Flame arms run the same unit-target Spell::CheckRange as Horusath Blast; cast-time spells (re-checked non-strictly at completion) and destination shapes (Rapture TargetA 53) are untested. The labels stay as measured evidence, the clause counts as open until a scripted, differently-shaped spell is run or the mentor rules on the scope of scripted in G-23. The threat clause (Dawnsear only) is not part of this round. Reference search: coa-history 0 events (passive), sidekick carries the tooltip only; nothing else found."
@@ -5460,7 +5468,13 @@
         ]
       },
       {
-        "claim": "Doubles the effectiveness of your Holy Form: the threat reduction (Effect[2], -50%) and the mana sacrifice of the Blessed ally (Effect[1])",
+        "claim": "Doubles the effectiveness of your Holy Form: the threat reduction (Effect[2], -50%)",
+        "labels": [
+          "800602 behaviour_metric_delta holy_form_threat_doubled"
+        ]
+      },
+      {
+        "claim": "Doubles the effectiveness of your Holy Form: the mana sacrifice of the Blessed ally (Effect[1])",
         "labels": []
       },
       {
@@ -7288,6 +7302,7 @@
     "spell": 807873,
     "clause": "and reduces the duration of disarm effects by $s2%.",
     "labels": [
+      "807873 behaviour_duration_ratio",
       "807873 effect_value e1 #1"
     ],
     "kind": "claim",
