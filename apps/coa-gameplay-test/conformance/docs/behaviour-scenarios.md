@@ -2132,6 +2132,8 @@ every module imports, names its kind and has a test file); its page is `docs/kin
   windows (ADR 0551)
 - [`block_charge_strikes`](kinds/block_charge_strikes.md): how many real blocks a block-charge aura lasts without and
   with a talent, block forced by `set_combat_avoidance` (ADR 1025, provisional)
+- [`block_extension_trials`](kinds/block_extension_trials.md): whether one blocked strike on a fresh aura extends
+  it by the stated time, every trial judged on game-time stamps (ADR 1047, provisional)
 - [`bounce_amounts`](kinds/bounce_amounts.md): the per-hit amount of each enemy a bouncing spell strikes, against
   its jump multiplier (ADR 0587)
 - [`cast_period`](kinds/cast_period.md): a minion's cast period from game-time stamped polls (ADR 0535)

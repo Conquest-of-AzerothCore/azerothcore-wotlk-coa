@@ -2138,7 +2138,8 @@
       {
         "claim": "Lasts for $n blocks",
         "labels": [
-          "560095 behaviour_metric_delta charges"
+          "680647 behaviour_metric_delta bulwark_blocks",
+          "681468 behaviour_metric_delta bulwark_blocks"
         ]
       },
       {
@@ -2150,7 +2151,7 @@
         ]
       }
     ],
-    "reason": "The blocks part ($n) stays data: its only reading is the aura_charges readback of the charges entry. A behaviour proof needs the five blocks to be taken and the aura to end on the last, and the harness cannot force a block (set_combat_avoidance sets dodge and parry only): a tool need, returned in the b10c3 report. The effect_value #2 label is dropped because the token $n has no readable effect value."
+    "reason": "The blocks part ($n) is behaviour through the control arm of the block_charge_strikes entries of Paying The Tithe 680647 and 681468 (kind block_charge_strikes): with block forced to 100% (set_combat_avoidance block, owner ruling O-20) Seraphic Bulwark 560095 must end on block 5 before the talent is learned, and the verdict alerts when the control arm lasts any other count, so a pass of either label proves the aura lasts its 5 charges of blocks. The aura_charges readback of the charges entry is not cited for this part."
   },
   {
     "spell": 560111,
@@ -5122,21 +5123,47 @@
   {
     "spell": 707629,
     "clause": "Blocking attacks now has a $h% chance to grant you Hammer of Kings for $/1000;712448s1 sec.",
-    "labels": [
-      "707629 effect_value #0",
-      "707629 effect_value 712448e0 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Blocking attacks now ... grant you Hammer of Kings (a blocked strike grants it, an unblocked hit never does)",
+        "labels": [
+          "707629 behaviour_metric_delta block_grant",
+          "707629 behaviour_metric_delta block_grant_unblocked"
+        ]
+      },
+      {
+        "claim": "has a $h% chance (30%, ProcChance)",
+        "labels": [
+          "707629 effect_value #0"
+        ]
+      },
+      {
+        "claim": "for $/1000;712448s1 sec (4 sec)",
+        "labels": [
+          "707629 effect_value 712448e0 #1"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "On block: 24 strikes at block 100% grant Hammer of Kings 804751 at least once after 707629 is learned and never before; 24 unblocked hits grant it never (block 0%), every strike checked blocked or landed (caster_avoidance block, D-176). Residual 0.7^24 = 1.9e-4 per run. The 30% chance stays data: G-20 step 1 not run (the band 28..32% needs about 5,450 to 13,900 blocks per arm; the cost goes to the mentor first); the extended share of the block_extension trials gives an interval, never judged. The 4 sec duration stays data."
   },
   {
     "spell": 707629,
     "clause": "If Hammer of Kings is already active, you increase the duration by 4 sec.",
-    "labels": [
-      "707629 effect_value 804752e0 #2",
-      "707629 aura_amplitude_ms #3",
-      "707629 spell_duration 804751 #4"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "If Hammer of Kings is already active, you increase the duration by 4 sec (one blocked strike per fresh application: expiry 12 s +-10% or 16 s +-10%, never other; unblocked hits never extend)",
+        "labels": [
+          "707629 behaviour_metric_delta block_extension",
+          "707629 behaviour_metric_delta block_extension_unblocked",
+          "707629 effect_value 804752e0 #2",
+          "707629 aura_amplitude_ms #3",
+          "707629 spell_duration 804751 #4"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Kind block_extension_trials (D-217): 24 trials of one blocked strike on a fresh 804751 cast, every trial judged on game-time stamps (12000 ms +-10% not extended, 16000 ms +-10% extended by 712469 Effect[0] 4000 ms). One strike per application because an extension casts nothing (AscensionSunClericEvents.cpp:150, Extend only sets the duration). Zero arm: 24 unblocked hits on one application, gone 13.8 s after the cast. The data labels of the base ledger are kept beside it."
   },
   {
     "spell": 707767,
