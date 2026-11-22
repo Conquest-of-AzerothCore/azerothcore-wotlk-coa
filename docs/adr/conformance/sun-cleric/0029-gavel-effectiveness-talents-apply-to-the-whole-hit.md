@@ -75,3 +75,25 @@ rule; a multiplicative reading would need code outside the engine's modifier sum
   of Xoroth 800340 chain) are untouched; their scenarios are rerun on the fix build.
 - If Ascension evidence later shows the compounded hit was live behaviour, removing the line in `ApplyContracts`
   restores the stock order.
+
+## Verification
+
+Counted pair at level 60 after the fix: 20261122-125423 / 20261122-130312 (`conformance.py prove`, pilot
+20261122-124732 not judged), build 182edc2cb1a6, server commit 607997a84a, no flip, 27 of 27 verdicts ok in both
+runs. Every reading lies inside its G-19 band and inside its own 99% interval around the prediction:
+
+| Entry | Expected bonus | Run 1 | Run 2 |
+|---|---|---|---|
+| Glorious Defender, Wrath / Light / Grace | +24.09 / +24.17 / +23.93 | +24.20 / +23.92 / +23.58 | +24.23 / +23.86 / +23.89 |
+| Fanaticism, Wrath / Grace / Light | +19.45 / +19.33 / +19.26 | +19.50 / +19.18 / +18.85 | +19.46 / +19.36 / +19.36 |
+| Fanaticism out of sample, Wrath / Grace / Light | +19.53 / +19.45 / +19.42 | +19.57 / +19.44 / +19.52 | +19.77 / +19.35 / +19.60 |
+| Fanaticism, Horusath Blast / out of sample | +19.34 / +19.34 | +19.32 / +19.48 | +19.50 / +19.69 |
+| Battle Cleric, 802561 / Wrath / Light / Grace | +49.75 / +49.26 / +49.31 / +49.09 | +50.50 / +49.10 / +49.32 / +48.54 | +49.97 / +49.47 / +48.91 / +49.46 |
+| Glorious Defender with Fanaticism (800617) | +43.84 | +44.24 | +43.70 |
+| Glorious Defender with Battle Cleric (802561) | +74.62 | +74.77 | +75.00 |
+
+The control arms read the model's no-talent means within one damage point (Gavel of Wrath 97.70 / 97.75 against
+97.67, 802561 under Paragon 279.7 / 280.8 against 280.61). On the same build, the Templar Argent Blade value and hit
+scenarios (the other flag users, generated from the Templar class file), the committed Templar and Knight of Xoroth
+flag scenarios and the committed scenarios of the touched spells passed twice (20261122-131010 / -131058, 32 of 32;
+the Templar generated scenarios compare 44 of 44 ok in both runs).
