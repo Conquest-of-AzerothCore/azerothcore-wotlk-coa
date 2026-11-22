@@ -906,7 +906,7 @@
       "300723 behaviour_hit_ratio fire_damage"
     ],
     "kind": "claim",
-    "reason": "Owner ruling O-19 (Q-sc-9, option b, 2026-11-22), replacing the earlier hold: the tooltip's Holy and Fire spell damage increase is the +30% Holy and Fire damage the server applies, and the Intellect-based effect is only for the spell hit rating (clause 66). Owner's words: \"On conserve +30% de spell damage pour le feu et le sacré. Le buff qui prend l'intelligence en compte n'est que pour le taux de toucher\". Expected value: x1.30 of the Holy and Fire hit (the ruling's 30%, not a measured value). The server rewrite at load (AscensionSunClericContracts.cpp:185-186, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire) is the ruled behaviour; no change. Counted on the b9d arms: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3), holy_damage, holy_damage_control and fire_damage hit_ratio and the effect_value e2 read ok in both runs, no flip, control arm holy_damage_control. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found beyond the ruling.",
+    "reason": "Owner ruling O-19 (Q-sc-9, option b, 2026-11-22), replacing the earlier hold: the tooltip's Holy and Fire spell damage increase is the +30% Holy and Fire damage the server applies, and the Intellect-based effect is only for the spell hit rating (clause 66). Owner's words: \"On conserve +30% de spell damage pour le feu et le sacr\u00e9. Le buff qui prend l'intelligence en compte n'est que pour le taux de toucher\". Expected value: x1.30 of the Holy and Fire hit (the ruling's 30%, not a measured value). The server rewrite at load (AscensionSunClericContracts.cpp:185-186, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire) is the ruled behaviour; no change. Counted on the b9d arms: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3), holy_damage, holy_damage_control and fire_damage hit_ratio and the effect_value e2 read ok in both runs, no flip, control arm holy_damage_control. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found beyond the ruling.",
     "text_source": {
       "basis": "owner_ruling",
       "spell": 300723,
@@ -2158,7 +2158,7 @@
       "560492 effect_value #0"
     ],
     "kind": "claim",
-    "reason": "Open (tool need): the token ${$560493m1*$<scalingbp>$spfi*0.12+$AP*0.03} is unreadable (missing '+' before $spfi, '$<scalingbp>' undefined), so no expected amount comes from data; the avoided-swing proc kind counts casts, not the damage amount and its SP and AP terms."
+    "reason": "Open (tool need, no entry written): (1) the token ${$560493m1*$<scalingbp>$spfi*0.12+$AP*0.03} has no '+' before $spfi, so the tool reads it as unreadable and no expected amount comes from data; the coefficients 0.12 and 0.03 match the class data (AscensionSunClericData.h:82), so the likely intended form is base x $<scalingbp> + $spfi x 0.12 + $AP x 0.03, a text correction that needs an owner ruling (only 'srtike' of 572885 is ruled, D-162). Reference search 2026-11-22: coa-history spell 560492: 0 events (a passive); 560493 Protector of the Flame: 1,083 SPELL_DAMAGE (min 1, max 1052, mean 233.0, 228 crits) and 2 SPELL_MISSED in 6 logs, which carry no coefficient, so they neither confirm nor contradict the 0.12 and 0.03; nothing else found. (2) script_hit has no avoided-attack trigger: Protector fires on a Miss, Dodge or Parry of the caster (AscensionSunClericEvents.cpp:72,100, one per 1000 ms), and the only avoidance forcing is set_combat_avoidance (caster_avoidance of taken_outcome, ADR 0900 procs), which script_hit does not take: a tool addition, held for a design note."
   },
   {
     "spell": 560492,
@@ -2748,9 +2748,17 @@
   },
   {
     "spell": 572885,
-    "clause": "In addition, increases the critical srtike chance of all Gavels by $s2%.",
+    "clause": "In addition, increases the critical strike chance of all Gavels by $s2%.",
+    "dbc_clause": "In addition, increases the critical srtike chance of all Gavels by $s2%.",
+    "text_source": {
+      "basis": "text_correction",
+      "spell": 572885,
+      "ruling": "D-162: 'srtike' read as 'strike', no figure differs (G-36); no client text change",
+      "dbc_differs": "Description: 'srtike' spelled 'strike'; no value changes",
+      "record": "ledger-only text_correction (D-162): no coa_client_spell_description row exists and none is added; the client text is unchanged"
+    },
     "kind": "claim",
-    "reason": "Counts as data, status not 1: the measurement is behavioural but the tooltip typo 'srtike' is kept in the clause, so coverage.py CRIT_WORDS does not match and the verdicts fall to data; a mentor or tool decision (typo-tolerant promise or text_source correction) is needed. Control arm = the read before the learn plus Horusath Blast 500154 outside the Gavel mask (gain 0.0, entry crit_control). Gavel of Light 800611, Gavel of Wrath 802561 and Gavel of Grace 807987 each gain 20.0 (expected 20 = BasePoints 19 + 1, within 0.01), both runs; the 3 Gavel shapes cover the mask (G-23: one effect, one class mask). The bindmysoul snapshot text lacks the Gavel sentence (an older tooltip state). Reference search 2026-11-22: coa-history spell 572885: 0 events in 186 logs (a passive leaves no event). Pair 20261122-045517 / 20261122-045553, build b3e613641105, server commit 68e7af248b64+, no flip, 16/16 ok in both runs.",
+    "reason": "Status 1. Mentor D-162: the tooltip's 'srtike' is read as 'strike' (text_correction, G-36: no figure differs, no client text change), so the crit promise words match. Control arm = the read before the learn plus Horusath Blast 500154 outside the Gavel mask (gain 0.0, entry crit_control, 4.6781 before and after). Gavel of Light 800611, Gavel of Wrath 802561 and Gavel of Grace 807987 each gain 20.0 (expected 20 = BasePoints 19 + 1, within 0.01), both runs; the 3 Gavel shapes cover the mask (G-23: one effect, one class mask). The bindmysoul snapshot text lacks the Gavel sentence (an older tooltip state). Reference search 2026-11-22: coa-history spell 572885: 0 events in 186 logs (a passive leaves no event). Pair 20261122-155322 / 20261122-155402, build 258d1652f626, server commit b2e2235ee2b5+, no flip, 15 of 15 verdicts ok or tolerated in both runs; the effect_value reads ran twice on the same build (20261122-155600 / -155644), ok.",
     "labels": [
       "572885 effect_value e1 #2",
       "572885 behaviour_metric_delta crit_gavel_light",
@@ -3056,9 +3064,13 @@
     "spell": 680637,
     "clause": "When the absorption shield from The Chosen is depleted, it explodes for ${$570187m1*$<scalingbp>+$AP*0.25+$sph*0.45} Holy damage,",
     "labels": [
-      "680637 effect_value 570187e0 #0"
+      "680637 effect_value 570187e0 #0",
+      "680637 script_hit 570187 explosion",
+      "680637 script_hit 570187 explosion_sp",
+      "680637 script_hit 570187 explosion_ap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1. ADR 0745 / 0160 / 0031 and Witch Hunter ADR 0004 read: a base-only read cannot be isolated (the data read gives the full token, 96.494 at attack power 70, ADR 0745 case), so the base term is judged by the hit at the measured stats and each power term by a contrast arm against the control. Real heal (Illumination 500143) turns The Chosen 704936 into the shield 802598; Grave Coil 47632 from a striker 3 yd away breaks it and Hope 570187 lands on the striker (the only enemy within 8 yd, so the split by enemy count is one). Control arm: the same heal and strike without 680637 learned counts no 570187 hit. Hit means (non-critical, unresisted, model 0 sigma): base 96.0 against 96.000, spell power arm 366.0 against 366.000 (+270 = 0.45 x 600 holy spell power, 10062 x6; a coefficient 10% off moves the hit by 27 against a 5% band of 18.3), attack power arm 346.0 against 346.000 (+250 = 0.25 x 1000 attack power); tooltip display 96.49, 366.49, 346.49 (integer truncation). 18 to 20 usable hits of 20 per arm; residual failure probability about 1e-6 per pair (0.85 per trial, minimum 8 of 20). The splitting by number of enemies is not proven (one enemy only). Reference search 2026-11-22: coa-history spell 680637 and 570187; the bindmysoul and ascension-data snapshots carry the text; nothing found beyond the tooltip and the DBC. Pair 20261122-155322 / 20261122-155402, build 258d1652f626, server commit b2e2235ee2b5+, no flip, 15 of 15 verdicts ok or tolerated in both runs; the effect_value reads ran twice on the same build (20261122-155600 / -155644), ok."
   },
   {
     "spell": 680637,
@@ -5912,10 +5924,39 @@
   {
     "spell": 804628,
     "clause": "At the end of the duration, or when Judgement Day ends, the enemy takes ${$807064m1*$<scalingbp>+$AP*.3+$sph*.5} Holy damage, increased for each stack on the target.",
-    "labels": [
-      "804628 effect_value 807064e0 #2"
+    "claims": [
+      {
+        "claim": "the enemy takes ${$807064m1*$<scalingbp>+$AP*.3+$sph*.5} Holy damage",
+        "labels": [
+          "804628 effect_value 807064e0 #2",
+          "804628 script_hit 807064 release",
+          "804628 script_hit 807064 release_sp",
+          "804628 script_hit 807064 release_ap"
+        ]
+      },
+      {
+        "claim": "increased for each stack on the target",
+        "labels": [
+          "804628 script_hit 807064 release",
+          "804628 script_hit 807064 release_1stack",
+          "804628 script_hit 807064 release_5stack"
+        ]
+      },
+      {
+        "claim": "when Judgement Day ends",
+        "labels": [
+          "804628 script_hit 807064 release",
+          "804628 script_hit 807064 release_1stack",
+          "804628 script_hit 807064 release_5stack"
+        ]
+      },
+      {
+        "claim": "At the end of the duration",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Split by D-165 / D-168. Amount: ADR 0745 / 0160 / 0031 and Witch Hunter ADR 0004 read as for Hope (the base term is judged by the hit at the measured stats, each power term by a contrast arm; control = the same cast without 804628, 0 hits). Judgement Day 806121 is cast at the dummy; the tooltip figure at the measured stats is 492.0 (attack power 70, spell power 0), 792.0 at +1000 attack power (+0.3 x 1000); at +2000 spell power (10062 x20, live read) it is 1492.0. Hit means at the 10-stack cap, x5.25: base 2583.0 against 2583.0, attack power arm 4158.0 against 4158.0 (ok, exact), spell power arm 7833.0 against 7833.0 (ok, exact; at 2000 spell power a coefficient 10% off, 0.45 or 0.55, moves the mean by 525 and leaves the 5% tier). Per stack: 'increased for each stack' states no figure; 25% per stack is data, 807080 Effect[0] aura 271 BasePoints 24 + 1, applied only by the 570125 slot 2 tick (AscensionSunClericAuras.cpp:239-243); the other DBC routes are closed: 807080 Effect[0] is rewritten to a dummy at load (AscensionSunClericContracts.cpp:209-210) and the proc route 804628 Effect[0] PROC_TRIGGER_SPELL to 807080 is rewritten to a dummy because 804628 is in SunClericDrivers (AscensionSunClericData.h:147, Contracts.cpp:53-61). The server applies the constant .25f at Contracts.cpp:316 (value x (1 + stacks x .25)); the expectation stays the DBC figure, not that constant. Judgement Day's own 50% damage taken is 570125 Effect[1] aura 271 BasePoints 49 + 1 (data); no ledger row exists for that sentence (806121 is open for its cooldown reset only), so the x1.5 cites its data (mentor D-178): Spell 570125 in /srv/coa/server-data/dbc, EffectApplyAuraName[1] = 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER, EffectBasePoints[1] = 49 (+1 = +50%), EffectMiscValue[1] = 127 (school mask), applied as a damage-taken multiplier by the caster's own aura in Unit::SpellDamageBonusTaken (Unit.cpp:10113-10118). Out-of-sample arm release_5stack, predicted in e23cddb195 before the arm existed: 492.0 x (1 + 5 x 0.25) x 1.5 = 1660.5 (band 1577.5 to 1743.5); measured 1660.0 tolerated in both runs, 12 of 12 trials read exactly 5 stacks before the harness removed Judgement Day (SETUP assert), so the stack factor is contrasted at 1, 5 and 10 stacks (the 5-stack figure measured again in the second pair, 1660.0 in both runs), the 1.5 at all three. Judgement Day ended: release_5stack exercises the harness removal of 570125 (the script releases on any 570125 removal while the caster knows 804628, Auras.cpp:187-189), release the natural 30 s end. Not proven: 'At the end of the duration' (the 807080 expiry path, Auras.cpp:190-191) and the no-debuff release (10 stacks without x1.5, predicted 1722.0, NOT MEASURED: state not reachable through Judgement Day removal, AscensionSunClericAuras.cpp:187-191, every 570125 removal releases with the debuff still on and removes 807080; 807080 stacks accrue only from the 570125 Effect[2] tick, Auras.cpp:237-243, so with no Judgement Day on the target no stack is added; the expiry path is not gated by 804628, observation only, no change; mentor D-168). 1-stack arm, predicted 922.5 in e23cddb195 (492.0 x (1 + 1 x 0.25) x 1.5, band 876.4 to 968.6), two attempts. Attempt 1 (pair 20261122-161820 / -161922) was void: its SETUP read of exactly 1 stack failed on trial 2 in both runs (read 10 after 9000 ms, trial 1 read 1 at 112 to 120 ms), entry archived in .agents/plans/sun-cleric-b11s1-fix/removed-entries.json. Cause, proven by the diagnostic run 20261122-164250 (non-failing reads of 570125 and 807080): the options were applied in every trial; 806121 lands Judgement Day about 150 ms after the cast (Effect[0] 183 delayed trigger, BasePoints 149, SpellEffects.cpp:1092-1094), so a removal straight after the cast removed nothing, the control arm left Judgement Day (30000 ms) on the dummy, learning 804628 let it tick (trial 1 read 1 from that leftover), trial 1's own removal again preceded the landing and its Judgement Day ticked through the settle (trial 2 started with 8 or more stacks). Attempt 2 (clean start, tool ADR 1030): Judgement Day is removed after the control drain and before 804628 is learned, each treatment trial starts only if 570125 is absent and 807080 holds 0 stacks on the dummy (24 of 24 reads clean per run), and each removal follows a read that 570125 is present (12 of 12) and that 807080 holds exactly 1 stack (12 of 12, read at 637 to 649 ms); measured 922.0 tolerated in both runs against 922.5, 12 usable hits, control 0 hits. Residual failure probability about 1.4e-4 per pair for each Suncharged arm (0.85 per trial, minimum 5 of 12). Reference search 2026-11-22: 807080's own description is Sunflare's ('increasing it's damage by 25% for $d'), which supports the 25% as the data figure; coa-history spell 804628: nothing beyond the tooltip and the DBC. Counted pair 20261122-165206 / 20261122-165247 (all 804628 arms except effect_value), build 258d1652f626, server commit b2e2235ee2b5+, no flip; the first pair 20261122-161820 / -161922 on the same build gave the same 5-stack and spell-power figures; effect_value read from the earlier pair 20261122-155600 / -155644 (same build), ok."
   },
   {
     "spell": 804629,

@@ -31806,6 +31806,339 @@
         "ally2": 43.5
       },
       "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; Fulfill (AscensionSunCleric.cpp:298-300) heals the allies of Allies(player, player, Radius(704911), MaxAffectedTargets): Nearby(center, range) uses AnyUnitInObjectRangeCheck -> IsWithinDistInMap(u, range) (GridNotifiers.h:1065-1067), whose defaults add both object sizes (Object.h:550, _IsWithinDist adds GetObjectSize() of each unit, = combat reach, Object.cpp:2898-2901). 704911 EffectRadiusIndex 23 = 40 yd (SpellRadius 23 RadiusMin = RadiusMax = 40; the blocker table's 9/11 yd does not match the DBC). Engine edge between two players: 40 + 1.5 + 1.5 = 43.0 yd (known engine behaviour, guide section 5 effective radius; there is no player leeway here, the radius comes from Radius(), not from a SRC_AREA target). Run 1 (pair-less exploratory run 20261122-154829) with allies at 39 and 41 yd healed the 41 yd ally: the lead that showed the reach term; the arms are now 42.5 and 43.5 yd, 0.5 yd on each side of the computed edge, so a radius 10% smaller (36 yd, edge 39.0) or larger (44 yd, edge 47.0) fails one arm. Same casts as the sunlight_heal entry (Dawn 804584 with 20 Solar Power 500149 set as a precondition fixture, Vow of Radiance 803489, Illumination 500143 on the caster at 50% health, 92136 learned between the phases). Expected: 1 Sunlight heal on the ally at 42.5 yd, 0 on the ally at 43.5 yd, 1 on the caster; the cap of five is not reached. The combat reach terms (1.5 each, Player.h:1110 and ObjectDefines.h:45) are read on the caster, the ally and ally2 by three ally_arm precondition arms (combat_reach, 1.5 within 0.01, before and after; mentor D-169): a read off 1.5 voids the trial (unmeasured), it never judges the radius; the edge itself is computed from the DBC radius and the cited rule, never from a measured distance. The arms measure distance_2d on flat ground; IsWithinDistInMap is 3D, immaterial for a 10% shift. Control: before the learn, no Sunlight heal. Reference search 2026-11-22: coa-history spell 92136: a passive, no events; nothing beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680637,
+      "name": "Hope (The Chosen shield explosion)",
+      "kind": "script_hit",
+      "variant": "explosion",
+      "label_suffix": "explosion",
+      "quote": "When the absorption shield from The Chosen is depleted, it explodes for ${$570187m1*$<scalingbp>+$AP*0.25+$sph*0.45} Holy damage, split between enemies within $570187a1 yds.",
+      "hit_spell": 570187,
+      "value_spell": 570187,
+      "value_effect": 0,
+      "learn": [
+        704936
+      ],
+      "casts": [
+        [
+          500143,
+          "caster"
+        ]
+      ],
+      "strike_spell": 47632,
+      "receiver": "striker",
+      "caster_health_pct": 30,
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "trials": 20,
+      "minimum_hits": 8,
+      "settle_ms": 1000,
+      "cast_power": 1363,
+      "observe_source": "680637 Hope (Effect[0] aura 4 DUMMY) is a passive of the class script: when The Chosen's shield 802598 absorbs a hit at least as large as its remaining amount and the caster knows 680637, the script casts Hope 570187 at the caster (AscensionSunClericAuras.cpp:168, Absorb :259-262; 570187 Effect[0] SCHOOL_DAMAGE BasePoints 79, TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, radius index 14 = 8 yd); the hit is divided by the number of enemy targets (AscensionSunClericAbilities.cpp:561-562), here one. The Chosen 704936 turns the heal of Illumination 500143 into the shield 802598 (AscensionSunClericEvents.cpp:375, entry shield_base), so the treatment is a real heal and a real strike: Grave Coil 47632 from a passive striker (creature 36, 3 yd from the caster) is far above the shield (11 to 12 at spell power 0) and breaks it. Every landed, unresisted, non-critical 570187 hit on the striker is judged against the tooltip read with the measured stats (base term with $<scalingbp>, 0.25 x attack power, 0.45 x holy spell power); 984954 removes spell crits (Effect[1] aura 57 BasePoints -1001) and adds weapon crit (Effect[0] aura 52 BasePoints 100) and 823764 partial resists on the caster (precondition fixtures, as the Sun Down entries). Control arm: the same heal and strike without 680637 learned must show no 570187 hit. The spell-power and attack-power arms raise the caster's stat before it is measured (10062, 10031) and are judged in the same pair against the same control (ADR 0745 / 0160: the base term is judged by the hit at the measured stats, each power term by its contrast arm). The striker is the only enemy within 8 yd, so the split is not exercised (a second enemy is not in this entry). Sizing: the exploratory read landed 28 of 30 trials as usable hits (a landed, non-critical hit); at a per-trial rate of 0.85, below that, 20 trials with a minimum of 8 usable hits fail with probability about 5e-7 per run, 1e-6 per pair."
+    },
+    {
+      "spell": 680637,
+      "name": "Hope (explosion, +600 spell power)",
+      "kind": "script_hit",
+      "variant": "explosion_sp",
+      "label_suffix": "explosion_sp",
+      "quote": "When the absorption shield from The Chosen is depleted, it explodes for ${$570187m1*$<scalingbp>+$AP*0.25+$sph*0.45} Holy damage, split between enemies within $570187a1 yds.",
+      "hit_spell": 570187,
+      "value_spell": 570187,
+      "value_effect": 0,
+      "learn": [
+        704936
+      ],
+      "casts": [
+        [
+          500143,
+          "caster"
+        ]
+      ],
+      "strike_spell": 47632,
+      "receiver": "striker",
+      "caster_health_pct": 30,
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "trials": 20,
+      "minimum_hits": 8,
+      "settle_ms": 1000,
+      "cast_power": 1363,
+      "observe_source": "680637 Hope (Effect[0] aura 4 DUMMY) is a passive of the class script: when The Chosen's shield 802598 absorbs a hit at least as large as its remaining amount and the caster knows 680637, the script casts Hope 570187 at the caster (AscensionSunClericAuras.cpp:168, Absorb :259-262; 570187 Effect[0] SCHOOL_DAMAGE BasePoints 79, TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, radius index 14 = 8 yd); the hit is divided by the number of enemy targets (AscensionSunClericAbilities.cpp:561-562), here one. The Chosen 704936 turns the heal of Illumination 500143 into the shield 802598 (AscensionSunClericEvents.cpp:375, entry shield_base), so the treatment is a real heal and a real strike: Grave Coil 47632 from a passive striker (creature 36, 3 yd from the caster) is far above the shield (11 to 12 at spell power 0) and breaks it. Every landed, unresisted, non-critical 570187 hit on the striker is judged against the tooltip read with the measured stats (base term with $<scalingbp>, 0.25 x attack power, 0.45 x holy spell power); 984954 removes spell crits (Effect[1] aura 57 BasePoints -1001) and adds weapon crit (Effect[0] aura 52 BasePoints 100) and 823764 partial resists on the caster (precondition fixtures, as the Sun Down entries). Control arm: the same heal and strike without 680637 learned must show no 570187 hit. The spell-power and attack-power arms raise the caster's stat before it is measured (10062 \"QA Test +100 SP\" at 6 stacks = +600 spell power, 10031 +1000 attack power) and are judged in the same pair against the same control (ADR 0745 / 0160: the base term is judged by the hit at the measured stats, each power term by its contrast arm). The striker is the only enemy within 8 yd, so the split is not exercised (a second enemy is not in this entry). Sizing: the exploratory read landed 28 of 30 trials as usable hits (a landed, non-critical hit); at a per-trial rate of 0.85, below that, 20 trials with a minimum of 8 usable hits fail with probability about 5e-7 per run, 1e-6 per pair.",
+      "stat_auras": [
+        [
+          10062,
+          6
+        ]
+      ]
+    },
+    {
+      "spell": 680637,
+      "name": "Hope (explosion, +1000 attack power)",
+      "kind": "script_hit",
+      "variant": "explosion_ap",
+      "label_suffix": "explosion_ap",
+      "quote": "When the absorption shield from The Chosen is depleted, it explodes for ${$570187m1*$<scalingbp>+$AP*0.25+$sph*0.45} Holy damage, split between enemies within $570187a1 yds.",
+      "hit_spell": 570187,
+      "value_spell": 570187,
+      "value_effect": 0,
+      "learn": [
+        704936
+      ],
+      "casts": [
+        [
+          500143,
+          "caster"
+        ]
+      ],
+      "strike_spell": 47632,
+      "receiver": "striker",
+      "caster_health_pct": 30,
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "trials": 20,
+      "minimum_hits": 8,
+      "settle_ms": 1000,
+      "cast_power": 1363,
+      "observe_source": "680637 Hope (Effect[0] aura 4 DUMMY) is a passive of the class script: when The Chosen's shield 802598 absorbs a hit at least as large as its remaining amount and the caster knows 680637, the script casts Hope 570187 at the caster (AscensionSunClericAuras.cpp:168, Absorb :259-262; 570187 Effect[0] SCHOOL_DAMAGE BasePoints 79, TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, radius index 14 = 8 yd); the hit is divided by the number of enemy targets (AscensionSunClericAbilities.cpp:561-562), here one. The Chosen 704936 turns the heal of Illumination 500143 into the shield 802598 (AscensionSunClericEvents.cpp:375, entry shield_base), so the treatment is a real heal and a real strike: Grave Coil 47632 from a passive striker (creature 36, 3 yd from the caster) is far above the shield (11 to 12 at spell power 0) and breaks it. Every landed, unresisted, non-critical 570187 hit on the striker is judged against the tooltip read with the measured stats (base term with $<scalingbp>, 0.25 x attack power, 0.45 x holy spell power); 984954 removes spell crits (Effect[1] aura 57 BasePoints -1001) and adds weapon crit (Effect[0] aura 52 BasePoints 100) and 823764 partial resists on the caster (precondition fixtures, as the Sun Down entries). Control arm: the same heal and strike without 680637 learned must show no 570187 hit. The spell-power and attack-power arms raise the caster's stat before it is measured (10062, 10031) and are judged in the same pair against the same control (ADR 0745 / 0160: the base term is judged by the hit at the measured stats, each power term by its contrast arm). The striker is the only enemy within 8 yd, so the split is not exercised (a second enemy is not in this entry). Sizing: the exploratory read landed 28 of 30 trials as usable hits (a landed, non-critical hit); at a per-trial rate of 0.85, below that, 20 trials with a minimum of 8 usable hits fail with probability about 5e-7 per run, 1e-6 per pair.",
+      "stat_auras": [
+        [
+          10031,
+          1
+        ]
+      ]
+    },
+    {
+      "spell": 804628,
+      "name": "Suncharged (release at the end of Judgement Day)",
+      "kind": "script_hit",
+      "variant": "release",
+      "label_suffix": "release",
+      "quote": "At the end of the duration, or when Judgement Day ends, the enemy takes ${$807064m1*$<scalingbp>+$AP*.3+$sph*.5} Holy damage, increased for each stack on the target.",
+      "hit_spell": 807064,
+      "value_spell": 807064,
+      "value_effect": 0,
+      "casts": [
+        [
+          806121,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "trials": 12,
+      "minimum_hits": 5,
+      "settle_ms": 32000,
+      "cast_power": 1363,
+      "observe_source": "804628 Suncharged lets Judgement Day apply Suncharge 807080 to the target every 0.5 s up to 10 stacks (entries suncharge_period and suncharge_cap). When Judgement Day 570125 ends (DurationIndex 9 = 30000 ms) the class script casts Suncharge 807064 at the target with the stacks read from 807080 (AscensionSunClericAuras.cpp:187-191, ReleaseSuncharge AscensionSunCleric.cpp:326-334; 807064 Effect[0] SCHOOL_DAMAGE BasePoints 476). The treatment casts Judgement Day 806121 at the dummy and waits for its end; every landed, unresisted, non-critical 807064 hit on the dummy is read against the tooltip at the measured stats (base term with $<scalingbp>, 0.3 x attack power, 0.5 x holy spell power); 984954 removes spell crits (Effect[1] aura 57 BasePoints -1001) and adds weapon crit (Effect[0] aura 52 BasePoints 100) and 823764 partial resists on the caster (precondition fixtures). Control arm: the same cast without 804628 learned must show no 807064 hit. The spell-power and attack-power arms raise the caster's stat (10062, 10031) before it is measured and are judged in the same pair against the same control. The hit is read at the stacks cap, so the tooltip figure is multiplied by two factors of data, not of the measurement: 1 + 10 stacks x 0.25 (807080 Effect[0] aura 271 BasePoints 24 + 1 = 25% per stack; 10 = $807080u, the cap proven by suncharge_cap) = 3.5, and Judgement Day's own damage taken from the caster, 570125 Effect[1] aura 271 BasePoints 49 + 1 = 50% (the aura is still on the target when the release is cast), = 1.5; multiplier 5.25. The tooltip states no figure for the stack increase; the 25% is the data value the server applies (AscensionSunClericContracts.cpp:315-316). The exploratory read (the three arms at 5.25 times the tooltip figure) preceded this derivation. Sizing: 24 of 24 exploratory trials landed; at 0.85 per trial, 12 trials with a minimum of 5 usable hits fail with probability about 7e-5 per run, 1.4e-4 per pair.",
+      "multiplier": 5.25
+    },
+    {
+      "spell": 804628,
+      "name": "Suncharged (release at 1 stack, Judgement Day ended by the harness)",
+      "kind": "script_hit",
+      "variant": "release_1stack",
+      "label_suffix": "release_1stack",
+      "quote": "At the end of the duration, or when Judgement Day ends, the enemy takes ${$807064m1*$<scalingbp>+$AP*.3+$sph*.5} Holy damage, increased for each stack on the target.",
+      "hit_spell": 807064,
+      "value_spell": 807064,
+      "value_effect": 0,
+      "casts": [
+        [
+          806121,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "trials": 12,
+      "minimum_hits": 5,
+      "settle_ms": 4000,
+      "cast_power": 1363,
+      "observe_source": "804628 Suncharged lets Judgement Day apply Suncharge 807080 to the target every 0.5 s up to 10 stacks (entries suncharge_period and suncharge_cap). When Judgement Day 570125 ends (DurationIndex 9 = 30000 ms) the class script casts Suncharge 807064 at the target with the stacks read from 807080 (AscensionSunClericAuras.cpp:187-191, ReleaseSuncharge AscensionSunCleric.cpp:326-334; 807064 Effect[0] SCHOOL_DAMAGE BasePoints 476). The treatment casts Judgement Day 806121 at the dummy and waits for its end; every landed, unresisted, non-critical 807064 hit on the dummy is read against the tooltip at the measured stats (base term with $<scalingbp>, 0.3 x attack power, 0.5 x holy spell power); 984954 removes spell crits (Effect[1] aura 57 BasePoints -1001) and adds weapon crit (Effect[0] aura 52 BasePoints 100) and 823764 partial resists on the caster (precondition fixtures). Control arm: the same cast without 804628 learned must show no 807064 hit. The spell-power and attack-power arms raise the caster's stat (10062, 10031) before it is measured and are judged in the same pair against the same control. The hit is read at the stacks cap, so the tooltip figure is multiplied by two factors of data, not of the measurement: 1 + 10 stacks x 0.25 (807080 Effect[0] aura 271 BasePoints 24 + 1 = 25% per stack; 10 = $807080u, the cap proven by suncharge_cap) = 3.5, and Judgement Day's own damage taken from the caster, 570125 Effect[1] aura 271 BasePoints 49 + 1 = 50% (the aura is still on the target when the release is cast), = 1.5; multiplier 5.25. The tooltip states no figure for the stack increase; the 25% is the data value the server applies (AscensionSunClericContracts.cpp:315-316). The exploratory read (the three arms at 5.25 times the tooltip figure) preceded this derivation. Sizing: 24 of 24 exploratory trials landed; at 0.85 per trial, 12 trials with a minimum of 5 usable hits fail with probability about 7e-5 per run, 1.4e-4 per pair. OUT OF SAMPLE arm (D-165, D-167): the harness removes Judgement Day 570125 from the dummy (set_aura stacks 0) as soon as 807080 reads exactly 1 stack on the dummy, which exercises the tooltip's 'when Judgement Day ends' branch (AscensionSunClericAuras.cpp:187-189, any removal mode, Judgement Day still on the target: x1.5); a trial that never reads 1 stack voids the arm (SETUP assert) and is not judged. Prediction committed in e23cddb195 before this arm existed: 492.0 x (1 + 1 x 0.25) x 1.5 = 922.5, tolerated band 5%; multiplier 1.875 = (1 + 1 x 0.25) x 1.5 from 807080 Effect[0] BasePoints 24 + 1 and 570125 Effect[1] BasePoints 49 + 1 (data). Clean start (D-174, fix2): 806121 lands Judgement Day about 150 ms after the cast (Effect[0] 183 delayed trigger, BasePoints 149; Spell::EffectAscensionTriggerSpellDelayed, SpellEffects.cpp:1061-1100), so a removal straight after the cast removes nothing and the control arm leaves Judgement Day (30000 ms) on the dummy. The harness therefore removes Judgement Day once more after the control drain and before 804628 is learned, every treatment trial starts only if 570125 is absent and 807080 holds no stack on the dummy, and each removal follows a read that 570125 is present; a trial that breaks one of these voids the arm (SETUP asserts).",
+      "multiplier": 1.875,
+      "receiver_aura_removals": [
+        [
+          570125,
+          0
+        ]
+      ],
+      "no_wait_after_casts": true,
+      "stacks_read_before_removal": [
+        807080,
+        1
+      ]
+    },
+    {
+      "spell": 804628,
+      "name": "Suncharged (release at 5 stacks, Judgement Day ended by the harness)",
+      "kind": "script_hit",
+      "variant": "release_5stack",
+      "label_suffix": "release_5stack",
+      "quote": "At the end of the duration, or when Judgement Day ends, the enemy takes ${$807064m1*$<scalingbp>+$AP*.3+$sph*.5} Holy damage, increased for each stack on the target.",
+      "hit_spell": 807064,
+      "value_spell": 807064,
+      "value_effect": 0,
+      "casts": [
+        [
+          806121,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "trials": 12,
+      "minimum_hits": 5,
+      "settle_ms": 4000,
+      "cast_power": 1363,
+      "observe_source": "804628 Suncharged lets Judgement Day apply Suncharge 807080 to the target every 0.5 s up to 10 stacks (entries suncharge_period and suncharge_cap). When Judgement Day 570125 ends (DurationIndex 9 = 30000 ms) the class script casts Suncharge 807064 at the target with the stacks read from 807080 (AscensionSunClericAuras.cpp:187-191, ReleaseSuncharge AscensionSunCleric.cpp:326-334; 807064 Effect[0] SCHOOL_DAMAGE BasePoints 476). The treatment casts Judgement Day 806121 at the dummy and waits for its end; every landed, unresisted, non-critical 807064 hit on the dummy is read against the tooltip at the measured stats (base term with $<scalingbp>, 0.3 x attack power, 0.5 x holy spell power); 984954 removes spell crits (Effect[1] aura 57 BasePoints -1001) and adds weapon crit (Effect[0] aura 52 BasePoints 100) and 823764 partial resists on the caster (precondition fixtures). Control arm: the same cast without 804628 learned must show no 807064 hit. The spell-power and attack-power arms raise the caster's stat (10062, 10031) before it is measured and are judged in the same pair against the same control. The hit is read at the stacks cap, so the tooltip figure is multiplied by two factors of data, not of the measurement: 1 + 10 stacks x 0.25 (807080 Effect[0] aura 271 BasePoints 24 + 1 = 25% per stack; 10 = $807080u, the cap proven by suncharge_cap) = 3.5, and Judgement Day's own damage taken from the caster, 570125 Effect[1] aura 271 BasePoints 49 + 1 = 50% (the aura is still on the target when the release is cast), = 1.5; multiplier 5.25. The tooltip states no figure for the stack increase; the 25% is the data value the server applies (AscensionSunClericContracts.cpp:315-316). The exploratory read (the three arms at 5.25 times the tooltip figure) preceded this derivation. Sizing: 24 of 24 exploratory trials landed; at 0.85 per trial, 12 trials with a minimum of 5 usable hits fail with probability about 7e-5 per run, 1.4e-4 per pair. OUT OF SAMPLE arm (D-165, D-167): the harness removes Judgement Day 570125 from the dummy (set_aura stacks 0) as soon as 807080 reads exactly 5 stacks on the dummy, which exercises the tooltip's 'when Judgement Day ends' branch (AscensionSunClericAuras.cpp:187-189, any removal mode, Judgement Day still on the target: x1.5); a trial that never reads 5 stacks voids the arm (SETUP assert) and is not judged. Prediction committed in e23cddb195 before this arm existed: 492.0 x (1 + 5 x 0.25) x 1.5 = 1660.5, tolerated band 5%; multiplier 3.375 = (1 + 5 x 0.25) x 1.5 from 807080 Effect[0] BasePoints 24 + 1 and 570125 Effect[1] BasePoints 49 + 1 (data). Clean start (D-174, fix2): 806121 lands Judgement Day about 150 ms after the cast (Effect[0] 183 delayed trigger, BasePoints 149; Spell::EffectAscensionTriggerSpellDelayed, SpellEffects.cpp:1061-1100), so a removal straight after the cast removes nothing and the control arm leaves Judgement Day (30000 ms) on the dummy. The harness therefore removes Judgement Day once more after the control drain and before 804628 is learned, every treatment trial starts only if 570125 is absent and 807080 holds no stack on the dummy, and each removal follows a read that 570125 is present; a trial that breaks one of these voids the arm (SETUP asserts).",
+      "multiplier": 3.375,
+      "receiver_aura_removals": [
+        [
+          570125,
+          0
+        ]
+      ],
+      "no_wait_after_casts": true,
+      "stacks_read_before_removal": [
+        807080,
+        5
+      ]
+    },
+    {
+      "spell": 804628,
+      "name": "Suncharged (release, +2000 spell power)",
+      "kind": "script_hit",
+      "variant": "release_sp",
+      "label_suffix": "release_sp",
+      "quote": "At the end of the duration, or when Judgement Day ends, the enemy takes ${$807064m1*$<scalingbp>+$AP*.3+$sph*.5} Holy damage, increased for each stack on the target.",
+      "hit_spell": 807064,
+      "value_spell": 807064,
+      "value_effect": 0,
+      "casts": [
+        [
+          806121,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "trials": 12,
+      "minimum_hits": 5,
+      "settle_ms": 32000,
+      "cast_power": 1363,
+      "observe_source": "804628 Suncharged lets Judgement Day apply Suncharge 807080 to the target every 0.5 s up to 10 stacks (entries suncharge_period and suncharge_cap). When Judgement Day 570125 ends (DurationIndex 9 = 30000 ms) the class script casts Suncharge 807064 at the target with the stacks read from 807080 (AscensionSunClericAuras.cpp:187-191, ReleaseSuncharge AscensionSunCleric.cpp:326-334; 807064 Effect[0] SCHOOL_DAMAGE BasePoints 476). The treatment casts Judgement Day 806121 at the dummy and waits for its end; every landed, unresisted, non-critical 807064 hit on the dummy is read against the tooltip at the measured stats (base term with $<scalingbp>, 0.3 x attack power, 0.5 x holy spell power); 984954 removes spell crits (Effect[1] aura 57 BasePoints -1001) and adds weapon crit (Effect[0] aura 52 BasePoints 100) and 823764 partial resists on the caster (precondition fixtures). Control arm: the same cast without 804628 learned must show no 807064 hit. The spell-power and attack-power arms raise the caster's stat (10062 \"QA Test +100 SP\" at 20 stacks = +2000 spell power, 10031 +1000 attack power) before it is measured and are judged in the same pair against the same control. The hit is read at the stacks cap, so the tooltip figure is multiplied by two factors of data, not of the measurement: 1 + 10 stacks x 0.25 (807080 Effect[0] aura 271 BasePoints 24 + 1 = 25% per stack; 10 = $807080u, the cap proven by suncharge_cap) = 3.5, and Judgement Day's own damage taken from the caster, 570125 Effect[1] aura 271 BasePoints 49 + 1 = 50% (the aura is still on the target when the release is cast), = 1.5; multiplier 5.25. The tooltip states no figure for the stack increase; the 25% is the data value the server applies (AscensionSunClericContracts.cpp:315-316). The exploratory read (the three arms at 5.25 times the tooltip figure) preceded this derivation. Sizing: 24 of 24 exploratory trials landed; at 0.85 per trial, 12 trials with a minimum of 5 usable hits fail with probability about 7e-5 per run, 1.4e-4 per pair.",
+      "multiplier": 5.25,
+      "stat_auras": [
+        [
+          10062,
+          20
+        ]
+      ]
+    },
+    {
+      "spell": 804628,
+      "name": "Suncharged (release, +1000 attack power)",
+      "kind": "script_hit",
+      "variant": "release_ap",
+      "label_suffix": "release_ap",
+      "quote": "At the end of the duration, or when Judgement Day ends, the enemy takes ${$807064m1*$<scalingbp>+$AP*.3+$sph*.5} Holy damage, increased for each stack on the target.",
+      "hit_spell": 807064,
+      "value_spell": 807064,
+      "value_effect": 0,
+      "casts": [
+        [
+          806121,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "trials": 12,
+      "minimum_hits": 5,
+      "settle_ms": 32000,
+      "cast_power": 1363,
+      "observe_source": "804628 Suncharged lets Judgement Day apply Suncharge 807080 to the target every 0.5 s up to 10 stacks (entries suncharge_period and suncharge_cap). When Judgement Day 570125 ends (DurationIndex 9 = 30000 ms) the class script casts Suncharge 807064 at the target with the stacks read from 807080 (AscensionSunClericAuras.cpp:187-191, ReleaseSuncharge AscensionSunCleric.cpp:326-334; 807064 Effect[0] SCHOOL_DAMAGE BasePoints 476). The treatment casts Judgement Day 806121 at the dummy and waits for its end; every landed, unresisted, non-critical 807064 hit on the dummy is read against the tooltip at the measured stats (base term with $<scalingbp>, 0.3 x attack power, 0.5 x holy spell power); 984954 removes spell crits (Effect[1] aura 57 BasePoints -1001) and adds weapon crit (Effect[0] aura 52 BasePoints 100) and 823764 partial resists on the caster (precondition fixtures). Control arm: the same cast without 804628 learned must show no 807064 hit. The spell-power and attack-power arms raise the caster's stat (10062, 10031) before it is measured and are judged in the same pair against the same control. The hit is read at the stacks cap, so the tooltip figure is multiplied by two factors of data, not of the measurement: 1 + 10 stacks x 0.25 (807080 Effect[0] aura 271 BasePoints 24 + 1 = 25% per stack; 10 = $807080u, the cap proven by suncharge_cap) = 3.5, and Judgement Day's own damage taken from the caster, 570125 Effect[1] aura 271 BasePoints 49 + 1 = 50% (the aura is still on the target when the release is cast), = 1.5; multiplier 5.25. The tooltip states no figure for the stack increase; the 25% is the data value the server applies (AscensionSunClericContracts.cpp:315-316). The exploratory read (the three arms at 5.25 times the tooltip figure) preceded this derivation. Sizing: 24 of 24 exploratory trials landed; at 0.85 per trial, 12 trials with a minimum of 5 usable hits fail with probability about 7e-5 per run, 1.4e-4 per pair.",
+      "multiplier": 5.25,
+      "stat_auras": [
+        [
+          10031,
+          1
+        ]
+      ]
     }
   ],
   "player_observations": [],
