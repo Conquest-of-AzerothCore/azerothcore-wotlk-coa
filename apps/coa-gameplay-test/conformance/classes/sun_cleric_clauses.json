@@ -1507,21 +1507,24 @@
       {
         "claim": "up to 5 nearby allies (the number)",
         "labels": [
-          "534267 effect_value #0"
+          "534267 behaviour_metric_delta nearby_allies_cap"
         ]
       },
       {
-        "claim": "the target's lowest health nearby allies (the priority order and the cap of 5 need a sixth candidate)",
-        "labels": []
+        "claim": "the target's lowest health nearby allies (the caster, the seventh candidate at full health, is not healed past the cap of 5)",
+        "labels": [
+          "534267 behaviour_metric_delta nearby_allies_cap"
+        ]
       },
       {
         "claim": "for 75% of the value",
         "labels": [
+          "534267 behaviour_metric_delta nearby_allies_amount",
           "534267 effect_value e0 #1"
         ]
       }
     ],
-    "reason": "One claim per source named at AscensionSunClericEvents.cpp:136 (the trigger is a script list, so G-23 does not cover a subset): Daybreak, Illumination, Shine and the Holy Form heal 807994 each have an entry. Open, tool need returned: the order and cap need allies above 5 in the ally option; the 75% amount needs an arm-to-arm ratio. Not given a final status."
+    "reason": "One claim per source named at AscensionSunClericEvents.cpp:136: Daybreak, Illumination, Shine and the Holy Form heal 807994 each have an entry. Cap and order: counted pair 20261122-065859 / 20261122-070442, build 2e2bdcd22257, server commit f7c27d317a43, no flip; seven candidates (six allies at 50% and the caster at 100%) read a total of 5 heals of 801215 and none on the caster; control = the phase before the passive. The five-of-six split among equal-health allies is the GUID tie order and is not asserted. Amount: the copy 801215 on ally2 over the Illumination heal on the ally, second cast alone, read 28/38 = 0.737 in both runs (expected 0.75 within 0.03, which excludes 0.675 and 0.825); control = no copy before the passive. Reference search 2026-11-22: coa-history 801215 has 10475 heal events (2034 crits) in 17 logs and no per-cast ratio; 534267 0 events; nothing else found."
   },
   {
     "spell": 547214,
@@ -2873,18 +2876,51 @@
   {
     "spell": 681253,
     "clause": "Your Solar Invocation spells now causes your Illumination to heal an additional nearby ally at 70% effectiveness for $681506d.",
-    "labels": [
-      "681253 spell_duration 681506 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "each of the four Solar Invocation spells grants the window, and Illumination then heals an additional nearby ally",
+        "labels": [
+          "681253 behaviour_metric_delta grant_800764",
+          "681253 behaviour_metric_delta grant_500152",
+          "681253 behaviour_metric_delta grant_503651",
+          "681253 behaviour_metric_delta grant_806159",
+          "681253 behaviour_metric_delta window_held"
+        ]
+      },
+      {
+        "claim": "at 70% effectiveness",
+        "labels": [
+          "681253 behaviour_metric_delta extra_amount"
+        ]
+      },
+      {
+        "claim": "for $681506d (10 s)",
+        "labels": [
+          "681253 spell_duration 681506 #0",
+          "681253 behaviour_metric_delta window_held",
+          "681253 behaviour_metric_delta window_gone"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "counted pair 20261122-065859 / 20261122-070442, build 2e2bdcd22257, server commit f7c27d317a43, no flip. Grants: 681506 on the caster after each of Conquest 800764, Ascension 500152, Revelation 503651 and Resplendence 806159, 0 in the control phase (the same cast before 681253 is learned). Window: a heal landing 9.1 s after the Conquest cast copies to the other ally (1), one landing 10.9 s after it does not (0), control = the same casts before the passive. Amount: the copy 803816 over the Illumination heal, second cast alone, 26/38 = 0.684 and 27/39 = 0.692 (expected 0.70 within 0.03, excludes 0.63 and 0.77). The extra-heal route is proven with Conquest; the grant is proven for all four casts, and the code gives all four the same Cast(player, player, 681506). Reference search 2026-11-22: coa-history 681253, 681506, 681789: 0 events; 803816 (Vow of Radiance, the 70% copy) 12520 heal events, no ratio per cast; nothing else found."
   },
   {
     "spell": 681253,
     "clause": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
     "labels": [
+      "681253 behaviour_metric_delta cd_cut_800764",
+      "681253 behaviour_metric_delta cd_cut_control_800764",
+      "681253 behaviour_metric_delta cd_cut_500152",
+      "681253 behaviour_metric_delta cd_cut_control_500152",
+      "681253 behaviour_metric_delta cd_cut_503651",
+      "681253 behaviour_metric_delta cd_cut_control_503651",
+      "681253 behaviour_metric_delta cd_cut_806159",
+      "681253 behaviour_metric_delta cd_cut_control_806159",
       "681253 effect_value 681789e0 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "counted pair 20261122-065859 / 20261122-070442, build 2e2bdcd22257, server commit f7c27d317a43, no flip. Each Solar Invocation spell is cast and Illumination follows; the remaining cooldown read 2600 ms after the Illumination cast started (run 1) is 24788 / 25890 / 24788 / 24788 (Conquest, Ascension, Revelation, Resplendence; expected 24800 / 25900 / 24800 / 24800 within 50, a cut of 0.9 or 1.1 s is outside the band) against the control reads 25788 / 26907 / 25788 / 25788 (Solar Conduit 300321 learned in place, an unrelated passive, expected 1000 ms more). Reference search 2026-11-22: coa-history 681789 0 events; nothing found."
   },
   {
     "spell": 681337,
@@ -5136,12 +5172,14 @@
       {
         "claim": "casting Sunflare has a 40% chance to grant Scorch Marks",
         "labels": [
-          "806021 proc_rate"
+          "806021 proc_rate 807059 502396"
         ]
       },
       {
         "claim": "casting Dawnsear has a 40% chance to grant Scorch Marks",
-        "labels": []
+        "labels": [
+          "806021 proc_rate 807059 500146"
+        ]
       },
       {
         "claim": "Scorch Marks lasts 10 s",
@@ -5150,7 +5188,7 @@
         ]
       }
     ],
-    "reason": "Sunflare rate: counted pair 20261120-204822 / 20261120-205026, 24024 trials per run, 0.4005 and 0.4052, 99% between-part intervals inside the 2-point band (residual failure probability stated in the proc entry), baseline 0 events. Duration pair 20261120-205725 / 20261120-205757 (Sun Ray 504764 grants Scorch Marks for real, control = no cast). Dawnsear half has no entry: two proc entries of one aura and proc spell share a label. Reference search: bindmysoul snapshot 'now have a 40% chance ... for 10 seconds', nothing else found. Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip.",
+    "reason": "Sunflare rate: counted pair 20261120-204822 / 20261120-205026, 24024 trials per run, 0.4005 and 0.4052, 99% between-part intervals inside the 2-point band (residual failure probability stated in the proc entry), baseline 0 events. Duration pair 20261120-205725 / 20261120-205757 (Sun Ray 504764 grants Scorch Marks for real, control = no cast). Dawnsear half: a second proc entry with the trigger 500146 (the labels of the two entries take the trigger suffix), counted pair 20261122-065859 / 20261122-070442, build 2e2bdcd22257, server commit f7c27d317a43, no flip, Sunflare 0.3965 and 0.4006, Dawnsear 0.3935 and 0.4000 against 0.4 (the 99% intervals and the residual failure probability at most 0.1% per pair are the proc entry's); baseline 0 events. Reference search: bindmysoul snapshot 'now have a 40% chance ... for 10 seconds', nothing else found. Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip.",
     "tool_gap": {
       "reason": "the Dawnsear half needs a second proc entry of the same aura and proc spell; two proc entries share one label",
       "attempts": [
