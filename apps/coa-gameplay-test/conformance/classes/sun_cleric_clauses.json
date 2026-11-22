@@ -106,18 +106,24 @@
       {
         "claim": "you now deal $301341s1% increased damage",
         "labels": [
-          "300314 effect_value 301341e0 #0"
+          "300314 behaviour_hit_ratio damage"
         ]
       },
       {
         "claim": "and healing",
-        "labels": []
+        "labels": [
+          "300314 behaviour_hit_ratio healing"
+        ]
       },
       {
         "claim": "While above 80% health",
-        "labels": []
+        "labels": [
+          "300314 behaviour_metric_delta gate_above",
+          "300314 behaviour_metric_delta gate_below"
+        ]
       }
-    ]
+    ],
+    "reason": "Control arm = the same hits without the passive: damage +9.99%, healing +9.98% at full health; the helper 301341 is present at 100% health and absent at 70%. Reference search 2026-11-22: coa-history spell 300314: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
   },
   {
     "spell": 300315,
@@ -491,25 +497,30 @@
     "spell": 300363,
     "clause": "Increases your spell haste by $s1%,",
     "labels": [
-      "300363 effect_value e0 #0"
+      "300363 behaviour_metric_delta night_haste"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the cast speed multiplier before the learn (1.0), read 0.970874 = 1/1.03 after, hour 0. Reference search 2026-11-22: coa-history spell 300363: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
   },
   {
     "spell": 300363,
     "clause": "plus an additional $s2% during the day.",
     "labels": [
-      "300363 effect_value e1 #1"
+      "300363 behaviour_metric_delta day_haste"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the same read before the learn (1.0) and the night arm; 1/(1.03 x 1.01) = 0.961261 at hour 12. Reference search 2026-11-22: coa-history spell 300363: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
   },
   {
     "spell": 300365,
     "clause": "Reduces the cast time of Rapture by $/1000;S1 sec.",
     "labels": [
-      "300365 effect_value e0 #0"
+      "300365 behaviour_metric_delta cast_time",
+      "300365 behaviour_metric_delta cast_held",
+      "300365 behaviour_metric_delta cast_done"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = Rapture still casting at 2460 and 2555 ms without the passive; with it the cast time reads 2500, casting at 2460 and finished at 2555. Reference search 2026-11-22: coa-history spell 300365: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
   },
   {
     "spell": 300367,
@@ -1057,10 +1068,28 @@
   {
     "spell": 504248,
     "clause": "Reduces the mana cost of Paragon, Chosen of the Light, and Judgement Day by $s1%.",
-    "labels": [
-      "504248 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Paragon cost reduced by $s1%",
+        "labels": [
+          "504248 behaviour_metric_delta paragon"
+        ]
+      },
+      {
+        "claim": "Chosen of the Light cost reduced by $s1%",
+        "labels": [
+          "504248 behaviour_metric_delta chosen"
+        ]
+      },
+      {
+        "claim": "Judgement Day cost reduced by $s1%",
+        "labels": [
+          "504248 behaviour_metric_delta judgement_day"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Control arm = mana spent before the learn (Paragon 286, Chosen 390, Judgement Day 327); Paragon 143 and Chosen 195 with it. ALERT: Judgement Day read 1363 after the learn (no mana spent, no cost) against 1200 expected, both runs; cause not established. Reference search 2026-11-22: coa-history spell 504248: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
   },
   {
     "spell": 504734,
@@ -1524,9 +1553,10 @@
     "spell": 560547,
     "clause": "You now emit an aura that causes all nearby allies to receive $s1% increased healing.",
     "labels": [
-      "560547 effect_value e0 #0"
+      "560547 behaviour_hit_ratio ally_healing"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the same ally heals without the passive; +5.97% (Sunlight), inside the 2-point band around +6%. Reference search 2026-11-22: coa-history spell 560547: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
   },
   {
     "spell": 560547,
@@ -1538,9 +1568,10 @@
     "spell": 560547,
     "clause": "In addition, the healing done by Illumination is increased by $s2%.",
     "labels": [
-      "560547 effect_value e1 #1"
+      "560547 behaviour_hit_ratio illumination"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the same Illumination heals without the passive; +27.2% = 1.20 x 1.06. Reference search 2026-11-22: coa-history spell 560547: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
   },
   {
     "spell": 560857,
@@ -2211,17 +2242,19 @@
     "spell": 680647,
     "clause": "Increases the critical strike chance of Dawnbreak by $s2%",
     "labels": [
-      "680647 effect_value e1 #0"
+      "680647 behaviour_metric_delta dawnbreak_crit"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the crit chance before the learn (0), gain 10 points. Reference search 2026-11-22: coa-history spell 680647: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
   },
   {
     "spell": 680647,
     "clause": "and your Seraphic Bulwark now lasts for $s1 additional blocks.",
     "labels": [
-      "680647 effect_value e0 #1"
+      "680647 behaviour_metric_delta bulwark_charges"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = 5 charges before the learn, 7 after. Reference search 2026-11-22: coa-history spell 680647: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
   },
   {
     "spell": 680648,
@@ -2500,9 +2533,12 @@
     "spell": 681448,
     "clause": "Increases the duration of Valkyr's Calling by $/1000;s1 sec.",
     "labels": [
-      "681448 effect_value e0 #0"
+      "681448 behaviour_metric_delta duration",
+      "681448 behaviour_metric_delta aura_held",
+      "681448 behaviour_metric_delta aura_done"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = aura 520025 without the passive: gone at 2740 ms. ALERT: with the passive the remaining duration reads 2694 at 300 ms (3000 total) but the aura is absent at 2740 ms (aura_held 0, expected 1), both runs; AscensionSunClericSummons.cpp:50-57 schedules the landing and RemoveAurasDueToSpell(520025) at SpellInfo(520024)->GetDuration() (2000 ms, no spell mod): fix note in the report. Reference search 2026-11-22: coa-history spell 681448: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
   },
   {
     "spell": 681467,
@@ -2742,17 +2778,19 @@
     "spell": 704586,
     "clause": "Activating Dawn now grants Shining Shield for $805265d.",
     "labels": [
-      "704586 spell_duration 805265 #0"
+      "704586 behaviour_metric_delta duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = aura 805265 absent after Dawn without the passive; remaining 59494 ms with it. Reference search 2026-11-22: coa-history spell 704586: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
   },
   {
     "spell": 704586,
     "clause": "Increases your Armor contribution from your shield by $s1%.",
     "labels": [
-      "704586 effect_value 805265e0 #1"
+      "704586 behaviour_metric_delta armor"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = armor before the learn; ALERT: the gain reads 24 (131 to 155) against 20.5 expected from shield 2129 armor 41 (a figure taken from the Sun-Touched Armor entry, not re-read here), both runs; cause not established. Reference search 2026-11-22: coa-history spell 704586: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
   },
   {
     "spell": 704903,
@@ -3482,15 +3520,19 @@
     "claims": [
       {
         "claim": "Increases your Holy and Physical damage by $s1%",
-        "labels": []
+        "labels": [
+          "707770 behaviour_hit_ratio holy_damage",
+          "707770 behaviour_hit_ratio physical_damage"
+        ]
       },
       {
         "claim": "and healing done by $s1%",
         "labels": [
-          "707770 effect_value e0 #0"
+          "707770 behaviour_hit_ratio healing"
         ]
       }
-    ]
+    ],
+    "reason": "Control arm = the same hits without the passive; Holy +7.998%, Physical +8.043%, healing +7.972%, inside the 2-point band around +8%. Reference search 2026-11-22: coa-history spell 707770: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
   },
   {
     "spell": 707771,
@@ -4099,24 +4141,31 @@
   {
     "spell": 804625,
     "clause": "Casting Dawn now grants Scorch Marks.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "804625 behaviour_metric_delta scorch_granted"
+    ],
+    "kind": "claim",
+    "reason": "Control arm = Dawn cast without the passive, aura 807059 absent; present with it. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
   },
   {
     "spell": 804625,
     "clause": "Your next Radiant Flame has no mana cost, ticks $s2% faster,",
     "labels": [
-      "804625 effect_value 807059e1 #0"
+      "804625 behaviour_metric_delta scorch_cost",
+      "804625 behaviour_metric_delta scorch_period",
+      "804625 behaviour_metric_delta scorch_next"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = Radiant Flame cost 340 and amplitude 1000 without the passive; 0 and 500 with it after Dawn; the next cast after consumption reads 1000 again. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
   },
   {
     "spell": 804625,
     "clause": "and its duration is reduced by $s1%.",
     "labels": [
-      "804625 effect_value 807059e0 #1"
+      "804625 behaviour_metric_delta scorch_duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = remaining duration 3700 without the passive (read 300 ms after the cast), 1694 with it (expected 1700, tolerance 80). Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
   },
   {
     "spell": 804628,
@@ -4272,17 +4321,19 @@
     "spell": 805267,
     "clause": "Reduces your spell damage taken by $s1%,",
     "labels": [
-      "805267 effect_value e0 #0"
+      "805267 behaviour_hit_ratio taken_below"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = Grave Coil damage without the passive; -5.12% at 70% health (helper 807876 absent). Reference search 2026-11-22: coa-history spell 805267: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
   },
   {
     "spell": 805267,
     "clause": "plus an additional $807876s1% while above 80% health.",
     "labels": [
-      "805267 effect_value 807876e0 #1"
+      "805267 behaviour_hit_ratio taken_above"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the same strikes without the passive; -9.75% at 100% health (0.95 x 0.95, helper 807876 present). Reference search 2026-11-22: coa-history spell 805267: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
   },
   {
     "spell": 805301,
