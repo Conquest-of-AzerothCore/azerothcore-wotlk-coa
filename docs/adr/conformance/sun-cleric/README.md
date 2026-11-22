@@ -21,3 +21,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0015](0015-luminary-mendicant-raises-vow-of-grace-mana-once.md) | Luminary Mendicant raises the Vow of Grace mana once |
 | [0016](0016-empowered-holy-form-shortens-every-rank-of-ancient-rites.md) | Empowered Holy Form shortens every rank of Ancient Rites |
 | [0017](0017-the-last-radiant-flame-tick-spends-its-dawn-charge.md) | The last Radiant Flame tick spends its Dawn charge |
+| [0018](0018-arbiter-of-grace-adds-its-share-while-vow-of-grace-is-active.md) | Arbiter of Grace adds its Glorious Execution mana share while Vow of Grace is active |
