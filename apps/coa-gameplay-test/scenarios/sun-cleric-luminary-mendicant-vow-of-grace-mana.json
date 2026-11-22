@@ -1,0 +1,332 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Luminary Mendicant adds 100% to the Vow of Grace mana once",
+  "contract": "Luminary Mendicant 547214: 'Increases the mana restored by Vow of Grace by $s1%' ($s1 = 100, Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8 on 504877's class mask). Vow of Grace 803719 restores 504775 effect 0 (5%) of the missing mana plus 504877 effect 0, both read with the caster so Luminary Mendicant's modifier raises each once, on a direct ability hit (AscensionSunClericEvents.cpp); the script no longer adds a second +100% (Sun Cleric ADR 0015). Each arm casts Vow of Grace and one Horusath Blast 500154 with the same starting mana, learns its spell, does it again, and reads the second energize of 504877 as a ratio of the first. Control arm: nothing learned, ratio 1. Luminary Mendicant arm: ratio 2 by the tooltip; the double application measured 926 against 285 (ratio 3.25). Bands of 0.05.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "luminary",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control_dummy",
+      "owner": "control",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "luminary_dummy",
+      "owner": "luminary",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true,
+      "min_level_armor": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 500154
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 803719
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 500154
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 803719
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 803719,
+      "target": "control"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 500154,
+      "target": "control_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "control: the first Horusath Blast restores Vow of Grace mana",
+      "actor": "control",
+      "metric": "spell_energize_count",
+      "spell": 504877,
+      "target": "control",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_energize_total",
+      "spell": 504877,
+      "target": "control",
+      "save_as": "control_first_mana"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 500154
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 803719
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 803719,
+      "target": "control"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 500154,
+      "target": "control_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "control: the second Horusath Blast restores Vow of Grace mana",
+      "actor": "control",
+      "metric": "spell_energize_count",
+      "spell": 504877,
+      "target": "control",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING control: nothing learned between the casts, the second restore equals the first",
+      "actor": "control",
+      "metric": "spell_energize_total",
+      "spell": 504877,
+      "target": "control",
+      "relative_to": "control_first_mana",
+      "ratio_to": "control_first_mana",
+      "min": 0.95,
+      "max": 1.05
+    },
+    {
+      "action": "learn",
+      "actor": "luminary",
+      "spell": 500154
+    },
+    {
+      "action": "learn",
+      "actor": "luminary",
+      "spell": 803719
+    },
+    {
+      "action": "set_aura",
+      "actor": "luminary",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "luminary",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "luminary",
+      "spell": 500154
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "luminary",
+      "spell": 803719
+    },
+    {
+      "action": "cast",
+      "actor": "luminary",
+      "spell": 803719,
+      "target": "luminary"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "luminary",
+      "spell": 500154,
+      "target": "luminary_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "luminary: the first Horusath Blast restores Vow of Grace mana",
+      "actor": "luminary",
+      "metric": "spell_energize_count",
+      "spell": 504877,
+      "target": "luminary",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "luminary",
+      "metric": "spell_energize_total",
+      "spell": 504877,
+      "target": "luminary",
+      "save_as": "luminary_first_mana"
+    },
+    {
+      "action": "learn",
+      "actor": "luminary",
+      "spell": 547214
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "set_aura",
+      "actor": "luminary",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "luminary",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "luminary",
+      "spell": 500154
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "luminary",
+      "spell": 803719
+    },
+    {
+      "action": "cast",
+      "actor": "luminary",
+      "spell": 803719,
+      "target": "luminary"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "luminary",
+      "spell": 500154,
+      "target": "luminary_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "luminary: the second Horusath Blast restores Vow of Grace mana",
+      "actor": "luminary",
+      "metric": "spell_energize_count",
+      "spell": 504877,
+      "target": "luminary",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING Luminary Mendicant learned: the second restore is twice the first (+100%), not four times",
+      "actor": "luminary",
+      "metric": "spell_energize_total",
+      "spell": 504877,
+      "target": "luminary",
+      "relative_to": "luminary_first_mana",
+      "ratio_to": "luminary_first_mana",
+      "min": 1.95,
+      "max": 2.05
+    }
+  ]
+}

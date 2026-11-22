@@ -3494,6 +3494,7 @@
     "spell": 707433,
     "clause": "Increases the tick rate of Mercy by $s1%,",
     "kind": "claim",
+    "reason": "Mentor D-74 (2026-11-22), owner information I-3: conformant as is. The basis is the DBC modifier value, Effect[0] SPELLMOD_ACTIVATION_TIME -50% on Mercy 504848's period, applied by the stock engine; the tooltip's 50 is read as that period figure (3000 to 1500 ms), not as a +50% tick rate.",
     "claims": [
       {
         "claim": "Increases the tick rate of Mercy",
