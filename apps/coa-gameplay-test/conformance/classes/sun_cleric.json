@@ -7408,6 +7408,78 @@
       "observe_source": "804632 Flames of Absolution Effect[0] aura 42 PROC_TRIGGER_SPELL 573449 (MaxAffectedTargets 5, radius index 8 = 5 yd = $573449a1); the handler fires on damage by Horusath Blast 500154. Centre named by the tooltip: the target. Centre used by the code: the struck target. Bracket 10% either side of 5 + both sizes. Control: the first arm, without the passive, strikes neither dummy. Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 damage events in 29 logs (no edge can be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Damage dealt by Horusath Blast now launches a Solar Flare at up to 5 enemies within 5 yds of your target.\" (same figures); nothing else found."
     },
     {
+      "spell": 504580,
+      "name": "Shield Radiance (cone: a dummy 4.5 degrees inside the 90 degree edge is struck, one 4.5 degrees outside and one behind are not)",
+      "kind": "metric_delta",
+      "variant": "cone_edge",
+      "label_suffix": "cone_edge",
+      "quote": "Radiate holy light from your shield on enemies in front of you, dealing ${$m1+0+$SP*0.25+$AP*0.1} Holyfire Damage, scaling with your block value.",
+      "trigger_spell": 504580,
+      "target": "dummy",
+      "cast_power": 1000,
+      "cast_in_before": false,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 504580,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": {
+        "cone": {
+          "angle": 90,
+          "radius": 12,
+          "source": "Spell::SelectImplicitConeTargets, Spell.cpp:1277-1279: 60 degrees unless spell_cone has a row; spell_cone 800654 ConeDegrees 90 covers every rank of Dawnbreak 504580 through GetFirstSpellInChain (data/sql/updates/pending_db_world/rev_20261027_02_dawnbreak_cone.sql); the arc test is Position::HasInArc, Position.cpp:148-179, half the angle either side of the facing; radius index 32 = 12 yd"
+        }
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "504580 Dawnbreak Effect[0] SCHOOL_DAMAGE, EffectImplicitTargetA 24 (TARGET_UNIT_CONE_ENEMY_24), radius index 32 = 12 yd, RangeIndex 2. The cone is 90 degrees (spell_cone 800654, Spell.cpp:1277-1279), so the edge lies 45 degrees either side of the caster's facing; HasInArc tests the centre bearing of the target (Position.cpp:148-179, no target radius is passed by isInFront, Object.cpp:1553-1556). The caster is moved off the dummy line by a relocate step (orientation unchanged and read) so three dummies on the line stand at 40.5 degrees (primary, struck), 49.5 degrees (area1, not struck: 10% of the half angle outside the edge) and 135 degrees (area2, behind the caster, not struck); every bearing is recomputed from the read positions and orientation and a dummy more than 1 degree off its plan, or a height more than 1 yd off the caster's, voids the trial. All three stand 4 to 11 yd from the caster, inside the 12 yd radius. Control: the first phase, without the spell learned, reads 0. Crit and resist fixtures 984954 and 823764 in both phases. Reference search 2026-11-22: coa-history spell 504580 Dawnbreak (angles cannot be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Radiate holy light from your shield on enemies in front of you\" (same text); nothing else found."
+    },
+    {
+      "spell": 504580,
+      "name": "Shield Radiance (no shield equipped: the cast is refused with the equipped item class failure)",
+      "kind": "metric_delta",
+      "variant": "no_shield",
+      "label_suffix": "no_shield",
+      "quote": "Radiate holy light from your shield on enemies in front of you, dealing ${$m1+0+$SP*0.25+$AP*0.1} Holyfire Damage, scaling with your block value.",
+      "trigger_spell": 504580,
+      "target": "dummy",
+      "cast_power": 1000,
+      "learn": [
+        504580
+      ],
+      "cast_in_before": true,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 504580
+      },
+      "before_expected": 0,
+      "expected": 29,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "without_item": {
+        "item": 2129,
+        "source": "504580 EquippedItemClass 4 with EquippedItemSubClassMask 64 (shield, server DBC set), refused through Spell::CheckItems HasItemFitToSpellRequirements, Spell.cpp:7539-7541, as SPELL_FAILED_EQUIPPED_ITEM_CLASS 29 (SharedDefines.h:1079)"
+      },
+      "observe_source": "504580 Dawnbreak requires an equipped shield: EquippedItemClass 4 (armor) with EquippedItemSubClassMask 64 (shield) and EquippedItemInventoryTypeMask 0 (server DBC set). The reference character carries shield 2129 in the off-hand (equip step, slot 16). Both phases cast 504580 at the dummy with the spell learned: the first with the shield, the control, reads cast_failure 0 (accepted); the first cast is read 2000 ms after it, past the 1500 ms global cooldown, then the cooldown of 504580 is reset (harness reset_cooldown step, so the first cast's own cooldown cannot answer first; either would refuse with 67), the shield is destroyed (harness destroy_item step on the equipped item) and the second cast reads 29, SPELL_FAILED_EQUIPPED_ITEM_CLASS (Spell.cpp:7539-7541). Reference search 2026-11-22: coa-history spell 504580 Dawnbreak (angles cannot be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Radiate holy light from your shield on enemies in front of you\" (same text); nothing else found."
+    },
+    {
       "spell": 704941,
       "kind": "metric_delta",
       "trigger_spell": 805301,
