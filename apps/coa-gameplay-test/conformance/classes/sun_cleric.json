@@ -36156,6 +36156,98 @@
         "dodge": 0,
         "parry": 0
       }
+    },
+    {
+      "spell": 300355,
+      "kind": "metric_delta",
+      "quote": "Melee critical strikes against you prevent you from being critically struck again for $301342d.",
+      "gate_spell": 300355,
+      "trigger_spell": 800722,
+      "target": "caster",
+      "phase_auras": [
+        [
+          425,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "strike": {
+        "spell": 11976,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 8,
+        "wait_ms": 500
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 301342
+      },
+      "measure_actor": "caster",
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 1300,
+      "expire_ms": 500,
+      "name": "Stalwart (no second critical hit: Vulnerable Tier 10 425, +100%, spaced Strikes, the aura is gone at 5.4 s)",
+      "variant": "immunity_no_regrant",
+      "label_suffix": "immunity_no_regrant",
+      "game_time": {
+        "after": [
+          1280,
+          1480
+        ]
+      },
+      "observe_source": "300355 Stalwart Effect[0] aura 42 proc-triggers 301342 (DurationIndex 35 = 4000 ms), whose Effect[0] aura 197 has EffectBasePoints -1001 (Spell.dbc). Eight Strikes 11976 500 ms apart hit the caster, so the last lands at 3.5 s, inside the 4 s window; the aura is read about 5.4 s after the first Strike. Fixture Vulnerable 425 (Effect[1] aura 197, EffectBasePoints 99 = +100% to be critically struck, harness set_aura, not the subject) makes the first Strike critical (base chance plus 100%) and, summed with 301342, leaves -901%, so no later Strike is critical and 301342 is not re-granted: it ends 4 s after the first landed Strike, before the read. A re-granted aura would last until at least 7.5 s.",
+      "caster_avoidance": {
+        "dodge": 0,
+        "parry": 0
+      }
+    },
+    {
+      "spell": 300355,
+      "kind": "metric_delta",
+      "quote": "Melee critical strikes against you prevent you from being critically struck again for $301342d.",
+      "gate_spell": 300355,
+      "trigger_spell": 800722,
+      "target": "caster",
+      "phase_auras": [
+        [
+          213,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "strike": {
+        "spell": 11976,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 8,
+        "wait_ms": 500
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 301342
+      },
+      "measure_actor": "caster",
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1300,
+      "expire_ms": 500,
+      "name": "Stalwart (control: Vulnerable 213, +10000%, a later critical hit re-grants the aura, still present at 5.4 s)",
+      "variant": "immunity_regrant_control",
+      "label_suffix": "immunity_regrant_control",
+      "game_time": {
+        "after": [
+          1280,
+          1480
+        ]
+      },
+      "observe_source": "300355 Stalwart Effect[0] aura 42 proc-triggers 301342 (DurationIndex 35 = 4000 ms), whose Effect[0] aura 197 has EffectBasePoints -1001 (Spell.dbc). Eight Strikes 11976 500 ms apart hit the caster, so the last lands at 3.5 s, inside the 4 s window; the aura is read about 5.4 s after the first Strike. Control arm with Vulnerable 213 (Effect[1] aura 197, EffectBasePoints 9999 = +10000%), which summed with 301342 leaves +8999%: later Strikes stay critical, each re-grants 301342, and the last (3.5 s) keeps it until 7.5 s, so the read finds it present. It shows the late read does see a re-grant when critical hits land.",
+      "caster_avoidance": {
+        "dodge": 0,
+        "parry": 0
+      }
     }
   ],
   "player_observations": [],

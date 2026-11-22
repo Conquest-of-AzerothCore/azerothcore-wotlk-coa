@@ -680,13 +680,25 @@
   {
     "spell": 300355,
     "clause": "Melee critical strikes against you prevent you from being critically struck again for $301342d.",
-    "labels": [
-      "300355 spell_duration 301342 #0",
-      "300355 behaviour_metric_delta immunity_held",
-      "300355 behaviour_metric_delta immunity_gone"
+    "claims": [
+      {
+        "claim": "Melee critical strikes against you grant Stalwart 301342 for $301342d",
+        "labels": [
+          "300355 spell_duration 301342 #0",
+          "300355 behaviour_metric_delta immunity_held",
+          "300355 behaviour_metric_delta immunity_gone"
+        ]
+      },
+      {
+        "claim": "prevent you from being critically struck again",
+        "labels": [
+          "300355 behaviour_metric_delta immunity_no_regrant",
+          "300355 behaviour_metric_delta immunity_regrant_control"
+        ]
+      }
     ],
     "kind": "claim",
-    "reason": "Counted pair 20261122-201141 / 20261122-201215, one build (worldserver 764e5d0be77f, server commit 4cc498eca10f+), no flip, 19 of 19 entries ok in both runs. Stalwart 300355 grants 301342 (DurationIndex 35 = 4000 ms) on a received melee critical hit with damage. A real Strike 11976 (melee) made critical by the Vulnerable 213 fixture (harness set_aura, not the subject) hits the caster; 300355 is learned between the phases, so the before phase is the control (aura absent). The aura is held at about 3.74 s after the critical hit and gone at about 4.24 s, so 4 s is neither 10% shorter (3.6 s) nor 10% longer (4.4 s). The reads are placed from a calibration run (aura_duration_ms, run 20261122-200519, readback used for placement only: 112 ms between the strike and the clock of the trigger cast). A first pair read the held entry once ok and once alert (a missed strike); the entries then cast four Strikes 20 ms apart with dodge and parry 0, residual about 2 p^4 per pair (1.3e-5 at the 5% base miss chance, at most 0.1% for p up to 0.149; p not measured). The second half of the tooltip ('prevent you from being critically struck again') is the aura's own effect 301342 Effect[0] aura 197 -1001%, read as data, not exercised by a second strike. Reference search 2026-11-22: coa-history spells 300355 and 301342: no logged event (passive); nothing found beyond the tooltip and the DBC."
+    "reason": "Counted pair 20261122-201141 / 20261122-201215, one build (worldserver 764e5d0be77f, server commit 4cc498eca10f+), no flip, 19 of 19 entries ok in both runs. Stalwart 300355 grants 301342 (DurationIndex 35 = 4000 ms) on a received melee critical hit with damage. A real Strike 11976 (melee) made critical by the Vulnerable 213 fixture (harness set_aura, not the subject) hits the caster; 300355 is learned between the phases, so the before phase is the control (aura absent). The aura is held at about 3.74 s after the critical hit and gone at about 4.24 s, so 4 s is neither 10% shorter (3.6 s) nor 10% longer (4.4 s). The reads are placed from a calibration run (aura_duration_ms, run 20261122-200519, readback used for placement only: 112 ms between the strike and the clock of the trigger cast). The 112 ms offset comes from that calibration run, not from the counted runs; with four Strikes under +10000% each re-granting 301342 (up to 60 ms later) the reads still absorb it (held 3.69 s or more after the last Strike, gone 4.19 s or less after the first), and the residual 2 p^4 leaves p unmeasured. A first pair read the held entry once ok and once alert (a missed strike); the entries then cast four Strikes 20 ms apart with dodge and parry 0, residual about 2 p^4 per pair (1.3e-5 at the 5% base miss chance, at most 0.1% for p up to 0.149; p not measured). The Vulnerable 213 fixture above (Effect[1] aura 197, +10000%) overrides the -1001% of 301342 Effect[0] (net +8999%), so these two entries show the grant and its duration only and each of the four Strikes re-grants the aura (up to 60 ms later, absorbed by the reads); the immunity half is proved by two further entries, counted pair 20261122-205822 / 20261122-205918, one build (worldserver 764e5d0be77f, server commit 4cc498eca10f+), no flip, 4 of 4 entries ok in both runs, cast_failures empty. immunity_no_regrant: fixture Vulnerable 425 (Effect[1] aura 197, EffectBasePoints 99 = +100%, harness set_aura, not the subject) makes the first Strike critical and sums with 301342 to -901%, so no later Strike of the eight (500 ms apart, the last at 3.5 s) is critical; the aura read about 5.4 s after the first Strike is gone (0 in both runs; a re-grant would keep it until at least 7.5 s). Control arm immunity_regrant_control: the same strikes under Vulnerable 213 (net +8999%) leave the aura present at the same read (1 in both runs), so the late read does see a re-grant when critical hits land; the before phase of both entries (300355 not learned) reads 0. Residual failure probability: the gone read fails only if the first three Strikes all miss, p^3 per run, 1.3e-4 at the 5% base miss chance and at most 0.1% for p up to 0.1 (p not measured), the control read fails only if all of Strikes 4 to 8 miss; the pairs' reads exclude a re-grant by more than 2 s. Fixture 425 carries a second effect (Effect[0] aura 325, BasePoints 29) that does not touch the critical chance. Reference search 2026-11-22: coa-history spells 300355 and 301342: no logged event (passive); nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 300357,
@@ -4146,7 +4158,7 @@
       "704579 behaviour_metric_delta fulfillment_ratio"
     ],
     "kind": "claim",
-    "reason": "Counted pair 20261122-201141 / 20261122-201215, one build (worldserver 764e5d0be77f, server commit 4cc498eca10f+), no flip, 19 of 19 entries ok in both runs. Ratio entry fulfillment_ratio: the Fulfillment copy of Vow of the Eclipse 807435 on a marked enemy (Sun Power 807215 damage events on the dummy) reads c without 704579 learned (10%, Dawn 807444 Effect[1] BasePoints 9 + 1) and the cumulative reading after the learn is 3c, so the learned copy is 2c, +100% = 704579 Effect[1] BasePoints 99 + 1; judged on the ratio 3.0 within 0.1 (the band of +100% is 5 points). Control = the before phase of the same entry. Vow of the Eclipse, Dawn (one charge) and the Eclipse mark 505340 are harness set_aura precondition fixtures; the subject is the Fulfillment copy. Crit and resist removed (984954, 823764), spell power 20000. Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots carry the same tooltip; nothing found that states another figure."
+    "reason": "Counted pair 20261122-201141 / 20261122-201215, one build (worldserver 764e5d0be77f, server commit 4cc498eca10f+), no flip, 19 of 19 entries ok in both runs. Ratio entry fulfillment_ratio: the Fulfillment copy of Vow of the Eclipse 807435 on a marked enemy (Sun Power 807215 damage events on the dummy) reads c without 704579 learned (10%, Dawn 807444 Effect[1] BasePoints 9 + 1) and the cumulative reading after the learn is 3c, so the learned copy is 2c, +100% = 704579 Effect[1] BasePoints 99 + 1; judged on the cumulative ratio 3 = 2 + x within 0.1, which is +-10 points on the learned copy's +100%, wider than the 5-point band; the reading is exactly 3.0 (503 / 1509) in both runs, so no false pass here. Control = the before phase of the same entry. Vow of the Eclipse, Dawn (one charge) and the Eclipse mark 505340 are harness set_aura precondition fixtures; the subject is the Fulfillment copy. Crit and resist removed (984954, 823764), spell power 20000. Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots carry the same tooltip; nothing found that states another figure."
   },
   {
     "spell": 704581,
