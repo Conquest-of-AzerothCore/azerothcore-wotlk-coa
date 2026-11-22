@@ -1,8 +1,10 @@
+from dataclasses import replace
 import random
 import unittest
 
 from behaviours import behaviour_scenario
 from compare import judge_behaviour
+from coverage import BEHAVIOUR, DATA, UNPROVEN, verdict_evidence
 from profile import DBC_DIR, load_fixture_class_file
 import run
 from test_behaviours import FakeRun, base_verdict
@@ -334,6 +336,18 @@ class WindowTests(unittest.TestCase):
                 verdict = self.judged(expectation)
                 self.assertEqual(verdict.status, 'unmeasured', verdict.explanation)
                 self.assertIn('outside', verdict.explanation)
+
+    def test_the_window_is_classed_behaviour_only_on_a_within_clause_with_its_contrast_stamped(self):
+        _, [expectation] = self.built()
+        verdict = self.judged(expectation)
+        self.assertEqual(verdict.detail, {'metric': 'aura_fed_window_casting', 'contrast': 'aura_window'})
+        self.assertEqual(verdict_evidence(verdict, 'within $d', {}), BEHAVIOUR)
+        self.assertEqual(verdict_evidence(verdict, 'Your next Dawnsear is instant cast', {}), DATA)
+        unstamped = replace(verdict, detail={'metric': 'aura_fed_window_casting'})
+        self.assertEqual(verdict_evidence(unstamped, 'within $d', {}), DATA)
+        learned = replace(verdict, detail={'metric': 'aura_fed_window_casting', 'contrast': 'learned'})
+        self.assertEqual(verdict_evidence(learned, 'within $d', {}), DATA)
+        self.assertEqual(verdict_evidence(self.judged(expectation, held=1.0), 'within $d', {}), UNPROVEN)
 
     def test_a_window_entry_needs_its_minimum_and_a_feed_past_the_global_cooldown(self):
         for changes in ({'min_judged': 0}, {'min_judged': 4}, {'every_ms': 1000}, {'held_ms': 11000},

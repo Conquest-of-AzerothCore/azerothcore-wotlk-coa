@@ -573,7 +573,8 @@
       "300348 effect_value e0 #0",
       "300348 behaviour_metric_delta spell_hit_taken"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "School split (G-23): 300348 Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, MiscValue 126 (Holy, Fire, Nature, Frost, Shadow, Arcane), BasePoints -4 (DBC); the entry spell_hit_taken casts Smite 585 (SchoolMask 2, Holy) only, so Holy is measured in game and the five other schools rest on the same aura and its MiscValue. Reference search 2026-11-22: coa-history spell 300348: 0 events in 186 logs (a passive); the bindmysoul and sidekick snapshots under ~/CoaServer/reference carry the tooltip words only; nothing found beyond the tooltip and the DBC for the value."
   },
   {
     "spell": 300349,
@@ -986,7 +987,7 @@
       "300723 behaviour_hit_ratio fire_damage"
     ],
     "kind": "claim",
-    "reason": "Owner ruling O-19 (Q-sc-9, option b, 2026-11-22), replacing the earlier hold: the tooltip's Holy and Fire spell damage increase is the +30% Holy and Fire damage the server applies, and the Intellect-based effect is only for the spell hit rating (clause 66). Owner's words: \"On conserve +30% de spell damage pour le feu et le sacr\u00e9. Le buff qui prend l'intelligence en compte n'est que pour le taux de toucher\". Expected value: x1.30 of the Holy and Fire hit (the ruling's 30%, not a measured value). The server rewrite at load (AscensionSunClericContracts.cpp:185-186, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire) is the ruled behaviour; no change. Counted on the b9d arms: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3), holy_damage, holy_damage_control and fire_damage hit_ratio and the effect_value e2 read ok in both runs, no flip, control arm holy_damage_control. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found beyond the ruling.",
+    "reason": "Owner ruling O-19 (Q-sc-9, option b, 2026-11-22), replacing the earlier hold: the tooltip's Holy and Fire spell damage increase is the +30% Holy and Fire damage the server applies, and the Intellect-based effect is only for the spell hit rating (clause 66). Owner's words: \"On conserve +30% de spell damage pour le feu et le sacré. Le buff qui prend l'intelligence en compte n'est que pour le taux de toucher\". Expected value: x1.30 of the Holy and Fire hit (the ruling's 30%, not a measured value). The server rewrite at load (AscensionSunClericContracts.cpp:185-186, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire) is the ruled behaviour; no change. Counted on the b9d arms: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3), holy_damage, holy_damage_control and fire_damage hit_ratio and the effect_value e2 read ok in both runs, no flip, control arm holy_damage_control. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found beyond the ruling.",
     "text_source": {
       "basis": "owner_ruling",
       "spell": 300723,
@@ -3080,7 +3081,8 @@
           "681433 cost_gate 800764 cd_conquest_area beyond"
         ]
       }
-    ]
+    ],
+    "reason": "Reference search 2026-11-22: coa-history spell 681433: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; for the per-target refund, coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found."
   },
   {
     "spell": 681433,
@@ -3363,7 +3365,7 @@
         ]
       },
       {
-        "claim": "on a target: a second target gets its own extra attack, and the extra attack lands as a second white swing",
+        "claim": "on a target: a second target gets its own extra attack (681472 cast) and its own 681531 marker",
         "labels": [
           "680643 behaviour_metric_delta second_target",
           "680643 behaviour_metric_delta second_marker"
@@ -5662,7 +5664,8 @@
           "802161 behaviour_metric_delta ally_blink"
         ]
       }
-    ]
+    ],
+    "reason": "Reference search 2026-11-22: coa-history (802161 casts and summon events, no ally interaction recorded) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC; the DBC and the tooltip are the expectation."
   },
   {
     "spell": 802161,
@@ -5672,7 +5675,7 @@
       "802161 behaviour_metric_delta ally_lockout"
     ],
     "kind": "claim",
-    "reason": "Open, no final status: the entry ally_lockout alerts in both runs of pair build/pair (rb7 2026-11-22) on its main reading, 802148 aura_apply_count 2 before and 4 after against 1 and 2 stated, while the use itself behaves: the ally's 802145 application count reads 1 then 2 (first interaction, refused try at 81 s = 0.9 x 90000 ms, accepted try at 99 s = 1.1 x 90000 ms), so a lockout of 81 s or less or of 99 s or more would alert. Lockout timing from the DBC: 802148 Sunstroke DurationIndex 23 = 90000 ms ($802148d), one effect (Effect[0] aura 4 DUMMY, no trigger spell). Observation (not a change): each accepted gossip interaction counts 802148 twice in the harness. The gossip handler casts 802148 once (AscensionSunClericSummons.cpp:116, after 802145 at :115, refusing while 802148 is held at :112) and no other source line references 802148 (grep over src/), so the second count is not a second cast or a script apply in this code; the engine reports OnAuraApply at a new application (Unit.cpp:5607) and at a stack or refresh of an existing aura (Unit.cpp:5466), and which of the two fired twice was not isolated. Probes (rb7, throwaway, never counted): set_aura, a player cast and a creature triggered self-cast of 802148 each read 1; the gossip path reads 2 with one stack and 88464 ms remaining 1500 ms later (one 90 s aura) and no SPELL_GO of 802148 at the ally, so no visible effect and no change; it goes on the owner's observation list. Tool need (mentor D-239, not written): ally_interact.check ties the main reading to the lockout aura (ally_interact.py:80-83: spec.fields == {'spell': lockout_aura}, whose DBC duration also sizes the waits), so making the 802145 use the judged reading and 802148 record-only needs a new ally_interact key, which needs approval. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found."
+    "reason": "Counted: the entry ally_lockout reads ok in both runs of pair 20261122-221318 / 20261122-221359 (judged build 8576ef7bd7ce, worldserver 10ee6279a3d1, no flip, 6 of 6 scenarios ok in each run) with the judged_spell key (a60d67ec76, ADR 1051 addendum, mentor D-239): the judged reading is the ally's 802145 application count, 1 after the first interaction and 2 after the accepted try, with the refused try at 81 s = 0.9 x 90000 ms and the accepted try at 99 s = 1.1 x 90000 ms, so a lockout of 81 s or less or of 99 s or more would alert. Lockout timing from the DBC: 802148 Sunstroke DurationIndex 23 = 90000 ms ($802148d), one effect (Effect[0] aura 4 DUMMY, no trigger spell). 802148's application count is recorded only, unjudged: 2 before and 4 after in both runs. Owner observation (not a change): each accepted gossip interaction counts 802148 twice in the harness. The gossip handler casts 802148 once (AscensionSunClericSummons.cpp:116, after 802145 at :115, refusing while 802148 is held at :112) and no other source line references 802148 (grep over src/); the engine reports OnAuraApply at a new application (Unit.cpp:5607) and at a stack or refresh of an existing aura (Unit.cpp:5466), and which of the two fired twice was not isolated. Probes (rb7, throwaway, never counted): set_aura, a player cast and a creature triggered self-cast of 802148 each read 1; the gossip path reads 2 with one stack and 88464 ms remaining 1500 ms later (one 90 s aura) and no SPELL_GO of 802148 at the ally, so no visible effect. The pair before the judged_spell key (214833 / 214945) ran an older scenario and is not used. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found."
   },
   {
     "spell": 802935,

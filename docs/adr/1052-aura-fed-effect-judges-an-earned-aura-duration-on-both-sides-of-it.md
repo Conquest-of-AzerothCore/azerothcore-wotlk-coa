@@ -33,3 +33,14 @@ preconditions per trial, a fixed `min_judged` per side, and an out-of-window age
 - Seeded tests (`kinds/test_aura_fed_effect.py`): the unlearn, relearn and cast timing; pass and both mutants
   (not instant inside, instant past); voids down to unmeasured; out-of-window ages unmeasured; refusals.
 - If the unlearn removed the aura, every trial would void (unmeasured): the controller's stop condition.
+
+## Addendum (2026-11-22, round B review part 2 I-1, D-234): evidence stamp
+
+The window verdict's detail named the base state metric `casting` with no contrast, so `coverage.verdict_evidence`
+classed `fed_window` as data. The window model now stamps `evidence_metric` `aura_fed_window_casting` and `contrast`
+`aura_window` (the aura held against the aura gone, the talent known on both sides). The kind declares its own rows,
+with no edit to `coverage.py`: `METRIC_EVIDENCE` state, `CONTRAST_PROOF` `aura_window` and `STATE_PROMISES` `within`.
+An ok verdict is behaviour only when the stamp is present and the clause, its ledger row or its promise says "within";
+without the stamp, with another contrast or on another clause it stays data. The judged reads, the tolerances and what
+counts as ok are unchanged, and the other variants carry no stamp, so the finished classes regenerate byte-identical.
+Seeded test: `WindowTests.test_the_window_is_classed_behaviour_only_on_a_within_clause_with_its_contrast_stamped`.

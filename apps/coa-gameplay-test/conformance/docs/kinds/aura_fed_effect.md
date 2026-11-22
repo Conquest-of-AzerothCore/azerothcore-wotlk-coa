@@ -65,6 +65,10 @@ not known at its start or after the relearn, the feed did not grant once, the au
 the channel still runs, a tick or a re-application follows the relearn, or the cast did not go off; fewer than
 `min_judged` judged trials on a side is unmeasured. `max_casts` assumes one tick per feed (conservative).
 
+Evidence: the verdict carries the metric `aura_fed_window_casting` with the contrast `aura_window` (aura held against
+aura gone), declared in the kind's `METRIC_EVIDENCE`, `CONTRAST_PROOF` and `STATE_PROMISES` rows; an ok verdict is
+behaviour on a clause that says "within" and data otherwise (ADR 1052 addendum).
+
 Calibration reads rb7 (2026-11-22, throwaway probes, never counted): 9981 ms of 10000 left at the stop in 6 of 6
 trials; 807299 sends no SPELL_GO (so no event dating); `set_moving` does not stop Radiant Flame; a 1600 ms feed gives
 two ticks per cast.

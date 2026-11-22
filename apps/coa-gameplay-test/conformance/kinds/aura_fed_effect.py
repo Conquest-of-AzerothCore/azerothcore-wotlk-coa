@@ -525,6 +525,8 @@ WINDOW_FEED_TICKS = 1
 WINDOW_CHANNEL_CLEAR_MS = 4500
 WINDOW_TRIAL_READS = ('known start', 'grants start', 'aura stop', 'grants stop', 'casting clear', 'ticks relearn',
                       'known relearn', 'ticks cast', 'grants cast', 'aura cast', 'casting', 'went')
+WINDOW_EVIDENCE_METRIC = 'aura_fed_window_casting'
+WINDOW_CONTRAST = 'aura_window'
 
 
 @dataclass(frozen=True)
@@ -668,7 +670,8 @@ def window_scenario(class_file: dict, spec: WindowSpec) -> tuple[dict, list[Expe
         'players': [player_fixture(class_file)],
         'creatures': [dummy_fixture(0, class_file, distance)],
         'steps': steps}
-    model = {'kind': KIND, 'variant': WINDOW_VARIANT, 'metric': 'casting', 'quote': entry.quote,
+    model = {'kind': KIND, 'variant': WINDOW_VARIANT, 'metric': 'casting', 'evidence_metric': WINDOW_EVIDENCE_METRIC,
+             'contrast': WINDOW_CONTRAST, 'quote': entry.quote,
              'expected': float(duration), 'reads': reads, 'bounds': bounds, 'ages': ages,
              'min_judged': spec.min_judged, 'max_casts': max_casts}
     expectation = Expectation(window_mark(spec, '').rstrip(), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.aura, None,
@@ -734,3 +737,6 @@ def label(entry: dict) -> list[str]:
 
 
 JUDGES = {BEHAVIOUR_METRIC_DELTA: aura_fed_verdict}
+METRIC_EVIDENCE = {WINDOW_EVIDENCE_METRIC: 'state'}
+CONTRAST_PROOF = {WINDOW_EVIDENCE_METRIC: WINDOW_CONTRAST}
+STATE_PROMISES = {WINDOW_EVIDENCE_METRIC: r'within'}
