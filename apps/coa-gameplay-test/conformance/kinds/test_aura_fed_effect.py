@@ -21,6 +21,8 @@ SIZED_HEAL = {**HEAL, 'name': 'Cultivate Divinity (Radiant Cascade)', 'variant':
               'label_suffix': 'fed_heal_cascade', 'quote': 'to increase the healing of your next Radiant Cascade',
               'feed_spell': 500143, 'aura': 300354, 'effect_spell': 500141, 'chance_spell': 707520, 'trials': 12,
               'fixture': {'spell_power': 20000}}
+SIZED_DAMAGE = {**DAMAGE, 'name': 'Spears of Glory (sized damage)', 'sized': True, 'figure_effect': 1,
+                'min_hits': 4, 'consumed': True, 'trials': 14, 'fixture': {'spell_power': 20000}}
 CONTROL_HIT = 8800.0
 SEED = 704920
 
@@ -49,6 +51,20 @@ class AuraFedEffectTests(unittest.TestCase):
             for trial in expectation.model['reads'][arm]:
                 count, total = count + 1, total + hit
                 values.update({trial['aura']: aura, trial['hits']: count, trial['damage']: total})
+        return values
+
+    def sized_damage_values(self, factor, again=1.0, spread=0.0025, entry=SIZED_DAMAGE, critical=()):
+        _, expectation = self.generated(entry)
+        draw = random.Random(SEED)
+        values, count, total = {}, 0.0, 0.0
+        for arm, hit, aura in (('control', CONTROL_HIT, 0.0), ('treatment', CONTROL_HIT * factor, 1.0)):
+            for index, trial in enumerate(expectation.model['reads'][arm]):
+                if (arm, index) not in critical:
+                    count, total = count + 1, total + hit * (1 + draw.gauss(0, spread))
+                values.update({trial['aura']: aura, trial['hits']: count, trial['damage']: total})
+                if 'next_hits' in trial:
+                    count, total = count + 1, total + CONTROL_HIT * again * (1 + draw.gauss(0, spread))
+                    values.update({trial['next_hits']: count, trial['next_damage']: total})
         return values
 
     def heal_values(self, factor, again=1.0, fed_aura=1.0, entry=HEAL, spread=0.0):
@@ -138,6 +154,52 @@ class AuraFedEffectTests(unittest.TestCase):
         self.assertEqual(self.judged(DAMAGE, self.damage_values(1.25)), 'ok')
         self.assertEqual(self.judged(DAMAGE, self.damage_values(1.0)), 'alert')
         self.assertEqual(self.judged(DAMAGE, self.damage_values(1.2)), 'alert')
+
+    def test_the_sized_damage_interval_must_lie_inside_the_figure_band(self):
+        for factor, status in ((1.25, 'ok'), (1.125, 'alert'), (1.2125, 'alert'), (1.2875, 'alert'), (1.0, 'alert')):
+            with self.subTest(factor=factor):
+                self.assertEqual(self.judged(SIZED_DAMAGE, self.sized_damage_values(factor)), status)
+
+    def test_a_sized_damage_interval_too_wide_for_the_band_alerts(self):
+        self.assertEqual(self.judged(SIZED_DAMAGE, self.sized_damage_values(1.25, spread=0.03)), 'alert')
+
+    def test_a_sized_damage_aura_not_consumed_by_the_next_cast_alerts(self):
+        self.assertEqual(self.judged(SIZED_DAMAGE, self.sized_damage_values(1.25, again=1.25)), 'alert')
+
+    def test_an_arm_below_the_sized_hit_count_is_unmeasured(self):
+        critical = {('control', index) for index in range(11)}
+        self.assertEqual(self.judged(SIZED_DAMAGE, self.sized_damage_values(1.25, critical=critical)), 'unmeasured')
+        critical = {('treatment', index) for index in range(10)}
+        self.assertEqual(self.judged(SIZED_DAMAGE, self.sized_damage_values(1.25, critical=critical)), 'ok')
+
+    def test_the_sized_damage_figure_comes_from_the_named_aura_effect(self):
+        scenario, expectation = self.generated(SIZED_DAMAGE)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        self.assertAlmostEqual(expectation.model['figure'], 0.25)
+        self.assertEqual(expectation.model['min_hits'], 4)
+        self.assertIn('spell power part included (Unit::SpellDamageBonusDone, Unit.cpp:9973)', scenario['contract'])
+        self.assertIn('1.225 to 1.275', scenario['contract'])
+        casts = [step for step in scenario['steps'] if step['action'] == 'cast' and step['spell'] == 554406]
+        self.assertEqual(len(casts), 14 + 14 * 2)
+        for refused in ({'expected': 1.2}, {'figure_effect': 0}, {'min_hits': 1}, {'min_hits': 15},
+                        {'consumed': None}, {'variant': 'heal'}):
+            with self.subTest(refused=refused), self.assertRaises(ValueError):
+                self.generated({**SIZED_DAMAGE, **refused})
+
+    def test_a_sized_damage_entry_without_a_next_claim_casts_once_per_fed_trial(self):
+        entry = {**SIZED_DAMAGE, 'consumed': False}
+        scenario, expectation = self.generated(entry)
+        casts = [step for step in scenario['steps'] if step['action'] == 'cast' and step['spell'] == 554406]
+        self.assertEqual(len(casts), 14 + 14)
+        self.assertIn('no second cast is judged', scenario['contract'])
+        self.assertNotIn('next_hits', expectation.model['reads']['treatment'][0])
+        self.assertEqual(self.judged(entry, self.sized_damage_values(1.25, entry=entry)), 'ok')
+        self.assertEqual(self.judged(entry, self.sized_damage_values(1.125, entry=entry)), 'alert')
+
+    def test_the_unsized_damage_model_carries_no_figure(self):
+        _, expectation = self.generated(DAMAGE)
+        self.assertNotIn('figure', expectation.model)
+        self.assertNotIn('next_hits', expectation.model['reads']['treatment'][0])
 
     def test_a_missing_read_is_unmeasured(self):
         self.assertEqual(self.judged(DAMAGE, {}), 'unmeasured')

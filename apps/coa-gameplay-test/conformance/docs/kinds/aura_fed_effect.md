@@ -16,6 +16,17 @@ Every trial reads `aura` right before the judged cast: 0 in the control, 1 in th
   trial: a fed cast that did not go off alerts, a control one makes the run unmeasured.
 - `variant: "damage"`: `trials` per arm, non-critical hits only; the mean fed hit must be `expected` times the control
   mean within `expected * EffectDieSides[0] / control mean`.
+- `variant: "damage"` with `sized: true` (ADR 1033, opt-in; absent, the band above is unchanged): `aura`
+  Effect[`figure_effect`] (default 0) must be `ADD_PCT_MODIFIER` on `SPELLMOD_DAMAGE` and `expected` must equal 1 plus
+  its value / 100 (the figure f), else the entry is refused. The 99% Welch-t interval of the fed to control mean hit
+  ratio must lie wholly inside [1 + 0.9 f, 1 + 1.1 f] (G-19); an arm with fewer than `min_hits` non-critical hits
+  (2 to `trials`) makes the run unmeasured. `consumed` is required: `true` when the tooltip says "next" or that the
+  aura is consumed, which adds a second `effect_spell` cast right after each fed one that must be back at the control
+  mean within `EffectDieSides[0] / control mean`; `false` judges no second cast. Size `min_hits` (the hit count whose
+  interval keeps a false alert at the residual) and `trials` (the cast count that keeps an arm below `min_hits` at the
+  residual) before the run and state the sizing in the entry; a `fixture` spell power narrows the dice share
+  (`Unit::SpellDamageBonusDone`, Unit.cpp:9973, multiplies the whole hit). Sized entries run on the accelerated
+  scenario cap.
 - `variant: "heal"` or `"heal_<suffix>"` (ADR 1033): `trials` per arm, the feed and effect cast at an ally set to 1
   health of a 2000000000 maximum before every trial; `chance_spell` (default `spell`) gives the ProcChance, one roll
   per feed cast. `aura` Effect[0] must be `ADD_PCT_MODIFIER` on `SPELLMOD_DAMAGE` and `expected` must equal 1 plus its
@@ -25,5 +36,6 @@ Every trial reads `aura` right before the judged cast: 0 in the control, 1 in th
   `EffectDieSides[0] / control mean` (consumed once). Size `trials` before the run from the heal's measured spread; a
   `fixture` spell power narrows the dice share.
 
-Sun Cleric: Spears of Glory 804629 (Radiant Flame 806060 feeding 807299, Dawnsear 554406 instant and +25%); Cultivate
+Sun Cleric: Spears of Glory 804629 (Radiant Flame 806060 feeding 807299, Dawnsear 554406 instant and +25%, the
++25% sized with `figure_effect` 1, `min_hits` 4, 14 trials and `consumed`); Cultivate
 Divinity 704920 (`heal` and `heal_cascade`: Radiant Cascade 500141 and Illumination 500143 feeding each other's +20%).
