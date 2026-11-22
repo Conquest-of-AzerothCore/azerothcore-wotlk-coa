@@ -1,4 +1,4 @@
-# Attacker miss share (`behaviour_metric_delta`, `kind: "attacker_miss_share"`, ADR 1017)
+# Attacker miss share (`behaviour_metric_delta`, `kind: "attacker_miss_share"`, ADR 1019)
 
 A debuff that lowers an enemy's chance to hit ("reduces the target's chance to hit by 3%") is read on the swings the
 enemies aim at the caster, never on the aura's amount or the unit's hit modifier. `attackers` (1 to 8, default 8)

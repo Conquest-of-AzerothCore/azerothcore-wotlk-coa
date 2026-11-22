@@ -1,4 +1,4 @@
-# 1017. A hit-chance debuff is read on the attackers' miss share
+# 1019. A hit-chance debuff is read on the attackers' miss share
 
 - Status: proposed (provisional number, numbered at merge)
 - Date: 2026-11-22
@@ -51,6 +51,8 @@ design 3 of the Sun Cleric designs-3 report.
   parts of 8000 swings; the tests seed both shapes.
 - Sizing (estimate until a part is measured): about 8040 swings per arm for a 5% → 8% share at a half-width of 1
   point; 8 attackers at 2000 ms give 4 swings per second, so 2 parts of 2 × 1496 s (4383 steps each).
+- Residual failure probability: at most 4.7e-6 per pair for a true share p0 of 8% or less (independent review of
+  the kind), within the 0.1% per pair the verification rules require (`.agents/rules/verification.md`).
 - Open risk: the first part's aura reads must confirm that Sun Down's ground reaches every attacker; otherwise the
   fallback is a real cast of 807175 on each attacker, named in the verdict.
 - Finished classes are untouched: Templar, Necromancer and Witch Hunter generate byte-identical output. The Sun

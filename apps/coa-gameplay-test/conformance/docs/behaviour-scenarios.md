@@ -2077,7 +2077,7 @@ Its tests are `kinds/test_<kind>.py`, run by `test_kinds.py` (one `conformance` 
 every module imports, names its kind and has a test file); its page is `docs/kinds/<kind>.md`. Kinds with a module:
 
 - [`attacker_miss_share`](kinds/attacker_miss_share.md): the share of attackers' swings that miss the caster
-  without and with a hit-chance aura from a real cast, pooled over parts (ADR 1017, provisional)
+  without and with a hit-chance aura from a real cast, pooled over parts (ADR 1019, provisional)
 - [`aura_expiry`](kinds/aura_expiry.md): how long a forced, rolled minion aura lasts, in game time (ADR 0485)
 - [`aura_keep_rate`](kinds/aura_keep_rate.md): the chance that a consumable aura survives the cast that consumes
   it, pooled over parts (ADR 0672, provisional)
