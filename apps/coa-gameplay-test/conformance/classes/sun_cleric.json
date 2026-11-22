@@ -4005,7 +4005,7 @@
       "priming_reads": [
         {
           "spell": 807440,
-          "expected": 0
+          "expected": 1
         }
       ]
     },
