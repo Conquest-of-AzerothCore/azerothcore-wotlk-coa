@@ -1524,7 +1524,7 @@
         ]
       }
     ],
-    "reason": "One claim per source named at AscensionSunClericEvents.cpp:136: Daybreak, Illumination, Shine and the Holy Form heal 807994 each have an entry. Cap and order: counted pair 20261122-065859 / 20261122-070442, build 2e2bdcd22257, server commit f7c27d317a43, no flip; seven candidates (six allies at 50% and the caster at 100%) read a total of 5 heals of 801215 and none on the caster; control = the phase before the passive. The five-of-six split among equal-health allies is the GUID tie order and is not asserted. Amount: the copy 801215 on ally2 over the Illumination heal on the ally, second cast alone, read 28/38 = 0.737 in both runs (expected 0.75 within 0.03, which excludes 0.675 and 0.825); control = no copy before the passive. Reference search 2026-11-22: coa-history 801215 has 10475 heal events (2034 crits) in 17 logs and no per-cast ratio; 534267 0 events; nothing else found."
+    "reason": "One claim per source named at AscensionSunClericEvents.cpp:136: Daybreak, Illumination, Shine and the Holy Form heal 807994 each have an entry. Cap and order: counted pair 20261122-065859 / 20261122-070442, build 2e2bdcd22257, server commit f7c27d317a43, no flip; seven candidates (six allies at 50% and the caster at 100%) read a total of 5 heals of 801215 and none on the caster; control = the phase before the passive. The five-of-six split among equal-health allies is the GUID tie order and is not asserted. Amount: the copy 801215 on ally2 over the Illumination heal on the ally, second cast alone, read 28/38 = 0.737 in both runs (expected 0.75 within 0.03, which excludes 0.675 and 0.825); control = no copy before the passive. Reference search 2026-11-22: coa-history 801215 has 10475 heal events (2034 crits) in 17 logs and no per-cast ratio; 534267 0 events; nothing else found. Fixture: Reg's Test Aura 984954 (Effect[1] aura 57, -1000% spell crit) is a phase aura on the caster so no heal crits and the amount arms are deterministic; it is never the subject of a claim."
   },
   {
     "spell": 547214,
@@ -2532,13 +2532,16 @@
         "claim": "Critical strikes with Gavels or Dawnbreak",
         "labels": [
           "680641 behaviour_metric_delta stack_one",
-          "680641 behaviour_metric_delta stack_dawnbreak"
+          "680641 behaviour_metric_delta stack_dawnbreak",
+          "680641 behaviour_metric_delta stack_light",
+          "680641 behaviour_metric_delta stack_grace",
+          "680641 behaviour_metric_delta stack_noncrit",
+          "680641 behaviour_metric_delta stack_dawnbreak_noncrit"
         ]
       },
       {
         "claim": "increases the healing of your next Illumination by $680642s1%",
         "labels": [
-          "680641 effect_value 680642e0 #1",
           "680641 behaviour_hit_ratio illumination_heal"
         ]
       },
@@ -2550,7 +2553,8 @@
           "680641 behaviour_metric_delta duration_gone"
         ]
       }
-    ]
+    ],
+    "reason": "counted pair 20261122-075620 / 20261122-075655, build 2e2bdcd22257, server commit f7c27d317a43, no flip, 15 scenarios per run, all ok. Gavels: the stack is granted by a forced-critical Gavel of Wrath 802561 (stack_one), Gavel of Light 800611 (stack_light) and Gavel of Grace 800614 (stack_grace), the three roots of the script list Gavel() (AscensionSunCleric.cpp:171-174, G-23), and by a forced-critical Dawnbreak 800654 (stack_dawnbreak): 0 stacks before the learn, 1 after. Non-critical arms: a Gavel of Wrath and a Dawnbreak that cannot crit (fixture 984954 with its Effect[0] amount set to -1000, a precondition, never the subject) read 0 stacks with the passive learned. Increase of the next Illumination: the hit ratio illumination_heal (15.002 / 15.002 against 15, expected from 680642 BasePoints 14 + 1); the not_measured effect_value label is no longer cited. Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 680641,
@@ -2575,7 +2579,10 @@
       },
       {
         "claim": "and critical block chance by $524859s1%",
-        "labels": []
+        "labels": [
+          "680641 behaviour_metric_delta consume_block_crit",
+          "680641 behaviour_metric_delta consume_block_crit_nostack"
+        ]
       },
       {
         "claim": "for $524859d",
@@ -2585,7 +2592,8 @@
           "680641 behaviour_metric_delta consume_gone"
         ]
       }
-    ]
+    ],
+    "reason": "counted pair 20261122-075620 / 20261122-075655, build 2e2bdcd22257, server commit f7c27d317a43, no flip, 15 scenarios per run, all ok. Movement speed: consume_speed 1.0 before the learn and 1.1 after (run_speed_rate, within 0.001). Critical block chance: consume_block_crit reads critical_block_chance (player->GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_CRIT_CHANCE), the sum Unit::isBlockCritical rolls on) 0 before the learn and 10 after the real Illumination consumed the real stack (expected 10 from 524859 Effect[1] BasePoints 9 + 1, within 0.05); condition-off arm consume_block_crit_nostack: the Gavel cannot crit, no stack, 0 after the learn. The read is a READBACK proved under the contrast rule of ADR 1021 (a non-zero arm and a condition-off arm). Reference search 2026-11-22: coa-history spell 524859: 0 events in 186 logs; nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 680643,
@@ -2944,7 +2952,7 @@
         ]
       }
     ],
-    "reason": "counted pair 20261122-065859 / 20261122-070442, build 2e2bdcd22257, server commit f7c27d317a43, no flip. Grants: 681506 on the caster after each of Conquest 800764, Ascension 500152, Revelation 503651 and Resplendence 806159, 0 in the control phase (the same cast before 681253 is learned). Window: a heal landing 9.1 s after the Conquest cast copies to the other ally (1), one landing 10.9 s after it does not (0), control = the same casts before the passive. Amount: the copy 803816 over the Illumination heal, second cast alone, 26/38 = 0.684 and 27/39 = 0.692 (expected 0.70 within 0.03, excludes 0.63 and 0.77). The extra-heal route is proven with Conquest; the grant is proven for all four casts, and the code gives all four the same Cast(player, player, 681506). Reference search 2026-11-22: coa-history 681253, 681506, 681789: 0 events; 803816 (Vow of Radiance, the 70% copy) 12520 heal events, no ratio per cast; nothing else found."
+    "reason": "counted pair 20261122-065859 / 20261122-070442, build 2e2bdcd22257, server commit f7c27d317a43, no flip. Grants: 681506 on the caster after each of Conquest 800764, Ascension 500152, Revelation 503651 and Resplendence 806159, 0 in the control phase (the same cast before 681253 is learned). Window: a heal landing 9.1 s after the Conquest cast copies to the other ally (1), one landing 10.9 s after it does not (0), control = the same casts before the passive. Amount: the copy 803816 over the Illumination heal, second cast alone, 26/38 = 0.684 and 27/39 = 0.692 (expected 0.70 within 0.03, excludes 0.63 and 0.77). The extra-heal route is proven with Conquest; the grant is proven for all four casts, and the code gives all four the same Cast(player, player, 681506). Reference search 2026-11-22: coa-history 681253, 681506, 681789: 0 events; 803816 (Vow of Radiance, the 70% copy) 12520 heal events, no ratio per cast; nothing else found. Fixture: Reg's Test Aura 984954 (Effect[1] aura 57, -1000% spell crit) is a phase aura on the caster so no heal crits and the amount arms are deterministic; it is never the subject of a claim."
   },
   {
     "spell": 681253,
@@ -2961,7 +2969,7 @@
       "681253 effect_value 681789e0 #1"
     ],
     "kind": "claim",
-    "reason": "counted pair 20261122-065859 / 20261122-070442, build 2e2bdcd22257, server commit f7c27d317a43, no flip. Each Solar Invocation spell is cast and Illumination follows; the remaining cooldown read 2600 ms after the Illumination cast started (run 1) is 24788 / 25890 / 24788 / 24788 (Conquest, Ascension, Revelation, Resplendence; expected 24800 / 25900 / 24800 / 24800 within 50, a cut of 0.9 or 1.1 s is outside the band) against the control reads 25788 / 26907 / 25788 / 25788 (Solar Conduit 300321 learned in place, an unrelated passive, expected 1000 ms more). Reference search 2026-11-22: coa-history 681789 0 events; nothing found."
+    "reason": "Data only, not behaviour and not a final status: the eight cd_cut labels read cooldown_ms, a READBACK metric (coverage.METRIC_EVIDENCE), so no applied event shows the cut being consumed. A cast gate (cost_gate, resource cooldown, as Lorescribe) was considered and not built: its margin is 500 ms by default and the 100 ms margin needed to exclude a cut 10% off is smaller than the wait drift measured in this class (game 28975 ms against nominal 28631 ms in one scenario), so the route needs attempts timed by game_time reads, as cooldown_clear_time does for a minion; tool need, claim left open (review b8a I-2). Readings of counted pair 20261122-065859 / 20261122-070442, build 2e2bdcd22257, server commit f7c27d317a43, no flip. Each Solar Invocation spell is cast and Illumination follows; the remaining cooldown read 2600 ms after the Illumination cast started (run 1) is 24788 / 25890 / 24788 / 24788 (Conquest, Ascension, Revelation, Resplendence; expected 24800 / 25900 / 24800 / 24800 within 50, a cut of 0.9 or 1.1 s is outside the band) against the control reads 25788 / 26907 / 25788 / 25788 (Solar Conduit 300321 learned in place, an unrelated passive, expected 1000 ms more). Reference search 2026-11-22: coa-history 681789 0 events; nothing found. Fixture: Reg's Test Aura 984954 (Effect[1] aura 57, -1000% spell crit) is a phase aura on the caster so no heal crits and the amount arms are deterministic; it is never the subject of a claim."
   },
   {
     "spell": 681337,
@@ -4149,7 +4157,7 @@
   },
   {
     "spell": 760379,
-    "clause": "While under the effects of Sunstorm, you can move but cannot perform any other abilities but you do not feel pity or remorse or fear and you cannot be stopped unless disarmed or killed.",
+    "clause": "While under the effects of Sunstorm, you can move but cannot perform any other abilities",
     "kind": "claim",
     "claims": [
       {
@@ -4161,11 +4169,21 @@
         "labels": [
           "760379 behaviour_metric_delta abilities"
         ]
-      },
-      {
-        "claim": "you do not feel pity or remorse",
-        "labels": []
-      },
+      }
+    ]
+  },
+  {
+    "spell": 760379,
+    "clause": "but you do not feel pity or remorse",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "Flavour text with no stated mechanic (mentor D-114); the fear and stop immunities are the clauses on either side, each a measured arm."
+  },
+  {
+    "spell": 760379,
+    "clause": "or fear and you cannot be stopped unless disarmed or killed.",
+    "kind": "claim",
+    "claims": [
       {
         "claim": "or fear",
         "labels": [
@@ -4187,7 +4205,8 @@
           "760379 immunity disarm 12323 control"
         ]
       }
-    ]
+    ],
+    "reason": "Reading of 'unless disarmed': the disarm is the exception to the immunity. A Disarm 676 lands under Sunstorm while the slow 12323 is refused in the same entry (label 760379 immunity disarm 676 with); whether a disarm ends the periodic Justice casts is not read. Each immunity is a measured arm (stun 56, fear 5782, root 47021, slow 12323, each with its control), never derived from the MiscValue 1733 mask decode. Observation: no immunity beyond those the tooltip names (fear, being stopped) was shown by a measured arm."
   },
   {
     "spell": 800039,
@@ -5232,16 +5251,7 @@
         ]
       }
     ],
-    "reason": "Sunflare rate: counted pair 20261120-204822 / 20261120-205026, 24024 trials per run, 0.4005 and 0.4052, 99% between-part intervals inside the 2-point band (residual failure probability stated in the proc entry), baseline 0 events. Duration pair 20261120-205725 / 20261120-205757 (Sun Ray 504764 grants Scorch Marks for real, control = no cast). Dawnsear half: a second proc entry with the trigger 500146 (the labels of the two entries take the trigger suffix), counted pair 20261122-065859 / 20261122-070442, build 2e2bdcd22257, server commit f7c27d317a43, no flip, Sunflare 0.3965 and 0.4006, Dawnsear 0.3935 and 0.4000 against 0.4 (the 99% intervals and the residual failure probability at most 0.1% per pair are the proc entry's); baseline 0 events. Reference search: bindmysoul snapshot 'now have a 40% chance ... for 10 seconds', nothing else found. Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip.",
-    "tool_gap": {
-      "reason": "the Dawnsear half needs a second proc entry of the same aura and proc spell; two proc entries share one label",
-      "attempts": [
-        {
-          "agent": "sc-b1a",
-          "report": ".agents/plans/sun-cleric-b1a/report.md"
-        }
-      ]
-    }
+    "reason": "Sunflare rate: counted pair 20261120-204822 / 20261120-205026, 24024 trials per run, 0.4005 and 0.4052, 99% between-part intervals inside the 2-point band (residual failure probability stated in the proc entry), baseline 0 events. Scorch Marks lasts 10 s: data only, not a behaviour claim and not status 1. Its label 806021 behaviour_metric_delta scorch_duration reads aura_duration_ms, a READBACK metric (coverage.METRIC_EVIDENCE), and its only verdict comes from pair 20261120-205725 / 20261120-205757 on another build than the 20261122 pair (Sun Ray 504764 grants Scorch Marks for real, control = no cast). A held/gone bracket on the live aura would make it behaviour; not built (review b8a I-1). Dawnsear half: a second proc entry with the trigger 500146 (the labels of the two entries take the trigger suffix), counted pair 20261122-065859 / 20261122-070442, build 2e2bdcd22257, server commit f7c27d317a43, no flip, Sunflare 0.3965 and 0.4006, Dawnsear 0.3935 and 0.4000 against 0.4 (the 99% intervals and the residual failure probability at most 0.1% per pair are the proc entry's); baseline 0 events. Reference search: bindmysoul snapshot 'now have a 40% chance ... for 10 seconds', nothing else found. Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip."
   },
   {
     "spell": 806021,

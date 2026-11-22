@@ -20708,6 +20708,221 @@
       ],
       "dummy_distance": 3,
       "observe_source": "760379 Sunstorm Effect[1] aura 147 MECHANIC_IMMUNITY_MASK MiscValue 1733, Effect[2] aura 263 ALLOW_ONLY_ABILITY, DurationIndex 32 = 6000 ms. Piercing Howl 12323 (aura 33, Mechanic 11) is the refused control and Disarm 676 (Mechanic 3, aura 67 MOD_DISARM, range index 2, DurationIndex 32 = 6000 ms) the effect the clause leaves out: each is cast by the dummy at the caster three times, 500 ms apart, inside the 6000 ms; the slow is absent and the disarm present after them, and the slow lands again after the expiry (control that the cast route lands). Reference search 2026-11-22: server DBC 760379; coa-history spell 760379: 0 events in 186 logs; ascension-data advancement.tsv lists Sunstorm as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "stacking up to $680642u times.",
+      "trigger_spell": 800611,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sun Strider (one critical Gavel of Light)",
+      "variant": "stack_light",
+      "label_suffix": "stack_light",
+      "expected": 1,
+      "observe_source": "680641 Effect[0] aura 42 PROC_TRIGGER_SPELL 680642 (AscensionSunClericEvents.cpp:125: a critical damaging Gavel); Gavel() is the script list Any(info, {800611, 800614, 800617}) (AscensionSunCleric.cpp:171-174), so each of the three Gavels is tested (G-23): Gavel of Light 800611 is cast at the dummy with forced melee crits (harness crit rating fixture), 680641 learned between the phases (control: the same crit without the passive, 0 stacks). One forced crit: 1 stack. Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "stacking up to $680642u times.",
+      "trigger_spell": 800614,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sun Strider (one critical Gavel of Grace)",
+      "variant": "stack_grace",
+      "label_suffix": "stack_grace",
+      "expected": 1,
+      "observe_source": "680641 Effect[0] aura 42 PROC_TRIGGER_SPELL 680642 (AscensionSunClericEvents.cpp:125: a critical damaging Gavel); Gavel() is the script list Any(info, {800611, 800614, 800617}) (AscensionSunCleric.cpp:171-174), so each of the three Gavels is tested (G-23): Gavel of Grace 800614 is cast at the dummy with forced melee crits (harness crit rating fixture), 680641 learned between the phases (control: the same crit without the passive, 0 stacks). One forced crit: 1 stack. Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "stacking up to $680642u times.",
+      "trigger_spell": 802561,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sun Strider (a non-critical Gavel grants no stack)",
+      "variant": "stack_noncrit",
+      "label_suffix": "stack_noncrit",
+      "expected": 0,
+      "observe_source": "Gavel of Wrath 802561 (rank 58) cast at the dummy, the learned passive against a hit that cannot crit. Non-critical arm: the melee crit chance is removed by the fixture 984954 (Reg's Test Aura, Effect[0] aura 52 MOD_CRIT_PERCENT, amount set to -1000 as a phase aura on the caster; Effect[1] aura 57 -1000% spell crit), with no forced crit rating, so the passive learned in the after phase meets a hit that cannot crit; the fixture is a precondition, never the subject of the claim. Expected 0 stacks: 680641 Effect[0] aura 42 PROC_TRIGGER_SPELL fires only on a critical damaging Gavel or Dawnbreak (AscensionSunClericEvents.cpp:125, `damage && critical && (Gavel(info) || Named(info,800654))`). Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC.",
+      "phase_aura_amounts": [
+        [
+          984954,
+          0,
+          -1000
+        ]
+      ]
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Critical strikes with Gavels or Dawnbreak now increases the healing of your next Illumination within $680642d by $680642s1%,",
+      "trigger_spell": 800654,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "name": "Sun Strider (a non-critical Dawnbreak grants no stack)",
+      "variant": "stack_dawnbreak_noncrit",
+      "label_suffix": "stack_dawnbreak_noncrit",
+      "wait_ms": 1500,
+      "expected": 0,
+      "observe_source": "Dawnbreak 800654 cast at the dummy in front of the caster, the learned passive against a spell that cannot crit (fixture 984954 Effect[1] aura 57, -1000% spell crit; no forced crit rating). (the same fixture) the fixture 984954 (Reg's Test Aura, Effect[0] aura 52 MOD_CRIT_PERCENT, amount set to -1000 as a phase aura on the caster; Effect[1] aura 57 -1000% spell crit), with no forced crit rating, so the passive learned in the after phase meets a hit that cannot crit; the fixture is a precondition, never the subject of the claim. Expected 0 stacks: the proc needs a critical damaging Gavel or Dawnbreak (AscensionSunClericEvents.cpp:125). Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Consuming the stacks increases your critical block chance and movement speed by $524859s1% for $524859d.",
+      "gate_spell": 680641,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_casts": [
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "dummy_distance": 5,
+      "select_dummy": true,
+      "force_crit": "melee",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 500,
+      "fields": {},
+      "name": "Sun Strider (consuming the stack raises critical block chance by 10%)",
+      "variant": "consume_block_crit",
+      "label_suffix": "consume_block_crit",
+      "metric": "critical_block_chance",
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0.05,
+      "wait_ms": 2100,
+      "observe_source": "Critical block chance of the caster 100 ms after the Illumination finishes: 0 in the control phase (before 680641 is learned) and 10 after, within 0.05. The read is `critical_block_chance` = player->GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_CRIT_CHANCE) (CoAGameplayTest.cpp:5139-5140), the sum the engine rolls on in Unit::isBlockCritical (Unit.cpp:3719-3723). 524859 Effect[1] aura 253 MOD_BLOCK_CRIT_CHANCE BasePoints 9 + 1 = 10 ($524859s1), applied by the next Illumination 500143 that consumes the stack (AscensionSunClericEvents.cpp:125, AscensionSunClericAbilities.cpp:43, 86-87). A forced-crit Gavel of Wrath 802561 at the dummy gives the stack, the Illumination cast 1600 ms later consumes it. Control: the same two casts before 680641 is learned. Condition-off arm: consume_block_crit_nostack. Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Consuming the stacks increases your critical block chance and movement speed by $524859s1% for $524859d.",
+      "gate_spell": 680641,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_casts": [
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "dummy_distance": 5,
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 500,
+      "fields": {},
+      "name": "Sun Strider (no critical block chance without a consumed stack)",
+      "variant": "consume_block_crit_nostack",
+      "label_suffix": "consume_block_crit_nostack",
+      "metric": "critical_block_chance",
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0.05,
+      "wait_ms": 2100,
+      "observe_source": "Condition-off arm of consume_block_crit: the Gavel cannot crit (fixture 984954, Effect[0] amount -1000 as a phase aura), so no 680642 stack exists and the Illumination consumes nothing; the critical block chance stays 0 after the learn. The same read and the same 524859 Effect[1] BasePoints 9 + 1 = 10 as consume_block_crit (CoAGameplayTest.cpp:5139-5140, Unit.cpp:3719-3723). Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC.",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          984954,
+          0,
+          -1000
+        ]
+      ]
     }
   ],
   "player_observations": [],
