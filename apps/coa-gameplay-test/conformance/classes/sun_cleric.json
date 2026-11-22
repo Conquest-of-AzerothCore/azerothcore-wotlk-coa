@@ -30053,9 +30053,17 @@
           ],
           "stacks": 20,
           "reason": "20 Solar Power 500149 are set on the caster before the Dawn 804584 cast, the stacks the Final Vows entries and the cd entry set: a named precondition fixture; the claim measured is the cut of the Horusath Blast cooldown by the fulfilment, not the Solar Power stacks."
+        },
+        {
+          "spell": 500154,
+          "auras": [
+            823764,
+            984954
+          ],
+          "reason": "Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, as in the cd entry's phase_auras: the fulfilment needs a Horusath Blast hit that lands, and the priming cast and the attempt both get them: named precondition fixtures, not the subject."
         }
       ],
-      "observe_source": "805581 Trial of Valor Effect[0] aura 4 SPELL_AURA_DUMMY; the class code (AscensionSunCleric.cpp:292-293, Fulfill) cuts Horusath Blast 500154 by |Amount(807445)| when a Vow is fulfilled under Dawn with 805581 known; 807445 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN, BasePoints -2001 (-2000 ms, $/1000;807445s1 = 2 s). Horusath Blast RecoveryTime 25000 ms. As the cd entry: Vow of Grace 803719 and Dawn 804584 are cast first (setup_casts, in every arm), then Horusath Blast is cast as the priming cast, which fulfils the Vow (the cd entry reads 22000 ms 1000 ms after such a cast: 25000 - 2000 - 1000). The attempt of Horusath Blast follows 25000 - 2000 + 200 = 23200 ms after the priming cast (with arm: accepted; without 805581: refused, SPELL_FAILED_NOT_READY) and 25000 - 2000 - 200 = 22800 ms after it (beyond arm: refused). The accepted or refused cast is an event (cast_failure), not a cooldown readback. A cut of 1800 ms (10% off) would leave the beyond attempt refused only if the cut is below 2200 and the with attempt accepted only from 1800: the three arms bracket the cut inside 1800..2200 ms, 10% either side of the 2000 ms stated. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC."
+      "observe_source": "805581 Trial of Valor Effect[0] aura 4 SPELL_AURA_DUMMY; the class code (AscensionSunCleric.cpp:292-293, Fulfill) cuts Horusath Blast 500154 by |Amount(807445)| when a Vow is fulfilled under Dawn with 805581 known; 807445 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN, BasePoints -2001 (-2000 ms, $/1000;807445s1 = 2 s). Horusath Blast RecoveryTime 25000 ms. As the cd entry: Vow of Grace 803719 and Dawn 804584 are cast first (setup_casts, in every arm), then Horusath Blast is cast as the priming cast, which fulfils the Vow (the cd entry reads 22000 ms 1000 ms after such a cast: 25000 - 2000 - 1000). The attempt of Horusath Blast follows 25000 - 2000 + 200 = 23200 ms after the priming cast (with arm: accepted; without 805581: refused, SPELL_FAILED_NOT_READY) and 25000 - 2000 - 200 = 22800 ms after it (beyond arm: refused). The accepted or refused cast is an event (cast_failure), not a cooldown readback. A cut of 1800 ms (10% off) would leave the beyond attempt refused only if the cut is below 2200 and the with attempt accepted only from 1800: the three arms bracket the cut inside 1800..2200 ms, 10% either side of the 2000 ms stated. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Design 2: the first pair (20261122-x2) read the with arm refused at 23200 ms (cast_failure 67) with only the Solar Power fixture, while the cd entry sets 823764 and 984954; the priming hit must land to fulfil the Vow, so both are now set before every Horusath Blast cast."
     },
     {
       "spell": 704936,
@@ -30071,7 +30079,7 @@
         "max_health": 100000,
         "count": 3,
         "wait_ms": 300,
-        "after_trigger_ms": 500
+        "after_trigger_ms": 2600
       },
       "phase_auras": [
         [
@@ -30096,7 +30104,7 @@
       "expected": 11.5,
       "after_at_least": 11,
       "after_at_most": 12,
-      "observe_source": "704936 The Chosen Effect[0] aura 354 ASCENSION_PROC_PERCENT_EVENT BasePoints 29 + 1 = 30 ($s1), trigger 802598 (Effect[0] aura 69 SCHOOL_ABSORB, all schools 127, base -1: the amount is set by the class code, AscensionSunClericEvents.cpp:370 Copy(player,player,802598,CalculatePct(healing,Amount(704936))), proc on healing by Illumination 500143, Events.cpp:138). Illumination 500143 is cast at the caster held at 30% of its health. 500 ms after the cast the striker casts Light of the Naaru 41394 (Effect[0] SCHOOL_DAMAGE, BasePoints 1099 + 1 = 1100 Holy) at the caster three times 300 ms apart; the first strike is absorbed by the shield up to its amount, so the total absorbed by 41394 on the caster (spell_absorb_total, an event) is the shield amount while 1100 exceeds it. Spell power 0: heal int((47 + 1..3) x 0.8) = 38..40, shield 30% = 11..12, absorbed read within 11..12 (the first design read the aura amount, a readback; this one reads the damage the shield stops). The before phase is the same cast with 704936 not yet learned and no strike. Control arm: the shield_absorb_control entry, the same heal and strikes without 704936. Reference search 2026-11-22: coa-history spell 704936: 0 events in 186 logs (a passive); nothing else found."
+      "observe_source": "704936 The Chosen Effect[0] aura 354 ASCENSION_PROC_PERCENT_EVENT BasePoints 29 + 1 = 30 ($s1), trigger 802598 (Effect[0] aura 69 SCHOOL_ABSORB, all schools 127, base -1: the amount is set by the class code, AscensionSunClericEvents.cpp:370 Copy(player,player,802598,CalculatePct(healing,Amount(704936))), proc on healing by Illumination 500143, Events.cpp:138). Illumination 500143 is cast at the caster held at 30% of its health. 2600 ms after the cast (past the Illumination cast and heal, the wait the aura_amount entries use) the striker casts Light of the Naaru 41394 (Effect[0] SCHOOL_DAMAGE, BasePoints 1099 + 1 = 1100 Holy) at the caster three times 300 ms apart; the first strike is absorbed by the shield up to its amount, so the total absorbed by 41394 on the caster (spell_absorb_total, an event) is the shield amount while 1100 exceeds it. Spell power 0: heal int((47 + 1..3) x 0.8) = 38..40, shield 30% = 11..12, absorbed read within 11..12 (the first design read the aura amount, a readback; this one reads the damage the shield stops). The before phase is the same cast with 704936 not yet learned and no strike. Control arm: the shield_absorb_control entry, the same heal and strikes without 704936. Reference search 2026-11-22: coa-history spell 704936: 0 events in 186 logs (a passive); nothing else found."
     },
     {
       "spell": 704936,
@@ -30112,7 +30120,7 @@
         "max_health": 100000,
         "count": 3,
         "wait_ms": 300,
-        "after_trigger_ms": 500
+        "after_trigger_ms": 2600
       },
       "phase_auras": [
         [
@@ -30138,7 +30146,7 @@
       "after_at_least": 262,
       "after_at_most": 265,
       "player_spell_power": 1000,
-      "observe_source": "704936 The Chosen Effect[0] aura 354 ASCENSION_PROC_PERCENT_EVENT BasePoints 29 + 1 = 30 ($s1), trigger 802598 (Effect[0] aura 69 SCHOOL_ABSORB, all schools 127, base -1: the amount is set by the class code, AscensionSunClericEvents.cpp:370 Copy(player,player,802598,CalculatePct(healing,Amount(704936))), proc on healing by Illumination 500143, Events.cpp:138). Illumination 500143 is cast at the caster held at 30% of its health. 500 ms after the cast the striker casts Light of the Naaru 41394 (Effect[0] SCHOOL_DAMAGE, BasePoints 1099 + 1 = 1100 Holy) at the caster three times 300 ms apart; the first strike is absorbed by the shield up to its amount, so the total absorbed by 41394 on the caster (spell_absorb_total, an event) is the shield amount while 1100 exceeds it. Contrast arm: +1000 spell power: heal (47 + 1..3 + 1.05 x 1000) x 0.8 = 878..880, shield 30% = 263..264, absorbed read within 262..265, against 11..12 at 0 in the shield_absorb entry, so the absorbed amount follows the amount healed. The strike damage 1100 exceeds the shield. Reference search 2026-11-22: coa-history spell 704936: 0 events in 186 logs (a passive); nothing else found."
+      "observe_source": "704936 The Chosen Effect[0] aura 354 ASCENSION_PROC_PERCENT_EVENT BasePoints 29 + 1 = 30 ($s1), trigger 802598 (Effect[0] aura 69 SCHOOL_ABSORB, all schools 127, base -1: the amount is set by the class code, AscensionSunClericEvents.cpp:370 Copy(player,player,802598,CalculatePct(healing,Amount(704936))), proc on healing by Illumination 500143, Events.cpp:138). Illumination 500143 is cast at the caster held at 30% of its health. 2600 ms after the cast (past the Illumination cast and heal, the wait the aura_amount entries use) the striker casts Light of the Naaru 41394 (Effect[0] SCHOOL_DAMAGE, BasePoints 1099 + 1 = 1100 Holy) at the caster three times 300 ms apart; the first strike is absorbed by the shield up to its amount, so the total absorbed by 41394 on the caster (spell_absorb_total, an event) is the shield amount while 1100 exceeds it. Contrast arm: +1000 spell power: heal (47 + 1..3 + 1.05 x 1000) x 0.8 = 878..880, shield 30% = 263..264, absorbed read within 262..265, against 11..12 at 0 in the shield_absorb entry, so the absorbed amount follows the amount healed. The strike damage 1100 exceeds the shield. Reference search 2026-11-22: coa-history spell 704936: 0 events in 186 logs (a passive); nothing else found."
     },
     {
       "spell": 704936,
@@ -30154,7 +30162,7 @@
         "max_health": 100000,
         "count": 3,
         "wait_ms": 300,
-        "after_trigger_ms": 500
+        "after_trigger_ms": 2600
       },
       "phase_auras": [
         [
@@ -30178,7 +30186,7 @@
       "label_suffix": "shield_absorb_control",
       "expected": 0,
       "gate_spell": 807963,
-      "observe_source": "704936 The Chosen Effect[0] aura 354 ASCENSION_PROC_PERCENT_EVENT BasePoints 29 + 1 = 30 ($s1), trigger 802598 (Effect[0] aura 69 SCHOOL_ABSORB, all schools 127, base -1: the amount is set by the class code, AscensionSunClericEvents.cpp:370 Copy(player,player,802598,CalculatePct(healing,Amount(704936))), proc on healing by Illumination 500143, Events.cpp:138). Illumination 500143 is cast at the caster held at 30% of its health. 500 ms after the cast the striker casts Light of the Naaru 41394 (Effect[0] SCHOOL_DAMAGE, BasePoints 1099 + 1 = 1100 Holy) at the caster three times 300 ms apart; the first strike is absorbed by the shield up to its amount, so the total absorbed by 41394 on the caster (spell_absorb_total, an event) is the shield amount while 1100 exceeds it. Control: 704936 is never learned (the unrelated passive 807963 is learned between phases in its place), so the Illumination heal creates no 802598 shield and the strikes are absorbed by nothing: 0 in both phases. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
+      "observe_source": "704936 The Chosen Effect[0] aura 354 ASCENSION_PROC_PERCENT_EVENT BasePoints 29 + 1 = 30 ($s1), trigger 802598 (Effect[0] aura 69 SCHOOL_ABSORB, all schools 127, base -1: the amount is set by the class code, AscensionSunClericEvents.cpp:370 Copy(player,player,802598,CalculatePct(healing,Amount(704936))), proc on healing by Illumination 500143, Events.cpp:138). Illumination 500143 is cast at the caster held at 30% of its health. 2600 ms after the cast (past the Illumination cast and heal, the wait the aura_amount entries use) the striker casts Light of the Naaru 41394 (Effect[0] SCHOOL_DAMAGE, BasePoints 1099 + 1 = 1100 Holy) at the caster three times 300 ms apart; the first strike is absorbed by the shield up to its amount, so the total absorbed by 41394 on the caster (spell_absorb_total, an event) is the shield amount while 1100 exceeds it. Control: 704936 is never learned (the unrelated passive 807963 is learned between phases in its place), so the Illumination heal creates no 802598 shield and the strikes are absorbed by nothing: 0 in both phases. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 504734,
@@ -30209,9 +30217,9 @@
       "label_suffix": "threat_hb",
       "name": "Solar Champion (threat generated, Horusath Blast)",
       "before_expected": 0,
-      "expected": 0.80596,
+      "expected": 0.80099,
       "gate_spell": 504734,
-      "observe_source": "504734 Solar Champion Effect[1] aura 108 MiscValue 2 (SPELLMOD_THREAT) BasePoints -21 + 1 = -20% ($s2) on EffectSpellClassMask [134217728, 17302850, 0], which Horusath Blast carries (Spell.dbc SpellFamilyFlags, family 33). Horusath Blast 500154 (SpellFamilyFlags[1] 64), a direct hit: Description ${$m1+0+$sph*1}, m1 = 72 + 1 = 73, damage mean 73 + 10000 x 1 = 10073, flat 60 / 10073 = 0.00596. Threat of the cast = damage x (1 + SPELLMOD_THREAT) plus the flat initial threat of the cast, 60, added with ignoreModifiers true (Spell.cpp:5737, 5765; as the Dawnsear threat entry, pair 20261122-055541 / -055630). Cast once after 504734 is learned (cast_in_before false), expected 0.8 + flat / damage. Spell power 10000. Tolerance 0.01 excludes a 10% or 30% cut (0.1 off). Reference search 2026-11-22: coa-history spell 504734: 0 events in 186 logs (a passive); nothing else found."
+      "observe_source": "504734 Solar Champion Effect[1] aura 108 MiscValue 2 (SPELLMOD_THREAT) BasePoints -21 + 1 = -20% ($s2) on EffectSpellClassMask [134217728, 17302850, 0], which Horusath Blast carries (Spell.dbc SpellFamilyFlags, family 33). Horusath Blast 500154 (SpellFamilyFlags[1] 64), a direct hit: Description ${$m1+0+$sph*1}, m1 = 72 + 1 = 73, damage mean 73 + 10000 x 1 = 10073, the root level is 10, flat 10 / 10073 = 0.00099, and a level-60 rank would add 0.00596; the expected value takes the root level and the tolerance 0.01 covers every rank up to 60. Threat of the cast = damage x (1 + SPELLMOD_THREAT) plus the flat initial threat of the cast, the SpellLevel of the spell cast (Spell.cpp:5736-5737: threat += m_spellInfo->SpellLevel when the spell has no threat entry), added with ignoreModifiers true (Spell.cpp:5765; as the Dawnsear threat entry, pair 20261122-055541 / -055630). Cast once after 504734 is learned (cast_in_before false), expected 0.8 + flat / damage. Spell power 10000. Tolerance 0.01 excludes a 10% or 30% cut (0.1 off). Reference search 2026-11-22: coa-history spell 504734: 0 events in 186 logs (a passive); nothing else found."
     },
     {
       "spell": 504734,
@@ -30241,9 +30249,9 @@
       "variant": "threat_base_hb",
       "label_suffix": "threat_base_hb",
       "name": "Solar Champion (threat generated, control without the talent, Horusath Blast)",
-      "before_expected": 1.00596,
-      "expected": 1.00596,
-      "observe_source": "504734 Solar Champion Effect[1] aura 108 MiscValue 2 (SPELLMOD_THREAT) BasePoints -21 + 1 = -20% ($s2) on EffectSpellClassMask [134217728, 17302850, 0], which Horusath Blast carries (Spell.dbc SpellFamilyFlags, family 33). Horusath Blast 500154 (SpellFamilyFlags[1] 64), a direct hit: Description ${$m1+0+$sph*1}, m1 = 72 + 1 = 73, damage mean 73 + 10000 x 1 = 10073, flat 60 / 10073 = 0.00596. Threat of the cast = damage x (1 + SPELLMOD_THREAT) plus the flat initial threat of the cast, 60, added with ignoreModifiers true (Spell.cpp:5737, 5765; as the Dawnsear threat entry, pair 20261122-055541 / -055630). Control: 504734 is never learned (the unrelated passive 807963 only), expected 1 + flat / damage. Spell power 10000. Tolerance 0.01 excludes a 10% or 30% cut (0.1 off). Reference search 2026-11-22: coa-history spell 504734: 0 events in 186 logs (a passive); nothing else found.",
+      "before_expected": 1.00099,
+      "expected": 1.00099,
+      "observe_source": "504734 Solar Champion Effect[1] aura 108 MiscValue 2 (SPELLMOD_THREAT) BasePoints -21 + 1 = -20% ($s2) on EffectSpellClassMask [134217728, 17302850, 0], which Horusath Blast carries (Spell.dbc SpellFamilyFlags, family 33). Horusath Blast 500154 (SpellFamilyFlags[1] 64), a direct hit: Description ${$m1+0+$sph*1}, m1 = 72 + 1 = 73, damage mean 73 + 10000 x 1 = 10073, the root level is 10, flat 10 / 10073 = 0.00099, and a level-60 rank would add 0.00596; the expected value takes the root level and the tolerance 0.01 covers every rank up to 60. Threat of the cast = damage x (1 + SPELLMOD_THREAT) plus the flat initial threat of the cast, the SpellLevel of the spell cast (Spell.cpp:5736-5737: threat += m_spellInfo->SpellLevel when the spell has no threat entry), added with ignoreModifiers true (Spell.cpp:5765; as the Dawnsear threat entry, pair 20261122-055541 / -055630). Control: 504734 is never learned (the unrelated passive 807963 only), expected 1 + flat / damage. Spell power 10000. Tolerance 0.01 excludes a 10% or 30% cut (0.1 off). Reference search 2026-11-22: coa-history spell 504734: 0 events in 186 logs (a passive); nothing else found.",
       "gate_spell": 807963
     },
     {
@@ -30275,9 +30283,9 @@
       "label_suffix": "threat_rapture",
       "name": "Solar Champion (threat generated, Rapture)",
       "before_expected": 0,
-      "expected": 0.80534,
+      "expected": 0.80517,
       "gate_spell": 504734,
-      "observe_source": "504734 Solar Champion Effect[1] aura 108 MiscValue 2 (SPELLMOD_THREAT) BasePoints -21 + 1 = -20% ($s2) on EffectSpellClassMask [134217728, 17302850, 0], which Rapture carries (Spell.dbc SpellFamilyFlags, family 33). Rapture 807372 (SpellFamilyFlags[1] 524288, maximum rank at level 60, Effect[0] SCHOOL_DAMAGE), a direct hit on the primary target: Description ${$m1+0+$spfi*1.03734}, m1 = 854 + 1 = 855, damage mean 855 + 10000 x 1.03734 = 11228, flat 60 / 11228 = 0.00534. Threat of the cast = damage x (1 + SPELLMOD_THREAT) plus the flat initial threat of the cast, 60, added with ignoreModifiers true (Spell.cpp:5737, 5765; as the Dawnsear threat entry, pair 20261122-055541 / -055630). Cast once after 504734 is learned (cast_in_before false), expected 0.8 + flat / damage. Spell power 10000. Tolerance 0.01 excludes a 10% or 30% cut (0.1 off). Reference search 2026-11-22: coa-history spell 504734: 0 events in 186 logs (a passive); nothing else found."
+      "observe_source": "504734 Solar Champion Effect[1] aura 108 MiscValue 2 (SPELLMOD_THREAT) BasePoints -21 + 1 = -20% ($s2) on EffectSpellClassMask [134217728, 17302850, 0], which Rapture carries (Spell.dbc SpellFamilyFlags, family 33). Rapture 807372 (SpellFamilyFlags[1] 524288, maximum rank at level 60, Effect[0] SCHOOL_DAMAGE), a direct hit on the primary target: Description ${$m1+0+$spfi*1.03734}, m1 = 854 + 1 = 855, damage mean 855 + 10000 x 1.03734 = 11228, the cast level is 58, flat 58 / 11228 = 0.00517. Threat of the cast = damage x (1 + SPELLMOD_THREAT) plus the flat initial threat of the cast, the SpellLevel of the spell cast (Spell.cpp:5736-5737: threat += m_spellInfo->SpellLevel when the spell has no threat entry), added with ignoreModifiers true (Spell.cpp:5765; as the Dawnsear threat entry, pair 20261122-055541 / -055630). Cast once after 504734 is learned (cast_in_before false), expected 0.8 + flat / damage. Spell power 10000. Tolerance 0.01 excludes a 10% or 30% cut (0.1 off). Reference search 2026-11-22: coa-history spell 504734: 0 events in 186 logs (a passive); nothing else found."
     },
     {
       "spell": 504734,
@@ -30307,9 +30315,9 @@
       "variant": "threat_base_rapture",
       "label_suffix": "threat_base_rapture",
       "name": "Solar Champion (threat generated, control without the talent, Rapture)",
-      "before_expected": 1.00534,
-      "expected": 1.00534,
-      "observe_source": "504734 Solar Champion Effect[1] aura 108 MiscValue 2 (SPELLMOD_THREAT) BasePoints -21 + 1 = -20% ($s2) on EffectSpellClassMask [134217728, 17302850, 0], which Rapture carries (Spell.dbc SpellFamilyFlags, family 33). Rapture 807372 (SpellFamilyFlags[1] 524288, maximum rank at level 60, Effect[0] SCHOOL_DAMAGE), a direct hit on the primary target: Description ${$m1+0+$spfi*1.03734}, m1 = 854 + 1 = 855, damage mean 855 + 10000 x 1.03734 = 11228, flat 60 / 11228 = 0.00534. Threat of the cast = damage x (1 + SPELLMOD_THREAT) plus the flat initial threat of the cast, 60, added with ignoreModifiers true (Spell.cpp:5737, 5765; as the Dawnsear threat entry, pair 20261122-055541 / -055630). Control: 504734 is never learned (the unrelated passive 807963 only), expected 1 + flat / damage. Spell power 10000. Tolerance 0.01 excludes a 10% or 30% cut (0.1 off). Reference search 2026-11-22: coa-history spell 504734: 0 events in 186 logs (a passive); nothing else found.",
+      "before_expected": 1.00517,
+      "expected": 1.00517,
+      "observe_source": "504734 Solar Champion Effect[1] aura 108 MiscValue 2 (SPELLMOD_THREAT) BasePoints -21 + 1 = -20% ($s2) on EffectSpellClassMask [134217728, 17302850, 0], which Rapture carries (Spell.dbc SpellFamilyFlags, family 33). Rapture 807372 (SpellFamilyFlags[1] 524288, maximum rank at level 60, Effect[0] SCHOOL_DAMAGE), a direct hit on the primary target: Description ${$m1+0+$spfi*1.03734}, m1 = 854 + 1 = 855, damage mean 855 + 10000 x 1.03734 = 11228, the cast level is 58, flat 58 / 11228 = 0.00517. Threat of the cast = damage x (1 + SPELLMOD_THREAT) plus the flat initial threat of the cast, the SpellLevel of the spell cast (Spell.cpp:5736-5737: threat += m_spellInfo->SpellLevel when the spell has no threat entry), added with ignoreModifiers true (Spell.cpp:5765; as the Dawnsear threat entry, pair 20261122-055541 / -055630). Control: 504734 is never learned (the unrelated passive 807963 only), expected 1 + flat / damage. Spell power 10000. Tolerance 0.01 excludes a 10% or 30% cut (0.1 off). Reference search 2026-11-22: coa-history spell 504734: 0 events in 186 logs (a passive); nothing else found.",
       "gate_spell": 807963
     },
     {
@@ -30341,9 +30349,9 @@
       "label_suffix": "threat_radiant",
       "name": "Solar Champion (threat generated, Radiant Flame)",
       "before_expected": 0,
-      "expected": 0.80669,
+      "expected": 0.80625,
       "gate_spell": 504734,
-      "observe_source": "504734 Solar Champion Effect[1] aura 108 MiscValue 2 (SPELLMOD_THREAT) BasePoints -21 + 1 = -20% ($s2) on EffectSpellClassMask [134217728, 17302850, 0], which Radiant Flame carries (Spell.dbc SpellFamilyFlags, family 33). Radiant Flame 560867 (SpellFamilyFlags[0] 134217728), a periodic shape: 4 ticks one second apart (DurationIndex 35 = 4000 ms, EffectAmplitude 1000), each ${$m1+0+$SP*0.206923}, m1 = 171 + 1 = 172, 172 + 10000 x 0.206923 = 2241 per tick, 8964 over the aura, the flat 60 added once at the cast: 60 / 8964 = 0.00669. Threat of the cast = damage x (1 + SPELLMOD_THREAT) plus the flat initial threat of the cast, 60, added with ignoreModifiers true (Spell.cpp:5737, 5765; as the Dawnsear threat entry, pair 20261122-055541 / -055630). Cast once after 504734 is learned (cast_in_before false), expected 0.8 + flat / damage. Spell power 10000. Tolerance 0.01 excludes a 10% or 30% cut (0.1 off). Reference search 2026-11-22: coa-history spell 504734: 0 events in 186 logs (a passive); nothing else found."
+      "observe_source": "504734 Solar Champion Effect[1] aura 108 MiscValue 2 (SPELLMOD_THREAT) BasePoints -21 + 1 = -20% ($s2) on EffectSpellClassMask [134217728, 17302850, 0], which Radiant Flame carries (Spell.dbc SpellFamilyFlags, family 33). Radiant Flame 560867 (SpellFamilyFlags[0] 134217728), a periodic shape: 4 ticks one second apart (DurationIndex 35 = 4000 ms, EffectAmplitude 1000), each ${$m1+0+$SP*0.206923}, m1 = 171 + 1 = 172, 172 + 10000 x 0.206923 = 2241 per tick, 8964 over the aura, the flat, the spell level 56, added once at the cast: 56 / 8964 = 0.00625. Threat of the cast = damage x (1 + SPELLMOD_THREAT) plus the flat initial threat of the cast, the SpellLevel of the spell cast (Spell.cpp:5736-5737: threat += m_spellInfo->SpellLevel when the spell has no threat entry), added with ignoreModifiers true (Spell.cpp:5765; as the Dawnsear threat entry, pair 20261122-055541 / -055630). Cast once after 504734 is learned (cast_in_before false), expected 0.8 + flat / damage. Spell power 10000. Tolerance 0.01 excludes a 10% or 30% cut (0.1 off). Reference search 2026-11-22: coa-history spell 504734: 0 events in 186 logs (a passive); nothing else found."
     },
     {
       "spell": 504734,
@@ -30373,10 +30381,290 @@
       "variant": "threat_base_radiant",
       "label_suffix": "threat_base_radiant",
       "name": "Solar Champion (threat generated, control without the talent, Radiant Flame)",
-      "before_expected": 1.00669,
-      "expected": 1.00669,
-      "observe_source": "504734 Solar Champion Effect[1] aura 108 MiscValue 2 (SPELLMOD_THREAT) BasePoints -21 + 1 = -20% ($s2) on EffectSpellClassMask [134217728, 17302850, 0], which Radiant Flame carries (Spell.dbc SpellFamilyFlags, family 33). Radiant Flame 560867 (SpellFamilyFlags[0] 134217728), a periodic shape: 4 ticks one second apart (DurationIndex 35 = 4000 ms, EffectAmplitude 1000), each ${$m1+0+$SP*0.206923}, m1 = 171 + 1 = 172, 172 + 10000 x 0.206923 = 2241 per tick, 8964 over the aura, the flat 60 added once at the cast: 60 / 8964 = 0.00669. Threat of the cast = damage x (1 + SPELLMOD_THREAT) plus the flat initial threat of the cast, 60, added with ignoreModifiers true (Spell.cpp:5737, 5765; as the Dawnsear threat entry, pair 20261122-055541 / -055630). Control: 504734 is never learned (the unrelated passive 807963 only), expected 1 + flat / damage. Spell power 10000. Tolerance 0.01 excludes a 10% or 30% cut (0.1 off). Reference search 2026-11-22: coa-history spell 504734: 0 events in 186 logs (a passive); nothing else found.",
+      "before_expected": 1.00625,
+      "expected": 1.00625,
+      "observe_source": "504734 Solar Champion Effect[1] aura 108 MiscValue 2 (SPELLMOD_THREAT) BasePoints -21 + 1 = -20% ($s2) on EffectSpellClassMask [134217728, 17302850, 0], which Radiant Flame carries (Spell.dbc SpellFamilyFlags, family 33). Radiant Flame 560867 (SpellFamilyFlags[0] 134217728), a periodic shape: 4 ticks one second apart (DurationIndex 35 = 4000 ms, EffectAmplitude 1000), each ${$m1+0+$SP*0.206923}, m1 = 171 + 1 = 172, 172 + 10000 x 0.206923 = 2241 per tick, 8964 over the aura, the flat, the spell level 56, added once at the cast: 56 / 8964 = 0.00625. Threat of the cast = damage x (1 + SPELLMOD_THREAT) plus the flat initial threat of the cast, the SpellLevel of the spell cast (Spell.cpp:5736-5737: threat += m_spellInfo->SpellLevel when the spell has no threat entry), added with ignoreModifiers true (Spell.cpp:5765; as the Dawnsear threat entry, pair 20261122-055541 / -055630). Control: 504734 is never learned (the unrelated passive 807963 only), expected 1 + flat / damage. Spell power 10000. Tolerance 0.01 excludes a 10% or 30% cut (0.1 off). Reference search 2026-11-22: coa-history spell 504734: 0 events in 186 logs (a passive); nothing else found.",
       "gate_spell": 807963
+    },
+    {
+      "spell": 301266,
+      "name": "Solar Concord (Horusath Blast recast in Sunrise) (cast in Sunset, the other phase)",
+      "kind": "cost_gate",
+      "variant": "reset_horusath_sunset",
+      "label_suffix": "reset_horusath_sunset",
+      "quote": "Resets the cooldown of Horusath Blast while in Sunrise and Rapture while in Sunset and causes their damage dealt to launch a Solar Flare.",
+      "gated_spell": 500154,
+      "resource": "cooldown",
+      "reduction": 0,
+      "resets": true,
+      "target": "dummy",
+      "margin_ms": 1600,
+      "after_casts": [
+        [
+          301266,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "cast_power": 1363,
+      "cast_auras": [
+        {
+          "spell": 301266,
+          "auras": [
+            500511
+          ],
+          "reason": "Sunset 500511 and the Sunrise-or-Sunset checker 500643 (CasterAuraSpell of 301266) are set on the caster before the Solar Concord cast: named precondition fixtures; this is the other phase, where the tooltip ('while in Sunrise') says no reset happens."
+        }
+      ],
+      "observe_source": "301266 Solar Concord: its aura apply handler (AscensionSunClericAuras.cpp:101-106) calls Reduce(player, 500154, INT32_MAX) in Sunrise and Reduce(player, 806477, INT32_MAX) in Sunset; the installed DBC also resets both cooldowns on every cast with no phase gate: Effect[1] TRIGGER_SPELL 302899 and Effect[2] TRIGGER_SPELL 301268 (301268 Effect[0] 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN MiscValue 500154; 302899 Effect[0] 195 MiscValue 806477; neither has a CasterAuraSpell; handler SpellEffects.cpp:1103-1112). Horusath Blast has RecoveryTime 25000 ms. The cooldown cost_gate (resets) casts Horusath Blast as the priming cast, then Solar Concord 1600 ms later (the cast is made in the with arm only), then attempts Horusath Blast again 1600 ms after that (past the global cooldown of the Solar Concord cast), inside its 25000 ms cooldown: refused without the Solar Concord cast (the control, SPELL_FAILED_NOT_READY), accepted with it. The accepted or refused cast is an event (cast_failure), not a cooldown readback. Other-phase arm (tool 1, ADR 1030 provisional): Solar Concord is cast with Sunset 500511 on the caster, so the tooltip words 'while in Sunrise' expect the recast of 500154 refused in the with arm as in the without arm (SPELL_FAILED_NOT_READY). The code gates the reset by phase (AscensionSunClericAuras.cpp:101-106) but the DBC effects 301268 / 302899 reset both cooldowns with no CasterAuraSpell: an accepted recast is a finding for the owner (fix note), never an expectation. Reference search 2026-11-22: coa-history spell 301266 (88 casts, no cooldown event); nothing else found.",
+      "refused_with": true
+    },
+    {
+      "spell": 301266,
+      "name": "Solar Concord (Rapture recast in Sunset) (cast in Sunrise, the other phase)",
+      "kind": "cost_gate",
+      "variant": "reset_rapture_sunrise",
+      "label_suffix": "reset_rapture_sunrise",
+      "quote": "Resets the cooldown of Horusath Blast while in Sunrise and Rapture while in Sunset and causes their damage dealt to launch a Solar Flare.",
+      "gated_spell": 806477,
+      "resource": "cooldown",
+      "reduction": 0,
+      "resets": true,
+      "target": "dummy",
+      "margin_ms": 1600,
+      "after_casts": [
+        [
+          301266,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 3200,
+      "cast_power": 1363,
+      "cast_auras": [
+        {
+          "spell": 301266,
+          "auras": [
+            500477
+          ],
+          "reason": "Sunrise 500477 and the Sunrise-or-Sunset checker 500643 (CasterAuraSpell of 301266) are set on the caster before the Solar Concord cast: named precondition fixtures; this is the other phase, where the tooltip ('while in Sunset') says no reset happens."
+        }
+      ],
+      "observe_source": "301266 Solar Concord: its aura apply handler (AscensionSunClericAuras.cpp:101-106) calls Reduce(player, 500154, INT32_MAX) in Sunrise and Reduce(player, 806477, INT32_MAX) in Sunset; the installed DBC also resets both cooldowns on every cast with no phase gate: Effect[1] TRIGGER_SPELL 302899 and Effect[2] TRIGGER_SPELL 301268 (301268 Effect[0] 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN MiscValue 500154; 302899 Effect[0] 195 MiscValue 806477; neither has a CasterAuraSpell; handler SpellEffects.cpp:1103-1112). Rapture has RecoveryTime 20000 ms. The cooldown cost_gate (resets) casts Rapture as the priming cast, then Solar Concord 3200 ms later (the cast is made in the with arm only), then attempts Rapture again 1600 ms after that (past the global cooldown of the Solar Concord cast), inside its 20000 ms cooldown: refused without the Solar Concord cast (the control, SPELL_FAILED_NOT_READY), accepted with it. The accepted or refused cast is an event (cast_failure), not a cooldown readback. Other-phase arm (tool 1, ADR 1030 provisional): Solar Concord is cast with Sunrise 500477 on the caster, so the tooltip words 'while in Sunset' expect the recast of 806477 refused in the with arm as in the without arm (SPELL_FAILED_NOT_READY). The code gates the reset by phase (AscensionSunClericAuras.cpp:101-106) but the DBC effects 301268 / 302899 reset both cooldowns with no CasterAuraSpell: an accepted recast is a finding for the owner (fix note), never an expectation. Reference search 2026-11-22: coa-history spell 301266 (88 casts, no cooldown event); nothing else found.",
+      "refused_with": true
+    },
+    {
+      "spell": 680630,
+      "kind": "metric_delta",
+      "quote": "Activate your pendant of the sun, refreshing the duration and all charges of Dawn.",
+      "target": "caster",
+      "setup_casts": [
+        500143,
+        500143
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 2600,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "name": "Pendant of the Sun (Dawn survives nine heals after the refresh)",
+      "variant": "pendant_consumption",
+      "label_suffix": "pendant_consumption",
+      "trigger_spell": 680630,
+      "post_trigger_casts": {
+        "spell": 500143,
+        "count": 9,
+        "health_pct": 50
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 807440
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "observe_source": "680630 Pendant of the Sun (CasterAuraSpell 807440) refreshes the Dawn state aura 807440 to its maximum charges, ProcCharges 10 (Spell.dbc), AscensionSunClericAbilities.cpp:466-470. The Dawn state aura is set by the harness at the start of each phase (a precondition fixture); each Illumination 500143 heal expends one charge (the pendant_charges entry reads 8 after two). Two Illumination heals are cast in both phases, then in the after phase the trigger, then post_trigger_casts heals (tool 3, ADR 1030 provisional), each with the caster at 50% health. 11 heals in all in both entries. With Pendant the refresh to 10 comes after the 2nd heal, so 9 later heals leave 1 charge and Dawn is present when read; in the control entry the trigger is itself an Illumination and no refresh happens: 2 + 1 + 8 = 11 heals against 10 charges, so Dawn is gone at the 10th heal. The count 10 is the DBC field ProcCharges, not a first read. Reference search 2026-11-22: coa-history spell 680630: 0 events in 186 logs; nothing else found."
+    },
+    {
+      "spell": 680630,
+      "kind": "metric_delta",
+      "quote": "Activate your pendant of the sun, refreshing the duration and all charges of Dawn.",
+      "target": "caster",
+      "setup_casts": [
+        500143,
+        500143
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 2600,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "name": "Pendant of the Sun (control: the same eleven heals without the refresh)",
+      "variant": "pendant_consumption_control",
+      "label_suffix": "pendant_consumption_control",
+      "trigger_spell": 500143,
+      "post_trigger_casts": {
+        "spell": 500143,
+        "count": 8,
+        "health_pct": 50
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 807440
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "observe_source": "680630 Pendant of the Sun (CasterAuraSpell 807440) refreshes the Dawn state aura 807440 to its maximum charges, ProcCharges 10 (Spell.dbc), AscensionSunClericAbilities.cpp:466-470. The Dawn state aura is set by the harness at the start of each phase (a precondition fixture); each Illumination 500143 heal expends one charge (the pendant_charges entry reads 8 after two). Two Illumination heals are cast in both phases, then in the after phase the trigger, then post_trigger_casts heals (tool 3, ADR 1030 provisional), each with the caster at 50% health. 11 heals in all in both entries. With Pendant the refresh to 10 comes after the 2nd heal, so 9 later heals leave 1 charge and Dawn is present when read; in the control entry the trigger is itself an Illumination and no refresh happens: 2 + 1 + 8 = 11 heals against 10 charges, so Dawn is gone at the 10th heal. The count 10 is the DBC field ProcCharges, not a first read. Reference search 2026-11-22: coa-history spell 680630: 0 events in 186 logs; nothing else found."
+    },
+    {
+      "spell": 504734,
+      "name": "Solar Champion (threat slope, Sunflare)",
+      "kind": "threat_slope",
+      "variant": "threat_slope_sunflare",
+      "label_suffix": "talent",
+      "quote": "and reduces the threat generated by them by $s2%.",
+      "hit_spell": 800231,
+      "expected_slope": 0.8,
+      "flat": 1,
+      "learn": [
+        504734
+      ],
+      "observe_source": "504734 Solar Champion Effect[1] aura 108 MiscValue 2 (SPELLMOD_THREAT) BasePoints -21 + 1 = -20% ($s2) on a mask that Sunflare 800231 (SpellFamilyFlags[1] 256) carries. Sunflare 800231 has no spell power term in its Description (${$m1+0} to ${$M1+0} Holy damage), so no threat per damage can be derived from the DBC; the threat_slope read judges (threat - flat) / health lost instead, with the flat initial threat of the cast stated: Spell.cpp:5733-5737 adds m_spellInfo->SpellLevel when the spell has no threat entry (level 1 for 800231), ignoring modifiers (Spell.cpp:5765). Expected 0.8 from the tooltip figure (-20%); the control entry without the talent must read 1.0 in band, which validates the flat (a control off 1.0 voids the trial). Reference search 2026-11-22: coa-history spell 504734: 0 events in 186 logs (a passive); nothing else found."
+    },
+    {
+      "spell": 504734,
+      "name": "Solar Champion (threat slope control, Sunflare without the talent)",
+      "kind": "threat_slope",
+      "variant": "threat_slope_sunflare_control",
+      "label_suffix": "control",
+      "quote": "and reduces the threat generated by them by $s2%.",
+      "hit_spell": 800231,
+      "expected_slope": 1.0,
+      "flat": 1,
+      "observe_source": "504734 Solar Champion Effect[1] aura 108 MiscValue 2 (SPELLMOD_THREAT) BasePoints -21 + 1 = -20% ($s2) on a mask that Sunflare 800231 (SpellFamilyFlags[1] 256) carries. Sunflare 800231 has no spell power term in its Description (${$m1+0} to ${$M1+0} Holy damage), so no threat per damage can be derived from the DBC; the threat_slope read judges (threat - flat) / health lost instead, with the flat initial threat of the cast stated: Spell.cpp:5733-5737 adds m_spellInfo->SpellLevel when the spell has no threat entry (level 1 for 800231), ignoring modifiers (Spell.cpp:5765). Expected 0.8 from the tooltip figure (-20%); the control entry without the talent must read 1.0 in band, which validates the flat (a control off 1.0 voids the trial). Reference search 2026-11-22: coa-history spell 504734: 0 events in 186 logs (a passive); nothing else found."
+    },
+    {
+      "spell": 680630,
+      "name": "Pendant of the Sun (control: Illumination in place of Pendant, Dawn gone past its original end)",
+      "kind": "metric_delta",
+      "variant": "pendant_duration_control",
+      "label_suffix": "pendant_duration_control",
+      "quote": "Activate your pendant of the sun, refreshing the duration and all charges of Dawn.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "setup_casts": [
+        500143,
+        500143
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 10000,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 807440
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 55200,
+      "expire_ms": 500,
+      "observe_source": "Control of pendant_duration (review I-4): the same timeline with the trigger an Illumination 500143 instead of Pendant 680630, so Dawn 807440 is not refreshed. The Dawn state aura (DurationIndex 3 = 60000 ms) is set at the start of the phase, about 20 s before the trigger, and ends 60 s after the fixture, so it is gone when read 55.0 to 56.0 s after the trigger (expected 0) while the Pendant entry reads it present at the same offset; the before reading (1) shows the fixture is present. Reference search 2026-11-22: coa-history spell 680630: 0 events in 186 logs; nothing else found.",
+      "game_time": {
+        "after": [
+          55000,
+          56000
+        ],
+        "expired": [
+          65000,
+          66000
+        ]
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "after_expiry_expected": 0,
+      "expiry_wait_ms": 10000
     }
   ],
   "player_observations": [],

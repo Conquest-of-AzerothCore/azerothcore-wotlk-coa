@@ -4213,6 +4213,7 @@ class CostGateSpec:
     strike: 'MetricDeltaStrike | None' = None
     strike_victim_auras: tuple[tuple[int, int], ...] = ()
     caster_health_pct: int | None = None
+    refused_with: bool = False
 
 
 @dataclass(frozen=True)
@@ -4301,8 +4302,11 @@ def removes_cooldown(spec: CostGateSpec, base: float) -> bool:
 def cost_gate_arms(spec: CostGateSpec, base: float) -> list[CostGateArm]:
     refused = COST_GATE_RESOURCES[spec.resource]
     allowed, beyond = cost_gate_levels(spec, base)
+    if spec.refused_with and not spec.resets:
+        raise ValueError(f'{spec.spell} refused_with states a reset that must not happen, so it needs resets')
     if spec.resets:
-        return [CostGateArm('without', False, allowed, refused), CostGateArm('with', True, allowed, NO_CAST_FAILURE)]
+        return [CostGateArm('without', False, allowed, refused),
+                CostGateArm('with', True, allowed, refused if spec.refused_with else NO_CAST_FAILURE)]
     if lengthens(spec):
         if spec.next_arm or spec.aura_duration_ms is not None or spec.after_casts:
             raise ValueError(f'{spec.spell} lengthens a cooldown, which takes no next, duration or after-cast arms')
@@ -4599,7 +4603,7 @@ def cost_gate_spec(entry: dict) -> CostGateSpec:
                         else shield_after_learn.parse(entry['shield_after_learn']),
                         metric_delta_strike(entry.get('strike')),
                         tuple((int(aura), int(stacks)) for aura, stacks in entry.get('strike_victim_auras', ())),
-                        entry.get('caster_health_pct'))
+                        entry.get('caster_health_pct'), bool(entry.get('refused_with', False)))
 
 
 def cost_gate_cast_auras(entry: dict) -> tuple[dict, ...]:
@@ -5510,10 +5514,14 @@ class ThreatSlopeSpec:
     hit_spell: int
     expected_slope: float
     flat_spells: tuple[int, ...] = ()
+    flat: float = 0.0
+    learn: tuple[int, ...] = ()
+    label_suffix: str = ''
 
 
 def threat_slope_label(spec: ThreatSlopeSpec, metric: str, moment: str) -> str:
-    return f'{spec.spell} threat_slope {spec.hit_spell} {metric} {moment}'
+    suffix = f' {spec.label_suffix}' if spec.label_suffix else ''
+    return f'{spec.spell} threat_slope {spec.hit_spell}{suffix} {metric} {moment}'
 
 
 def flat_threat(records: Records, spell_id: int) -> float:
@@ -5531,8 +5539,9 @@ def threat_slope_scenario(class_file: dict, spec: ThreatSlopeSpec) -> tuple[dict
     labels = {key: threat_slope_label(spec, *key.split(' ')) for key in
               ('health before', 'health after', 'threat after', 'cast_failure after')}
     steps = (base_steps(class_file)
-             + [{'action': 'learn', 'actor': CASTER, 'spell': spec.hit_spell},
-                measurement(labels['health before'], TARGET, 'health'),
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spec.hit_spell}]
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in spec.learn]
+             + [measurement(labels['health before'], TARGET, 'health'),
                 {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.hit_spell}]
              + cast_gate_power_step(facts) + required_aura_steps(facts)
              + [{'action': 'cast', 'actor': CASTER, 'spell': spec.hit_spell, 'target': TARGET},
@@ -5540,7 +5549,8 @@ def threat_slope_scenario(class_file: dict, spec: ThreatSlopeSpec) -> tuple[dict
                 measurement(labels['cast_failure after'], CASTER, 'cast_failure', spell=spec.hit_spell),
                 measurement(labels['health after'], TARGET, 'health'),
                 measurement(labels['threat after'], TARGET, 'threat', target=CASTER)])
-    flat = flat_threat(records, spec.hit_spell) + sum(flat_threat(records, spell) for spell in spec.flat_spells)
+    flat = (flat_threat(records, spec.hit_spell) + sum(flat_threat(records, spell) for spell in spec.flat_spells)
+            + spec.flat)
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour threat slope',
@@ -5556,7 +5566,8 @@ def threat_slope_scenario(class_file: dict, spec: ThreatSlopeSpec) -> tuple[dict
     model = {'kind': 'threat_slope', 'quote': entry.quote, 'flat': flat, 'expected': spec.expected_slope,
              'health_before_label': labels['health before'], 'health_after_label': labels['health after'],
              'threat_label': labels['threat after'], 'cast_label': labels['cast_failure after']}
-    expectation = Expectation(f'{spec.spell} behaviour_threat_slope {spec.hit_spell}', BEHAVIOUR_THREAT_SLOPE,
+    suffix = f' {spec.label_suffix}' if spec.label_suffix else ''
+    expectation = Expectation(f'{spec.spell} behaviour_threat_slope {spec.hit_spell}{suffix}', BEHAVIOUR_THREAT_SLOPE,
                               spec.spell, spec.hit_spell, None, f'{spec.expected_slope:g}',
                               prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]
@@ -5564,7 +5575,9 @@ def threat_slope_scenario(class_file: dict, spec: ThreatSlopeSpec) -> tuple[dict
 
 def threat_slope_spec(entry: dict) -> ThreatSlopeSpec:
     return ThreatSlopeSpec(entry['spell'], entry['name'], entry['quote'], entry['hit_spell'],
-                           float(entry['expected_slope']), tuple(int(spell) for spell in entry.get('flat_spells', ())))
+                           float(entry['expected_slope']), tuple(int(spell) for spell in entry.get('flat_spells', ())),
+                           float(entry.get('flat', 0.0)), tuple(int(spell) for spell in entry.get('learn', ())),
+                           entry.get('label_suffix', ''))
 
 
 EVENT_DELAY_TRIALS = 3
