@@ -1,4 +1,6 @@
+import json
 import unittest
+from pathlib import Path
 
 from behaviours import behaviour_scenario
 from compare import judge_behaviour
@@ -8,6 +10,7 @@ import run
 from test_behaviours import FakeRun, base_verdict
 
 CALM = 804057
+RANGED_ENTRY = Path(__file__).with_name('fixtures_enemy_shooter_ranged.json')
 
 
 def class_file() -> dict:
@@ -15,8 +18,11 @@ def class_file() -> dict:
 
 
 def shooter_entry(variant='shooter_ranged', **changes) -> dict:
-    entry = next(entry for entry in class_file()['behaviours'] if entry['spell'] == CALM
-                 and entry.get('variant') == variant)
+    if variant == 'shooter_ranged':
+        entry = json.loads(RANGED_ENTRY.read_text(encoding='utf-8'))
+    else:
+        entry = next(entry for entry in class_file()['behaviours'] if entry['spell'] == CALM
+                     and entry.get('variant') == variant)
     return {**entry, **changes}
 
 
