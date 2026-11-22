@@ -537,6 +537,8 @@ void ApplyContracts(SpellInfo* info)
                         effect.Effect = SPELL_EFFECT_APPLY_AURA;
                     effect.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
                     effect.TargetB = SpellImplicitTargetInfo();
+                    if (id == VoodooFire)
+                        effect.ChainTarget = 0;
                 }
     if (id == ShadowField)
     {

@@ -38,3 +38,4 @@ numbers ([ADR 0583](../../0583-class-conformance-adrs-live-in-a-per-class-folder
 | [0029](0029-graven-effigy-lengthens-crowd-control.md) | Graven Effigy lengthens crowd control | accepted (contributor decision 2026-11-22); engine file `Unit.cpp`, gated on Witch Doctor ids |
 | [0030](0030-soul-marionette-roots-for-eight-seconds.md) | Soul Marionette roots for 8 sec | accepted (contributor decision 2026-11-22) |
 | [0031](0031-overflowing-juju-scales-malefic-arrow.md) | Overflowing Juju scales Malefic Arrow | accepted (contributor decision 2026-11-22); amends 0016 |
+| [0032](0032-voodoo-fire-strikes-up-to-three-enemies.md) | Voodoo Fire strikes up to three enemies | accepted |
