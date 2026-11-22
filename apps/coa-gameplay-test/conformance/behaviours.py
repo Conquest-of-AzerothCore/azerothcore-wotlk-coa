@@ -6033,6 +6033,7 @@ MECHANIC_DR_RESET_MS = 15000
 MECHANIC_GAP_MARGIN_MS = 2000
 MECHANIC_LAND_ATTEMPTS = 3
 MECHANIC_RETRY_WAIT_MS = 500
+DURATION_RATIO_DISCRIMINATED = 0.10
 
 
 @dataclass(frozen=True)
@@ -6043,6 +6044,8 @@ class MechanicDurationSpec:
     expected_ratio: float
     vehicle_spell: int
     striker_entry: int = 36
+    attempts: int = MECHANIC_LAND_ATTEMPTS
+    margin_ms: int | None = None
 
 
 def mechanic_duration_label(spec: MechanicDurationSpec, moment: str) -> str:
@@ -6061,9 +6064,9 @@ def mechanic_duration_scenario(class_file: dict, spec: MechanicDurationSpec) -> 
 
     def phase(label: str) -> list[dict]:
         steps = [{'action': 'set_combat_avoidance', 'actor': CASTER, 'dodge': 0, 'parry': 0}]
-        for attempt in range(MECHANIC_LAND_ATTEMPTS):
+        for attempt in range(spec.attempts):
             steps.append({'action': 'cast', 'actor': STRIKER, 'spell': spec.vehicle_spell, 'target': CASTER})
-            if attempt < MECHANIC_LAND_ATTEMPTS - 1:
+            if attempt < spec.attempts - 1:
                 steps.append({'action': 'wait', 'label': f'{spec.spell} {label} land attempt {attempt + 1}',
                              'ms': MECHANIC_RETRY_WAIT_MS})
         steps.append({'action': 'wait', 'label': f'{spec.spell} {label} settle', 'ms': CAST_MARGIN_MS})
@@ -6077,7 +6080,7 @@ def mechanic_duration_scenario(class_file: dict, spec: MechanicDurationSpec) -> 
                     f'fixture overriding Player::m_realDodge/m_realParry directly, the same fields '
                     f'Unit::MeleeSpellHitResult reads via GetUnitDodgeChance/GetUnitParryChance) before a striker '
                     f'(creature entry {spec.striker_entry}, spell_hit_bonus forced to 100) casts '
-                    f'{spec.vehicle_spell} directly at the caster up to {MECHANIC_LAND_ATTEMPTS} times '
+                    f'{spec.vehicle_spell} directly at the caster up to {spec.attempts} times '
                     f'(DmgClass SPELL_DAMAGE_CLASS_MELEE: spell_hit_bonus only removes the miss roll, not the '
                     f'separate dodge/parry roll of the melee combat table, so without this override a single cast '
                     f'could still land on no one; the retries stay as a safety margin, no longer load-bearing); '
@@ -6101,18 +6104,29 @@ def mechanic_duration_scenario(class_file: dict, spec: MechanicDurationSpec) -> 
                  [{'action': 'wait', 'label': f'{spec.spell} let the vehicle aura and its DR window expire',
                   'ms': gap_ms},
                  {'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + phase(after_label)}
+    if spec.margin_ms is not None:
+        scenario['contract'] += (f' The judge\'s margin is {spec.margin_ms} ms plus the run\'s tick overshoot, and the '
+                                 f'verdict is unmeasured unless that margin stays below '
+                                 f'{DURATION_RATIO_DISCRIMINATED:.0%} of the expected delta.')
     label = f'{spec.spell} behaviour_duration_ratio'
     model = {'kind': 'duration_ratio', 'before_label': before_label, 'after_label': after_label,
              'expected': spec.expected_ratio, 'quote': entry.quote, 'target_name': spec.name,
-             'vehicle_spell': spec.vehicle_spell}
+             'vehicle_spell': spec.vehicle_spell,
+             **({'margin_ms': spec.margin_ms} if spec.margin_ms is not None else {})}
     expectation = Expectation(label, BEHAVIOUR_DURATION_RATIO, spec.spell, spec.vehicle_spell, None,
                               str(spec.expected_ratio), prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]
 
 
 def mechanic_duration_spec(entry: dict) -> MechanicDurationSpec:
-    return MechanicDurationSpec(entry['spell'], entry['name'], entry['quote'], entry['expected_ratio'],
-                                entry['vehicle_spell'], entry.get('striker_entry', 36))
+    spec = MechanicDurationSpec(entry['spell'], entry['name'], entry['quote'], entry['expected_ratio'],
+                                entry['vehicle_spell'], entry.get('striker_entry', 36),
+                                entry.get('attempts', MECHANIC_LAND_ATTEMPTS), entry.get('margin_ms'))
+    if type(spec.attempts) is not int or not 1 <= spec.attempts <= MECHANIC_LAND_ATTEMPTS \
+            or spec.margin_ms is not None and (type(spec.margin_ms) is not int or spec.margin_ms < 0):
+        raise ValueError(f'{spec.spell} duration_ratio lands its vehicle 1 to {MECHANIC_LAND_ATTEMPTS} times and '
+                         f'states a margin_ms of 0 or more, not {spec.attempts!r} and {spec.margin_ms!r}')
+    return spec
 
 
 DEFAULT_DURATION_REFRESH_DECAY_MS = 4000
@@ -7750,6 +7764,7 @@ class ScriptHitSpec:
     normalized_percent: bool = False
     value_rolls: bool = False
     strikes_per_cast: int | None = None
+    caster_avoidance: tuple[float, float] | None = None
 
 
 def script_hit_label(spec: ScriptHitSpec) -> str:
@@ -7761,11 +7776,13 @@ def script_hit_validate(spec: ScriptHitSpec):
         raise ValueError(f'{spec.spell} script_hit measures another spell than the one whose tooltip states it')
     if spec.trials < 1 or not 1 <= spec.minimum_hits:
         raise ValueError(f'{spec.spell} script_hit needs at least one trial and one hit')
-    if not spec.casts and not spec.strike_spell:
-        raise ValueError(f'{spec.spell} script_hit needs a cast or a strike to set off the script')
+    if not spec.casts and not spec.strike_spell and spec.caster_avoidance is None:
+        raise ValueError(f'{spec.spell} script_hit needs a cast, a strike or a melee striker to set off the script')
+    if spec.caster_avoidance is not None and (spec.strike_spell or spec.strike_owned_entry is not None):
+        raise ValueError(f'{spec.spell} script_hit caster_avoidance sets a melee striker in place of strike_spell')
     if spec.receiver not in SCRIPT_HIT_RECEIVERS:
         raise ValueError(f'{spec.spell} script_hit receiver {spec.receiver!r} is not one of {SCRIPT_HIT_RECEIVERS}')
-    if spec.receiver == STRIKER and not spec.strike_spell:
+    if spec.receiver == STRIKER and not spec.strike_spell and spec.caster_avoidance is None:
         raise ValueError(f'{spec.spell} script_hit is received by a striker that never strikes')
     if spec.caster_health_pct is not None and not 0 < spec.caster_health_pct <= 100:
         raise ValueError(f'{spec.spell} script_hit caster health {spec.caster_health_pct} is not a percent')
@@ -7799,6 +7816,9 @@ def script_hit_validate(spec: ScriptHitSpec):
 def script_hit_trial(records: Records, spec: ScriptHitSpec, arm: str, trial: int) -> list[dict]:
     steps = [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
              for spell, stacks in spec.caster_auras]
+    if spec.caster_avoidance is not None:
+        dodge, parry = spec.caster_avoidance
+        steps.append({'action': 'set_combat_avoidance', 'actor': CASTER, 'dodge': dodge, 'parry': parry})
     if spec.caster_health_pct is not None:
         steps.append({'action': 'set_health', 'actor': CASTER,
                       'value': spec.caster_health_pct * FIXTURE_MAX_HEALTH // 100, 'maximum': FIXTURE_MAX_HEALTH})
@@ -7906,12 +7926,19 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
     if spec.strike_spell:
         creatures.append({'id': STRIKER, 'owner': CASTER, 'entry': spec.striker_entry, 'level': class_file['level'],
                           'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'stationary': True})
+    if spec.caster_avoidance is not None:
+        creatures.append({'id': STRIKER, 'owner': CASTER, 'entry': spec.striker_entry, 'level': class_file['level'],
+                          'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 2,
+                          'stationary': True})
     setup = ([f'casts {[spell for spell, _ in spec.casts]}'] if spec.casts else []) + \
         ([f'a passive, stationary striker (creature entry {spec.striker_entry}) casts {spec.strike_spell} at the '
           f'caster'] if spec.strike_spell and spec.strike_owned_entry is None else []) + \
         ([f'a passive, stationary striker (creature entry {spec.striker_entry}) casts {spec.strike_spell} at the '
           f'caster\'s creature {spec.strike_owned_entry} in the treatment arm only'] if spec.strike_owned_entry
-         is not None else [])
+         is not None else []) + \
+        ([f'has its dodge and parry set to {spec.caster_avoidance[0]:g}% and {spec.caster_avoidance[1]:g}% '
+          f'(set_combat_avoidance) while a hostile, stationary melee striker (creature entry {spec.striker_entry}) '
+          f'swings at it'] if spec.caster_avoidance is not None else [])
     if spec.control_casts is None:
         control_text, control_rule = f'without {spec.spell} known', f'without {spec.spell}'
     else:
@@ -8001,7 +8028,16 @@ def script_hit_spec(entry: dict) -> ScriptHitSpec:
                          entry.get('normalized_value', False) is True,
                          entry.get('effective_school', False) is True,
                          entry.get('normalized_percent', False) is True,
-                         entry.get('value_rolls', False) is True, entry.get('strikes_per_cast'))
+                         entry.get('value_rolls', False) is True, entry.get('strikes_per_cast'),
+                         script_hit_avoidance(entry))
+
+
+def script_hit_avoidance(entry: dict) -> tuple[float, float] | None:
+    try:
+        return taken_outcome_avoidance(entry.get('caster_avoidance'))
+    except ValueError:
+        raise ValueError(f'{entry["spell"]} script_hit caster_avoidance is {{"dodge": percent, "parry": percent}}, '
+                         f'not {entry["caster_avoidance"]!r}') from None
 
 
 TAKEN_OUTCOME_ATTACKERS = 8
@@ -8949,6 +8985,8 @@ class DispelCountArm:
     name: str
     auras: tuple[tuple[int, int], ...]
     expected: tuple[tuple[int, int], ...]
+    learns: tuple[int, ...] = ()
+    cast: bool = True
 
 
 @dataclass(frozen=True)
@@ -8980,8 +9018,12 @@ def dispel_count_validate(records: Records, spec: DispelCountSpec):
     names = [arm.name for arm in spec.arms]
     if len(set(names)) != len(names) or len(names) < 2:
         raise ValueError(f'{spec.spell} dispel_count needs at least two distinct arms, here {names}')
-    if not any(not arm.auras for arm in spec.arms):
-        raise ValueError(f'{spec.spell} dispel_count needs a control arm without auras')
+    if not any(not arm.auras and not arm.learns or not arm.cast for arm in spec.arms):
+        raise ValueError(f'{spec.spell} dispel_count needs a control arm without auras or learns, or without the '
+                         f'cast')
+    for arm in spec.arms:
+        if not arm.cast and any(count for _, count in arm.expected):
+            raise ValueError(f'{spec.spell} dispel_count arm {arm.name} does not cast, so it expects no removal')
     types = [dispel_type for dispel_type, _ in spec.debuffs]
     for dispel_type, debuffs in spec.debuffs:
         if dispel_type not in DISPEL_TYPE_NAMES or not debuffs:
@@ -9005,6 +9047,7 @@ def dispel_count_scenario(class_file: dict, spec: DispelCountSpec) -> tuple[dict
     debuffs = [debuff for _, group in spec.debuffs for debuff in group]
     steps = [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell}]
     for arm in spec.arms:
+        steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in arm.learns]
         steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
                   for spell, stacks in arm.auras]
         for trial in range(1, spec.trials + 1):
@@ -9012,14 +9055,20 @@ def dispel_count_scenario(class_file: dict, spec: DispelCountSpec) -> tuple[dict
                       for debuff in debuffs]
             steps += [measurement(dispel_count_read_label(spec, arm.name, trial, debuff, BEFORE), DISPEL_COUNT_TARGET,
                                   'aura', spell=debuff) for debuff in debuffs]
-            steps += hit_ratio_cast(records, spec.cast_spell, CASTER, DISPEL_COUNT_TARGET)
+            if arm.cast:
+                steps += hit_ratio_cast(records, spec.cast_spell, CASTER, DISPEL_COUNT_TARGET)
             steps.append({'action': 'wait', 'ms': spec.wait_ms})
             steps += [measurement(dispel_count_read_label(spec, arm.name, trial, debuff, AFTER), DISPEL_COUNT_TARGET,
                                   'aura', spell=debuff) for debuff in debuffs]
             steps += [{'action': 'set_aura', 'actor': DISPEL_COUNT_TARGET, 'spell': debuff, 'stacks': 0}
                       for debuff in debuffs]
         steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0} for spell, _ in arm.auras]
+        steps += [{'action': 'unlearn', 'actor': CASTER, 'spell': spell} for spell in arm.learns]
     waited = waited_ms(steps)
+    arm_notes = ''.join(
+        (f' Arm {arm.name} learns {list(arm.learns)} first and unlearns them after.' if arm.learns else '')
+        + (f' Arm {arm.name} does not cast: it waits and reads the same way, so it expects no removal.'
+           if not arm.cast else '') for arm in spec.arms)
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour dispel count'
@@ -9028,7 +9077,7 @@ def dispel_count_scenario(class_file: dict, spec: DispelCountSpec) -> tuple[dict
                     f'{[dispel_type for dispel_type, _ in spec.debuffs]}); the caster casts {spec.cast_spell} on it '
                     f'{spec.trials} times per arm {[arm.name for arm in spec.arms]}, each arm setting its auras first; '
                     f'each debuff is read before and {spec.wait_ms} ms after every cast, and the removals are counted '
-                    f'per dispel type.',
+                    f'per dispel type.' + arm_notes,
         'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': DISPEL_COUNT_TARGET}],
         'steps': base_steps(class_file) + steps,
         'timeout_ms': waited + TIMEOUT_MARGIN_MS}
@@ -9040,7 +9089,7 @@ def dispel_count_scenario(class_file: dict, spec: DispelCountSpec) -> tuple[dict
                        dispel_count_read_label(spec, arm.name, trial, debuff, AFTER)] for debuff in group]
                      for trial in range(1, spec.trials + 1)]
             model = {'kind': 'dispel_count', 'arm': arm.name, 'dispel_type': dispel_type, 'reads': reads,
-                     'expected': count, 'quote': entry.quote}
+                     'expected': count, 'quote': entry.quote, **({} if arm.cast else {'cast': False})}
             expectations.append(Expectation(dispel_count_label(spec, arm.name, dispel_type), BEHAVIOUR_DISPEL_COUNT,
                                             spec.spell, spec.cast_spell, None, str(count),
                                             prose_rule(entry.quote, spec.spell), model))
@@ -9049,8 +9098,11 @@ def dispel_count_scenario(class_file: dict, spec: DispelCountSpec) -> tuple[dict
 
 def dispel_count_spec(entry: dict) -> DispelCountSpec:
     arms = tuple(DispelCountArm(arm['name'], tuple((int(spell), int(stacks)) for spell, stacks in arm.get('auras', ())),
-                                tuple((int(kind), int(count)) for kind, count in arm['expected']))
+                                tuple((int(kind), int(count)) for kind, count in arm['expected']),
+                                tuple(int(spell) for spell in arm.get('learns', ())), arm.get('cast', True))
                  for arm in entry['arms'])
+    if any(type(arm.cast) is not bool for arm in arms):
+        raise ValueError(f'{entry["spell"]} dispel_count arm cast is true or false')
     debuffs = tuple((int(kind), tuple(int(debuff) for debuff in group)) for kind, group in entry['debuffs'])
     return DispelCountSpec(entry['spell'], entry['name'], entry['quote'], entry['cast_spell'], debuffs, arms,
                            entry.get('trials', DISPEL_COUNT_TRIALS), entry.get('wait_ms', DISPEL_COUNT_WAIT_MS),

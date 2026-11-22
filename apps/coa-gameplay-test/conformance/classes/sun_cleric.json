@@ -16239,7 +16239,10 @@
       "quote": "Reduces the duration of stun effects on you by $s2%.",
       "expected_ratio": 0.8,
       "vehicle_spell": 2880,
-      "striker_entry": 36
+      "striker_entry": 36,
+      "attempts": 1,
+      "margin_ms": 50,
+      "observe_source": "704581 Effect[1] $s2 = 20: stun durations on the caster x0.8. Vehicle Stun 2880 (installed DBC duration 10000 ms) cast once per phase (attempts 1) so the read is a single, undiminished landing: the earlier design landed it three times 500 ms apart and read a diminished re-application (1994 ms before). Expected delta = 10000 x (0.8 - 1) = -2000 ms less the same settle in both phases; margin 50 ms plus the run's tick overshoot, unmeasured unless below 10% of the expected delta (200 ms), so a 10% deviation either side is excluded. The 27 s gap between the phases exceeds the 15 s diminishing-returns reset. Control: the before phase without 704581. Expected from the installed DBC and the tooltip; nothing from a run."
     },
     {
       "spell": 805581,
@@ -23260,6 +23263,47 @@
         ]
       },
       "observe_source": "504848 Mercy Effect[0] target 21 TARGET_UNIT_TARGET_ALLY, EffectChainTarget[0] 6: the explicit ally plus ChainTarget - 1 = 5 more units (Spell.cpp:1895-1939, SearchChainTargets :2200-2300; reach_source on the arm). Mercy is cast at ally with six other players (the caster and ally2..ally7, all within the 10 yd hop): the aura is read on the target (1) and summed over the six others, the caster and ally2..ally7 (5, the cap of the tooltip \"up to 5 nearby allies\"); 0 in the uncast control before. Uncapped, the six others would all read 1 (6, and 7 with the target), so a cap of 6 or more would read 6 on the others. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for the count; nothing found."
+    },
+    {
+      "spell": 504848,
+      "name": "Mercy (abolishes 2 of 3 disease effects per pulse)",
+      "kind": "dispel_count",
+      "label_suffix": "abolish",
+      "quote": "abolishing $503650s1 disease effects,",
+      "cast_spell": 504848,
+      "debuffs": [
+        [
+          3,
+          [
+            55095,
+            55078,
+            3427
+          ]
+        ]
+      ],
+      "trials": 1,
+      "arms": [
+        {
+          "name": "no_cast",
+          "cast": false,
+          "expected": [
+            [
+              3,
+              0
+            ]
+          ]
+        },
+        {
+          "name": "cast",
+          "expected": [
+            [
+              3,
+              2
+            ]
+          ]
+        }
+      ],
+      "expected_source": "503650 Effect[0] SPELL_EFFECT_DISPEL EffectMiscValue 3 (DISPEL_DISEASE), $503650s1 = 2 (installed DBC); Mercy 504848 Effect[0] aura 23 periodic trigger of 503650, the first 503650 cast on application (period_held reads 1 cast at 2750 ms). The ally carries three diseases (Frost Fever 55095, Blood Plague 55078, Infected Wound 3427, each Dispel 3) so two removed is not all; the read is 800 ms after the cast, before the 3000 ms pulse. Control: the no_cast arm waits and reads the same way with no Mercy cast and expects 0, so a removal by anything else alerts. One trial per arm: a dispel count is not random and a recast would refresh a running aura."
     },
     {
       "spell": 804257,

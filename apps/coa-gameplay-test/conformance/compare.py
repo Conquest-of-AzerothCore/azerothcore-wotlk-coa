@@ -32,6 +32,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         STAT_GAIN_RETURN, TAKEN_HIT_CONTROL_ARM, TAKEN_HIT_RETURNED_KEYS, TAKEN_HIT_TRANSFER_KEYS,
                         engine_amount, stated_ratio,
                         strongest_percent)
+from behaviours import DURATION_RATIO_DISCRIMINATED
 from bonus_data import (POWER_TERM, SPELL_RANK_FILE, NotModelled, bonus_row, bonus_table, bonus_terms,
                         client_first_ranks, coefficient_modifiers)
 from bonus import (RELATIVE_BAND, Bonus, band_excluded_text, band_status, bonus_band, bonus_detail, bonus_of,
@@ -3839,10 +3840,19 @@ def behaviour_duration_ratio_verdict(base: Verdict, run: Run, model: dict) -> Ve
     delta = after - before
     expected_delta = before * (expected_ratio - 1.0)
     overshoot = run.max_step_ms or 0.0
-    settle_window_jitter_margin = CAST_MARGIN_MS + overshoot
+    settle_window_jitter_margin = model.get('margin_ms', CAST_MARGIN_MS) + overshoot
     status = 'alert' if abs(delta) <= FLOAT_EPSILON < abs(expected_delta) \
         else 'ok' if abs(delta - expected_delta) <= settle_window_jitter_margin + FLOAT_EPSILON else 'alert'
     margin_ratio = settle_window_jitter_margin / before
+    if 'margin_ms' in model and settle_window_jitter_margin >= DURATION_RATIO_DISCRIMINATED * abs(expected_delta):
+        return replace(base, status='unmeasured', measured=ratio, expected=expected_ratio,
+                       low=expected_ratio - margin_ratio, high=expected_ratio + margin_ratio,
+                       explanation=f'{model["vehicle_spell"]} aura_duration_ms measured {before:g} ms before and '
+                                   f'{after:g} ms after {model["target_name"]} was learned; the margin of '
+                                   f'{settle_window_jitter_margin:g} ms ({model["margin_ms"]:g} ms stated plus '
+                                   f'{overshoot:g} ms of tick overshoot) is not below '
+                                   f'{DURATION_RATIO_DISCRIMINATED:.0%} of the expected delta '
+                                   f'{expected_delta:+g} ms, so it cannot exclude a 10% deviation')
     return replace(base, status=status, measured=ratio, expected=expected_ratio, low=expected_ratio - margin_ratio,
                    high=expected_ratio + margin_ratio,
                    explanation=f'{model["vehicle_spell"]} aura_duration_ms measured {before:g} ms before and '
@@ -4902,7 +4912,9 @@ def behaviour_dispel_count_verdict(base: Verdict, run: Run, model: dict) -> Verd
     mean = sum(removed) / len(removed)
     return replace(base, status=status, measured=float(mean), expected=float(expected), low=float(expected),
                    high=float(expected), explanation=(
-                       f'{model["arm"]}: {kind} debuffs removed per cast {removed} of {carried[0]} carried, against '
+                       f'{model["arm"]}: {kind} debuffs removed per '
+                       + ('cast' if model.get('cast', True) else 'wait with no cast') + f' {removed} of {carried[0]} '
+                       f'carried, against '
                        f'{expected}; ' + ('; '.join(faults) if faults else 'every cast matches')
                        + '; each count is compared exactly'))
 

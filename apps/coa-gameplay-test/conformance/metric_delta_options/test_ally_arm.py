@@ -30,7 +30,7 @@ RATIO = {'numerator': 0, 'denominator': 1, 'expected': 0.75, 'tolerance': 0.01, 
 ENERGIZE_ARM = {'actors': ['caster'], 'metric': 'spell_energize_total', 'count_metric': 'spell_energize_count',
                 'fields': {'spell': SPELL}, 'source': 'a seeded 5% mana return per strike'}
 DAMAGE_ARM = {'actors': ['caster'], 'metric': 'spell_damage_total', 'count_metric': 'spell_damage_count',
-              'fields': {'spell': SPELL, 'target': 'dummy'}, 'source': 'a seeded strike'}
+              'fields': {'spell': SPELL}, 'source': 'a seeded strike'}
 COUNT_ARM = {'actors': ['caster'], 'metric': 'spell_energize_count', 'fields': {'spell': SPELL}, 'before_expected': 0,
              'expected': 4, 'tolerance': 0, 'source': 'a seeded four strikes'}
 FLOOR_RATIO = {'numerator': 0, 'denominator': 1, 'expected': 0.05, 'tolerance': 0.001, 'floor_count': 2,
@@ -61,7 +61,7 @@ def ratio_entry(**ratio) -> dict:
 
 
 STRIKE_ARM = {'actors': ['caster'], 'metric': 'spell_damage_total', 'count_metric': 'spell_damage_count',
-              'fields': {'spell': ALLY_SPELL, 'target': 'dummy'}, 'source': 'a seeded second strike'}
+              'fields': {'spell': ALLY_SPELL}, 'source': 'a seeded second strike'}
 SUMMED_RATIO = {'numerator': 0, 'denominator': [1, 2], 'expected': 0.05, 'tolerance': 0.001, 'floor_count': 0,
                 'source': 'a seeded floor(5% of each of two strikes)'}
 
@@ -339,7 +339,7 @@ class AllyArmScenarioTests(unittest.TestCase):
                                          'ratios': [{**SUMMED_RATIO, 'denominator': [1, 2]}]}),
                    steed_entry(ally_arm={'allies': 2, 'arms': [COPY_ARM, PRIMARY_ARM],
                                          'ratios': [{**RATIO, 'floor_count': 0, 'tolerance': 0.05}]}),
-                   caster_ratio_entry(floor_count=True), caster_ratio_entry(tolerance=0.005)]
+                   caster_ratio_entry(floor_count=True), caster_ratio_entry(tolerance=0.01)]
         for entry in refused:
             with self.subTest(entry=entry['ally_arm']), self.assertRaisesRegex(ValueError, 'ally_arm'):
                 self.scenario(entry)

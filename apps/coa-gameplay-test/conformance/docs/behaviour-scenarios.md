@@ -457,6 +457,11 @@ vary slightly run to run); that per-read jitter is amplified by the ratio itself
 measured at up to ~100 ms for Courage's -20% rank — within `CAST_MARGIN_MS`, comfortably outside the shared
 delta-margin scale's usual 0.5%-of-expected floor.
 
+Two opt-in fields (ADR 1028) leave every other entry unchanged. `attempts` (1 to 3, default 3) lands the vehicle that
+many times per phase; 1 reads a single landing, never a diminished re-application. `margin_ms` (absent by default)
+replaces `CAST_MARGIN_MS` in the judge's margin, `margin_ms + run.max_step_ms`, and the verdict is `unmeasured` when
+that margin is not below 10% of `|expected_delta|`, so a stated margin never passes a 10% deviation.
+
 ### Duration-refresh scenarios (`behaviour_duration_refresh`, `kind: "duration_refresh"`)
 
 Some prose passives refresh an existing aura's remaining duration back to its own maximum, rather than reducing
@@ -1297,6 +1302,10 @@ cannot show more removals than the fixtures of a type, so a type needs at least 
 Disciplined Mind 680399 / 681483 (ADR 0158) uses Frost Fever 55095 and Blood Plague 55078 (disease), Deadly Poison
 2818 and Mind-numbing Poison 25810 (poison), and Benediction 578276.
 
+An arm may state `learns` (spells learned before the arm and unlearned after it, for a claim whose own aura must not
+be set with `set_aura`) and `cast: false` (the arm waits and reads the same way without casting, and expects no
+removal: a no-cast control). The control arm is an arm without auras or learns, or a no-cast arm (ADR 1028).
+
 ### Threat-tick periods
 
 A `threat_tick_ratio` entry may set `ticks` (default 1) and `label_suffix`: the wait then lets that many periodic ticks
@@ -1475,7 +1484,11 @@ strike when a shield breaks (ADR 0160). `hit_spell` is the spell the script cast
 tooltip shows its amount. Every trial sets `caster_auras` on the caster, holds the caster at `caster_health_pct`
 of 10000 health, makes the `casts` (`[spell, target]`, after their power, cooldown and required-aura fixtures)
 and, with `strike_spell`, has a passive, stationary striker (creature `striker_entry`, default 36) cast it at the
-caster; it then waits `settle_ms` (default 500). `trials` trials run without `spell` known (the control arm,
+caster; with `caster_avoidance` (`{"dodge": percent, "parry": percent}`, ADR 1028) it instead sets the caster's
+avoidance with `set_combat_avoidance` at the start of every trial while a hostile, stationary melee striker (creature
+`striker_entry`, `reaction` 2) swings at it, so an avoided swing can set off the script, and the striker can be the
+`receiver` (refused with `strike_spell`); it then waits `settle_ms` (default 500). `trials` trials run without
+`spell` known (the control arm,
 whose `hit_spell` hits on the `receiver` must count 0) and `trials` with it. The `receiver` is the dummy or the
 striker; its armor, view level and resistances are read for the mitigation model. `weapon_only: true` (ADR 0742,
 design D-16) models a `hit_spell` whose only damage effect is one weapon percent effect, with no school damage
