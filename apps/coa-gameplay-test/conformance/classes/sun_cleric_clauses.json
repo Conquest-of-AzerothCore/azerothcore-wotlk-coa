@@ -4717,7 +4717,7 @@
     "spell": 707433,
     "clause": "Increases the tick rate of Mercy by $s1%,",
     "kind": "claim",
-    "reason": "Owner ruling O-24 (2026-11-22), Sun Cleric ADR 0031: +50% tick rate = period x 2/3 with the duration unchanged, so Mercy 504848's 3000 ms period becomes 2000 ms (the stock -50% period modifier gave 1500 ms; the D-74 note is withdrawn). The server sets Mercy's amplitude before the engine applies Blightbreaker's unchanged Effect[0] modifier (aura_ascension_sun_cleric_mercy).",
+    "reason": "Owner ruling O-24 (2026-11-22), Sun Cleric ADR 0031: +50% tick rate = period x 2/3 with the duration unchanged, so Mercy 504848's 3000 ms period becomes 2000 ms (the stock -50% period modifier gave 1500 ms; the D-74 note is withdrawn). The server sets Mercy's amplitude before the engine applies Blightbreaker's unchanged Effect[0] modifier (aura_ascension_sun_cleric_mercy). Counted pair after the fix: 20261122-160902 / 20261122-160936, build eb64db249abd, server commit 859c4970d6, no flip, 3 of 3 verdicts ok in both runs: mercy_period 2000 (expected 2000, control 3000), mercy_cost 572 and mercy_spent 791 unchanged. Before (base pair 11, 20261122-143800): mercy_period 1500. Ticks over the whole 12000 ms aura, sun-cleric-blightbreaker-mercy: 5 without the passive, 7 with it.",
     "text_source": {
       "basis": "owner_ruling",
       "spell": 707433,
