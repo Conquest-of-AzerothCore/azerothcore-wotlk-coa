@@ -30021,6 +30021,90 @@
       "expire_ms": 500,
       "observe_source": "AscensionSunCleric.cpp:312: Eclipse casts Blinded 505342 only when the target is not a creature flagged a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862). Eclipse first copies Vow of the Eclipse 505340 to the target (:308-311), with no boss gate, so 505340 on the same target is the landing control. Target: Harvest Golem 36, a normal creature (rank 0). 505340 lands in both phases (the Vow phase aura 807435 is up in both).",
       "target_entry": 36
+    },
+    {
+      "spell": 300347,
+      "name": "Battle Cleric (Paragon is ready again after 1 min, not before)",
+      "kind": "cost_gate",
+      "variant": "paragon_gate",
+      "label_suffix": "paragon_gate",
+      "quote": "Paragon now has a 1 min cooldown",
+      "gated_spell": 680639,
+      "resource": "cooldown",
+      "reduction": 240000,
+      "target": "caster",
+      "margin_ms": 5000,
+      "observe_source": "Paragon 680639 RecoveryTime 300000 and CategoryRecoveryTime 300000 (Spell.dbc); the tooltip states 1 min, a cut of 240000 ms (Sun Cleric ADR 0012 for the script that takes it off after the cast). Paragon is cast and cast again 55000 ms later (the beyond arm, 8.3% under 60000) and 65000 ms later (the with arm, 8.3% over): refused at 55 s and through at 65 s with 300347, refused at 65 s without it (control, 300000 ms). The 1 min figure is read from whether the second cast is accepted, not from a remaining-cooldown readback, so a cooldown 10% off (54000 or 66000 ms) is excluded on both sides. Reference search 2026-11-22: server DBC 300347, 562316 and 680639; AscensionSunClericBattleCleric.cpp; the cooldown_ms entry paragon_cd of this clause; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 300347,
+      "name": "Battle Cleric (Gavel is ready again at once under Paragon)",
+      "kind": "cost_gate",
+      "variant": "gavel_gate",
+      "label_suffix": "gavel_gate",
+      "quote": "empowers your Gavels, causing them to have no cooldown",
+      "gated_spell": 802561,
+      "resource": "cooldown",
+      "reduction": 5000,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "setup_casts": [
+        [
+          680639,
+          "caster"
+        ]
+      ],
+      "observe_source": "562316 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -101 (-100%) on the Gavels' class mask; Gavel of Wrath 802561 has CategoryRecoveryTime 5000 (category 1207). Paragon is cast before the priming Gavel in every arm; the second Gavel is attempted one global cooldown plus the margin after the first: refused without 300347 (control, the 5000 ms cooldown is running), through with it. There is no beyond arm: every later wait is allowed. Reference search 2026-11-22: server DBC 300347, 562316 and 802561; AscensionSunClericBattleCleric.cpp; the cooldown_ms entry gavel_cd of this clause; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 572885,
+      "name": "Touch of Light (a struck enemy deals 20% less Physical damage)",
+      "kind": "taken_hit",
+      "variant": "struck_damage",
+      "label_suffix": "struck_damage",
+      "judge": "damage_ratio",
+      "expected": 0.8,
+      "quote": "Enemies struck by Blessing of Absolution now deal $572886s1% reduced damage",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "cast_power": 1363,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            572885
+          ],
+          "casts": [
+            [
+              804247,
+              "caster"
+            ],
+            [
+              804249,
+              "caster"
+            ]
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            572885
+          ],
+          "casts": [
+            [
+              804247,
+              "caster"
+            ],
+            [
+              804249,
+              "caster"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "Touch of Light 572886 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 1 (Physical), BasePoints -21 + 1 = -20, DurationIndex 28 (5000 ms); 572885 casts it on the enemy damaged by the strike 804252 of Blessing of Absolution 804249 (AscensionSunClericEvents.cpp:119, :266). Every trial the caster casts Bless 804247 and Blessing of Absolution 804249 on itself, then the striker (the struck enemy) casts Void Zone 92559 (1000 Physical, DmgClass 0: it neither misses nor crits) at the caster, inside the 5 s of the debuff: the damage ratio of the treatment arm (572885 learned) to the control arm (unlearned, same casts) is judged against 0.8, a hit actually applied. Reference search 2026-11-22: coa-history spell 572886: 0 events in 186 logs; the bindmysoul snapshot carries deal -20% reduced damage for 5 seconds; nothing else found."
     }
   ],
   "player_observations": [],

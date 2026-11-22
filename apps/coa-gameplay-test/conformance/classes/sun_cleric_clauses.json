@@ -477,7 +477,10 @@
     "kind": "claim",
     "labels": [
       "300347 behaviour_metric_delta paragon_cd",
-      "300347 behaviour_metric_delta paragon_cd_newday"
+      "300347 behaviour_metric_delta paragon_cd_newday",
+      "300347 cost_gate 680639 paragon_gate without",
+      "300347 cost_gate 680639 paragon_gate with",
+      "300347 cost_gate 680639 paragon_gate beyond"
     ]
   },
   {
@@ -488,7 +491,9 @@
       {
         "claim": "empowers your Gavels, causing them to have no cooldown",
         "labels": [
-          "300347 behaviour_metric_delta gavel_cd"
+          "300347 behaviour_metric_delta gavel_cd",
+          "300347 cost_gate 802561 gavel_gate without",
+          "300347 cost_gate 802561 gavel_gate with"
         ]
       },
       {
@@ -2715,7 +2720,8 @@
         "claim": "Enemies struck by Blessing of Absolution now deal $572886s1% reduced damage",
         "labels": [
           "572885 effect_value 572886e0 #0",
-          "572885 behaviour_metric_delta debuff_amount"
+          "572885 behaviour_metric_delta debuff_amount",
+          "572885 behaviour_hit_ratio struck_damage"
         ]
       },
       {
