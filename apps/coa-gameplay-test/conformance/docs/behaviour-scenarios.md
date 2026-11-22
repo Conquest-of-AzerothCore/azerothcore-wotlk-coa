@@ -233,7 +233,7 @@ regression reads ~0.12 off, not ~1e-7).
 settle after each), for an interrupt that needs a target casting: Heartchill 801739 interrupts the dummy's Evocation
 12051 channel (`casting` reads 1 then 0, a state read its clause's cast words promise, ADR 0403) and slows it.
 The same channel's school lockout reads with `school_prohibited` (`fields.school_mask`), a state read its
-clause's interrupt or lockout words promise (ADR 1021): Luminary Mendicant 547214 reads Arcane locked 3000 ms and free
+claim's interrupt, lockout or `for $d` duration words promise (ADR 1021): Luminary Mendicant 547214 reads Arcane locked 3000 ms and free
 3475 ms after a Horusath Blast cast.
 
 `caster_health_pct` (ADR 0423) holds the caster at that percent of the 10000 health fixture before each trigger

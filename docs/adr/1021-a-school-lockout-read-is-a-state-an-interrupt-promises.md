@@ -24,9 +24,12 @@ cross-class guard of `test_coverage.py` failed.
 
 ## Decision
 
-Option 2: `school_prohibited` is a `STATE` metric whose promise words are `interrupt\w*`, `lock(?:s|ed|ing)? out`
-and `lockout`. A learned-contrast `metric_delta` read counts as behaviour only where the clause, its row or its
-promise source names an interrupt or a lockout; elsewhere it stays data.
+Option 2: `school_prohibited` is a `STATE` metric whose promise words are `interrupt\w*`, `lock(?:s|ed|ing)? out`,
+`lockout` and the tooltip duration `for \$\d*d` (as `stop_shooting_after_ms` declares). A learned-contrast
+`metric_delta` read counts as behaviour only where the claim or its promise source names an interrupt, a lockout or
+a `for $d` duration; elsewhere it stays data. The claim words are matched, not the whole clause, so 547214's two
+claims stay split: "and causes Horusath Blast to interrupt the target" and "for $547217d", the second proved by the
+held and free reads around the stated end (controller ruling, option B).
 
 ## Consequences
 
@@ -35,5 +38,6 @@ promise source names an interrupt or a lockout; elsewhere it stays data.
 - The `school_lockout` kind (Witch Hunter 802139, Templar 806153) is judged by `behaviour_expiry`, whose evidence is
   `BEHAVIOUR` and is returned before any metric lookup: its coverage does not move. Templar, Necromancer and Witch
   Hunter generate byte-identical output.
-- Unit tests seed the row as a readback (the claim drops to data), an unlearned contrast and an unpromised clause,
-  and remove the row (the cross-class guard names `sun_cleric.json`).
+- Unit tests seed the row as a readback (both claims drop to data), an unlearned contrast, an unpromised clause,
+  the promise without its duration form (the duration claim drops to data) and a `casting` read of the duration
+  claim, and remove the row (the cross-class guard names `sun_cleric.json`).

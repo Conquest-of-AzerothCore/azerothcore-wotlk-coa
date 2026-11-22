@@ -490,7 +490,7 @@ STATE_PROMISES = {
     'can_detect': r'seen|detect\w*|stealth\w*',
     'temporary_spell_replacement': r'transform\w*|replac\w*|last \w+ consumed',
     'owned_creature_remaining_ms': r'lasts?|duration',
-    'school_prohibited': r'interrupt\w*|lock(?:s|ed|ing)? out|lockout',
+    'school_prohibited': r'interrupt\w*|lock(?:s|ed|ing)? out|lockout|for \$\d*d',
 }
 EVENT_PROMISES = {'spell_go_count': r'unleash\w*|cast\w*'}
 CONTRAST_CHECKS = frozenset({PASSIVE_DELTA, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_PARTY_STAT_RATIO})
