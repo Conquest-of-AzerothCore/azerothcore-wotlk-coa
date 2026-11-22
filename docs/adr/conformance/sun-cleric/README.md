@@ -25,3 +25,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0019](0019-sunsworn-logs-its-mana-as-energize-3-percent.md) | Sunsworn logs its auto attack mana as Energize 3% |
 | [0020](0020-five-mana-restores-log-under-their-own-spell.md) | Five Sun Cleric mana restores log under their own spell, not Vow of Grace |
 | [0021](0021-lead-me-not-astray-doubles-the-bless-heal.md) | Lead Me Not Astray doubles the Bless heal as well as the mana |
+| [0022](0022-glaring-rays-haste-stacks-as-two-multipliers.md) | Glaring Rays haste stacks as two multipliers |

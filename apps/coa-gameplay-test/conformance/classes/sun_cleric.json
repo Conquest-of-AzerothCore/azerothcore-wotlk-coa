@@ -967,110 +967,6 @@
       "observe_source": "520647 Effect[0] PERSISTENT_AREA_AURA, aura 23 PERIODIC_TRIGGER_SPELL every 1500 ms (EffectAmplitude, $T1), duration 15000 ms (DurationIndex 8, $d), radius index 13 (10 yd, $a1); it triggers 520648 (Effect[0] SPELL_EFFECT_HEAL, BasePoints 49 + 1 = 50). $520648m1 = 50, AP 70 x 0.125 = 8.75, spell power 0: 58.75. One real cast of 520647 at the caster's position, the caster held at 30% health (the circle covers it); heals of 520648 on the caster read 16500 ms after the cast: 10 heal events (15000 / 1500), excluding a period or duration 10% off on either side (9 or 11 events).. Control (before): no cast, 0."
     },
     {
-      "spell": 92136,
-      "kind": "metric_delta",
-      "quote": "Fulfilling your Vow now unleashes Sunlight restoring ${$704911m1+$BH*0.15} health to up to $704911i allies within $704911a1 yds, prioritizing the lowest health allies.",
-      "trigger_spell": 500143,
-      "gate_spell": 92136,
-      "target": "caster",
-      "setup_casts": [
-        803489,
-        804584
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 1600,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ],
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "caster_health_pct": 50,
-      "metric": "spell_heal_total",
-      "fields": {
-        "spell": 704911,
-        "target": "caster"
-      },
-      "before_expected": 0,
-      "wait_ms": 1500,
-      "expire_ms": 500,
-      "name": "Sunlight (heal on a fulfilled Vow)",
-      "variant": "sunlight_heal",
-      "label_suffix": "sunlight_heal",
-      "after_at_least": 60,
-      "after_at_most": 64,
-      "expected": 62,
-      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; AscensionSunCleric.cpp:298-300 casts Sunlight 704911 on up to its MaxAffectedTargets allies of the Vow fulfilment (Fulfill, requires a spell cast under Dawn 807440 and a Vow aura, here Vow of Radiance 803489, cast before Dawn). 704911 Effect[0] SPELL_EFFECT_HEAL, BasePoints 24, DieSides 7, per level 1.0 x (60 - 10): m1 = 75..81. Caster at 50% health; Dawn 804584 cast with 20 Solar Power 500149 set (harness precondition fixture), then Illumination 500143 (a direct heal, Holy) on the caster, in both phases; 92136 learned between the phases. Control (before): the same casts without 92136, 0 healed by Sunlight. Class tuning: 887015 CoA Aura - Sun Cleric Class: Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, MiscValue 127, BasePoints -1, DieSides 1, RealPointsPerLevel -0.4, BaseLevel 10: -1 + int(50 x -0.4) + 1 = -20% at level 60 (SpellInfo.cpp:487-497; known_auras; applied by AscensionClassTuning::Synchronize). Reference search: no 887015 in ~/CoaServer/reference snapshots, nothing found for the heal value. The heal is the DBC value x 0.8, truncated: 75..81 -> 60..64 (int(75 x 0.8) = 60, int(81 x 0.8) = 64); (75..81 + 3000) x 0.8 -> 2460..2464. Crit forced out by fixture 984954 (spell crit -1000, set on the caster in both phases)."
-    },
-    {
-      "spell": 92136,
-      "kind": "metric_delta",
-      "quote": "Fulfilling your Vow now unleashes Sunlight restoring ${$704911m1+$BH*0.15} health to up to $704911i allies within $704911a1 yds, prioritizing the lowest health allies.",
-      "trigger_spell": 500143,
-      "gate_spell": 92136,
-      "target": "caster",
-      "setup_casts": [
-        803489,
-        804584
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 1600,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ],
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "caster_health_pct": 50,
-      "metric": "spell_heal_total",
-      "fields": {
-        "spell": 704911,
-        "target": "caster"
-      },
-      "before_expected": 0,
-      "wait_ms": 1500,
-      "expire_ms": 500,
-      "name": "Sunlight (heal at +20000 spell power)",
-      "variant": "sunlight_bh",
-      "label_suffix": "sunlight_bh",
-      "player_spell_power": {
-        "amount": 20000,
-        "hit_arm": true
-      },
-      "after_at_least": 2460,
-      "after_at_most": 2464,
-      "expected": 2462,
-      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; AscensionSunCleric.cpp:298-300 casts Sunlight 704911 on up to its MaxAffectedTargets allies of the Vow fulfilment (Fulfill, requires a spell cast under Dawn 807440 and a Vow aura, here Vow of Radiance 803489, cast before Dawn). 704911 Effect[0] SPELL_EFFECT_HEAL, BasePoints 24, DieSides 7, per level 1.0 x (60 - 10): m1 = 75..81. Caster at 50% health; Dawn 804584 cast with 20 Solar Power 500149 set (harness precondition fixture), then Illumination 500143 (a direct heal, Holy) on the caster, in both phases; 92136 learned between the phases. With 20000 more spell power: 75..81 + int32(0.15 x 20000) = 3075..3081 (BH term), the contrast of sunlight_heal on the same build. Class tuning: 887015 CoA Aura - Sun Cleric Class: Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, MiscValue 127, BasePoints -1, DieSides 1, RealPointsPerLevel -0.4, BaseLevel 10: -1 + int(50 x -0.4) + 1 = -20% at level 60 (SpellInfo.cpp:487-497; known_auras; applied by AscensionClassTuning::Synchronize). Reference search: no 887015 in ~/CoaServer/reference snapshots, nothing found for the heal value. The heal is the DBC value x 0.8, truncated: 75..81 -> 60..64 (int(75 x 0.8) = 60, int(81 x 0.8) = 64); (75..81 + 3000) x 0.8 -> 2460..2464. Crit forced out by fixture 984954 (spell crit -1000, set on the caster in both phases)."
-    },
-    {
       "spell": 806123,
       "kind": "metric_delta",
       "trigger_spell": 802561,
@@ -22163,6 +22059,850 @@
         "after_trigger_ms": 1600
       },
       "tolerance": 1
+    },
+    {
+      "spell": 92136,
+      "kind": "metric_delta",
+      "quote": "Fulfilling your Vow now unleashes Sunlight restoring ${$704911m1+$BH*0.15} health to up to $704911i allies within $704911a1 yds, prioritizing the lowest health allies.",
+      "trigger_spell": 500143,
+      "gate_spell": 92136,
+      "target": "caster",
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "caster_health_pct": 50,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 704911,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sunlight (heal on a fulfilled Vow)",
+      "variant": "sunlight_heal",
+      "label_suffix": "sunlight_heal",
+      "after_at_least": 60,
+      "after_at_most": 64,
+      "expected": 62,
+      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; AscensionSunCleric.cpp:298-300 casts Sunlight 704911 on up to its MaxAffectedTargets allies of the Vow fulfilment (Fulfill, requires a spell cast under Dawn 807440 and a Vow aura, here Vow of Radiance 803489, cast before Dawn). 704911 Effect[0] SPELL_EFFECT_HEAL, BasePoints 24, DieSides 7, per level 1.0 x (60 - 10): m1 = 75..81. Caster at 50% health; Dawn 804584 cast with 20 Solar Power 500149 set (harness precondition fixture), then Illumination 500143 (a direct heal, Holy) on the caster, in both phases; 92136 learned between the phases. Control (before): the same casts without 92136, 0 healed by Sunlight. Class tuning: 887015 CoA Aura - Sun Cleric Class: Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, MiscValue 127, BasePoints -1, DieSides 1, RealPointsPerLevel -0.4, BaseLevel 10: -1 + int(50 x -0.4) + 1 = -20% at level 60 (SpellInfo.cpp:487-497; known_auras; applied by AscensionClassTuning::Synchronize). Reference search: no 887015 in ~/CoaServer/reference snapshots, nothing found for the heal value. The heal is the DBC value x 0.8, truncated: 75..81 -> 60..64 (int(75 x 0.8) = 60, int(81 x 0.8) = 64); (75..81 + 3000) x 0.8 -> 2460..2464. Crit forced out by fixture 984954 (spell crit -1000 (Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE BasePoints -1001); its Effect[0] is aura 52 MOD_WEAPON_CRIT_PERCENT BasePoints 100, +101% weapon crit, which no spell subject of this entry reads, set on the caster in both phases)."
+    },
+    {
+      "spell": 92136,
+      "kind": "metric_delta",
+      "quote": "Fulfilling your Vow now unleashes Sunlight restoring ${$704911m1+$BH*0.15} health to up to $704911i allies within $704911a1 yds, prioritizing the lowest health allies.",
+      "trigger_spell": 500143,
+      "gate_spell": 92136,
+      "target": "caster",
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "caster_health_pct": 50,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 704911,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sunlight (heal at +20000 spell power)",
+      "variant": "sunlight_bh",
+      "label_suffix": "sunlight_bh",
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "after_at_least": 2460,
+      "after_at_most": 2464,
+      "expected": 2462,
+      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; AscensionSunCleric.cpp:298-300 casts Sunlight 704911 on up to its MaxAffectedTargets allies of the Vow fulfilment (Fulfill, requires a spell cast under Dawn 807440 and a Vow aura, here Vow of Radiance 803489, cast before Dawn). 704911 Effect[0] SPELL_EFFECT_HEAL, BasePoints 24, DieSides 7, per level 1.0 x (60 - 10): m1 = 75..81. Caster at 50% health; Dawn 804584 cast with 20 Solar Power 500149 set (harness precondition fixture), then Illumination 500143 (a direct heal, Holy) on the caster, in both phases; 92136 learned between the phases. With 20000 more spell power: 75..81 + int32(0.15 x 20000) = 3075..3081 (BH term), the contrast of sunlight_heal on the same build. Class tuning: 887015 CoA Aura - Sun Cleric Class: Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, MiscValue 127, BasePoints -1, DieSides 1, RealPointsPerLevel -0.4, BaseLevel 10: -1 + int(50 x -0.4) + 1 = -20% at level 60 (SpellInfo.cpp:487-497; known_auras; applied by AscensionClassTuning::Synchronize). Reference search: no 887015 in ~/CoaServer/reference snapshots, nothing found for the heal value. The heal is the DBC value x 0.8, truncated: 75..81 -> 60..64 (int(75 x 0.8) = 60, int(81 x 0.8) = 64); (75..81 + 3000) x 0.8 -> 2460..2464. Crit forced out by fixture 984954 (spell crit -1000 (Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE BasePoints -1001); its Effect[0] is aura 52 MOD_WEAPON_CRIT_PERCENT BasePoints 100, +101% weapon crit, which no spell subject of this entry reads, set on the caster in both phases)."
+    },
+    {
+      "spell": 92136,
+      "kind": "metric_delta",
+      "quote": "Fulfilling your Vow now unleashes Sunlight restoring ${$704911m1+$BH*0.15} health to up to $704911i allies within $704911a1 yds, prioritizing the lowest health allies.",
+      "trigger_spell": 500143,
+      "gate_spell": 92136,
+      "target": "caster",
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sunlight (heals at most 5 of 8 players, healthiest caster left out)",
+      "variant": "cap_caster_full",
+      "label_suffix": "cap_caster_full",
+      "fields": {
+        "spell": 704911
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0,
+      "caster_health_pct": 99,
+      "ally_arm": {
+        "allies": 7,
+        "ally_health": [
+          50,
+          100
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 704911,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "The caster at 99% health is the healthiest of the eight, so the five lowest (allies at 50%) are healed and the caster is not: 5 Sunlight heals in all, 0 on the caster (AscensionSunCleric.cpp:155-160 orders by health percentage)."
+          }
+        ]
+      },
+      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; AscensionSunCleric.cpp:298-300 (Fulfill) heals with Sunlight 704911 the allies returned by Allies(player, player, Radius(704911), MaxAffectedTargets of 704911) (AscensionSunCleric.cpp:149-165): the caster and the units of the caster's raid within the radius, sorted by health percentage (lowest first, ties by GUID), cut to MaxAffectedTargets. 704911 MaxAffectedTargets = 5 ($704911i, the tooltip resolves 5 with the reference stats). Eight players stand in the raid (the caster and seven allies, ally_arm allies 7), all within the 40 yd radius, the seven allies held at 50% health. Dawn 804584 cast with 20 Solar Power 500149 set (harness precondition fixture), Vow of Radiance 803489 cast before it, Illumination 500143 (a direct heal) cast on the caster as in the heal entry; 92136 learned between the phases. Control (before): the same casts without 92136, no Sunlight heal. Heals are counted from the caster's own spell_heal_count of 704911, all targets. Reference search 2026-11-22: coa-history spell 92136: 0 casts (a passive); no snapshot in ~/CoaServer/reference carries a target cap or an ordering beyond the tooltip; nothing found. The caster at 99% health is the healthiest of the eight, so the five lowest (allies at 50%) are healed and the caster is not: 5 Sunlight heals in all, 0 on the caster (AscensionSunCleric.cpp:155-160 orders by health percentage). Discrimination, stated: the seven allies hold the same 50%, so the order shows only through the caster's health. Against a GUID order the check discriminates only if the caster's GUID is among the five lowest of the eight, which is not shown; against a random pick of five of eight both caster entries pass together with probability about (3/8 x 5/8)^2 = 5.5% per pair, not the 0.1% the rules ask. The priority wording therefore holds as the observed result of this layout, and a layout with spread health (some allies at 100%) would decide it alone."
+    },
+    {
+      "spell": 92136,
+      "kind": "metric_delta",
+      "quote": "Fulfilling your Vow now unleashes Sunlight restoring ${$704911m1+$BH*0.15} health to up to $704911i allies within $704911a1 yds, prioritizing the lowest health allies.",
+      "trigger_spell": 500143,
+      "gate_spell": 92136,
+      "target": "caster",
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sunlight (heals at most 5 of 8 players, wounded caster first)",
+      "variant": "cap_caster_low",
+      "label_suffix": "cap_caster_low",
+      "fields": {
+        "spell": 704911
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0,
+      "caster_health_pct": 30,
+      "ally_arm": {
+        "allies": 7,
+        "ally_health": [
+          50,
+          100
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 704911,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "The caster at 30% health is the lowest of the eight, so it is among the five healed (1 heal on the caster) and the total stays 5 (AscensionSunCleric.cpp:155-160 orders by health percentage, then cuts at 5). With the caster_full entry this shows the order by health, not by GUID."
+          }
+        ]
+      },
+      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; AscensionSunCleric.cpp:298-300 (Fulfill) heals with Sunlight 704911 the allies returned by Allies(player, player, Radius(704911), MaxAffectedTargets of 704911) (AscensionSunCleric.cpp:149-165): the caster and the units of the caster's raid within the radius, sorted by health percentage (lowest first, ties by GUID), cut to MaxAffectedTargets. 704911 MaxAffectedTargets = 5 ($704911i, the tooltip resolves 5 with the reference stats). Eight players stand in the raid (the caster and seven allies, ally_arm allies 7), all within the 40 yd radius, the seven allies held at 50% health. Dawn 804584 cast with 20 Solar Power 500149 set (harness precondition fixture), Vow of Radiance 803489 cast before it, Illumination 500143 (a direct heal) cast on the caster as in the heal entry; 92136 learned between the phases. Control (before): the same casts without 92136, no Sunlight heal. Heals are counted from the caster's own spell_heal_count of 704911, all targets. Reference search 2026-11-22: coa-history spell 92136: 0 casts (a passive); no snapshot in ~/CoaServer/reference carries a target cap or an ordering beyond the tooltip; nothing found. The caster at 30% health is the lowest of the eight, so it is among the five healed (1 heal on the caster) and the total stays 5 (AscensionSunCleric.cpp:155-160 orders by health percentage, then cuts at 5). With the caster_full entry this shows the order by health, not by GUID. Discrimination, stated: the seven allies hold the same 50%, so the order shows only through the caster's health. Against a GUID order the check discriminates only if the caster's GUID is among the five lowest of the eight, which is not shown; against a random pick of five of eight both caster entries pass together with probability about (3/8 x 5/8)^2 = 5.5% per pair, not the 0.1% the rules ask. The priority wording therefore holds as the observed result of this layout, and a layout with spread health (some allies at 100%) would decide it alone."
+    },
+    {
+      "spell": 504848,
+      "name": "Mercy (the cap: six receive it out of eight players)",
+      "kind": "metric_delta",
+      "variant": "targets_cap",
+      "label_suffix": "targets_cap",
+      "quote": "Grant mercy to an ally and up to 5 nearby allies,",
+      "trigger_spell": 504848,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_power": 1000,
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 504848
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1000,
+      "ally_arm": {
+        "allies": 7,
+        "arms": [
+          {
+            "actors": [
+              "caster",
+              "ally2",
+              "ally3",
+              "ally4",
+              "ally5",
+              "ally6",
+              "ally7"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 504848
+            },
+            "before_expected": 0,
+            "expected": 5,
+            "tolerance": 0,
+            "source": "Mercy 504848 Effect[0] target 21 TARGET_UNIT_TARGET_ALLY, EffectChainTarget 6 (the target and up to 5 more): of the seven units other than the target (the caster and ally2..ally7) exactly 5 hold the aura, whichever the chain picks; none holds it in the uncast control. Uncapped it would be 6.",
+            "reach_source": "The unit filter of the chain search is TARGET_CHECK_ALLY: WorldObjectSpellTargetCheck keeps a unit when _IsValidAssistTarget holds, with no IsInPartyWith or IsInRaidWith test (Spell.cpp:9353-9358, reached through WorldObjectSpellAreaTargetCheck with the Chain reason, :9420-9479, which adds only a distance test; only TARGET_CHECK_PARTY :9359 and TARGET_CHECK_RAID :9373 test the group), so ally5 in raid subgroup 2 stands within the 10 yd hop like the party members. Mercy 504848 Effect[0] target 21 TARGET_UNIT_TARGET_ALLY with EffectChainTarget[0] 6: Spell::SelectImplicitTargetObjectTargets adds the explicit ally and calls Spell::SelectImplicitChainTargets (Spell.cpp:1895-1917, :1919-1939), which asks SearchChainTargets for ChainTarget - 1 = 5 more units (Spell.cpp:2200-2300); the spell is a magic-class spell, so the search radius is the 10 yd jump radius times 5 and each hop is within 10 yd of the previous unit; no spell_jump_distance row and no script for 504848 or 503650 exists (data/sql searched), and Mercy MaxAffectedTargets 6 is read only for cone and area targets (Spell.cpp:1303, :1405)"
+          }
+        ]
+      },
+      "observe_source": "504848 Mercy Effect[0] target 21 TARGET_UNIT_TARGET_ALLY, EffectChainTarget[0] 6: the explicit ally plus ChainTarget - 1 = 5 more units (Spell.cpp:1895-1939, SearchChainTargets :2200-2300; reach_source on the arm). Mercy is cast at ally with six other players (the caster and ally2..ally7, all within the 10 yd hop): the aura is read on the target (1) and summed over the six others, the caster and ally2..ally7 (5, the cap of the tooltip \"up to 5 nearby allies\"); 0 in the uncast control before. Uncapped, the six others would all read 1 (6, and 7 with the target), so a cap of 6 or more would read 6 on the others. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for the count; nothing found."
+    },
+    {
+      "spell": 804257,
+      "name": "Glaring Rays (the caster hastes by 3% + 3%)",
+      "kind": "metric_delta",
+      "variant": "caster_haste",
+      "label_suffix": "caster_haste",
+      "quote": "Increases the spell haste of all party and raid members by $s1% and your spell haste by an additional $s2%.",
+      "trigger_spell": 805301,
+      "gate_spell": 804257,
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0.942596,
+      "tolerance": 0.0001,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "804257 Glaring Rays Effect[0] SPELL_EFFECT_APPLY_AREA_AURA_RAID aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 + 1 = 3 ($s1), TargetA 1 (caster), radius index 287; Effect[1] APPLY_AURA aura 216, BasePoints 2 + 1 = 3 ($s2), TargetA 1. Holy Form 805301 is cast in both phases as the trigger and the passive is learned between them (control: the before reading without it, multiplier 1). The unit's engine cast speed multiplier (the same function as the Swift Justice 300327 spell_haste entry) is read 1500 ms after. Reference search 2026-11-22: coa-history spell 804257: 0 events (a passive leaves no event); nothing else found beyond the tooltip and the DBC. The caster receives both effects. Each aura 216 multiplies the unit's cast speed: AuraEffect::HandleModCastingSpeed (SpellAuraEffects.cpp:5035-5056) calls Unit::ApplyCastTimePercentMod (Unit.cpp:14991-14999) once per effect, and ApplyPercentModFloatVar multiplies by 100 / (100 + 3) (Unit.cpp:14967-14970), so the two effects give 1 / (1.03 x 1.03) = 0.942596, not the additive 1 / 1.06 = 0.943396 (pair 1 read 0.942596 in both runs; this expectation is the engine rule, written from the code before the re-run). The second effect applies only through the CoA raid group exception (SpellMgr.cpp:826-828, 4ced460235): Glaring Rays is in spell_group 2000182, which the stock rule (SpellAuraEffects.cpp:5049-5051) would let block Effect[1]. Mentor ruling D-119 (2026-11-22): the second effect 'an additional $s2%' is its own aura 216, so the engine stacks the two multipliers: 1/1.03^2 for the caster, 1/1.03 for a party ally (ally_haste). The tooltip's additive reading, 1/1.06 = 0.943396, differs by 0.08%, eight times the tolerance of this band, which accepts only the engine value; the expectation is the engine rule with its cited lines, not the measured value."
+    },
+    {
+      "spell": 804257,
+      "name": "Glaring Rays (a grouped ally hastes by 3%)",
+      "kind": "metric_delta",
+      "variant": "ally_haste",
+      "label_suffix": "ally_haste",
+      "quote": "Increases the spell haste of all party and raid members by $s1% and your spell haste by an additional $s2%.",
+      "trigger_spell": 805301,
+      "gate_spell": 804257,
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0.970874,
+      "tolerance": 0.0001,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "804257 Glaring Rays Effect[0] SPELL_EFFECT_APPLY_AREA_AURA_RAID aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 + 1 = 3 ($s1), TargetA 1 (caster), radius index 287; Effect[1] APPLY_AURA aura 216, BasePoints 2 + 1 = 3 ($s2), TargetA 1. Holy Form 805301 is cast in both phases as the trigger and the passive is learned between them (control: the before reading without it, multiplier 1). The unit's engine cast speed multiplier (the same function as the Swift Justice 300327 spell_haste entry) is read 1500 ms after. Reference search 2026-11-22: coa-history spell 804257: 0 events (a passive leaves no event); nothing else found beyond the tooltip and the DBC. A grouped ally receives Effect[0] only: 1 / 1.03 = 0.970874 (the Swift Justice 300322 entry reads the same aura 216 at 3% as 0.970874).",
+      "measure_actor": "ally",
+      "disable_regeneration": true,
+      "ally_arm": {
+        "allies": 1
+      },
+      "cast_in_before": false
+    },
+    {
+      "spell": 300334,
+      "name": "Blessed Armor (spell power per 125 armor, from an armor gain)",
+      "kind": "metric_delta",
+      "variant": "sp_per_armor",
+      "label_suffix": "sp_per_armor",
+      "quote": "Increases your spell power by 3 for every 125 Armor you have.",
+      "trigger_spell": 805301,
+      "gate_spell": 561023,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 2
+      },
+      "before_expected": 0,
+      "expected": 9.54,
+      "expected_gain": 9.54,
+      "tolerance": 1,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "observe_source": "300334 Blessed Armor Effect[0] aura 23 PERIODIC_TRIGGER_SPELL (2000 ms) of 301006; 301006 Effect[0] aura 345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT misc 127; the script (AscensionSunCleric.cpp:383, AscensionSunClericContracts.cpp:260) sets it to 3 per 125 armor, i.e. 0.024 x armor. Design 3 (designs 1 and 2 in the b3b report failed: live armor not derivable, spell power already set before a read): the armor is raised by a real learned talent whose gain is data-derived, Sun-Touched Armor 561023, +397.5 armor (the 561023 armor entry, 250% of Strength and Intellect of the reference stats), and the Holy spell power read (Unit::SpellBaseDamageBonusDone, the use-time function) is judged on its gain: 397.5 x 3 / 125 = 9.54, tolerance 1 (the truncation of the two readings differs by at most 1). The passive 300334 is learned in both phases (pair 1 without it read 0 before and after). Control: the before reading, taken with 561023 unlearned and the same armor. The gain is read 2600 ms after the learn, after one 2000 ms tick of 301006. Reference search 2026-11-22: bindmysoul snapshot carries an older state (1 per 125 armor) (older reference, G-9); nothing else found.",
+      "learn": [
+        300334
+      ]
+    },
+    {
+      "spell": 503505,
+      "name": "Blessing of Absolution (damage at +20000 spell power, Blessed ally)",
+      "kind": "metric_delta",
+      "variant": "cone_damage",
+      "label_suffix": "cone_damage",
+      "quote": "Empower a Blessed ally to unleash a burst of holy energy in front of them, dealing ${$m1+0+$BH*1.5} Holy damage enemies in a $804252a1 yd frontal cone and generating additional threat.",
+      "trigger_spell": 503505,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "dummy_distance": 5,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_with_resist_total",
+      "fields": {
+        "spell": 804252,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "learn": [
+        804247
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "control_wait": true
+      },
+      "player_spell_power": 20000,
+      "observe_source": "503505 Blessing of Absolution Effect[0] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (680893, then 804252): BasePoints 403, DieSides 53, RealPointsPerLevel 1.8207, BaseLevel 60: at level 60 m1 = 404..456 ($m1). Script (AscensionSunClericAbilities.cpp:495-508): with Bless 804247 on the ally, amount = effect value + 1.5 x SpellBaseHealingBonusDone(Holy) of the caster, dealt as 804252 Holy damage to every attackable enemy within Radius(804252) = 10 yd of the ally (HasInArc(pi) = the front half). Bless is cast at the ally in both phases (a real cast, ally_casts), the 503505 cast at the ally is the trigger; with 20000 spell power (player_spell_power, harness fixture; its contrast is the cone_damage_base entry of the same pair) the damage is 404..456 + int(1.5 x 20000) = 30404..30456 (the run reads the reference character's Holy spell power as 0, so the base term adds nothing). Crit forced out by fixture 984954 (spell crit -1000 (Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE BasePoints -1001); its Effect[0] is aura 52 MOD_WEAPON_CRIT_PERCENT BasePoints 100, +101% weapon crit, which no spell subject of this entry reads). The read adds each log's resisted amount back (spell_damage_with_resist_total), so the random partial resist of the dummy does not move it (pair 1 read 27378 and 24356 with spell_damage_total). Control (before): the same Bless without the 503505 cast, no damage. Reference search 2026-11-22: coa-history spell 503505: 0 events; the bindmysoul snapshot has no value for this spell; nothing found. ",
+      "expected": 30430,
+      "after_at_least": 30404,
+      "after_at_most": 30456
+    },
+    {
+      "spell": 503505,
+      "name": "Blessing of Absolution (damage without added spell power, Blessed ally)",
+      "kind": "metric_delta",
+      "variant": "cone_damage_base",
+      "label_suffix": "cone_damage_base",
+      "quote": "Empower a Blessed ally to unleash a burst of holy energy in front of them, dealing ${$m1+0+$BH*1.5} Holy damage enemies in a $804252a1 yd frontal cone and generating additional threat.",
+      "trigger_spell": 503505,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "dummy_distance": 5,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_with_resist_total",
+      "fields": {
+        "spell": 804252,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "learn": [
+        804247
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "control_wait": true
+      },
+      "observe_source": "503505 Blessing of Absolution Effect[0] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (680893, then 804252): BasePoints 403, DieSides 53, RealPointsPerLevel 1.8207, BaseLevel 60: at level 60 m1 = 404..456 ($m1). Script (AscensionSunClericAbilities.cpp:495-508): with Bless 804247 on the ally, amount = effect value + 1.5 x SpellBaseHealingBonusDone(Holy) of the caster, dealt as 804252 Holy damage to every attackable enemy within Radius(804252) = 10 yd of the ally (HasInArc(pi) = the front half). Bless is cast at the ally in both phases (a real cast, ally_casts), the 503505 cast at the ally is the trigger; without the spell power fixture (contrast of cone_damage, same pair) the damage is 404..456 plus 1.5 x the reference character's Holy spell power, which the run reads as 0 (step spell_power, actual 0): 404..456. Crit forced out by fixture 984954 (spell crit -1000 (Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE BasePoints -1001); its Effect[0] is aura 52 MOD_WEAPON_CRIT_PERCENT BasePoints 100, +101% weapon crit, which no spell subject of this entry reads). The read adds each log's resisted amount back (spell_damage_with_resist_total), so the random partial resist of the dummy does not move it (pair 1 read 27378 and 24356 with spell_damage_total). Control (before): the same Bless without the 503505 cast, no damage. Reference search 2026-11-22: coa-history spell 503505: 0 events; the bindmysoul snapshot has no value for this spell; nothing found. ",
+      "expected": 430,
+      "after_at_least": 404,
+      "after_at_most": 456
+    },
+    {
+      "spell": 503505,
+      "name": "Blessing of Absolution (control: the ally has no Bless, no damage)",
+      "kind": "metric_delta",
+      "variant": "cone_needs_bless",
+      "label_suffix": "cone_needs_bless",
+      "quote": "Empower a Blessed ally to unleash a burst of holy energy in front of them, dealing ${$m1+0+$BH*1.5} Holy damage enemies in a $804252a1 yd frontal cone and generating additional threat.",
+      "trigger_spell": 503505,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "dummy_distance": 5,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 804252,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 1,
+        "control_wait": true
+      },
+      "observe_source": "Control of cone_damage: the identical cast of 503505 at an ally that does not hold the caster's Bless: the script returns before the damage (AscensionSunClericAbilities.cpp:497-499, !ally->HasAura(Bless, player->GetGUID())), so 0 damage in both phases (tooltip: Only usable on your ally with Bless active). Without the player_spell_power fixture the amount would be 404..456 + 1.5 x base spell power. Control (before): the same Bless without the 503505 cast, no damage. Reference search 2026-11-22: coa-history spell 503505: 0 events; the bindmysoul snapshot has no value for this spell; nothing found. "
+    },
+    {
+      "spell": 503505,
+      "name": "Blessing of Absolution (control: the cast at an ally without Bless)",
+      "kind": "metric_delta",
+      "variant": "cone_needs_bless_cast",
+      "label_suffix": "cone_needs_bless_cast",
+      "quote": "Empower a Blessed ally to unleash a burst of holy energy in front of them, dealing ${$m1+0+$BH*1.5} Holy damage enemies in a $804252a1 yd frontal cone and generating additional threat.",
+      "trigger_spell": 503505,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 503505
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 1,
+        "control_wait": true
+      },
+      "observe_source": "Cast outcome of the unblessed arm of cone_needs_bless, same pair. The tooltip says 'Only usable on your ally with Bless active', so a refused cast reports a failure code. 503505 has TargetAuraSpell 804247 (Bless) in Spell.dbc, and SpellInfo::CheckTarget returns SPELL_FAILED_TARGET_AURASTATE for a target without that aura (SpellInfo.cpp:2155-2156); the script's own Bless check only returns before the damage (AscensionSunClericAbilities.cpp:497-499). This read asks whether the cast of 503505 at the unblessed ally is refused: the caster's cast_failure must be a refusal code (1 to 255), where 0 means the cast went through (cost and cooldown spent, no damage). The control of the refusal is the Blessed arm in the cone_damage entries of the same pair: the same cast at an ally holding the caster's Bless lands and deals damage. Reference search 2026-11-22: coa-history spell 503505: 0 events; the bindmysoul snapshot has no value for this spell; nothing found.",
+      "after_at_least": 1,
+      "after_at_most": 255
+    },
+    {
+      "spell": 300360,
+      "name": "Learning Light (spell haste on entering Sunrise)",
+      "kind": "metric_delta",
+      "variant": "sunrise_haste",
+      "label_suffix": "sunrise_haste",
+      "quote": "Entering Sunset or Sunrise increases your spell haste by $301265s1%.",
+      "trigger_spell": 800231,
+      "gate_spell": 300360,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "setup_casts": [
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          92135,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0.833333,
+      "tolerance": 0.0001,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Learning Light Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20 ($301265s1). SpendDawn (AscensionSunClericAbilities.cpp:94-120) removes Sunrise/Sunset and enters the other one when Dawn is active, the spell cast spends it (a Holy or Fire spell of family 33 that does damage or heals), the caster has the specialization 92135 and Dawn's choice effect is set (ActivateDawn, AscensionSunCleric.cpp:263-270), and casts 301265 when the caster has 300360 (:116-117). A Holy spell enters Sunrise 500477, a Fire spell enters Sunset 500511 (:112-115). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, and any Dawn left by the first phase is removed first (set_aura 807440 at 0 stacks), since a second Dawn cast cancels an active Dawn; 300360 is learned between the phases (control: the before reading, multiplier 1, same Dawn and same spell). The caster's engine cast speed multiplier is read after the spell; each aura 216 multiplies it by 100 / (100 + 20) (Unit.cpp:14967-14970, as the Glaring Rays entry), 1 / 1.2 = 0.833333, within 0.0001 (excludes 18% and 22%: 0.847458, 0.819672). Sunflare 800231 (Holy, SchoolMask 2) is cast at the dummy after Dawn: Sunrise is entered. Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the haste aura exists in real play, no amount in the events), 300360 0 events (a passive); bindmysoul snapshot (fetched 2026-07-22) carries \"Entering Sunset or Sunrise increases your spell haste by 20%. Lasts for 10 seconds or 3 casts.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 300360,
+      "name": "Learning Light (spell haste on entering Sunset)",
+      "kind": "metric_delta",
+      "variant": "sunset_haste",
+      "label_suffix": "sunset_haste",
+      "quote": "Entering Sunset or Sunrise increases your spell haste by $301265s1%.",
+      "trigger_spell": 554406,
+      "gate_spell": 300360,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "setup_casts": [
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          92135,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0.833333,
+      "tolerance": 0.0001,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Learning Light Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20 ($301265s1). SpendDawn (AscensionSunClericAbilities.cpp:94-120) removes Sunrise/Sunset and enters the other one when Dawn is active, the spell cast spends it (a Holy or Fire spell of family 33 that does damage or heals), the caster has the specialization 92135 and Dawn's choice effect is set (ActivateDawn, AscensionSunCleric.cpp:263-270), and casts 301265 when the caster has 300360 (:116-117). A Holy spell enters Sunrise 500477, a Fire spell enters Sunset 500511 (:112-115). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, and any Dawn left by the first phase is removed first (set_aura 807440 at 0 stacks), since a second Dawn cast cancels an active Dawn; 300360 is learned between the phases (control: the before reading, multiplier 1, same Dawn and same spell). The caster's engine cast speed multiplier is read after the spell; each aura 216 multiplies it by 100 / (100 + 20) (Unit.cpp:14967-14970, as the Glaring Rays entry), 1 / 1.2 = 0.833333, within 0.0001 (excludes 18% and 22%: 0.847458, 0.819672). Dawnsear 554406 (Fire, SchoolMask 4, cast time 3500 ms) is cast at the dummy after Dawn and read at 4500 ms: Sunset is entered when the cast completes. Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the haste aura exists in real play, no amount in the events), 300360 0 events (a passive); bindmysoul snapshot (fetched 2026-07-22) carries \"Entering Sunset or Sunrise increases your spell haste by 20%. Lasts for 10 seconds or 3 casts.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 680624,
+      "name": "Divine Retribution (unleashes 25% of the damage dealt)",
+      "kind": "metric_delta",
+      "variant": "unleash_quarter",
+      "label_suffix": "unleash_quarter",
+      "quote": "Accumulates 25% of your damage dealt to on the target",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "setup_casts": [
+        680624
+      ],
+      "setup_target": "dummy",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 570147,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 34,
+      "tolerance": 1,
+      "wait_ms": 8800,
+      "expire_ms": 500,
+      "observe_source": "680624 Divine Retribution Effect[0] aura 4 DUMMY, EffectTriggerSpell 570147, DurationIndex 31 (8000 ms, $d); the accumulator adds every own direct damage event on the target (AscensionSunClericEvents.cpp:90 and :387-389, not a copy spell) and on expiry casts 570147 at each enemy within its radius with a quarter of the sum (AscensionSunClericAuras.cpp:170-178, amount / 4). The damage source is Solar Flare 807175 (not a copy spell, so it counts), a fixed hit: Effect[1] SCHOOL_DAMAGE BasePoints 50 + 1, DieSides 1, RealPointsPerLevel 1.9, the streamed tooltip ${$m2+$ppl2+$SP*0.26} = 136.5 at level 60 and the reference spell power 0 (packet value $m2 51 + 1.9 x 45). Crit and resist fixtures 984954 and 823764 in both phases make the hit constant. Divine Retribution 680624 is cast at the dummy before the hit in the after phase only (setup_only_after); the control phase deals the same hit with no Divine Retribution. One hit of 136 or 137 accumulates and the unleash on the dummy reads 136 / 4 = 34 (137 / 4 = 34), within 1 (excludes 20% = 27 and 30% = 41, and the band of 2 points, 23% = 31 and 27% = 36.7 lie outside 33 to 35). The control reading of the unleash spell on the dummy is 0. Reference search 2026-11-22: coa-history spell 680624 Divine Retribution: 46 casts, 46 applications and 46 removals, 2273 refreshes (one per accumulated hit) in 4 logs; 570147: 76 SPELL_DAMAGE events (min 122, max 50441) in 4 logs, so the accumulate-then-unleash shape exists in real play but a 25% share cannot be read from aggregates; bindmysoul snapshot (fetched 2026-07-22) carries \"Accumulates 25% of your damage dealt to on the target and unleashes it after 8 seconds, damaging enemies within 10 yds as Holy damage.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 804632,
+      "name": "Flames of Absolution (at most 5 Solar Flares among 7 enemies)",
+      "kind": "metric_delta",
+      "variant": "flare_cap",
+      "label_suffix": "flare_cap",
+      "quote": "Damage dealt by Horusath Blast now launches a Solar Flare at up to $573449i enemies within $573449a1 yds of your target.",
+      "trigger_spell": 500154,
+      "gate_spell": 804632,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "area_dummies": [
+        7,
+        8,
+        9,
+        11,
+        12,
+        13
+      ],
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 807175,
+        "target": "dummy"
+      },
+      "area_sum": true,
+      "expected": 5,
+      "observe_source": "804632 Flames of Absolution Effect[0] aura 42 PROC_TRIGGER_SPELL 573449 (MaxAffectedTargets 5 = $573449i, radius index 8 = 5 yd = $573449a1); the handler (AscensionSunClericEvents.cpp:126 and :303-312) fires on damage by Horusath Blast 500154, lists the living units within 5 yd of the target sorted by GUID (the target added if absent) and casts Solar Flare 807175 at each valid enemy until the count of 5 is spent. Horusath Blast is cast at the dummy in both phases and 804632 is learned between them (control: the first phase, 0 Solar Flare damage events). Crit and resist fixtures 984954 and 823764 in both phases. The Solar Flare damage events of 807175 are counted over every dummy (area_sum). Seven enemies stand 1 to 3 yd from the target (the target at 10 yd and six dummies at 7, 8, 9, 11, 12 and 13 yd from the caster, all in line), well inside 5 yd by centre distance, so the cap decides: exactly 5 events (excludes 4 and 6 and 7). Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 damage events in 29 logs (no cap can be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Damage dealt by Horusath Blast now launches a Solar Flare at up to 5 enemies within 5 yds of your target.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 804632,
+      "name": "Flames of Absolution (a dummy 4.9 yd from the target is hit, one 7.8 yd away is not)",
+      "kind": "metric_delta",
+      "variant": "flare_radius",
+      "label_suffix": "flare_radius",
+      "quote": "Damage dealt by Horusath Blast now launches a Solar Flare at up to $573449i enemies within $573449a1 yds of your target.",
+      "trigger_spell": 500154,
+      "gate_spell": 804632,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "area_dummies": [
+        14.9,
+        17.8
+      ],
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 807175,
+        "target": "dummy"
+      },
+      "area_sum": true,
+      "expected": 2,
+      "observe_source": "804632 Flames of Absolution Effect[0] aura 42 PROC_TRIGGER_SPELL 573449 (MaxAffectedTargets 5 = $573449i, radius index 8 = 5 yd = $573449a1); the handler (AscensionSunClericEvents.cpp:126 and :303-312) fires on damage by Horusath Blast 500154, lists the living units within 5 yd of the target sorted by GUID (the target added if absent) and casts Solar Flare 807175 at each valid enemy until the count of 5 is spent. Horusath Blast is cast at the dummy in both phases and 804632 is learned between them (control: the first phase, 0 Solar Flare damage events). Crit and resist fixtures 984954 and 823764 in both phases. The Solar Flare damage events of 807175 are counted over every dummy (area_sum). Layout: the target at 10 yd and two dummies 4.9 and 7.8 yd from it (14.9 and 17.8 yd from the caster, in line). Bounds from the data and the code, not a +-10% bracket: the radius is 5 yd (SpellRadius 8, RadiusMin = RadiusMax 5, no per-level term; SpellEffectInfo::CalcRadius, SpellInfo.cpp:624-639), so a dummy 4.9 yd away is inside under every reading that adds a reach of 0 or more; the largest edge any code path gives is 5 + 2 x 1.275 = 7.55 yd (Nearby() lists with IsWithinDistInMap, which adds both combat reaches: GridNotifiers.h:1061-1070, Object.cpp:1257-1264, defaults at Object.h:550; dummy entry 36 combat reach 1.275 yd, read 1.275 in the diagnostic run 20261122-081052), so a dummy 7.8 yd away is outside under every reading. Expected exactly 2 events (the target and the inside dummy); it excludes 1 (a radius under 4.9 yd) and 3 (an edge past 7.8 yd). Control: the first phase, without the passive, reads 0. Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 damage events in 29 logs (no cap can be read from aggregates); bindmysoul snapshot (fetched 2026-07-22) carries \"Damage dealt by Horusath Blast now launches a Solar Flare at up to 5 enemies within 5 yds of your target.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 704941,
+      "kind": "metric_delta",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "strike": {
+        "spell": 2118233,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300
+      },
+      "caster_avoidance": {
+        "parry": 100
+      },
+      "quote": "and increases your chance to parry the next attack by $707843s1%.",
+      "metric": "parry_chance",
+      "fields": {},
+      "expected": 30,
+      "name": "Light of the Sun (live parry chance +30 points after a parry)",
+      "variant": "parry_chance",
+      "label_suffix": "parry_chance",
+      "expected_gain": 30,
+      "tolerance": 0.01,
+      "observe_source": "704941 Light of the Sun Effect[0] aura 42 PROC_TRIGGER_SPELL 707843; 707843 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT BasePoints 29 + 1 = 30 ($707843s1), DurationIndex 28 (5000 ms), no charges. The scenario is the one of the aura_amount entry (a parried Speed Slash 2118233 in each phase, caster parry chance forced to 100% by harness set_combat_avoidance as a named precondition fixture of both phases, 704941 learned between the phases), but the read is the live unit value: PLAYER_PARRY_PERCENTAGE (CoAGameplayTest.cpp:5133), read 500 ms after the Holy Form 805301 cast and the strike: the gain of the learned phase over the phase without it (the control) is 30 points, within 0.01. Reference search 2026-11-22: coa-history spell 707843 Light of the Sun: 2 SPELL_AURA_APPLIED, 2 SPELL_AURA_REMOVED and 2 SPELL_HEAL (90 to 101) in 2 logs (the aura exists in real play, no parry chance in the events), 704941 0 events (a passive); bindmysoul snapshot (fetched 2026-07-22) carries \"Parrying an attack now restores 3% of your maximum health and increases your chance to parry the next attack by 30%.\" (same figures); nothing else found."
+    },
+    {
+      "spell": 300343,
+      "name": "Savior (critical strike chance below 20% health)",
+      "kind": "metric_delta",
+      "variant": "below_20",
+      "label_suffix": "below_20",
+      "quote": "Increases your critical strike chance on targets below 20% health by $s1%.",
+      "trigger_spell": 500154,
+      "gate_spell": 300343,
+      "target": "dummy",
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 500154,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 30,
+      "tolerance": 0.05,
+      "cast_in_before": false,
+      "phase_target_health_pct": [
+        99,
+        19
+      ],
+      "expected_gain": 30,
+      "observe_source": "300343 Savior Effect[0] and Effect[1] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, BasePoints 29 + 1 = 30 ($s1), TARGET_UNIT_CASTER; the scripted crit hook (AscensionSunClericAbilities.cpp:206-207) adds Amount(300343) to the crit chance of a family 33 spell when the target's health percentage is below 20. Horusath Blast 500154 is read with the engine's own SpellDoneCritChance plus the script hook (spell_done_crit_chance_scripted) against the dummy, before and after a real learn of 300343 (the reading before, with the dummy at 99% health, is the control and fixes the base chance); the gain of the learned phase is judged. The dummy is held at 19% in the treatment phase: the gain is 30, within 0.05 (excludes 0). Reference search 2026-11-22: coa-history spell 300343: 0 events in 186 logs (a passive leaves no event); the bindmysoul snapshot (fetched 2026-07-22) carries \"Increases your healing on targets below 20% health by 30%.\" (an older wording: our Spell.dbc 300343 and the code say critical strike chance, and the tooltip comes first); nothing else found."
+    },
+    {
+      "spell": 300343,
+      "name": "Savior (no bonus above 20% health)",
+      "kind": "metric_delta",
+      "variant": "above_20",
+      "label_suffix": "above_20",
+      "quote": "Increases your critical strike chance on targets below 20% health by $s1%.",
+      "trigger_spell": 500154,
+      "gate_spell": 300343,
+      "target": "dummy",
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 500154,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0.05,
+      "cast_in_before": false,
+      "phase_target_health_pct": [
+        99,
+        21
+      ],
+      "expected_gain": 0,
+      "observe_source": "300343 Savior Effect[0] and Effect[1] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, BasePoints 29 + 1 = 30 ($s1), TARGET_UNIT_CASTER; the scripted crit hook (AscensionSunClericAbilities.cpp:206-207) adds Amount(300343) to the crit chance of a family 33 spell when the target's health percentage is below 20. Horusath Blast 500154 is read with the engine's own SpellDoneCritChance plus the script hook (spell_done_crit_chance_scripted) against the dummy, before and after a real learn of 300343 (the reading before, with the dummy at 99% health, is the control and fixes the base chance); the gain of the learned phase is judged. The dummy is held at 21% in the treatment phase: the gain is 0 (the other side of the stated 20%, bracketed with the 19% entry in the same pair; an exact 20% hold read the bonus in the first pair, so the edge itself is not claimed). Reference search 2026-11-22: coa-history spell 300343: 0 events in 186 logs (a passive leaves no event); the bindmysoul snapshot (fetched 2026-07-22) carries \"Increases your healing on targets below 20% health by 30%.\" (an older wording: our Spell.dbc 300343 and the code say critical strike chance, and the tooltip comes first); nothing else found."
     }
   ],
   "player_observations": [],
