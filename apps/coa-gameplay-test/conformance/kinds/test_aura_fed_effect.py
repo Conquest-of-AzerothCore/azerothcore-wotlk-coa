@@ -25,11 +25,12 @@ class AuraFedEffectTests(unittest.TestCase):
         _, expectation = self.generated(entry)
         return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
 
-    def instant_values(self, control=1.0, fed=0.0, fed_aura=1.0):
+    def instant_values(self, control=1.0, fed=0.0, fed_aura=1.0, control_went=1.0, fed_went=2.0):
         _, expectation = self.generated(INSTANT)
         reads = expectation.model['reads']
         return {reads['control'][0]['aura']: 0.0, reads['control'][0]['casting']: control,
-                reads['treatment'][0]['aura']: fed_aura, reads['treatment'][0]['casting']: fed}
+                reads['control'][0]['went']: control_went, reads['treatment'][0]['aura']: fed_aura,
+                reads['treatment'][0]['casting']: fed, reads['treatment'][0]['went']: fed_went}
 
     def damage_values(self, factor, fed_aura=1.0):
         _, expectation = self.generated(DAMAGE)
@@ -57,6 +58,18 @@ class AuraFedEffectTests(unittest.TestCase):
 
     def test_mutant_still_casting_with_the_aura_alerts(self):
         self.assertEqual(self.judged(INSTANT, self.instant_values(fed=1.0)), 'alert')
+
+    def test_mutant_refused_fed_cast_alerts(self):
+        self.assertEqual(self.judged(INSTANT, self.instant_values(fed_went=1.0)), 'alert')
+
+    def test_a_control_cast_that_did_not_go_off_is_unmeasured(self):
+        self.assertEqual(self.judged(INSTANT, self.instant_values(control_went=0.0, fed_went=1.0)), 'unmeasured')
+
+    def test_the_instant_arms_read_the_judged_cast_going_off(self):
+        scenario, _ = self.generated(INSTANT)
+        reads = [step for step in scenario['steps'] if step.get('metric') == 'spell_go_count']
+        self.assertEqual([(step['label'].split()[-3:], step['spell']) for step in reads],
+                         [(['control', '0', 'went'], 554406), (['treatment', '0', 'went'], 554406)])
 
     def test_cap_reached_without_the_aura_is_unmeasured_not_ok(self):
         self.assertEqual(self.judged(INSTANT, self.instant_values(fed_aura=0.0)), 'unmeasured')

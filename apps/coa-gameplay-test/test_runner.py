@@ -254,7 +254,9 @@ class RunnerTests(unittest.TestCase):
     def test_combat_avoidance_block_is_a_percent_with_an_optional_refusal(self):
         step = {'action': 'set_combat_avoidance', 'actor': 'caster', 'block': 100}
         self.assert_step_validates(step)
-        self.assert_step_validates({**step, 'block': 0, 'rejected': True})
+        self.assert_step_validates({**step, 'block': 40, 'rejected': True})
+        self.assert_step_validates({**step, 'block': 0, 'rejected': False})
+        self.assert_step_rejected({**step, 'block': 0, 'rejected': True})
         self.assert_step_validates({'action': 'set_combat_avoidance', 'actor': 'caster', 'parry': 100})
         for change in ({'block': -1}, {'block': 101}, {'block': '100'}, {'rejected': 1}):
             self.assert_step_rejected({**step, **change})

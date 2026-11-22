@@ -5,7 +5,8 @@
 - Related: [ADR 0581](0581-behaviour-kinds-are-modules-discovered-at-run-time.md) (kind modules),
   [ADR 0120](0120-two-proof-statuses-computed-by-clause-coverage.md) (evidence tables).
 - Decided by: owner ruling O-17 (Sun Cleric Q-sc-7, both harness actions approved) and owner ruling O-20 (the block
-  fixture); G-39 notes sent to the controller before the harness C++ was edited.
+  fixture). These rulings are the G-39 approval of the harness actions; design notes went to the controller before
+  the harness C++ was edited.
 
 ## Context
 
@@ -33,6 +34,11 @@ and `reset_cooldown` clears only the spell's own cooldown.
   at the first poll that reads it or after `max_casts`, records `attempts` and `stopped`, and never sets the aura.
 - `kinds/aura_fed_effect.py`: control trials cancel the aura, treatment trials earn it through `cast_until_aura`; every
   trial reads the aura right before the judged cast, and a disagreeing read makes the run unmeasured, never ok.
+  The instant variant reads `casting` 300 ms into the judged cast and its `spell_go_count` after the cast ends: a fed
+  cast that did not go off alerts, a control one makes the run unmeasured (review t8 I1). The damage variant compares
+  the mean non-critical hit of the two arms against `expected x (1 +- EffectDieSides / control mean)`: the band is the
+  dice envelope of the hit itself, narrower than the G-19 band, so it risks only false alerts (review t8 M2). It
+  accepts one usable hit per arm and states the counts it judged.
   `max_casts` comes from the DBC ProcChance and tick count of the feed for a residual of at most `residual_target` per
   pair.
 - `kinds/timer_spacing_arms.py`: two arms of two real hits, the second cast `ignore_gcd` inside `[timer - 10%, timer)`

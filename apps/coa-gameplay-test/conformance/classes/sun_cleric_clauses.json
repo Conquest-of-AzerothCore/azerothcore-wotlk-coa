@@ -484,7 +484,7 @@
       "300349 behaviour_metric_delta icd_spacing"
     ],
     "kind": "claim",
-    "reason": "Pair 20261122-123610 / 20261122-123655, build 770d0fc468d0 (commit bd2588d51ac4), no flip. Two forced-crit Daybreak 503624 heals per arm, the second cast with ignore_gcd (owner ruling O-17): measured 955 ms apart, Conquest 800764 cut once (1 whole cut in the summed elapsed window), and 1065 ms apart, cut twice, in both runs; bands [900, 1000) and (1000, 1100] (review b7a I3). Tool: kind timer_spacing_arms, ADR 1025 (provisional)."
+    "reason": "Pair 20261122-123610 / 20261122-123655, build 770d0fc468d0 (commit bd2588d51ac4), no flip. Two forced-crit Daybreak 503624 heals per arm, the second cast with ignore_gcd (owner ruling O-17): measured 955 ms apart, Conquest 800764 cut once (1 whole cut in the summed elapsed window), and 1065 ms apart, cut twice, in both runs; bands [900, 1000) and (1000, 1100] (review b7a I3). Tool: kind timer_spacing_arms, ADR 1025 (provisional). Reference search 2026-11-22: coa-history spell 300349: 0 events in 186 logs (a passive); a combat log records no cooldown, so Conquest 800764 (645 casts) cannot show the 1000 ms timer; the coabuildhub and bindmysoul snapshots (fetched 2026-09-18) repeat the tooltip; nothing else found."
   },
   {
     "spell": 300351,
@@ -712,7 +712,7 @@
     "labels": [
       "300371 behaviour_metric_delta icd_spacing"
     ],
-    "reason": "Pair 20261122-123610 / 20261122-123655, build 770d0fc468d0 (commit bd2588d51ac4), no flip. Two Horusath Blast 572801 hits per arm on a Chains of Light 806697 target, the second cast with ignore_gcd (owner ruling O-17): 952 ms apart give 1 new copy on the spares and 1048 / 1060 ms apart give 2, in both runs; bands [900, 1000) and (1000, 1100]. The chain label alone cited no time read (review b7b). Tool: kind timer_spacing_arms, ADR 1025 (provisional)."
+    "reason": "Pair 20261122-123610 / 20261122-123655, build 770d0fc468d0 (commit bd2588d51ac4), no flip. Two Horusath Blast 572801 hits per arm on a Chains of Light 806697 target, the second cast with ignore_gcd (owner ruling O-17): 952 ms apart give 1 new copy on the spares and 1048 / 1060 ms apart give 2, in both runs; bands [900, 1000) and (1000, 1100]. The chain label alone cited no time read (review b7b). Tool: kind timer_spacing_arms, ADR 1025 (provisional). Reference search 2026-11-22: coa-history spell 300371: 0 events in 186 logs (a passive); Chains of Light 806697 shows 10 applications for 10 casts in 3 logs, with no copy to a second enemy to time; the coabuildhub snapshot (fetched 2026-09-18) repeats the tooltip; nothing else found."
   },
   {
     "spell": 300621,
@@ -5510,7 +5510,7 @@
         ]
       }
     ],
-    "reason": "Pair 20261122-123610 / 20261122-123655, build 770d0fc468d0 (commit bd2588d51ac4), no flip. Spears of Glory 807299 is earned for real: Radiant Flame 806060 is cast every 4300 ms by cast_until_aura (owner ruling O-17) until the aura is on the caster, never set by the harness, and its presence is read right before the judged Dawnsear (control: cancelled, Dawnsear still casting after 300 ms; fed: casting 0). The held set_aura entries instant, instant_once and damage (review b7c C1) stay uncounted. Tool: kind aura_fed_effect, ADR 1025 (provisional)."
+    "reason": "fed_instant: pair 20261122-132546 / 20261122-132659, build 7066298e412e (commit b99e76ea21f7), no flip, with the go-off read of each judged Dawnsear 554406 (spell_go_count 1 control, 2 after the fed cast; review t8 I1); the earlier pair 20261122-123610 / 20261122-123655 (build 770d0fc468d0) judged casting only. Spears of Glory 807299 is earned for real: Radiant Flame 806060 is cast every 4300 ms by cast_until_aura (owner ruling O-17) until the aura is on the caster, never set by the harness, and its presence is read right before the judged Dawnsear (control: cancelled, Dawnsear still casting after 300 ms; fed: casting 0). The held set_aura entries instant, instant_once and damage (review b7c C1) stay uncounted. Tool: kind aura_fed_effect, ADR 1025 (provisional). Reference search 2026-11-22: coa-history spells 804629 and 807299: 0 events in 186 logs (the aura is not logged); Dawnsear 554406 is found in 1 log with no event naming Spears of Glory; the coabuildhub and bindmysoul snapshots (fetched 2026-09-18) repeat the tooltip; nothing else found."
   },
   {
     "spell": 804629,
@@ -5519,7 +5519,7 @@
       "804629 behaviour_metric_delta fed_damage"
     ],
     "kind": "claim",
-    "reason": "Pair 20261122-123610 / 20261122-123655, build 770d0fc468d0 (commit bd2588d51ac4), no flip. Six control and six fed Dawnsear 554406 hits, non-critical only, spell power 10000: the mean fed hit reads 1.2510 and 1.2506 times the control mean against 1.25 within the 80 die sides band; each fed trial earns 807299 through cast_until_aura (owner ruling O-17) and reads it before the cast. Tool: kind aura_fed_effect, ADR 1025 (provisional)."
+    "reason": "Pair 20261122-123610 / 20261122-123655, build 770d0fc468d0 (commit bd2588d51ac4), no flip. Six control and six fed Dawnsear 554406 trials, non-critical hits only (run 1 judged 6 fed against 3 control hits, run 2 6 against 6; one usable hit per arm suffices), spell power 10000: the mean fed hit reads 1.2510 and 1.2506 times the control mean against 1.25 within the 80 die sides band; each fed trial earns 807299 through cast_until_aura (owner ruling O-17) and reads it before the cast. Tool: kind aura_fed_effect, ADR 1025 (provisional). Reference search 2026-11-22: coa-history spells 804629 and 807299: 0 events in 186 logs (the aura is not logged); Dawnsear 554406 is found in 1 log with no event naming Spears of Glory; the coabuildhub and bindmysoul snapshots (fetched 2026-09-18) repeat the tooltip; nothing else found."
   },
   {
     "spell": 804630,

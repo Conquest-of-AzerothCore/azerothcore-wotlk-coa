@@ -12,7 +12,8 @@ Every trial reads `aura` right before the judged cast: 0 in the control, 1 in th
 (a feed that reached its cap is never ok).
 
 - `variant: "instant"`: one trial per arm; `casting` 300 ms after the cast reads 1 in the control and must read 0
-  (`expected` 0) in the treatment.
+  (`expected` 0) in the treatment, and `spell_go_count` of `effect_spell` read after the cast must rise by 1 per
+  trial: a fed cast that did not go off alerts, a control one makes the run unmeasured.
 - `variant: "damage"`: `trials` per arm, non-critical hits only; the mean fed hit must be `expected` times the control
   mean within `expected * EffectDieSides[0] / control mean`.
 

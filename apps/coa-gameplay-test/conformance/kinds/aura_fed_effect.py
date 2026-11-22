@@ -114,7 +114,9 @@ def aura_fed_scenario(class_file: dict, spec: AuraFedSpec) -> tuple[dict, list[E
             return steps + [{'action': 'wait', 'label': f'{arm} {index} casting read', 'ms': CASTING_READ_MS},
                             measurement(mark(spec, f'{arm} {index} casting'), CASTER, 'casting'),
                             {'action': 'wait', 'label': f'{arm} {index} cast ends',
-                             'ms': effect.cast_time_ms + travel_ms + GCD_WAIT_MS}]
+                             'ms': effect.cast_time_ms + travel_ms + GCD_WAIT_MS},
+                            measurement(mark(spec, f'{arm} {index} went'), CASTER, 'spell_go_count',
+                                        spell=spec.effect_spell)]
         return steps + [{'action': 'wait', 'label': f'{arm} {index} hit',
                          'ms': effect.cast_time_ms + travel_ms + GCD_WAIT_MS}] + damage_reads(arm, index)
 
@@ -127,10 +129,12 @@ def aura_fed_scenario(class_file: dict, spec: AuraFedSpec) -> tuple[dict, list[E
             steps += trial(arm, index)
     windows = spec.trials * max_casts * spec.every_ms
     reads = {arm: [{'aura': mark(spec, f'{arm} {index} aura'),
-                    **({'casting': mark(spec, f'{arm} {index} casting')} if spec.variant == 'instant' else
+                    **({'casting': mark(spec, f'{arm} {index} casting'), 'went': mark(spec, f'{arm} {index} went')}
+                       if spec.variant == 'instant' else
                        {'hits': mark(spec, f'{arm} {index} hits'), 'damage': mark(spec, f'{arm} {index} damage')})}
                    for index in range(spec.trials)] for arm in ARMS}
-    expected_text = ('casting reads 1 in the control and 0 in the treatment' if spec.variant == 'instant' else
+    expected_text = (f'casting reads 1 in the control and 0 in the treatment, and each judged {spec.effect_spell} '
+                     f'cast must go off (spell_go_count +1 per trial)' if spec.variant == 'instant' else
                      f'the mean non-critical {spec.effect_spell} hit of the treatment is {spec.expected:g} times the '
                      f'control mean within the DBC dice spread')
     scenario = {
@@ -171,9 +175,17 @@ def aura_fed_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
         if any(value != 1 for value in control):
             return replace(base, status='unmeasured',
                            explanation=f'the control cast was not running {CASTING_READ_MS} ms in: {control}')
-        status = 'ok' if all(value == model['expected'] for value in treatment) else 'alert'
+        went = {arm: [run.values[trial['went']] for trial in model['reads'][arm]] for arm in ARMS}
+        control_went = list(range(1, len(control) + 1))
+        if went[ARMS[0]] != control_went:
+            return replace(base, status='unmeasured',
+                           explanation=f'the control casts did not all go off: {went[ARMS[0]]}, {control_went} needed')
+        fed_went = list(range(len(control) + 1, len(control) + len(treatment) + 1))
+        landed = went[ARMS[1]] == fed_went
+        status = 'ok' if landed and all(value == model['expected'] for value in treatment) else 'alert'
         return replace(base, status=status, measured=max(treatment), expected=model['expected'], low=0.0, high=0.0,
-                       explanation=f'casting {CASTING_READ_MS} ms after the cast: control {control}, fed {treatment}')
+                       explanation=f'casting {CASTING_READ_MS} ms after the cast: control {control}, fed {treatment}; '
+                                   f'casts gone off {went[ARMS[0]]} and {went[ARMS[1]]}, {fed_went} needed fed')
     hits = {arm: [] for arm in ARMS}
     count_before, total_before = 0.0, 0.0
     for arm in ARMS:

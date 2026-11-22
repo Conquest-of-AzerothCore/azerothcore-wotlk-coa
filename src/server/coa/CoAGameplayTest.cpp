@@ -8787,7 +8787,9 @@ private:
                 actor.clientReadyAtAttempt[spell] = ClientCooldownReady(actor, spell, GameNowMs());
                 if (step.get<bool>("ignore_gcd", false))
                 {
-                    player->GetGlobalCooldownMgr().CancelGlobalCooldown(sSpellMgr->GetSpellInfo(spell));
+                    SpellInfo const* gcdInfo = sSpellMgr->GetSpellInfo(spell);
+                    Require(gcdInfo != nullptr, "ignore_gcd needs a known spell");
+                    player->GetGlobalCooldownMgr().CancelGlobalCooldown(gcdInfo);
                     record.put("gcd_ignored", true);
                 }
                 player->GetSession()->HandleCastSpellOpcode(packet);

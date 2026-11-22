@@ -1098,6 +1098,8 @@ def validate(scenario, clock=REAL_CLOCK):
             if 'rejected' in step:
                 require(type(step['rejected']) is bool and 'block' in step,
                         f'{where}: rejected is a boolean that expects the block fixture to be refused')
+                require(step['rejected'] is not True or step['block'] > 0,
+                        f'{where}: a block chance of 0 is always reached, so it cannot be refused')
         if action == 'set_health' and 'maximum' in step:
             require(step['actor'] in player_ids, f'{where}: maximum health fixture needs a player or their pet')
             number(step['maximum'], f'{where}.maximum', 1, 2**31 - 1, True)
