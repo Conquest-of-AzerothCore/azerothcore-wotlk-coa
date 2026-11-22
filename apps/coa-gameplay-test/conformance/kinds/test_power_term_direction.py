@@ -1,10 +1,14 @@
 import random
+from statistics import NormalDist
 import unittest
 
 from behaviours import behaviour_scenario
 from compare import judge_behaviour
+from kinds.power_term_direction import (ARMS, CONTROL_PROBABILITY, DIRECTION_PROBABILITY, control_alerts,
+                                        direction_passes, judged_samples)
 from profile import DBC_DIR, load_fixture_class_file
 import run
+from stack import student_t_quantile
 from test_behaviours import FakeRun, base_verdict
 
 ENTRY = {'spell': 680656, 'name': "Sun's Gift (attack power term direction)", 'kind': 'power_term_direction',
@@ -45,6 +49,19 @@ def judged(means, **options):
 
 
 WITH_TERM = {'control low': 840.0, 'control high': 840.0, 'learned high': 1102.0, 'learned low': 857.0}
+NULL_PAIRS = 20000
+NULL_SAMPLES = 10
+BOUND = 0.001
+
+
+def null_pairs():
+    rolls = random.Random(20261122)
+    return [[judged_samples({arm: [rolls.gauss(0.0, 1.0) for _ in range(NULL_SAMPLES)] for arm in ARMS})
+             for _ in range(2)] for _ in range(NULL_PAIRS)]
+
+
+def normal_quantile(probability):
+    return NormalDist().inv_cdf(probability)
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
@@ -67,7 +84,10 @@ class PowerTermDirectionTests(unittest.TestCase):
         self.assertEqual(reads[expectation.model['reads']['control low']['power']]['metric'], 'attack_power')
         self.assertEqual(expectation.label, '680656 behaviour_metric_delta power_direction')
         self.assertIn('direction only: no figure judged', scenario['contract'])
-        self.assertIn('its false alert is 0.2% per run and 0.4% per pair under the normal law', scenario['contract'])
+        self.assertIn('two-sided at the 99.975% Student t quantile at the control arms\' Welch-Satterthwaite degrees '
+                      'of freedom (z 3.48 at infinite freedom): its false alert is 0.050% per run and 0.1% per pair',
+                      scenario['contract'])
+        self.assertIn('one-sided 99.9% Student t quantile', scenario['contract'])
 
     def test_a_term_that_grows_with_attack_power_only_with_the_passive_passes(self):
         verdict = judged(WITH_TERM)
@@ -112,3 +132,31 @@ class PowerTermDirectionTests(unittest.TestCase):
     def test_an_aura_without_attack_power_is_refused(self):
         with self.assertRaises(ValueError):
             built({**ENTRY, 'power_aura': 823764})
+
+
+class PowerTermDirectionNullRateTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.pairs = null_pairs()
+
+    def test_the_quantiles_are_the_student_t_quantiles_of_the_stated_levels(self):
+        self.assertAlmostEqual(CONTROL_PROBABILITY, 1 - (1 - 0.999 ** 0.5) / 2, places=12)
+        self.assertAlmostEqual(student_t_quantile(CONTROL_PROBABILITY, 36), 3.8255, places=3)
+        self.assertAlmostEqual(student_t_quantile(CONTROL_PROBABILITY, float('inf')), 3.4807, places=3)
+        self.assertAlmostEqual(student_t_quantile(DIRECTION_PROBABILITY, 30), 3.385, places=3)
+
+    def test_the_control_check_false_alert_without_any_growth_is_at_most_a_tenth_percent_per_pair(self):
+        alerted = sum(any(control_alerts(run) for run in pair) for pair in self.pairs)
+        normal = sum(any(abs(run.control.z) >= normal_quantile(CONTROL_PROBABILITY) for run in pair)
+                     for pair in self.pairs)
+        self.assertLessEqual(alerted / NULL_PAIRS, BOUND)
+        self.assertGreater(normal / NULL_PAIRS, 2 * BOUND)
+
+    def test_the_direction_false_pass_without_any_term_is_at_most_a_tenth_percent_per_run(self):
+        runs = [run for pair in self.pairs for run in pair]
+        passed = sum(direction_passes(run) for run in runs)
+        normal = sum(run.interaction.z >= normal_quantile(DIRECTION_PROBABILITY) for run in runs)
+        both = sum(all(direction_passes(run) for run in pair) for pair in self.pairs)
+        self.assertLessEqual(passed / len(runs), BOUND)
+        self.assertLessEqual(both / NULL_PAIRS, BOUND)
+        self.assertGreater(normal / len(runs), 1.5 * BOUND)

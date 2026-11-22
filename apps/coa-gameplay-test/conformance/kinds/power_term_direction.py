@@ -8,14 +8,16 @@ from behaviours import BEHAVIOUR_METRIC_DELTA, behaviour_entry, prose_rule, wait
 from compare import Run, Verdict, missing_measurement
 from hits import MAX_ACCELERATED_SCENARIO_MS, base_mana_steps, creature_fixture, timed
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
+from stack import student_t_quantile
 from tooltip import Records
 from values import Expectation, TARGET, dataset, facts_of
 
 KIND = 'power_term_direction'
 ORDER = 47
-ONE_SIDED_Z = NormalDist().inv_cdf(0.999)
-CONTROL_FALSE_ALERT_PER_RUN = 2 * (1 - NormalDist().cdf(ONE_SIDED_Z))
-CONTROL_FALSE_ALERT_PER_PAIR = 1 - (1 - CONTROL_FALSE_ALERT_PER_RUN) ** 2
+DIRECTION_PROBABILITY = 0.999
+CONTROL_FALSE_ALERT_PER_PAIR = 0.001
+CONTROL_FALSE_ALERT_PER_RUN = 1 - math.sqrt(1 - CONTROL_FALSE_ALERT_PER_PAIR)
+CONTROL_PROBABILITY = 1 - CONTROL_FALSE_ALERT_PER_RUN / 2
 MIN_SAMPLES = 10
 MAXIMUM_STEPS = 10000
 ATTACK_POWER_AURA = 99
@@ -123,18 +125,22 @@ def power_term_direction_scenario(class_file: dict, spec: PowerTermDirectionSpec
                      f'{spec.power_aura} ({spec.power_aura_source}), with {spec.talent} learned and the aura, and '
                      f'with {spec.talent} after the aura is removed. The attack power is read before each arm and '
                      f'each non-critical hit is one sample. The interaction (learned high - control high) - '
-                     f'(learned low - control low) must exceed 0 at one-sided z {ONE_SIDED_Z:.2f} (Welch standard '
-                     f'error) while the control arms do not grow with attack power: {OK_TEXT}. The control check '
-                     f'is two-sided at the same z: its false alert is {CONTROL_FALSE_ALERT_PER_RUN:.1%} per run and '
-                     f'{CONTROL_FALSE_ALERT_PER_PAIR:.1%} per pair under the normal law, more under the t law of '
-                     f'{spec.casts} samples per arm; a false pass needs the interaction above z '
-                     f'{ONE_SIDED_Z:.2f} in both runs.'
+                     f'(learned low - control low) must reach the one-sided {DIRECTION_PROBABILITY:.1%} Student t '
+                     f'quantile at its Welch-Satterthwaite degrees of freedom (Welch standard error; z '
+                     f'{NormalDist().inv_cdf(DIRECTION_PROBABILITY):.2f} at infinite freedom) while the control arms '
+                     f'do not grow with attack power: {OK_TEXT}. The control check is two-sided at the '
+                     f'{CONTROL_PROBABILITY:.3%} Student t quantile at the control arms\' Welch-Satterthwaite '
+                     f'degrees of freedom (z {NormalDist().inv_cdf(CONTROL_PROBABILITY):.2f} at infinite freedom): '
+                     f'its false alert is {CONTROL_FALSE_ALERT_PER_RUN:.3%} per run and '
+                     f'{CONTROL_FALSE_ALERT_PER_PAIR:.1%} per pair; a false pass needs the interaction above its '
+                     f'quantile in both runs, at most {1 - DIRECTION_PROBABILITY:.1%} per run.'
                      + ''.join(f' Aura {spell} is set on the caster at {stacks} stacks before each cast.'
                                for spell, stacks in spec.attempt_auras)),
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
-    model = {'kind': KIND, 'metric': 'spell_damage_total', 'quote': entry.quote, 'z': ONE_SIDED_Z,
+    model = {'kind': KIND, 'metric': 'spell_damage_total', 'quote': entry.quote,
+             'direction_probability': DIRECTION_PROBABILITY, 'control_probability': CONTROL_PROBABILITY,
              'minimum_samples': MIN_SAMPLES, 'power_aura': spec.power_aura, 'fixture': named, 'reads': reads}
     expectation = Expectation(mark(spec, '').rstrip(), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.talent, None,
                               'direction', prose_rule(entry.quote, spec.spell), model)
@@ -147,14 +153,60 @@ def arm_samples(values: dict, reads: dict) -> list[float]:
             if counts[cast] - counts[cast - 1] == 1]
 
 
-def welch(high: list[float], low: list[float]) -> tuple[float, float]:
-    return fmean(high) - fmean(low), math.sqrt(variance(high) / len(high) + variance(low) / len(low))
-
-
 def z_of(difference: float, error: float) -> float:
     if error > 0:
         return difference / error
     return math.inf if difference > 0 else -math.inf if difference < 0 else 0.0
+
+
+@dataclass(frozen=True)
+class Statistic:
+    difference: float
+    error: float
+    dof: float
+
+    @property
+    def z(self) -> float:
+        return z_of(self.difference, self.error)
+
+
+@dataclass(frozen=True)
+class Judged:
+    means: dict[str, float]
+    control: Statistic
+    learned_growth: float
+    interaction: Statistic
+
+
+def welch(difference: float, arms: list[tuple[float, int]]) -> Statistic:
+    shares = sum(share for share, _ in arms)
+    dof = shares ** 2 / sum(share ** 2 / (count - 1) for share, count in arms) if shares > 0 else math.inf
+    return Statistic(difference, math.sqrt(shares), dof)
+
+
+def judged_samples(samples: dict[str, list[float]]) -> Judged:
+    means = {arm: fmean(found) for arm, found in samples.items()}
+    arms = {arm: (variance(found) / len(found), len(found)) for arm, found in samples.items()}
+    control = means['control high'] - means['control low']
+    learned = means['learned high'] - means['learned low']
+    return Judged(means, welch(control, [arms['control high'], arms['control low']]), learned,
+                  welch(learned - control, list(arms.values())))
+
+
+def reaches(z: float, probability: float, dof: float) -> bool:
+    return z >= NormalDist().inv_cdf(probability) and z >= student_t_quantile(probability, dof)
+
+
+def control_alerts(judged: Judged, probability: float = CONTROL_PROBABILITY) -> bool:
+    return reaches(abs(judged.control.z), probability, judged.control.dof)
+
+
+def direction_passes(judged: Judged, probability: float = DIRECTION_PROBABILITY) -> bool:
+    return reaches(judged.interaction.z, probability, judged.interaction.dof)
+
+
+def quantile_text(probability: float, dof: float) -> str:
+    return f'{student_t_quantile(probability, dof):.2f} at {dof:.1f} degrees of freedom'
 
 
 def power_term_direction_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
@@ -173,26 +225,29 @@ def power_term_direction_verdict(base: Verdict, run: Run, model: dict) -> Verdic
     if short:
         return replace(base, status='insufficient_trials',
                        explanation=f'fewer than {model["minimum_samples"]} non-critical hits in {short}')
-    means = {arm: fmean(found) for arm, found in samples.items()}
-    control, control_error = welch(samples['control high'], samples['control low'])
-    learned, learned_error = welch(samples['learned high'], samples['learned low'])
-    interaction, error = learned - control, math.hypot(control_error, learned_error)
-    z, control_z, threshold = z_of(interaction, error), z_of(control, control_error), model['z']
+    found = judged_samples(samples)
+    control, interaction = found.control, found.interaction
+    control_p, direction_p = model['control_probability'], model['direction_probability']
     stated = (f'attack power {power["control low"]:g} / {power["control high"]:g} (control), '
               f'{power["learned low"]:g} / {power["learned high"]:g} (learned); mean non-critical hit '
-              + ', '.join(f'{arm} {mean:.2f} ({len(samples[arm])})' for arm, mean in means.items())
-              + f'; control growth {control:.2f} (z {control_z:.2f}), learned growth {learned:.2f}, interaction '
-                f'{interaction:.2f} (Welch standard error {error:.2f}, z {z:.2f} against {threshold:.2f}); '
+              + ', '.join(f'{arm} {mean:.2f} ({len(samples[arm])})' for arm, mean in found.means.items())
+              + f'; control growth {control.difference:.2f} (z {control.z:.2f} against the two-sided t quantile '
+                f'{quantile_text(control_p, control.dof)}), learned growth {found.learned_growth:.2f}, interaction '
+                f'{interaction.difference:.2f} (Welch standard error {interaction.error:.2f}, z {interaction.z:.2f} '
+                f'against the one-sided t quantile {quantile_text(direction_p, interaction.dof)}); '
                 f'fixture: {model["fixture"]}')
-    detail = {'interaction': interaction, 'standard_error': error, 'z': z, 'control_growth': control,
-              'learned_growth': learned, 'means': means, 'attack_power': power}
-    if abs(control_z) >= threshold:
-        return replace(base, status='alert', measured=interaction, detail=detail,
+    detail = {'interaction': interaction.difference, 'standard_error': interaction.error, 'z': interaction.z,
+              'dof': interaction.dof, 'control_growth': control.difference, 'control_z': control.z,
+              'control_dof': control.dof, 'learned_growth': found.learned_growth, 'means': found.means,
+              'attack_power': power}
+    measured = interaction.difference
+    if control_alerts(found, control_p):
+        return replace(base, status='alert', measured=measured, detail=detail,
                        explanation=f'without the passive the damage changes with attack power: {stated}')
-    if z < threshold:
-        return replace(base, status='alert', measured=interaction, detail=detail,
+    if not direction_passes(found, direction_p):
+        return replace(base, status='alert', measured=measured, detail=detail,
                        explanation=f'the passive adds no damage that grows with attack power: {stated}')
-    return replace(base, status='ok', measured=interaction, detail=detail, explanation=f'{OK_TEXT}: {stated}')
+    return replace(base, status='ok', measured=measured, detail=detail, explanation=f'{OK_TEXT}: {stated}')
 
 
 def scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:

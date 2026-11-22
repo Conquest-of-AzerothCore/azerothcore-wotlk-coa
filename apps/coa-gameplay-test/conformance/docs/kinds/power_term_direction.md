@@ -15,17 +15,19 @@ The verdict:
 
 - a missing read is `unmeasured`; an aura that did not raise the attack power in both pairs is `unmeasured`;
 - fewer than 10 samples in an arm is `insufficient_trials`;
-- the control growth `control high - control low` at |z| >= 3.09 (Welch) alerts: the damage changes with attack
-  power without the passive;
-- the interaction `(learned high - control high) - (learned low - control low)` below one-sided z 3.09 (Welch
-  standard error over the four arms) alerts: the passive adds no damage that grows with attack power;
-- otherwise `ok`, worded "direction only: no figure judged", with the means, the attack powers, the growths and the
-  z in the text.
+- the control growth `control high - control low` with |z| (Welch) at or above the two-sided Student t quantile of
+  a 0.05% per-run level (`1 - sqrt(0.999)`) at the control arms' Welch-Satterthwaite degrees of freedom alerts (3.83
+  at 36 degrees of freedom, z 3.48 at infinite freedom): the damage changes with attack power without the passive;
+- the interaction `(learned high - control high) - (learned low - control low)` with z (Welch standard error over
+  the four arms) below the one-sided 99.9% Student t quantile at its Welch-Satterthwaite degrees of freedom alerts:
+  the passive adds no damage that grows with attack power;
+- otherwise `ok`, worded "direction only: no figure judged", with the means, the attack powers, the growths, each z
+  and its quantile with the degrees of freedom in the text.
 
 Every judged verdict ends with "fixture: <power aura name> <id> set by harness set_aura on the caster for the high
-arms", followed by each `attempt_auras` spell with its stacks. The contract states the control check's false alert:
-two-sided at z 3.09, 0.2% per run and 0.4% per pair under the normal law, more under the t law of the arms' samples
-(about 0.8% per pair at 36 degrees of freedom); a false pass needs the interaction above z 3.09 in both runs.
+arms", followed by each `attempt_auras` spell with its stacks. The contract states both levels: the control check's
+false alert is 0.05% per run and 0.1% per pair (D-197); a false pass needs the interaction above its quantile in both
+runs, at most 0.1% per run (mentor D-127; the quantile is `stack.student_t_quantile`).
 
 Entry fields: `spell`, `name`, `quote`, `talent`, `cast_spell`, `power_aura` (a spell with aura 99
 `SPELL_AURA_MOD_ATTACK_POWER`), `power_aura_source`, `casts` (at least 10), `cast_wait_ms`, optional `attempt_auras`

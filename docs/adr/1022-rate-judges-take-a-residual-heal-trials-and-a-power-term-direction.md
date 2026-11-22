@@ -56,13 +56,20 @@ finished-class snapshots regenerate unchanged).
   accepted as an ally trigger only with this trial.
 - A new kind `power_term_direction` casts the spell in four arms (without the passive at base and raised attack power,
   with the passive at raised and base attack power), the attack power read before each arm and every non-critical hit
-  one sample. It judges the interaction `(learned high - control high) - (learned low - control low) > 0` at one-sided
-  z 3.09 (Welch standard error) and alerts when the control arms change with attack power: the term belongs to the
-  passive. `ok` says "direction only: no figure judged"; an entry with an expected figure or a quote with a figure is
-  refused (a figure goes to `stat_gain` or `hit_ratio` with its own proof). The verdict names its fixtures (the attack
-  power aura and the `attempt_auras`, set by harness `set_aura`), and the contract states the control check's false
-  alert: two-sided at z 3.09, 0.2% per run and 0.4% per pair under the normal law, more under the t law of the
-  arms' samples.
+  one sample. It judges the interaction `(learned high - control high) - (learned low - control low) > 0` against the
+  one-sided 99.9% Student t quantile at its Welch-Satterthwaite degrees of freedom over the four arms (Welch standard
+  error; z 3.09 at infinite freedom) and alerts when the control growth `control high - control low` reaches the
+  two-sided Student t quantile of a 0.05% per-run level (`1 - sqrt(0.999)`) at the control arms' Welch-Satterthwaite
+  degrees of freedom (3.83 at 36, z 3.48 at infinite freedom): the term belongs to the passive. `ok` says "direction
+  only: no figure judged"; an entry with an expected figure or a quote with a figure is refused (a figure goes to
+  `stat_gain` or `hit_ratio` with its own proof). The verdict names its fixtures (the attack power aura and the
+  `attempt_auras`, set by harness `set_aura`), and the contract states both levels: the control check's false alert is
+  0.05% per run and 0.1% per pair (D-197), and a false pass needs the interaction above its quantile in both runs, at
+  most 0.1% per run. The t quantile is `stack.student_t_quantile`, the one the band and exclusion judges use. Mentor
+  D-127 replaced the first version's normal quantiles (z 3.09 on both sides: 0.77% per pair for the control at 36
+  degrees of freedom, review I-A). A seeded null simulation in the kind's tests (20000 pairs, 10 samples per arm, equal
+  spreads) gives 0.055% per pair for the control alert and 0.075% per run for the false pass, against 0.51% and 0.17% at
+  the normal quantiles.
 
 ## Consequences
 
@@ -74,10 +81,10 @@ finished-class snapshots regenerate unchanged).
   2300 ms weapon) and 704920 188 and 230 parts (the 1.5x outcome margin of the proc plan).
 - The rate proves the chance of 704920, not the healing increase of the next Illumination or Radiant Cascade: the
   ledger splits each clause into the chance claim and the increase claim, which stays open.
-- The control check of `power_term_direction` exceeds the 0.1% per-pair false-alert bound of D-197 (0.4% per pair
-  under the normal law); its threshold is unchanged here and stated in the contract.
+- The control check of `power_term_direction` meets the 0.1% per-pair false-alert bound of D-197 under the t law;
+  the higher quantile lowers only the guard's power.
 - The residual sizing does not shorten a run: the band's own minimum still applies.
-- The direction judge's false alert rests on the measured spread and is printed as the z of the interaction; the
-  0.25 x AP stays an owner observation.
+- The direction judge's levels rest on the Welch-Satterthwaite approximation of the measured spreads; the verdict
+  prints each z with its t quantile and degrees of freedom. The 0.25 x AP stays an owner observation.
 - Not checked: whether the server's chain-heal target search ever picks a full-health caster; the caster guard read
   makes it visible instead.
