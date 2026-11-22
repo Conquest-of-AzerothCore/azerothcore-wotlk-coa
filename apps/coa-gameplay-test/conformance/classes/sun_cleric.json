@@ -23259,6 +23259,41 @@
       "observe_source": "704941 Light of the Sun Effect[0] aura 42 PROC_TRIGGER_SPELL 707843; 707843 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT BasePoints 29 + 1 = 30 ($707843s1), DurationIndex 28 (5000 ms), no charges. The scenario is the one of the aura_amount entry (a parried Speed Slash 2118233 in each phase, caster parry chance forced to 100% by harness set_combat_avoidance as a named precondition fixture of both phases, 704941 learned between the phases), but the read is the live unit value: PLAYER_PARRY_PERCENTAGE (CoAGameplayTest.cpp:5133), read 500 ms after the Holy Form 805301 cast and the strike: the gain of the learned phase over the phase without it (the control) is 30 points, within 0.01. Reference search 2026-11-22: coa-history spell 707843 Light of the Sun: 2 SPELL_AURA_APPLIED, 2 SPELL_AURA_REMOVED and 2 SPELL_HEAL (90 to 101) in 2 logs (the aura exists in real play, no parry chance in the events), 704941 0 events (a passive); bindmysoul snapshot (fetched 2026-07-22) carries \"Parrying an attack now restores 3% of your maximum health and increases your chance to parry the next attack by 30%.\" (same figures); nothing else found."
     },
     {
+      "spell": 704941,
+      "kind": "metric_delta",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "strike": {
+        "spell": 2118233,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300
+      },
+      "caster_avoidance": {
+        "parry": 100
+      },
+      "name": "Light of the Sun (the +30% parry is consumed by the next attack)",
+      "variant": "parry_next",
+      "label_suffix": "parry_next",
+      "quote": "and increases your chance to parry the next attack by $707843s1%.",
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 707843,
+        "effect": 0
+      },
+      "expected": 0,
+      "second_strike": {
+        "spell": 23583,
+        "present": 30
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "707843 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT BasePoints 29 + 1 = 30 ($707843s1), DurationIndex 28 (5000 ms), ProcCharges 0, ProcFlags 0, AuraInterruptFlags 0 (Spell.dbc, /srv/coa/server-data/dbc); the class code only casts it on a parry (AscensionSunClericEvents.cpp). The scenario is the one of the parry entry (a Speed Slash 2118233 parried at a caster parry chance forced to 100%, harness set_combat_avoidance, a named precondition fixture; Holy Form 805301 the trigger cast; 704941 learned between the phases), then metric_delta second_strike: right after the Holy Form cast the aura amount is read and must be 30 in the treatment phase (the aura the next attack meets), the caster's dodge and parry are set to 0% and the striker casts Night Slaughter 23583 at the caster (SPELL_ATTR0_NO_ACTIVE_DEFENSE: never dodged or parried, so it cannot re-apply the aura through a parry), 300 ms, then the entry's 500 ms wait and the read of the amount of effect 0 of 707843 on the caster. Expected from the tooltip ('the next attack'): 0, the bonus consumed by the attack that followed; control: the phase without 704941 has no aura, 0. The read comes about 1.1 s after the parry, inside the 5000 ms duration, so a 0 cannot be the aura's expiry. The damage logs of 23583 are counted after the after reading: no landed second strike, or a present read other than 30, makes the trial unmeasured. A reading of 30 is a finding against the tooltip (no server change in this entry). Reference search 2026-11-22: as the parry entry (bindmysoul snapshot 2026-07-22 carries the same tooltip; coa-history 707843: 2 SPELL_AURA_APPLIED and 2 SPELL_AURA_REMOVED in 2 logs, no consumption timing); nothing found on consumption."
+    },
+    {
       "spell": 300343,
       "name": "Savior (critical strike chance below 20% health)",
       "kind": "metric_delta",
@@ -36589,6 +36624,172 @@
       ],
       "dummy_distance": 3,
       "phase_power_in_uncast_before": true
+    },
+    {
+      "spell": 300353,
+      "kind": "metric_delta",
+      "gate_spell": 300353,
+      "trigger_spell": 800617,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "cast_power": 1363,
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 600,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800617,
+        "target": "dummy"
+      },
+      "expected": 1,
+      "tolerance": 0,
+      "void_on_cast_failure": true,
+      "quote": "Your Gavels can no longer be missed, dodged, or parried",
+      "name": "Heaven's Appraisal (a Gavel of Wrath is not dodged by a 100% dodge dummy)",
+      "variant": "gavel_undodged",
+      "label_suffix": "gavel_undodged",
+      "phase_auras": [
+        [
+          805301,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          10020,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "observe_source": "300353 Heaven's Appraisal: Spell.dbc Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 16 (SPELLMOD_RESIST_MISS_CHANCE) BasePoints 999 on class mask word 1 = 32; Effects 1 and 2 are rewritten at load to SPELL_AURA_IGNORE_COMBAT_RESULT MELEE_HIT_DODGE and MELEE_HIT_PARRY with class mask word 1 = 32 (AscensionSunClericContracts.cpp:184-189); Gavel of Wrath 800617 carries SpellFamilyFlags[1] = 32 and Effect[0] 121 NORMALIZED_WEAPON_DMG (the melee spell table, Unit::MeleeSpellHitResult, whose IGNORE_COMBAT_RESULT loop clears canDodge / canParry). The class code sets no Holy Form condition on the avoidance part (no HasAura(HolyForm) on these effects); Holy Form 805301 is set on the caster in both phases (harness set_aura, a precondition fixture) so the entry holds under both readings of 'when under Holy Form'. QA Test 100% Dodge 10020 (Effect[0] aura 49 SPELL_AURA_MOD_DODGE_PERCENT BasePoints 99 + 1 = 100) is set on the dummy in both phases, a named precondition fixture (the subject is the Gavel's table, not the fixture). One Gavel of Wrath per phase at the dummy, the damage events (spell_damage_count, a dodged spell logs none) of 800617 on the dummy are counted: control without 300353 dodged, 0; with 300353 learned, 1. A control reading above 0 shows the fixture did not dodge (the entry then proves nothing and is unmeasured by review). Reference search 2026-11-22: bindmysoul snapshot (2026-07-22) carries the same tooltip for 300353; nothing else found. The phases are 1600 ms apart (wait_ms 1000 + expire_ms 600), past the 1500 ms global cooldown (StartRecoveryTime 1500)."
+    },
+    {
+      "spell": 300353,
+      "kind": "metric_delta",
+      "gate_spell": 300353,
+      "trigger_spell": 800617,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "cast_power": 1363,
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 600,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800617,
+        "target": "dummy"
+      },
+      "expected": 1,
+      "tolerance": 0,
+      "void_on_cast_failure": true,
+      "quote": "Your Gavels can no longer be missed, dodged, or parried",
+      "name": "Heaven's Appraisal (a Gavel of Wrath is not parried by a 100% parry dummy)",
+      "variant": "gavel_unparried",
+      "label_suffix": "gavel_unparried",
+      "phase_auras": [
+        [
+          805301,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          10019,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "observe_source": "300353 Heaven's Appraisal: Spell.dbc Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 16 (SPELLMOD_RESIST_MISS_CHANCE) BasePoints 999 on class mask word 1 = 32; Effects 1 and 2 are rewritten at load to SPELL_AURA_IGNORE_COMBAT_RESULT MELEE_HIT_DODGE and MELEE_HIT_PARRY with class mask word 1 = 32 (AscensionSunClericContracts.cpp:184-189); Gavel of Wrath 800617 carries SpellFamilyFlags[1] = 32 and Effect[0] 121 NORMALIZED_WEAPON_DMG (the melee spell table, Unit::MeleeSpellHitResult, whose IGNORE_COMBAT_RESULT loop clears canDodge / canParry). The class code sets no Holy Form condition on the avoidance part (no HasAura(HolyForm) on these effects); Holy Form 805301 is set on the caster in both phases (harness set_aura, a precondition fixture) so the entry holds under both readings of 'when under Holy Form'. QA Test 100% Parry 10019 (Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT BasePoints 99 + 1 = 100) is set on the dummy in both phases, a named precondition fixture. A parry needs the dummy to face the caster (MeleeSpellHitResult: HasInArc(M_PI) else canParry false); the control phase reads it: without 300353 the Gavel is parried, 0 damage events of 800617 on the dummy; with 300353 learned, 1. A control reading above 0 shows the dummy did not parry (facing or flags_extra NO_PARRY) and the entry proves nothing. Reference search 2026-11-22: bindmysoul snapshot (2026-07-22) carries the same tooltip for 300353; nothing else found. The phases are 1600 ms apart (wait_ms 1000 + expire_ms 600), past the 1500 ms global cooldown (StartRecoveryTime 1500)."
+    },
+    {
+      "spell": 300353,
+      "kind": "metric_delta",
+      "gate_spell": 300353,
+      "trigger_spell": 800611,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "player_attack_power": 20000,
+      "metric": "aura",
+      "fields": {
+        "spell": 805489,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "tolerance": 0,
+      "void_on_cast_failure": true,
+      "quote": "Gavel of Light: Places an absorption shield equal to the amount healed.",
+      "name": "Heaven's Appraisal (Gavel of Light places Holy Shield under Holy Form)",
+      "variant": "light_shield",
+      "label_suffix": "light_shield",
+      "expected": 1,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          805301,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Code path: AscensionSunClericAbilities.cpp:343-356, a damaging Gavel of Light 800611 copies CalculatePct(damage, share) to the caster as the heal 707522 and, when the caster has Holy Form and 300353, the same amount as Holy Shield 805489 (Spell.dbc Effect[0] aura 69 SCHOOL_ABSORB MiscValue 127, all schools, DurationIndex 8). The setup is the one of the gavel_heal entries (Gavel of Light at the dummy, caster health 50%, player_attack_power 20000, 984954 and 823764 on the caster). The presence of 805489 on the caster is read 1500 ms after the cast. Holy Form 805301 is set on the caster in both phases (harness set_aura, a precondition fixture). Control without 300353: no shield, 0; with 300353: 1. Reference search 2026-11-22: bindmysoul snapshot (2026-07-22) carries the same tooltip for 300353; nothing else found."
+    },
+    {
+      "spell": 300353,
+      "kind": "metric_delta",
+      "gate_spell": 300353,
+      "trigger_spell": 800611,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "player_attack_power": 20000,
+      "metric": "aura",
+      "fields": {
+        "spell": 805489,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "tolerance": 0,
+      "void_on_cast_failure": true,
+      "quote": "Gavel of Light: Places an absorption shield equal to the amount healed.",
+      "name": "Heaven's Appraisal (control: Gavel of Light without Holy Form places no shield)",
+      "variant": "light_shield_control",
+      "label_suffix": "light_shield_control",
+      "expected": 0,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Code path: AscensionSunClericAbilities.cpp:343-356, a damaging Gavel of Light 800611 copies CalculatePct(damage, share) to the caster as the heal 707522 and, when the caster has Holy Form and 300353, the same amount as Holy Shield 805489 (Spell.dbc Effect[0] aura 69 SCHOOL_ABSORB MiscValue 127, all schools, DurationIndex 8). The setup is the one of the gavel_heal entries (Gavel of Light at the dummy, caster health 50%, player_attack_power 20000, 984954 and 823764 on the caster). The presence of 805489 on the caster is read 1500 ms after the cast. Without Holy Form on the caster the condition is false: no shield in either phase, 0 before and 0 after 300353 is learned. Reference search 2026-11-22: as light_shield; nothing else found."
     },
     {
       "spell": 704579,

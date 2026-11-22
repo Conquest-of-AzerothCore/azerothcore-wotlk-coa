@@ -651,14 +651,47 @@
   {
     "spell": 300353,
     "clause": "Your Gavels can no longer be missed, dodged, or parried and they gain an empowered effect when under Holy Form.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "can no longer be missed",
+        "labels": []
+      },
+      {
+        "claim": "can no longer be dodged",
+        "labels": [
+          "300353 behaviour_metric_delta gavel_undodged"
+        ]
+      },
+      {
+        "claim": "can no longer be parried",
+        "labels": [
+          "300353 behaviour_metric_delta gavel_unparried"
+        ]
+      },
+      {
+        "claim": "they gain an empowered effect when under Holy Form (the Gavel of Light, Grace and Wrath clauses)",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 300353,
     "clause": "Gavel of Light: Places an absorption shield equal to the amount healed.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Gavel of Light places an absorption shield (under Holy Form)",
+        "labels": [
+          "300353 behaviour_metric_delta light_shield",
+          "300353 behaviour_metric_delta light_shield_control"
+        ]
+      },
+      {
+        "claim": "the shield equals the amount healed",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 300353,
@@ -4756,7 +4789,9 @@
       },
       {
         "claim": "the next attack (the bonus is consumed by the next attack)",
-        "labels": []
+        "labels": [
+          "704941 behaviour_metric_delta parry_next"
+        ]
       }
     ],
     "reason": "Open, not status 5 (no measurement yet). Lead from the data: 707843 has DurationIndex 28 (5000 ms), ProcCharges 0, ProcFlags 0 and AuraInterruptFlags 0 (Spell.dbc), its only server reference is the cast at AscensionSunClericEvents.cpp:297 and data/sql holds no spell_proc row for it, so nothing consumes the aura on the next attack: the +30 would last 5 s over several attacks. No check shows it, and a parried strike procs the aura again, so a plain second strike at 100% parry cannot tell consumption from a refresh. Reference search 2026-11-22: bindmysoul snapshot carries the same tooltip; nothing found on consumption."
