@@ -12700,6 +12700,154 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "Blightbreaker 707433 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 19 (SPELLMOD_ACTIVATION_TIME, the period of a periodic aura), BasePoints -51 + 1 = -50 ($s1 shown unsigned), and Effect[1] MiscValue 14 (SPELLMOD_COST), BasePoints 99 + 1 = 100 ($s2), both on Mercy 504848's class mask (SpellFamilyFlags[0] 32). Mercy 504848 Effect[0] aura 23 PERIODIC_TRIGGER_SPELL, EffectAmplitude 3000, ManaCostPercentage 21 of the reference base mana 1363 (286.23). The use-time cost function of Mercy is read before the learn (21% x 1363 = 286.23, the control) and after it (+100%: 572.46), the same shape as Resplendence's cost entry (spell 806159)."
+    },
+    {
+      "spell": 800602,
+      "name": "Empowered Holy Form (Ancient Rites first tick by 10.8 s)",
+      "kind": "metric_delta",
+      "variant": "period_upper",
+      "label_suffix": "period_upper",
+      "quote": "Doubles the effectiveness of your Holy Form and reduces the tick rate of Ancient Rites by $/1000;s2 sec.",
+      "gate_spell": 300351,
+      "learn": [
+        800602
+      ],
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 301368
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 10300,
+      "observe_source": "800602 Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 19 (SPELLMOD_ACTIVATION_TIME, SpellDefines.h:95, the period of a periodic aura), BasePoints -5001 = -5000 ms ($/1000;s2 = 5 s); Ancient Rites 300351 (rank 1, the rank the class code reduces: AscensionSunClericAuras.cpp:133 Named(GetSpellInfo(),300351)) Effect[0] aura 227 EffectAmplitude 15000 triggers the energize 301368, so the period is 15000 - 5000 = 10000 ms. 800602 is known from the start (learn) and Ancient Rites 300351 is the gate learned between the phases: the periodic aura is created with the modifier in place and the before phase has no Ancient Rites at all (its energize count is 0). The energize events of 301368 are counted a set time after the Holy Form cast of the second phase, which follows the gate learn by 500 ms (expire_ms) plus no cast delay (the cast is instant). Read 10300 ms after the cast, 10.8 to 10.9 s after the gate learn: exactly 1 energize, so the period is at most 10.9 s (excludes 11 s, +10%). Control entry period_control: the same two phases without 800602, 0 energize at the same time. Reference search 2026-11-22: coa-history and merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 800602,
+      "name": "Empowered Holy Form (Ancient Rites no tick by 9.1 s)",
+      "kind": "metric_delta",
+      "variant": "period_lower",
+      "label_suffix": "period_lower",
+      "quote": "Doubles the effectiveness of your Holy Form and reduces the tick rate of Ancient Rites by $/1000;s2 sec.",
+      "gate_spell": 300351,
+      "learn": [
+        800602
+      ],
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 301368
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 8600,
+      "observe_source": "800602 Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 19 (SPELLMOD_ACTIVATION_TIME, SpellDefines.h:95, the period of a periodic aura), BasePoints -5001 = -5000 ms ($/1000;s2 = 5 s); Ancient Rites 300351 (rank 1, the rank the class code reduces: AscensionSunClericAuras.cpp:133 Named(GetSpellInfo(),300351)) Effect[0] aura 227 EffectAmplitude 15000 triggers the energize 301368, so the period is 15000 - 5000 = 10000 ms. 800602 is known from the start (learn) and Ancient Rites 300351 is the gate learned between the phases: the periodic aura is created with the modifier in place and the before phase has no Ancient Rites at all (its energize count is 0). The energize events of 301368 are counted a set time after the Holy Form cast of the second phase, which follows the gate learn by 500 ms (expire_ms) plus no cast delay (the cast is instant). Read 8600 ms after the cast, 9.1 to 9.2 s after the gate learn: 0 energize, so the period is above 9.2 s (excludes 9 s, -10%). With period_upper the period lies in (9.2 s, 10.9 s]. Control entry period_control. Reference search 2026-11-22: coa-history and merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 800602,
+      "name": "Empowered Holy Form (control: no tick by 10.8 s without it)",
+      "kind": "metric_delta",
+      "variant": "period_control",
+      "label_suffix": "period_control",
+      "quote": "Doubles the effectiveness of your Holy Form and reduces the tick rate of Ancient Rites by $/1000;s2 sec.",
+      "gate_spell": 300351,
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 301368
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 10300,
+      "observe_source": "Control arm of period_upper: the same two phases with 800602 not known. Ancient Rites keeps its 15000 ms period (301345 Effect[0] EffectAmplitude 15000), so no energize of 301368 lands by 10.8 s after the gate learn: 0, where period_upper reads 1. Reference search 2026-11-22: coa-history and merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 800602,
+      "name": "Empowered Holy Form (Ancient Rites 301345 first tick by 10.8 s)",
+      "kind": "metric_delta",
+      "variant": "period_upper_301345",
+      "label_suffix": "period_upper_301345",
+      "quote": "Doubles the effectiveness of your Holy Form and reduces the tick rate of Ancient Rites by $/1000;s2 sec.",
+      "gate_spell": 301345,
+      "learn": [
+        800602
+      ],
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 301368
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 10300,
+      "observe_source": "Same as period_upper for the other rank of the talent Ancient Rites: 301345 has the same Effect[0] aura 227 EffectAmplitude 15000 and the same name and tooltip words, and the tooltip of 800602 says only 'Ancient Rites'. Read 10300 ms after the cast: the period of 301345 is expected at most 10.9 s. Reference search 2026-11-22: coa-history and merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 800602,
+      "name": "Empowered Holy Form (Ancient Rites 301817 first tick by 10.8 s)",
+      "kind": "metric_delta",
+      "variant": "period_upper_301817",
+      "label_suffix": "period_upper_301817",
+      "quote": "Doubles the effectiveness of your Holy Form and reduces the tick rate of Ancient Rites by $/1000;s2 sec.",
+      "gate_spell": 301817,
+      "learn": [
+        800602
+      ],
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 301368
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 10300,
+      "observe_source": "Same as period_upper for the other rank of the talent Ancient Rites: 301817 has the same Effect[0] aura 227 EffectAmplitude 15000 and the same name and tooltip words, and the tooltip of 800602 says only 'Ancient Rites'. Read 10300 ms after the cast: the period of 301817 is expected at most 10.9 s. Reference search 2026-11-22: coa-history and merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 547214,
+      "name": "Luminary Mendicant (mana restored by Vow of Grace)",
+      "kind": "metric_delta",
+      "variant": "vow_grace_mana",
+      "label_suffix": "vow_grace_mana",
+      "quote": "Increases the mana restored by Vow of Grace by $s1%",
+      "gate_spell": 547214,
+      "trigger_spell": 500154,
+      "target": "dummy",
+      "setup_casts": [
+        803719
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 504877
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "expected_ratio": 3.0,
+      "tolerance": 0.05,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "Vow of Grace 803719 (cast on the caster before each phase) restores CalculatePct(missing mana, 5%) plus 504877 m1 on a direct ability hit (AscensionSunClericEvents.cpp:214-219); 547214 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8, BasePoints 99 + 1 = 100 ($s1), and the handler adds AddPct(mana, Amount(547214)) when the caster has it. Horusath Blast 500154 is cast at the dummy in both phases with the same starting mana; the energize events of 504877 (the Mana() source) are totalled. The energize totals are cumulative over the scenario: the first reading is one event of X (the first phase, no 547214), the second reading is X plus one event of 2X (+100% by the tooltip), so the stated ratio is (X + 2X) / X = 3.0, tolerance 0.05 (excludes 2.95 and 3.05; the first reading must be above 0, the event count of 504877 is 1 then 2). Control: the first phase without 547214. Reference search 2026-11-22: coa-history and merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
     }
   ],
   "player_observations": [],
