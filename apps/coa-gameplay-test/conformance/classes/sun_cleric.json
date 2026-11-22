@@ -27045,6 +27045,61 @@
     },
     {
       "spell": 680637,
+      "name": "Hope (explosion split between three enemies within the radius, none outside)",
+      "kind": "metric_delta",
+      "variant": "split_radius",
+      "label_suffix": "split_radius",
+      "quote": "When the absorption shield from The Chosen is depleted, it explodes for ${$570187m1*$<scalingbp>+$AP*0.25+$sph*0.45} Holy damage, split between enemies within $570187a1 yds.",
+      "gate_spell": 680637,
+      "learn": [
+        704936
+      ],
+      "trigger_spell": 500143,
+      "target": "caster",
+      "caster_health_pct": 30,
+      "cast_power": 1363,
+      "strike": {
+        "spell": 47632,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 3200
+      },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 570187,
+        "target": "dummy"
+      },
+      "dummy_distance": 5,
+      "area_dummies": [
+        6.0,
+        11.0
+      ],
+      "area_sum": true,
+      "before_expected": 0,
+      "expected": 64,
+      "tolerance": 2.0,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "observe_source": "Expected from the tooltip and the DBC: 570187 Effect[0] BasePoints 79 with the 0.25 x attack power term at the reference attack power 70 gives the hit 96 (96.494 displayed, the ledger entry 190 hit at the measured stats), split by the number of enemy targets within radius index 14 = 8 yd (570187 Effect[0] TARGET_UNIT_SRC_AREA_ENEMY). Three enemies stand inside the radius: the striker (3 yd from the caster), the dummy (5 yd) and area1 (6 yd); area2 stands 11 yd away, outside the radius. Each of the three takes 96 / 3 = 32, and the sum read on the dummy, area1 and area2 is 32 + 32 + 0 = 64. A server that does not split reads 192, one that counts area2 in the split reads 24 + 24 + 24 = 72, one that hits area2 without counting it reads 160; the tolerance 2 separates all of them. Control arm: before the gate (680637 not learned) the same heal and strike must read 0. The hit is made non-critical and unresisted by 984954 and 823764 (precondition fixtures, as the explosion entries). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680637,
       "name": "Hope (The Chosen shield explosion)",
       "kind": "script_hit",
       "variant": "explosion",
