@@ -12848,6 +12848,395 @@
       "wait_ms": 1000,
       "expire_ms": 500,
       "observe_source": "Vow of Grace 803719 (cast on the caster before each phase) restores CalculatePct(missing mana, 5%) plus 504877 m1 on a direct ability hit (AscensionSunClericEvents.cpp:214-219); 547214 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8, BasePoints 99 + 1 = 100 ($s1), and the handler adds AddPct(mana, Amount(547214)) when the caster has it. Horusath Blast 500154 is cast at the dummy in both phases with the same starting mana; the energize events of 504877 (the Mana() source) are totalled. The energize totals are cumulative over the scenario: the first reading is one event of X (the first phase, no 547214), the second reading is X plus one event of 2X (+100% by the tooltip), so the stated ratio is (X + 2X) / X = 3.0, tolerance 0.05 (excludes 2.95 and 3.05; the first reading must be above 0, the event count of 504877 is 1 then 2). Control: the first phase without 547214. Reference search 2026-11-22: coa-history and merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 560095,
+      "name": "Seraphic Bulwark (5 blocks)",
+      "kind": "metric_delta",
+      "variant": "charges",
+      "label_suffix": "charges",
+      "quote": "Raise your blessed shield, increasing your block value by $s1%. Lasts for $n blocks or $d.",
+      "gate_spell": 560095,
+      "trigger_spell": 560095,
+      "target": "caster",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "aura_charges",
+      "fields": {
+        "spell": 560095
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "shield_after_learn": {
+        "item": 231296,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "observe_source": "Seraphic Bulwark 560095 ProcCharges 5 (Spell.dbc), the '$n blocks'. The aura is read 500 ms after a real cast with shield 231296 equipped in both phases; the before phase does not cast (control: no aura, 0 charges). Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 560095,
+      "name": "Seraphic Bulwark (block value doubled)",
+      "kind": "metric_delta",
+      "variant": "block_value",
+      "label_suffix": "block_value",
+      "quote": "Raise your blessed shield, increasing your block value by $s1%. Lasts for $n blocks or $d.",
+      "gate_spell": 560095,
+      "trigger_spell": 560095,
+      "target": "caster",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "block_value",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 2,
+      "expected_ratio": 2.0,
+      "tolerance": 0.03,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "shield_after_learn": {
+        "item": 231296,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "observe_source": "560095 Effect[0] aura 150 SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT, BasePoints 99 + 1 = 100 ($s1): +100% of the block value. The caster's block value is read with shield 231296 equipped before the cast (control, no aura) and 500 ms after a real cast: ratio 2.0, tolerance 0.03 (excludes 1.97 and 2.03; the block value is an integer of at least 33 so a rounding of 0.5 is below 0.015). Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 560095,
+      "name": "Seraphic Bulwark (still active at 9.5 s)",
+      "kind": "metric_delta",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "Raise your blessed shield, increasing your block value by $s1%. Lasts for $n blocks or $d.",
+      "gate_spell": 560095,
+      "trigger_spell": 560095,
+      "target": "caster",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 560095
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "shield_after_learn": {
+        "item": 231296,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "observe_source": "Seraphic Bulwark 560095 DurationIndex 1 (10 s, $d). Present 9500 ms after the cast: the duration is above 9.5 s (excludes 9 s, -10%). Control: no cast before, absent. With duration_gone it brackets 10 s. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 560095,
+      "name": "Seraphic Bulwark (gone by 10.5 s)",
+      "kind": "metric_delta",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "quote": "Raise your blessed shield, increasing your block value by $s1%. Lasts for $n blocks or $d.",
+      "gate_spell": 560095,
+      "trigger_spell": 560095,
+      "target": "caster",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 560095
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 10500,
+      "expire_ms": 500,
+      "shield_after_learn": {
+        "item": 231296,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "observe_source": "Absent 10500 ms after the cast: the duration is below 10.5 s (excludes 11 s, +10%); no block was taken, so the aura ends by its duration. Control: absent before the cast. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 681433,
+      "kind": "metric_delta",
+      "quote": "Emit a powerful holy light in an $a1 yd radius, dealing ${$m1+0+$sph*0.5+$AP*0.050575} Holy damage to all nearby enemies. Reduces the cooldown of your Solar Invocation spells by $/1000;524858s1 sec for each target struck.",
+      "gate_spell": 681433,
+      "trigger_spell": 681433,
+      "target": "dummy",
+      "cast_in_before": false,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800764
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Solar Nova (cooldown reduced by 1 s for each of 3 targets struck)",
+      "variant": "cd_refund_three",
+      "label_suffix": "cd_refund_three",
+      "dummy_distance": 3,
+      "area_dummies": [
+        7,
+        8
+      ],
+      "expected": 24900,
+      "tolerance": 300,
+      "observe_source": "Solar Nova 681433 Effect[0] SCHOOL_DAMAGE on the enemies within 8 yd; 524858 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165) BasePoints -1001 on 800764 Conquest, 503651 Revelation and 806159 Resplendence ($/1000;524858s1 = 1 s each; the class code HandleAscensionClassMechanics26To32Hit casts 524858 per target). Solar Invocation: Conquest 800764 (cooldown 30000 ms, Category 767) is cast, 1600 ms later Solar Nova strikes the primary dummy and two more within 8 yd, and the cooldown of 800764 is read 500 ms after: 30000 - 3 x 1000 - 2100 ms elapsed = 24900, tolerance 300 (excludes the 1000 ms steps of 2 or 4 targets). Control: cd_refund_none (no target in range) reads 30000 - 2100. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 681433,
+      "kind": "metric_delta",
+      "quote": "Emit a powerful holy light in an $a1 yd radius, dealing ${$m1+0+$sph*0.5+$AP*0.050575} Holy damage to all nearby enemies. Reduces the cooldown of your Solar Invocation spells by $/1000;524858s1 sec for each target struck.",
+      "gate_spell": 681433,
+      "trigger_spell": 681433,
+      "target": "dummy",
+      "cast_in_before": false,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800764
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Solar Nova (cooldown reduced by 1 s for one target struck)",
+      "variant": "cd_refund_one",
+      "label_suffix": "cd_refund_one",
+      "dummy_distance": 3,
+      "expected": 26900,
+      "tolerance": 300,
+      "observe_source": "Same as cd_refund_three with only the primary dummy at 3 yd, inside the 8 yd radius: one target struck, 30000 - 1000 - 2100 ms elapsed = 26900, tolerance 300 (excludes 0 and 2 targets). Control: cd_refund_none. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 681433,
+      "kind": "metric_delta",
+      "quote": "Emit a powerful holy light in an $a1 yd radius, dealing ${$m1+0+$sph*0.5+$AP*0.050575} Holy damage to all nearby enemies. Reduces the cooldown of your Solar Invocation spells by $/1000;524858s1 sec for each target struck.",
+      "gate_spell": 681433,
+      "trigger_spell": 681433,
+      "target": "dummy",
+      "cast_in_before": false,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800764
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Solar Nova (control: no target struck, no reduction)",
+      "variant": "cd_refund_none",
+      "label_suffix": "cd_refund_none",
+      "dummy_distance": 20,
+      "expected": 27900,
+      "tolerance": 300,
+      "observe_source": "Control of cd_refund_three: the only dummy stands 20 yd away, outside the 8 yd radius, so no target is struck and the cooldown of Solar Invocation: Conquest 800764 reads 30000 - 2100 ms elapsed = 27900, tolerance 300. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 704910,
+      "name": "Sun Worship (spell haste rating from Intellect)",
+      "kind": "metric_delta",
+      "variant": "haste_rating",
+      "label_suffix": "haste_rating",
+      "quote": "Increases your healing power by $s1% of your Intellect and your spell haste rating by $s2% of your Intellect.",
+      "trigger_spell": 804247,
+      "gate_spell": 704910,
+      "target": "caster",
+      "phase_auras": [
+        [
+          48100,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 19
+      },
+      "before_expected": 0,
+      "expected": 41.75,
+      "tolerance": 1.0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "704910 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 524288 (1 << 19, CR_HASTE_SPELL), MiscValueB 3 (Intellect), BasePoints 24 + 1 = 25 ($s2). Intellect 48100 is set by harness set_aura in both phases as a precondition fixture (the same fixture as Solar Discernment 807654; Intellect reads 167 against the reference 119); the passive is the subject and is learned for real between the phases. Combat rating 19 read before the learn (control, 0) and after: 25% of 167 = 41.75, within 1 for the integer rounding. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 301239,
+      "name": "City of Light (3% of missing health restored by a Radiant Flame tick)",
+      "kind": "metric_delta",
+      "variant": "heal_missing",
+      "label_suffix": "heal_missing",
+      "quote": "Damage dealt by Radiant Flame now restores $302896s1% of your missing health and mana.",
+      "gate_spell": 301239,
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 707522,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 150,
+      "tolerance": 2,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "301239 Effect[0] aura 42 PROC_TRIGGER_SPELL 302896 (Effect[0] HEAL_PCT BasePoints 2 + 1 = 3 ($302896s1), Effect[1] ENERGIZE_PCT 3); AscensionSunClericEvents.cpp:116 accepts an own damage hit of Radiant Flame's tick 807058 and :255-258 gives CalculatePct(max mana - mana, 3) mana and a heal of 3% of the missing health (Copy 707522). Radiant Flame 806060 (no mana cost, period 1000 ms, 4000 ms) is cast at the dummy with the caster held at 50% of its 10000 health (caster_health_pct): the first tick lands when the aura is applied (the first run of this entry read two heals, 150 and 145, with a 1500 ms read, so the aura ticks at once and again at 1000 ms) and the read is at 500 ms, so one heal of 3% x 5000 = 150, tolerance 2 for the health regeneration between the set and the tick. The before phase does not cast (cast_in_before false), so no earlier Radiant Flame aura can tick in the second phase; the control entry heal_missing_control is the same scenario with the unrelated passive 300341 as the gate. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 301239,
+      "name": "City of Light (control: no heal without it)",
+      "kind": "metric_delta",
+      "variant": "heal_missing_control",
+      "label_suffix": "heal_missing_control",
+      "quote": "Damage dealt by Radiant Flame now restores $302896s1% of your missing health and mana.",
+      "gate_spell": 300341,
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 707522,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Control arm of heal_missing: the same two phases and the same Radiant Flame cast with 301239 not known; the passive learned between the phases is Exorcism 300341 (an unrelated Sanctify modifier). No heal of 707522 lands: 0. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 800600,
+      "kind": "metric_delta",
+      "quote": "Start anew, reseting the cooldown of Paragon, Chosen of the Light, and Judgement Day spells.",
+      "gate_spell": 800600,
+      "setup_casts": [
+        680639
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "setup_only_after": true,
+      "cast_power": 1363,
+      "target": "caster",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 680639
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "New Day (Paragon cooldown reset)",
+      "variant": "reset_680639",
+      "label_suffix": "reset_680639",
+      "trigger_spell": 800600,
+      "expected": 0,
+      "tolerance": 1,
+      "observe_source": "New Day 800600 Effect[0..2] SPELL_EFFECT_ASCENSION_RESET_COOLDOWN (195) on 680639 Paragon, 800622 Chosen of the Light and 806121 Judgement Day. Paragon 680639 has RecoveryTime 300000 ms (Spell.dbc). With New Day known in both phases, the first phase casts New Day with Paragon not on cooldown, the second casts Paragon first and New Day after: the cooldown of Paragon reads 0 after New Day. Control entry reset_680639_control: the same second phase with Holy Form 805301 cast instead of New Day, the cooldown stays. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 800600,
+      "kind": "metric_delta",
+      "quote": "Start anew, reseting the cooldown of Paragon, Chosen of the Light, and Judgement Day spells.",
+      "gate_spell": 800600,
+      "setup_casts": [
+        680639
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "setup_only_after": true,
+      "cast_power": 1363,
+      "target": "caster",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 680639
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "New Day (control: Paragon keeps its cooldown without it)",
+      "variant": "reset_680639_control",
+      "label_suffix": "reset_680639_control",
+      "trigger_spell": 805301,
+      "expected": 298400,
+      "tolerance": 2500,
+      "observe_source": "Control of reset_680639: Paragon is cast, then Holy Form 805301 (no cooldown effect) instead of New Day; the cooldown of Paragon reads 300000 ms minus the 1600 ms setup wait and the 500 ms read wait, within 2500 ms, far from 0. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 800600,
+      "kind": "metric_delta",
+      "quote": "Start anew, reseting the cooldown of Paragon, Chosen of the Light, and Judgement Day spells.",
+      "gate_spell": 800600,
+      "setup_casts": [
+        800622
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "setup_only_after": true,
+      "cast_power": 1363,
+      "target": "caster",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800622
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "New Day (Chosen of the Light cooldown reset)",
+      "variant": "reset_800622",
+      "label_suffix": "reset_800622",
+      "trigger_spell": 800600,
+      "expected": 0,
+      "tolerance": 1,
+      "observe_source": "New Day 800600 Effect[0..2] SPELL_EFFECT_ASCENSION_RESET_COOLDOWN (195) on 680639 Paragon, 800622 Chosen of the Light and 806121 Judgement Day. Chosen of the Light 800622 has RecoveryTime 180000 ms (Spell.dbc). With New Day known in both phases, the first phase casts New Day with Chosen of the Light not on cooldown, the second casts Chosen of the Light first and New Day after: the cooldown of Chosen of the Light reads 0 after New Day. Control entry reset_800622_control: the same second phase with Holy Form 805301 cast instead of New Day, the cooldown stays. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 800600,
+      "kind": "metric_delta",
+      "quote": "Start anew, reseting the cooldown of Paragon, Chosen of the Light, and Judgement Day spells.",
+      "gate_spell": 800600,
+      "setup_casts": [
+        800622
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "setup_only_after": true,
+      "cast_power": 1363,
+      "target": "caster",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800622
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "New Day (control: Chosen of the Light keeps its cooldown without it)",
+      "variant": "reset_800622_control",
+      "label_suffix": "reset_800622_control",
+      "trigger_spell": 805301,
+      "expected": 178400,
+      "tolerance": 2500,
+      "observe_source": "Control of reset_800622: Chosen of the Light is cast, then Holy Form 805301 (no cooldown effect) instead of New Day; the cooldown of Chosen of the Light reads 180000 ms minus the 1600 ms setup wait and the 500 ms read wait, within 2500 ms, far from 0. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
     }
   ],
   "player_observations": [],

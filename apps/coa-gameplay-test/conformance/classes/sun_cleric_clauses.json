@@ -709,7 +709,9 @@
       {
         "claim": "Damage dealt by Radiant Flame now restores $302896s1% of your missing health",
         "labels": [
-          "301239 effect_value 302896e0 #0"
+          "301239 effect_value 302896e0 #0",
+          "301239 behaviour_metric_delta heal_missing",
+          "301239 behaviour_metric_delta heal_missing_control"
         ]
       },
       {
@@ -1307,7 +1309,8 @@
     "spell": 547214,
     "clause": "Increases the mana restored by Vow of Grace by $s1%",
     "labels": [
-      "547214 effect_value e0 #0"
+      "547214 effect_value e0 #0",
+      "547214 behaviour_metric_delta vow_grace_mana"
     ],
     "kind": "claim"
   },
@@ -1357,18 +1360,32 @@
     "clause": "Raise your blessed shield, increasing your block value by $s1%.",
     "labels": [
       "560095 effect_value e0 #0",
-      "560095 aura_amount e0 #0"
+      "560095 aura_amount e0 #0",
+      "560095 behaviour_metric_delta block_value"
     ],
     "kind": "claim"
   },
   {
     "spell": 560095,
     "clause": "Lasts for $n blocks or $d.",
-    "labels": [
-      "560095 aura_duration_ms #1",
-      "560095 effect_value #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Lasts for $n blocks",
+        "labels": [
+          "560095 behaviour_metric_delta charges",
+          "560095 effect_value #2"
+        ]
+      },
+      {
+        "claim": "or $d",
+        "labels": [
+          "560095 behaviour_metric_delta duration_held",
+          "560095 behaviour_metric_delta duration_gone",
+          "560095 aura_duration_ms #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 560111,
@@ -2046,7 +2063,10 @@
     "spell": 681433,
     "clause": "Reduces the cooldown of your Solar Invocation spells by $/1000;524858s1 sec for each target struck.",
     "labels": [
-      "681433 effect_value 524858e0 #2"
+      "681433 effect_value 524858e0 #2",
+      "681433 behaviour_metric_delta cd_refund_one",
+      "681433 behaviour_metric_delta cd_refund_three",
+      "681433 behaviour_metric_delta cd_refund_none"
     ],
     "kind": "claim"
   },
@@ -2906,7 +2926,8 @@
     "spell": 704910,
     "clause": "and your spell haste rating by $s2% of your Intellect.",
     "labels": [
-      "704910 effect_value e1 #1"
+      "704910 effect_value e1 #1",
+      "704910 behaviour_metric_delta haste_rating"
     ],
     "kind": "claim"
   },
@@ -3727,16 +3748,49 @@
   {
     "spell": 800600,
     "clause": "Start anew, reseting the cooldown of Paragon, Chosen of the Light, and Judgement Day spells.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Start anew, reseting the cooldown of Paragon",
+        "labels": [
+          "800600 behaviour_metric_delta reset_680639",
+          "800600 behaviour_metric_delta reset_680639_control"
+        ]
+      },
+      {
+        "claim": "Chosen of the Light",
+        "labels": [
+          "800600 behaviour_metric_delta reset_800622",
+          "800600 behaviour_metric_delta reset_800622_control"
+        ]
+      },
+      {
+        "claim": "and Judgement Day spells",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 800602,
     "clause": "Doubles the effectiveness of your Holy Form and reduces the tick rate of Ancient Rites by $/1000;s2 sec.",
-    "labels": [
-      "800602 effect_value e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Doubles the effectiveness of your Holy Form",
+        "labels": []
+      },
+      {
+        "claim": "and reduces the tick rate of Ancient Rites by $/1000;s2 sec",
+        "labels": [
+          "800602 behaviour_metric_delta period_upper",
+          "800602 behaviour_metric_delta period_lower",
+          "800602 behaviour_metric_delta period_control",
+          "800602 behaviour_metric_delta period_upper_301345",
+          "800602 behaviour_metric_delta period_upper_301817",
+          "800602 effect_value e1 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 800612,
