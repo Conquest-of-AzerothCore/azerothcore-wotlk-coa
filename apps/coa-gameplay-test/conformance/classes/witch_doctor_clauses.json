@@ -49,7 +49,7 @@
       "92084 behaviour_metric_delta stored_share"
     ],
     "kind": "claim",
-    "reason": "Cycle 11 author d: \"92084 behaviour_metric_delta stored_share\" reads the released Puppeteer's Threads 572837 hit over the Malefic Wrath hit that fed it, each phase counted from its own trigger cast (phase_since, ADR 1130 provisional, with ratio_to_metric): 0 without the passive, 0.15 with it. The release ignores caster and taken modifiers and cannot crit (572837 attributes), so the share is the stored 15% itself."
+    "reason": "Cycle 11 author d: \"92084 behaviour_metric_delta stored_share\" reads the released Puppeteer's Threads 572837 hit over the Malefic Wrath hit that fed it, each phase counted from its own trigger cast (phase_since, ADR 1130 provisional, with ratio_to_metric): 0 without the passive, 0.15 with it. The release ignores caster and taken modifiers and cannot crit (572837 attributes), so the share is the stored 15% itself. Triage (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): the release was partially resisted by the dummy's monster resistance (0.135 = 0.15 x 0.9); 823764 on the caster now removes it, the label is unchanged."
   },
   {
     "spell": 92084,
@@ -1921,7 +1921,7 @@
       "560545 behaviour_metric_delta puppets_period_control"
     ],
     "kind": "claim",
-    "reason": "Cycle 11 author C (hit_period learn, ADR 1120 provisional; closes the cycle 9 tool gap of B14): Shadow Puppets 501087 hits are stamped in game time; with 560545 learned they come 600 ms apart (750 x 0.8, SPELLMOD_ACTIVATION_TIME -20), puppets_period_control reads 750 ms without the talent, each in its G-19 band."
+    "reason": "Cycle 11 author C (hit_period learn, ADR 1120 provisional; closes the cycle 9 tool gap of B14): Shadow Puppets 501087 hits are stamped in game time; with 560545 learned they come 600 ms apart (750 x 0.8, SPELLMOD_ACTIVATION_TIME -20), puppets_period_control reads 750 ms without the talent, each in its G-19 band. Triage (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): Shadow Puppets ticks at the apply (SPELL_ATTR5_EXTRA_INITIAL_PERIOD), so both windows now open 20 ms after the cast, before the first hit; the labels are unchanged."
   },
   {
     "spell": 560748,
@@ -2122,7 +2122,7 @@
         ]
       }
     ],
-    "reason": "Cycle 11 author A: \"578295 behaviour_metric_delta touch_taken\" reads a deterministic Blood Frenzy 530295 hit of the caster on the dummy after a real Bottle debuffed it: 1.03 of the hit without the passive (2.03 on the running total), crits suppressed."
+    "reason": "Cycle 11 author A: \"578295 behaviour_metric_delta touch_taken\" reads a deterministic Blood Frenzy 530295 hit of the caster on the dummy after a real Bottle debuffed it: 1.03 of the hit without the passive (2.03 on the running total), crits suppressed. Triage (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): the scenario failed on a rage fixture of 2000 (Blood Frenzy is a rage spell without cost); cast_power is dropped and 823764 removes the partial resist of the Shadow hits."
   },
   {
     "spell": 578295,
@@ -2596,7 +2596,7 @@
         ]
       }
     ],
-    "reason": "Cycle 11 author C: \"704497 behaviour_metric_delta stun_lasts\" (aura_window) stamps the first read with the stun on the dummy and the first without it, about every 10 ms around its start (7500 to 9000 ms) and end, so the 4000 ms are read from the stun's own start, the tool note of cycle 7 (B8-fix); 4000 +- 200 ms (G-19)."
+    "reason": "Cycle 11 author C: \"704497 behaviour_metric_delta stun_lasts\" (aura_window) stamps the first read with the stun on the dummy and the first without it, about every 10 ms around its start (7500 to 9000 ms) and end, so the 4000 ms are read from the stun's own start, the tool note of cycle 7 (B8-fix); 4000 +- 200 ms (G-19). Triage (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): the treatment stun was halved by diminishing returns (a second stun within 15 sec); the treatment phase now waits 6000 ms after a Spirit Idol cast so the DR level resets."
   },
   {
     "spell": 704500,
@@ -3524,7 +3524,7 @@
       "705906 behaviour_metric_delta mass_curse"
     ],
     "kind": "claim",
-    "reason": "Cycle 11 author A: the mass_reach entry (ally_heal_reach aura_reach, ADR 1100) casts Allcure Elixir with and without 705906: with it a grouped ally 22 yd away loses a poison, a disease and a curse and one 34 yd away (beyond 30 plus its reach) keeps them; without it only the caster is cleansed."
+    "reason": "Cycle 11 author A: the mass_reach entry (ally_heal_reach aura_reach, ADR 1100) casts Allcure Elixir with and without 705906: with it a grouped ally 22 yd away loses a poison, a disease and a curse and one 34 yd away (beyond 30 plus its reach) keeps them; without it only the caster is cleansed. Triage (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): the caster area search reaches 30 + 2.66 (player leeway) + 1.5 (reach) = 34.16 yd, so the outside ally moves from 34 to 37 yd; the labels are unchanged."
   },
   {
     "spell": 705906,
@@ -4205,7 +4205,7 @@
         ]
       }
     ],
-    "reason": "Cycle 11 author d: \"706557 behaviour_metric_delta heal_cut\" has the dummy cast a fixed heal (Gift of Life 23783, 1500) on itself after each Arrow and reads it per phase (phase_since, ADR 1130): 1500 without the passive, 1200 under one Hex of Death stack, 0.8 within 0.001. The duration claim is read by \"706557 behaviour_metric_delta lasts\"."
+    "reason": "Cycle 11 author d: \"706557 behaviour_metric_delta heal_cut\" has the dummy cast a fixed heal (Gift of Life 23783, 1500) on itself after each Arrow and reads it per phase (phase_since, ADR 1130): 1500 without the passive, 1200 under one Hex of Death stack, 0.8 within 0.001. The duration claim is read by \"706557 behaviour_metric_delta lasts\". Triage (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): the dummy's self-heal never reached the read (0 in both phases); heal_cut now reads an enemy player's Rejuvenation 9840 ticks under the debuff (the 501181 mark_heals read), 156 then 124."
   },
   {
     "spell": 706557,
@@ -4742,7 +4742,7 @@
       "707854 behaviour_metric_delta arrow_heal"
     ],
     "kind": "claim",
-    "reason": "Cycle 11 author A: \"707854 behaviour_metric_delta arrow_heal\" quotes the pulled markup @s:801674:0@ (the 301175 Spirit precedent) and reads the Devotion of Bwonsamdi 570156 heal over the Malefic Arrow 801674 damage of the after phase (ratio_to_metric increments): 0.40 with Shadowhunter 92086 learned between the phases, 0 without it; heal crits suppressed."
+    "reason": "Cycle 11 author A: \"707854 behaviour_metric_delta arrow_heal\" quotes the pulled markup @s:801674:0@ (the 301175 Spirit precedent) and reads the Devotion of Bwonsamdi 570156 heal over the Malefic Arrow 801674 damage of the after phase (ratio_to_metric increments): 0.40 with Shadowhunter 92086 learned between the phases, 0 without it; heal crits suppressed. Triage (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): a 72-point Arrow made the integer heal read 0.389; the caster now has 20000 spell power so the floor moves the share by under 0.0003, tolerance 0.001."
   },
   {
     "spell": 707855,
@@ -5138,7 +5138,7 @@
         ]
       }
     ],
-    "reason": "Cycle 11 B: potion_leech reads the Bloodthistle leech heal 803287 over the damage of one real Malefic Arrow with a real potion on the caster (0.05 within 0.0005, ratio_to_metric increments, ADR 1117 provisional), the uncast potion reading 0; this closes tool note 1042 without a proc_gate_interval label."
+    "reason": "Cycle 11 B: potion_leech reads the Bloodthistle leech heal 803287 over the damage of one real Malefic Arrow with a real potion on the caster (0.05 within 0.0005, ratio_to_metric increments, ADR 1117 provisional), the uncast potion reading 0; this closes tool note 1042 without a proc_gate_interval label. Triage (group B sweep 20261121-235946): the Arrow never hit (no Arrow gate learned, the dummy inside the ranged minimum), so both ratio bases read 0 and the reading was dropped; potion_leech now learns 707854 and stands the dummy 15 yd away, the label is unchanged."
   },
   {
     "spell": 801664,
@@ -6568,7 +6568,7 @@
       "807905 behaviour_hit_ratio hit_landed"
     ],
     "kind": "claim",
-    "reason": "Aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT (SpellAuraDefines.h:390) raises every hit chance; the passive reads of the melee and spell hit chance around the learn give the stated points in both final07 runs, judged to the rounding, as Templar 705250 \"and your chance to hit by $s2%\" is counted. Cycle 11 author B: the behaviour read is the landed share of real Hexfire casts against a same-level dummy with the spell hit rating at 0 (rate landed, ADR 1116 provisional): 96% without the passive, 100% with it, +4 points, 2560 casts per arm."
+    "reason": "Aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT (SpellAuraDefines.h:390) raises every hit chance; the passive reads of the melee and spell hit chance around the learn give the stated points in both final07 runs, judged to the rounding, as Templar 705250 \"and your chance to hit by $s2%\" is counted. Cycle 11 author B: the behaviour read is the landed share of real Hexfire casts against a same-level dummy with the spell hit rating at 0 (rate landed, ADR 1116 provisional): 96% without the passive, 100% with it, +4 points, 2560 casts per arm. Triage (group B sweep 20261121-235946): the pooled 99% half-width over 16 parts was 1.16 points; hit_landed now runs 48 parts of 160 casts per arm, the label is unchanged."
   },
   {
     "spell": 807915,
@@ -6631,7 +6631,7 @@
         ]
       }
     ],
-    "reason": "Cycle 11 author d: focus_primary and focus_control engage the dummy and a second dummy in both phases and change only the selection (engage_and_select, ADR 1137 provisional): the ward's 573055 hits land on area1 while it is selected (0 on the dummy) and on the dummy while the dummy is selected (no new hit on area1)."
+    "reason": "Cycle 11 author d: focus_primary and focus_control engage the dummy and a second dummy in both phases and change only the selection (engage_and_select, ADR 1137 provisional): the ward's 573055 hits land on area1 while it is selected (0 on the dummy) and on the dummy while the dummy is selected (no new hit on area1). Triage (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): the engage casts of Hex of Malice 504608 were dropped because the caster did not know the spell; both entries now learn it."
   },
   {
     "spell": 500960,
@@ -7450,7 +7450,7 @@
       "501146 behaviour_metric_delta flare_hits"
     ],
     "kind": "claim",
-    "reason": "Cycle 11 author d: the damage is read by \"501146 behaviour_metric_delta flare_damage\", one real cast at 20000 spell power and the reference 47 ranged attack power, crits removed: 602 + 7000 + 4.7 = 7606.7 within 1, with \"flare_hits\" proving one hit per cast. The no_behaviour_route of cycle 9 (hit_mean cannot model the TRIGGER_SPELL_WITH_VALUE effect, T-b13-3) is superseded by this direct read; hits.py is unchanged."
+    "reason": "Cycle 11 author d: the damage is read by \"501146 behaviour_metric_delta flare_damage\", one real cast at 20000 spell power and the reference 47 ranged attack power, crits removed: 602 + 7000 + 4.7 = 7606.7 within 1, with \"flare_hits\" proving one hit per cast. The no_behaviour_route of cycle 9 (hit_mean cannot model the TRIGGER_SPELL_WITH_VALUE effect, T-b13-3) is superseded by this direct read; hits.py is unchanged. Triage (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): 5325 = 7607 less a 30% partial resist; 823764 on the caster removes the dummy's monster resistance."
   },
   {
     "spell": 501146,
@@ -7603,7 +7603,7 @@
         ]
       }
     ],
-    "reason": "The stun landing is behaviour (the aura 801677 on the dummy at the burst, the uncast control). The 4000 ms of the stun keep their data label: the burst comes at about 2050 ms, so a stamped bracket of the stun end would measure the 2000 ms fuse and the 4000 ms stun together (6000 ms, 5% = 300 ms), not the stun alone; no existing kind reads the stun on its own (aura_window needs a talent contrast). Cycle 11 author C: \"801678 behaviour_metric_delta stun_lasts\" (aura_window) stamps the stun on the dummy from its first read with it to the first without it, so the 2000 ms fuse is not in the reading: 4000 +- 200 ms. The no-route record is dropped.",
+    "reason": "The stun landing is behaviour (the aura 801677 on the dummy at the burst, the uncast control). The 4000 ms of the stun keep their data label: the burst comes at about 2050 ms, so a stamped bracket of the stun end would measure the 2000 ms fuse and the 4000 ms stun together (6000 ms, 5% = 300 ms), not the stun alone; no existing kind reads the stun on its own (aura_window needs a talent contrast). Cycle 11 author C: \"801678 behaviour_metric_delta stun_lasts\" (aura_window) stamps the stun on the dummy from its first read with it to the first without it, so the 2000 ms fuse is not in the reading: 4000 +- 200 ms. The no-route record is dropped. Triage (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): the treatment stun was halved by diminishing returns; the treatment phase now waits 12000 ms after a Spirit Idol cast so the DR level resets.",
     "labels": []
   },
   {

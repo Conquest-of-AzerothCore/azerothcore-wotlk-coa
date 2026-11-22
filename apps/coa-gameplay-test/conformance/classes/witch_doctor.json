@@ -24111,50 +24111,6 @@
       "observe_source": "The master_heal layout (Cauldron Brewer 92085 learned at the start, Ingredient: Jungle Shrooms 801660 and Potion Toss 801661 at the caster, then a real Hexfire 573026 at the dummy 3 yd away, 801690 learned between the phases). Reading: the Concoctions heal 570185 on the caster divided by the Hexfire 573026 damage on the dummy, each the increase over the after phase (ratio_to_metric increments, both are running totals). Code: the buff 570064 stamps its amount on the next offensive cast (Abilities.cpp:48-51) and a damaging hit casts 570185 for damage x amount / 100 (Abilities.cpp:186-190); $570064s1 = 5. Hexfire 573026 is one direct hit (Effect[0] SCHOOL_DAMAGE, ChainTarget 1, no periodic effect), so every damage point read has one heal. Reg's Test Aura 984954 (spell crit -1000) on the caster keeps the heal and the hit non-critical (precondition fixture). Expected 0.05; tolerance 0.003 (the heal truncates: at most 1 / damage, about 0.0025 for a hit near 420). Control: the before phase without 801690 makes no heal, 0. The cap of 3 casts is not read here. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
     },
     {
-      "spell": 707854,
-      "kind": "metric_delta",
-      "name": "Malefic Arrow (Shadowhunter heals 40% of the Arrow damage)",
-      "variant": "arrow_heal",
-      "label_suffix": "arrow_heal",
-      "quote": "Malefic Arrow.@s:801674:0@",
-      "trigger_spell": 801674,
-      "target": "dummy",
-      "dummy_distance": 15,
-      "learn": [
-        707854
-      ],
-      "gate_spell": 92086,
-      "measure_actor": "caster",
-      "cast_power": 1400,
-      "metric": "spell_heal_total",
-      "fields": {
-        "spell": 570156,
-        "target": "caster"
-      },
-      "ratio_to_metric": {
-        "metric": "spell_damage_total",
-        "fields": {
-          "spell": 801674,
-          "target": "dummy"
-        },
-        "increments": true
-      },
-      "phase_auras": [
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "before_expected": 0,
-      "expected": 0.4,
-      "tolerance": 0.01,
-      "wait_ms": 1500,
-      "expire_ms": 500,
-      "observe_source": "Tooltip: the 707854 Description pulls Malefic Arrow 801674 (@s:801674:0@, the 301175 Spirit precedent quotes the pulled markup the same way): \"healing you equal to $92086s2% of the damage dealt\" ($92086s2 = Shadowhunter 92086 Effect[1] BasePoints 39 + 1 = 40). Code: AscensionWitchDoctorAbilities.cpp:243-244, a damaging Arrow (IsArrow) with Shadowhunter 92086 held makes Copy(player, player, DevotionHeal 570156, damage x 40 / 100). Arms: Malefic Arrow 707854 is learned at the start so the Arrow passes its cast gate (Abilities.cpp:87 refuses an Arrow without 92086 or 707854); Shadowhunter 92086 is learned between the phases (gate_spell; the reference character does not know it, the 92086 Auto Shot and cost entries learn it the same way). A real Arrow 801674 (ranged slot, cast 500 ms longer on this server, Speed 40 over 15 yd = 375 ms, RecoveryTime 8000 reset, 5% mana) at the dummy 15 yd away (the ranged slot refuses closer targets), read 1500 ms after the cast. Reading: the 570156 heal on the caster divided by the 801674 damage on the dummy, the after-phase increase of each (ratio_to_metric increments). Reg's Test Aura 984954 suppresses heal crits (precondition fixture; an Arrow crit changes the damage, not the share). Expected 0.40, tolerance 0.01 (the heal truncates). Control: the before phase without 92086 heals nothing, 0. The reference $bh is 0, so no healing bonus is added to the copy. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
-    },
-    {
       "spell": 573435,
       "kind": "metric_delta",
       "name": "Potion Toss (the potion follows the active Ingredient)",
@@ -24191,47 +24147,6 @@
       "wait_ms": 1700,
       "expire_ms": 500,
       "observe_source": "PotionEffects (AscensionWitchDoctorBrewing.cpp:86-107) casts on the toss target the Potion of each Ingredient the cast stamped (IngredientMarker mask): Frog Bones gives Potion: Frog Bones 802971, Fish Oil gives Potion: Fish Oil 802969. Both phases learn Cauldron Brewer 92085 at the start (precondition: the Has Ingredient Marker 801702, Brewing.cpp:38-45) and carry the Ingredient: Frog Bones aura 801663 (set_aura in both phases; cost reason: metric_delta casts the same setup in both phases except with setup_only_after, so the control ingredient is the fixture, and the claim is the potion, not the ingredient). Before phase: Frog Bones is the active Ingredient and a real Potion Toss 573435 (the level 60 rank, instant, GCD 1500, category cooldown reset) at the caster gives no 802969 (the control: the toss does not always give the Fish Oil potion). After phase: a real Ingredient: Fish Oil 801662 cast (instant, 5% mana, replaces Frog Bones: one Ingredient without Mixologist, SyncIngredients capacity 1) 1700 ms before the toss, and the toss gives 802969 (DurationIndex 31 = 8000 ms, read 1700 ms after the toss). A server whose toss ignores the Ingredient reads the same in both phases. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
-    },
-    {
-      "spell": 578295,
-      "kind": "metric_delta",
-      "name": "Touch of the Spirits (the debuffed enemy takes 3% more damage)",
-      "variant": "touch_taken",
-      "label_suffix": "touch_taken",
-      "quote": "to take $578296s1% more damage",
-      "trigger_spell": 530295,
-      "target": "dummy",
-      "measure_actor": "caster",
-      "setup_casts": [
-        801696
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 2000,
-      "caster_health": [
-        5000,
-        10000
-      ],
-      "cast_power": 2000,
-      "metric": "spell_damage_total",
-      "fields": {
-        "spell": 530295,
-        "target": "dummy"
-      },
-      "phase_auras": [
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "before_expected": 100,
-      "expected": 203,
-      "expected_ratio": 2.03,
-      "tolerance": 0.01,
-      "wait_ms": 1000,
-      "expire_ms": 500,
-      "observe_source": "The touch_debuff route lays the debuff: a real Spirit in a Bottle 801696 (1500 ms cast) at the caster held at 5000 of 10000 health (an effective heal, Abilities.cpp:217) makes Bottle damage 504606 on the dummy 3 yd away, and with 578295 known the hit casts Touch of the Spirits 578296 on it (Abilities.cpp:269-270; Effect[0] aura 87 MOD_DAMAGE_PERCENT_TAKEN misc 127 +3% = $578296s1, DurationIndex 8 = 15000 ms). 2000 ms after the Bottle the caster casts Blood Frenzy 530295 at the dummy (instant, Effect[0] SCHOOL_DAMAGE BasePoints 164 DieSides 1: no roll, a deterministic hit) in both phases; 578295 is learned between them. spell_damage_total is a running total, so after = before + after-phase hit: 1 + 1.03 = 2.03 (the Necromancer 560848 soulfreeze_damage form); a hit near 170 rounds by under 1 point (tolerance 0.01, G-19 band of 3% is 2 points: 2.01 to 2.05). Reg's Test Aura 984954 (spell crit -1000) on the caster keeps the hits non-critical; the dummy has no resistance, so no partial resist. Control: the same Bottle and hit without the passive (the before reading, at least 100). Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
     },
     {
       "spell": 578295,
@@ -24604,120 +24519,6 @@
     {
       "spell": 705906,
       "kind": "ally_heal_reach",
-      "variant": "mass_reach",
-      "name": "For Da Loa! (Mass Allcure cleanses party members within 30 yd)",
-      "quote": "Transforms Allcure Elixir into Mass Allcure Elixir.@s:706555:0@",
-      "gate_spell": 705906,
-      "gate_settle_ms": 1000,
-      "caster_auras": [
-        [
-          2818,
-          1
-        ],
-        [
-          55095,
-          1
-        ],
-        [
-          702,
-          1
-        ]
-      ],
-      "allies": [
-        {
-          "id": "mass_in",
-          "dx": 22,
-          "dy": 0,
-          "auras": [
-            [
-              2818,
-              1
-            ],
-            [
-              55095,
-              1
-            ],
-            [
-              702,
-              1
-            ]
-          ]
-        },
-        {
-          "id": "mass_out",
-          "dx": 34,
-          "dy": 0,
-          "auras": [
-            [
-              2818,
-              1
-            ],
-            [
-              55095,
-              1
-            ],
-            [
-              702,
-              1
-            ]
-          ]
-        }
-      ],
-      "casts": [
-        {
-          "spell": 804049,
-          "target": "caster",
-          "watch_ms": 1000,
-          "poll_ms": 250,
-          "end_ms": 3000
-        }
-      ],
-      "checks": [
-        {
-          "name": "mass_poison",
-          "judge": "aura_reach",
-          "spell": 804049,
-          "aura": 2818,
-          "reference": "caster",
-          "removed": [
-            "mass_in"
-          ],
-          "kept": [
-            "mass_out"
-          ]
-        },
-        {
-          "name": "mass_disease",
-          "judge": "aura_reach",
-          "spell": 804049,
-          "aura": 55095,
-          "reference": "caster",
-          "removed": [
-            "mass_in"
-          ],
-          "kept": [
-            "mass_out"
-          ]
-        },
-        {
-          "name": "mass_curse",
-          "judge": "aura_reach",
-          "spell": 804049,
-          "aura": 702,
-          "reference": "caster",
-          "removed": [
-            "mass_in"
-          ],
-          "kept": [
-            "mass_out"
-          ]
-        }
-      ],
-      "observe_source": "For Da Loa! 705906 (passive) makes Allcure Elixir 804049 cast Mass Allcure Elixir 706555 (SyncReplacements every 500 ms, the base_refused entry; 1000 ms after the gate learn). 706555: three SPELL_AURA_DISPEL_IMMUNITY effects (misc 4 poison, 3 disease, 2 curse) at TARGET_UNIT_CASTER_AREA_RAID, EffectRadiusIndex 10 = 30 yd ($a1), DurationIndex 27 = 3000 ms ($d), AttributesEx 32768 SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY (the auras of those types are removed when the immunity applies). Fixtures (set_aura at each phase start, the 804049 dispel_removal debuffs): Deadly Poison 2818, Frost Fever 55095 and Curse of Weakness 702 on the caster and the allies. Control phase (705906 not known): the same Allcure Elixir cast at the caster is single-target, so only the caster is cleansed and immune. Layout: mass_in (22, 0), inside 30 yd plus its 1.5 yd reach; mass_out (34, 0), 2.5 yd beyond that edge, grouped (5 or fewer: a party). The debuffs are read 1000 ms after the cast. Treatment: the caster and mass_in lose all three, mass_out keeps them (a radius bracket). Limit: no witness reaches mass_out, so its kept debuffs are not told apart from a line of sight fault (it stands on the line of mass_in, 12 yd further); a search wider than 32.5 yd still alerts on it. 3000 ms end wait lets the immunity end before the next phase. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
-    },
-    {
-      "spell": 705906,
-      "kind": "ally_heal_reach",
       "variant": "mass_immune",
       "name": "For Da Loa! (Mass Allcure grants the party immunity for 3 sec)",
       "quote": "Transforms Allcure Elixir into Mass Allcure Elixir.@s:706555:0@",
@@ -24906,44 +24707,6 @@
       "specialization": 6
     },
     {
-      "spell": 92084,
-      "kind": "metric_delta",
-      "name": "Puppeteer's Threads (the released hit is 15% of the hit that fed the Threads)",
-      "variant": "stored_share",
-      "label_suffix": "stored_share",
-      "quote": "Damaging abilities now leave behind Puppeteer's Threads on enemies for $572836d.",
-      "trigger_spell": 807037,
-      "target": "dummy",
-      "measure_actor": "caster",
-      "metric": "spell_damage_total",
-      "fields": {
-        "spell": 572837,
-        "target": "dummy"
-      },
-      "cast_power": 1400,
-      "player_spell_power": 20000,
-      "before_expected": 0,
-      "expected": 0.15,
-      "tolerance": 0.0002,
-      "wait_ms": 12600,
-      "expire_ms": 500,
-      "game_time": {
-        "after": [
-          12300,
-          14000
-        ]
-      },
-      "ratio_to_metric": {
-        "metric": "spell_damage_total",
-        "fields": {
-          "spell": 807037,
-          "target": "dummy"
-        }
-      },
-      "phase_since": true,
-      "observe_source": "Puppeteer 92084 (not a starting spell: unknown in the control phase, learned between the phases): AscensionWitchDoctorEvents.cpp:77-79 (Check: an outgoing non-periodic spell hit by the doctor) and :132-141 (Proc: Threads 572836 on the target, damage x 15 / 100 added to its Effect[0] amount); AscensionWitchDoctorAuras.cpp:386-390 releases the stored amount once as Puppeteer's Threads 572837 (SCHOOL_DAMAGE, SPELL_ATTR2_CANT_CRIT, SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS, SPELL_ATTR6_IGNORE_CASTER_DAMAGE_MODIFIERS: no bonus, crit or taken modifier changes it; Shadow at a level 60 dummy with 0 resistance, no partial resist). Malefic Wrath 807037 (2000 ms cast, Speed 35, lands about 143 ms later at 3 yd, 11% of the 1497 base mana) at 20000 spell power (about 12,500 per hit, so the integer floor of the 15% moves the share by less than 8e-5). Each phase casts one Wrath and reads 12600 ms after the cast start, past the Threads' end at about 12143 ms (game time stamped): the released 572837 total over the Wrath total of the same phase (phase_since, ratio_to_metric). Control: without 92084 no Threads, 0. Treatment: 0.15 within 0.0002. A crit of the Wrath changes both totals alike. Clause \"Damage taken from the Witch Doctor stores 15% of its value.\" (92084 and its embedded copy in 707331). Player reports: none."
-    },
-    {
       "spell": 560748,
       "name": "Frenzied Spirits (three Spirits consumed: the heal is 6% of a damage hit)",
       "kind": "metric_delta",
@@ -25101,54 +24864,6 @@
       "observe_source": "Death Draught 602220 (instant self cast, RecoveryTime 30000 reset): Effect[0] aura 66 SPELL_AURA_FEIGN_DEATH, Effect[1] FORCE_DESELECT, Effect[2] Feign Death 985329 (MODIFY_THREAT_PERCENT -100 on enemies around the caster; the caster's spell hit rating 10000 leaves it no miss). The dummy melees the caster from the start of the control phase (target_attack_window, creature_attack): at least 2 swings in the 6000 ms control window; after the draught (500 ms to land) the dummy's swings at the caster are counted over 6000 ms: 0. Clause \"which may trick enemies into ignoring you\". Player reports: none."
     },
     {
-      "spell": 706557,
-      "kind": "metric_delta",
-      "variant": "heal_cut",
-      "label_suffix": "heal_cut",
-      "name": "Hex of Death (a heal the debuffed enemy receives is 20% smaller)",
-      "quote": "reduces the targets healing received by",
-      "trigger_spell": 801674,
-      "target": "dummy",
-      "measure_actor": "caster",
-      "dummy_distance": 15,
-      "learn": [
-        707854
-      ],
-      "metric": "spell_heal_total",
-      "fields": {
-        "spell": 23783,
-        "caster_entry": 36,
-        "target": "dummy"
-      },
-      "target_casts": [
-        23783
-      ],
-      "enemy_cast_wait_ms": 500,
-      "cast_power": 1400,
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          984954,
-          1,
-          "dummy",
-          "dummy"
-        ]
-      ],
-      "before_expected": 1500,
-      "expected": 1200,
-      "expected_ratio": 0.8,
-      "tolerance": 0.001,
-      "wait_ms": 1500,
-      "expire_ms": 10500,
-      "phase_since": true,
-      "observe_source": "Hex of Death 706557: AscensionWitchDoctorEvents.cpp:108-109 and :182-183 put Hex of Death 706559 on the enemy an Arrow damages; 706559 Effect[0] aura 118 SPELL_AURA_MOD_HEALING_PCT BasePoints -21 + 1 = -20% ($706559s1), applied by SpellHealingBonusTaken. Both phases cast a real Malefic Arrow 801674 at the dummy (15 yd, the one_stack layout, 707854 learned, fixture 823764), then the dummy casts Gift of Life 23783 on itself (SPELL_EFFECT_HEAL, BasePoints 1499 + 1, no die, no cost, instant; Reg's Test Aura 984954 on the dummy removes its spell crit) and the caster reads the heal total of creature 36 on the dummy for that phase (phase_since): 1500 without the passive (no debuff), 1200 with one stack, the ratio 0.8 within 0.001. Clause claim \"by $706559s1%\". Player reports: none."
-    },
-    {
       "spell": 705904,
       "kind": "metric_delta",
       "variant": "cost_spent",
@@ -25261,41 +24976,6 @@
     {
       "spell": 501146,
       "kind": "metric_delta",
-      "variant": "flare_damage",
-      "label_suffix": "flare_damage",
-      "name": "Shadowflare (602 + 35% of 20000 spell power + 10% of 47 ranged attack power)",
-      "quote": "Rain down shadow magic at a location, dealing ${$m1+0+$sps*.35+$RAP*.1} Shadow damage to all enemies.",
-      "trigger_spell": 501146,
-      "target": "dummy",
-      "measure_actor": "caster",
-      "metric": "spell_damage_total",
-      "fields": {
-        "spell": 501146,
-        "target": "dummy",
-        "critical": false
-      },
-      "gate_timing": "start",
-      "trigger_only_after": true,
-      "cast_power": 1400,
-      "player_spell_power": 20000,
-      "phase_auras": [
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "before_expected": 0,
-      "expected": 7606.7,
-      "tolerance": 1,
-      "wait_ms": 3500,
-      "expire_ms": 500,
-      "observe_source": "Shadowflare 501146 (BaseLevel 60, EffectBasePoints[0] 601 + 1, EffectRealPointsPerLevel 2.04 x 0 levels at 60 = $m1 602; AscensionWitchDoctorCoefficients.h:44 sp 0.35, rap 0.10, the tooltip's $sps*.35 and $RAP*.1). A real cast at the dummy at 20000 spell power (harness fixture) and the reference ranged attack power 47 (class file reference_stats); Reg's Test Aura 984954 removes spell crits and the read keeps non-critical hits; Shadow at a level 60 dummy with 0 resistance. Expected 602 + 7000 + 4.7 = 7606.7 within 1 (the engine truncates; the 801669 rank read 7069 against 7070.3 in final07, the same truncation). The control is the uncast before phase (0). Companion flare_hits counts one hit per cast. Clause \"Rain down shadow magic at a location, dealing ${$m1+0+$sps*.35+$RAP*.1} Shadow damage to all enemies.\" Player reports: none."
-    },
-    {
-      "spell": 501146,
-      "kind": "metric_delta",
       "variant": "flare_hits",
       "label_suffix": "flare_hits",
       "name": "Shadowflare (one cast strikes the dummy once)",
@@ -25376,74 +25056,6 @@
         60
       ],
       "observe_source": "Arcane Brew 801689 Effect[0] aura 345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT, BasePoints 29 + 1, EffectRealPointsPerLevel 1.5 above SpellLevel 31, MaxLevel 0: 58.5 at caster level 50 and 73.5 at 60 (SpellInfo CalcValue with the caster level). The same real self cast in both phases, the caster set to level 50 before the control cast and 60 before the treatment cast (phase_caster_level, harness set_level), each read 1500 ms after the cast; the 10500 ms between the phases lets the first 10000 ms buff end. The reference character has no spell power of its own (reference_stats 0). Level 50 is a fixture of this claim only (owner note: level policy). Clause \"Spell power scales with caster level.\" Player reports: none."
-    },
-    {
-      "spell": 500960,
-      "kind": "metric_delta",
-      "name": "Serpent Ward (spits at the selected one of two engaged enemies)",
-      "variant": "focus_primary",
-      "label_suffix": "focus_primary",
-      "quote": "attempting to focus on your primary target",
-      "trigger_spell": 500960,
-      "target": "caster",
-      "select_dummy": true,
-      "measure_actor": "caster",
-      "metric": "spell_damage_count",
-      "fields": {
-        "spell": 573055,
-        "target": "dummy"
-      },
-      "cast_power": 1400,
-      "before_expected": 0,
-      "expected": 3,
-      "after_at_least": 2,
-      "after_at_most": 4,
-      "wait_ms": 4300,
-      "expire_ms": 500,
-      "area_dummies": [
-        6
-      ],
-      "engage_and_select": {
-        "spell": 504608,
-        "gap_ms": 1600,
-        "select_before": "area1",
-        "select_after": "dummy"
-      },
-      "observe_source": "AscensionWitchDoctorSummons.cpp:420-431 (Enemy): with the owner in combat, the ward takes the owner's selected unit when it is a valid attack target within 30 yd and in line of sight, else the first nearby enemy in combat with the owner; :466-468 casts Serpent Ward Attack 573055 at it every WardAttackInterval (2000 ms at no haste) with the owner as original caster, so the hits are logged under the caster. Both phases cast Serpent Ward 500960 at the caster, then select (area1 in the control phase, the dummy in the treatment phase) and cast Hex of Malice 504608 at area1 (6 yd) and the dummy (3 yd), 1600 ms apart, so the owner is in combat with both (engage_and_select). 573055 hits on the dummy 4300 ms after the second Hex: 0 with area1 selected, 2 to 4 (three ward updates) with the dummy selected. A ward that ignored the selection would hit the same dummy in both phases. Pair: focus_control. Open player report: #4067. Clause \"attempting to focus on your primary target.\""
-    },
-    {
-      "spell": 500960,
-      "kind": "metric_delta",
-      "name": "Serpent Ward (the unselected engaged enemy draws no spit)",
-      "variant": "focus_control",
-      "label_suffix": "focus_control",
-      "quote": "attempting to focus on your primary target",
-      "trigger_spell": 500960,
-      "target": "caster",
-      "select_dummy": true,
-      "measure_actor": "caster",
-      "metric": "spell_damage_count",
-      "fields": {
-        "spell": 573055,
-        "target": "area1"
-      },
-      "cast_power": 1400,
-      "before_expected": 2,
-      "expected": 2,
-      "expected_gain": 0,
-      "tolerance": 0,
-      "wait_ms": 4300,
-      "expire_ms": 500,
-      "area_dummies": [
-        6
-      ],
-      "engage_and_select": {
-        "spell": 504608,
-        "gap_ms": 1600,
-        "select_before": "area1",
-        "select_after": "dummy"
-      },
-      "observe_source": "Pair of focus_primary, the same layout read on area1: at least 2 hits on area1 in the control phase (area1 selected; the ward was attacking), and no new hit on area1 in the treatment phase (gain 0) while the dummy is selected."
     },
     {
       "spell": 807908,
@@ -25683,43 +25295,6 @@
         }
       ],
       "observe_source": "Spirit Eclipse 811117 (rank 7): Effect[0] aura 227 PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 250 ms ($t1); AscensionWitchDoctorCompletion.cpp:343-349 keeps the 250 ms period, AscensionWitchDoctorAbilities.cpp:143-149 makes the aura last 250 ms per Spirit, and AscensionWitchDoctorAuras.cpp:285-296 casts one Spirit Eclipse 802717 hit per tick until the stored Spirit count (one per Spirit) is reached, then removes the aura. Five Spirits are made for real, as in the passing spirit_hits entry: Mirage 501136 (instant, 29% base mana, RecoveryTime 180000 reset, GCD 1500; Abilities.cpp:345-346 GainSpirit 5, capped at 5) at the caster, 1700 ms later the dummy casts Detect Invisibility 132 at itself (a harness creature cast; Mirage makes the caster invisible, and an invisible caster sees only targets that detect it, Object.cpp:2036-2039; precondition of the target, the spirit_hits repair), 300 ms later the Eclipse is cast at the dummy (CasterAuraSpell 561136 held by the real Spirits, CategoryRecoveryTime 10000 reset). The 802717 hits on the dummy and the game time are polled about every 10 ms over 50 to 2000 ms after the cast: five hits, (last - first) / 4 must lie in 250 +- 12.5 ms (G-19, 5%); the missile flight (Speed 25, 3 yd, about 120 ms) is the same for every hit and cancels. A 500 ms period reads 500, a single tick (no period) is unmeasured, two ticks in one update alert (the polls must bracket each hit). Control: no 802717 hit on the dummy before the cast. Closes the cycle 8 tool note (setup casts for hit_period, ADR 1120). Cast timing checked: Mirage and Eclipse instant, GCD 1500 inside the 2000 ms setup. Player reports: none."
-    },
-    {
-      "spell": 560545,
-      "kind": "hit_period",
-      "variant": "puppets_period",
-      "label_suffix": "puppets_period",
-      "name": "Dark Loa's Blessing (Shadow Puppets hits every 600 ms)",
-      "quote": "In addition, your Shadow Puppets now deals damage $706548s1% faster.",
-      "trigger_spell": 501087,
-      "hit_spell": 802745,
-      "expected_ms": 600,
-      "window": [
-        300,
-        2900
-      ],
-      "poll_ms": 1,
-      "learn": [
-        560545
-      ],
-      "observe_source": "Dark Loa's Blessing 560545 (passive) Effect[1] and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER on misc 1 (SPELLMOD_DURATION) and 19 (SPELLMOD_ACTIVATION_TIME, the periodic amplitude), BasePoints -21 + 1 = -20 (the token spell Dark Loyalty 706548 carries the same pair, $706548s1 = 20); no EffectSpellClassMask, so the modifier reaches every family 19 spell, Shadow Puppets 501087 among them. Shadow Puppets 501087: instant, RecoveryTime 18000 reset by the kind, 15% base mana, DurationIndex 27 = 3000 ms, Effect[0] aura 227 every 750 ms; AscensionWitchDoctorCompletion.cpp:338-341 keeps that period and drops Effect[1], and AscensionWitchDoctorAuras.cpp:279-283 casts one Shadow Puppet 802745 hit per tick (Speed 26, 3 yd, about 115 ms of flight, the same for every hit). No Mirage and no Spirit: Puppets needs neither, so the caster stays visible. The 802745 hits on the dummy and the game time are polled about every 10 ms; (last - first) / (hits - 1) must lie inside the stated period +- 5% (G-19). Treatment: 560545 learned at the start (a passive learn applies its aura): four hits 600 ms apart (750 x 0.8; the 2400 ms duration keeps four ticks), so 600 +- 30 ms; the control entry puppets_period_control reads 750 ms without the talent. A 10% cut (675 ms) or none alerts. Closes the cycle 9 tool gap (B14). Cast timing checked: instant. Player reports: none."
-    },
-    {
-      "spell": 560545,
-      "kind": "hit_period",
-      "variant": "puppets_period_control",
-      "label_suffix": "puppets_period_control",
-      "name": "Dark Loa's Blessing (control: Shadow Puppets every 750 ms)",
-      "quote": "In addition, your Shadow Puppets now deals damage $706548s1% faster.",
-      "trigger_spell": 501087,
-      "hit_spell": 802745,
-      "expected_ms": 750,
-      "window": [
-        300,
-        3600
-      ],
-      "poll_ms": 1,
-      "observe_source": "Dark Loa's Blessing 560545 (passive) Effect[1] and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER on misc 1 (SPELLMOD_DURATION) and 19 (SPELLMOD_ACTIVATION_TIME, the periodic amplitude), BasePoints -21 + 1 = -20 (the token spell Dark Loyalty 706548 carries the same pair, $706548s1 = 20); no EffectSpellClassMask, so the modifier reaches every family 19 spell, Shadow Puppets 501087 among them. Shadow Puppets 501087: instant, RecoveryTime 18000 reset by the kind, 15% base mana, DurationIndex 27 = 3000 ms, Effect[0] aura 227 every 750 ms; AscensionWitchDoctorCompletion.cpp:338-341 keeps that period and drops Effect[1], and AscensionWitchDoctorAuras.cpp:279-283 casts one Shadow Puppet 802745 hit per tick (Speed 26, 3 yd, about 115 ms of flight, the same for every hit). No Mirage and no Spirit: Puppets needs neither, so the caster stays visible. The 802745 hits on the dummy and the game time are polled about every 10 ms; (last - first) / (hits - 1) must lie inside the stated period +- 5% (G-19). Control of puppets_period: 560545 not known, four hits 750 ms apart (750 +- 37.5 ms), so the 600 ms of the treatment is the talent and not the spell itself. Cast timing checked: instant. Player reports: none."
     },
     {
       "spell": 500957,
@@ -25972,76 +25547,6 @@
       "observe_source": "Soul Marionette 704497 (instant, RecoveryTime 90000 reset before each cast, 22% base mana, cast_power 2000): five clones (creature 300661, a 2.5 yd ring around the caster) stack 807057 on the caster every 2000 ms; at the 20th stack, about 8000 to 8400 ms after the cast, ExplodeClones (AscensionWitchDoctorSummons.cpp:112-119) makes each clone cast Soul Marionette 706553 at itself with the doctor as original caster (:371-376), so the five hits on the dummy (3 yd) log under the caster (Spell.cpp:2674, the explosion_hits diagnostic: 5 per cast). 706553 Effect[0] SCHOOL_DAMAGE Shadow 581 + 1 = 582, no per-level term; AscensionWitchDoctorAbilities.cpp:150-151 strips only the stun effect from a target already stunned by the first explosion (M-51), so every explosion deals damage. Each trial casts a real Marionette and waits 9500 ms; 8 trials, 40 hits, of which at least 20 non-critical are needed. The mean non-critical hit is judged against ${$706553m1+$706553ppl1+$sps*.5} read with the measured stats. 706553 has DmgClass 1: Reg's Test Aura 984954 (spell crit -1000) holds the spell crit at 0, and beeg spellpen 823764 removes partial resists (precondition fixtures; the transform 807044's +100 crit and +30% damage reach only Malefic Wrath and Bad Juju, whose masks 706553 lacks). Control: 8 trials that learn 704497 and never cast it, no 706553 hit. The earlier objection (cycle 7 B8: the casts must finish inside the settle) is met by the 9500 ms settle past the explosions. Cast timing checked: instant. Player reports: none."
     },
     {
-      "spell": 704497,
-      "kind": "aura_window",
-      "variant": "stun_lasts",
-      "label_suffix": "stun_lasts",
-      "name": "Soul Marionette (the explosion stuns for 4 sec)",
-      "quote": "applying a stack of",
-      "trigger_spell": 704497,
-      "aura": 706553,
-      "control_ms": 4000,
-      "treatment_ms": 4000,
-      "control_windows": [
-        [
-          7500,
-          9000
-        ],
-        [
-          11300,
-          13300
-        ]
-      ],
-      "treatment_windows": [
-        [
-          7500,
-          9000
-        ],
-        [
-          11300,
-          13300
-        ]
-      ],
-      "trigger_power": 2000,
-      "poll_ms": 1,
-      "observe_source": "Soul Marionette 704497 (instant, RecoveryTime 90000 reset, 22% base mana, trigger_power 2000) explodes its five clones about 8000 to 8400 ms after the cast (the stun entry); the first explosion puts Soul Marionette 706553 Effect[1] SPELL_AURA_MOD_STUN (DurationIndex 35 = 4000 ms, $706553d) on the dummy (3 yd), with the doctor as the aura's caster (original caster), and the four that follow it do not refresh it (AscensionWitchDoctorAbilities.cpp:150-151 strips the stun effect from a stunned target). The stun on the dummy and the game time are read about every 10 ms over a start window around the stun's start and an end window around its end (aura_window, ADR 0551), so its stamped duration, from the first read with the aura to the first read without it, does not depend on when the stun started; it must be 4000 ms +- 200 (G-19, 5%) in both phases. The kind runs a first phase before a repeated learn of the cast spell itself (a no-op), so the two phases are two equal measurements, not a talent contrast; the uncast state is the start window's first read, which must hold no stun. Closes the cycle 7 tool note (B8-fix: a read relative to the stun's own start). Cast timing checked: instant. Player reports: none."
-    },
-    {
-      "spell": 801678,
-      "kind": "aura_window",
-      "variant": "stun_lasts",
-      "label_suffix": "stun_lasts",
-      "name": "Stasis Ward (the burst stuns for 4 sec)",
-      "quote": "the ward will burst with lightning, stunning nearby enemies for $801677d",
-      "trigger_spell": 801678,
-      "aura": 801677,
-      "control_ms": 4000,
-      "treatment_ms": 4000,
-      "control_windows": [
-        [
-          1700,
-          2600
-        ],
-        [
-          5600,
-          6800
-        ]
-      ],
-      "treatment_windows": [
-        [
-          1700,
-          2600
-        ],
-        [
-          5600,
-          6800
-        ]
-      ],
-      "trigger_power": 1400,
-      "poll_ms": 1,
-      "observe_source": "Stasis Ward 801678 (instant, RecoveryTime 60000 reset, 13% base mana, trigger_power 1400) summons Stasis Ward 50108; at its first update with _age >= 2000 ms (about 2000 to 2100 ms after the cast; burst_held and burst bracket it) it casts Stasis 801677 at itself with the doctor as original caster and despawns (AscensionWitchDoctorSummons.cpp:541-544). 801677 Effect[0] SPELL_AURA_MOD_STUN, DurationIndex 35 = 4000 ms ($801677d), on the dummy 3 yd away inside the 10 yd burst. The stun on the dummy and the game time are read about every 10 ms over a start window around the stun's start and an end window around its end (aura_window, ADR 0551), so its stamped duration, from the first read with the aura to the first read without it, does not depend on when the stun started; it must be 4000 ms +- 200 (G-19, 5%) in both phases. The kind runs a first phase before a repeated learn of the cast spell itself (a no-op), so the two phases are two equal measurements, not a talent contrast; the uncast state is the start window's first read, which must hold no stun. This separates the 4000 ms stun from the 2000 ms fuse, the objection of the cycle 9 no-route note (B16): the stamps start at the stun, not at the cast. Cast timing checked: instant. Player reports: none."
-    },
-    {
       "spell": 802719,
       "kind": "immunity",
       "variant": "field",
@@ -26277,49 +25782,6 @@
       "cast_spell": 807743,
       "channel_spell": 12051,
       "observe_source": "Spirit Shock 807743 (instant, RecoveryTime 28000 reset, 25% base mana, 30 yd): Effect[0] aura 27 SPELL_AURA_MOD_SILENCE (Mechanic 9) for 4000 ms; AscensionWitchDoctorAbilities.cpp:274-275 casts Spirit Shock 807772 (Effect[0] SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 35 = 4000 ms, $807772d) at a non-player target from OnSpellHitResult. The tooltip promises the interrupt of non-player spellcasting for 4 sec, which Spell::EffectInterruptCast (SpellEffects.cpp:4815-4847) delivers as a 4000 ms lock of the interrupted school (ProhibitSpellSchool) on a running PreventionType silence cast. The school_lockout kind (Divine Force 806153 and Darkslayer's Lantern 802139 shape): the dummy channels Evocation 12051 (Arcane, PreventionType silence, interruptible), the caster casts a real Spirit Shock at it, and school_prohibited of Arcane is read as an expiry pair around the stated 4000 ms from the cast: locked just before, free just after; not locked while the channel runs before the cast. The silence alone cannot read locked: a silence blocks casts by PreventionType and sets no school lock. Lead (fix note FIX-X1): on this build the silence aura applies before OnSpellHitResult and stops the channel on apply (AuraEffect::HandleAuraModSilence), so 807772 finds no running cast, sets no lock, and this entry is expected to alert until the interrupt is cast before the silence lands. Clause 381 (both claims). Cast timing checked: instant. Player reports: none."
-    },
-    {
-      "spell": 807905,
-      "kind": "hit_ratio",
-      "variant": "hit_landed",
-      "label_suffix": "hit_landed",
-      "name": "Staff of the Coven (spell hit chance +4%, pooled)",
-      "quote": "and your hit chance by $s2%.",
-      "expected": 1.0,
-      "observe_spell": 573026,
-      "control": {
-        "auras": [
-          [
-            823764,
-            1
-          ]
-        ]
-      },
-      "treatment": {
-        "auras": [
-          [
-            823764,
-            1
-          ]
-        ],
-        "learn": [
-          807905
-        ]
-      },
-      "rate": "landed",
-      "expected_points": 4,
-      "trials": 160,
-      "parts": 16,
-      "streams": 8,
-      "cast_power": 1000,
-      "fixture": {
-        "spell_hit_rating": 0
-      },
-      "isolation": {
-        "reach_yd": 0,
-        "source": "Hexfire 573026 (EffectImplicitTargetA 6, no radius, EffectChainTarget 1; the Puppeteer's Threads branch needs 704511, never known here) is cast at the stream's own dummy by id; Staff of the Coven 807905 changes its owner's own hit chance only, and the streams are never grouped"
-      },
-      "observe_source": "Staff of the Coven 807905 (passive, learned for real in the treatment arm, pitfall 9): Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 3 + 1 = +4 ($s2), which StatSystem.cpp:1043 adds to m_modSpellHitChance. Unit::MagicSpellHitResult (Unit.cpp:3992-4040) gives a same-level creature target a base hit chance of 96 (levelDiff 0), adds m_modSpellHitChance and clamps to 100, so without the passive a spell misses 4% of its casts and with it none. The caster's spell hit rating is set to 0 for the entry (fixture spell_hit_rating 0, ADR 1116 provisional; the reference character carries 10000, which already removes every miss). Each trial casts a real Hexfire 573026 (instant, CategoryRecoveryTime 10000 reset, 17% mana, cast_power 1000) at the dummy (level 60, the class level) and reads the spell's damage events over its SPELL_GO count (rate \"landed\", ADR 1116 provisional: a miss sends SMSG_SPELLLOGMISS and no damage log), with beeg spellpen 823764 so no partial resist leaves a zero hit. Expected +4 points (96% to 100%) inside the 2-point band; an ignored aura 333 reads 0. Sizing: the control share 0.96 has a variance of 0.0384 per cast and the treatment 0, so the 99% half-width of the difference is 2.576 x sqrt(0.0384 / n) x 100 points; n = 2560 casts per arm (16 parts of 160, 8 streams of 20) gives 1.00 point, half the band. Lead: the 96% base assumes spell_hit_chance reads 0 before the passive with the rating at 0 (the passive reads 807905 e1 spell_hit_chance show the +4 step); another base shrinks the clamped difference and the entry alerts, a fixture fault to triage. Clause 389. Cast timing checked: instant, GCD 1500, the 1600 ms cast wait. Player reports: none."
     },
     {
       "spell": 503714,
@@ -26960,47 +26422,6 @@
       "observe_source": "Splash Potion 567736 rank 7 (BaseLevel and SpellLevel 58, MaxLevel 66, Effect[0] SPELL_EFFECT_HEAL BasePoints 202, DieSides 23, EffectRealPointsPerLevel 1.71772): SpellEffectInfo::CalcValue at level 60 adds int32(2 x 1.71772) = 3 and the roll 1 to 23, so $m1 rolls 206 to 228; the coefficient row {567736, 0, sp 0.224494, spirit 0.08, healing} (AscensionWitchDoctorCoefficients.h:99) adds 0.224494 x the healing power and 0.08 x Spirit in ModifySpellEffectBaseValue (Completion.cpp:653-672, BonusMultiplier zeroed :592-594), and the value is truncated. 567736 is not in ScalingBaseSpells. At the spell power fixture 20000 (player_spell_power; the 801660 pulse_heal_sp read shows the healing power equal to it) and the reference Spirit 109 (class file reference_stats, the 560280 healing_power read): 206 + 4489.88 + 8.72 = 4704.6 to 4726.6, read 4704 to 4726. Spell crit is removed by Reg's Test Aura 984954 (a precondition fixture, the boom_heal precedent). A real Ingredient: Frog Bones 801663 first (setup cast, 1700 ms), then a real Splash Potion at the caster; the heal of 567736 on the caster is read 1500 ms later. A splash without the healing term reads 214 to 237, one with 0.2 or 0.25 about 4200 or 5240. Control: the uncast before phase reads 0. Clause 332 (the amount half of \"healing up to $i allies for ...\"). Cast timing checked: instant, GCD 1500."
     },
     {
-      "spell": 801664,
-      "kind": "metric_delta",
-      "variant": "potion_leech",
-      "label_suffix": "potion_leech",
-      "name": "Ingredient: Bloodthistle (the potion leeches 5% of the damage dealt)",
-      "quote": "Potion: Causes target ally to leech $802975s1% of all damage they deal",
-      "trigger_spell": 801674,
-      "target": "dummy",
-      "measure_actor": "caster",
-      "metric": "spell_heal_total",
-      "fields": {
-        "spell": 803287,
-        "target": "caster"
-      },
-      "before_expected": 0,
-      "expected": 0.05,
-      "tolerance": 0.0005,
-      "ratio_to_metric": {
-        "metric": "spell_damage_total",
-        "fields": {
-          "spell": 801674,
-          "target": "dummy"
-        },
-        "increments": true
-      },
-      "setup_casts": [
-        801664,
-        801661,
-        801663
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 2100,
-      "setup_only_after": true,
-      "gate_spell": 92085,
-      "cast_power": 1000,
-      "wait_ms": 1500,
-      "expire_ms": 500,
-      "player_spell_power": 20000,
-      "observe_source": "Bloodthistle potion 802975 (aura 354, BasePoints 4 + 1 = 5, $802975s1, 15000 ms) on the caster: AscensionWitchDoctorEvents.cpp:68-69 (Check: outgoing damage, not Derived) and :199-205 (Proc: Copy of Bloodthistle 803287 on the owner for uint64(damage) x 5 / 100, the damage of the proc's DamageInfo, after resist and absorb, as the hit's log). 803287 is made a HEAL at the caster with BonusMultiplier 0, CANT_CRIT and IGNORE_CASTER_MODIFIERS (Completion.cpp:396-401, :595-605). The potion is real: Cauldron Brewer 92085 is the gate, learned throughout (setup_only_after); in the treatment phase Ingredient: Bloodthistle 801664, Potion Toss 801661 at the caster (PotionEffects casts 802975, Brewing.cpp:86-107; the 801702 caster aura by required_aura_steps), then Ingredient: Frog Bones 801663, each 2100 ms apart. Frog Bones takes the one Ingredient slot (Brewing.cpp:31-37), so Bloodthistle's +8% healing taken 802771 (2000 ms, refreshed every 1500 ms by the Ingredient) runs out before the Arrow, and the leech heal is not multiplied (Frog Bones' own cauldron aura 803697 is damage taken only). The trigger is one real Malefic Arrow 801674 at the dummy (instant ranged shot, Speed 40, one damage event, a DONE_SPELL_RANGED_DMG_CLASS proc; its 8000 ms cooldown reset), 6300 ms after the Ingredient, inside the 15000 ms potion; the spell power fixture 20000 makes the hit about 5000, so the floor of 5% costs at most 0.0002 of the ratio. The reading is the 803287 heal total over the 801674 damage total on the dummy (ratio_to_metric, increments: the after reading is the phase's increment of each), before_expected 0 (no potion: no leech heal) and expected 0.05 within 0.0005. A 4% or 6% leech reads 0.04 or 0.06, the +8% cauldron left on 0.054. Control: the before phase casts the Arrow with no Ingredient or potion and reads 0. Cast timing checked: Ingredients and Potion Toss instant (GCD 1500), the Arrow lands in about 0.5 s, read 1500 ms after it."
-    },
-    {
       "spell": 500961,
       "kind": "summon_edge",
       "variant": "ally_edge",
@@ -27530,6 +26951,625 @@
       "settle_ms": 1000,
       "wait_ms": 3000,
       "observe_source": "Big Bad Voodoo 802719: instant, RecoveryTime 300000 (reset by the scenario), 25% base mana, DurationIndex 31 = 8000 ms, Effect[0] SUMMON at TARGET_DEST_CASTER of the spirit 310659 (AscensionWitchDoctorSummons.cpp:171-230, placed at the cast point; display 142802 set at :299-305, so its combat reach is only known at run time). Every second the spirit casts the field 802718 on itself with the owner as original caster (:564-565 and :378-383, the aura set to 2200 ms), and Completion.cpp:499-504 turns the three APPLY_AREA_AURA_OWNER effects of 802718 into APPLY_AREA_AURA_PET: UnitAura::FillTargetMap (SpellAuras.cpp:2953-2962) adds the spirit and its owner when GetUnitOwner()->IsWithinDistInMap(owner, radius), the 15 yd of 802718 (SpellRadius 18, $802718a1) plus both combat reaches, 3D, no grid search (cell_search false). Layout (kind summon_edge role owner, ADR 1111 provisional): 1000 ms after the cast the caster itself is placed by the harness at the spirit (ADR 1110 provisional), 0.5 yd beyond 15 yd + the spirit's reach + its own reach, at the spirit's height; the positions and reaches are read at the start and the end of a 3000 ms window (the spirit lives 8000 ms), and a margin under 0.25 yd makes the verdict unmeasured. Read: aura 802718 on the caster at the end of the window, after three field refreshes. Expected 0: the owner copy leaves at the next target update (500 ms) once the caster is beyond the edge; field_owner_inside is the control (the same placement 0.5 yd inside keeps it), so the 0 is the radius. Cast timing checked: instant. Clause 483 (802719 \"While within $802718a1 yds,\")."
+    },
+    {
+      "spell": 92084,
+      "kind": "metric_delta",
+      "name": "Puppeteer's Threads (the released hit is 15% of the hit that fed the Threads)",
+      "variant": "stored_share",
+      "label_suffix": "stored_share",
+      "quote": "Damaging abilities now leave behind Puppeteer's Threads on enemies for $572836d.",
+      "trigger_spell": 807037,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572837,
+        "target": "dummy"
+      },
+      "cast_power": 1400,
+      "player_spell_power": 20000,
+      "before_expected": 0,
+      "expected": 0.15,
+      "tolerance": 0.0002,
+      "wait_ms": 12600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          12300,
+          14000
+        ]
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 807037,
+          "target": "dummy"
+        }
+      },
+      "phase_since": true,
+      "observe_source": "Puppeteer 92084 (not a starting spell: unknown in the control phase, learned between the phases): AscensionWitchDoctorEvents.cpp:77-79 (Check: an outgoing non-periodic spell hit by the doctor) and :132-141 (Proc: Threads 572836 on the target, damage x 15 / 100 added to its Effect[0] amount); AscensionWitchDoctorAuras.cpp:386-390 releases the stored amount once as Puppeteer's Threads 572837 (SCHOOL_DAMAGE, SPELL_ATTR2_CANT_CRIT, SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS, SPELL_ATTR6_IGNORE_CASTER_DAMAGE_MODIFIERS: no bonus, crit or taken modifier changes it; Shadow at a level 60 dummy; 823764 on the caster removes the partial resist). Malefic Wrath 807037 (2000 ms cast, Speed 35, lands about 143 ms later at 3 yd, 11% of the 1497 base mana) at 20000 spell power (about 12,500 per hit, so the integer floor of the 15% moves the share by less than 8e-5). Each phase casts one Wrath and reads 12600 ms after the cast start, past the Threads' end at about 12143 ms (game time stamped): the released 572837 total over the Wrath total of the same phase (phase_since, ratio_to_metric). Control: without 92084 no Threads, 0. Treatment: 0.15 within 0.0002. A crit of the Wrath changes both totals alike. Clause \"Damage taken from the Witch Doctor stores 15% of its value.\" (92084 and its embedded copy in 707331). Player reports: none. Triage repair (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): the entry read 1522 / 11275 = 0.135 against 0.15. The stored 15% was exact (floor(11275 x 15 / 100) = 1691), but the released 572837 hit was partially resisted by 10% (1691 - floor(1691 x 1 / 10) = 1522): creatures carry the CoA linear monster resistance, 60 x CoA.MonsterResistance.PerLevel 1.0 / PerPercent 5.0 = 12% average (WorldConfig.cpp:387-395, Unit.cpp:2566-2587 and 2603-2607), rolled in 10% steps for every magic hit (Unit.cpp:2665-2690); the two Wrath hits of the run show it too (10021 and 11275, 80% and 90% of an unresisted 12525). The beeg spellpen aura 823764 (aura 123 MOD_TARGET_RESISTANCE -9999 on the magic schools, Unit.cpp:2589-2600) is now set on the caster in both phases, a precondition fixture (no player cast removes a creature resistance), so neither the Wrath nor the release is resisted and the share is floor(0.15 W) / W, within 1 / W (about 8e-5 at 12525) of 0.15.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 500960,
+      "kind": "metric_delta",
+      "name": "Serpent Ward (spits at the selected one of two engaged enemies)",
+      "variant": "focus_primary",
+      "label_suffix": "focus_primary",
+      "quote": "attempting to focus on your primary target",
+      "trigger_spell": 500960,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 573055,
+        "target": "dummy"
+      },
+      "cast_power": 1400,
+      "before_expected": 0,
+      "expected": 3,
+      "after_at_least": 2,
+      "after_at_most": 4,
+      "wait_ms": 4300,
+      "expire_ms": 500,
+      "area_dummies": [
+        6
+      ],
+      "engage_and_select": {
+        "spell": 504608,
+        "gap_ms": 1600,
+        "select_before": "area1",
+        "select_after": "dummy"
+      },
+      "observe_source": "AscensionWitchDoctorSummons.cpp:420-431 (Enemy): with the owner in combat, the ward takes the owner's selected unit when it is a valid attack target within 30 yd and in line of sight, else the first nearby enemy in combat with the owner; :466-468 casts Serpent Ward Attack 573055 at it every WardAttackInterval (2000 ms at no haste) with the owner as original caster, so the hits are logged under the caster. Both phases cast Serpent Ward 500960 at the caster, then select (area1 in the control phase, the dummy in the treatment phase) and cast Hex of Malice 504608 at area1 (6 yd) and the dummy (3 yd), 1600 ms apart, so the owner is in combat with both (engage_and_select). 573055 hits on the dummy 4300 ms after the second Hex: 0 with area1 selected, 2 to 4 (three ward updates) with the dummy selected. A ward that ignored the selection would hit the same dummy in both phases. Pair: focus_control. Open player report: #4067. Clause \"attempting to focus on your primary target.\" Triage repair (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): both phases read 0 ward hits on every dummy (focus_primary 0 against 3, focus_control 0 before against at least 2). The engage casts of Hex of Malice 504608 were never cast: the cast records show spell_active false (the reference character does not know 504608), and the harness cast goes through WorldSession::HandleCastSpellOpcode (CoAGameplayTest.cpp cast action), which drops a spell the player does not know, so the caster never entered combat and the ward has no Enemy() (AscensionWitchDoctorSummons.cpp:420-431 returns nothing out of combat). engage_and_select does not learn its spell, so the entry now learns 504608 at the start (learn). Two Hexes (20% of 1497 each) and the ward (5%) cost 674 of the 1400 cast_power; the 1600 ms gaps exceed the Hex GCD of 1500 ms.",
+      "learn": [
+        504608
+      ]
+    },
+    {
+      "spell": 500960,
+      "kind": "metric_delta",
+      "name": "Serpent Ward (the unselected engaged enemy draws no spit)",
+      "variant": "focus_control",
+      "label_suffix": "focus_control",
+      "quote": "attempting to focus on your primary target",
+      "trigger_spell": 500960,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 573055,
+        "target": "area1"
+      },
+      "cast_power": 1400,
+      "before_expected": 2,
+      "expected": 2,
+      "expected_gain": 0,
+      "tolerance": 0,
+      "wait_ms": 4300,
+      "expire_ms": 500,
+      "area_dummies": [
+        6
+      ],
+      "engage_and_select": {
+        "spell": 504608,
+        "gap_ms": 1600,
+        "select_before": "area1",
+        "select_after": "dummy"
+      },
+      "observe_source": "Pair of focus_primary, the same layout read on area1: at least 2 hits on area1 in the control phase (area1 selected; the ward was attacking), and no new hit on area1 in the treatment phase (gain 0) while the dummy is selected. Triage repair (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): both phases read 0 ward hits on every dummy (focus_primary 0 against 3, focus_control 0 before against at least 2). The engage casts of Hex of Malice 504608 were never cast: the cast records show spell_active false (the reference character does not know 504608), and the harness cast goes through WorldSession::HandleCastSpellOpcode (CoAGameplayTest.cpp cast action), which drops a spell the player does not know, so the caster never entered combat and the ward has no Enemy() (AscensionWitchDoctorSummons.cpp:420-431 returns nothing out of combat). engage_and_select does not learn its spell, so the entry now learns 504608 at the start (learn). Two Hexes (20% of 1497 each) and the ward (5%) cost 674 of the 1400 cast_power; the 1600 ms gaps exceed the Hex GCD of 1500 ms.",
+      "learn": [
+        504608
+      ]
+    },
+    {
+      "spell": 501146,
+      "kind": "metric_delta",
+      "variant": "flare_damage",
+      "label_suffix": "flare_damage",
+      "name": "Shadowflare (602 + 35% of 20000 spell power + 10% of 47 ranged attack power)",
+      "quote": "Rain down shadow magic at a location, dealing ${$m1+0+$sps*.35+$RAP*.1} Shadow damage to all enemies.",
+      "trigger_spell": 501146,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 501146,
+        "target": "dummy",
+        "critical": false
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1400,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expected": 7606.7,
+      "tolerance": 1,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "observe_source": "Shadowflare 501146 (BaseLevel 60, EffectBasePoints[0] 601 + 1, EffectRealPointsPerLevel 2.04 x 0 levels at 60 = $m1 602; AscensionWitchDoctorCoefficients.h:44 sp 0.35, rap 0.10, the tooltip's $sps*.35 and $RAP*.1). A real cast at the dummy at 20000 spell power (harness fixture) and the reference ranged attack power 47 (class file reference_stats); Reg's Test Aura 984954 removes spell crits and the read keeps non-critical hits; Shadow at a level 60 dummy; 823764 on the caster removes the partial resist. Expected 602 + 7000 + 4.7 = 7606.7 within 1 (the engine truncates; the 801669 rank read 7069 against 7070.3 in final07, the same truncation). The control is the uncast before phase (0). Companion flare_hits counts one hit per cast. Clause \"Rain down shadow magic at a location, dealing ${$m1+0+$sps*.35+$RAP*.1} Shadow damage to all enemies.\" Player reports: none. Triage repair (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): the entry read 5325 against 7606.7: 5325 = 7607 - floor(7607 x 3 / 10), a 30% partial resist of the expected hit by the dummy's 12% linear monster resistance (WorldConfig.cpp:387-395, Unit.cpp:2566-2587, 2665-2690); flare_hits read the one hit. The beeg spellpen aura 823764 is now set on the caster in both phases with 984954, a precondition fixture, so the hit is the formula alone."
+    },
+    {
+      "spell": 560545,
+      "kind": "hit_period",
+      "variant": "puppets_period",
+      "label_suffix": "puppets_period",
+      "name": "Dark Loa's Blessing (Shadow Puppets hits every 600 ms)",
+      "quote": "In addition, your Shadow Puppets now deals damage $706548s1% faster.",
+      "trigger_spell": 501087,
+      "hit_spell": 802745,
+      "expected_ms": 600,
+      "window": [
+        20,
+        2900
+      ],
+      "poll_ms": 1,
+      "learn": [
+        560545
+      ],
+      "observe_source": "Dark Loa's Blessing 560545 (passive) Effect[1] and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER on misc 1 (SPELLMOD_DURATION) and 19 (SPELLMOD_ACTIVATION_TIME, the periodic amplitude), BasePoints -21 + 1 = -20 (the token spell Dark Loyalty 706548 carries the same pair, $706548s1 = 20); no EffectSpellClassMask, so the modifier reaches every family 19 spell, Shadow Puppets 501087 among them. Shadow Puppets 501087: instant, RecoveryTime 18000 reset by the kind, 15% base mana, DurationIndex 27 = 3000 ms, Effect[0] aura 227 every 750 ms; AscensionWitchDoctorCompletion.cpp:338-341 keeps that period and drops Effect[1], and AscensionWitchDoctorAuras.cpp:279-283 casts one Shadow Puppet 802745 hit per tick (Speed 26, 3 yd floored to 5 yd, about 192 ms of flight, the same for every hit; 501087 carries SPELL_ATTR5_EXTRA_INITIAL_PERIOD, so the first tick comes at the apply and its hit lands about 195 ms after the cast). No Mirage and no Spirit: Puppets needs neither, so the caster stays visible. The 802745 hits on the dummy and the game time are polled about every 10 ms; (last - first) / (hits - 1) must lie inside the stated period +- 5% (G-19). Treatment: 560545 learned at the start (a passive learn applies its aura): four hits 600 ms apart (750 x 0.8; the 2400 ms duration keeps four ticks), so 600 +- 30 ms; the control entry puppets_period_control reads 750 ms without the talent. A 10% cut (675 ms) or none alerts. Closes the cycle 9 tool gap (B14). Cast timing checked: instant. Player reports: none. Triage repair (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): 4 hits in the window, 1 already at the first read 300 ms after the cast, so the period was unmeasured. Shadow Puppets 501087 has SPELL_ATTR5_EXTRA_INITIAL_PERIOD (the DBC), a tick at the apply and then one every amplitude, four ticks in all (0, 600, 1200, 1800 ms with the talent; 0, 750, 1500, 2250 ms without). The later hits of the run fit it: 794, 1406 and 1998 ms with the talent (602 ms apart) and 952, 1707 and 2456 ms without (752 ms apart), each 192 ms of flight after its tick. The window now opens 20 ms after the cast, before the first hit, so the first read holds none and all four hits are stamped."
+    },
+    {
+      "spell": 560545,
+      "kind": "hit_period",
+      "variant": "puppets_period_control",
+      "label_suffix": "puppets_period_control",
+      "name": "Dark Loa's Blessing (control: Shadow Puppets every 750 ms)",
+      "quote": "In addition, your Shadow Puppets now deals damage $706548s1% faster.",
+      "trigger_spell": 501087,
+      "hit_spell": 802745,
+      "expected_ms": 750,
+      "window": [
+        20,
+        3600
+      ],
+      "poll_ms": 1,
+      "observe_source": "Dark Loa's Blessing 560545 (passive) Effect[1] and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER on misc 1 (SPELLMOD_DURATION) and 19 (SPELLMOD_ACTIVATION_TIME, the periodic amplitude), BasePoints -21 + 1 = -20 (the token spell Dark Loyalty 706548 carries the same pair, $706548s1 = 20); no EffectSpellClassMask, so the modifier reaches every family 19 spell, Shadow Puppets 501087 among them. Shadow Puppets 501087: instant, RecoveryTime 18000 reset by the kind, 15% base mana, DurationIndex 27 = 3000 ms, Effect[0] aura 227 every 750 ms; AscensionWitchDoctorCompletion.cpp:338-341 keeps that period and drops Effect[1], and AscensionWitchDoctorAuras.cpp:279-283 casts one Shadow Puppet 802745 hit per tick (Speed 26, 3 yd floored to 5 yd, about 192 ms of flight, the same for every hit; 501087 carries SPELL_ATTR5_EXTRA_INITIAL_PERIOD, so the first tick comes at the apply and its hit lands about 195 ms after the cast). No Mirage and no Spirit: Puppets needs neither, so the caster stays visible. The 802745 hits on the dummy and the game time are polled about every 10 ms; (last - first) / (hits - 1) must lie inside the stated period +- 5% (G-19). Control of puppets_period: 560545 not known, four hits 750 ms apart (750 +- 37.5 ms), so the 600 ms of the treatment is the talent and not the spell itself. Cast timing checked: instant. Player reports: none. Triage repair (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): 4 hits in the window, 1 already at the first read 300 ms after the cast, so the period was unmeasured. Shadow Puppets 501087 has SPELL_ATTR5_EXTRA_INITIAL_PERIOD (the DBC), a tick at the apply and then one every amplitude, four ticks in all (0, 600, 1200, 1800 ms with the talent; 0, 750, 1500, 2250 ms without). The later hits of the run fit it: 794, 1406 and 1998 ms with the talent (602 ms apart) and 952, 1707 and 2456 ms without (752 ms apart), each 192 ms of flight after its tick. The window now opens 20 ms after the cast, before the first hit, so the first read holds none and all four hits are stamped."
+    },
+    {
+      "spell": 704497,
+      "kind": "aura_window",
+      "variant": "stun_lasts",
+      "label_suffix": "stun_lasts",
+      "name": "Soul Marionette (the explosion stuns for 4 sec)",
+      "quote": "applying a stack of",
+      "trigger_spell": 704497,
+      "aura": 706553,
+      "control_ms": 4000,
+      "treatment_ms": 4000,
+      "control_windows": [
+        [
+          7500,
+          9000
+        ],
+        [
+          11300,
+          13300
+        ]
+      ],
+      "treatment_windows": [
+        [
+          7500,
+          9000
+        ],
+        [
+          11300,
+          13300
+        ]
+      ],
+      "trigger_power": 2000,
+      "poll_ms": 1,
+      "observe_source": "Soul Marionette 704497 (instant, RecoveryTime 90000 reset, 22% base mana, trigger_power 2000) explodes its five clones about 8000 to 8400 ms after the cast (the stun entry); the first explosion puts Soul Marionette 706553 Effect[1] SPELL_AURA_MOD_STUN (DurationIndex 35 = 4000 ms, $706553d) on the dummy (3 yd), with the doctor as the aura's caster (original caster), and the four that follow it do not refresh it (AscensionWitchDoctorAbilities.cpp:150-151 strips the stun effect from a stunned target). The stun on the dummy and the game time are read about every 10 ms over a start window around the stun's start and an end window around its end (aura_window, ADR 0551), so its stamped duration, from the first read with the aura to the first read without it, does not depend on when the stun started; it must be 4000 ms +- 200 (G-19, 5%) in both phases. The kind runs a first phase before a repeated learn of the cast spell itself (a no-op), so the two phases are two equal measurements, not a talent contrast; the uncast state is the start window's first read, which must hold no stun. Closes the cycle 7 tool note (B8-fix: a read relative to the stun's own start). Cast timing checked: instant. Player reports: none. Triage repair (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): the control stun lasted 4000 ms, the treatment stun about 2000 ms (bracketed by the windows, 954 to 3258 ms). The second stun on the same dummy was halved by diminishing returns: a stun is DIMINISHING_STUN (triggered, SpellMgr.cpp:300-301, the mechanic 12 of the aura), a DRTYPE_ALL group that also applies to creatures (SpellMgr.cpp:312-322, Unit.cpp:13215-13235, level 2 = 50%), and the level resets only 15000 ms after the last stun of the group ended (Unit.cpp:13138-13143). The run stamps the second stun 11974 ms after the first one ended. The treatment phase now first casts a real Spirit Idol 500961 at the caster (instant, no cost, RecoveryTime reset by the kind) and waits 6000 ms (setup_casts, ADR 1121), a delay only: the idol energizes allies and touches no enemy, so the treatment stun lands about 17974 ms after the first ended and is a first-level stun again. Both phases then read the stated 4000 ms.",
+      "setup_casts": [
+        {
+          "spell": 500961,
+          "target": "caster",
+          "wait_ms": 6000
+        }
+      ]
+    },
+    {
+      "spell": 801678,
+      "kind": "aura_window",
+      "variant": "stun_lasts",
+      "label_suffix": "stun_lasts",
+      "name": "Stasis Ward (the burst stuns for 4 sec)",
+      "quote": "the ward will burst with lightning, stunning nearby enemies for $801677d",
+      "trigger_spell": 801678,
+      "aura": 801677,
+      "control_ms": 4000,
+      "treatment_ms": 4000,
+      "control_windows": [
+        [
+          1700,
+          2600
+        ],
+        [
+          5600,
+          6800
+        ]
+      ],
+      "treatment_windows": [
+        [
+          1700,
+          2600
+        ],
+        [
+          5600,
+          6800
+        ]
+      ],
+      "trigger_power": 1400,
+      "poll_ms": 1,
+      "observe_source": "Stasis Ward 801678 (instant, RecoveryTime 60000 reset, 13% base mana, trigger_power 1400) summons Stasis Ward 50108; at its first update with _age >= 2000 ms (about 2000 to 2100 ms after the cast; burst_held and burst bracket it) it casts Stasis 801677 at itself with the doctor as original caster and despawns (AscensionWitchDoctorSummons.cpp:541-544). 801677 Effect[0] SPELL_AURA_MOD_STUN, DurationIndex 35 = 4000 ms ($801677d), on the dummy 3 yd away inside the 10 yd burst. The stun on the dummy and the game time are read about every 10 ms over a start window around the stun's start and an end window around its end (aura_window, ADR 0551), so its stamped duration, from the first read with the aura to the first read without it, does not depend on when the stun started; it must be 4000 ms +- 200 (G-19, 5%) in both phases. The kind runs a first phase before a repeated learn of the cast spell itself (a no-op), so the two phases are two equal measurements, not a talent contrast; the uncast state is the start window's first read, which must hold no stun. This separates the 4000 ms stun from the 2000 ms fuse, the objection of the cycle 9 no-route note (B16): the stamps start at the stun, not at the cast. Cast timing checked: instant. Player reports: none. Triage repair (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): the control stun lasted 4000 ms, the treatment stun about 2000 ms (bracketed by the windows, 399 to 3399 ms). The second stun on the same dummy was halved by diminishing returns: a stun is DIMINISHING_STUN (triggered, SpellMgr.cpp:300-301, the mechanic 12 of the aura), a DRTYPE_ALL group that also applies to creatures (SpellMgr.cpp:312-322, Unit.cpp:13215-13235, level 2 = 50%), and the level resets only 15000 ms after the last stun of the group ended (Unit.cpp:13138-13143). The run stamps the second stun 5856 ms after the first one ended. The treatment phase now first casts a real Spirit Idol 500961 at the caster (instant, no cost, RecoveryTime reset by the kind) and waits 12000 ms (setup_casts, ADR 1121), a delay only: the idol energizes allies and touches no enemy, so the treatment stun lands about 17856 ms after the first ended and is a first-level stun again. Both phases then read the stated 4000 ms.",
+      "setup_casts": [
+        {
+          "spell": 500961,
+          "target": "caster",
+          "wait_ms": 12000
+        }
+      ]
+    },
+    {
+      "spell": 705906,
+      "kind": "ally_heal_reach",
+      "variant": "mass_reach",
+      "name": "For Da Loa! (Mass Allcure cleanses party members within 30 yd)",
+      "quote": "Transforms Allcure Elixir into Mass Allcure Elixir.@s:706555:0@",
+      "gate_spell": 705906,
+      "gate_settle_ms": 1000,
+      "caster_auras": [
+        [
+          2818,
+          1
+        ],
+        [
+          55095,
+          1
+        ],
+        [
+          702,
+          1
+        ]
+      ],
+      "allies": [
+        {
+          "id": "mass_in",
+          "dx": 22,
+          "dy": 0,
+          "auras": [
+            [
+              2818,
+              1
+            ],
+            [
+              55095,
+              1
+            ],
+            [
+              702,
+              1
+            ]
+          ]
+        },
+        {
+          "id": "mass_out",
+          "dx": 37,
+          "dy": 0,
+          "auras": [
+            [
+              2818,
+              1
+            ],
+            [
+              55095,
+              1
+            ],
+            [
+              702,
+              1
+            ]
+          ]
+        }
+      ],
+      "casts": [
+        {
+          "spell": 804049,
+          "target": "caster",
+          "watch_ms": 1000,
+          "poll_ms": 250,
+          "end_ms": 3000
+        }
+      ],
+      "checks": [
+        {
+          "name": "mass_poison",
+          "judge": "aura_reach",
+          "spell": 804049,
+          "aura": 2818,
+          "reference": "caster",
+          "removed": [
+            "mass_in"
+          ],
+          "kept": [
+            "mass_out"
+          ]
+        },
+        {
+          "name": "mass_disease",
+          "judge": "aura_reach",
+          "spell": 804049,
+          "aura": 55095,
+          "reference": "caster",
+          "removed": [
+            "mass_in"
+          ],
+          "kept": [
+            "mass_out"
+          ]
+        },
+        {
+          "name": "mass_curse",
+          "judge": "aura_reach",
+          "spell": 804049,
+          "aura": 702,
+          "reference": "caster",
+          "removed": [
+            "mass_in"
+          ],
+          "kept": [
+            "mass_out"
+          ]
+        }
+      ],
+      "observe_source": "For Da Loa! 705906 (passive) makes Allcure Elixir 804049 cast Mass Allcure Elixir 706555 (SyncReplacements every 500 ms, the base_refused entry; 1000 ms after the gate learn). 706555: three SPELL_AURA_DISPEL_IMMUNITY effects (misc 4 poison, 3 disease, 2 curse) at TARGET_UNIT_CASTER_AREA_RAID, EffectRadiusIndex 10 = 30 yd ($a1), DurationIndex 27 = 3000 ms ($d), AttributesEx 32768 SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY (the auras of those types are removed when the immunity applies). Fixtures (set_aura at each phase start, the 804049 dispel_removal debuffs): Deadly Poison 2818, Frost Fever 55095 and Curse of Weakness 702 on the caster and the allies. Control phase (705906 not known): the same Allcure Elixir cast at the caster is single-target, so only the caster is cleansed and immune. Layout: mass_in (22, 0), inside 30 yd plus its 1.5 yd reach; mass_out (37, 0), 2.84 yd beyond the edge of 30 + 2.66 + 1.5 = 34.16 yd, grouped (5 or fewer: a party). The debuffs are read 1000 ms after the cast. Treatment: the caster and mass_in lose all three, mass_out keeps them (a radius bracket). Limit: no witness reaches mass_out, so its kept debuffs are not told apart from a line of sight fault (it stands on the line of mass_in, 12 yd further); a search wider than 35.5 yd still alerts on it. 3000 ms end wait lets the immunity end before the next phase. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md. Triage repair (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): mass_out at 34 yd lost all three debuffs in the treatment (mass_in and the caster too), so the bracket read it as cleansed. TARGET_UNIT_CASTER_AREA_RAID adds the caster's leeway radius to the 30 yd (Spell.cpp:1393-1394), and GetLeewayBonusRadius gives a player LEEWAY_BONUS_RANGE 2.66 yd whenever its run speed exceeds LEEWAY_MIN_MOVE_SPEED 4.97, standing or not (Object.cpp:1786-1805, ObjectDefines.h:50-51); the area check then adds the ally's 1.5 yd reach (Spell.cpp:9453, Object.cpp:1354-1357): 34.16 yd, so 34 was inside. mass_out now stands at 37 yd, beyond it with a 2.84 yd margin; mass_in at 22 yd stays inside. The leeway is inherited engine code, not a Witch Doctor fault."
+    },
+    {
+      "spell": 707854,
+      "kind": "metric_delta",
+      "name": "Malefic Arrow (Shadowhunter heals 40% of the Arrow damage)",
+      "variant": "arrow_heal",
+      "label_suffix": "arrow_heal",
+      "quote": "Malefic Arrow.@s:801674:0@",
+      "trigger_spell": 801674,
+      "target": "dummy",
+      "dummy_distance": 15,
+      "learn": [
+        707854
+      ],
+      "gate_spell": 92086,
+      "measure_actor": "caster",
+      "cast_power": 1400,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 570156,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 801674,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expected": 0.4,
+      "tolerance": 0.001,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Tooltip: the 707854 Description pulls Malefic Arrow 801674 (@s:801674:0@, the 301175 Spirit precedent quotes the pulled markup the same way): \"healing you equal to $92086s2% of the damage dealt\" ($92086s2 = Shadowhunter 92086 Effect[1] BasePoints 39 + 1 = 40). Code: AscensionWitchDoctorAbilities.cpp:243-244, a damaging Arrow (IsArrow) with Shadowhunter 92086 held makes Copy(player, player, DevotionHeal 570156, damage x 40 / 100). Arms: Malefic Arrow 707854 is learned at the start so the Arrow passes its cast gate (Abilities.cpp:87 refuses an Arrow without 92086 or 707854); Shadowhunter 92086 is learned between the phases (gate_spell; the reference character does not know it, the 92086 Auto Shot and cost entries learn it the same way). A real Arrow 801674 (ranged slot, cast 500 ms longer on this server, Speed 40 over 15 yd = 375 ms, RecoveryTime 8000 reset, 5% mana) at the dummy 15 yd away (the ranged slot refuses closer targets), read 1500 ms after the cast. Reading: the 570156 heal on the caster divided by the 801674 damage on the dummy, the after-phase increase of each (ratio_to_metric increments). Reg's Test Aura 984954 suppresses heal crits (precondition fixture; an Arrow crit changes the damage, not the share). Expected 0.40, tolerance 0.01 (the heal truncates). Control: the before phase without 92086 heals nothing, 0. The reference $bh is 0, so no healing bonus is added to the copy. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md. Triage repair (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): the entry read 28 / 72 = 0.389 against 0.40 within 0.01: the Arrow hit of 72 (88 in the control) is so small that the integer heal floor(72 x 40 / 100) = 28 moves the share by 1.1 points (AscensionWitchDoctorAbilities.cpp:243-244). The caster now has 20000 spell power (player_spell_power), so the Arrow (AscensionWitchDoctorCoefficients.h:131, sp 0.25, with the rank 1 level penalty) hits for several thousand and the floor moves the share by under 0.0003; the tolerance is 0.001. The heal copy Devotion of Bwonsamdi 570156 has BonusMultiplier 0, SPELL_ATTR3_IGNORE_CASTER_MODIFIERS and CANT_CRIT (AscensionWitchDoctorCompletion.cpp:595-606), so the spell power adds nothing to the heal; 984954 forces the Arrow (DmgClass 3) to crit, which changes the hit and not the share.",
+      "player_spell_power": 20000
+    },
+    {
+      "spell": 578295,
+      "kind": "metric_delta",
+      "name": "Touch of the Spirits (the debuffed enemy takes 3% more damage)",
+      "variant": "touch_taken",
+      "label_suffix": "touch_taken",
+      "quote": "to take $578296s1% more damage",
+      "trigger_spell": 530295,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        801696
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 2000,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 530295,
+        "target": "dummy"
+      },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 100,
+      "expected": 203,
+      "expected_ratio": 2.03,
+      "tolerance": 0.01,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "The touch_debuff route lays the debuff: a real Spirit in a Bottle 801696 (1500 ms cast) at the caster held at 5000 of 10000 health (an effective heal, Abilities.cpp:217) makes Bottle damage 504606 on the dummy 3 yd away, and with 578295 known the hit casts Touch of the Spirits 578296 on it (Abilities.cpp:269-270; Effect[0] aura 87 MOD_DAMAGE_PERCENT_TAKEN misc 127 +3% = $578296s1, DurationIndex 8 = 15000 ms). 2000 ms after the Bottle the caster casts Blood Frenzy 530295 at the dummy (instant, Effect[0] SCHOOL_DAMAGE BasePoints 164 DieSides 1: no roll, a deterministic hit) in both phases; 578295 is learned between them. spell_damage_total is a running total, so after = before + after-phase hit: 1 + 1.03 = 2.03 (the Necromancer 560848 soulfreeze_damage form); a hit near 170 rounds by under 1 point (tolerance 0.01, G-19 band of 3% is 2 points: 2.01 to 2.05). Reg's Test Aura 984954 (spell crit -1000) on the caster keeps the hits non-critical; 823764 on the caster removes the partial resist of the Shadow hits. Control: the same Bottle and hit without the passive (the before reading, at least 100). Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md. Triage repair (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): the scenario failed at its first set_power: cast_power 2000 sets the power of the trigger's type, and Blood Frenzy 530295 is PowerType 1 (rage, maximum 1000) with no cost, so the harness refused (\"Power fixture exceeds maximum\"). cast_power is dropped: the trigger costs nothing and the Bottle setup cast (15% of the 1497 base mana) is paid from the full mana pool. Blood Frenzy and the Bottle damage 504606 are Shadow, which the dummy's 12% linear monster resistance would partially resist in 10% steps (Unit.cpp:2566-2587, 2665-2690), so 823764 is set on the caster in both phases with 984954, a precondition fixture. Expected hit 169 (164 + 1 + 4 x 1 level), 174 under the debuff: 343 / 169 = 2.030."
+    },
+    {
+      "spell": 706557,
+      "kind": "metric_delta",
+      "variant": "heal_cut",
+      "label_suffix": "heal_cut",
+      "name": "Hex of Death (a heal the debuffed enemy receives is 20% smaller)",
+      "quote": "reduces the targets healing received by",
+      "trigger_spell": 801674,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "enemy_casts": [
+        9840
+      ],
+      "enemy_cast_wait_ms": 7500,
+      "learn": [
+        707854
+      ],
+      "relocate_before_trigger": {
+        "dx": -10
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 9840,
+        "target": "enemy"
+      },
+      "cast_power": 1400,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 156,
+      "expected": 124.8,
+      "expected_ratio": 0.8,
+      "tolerance": 0.01,
+      "wait_ms": 2000,
+      "expire_ms": 9000,
+      "phase_since": true,
+      "observe_source": "Hex of Death 706557: AscensionWitchDoctorEvents.cpp:108-109 and :182-183 put Hex of Death 706559 on the enemy an Arrow damages; 706559 Effect[0] aura 118 SPELL_AURA_MOD_HEALING_PCT BasePoints -21 + 1 = -20% ($706559s1), DurationIndex 1 = 10000 ms, applied by SpellHealingBonusTaken. The heal read follows the Bad Juju 501181 mark_heals entry (ok, 748 against 748.8 in the cycle 10 fix run): an enemy player (race 2, PvP flagged) puts Rejuvenation 9840 on itself (78 every 3000 ms for 15000 ms, a HoT that does not crit, no spell power at the reference stats) and its own heal events are read. Both phases cast a real Malefic Arrow 801674 at the enemy (707854 learned so the Arrow passes its gate, Abilities.cpp:87; 823764 on the caster); the caster steps 10 yd back along x before each Arrow (relocate_before_trigger, 10 then 20 yd), because the ranged slot refuses a target inside melee range (Spell.cpp:7355-7360) and the enemy player stands at the caster's start. 2000 ms after the Arrow (it lands within 1500 ms at 15 yd in one_stack, 500 ms of flight at 20 yd) the enemy casts the Rejuvenation; its ticks come 3000 and 6000 ms later, both inside the 10000 ms debuff, and the read 7500 ms after the cast stops before the third tick. Each phase is read from its own trigger cast (phase_since); expire_ms 9000 lets the control Rejuvenation run out (its last tick 15000 ms after its cast) before the treatment snapshot. Control (706557 not known): 2 x 78 = 156. Treatment: 2 x floor(78 x 0.8) = 124, the ratio 0.795 against 0.8 within 0.01 (the integer tick moves it by 0.005; the G-19 band of the stated 20% is 2 points, 0.78 to 0.82). No cut reads 1.0, a doubled stack 0.6. Clause claim \"by $706559s1%\". Player reports: none. Triage repair (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): the first design (Gift of Life 23783 cast by the dummy on itself, read by caster_entry 36) read 0 heal events in both phases although both creature casts were accepted (cast_result 255): the heal never reached the read, a path no earlier entry had proven (no class file reads a creature self-heal; the dummy's own self-casts do land, 806283 misery_lands). The cause is not established from the result, so the entry moves to the proven enemy-player read."
+    },
+    {
+      "spell": 801664,
+      "kind": "metric_delta",
+      "variant": "potion_leech",
+      "label_suffix": "potion_leech",
+      "name": "Ingredient: Bloodthistle (the potion leeches 5% of the damage dealt)",
+      "quote": "Potion: Causes target ally to leech $802975s1% of all damage they deal",
+      "trigger_spell": 801674,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 803287,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0.05,
+      "tolerance": 0.0005,
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 801674,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "setup_casts": [
+        801664,
+        801661,
+        801663
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 2100,
+      "setup_only_after": true,
+      "gate_spell": 92085,
+      "cast_power": 1000,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "player_spell_power": 20000,
+      "observe_source": "Bloodthistle potion 802975 (aura 354, BasePoints 4 + 1 = 5, $802975s1, 15000 ms) on the caster: AscensionWitchDoctorEvents.cpp:68-69 (Check: outgoing damage, not Derived) and :199-205 (Proc: Copy of Bloodthistle 803287 on the owner for uint64(damage) x 5 / 100, the damage of the proc's DamageInfo, after resist and absorb, as the hit's log). 803287 is made a HEAL at the caster with BonusMultiplier 0, CANT_CRIT and IGNORE_CASTER_MODIFIERS (Completion.cpp:396-401, :595-605). The potion is real: Cauldron Brewer 92085 is the gate, learned throughout (setup_only_after); in the treatment phase Ingredient: Bloodthistle 801664, Potion Toss 801661 at the caster (PotionEffects casts 802975, Brewing.cpp:86-107; the 801702 caster aura by required_aura_steps), then Ingredient: Frog Bones 801663, each 2100 ms apart. Frog Bones takes the one Ingredient slot (Brewing.cpp:31-37), so Bloodthistle's +8% healing taken 802771 (2000 ms, refreshed every 1500 ms by the Ingredient) runs out before the Arrow, and the leech heal is not multiplied (Frog Bones' own cauldron aura 803697 is damage taken only). The trigger is one real Malefic Arrow 801674 at the dummy (instant ranged shot, Speed 40, one damage event, a DONE_SPELL_RANGED_DMG_CLASS proc; its 8000 ms cooldown reset), 6300 ms after the Ingredient, inside the 15000 ms potion; the spell power fixture 20000 makes the hit about 5000, so the floor of 5% costs at most 0.0002 of the ratio. The reading is the 803287 heal total over the 801674 damage total on the dummy (ratio_to_metric, increments: the after reading is the phase's increment of each), before_expected 0 (no potion: no leech heal) and expected 0.05 within 0.0005. A 4% or 6% leech reads 0.04 or 0.06, the +8% cauldron left on 0.054. Control: the before phase casts the Arrow with no Ingredient or potion and reads 0. Cast timing checked: Ingredients and Potion Toss instant (GCD 1500), the Arrow lands in about 0.5 s, read 1500 ms after it. Triage repair (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): (run group B sweep 20261121-235946) the compare found no \"801664 spell_heal_total before\": the read was in the result (0), but both ratio bases read 0, and ratio_to_metric drops a reading whose base is 0 (metric_delta_options/ratio_to_metric.py run_values: \"/ divisor if divisor else None\"), so the label had no value. The Malefic Arrow 801674 never dealt damage: its cast gate refuses an Arrow without Shadowhunter 92086 or Malefic Arrow 707854 (AscensionWitchDoctorAbilities.cpp:87, SPELL_FAILED_CASTER_AURASTATE; the entry learns only the Brewer gate 92085), and the dummy stood 3 yd away, inside the melee range the ranged slot refuses (Spell.cpp:7355-7360). The entry now learns 707854 at the start (the arrow_heal and heal_cut precedent) and stands the dummy 15 yd away (dummy_distance, the one_stack layout, where the Arrow lands inside the 1500 ms read wait).",
+      "learn": [
+        707854
+      ],
+      "dummy_distance": 15
+    },
+    {
+      "spell": 807905,
+      "kind": "hit_ratio",
+      "variant": "hit_landed",
+      "label_suffix": "hit_landed",
+      "name": "Staff of the Coven (spell hit chance +4%, pooled)",
+      "quote": "and your hit chance by $s2%.",
+      "expected": 1.0,
+      "observe_spell": 573026,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          807905
+        ]
+      },
+      "rate": "landed",
+      "expected_points": 4,
+      "trials": 160,
+      "parts": 48,
+      "streams": 8,
+      "cast_power": 1000,
+      "fixture": {
+        "spell_hit_rating": 0
+      },
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Hexfire 573026 (EffectImplicitTargetA 6, no radius, EffectChainTarget 1; the Puppeteer's Threads branch needs 704511, never known here) is cast at the stream's own dummy by id; Staff of the Coven 807905 changes its owner's own hit chance only, and the streams are never grouped"
+      },
+      "observe_source": "Staff of the Coven 807905 (passive, learned for real in the treatment arm, pitfall 9): Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 3 + 1 = +4 ($s2), which StatSystem.cpp:1043 adds to m_modSpellHitChance. Unit::MagicSpellHitResult (Unit.cpp:3992-4040) gives a same-level creature target a base hit chance of 96 (levelDiff 0), adds m_modSpellHitChance and clamps to 100, so without the passive a spell misses 4% of its casts and with it none. The caster's spell hit rating is set to 0 for the entry (fixture spell_hit_rating 0, ADR 1116 provisional; the reference character carries 10000, which already removes every miss). Each trial casts a real Hexfire 573026 (instant, CategoryRecoveryTime 10000 reset, 17% mana, cast_power 1000) at the dummy (level 60, the class level) and reads the spell's damage events over its SPELL_GO count (rate \"landed\", ADR 1116 provisional: a miss sends SMSG_SPELLLOGMISS and no damage log), with beeg spellpen 823764 so no partial resist leaves a zero hit. Expected +4 points (96% to 100%) inside the 2-point band; an ignored aura 333 reads 0. Sizing: the control share 0.96 has a variance of 0.0384 per cast and the treatment 0, so the 99% half-width of the difference is 2.576 x sqrt(0.0384 / n) x 100 points; the pooled judge, however, takes the 99% interval from the between-part variance with t over the parts, so the number of parts sets the width: 48 parts of 160 (8 streams of 20), 7680 casts per arm. Lead: the 96% base assumes spell_hit_chance reads 0 before the passive with the rating at 0 (the passive reads 807905 e1 spell_hit_chance show the +4 step); another base shrinks the clamped difference and the entry alerts, a fixture fault to triage. Clause 389. Cast timing checked: instant, GCD 1500, the 1600 ms cast wait. Player reports: none. Triage repair (cycle 11 sweep 20261121-231523, build 014aabf4, commit 9ebe6527de): (run group B sweep 20261121-235946) insufficient_trials: +3.36 points (control 96.64%, treatment 100%) with a 99% half-width of 1.16 points over 16 parts against the 1.00 allowed (half the 2-point band); the compare sized it at 34 parts (sized_trials, 16 x (1.163 / 0.8)^2). The between-part standard deviation of the run is 1.58 points (1.163 x 4 / t(15, 0.995) 2.946), against the 1.42 of a binomial 96.6% share over 160 casts. With 48 parts the half-width is t(47, 0.995) 2.685 x 1.58 / sqrt(48) = 0.61 points (0.55 at the binomial 1.42); it passes 1.00 only if the part spread reaches 2.58 points, which a chi-square with 47 degrees of freedom gives with a probability of 5e-9 at the observed spread (2e-13 at the binomial one); 40 parts would leave 3e-5. The reading itself (100 - the control share) has a standard error of 0.22 points over 7680 casts, so a true +4 (or the measured +3.4) cannot leave the 2 to 6 band by chance."
     }
   ],
   "player_observations": [],
