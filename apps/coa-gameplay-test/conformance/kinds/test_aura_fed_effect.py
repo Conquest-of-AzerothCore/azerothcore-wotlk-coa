@@ -295,7 +295,7 @@ class AuraFedEffectTests(unittest.TestCase):
 
     def test_the_reset_recast_feeds_for_real_and_never_sets_the_aura(self):
         scenario, expectation = self.generated(RESET)
-        run.validate(scenario)
+        run.validate(scenario, run.SIMULATED_CLOCK)
         feeds = [step for step in scenario['steps'] if step['action'] == 'cast_until_aura']
         self.assertEqual([(step['spell'], step['aura']) for step in feeds], [(800654, 503691)] * 15)
         self.assertFalse(any(step['action'] == 'set_aura' and step['spell'] == 503691 for step in scenario['steps']))
