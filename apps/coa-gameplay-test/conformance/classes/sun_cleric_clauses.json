@@ -4056,27 +4056,19 @@
     "claims": [
       {
         "claim": "Increases the effectiveness of Gavels (Gavel of Light)",
-        "labels": [
-          "805628 behaviour_hit_ratio effect_gavel_light"
-        ]
+        "labels": []
       },
       {
         "claim": "Increases the effectiveness of Gavels (Gavel of Grace)",
-        "labels": [
-          "805628 behaviour_hit_ratio effect_gavel_grace"
-        ]
+        "labels": []
       },
       {
         "claim": "Increases the effectiveness of Gavels (Gavel of Wrath)",
-        "labels": [
-          "805628 behaviour_hit_ratio effect_gavel"
-        ]
+        "labels": []
       },
       {
         "claim": "Increases the effectiveness of Horusath Blast",
-        "labels": [
-          "805628 behaviour_hit_ratio effect_horusath"
-        ]
+        "labels": []
       },
       {
         "claim": "reduces the mana cost of Gavels by $s2% (Gavel of Light and Gavel of Wrath; Gavel of Grace has no mana cost)",
@@ -4092,7 +4084,7 @@
         ]
       }
     ],
-    "reason": "Mentor D-54, ruling (a): the stock engine order is accepted; the expectation is the reproduced engine arithmetic, every term from data or code (ADR sun-cleric 0007 decision, 0008 figures): Horusath Blast +19.34%, Gavel of Wrath +27.14%, Gavel of Grace +23.85%, Gavel of Light +21.67%, each judged in the G-19 band of 2 points. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC (coa-history, the snapshots, merged PRs #4516, #8988, #9558; the full text is in each entry's expected_source)."
+    "reason": "Mentor D-60: the four effectiveness claims are not counted (labels withheld) until the mentor settles the model; the cost claims are counted. The D-54 expectation stays in the entries; the reproduced model (Horusath +19.34%, Gavel of Wrath +27.14%, Gavel of Grace +23.85%, Gavel of Light +21.67%) with file:line is in the fix report and ADR sun-cleric 0008 (proposed). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC (the full text is in each entry's expected_source)."
   },
   {
     "spell": 807973,

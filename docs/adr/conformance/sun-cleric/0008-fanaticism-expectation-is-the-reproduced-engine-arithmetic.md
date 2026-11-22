@@ -1,6 +1,6 @@
 # 0008. Fanaticism expectation is the reproduced engine arithmetic
 
-- Status: accepted
+- Status: proposed (mentor D-60: awaiting the mentor; the entries keep the D-54 expectation)
 - Date: 2026-11-22
 - Supersedes: the expected figures and the Horusath Blast sentence of [0007](0007-fanaticism-compounds-on-the-gavel-flat-damage.md).
   Its decision (a), accept the stock engine order, stands.
