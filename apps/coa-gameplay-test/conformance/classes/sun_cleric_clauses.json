@@ -3555,9 +3555,7 @@
       },
       {
         "claim": "healing you for 10% of the damage dealt",
-        "labels": [
-          "704903 behaviour_metric_delta lone_heal"
-        ]
+        "labels": []
       }
     ]
   },

@@ -23337,14 +23337,14 @@
           "caster"
         ],
         [
-          984954,
+          33143,
           1,
-          "caster",
-          "caster"
+          "dummy",
+          "dummy"
         ]
       ],
       "wait_ms": 1500,
-      "expire_ms": 500,
+      "expire_ms": 16000,
       "spell": 704903,
       "name": "Adjudicator (a lone enemy takes 50% of the hit, increased by 50%)",
       "kind": "metric_delta",
@@ -23375,14 +23375,14 @@
           "caster"
         ],
         [
-          984954,
+          33143,
           1,
-          "caster",
-          "caster"
+          "dummy",
+          "dummy"
         ]
       ],
       "wait_ms": 1500,
-      "expire_ms": 500,
+      "expire_ms": 16000,
       "spell": 704903,
       "name": "Adjudicator (with a second enemy in range the target takes 50% of the hit, not increased)",
       "kind": "metric_delta",
@@ -23416,14 +23416,14 @@
           "caster"
         ],
         [
-          984954,
+          33143,
           1,
-          "caster",
-          "caster"
+          "dummy",
+          "dummy"
         ]
       ],
       "wait_ms": 1500,
-      "expire_ms": 500,
+      "expire_ms": 16000,
       "spell": 704903,
       "name": "Adjudicator (an enemy around the target takes 50% of the hit)",
       "kind": "metric_delta",
@@ -23444,44 +23444,6 @@
         4.0
       ],
       "observe_source": "704903 Adjudicator Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT BasePoints 49 + 1 = 50 ($s1), EffectTriggerSpell 707774; 707774 Adjudicated Effect[0] SPELL_EFFECT_HEALTH_LEECH, BasePoints 0 (the class code passes the amount), Holy (SchoolMask 2), EffectValueMultiplier 0.1 (the heal share), targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8 = 5 yd. AscensionSunClericEvents.cpp:137 (a damage hit of Justicar's Wrath 806980) and :358-368 (enemies within the radius of the target plus the target; amount = 50% of the hit; with exactly one enemy the amount gains another 50%). Justicar's Wrath 806980 at the reference stats reads 532..540 (the 806980 damage entry: 515..523 + int(0.25 x 70) = 532..540). The enemy around the target (area1, 4 yd from the caster, inside the 5 yd radius of the dummy at 6 yd) takes 0.5 x (532..540) = 266..270, read within 264..272. Control: the first phase casts Wrath without 704903, 0. Reference search 2026-11-22: coa-history spell 704903: 0 events in 186 logs (a passive); coa-history spell 707774 (Adjudicated): SPELL_DAMAGE 1000 events in 4 logs, no crits, min 8 max 16677 (players' gear differs; no figure decides); the ascension-data snapshot rows read carry the acquisition of 704903 and no value; nothing else found."
-    },
-    {
-      "trigger_spell": 806980,
-      "target": "dummy",
-      "cast_power": 1363,
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "wait_ms": 1500,
-      "expire_ms": 500,
-      "spell": 704903,
-      "name": "Adjudicator (the caster is healed for 10% of the damage dealt)",
-      "kind": "metric_delta",
-      "variant": "lone_heal",
-      "label_suffix": "lone_heal",
-      "quote": "and enemies around them, healing you for 10% of the damage dealt.",
-      "gate_spell": 704903,
-      "before_expected": 0,
-      "metric": "spell_heal_total",
-      "fields": {
-        "spell": 707774
-      },
-      "caster_health_pct": 50,
-      "expected": 40,
-      "after_at_least": 39,
-      "after_at_most": 41,
-      "observe_source": "704903 Adjudicator Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT BasePoints 49 + 1 = 50 ($s1), EffectTriggerSpell 707774; 707774 Adjudicated Effect[0] SPELL_EFFECT_HEALTH_LEECH, BasePoints 0 (the class code passes the amount), Holy (SchoolMask 2), EffectValueMultiplier 0.1 (the heal share), targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8 = 5 yd. AscensionSunClericEvents.cpp:137 (a damage hit of Justicar's Wrath 806980) and :358-368 (enemies within the radius of the target plus the target; amount = 50% of the hit; with exactly one enemy the amount gains another 50%). Justicar's Wrath 806980 at the reference stats reads 532..540 (the 806980 damage entry: 515..523 + int(0.25 x 70) = 532..540). The caster is held at 50% of the health fixture before each cast so the heal is not capped. One dummy: the leech deals 399..405 and heals the caster for its EffectValueMultiplier 0.1 = 39.9..40.5, read within 39..41. Control: the first phase casts Wrath without 704903, 0. Reference search 2026-11-22: coa-history spell 704903: 0 events in 186 logs (a passive); coa-history spell 707774 (Adjudicated): SPELL_DAMAGE 1000 events in 4 logs, no crits, min 8 max 16677 (players' gear differs; no figure decides); the ascension-data snapshot rows read carry the acquisition of 704903 and no value; nothing else found."
     },
     {
       "spell": 804257,
@@ -23510,45 +23472,6 @@
       "learn": [
         560628
       ]
-    },
-    {
-      "trigger_spell": 806980,
-      "target": "dummy",
-      "cast_power": 1363,
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "wait_ms": 1500,
-      "expire_ms": 500,
-      "spell": 704903,
-      "name": "Adjudicator (diagnostic: the Wrath hit itself with the passive learned)",
-      "kind": "metric_delta",
-      "variant": "wrath_hit",
-      "label_suffix": "wrath_hit",
-      "quote": "If you only hit one target, the damage dealt is increased to that target by 50%.",
-      "gate_spell": 704903,
-      "before_expected": 0,
-      "metric": "spell_damage_total",
-      "fields": {
-        "spell": 806980,
-        "target": "dummy",
-        "critical": false
-      },
-      "expected": 536,
-      "after_at_least": 531,
-      "after_at_most": 541,
-      "observe_source": "Diagnostic of lone_damage: Justicar's Wrath 806980 read on the dummy with 704903 learned: 515..523 + int(0.25 x 70) = 532..540 at the reference stats (the 806980 damage entry), read within 531..541."
     }
   ],
   "player_observations": [],
