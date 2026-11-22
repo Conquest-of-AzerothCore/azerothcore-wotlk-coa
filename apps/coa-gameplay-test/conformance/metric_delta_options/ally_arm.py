@@ -3,6 +3,8 @@ import math
 
 NAME = 'ally_arm'
 ORDER = 24
+METRIC_EVIDENCE = {'combat_reach': 'state'}
+PRECONDITION_ONLY_METRICS = frozenset(METRIC_EVIDENCE)
 ALLY_IDS = ('ally', 'ally2', 'ally3', 'ally4', 'ally5', 'ally6', 'ally7')
 RAID_SUBGROUP_TWO = ALLY_IDS[4:]
 ALLY_CAST_SETTLE_MS = 2000
@@ -15,9 +17,11 @@ CASTER_ENTRY_METRICS = {'spell_heal_count', 'spell_heal_total', 'spell_effective
 CONTROL_LABEL = 'timed no-cast control'
 EXPIRE_LABEL = 'let the first effect fully expire'
 KEYS = {'allies', 'ally_health', 'ally_casts', 'control_wait', 'arms', 'ratios', 'reach_source'}
-ARM_KEYS = {'actors', 'metric', 'fields', 'before_expected', 'expected', 'tolerance', 'source', 'reach_source'}
+ARM_KEYS = {'actors', 'metric', 'fields', 'before_expected', 'expected', 'tolerance', 'source', 'reach_source',
+            'precondition'}
+OPTIONAL_ARM_KEYS = {'fields', 'reach_source', 'precondition'}
 JUDGED_ARM_KEYS = ('before_expected', 'expected', 'tolerance')
-RATIO_ONLY_ARM_KEYS = ARM_KEYS - set(JUDGED_ARM_KEYS) | {'count_metric'}
+RATIO_ONLY_ARM_KEYS = ARM_KEYS - set(JUDGED_ARM_KEYS) - {'precondition'} | {'count_metric'}
 ALLY_CAST_KEYS = {'spell', 'spell_go_per_cast', 'source'}
 RATIO_KEYS = {'numerator', 'denominator', 'expected', 'tolerance', 'source'}
 FLOOR_COUNT_KEY = 'floor_count'
@@ -35,6 +39,7 @@ class Arm:
     source: str
     reach_source: str = ''
     count_metric: str | None = None
+    precondition: bool = False
 
     @property
     def ratio_only(self) -> bool:
@@ -79,6 +84,9 @@ def stated_text(value) -> bool:
 
 
 def parse_ratio_only_arm(raw: dict) -> Arm:
+    if 'precondition' in raw:
+        raise ValueError(f'an ally_arm precondition arm states before_expected, expected and tolerance; it is never '
+                         f'ratio-only, not {raw!r}')
     if not set(raw) <= RATIO_ONLY_ARM_KEYS or not isinstance(raw.get('actors'), list) or not raw['actors'] \
             or not all(isinstance(actor, str) and actor for actor in raw['actors']) \
             or len(set(raw['actors'])) != len(raw['actors']) \
@@ -95,7 +103,7 @@ def parse_ratio_only_arm(raw: dict) -> Arm:
 def parse_arm(raw) -> Arm:
     if isinstance(raw, dict) and not any(key in raw for key in JUDGED_ARM_KEYS) and 'count_metric' in raw:
         return parse_ratio_only_arm(raw)
-    if not isinstance(raw, dict) or not ARM_KEYS - {'fields', 'reach_source'} <= set(raw) <= ARM_KEYS \
+    if not isinstance(raw, dict) or not ARM_KEYS - OPTIONAL_ARM_KEYS <= set(raw) <= ARM_KEYS \
             or not isinstance(raw['actors'], list) or not raw['actors'] \
             or not all(isinstance(actor, str) and actor for actor in raw['actors']) \
             or len(set(raw['actors'])) != len(raw['actors']) \
@@ -103,12 +111,14 @@ def parse_arm(raw) -> Arm:
             or not isinstance(raw.get('fields', {}), dict) \
             or not all(number(raw[key]) for key in ('before_expected', 'expected', 'tolerance')) \
             or raw['tolerance'] < 0 or not stated_text(raw['source']) \
-            or ('reach_source' in raw and not stated_text(raw['reach_source'])):
+            or ('reach_source' in raw and not stated_text(raw['reach_source'])) \
+            or raw.get('precondition', True) is not True:
         raise ValueError(f'an ally_arm arm is {{actors: [unit, ...], metric, fields?, before_expected, expected, '
-                         f'tolerance >= 0, source: text, reach_source?: text}}, finite numbers, every expectation '
-                         f'stated with its source, not {raw!r}')
+                         f'tolerance >= 0, source: text, reach_source?: text, precondition?: true}}, finite numbers, '
+                         f'every expectation stated with its source, not {raw!r}')
     return Arm(tuple(raw['actors']), raw['metric'], dict(raw.get('fields', {})), float(raw['before_expected']),
-               float(raw['expected']), float(raw['tolerance']), raw['source'], raw.get('reach_source', ''))
+               float(raw['expected']), float(raw['tolerance']), raw['source'], raw.get('reach_source', ''),
+               precondition='precondition' in raw)
 
 
 def parse_ally_cast(raw) -> tuple[int, int, str]:
@@ -195,6 +205,8 @@ def parse(raw) -> AllyArm:
     parsed_ratios = tuple(parse_ratio(ratio, len(arms)) for ratio in ratios)
     named = {index for ratio in parsed_ratios
              for index in (ratio.numerator, *denominator_arms(ratio.denominator), ratio.floor_count)}
+    if any(index is not None and parsed_arms[index].precondition for index in named):
+        raise ValueError('an ally_arm ratio names behaviour arms only, never a precondition arm')
     unnamed = [index for index, arm in enumerate(parsed_arms) if arm.ratio_only and index not in named]
     if unnamed:
         raise ValueError(f'ally_arm ratio-only arms {unnamed} are named by no ratio, so nothing would judge them')
@@ -218,7 +230,7 @@ def parse(raw) -> AllyArm:
 def check(spec, ally):
     if ally is None:
         return
-    from coverage import READBACK, metric_evidence
+    from coverage import READBACK, STATE, metric_evidence
     from profile import CASTER
     from values import TARGET
     dummy = spec.select_dummy or TARGET in (spec.target, spec.measure_actor, spec.fields.get('target'))
@@ -232,6 +244,12 @@ def check(spec, ally):
         if evidence is None or evidence == READBACK:
             raise ValueError(f'{spec.spell} ally_arm metric {arm.metric!r} needs a METRIC_EVIDENCE row that is not '
                              f'a readback, found {evidence!r}')
+        if arm.metric in PRECONDITION_ONLY_METRICS and not arm.precondition:
+            raise ValueError(f'{spec.spell} ally_arm arm {index} reads {arm.metric}, a precondition-only metric: '
+                             f'state precondition: true, so an off read voids the trial instead of judging it')
+        if arm.precondition and evidence != STATE:
+            raise ValueError(f'{spec.spell} ally_arm arm {index} is a precondition on {arm.metric!r}, which is not '
+                             f'a state metric ({evidence!r}): a precondition reads a state, never a behaviour')
         reads += [(actor, arm.metric, arm.fields, f'arm {index}') for actor in arm.actors]
         if arm.ratio_only:
             counted = metric_evidence().get(arm.count_metric)
@@ -412,6 +430,9 @@ def fixtures(class_file: dict, spec, ally: AllyArm, scenario: dict):
             contract += (f' Arm {index}: {arm.metric} {arm.fields} summed over {list(arm.actors)}, read right after '
                          f'each main reading, expected {arm.before_expected:g} then {arm.expected:g} within '
                          f'{arm.tolerance:g} ({arm.source}).')
+        if arm.precondition:
+            contract += (f' Arm {index} is a precondition: off or unread, it voids the trial (unmeasured), never '
+                         f'an alert or a judgement.')
         if arm.reach_source:
             contract += f' Arm {index} reaches raid subgroup 2 ({arm.reach_source}).'
     for ratio in ally.ratios:
@@ -444,18 +465,58 @@ def arm_model(spec, index: int, arm: Arm) -> dict:
                 **{f'count_{moment}': [arm_count_label(spec, moment, index, actor) for actor in arm.actors]
                    for moment in ('before', 'after')}}
     return {'metric': arm.metric, 'before_expected': arm.before_expected, 'expected': arm.expected,
-            'tolerance': arm.tolerance, 'source': arm.source, **labels}
+            'tolerance': arm.tolerance, 'source': arm.source, **labels,
+            **({'precondition': True} if arm.precondition else {})}
+
+
+def arm_text(index: int, arm: dict, before: float, after: float, held: bool) -> str:
+    return (f'ally arm {index} {arm["metric"]}: {before:g} before (expected {arm["before_expected"]:g}) '
+            f'and {after:g} after (expected {arm["expected"]:g}), within {arm["tolerance"]:g}: '
+            f'{"ok" if held else "off"} ({arm["source"]})')
+
+
+def arm_held(arm: dict, before: float, after: float) -> bool:
+    return (abs(before - arm['before_expected']) <= arm['tolerance']
+            and abs(after - arm['expected']) <= arm['tolerance'])
+
+
+def void_trial(verdict, run, arms: list[dict]):
+    texts = []
+    void = False
+    for index, arm in enumerate(arms):
+        if not arm.get('precondition'):
+            continue
+        missing = next((label for label in (*arm['before'], *arm['after']) if run.values.get(label) is None), None)
+        if missing is not None:
+            texts.append(f'precondition arm {index}: {missing} was not read')
+            void = True
+            continue
+        before = sum(run.values[label] for label in arm['before'])
+        after = sum(run.values[label] for label in arm['after'])
+        held = arm_held(arm, before, after)
+        void = void or not held
+        texts.append(f'precondition {arm_text(index, arm, before, after, held)}')
+    if not void:
+        return None, texts
+    return replace(verdict, status='unmeasured',
+                   explanation='; '.join([verdict.explanation, *texts,
+                                          'a precondition failed: the trial is void, not judged'])), texts
 
 
 def verdict(verdict, run, ally: dict):
     if not ally['arms'] or verdict.status == 'unmeasured':
         return verdict
-    texts = []
+    voided, texts = void_trial(verdict, run, ally['arms'])
+    if voided is not None:
+        return voided
     off = False
     deltas = []
     landed_counts = {}
     uncounted = set()
     for index, arm in enumerate(ally['arms']):
+        if arm.get('precondition'):
+            deltas.append(None)
+            continue
         counts = (*arm.get('count_before', ()), *arm.get('count_after', ()))
         missing = next((label for label in (*arm['before'], *arm['after'], *counts)
                         if run.values.get(label) is None), None)
@@ -474,12 +535,9 @@ def verdict(verdict, run, ally: dict):
             texts.append(f'ally arm {index} {arm["metric"]}: {before:g} before and {after:g} after, {landed:g} '
                          f'{arm["count_metric"]} events landed, judged through its ratio ({arm["source"]})')
             continue
-        held = (abs(before - arm['before_expected']) <= arm['tolerance']
-                and abs(after - arm['expected']) <= arm['tolerance'])
+        held = arm_held(arm, before, after)
         off = off or not held
-        texts.append(f'ally arm {index} {arm["metric"]}: {before:g} before (expected {arm["before_expected"]:g}) '
-                     f'and {after:g} after (expected {arm["expected"]:g}), within {arm["tolerance"]:g}: '
-                     f'{"ok" if held else "off"} ({arm["source"]})')
+        texts.append(arm_text(index, arm, before, after, held))
     undiscriminated = False
     for ratio in ally.get('ratios', []):
         numerator = deltas[ratio['numerator']]

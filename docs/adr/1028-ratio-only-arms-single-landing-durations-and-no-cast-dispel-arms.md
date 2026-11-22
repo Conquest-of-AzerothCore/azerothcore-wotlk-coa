@@ -33,6 +33,8 @@ by any data, and the mana is truncated per strike.
   ratio-only arm's count moved; a ratio's `denominator` may be a list of ratio-only arms, summed; `floor_count`
   widens only the low end by the counted events over the denominator (one unit per truncated event), with a
   tolerance below 10% of `expected` and the ratio unmeasured when the widened band no longer excludes 10% below.
+  A precondition arm (ADR 1029) is never ratio-only, and no ratio names it, in a denominator list or as
+  `floor_count` included.
 - `duration_ratio`: `attempts` (1 to 3, default 3) and `margin_ms` (mentor D-170). With `margin_ms` each phase reads
   the game time after its last landing and after its read; the expected delta is the vehicle's full DBC duration
   times (tooltip ratio - 1), never a reading; the margin is `margin_ms` plus the tick overshoot; the trial is void

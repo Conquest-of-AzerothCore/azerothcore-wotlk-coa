@@ -130,7 +130,8 @@
       {
         "claim": "within $704911a1 yds",
         "labels": [
-          "92136 effect_radius 704911e0 #1"
+          "92136 effect_radius 704911e0 #1",
+          "92136 behaviour_metric_delta radius_edge"
         ]
       },
       {
@@ -140,7 +141,8 @@
           "92136 behaviour_metric_delta cap_caster_low"
         ]
       }
-    ]
+    ],
+    "reason": "Radius part: the computed edge is 43.0 yd: 704911 EffectRadiusIndex 23 = SpellRadius 23 RadiusMax 40 yd (server DBC set) plus the caster's and the ally's object sizes, both added by IsWithinDistInMap (Object.h:550 defaults, _IsWithinDist Object.cpp:1257-1264; GetObjectSize = UNIT_FIELD_COMBATREACH, Object.cpp:2898-2901), 1.5 each, read on the caster, ally and ally2 by three ally_arm precondition arms (1.5 within 0.01; a read off 1.5 voids the trial, mentor D-169, ADR 1029). The ally at 42.5 yd is healed and ally2 at 43.5 yd is not, which excludes a radius of 36 yd (edge 39.0) and of 44 yd (edge 47.0); a first run with 39/41 yd healed the 41 yd ally, the lead that showed the reach term. Pair reach run1 / run2 (2026-11-22), worldserver sha256 46e2dd462d93, server commit 71d1f5856905: 7 ok, 0 alert in each run, no status flip; the three reach reads are 1.5 before and after in both runs, and 92136 effect_radius 704911e0 #1 is ok in both. Reference search 2026-11-22: coa-history spell 92136 (a passive, no events) and merged PRs give nothing beyond the tooltip and the DBC; nothing found."
   },
   {
     "spell": 92137,
@@ -172,7 +174,8 @@
       {
         "claim": "and free of cost",
         "labels": [
-          "92137 behaviour_metric_delta free"
+          "92137 behaviour_metric_delta free",
+          "92137 behaviour_metric_delta consumed_cost"
         ]
       },
       {
@@ -184,11 +187,12 @@
       {
         "claim": "within $d (15 s)",
         "labels": [
-          "92137 spell_duration 800722 #1"
+          "92137 behaviour_metric_delta window_held",
+          "92137 behaviour_metric_delta window_gone"
         ]
       }
     ],
-    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Instant cast 0 ms and free 0 mana against 2000 ms and 408.9 in the control, after 40 real parried strikes (0.8^40 = 1.3e-4 residual per run); the consumed entry reads 2000 after one Illumination. The 15 s window stays a data check (aura remaining time after a random last proc cannot be stated exactly): needs a design with a known proc time."
+    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Instant cast 0 ms and free 0 mana against 2000 ms and 408.9 in the control, after 40 real parried strikes (0.8^40 = 1.3e-4 residual per run); the consumed entry reads 2000 after one Illumination. Round 11 d2: the 15 s window is read by a real cast of 800722 (known start): Illumination still instant 13.6 s after, no longer 16.4 s after (window_held, window_gone, use_time_contrast arms); the cost is shown consumed by consumed_cost."
   },
   {
     "spell": 300314,
@@ -222,10 +226,13 @@
     "clause": "Reduces the cooldown of Judgement Day by $/1000;s1 sec.",
     "labels": [
       "300315 effect_value e0 #0",
-      "300315 behaviour_metric_delta judgement_day_cooldown"
+      "300315 behaviour_metric_delta judgement_day_cooldown",
+      "300315 cost_gate 806121 judgement_day_gate without",
+      "300315 cost_gate 806121 judgement_day_gate with",
+      "300315 cost_gate 806121 judgement_day_gate beyond"
     ],
     "kind": "claim",
-    "reason": "Data conformant only, not status 1: the behaviour entry reads the remaining cooldown (cooldown_ms) through a readback metric (coverage.py READBACK), which counts as data without a contrast proof. The data label 300315 effect_value e0 #0 was not emitted by the b7b counted pairs (build d61531085dc5), so the row stays unproven on these pairs and resolves at the next base pair, where the data scenarios run on the same build as the behaviour entry. A behaviour route needs a cast refused then accepted around the reduced cooldown (a cooldown gate)."
+    "reason": "Behaviour route, cooldown gate: Judgement Day 806121 (RecoveryTime 60000 ms) attempted 45700 ms after its cast is refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again at 44300 ms (beyond), so the cut lies in [14300, 15700] ms and excludes 13500 and 16500 ms (10% off on both sides). The readback label judgement_day_cooldown is kept as data. Counted pair 20261122-160022 / 20261122-160145, build 9cffb962143f, server commit a6c61f91d126, no flip, every label ok in both runs. The data labels of this row (effect_value, aura_duration_ms, effect_radius, the readback label) are emitted by the base pair only, a behaviour-only pair does not run them; they read ok at the last base pair, and the row resolves at the next base pair on this build. Reference search 2026-11-22: coa-history spell 300315: 0 events (a passive); nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 300318,
@@ -282,10 +289,26 @@
   {
     "spell": 300323,
     "clause": "Increases the effectiveness of Sunrise and Sunset by $s1%.",
-    "labels": [
-      "300323 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the effectiveness of Sunrise by $s1%",
+        "labels": [
+          "300323 behaviour_hit_ratio effect_sunrise"
+        ]
+      },
+      {
+        "claim": "Increases the effectiveness of Sunset Fire damage by $s1%",
+        "labels": [
+          "300323 behaviour_hit_ratio effect_sunset"
+        ]
+      },
+      {
+        "claim": "Increases the effectiveness of Sunset critical strike chance by $s1%",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-165027 / 20261122-165216 (prove, build 70eef6b19c8a, server e745c250f2af), no flip, no alert. Sunrise: Holy damage bonus read as +20.0% of the stated 20 (99% interval inside the band), i.e. 24% with the passive; Sunset: Fire damage part 12 against the stated 10 x 1.2 = 12 (11.9 / 11.8, interval inside 11.4 to 12.6). The Sunset critical strike chance part (500511 Effect[0] aura 71, the same $s1: 20% x 1.2) is not measured by these entries: its claim has no label and the row stays open until a crit entry exists. Reference search 2026-11-22: coa-history 300323: 0 events in 186 logs (a passive); nothing else found."
   },
   {
     "spell": 300324,
@@ -295,7 +318,7 @@
       "300324 behaviour_metric_delta dawn_casts"
     ],
     "kind": "claim",
-    "reason": "Control arm = the Dawn state aura charges before the learn (10). After the learn 13 against 10 + 3 from Effect[0] ADD_FLAT_MODIFIER MiscValue 4 BasePoints 2 + 1 on 807440. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
+    "reason": "Control arm = the Dawn state aura charges before the learn (10). After the learn 13 against 10 + 3 from Effect[0] ADD_FLAT_MODIFIER MiscValue 4 BasePoints 2 + 1 on 807440. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip. Open: the exact count 13 = 10 + 3 is not proven. In pair 20261122-155900 / 20261122-155954 (build bb13592025dc) a 13-cast read still found Dawn 807440 present after the 13th cast (expected 0, alert in both runs), so the entries consume_12 and consume_13 are removed (archived in .agents/plans/sun-cleric-b11d1-fix/removed-entries.json) and unlinked; dawn_casts (13 charges read after the cast) is a charge-count readback. The three attempts (Illumination route; Gavels with a Gavel trigger; all Gavels as setup casts with a Holy Form trigger) are one design (aura read after N real casts), so no status 3. Lead: Gavel of Wrath 800617 has ManaCost 3 and ManaCostPercentage 10 (Spell.dbc; SpellInfo.cpp:3185-3194 adds 10% of base mana), so 13 Gavels plus Holy Form 805301 (ManaCostPercentage 40) may exceed what the setup refill covers; Dawn charge refresh paths that add casts: ActivateDawn sets charges to max (AscensionSunCleric.cpp:263-268), a reapply resets them to CalcMaxCharges (AscensionSunClericAuras.cpp:97-98), 680630 resets charges and duration (AscensionSunClericAbilities.cpp:526-531). A per-cast count (charges read after each Gavel) would separate 14 charges from an uncounted cast."
   },
   {
     "spell": 300325,
@@ -428,16 +451,21 @@
       },
       {
         "claim": "When you critically heal your target",
-        "labels": []
+        "labels": [
+          "300339 behaviour_metric_delta noncrit_heal_return",
+          "300339 behaviour_metric_delta noncrit_heal_landed",
+          "300339 behaviour_metric_delta noncrit_strike_landed"
+        ]
       }
     ],
-    "reason": "Held open by review I-1: no arm shows that a non-critical heal returns nothing. A critical-only gate (AscensionSunClericEvents.cpp:140) cannot be separated from a server that returns 30% of every heal without a heal that is certainly not critical, and the harness has none: a negative spell_crit_rating clamps at 0 in Player::UpdateRating (PlayerUpdates.cpp:671-672), so the intellect crit stays. Parts proven by behaviour in the entries crit_heal_return (30% band 28 to 32%, 1 return after a strike) and crit_heal_return_nostrike (0 returns without damage); the 'critically' part has no label. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
+    "reason": "Parts proven by behaviour in the entries crit_heal_return (30% band 28 to 32%, 1 return after a strike) and crit_heal_return_nostrike (0 returns without damage). The \"critically\" part: noncrit_heal_return reads 0 returns for a heal that is certainly not critical (fixture 984954, Effect[1] aura 57 spell crit -1000), against 1 in crit_heal_return, with noncrit_heal_landed (the Illumination heal landed) and noncrit_strike_landed (the 47632 strike landed in the same scenario) so a missed heal or strike cannot pass it. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 300339,
     "clause": "Lasts $301005d.",
     "labels": [
-      "300339 spell_duration 301005 #0"
+      "300339 spell_duration 301005 #0",
+      "300339 behaviour_metric_delta return_window"
     ],
     "kind": "claim"
   },
@@ -484,8 +512,12 @@
     "kind": "claim",
     "labels": [
       "300347 behaviour_metric_delta paragon_cd",
-      "300347 behaviour_metric_delta paragon_cd_newday"
-    ]
+      "300347 behaviour_metric_delta paragon_cd_newday",
+      "300347 cost_gate 680639 paragon_gate without",
+      "300347 cost_gate 680639 paragon_gate with",
+      "300347 cost_gate 680639 paragon_gate beyond"
+    ],
+    "reason": "Reference search 2026-11-22: coa-history spell 680639: 60 casts in 15 logs, recasts 62.3 s apart for player Sunofabetch (log 2026-08-22), under the 300 s base cooldown, consistent with the claim. Pair 20261122-164341 / 20261122-164658, build 6cd75cfa82e6, server commit 7a2ad0994d9d, no flip, 29 verdicts per run. Both runs: without refused, with through, beyond refused."
   },
   {
     "spell": 300347,
@@ -495,7 +527,10 @@
       {
         "claim": "empowers your Gavels, causing them to have no cooldown",
         "labels": [
-          "300347 behaviour_metric_delta gavel_cd"
+          "300347 behaviour_metric_delta gavel_cd",
+          "300347 cost_gate 802561 gavel_gate without",
+          "300347 cost_gate 802561 gavel_gate with",
+          "300347 cost_gate 802561 gavel_gate unset"
         ]
       },
       {
@@ -509,7 +544,7 @@
         ]
       }
     ],
-    "reason": "Owner ruling O-18 (Q-sc-8, option b) with mentor D-146, Sun Cleric ADR 0029: the +50% applies to the whole Gavel hit; the server sets the ADR 0010 flag on every Gavel rank (AscensionSunClericContracts.cpp), so the hit is int(W x 150 / 100) + int(F x 1.5). The effectiveness claim is proven on the four Gavel arms under Paragon, each against a Paragon control without the passive: 802561 (expected 1.49750), 800617 (1.49255), 800611 (1.49308) and 800614 (1.49087), predictions committed before the fix ran (commit 99bb713c1a); the gap to 1.5 is integer truncation. Before the fix the stock compounding read +111.96 / +111.20 on 802561 (base pair 10, 20261122-113024 / -115522, build fd0671597bc3). The cooldown claim is unchanged. Counted pair after the fix: 20261122-125423 / 20261122-130312, build 182edc2cb1a6, server commit 607997a84a, no flip, 27 of 27 verdicts ok in both runs. Read: 802561 +50.50 / +49.97, 800617 +49.10 / +49.47, 800611 +49.32 / +48.91, 800614 +48.54 / +49.46 (expected +49.75, +49.26, +49.31, +49.09; band 2.45 to 2.49 points); control means 279.7 / 280.8, 100.6 / 100.2, 65.8 / 65.9, 77.2 / 77.0 against the model's 280.61, 100.41, 65.73, 77.14.",
+    "reason": "Owner ruling O-18 (Q-sc-8, option b) with mentor D-146, Sun Cleric ADR 0029: the +50% applies to the whole Gavel hit; the server sets the ADR 0010 flag on every Gavel rank (AscensionSunClericContracts.cpp), so the hit is int(W x 150 / 100) + int(F x 1.5). The effectiveness claim is proven on the four Gavel arms under Paragon, each against a Paragon control without the passive: 802561 (expected 1.49750), 800617 (1.49255), 800611 (1.49308) and 800614 (1.49087), predictions committed before the fix ran (commit 99bb713c1a); the gap to 1.5 is integer truncation. Before the fix the stock compounding read +111.96 / +111.20 on 802561 (base pair 10, 20261122-113024 / -115522, build fd0671597bc3). Cooldown claim: cost_gate gavel_gate with three arms, all after Paragon is cast first except unset: without (300347 unlearned, Paragon cast) refused 67, with (learned, Paragon cast) through, unset (learned, Paragon not cast) refused 67, so the removal needs Paragon and not the passive alone; Pair 20261122-164341 / 20261122-164658, build 6cd75cfa82e6, server commit 7a2ad0994d9d, no flip, 29 verdicts per run. Both runs: without refused 67, with through, unset refused 67. The interval from 2100 ms up to the 5000 ms cooldown is excluded; a cooldown cut below 2100 ms is bounded by the 1500 ms global cooldown and read as data by gavel_cd. Dawn 807440 is applied by harness set_auras as Paragon's required caster aura in every arm (no cooldown effect on it, same in control and treatment). Coa-history: Paragon 680639 60 casts in 15 logs, recasts 62.3 s apart (Sunofabetch, log 2026-08-22). Counted pair after the fix: 20261122-125423 / 20261122-130312, build 182edc2cb1a6, server commit 607997a84a, no flip, 27 of 27 verdicts ok in both runs. Read: 802561 +50.50 / +49.97, 800617 +49.10 / +49.47, 800611 +49.32 / +48.91, 800614 +48.54 / +49.46 (expected +49.75, +49.26, +49.31, +49.09; band 2.45 to 2.49 points); control means 279.7 / 280.8, 100.6 / 100.2, 65.8 / 65.9, 77.2 / 77.0 against the model's 280.61, 100.41, 65.73, 77.14.",
     "text_source": {
       "basis": "owner_ruling",
       "spell": 300347,
@@ -678,10 +713,20 @@
   {
     "spell": 300360,
     "clause": "Lasts for $301265d or 3 casts.",
-    "labels": [
-      "300360 spell_duration 301265 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Lasts for $301265d",
+        "labels": [
+          "300360 behaviour_metric_delta haste_duration_window"
+        ]
+      },
+      {
+        "claim": "or 3 casts (open: no consumption read judged, see the reason)",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Duration part measured by the window entry (aura present 9100 ms after being granted, gone by 10900 ms, pair 20261122-165027 / 20261122-165216). The '3 casts' part is open after two designs. Design 1 (Dawn left active): the aura did not read as consumed because Dawn holds 10 charges and every Holy or Fire cast under it enters the other state and grants 301265 again (AscensionSunClericAbilities.cpp:94-120, :202-216), and the reads came out 1.0 after 3 spells and 0.833333 after 4. Design 2 (a second Dawn cast right after the entering one, meant to cancel Dawn, and each count read after its last cast completed, 2600 ms after it started): two finished casts left the aura (0.833333, ok) and three finished casts left it too (0.833333, expected 1.0, alert in both runs of pair 3). Whether the second Dawn cast cancels Dawn is not shown, so the alert is a lead, not a defect: the entries were removed from the class file, nothing was changed in the server. A route would need a consumer spell that does not spend Dawn, or a Dawn-free way to enter Sunrise. Reference search 2026-11-22: coa-history 301265: aura applied and removed events in 3 logs, no charge or amount; nothing else found."
   },
   {
     "spell": 300361,
@@ -807,7 +852,9 @@
     "clause": "and reduces the target's chance to hit by $s1% for $d.",
     "labels": [
       "804630 behaviour_metric_delta flare_hit",
-      "804630 behaviour_metric_delta flare_duration"
+      "804630 behaviour_metric_delta flare_duration",
+      "300369 behaviour_metric_delta flare_expiry",
+      "572752 behaviour_metric_delta attacker_miss"
     ],
     "kind": "claim"
   },
@@ -817,7 +864,8 @@
     "kind": "claim",
     "labels": [
       "300371 behaviour_metric_delta chain"
-    ]
+    ],
+    "reason": "Open: label 300371 behaviour_metric_delta chain is unmeasured; row 59 shows copies spreading but without a no-300371 control. Tool need: a spread_per_crit hit-count mode, or a control arm without 300371 on timer_spacing_arms. Reference search 2026-11-22: coa-history spell 300371: 0 events in 186 logs (a passive); nothing else found."
   },
   {
     "spell": 300371,
@@ -906,7 +954,7 @@
       "300723 behaviour_hit_ratio fire_damage"
     ],
     "kind": "claim",
-    "reason": "Owner ruling O-19 (Q-sc-9, option b, 2026-11-22), replacing the earlier hold: the tooltip's Holy and Fire spell damage increase is the +30% Holy and Fire damage the server applies, and the Intellect-based effect is only for the spell hit rating (clause 66). Owner's words: \"On conserve +30% de spell damage pour le feu et le sacré. Le buff qui prend l'intelligence en compte n'est que pour le taux de toucher\". Expected value: x1.30 of the Holy and Fire hit (the ruling's 30%, not a measured value). The server rewrite at load (AscensionSunClericContracts.cpp:185-186, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire) is the ruled behaviour; no change. Counted on the b9d arms: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3), holy_damage, holy_damage_control and fire_damage hit_ratio and the effect_value e2 read ok in both runs, no flip, control arm holy_damage_control. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found beyond the ruling.",
+    "reason": "Owner ruling O-19 (Q-sc-9, option b, 2026-11-22), replacing the earlier hold: the tooltip's Holy and Fire spell damage increase is the +30% Holy and Fire damage the server applies, and the Intellect-based effect is only for the spell hit rating (clause 66). Owner's words: \"On conserve +30% de spell damage pour le feu et le sacr\u00e9. Le buff qui prend l'intelligence en compte n'est que pour le taux de toucher\". Expected value: x1.30 of the Holy and Fire hit (the ruling's 30%, not a measured value). The server rewrite at load (AscensionSunClericContracts.cpp:185-186, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire) is the ruled behaviour; no change. Counted on the b9d arms: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3), holy_damage, holy_damage_control and fire_damage hit_ratio and the effect_value e2 read ok in both runs, no flip, control arm holy_damage_control. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found beyond the ruling.",
     "text_source": {
       "basis": "owner_ruling",
       "spell": 300723,
@@ -1707,15 +1755,38 @@
   {
     "spell": 520024,
     "clause": "At the end of the duration, you charge back down, dealing ${$570034m1+$570034ppl1+$AP*1+$SP*.225} Holy damage to all enemies within $570034a1 yds.",
-    "labels": [
-      "520024 effect_value 570034e0 #1",
-      "520024 effect_radius 570034e0 #2"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "At the end of the duration, you charge back down",
+        "labels": [
+          "520024 behaviour_metric_delta charge_hit",
+          "520024 behaviour_metric_delta charge_hit_ap"
+        ]
+      },
+      {
+        "claim": "dealing ${$570034m1+$570034ppl1+$AP*1+$SP*.225} Holy damage",
+        "labels": [
+          "520024 effect_value 570034e0 #1",
+          "520024 behaviour_metric_delta charge_hit",
+          "520024 behaviour_metric_delta charge_hit_ap",
+          "520024 behaviour_metric_delta charge_cast",
+          "520024 behaviour_metric_delta charge_cast_sp"
+        ]
+      },
+      {
+        "claim": "to all enemies within $570034a1 yds",
+        "labels": [
+          "520024 effect_radius 570034e0 #2"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Counted pair 20261122-165714 / -165754 (b11d9 fix round, build 9c082b20c072, server commit 4d75f6bdf8fa, no flip, 26 ok, 0 alerts in both runs; control = no cast before, 0 damage): charge_hit 497 and charge_hit_ap 10497 on a real 520024 cast with the dummy selected (select_dummy; without a selection the landing cast 570034 fails with cast_failure 27, a test fault, not a server verdict), against 497.6 and 10497.6; charge_cast 497 and charge_cast_sp 4997 on a direct cast of 570034 (the hit arm reads the school of the cast spell, and 520024 has none), against 497.6 and 4997.6. Observation M1 (no fix): the landing cast in Valkyr (AscensionSunClericSummons.cpp:85-86) depends on the player selection at landing, not on the stored victim (:48); with no or a friendly selection the landing deals no damage, and with an enemy selected the area is centred on that unit, not on the landing point."
   },
   {
     "spell": 572848,
     "clause": "Spin and strike with both weapons dealing $524857s1% Weapon Damage plus ${$524857m2+$spfi*0.2} to up to $i enemies within $a1 yds.",
+    "reason": "Open, not written: the value labels need a per-hand weapon hit with an absolute expected from the weapon and the off-hand rule. Observation: the tooltip token $524857m2 reads 6 while 572850 and 572045 effect 1 BasePoints are 156 and 104 (+1).",
     "labels": [
       "572848 effect_value 524857e0 #0",
       "572848 effect_value 524857e1 #1",
@@ -1727,6 +1798,7 @@
   {
     "spell": 572848,
     "clause": "Your main-hand strike will deal Physical damage and your off-hand strike will deal Fire damage.",
+    "reason": "Open, tool need: no per-event school read exists (SpellDamageEvent in CoAGameplayTest.cpp carries no school field). The data side is DBC: 572850 SchoolMask 1 (Physical) and 572045 SchoolMask 4 (Fire).",
     "labels": [],
     "kind": "claim"
   },
@@ -2003,11 +2075,12 @@
     "spell": 560113,
     "clause": "Reduces the cooldown of Radiance by $/1000;s1 sec.",
     "labels": [
-      "560113 effect_value e0 #0",
-      "560113 behaviour_metric_delta radiance_cooldown"
+      "560113 cost_gate 800054 cooldown without",
+      "560113 cost_gate 800054 cooldown with",
+      "560113 cost_gate 800054 cooldown beyond"
     ],
     "kind": "claim",
-    "reason": "Data conformant only, not status 1: the behaviour entry reads the remaining cooldown (cooldown_ms) through a readback metric (coverage.py READBACK), which counts as data without a contrast proof. The data label 560113 effect_value e0 #0 was not emitted by the b7b counted pairs (build d61531085dc5), so the row stays unproven on these pairs and resolves at the next base pair, where the data scenarios run on the same build as the behaviour entry. A behaviour route needs a cast refused then accepted around the reduced cooldown (a cooldown gate)."
+    "reason": "The cooldown_ms readback (data) and the effect_value token are replaced by the cost_gate arms: Radiance is attempted 500 ms before and after the reduced cooldown of 90000 ms, without Zealous (refused), with it (accepted)."
   },
   {
     "spell": 560113,
@@ -2160,7 +2233,7 @@
       "560492 effect_value #0"
     ],
     "kind": "claim",
-    "reason": "Open (tool need): the token ${$560493m1*$<scalingbp>$spfi*0.12+$AP*0.03} is unreadable (missing '+' before $spfi, '$<scalingbp>' undefined), so no expected amount comes from data; the avoided-swing proc kind counts casts, not the damage amount and its SP and AP terms."
+    "reason": "Open (tool need, no entry written): (1) the token ${$560493m1*$<scalingbp>$spfi*0.12+$AP*0.03} has no '+' before $spfi, so the tool reads it as unreadable and no expected amount comes from data; the coefficients 0.12 and 0.03 match the class data (AscensionSunClericData.h:82), so the likely intended form is base x $<scalingbp> + $spfi x 0.12 + $AP x 0.03, a text correction that needs an owner ruling (only 'srtike' of 572885 is ruled, D-162). Reference search 2026-11-22: coa-history spell 560492: 0 events (a passive); 560493 Protector of the Flame: 1,083 SPELL_DAMAGE (min 1, max 1052, mean 233.0, 228 crits) and 2 SPELL_MISSED in 6 logs, which carry no coefficient, so they neither confirm nor contradict the 0.12 and 0.03; nothing else found. (2) script_hit has no avoided-attack trigger: Protector fires on a Miss, Dodge or Parry of the caster (AscensionSunClericEvents.cpp:72,100, one per 1000 ms), and the only avoidance forcing is set_combat_avoidance (caster_avoidance of taken_outcome, ADR 0900 procs), which script_hit does not take: a tool addition, held for a design note."
   },
   {
     "spell": 560492,
@@ -2305,9 +2378,18 @@
     "spell": 560861,
     "clause": "While Dawn is active, damage dealt by Radiant Flame now reduces the cooldown of Dawnfall and Solar Concord by $/1000;560860S1 sec.",
     "labels": [
-      "560861 effect_value 560860e0 #0"
+      "560861 effect_value 560860e0 #0",
+      "560861 cost_gate 806118 dawnfall_gate without",
+      "560861 cost_gate 806118 dawnfall_gate with",
+      "560861 cost_gate 806118 dawnfall_gate unset",
+      "560861 cost_gate 806118 dawnfall_gate beyond",
+      "560861 cost_gate 301266 concord_gate without",
+      "560861 cost_gate 301266 concord_gate with",
+      "560861 cost_gate 301266 concord_gate unset",
+      "560861 cost_gate 301266 concord_gate beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Behaviour route, cooldown gates under a real Dawn cast (Solar Power 500149 set as a precondition fixture): Radiant Flame 806060 ticks five times (DurationIndex 35 = 4000 ms, EffectAmplitude 1000, SPELL_ATTR5_EXTRA_INITIAL_PERIOD: 4000 / 1000 + 1, from the DBC), so 5 x 1000 ms (560860 BasePoints -1001) are cut from Dawnfall 806118 (120000 ms) and from Solar Concord 301266 (30000 ms): each is refused at its cooldown less 5000 ms plus 250 ms without the passive, accepted with it, refused 250 ms earlier (beyond), so the cut lies in [4750, 5250] ms, excluding 4500 and 5500 ms. Control of 'While Dawn is active': the unset arm keeps the passive and skips the Dawn cast, refused in both entries. Solar Concord arms start 40000 ms apart (arm_wait_ms) because a Dawn cast over a Dawn still up switches it off (807440 read 0 in a diagnostic, the with arm then missed the cut). Counted pair 20261122-160022 / 20261122-160145, build 9cffb962143f, server commit a6c61f91d126, no flip, every label ok in both runs. The data labels of this row (effect_value, aura_duration_ms, effect_radius, the readback label) are emitted by the base pair only, a behaviour-only pair does not run them; they read ok at the last base pair, and the row resolves at the next base pair on this build. Reference search 2026-11-22: coa-history spell 560861: 0 events in 186 logs (a passive); nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 561023,
@@ -2499,7 +2581,7 @@
     "spell": 561328,
     "clause": "Removes the cast time of Glare while above 80% health.",
     "kind": "claim",
-    "reason": "Pair 20261122-134456 / 20261122-134548 (prove, build e496bda1, server b7e79aca55+), no flip, no alert. Glare 807870 cast time after the learn: 0 ms at 81% entered from 50%, 1500 ms at 79% entered from 90% or from 50% and at 75% entered from 90% (the four edges D-153 named, judged by the tooltip literal). The #5963 band (AscensionSunCleric.cpp:366-371, b2ad6f76d6) keeps the helper aura between 75% and 80%, but not its effect: the helper carries CasterAuraState 28 (ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT, HealthAbovePct(80) each update, Unit.cpp:766, 3f8e071750), and ModifyAuraState unapplies the effects of owned auras with that state (Unit.cpp:8541-8553). Mentor D-157: the tooltip literal holds, no status 2, no server change. Data conformant, not status 1: the arms read spell_cast_time_ms, a readback in coverage.METRIC_EVIDENCE, so coverage counts both claims as data; status 1 waits for a behaviour route (an observed cast duration). Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state found #5963; nothing else found.",
+    "reason": "Pair 20261122-165027 / 20261122-165216 (prove, build 70eef6b19c8a, server e745c250f2af), no flip, no alert: Glare 807870 cast time read with the engine's own use-time function after the learn, judged as a learned contrast on the named arms (ADR 1024, use_time_contrast): 1500 -> 0 ms (gain -1500) at 90% health and at 81% entered from 50%, 1500 -> 1500 ms (gain 0) at 50%, at 79% entered from 90% or from 50% and at 75% entered from 90% (the four edges D-153 named, judged by the tooltip literal D-157). The #5963 band (AscensionSunCleric.cpp:366-371, b2ad6f76d6) keeps the helper aura between 75% and 80%, but not its effect: the helper carries CasterAuraState 28 (ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT, HealthAbovePct(80) each update, Unit.cpp:766, 3f8e071750), and ModifyAuraState unapplies the effects of owned auras with that state (Unit.cpp:8541-8553). Mentor D-157: the tooltip literal holds, no status 2, no server change. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state found #5963; nothing else found.",
     "claims": [
       {
         "claim": "Removes the cast time of Glare",
@@ -2529,14 +2611,16 @@
         "labels": [
           "561329 effect_value e0 #0",
           "561329 behaviour_metric_delta dawnsear_cast_time",
-          "561329 behaviour_metric_delta sunflare_cast_time"
+          "561329 behaviour_metric_delta sunflare_cast_time",
+          "561329 behaviour_metric_delta cascade_cast_time"
         ]
       },
       {
         "claim": "and mana cost by $s1%",
         "labels": [
           "561329 behaviour_metric_delta dawnsear_cost",
-          "561329 behaviour_metric_delta sunflare_cost"
+          "561329 behaviour_metric_delta sunflare_cost",
+          "561329 behaviour_metric_delta cascade_cost"
         ]
       }
     ],
@@ -2725,7 +2809,9 @@
         "claim": "Enemies struck by Blessing of Absolution now deal $572886s1% reduced damage",
         "labels": [
           "572885 effect_value 572886e0 #0",
-          "572885 behaviour_metric_delta debuff_amount"
+          "572885 behaviour_metric_delta debuff_amount",
+          "572885 behaviour_hit_ratio struck_damage",
+          "572885 behaviour_hit_ratio struck_damage_magic"
         ]
       },
       {
@@ -2737,13 +2823,21 @@
         ]
       }
     ],
-    "reason": "Duration claim: Touch of Light 572886 on the dummy is present when read 4650..4950 ms of game time after Blessing of Absolution 804249 (above 4500, -10% excluded) and gone when read 5150..5500 ms after it (below 5500, +10% excluded), both runs; control = the same cast with 300341 learned instead of 572885, no aura (entry debuff_no_touch). The reduced-damage claim stays data only: the aura amount reads -20 (BasePoints -21 + 1), but no existing kind makes an enemy carrying a real 572886 strike and compares its damage (tool need in the report). Reference search 2026-11-22: coa-history spell 572885: 0 events in 186 logs (a passive leaves no event); the bindmysoul snapshot under ~/CoaServer/reference carries \"Enemies struck by Blessing of Absolution now deal -20% reduced damage for 5 seconds.\" (same figures); nothing else found. Pair 20261122-045517 / 20261122-045553, build b3e613641105, server commit 68e7af248b64+, no flip, 16/16 ok in both runs."
+    "reason": "Duration claim: Touch of Light 572886 on the dummy is present when read 4650..4950 ms of game time after Blessing of Absolution 804249 (above 4500, -10% excluded) and gone when read 5150..5500 ms after it (below 5500, +10% excluded), both runs; control = the same cast with 300341 learned instead of 572885, no aura (entry debuff_no_touch). Reduced-damage claim, Physical part: entry struck_damage, 20 trials per arm, the struck enemy casts Void Zone 92559 (1000 Physical, DmgClass 0, no miss, no crit) at the caster inside the 5 s of the debuff, control arm = 572885 unlearned with the same casts: the damage ratio treatment / control is judged against 0.8 (572886 Effect[0] BasePoints -21 + 1 = -20); Pair 20261122-164341 / 20261122-164658, build 6cd75cfa82e6, server commit 7a2ad0994d9d, no flip, 29 verdicts per run. struck_damage read 0.80041 in both runs (782 vs 977 per hit, 20 and 18 treatment hits). The school: 572886 Effect[0] is aura 79 with DBC MiscValue 1 (Physical only) and the tooltip says 'damage' with no school; owner ruling O-25 says ALL damage is reduced by 20%, and the class contract widens the mask to 127, all schools (Sun Cleric ADR 0032). Magic part: entry struck_damage_magic, same shape with Light of the Naaru 41394 (Holy), expected 0.8 from the tooltip and O-25. Before the fix, pair 20261122-164341 / 20261122-164658: ratio 1.0 in both runs (1100 vs 1100 per hit, 19 to 20 hits per arm, alert). After the fix, pair 20261122-165439 / 20261122-165829, build 50524417587e, server commit 28be782efacd, no flip, 9 verdicts per run all ok: struck_damage_magic read 0.80 (-20.0%; excluded below -22 and above -18) and struck_damage 0.80041 (-19.96%) in both runs, 20 trials per arm; the magic part is now provable (O-25). Reference search 2026-11-22: coa-history spell 572885 and 572886: 0 events in 186 logs (a passive and its debuff leave no event); the bindmysoul snapshot under ~/CoaServer/reference carries \"Enemies struck by Blessing of Absolution now deal -20% reduced damage for 5 seconds.\" (same figures, no school); nothing else found."
   },
   {
     "spell": 572885,
-    "clause": "In addition, increases the critical srtike chance of all Gavels by $s2%.",
+    "clause": "In addition, increases the critical strike chance of all Gavels by $s2%.",
+    "dbc_clause": "In addition, increases the critical srtike chance of all Gavels by $s2%.",
+    "text_source": {
+      "basis": "text_correction",
+      "spell": 572885,
+      "ruling": "D-162: 'srtike' read as 'strike', no figure differs (G-36); no client text change",
+      "dbc_differs": "Description: 'srtike' spelled 'strike'; no value changes",
+      "record": "ledger-only text_correction (D-162): no coa_client_spell_description row exists and none is added; the client text is unchanged"
+    },
     "kind": "claim",
-    "reason": "Counts as data, status not 1: the measurement is behavioural but the tooltip typo 'srtike' is kept in the clause, so coverage.py CRIT_WORDS does not match and the verdicts fall to data; a mentor or tool decision (typo-tolerant promise or text_source correction) is needed. Control arm = the read before the learn plus Horusath Blast 500154 outside the Gavel mask (gain 0.0, entry crit_control). Gavel of Light 800611, Gavel of Wrath 802561 and Gavel of Grace 807987 each gain 20.0 (expected 20 = BasePoints 19 + 1, within 0.01), both runs; the 3 Gavel shapes cover the mask (G-23: one effect, one class mask). The bindmysoul snapshot text lacks the Gavel sentence (an older tooltip state). Reference search 2026-11-22: coa-history spell 572885: 0 events in 186 logs (a passive leaves no event). Pair 20261122-045517 / 20261122-045553, build b3e613641105, server commit 68e7af248b64+, no flip, 16/16 ok in both runs.",
+    "reason": "Status 1. Mentor D-162: the tooltip's 'srtike' is read as 'strike' (text_correction, G-36: no figure differs, no client text change), so the crit promise words match. Control arm = the read before the learn plus Horusath Blast 500154 outside the Gavel mask (gain 0.0, entry crit_control, 4.6781 before and after). Gavel of Light 800611, Gavel of Wrath 802561 and Gavel of Grace 807987 each gain 20.0 (expected 20 = BasePoints 19 + 1, within 0.01), both runs; the 3 Gavel shapes cover the mask (G-23: one effect, one class mask). The bindmysoul snapshot text lacks the Gavel sentence (an older tooltip state). Reference search 2026-11-22: coa-history spell 572885: 0 events in 186 logs (a passive leaves no event). Pair 20261122-155322 / 20261122-155402, build 258d1652f626, server commit b2e2235ee2b5+, no flip, 15 of 15 verdicts ok or tolerated in both runs; the effect_value reads ran twice on the same build (20261122-155600 / -155644), ok.",
     "labels": [
       "572885 effect_value e1 #2",
       "572885 behaviour_metric_delta crit_gavel_light",
@@ -2828,28 +2922,66 @@
     "spell": 681433,
     "clause": "Emit a powerful holy light in an $a1 yd radius,",
     "labels": [
-      "681433 effect_radius e0 #0"
+      "681433 effect_radius e0 #0",
+      "681433 behaviour_metric_delta radius_edge"
     ],
     "kind": "claim"
   },
   {
     "spell": 681433,
     "clause": "dealing ${$m1+0+$sph*0.5+$AP*0.050575} Holy damage to all nearby enemies.",
-    "labels": [
-      "681433 effect_value e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$sph*0.5+$AP*0.050575} Holy damage to all nearby enemies",
+        "labels": [
+          "681433 effect_value e0 #1",
+          "681433 behaviour_metric_delta nova_base"
+        ]
+      },
+      {
+        "claim": "$sph*0.5",
+        "labels": [
+          "681433 behaviour_metric_delta nova_sp"
+        ]
+      },
+      {
+        "claim": "$AP*0.050575",
+        "labels": [
+          "681433 behaviour_metric_delta nova_ap"
+        ]
+      }
+    ]
   },
   {
     "spell": 681433,
     "clause": "Reduces the cooldown of your Solar Invocation spells by $/1000;524858s1 sec for each target struck.",
-    "labels": [
-      "681433 effect_value 524858e0 #2",
-      "681433 behaviour_metric_delta cd_refund_one",
-      "681433 behaviour_metric_delta cd_refund_three",
-      "681433 behaviour_metric_delta cd_refund_none"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reduces the cooldown of your Solar Invocation spells by $/1000;524858s1 sec for each target struck",
+        "labels": [
+          "681433 cost_gate 800764 cd_conquest without",
+          "681433 cost_gate 800764 cd_conquest with",
+          "681433 cost_gate 800764 cd_conquest beyond",
+          "681433 cost_gate 503651 cd_revelation without",
+          "681433 cost_gate 503651 cd_revelation with",
+          "681433 cost_gate 503651 cd_revelation beyond",
+          "681433 cost_gate 806159 cd_resplendence without",
+          "681433 cost_gate 806159 cd_resplendence with",
+          "681433 cost_gate 806159 cd_resplendence beyond"
+        ]
+      },
+      {
+        "claim": "for each target struck",
+        "labels": [
+          "681433 effect_value 524858e0 #2",
+          "681433 behaviour_metric_delta cd_refund_one",
+          "681433 behaviour_metric_delta cd_refund_three",
+          "681433 behaviour_metric_delta cd_refund_none"
+        ]
+      }
+    ]
   },
   {
     "spell": 681433,
@@ -2916,7 +3048,8 @@
     "spell": 680624,
     "clause": "and unleashes it after $d,",
     "labels": [
-      "680624 aura_duration_ms #0"
+      "680624 aura_duration_ms #0",
+      "680624 behaviour_metric_delta unleash_timing"
     ],
     "kind": "claim"
   },
@@ -2924,7 +3057,9 @@
     "spell": 680624,
     "clause": "damaging enemies within $570147a1 yds as Holy damage.",
     "labels": [
-      "680624 effect_radius 570147e0 #1"
+      "680624 effect_radius 570147e0 #1",
+      "680624 behaviour_metric_delta radius_in",
+      "680624 behaviour_metric_delta radius_out"
     ],
     "kind": "claim"
   },
@@ -3011,9 +3146,13 @@
     "spell": 680637,
     "clause": "When the absorption shield from The Chosen is depleted, it explodes for ${$570187m1*$<scalingbp>+$AP*0.25+$sph*0.45} Holy damage,",
     "labels": [
-      "680637 effect_value 570187e0 #0"
+      "680637 effect_value 570187e0 #0",
+      "680637 script_hit 570187 explosion",
+      "680637 script_hit 570187 explosion_sp",
+      "680637 script_hit 570187 explosion_ap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1. ADR 0745 / 0160 / 0031 and Witch Hunter ADR 0004 read: a base-only read cannot be isolated (the data read gives the full token, 96.494 at attack power 70, ADR 0745 case), so the base term is judged by the hit at the measured stats and each power term by a contrast arm against the control. Real heal (Illumination 500143) turns The Chosen 704936 into the shield 802598; Grave Coil 47632 from a striker 3 yd away breaks it and Hope 570187 lands on the striker (the only enemy within 8 yd, so the split by enemy count is one). Control arm: the same heal and strike without 680637 learned counts no 570187 hit. Hit means (non-critical, unresisted, model 0 sigma): base 96.0 against 96.000, spell power arm 366.0 against 366.000 (+270 = 0.45 x 600 holy spell power, 10062 x6; a coefficient 10% off moves the hit by 27 against a 5% band of 18.3), attack power arm 346.0 against 346.000 (+250 = 0.25 x 1000 attack power); tooltip display 96.49, 366.49, 346.49 (integer truncation). 18 to 20 usable hits of 20 per arm; residual failure probability about 1e-6 per pair (0.85 per trial, minimum 8 of 20). The splitting by number of enemies is not proven (one enemy only). Reference search 2026-11-22: coa-history spell 680637 and 570187; the bindmysoul and ascension-data snapshots carry the text; nothing found beyond the tooltip and the DBC. Pair 20261122-155322 / 20261122-155402, build 258d1652f626, server commit b2e2235ee2b5+, no flip, 15 of 15 verdicts ok or tolerated in both runs; the effect_value reads ran twice on the same build (20261122-155600 / -155644), ok."
   },
   {
     "spell": 680637,
@@ -3127,7 +3266,7 @@
         ]
       }
     ],
-    "reason": "Haste: the main-hand attack time (Seraphim 2027, 2300 ms) reads 2300 before the learn (control) and 2000 after, ratio 0.869565 within 0.001, which excludes 14% and 16% and 13.5% and 16.5%. Extra attack (ADR 0024): the DBC proc runs again. 680643 Effect[1] aura 42 PROC_TRIGGER_SPELL casts 681472 (Effect[0] 19 ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531, ExcludeTargetAuraSpell 681531); 681531 is the per-target marker (Effect[0] aura 4 DUMMY on the enemy, duration index 6 = 600000 ms), and a cast of 681472 at a target holding it is refused (SpellInfo::CheckTarget), which replaces the earlier per-GUID set. Over 3 swing intervals at the dummy the caster's casts of 681472 read 0 before the learn (control) and exactly 1 after (not one per swing), the dummy holds 681531 after the learn and not before, the cast is already there after 1 swing interval, and casts of 506824 read 0 in both phases (the strike the code cast before ADR 0024). Pair 20261122-083906 / 20261122-083941, build 138707765c08, server commit 8045c0550b87+, no flip (both runs the same statuses), 5 of 5 scenarios ok in each run; the class file ratings leave no miss, dodge or parry, residual failure probability 0 per pair. Not measured, tool_gap: a second target gets its own extra attack (autos are driven at the dummy only), and the extra attack lands as a second white swing (melee_attack_count and melee_damage_count change with the swing at the interval boundary, tried and dropped in the b8d1 pass); the first_interval read does not separate the first from the second hasted swing of the interval, only the marker gates. The damage of the first exchange (white swing against the 506824 strike) is not measured: no entry reads it deterministically and the pre-fix tree is not rebuilt. Reference search 2026-11-22: coa-history log 161 (2026-08-22, one Sun Cleric player): SPELL_EXTRA_ATTACKS 681472 36 events (self-target), each followed in the same millisecond by a second SWING_DAMAGE on the same target, and SPELL_AURA_APPLIED 681531 DEBUFF on the target about 300 ms later, 35 events on 35 distinct target GUIDs (none twice); that player has 0 events of 506824 in all 186 logs, the 1388 SPELL_DAMAGE events of 506824 come from four other players; 680643 0 events (a passive); bindmysoul reads the tooltip figure 15%; nothing else found. Limit (mentor D-131): a target marked by one Sun Cleric refuses another Sun Cleric's Valiance for 10 min; stock DBC ExcludeTargetAuraSpell, no caster check (SpellInfo.cpp:2158); live behaviour with two Valiance users unknown. ADR 0024.",
+    "reason": "Haste: the main-hand attack time (Seraphim 2027, 2300 ms) reads 2300 before the learn (control) and 2000 after, ratio 0.869565 within 0.001, which excludes 14% and 16% and 13.5% and 16.5%. Extra attack (ADR 0024): the DBC proc runs again. 680643 Effect[1] aura 42 PROC_TRIGGER_SPELL casts 681472 (Effect[0] 19 ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531, ExcludeTargetAuraSpell 681531); 681531 is the per-target marker (Effect[0] aura 4 DUMMY on the enemy, duration index 6 = 600000 ms), one per caster since owner ruling O-21: the class contracts clear 681472's ExcludeTargetAuraSpell and give 681531 SPELL_ATTR3_DOT_STACKING_RULE, and the 680643 proc condition refuses a target holding the caster's own 681531, which replaces the earlier per-GUID set. Over 3 swing intervals at the dummy the caster's casts of 681472 read 0 before the learn (control) and exactly 1 after (not one per swing), the dummy holds 681531 after the learn and not before, the cast is already there after 1 swing interval, and casts of 506824 read 0 in both phases (the strike the code cast before ADR 0024). Pair 20261122-155841 / 20261122-155932, build cfec1ab6a6b1, server commit 13ba1646fee4 (O-21, one marker per caster; the pair before it was 20261122-083906 / 20261122-083941, build 138707765c08), no flip (both runs the same statuses), 5 of 5 scenarios ok in each run; the class file ratings leave no miss, dodge or parry, residual failure probability 0 per pair. Not measured, tool_gap: a second target gets its own extra attack (autos are driven at the dummy only), and the extra attack lands as a second white swing (melee_attack_count and melee_damage_count change with the swing at the interval boundary, tried and dropped in the b8d1 pass); the first_interval read does not separate the first from the second hasted swing of the interval, only the marker gates. The damage of the first exchange (white swing against the 506824 strike) is not measured: no entry reads it deterministically and the pre-fix tree is not rebuilt. Reference search 2026-11-22: coa-history log 161 (2026-08-22, one Sun Cleric player): SPELL_EXTRA_ATTACKS 681472 36 events (self-target), each followed in the same millisecond by a second SWING_DAMAGE on the same target, and SPELL_AURA_APPLIED 681531 DEBUFF on the target about 300 ms later, 35 events on 35 distinct target GUIDs (none twice); that player has 0 events of 506824 in all 186 logs, the 1388 SPELL_DAMAGE events of 506824 come from four other players; 680643 0 events (a passive); bindmysoul reads the tooltip figure 15%; nothing else found. Old behaviour (mentor D-131, overturned by owner ruling O-21): a target marked by one Sun Cleric refused another Sun Cleric's Valiance for 10 min, stock DBC ExcludeTargetAuraSpell with no caster check (SpellInfo.cpp:2158). Per caster since O-21, regression sun-cleric-valiance-per-caster-marker (three level 60 Sun Clerics, Valkyr weapon set, one dummy): the second gets one 681472 cast on the dummy the first marked, both markers stay, the first attacking again gets no second cast, a control without Valiance gets none. Two Valiance users: nothing found (the only log has one); owner ruling O-21. Clearing 681472's ExcludeTargetAuraSpell also drops the stock pre-cast of 681531 (Spell::PrepareTriggersExecutedOnHit, Spell.cpp:9119-9121, applied by Spell::DoTriggersOnSpellHit, Spell.cpp:3330-3345), which added the marker at the hit on the target and on the caster: the marker now lands only at +200 ms on the target, from Effect[1] 183 (code reading). Regression run 20261122-155529 (verification passed). ADR 0024.",
     "tool_gap": {
       "reason": "autos are driven at the dummy only (attack_swings requires target dummy), so no second target can be attacked and the landing white swing has no deterministic count (melee_attack_count and melee_damage_count change with the swing at the interval boundary)",
       "attempts": [
@@ -3281,15 +3420,18 @@
           "680648 spell_duration 681254 #1"
         ]
       }
-    ]
+    ],
+    "reason": "Heal part: design 1 (hit_ratio arms) ran and alerted (ratio 0.99988), probable cause (not proven): Illumination 500143 EffectImplicitTargetA 21 (ally target) while the hit_ratio arm casts go to the dummy; tool need: a per-cast target in hit_ratio arms. Reference search 2026-11-22: coa-history spell 681254: 0 events in 186 logs; nothing else found. Stays open, no status 3 or 5."
   },
   {
     "spell": 680648,
     "clause": "stacking up to $681254u times.",
     "labels": [
-      "680648 max_stacks 681254 #2"
+      "680648 max_stacks 681254 #2",
+      "680648 behaviour_metric_delta max_stacks"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Entry max_stacks (second design on the existing metric_delta kind, no haste fixture): Angelic Presence 800722 is instant with no global cooldown, so a cycle of 800722 then 500143 spaced 800 ms apart consumes it 11 times in 16.8 s, inside the 20 s of the first stack (681254 StackAmount 10, DurationIndex 18); expected 10 stacks (the cap), an uncapped counter would read 11; control = the same sequence without 680648 (0 stacks). The first design's premise (unhasted 1.5 s global cooldown and 2 s cast) ignored that 800722 makes Illumination instant (review b11d6 I-4). Pair 20261122-164341 / 20261122-164658, build 6cd75cfa82e6, server commit 7a2ad0994d9d, no flip, 29 verdicts per run. Read 0 before the learn and 10 after, both runs."
   },
   {
     "spell": 680648,
@@ -3507,9 +3649,13 @@
     "spell": 681252,
     "clause": "Direct Physical damage dealt now reduces the cooldown of Champion of the Sun by $/1000;681263s1 sec.",
     "labels": [
-      "681252 effect_value 681263e0 #0"
+      "681252 effect_value 681263e0 #0",
+      "681252 cost_gate 800612 cooldown_cut without",
+      "681252 cost_gate 800612 cooldown_cut with",
+      "681252 cost_gate 800612 cooldown_cut beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Cost-gate arms: without 681252 the cooldown of Champion of the Sun runs on (attempt at 119080 ms refused), with it the attempt goes through, the 118920 ms attempt is refused: cut 1000 ms, excludes 900 and 1100. Pair 20261122-155900 / 20261122-155954, build bb13592025dc, server commit e3a927f41c42, no flip. Reference search 2026-11-22: coa-history and merged PRs give nothing beyond the tooltip and the DBC for the cut; nothing found. Open: the data label 681252 effect_value 681263e0 #0 has no verdict on build bb13592025dc, so the row closes at the next pair that holds all its labels on one build. The qualifier Direct Physical has no contrast arm (a non-Physical or periodic hit is not run); one direct Physical Gavel is proven to cut 1000 ms. Hit landing is by construction (class ratings melee hit 10000, expertise 10000: no miss, dodge or parry)."
   },
   {
     "spell": 681252,
@@ -3572,19 +3718,31 @@
   {
     "spell": 681253,
     "clause": "In addition, Illumination now reduces the cooldown of Solar Invocation spells by $/1000;681789s1 sec.",
-    "labels": [
-      "681253 behaviour_metric_delta cd_cut_800764",
-      "681253 behaviour_metric_delta cd_cut_control_800764",
-      "681253 behaviour_metric_delta cd_cut_500152",
-      "681253 behaviour_metric_delta cd_cut_control_500152",
-      "681253 behaviour_metric_delta cd_cut_503651",
-      "681253 behaviour_metric_delta cd_cut_control_503651",
-      "681253 behaviour_metric_delta cd_cut_806159",
-      "681253 behaviour_metric_delta cd_cut_control_806159",
-      "681253 effect_value 681789e0 #1"
+    "claims": [
+      {
+        "claim": "reduces the cooldown of Conquest, Revelation and Resplendence by $/1000;681789s1 sec",
+        "labels": [
+          "681253 cost_gate 800764 cd_gate_800764 without",
+          "681253 cost_gate 800764 cd_gate_800764 with",
+          "681253 cost_gate 800764 cd_gate_800764 beyond",
+          "681253 cost_gate 503651 cd_gate_503651 without",
+          "681253 cost_gate 503651 cd_gate_503651 with",
+          "681253 cost_gate 503651 cd_gate_503651 beyond",
+          "681253 cost_gate 806159 cd_gate_806159 without",
+          "681253 cost_gate 806159 cd_gate_806159 with",
+          "681253 cost_gate 806159 cd_gate_806159 beyond"
+        ]
+      },
+      {
+        "claim": "reduces the cooldown of Ascension by $/1000;681789s1 sec",
+        "labels": [
+          "681253 behaviour_metric_delta cd_cut_500152",
+          "681253 behaviour_metric_delta cd_cut_control_500152"
+        ]
+      }
     ],
     "kind": "claim",
-    "reason": "Data only, not behaviour and not a final status: the eight cd_cut labels read cooldown_ms, a READBACK metric (coverage.METRIC_EVIDENCE), so no applied event shows the cut being consumed. A cast gate (cost_gate, resource cooldown, as Lorescribe) was considered and not built: its margin is 500 ms by default and the 100 ms margin needed to exclude a cut 10% off is smaller than the wait drift measured in this class (game 28975 ms against nominal 28631 ms in one scenario), so the route needs attempts timed by game_time reads, as cooldown_clear_time does for a minion; tool need, claim left open (review b8a I-2). Readings of counted pair 20261122-065859 / 20261122-070442, build 2e2bdcd22257, server commit f7c27d317a43, no flip. Each Solar Invocation spell is cast and Illumination follows; the remaining cooldown read 2600 ms after the Illumination cast started (run 1) is 24788 / 25890 / 24788 / 24788 (Conquest, Ascension, Revelation, Resplendence; expected 24800 / 25900 / 24800 / 24800 within 50, a cut of 0.9 or 1.1 s is outside the band) against the control reads 25788 / 26907 / 25788 / 25788 (Solar Conduit 300321 learned in place, an unrelated passive, expected 1000 ms more). Reference search 2026-11-22: coa-history 681789 0 events; nothing found. Fixture: Reg's Test Aura 984954 (Effect[1] aura 57, -1000% spell crit) is a phase aura on the caster so no heal crits and the amount arms are deterministic; it is never the subject of a claim."
+    "reason": "Split by spell (G-23 subset argued per claim). Conquest 800764, Revelation 503651 and Resplendence 806159: the cooldown_ms readbacks are replaced by the cost_gate arms, each spell attempted 60 ms before and 60 ms after the reduced cooldown, without the talent (refused), with it (accepted); the 60 ms margin excludes a 0.9 s or 1.1 s cut because the simulated clock runs the waits at nominal (run1 681253 cd_gate_800764 result.json: waits 1600 / 27460 / 27340 ms, max_step_ms 25, game_elapsed 98836 against 98936), and it is not safe for a real-clock rerun (blockers.tsv row 64: 344 ms drift measured earlier). Ascension 500152 is its own claim and stays data: it casts for 2500 ms and its cooldown starts at the cast end, so the cut from the cast start is -1500 ms, and cost_gate refuses a negative cooldown reduction with after_casts (tool need); only its cooldown_ms readbacks cd_cut_500152 and cd_cut_control_500152 carry it. The roots are {800764, 500152, 503651, 806159} (AscensionSunCleric.cpp:215)."
   },
   {
     "spell": 681337,
@@ -3616,11 +3774,31 @@
   {
     "spell": 681436,
     "clause": "Removes the cost of your Solar Invocation spells and they now generate $504679s1% of your missing mana when cast.",
-    "labels": [
-      "681436 effect_value 504679e0 #0"
-    ],
     "kind": "claim",
-    "reason": "Observation, not a status: Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. energize_conquest reads 79 against 79 derived from the DBC (Conquest 800764 refunds 10% of the 2868 maximum mana, 286, before Devoted gives 5% of the 2868 - 1286 missing, 79.1); energize_resplendence, energize_revelation and energize_ascension read 93 (none of the three has an energize effect, so no refund precedes Devoted); cost_resplendence, cost_revelation and cost_ascension read 1093; no cost entry exists for Conquest. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs; nothing else found. The behaviour labels are not cited by this clause (a claim split over the cost and the energize halves is a later ledger decision)."
+    "reason": "Cost claim: the engine's own use-time function (CalcPowerCost, ADR 1024) read as a learned contrast on the four Solar Invocations, gains -258.97 Resplendence, -190.82 Revelation, -68.15 Conquest, -477.05 Ascension (ManaCostPercentage 19, 14, 5, 35 of the base mana 1363, Spell.dbc), measured -258, -190, -68, -477 (the engine truncates the cost to a whole number, band 1), and the control arm Dawnsear 554406, outside the class mask, gain 0 measured 0; the arms are all named in each entry. Energize claim: 5% of the missing mana, 93 (Resplendence, Revelation, Ascension) and 79 (Conquest: its own 10% refund of 286 comes first, 5 x (2868 - 1286) / 100), 0 under the Vow of Grace source (energize_conquest_not_vow), measured equal in both runs. Counted pair 20261122-160022 / 20261122-160145, build 9cffb962143f, server commit a6c61f91d126, no flip, every label ok in both runs. The energize claim carries the data label effect_value 504679e0 #0, emitted by the base pair only; it reads ok at the last base pair. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive), the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs; nothing else found.",
+    "claims": [
+      {
+        "claim": "Removes the cost of your Solar Invocation spells",
+        "labels": [
+          "681436 behaviour_metric_delta cost_use_resplendence",
+          "681436 behaviour_metric_delta cost_use_revelation",
+          "681436 behaviour_metric_delta cost_use_conquest",
+          "681436 behaviour_metric_delta cost_use_ascension",
+          "681436 behaviour_metric_delta cost_use_control"
+        ]
+      },
+      {
+        "claim": "they now generate $504679s1% of your missing mana when cast",
+        "labels": [
+          "681436 effect_value 504679e0 #0",
+          "681436 behaviour_metric_delta energize_resplendence",
+          "681436 behaviour_metric_delta energize_revelation",
+          "681436 behaviour_metric_delta energize_conquest",
+          "681436 behaviour_metric_delta energize_ascension",
+          "681436 behaviour_metric_delta energize_conquest_not_vow"
+        ]
+      }
+    ]
   },
   {
     "spell": 681448,
@@ -3797,10 +3975,22 @@
   {
     "spell": 704565,
     "clause": "Your Radiant Cascade now bounces to $s1 additional allies.",
-    "labels": [
-      "704565 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Radiant Cascade heals 5 units without the passive (control)",
+        "labels": [
+          "704565 behaviour_metric_delta bounce_count"
+        ]
+      },
+      {
+        "claim": "bounces to $s1 additional allies",
+        "labels": [
+          "704565 behaviour_metric_delta bounce_count"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-165027 / 20261122-165216 (prove, build 70eef6b19c8a, server e745c250f2af), no flip, no alert. Radiant Cascade heals 5 units per cast without Everglow (control; the effective ChainTarget is 5, AscensionSunClericContracts.cpp:226, the DBC says 4) and 7 with it (cumulative 5 then 12), so the passive adds the 2 additional allies of $s1. Reference search 2026-11-22: coa-history 704565: 0 events in 186 logs; nothing else found."
   },
   {
     "spell": 704568,
@@ -3859,15 +4049,27 @@
     "spell": 704579,
     "clause": "Does not work on bosses.",
     "kind": "claim",
-    "reason": "Open, no label. Dungeon-boss part: AscensionSunCleric.cpp:312 skips Blinded 505342 only when IsDungeonBoss() (flag set at load from a non-raid instance_encounters credit creature, ObjectMgr.cpp:6846-6862). The Ramstein the Gorger 10439 arms (boss_blind, boss_hit_landed) are withdrawn: in all 4 runs of pairs 2 and 4 each boss scenario logged one cast failure, SpellCastResult 12 SPELL_FAILED_BAD_TARGETS (SharedDefines.h:1062) on Sunflare 800231, which the blind_duration scenario on the training dummy never logs, and boss_hit_landed read 0 hits in pair 4 run 1 (20261122-125701) so boss_blind passed on no hit. The cause of the failed cast is not established (a hit-rating fixture cannot fix a target check: the class file sets spell_hit_rating 10000, which clamps the hit chance to 100% so the miss roll of Unit.cpp MagicSpellHitResult never fires, not measured here), so no landing proof exists; the arms are archived in .agents/plans/sun-cleric-b10c4-fix/removed-entries.json. Next design: read the cast result per cast before the learn and after it. Raid and world boss part: open, server fix approved by mentor decision D-154 (bosses include raid encounter creatures and world-boss rank; 00b1aaf7b2 / #8881 removed the dungeon-boss flag from raid credit creatures for rewards, not for this spell): the code excludes only dungeon bosses, so a raid or world boss is blinded today while the tooltip says bosses; the fix and its regression on the tool group 5 boss fixture follow. Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); nothing found beyond the tooltip and Spell.dbc.",
+    "reason": "Both claims proven by behaviour on one build (Twilight ADR 0030, mentor decision D-154, after 00b1aaf7b2 / #8881 took the dungeon-boss flag off raid kill-credit creatures). AscensionSunCleric.cpp:305-311, :320: Blinded 505342 is skipped on a creature without a player owner that is a dungeon boss, a raid encounter kill credit (ObjectMgr::IsRaidEncounterKillCredit) or of world-boss rank. Six Sunflare 800231 hits with Vow of the Eclipse 807435 up, 704579 learned between the phases: Blinded stacks read 0 before and 0 after on Sneed 643 (dungeon boss), Sulfuron Harbinger 12098 (Molten Core encounter 4037, raid) and Baron Rivendare 29109 (rank 3, no encounter), and 0 then 5 on Harvest Golem 36 (normal, the control). Vow of the Eclipse 505340, copied by the same Eclipse call with no boss gate, reads 1 in both phases on each of the four targets (landing controls), and every scenario's cast_failures list is empty. The data explains the SpellCastResult 12 SPELL_FAILED_BAD_TARGETS of the b10c4 Ramstein the Gorger 10439 arms (not re-run): its On Reset action list 1043900 sets unit flags 768 (immune to players and NPCs) and removes them about 6 s later, so a Sunflare cast in that window has no valid target. Lucifron 12118 was rejected as the raid fixture: its coa_boss_summon row brings Shadow of Lucifron 12268 at 5000 ms and the caster died (SpellCastResult 23 from cast 4, runs 20261122-153152 / -153355). Every attackable raid credit creature in the data is also rank 3, so the raid arm proves the outcome, not which condition gave it. Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); nothing found beyond the tooltip and Spell.dbc. Pair 20261122-153655 / 20261122-153725, build deaee7002ec1, server commit 6bb059fc763b+ (the class file of the fix commit), no flip, 10/10 ok in both runs.",
     "claims": [
       {
         "claim": "Does not work on dungeon bosses",
-        "labels": []
+        "labels": [
+          "704579 behaviour_metric_delta blind_stacks_dungeon_boss",
+          "704579 behaviour_metric_delta eclipse_lands_dungeon_boss",
+          "704579 behaviour_metric_delta blind_stacks_normal",
+          "704579 behaviour_metric_delta eclipse_lands_normal"
+        ]
       },
       {
         "claim": "Does not work on raid and world bosses",
-        "labels": []
+        "labels": [
+          "704579 behaviour_metric_delta blind_stacks_raid_encounter",
+          "704579 behaviour_metric_delta eclipse_lands_raid_encounter",
+          "704579 behaviour_metric_delta blind_stacks_world_boss",
+          "704579 behaviour_metric_delta eclipse_lands_world_boss",
+          "704579 behaviour_metric_delta blind_stacks_normal",
+          "704579 behaviour_metric_delta eclipse_lands_normal"
+        ]
       }
     ]
   },
@@ -4113,7 +4315,9 @@
     "spell": 704910,
     "clause": "Increases your healing power by $s1% of your Intellect",
     "labels": [
-      "704910 effect_value e0 #0"
+      "704910 effect_value e0 #0",
+      "704910 behaviour_metric_delta heal_power",
+      "704910 behaviour_metric_delta heal_power_control"
     ],
     "kind": "claim"
   },
@@ -4327,7 +4531,8 @@
           "704932 behaviour_metric_delta duration_control"
         ]
       }
-    ]
+    ],
+    "reason": "Hit part: 704931 DurationIndex 0 and 704932 Effect[0] aura 107 SPELLMOD_DURATION BasePoints 14999 (server DBC); open: tool need attacker_miss_share duration override read from 704932 e0. Stays open, no status 3 or 5."
   },
   {
     "spell": 704934,
@@ -4717,17 +4922,27 @@
     "spell": 707433,
     "clause": "Increases the tick rate of Mercy by $s1%,",
     "kind": "claim",
-    "reason": "Mentor D-74 (2026-11-22), owner information I-3: conformant as is. The basis is the DBC modifier value, Effect[0] SPELLMOD_ACTIVATION_TIME -50% on Mercy 504848's period, applied by the stock engine; the tooltip's 50 is read as that period figure (3000 to 1500 ms), not as a +50% tick rate.",
+    "reason": "Owner ruling O-24 (2026-11-22), Sun Cleric ADR 0031: +50% tick rate = period x 2/3 with the duration unchanged, so Mercy 504848's 3000 ms period becomes 2000 ms (the stock -50% period modifier gave 1500 ms; the D-74 note is withdrawn). The server sets Mercy's amplitude before the engine applies Blightbreaker's unchanged Effect[0] modifier (aura_ascension_sun_cleric_mercy). Counted pair after the fix: 20261122-160902 / 20261122-160936, build eb64db249abd, server commit 859c4970d6, no flip, 3 of 3 verdicts ok in both runs: mercy_period 2000 (expected 2000, control 3000), mercy_cost 572 and mercy_spent 791 unchanged. Before (base pair 11, 20261122-143800): mercy_period 1500. Ticks over the whole 12000 ms aura, sun-cleric-blightbreaker-mercy: 5 without the passive, 7 with it. Behaviour proof beside the period read: the caster's Mercy Proc 503650 cast count (one per tick) at 4300 ms and 5500 ms after a real cast, cumulative over a control cast without Blightbreaker (ticks 2, then 5 + 3 = 8 expected from the 2000 ms period; tolerance 0, the pair bounds the period to 1834 to 2150 ms and excludes 1800, 2200, 1500 and 3000 ms). The figure claim 'by $s1%' cites the applied period and the tick counts, not only the DBC -50% readback, which the fix leaves unchanged. Reference search 2026-11-22: coa-history spell 503650 and 504848: 0 events in 186 logs; bindmysoul lists Blightbreaker without a period; nothing found.",
+    "text_source": {
+      "basis": "owner_ruling",
+      "spell": 707433,
+      "ruling": "O-24 (2026-11-22): Blightbreaker raises Mercy's tick rate by 50% with its duration unchanged, a 2 sec period instead of 1.5 sec"
+    },
     "claims": [
       {
         "claim": "Increases the tick rate of Mercy",
         "labels": [
-          "707433 behaviour_metric_delta mercy_period"
+          "707433 behaviour_metric_delta mercy_period",
+          "707433 behaviour_metric_delta mercy_ticks_early",
+          "707433 behaviour_metric_delta mercy_ticks_late"
         ]
       },
       {
         "claim": "by $s1%",
         "labels": [
+          "707433 behaviour_metric_delta mercy_period",
+          "707433 behaviour_metric_delta mercy_ticks_early",
+          "707433 behaviour_metric_delta mercy_ticks_late",
           "707433 effect_value e0 #0"
         ]
       }
@@ -4770,7 +4985,10 @@
     "kind": "claim",
     "labels": [
       "707528 behaviour_metric_delta cd",
-      "707528 behaviour_metric_delta cd_control"
+      "707528 behaviour_metric_delta cd_control",
+      "707528 cost_gate 500154 cd_gate without",
+      "707528 cost_gate 500154 cd_gate with",
+      "707528 cost_gate 500154 cd_gate beyond"
     ]
   },
   {
@@ -5027,26 +5245,64 @@
   {
     "spell": 800054,
     "clause": "healing nearby allies for ${$800038m1+$800038ppl1+$SP*0.2+$AP*0.1}",
-    "labels": [
-      "800054 effect_value 800038e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "the base healing",
+        "labels": [
+          "800054 behaviour_metric_delta burst_heal"
+        ]
+      },
+      {
+        "claim": "the spell power term",
+        "labels": [
+          "800054 behaviour_metric_delta burst_heal_sp"
+        ]
+      },
+      {
+        "claim": "the attack power term",
+        "labels": [
+          "800054 behaviour_metric_delta burst_heal_ap"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Heal 34 / 34 at the reference stats (expected 34.4..35.2 from the DBC), 1635 / 1634 at +10000 spell power and 1635 / 1635 at +20000 attack power (expected 1634.4..1635.2): the terms 0.2 SP and 0.1 AP are proven by their contrast arms against the base arm of the same pair. Every entry reads its control before the cause (no cast, 0), crit forced out by fixture 984954. Counted pair 20261122-160022 / 20261122-160145, build 9cffb962143f, server commit a6c61f91d126, no flip, every label ok in both runs. Reference search 2026-11-22: coa-history (800038 SPELL_HEAL mean 689, SPELL_DAMAGE mean 774) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC; the DBC and the tooltip are the expectation. Same entries as the Hegemony 561204 rows, written for 800054's own labels."
   },
   {
     "spell": 800054,
     "clause": "and damaging nearby enemies for ${$800038m2+$800038ppl2+$SP*0.4+$AP*0.15}.",
-    "labels": [
-      "800054 effect_value 800038e1 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "the base damage",
+        "labels": [
+          "800054 behaviour_metric_delta burst_damage"
+        ]
+      },
+      {
+        "claim": "the spell power term",
+        "labels": [
+          "800054 behaviour_metric_delta burst_damage_sp"
+        ]
+      },
+      {
+        "claim": "the attack power term",
+        "labels": [
+          "800054 behaviour_metric_delta burst_damage_ap"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Damage 47 / 48 at the reference stats (expected 47.5..48.5), 4047 / 4048 at +10000 spell power (4047.5..4048.5) and 3048 / 3047 at +20000 attack power (3047.5..3048.5): the terms 0.4 SP and 0.15 AP are proven by their contrast arms against the base arm of the same pair. Every entry reads its control before the cause (no cast, 0), crit forced out by fixture 984954. Counted pair 20261122-160022 / 20261122-160145, build 9cffb962143f, server commit a6c61f91d126, no flip, every label ok in both runs. Reference search 2026-11-22: coa-history (800038 SPELL_HEAL mean 689, SPELL_DAMAGE mean 774) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC; the DBC and the tooltip are the expectation. Same entries as the Hegemony 561204 rows, written for 800054's own labels."
   },
   {
     "spell": 800054,
     "clause": "Lasts $d.",
     "labels": [
-      "800054 aura_duration_ms #2"
+      "800054 aura_duration_ms #2",
+      "800054 behaviour_metric_delta radiance_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Presence pair on the aura of a real Radiance cast: present 9500..9950 ms and gone 10150..10550 ms of game time after the cast (DurationIndex 1 = 10000 ms), which excludes a duration 10% (1000 ms) shorter or longer; control: the before phase casts nothing and reads the aura absent. Counted pair 20261122-160022 / 20261122-160145, build 9cffb962143f, server commit a6c61f91d126, no flip, every label ok in both runs. The data labels of this row (effect_value, aura_duration_ms, effect_radius, the readback label) are emitted by the base pair only, a behaviour-only pair does not run them; they read ok at the last base pair, and the row resolves at the next base pair on this build. Reference search 2026-11-22: coa-history spell 800054 lists Radiance applied and removed events with no stated duration; nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 800600,
@@ -5057,22 +5313,29 @@
         "claim": "Start anew, reseting the cooldown of Paragon",
         "labels": [
           "800600 behaviour_metric_delta reset_680639",
-          "800600 behaviour_metric_delta reset_680639_control"
+          "800600 behaviour_metric_delta reset_680639_control",
+          "800600 cost_gate 680639 reset_680639_cast without",
+          "800600 cost_gate 680639 reset_680639_cast with"
         ]
       },
       {
         "claim": "Chosen of the Light",
         "labels": [
           "800600 behaviour_metric_delta reset_800622",
-          "800600 behaviour_metric_delta reset_800622_control"
+          "800600 behaviour_metric_delta reset_800622_control",
+          "800600 cost_gate 800622 reset_800622_cast without",
+          "800600 cost_gate 800622 reset_800622_cast with"
         ]
       },
       {
         "claim": "and Judgement Day spells",
-        "labels": []
+        "labels": [
+          "800600 cost_gate 806121 reset_806121 without",
+          "800600 cost_gate 806121 reset_806121 with"
+        ]
       }
     ],
-    "reason": "Open for Judgement Day: the reset_806121 arms and their control are withdrawn (archived in .agents/plans/sun-cleric-b10c4-fix/removed-entries.json): the control read cooldown 0 against 58400 in all 4 runs of pairs 2 and 4, so the setup cast of 806121 leaves no cooldown (RecoveryTime 60000, Spell.dbc) and the reset arm's 0 proves nothing. One design so far (cast at the caster, then at the dummy are two targets of the same design), so no status 3. Lead: establish that 806121 is cast and on cooldown right after the setup cast (cast-count or cooldown read) before New Day. Paragon and Chosen of the Light are proven by their own labels."
+    "reason": "Second design for Judgement Day: a cost_gate resets arm (primer cast of 806121 with a dummy in its area, New Day cast after it, 806121 attempted again inside its 60000 ms cooldown: refused 67 without, accepted with), replacing the withdrawn cooldown read (b10c4: the primer found no enemy and left no cooldown). Paragon and Chosen of the Light get the same cast-attempt arms beside their cooldown readbacks. Judgement Day: refused without, accepted with, on the cost_gate resets arm. Pair 20261122-155900 / 20261122-155954, build bb13592025dc, server commit e3a927f41c42, no flip. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found."
   },
   {
     "spell": 800602,
@@ -5176,7 +5439,42 @@
     "spell": 504580,
     "clause": "Radiate holy light from your shield on enemies in front of you, dealing ${$m1+0+$SP*0.25+$AP*0.1} Holyfire Damage, scaling with your block value.",
     "kind": "claim",
-    "reason": "Unproven until the cause of the run-1 zero read in base pair 7 is proven, crit or miss (mentor D-95); no status is given. The expectation under test: damage = m1 207..240 + AP term 7 + the shield block value x 1.0 (AscensionSunClericContracts.cpp:311-312); the tooltip says 'scaling with your block value' with no coefficient. Pair 20261120-221023 / 20261120-221237 (the earlier pair 20261120-220241 / 20261120-220458, archive pair3-with-block-value-entries, holds the block_value reads: 11 = 1 + 40 x 0.5 - 10, and 1011 at +2000 Strength; the metric block_value has no coverage.py row, so no class-file entry keeps it): damage 246 and 253 against the tooltip's own [214, 247] and inside [225, 258] with the term; at +2000 Strength (block value 1011, attack power 4070) damage_block reads 1632 and 1642 against [1625, 1658] at 1.0 (0 would give [614, 647]). Reference search: bindmysoul and coabuildhub carry the same sentence (23 + 25% SP + 10% AP at rank 1, 'scaling with your block value'), no coefficient; 638 live Dawnbreak 504580 damage events in the combat logs, mean 1155, max 2467, gear unknown. Flip lead (base pair 7, run 1): damage 0 after a completed cast, ok in 5 of 6 runs. The read filters critical false (CoAGameplayTest.cpp:5268-5277), so a critical hit of the cast would read 0, and so would a miss (Unit.cpp:3992 base hit 96 against a same-level target; 504580 has neither ALWAYS_HIT nor NO_ATTACK_MISS), although the fixture sets spell hit rating 10000; the run-1 result records neither a crit nor a miss, so the cause is not established (crit, miss or another). The fixture 984954 has two effects: Effect[0] +101% weapon crit (aura 52, MiscValue 127), which does not enter this spell-filtered read, and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE, BasePoints -1001 (-1000% spell crit), while 504580 is DmgClass MAGIC, so the fixture removes spell crit for this spell and a crit is not supported as the lead without a mechanism; the residual probability of a zero read is not stated."
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$SP*0.25+$AP*0.1} Holyfire Damage",
+        "labels": [
+          "504580 behaviour_metric_delta damage"
+        ]
+      },
+      {
+        "claim": "$SP*0.25",
+        "labels": [
+          "504580 behaviour_metric_delta damage_sp"
+        ]
+      },
+      {
+        "claim": "$AP*0.1",
+        "labels": [
+          "504580 behaviour_metric_delta damage_ap"
+        ]
+      },
+      {
+        "claim": "scaling with your block value",
+        "labels": [
+          "504580 behaviour_metric_delta damage_block",
+          "504580 behaviour_metric_delta damage_block_only"
+        ]
+      },
+      {
+        "claim": "on enemies in front of you",
+        "labels": []
+      },
+      {
+        "claim": "from your shield",
+        "labels": []
+      }
+    ],
+    "reason": "Held, not counted (D-95, mentor condition: cause of the run-1 zero first). The cause of the zero read of base pair 7 run 1 (a crit, a miss or another cause) is unproven and no measured arm settles it. The Strength entry damage_block and the damage entry keep the critical false filter (unchanged since 221e0ff4a2, 2026-11-20): a critical hit would read 0 there; the arms damage_sp, damage_ap and damage_block_only count every damage event with no critical filter, so a crit would exceed their window and alert. Fixture 984954 (Effect[1] aura 57, -1000% spell crit) on a DmgClass 1 spell already makes a crit impossible in every arm, so dropping the filter does not test the crit hypothesis. The block value coefficient 1.0 is the implementation's (AscensionSunClericContracts.cpp:311-312), the tooltip states none and the reference search found none; the contrast of damage_block_only against the base arms shows the stated scaling with block value, not the coefficient. Two claims stay open: the front cone (Spell.dbc 504580 Effect[0] EffectImplicitTargetA 24, EffectRadiusIndex 32) and the shield requirement (EquippedItemClass 4, SubClassMask 64): every arm strikes one dummy in front of the caster, none shows a cone edge, a second enemy or a cast without a shield."
   },
   {
     "spell": 800764,
@@ -5462,7 +5760,11 @@
       {
         "claim": "enemies in a $804252a1 yd frontal cone",
         "labels": [
-          "503505 effect_radius 804252e0 #0"
+          "503505 effect_radius 804252e0 #0",
+          "503505 behaviour_metric_delta cone_edge_in_out",
+          "503505 behaviour_metric_delta cone_front",
+          "503505 behaviour_metric_delta cone_behind",
+          "503505 behaviour_metric_delta cone_behind_cast"
         ]
       },
       {
@@ -5473,7 +5775,7 @@
         ]
       }
     ],
-    "reason": "The tooltip gives no number for 'additional threat'. The qualitative claim is proven by threat per damage 1.1505 (cone_threat) against 1.0056 for an ordinary Holy hit (threat_control), band 0.02. The 15 percent is the server convention for effect 63 spells (PR #9382, rev_20261026_20_coa_tank_ability_threat.sql: spell_threat pctMod 1.15 for 804252, the flat 15 kept), pinned by the arm as a regression, not a ruling on the tooltip. Reference search 2026-11-22: see the entries; nothing found beyond the tooltip, the DBC and that SQL."
+    "reason": "The tooltip gives no number for 'additional threat'. The qualitative claim is proven by threat per damage 1.1505 (cone_threat) against 1.0056 for an ordinary Holy hit (threat_control), band 0.02. The 15 percent is the server convention for effect 63 spells (PR #9382, rev_20261026_20_coa_tank_ability_threat.sql: spell_threat pctMod 1.15 for 804252, the flat 15 kept), pinned by the arm as a regression, not a ruling on the tooltip. Reference search 2026-11-22: see the entries; nothing found beyond the tooltip, the DBC and that SQL. Round 11 d3, cone bracket: the area test is Nearby(ally, 10), IsWithinDist adding both combat reaches, so the effective centre distance is 10 + 1.5 (player) + 1.275 (dummy entry 36) = 12.775 yd (a first exploratory run read two hits with the second dummy at 11 yd, inside that reach). Dummies at 12.275 yd (9.5 yd from the surface, inside) and 13.275 yd (10.5 yd, outside): one hit of 404..456 summed (451 and 440), so the 10 yd radius lies in (9.5, 10.5). Front arm: a dummy 3 yd in front of the ally (ally 2 yd forward) takes one hit (428, 414); the dummy 3 yd behind the ally (ally 8 yd forward) takes none (0), and the cast itself goes through (cast_failure 0, cone_behind_cast), so the front half is the arc the code applies (HasInArc(pi)), the tooltip gives no angle. Counted pair 20261122-160022 / 20261122-160145, build 9cffb962143f, server commit a6c61f91d126, no flip, every label ok in both runs. The radius claim carries the data label effect_radius 804252e0 #0, emitted by the base pair only; it reads ok at the last base pair."
   },
   {
     "spell": 503505,
@@ -5509,6 +5811,7 @@
   {
     "spell": 804250,
     "clause": "and $680911s3% increased damage.",
+    "reason": "Open, tool need: the ally must deal damage under a real 804250 cast. hit_ratio arm casts are spell ids cast at the dummy (behaviours.py), ally_arm has no ally attack, and set_aura of 680911 is forbidden as a fixture of the claim.",
     "labels": [
       "804250 effect_value 680911e2 #2"
     ],
@@ -5517,6 +5820,7 @@
   {
     "spell": 804250,
     "clause": "If the ally falls below 35% maximum health they are healed for $680911s3% of their direct damage dealt for the remaining duration.",
+    "reason": "Open, tool need: same as the increased damage clause (the ally must deal damage under a real 804250 cast); no existing kind reads the ally's damage or its healing.",
     "labels": [
       "804250 effect_value 680911e2 #3"
     ],
@@ -5565,10 +5869,23 @@
   {
     "spell": 804254,
     "clause": "Guard a Blessed ally, deflecting the next harmful spell cast on them within $680888d.",
-    "labels": [
-      "804254 spell_duration 680888 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "deflecting the next harmful spell cast on them",
+        "labels": [
+          "804254 behaviour_metric_delta deflect_next",
+          "804254 behaviour_metric_delta deflect_control"
+        ]
+      },
+      {
+        "claim": "within $680888d",
+        "labels": [
+          "804254 behaviour_metric_delta deflect_duration_window"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-165027 / 20261122-165216 (prove, build 70eef6b19c8a, server e745c250f2af), no flip, no alert. Strikes land twice with no Blessing (cumulative 2 damage events of Grave Coil 47632 on the caster), 4 when the Blessing is cast without Bless (both land), 3 with Bless then the Blessing (one deflected, one landed); the aura 680888 is present 55.5 s after the cast and gone by 64.5 s (60000 ms, 680888 DurationIndex 3, game time). Control and treatment read on the caster as its own Blessed ally (strike spells can only target the caster in this tool; an ally struck by the striker is not available). By code reading the measured parts do not depend on who holds the aura: AscensionSunClericAbilities.cpp:539-553 casts 680888 on GetHitUnit() when it has Bless from the player, the deflect roll is the victim's aura total (Unit.cpp:3815), removal compares ActionTarget with the aura holder (AscensionSunClericEvents.cpp:74, :86). What stays unmeasured is the targeting of another unit (TARGET_UNIT_TARGET_ALLY, range, the Bless check on another unit): no stated value, no claim. Reference search 2026-11-22: coa-history spells 804254 and 680888: 0 events in 186 logs; nothing else found."
   },
   {
     "spell": 804254,
@@ -5676,7 +5993,10 @@
     "labels": [
       "804625 behaviour_metric_delta scorch_cost",
       "804625 behaviour_metric_delta scorch_period",
-      "804625 behaviour_metric_delta scorch_next"
+      "804625 behaviour_metric_delta scorch_next",
+      "804625 behaviour_metric_delta scorch_cost_next",
+      "804625 behaviour_metric_delta scorch_ticks",
+      "804625 behaviour_metric_delta scorch_ticks_control"
     ],
     "kind": "claim",
     "reason": "Control arm = Radiant Flame cost 340 and amplitude 1000 without the passive; 0 and 500 with it after Dawn; the next cast after consumption reads 1000 again. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
@@ -5725,10 +6045,39 @@
   {
     "spell": 804628,
     "clause": "At the end of the duration, or when Judgement Day ends, the enemy takes ${$807064m1*$<scalingbp>+$AP*.3+$sph*.5} Holy damage, increased for each stack on the target.",
-    "labels": [
-      "804628 effect_value 807064e0 #2"
+    "claims": [
+      {
+        "claim": "the enemy takes ${$807064m1*$<scalingbp>+$AP*.3+$sph*.5} Holy damage",
+        "labels": [
+          "804628 effect_value 807064e0 #2",
+          "804628 script_hit 807064 release",
+          "804628 script_hit 807064 release_sp",
+          "804628 script_hit 807064 release_ap"
+        ]
+      },
+      {
+        "claim": "increased for each stack on the target",
+        "labels": [
+          "804628 script_hit 807064 release",
+          "804628 script_hit 807064 release_1stack",
+          "804628 script_hit 807064 release_5stack"
+        ]
+      },
+      {
+        "claim": "when Judgement Day ends",
+        "labels": [
+          "804628 script_hit 807064 release",
+          "804628 script_hit 807064 release_1stack",
+          "804628 script_hit 807064 release_5stack"
+        ]
+      },
+      {
+        "claim": "At the end of the duration",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Split by D-165 / D-168. Amount: ADR 0745 / 0160 / 0031 and Witch Hunter ADR 0004 read as for Hope (the base term is judged by the hit at the measured stats, each power term by a contrast arm; control = the same cast without 804628, 0 hits). Judgement Day 806121 is cast at the dummy; the tooltip figure at the measured stats is 492.0 (attack power 70, spell power 0), 792.0 at +1000 attack power (+0.3 x 1000); at +2000 spell power (10062 x20, live read) it is 1492.0. Hit means at the 10-stack cap, x5.25: base 2583.0 against 2583.0, attack power arm 4158.0 against 4158.0 (ok, exact), spell power arm 7833.0 against 7833.0 (ok, exact; at 2000 spell power a coefficient 10% off, 0.45 or 0.55, moves the mean by 525 and leaves the 5% tier). Per stack: 'increased for each stack' states no figure; 25% per stack is data, 807080 Effect[0] aura 271 BasePoints 24 + 1, applied only by the 570125 slot 2 tick (AscensionSunClericAuras.cpp:239-243); the other DBC routes are closed: 807080 Effect[0] is rewritten to a dummy at load (AscensionSunClericContracts.cpp:209-210) and the proc route 804628 Effect[0] PROC_TRIGGER_SPELL to 807080 is rewritten to a dummy because 804628 is in SunClericDrivers (AscensionSunClericData.h:147, Contracts.cpp:53-61). The server applies the constant .25f at Contracts.cpp:316 (value x (1 + stacks x .25)); the expectation stays the DBC figure, not that constant. Judgement Day's own 50% damage taken is 570125 Effect[1] aura 271 BasePoints 49 + 1 (data); no ledger row exists for that sentence (806121 is open for its cooldown reset only), so the x1.5 cites its data (mentor D-178): Spell 570125 in /srv/coa/server-data/dbc, EffectApplyAuraName[1] = 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER, EffectBasePoints[1] = 49 (+1 = +50%), EffectMiscValue[1] = 127 (school mask), applied as a damage-taken multiplier by the caster's own aura in Unit::SpellDamageBonusTaken (Unit.cpp:10113-10118). Out-of-sample arm release_5stack, predicted in e23cddb195 before the arm existed: 492.0 x (1 + 5 x 0.25) x 1.5 = 1660.5 (band 1577.5 to 1743.5); measured 1660.0 tolerated in both runs, 12 of 12 trials read exactly 5 stacks before the harness removed Judgement Day (SETUP assert), so the stack factor is contrasted at 1, 5 and 10 stacks (the 5-stack figure measured again in the second pair, 1660.0 in both runs), the 1.5 at all three. Judgement Day ended: release_5stack exercises the harness removal of 570125 (the script releases on any 570125 removal while the caster knows 804628, Auras.cpp:187-189), release the natural 30 s end. Not proven: 'At the end of the duration' (the 807080 expiry path, Auras.cpp:190-191) and the no-debuff release (10 stacks without x1.5, predicted 1722.0, NOT MEASURED: state not reachable through Judgement Day removal, AscensionSunClericAuras.cpp:187-191, every 570125 removal releases with the debuff still on and removes 807080; 807080 stacks accrue only from the 570125 Effect[2] tick, Auras.cpp:237-243, so with no Judgement Day on the target no stack is added; the expiry path is not gated by 804628, observation only, no change; mentor D-168). 1-stack arm, predicted 922.5 in e23cddb195 (492.0 x (1 + 1 x 0.25) x 1.5, band 876.4 to 968.6), two attempts. Attempt 1 (pair 20261122-161820 / -161922) was void: its SETUP read of exactly 1 stack failed on trial 2 in both runs (read 10 after 9000 ms, trial 1 read 1 at 112 to 120 ms), entry archived in .agents/plans/sun-cleric-b11s1-fix/removed-entries.json. Cause, proven by the diagnostic run 20261122-164250 (non-failing reads of 570125 and 807080): the options were applied in every trial; 806121 lands Judgement Day about 150 ms after the cast (Effect[0] 183 delayed trigger, BasePoints 149, SpellEffects.cpp:1092-1094), so a removal straight after the cast removed nothing, the control arm left Judgement Day (30000 ms) on the dummy, learning 804628 let it tick (trial 1 read 1 from that leftover), trial 1's own removal again preceded the landing and its Judgement Day ticked through the settle (trial 2 started with 8 or more stacks). Attempt 2 (clean start, tool ADR 1030): Judgement Day is removed after the control drain and before 804628 is learned, each treatment trial starts only if 570125 is absent and 807080 holds 0 stacks on the dummy (24 of 24 reads clean per run), and each removal follows a read that 570125 is present (12 of 12) and that 807080 holds exactly 1 stack (12 of 12, read at 637 to 649 ms); measured 922.0 tolerated in both runs against 922.5, 12 usable hits, control 0 hits. Residual failure probability about 1.4e-4 per pair for each Suncharged arm (0.85 per trial, minimum 5 of 12). Reference search 2026-11-22: 807080's own description is Sunflare's ('increasing it's damage by 25% for $d'), which supports the 25% as the data figure; coa-history spell 804628: nothing beyond the tooltip and the DBC. Counted pair 20261122-165206 / 20261122-165247 (all 804628 arms except effect_value), build 258d1652f626, server commit b2e2235ee2b5+, no flip; the first pair 20261122-161820 / -161922 on the same build gave the same 5-stack and spell-power figures; effect_value read from the earlier pair 20261122-155600 / -155644 (same build), ok."
   },
   {
     "spell": 804629,
@@ -5756,7 +6105,7 @@
         ]
       }
     ],
-    "reason": "fed_instant: pair 20261122-132546 / 20261122-132659, build 7066298e412e (commit b99e76ea21f7), no flip, with the go-off read of each judged Dawnsear 554406 (spell_go_count 1 control, 2 after the fed cast; review t8 I1); the earlier pair 20261122-123610 / 20261122-123655 (build 770d0fc468d0) judged casting only. Spears of Glory 807299 is earned for real: Radiant Flame 806060 is cast every 4300 ms by cast_until_aura (owner ruling O-17) until the aura is on the caster, never set by the harness, and its presence is read right before the judged Dawnsear (control: cancelled, Dawnsear still casting after 300 ms; fed: casting 0). The held set_aura entries instant, instant_once and damage (review b7c C1) stay uncounted. Tool: kind aura_fed_effect, ADR 1025 (provisional). Reference search 2026-11-22: coa-history spells 804629 and 807299: 0 events in 186 logs (the aura is not logged); Dawnsear 554406 is found in 1 log with no event naming Spears of Glory; the coabuildhub and bindmysoul snapshots (fetched 2026-09-18) repeat the tooltip; nothing else found."
+    "reason": "fed_instant: pair 20261122-132546 / 20261122-132659, build 7066298e412e (commit b99e76ea21f7), no flip, with the go-off read of each judged Dawnsear 554406 (spell_go_count 1 control, 2 after the fed cast; review t8 I1); the earlier pair 20261122-123610 / 20261122-123655 (build 770d0fc468d0) judged casting only. Spears of Glory 807299 is earned for real: Radiant Flame 806060 is cast every 4300 ms by cast_until_aura (owner ruling O-17) until the aura is on the caster, never set by the harness, and its presence is read right before the judged Dawnsear (control: cancelled, Dawnsear still casting after 300 ms; fed: casting 0). The held set_aura entries instant, instant_once and damage (review b7c C1) stay uncounted. Tool: kind aura_fed_effect, ADR 1025 (provisional). Reference search 2026-11-22: coa-history spells 804629 and 807299: 0 events in 186 logs (the aura is not logged); Dawnsear 554406 is found in 1 log with no event naming Spears of Glory; the coabuildhub and bindmysoul snapshots (fetched 2026-09-18) repeat the tooltip; nothing else found. Claim 'within $d' is open: only the data label 804629 spell_duration 807299 #1 exists; tool need: an aura_fed_effect cast-time variant with a consumed arm and reads around 9 s and 11 s if $d is 10 s (not checked)."
   },
   {
     "spell": 804629,
@@ -5814,24 +6163,47 @@
         "labels": []
       }
     ],
-    "reason": "Radius claim open, not status 1. Review I1 (the 2 and 3 yd inside dummies and 9 and 10 yd outside ones let any radius from 0.45 to 6.45 yd pass) is right, and the re-bracket around the predicted edge 5 + 2 x 1.275 = 7.55 yd failed: the dummies stand 7.3 and 7.8 yd from the target (geometry read in diagnostic run 20261122-081052: combat reach 1.275 on all, equal Z, 2D distances 7.2998 and 7.7998) and the pair 20261122-080756 / -080833 read 1 flare against the expected 2, so the 7.3 yd dummy is not hit. Diagnostic scans, not counted (runs 20261122-081200 and 20261122-081418; flares on the dummy at 4, 5, 5.1, 5.2, 5.3 and 5.55 yd from the target, none at 5.7, 6, 6.3, 7, 7.3, 7.5, 7.8 and 8.5 yd): the edge lies between 5.55 and 5.70 yd, which neither code path predicts (CoA handler Nearby(): 7.55 yd; core 573449 DEST_AREA_ENEMY search with the target's combat reach added for a player caster, Spell.cpp:9434-9442: 6.275 yd). Lead for the mentor: find which path picks the targets (spell_proc row 804632 triggers 573449, whose Effect 64 casts 807175, and the handler of case 804632 also casts it) and where 5.6 yd comes from. The tooltip says 5 yds, so the measured edge is close to it: an uncertain expectation of the reach term, not a defect, no server change. The entry flare_radius keeps the bounds it can prove (4.9 yd inside, 7.8 yd outside) and is not attached to the claim: it reads 2 in both runs of the counted pair 20261122-081610 / -081655. Second lead, by code reading only, not measured: Nearby() includes the target itself, the list is sorted by GUID (AscensionSunCleric.cpp:146) and the target is prepended only when absent (AscensionSunClericEvents.cpp:305-306, e36bc50aad), so with more than 5 valid enemies within the radius the target gets no flare when its GUID is not among the five lowest. The tooltip is silent on this; flare_cap (the count stays 5) is not affected."
+    "reason": "Radius claim open, not status 1. Review I1 (the 2 and 3 yd inside dummies and 9 and 10 yd outside ones let any radius from 0.45 to 6.45 yd pass) is right, and the re-bracket around the predicted edge 5 + 2 x 1.275 = 7.55 yd failed: the dummies stand 7.3 and 7.8 yd from the target (geometry read in diagnostic run 20261122-081052: combat reach 1.275 on all, equal Z, 2D distances 7.2998 and 7.7998) and the pair 20261122-080756 / -080833 read 1 flare against the expected 2, so the 7.3 yd dummy is not hit. Diagnostic scans, not counted (runs 20261122-081200 and 20261122-081418; flares on the dummy at 4, 5, 5.1, 5.2, 5.3 and 5.55 yd from the target, none at 5.7, 6, 6.3, 7, 7.3, 7.5, 7.8 and 8.5 yd): the edge lies between 5.55 and 5.70 yd, which neither code path predicts (CoA handler Nearby(): 7.55 yd; core 573449 DEST_AREA_ENEMY search with the target's combat reach added for a player caster, Spell.cpp:9434-9442: 6.275 yd). Lead for the mentor: find which path picks the targets (spell_proc row 804632 triggers 573449, whose Effect 64 casts 807175, and the handler of case 804632 also casts it) and where 5.6 yd comes from. The tooltip says 5 yds, so the measured edge is close to it: an uncertain expectation of the reach term, not a defect, no server change. The entry flare_radius keeps the bounds it can prove (4.9 yd inside, 7.8 yd outside) and is not attached to the claim: it reads 2 in both runs of the counted pair 20261122-081610 / -081655. Second lead, by code reading only, not measured: Nearby() includes the target itself, the list is sorted by GUID (AscensionSunCleric.cpp:146) and the target is prepended only when absent (AscensionSunClericEvents.cpp:305-306, e36bc50aad), so with more than 5 valid enemies within the radius the target gets no flare when its GUID is not among the five lowest. The tooltip is silent on this; flare_cap (the count stays 5) is not affected. Round 11 d4 observation (not a measurement of the edge): in run 1 of an exploratory pair of round 11 chunk d4 (build 70eef6b19c8a) the existing entry flare_radius read 1 Solar Flare instead of 2 (the dummy 4.9 yd from the target got none) and 2 in the next five runs, with the same inputs; the spell hit rating is 10000, so a miss does not explain it. A dummy 4.9 yd away is inside every predicted edge (5 yd, 6.275 yd, 7.55 yd), so the cause of that one run and the measured edge between 5.55 and 5.70 yd stay unexplained; the row stays open after two designs (the earlier bracket around 7.55 yd and no new bracket here), no server change."
   },
   {
     "spell": 804632,
     "clause": "Deals ${$m2+$ppl2+$SP*0.26} Holyflame Damage",
-    "labels": [
-      "804632 effect_value 807175e1 #2"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Deals ${$m2+$ppl2} Holyflame damage (no spell power)",
+        "labels": [
+          "804632 behaviour_metric_delta flare_sp_zero"
+        ]
+      },
+      {
+        "claim": "+ $SP*0.26 (spell power term)",
+        "labels": [
+          "804632 behaviour_metric_delta flare_sp"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-165027 / 20261122-165216 (prove, build 70eef6b19c8a, server e745c250f2af), no flip, no alert. Solar Flare damage on the dummy 136 with no added spell power and 2736 at 10000 spell power (136.5 + 0.26 x 10000 = 2736.5, band 5%). Fixture 984954 carries two effects: Effect[0] aura 52 weapon crit +101% (no effect on the magic Solar Flare, reads non-crit in both runs) and Effect[1] aura 57 spell crit -1001. Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher), 807175 Solar Flare: 15499 SPELL_DAMAGE (3 to 3191, mean 520, with spell power and crits) in 29 logs; nothing else found."
   },
   {
     "spell": 804632,
     "clause": "and reduces the target's chance to hit by $s1% for $d.",
-    "labels": [
-      "804632 effect_value 807175e0 #3",
-      "804632 spell_duration 807175 #4"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reduces the target's chance to hit by $s1%",
+        "labels": [
+          "804632 behaviour_metric_delta attacker_miss"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "804632 behaviour_metric_delta flare_duration_direct"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-165027 / 20261122-165216 (prove, build 70eef6b19c8a, server e745c250f2af), no flip, no alert. Attackers' miss share +2.69 (99% +1.79 to +3.60, 9395 / 9424 swings) and +2.61 (+1.70 to +3.53, 9407 / 9449) points (stated +3 from 807175 Effect[0] BasePoints -4 + 1, band 1 to 5, 99% interval excludes 0). Residual failure probability: half-width 0.90 gives sigma 0.35, so a null effect reaches an estimate of 1 or more with z 2.86 (0.21%) in one run, both runs about 4.4e-6 per pair, below 0.1%; Solar Flare cast directly lasts between 9.1 and 10.9 s (read at 9509 and 10518 ms). Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher), 807175 Solar Flare: 2442 SPELL_AURA_APPLIED and 2416 SPELL_AURA_REMOVED in 29 logs without a duration, no hit chance readable; nothing else found. Window attempt through Horusath Blast alone was not judged: it read the aura still held at 10518 ms because of the two flights."
   },
   {
     "spell": 804751,
@@ -6613,7 +6985,7 @@
     "spell": 807343,
     "clause": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
     "kind": "claim",
-    "reason": "Control arm = the reading before the learn in each entry. Duration 10000 ms bracketed to (9000, 11000). Reference search: bindmysoul snapshot carries the same sentence; nothing else found. Pair 20261122-001533 / 20261122-001615, build aed1b333, server commit 95a06d0da0a6+, no flip.",
+    "reason": "Control arm = the reading before the learn in each entry. Duration 10000 ms bracketed to (9000, 11000). Reference search: bindmysoul snapshot carries the same sentence; nothing else found. Pair 20261122-001533 / 20261122-001615, build aed1b333, server commit 95a06d0da0a6+, no flip. light_held: present at 9500..9800 ms, gone at 10700..11000 ms after the cast. Pair 20261122-155900 / 20261122-155954, build bb13592025dc, server commit e3a927f41c42, no flip. The hit delay after the cast (about 250 ms, Speed 20 at 5 yd) is computed, not read; the windows leave about 150 to 200 ms per side.",
     "claims": [
       {
         "claim": "grants you Light of Absolution on Horusath Blast damage",
@@ -6624,7 +6996,8 @@
       {
         "claim": "for $807523d (10 s, remaining duration read)",
         "labels": [
-          "807343 behaviour_metric_delta light_remaining"
+          "807343 behaviour_metric_delta light_remaining",
+          "807343 behaviour_metric_delta light_held"
         ]
       }
     ]
@@ -6728,6 +7101,7 @@
     "spell": 807749,
     "clause": "and deal $s2% increased damage.",
     "labels": [
+      "807749 behaviour_metric_delta damage_swings",
       "807749 behaviour_metric_delta damage"
     ],
     "kind": "claim"

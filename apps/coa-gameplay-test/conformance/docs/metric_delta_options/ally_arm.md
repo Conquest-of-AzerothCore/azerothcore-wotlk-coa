@@ -1,4 +1,4 @@
-# Ally arm (`metric_delta` `ally_arm`, ADR 1016)
+# Ally arm (`metric_delta` `ally_arm`, ADR 1016, ADR 1029)
 
 `ally_arm` is an object of these keys, at least one:
 
@@ -47,7 +47,8 @@
   widened low end at or below 90% of `expected` makes the ratio unmeasured, never ok (ADR 1028).
 - `allies: 0` (from 0 to 7, default 1) adds no ally player and no group step, for arms on the caster or the dummy
   only; it needs arms and refuses `ally_health` and `ally_casts`.
-- `arms`: a list of `{actors, metric, fields?, before_expected, expected, tolerance, source, reach_source?}`. Each
+- `arms`: a list of `{actors, metric, fields?, before_expected, expected, tolerance, source, reach_source?,
+  precondition?}`. Each
   arm reads `metric` on every unit of `actors` (the caster, the allies, the dummy when the scenario has it) with the
   arm's `fields`, right after the main before and after readings, and judges the sums:
   `|sum - expected| <= tolerance`. Every value is a finite number stated with its `source`; no default tolerance. The
@@ -59,6 +60,11 @@
   `expected` and `tolerance` together, for totals no data states (a heal or damage amount). It reads `count_metric`
   with the same fields beside `metric`, is judged only through the ratios that name it (an arm no ratio names is
   refused), and any ratio over it is unmeasured unless its count moved, or when its denominator did not move.
+- `precondition: true` on an arm (ADR 1029, mentor D-169): the arm states a premise of the trial, never behaviour.
+  Its metric must be a state metric; `combat_reach` (`METRIC_EVIDENCE` row `state` declared by this option, the
+  harness `GetCombatReach()` read) is accepted only on such an arm. A precondition arm is never ratio-only, and no
+  ratio names it as numerator, in a denominator or list, or as `floor_count` (ADR 1028, ADR 1029). Any other value
+  than `true` is refused; the key is written to the model and the contract only when set.
 
 Heal and energize totals (`spell_heal_count`, `spell_heal_total`, `spell_effective_heal_total`,
 `spell_energize_count`, `spell_energize_total`), and the spell damage, log and count reads (`spell_damage_count`,
@@ -69,7 +75,9 @@ arm or the main reading with one of them on a unit other than the caster is refu
 `caster_entry`. Read a heal the caster gives an ally on the caster with `fields.target` set to that ally, one arm per
 ally.
 
-Verdict: the main verdict, then alert when an arm or a ratio is off; a missing arm read makes it unmeasured, or keeps an
+Verdict: first the precondition arms: one off or unread makes the verdict unmeasured (the trial is void, not
+judged), whatever the main verdict and the other arms say; held, they leave the status as is. Then the main verdict,
+then alert when an arm or a ratio is off; a missing arm read makes it unmeasured, or keeps an
 alert the main verdict already gives. Without arms the verdict is the plain one. One `tolerance` serves both phases, so
 a random value whose band differs between phases (G-19) cannot be stated in one arm. The evidence class stays the main
 metric's: an arm does not pass through the clause gates (`CONTRAST_PROOF`, `STATE_PROMISES`, `EVENT_PROMISES`), so a

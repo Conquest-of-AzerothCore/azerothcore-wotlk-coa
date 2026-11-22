@@ -21,6 +21,10 @@ enum SunwellSpells : uint32
     SPELL_SUNWELL_VISUAL = 560124,
     SPELL_SUN_STRIDE = 680700
 };
+enum BlightbreakerSpells : uint32
+{
+    SPELL_BLIGHTBREAKER = 707433
+};
 bool First(AuraEffect const* effect)
 {
     for (uint8 slot = 0; slot < effect->GetEffIndex(); ++slot)
@@ -334,9 +338,35 @@ class aura_ascension_rejuvenating_rays : public AuraScript
             EFFECT_1, SPELL_AURA_OBS_MOD_POWER);
     }
 };
+class aura_ascension_sun_cleric_mercy : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_sun_cleric_mercy);
+
+    void Period(AuraEffect const*, bool&, int32& amplitude)
+    {
+        Unit* caster = GetCaster();
+        Player* owner = caster ? caster->GetSpellModOwner() : nullptr;
+        AuraEffect const* blightbreaker = owner ? owner->GetAuraEffect(SPELL_BLIGHTBREAKER, EFFECT_0) : nullptr;
+        if (!blightbreaker)
+            return;
+
+        int32 modifier = blightbreaker->GetAmount();
+        if (modifier <= -100 || modifier >= 100)
+            return;
+
+        amplitude = amplitude * 100 / (100 - modifier) * 100 / (100 + modifier);
+    }
+
+    void Register() override
+    {
+        DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(aura_ascension_sun_cleric_mercy::Period,
+            EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+    }
+};
 }
 void AddSC_AscensionSunClericAuras()
 {
     RegisterSpellScript(aura_ascension_sun_cleric_lifecycle);
     RegisterSpellScript(aura_ascension_rejuvenating_rays);
+    RegisterSpellScript(aura_ascension_sun_cleric_mercy);
 }
