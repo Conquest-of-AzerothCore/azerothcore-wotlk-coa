@@ -3557,7 +3557,8 @@
         "claim": "healing you for 10% of the damage dealt",
         "labels": []
       }
-    ]
+    ],
+    "reason": "Enemies around the target: proven (group_target, group_around). Pair 20261122-100356 / 20261122-100442, same build, no flip. The heal part (10% of the damage dealt) stays unproven: spell_heal_total and spell_heal_count of 707774 read 0 while the damage lands; cause not found."
   },
   {
     "spell": 704903,
@@ -3566,7 +3567,8 @@
       "704903 behaviour_metric_delta lone_damage",
       "704903 behaviour_metric_delta group_target"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Lone dummy reads 0.75 x the Wrath hit, two dummies read 0.5 x each (Adjudicated 707774, radius 5 yd). The first phase's Wrath leaves Justicar's Wrath 572067 (aura 87, +10% damage taken, 15 s) on the dummy, so the second phase waits 16 s (expire_ms). Pair 20261122-100356 / 20261122-100442, same build, no flip."
   },
   {
     "spell": 704908,
