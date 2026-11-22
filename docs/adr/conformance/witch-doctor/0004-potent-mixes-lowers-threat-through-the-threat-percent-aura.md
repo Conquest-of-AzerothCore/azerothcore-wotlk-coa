@@ -16,7 +16,7 @@ measured 1.14 threat per damage with 504888 against 1.13 without. The mentor cla
 
 - `ApplyContracts` turns effect 1 of both spells from aura 103 into aura 10 SPELL_AURA_MOD_THREAT for all schools
   (`SPELL_SCHOOL_MASK_ALL`), the form stock threat talents use.
-- The school mask stays an owner question: the tooltip says "your spells".
+- All schools: the tooltip says "your spells" and names none (contributor decision 2026-11-22).
 
 ## Consequences
 
