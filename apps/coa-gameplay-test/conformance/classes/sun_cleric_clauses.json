@@ -537,7 +537,8 @@
           "804247 behaviour_metric_delta mana_tick_lead"
         ]
       }
-    ]
+    ],
+    "reason": "Pair 20261122-070213 / 20261122-070253, build of server commit 821dc311ea6a, no flip. Mana half: Bless on the caster reads the mana after one tick (mana_tick_lead, both runs ok, control = before the learn). Healing half: ALERT in both runs, the health after one tick reads 5500 before and 5500 after the learn against 6000 expected: 300357 does not double the Bless heal (AscensionSunClericAuras.cpp:219-223 doubles only the mana). Lead, not a verdict: fix note in the report (clause 39). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
   },
   {
     "spell": 300360,
@@ -1238,7 +1239,7 @@
         ]
       }
     ],
-    "reason": "Open: the 40% chance (the first claim) needs 15,926 landed trials for the band alone (G-20) and 43,617 attempts for a residual of 0.1% per pair (procs.py sizing, min_detectable 4); Dawnbreak 800654 has a 6000 ms category cooldown, so one attempt takes 6500 ms and the proof needs about 80 parts, past the 90 minute limit; no cheaper attempt route exists in the tools (a tool need is returned: a cooldown reset between attempts for procs). The reset and the free next Gavel are read by gavel_free with the roll forced."
+    "reason": "Pair 20261122-070213 / 20261122-070253, build of server commit 821dc311ea6a, no flip. Reset: gavel_reset reads 1 completed Gavel without 503690 and 2 with it and the roll forced (the trigger Gavel is refused by its 5000 ms cooldown without the reset). Chance: status 5, the pooled proof exceeds the 90 minute limit of G-20 (15,926 landed trials for the band, 43,617 attempts for a residual of 0.1% per pair, one attempt per 6500 ms as Dawnbreak has a 6000 ms category cooldown, about 80 parts); a tool need is returned (a cooldown reset between attempts for the proc kind). Free next Gavel: two designs on spell_cast_count (gavel_free, gavel_once) read more completed Gavels than casts were made (5 and 4 against at most 3 in the treatment, runs 070213 and 070253): the counter is not a valid read of this claim here; open, not given a final status. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
   },
   {
     "spell": 504070,
@@ -2332,7 +2333,8 @@
           "582832 behaviour_hit_ratio healing_cap"
         ]
       }
-    ]
+    ],
+    "reason": "Pair 20261122-070213 / 20261122-070253, build of server commit 821dc311ea6a, no flip. Forced melee crits with Gavel of Wrath 802561 (harness crit rating fixture), control = the same crits before 582832 is learned. Haste: spell cast speed multiplier 1 to 0.952381 at one stack and 0.869565 at three, main-hand attack time 2300 to 2190.48 and 2000 (5% per stack, both haste auras). Healing: Sunlight 704911 heals +14.99% and +14.99% at three stacks (three real casts of 582837 before each heal, ally at 50% health, spell power 20000; the 99% interval lies inside the 2-point band); a one-stack read is not possible as stacks accumulate over trials (a first attempt read +14.6%, test fault, dropped). Stacks 1 then 3 for four crits (cap 3, not 4). Duration: aura present at 9.0 s and gone at 11.0 s (10000 ms, excludes -10% and +10%). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
   },
   {
     "spell": 582832,
@@ -2342,7 +2344,8 @@
       "582832 behaviour_metric_delta stack_one",
       "582832 behaviour_metric_delta stack_cap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261122-070213 / 20261122-070253, build of server commit 821dc311ea6a, no flip. Forced melee crits with Gavel of Wrath 802561 (harness crit rating fixture), control = the same crits before 582832 is learned. Haste: spell cast speed multiplier 1 to 0.952381 at one stack and 0.869565 at three, main-hand attack time 2300 to 2190.48 and 2000 (5% per stack, both haste auras). Healing: Sunlight 704911 heals +14.99% and +14.99% at three stacks (three real casts of 582837 before each heal, ally at 50% health, spell power 20000; the 99% interval lies inside the 2-point band); a one-stack read is not possible as stacks accumulate over trials (a first attempt read +14.6%, test fault, dropped). Stacks 1 then 3 for four crits (cap 3, not 4). Duration: aura present at 9.0 s and gone at 11.0 s (10000 ms, excludes -10% and +10%). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
   },
   {
     "spell": 582832,
@@ -2352,7 +2355,8 @@
       "582832 behaviour_metric_delta duration_held",
       "582832 behaviour_metric_delta duration_gone"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261122-070213 / 20261122-070253, build of server commit 821dc311ea6a, no flip. Forced melee crits with Gavel of Wrath 802561 (harness crit rating fixture), control = the same crits before 582832 is learned. Haste: spell cast speed multiplier 1 to 0.952381 at one stack and 0.869565 at three, main-hand attack time 2300 to 2190.48 and 2000 (5% per stack, both haste auras). Healing: Sunlight 704911 heals +14.99% and +14.99% at three stacks (three real casts of 582837 before each heal, ally at 50% health, spell power 20000; the 99% interval lies inside the 2-point band); a one-stack read is not possible as stacks accumulate over trials (a first attempt read +14.6%, test fault, dropped). Stacks 1 then 3 for four crits (cap 3, not 4). Duration: aura present at 9.0 s and gone at 11.0 s (10000 ms, excludes -10% and +10%). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
   },
   {
     "spell": 680618,
@@ -5737,16 +5741,17 @@
     "labels": [
       "807873 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, tool need returned: hit_ratio swings the off-hand through the class file off_hand_weapons item, equipped before any learn; the harness refuses item 2027 in the off-hand slot (equip error 20, ITEM_CANT_BE_EQUIPPED) because Sun Cleric has no Dual Wield grant, and the Valkyr set (two-hand items in both hands) is not reachable from hit_ratio. A hit_ratio option learning a spell before the equip, or a weapon-set off-hand swing read, is needed. Not given a final status. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
   },
   {
     "spell": 807873,
     "clause": "and reduces the duration of disarm effects by $s2%.",
     "labels": [
-      "807873 effect_value e1 #1",
-      "807873 behaviour_duration_ratio"
+      "807873 effect_value e1 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261122-070213 / 20261122-070253, build of server commit 821dc311ea6a, no flip. Open, tool need returned: duration_ratio judges a margin of 500 ms plus the tick overshoot on a Melt Weapon 301235 aura read 1272 ms after landing (measured delta -450 ms against -381.6 ms expected, 68 ms apart), which cannot exclude the 10% either side (about 38 ms); a duration_ratio tolerance option is needed. Not given a final status. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
   },
   {
     "spell": 807874,
