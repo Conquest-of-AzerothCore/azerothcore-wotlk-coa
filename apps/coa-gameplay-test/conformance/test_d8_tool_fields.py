@@ -215,7 +215,7 @@ class PrimingArmExpectedTests(unittest.TestCase):
         _, expectations = self.scenario()
         arms = self.priming(expectations)
         self.assertEqual({arm: e.displayed for arm, e in arms.items()},
-                         {'without': '1', 'with': '1', 'unset': '0'})
+                         {'without': '1', 'with': '1', 'unset': '0', 'beyond': '1'})
 
     def test_a_mutant_with_dawn_up_in_the_unset_arm_is_not_ok(self):
         _, expectations = self.scenario()
