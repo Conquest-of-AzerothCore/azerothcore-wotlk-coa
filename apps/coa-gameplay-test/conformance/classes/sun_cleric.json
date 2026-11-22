@@ -23324,6 +23324,90 @@
       "minimum_hits": 15,
       "cast_power": 1363,
       "observe_source": "Tooltip 803913: 'Strike with both weapons dealing Weapon Damage plus $s1 Physical damage'; $s1 = 76 (803913 EffectBasePoints[0] 75 + 1, EffectDieSides 1), passed to each hand's strike by SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (803913 Effect[0] 142 -> 800691 main hand, Effect[2] 142 -> 802566 off hand). Each strike is one SPELL_EFFECT_NORMALIZED_WEAPON_DMG (121), SchoolMask 1 (Physical). Model part normalized_value (ADR 0762): the hand's weapon roll (Valkyr set, two 2529 Zweihander 73.62 to 103.34, 2800 ms, normalized speed 3.3, learned 707072 Titan's Grip) plus attack power / 14 x its normalized speed, times 0.5 for the off hand, plus the value points (halved and truncated on the off hand), then armor mitigation; the 99% interval of the mean of 40 non-critical hits is judged, and the control arm (no cast) must count 0 hits of 802566. The strikes 800691 and 802566 are mapped to the Valkyr weapon set in spell_weapon_sets so that the judged weapon is the one the scenario wears (the spell 803913 maps to Valkyr). Class file ratings leave no miss. Reference search 2026-11-22: coa-history 800691 SPELL_DAMAGE 3417 events in 14 logs (mean 731) and 802566 3362 events (mean 503). Per player (coa-history spell_events, SPELL_DAMAGE mean of 802566 over 800691, players with 20 or more hits of each) the off-hand to main-hand ratio is 227.0/354.8 = 0.64, 820.0/1266.6 = 0.65, 618.8/866.5 = 0.71, 342.1/432.6 = 0.79, 203.7/255.4 = 0.80 and 374.8/440.6 = 0.85 for six players (23 to 1406 hits each), against 0.50 here by model and measure (the engine's UNIT_MOD_DAMAGE_OFFHAND 0.5 on the weapon and the fixed bonus, SpellEffects.cpp:4689-4706, ADR 0762; the off hand measures plus 38 where the tooltip states 'plus $s1' for each strike). The live ratio is above ours for every player: a lead on the off-hand share, not an agreement and not a proven difference (live gear, off-hand talents and crits are unknown), held open for the owner; no value is taken from the live figures; bindmysoul has no Glorious Execution value; coabuildhub index lists the name only; nothing found for the flat 76 beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 561329,
+      "name": "Burning Cascade (Dawnsear mana cost)",
+      "kind": "metric_delta",
+      "variant": "dawnsear_cost",
+      "label_suffix": "dawnsear_cost",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 804584,
+      "gate_spell": 561329,
+      "target": "caster",
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 554406
+      },
+      "before_expected": 204,
+      "expected": 163,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "observe_source": "Dawnsear 554406 costs ManaCostPercentage 15 of BaseMana 1363 (player_class_stats class 27 level 60) = 204 before the learn (the reading before is the control). 561329 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -21 (-20, $s1), EffectSpellClassMask word 1 = 1282 (bits 2, 256, 1024) which holds the Dawnsear family flag 2 (SpellFamilyFlags[1] of 554406): 204 x 0.8 = 163.2, read within 1."
+    },
+    {
+      "spell": 561329,
+      "name": "Burning Cascade (Sunflare mana cost)",
+      "kind": "metric_delta",
+      "variant": "sunflare_cost",
+      "label_suffix": "sunflare_cost",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 804584,
+      "gate_spell": 561329,
+      "target": "caster",
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 800231
+      },
+      "before_expected": 136,
+      "expected": 109,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "observe_source": "Sunflare 800231 costs ManaCostPercentage 10 of BaseMana 1363 = 136 before the learn (the reading before is the control). 561329 Effect[1] SPELLMOD_COST -20% with class mask word 1 = 1282, which holds the family flag 256 of 800231: 136 x 0.8 = 108.8, read within 1."
+    },
+    {
+      "spell": 561329,
+      "name": "Burning Cascade (Sunflare cast time)",
+      "kind": "metric_delta",
+      "variant": "sunflare_cast_time",
+      "label_suffix": "sunflare_cast_time",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 804584,
+      "gate_spell": 561329,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 800231
+      },
+      "before_expected": 2000,
+      "expected": 1600,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "observe_source": "Sunflare 800231 has a 2000 ms cast time (CastingTimeIndex 5, SpellCastTimes.dbc 5 CastTime 2000), read before the learn as the control. 561329 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME) BasePoints -21 (-20, $s1), class mask word 1 = 1282 holding the family flag 256 of 800231: 2000 x 0.8 = 1600 ms, read within 1."
+    },
+    {
+      "spell": 561329,
+      "name": "Burning Cascade (Dawnsear cast time)",
+      "kind": "metric_delta",
+      "variant": "dawnsear_cast_time",
+      "label_suffix": "dawnsear_cast_time",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 804584,
+      "gate_spell": 561329,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 554406
+      },
+      "before_expected": 3500,
+      "expected": 2800,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimeIndex 22, SpellCastTimes.dbc 22 CastTime 3500), read before the learn as the control. 561329 Effect[0] SPELLMOD_CASTING_TIME -20% with class mask word 1 = 1282 holding the family flag 2 of 554406: 3500 x 0.8 = 2800 ms, read within 1."
     }
   ],
   "player_observations": [],

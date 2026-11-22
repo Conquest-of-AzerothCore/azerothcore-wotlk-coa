@@ -2205,12 +2205,17 @@
       {
         "claim": "Reduces the cast time of Dawnsear and Sunflare by $s1%",
         "labels": [
-          "561329 effect_value e0 #0"
+          "561329 effect_value e0 #0",
+          "561329 behaviour_metric_delta dawnsear_cast_time",
+          "561329 behaviour_metric_delta sunflare_cast_time"
         ]
       },
       {
         "claim": "and mana cost by $s1%",
-        "labels": []
+        "labels": [
+          "561329 behaviour_metric_delta dawnsear_cost",
+          "561329 behaviour_metric_delta sunflare_cost"
+        ]
       }
     ]
   },
