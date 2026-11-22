@@ -2171,7 +2171,8 @@
       {
         "claim": "Lasts for $n blocks",
         "labels": [
-          "560095 behaviour_metric_delta charges"
+          "680647 behaviour_metric_delta bulwark_blocks",
+          "681468 behaviour_metric_delta bulwark_blocks"
         ]
       },
       {
@@ -2183,7 +2184,7 @@
         ]
       }
     ],
-    "reason": "The blocks part ($n) stays data: its only reading is the aura_charges readback of the charges entry. A behaviour proof needs the five blocks to be taken and the aura to end on the last, and the harness cannot force a block (set_combat_avoidance sets dodge and parry only): a tool need, returned in the b10c3 report. The effect_value #2 label is dropped because the token $n has no readable effect value."
+    "reason": "The blocks part ($n) is behaviour through the control arm of the block_charge_strikes entries of Paying The Tithe 680647 and 681468 (kind block_charge_strikes): with block forced to 100% (set_combat_avoidance block, owner ruling O-20) Seraphic Bulwark 560095 must end on block 5 before the talent is learned, and the verdict alerts when the control arm lasts any other count, so a pass of either label proves the aura lasts its 5 charges of blocks. The aura_charges readback of the charges entry is not cited for this part."
   },
   {
     "spell": 560111,
@@ -5170,21 +5171,39 @@
   {
     "spell": 707629,
     "clause": "Blocking attacks now has a $h% chance to grant you Hammer of Kings for $/1000;712448s1 sec.",
-    "labels": [
-      "707629 effect_value #0",
-      "707629 effect_value 712448e0 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Blocking attacks now ... grant you Hammer of Kings (a blocked strike grants it, an unblocked hit never does)",
+        "labels": [
+          "707629 behaviour_metric_delta block_grant",
+          "707629 behaviour_metric_delta block_grant_unblocked"
+        ]
+      },
+      {
+        "claim": "has a $h% chance (30%, ProcChance)",
+        "labels": [
+          "707629 behaviour_metric_delta block_grant_rate"
+        ]
+      },
+      {
+        "claim": "for $/1000;712448s1 sec (4 sec)",
+        "labels": [
+          "707629 effect_value 712448e0 #1"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "On block: 24 strikes at block 100% grant Hammer of Kings 804751 at least once after 707629 is learned and never before; unblocked hits grant it never: kind block_extension_trials mode grant (D-228), block 0% with the shield on, each trial removes the aura, reads it absent, strikes once and reads the damage log; a strike blocked anyway voids its trial (about 4%), at least 24 judged trials, 0.7^24 = 1.9e-4 per run. The 30% chance: 38 pooled parts of 950 trials at block 100% (36100, D-236: the 99% Wilson half-width is 0.62 points at p = 0.30, so each run's whole interval must lie inside 28.4..31.6%; the 5700 of D-228 gave 1.56 points and low ends 28.03 and 28.29), mentor band 28.4..31.6%, 24 control trials per part before the learn show no aura. Counted pair 2026-11-22 (d236, runs started 23:0x, same build-dev binary as D-228, no C++ change, no flip): run A 10776 grants in 36100 judged = 29.85%, Wilson 99% [29.23, 30.47]; run B 10854 in 36100 = 30.07%, [29.45, 30.69]; both intervals inside 28.4..31.6, control 0 grants in 912 judged trials per run. The expected 30% is the tooltip's $h (ProcChance 30 of 707629, DBC); no external reference was searched in this resize. The 4 sec duration stays data."
   },
   {
     "spell": 707629,
     "clause": "If Hammer of Kings is already active, you increase the duration by 4 sec.",
     "labels": [
-      "707629 effect_value 804752e0 #2",
-      "707629 aura_amplitude_ms #3",
-      "707629 spell_duration 804751 #4"
+      "707629 behaviour_metric_delta block_extension",
+      "707629 behaviour_metric_delta block_extension_unblocked"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Kind block_extension_trials (D-217): 24 trials of one blocked strike on a fresh 804751 cast, every trial judged on game-time stamps (12000 ms +-10% not extended, 16000 ms +-10% extended by 712469 Effect[0] 4000 ms). One strike per application because an extension casts nothing (AscensionSunClericEvents.cpp:150, Extend only sets the duration). Zero arm (D-228): 32 trials at block 0% on the same kind (opt-in block 0); a strike blocked anyway voids its trial, every judged trial must stay in the base band, at least 24 judged. The tokens of the @s:804751:0@ pull (804752e0 #2, aura_amplitude_ms #3, 804751 #4) describe Hammer of Kings' own damage, tick and duration, not this clause, and are no longer cited here."
   },
   {
     "spell": 707767,

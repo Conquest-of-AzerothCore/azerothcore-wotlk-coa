@@ -37895,6 +37895,116 @@
       "radius": 10.0,
       "cast_power": 1360,
       "observe_source": "AscensionSunClericEvents.cpp:134 300371: direct && damage && the target carries the caster's 806697 && Chance(player, id, 1000) (ProcChance 100, a 1000 ms timer); :327-334 copies 806697 to the first other enemy within 10 yd without it. Each arm seeds Chains of Light 801524 (TRIGGER_SPELL 806697) on the primary dummy, then two Horusath Blast 572801 hits on it (instant, single target, missile speed 20, cooldown reset between them), the second cast with ignore_gcd (owner ruling O-17) 940 ms (blocked arm) or 1050 ms (allowed arm) after the first. Dawnbreak 502496 was not used: a cone (EffectImplicitTargetA 24) that would hit the spares, with a 6000 ms category cooldown. Expected new copies on the six spares: 1 in the blocked arm, 2 in the allowed arm. The measured spacing of the two damage events must lie in [900, 1000) and (1000, 1100] ms or the run is unmeasured. Reference search 2026-11-22: coa-history spell 300371: 0 events in 186 logs (a passive); Horusath Blast 572801 (872 damage events in 9 logs) and Chains of Light 806697 (10 applications for 10 casts of 801524 in 3 logs) are found, with no copy to a second enemy to time; the coabuildhub snapshot (fetched 2026-09-18) repeats the tooltip; nothing else found. Control arm (variant chain_control, round B, row 51): before 300371 is learned, the same seed and two Horusath Blast 572801 hits 1050 ms apart must give no new copy on the six spares; the opening counts of the later arms shift by one."
+    },
+    {
+      "spell": 707629,
+      "kind": "metric_delta",
+      "name": "Sunflare Aegis (a blocked attack grants Hammer of Kings)",
+      "variant": "block_grant",
+      "label_suffix": "block_grant",
+      "quote": "Blocking attacks now has a $h% chance to grant you Hammer of Kings for $/1000;712448s1 sec.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "learn": [
+        107
+      ],
+      "shield_after_learn": {
+        "item": 231296,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "void_on_cast_failure": true,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "strike": {
+        "spell": 2118233,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 24,
+        "wait_ms": 300,
+        "reaction": 0
+      },
+      "caster_avoidance": {
+        "block": 100
+      },
+      "metric": "aura_apply_count",
+      "fields": {
+        "spell": 804751
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "observe_source": "707629 Sunflare Aegis: ProcChance 30 ($h), Effect[0] aura 42 trigger 712448 (Effect[0] 178, BasePoints 3999: 4000 ms, trigger 804751 Hammer of Kings), Effect[1] aura 42 trigger 712469 (Effect[0] 177, BasePoints 3999, MiscValue 804751); spell_proc row (rev_20260909_13_sun_cleric_completion.sql) Chance 100, the script rolls: AscensionSunClericEvents.cpp:106 accepts a received block (PROC_HIT_BLOCK or PROC_HIT_FULL_BLOCK) when Chance(player, 707629) rolls ProcChance 30 (AscensionSunCleric.cpp:197), :150 prevents the default trigger and :307 calls Extend(player, 804751, 4000): AscensionSunCleric.cpp:219 casts 804751 with a 4000 ms duration when it is absent and adds 4000 ms when it is on. Hammer of Kings 804751 DurationIndex 29 (12000 ms). Shield 231296 equipped and Block 107 learned in both phases; a passive striker casts Speed Slash 2118233 (melee class, can be blocked) at the caster. Block forced to 100% (dodge and parry 0) before each of 24 strikes in each phase: no Hammer of Kings application before 707629 is learned (control), at least one after. Residual of a conformant server: 0.7^24 = 1.9e-4 per run, about 4e-4 per pair. The 30% rate is not judged here (G-20)."
+    },
+    {
+      "spell": 707629,
+      "kind": "block_extension_trials",
+      "mode": "grant",
+      "name": "Sunflare Aegis (no grant on unblocked hits)",
+      "variant": "block_grant_unblocked",
+      "label_suffix": "block_grant_unblocked",
+      "quote": "Blocking attacks now has a $h% chance to grant you Hammer of Kings for $/1000;712448s1 sec.",
+      "aura": 804751,
+      "shield": 231296,
+      "strike_spell": 2118233,
+      "trials": 48,
+      "block": 0,
+      "void_on_cast_failure": true,
+      "observe_source": "707629 Sunflare Aegis: ProcChance 30 ($h), Effect[0] aura 42 trigger 712448 (Effect[0] 178, BasePoints 3999: 4000 ms, trigger 804751 Hammer of Kings), Effect[1] aura 42 trigger 712469 (Effect[0] 177, BasePoints 3999, MiscValue 804751); spell_proc row (rev_20260909_13_sun_cleric_completion.sql) Chance 100, the script rolls: AscensionSunClericEvents.cpp:106 accepts a received block (PROC_HIT_BLOCK or PROC_HIT_FULL_BLOCK) when Chance(player, 707629) rolls ProcChance 30 (AscensionSunCleric.cpp:197), :150 prevents the default trigger and :307 calls Extend(player, 804751, 4000): AscensionSunCleric.cpp:219 casts 804751 with a 4000 ms duration when it is absent and adds 4000 ms when it is on. Hammer of Kings 804751 DurationIndex 29 (12000 ms). Shield 231296 equipped and Block 107 learned; a passive striker casts Speed Slash 2118233 at the caster. Zero arm (D-228, third design): 48 trials, each removes 804751, reads it absent, forces block 0% and strikes once; a trial whose strike was blocked anyway (damage log) or that started with the aura on is void, not a failure. 707629 is learned before the trials; every judged trial must show no Hammer of Kings; fewer than 24 judged trials is unmeasured. A server granting 30% of unblocked strikes escapes 24 judged trials with probability 0.7^24 = 1.9e-4 per run."
+    },
+    {
+      "spell": 707629,
+      "kind": "block_extension_trials",
+      "mode": "grant",
+      "name": "Sunflare Aegis (30% chance to grant Hammer of Kings on block)",
+      "variant": "block_grant_rate",
+      "label_suffix": "block_grant_rate",
+      "quote": "Blocking attacks now has a $h% chance to grant you Hammer of Kings for $/1000;712448s1 sec.",
+      "aura": 804751,
+      "shield": 231296,
+      "strike_spell": 2118233,
+      "trials": 950,
+      "parts": 38,
+      "control_trials": 24,
+      "block": 100,
+      "chance_pct": 30,
+      "half_width_points": 1.6,
+      "void_on_cast_failure": true,
+      "observe_source": "707629 Sunflare Aegis: ProcChance 30 ($h), Effect[0] aura 42 trigger 712448 (Effect[0] 178, BasePoints 3999: 4000 ms, trigger 804751 Hammer of Kings), Effect[1] aura 42 trigger 712469 (Effect[0] 177, BasePoints 3999, MiscValue 804751); spell_proc row (rev_20260909_13_sun_cleric_completion.sql) Chance 100, the script rolls: AscensionSunClericEvents.cpp:106 accepts a received block (PROC_HIT_BLOCK or PROC_HIT_FULL_BLOCK) when Chance(player, 707629) rolls ProcChance 30 (AscensionSunCleric.cpp:197), :150 prevents the default trigger and :307 calls Extend(player, 804751, 4000): AscensionSunCleric.cpp:219 casts 804751 with a 4000 ms duration when it is absent and adds 4000 ms when it is on. Hammer of Kings 804751 DurationIndex 29 (12000 ms). Shield 231296 equipped and Block 107 learned; a passive striker casts Speed Slash 2118233 at the caster. Rate arm (D-228, D-236, mentor band 28.4..31.6%): 38 pooled parts of 950 trials (36100, sized so the whole 99% Wilson interval lies inside the band: at p = 0.30 the half-width is 2.576 x sqrt(0.21 / n) = 0.62 points at n = 36100 (0.63 at 35000 judged), so the measured share may sit up to 0.97 points from 30%, 3.9 standard errors (sigma 0.24 points); a conformant 30% leaves it with probability 1e-4 per run, 2e-4 per pair; the first sizing of 5700 gave 1.56 points and intervals 28.03..31.14 and 28.29..31.41, low ends below 28.4), each trial removes 804751, reads it absent, forces block 100% and strikes once, then reads whether the aura is on; a trial whose strike was not blocked (damage log) or that started with the aura on is void. 24 control trials per part before 707629 is learned show no aura. A share outside 28.4..31.6% alerts as a finding for the mentor."
+    },
+    {
+      "spell": 707629,
+      "kind": "block_extension_trials",
+      "name": "Sunflare Aegis (a block extends an active Hammer of Kings)",
+      "label_suffix": "block_extension",
+      "quote": "If Hammer of Kings is already active, you increase the duration by 4 sec.",
+      "aura": 804751,
+      "extension_spell": 712469,
+      "extension_effect": 0,
+      "shield": 231296,
+      "strike_spell": 2118233,
+      "cast_power": 1363,
+      "trials": 24,
+      "void_on_cast_failure": true,
+      "observe_source": "707629 Sunflare Aegis: ProcChance 30 ($h), Effect[0] aura 42 trigger 712448 (Effect[0] 178, BasePoints 3999: 4000 ms, trigger 804751 Hammer of Kings), Effect[1] aura 42 trigger 712469 (Effect[0] 177, BasePoints 3999, MiscValue 804751); spell_proc row (rev_20260909_13_sun_cleric_completion.sql) Chance 100, the script rolls: AscensionSunClericEvents.cpp:106 accepts a received block (PROC_HIT_BLOCK or PROC_HIT_FULL_BLOCK) when Chance(player, 707629) rolls ProcChance 30 (AscensionSunCleric.cpp:197), :150 prevents the default trigger and :307 calls Extend(player, 804751, 4000): AscensionSunCleric.cpp:219 casts 804751 with a 4000 ms duration when it is absent and adds 4000 ms when it is on. Hammer of Kings 804751 DurationIndex 29 (12000 ms). Shield 231296 equipped and Block 107 learned in both phases; a passive striker casts Speed Slash 2118233 (melee class, can be blocked) at the caster. 24 trials, one blocked strike per fresh 804751 application (12000 ms): an extended trial must expire inside 15600..16400 ms (12000 + 4000 +-10%, 712469 Effect[0]), a plain one inside 10800..13200 ms. Residual of no extended trial on a conformant server: 0.7^24 = 1.9e-4 per run. cast_power 1363 = class 27 level 60 BaseMana (804751 costs 16% of it)."
+    },
+    {
+      "spell": 707629,
+      "kind": "block_extension_trials",
+      "name": "Sunflare Aegis (no extension on unblocked hits)",
+      "variant": "block_extension_unblocked",
+      "label_suffix": "block_extension_unblocked",
+      "quote": "If Hammer of Kings is already active, you increase the duration by 4 sec.",
+      "aura": 804751,
+      "extension_spell": 712469,
+      "extension_effect": 0,
+      "shield": 231296,
+      "strike_spell": 2118233,
+      "cast_power": 1363,
+      "trials": 32,
+      "block": 0,
+      "void_on_cast_failure": true,
+      "observe_source": "707629 Sunflare Aegis: ProcChance 30 ($h), Effect[0] aura 42 trigger 712448 (Effect[0] 178, BasePoints 3999: 4000 ms, trigger 804751 Hammer of Kings), Effect[1] aura 42 trigger 712469 (Effect[0] 177, BasePoints 3999, MiscValue 804751); spell_proc row (rev_20260909_13_sun_cleric_completion.sql) Chance 100, the script rolls: AscensionSunClericEvents.cpp:106 accepts a received block (PROC_HIT_BLOCK or PROC_HIT_FULL_BLOCK) when Chance(player, 707629) rolls ProcChance 30 (AscensionSunCleric.cpp:197), :150 prevents the default trigger and :307 calls Extend(player, 804751, 4000): AscensionSunCleric.cpp:219 casts 804751 with a 4000 ms duration when it is absent and adds 4000 ms when it is on. Hammer of Kings 804751 DurationIndex 29 (12000 ms). Shield 231296 equipped and Block 107 learned; a passive striker casts Speed Slash 2118233 at the caster. Zero arm (D-228, third design): 32 trials of one strike per fresh 804751 cast (12000 ms) with block set to 0%; the damage log of each trial says whether its strike was blocked anyway (about 4% are with the shield on): those trials are void, not failures. Every trial with one unblocked hit must expire inside 10800..13200 ms; an extended expiry (15600..16400) alerts; fewer than 24 judged trials is unmeasured. A server extending 30% of unblocked strikes escapes 24 judged trials with probability 0.7^24 = 1.9e-4 per run."
     }
   ],
   "player_observations": [],
