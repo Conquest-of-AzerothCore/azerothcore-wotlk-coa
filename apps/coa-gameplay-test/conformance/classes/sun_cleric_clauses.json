@@ -548,8 +548,12 @@
   {
     "spell": 300353,
     "clause": "Gavel of Wrath: Strikes 5 additional nearby enemies.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "300353 behaviour_metric_delta wrath_extra",
+      "300353 behaviour_metric_delta wrath_extra_control"
+    ],
+    "kind": "claim",
+    "reason": "Seven enemies within 8 yd of the target, Heaven's Appraisal learned and Holy Form 805301 on the caster by harness set_aura (a precondition fixture, the subject is the Gavel effect): 6 damage events of Gavel of Wrath 800617 (the primary plus 5), against 1 without Holy Form (wrath_extra_control)."
   },
   {
     "spell": 300355,
@@ -1084,11 +1088,12 @@
       {
         "claim": "$807446s3% (the additional percent)",
         "labels": [
-          "301313 effect_value 807446e2 #0"
+          "301313 behaviour_metric_delta ge_mana_vow",
+          "301313 behaviour_metric_delta ge_mana_no_vow"
         ]
       }
     ],
-    "reason": "Fixed (Sun Cleric ADR 0018, mentor D-84): Glorious Execution adds 807446 effect 2 to its mana share while the caster has 301313 and Vow of Grace 803719. Before, on the counted pair of batch 6b (build f50fb5fce072, server commit 68e7af248b64+): ge_mana_vow 1.9985 / 2.0015 against 5.0, ge_mana_no_vow 2.0045 / 2.0015 against 2.0. After, pair 20261122-043143 / 20261122-043214 (build 81dc59a6e458, server commit 5a6c7944a09c+, no flip): ge_mana_vow 5.0015 / 4.9955 within 0.4 of 5.0, ge_mana_no_vow 2.0015 / 2.0 within 0.4 of 2.0. Regression sun-cleric-arbiter-of-grace-vow-gate (three arms). Claim 2 (the $807446s3 percent) stays unproven: its label 301313 effect_value 807446e2 #0 is emitted in neither pair run."
+    "reason": "Fixed (Sun Cleric ADR 0018, mentor D-84): Glorious Execution adds 807446 effect 2 to its mana share while the caster has 301313 and Vow of Grace 803719. Before, on the counted pair of batch 6b (build f50fb5fce072, server commit 68e7af248b64+): ge_mana_vow 1.9985 / 2.0015 against 5.0, ge_mana_no_vow 2.0045 / 2.0015 against 2.0. After, pair 20261122-043143 / 20261122-043214 (build 81dc59a6e458, server commit 5a6c7944a09c+, no flip): ge_mana_vow 5.0015 / 4.9955 within 0.4 of 5.0, ge_mana_no_vow 2.0015 / 2.0 within 0.4 of 2.0. Regression sun-cleric-arbiter-of-grace-vow-gate (three arms). Claim 2 (the $807446s3 percent) is read by the same two behaviour labels: the readback label 301313 effect_value 807446e2 #0 is not_measured because a DoEffectCalcAmount hook of the Vow of Grace aura script sets that effect's amount after CalcValue, so it cannot measure the amount the aura applies; the ratio 5.0 within 0.4 (15 points: 5 + 15 = 20 percent of the damage over the base 5) is the DBC-derived measurement of the 15 (807446 Effect[2] BasePoints 14 + 1), with the 2.0 control without Vow of Grace."
   },
   {
     "spell": 301343,
@@ -1530,14 +1535,19 @@
       },
       {
         "claim": "becoming immune to all physical attacks and spells (no landing of a physical and a magic fixture during the window)",
-        "labels": []
+        "labels": [
+          "520024 behaviour_metric_delta immune_magic",
+          "520024 behaviour_metric_delta immune_physical",
+          "520024 behaviour_metric_delta immune_magic_after",
+          "520024 behaviour_metric_delta immune_physical_after"
+        ]
       },
       {
         "claim": "leap into the air (client-acknowledged knockback, not observable on the server)",
         "labels": []
       }
     ],
-    "reason": "Duration measured by the 520025 aura held / gone pair. The immunity claim needs the immunity kind with an enemy-target cast: its self_cast_attempt casts the spell on the subject, and Valkyr's Calling targets an enemy (tool need, returned to the controller). The leap is a status 4 candidate (client acknowledgement)."
+    "reason": "Duration measured by the 520025 aura held / gone pair. The immunity is measured by a real cast of 520024 at the dummy and a creature striker's hit 800 ms later: a Shadow hit (47632, magic) and a Physical hit (32247), each landing without the cast (count 1) and not landing under it (count still 1), and landing again 2600 ms after the cast (count 2, the route control): the same shape as Blessing of Purity 804253 immune_strike. The leap is a status 4 candidate (SPELL_EFFECT_LEAP_BACK is a knockback packet the client acknowledges, guide section 2) and keeps no label."
   },
   {
     "spell": 520024,
@@ -3394,7 +3404,7 @@
     "spell": 681337,
     "clause": "Doubles the effectiveness of Vow of the Valkyr and Vow of Light.",
     "kind": "claim",
-    "reason": "The Valkyr half is measured on its damage row only (valkyr_damage, the doubling of the increased damage); the Solar Power generation row of Vow of the Valkyr is not measured, and the Vow of Light half has no label. Reference search 2026-11-22: nothing found beyond the tooltip.",
+    "reason": "The Valkyr half is measured on its damage row only (valkyr_damage, the doubling of the increased damage); the Solar Power generation row of Vow of the Valkyr is not measured. The Vow of Light half is the vow_light entry: Vow of Light 807547 cast on the caster, a Holy hit of 1100 on the caster, the copy heal 505197 read before and after the learn: the cumulative ratio (H + 2H) / H = 3.0 within 0.05, which excludes the 2.0 of no doubling. Reference search 2026-11-22: nothing found beyond the tooltip and the server DBC.",
     "claims": [
       {
         "claim": "Doubles the effectiveness of Vow of the Valkyr",
@@ -3404,7 +3414,9 @@
       },
       {
         "claim": "Doubles the effectiveness of Vow of Light",
-        "labels": []
+        "labels": [
+          "681337 behaviour_metric_delta vow_light"
+        ]
       }
     ]
   },
@@ -4514,16 +4526,19 @@
       {
         "claim": "but increases its mana cost",
         "labels": [
-          "707433 behaviour_metric_delta mercy_cost"
+          "707433 behaviour_metric_delta mercy_cost",
+          "707433 behaviour_metric_delta mercy_spent"
         ]
       },
       {
         "claim": "by $s2%",
         "labels": [
-          "707433 effect_value e1 #1"
+          "707433 effect_value e1 #1",
+          "707433 behaviour_metric_delta mercy_spent"
         ]
       }
-    ]
+    ],
+    "reason": "The mana spent by a real cast of Mercy is read before and after the learn (1077 then 791 left from 1363, cost 286 then 572), the behaviour read beside the use-time cost function mercy_cost."
   },
   {
     "spell": 707517,
@@ -5220,9 +5235,13 @@
       },
       {
         "claim": "and generating additional threat.",
-        "labels": []
+        "labels": [
+          "503505 behaviour_metric_delta cone_threat",
+          "503505 behaviour_metric_delta threat_control"
+        ]
       }
-    ]
+    ],
+    "reason": "The 'additional threat' has no number in the tooltip: it is read as the effect 63 value 15 taken as a percentage of the damage, the convention the server already applies to every effect 63 spell of rev_20261026_20_coa_tank_ability_threat.sql (spell_threat pctMod 1.15 for 804252, the flat 15 kept): threat per damage 1.15 within the 2-point band, against 1.0 for an ordinary Holy hit (threat_control). An interpretation, noted for the mentor."
   },
   {
     "spell": 503505,

@@ -25907,6 +25907,367 @@
       "expected": 3,
       "observe_source": "806159 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9999 + 1 = 10000 on Illumination 500143 (mask word 2 = 512). Three real Illumination casts on the caster (health held at 30%) are counted as critical heal events (spell_heal_count of 500143, critical true), 1600 ms apart with the unrelated passive Solar Conduit 300321 instead of 806159: all 3 heals land (spell_heal_count of 500143 without the critical filter, expected 3), so the control arm of crit_control counted real heals. Without Resplendence Illumination keeps its 2000 ms cast, so the casts are 2100 ms apart and the last heal is read 2600 ms after its cast. Reference search 2026-11-22: coa-history spell 806159 (6 casts in 2 logs) and the tooltip give nothing on the crit chance; nothing else found; this arm judges only that the heals landed.",
       "after_at_least": 3
+    },
+    {
+      "spell": 707433,
+      "name": "Blightbreaker (Mercy mana spent)",
+      "kind": "metric_delta",
+      "variant": "mercy_spent",
+      "label_suffix": "mercy_spent",
+      "quote": "but increases its mana cost by $s2%.",
+      "trigger_spell": 504848,
+      "gate_spell": 707433,
+      "target": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1077,
+      "expected": 791,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 20000,
+      "observe_source": "707433 Blightbreaker Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST), BasePoints 99 + 1 = +100% ($s2), on Mercy 504848's class mask. Mercy 504848 has ManaCostPercentage 21 of the class base mana 1363 (player_class_stats class 27 level 60), 286.23, so 286 spent: 1363 - 286 = 1077 left without the passive (the control, the phase before the learn); with +100% the cost is 572 and 1363 - 572 = 791 left. Mana is set to 1363 before each real cast of Mercy with regeneration off and read 500 ms after it, before the first periodic tick of either period; tolerance 1 for the engine's integer cost, which excludes a cost 10% off (a 29 point read). This is the behaviour read of the claim: the mana the cast actually spends, where mercy_cost reads the use-time cost function (a readback). Reference search 2026-11-22: coa-history spell 504848: 0 events in 186 logs; nothing found beyond the tooltip and the server DBC."
+    },
+    {
+      "spell": 681337,
+      "name": "Holy Giant (Vow of Light value doubled)",
+      "kind": "metric_delta",
+      "variant": "vow_light",
+      "label_suffix": "vow_light",
+      "quote": "Doubles the effectiveness of Vow of the Valkyr and Vow of Light.",
+      "trigger_spell": 804247,
+      "gate_spell": 681337,
+      "target": "caster",
+      "setup_casts": [
+        807547
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "strike": {
+        "spell": 41394,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 505197,
+        "target": "caster"
+      },
+      "before_expected": 50,
+      "expected": 150,
+      "expected_ratio": 3.0,
+      "tolerance": 0.05,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "681337 Holy Giant Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 99 + 1 = +100%, EffectSpellClassMask word 2 = 537919488, which holds 536870912 = the SpellFamilyFlags[2] of Vow of Light 807750 (Effect[0] BasePoints 9 + 1 = 10, the percent of the damage or healing received that the copy heal 505197 returns, AscensionSunClericEvents.cpp:236-243). The script reads Amount(807750, 0, caster), so the modifier reaches it once. Vow of Light 807547 is cast on the caster in both phases; Light of the Naaru 41394 (BasePoints 1099 + 1 = 1100 Holy) hits the caster (50% health) and the copy heal 505197 is read. spell_heal_total sums every heal event since the scenario started, so the second reading carries the first: (H + 2H) / H = 3.0 when the value is doubled (H = 10% of 1100 = 110), 2.0 when it is not, 4.0 when tripled. The band is 5 points of +100% (G-19), 0.05 on the ratio: 3.0 +- 0.05 excludes 2.95 and 3.05 and with them the 2.0 of no doubling. Control: the phase before the learn of 681337. Crit forced out by 984954. The Vow of the Valkyr half is the valkyr_damage entry. Reference search 2026-11-22: coa-history spell 681337: 0 events in 186 logs (a passive); the same effect on Soul of Light 807964 and Sunwalker 704934 reads 110 and 330 in the b10 base pair; nothing else found."
+    },
+    {
+      "spell": 520024,
+      "name": "Valkyr's Calling (immune to spell damage: Shadow strike)",
+      "kind": "metric_delta",
+      "variant": "immune_magic",
+      "label_suffix": "immune_magic",
+      "quote": "Target an enemy and leap into the air, becoming immune to all physical attacks and spells for $d.",
+      "trigger_spell": 520024,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "strike": {
+        "spell": 47632,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 800
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 47632,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "520024 Valkyr's Calling Effect[1] triggers 520025 on the caster, whose Effect[2] is aura 39 SPELL_AURA_SCHOOL_IMMUNITY MiscValue 127 (all seven schools), DurationIndex 39 = 2000 ms ($d). 47632 (600 Shadow, DmgClass 1, school mask 32 Shadow) is cast at the caster by a creature striker. Before phase (control, no cast): the strike lands and the cumulative count of its damage events on the caster reads 1. After phase: 520024 is cast for real at the dummy (cooldown and mana set), and 800 ms later, inside the 2000 ms window, the same strike is cast: the count still reads 1, so it dealt no damage under the immunity. The leap itself (520025 Effect[0] LEAP_BACK) is a knockback packet the client acknowledges: status 4 as for Norgannon's Wrath 524739 (guide section 2), the leap claim of the ledger entry. Reference search 2026-11-22: coa-history 520025 (the aura): 37 SPELL_AURA_APPLIED and 37 SPELL_AURA_REMOVED events in 6 logs; coa-history 520024: 41 casts; nothing found beyond the tooltip and the server DBC."
+    },
+    {
+      "spell": 520024,
+      "name": "Valkyr's Calling (immune to physical attacks: Physical strike)",
+      "kind": "metric_delta",
+      "variant": "immune_physical",
+      "label_suffix": "immune_physical",
+      "quote": "Target an enemy and leap into the air, becoming immune to all physical attacks and spells for $d.",
+      "trigger_spell": 520024,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "strike": {
+        "spell": 32247,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 800
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 32247,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "520024 Valkyr's Calling Effect[1] triggers 520025 on the caster, whose Effect[2] is aura 39 SPELL_AURA_SCHOOL_IMMUNITY MiscValue 127 (all seven schools), DurationIndex 39 = 2000 ms ($d). 32247 (1000 Physical, DmgClass 0, school mask 1 Physical) is cast at the caster by a creature striker. Before phase (control, no cast): the strike lands and the cumulative count of its damage events on the caster reads 1. After phase: 520024 is cast for real at the dummy (cooldown and mana set), and 800 ms later, inside the 2000 ms window, the same strike is cast: the count still reads 1, so it dealt no damage under the immunity. The leap itself (520025 Effect[0] LEAP_BACK) is a knockback packet the client acknowledges: status 4 as for Norgannon's Wrath 524739 (guide section 2), the leap claim of the ledger entry. Reference search 2026-11-22: coa-history 520025 (the aura): 37 SPELL_AURA_APPLIED and 37 SPELL_AURA_REMOVED events in 6 logs; coa-history 520024: 41 casts; nothing found beyond the tooltip and the server DBC."
+    },
+    {
+      "spell": 503505,
+      "name": "Blessing of Absolution (additional threat, Blessed ally)",
+      "kind": "metric_delta",
+      "variant": "cone_threat",
+      "label_suffix": "cone_threat",
+      "quote": "Empower a Blessed ally to unleash a burst of holy energy in front of them, dealing ${$m1+0+$BH*1.5} Holy damage enemies in a $804252a1 yd frontal cone and generating additional threat.",
+      "trigger_spell": 503505,
+      "target": "ally",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "dummy_distance": 5,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "learn": [
+        804247
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "control_wait": true
+      },
+      "observe_source": "804252 Blessing of Absolution Effect[1] SPELL_EFFECT_THREAT BasePoints 14 + 1 = 15, the additional threat of the tooltip ('generating additional threat'; no number). CoA's Spell.dbc carries these effect 63 values as a percentage of the damage, which Ascension used and the server reproduces with a spell_threat row of pctMod 1 + 15 / 100 = 1.15 (data/sql/updates/pending_db_world/rev_20261026_20_coa_tank_ability_threat.sql, the owner's High Threat precedent of 2026-11-10 and 2026-11-12 for Justicar's Wrath 806980, whose flat effect 63 amount is kept). Threat of one hit is damage x 1.15 plus the flat effect amount 15, divided by the health the dummy lost: 1.15 + 15 / D. The cast is the 503505 cast at a Blessed ally (Bless 804247 cast at the ally in both phases), with 20000 spell power (fixture) so the Holy hit is 404..456 + int(1.5 x 20000) = 30404..30456 and the flat part moves the ratio by 0.0005 only: 1.1505. The band is 2 points of the 15 percent (G-19), 0.02: it excludes no additional threat (1.0, 1.0000 + the spell level 1 of 804252 over D) and a percentage of 13 or 17. The control of the claim is the threat_control entry of the same pair: an ordinary Holy hit reads about 1.0. Crit forced out by fixture 984954. Control (before): the same Bless without the 503505 cast, no damage and a ratio of 0. Interpretation noted for the mentor: the amount is read as a percentage, the convention the server already applies to every effect 63 spell of this table; the tooltip itself gives no number. Reference search 2026-11-22: coa-history spell 804252: 8 SPELL_DAMAGE events of 1015 in 1 log, no threat events are logged; the pending SQL above; nothing else found.",
+      "expected": 1.1505,
+      "tolerance": 0.02,
+      "player_spell_power": 20000
+    },
+    {
+      "spell": 503505,
+      "name": "Blessing of Absolution (additional threat, control: an ordinary Holy hit)",
+      "kind": "metric_delta",
+      "variant": "threat_control",
+      "label_suffix": "threat_control",
+      "quote": "Empower a Blessed ally to unleash a burst of holy energy in front of them, dealing ${$m1+0+$BH*1.5} Holy damage enemies in a $804252a1 yd frontal cone and generating additional threat.",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "cast_in_before": false,
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1.00718,
+      "tolerance": 0.01,
+      "wait_ms": 4500,
+      "expire_ms": 5000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "player_spell_power": 10000,
+      "observe_source": "Control of cone_threat: Dawnsear 554406 (no threat effect, no spell_threat row) at spell power 10000 gives threat = damage x 1 + the flat initial threat 60 of a level 60 cast (Spell::HandleThreatSpells, Spell.cpp:5737; derivation of the Holy Form threat_base control, 805301): 1 + 60 / 8360.7 = 1.00718, so the 1.15 of Blessing of Absolution is not the class's baseline. Reference search 2026-11-22: nothing found beyond the tooltip and the server DBC."
+    },
+    {
+      "spell": 520024,
+      "name": "Valkyr's Calling (control: lands again after the window, immune to spell damage, Shadow strike)",
+      "kind": "metric_delta",
+      "variant": "immune_magic_after",
+      "label_suffix": "immune_magic_after",
+      "quote": "Target an enemy and leap into the air, becoming immune to all physical attacks and spells for $d.",
+      "trigger_spell": 520024,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "strike": {
+        "spell": 47632,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 2600
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 47632,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Route control of immune_magic: the identical real cast of 520024 and the same strike, cast 2600 ms after the cast, after the 2000 ms immunity ($d) has ended: the cumulative count of the strike's damage events on the caster reads 2 (the strike lands again), so the cast route and the striker work in the same scenario shape and the 1 of the immune_magic entry is the immunity, not a strike that never lands. Excludes a window 30% longer than 2000 ms. Reference search 2026-11-22: coa-history 520025: 37 SPELL_AURA_APPLIED / 37 SPELL_AURA_REMOVED in 6 logs; nothing found beyond the tooltip and the server DBC."
+    },
+    {
+      "spell": 520024,
+      "name": "Valkyr's Calling (control: lands again after the window, immune to physical attacks, Physical strike)",
+      "kind": "metric_delta",
+      "variant": "immune_physical_after",
+      "label_suffix": "immune_physical_after",
+      "quote": "Target an enemy and leap into the air, becoming immune to all physical attacks and spells for $d.",
+      "trigger_spell": 520024,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "strike": {
+        "spell": 32247,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 2600
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 32247,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Route control of immune_physical: the identical real cast of 520024 and the same strike, cast 2600 ms after the cast, after the 2000 ms immunity ($d) has ended: the cumulative count of the strike's damage events on the caster reads 2 (the strike lands again), so the cast route and the striker work in the same scenario shape and the 1 of the immune_physical entry is the immunity, not a strike that never lands. Excludes a window 30% longer than 2000 ms. Reference search 2026-11-22: coa-history 520025: 37 SPELL_AURA_APPLIED / 37 SPELL_AURA_REMOVED in 6 logs; nothing found beyond the tooltip and the server DBC."
+    },
+    {
+      "spell": 300353,
+      "kind": "metric_delta",
+      "gate_spell": 300353,
+      "quote": "Gavel of Wrath: Strikes 5 additional nearby enemies.",
+      "trigger_spell": 800617,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "area_dummies": [
+        3.5,
+        4,
+        4.5,
+        5,
+        5.5,
+        6,
+        6.5
+      ],
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          805301,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "name": "Heaven's Appraisal (Gavel of Wrath strikes five additional enemies under Holy Form)",
+      "variant": "wrath_extra",
+      "label_suffix": "wrath_extra",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800617,
+        "target": "dummy"
+      },
+      "area_sum": true,
+      "expected": 6,
+      "observe_source": "300353 Heaven's Appraisal is learned between the phases and Gavel of Wrath 800617 (DmgClass melee, the weapon strike) is cast once at the dummy in the after phase only (cast_in_before false), with seven more dummies at 3.5 to 6.5 yd, every one within 8 yd of the primary at 3 yd; crit forced out by 984954 so the roll cannot move a count. The tooltip: 'Gavel of Wrath: Strikes 5 additional nearby enemies', under Holy Form 805301, applied by harness set_aura as a precondition fixture (the claim's subject is the Gavel effect of 300353, not Holy Form; the control arm is the same cast without it; area_dummies refuse a setup cast on the caster). spell_damage_count of 800617 on the dummy and every area dummy is summed (area_sum). Expected 6: the primary hit plus the 5 additional strikes of the tooltip, from seven nearby enemies (the cap is the claim: 7 candidates, 5 struck). Control: the wrath_extra_control entry, the same cast without Holy Form, expects the primary alone. Reference search 2026-11-22: coa-history spell 300353 and the Gavel roots 800611, 800614, 800617: 0 events (passives and Gavels leave no logged event, see the Fanaticism entries); nothing found beyond the tooltip and the server DBC.",
+      "cast_in_before": false
+    },
+    {
+      "spell": 300353,
+      "kind": "metric_delta",
+      "gate_spell": 300353,
+      "quote": "Gavel of Wrath: Strikes 5 additional nearby enemies.",
+      "trigger_spell": 800617,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "area_dummies": [
+        3.5,
+        4,
+        4.5,
+        5,
+        5.5,
+        6,
+        6.5
+      ],
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "name": "Heaven's Appraisal (control: Gavel of Wrath without Holy Form strikes the primary alone)",
+      "variant": "wrath_extra_control",
+      "label_suffix": "wrath_extra_control",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800617,
+        "target": "dummy"
+      },
+      "area_sum": true,
+      "expected": 1,
+      "observe_source": "300353 Heaven's Appraisal is learned between the phases and Gavel of Wrath 800617 (DmgClass melee, the weapon strike) is cast once at the dummy in the after phase only (cast_in_before false), with seven more dummies at 3.5 to 6.5 yd, every one within 8 yd of the primary at 3 yd; crit forced out by 984954 so the roll cannot move a count. The tooltip: 'Gavel of Wrath: Strikes 5 additional nearby enemies', under Holy Form 805301 (cast for real on the caster before the Gavel: ManaCostPercentage 40, cooldown 10 s, Effect[0] aura +10, Effect[1] aura +50, Effect[2] aura 10 MOD_THREAT -50 percent). spell_damage_count of 800617 on the dummy and every area dummy is summed (area_sum). Control of wrath_extra: Heaven's Appraisal learned, no Holy Form on the caster, the same seven nearby dummies: only the primary is struck, 1 in total, so the 5 additional strikes need Holy Form. Reference search 2026-11-22: nothing found beyond the tooltip and the server DBC.",
+      "cast_in_before": false
     }
   ],
   "player_observations": [],
