@@ -27100,7 +27100,7 @@
       "dummy_distance": 5,
       "area_dummies": [
         6.0,
-        11.0
+        20.0
       ],
       "area_sum": true,
       "before_expected": 0,
@@ -27108,7 +27108,7 @@
       "tolerance": 2.0,
       "wait_ms": 4500,
       "expire_ms": 500,
-      "observe_source": "Expected from the tooltip and the DBC: 570187 Effect[0] BasePoints 79 with the 0.25 x attack power term at the reference attack power 70 gives the hit 96 (96.494 displayed, the ledger entry 190 hit at the measured stats), split by the number of enemy targets within radius index 14 = 8 yd (570187 Effect[0] TARGET_UNIT_SRC_AREA_ENEMY). Three enemies stand inside the radius: the striker (3 yd from the caster), the dummy (5 yd) and area1 (6 yd); area2 stands 11 yd away, outside the radius. Each of the three takes 96 / 3 = 32, and the sum read on the dummy, area1 and area2 is 32 + 32 + 0 = 64. A server that does not split reads 192, one that counts area2 in the split reads 24 + 24 + 24 = 72, one that hits area2 without counting it reads 160; the tolerance 2 separates all of them. Control arm: before the gate (680637 not learned) the same heal and strike must read 0. The hit is made non-critical and unresisted by 984954 and 823764 (precondition fixtures, as the explosion entries). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
+      "observe_source": "Expected from the tooltip and the DBC: 570187 Effect[0] BasePoints 79 with the 0.25 x attack power term at the reference attack power 70 gives the hit 96 (96.494 displayed, the ledger entry 190 hit at the measured stats), split by the number of enemy targets within radius index 14 = 8 yd (570187 Effect[0] TARGET_UNIT_SRC_AREA_ENEMY). Three enemies stand inside the radius: the striker (3 yd from the caster), the dummy (5 yd) and area1 (6 yd); area2 stands 20 yd away. A player caster's area check adds the target's combat reach to the radius (Spell.cpp:9437-9442, effective range 8 + reach); a first design with area2 at 11 yd read 24 + 24 + 24 = 72 in both runs of pair 20261123-000323 (four enemies counted, area2 struck), a lead on the effective reach of creature 36 or on the target selection, not judged here, so the second design puts area2 beyond any plausible reach. Each of the three takes 96 / 3 = 32, and the sum read on the dummy, area1 and area2 is 32 + 32 + 0 = 64. A server that does not split reads 192, one that counts and strikes area2 in the split reads 24 + 24 + 24 = 72, one that hits area2 without counting it reads 160; the tolerance 2 separates all of them. Control arm: before the gate (680637 not learned) the same heal and strike must read 0. The hit is made non-critical and unresisted by 984954 and 823764 (precondition fixtures, as the explosion entries). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 680637,
