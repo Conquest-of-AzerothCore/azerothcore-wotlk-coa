@@ -72,6 +72,11 @@ MAX_DUMMY_DISTANCE_YD = 100
 RESIDUAL_TARGET = 'residual_target'
 MIN_DETECTABLE = 'min_detectable'
 EVENTS_BASELINE = 'events_baseline_per_attempt'
+TRIAL_FIELD = 'trial'
+EFFECTIVE_HEAL = 'effective_heal'
+HEAL_POOL = 2000000000
+HEAL_COUNT = 'spell_heal_count'
+TARGET_UNIT_TARGET_CHAINHEAL_ALLY = 45
 
 
 @dataclass(frozen=True)
@@ -565,7 +570,7 @@ def attempt_interval(class_file: dict, entry: dict) -> int:
         raise ValueError(f'Unknown trigger action {trigger["action"]!r} of proc {entry["aura"]}')
     facts = facts_of(records_of(class_file), trigger['spell'])
     if trigger_target(entry) == ALLY:
-        if facts.passive or not targets_ally(facts):
+        if facts.passive or not (targets_ally(facts) or counts_effective_heals(entry) and chain_heals_ally(facts)):
             raise Unmodelled(f'trigger spell {trigger["spell"]} is not cast at an ally')
     elif facts.passive or not (is_hostile(facts) or events_baseline(entry)):
         raise Unmodelled(f'trigger spell {trigger["spell"]} is not cast at an enemy')
@@ -588,6 +593,7 @@ def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> Pro
     per_trigger_limit(entry)
     trigger_spells(entry)
     trigger_lands_no_hit(entry)
+    counts_effective_heals(entry)
     chance = proc_chance(class_file, entry)
     needed = band_trials_needed(chance / 100) if entry.get('band') else trials_needed(chance / 100)
     from proc_avoided import is_avoided, strikers
@@ -626,6 +632,42 @@ def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> Pro
                     per_part=per_part)
 
 
+def chain_heals_ally(facts) -> bool:
+    return any(facts.effects[effect] and facts.target_a[effect] == TARGET_UNIT_TARGET_CHAINHEAL_ALLY
+               for effect in EFFECTS)
+
+
+def counts_effective_heals(entry: dict) -> bool:
+    if TRIAL_FIELD not in entry:
+        return False
+    if entry[TRIAL_FIELD] != EFFECTIVE_HEAL or entry['trigger']['action'] != CAST or trigger_target(entry) != ALLY \
+            or entry.get('trial_casts') or entry.get('trial_readings') or trigger_spells(entry):
+        raise ValueError(f'Proc {entry["aura"]} {TRIAL_FIELD} is {EFFECTIVE_HEAL!r} only, on a cast trigger at the '
+                         f'{ALLY} with no trial_casts, trial_readings or trigger_spells')
+    return True
+
+
+def heal_guard_labels(aura: int) -> dict[str, str]:
+    return {part: f'{aura} proc heal {part}' for part in ('ally total', 'ally effective', 'caster effective')}
+
+
+def heal_guard_steps(entry: dict) -> list[dict]:
+    if not counts_effective_heals(entry):
+        return []
+    labels, spell = heal_guard_labels(entry['aura']), trigger_spell(entry)
+    return [measurement(labels['ally total'], CASTER, 'spell_heal_total', spell=spell, target=ALLY),
+            measurement(labels['ally effective'], CASTER, 'spell_effective_heal_total', spell=spell, target=ALLY),
+            measurement(labels['caster effective'], CASTER, 'spell_effective_heal_total', spell=spell, target=CASTER)]
+
+
+def heal_trial_rule(entry: dict) -> str:
+    return (f'trials: heals of {trigger_spell(entry)} on the ally ({HEAL_COUNT}, target ally), each one effective: '
+            f'the ally is set to 1 health of a {HEAL_POOL} maximum before every cast; the caster stays at full health, '
+            f'so a heal of it is not effective and does not roll; the overheal on the ally and the effective healing '
+            f'on the caster, both of {trigger_spell(entry)} and read at the end of each part, must be 0, otherwise '
+            f'the rate is unmeasured')
+
+
 def trial_rule(entry: dict) -> str:
     trigger = entry['trigger']
     if trigger['action'] == MINION:
@@ -651,6 +693,8 @@ def trial_rule(entry: dict) -> str:
     if entry['trigger']['action'] == TAKEN_HIT:
         return (f'trials: damage events of {trigger["spell"]} cast by the striker {trigger["striker_entry"]} at the '
                 f'caster (spell_damage_count, caster striker, target caster)')
+    if counts_effective_heals(entry):
+        return heal_trial_rule(entry)
     if trigger_target(entry) == ALLY:
         return f'trials: completed casts of {entry["trigger"]["spell"]} at the ally (spell_cast_count)'
     if trigger_lands_no_hit(entry):
@@ -666,6 +710,8 @@ def trial_rule(entry: dict) -> str:
 
 def trials_step(entry: dict, label: str) -> dict:
     spell = trigger_spell(entry)
+    if counts_effective_heals(entry):
+        return measurement(label, CASTER, HEAL_COUNT, spell=spell, target=ALLY)
     if trigger_target(entry) == ALLY or entry.get('trial_casts'):
         return measurement(label, CASTER, CAST_COUNT, spell=spell)
     return measurement(label, CASTER, 'spell_damage_count', spell=spell, target=TARGET)
@@ -692,6 +738,8 @@ def attempt_fixtures(entry: dict) -> list[dict]:
     fixtures += attempt_auras(entry)
     if trigger_target(entry) == ALLY:
         fixtures.append({'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD})
+    if counts_effective_heals(entry):
+        fixtures.append({'action': 'set_health', 'actor': ALLY, 'value': 1, 'maximum': HEAL_POOL})
     return fixtures
 
 
@@ -960,6 +1008,7 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
     steps += attempt_steps(class_file, entry, plan, labels)
     if limit is None:
         steps += added_trial_steps(entry) + event_steps(entry) + energize_steps(entry) + excluded_trial_steps(entry)
+        steps += heal_guard_steps(entry)
     if entry.get('aura_on_minion'):
         if minion_entry(entry) is None:
             raise ValueError(f'Proc {aura} reads its aura on a minion without a minion trigger')
@@ -1032,6 +1081,8 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
         model['minimum_trials'] = max(plan.needed, residual['trials'])
     if entry.get('trial_excluded_spells'):
         model['trial_exclusions'] = excluded_trial_labels(entry)
+    if counts_effective_heals(entry):
+        model['heal_guards'] = heal_guard_labels(aura)
     rule = f'{WILSON_RULE}; {trial_rule(entry)}'
     if entry.get('band'):
         rule += (f'; the 99% interval inside the band of {rate_band(plan.chance_pct / 100) * 100:g} points around '

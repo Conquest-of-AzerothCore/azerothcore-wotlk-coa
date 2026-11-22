@@ -1353,6 +1353,13 @@ def own_summons_judgement(base: Verdict, model: dict, own_summons: int, baseline
     return None
 
 
+def heal_spoiled(guards: dict[str, str], run: Run) -> str:
+    overheal = run.values[guards['ally total']] - run.values[guards['ally effective']]
+    caster = run.values[guards['caster effective']]
+    return '; '.join(([f'overheal {overheal:g} on the ally'] if overheal > 0 else [])
+                     + ([f'effective healing {caster:g} on the caster'] if caster > 0 else []))
+
+
 def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -> Verdict:
     first_entry, first_run, expectation = parts[0]
     model = expectation.model
@@ -1364,13 +1371,14 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
     readings = proc_readings(model)
     event_labels = model.get('event_labels') or [labels['events']]
     refunds = [model['charge_pool'], labels['attempts']] if model.get('charge_pool') else []
+    heal_guards = model.get('heal_guards', {})
     wanted = [labels['aura']] + list(dict.fromkeys(
         event_labels + [labels['trials']] + [label for reading in readings for label in reading['labels']]
-        + refunds))
+        + refunds + list(heal_guards.values())))
     trigger = model['trigger']['spell'] if model['trigger']['action'] == CAST else 0
     totals = dict.fromkeys(wanted[1:], 0.0)
     events = 0.0
-    counted, without_aura, unmeasured, reasons, ungranted = [], [], [], [], []
+    counted, without_aura, unmeasured, reasons, ungranted, spoiled = [], [], [], [], [], []
     granted = 0
     per_part: list[tuple[dict[str, float], float]] = []
     baseline_trials = baseline_events = None
@@ -1395,6 +1403,8 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
             unmeasured.append(f'{run.key} ({run.status}: {run.message})')
         elif any(read <= 0 for _, read in grant_reads):
             ungranted.append(f'{run.key} ({ungranted_text(grant_reads)})')
+        elif heal_guards and heal_spoiled(heal_guards, run):
+            spoiled.append(f'{run.key} ({heal_spoiled(heal_guards, run)})')
         elif values[0] <= 0:
             without_aura.append(run.key)
         else:
@@ -1422,6 +1432,11 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
             offset = refund_offset(model, run) - player_casts(model, run, trigger)
             events += offset
             per_part.append((part_totals, offset))
+    if spoiled:
+        return replace(base, status='unmeasured', expected=0.0,
+                       explanation=f'not every heal of the trigger was an effective heal on the ally in '
+                                   f'{", ".join(spoiled)}: the trials would hold heals that never roll, so the proc '
+                                   f'rate is not judged')
     if trigger_hits:
         return replace(base, status='alert', expected=0.0,
                        explanation=f'the trigger {trigger} landed hits of its own in {", ".join(trigger_hits)}, '

@@ -1763,3 +1763,83 @@ class ControlWeaponCompareTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+HEAL_GUARDS = {'ally total': '92111 proc heal ally total', 'ally effective': '92111 proc heal ally effective',
+               'caster effective': '92111 proc heal caster effective'}
+
+
+def effective_heal_entry(**changes):
+    entry = {**{key: value for key, value in templar_proc(TRANSCENDENT_GUARDIAN).items() if key != 'trial_readings'},
+             'trial': 'effective_heal', 'event_metric': 'spell_cast_count', 'proc_spell': SCOURGEBANE_STRIKE}
+    return {**entry, **changes}
+
+
+class EffectiveHealTrialTest(unittest.TestCase):
+    def test_the_ally_heals_are_the_trials_and_the_ally_is_low_before_each_cast(self):
+        entry = effective_heal_entry()
+        plan = proc_plan(CLASS_FILE, entry)
+        scenario, [expectation] = proc_scenario(CLASS_FILE, entry, 0)
+        run.validate(scenario)
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['target'] == 'ally']
+        self.assertEqual(len(casts), plan.per_part)
+        for index in casts:
+            self.assertIn({'action': 'set_health', 'actor': 'ally', 'value': 1, 'maximum': 2000000000},
+                          steps[index - 4:index])
+        measured = {step['label']: step for step in steps if step['action'] == 'assert'}
+        trials = measured['804571 proc trials']
+        self.assertEqual((trials['metric'], trials['spell'], trials['target']),
+                         ('spell_heal_count', TEMPLE_GUARDIAN, 'ally'))
+        guards = expectation.model['heal_guards']
+        self.assertEqual([(measured[guards[key]]['metric'], measured[guards[key]]['target']) for key in guards],
+                         [('spell_heal_total', 'ally'), ('spell_effective_heal_total', 'ally'),
+                          ('spell_effective_heal_total', 'caster')])
+        self.assertIn('the caster stays at full health', expectation.rule)
+
+    def test_without_the_trial_field_the_ally_casts_stay_the_trials(self):
+        scenario, [expectation] = proc_scenario(CLASS_FILE, templar_proc(TRANSCENDENT_GUARDIAN), 0)
+        self.assertNotIn('heal_guards', expectation.model)
+        self.assertFalse(any(step['action'] == 'set_health' for step in scenario['steps']))
+
+    def test_the_trial_is_refused_off_an_ally_cast_or_with_another_value(self):
+        for entry in (effective_heal_entry(trial='heal'),
+                      effective_heal_entry(trigger={'action': 'cast', 'spell': TEMPLE_GUARDIAN}),
+                      effective_heal_entry(trial_casts=True)):
+            with self.subTest(entry=entry['trial']), self.assertRaises(ValueError):
+                proc_plan(CLASS_FILE, entry)
+
+
+class EffectiveHealCompareTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def verdict(self, events=340, ally_total=5000, ally_effective=5000, caster_effective=0):
+        expectation = proc_expectation()
+        expectation = replace(expectation, model={**expectation.model, 'heal_guards': HEAL_GUARDS})
+        steps = proc_steps(1699, events) + [assert_step(HEAL_GUARDS['ally total'], str(ally_total)),
+                                            assert_step(HEAL_GUARDS['ally effective'], str(ally_effective)),
+                                            assert_step(HEAL_GUARDS['caster effective'], str(caster_effective))]
+        self.workspace.scenario(PROC_KEY, 'proc', [expectation], steps=steps)
+        manifest, results = self.workspace.manifest()
+        from compare import compare
+        [verdict] = [verdict for verdict in compare(manifest, results, tooltips=chance_reader())
+                     if verdict.check == PROC_CHECK]
+        return verdict
+
+    def test_effective_heals_on_the_ally_only_are_judged(self):
+        self.assertEqual(self.verdict().status, 'ok')
+
+    def test_an_overheal_on_the_ally_or_an_effective_heal_on_the_caster_is_unmeasured(self):
+        for changes, text in (({'ally_effective': 4900}, 'overheal 100 on the ally'),
+                              ({'caster_effective': 50}, 'effective healing 50 on the caster')):
+            with self.subTest(changes=changes):
+                verdict = self.verdict(**changes)
+                self.assertEqual(verdict.status, 'unmeasured')
+                self.assertIn(text, verdict.explanation)
+
+    def test_mutant_counting_events_that_never_roll_alerts(self):
+        self.assertEqual(self.verdict(events=680).status, 'alert')
