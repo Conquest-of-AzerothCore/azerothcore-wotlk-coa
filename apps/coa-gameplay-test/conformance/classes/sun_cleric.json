@@ -32907,36 +32907,6 @@
     },
     {
       "spell": 503690,
-      "name": "Dawn's Arrival (the next Gavel incurs no cooldown, free-Gavel aura as fixture)",
-      "kind": "metric_delta",
-      "variant": "gavel_free_cooldown",
-      "label_suffix": "gavel_free_cooldown",
-      "quote": "causes the next one to not incur a cooldown.",
-      "trigger_spell": 800611,
-      "target": "dummy",
-      "cast_power": 1363,
-      "gate_spell": 503690,
-      "after_auras": [
-        [
-          503691,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "cooldown_ms",
-      "fields": {
-        "spell": 800611
-      },
-      "before_expected": 4500,
-      "expected": 0,
-      "tolerance": 250,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "503691 Dawn's Arrival free-Gavel aura: AscensionSunClericAbilities.cpp:291-292 reduces the cooldown of a Gavel (800611, 800614, 800617, AscensionSunCleric.cpp:172-175) to none (Reduce at INT32_MAX removes the spell cooldown, AscensionSunCleric.cpp:103-113) when the cast carried 503691 (Select, :47). Gavel of Light 800611 has CategoryRecoveryTime 5000 and Category 1207 (Spell.dbc). 503691 is set on the caster as a named precondition fixture in the after phase only (after_auras); the grant by Dawnbreak 800654 rides the 40% chance and is not claimed here. Control: the same Gavel cast without 503691 leaves its cooldown (5000 ms less the 500 ms read delay, 4500); with it the remaining cooldown reads 0; the 10% bands are 500 ms either side of 0 and 450 ms either side of 4500. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
-    },
-    {
-      "spell": 503690,
       "name": "Dawn's Arrival (free Gavel earned from Dawnbreak)",
       "kind": "aura_fed_effect",
       "variant": "cooldown",
