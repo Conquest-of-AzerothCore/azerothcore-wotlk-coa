@@ -26,7 +26,9 @@
   not a readback.
 
 Heal and energize totals (`spell_heal_count`, `spell_heal_total`, `spell_effective_heal_total`,
-`spell_energize_count`, `spell_energize_total`) count only the events the read unit itself (or its pet) cast; a
+`spell_energize_count`, `spell_energize_total`), and the spell damage, log and count reads (`spell_damage_count`,
+`spell_damage_total`, `spell_log_count`, `spell_absorb_total`, `spell_resist_total`, `spell_go_count`,
+`spell_cast_count`, `spell_proc_count`) count only the events the read unit itself (or its pet) cast; a
 heal also takes `caster_entry` for a creature caster. Read on an ally they would count the ally's own casts, so an
 arm or the main reading with one of them on a unit other than the caster is refused, unless a heal names
 `caster_entry`. Read a heal the caster gives an ally on the caster with `fields.target` set to that ally, one arm per

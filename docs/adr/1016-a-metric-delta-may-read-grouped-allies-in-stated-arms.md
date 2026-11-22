@@ -41,7 +41,8 @@ Option 2 (mentor D-48, controller design approval). `metric_delta_options/ally_a
   the treatment's time. Only with `cast_in_before` false and the default gate timing, and without the after-phase-only
   acts (`setup_wait_ms` with setup casts, enemy, helper and target casts). At load the waits from the ally fixture to
   each reading are compared and any difference, such as another option's waits after the trigger, is refused.
-- Heal and energize totals on a unit other than the caster are refused (unless a heal names `caster_entry`): a heal
+- Heal and energize totals, and the spell damage, log, go, cast and proc counts, on a unit other than the caster are
+  refused (unless a heal names `caster_entry`; re-review N-1): a heal
   the caster gives an ally is read on the caster with `fields.target` naming that ally. The harness read is not
   changed.
 - `arms`: extra reads, each summed over its `actors`, placed right after the main before and after readings. Every

@@ -193,6 +193,8 @@ class AllyArmScenarioTests(unittest.TestCase):
                        {**heal, 'actors': ['caster', 'ally2'], 'metric': 'spell_heal_count'}]}),
                    steed_entry(measure_actor='ally', metric='spell_effective_heal_total', fields={'spell': SPELL},
                                ally_arm={'allies': 1})]
+        refused += [steed_entry(ally_arm={'arms': [{**heal, 'metric': metric}]})
+                    for metric in ('spell_damage_total', 'spell_log_count', 'spell_go_count', 'spell_proc_count')]
         for entry in refused:
             with self.subTest(entry=entry), self.assertRaisesRegex(ValueError, 'never the caster'):
                 self.scenario(entry)

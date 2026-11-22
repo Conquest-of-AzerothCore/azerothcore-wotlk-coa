@@ -7,7 +7,9 @@ ALLY_IDS = ('ally', 'ally2', 'ally3', 'ally4', 'ally5')
 ALLY_CAST_SETTLE_MS = 2000
 ALLY_CAST_PROOF_METRIC = 'spell_go_count'
 CASTER_SCOPED_METRICS = {'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',
-                         'spell_energize_count', 'spell_energize_total'}
+                         'spell_energize_count', 'spell_energize_total', 'spell_damage_count', 'spell_damage_total',
+                         'spell_log_count', 'spell_absorb_total', 'spell_resist_total', 'spell_go_count',
+                         'spell_cast_count', 'spell_proc_count'}
 CASTER_ENTRY_METRICS = {'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total'}
 CONTROL_LABEL = 'timed no-cast control'
 EXPIRE_LABEL = 'let the first effect fully expire'
