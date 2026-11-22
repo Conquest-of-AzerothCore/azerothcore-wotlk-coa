@@ -11,7 +11,8 @@ SEEDED_ENTRY = {
     'wait_ms': 500, 'expire_ms': 2000,
     'strike': {'spell': 2118233, 'health': 50000, 'max_health': 100000, 'count': 1, 'wait_ms': 300},
     'caster_avoidance': {'parry': 100}, 'name': 'seeded next attack', 'variant': 'seeded', 'label_suffix': 'seeded',
-    'quote': 'seeded', 'metric': 'aura_amount', 'fields': {'spell': 707843, 'effect': 0}, 'expected': 0,
+    'quote': 'and increases your chance to parry the next attack by $707843s1%.', 'metric': 'aura_amount',
+    'fields': {'spell': 707843, 'effect': 0}, 'expected': 0,
     'second_strike': {'spell': 23583, 'present': 30}}
 
 
