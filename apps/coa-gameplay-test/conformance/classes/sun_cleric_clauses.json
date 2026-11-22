@@ -2618,7 +2618,17 @@
         "claim": "within 15 yds",
         "labels": []
       }
-    ]
+    ],
+    "reason": "Pair 20261122-074554 / 20261122-074843, build f7a4e43e, server commit 819ed69786ee, no flip. Damage: the Grave Coil 47632 hit (600 Shadow) on the caster, cumulative 600 in the control phase, 1028 and 1030 after the Scroll (420 per hit = 30% less, band 1008 to 1032). Duration: aura on the caster at about 9.1 s and gone by 10.75 s (windows 9050-9400, 10600-10950), excluding 9 and 11 s. Reach: the aura is on ally and on ally2 to ally5 (raid subgroup 2 included), 0 in the control. Radius 15 yd: not proven. An area aura of grouped allies needs allies placed at the edge (15 yd plus both players' object sizes, AnyGroupedUnitInObjectRangeCheck, GridNotifiers.h:1051) with their combat reach read, and neither radius_edge (enemy dummies, spell targeting) nor ally_arm (no ally placement) offers it: tool need returned to the controller. Reference search 2026-11-22: coa-history 0 events for 680646, 681383, 47632; bindmysoul reads -30%, 15 yds, 10 seconds; nothing else found.",
+    "tool_gap": {
+      "reason": "No kind places a grouped ally at the edge of an area aura radius and reads the players' object sizes: radius_edge places enemy dummies for spell targeting, ally_arm places no ally, relocate_before_trigger moves the caster only with the ally at its spawn and without the reach reads, so the edge cannot be bracketed inside 10% of 15 yd.",
+      "attempts": [
+        {
+          "agent": "sc-b8e1",
+          "report": ".agents/plans/sun-cleric-b8e1/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 680646,
@@ -2644,7 +2654,8 @@
           "680646 behaviour_metric_delta heal_once"
         ]
       }
-    ]
+    ],
+    "reason": "Pair 20261122-074554 / 20261122-074843, build f7a4e43e, server commit 819ed69786ee, no flip. Control = the same strike without the Scroll (before phase): no heal. Caster set to 3800 of 10000 health, Grave Coil takes it below 35%: heal 681383 read 1500 = 15% of 10000 after the Scroll. Five hits (a second fall below 35% at the fifth): the heal total stays 1500, once. Starting at 6000 (55.8% after the hit): 0. The harness striker can only hit the caster, so the caster stands for any ally; the aura reaches allies (reach entry of the previous clause). Reference search: as the previous clause; nothing else found."
   },
   {
     "spell": 680647,
@@ -3338,7 +3349,8 @@
           "704908 behaviour_metric_delta next_ticks"
         ]
       }
-    ]
+    ],
+    "reason": "Pair 20261122-074554 / 20261122-074843, build f7a4e43e, server commit 819ed69786ee, no flip. Control = Radiant Flame without Scorch Marks (before phase). Free cast: at 182 mana the control casts 0 times, after a real Sun Ray it casts once. Ticks: median interval of the damage events 1000 ms control, 503 and 514 ms with Scorch Marks (tolerance 50). Only the next: the second Radiant Flame after Sun Ray ticks at 990 and 987.5 ms. Scorch Marks from a real Sun Ray cast, no set_aura. Reference search 2026-11-22: coa-history 0 events for 806060, 807058, 504764; bindmysoul 806021 text reads the same sentence; nothing else found."
   },
   {
     "spell": 704908,
@@ -3347,7 +3359,8 @@
       "704908 behaviour_metric_delta shorter_held",
       "704908 behaviour_metric_delta shorter_gone"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261122-074554 / 20261122-074843, build f7a4e43e, server commit 819ed69786ee, no flip. Control = the before phase: Radiant Flame aura present at 1.9 s and 2.15 s without Scorch Marks (4000 ms). With it the aura is still on at 1.9 s and gone by 2.15 s (windows 1850-1990 and 2100-2190), so its duration lies in (1.85, 2.19] s around 2000 ms, excluding 1.8 and 2.2 s. Reference search: as the previous clause; nothing else found."
   },
   {
     "spell": 704909,
@@ -4067,7 +4080,8 @@
       "707771 behaviour_metric_delta illum_held",
       "707771 behaviour_metric_delta illum_done"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261122-074554 / 20261122-074843, build f7a4e43e, server commit 819ed69786ee, no flip. Control arm = Illumination before the learn: still casting at 1470 and 1530 ms (2000 ms). With 707771 the cast is still running at 1470 ms and finished by 1530 ms (game-time windows 1462-1482 and 1522-1540), so the cast time lies in about (1.46, 1.54] s around 1500 ms, which excludes 1.45 and 1.55 s. Reference search 2026-11-22: coa-history spell 707771: 0 events in 186 logs (a passive); nothing else found beyond the tooltip and the DBC."
   },
   {
     "spell": 707772,
