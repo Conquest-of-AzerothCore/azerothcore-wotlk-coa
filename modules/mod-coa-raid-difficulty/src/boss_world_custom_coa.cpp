@@ -1063,6 +1063,7 @@ namespace
         SPELL_HOVER_FALL        = 2119354,
         SPELL_TWILIGHT_SHIELD   = 2119350,
         SPELL_TWILIGHT_BEAM     = 2119351,
+        SPELL_GHOSTLY           = 22650,
         SPELL_TEAR_MISSILE      = 2119316,
         NPC_SOGGOTH             = 64605,
         NPC_PSYCHOPHAGE         = 454004,
@@ -1125,36 +1126,41 @@ namespace
 
         void Shield(bool shield)
         {
-            if (shield == _shielded)
-                return;
             _shielded = shield;
             me->SetReactState(shield ? REACT_PASSIVE : REACT_AGGRESSIVE);
             if (shield)
             {
-                me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
-                DoCastSelf(SPELL_TWILIGHT_SHIELD, true);
+                me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                if (!me->HasAura(SPELL_TWILIGHT_SHIELD))
+                    DoCastSelf(SPELL_TWILIGHT_SHIELD, true);
+                if (!me->HasAura(SPELL_GHOSTLY))
+                    DoCastSelf(SPELL_GHOSTLY, true);
+                return;
             }
-            else
-            {
-                me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
-                me->RemoveAurasDueToSpell(SPELL_TWILIGHT_SHIELD);
-                me->RemoveAurasDueToSpell(SPELL_TWILIGHT_BEAM);
-                DoCastSelf(SPELL_HOVER_FALL, true);
-            }
+            me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+            me->RemoveAurasDueToSpell(SPELL_TWILIGHT_SHIELD);
+            me->RemoveAurasDueToSpell(SPELL_TWILIGHT_BEAM);
+            me->RemoveAurasDueToSpell(SPELL_GHOSTLY);
+            DoCastSelf(SPELL_HOVER_FALL, true);
+            DoZoneInCombat(me, 200.0f);
         }
 
         void UpdateAI(uint32 diff) override
         {
-            if (_shielded)
+            if (!me->IsInCombat())
             {
                 _heraldCheck -= Milliseconds(diff);
                 if (_heraldCheck <= 0ms)
                 {
                     _heraldCheck = 1s;
-                    if (!HeraldsAlive())
+                    bool const alive = HeraldsAlive();
+                    if (alive && (!_shielded || !me->HasAura(SPELL_TWILIGHT_SHIELD)))
+                        Shield(true);
+                    else if (!alive && _shielded)
                         Shield(false);
                 }
-                return;
+                if (_shielded)
+                    return;
             }
             custom_world_boss_coa::UpdateAI(diff);
         }
@@ -1226,7 +1232,8 @@ namespace
             {
                 for (Player* p : PlayersWithin(me, 200.0f))
                 {
-                    me->CastSpell(p, SPELL_VISIONS_HIT, true);
+                    SpellDamage(me, p, SPELL_VISIONS_HIT, uint32(Info(me, SPELL_VISIONS_HIT) * _damage),
+                        SPELL_SCHOOL_MASK_SHADOW);
                     me->CastSpell(p, SPELL_VISIONS_MARK, true);
                 }
                 _clock.ScheduleEvent(TG_REND, 5s);
@@ -1241,7 +1248,8 @@ namespace
                     for (auto it = _tears.begin(); it != _tears.end();)
                     {
                         for (Player* p : Players(me, [&](Player* x) { return x->IsWithinDist3d(&it->first, TEAR_RADIUS); }))
-                            me->CastSpell(p, SPELL_TEAR_HIT, true);
+                            SpellDamage(me, p, SPELL_TEAR_HIT, uint32(Info(me, SPELL_TEAR_HIT) * _damage),
+                                SPELL_SCHOOL_MASK_SHADOW);
                         it = --it->second ? std::next(it) : _tears.erase(it);
                     }
                     _clock.ScheduleEvent(TG_TEAR_SECOND, 1s);
@@ -1444,7 +1452,8 @@ namespace
                     {
                         Position const& spot = it->first;
                         for (Player* p : Players(me, [&](Player* x) { return x->IsWithinDist3d(&spot, TEAR_RADIUS); }))
-                            me->CastSpell(p, SPELL_HERALD_TEAR_HIT, true);
+                            SpellDamage(me, p, SPELL_HERALD_TEAR_HIT,
+                                uint32(Info(me, SPELL_HERALD_TEAR_HIT) * _damage), SPELL_SCHOOL_MASK_SHADOW);
                         it = --it->second ? std::next(it) : _tears.erase(it);
                     }
                     _clock.ScheduleEvent(TH_TEAR, 1s);

@@ -45,3 +45,6 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 -- The models the client gives these creatures their own scale (Creature.dbc): no extra scale on top.
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 5965, `DisplayScale` = 1 WHERE `CreatureID` = 64600;
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 92610, `DisplayScale` = 1 WHERE `CreatureID` = 454004;
+
+-- Psychophages are level 61.
+UPDATE `creature_template` SET `minlevel` = 61, `maxlevel` = 61 WHERE `entry` = 454004;

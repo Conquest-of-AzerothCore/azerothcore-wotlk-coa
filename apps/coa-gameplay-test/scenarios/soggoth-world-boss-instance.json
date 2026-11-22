@@ -170,6 +170,15 @@
     {
       "action": "assert",
       "actor": "raider",
+      "label": "and he looks like a ghost",
+      "metric": "nearby_creature_aura_count",
+      "entry": 64605,
+      "spell": 22650,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
       "label": "His heralds bind him with their Twilight Beams",
       "metric": "nearby_creature_aura_count",
       "entry": 64605,
@@ -321,6 +330,154 @@
       "entry": 64605,
       "spell": 2119350,
       "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "nor looks like a ghost",
+      "metric": "nearby_creature_aura_count",
+      "entry": 64605,
+      "spell": 22650,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "He engages on his own, without a pull",
+      "metric": "health",
+      "max": 49999999,
+      "within_ms": 15000
+    },
+    {
+      "action": "die",
+      "actor": "raider"
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "A wipe on him shields him again",
+      "metric": "nearby_creature_aura_count",
+      "entry": 64605,
+      "spell": 2119350,
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "as a ghost",
+      "metric": "nearby_creature_aura_count",
+      "entry": 64605,
+      "spell": 22650,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "that cannot be attacked",
+      "metric": "nearby_creature_can_attack",
+      "entry": 64605,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "Herald 64606 is back",
+      "metric": "nearby_creature_count",
+      "entry": 64606,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "Herald 64607 is back",
+      "metric": "nearby_creature_count",
+      "entry": 64607,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "Herald 64608 is back",
+      "metric": "nearby_creature_count",
+      "entry": 64608,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "and they bind him again",
+      "metric": "nearby_creature_aura_count",
+      "entry": 64605,
+      "spell": 2119351,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "command",
+      "actor": "raider",
+      "command": ".revive"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "actor": "raider",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "raider",
+      "guid": 9781601
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64606,
+      "radius": 60,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64607,
+      "radius": 60,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64608,
+      "radius": 60,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "Without his heralds he can be attacked again",
+      "metric": "nearby_creature_can_attack",
+      "entry": 64605,
+      "equals": 1,
+      "within_ms": 5000
     },
     {
       "action": "assert",
