@@ -7581,6 +7581,14 @@
       "observe_source": "760379 Sunstorm Effect[1] aura 147 SPELL_AURA_MECHANIC_IMMUNITY_MASK MiscValue 1733, Effect[2] aura 263 SPELL_AURA_ALLOW_ONLY_ABILITY, DurationIndex 32 = 6000 ms. Glare 807870 is attempted at the dummy in both phases: accepted before Sunstorm (control: failure 0) and refused after a real Sunstorm cast 1600 ms earlier with SPELL_FAILED_SPELL_IN_PROGRESS (105, the refusal of every non-triggered cast while the aura 263 flag is set, Spell.cpp:5825). Moving is not covered by this entry. Reference search 2026-11-22: server DBC 760379 description; ascension-data advancement.tsv lists Sunstorm as a Valkyr node only; bindmysoul snapshot has no entry; coa-history spell 760379 0 events in 186 logs; nothing found beyond the tooltip and the DBC."
     },
     {
+      "spell": 760379,
+      "name": "Sunstorm (you can move)",
+      "kind": "move_under_aura",
+      "label_suffix": "move",
+      "quote": "While under the effects of Sunstorm, you can move but cannot perform any other abilities",
+      "observe_source": "760379 Sunstorm (installed DBC): ChannelInterruptFlags 0, a 6000 ms self aura. Movement is driven through the existing client_packet action (MSG_MOVE_START_FORWARD then MSG_MOVE_STOP reach WorldSession::HandleMovementOpcodes, consumed false), no harness action (mentor D-171). Control: without the aura the same packets move the player 2 yd, which proves the packet moves the player; under the aura the player must move 2 yd and the aura must stay. t10 probe 2026-11-22 (build 0df866d2): 2389.03 -> 2391.03 without and 2391.03 -> 2393.03 under the aura, aura 1 at start, moved and stopped."
+    },
+    {
       "spell": 804629,
       "name": "Spears of Glory (Dawnsear is instant cast)",
       "kind": "metric_delta",
@@ -12982,6 +12990,40 @@
       "metric": "spell_hit_chance",
       "fields": {},
       "observe_source": "707072 Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 5 (+1 = 6, $707072s2); StatSystem.cpp:1042 m_modSpellHitChance = GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE, SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT). The caster's live value (STATE read) around a Bless 804247 cast, before 707072 is learned (control, gain 0) and after: gain 6. The scenario wears the default weapon set: 707072 is mapped to no set in spell_weapon_sets, so the learn between the phases is the only change. Reference search 2026-11-22: server DBC 707072; the Necromancer entry 803291 (aura 333 hit chance reads); weapon_set_spells.Valkyr; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 707072,
+      "name": "Valkyr's Grip (dual wield and two-handers in each hand)",
+      "kind": "equip_grant",
+      "label_suffix": "equip",
+      "quote": "Allows you to dual wield and to wield a Two-Handed Mace, Sword, or Polearm in each hand",
+      "pairs": [
+        {
+          "main_hand": 2524,
+          "off_hand": 30754,
+          "skill_line": 54,
+          "source": "dual wield: the class one-hand mace 2524 with the one-hand mace 30754 (off_hand_weapons)"
+        },
+        {
+          "main_hand": 2529,
+          "off_hand": 2529,
+          "skill_line": 55,
+          "source": "Two-Handed Sword: 2529, the Valkyr weapon set item"
+        },
+        {
+          "main_hand": 1197,
+          "off_hand": 1197,
+          "skill_line": 160,
+          "source": "Two-Handed Mace: Giant Mace 1197 (data/sql/base item_template class 2 subclass 5 InventoryType 17, RequiredLevel 10)"
+        },
+        {
+          "main_hand": 11864,
+          "off_hand": 11864,
+          "skill_line": 229,
+          "source": "Polearm: White Bone Spear 11864 (data/sql/base item_template class 2 subclass 6 InventoryType 17, RequiredLevel 0)"
+        }
+      ],
+      "observe_source": "707072 Effect[2] SPELL_EFFECT_DUAL_WIELD (40) and Effect[0] SPELL_EFFECT_TITAN_GRIP (155) (installed DBC). Control: the same four off-hand equips with 707072 unlearned are refused (the harness fails the step if one is accepted); learned, each is accepted and both hands hold their items. Skill lines 55, 160 and 229 are set so proficiency is not what refuses the equip."
     },
     {
       "spell": 804247,
@@ -23367,6 +23409,63 @@
         }
       ],
       "expected_source": "503650 Effect[0] SPELL_EFFECT_DISPEL EffectMiscValue 3 (DISPEL_DISEASE), $503650s1 = 2 (installed DBC); Mercy 504848 Effect[0] aura 23 periodic trigger of 503650, the first 503650 cast on application (period_held reads 1 cast at 2750 ms). The ally carries three diseases (Frost Fever 55095, Blood Plague 55078, Infected Wound 3427, each Dispel 3) so two removed is not all; the read is 800 ms after the cast, before the 3000 ms pulse. Control: the no_cast arm waits and reads the same way with no Mercy cast and expects 0, so a removal by anything else alerts. One trial per arm: a dispel count is not random and a recast would refresh a running aura."
+    },
+    {
+      "spell": 300341,
+      "name": "Exorcism (Sanctify dispels one more effect of each type)",
+      "kind": "dispel_count",
+      "label_suffix": "additional",
+      "quote": "Sanctify now dispels $s1 additional effect.",
+      "cast_spell": 524968,
+      "debuffs": [
+        [
+          3,
+          [
+            55095,
+            55078,
+            3427
+          ]
+        ],
+        [
+          4,
+          [
+            2818,
+            25810
+          ]
+        ]
+      ],
+      "arms": [
+        {
+          "name": "base",
+          "expected": [
+            [
+              3,
+              1
+            ],
+            [
+              4,
+              1
+            ]
+          ]
+        },
+        {
+          "name": "learned",
+          "learns": [
+            300341
+          ],
+          "expected": [
+            [
+              3,
+              2
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        }
+      ],
+      "expected_source": "Mentor D-172. Sanctify 524968 (installed DBC) has three SPELL_EFFECT_DISPEL effects, EffectMiscValue 3 (disease), 4 (poison) and 1 (magic), EffectBasePoints 0 + EffectDieSides 1 = 1 each; Exorcism 300341 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 8 (all effects) +1 on Sanctify's class mask (family 33, flags word 1 = 16384), so each type goes 1 -> 2. The ally carries three diseases (55095, 55078, 3427) and two poisons (2818, 25810): without Exorcism one of each is removed per cast (control arm, nothing learned), with it learned two of each (both poisons, two of three diseases, one remains). Exorcism is learned, never set with set_aura. A learned arm that removes only one more in total is a finding against the data, not adapted."
     },
     {
       "spell": 804257,

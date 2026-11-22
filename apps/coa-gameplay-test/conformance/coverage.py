@@ -487,7 +487,7 @@ STATE_PROMISES = {
     'owned_creature_spell_hit_chance': r'hit chance|chance to hit',
     'alive': r'\bdie\b|death|dead', 'can_attack': r'\battack',
     'owned_creature_react_state': r'aggres+ive|defensive|passive',
-    'casting': r'\bcast\w*|haste|all actions',
+    'casting': r'\bcast\w*|haste|all actions|interrupt\w*',
     'item_count': r'creat\w*',
     'distance_2d': r'location|hook\w*|pull\w*',
     'point_distance_2d': r'leap\w*|range|yds?',

@@ -1,4 +1,4 @@
-# 1028. Ratio-only arms, single-landing durations, no-cast dispel arms and an avoided-swing script hit
+# 1028. Ratio-only arms, single-landing durations, no-cast dispel arms, equip and movement kinds
 
 - Status: proposed (provisional number; renumbered at merge, guide 14.4)
 - Date: 2026-11-22
@@ -44,6 +44,12 @@ by any data, and the mana is truncated per strike.
   expects no removal).
 - `script_hit`: `caster_avoidance {dodge, parry}` set before each trial with a hostile melee striker in place of
   `strike_spell`.
+- Kind module `equip_grant`: a grant learned between a refused and an accepted off-hand equip, read with
+  `equipped_item` (Valkyr's Grip 707072).
+- Kind module `move_under_aura` (mentor D-171): a movement step sent through the existing `client_packet` action
+  (`MSG_MOVE_START_FORWARD`, `MSG_MOVE_STOP`, consumed false), with a control move without the aura that must move the
+  player, then the same move under the aura (Sunstorm 760379). No harness action is added.
+- `coverage` (mentor D-171): the `casting` state read is promised by `interrupt\w*` as well (547214 c110).
 
 ## Consequences
 
