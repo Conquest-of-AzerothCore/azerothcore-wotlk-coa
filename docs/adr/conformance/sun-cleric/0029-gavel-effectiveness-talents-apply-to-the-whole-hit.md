@@ -1,6 +1,7 @@
 # 0029. Gavel effectiveness talents apply their figure to the whole hit
 
 - Status: accepted (owner ruling O-18, Q-sc-8 option b, 2026-11-22; design approved by mentor D-146)
+- Confirmed: owner ruling O-22 (2026-11-22): two Gavel effectiveness talents add, as decided by D-146.
 - Date: 2026-11-22
 - Supersedes: [0007](0007-fanaticism-compounds-on-the-gavel-flat-damage.md) (its decision (a), the stock engine
   order, for the Gavels) and the Gavel figures of [0008](0008-fanaticism-expectation-is-the-reproduced-engine-arithmetic.md).

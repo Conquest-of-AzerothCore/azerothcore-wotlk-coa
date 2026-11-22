@@ -1,6 +1,7 @@
 # 0027. Vow of the Valkyr's Fulfillment triggers one auto attack per weapon per ability cast
 
 - Status: accepted
+- Confirmed: owner ruling O-23 (2026-11-22): a channel tick counts as its own cast, as decided by D-148.
 - Date: 2026-11-22
 
 ## Context
