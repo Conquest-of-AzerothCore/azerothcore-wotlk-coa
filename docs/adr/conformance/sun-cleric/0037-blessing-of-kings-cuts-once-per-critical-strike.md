@@ -1,4 +1,4 @@
-# 0035. Blessing of Kings cuts the cooldowns once per critical strike, a self-heal included
+# 0037. Blessing of Kings cuts the cooldowns once per critical strike, a self-heal included
 
 - Status: accepted (mentor D-220, confirmed defect under the tooltip, 2026-11-22)
 - Date: 2026-11-22
