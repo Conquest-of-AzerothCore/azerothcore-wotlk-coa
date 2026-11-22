@@ -37472,6 +37472,90 @@
         ]
       },
       "observe_source": "Solar Flare 807175 lasts 10000 ms (DurationIndex 1, Spell.dbc), applied when the Dawnsear 500146 hit finds the Herald marker (AscensionSunClericAbilities.cpp:353-356). Same route as the flare_hit entry. The application lies between the end of the 3500 ms Dawnsear cast and the 4000 ms read of the flare_hit entry, where the aura is already on the dummy (both from Spell.dbc and that entry's presence read). Read 14450 ms after the trigger, at least 10550 ms and at most 10950 ms after the application: gone excludes a duration of 11000 ms (10% long) or more, since the read is at most 10950 ms after the application, and a 10000 ms aura is gone from 10000 ms on. Control: before the learn the Solar Flare is absent (0 before in both entries). Reference search 2026-11-22: coa-history 807175: 2442 SPELL_AURA_APPLIED and 2416 SPELL_AURA_REMOVED in 29 logs, no per-cast duration readable; nothing else found."
+    },
+    {
+      "spell": 680622,
+      "kind": "hit_ratio",
+      "quote": "Fulfilling a Vow now increases the damage of your Sunslam by $680623s1% for $680623d,",
+      "expected": 1.1,
+      "critical": false,
+      "observe_spell": 805639,
+      "cast_spell": 807973,
+      "cast_wait_ms": 4500,
+      "control": {},
+      "treatment": {
+        "auras": [
+          [
+            680623,
+            1
+          ]
+        ]
+      },
+      "fixture": {
+        "attack_power": 10000
+      },
+      "name": "Fervor of the Sun (Sunslam tick damage ratio)",
+      "variant": "tick_ratio",
+      "label_suffix": "tick_ratio",
+      "trials": 14,
+      "expected_source": "680623 Fervor of the Sun Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 9 + 1 = 10 ($680623s1), class mask word 1 = 2097152 = Sunslam 807973/805639/807447 SpellFamilyFlags[1]; the tooltip states +10% of Sunslam's damage, so the expected ratio of the mean non-crit hit with one Fervor stack to the mean hit without it is 1.10, per damaging component (/srv/coa/server-data/dbc, Spell.dbc). Sunslam 807973 Effect[0] aura 227 every 1000 ms triggers 805639 (Holy), Effect[1] aura 231 every 988 ms triggers 807447 (weapon-percent effect 31). Control = no Fervor, treatment = 680623 at 1 stack (precondition fixture set_aura each trial; the claim is the damage, its application by a fulfilled Vow is the stack_one entry). Dawn 807440, the caster aura Sunslam requires, is set by the pipeline as a precondition. Attack power fixture 10000 so that a flat +10 on a base of 100 + 0.159426 x AP reads about 1.006, far from 1.10. Non-crit hits only (critical false). Reference search 2026-11-22: coa-history spell 805639 4959 damage events in 11 logs (no Fervor split); spell 680623 aura events only; nothing else found."
+    },
+    {
+      "spell": 680622,
+      "kind": "hit_ratio",
+      "quote": "Fulfilling a Vow now increases the damage of your Sunslam by $680623s1% for $680623d,",
+      "expected": 1.1,
+      "critical": false,
+      "observe_spell": 805639,
+      "cast_spell": 807973,
+      "cast_wait_ms": 4500,
+      "control": {},
+      "treatment": {
+        "auras": [
+          [
+            680623,
+            1
+          ]
+        ]
+      },
+      "name": "Fervor of the Sun (Sunslam tick damage ratio, reference attack power)",
+      "variant": "tick_ratio_ref",
+      "label_suffix": "tick_ratio_ref",
+      "trials": 14,
+      "expected_source": "680623 Fervor of the Sun Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 9 + 1 = 10 ($680623s1), class mask word 1 = 2097152 = Sunslam 807973/805639/807447 SpellFamilyFlags[1]; the tooltip states +10% of Sunslam's damage, so the expected ratio of the mean non-crit hit with one Fervor stack to the mean hit without it is 1.10, per damaging component (/srv/coa/server-data/dbc, Spell.dbc). Sunslam 807973 Effect[0] aura 227 every 1000 ms triggers 805639 (Holy), Effect[1] aura 231 every 988 ms triggers 807447 (weapon-percent effect 31). Control = no Fervor, treatment = 680623 at 1 stack (precondition fixture set_aura each trial; the claim is the damage, its application by a fulfilled Vow is the stack_one entry). Dawn 807440, the caster aura Sunslam requires, is set by the pipeline as a precondition. Second design: the reference attack power 70 (no fixture), so the hit is 100 + 0.159426 x 70 = 111.16 and a flat +10 would read 1.09; the resist fixture 823764 on the caster (Effect[0] aura 123 -10000 on schools 126, no magic resistance) removes the partial-resist spread of the first design. Non-crit hits only (critical false). Reference search 2026-11-22: coa-history spell 805639 4959 damage events in 11 logs (no Fervor split); spell 680623 aura events only; nothing else found.",
+      "cast_unit_auras": [
+        [
+          823764,
+          1
+        ]
+      ]
+    },
+    {
+      "spell": 680622,
+      "kind": "hit_ratio",
+      "quote": "Fulfilling a Vow now increases the damage of your Sunslam by $680623s1% for $680623d,",
+      "expected": 1.1,
+      "critical": false,
+      "observe_spell": 807447,
+      "cast_spell": 807973,
+      "cast_wait_ms": 4500,
+      "control": {},
+      "treatment": {
+        "auras": [
+          [
+            680623,
+            1
+          ]
+        ]
+      },
+      "fixture": {
+        "attack_power": 10000
+      },
+      "name": "Fervor of the Sun (Sunslam weapon part ratio)",
+      "variant": "weapon_ratio",
+      "label_suffix": "weapon_ratio",
+      "trials": 40,
+      "expected_source": "680623 Fervor of the Sun Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 9 + 1 = 10 ($680623s1), class mask word 1 = 2097152 = Sunslam 807973/805639/807447 SpellFamilyFlags[1]; the tooltip states +10% of Sunslam's damage, so the expected ratio of the mean non-crit hit with one Fervor stack to the mean hit without it is 1.10, per damaging component (/srv/coa/server-data/dbc, Spell.dbc). Sunslam 807973 Effect[0] aura 227 every 1000 ms triggers 805639 (Holy), Effect[1] aura 231 every 988 ms triggers 807447 (weapon-percent effect 31). Control = no Fervor, treatment = 680623 at 1 stack (precondition fixture set_aura each trial; the claim is the damage, its application by a fulfilled Vow is the stack_one entry). Dawn 807440, the caster aura Sunslam requires, is set by the pipeline as a precondition. Attack power fixture 10000 so that a flat +10 on a base of 100 + 0.159426 x AP reads about 1.006, far from 1.10. Non-crit hits only (critical false). Reference search 2026-11-22: coa-history spell 807447: 0 events in 186 logs; nothing else found."
     }
   ],
   "player_observations": [],
