@@ -5756,12 +5756,18 @@ private:
             return expiry ? std::max<time_t>(0, expiry - GameTime::GetGameTime().count()) * IN_MILLISECONDS : -1;
         }
         if (metric == "dynamic_object" || metric == "dynamic_object_duration_ms" ||
-            metric == "dynamic_object_height")
+            metric == "dynamic_object_height" || metric == "dynamic_object_radius" ||
+            metric == "dynamic_object_size")
         {
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown ground-effect spell");
             DynamicObject* object = player->GetDynObject(spell);
             if (metric == "dynamic_object")
                 return object && object->IsInWorld();
+            if (metric == "dynamic_object_radius" || metric == "dynamic_object_size")
+            {
+                Require(object != nullptr, "Ground-effect radius or size needs an existing ground effect");
+                return metric == "dynamic_object_radius" ? object->GetRadius() : object->GetObjectSize();
+            }
             if (metric == "dynamic_object_height")
             {
                 Require(object != nullptr, "Ground-effect height needs an existing ground effect");
