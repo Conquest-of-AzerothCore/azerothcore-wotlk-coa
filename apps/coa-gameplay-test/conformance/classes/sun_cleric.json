@@ -18416,6 +18416,103 @@
       "label_suffix": "gate_gone"
     },
     {
+      "spell": 802161,
+      "name": "Sun Gate (an ally interacting with the gate blinks 25 yd forward)",
+      "kind": "metric_delta",
+      "variant": "ally_blink",
+      "label_suffix": "ally_blink",
+      "quote": "This leaves behind a Sun Gate for $d that allies can interact with to blink themselves the same distance forward.",
+      "trigger_spell": 802161,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "measure_actor": "ally",
+      "metric": "position_x",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 25,
+      "tolerance": 1.0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 802145
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the gate's interaction makes the ally cast 802145 on itself once, which applies its aura (802145 Effect[1] aura 77 MECHANIC_IMMUNITY), so its application on the ally is counted (AscensionSunClericSummons.cpp:106-117): 0 in the before phase (no gate), 1 after the interaction, so the interaction landed"
+          }
+        ]
+      },
+      "ally_offsets": {
+        "ally": 3
+      },
+      "ally_interact": {
+        "entry": 50331,
+        "bearing": 0
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Code: SunGate (AscensionSunClericSummons.cpp:22-43) summons the gate 50331 at the caster's origin, then leaps the caster; npc_ascension_sun_gate::sGossipHello (:106-117) requires the interacting player alive, within INTERACTION_DISTANCE, friendly to and in a group with the owner, and without 802148, then removes impairing auras and casts 802145 (Effect[0] radius index 20 = 25 yd, $802145a1) and 802148 (DurationIndex 23 = 90000 ms, $802148d = 90 sec). The grouped ally (ally_arm) stands 3 yd from the caster's origin along x (ally_offsets), inside the 5 yd interaction distance, so the harness gossip_hello with entry 50331 does not walk it (calibration read rb7 2026-11-22, a throwaway probe, never counted: an ungrouped ally 3 yd from the gate kept its position, a grouped one moved 25.0 yd). Before phase (control): no Sun Gate cast and no interaction, ally displacement 0. After phase: Sun Gate, 1500 ms later the ally interacts, and its 2D displacement from right before the interaction to the reading 1500 ms later is the same distance forward the caster shifts, $802145a1 = 25 yd (the DBC radius, never from a run), within 1 yd as the shift entry, pointing along the ally's facing within 15 degrees (forward). Judged arm: the ally's 802145 application count 0 then 1. Deterministic: no roll, residual 0 per pair. Reference search 2026-11-22: coa-history (802161 casts only, no ally interaction recorded) and the bindmysoul snapshot give nothing beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 802161,
+      "name": "Sun Gate (an ally can use a gate only every 90 s)",
+      "kind": "metric_delta",
+      "variant": "ally_lockout",
+      "label_suffix": "ally_lockout",
+      "quote": "Allies can only use Sun Gate every $802148d.",
+      "trigger_spell": 802161,
+      "target": "caster",
+      "cast_in_before": true,
+      "cast_power": 1363,
+      "measure_actor": "ally",
+      "metric": "aura_apply_count",
+      "fields": {
+        "spell": 802148
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 14500,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 802145
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "each accepted interaction makes the ally cast 802145 on itself once, which applies its aura (802145 Effect[1] aura 77 MECHANIC_IMMUNITY), so its application on the ally is counted (AscensionSunClericSummons.cpp:106-117): 1 after the first interaction and the refused one, 2 after the accepted one"
+          }
+        ]
+      },
+      "ally_offsets": {
+        "ally": 3
+      },
+      "ally_interact": {
+        "entry": 50331,
+        "lockout_aura": 802148,
+        "return_yd": 25
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Code: SunGate (AscensionSunClericSummons.cpp:22-43) summons the gate 50331 at the caster's origin, then leaps the caster; npc_ascension_sun_gate::sGossipHello (:106-117) requires the interacting player alive, within INTERACTION_DISTANCE, friendly to and in a group with the owner, and without 802148, then removes impairing auras and casts 802145 (Effect[0] radius index 20 = 25 yd, $802145a1) and 802148 (DurationIndex 23 = 90000 ms, $802148d = 90 sec). The grouped ally (ally_arm) stands 3 yd from the caster's origin along x (ally_offsets), inside the 5 yd interaction distance, so the harness gossip_hello with entry 50331 does not walk it (calibration read rb7 2026-11-22, a throwaway probe, never counted: an ungrouped ally 3 yd from the gate kept its position, a grouped one moved 25.0 yd). The before phase casts Sun Gate and the ally interacts (lockout 802148 applied, count 1); the caster and the ally are moved back 25 yd along x after the blink, so the next gate stands 3 yd from the ally; 81000 ms after the first interaction (0.9 x the DBC 90000 ms) a new Sun Gate (reset_cooldown, a named precondition fixture: 802161 RecoveryTime 90000) and the ally's interaction is refused (count stays 1); 99000 ms after the first (1.1 x 90000) another gate and the interaction is accepted (count 2). The 99 s acceptance with the same geometry is the control for the 81 s refusal; a lockout of 81 s or less, or of 99 s or more, alerts. cast_power refills the mana for each Sun Gate (27% of base mana; not a mana claim). Deterministic: no roll, residual 0 per pair. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC."
+    },
+    {
       "spell": 300349,
       "quote": "Your critical heals now reduce the cooldown of Solar Invocation spells by $/1000;804512s1 sec.",
       "gate_spell": 300349,

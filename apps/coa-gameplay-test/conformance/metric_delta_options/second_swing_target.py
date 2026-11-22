@@ -44,9 +44,9 @@ def fixtures(class_file: dict, spec, target: str, scenario: dict):
     from hits import timed
     scenario.pop('timeout_ms', None)
     timed(scenario, sum(step['ms'] for step in steps if step['action'] == 'wait'))
+    wait = steps[blocks[0] + 1]['ms']
     scenario['contract'] += (f' In each phase, after the swings at the dummy, the caster stops attacking and attacks '
-                             f'{target} (a copy of the dummy at its distance) for the same {steps[blocks[0] + 1]["ms"]} '
-                             f'ms, then stops.')
+                             f'{target} (a copy of the dummy at its distance) for the same {wait} ms, then stops.')
 
 
 def model(spec, target: str) -> dict:
