@@ -23889,9 +23889,20 @@
       "expected": 1.3,
       "observe_spell": 500146,
       "control": {
-        "auras": []
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
       },
       "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
         "learn": [
           300723
         ]
@@ -23900,9 +23911,9 @@
       "trials": 40,
       "cast_power": 1363,
       "fixture": {
-        "spell_power": 20000
+        "spell_power": 10000
       },
-      "expected_source": "300723 Effect[2] is rewritten at load to aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30 (the $s3), MiscValue Holy|Fire (AscensionSunClericContracts.cpp:185-186). Dawnsear 500146 (Fire, SchoolMask 4) is cast at the dummy 40 times without and 40 times with 300723 learned, non-critical hits at 20000 spell power: the mean ratio is 1.30 within the 2-point band (G-19), the control arm being the casts without the passive. A first design that read one cumulative total over both phases read 2.30 (10099 then 23230): the second read included the first hit, a fault of the design, not of the server. Tooltip and DBC settle the value; the references add nothing for it."
+      "expected_source": "300723 Effect[2] is rewritten at load to aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30 (the $s3), MiscValue Holy|Fire (AscensionSunClericContracts.cpp:185-186). Dawnsear 500146 (Fire, SchoolMask 4) is cast at the dummy 40 times without and 40 times with 300723 learned, non-critical hits at 10000 spell power, the dummy's magic resistance removed by 823764 in both arms (precondition fixture, as the Flames of the Father entry): the mean ratio is 1.30 within the 2-point band (G-19), the control arm being the casts without the passive. A first design that read one cumulative total over both phases read 2.30 (10099 then 23230): the second read included the first hit, a fault of the design, not of the server. Tooltip and DBC settle the value; the references add nothing for it."
     }
   ],
   "player_observations": [],
