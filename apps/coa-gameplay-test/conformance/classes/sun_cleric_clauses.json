@@ -469,13 +469,22 @@
     "kind": "claim",
     "labels": [
       "300349 behaviour_metric_delta cd_cut",
-      "300349 behaviour_metric_delta cd_cut_control",
-      "300349 behaviour_metric_delta cd_cut_806159",
-      "300349 behaviour_metric_delta cd_cut_control_806159",
       "300349 behaviour_metric_delta cd_cut_503651",
-      "300349 behaviour_metric_delta cd_cut_control_503651"
+      "300349 behaviour_metric_delta cd_cut_806159",
+      "300349 behaviour_metric_delta cd_cut_control",
+      "300349 behaviour_metric_delta cd_cut_control_503651",
+      "300349 behaviour_metric_delta cd_cut_control_806159",
+      "300349 cost_gate 503651 cd_gate_503651 beyond",
+      "300349 cost_gate 503651 cd_gate_503651 with",
+      "300349 cost_gate 503651 cd_gate_503651 without",
+      "300349 cost_gate 800764 cd_gate beyond",
+      "300349 cost_gate 800764 cd_gate with",
+      "300349 cost_gate 800764 cd_gate without",
+      "300349 cost_gate 806159 cd_gate_806159 beyond",
+      "300349 cost_gate 806159 cd_gate_806159 with",
+      "300349 cost_gate 806159 cd_gate_806159 without"
     ],
-    "reason": "Pair 20261122-054615 / 20261122-054649, build b0637b14, no flip. Hope's three Solar Invocation targets (Conquest 800764, Resplendence 806159, Revelation 503651) are each read after a forced critical Daybreak with a control arm (Solar Conduit in place of Hope): cooldown 30000 - 1000 - 2100 elapsed = 26900 within 50 ms, so a 0.9 s or 1.1 s cut fails. Solar Invocation: Ascension 500152 (the fourth spell of category 767) is not a target of 804512 and is not read. The once-per-second clause 31 stays open."
+    "reason": "Pair 20261122-134456 / 20261122-134548 (prove, build e496bda1, server b7e79aca55+), no flip, no alert. Cost gates: each Solar Invocation (Conquest 800764, Resplendence 806159, Revelation 503651) attempted 1000 ms early after a critical Daybreak 503624 on the caster held at 30% health (cost_gate caster_health_pct, ADR 1027; crit fixture 10043): refused without Hope, accepted with it, refused one step beyond. The cooldown_ms readbacks cd_cut / cd_cut_control stay as the term read. Earlier gates failed at full health (no effective heal, Events.cpp:51). Reference search: none needed beyond the tooltip, the DBC and the code (design D-145, group 5)."
   },
   {
     "spell": 300349,
@@ -612,19 +621,25 @@
     "spell": 300361,
     "clause": "While in Sunrise, the remaining cooldown of Horusath Blast is reduced by $301176s2% every $t1 sec.",
     "labels": [
-      "300361 effect_value 301176e1 #0",
-      "300361 aura_amplitude_ms #1"
+      "300361 aura_amplitude_ms #1",
+      "300361 behaviour_metric_delta tick_cut_sunrise",
+      "300361 behaviour_metric_delta tick_cut_sunrise_control",
+      "300361 effect_value 301176e1 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261122-134456 / 20261122-134548 (prove, build e496bda1, server b7e79aca55+), no flip, no alert. The remaining cooldown read every 250 ms over 3 s after a cast in Sunrise: 3 ticks, each cut bracketed near 10% (9.9 to 10.3%) with no tick epoch (cooldown_tick_cut, ADR 1027); the control in the other phase shows no tick. 301176 Effect[1] BasePoints 9 + DieSides 1 = 10% ($301176s2), amplitude 1000 ms ($t1). Reference search: none needed beyond the tooltip, the DBC and the code (design D-145, group 5)."
   },
   {
     "spell": 300361,
     "clause": "While in Sunset, the remaining cooldown of Rapture is reduced by $301176s2% every $t1 sec.",
     "labels": [
-      "300361 effect_value 301176e1 #2",
-      "300361 aura_amplitude_ms #3"
+      "300361 aura_amplitude_ms #3",
+      "300361 behaviour_metric_delta tick_cut_sunset",
+      "300361 behaviour_metric_delta tick_cut_sunset_control",
+      "300361 effect_value 301176e1 #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261122-134456 / 20261122-134548 (prove, build e496bda1, server b7e79aca55+), no flip, no alert. The remaining cooldown read every 250 ms over 3 s after a cast in Sunset: 3 ticks, each cut bracketed near 10% (9.9 to 10.3%) with no tick epoch (cooldown_tick_cut, ADR 1027); the control in the other phase shows no tick. 301176 Effect[1] BasePoints 9 + DieSides 1 = 10% ($301176s2), amplitude 1000 ms ($t1). Reference search: none needed beyond the tooltip, the DBC and the code (design D-145, group 5)."
   },
   {
     "spell": 300363,
@@ -1565,9 +1580,21 @@
         "claim": "becoming immune to all physical attacks and spells (no landing of a physical and a magic fixture during the window)",
         "labels": [
           "520024 behaviour_metric_delta immune_magic",
-          "520024 behaviour_metric_delta immune_physical",
           "520024 behaviour_metric_delta immune_magic_after",
-          "520024 behaviour_metric_delta immune_physical_after"
+          "520024 behaviour_metric_delta immune_physical",
+          "520024 behaviour_metric_delta immune_physical_after",
+          "520024 immunity enemy_physical 1715 control",
+          "520024 immunity enemy_physical 1715 with",
+          "520024 immunity enemy_physical 1715 without",
+          "520024 immunity enemy_physical 520024 applied",
+          "520024 immunity enemy_physical 520024 cast",
+          "520024 immunity enemy_physical 520024 expired",
+          "520024 immunity enemy_spells 520024 applied",
+          "520024 immunity enemy_spells 520024 cast",
+          "520024 immunity enemy_spells 520024 expired",
+          "520024 immunity enemy_spells 5782 control",
+          "520024 immunity enemy_spells 5782 with",
+          "520024 immunity enemy_spells 5782 without"
         ]
       },
       {
@@ -1575,7 +1602,7 @@
         "labels": []
       }
     ],
-    "reason": "Duration measured by the 520025 aura held / gone pair. The immunity is measured by a real cast of 520024 at the dummy and a creature striker's hit 800 ms later: a Shadow hit (47632, magic) and a Physical hit (32247), each landing without the cast (count 1) and not landing under it (count still 1), and landing again 2600 ms after the cast (count 2, the route control): the same shape as Blessing of Purity 804253 immune_strike. The leap is status 4: 520025 Effect[0] is 138 SPELL_EFFECT_LEAP_BACK on the caster, a knockback packet the client acknowledges, as Norgannon's Wrath 524739 (guide section 2). A client-side check would cast 520024 in the lab client and read the position during and after the window, expecting a launch of 200 (520025 Effect[0] BasePoints 200, MiscValueB 200). Reference search 2026-11-22: see the entries; nothing found beyond the tooltip and the server DBC."
+    "reason": "Duration measured by the 520025 aura held / gone pair. The immunity is measured by a real cast of 520024 at the dummy and a creature striker's hit 800 ms later: a Shadow hit (47632, magic) and a Physical hit (32247), each landing without the cast (count 1) and not landing under it (count still 1), and landing again 2600 ms after the cast (count 2, the route control): the same shape as Blessing of Purity 804253 immune_strike. The leap is status 4: 520025 Effect[0] is 138 SPELL_EFFECT_LEAP_BACK on the caster, a knockback packet the client acknowledges, as Norgannon's Wrath 524739 (guide section 2). A client-side check would cast 520024 in the lab client and read the position during and after the window, expecting a launch of 200 (520025 Effect[0] BasePoints 200, MiscValueB 200). Reference search 2026-11-22: see the entries; nothing found beyond the tooltip and the server DBC. Added: Pair 20261122-134456 / 20261122-134548 (prove, build e496bda1, server b7e79aca55+), no flip, no alert. 520024 cast at the dummy (cast_target, ADR 1027) puts 520025 on the caster; Hamstring 1715 (Physical, melee) and Fear 5782 (Shadow) applied by the dummy land before, do not land in the 2 s window and land again after it."
   },
   {
     "spell": 520024,
@@ -1654,7 +1681,12 @@
     "claims": [
       {
         "claim": "a 10 yd holy circle",
-        "labels": []
+        "labels": [
+          "520647 behaviour_metric_delta reach_in",
+          "520647 behaviour_metric_delta reach_out",
+          "520647 behaviour_metric_delta dynobj_radius",
+          "520647 behaviour_metric_delta dynobj_size"
+        ]
       },
       {
         "claim": "for 15 s",
@@ -1663,7 +1695,7 @@
         ]
       }
     ],
-    "reason": "OPEN: the radius claim has no status. Radius: caster at 9 yd from the circle centre holds the aura, at 13 yd does not (labels radius_in, radius_out ran, not cited): that brackets 9 to 13 yd only and a 9 yd or 11 yd circle passes both, and the area test adds object sizes (AnyFriendlyUnitInObjectRangeCheck, IsWithinDistInMap) with no stock control. Duration: aura on the caster read 9988 ms against 10000 five seconds in (13500 and 16500 ms excluded), a readback. Reference search: bindmysoul agrees (10 yd, 15 seconds)."
+    "reason": "Pair 20261122-134456 / 20261122-134548 (prove, build e496bda1, server b7e79aca55+), no flip, no alert. Reach written term by term: radius 10 (dynamic_object_radius read 10; EffectRadiusIndex 13) + dynamic object size 0.389 (dynamic_object_size read 0.389) + caster combat reach 1.5 = 11.889 yd from the circle centre (_IsWithinDist adds both sizes, Object.cpp:1257-1264). The caster at 11.4 yd holds the aura, at 12.4 yd does not. Duration: circle_duration (unchanged). Reference search: none needed beyond the tooltip, the DBC and the code (design D-145, group 5)."
   },
   {
     "spell": 520647,
@@ -2365,7 +2397,7 @@
     "spell": 561328,
     "clause": "Removes the cast time of Glare while above 80% health.",
     "kind": "claim",
-    "reason": "The 80% literal is not measured: the arms read 90% (cast time 0) and 50% (control, 1500 ms), which any threshold between 50% and 90% passes, and the code keeps Fortuitous on above 80% and off only at or below 75% (AscensionSunCleric.cpp:366-371, hysteresis set on purpose by b2ad6f76d6, #5963, Fixes #5763/#5783). Tool need: a pre-step that clears the state below 75% before the reads at 79% (1500 ms expected) and 81% (0 ms expected), and a drop from full health to 76-79% that records the hysteresis. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state found #5963; nothing else found.",
+    "reason": "Pair 20261122-134456 / 20261122-134548 (prove, build e496bda1, server b7e79aca55+), no flip, no alert. Glare 807870 cast time after the learn: 0 ms at 81% entered from 50%, 1500 ms at 79% entered from 90% or from 50% and at 75% entered from 90% (the four edges D-153 named, judged by the tooltip literal). The #5963 band (AscensionSunCleric.cpp:366-371, b2ad6f76d6) keeps the helper aura between 75% and 80%, but not its effect: the helper carries CasterAuraState 28 (ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT, HealthAbovePct(80) each update, Unit.cpp:766, 3f8e071750), and ModifyAuraState unapplies the effects of owned auras with that state (Unit.cpp:8541-8553). Mentor D-157: the tooltip literal holds, status 1, no status 2, no server change. Reference search: none needed beyond the tooltip, the DBC and the code (design D-145, group 5).",
     "claims": [
       {
         "claim": "Removes the cast time of Glare",
@@ -2375,8 +2407,13 @@
         ]
       },
       {
-        "claim": "while above 80% health",
-        "labels": []
+        "claim": "while above 80% health (on at 81% from 50%; off at 79% from 90% and from 50%; off at 75% from 90%)",
+        "labels": [
+          "561328 behaviour_metric_delta glare_edge_on_above_80",
+          "561328 behaviour_metric_delta glare_edge_off_band_from_above",
+          "561328 behaviour_metric_delta glare_edge_off_band_from_below",
+          "561328 behaviour_metric_delta glare_edge_off_at_75"
+        ]
       }
     ]
   },
@@ -3707,7 +3744,7 @@
     "clause": "Does not work on bosses.",
     "labels": [],
     "kind": "claim",
-    "reason": "Open. A harness fixture is not an owned boss: Creature::IsDungeonBoss() is false only for a player-owned creature (Creature.cpp:3627-3628, owner = UNIT_FIELD_SUMMONEDBY), and player->SummonCreature(entry, position) stores no owner (TemporarySummon.cpp:27-37, 229-230), so the flag read is the template's. Training dummy 31146 reads as a non-boss because CREATURE_FLAG_EXTRA_DUNGEON_BOSS is set only for kill-credit creatures of non-raid instance_encounters (ObjectMgr.cpp:6846-6862). Next design: a 5-man encounter kill-credit creature as the target (entry not checked, nor whether its AI tolerates the harness). Lead (observation, no change): AscensionSunCleric.cpp:312 tests only IsDungeonBoss(), and raid encounter creatures never get the flag (ObjectMgr.cpp:6856-6862), so a raid or world boss is not excluded although the tooltip says 'Does not work on bosses.'"
+    "reason": "Open. A harness fixture is not an owned boss: Creature::IsDungeonBoss() is false only for a player-owned creature (Creature.cpp:3627-3628, owner = UNIT_FIELD_SUMMONEDBY), and player->SummonCreature(entry, position) stores no owner (TemporarySummon.cpp:27-37, 229-230), so the flag read is the template's. Training dummy 31146 reads as a non-boss because CREATURE_FLAG_EXTRA_DUNGEON_BOSS is set only for kill-credit creatures of non-raid instance_encounters (ObjectMgr.cpp:6846-6862). Next design: a 5-man encounter kill-credit creature as the target (entry not checked, nor whether its AI tolerates the harness). Lead (observation, no change): AscensionSunCleric.cpp:312 tests only IsDungeonBoss(), and raid encounter creatures never get the flag (ObjectMgr.cpp:6856-6862), so a raid or world boss is not excluded although the tooltip says 'Does not work on bosses.' Group 5 (D-154): arms ready, not linked: Sneed 643 (Deadmines dungeon boss) reads 0 Blinded stacks with Vow of the Eclipse 505340 landing (blind_stacks_dungeon_boss, eclipse_lands_dungeon_boss) and Harvest Golem 36 reads 5 (blind_stacks_normal, eclipse_lands_normal), pair 20261122-134456 / 20261122-134548; the raid-encounter and world-boss-rank arms come with the Twilight server fix."
   },
   {
     "spell": 704579,
@@ -3756,11 +3793,15 @@
         ]
       },
       {
-        "claim": "while above 80% health (open: the server holds the helper through a 75% to 80% hysteresis band, so the 80% literal needs an arm that enters from below at 79% and 81%; the arms here are 74% and 82%)",
-        "labels": []
+        "claim": "while above 80% health (on at 81% entered from 50%; off at 79% entered from 50% and from 90%)",
+        "labels": [
+          "704585 behaviour_hit_ratio taken_above_from_below",
+          "704585 behaviour_hit_ratio taken_band_from_below",
+          "704585 behaviour_hit_ratio taken_off_band_from_above"
+        ]
       }
     ],
-    "reason": "The 80% literal is held open (I-2 of the b9a review). A 78% arm cannot bracket it: AscensionSunCleric.cpp:366-370 (b2ad6f76d6, fixes #5763 and #5783) enters the helper above 80% and leaves it at or below 75%, so inside 75% to 80% the previous state holds, and a first attempt at 78% failed its own check (helper 707769 still present, aura check 1 of the treatment arm, both runs). Tool need returned to the controller: a taken_hit pre-step that sets the health below 75% and lets the helper clear before the health is raised to 79% and 81%."
+    "reason": "Pair 20261122-134456 / 20261122-134548 (prove, build e496bda1, server b7e79aca55+), no flip, no alert. Strikes of Void Zone 92559 against a control arm: 81% entered from 50% reads ratio 0.9028 (5% plus 5%), 79% entered from 50% reads 0.9499 and 79% entered from 90% reads 0.9499 with the helper 707769 present. The #5963 band (AscensionSunCleric.cpp:366-371, b2ad6f76d6) keeps the helper aura between 75% and 80%, but not its effect: the helper carries CasterAuraState 28 (ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT, HealthAbovePct(80) each update, Unit.cpp:766, 3f8e071750), and ModifyAuraState unapplies the effects of owned auras with that state (Unit.cpp:8541-8553). Mentor D-157: the tooltip literal holds, status 1, no status 2, no server change. Reference search: none needed beyond the tooltip, the DBC and the code (design D-145, group 5)."
   },
   {
     "spell": 704586,
@@ -5098,16 +5139,19 @@
     "spell": 802935,
     "clause": "and auto attacks now have a $h% chance to restore $504619s1% of your maximum mana.",
     "kind": "claim",
-    "reason": "Energize source fixed (Sun Cleric ADR 0019, mentor D-93): the proc's mana is logged as Energize 3% 504619, threat-free, no longer as Vow of Grace 504877; regression sun-cleric-sunsworn-mana-source-504619.json (control without Sunsworn). Rate and amount stay open: a proc entry for 802935 was tried (pair 20261122-124700 / -125240) and removed: the character dual-wields 2529 in both hands (Titan's Grip), the procs kind divides both hands' events by the main-hand trials, proc_rate read 0.195 and 0.194 against 0.10 (alert in both runs, about twice the chance), and the energize amount (86 = floor(3% of max mana) in both runs, 3% from 504619 Effect[0] BasePoints 2 + 1) had no control arm in the pair (an attack trigger takes no baseline). Tool needs: per-hand trials for the procs kind (batch 6 group 5 item 4) and a baseline arm for an attack trigger. Reference search 2026-11-22: bindmysoul snapshot \"10% chance to restore 3% of your maximum mana\" (same figures); nothing else found.",
+    "reason": "Pair 20261122-134456 / 20261122-134548 (prove, build e496bda1, server b7e79aca55+), no flip, no alert. Trials are both hands' damaging auto attacks (trial_hand both, ADR 1027): the handler rolls on every automatic damage event of either hand (AscensionSunClericEvents.cpp:124, Chance ProcChance 10). Rate 0.1035 in run 1 inside the band 0.08-0.12 (pilot 0.0947 over 8952 trials), baseline arm without the passive; each energize restores 3% of maximum mana (504619). The earlier entry divided both hands' events by main-hand trials (0.195, pair 20261122-124700 / -125240). Energize source: Sun Cleric ADR 0019, mentor D-93. Reference search: none needed beyond the tooltip, the DBC and the code (design D-145, group 5).",
     "claims": [
       {
         "claim": "auto attacks now have a $h% chance",
-        "labels": []
+        "labels": [
+          "802935 proc_rate"
+        ]
       },
       {
         "claim": "to restore $504619s1% of your maximum mana",
         "labels": [
-          "802935 effect_value 504619e0 #2"
+          "802935 effect_value 504619e0 #2",
+          "802935 proc_energize_amount 0"
         ]
       }
     ]
@@ -5930,7 +5974,8 @@
     "labels": [
       "805647 effect_value #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, server lead: a proc entry (trigger Glorious Execution 803913, events = its casts beyond the trigger casts, trials = landed 800691 strikes) read 0 additional strikes in 92 trials in the group 5 pilot (20% expected, 0.8^92 about 1e-9); the entry was removed (nothing merges alerting). Handler Events.cpp:128, reaction :303 Cast(player, target, Highest(player, 800626)). Cause not traced."
   },
   {
     "spell": 805816,
