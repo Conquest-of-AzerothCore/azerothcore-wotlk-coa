@@ -952,7 +952,7 @@
       "300723 behaviour_hit_ratio fire_damage"
     ],
     "kind": "claim",
-    "reason": "Owner ruling O-19 (Q-sc-9, option b, 2026-11-22), replacing the earlier hold: the tooltip's Holy and Fire spell damage increase is the +30% Holy and Fire damage the server applies, and the Intellect-based effect is only for the spell hit rating (clause 66). Owner's words: \"On conserve +30% de spell damage pour le feu et le sacr\u00e9. Le buff qui prend l'intelligence en compte n'est que pour le taux de toucher\". Expected value: x1.30 of the Holy and Fire hit (the ruling's 30%, not a measured value). The server rewrite at load (AscensionSunClericContracts.cpp:185-186, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire) is the ruled behaviour; no change. Counted on the b9d arms: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3), holy_damage, holy_damage_control and fire_damage hit_ratio and the effect_value e2 read ok in both runs, no flip, control arm holy_damage_control. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found beyond the ruling.",
+    "reason": "Owner ruling O-19 (Q-sc-9, option b, 2026-11-22), replacing the earlier hold: the tooltip's Holy and Fire spell damage increase is the +30% Holy and Fire damage the server applies, and the Intellect-based effect is only for the spell hit rating (clause 66). Owner's words: \"On conserve +30% de spell damage pour le feu et le sacré. Le buff qui prend l'intelligence en compte n'est que pour le taux de toucher\". Expected value: x1.30 of the Holy and Fire hit (the ruling's 30%, not a measured value). The server rewrite at load (AscensionSunClericContracts.cpp:185-186, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire) is the ruled behaviour; no change. Counted on the b9d arms: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3), holy_damage, holy_damage_control and fire_damage hit_ratio and the effect_value e2 read ok in both runs, no flip, control arm holy_damage_control. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found beyond the ruling.",
     "text_source": {
       "basis": "owner_ruling",
       "spell": 300723,
@@ -1150,7 +1150,11 @@
       },
       {
         "claim": "while in Sunrise",
-        "labels": []
+        "labels": [
+          "301266 cost_gate 500154 reset_horusath_sunset without",
+          "301266 cost_gate 500154 reset_horusath_sunset with",
+          "301266 cost_gate 500154 reset_horusath_sunset with after_cast"
+        ]
       },
       {
         "claim": "and Rapture",
@@ -1161,7 +1165,11 @@
       },
       {
         "claim": "while in Sunset",
-        "labels": []
+        "labels": [
+          "301266 cost_gate 806477 reset_rapture_sunrise without",
+          "301266 cost_gate 806477 reset_rapture_sunrise with",
+          "301266 cost_gate 806477 reset_rapture_sunrise with after_cast"
+        ]
       },
       {
         "claim": "and causes their damage dealt to launch a Solar Flare",
@@ -1171,7 +1179,7 @@
         ]
       }
     ],
-    "reason": "Reset arms: cost_gate resets, Solar Concord cast with the phase aura and the checker 500643 set as named precondition fixtures; control = the same sequence without the Solar Concord cast and without the phase aura. The DBC resets both cooldowns through 301268 / 302899 with no phase gate, so the arms prove the reset by the cast and not the words \"while in Sunrise\" / \"while in Sunset\", which stay open (tool need: a cost_gate arm with the cast in the other phase, expected refused; an accepted recast there would be a server finding for the owner). Reference search 2026-11-22: coa-history spell 301266 (88 casts, no cooldown event); nothing else found."
+    "reason": "Reset arms: cost_gate resets, Solar Concord cast with the phase aura and the checker 500643 set as named precondition fixtures; control = the same sequence without the Solar Concord cast and without the phase aura. The DBC resets both cooldowns through 301268 / 302899 with no phase gate, so the arms prove the reset by the cast and not the words \"while in Sunrise\" / \"while in Sunset\", which stay open (tool need: a cost_gate arm with the cast in the other phase, expected refused; an accepted recast there would be a server finding for the owner). Reference search 2026-11-22: coa-history spell 301266 (88 casts, no cooldown event); nothing else found. Round 11 d8: the phase words are read by other-phase arms (cost_gate refused_with), whose expectation is a refused recast: Solar Concord cast under Sunset, then Horusath Blast; Solar Concord cast under Sunrise, then Rapture. ALERT, finding F1 awaiting an owner ruling: the recast was accepted in both other-phase arms, cast_failure 0 against 67 expected (SPELL_FAILED_NOT_READY), in all four runs of pairs x3 and x4 (build 80cb6ee11a34), while the without arms read 67 ok and the in-phase with arms read 0 ok. The installed DBC resets both cooldowns on every cast through 301268 / 302899 (Effect 195, no CasterAuraSpell), and the only phase gate was in the aura-apply hook (AscensionSunClericAuras.cpp:101-107 before the O-26 fix, e36bc50aad). The 'while in Sunrise' and 'while in Sunset' parts stay open; the expectation stays the tooltip's. Fix round: each other-phase with arm now also reads cast_failure 0 of Solar Concord before the recast (label 'with after_cast'), so a refused Concord cast alerts instead of reading as a refused reset. Fix pair y1 (build 80cb6ee11a34, server commit 24eca3a958b6, no flip): both after_cast labels read 0 (Concord went through) and both other-phase with arms read 0 against 67 again, in both runs, so F1 stands with the Concord cast proven landed. Owner ruling O-26 (reset by phase, as the tooltip says), fix ADR conformance/sun-cleric 0033: the class spell script prevents 301268 outside Sunrise 500477 and 302899 outside Sunset 500511 (AscensionSunClericAbilities.cpp:509-510, bound by rev_20261122_50_sun_cleric_solar_concord_phase_reset.sql) and the duplicate in-phase reset of the aura-apply hook is removed. Fix pair z1 20261122-175938 / 20261122-180305 (build 60f842dff8ae, server commit a1321a6ef242, no flip): reset_horusath and reset_rapture with 0 ok and without 67 ok; reset_horusath_sunset and reset_rapture_sunrise with 67 ok, with after_cast 0 ok (Concord landed), without 67 ok, in both runs. The other-phase aura is not read absent (m-5, tool need: a cost_gate cast_auras removal or absence read; cast_auras refuses stacks 0); with the fix, a refused other-phase recast also shows the gating aura was absent when 301268 / 302899 hit."
   },
   {
     "spell": 301266,
@@ -1208,7 +1216,7 @@
       {
         "claim": "reduces the target's chance to hit by $s1%",
         "labels": [
-          "301266 behaviour_metric_delta flare_hit_chance"
+          "572752 behaviour_metric_delta attacker_miss"
         ]
       },
       {
@@ -1217,7 +1225,8 @@
           "301266 behaviour_metric_delta flare_duration"
         ]
       }
-    ]
+    ],
+    "reason": "Round 11 d8: the miss share of Solar Flare 807175 effect 0 (SPELL_AURA_MOD_HIT_CHANCE, $s1 = 3) is read on the swings of 8 attackers by the attacker_miss_share entry of Sun Down 572752 (aura 807175 never set by the harness, 5 parts, control arm without the cast): the same spell and effect that Solar Concord's proc casts at the target (AscensionSunClericEvents.cpp:250 casts 807175), so the engine path that lowers the swings is the one of the aura, whoever launched it. This clause cites that label as the Solar Flare claims of 560276 cite flare_damage of 301266. Solar Concord has no attacker_miss_share entry of its own: that kind casts one spell at the attackers and has no pre-cast of Solar Concord with the phase aura (tool need). The readback flare_hit_chance (aura_amount -3 on the dummy after a Concord proc) stays in the class file as evidence of the application by Solar Concord and is not a claim label. Reference search 2026-11-22: coa-history 807175 Solar Flare: 15499 damage events in 29 logs; bindmysoul (fetched 2026-07-22) reads 'reduces the target's chance to hit by -3% for 10 seconds' on Adjudication 804630; nothing else found."
   },
   {
     "spell": 301267,
@@ -1644,11 +1653,49 @@
         ]
       },
       {
-        "claim": "the threat reduction holds for the Piety spells (G-23 subset)",
-        "labels": []
+        "claim": "reduces the threat generated by them by $s2% (Dawnsear 554406)",
+        "labels": [
+          "504734 behaviour_metric_delta threat",
+          "504734 behaviour_metric_delta threat_base"
+        ]
+      },
+      {
+        "claim": "reduces the threat generated by them by $s2% (Horusath Blast 500154)",
+        "labels": [
+          "504734 behaviour_metric_delta threat_hb",
+          "504734 behaviour_metric_delta threat_base_hb"
+        ]
+      },
+      {
+        "claim": "reduces the threat generated by them by $s2% (Rapture 807372)",
+        "labels": [
+          "504734 behaviour_metric_delta threat_rapture",
+          "504734 behaviour_metric_delta threat_base_rapture"
+        ]
+      },
+      {
+        "claim": "reduces the threat generated by them by $s2% (Radiant Flame 560867)",
+        "labels": [
+          "504734 behaviour_metric_delta threat_radiant",
+          "504734 behaviour_metric_delta threat_base_radiant"
+        ]
+      },
+      {
+        "claim": "reduces the threat generated by them by $s2% (Sun Down 572752)",
+        "labels": [
+          "504734 behaviour_threat_slope 572752 talent",
+          "504734 behaviour_threat_slope 572752 control"
+        ]
+      },
+      {
+        "claim": "reduces the threat generated by them by $s2% (Sunflare 800231)",
+        "labels": [
+          "504734 behaviour_threat_slope 800231 talent",
+          "504734 behaviour_threat_slope 800231 control"
+        ]
       }
     ],
-    "reason": "HELD, no final status: the threat label 504734 behaviour_metric_delta threat is measured on Dawnsear 554406 only and is moved out of the claim because G-23 is unmet (the scripted spells Sun Down 572752, Sunflare 800231 and Rapture 806477 and other shapes are untested), so the audit does not count it as behaviour; the entry keeps emitting it as evidence. Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. Dawnsear 554406 at spell power 10000: threat per damage 0.8056 and 0.8056 after the learn against 0.80718 expected (0.8 + 60/8360.7), control threat_base 1.0056 and 1.0056 against 1.00718 (the flat 60 initial threat is unmodified, as in Holy Form 805301). The first design read a cumulative ratio over two casts and alerted (0.9245, 0.9057); that was a test fault, fixed by one cast per entry. Reference search: coa-history 0 events (passive); nothing else found. Subset: threat tested on Dawnsear 554406 only, no N-of-M split of the Piety spells (G-23). Note: the control reads 1.0056, so the 60 flat term implies a damage of about 10.7k against the modelled mean 8360.7; the 0.01 tolerance absorbs it and a 10% or 30% cut would read 0.1 off."
+    "reason": "HELD, no final status: the threat label 504734 behaviour_metric_delta threat is measured on Dawnsear 554406 only and is moved out of the claim because G-23 is unmet (the scripted spells Sun Down 572752, Sunflare 800231 and Rapture 806477 and other shapes are untested), so the audit does not count it as behaviour; the entry keeps emitting it as evidence. Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. Dawnsear 554406 at spell power 10000: threat per damage 0.8056 and 0.8056 after the learn against 0.80718 expected (0.8 + 60/8360.7), control threat_base 1.0056 and 1.0056 against 1.00718 (the flat 60 initial threat is unmodified, as in Holy Form 805301). The first design read a cumulative ratio over two casts and alerted (0.9245, 0.9057); that was a test fault, fixed by one cast per entry. Reference search: coa-history 0 events (passive); nothing else found. Subset: threat tested on Dawnsear 554406 only, no N-of-M split of the Piety spells (G-23). Note: the control reads 1.0056, so the 60 flat term implies a damage of about 10.7k against the modelled mean 8360.7; the 0.01 tolerance absorbs it and a 10% or 30% cut would read 0.1 off. Round 11 d8: evidence arms added for Horusath Blast 500154 (direct), Rapture 807372 (direct) and Radiant Flame 560867 (periodic), each with a control arm without the talent (labels 504734 behaviour_metric_delta threat_hb, threat_base_hb, threat_rapture, threat_base_rapture, threat_radiant, threat_base_radiant). Sun Down 572752 and Sunflare 800231 stay untested, so G-23 stays unmet and the claim stays held: Sunflare 800231 carries no spell power coefficient in its Description and Sun Down damages through a delayed trigger and a ground aura, so no expected threat per damage can be derived from the DBC without a measured value; that needs a threat slope read with a stated flat part (tool need). Sunflare 800231 is now read by a threat_slope pair (labels 504734 behaviour_threat_slope 800231 talent and control, flat = SpellLevel, Spell.cpp:5733-5737): 0.8 / 0.8 ok and control 1.0 / 1.0 ok in pairs x3 and x4. ALERT, finding F2 awaiting an owner ruling: threat_radiant reads 1.0053 to 1.0058 against 0.80625 expected in all six runs of pairs x2, x3 and x4 (builds a94b9d9a49e5 and 80cb6ee11a34), and its control threat_base_radiant reads 1.0053 to 1.0058 in band (1.00625), so the control holds and the reading is no cut on Radiant Flame: ThreatManager.cpp:713 applies SPELLMOD_THREAT with the damaging spell 807058, whose flags [0, 0, 0x8] fall outside 504734's mask. The claim stays held and open; the expectation stays the tooltip's -20%. Fix round: a Sun Down 572752 threat_slope pair is added (labels 504734 behaviour_threat_slope 572752 talent and control, flat 119 = SpellLevel 59 + 60 of 572752 and 572753, read after the delayed 572753 hit and before the first Solar Flare tick). Fix pair y1 (build 80cb6ee11a34, server commit 24eca3a958b6, no flip, no Solar Flare 807175 hit by the read): VOID, the control without the talent read 1.0414 and 1.0329 against 1.0 (band 0.001), so the flat 119 is wrong and the talent arm (1.0331, 1.0364) judges nothing. Raw readings: talent threat 1960 for 1782 health lost and 1798 for 1620; control 1602 for 1424 and 1974 for 1796. Threat less health lost is 178 in all four readings, with and without the talent; 178 = 119 + 59 would match the SpellLevel 59 of the ground aura 572754, a hypothesis not traced in the code. Sun Down stays untested for the claim; a next design states that flat with its code citation and its control. Mentor D-185 (confirmed defect under the tooltip), fix ADR conformance/sun-cleric 0034: the class contract adds 0x8 | 0x40 to word 2 of 504734 Effect[1]'s mask (AscensionSunClericContracts.cpp:285-286), so the cut reaches 807058 and 572753; the only other family-33 spell with those bits, Vow of Light 505197, ignores caster modifiers (SunClericCopies, AscensionSunClericContracts.cpp:64-68; SpellInfo.cpp:1566-1570). Sun Down's flat is 178 = SpellLevel 59 of 572752 + 60 of 572753 + 59 of 572754, each cast adding its SpellLevel once with ignoreModifiers (Spell.cpp:5736-5737, 5766). Fix pair z1 20261122-175938 / 20261122-180305 (build 60f842dff8ae, server commit a1321a6ef242, no flip): threat_radiant 0.8058 / 0.8052 ok against 0.80625 (control 1.0055 / 1.0058 ok); Sun Down threat_slope 0.8 / 0.8 ok, control 1.0 / 1.0 ok; Horusath Blast 0.8022 / 0.8015, Rapture 0.8051 / 0.8051, Sunflare slope 0.8 / 0.8, Dawnsear 0.8072 / 0.8072, all ok, with their controls ok. The six spells measured read the -20% after the fix: Dawnsear 554406 (threat), Horusath Blast 500154 (threat_hb), Rapture 807372 (threat_rapture), Radiant Flame 560867 (threat_radiant), Sun Down 572752 (threat_slope 572752) and Sunflare 800231 (threat_slope 800231), one rank each, each with its control arm without the talent; the other spells of the mask were not measured. Before and after (mentor D-185, ADR sc/0034): threat_radiant read 1.0053 to 1.0058 in all six runs of pairs x2, x3 and x4 against 0.80625 expected, and reads 0.8058 / 0.8052 in z1; Sun Down had no valid before reading (the y1 control read 1.0414 / 1.0329 against 1.0 because the flat was wrong) and reads 0.8 / 0.8 in z1 with the flat 178 of the ADR. Radiant Flame flat: the 56 stated is the SpellLevel of 560867 (DBC); each 807058 tick (SpellLevel 13, DBC) also passes HandleThreatSpells (Spell.cpp:4354) and may add its own 13, 4 x 13 = 52 (0.0058), so the exact flat is not traced; the difference is at most 0.006, inside the 0.01 tolerance, which is unchanged. The claim's status stays for the triage."
   },
   {
     "spell": 504848,
@@ -3075,7 +3122,8 @@
       {
         "claim": "Activate your pendant of the sun, refreshing the duration of Dawn",
         "labels": [
-          "680630 behaviour_metric_delta pendant_duration"
+          "680630 behaviour_metric_delta pendant_duration",
+          "680630 behaviour_metric_delta pendant_duration_control"
         ]
       },
       {
@@ -3085,7 +3133,7 @@
         ]
       }
     ],
-    "reason": "The Pendant duration is read by two presence windows on the Dawn state aura 807440 (harness phase_auras fixture, the condition Pendant needs, not the subject): present 55.0 to 56.0 s and gone 65 to 66 s after the Pendant cast started, which excludes 54 s and 66 s. No arm without Pendant is read at the same offset (review I-4), so the duration part is not control-armed and the row stays data through the charges claim (aura_charges: 8 charges before, 10 after). Reference search 2026-11-22: coa-history spell 680630 shows 0 events in 186 logs; nothing else found. Pair numbers in the fix report."
+    "reason": "The Pendant duration is read by two presence windows on the Dawn state aura 807440 (harness phase_auras fixture, the condition Pendant needs, not the subject): present 55.0 to 56.0 s and gone 65 to 66 s after the Pendant cast started, which excludes 54 s and 66 s. No arm without Pendant is read at the same offset (review I-4), so the duration part is not control-armed and the row stays data through the charges claim (aura_charges: 8 charges before, 10 after). Reference search 2026-11-22: coa-history spell 680630 shows 0 events in 186 logs; nothing else found. Pair numbers in the fix report. Round 11 d8: the duration part now has its control (pendant_duration_control: an Illumination in place of Pendant, Dawn gone when read 55 s later, ok in both runs of pair x3, build 80cb6ee11a34, no flip). The charges part stays data (aura_charges readback 8 to 10). Consumption was tried with post_trigger_casts: 2 heals, Pendant, 9 heals read Dawn present (ProcCharges 10 from the DBC), but the control of 11 heals without the refresh also read Dawn present in both runs where the DBC count says it should be gone, so the presence read does not tell the refresh from none (a state aura may stay with 0 charges; cause not established). Design 2 (read aura_charges after the post casts) is a readback and cannot count as behaviour. Both consumption entries withdrawn."
   },
   {
     "spell": 680631,
@@ -3501,7 +3549,7 @@
         ]
       }
     ],
-    "reason": "Direction proven, figure not stated by the tooltip, server value 0.25 unsourced (mentor D-106; power_term_direction, ADR 1022, provisional). Horusath Blast 572801 at attack power 70 and 1050 (fixture: Attack Power 980 35785 set by harness set_aura), with and without 680656: interaction 235.4 / 227.6 at z 16.47 / 15.98 against 3.09, control growth -4.46 / 11.99 (z -0.43 / 1.19), control check false alert 0.4% per pair under the normal law; the 0.25 x AP at AscensionSunClericContracts.cpp:309-310 stays an owner observation. Reference search 2026-11-22: the tooltip, the DBC (681471 carries no value), the bindmysoul snapshot (fetched 2026-07-22, the same sentence with no coefficient), ascension-data and coa-history give no coefficient. Pair 20261122-080523 / 20261122-081232, build 614be08400d8, server commit d043cfebbc4f, no flip."
+    "reason": "Direction proven, figure not stated by the tooltip, server value 0.25 unsourced (mentor D-106; power_term_direction, ADR 1022, provisional). Horusath Blast 572801 at attack power 70 and 1050 (fixture: Attack Power 980 35785 set by harness set_aura), with and without 680656: interaction 235.4 / 227.6 at z 16.47 / 15.98 against 3.09, control growth -4.46 / 11.99 (z -0.43 / 1.19), control check false alert 0.4% per pair under the normal law; the 0.25 x AP at AscensionSunClericContracts.cpp:313-314 stays an owner observation. Reference search 2026-11-22: the tooltip, the DBC (681471 carries no value), the bindmysoul snapshot (fetched 2026-07-22, the same sentence with no coefficient), ascension-data and coa-history give no coefficient. Pair 20261122-080523 / 20261122-081232, build 614be08400d8, server commit d043cfebbc4f, no flip."
   },
   {
     "spell": 680656,
@@ -4622,9 +4670,11 @@
     "clause": "Your Illumination now shields you for $s1% of the amount healed.",
     "kind": "claim",
     "labels": [
-      "704936 behaviour_metric_delta shield_base",
-      "704936 behaviour_metric_delta shield_sp"
-    ]
+      "704936 behaviour_metric_delta shield_absorb",
+      "704936 behaviour_metric_delta shield_absorb_sp",
+      "704936 behaviour_metric_delta shield_absorb_control"
+    ],
+    "reason": "Round 11 d8: the shield is read by the damage it stops (spell_absorb_total of Light of the Naaru 41394 on the caster, an event), at 0 and +1000 spell power with a control arm without 704936. The aura_amount readbacks shield_base and shield_sp measured the same amounts (11..12 and 262..265) and stay in the class file as evidence; they are not claim labels because the absorbed total reads the same claim as a behaviour. Reference search 2026-11-22: coa-history spell 704936: 0 events in 186 logs (a passive); nothing else found."
   },
   {
     "spell": 704938,
@@ -5486,7 +5536,7 @@
         "labels": []
       }
     ],
-    "reason": "Held, not counted (D-95, mentor condition: cause of the run-1 zero first). The cause of the zero read of base pair 7 run 1 (a crit, a miss or another cause) is unproven and no measured arm settles it. The Strength entry damage_block and the damage entry keep the critical false filter (unchanged since 221e0ff4a2, 2026-11-20): a critical hit would read 0 there; the arms damage_sp, damage_ap and damage_block_only count every damage event with no critical filter, so a crit would exceed their window and alert. Fixture 984954 (Effect[1] aura 57, -1000% spell crit) on a DmgClass 1 spell already makes a crit impossible in every arm, so dropping the filter does not test the crit hypothesis. The block value coefficient 1.0 is the implementation's (AscensionSunClericContracts.cpp:311-312), the tooltip states none and the reference search found none; the contrast of damage_block_only against the base arms shows the stated scaling with block value, not the coefficient. Two claims stay open: the front cone (Spell.dbc 504580 Effect[0] EffectImplicitTargetA 24, EffectRadiusIndex 32) and the shield requirement (EquippedItemClass 4, SubClassMask 64): every arm strikes one dummy in front of the caster, none shows a cone edge, a second enemy or a cast without a shield."
+    "reason": "Held, not counted (D-95, mentor condition: cause of the run-1 zero first). The cause of the zero read of base pair 7 run 1 (a crit, a miss or another cause) is unproven and no measured arm settles it. The Strength entry damage_block and the damage entry keep the critical false filter (unchanged since 221e0ff4a2, 2026-11-20): a critical hit would read 0 there; the arms damage_sp, damage_ap and damage_block_only count every damage event with no critical filter, so a crit would exceed their window and alert. Fixture 984954 (Effect[1] aura 57, -1000% spell crit) on a DmgClass 1 spell already makes a crit impossible in every arm, so dropping the filter does not test the crit hypothesis. The block value coefficient 1.0 is the implementation's (AscensionSunClericContracts.cpp:322), the tooltip states none and the reference search found none; the contrast of damage_block_only against the base arms shows the stated scaling with block value, not the coefficient. Two claims stay open: the front cone (Spell.dbc 504580 Effect[0] EffectImplicitTargetA 24, EffectRadiusIndex 32) and the shield requirement (EquippedItemClass 4, SubClassMask 64): every arm strikes one dummy in front of the caster, none shows a cone edge, a second enemy or a cast without a shield."
   },
   {
     "spell": 800764,
@@ -6334,7 +6384,7 @@
       "805581 behaviour_metric_delta cd_control"
     ],
     "kind": "claim",
-    "reason": "Control arms = the plain cast without fulfilment (23994) and the same fulfilment without 805581 (23991). With it 21991 against 22000 within 150: cut 2000 ms from 807445 BasePoints -2001, excludes 1800 and 2200 ms (10% off both sides). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
+    "reason": "Control arms = the plain cast without fulfilment (23994) and the same fulfilment without 805581 (23991). With it 21991 against 22000 within 150: cut 2000 ms from 807445 BasePoints -2001, excludes 1800 and 2200 ms (10% off both sides). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip. Round 11 d8, open: the cooldown cut is not yet read as a behaviour. Design 1: cost_gate cooldown arms with the Vow and Dawn casts as setup_casts before the priming Horusath Blast, attempt at 23200 ms: the with arm was refused (cast_failure 67) in both runs while the without and beyond arms were refused as expected (pair 20261122 x3, build 80cb6ee11a34, no flip). Design 2: the same with fixtures 823764 and 984954 before every Horusath Blast cast (a landed hit): the with arm was still refused (67), so the cut that the cd entry reads (22000 ms 1000 ms after the cast) does not show as an early accepted recast in that sequence; the cause is not established (no cause guessed), both entries withdrawn from the class file, the cd readback labels stay."
   },
   {
     "spell": 807870,

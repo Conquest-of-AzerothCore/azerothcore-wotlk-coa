@@ -102,13 +102,6 @@ class aura_ascension_sun_cleric_lifecycle : public AuraScript
             GetAura()->SetCharges(id == Dawn ? GetAura()->CalcMaxCharges() : id == 301265 ? 3 : 2);
         if (id == Dawn || id == 301265 || id == 301242)
             GetAura()->SetUsingCharges(false);
-        if (id == 301266)
-        {
-            if (player->HasAura(Sunrise))
-                Reduce(player,500154,INT32_MAX);
-            if (player->HasAura(Sunset))
-                Reduce(player,806477,INT32_MAX);
-        }
         if (id == 803238)
             Refresh(player);
     }

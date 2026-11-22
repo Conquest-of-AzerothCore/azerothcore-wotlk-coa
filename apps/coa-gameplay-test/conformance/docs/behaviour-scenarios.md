@@ -834,6 +834,13 @@ A `threat_slope` entry may name `flat_spells`, spells the hit triggers on the du
 join the flat part, and the hit spell's `CasterAuraSpell` is set before its cast (ADR 0225). Sacred Swing 572769: the
 slow 301061 it triggers adds a flat 50.
 
+Opt-in fields (ADR 1034): `flat` adds a stated flat part (the SpellLevel initial threat of `Spell.cpp:5736-5737`),
+`learn` learns spells after `hit_spell` (the talent), `label_suffix` keeps a talent entry and its control apart,
+`settle_ms` lengthens the read wait for a delayed hit, and `unlanded` (needs `settle_ms`) reads
+`spell_damage_count` of each named spell on the dummy after the threat read; a count above 0 makes the trial
+`unmeasured`. Sun Down 572752 (flat 178, `settle_ms` 2500, `unlanded` [807175]) reads after its 572753 hit and
+before the first Solar Flare tick; its control without the talent must read 1.0.
+
 ### Event-delay scenarios (`behaviour_event_delay`, `kind: "event_delay"`)
 
 A spell whose effect casts another spell some time later (`SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED`, ADR 0144)
@@ -1097,6 +1104,11 @@ after-cast arms are refused.
 the gated spell `margin_ms` after the after casts, `without` refused (the control) and `with` through; there is no
 `beyond` arm, since any later attempt goes through. Tome of Light 805422 resets Barrier of Light 805417
 (`AscensionTemplarAuras.cpp:122-128`): Barrier is primed, Tome is cast 2000 ms later, Barrier is attempted at 2500 ms.
+
+`refused_with: true` (only with `resets`, ADR 1034) states a reset that must not happen: the `with` arm expects the
+refusal code, as `without` does, and also reads `cast_failure` of the entry's spell just before the attempt (label
+`<spell> cost_gate <gated>[ <suffix>] with after_cast`, expected 0), so a refused after cast alerts instead of reading
+as a refused reset. Solar Concord 301266 under the other phase's aura uses it.
 
 `forced_roll` (a talent id, ADR 0545) adds the forcing fixture of mentor ruling N-a1 to a cost gate whose opening
 needs a proc: a SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier mutant on that talent right after the learns, so its

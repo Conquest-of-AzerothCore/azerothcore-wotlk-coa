@@ -36,3 +36,5 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0030](0030-twilight-does-not-blind-raid-or-world-bosses.md) | Twilight does not blind raid encounter or world-boss-rank creatures (mentor decision D-154) |
 | [0031](0031-blightbreaker-gives-mercy-a-two-second-period.md) | Blightbreaker gives Mercy a 2 sec period, duration unchanged (owner ruling O-24) |
 | [0032](0032-touch-of-light-reduces-damage-of-every-school.md) | Touch of Light 572886 reduces the damage of every school, not Physical only (owner ruling O-25) |
+| [0033](0033-solar-concord-resets-only-the-spell-of-the-active-phase.md) | Solar Concord resets Horusath Blast only in Sunrise and Rapture only in Sunset (owner ruling O-26) |
+| [0034](0034-solar-champion-threat-reaches-the-triggered-damage-spells.md) | Solar Champion's threat reduction reaches the damage spells of Radiant Flame and Sun Down (mentor D-185) |
