@@ -986,10 +986,12 @@
   {
     "spell": 503651,
     "clause": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
+    "kind": "claim",
     "labels": [
-      "503651 effect_value #4"
-    ],
-    "kind": "claim"
+      "503651 behaviour_metric_delta shared_ascension",
+      "503651 behaviour_metric_delta shared_conquest",
+      "503651 behaviour_metric_delta shared_resplendence"
+    ]
   },
   {
     "spell": 503690,
@@ -1621,10 +1623,21 @@
   {
     "spell": 570027,
     "clause": "Increases the damage of Horusath Blast and Rapture by $s1%.",
-    "labels": [
-      "570027 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the damage of Horusath Blast by $s1%",
+        "labels": [
+          "570027 behaviour_hit_ratio horusath"
+        ]
+      },
+      {
+        "claim": "and Rapture by $s1%",
+        "labels": [
+          "570027 behaviour_hit_ratio rapture"
+        ]
+      }
+    ]
   },
   {
     "spell": 570120,
@@ -2261,10 +2274,22 @@
   {
     "spell": 681066,
     "clause": "Reduces the cooldown of your Solar Invocation spells by $/1000;s1 sec.",
+    "kind": "claim",
+    "reason": "Solar Invocation spells: 4 in family 33 (Revelation, Resplendence share mask word 0), all four are tested (G-23).",
     "labels": [
-      "681066 effect_value e0 #0"
-    ],
-    "kind": "claim"
+      "681066 cost_gate 503651 cd_revelation without",
+      "681066 cost_gate 503651 cd_revelation with",
+      "681066 cost_gate 503651 cd_revelation beyond",
+      "681066 cost_gate 500152 cd_ascension without",
+      "681066 cost_gate 500152 cd_ascension with",
+      "681066 cost_gate 500152 cd_ascension beyond",
+      "681066 cost_gate 800764 cd_conquest without",
+      "681066 cost_gate 800764 cd_conquest with",
+      "681066 cost_gate 800764 cd_conquest beyond",
+      "681066 cost_gate 806159 cd_resplendence without",
+      "681066 cost_gate 806159 cd_resplendence with",
+      "681066 cost_gate 806159 cd_resplendence beyond"
+    ]
   },
   {
     "spell": 681252,
@@ -2928,10 +2953,31 @@
   {
     "spell": 704945,
     "clause": "Reduces the cooldown of Gavels and Horusath Blast by $s1%.",
-    "labels": [
-      "704945 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the cooldown of Gavels by $s1%",
+        "labels": [
+          "704945 cost_gate 800611 cd_light without",
+          "704945 cost_gate 800611 cd_light with",
+          "704945 cost_gate 800611 cd_light beyond",
+          "704945 cost_gate 800614 cd_grace without",
+          "704945 cost_gate 800614 cd_grace with",
+          "704945 cost_gate 800614 cd_grace beyond",
+          "704945 cost_gate 800617 cd_wrath without",
+          "704945 cost_gate 800617 cd_wrath with",
+          "704945 cost_gate 800617 cd_wrath beyond"
+        ]
+      },
+      {
+        "claim": "and Horusath Blast by $s1%",
+        "labels": [
+          "704945 cost_gate 500154 cd_horusath without",
+          "704945 cost_gate 500154 cd_horusath with",
+          "704945 cost_gate 500154 cd_horusath beyond"
+        ]
+      }
+    ]
   },
   {
     "spell": 704947,

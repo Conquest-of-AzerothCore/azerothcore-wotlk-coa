@@ -8479,6 +8479,257 @@
       "setup_only_after": true,
       "after_at_least": 60,
       "after_at_most": 64
+    },
+    {
+      "spell": 570027,
+      "name": "A Pious Life 570027 (Horusath Blast damage)",
+      "kind": "hit_ratio",
+      "variant": "horusath",
+      "label_suffix": "horusath",
+      "quote": "Increases the damage of Horusath Blast and Rapture by $s1%.",
+      "expected": 1.15,
+      "observe_spell": 572801,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          570027
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "cast_power": 1000,
+      "critical": false,
+      "expected_source": "$s1 = 15 (570027 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectBasePoints 14 + 1, class mask word 1 = 524352 = 64 + 524288, Horusath Blast's and Rapture's SpellFamilyFlags[1], the same mask as 570223). The tooltip states +15%, so the whole non-critical hit of Horusath Blast 572801 is expected at 1.15 times the control hit, spell power fixture 10000 so the coefficient and base parts are both present. Control: 570027 not learned (570223, the 30% rank, is not learned either). 823764 removes the dummy's magic resistance as in the 570223 entries. Merged PR #4516 (commit 48105650a8) pinned the same modifier by a spell_modifier readback only (data). Reference search 2026-11-22: coa-history spell 570027: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 570027 and no value; git log --grep and gh pr list --search 570027: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 570027,
+      "name": "A Pious Life 570027 (Rapture damage)",
+      "kind": "hit_ratio",
+      "variant": "rapture",
+      "label_suffix": "rapture",
+      "quote": "Increases the damage of Horusath Blast and Rapture by $s1%.",
+      "expected": 1.15,
+      "observe_spell": 807372,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          570027
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 10000
+      },
+      "cast_power": 1000,
+      "critical": false,
+      "expected_source": "$s1 = 15 (570027 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectBasePoints 14 + 1, class mask word 1 = 524352 = 64 + 524288, Horusath Blast's and Rapture's SpellFamilyFlags[1], the same mask as 570223). The tooltip states +15%, so the whole non-critical hit of Rapture 807372 is expected at 1.15 times the control hit, spell power fixture 10000 so the coefficient and base parts are both present. Control: 570027 not learned (570223, the 30% rank, is not learned either). 823764 removes the dummy's magic resistance as in the 570223 entries. Merged PR #4516 (commit 48105650a8) pinned the same modifier by a spell_modifier readback only (data). Reference search 2026-11-22: coa-history spell 570027: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 570027 and no value; git log --grep and gh pr list --search 570027: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 704945,
+      "name": "Unbreakable Focus (Gavel of Light cooldown)",
+      "kind": "cost_gate",
+      "variant": "cd_light",
+      "label_suffix": "cd_light",
+      "quote": "Reduces the cooldown of Gavels and Horusath Blast by $s1%.",
+      "gated_spell": 800611,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "target": "dummy",
+      "margin_ms": 80,
+      "dummy_distance": 5,
+      "observe_source": "704945 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -21 + 1 = -20% ($s1), class mask word 1 = 96 = 32 + 64 (Gavels' SpellFamilyFlags[1] 32 and Horusath Blast's 64). Gavel of Light 800611 has a 5000 ms category cooldown (Spell.dbc), so 20% is 1000 ms. The spell is cast and attempted again 4000 ms plus 80 ms after the cast: refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again 80 ms before the reduced cooldown, so the cut lies within 80 ms of 1000 ms, which excludes 18% and 22% (900 and 1100 ms). Gavels share one category (Category 1207, CategoryRecoveryTime 5000), so the three Gavels are tested for their different shapes (heal, mana, dispel) and Horusath Blast for the other mask bit. Reference search 2026-11-22: coa-history spell 704945: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 704945 and no value; git log --grep and gh pr list --search 704945: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 704945,
+      "name": "Unbreakable Focus (Gavel of Grace cooldown)",
+      "kind": "cost_gate",
+      "variant": "cd_grace",
+      "label_suffix": "cd_grace",
+      "quote": "Reduces the cooldown of Gavels and Horusath Blast by $s1%.",
+      "gated_spell": 800614,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "target": "dummy",
+      "margin_ms": 80,
+      "dummy_distance": 5,
+      "observe_source": "704945 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -21 + 1 = -20% ($s1), class mask word 1 = 96 = 32 + 64 (Gavels' SpellFamilyFlags[1] 32 and Horusath Blast's 64). Gavel of Grace 800614 has a 5000 ms category cooldown (Spell.dbc), so 20% is 1000 ms. The spell is cast and attempted again 4000 ms plus 80 ms after the cast: refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again 80 ms before the reduced cooldown, so the cut lies within 80 ms of 1000 ms, which excludes 18% and 22% (900 and 1100 ms). Gavels share one category (Category 1207, CategoryRecoveryTime 5000), so the three Gavels are tested for their different shapes (heal, mana, dispel) and Horusath Blast for the other mask bit. Reference search 2026-11-22: coa-history spell 704945: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 704945 and no value; git log --grep and gh pr list --search 704945: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 704945,
+      "name": "Unbreakable Focus (Gavel of Wrath cooldown)",
+      "kind": "cost_gate",
+      "variant": "cd_wrath",
+      "label_suffix": "cd_wrath",
+      "quote": "Reduces the cooldown of Gavels and Horusath Blast by $s1%.",
+      "gated_spell": 800617,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "target": "dummy",
+      "margin_ms": 80,
+      "dummy_distance": 5,
+      "observe_source": "704945 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -21 + 1 = -20% ($s1), class mask word 1 = 96 = 32 + 64 (Gavels' SpellFamilyFlags[1] 32 and Horusath Blast's 64). Gavel of Wrath 800617 has a 5000 ms category cooldown (Spell.dbc), so 20% is 1000 ms. The spell is cast and attempted again 4000 ms plus 80 ms after the cast: refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again 80 ms before the reduced cooldown, so the cut lies within 80 ms of 1000 ms, which excludes 18% and 22% (900 and 1100 ms). Gavels share one category (Category 1207, CategoryRecoveryTime 5000), so the three Gavels are tested for their different shapes (heal, mana, dispel) and Horusath Blast for the other mask bit. Reference search 2026-11-22: coa-history spell 704945: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 704945 and no value; git log --grep and gh pr list --search 704945: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 704945,
+      "name": "Unbreakable Focus (Horusath Blast cooldown)",
+      "kind": "cost_gate",
+      "variant": "cd_horusath",
+      "label_suffix": "cd_horusath",
+      "quote": "Reduces the cooldown of Gavels and Horusath Blast by $s1%.",
+      "gated_spell": 500154,
+      "resource": "cooldown",
+      "reduction": 5000,
+      "target": "dummy",
+      "margin_ms": 400,
+      "dummy_distance": 5,
+      "observe_source": "704945 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -21 + 1 = -20% ($s1), class mask word 1 = 96 = 32 + 64 (Gavels' SpellFamilyFlags[1] 32 and Horusath Blast's 64). Horusath Blast 500154 has a 25000 ms spell cooldown (Spell.dbc), so 20% is 5000 ms. The spell is cast and attempted again 20000 ms plus 400 ms after the cast: refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again 400 ms before the reduced cooldown, so the cut lies within 400 ms of 5000 ms, which excludes 18% and 22% (4500 and 5500 ms). Gavels share one category (Category 1207, CategoryRecoveryTime 5000), so the three Gavels are tested for their different shapes (heal, mana, dispel) and Horusath Blast for the other mask bit. Reference search 2026-11-22: coa-history spell 704945: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 704945 and no value; git log --grep and gh pr list --search 704945: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681066,
+      "name": "Devoted to the Sun (Revelation cooldown)",
+      "kind": "cost_gate",
+      "variant": "cd_revelation",
+      "label_suffix": "cd_revelation",
+      "quote": "Reduces the cooldown of your Solar Invocation spells by $/1000;s1 sec.",
+      "gated_spell": 503651,
+      "resource": "cooldown",
+      "reduction": 5000,
+      "target": "caster",
+      "margin_ms": 400,
+      "observe_source": "681066 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -5001 (-5000 ms, $/1000;s1 = 5 s), class mask 294912 / 128 / 524290. Revelation 503651 is one of the Solar Invocation spells (30000 ms cooldown, shared category 767); the four spells carry one mask word each (Revelation and Resplendence word 0 bit 262144, Ascension word 1 bit 128, Conquest word 2 bit 524288), so Revelation, Ascension and Conquest are tested for their three mask words and Resplendence shares Revelation's. The spell is cast and attempted again 25000 ms plus 400 ms after the cast: refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again 400 ms before 25000 ms, so the cut lies within 400 ms of 5000 ms, excluding 4500 and 5500 ms. Reference search 2026-11-22: coa-history spell 681066: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 681066 and no value; git log --grep and gh pr list --search 681066: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681066,
+      "name": "Devoted to the Sun (Ascension cooldown)",
+      "kind": "cost_gate",
+      "variant": "cd_ascension",
+      "label_suffix": "cd_ascension",
+      "quote": "Reduces the cooldown of your Solar Invocation spells by $/1000;s1 sec.",
+      "gated_spell": 500152,
+      "resource": "cooldown",
+      "reduction": 5000,
+      "target": "caster",
+      "margin_ms": 400,
+      "observe_source": "681066 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -5001 (-5000 ms, $/1000;s1 = 5 s), class mask 294912 / 128 / 524290. Ascension 500152 is one of the Solar Invocation spells (30000 ms cooldown, shared category 767); the four spells carry one mask word each (Revelation and Resplendence word 0 bit 262144, Ascension word 1 bit 128, Conquest word 2 bit 524288), so Revelation, Ascension and Conquest are tested for their three mask words and Resplendence shares Revelation's. The spell is cast and attempted again 25000 ms plus 400 ms after the cast: refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again 400 ms before 25000 ms, so the cut lies within 400 ms of 5000 ms, excluding 4500 and 5500 ms. Reference search 2026-11-22: coa-history spell 681066: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 681066 and no value; git log --grep and gh pr list --search 681066: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681066,
+      "name": "Devoted to the Sun (Conquest cooldown)",
+      "kind": "cost_gate",
+      "variant": "cd_conquest",
+      "label_suffix": "cd_conquest",
+      "quote": "Reduces the cooldown of your Solar Invocation spells by $/1000;s1 sec.",
+      "gated_spell": 800764,
+      "resource": "cooldown",
+      "reduction": 5000,
+      "target": "caster",
+      "margin_ms": 400,
+      "observe_source": "681066 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -5001 (-5000 ms, $/1000;s1 = 5 s), class mask 294912 / 128 / 524290. Conquest 800764 is one of the Solar Invocation spells (30000 ms cooldown, shared category 767); the four spells carry one mask word each (Revelation and Resplendence word 0 bit 262144, Ascension word 1 bit 128, Conquest word 2 bit 524288), so Revelation, Ascension and Conquest are tested for their three mask words and Resplendence shares Revelation's. The spell is cast and attempted again 25000 ms plus 400 ms after the cast: refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again 400 ms before 25000 ms, so the cut lies within 400 ms of 5000 ms, excluding 4500 and 5500 ms. Reference search 2026-11-22: coa-history spell 681066: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 681066 and no value; git log --grep and gh pr list --search 681066: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681066,
+      "name": "Devoted to the Sun (Resplendence cooldown)",
+      "kind": "cost_gate",
+      "variant": "cd_resplendence",
+      "label_suffix": "cd_resplendence",
+      "quote": "Reduces the cooldown of your Solar Invocation spells by $/1000;s1 sec.",
+      "gated_spell": 806159,
+      "resource": "cooldown",
+      "reduction": 5000,
+      "target": "caster",
+      "margin_ms": 400,
+      "observe_source": "681066 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -5001 (-5000 ms, $/1000;s1 = 5 s), class mask 294912 / 128 / 524290. Resplendence 806159 is one of the Solar Invocation spells (30000 ms cooldown, shared category 767); the four spells carry one mask word each (Revelation and Resplendence word 0 bit 262144, Ascension word 1 bit 128, Conquest word 2 bit 524288), so Revelation, Ascension and Conquest are tested for their three mask words and Resplendence shares Revelation's. The spell is cast and attempted again 25000 ms plus 400 ms after the cast: refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, and refused again 400 ms before 25000 ms, so the cut lies within 400 ms of 5000 ms, excluding 4500 and 5500 ms. Reference search 2026-11-22: coa-history spell 681066: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 681066 and no value; git log --grep and gh pr list --search 681066: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 503651,
+      "kind": "metric_delta",
+      "trigger_spell": 503651,
+      "target": "caster",
+      "cast_in_before": false,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Solar Invocation: Revelation (shared cooldown with Ascension)",
+      "variant": "shared_ascension",
+      "label_suffix": "shared_ascension",
+      "quote": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 500152
+      },
+      "before_expected": 0,
+      "expected": 29500,
+      "tolerance": 1500,
+      "observe_source": "503651 Revelation and Ascension 500152 carry the same Category 767 with CategoryRecoveryTime 30000 (Spell.dbc; the Category field is read for 503651, 800764 and 500152 in the existing 800764 entry). One cast of 503651 at the caster is followed 500 ms later by a read of the remaining cooldown of 500152, which was never cast: 0 before the cast (control) and 30000 less the elapsed time after it, expected 29500 with a tolerance of 1500 ms (5%), which excludes a category cooldown 10% (3000 ms) off on both sides. Reference search 2026-11-22: coa-history spell 503651: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 503651 and no value; git log --grep and gh pr list --search 503651: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 503651,
+      "kind": "metric_delta",
+      "trigger_spell": 503651,
+      "target": "caster",
+      "cast_in_before": false,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Solar Invocation: Revelation (shared cooldown with Conquest)",
+      "variant": "shared_conquest",
+      "label_suffix": "shared_conquest",
+      "quote": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800764
+      },
+      "before_expected": 0,
+      "expected": 29500,
+      "tolerance": 1500,
+      "observe_source": "503651 Revelation and Conquest 800764 carry the same Category 767 with CategoryRecoveryTime 30000 (Spell.dbc; the Category field is read for 503651, 800764 and 500152 in the existing 800764 entry). One cast of 503651 at the caster is followed 500 ms later by a read of the remaining cooldown of 800764, which was never cast: 0 before the cast (control) and 30000 less the elapsed time after it, expected 29500 with a tolerance of 1500 ms (5%), which excludes a category cooldown 10% (3000 ms) off on both sides. Reference search 2026-11-22: coa-history spell 503651: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 503651 and no value; git log --grep and gh pr list --search 503651: see the report; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 503651,
+      "kind": "metric_delta",
+      "trigger_spell": 503651,
+      "target": "caster",
+      "cast_in_before": false,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Solar Invocation: Revelation (shared cooldown with Resplendence)",
+      "variant": "shared_resplendence",
+      "label_suffix": "shared_resplendence",
+      "quote": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 806159
+      },
+      "before_expected": 0,
+      "expected": 29500,
+      "tolerance": 1500,
+      "observe_source": "503651 Revelation and Resplendence 806159 carry the same Category 767 with CategoryRecoveryTime 30000 (Spell.dbc; the Category field is read for 503651, 800764 and 500152 in the existing 800764 entry). One cast of 503651 at the caster is followed 500 ms later by a read of the remaining cooldown of 806159, which was never cast: 0 before the cast (control) and 30000 less the elapsed time after it, expected 29500 with a tolerance of 1500 ms (5%), which excludes a category cooldown 10% (3000 ms) off on both sides. Reference search 2026-11-22: coa-history spell 503651: 0 events in 186 logs (a passive); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 503651 and no value; git log --grep and gh pr list --search 503651: see the report; nothing found beyond the tooltip and the DBC for the value."
     }
   ],
   "player_observations": [],
