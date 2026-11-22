@@ -8480,6 +8480,398 @@
       "setup_only_after": true,
       "after_at_least": 60,
       "after_at_most": 64
+    },
+    {
+      "spell": 804247,
+      "name": "Bless (health per tick on the ally)",
+      "kind": "metric_delta",
+      "variant": "health_tick_ally",
+      "label_suffix": "health_tick_ally",
+      "quote": "Bless yourself and an ally, restoring 5% of their maximum health",
+      "trigger_spell": 804247,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "disable_regeneration": true,
+      "wait_ms": 10500,
+      "expire_ms": 1000,
+      "metric": "health",
+      "fields": {},
+      "before_expected": 5000,
+      "expected": 5500,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "control_wait": true,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804247
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Bless 804247 cast at the ally leaves its aura on the ally (Effect[0] target 21 TARGET_UNIT_TARGET_ALLY); absent in the uncast control"
+          }
+        ]
+      },
+      "observe_source": "Bless 804247 Effect[0] aura 227 every 10000 ms triggers 805360 (HEAL_PCT, target 21 ally); AscensionSunClericAuras.cpp:208-212 heals Copy(player, target, 707522, CalculatePct(target max health, effect 0 amount)) on the aura target, and AscensionSunClericAuras.cpp:67-74 (id == Bless && target != player) records the blessed ally and casts Bless on the caster. The ally, grouped with the caster, is held at 5000 of the 10000 health fixture in both phases, regeneration off; the uncast before phase waits the after phase's 10500 ms (timed control) and reads 5000; after a real Bless cast at the ally and 10500 ms, one tick: 5000 + 5% of 10000 = 5500 from the tooltip ($s1 = 5). Arm: the Bless aura on the ally, 0 then 1. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 300943,
+      "name": "Pious (Replenishment on the ally after a critical strike)",
+      "kind": "metric_delta",
+      "variant": "proc_aura_ally",
+      "label_suffix": "proc_aura_ally",
+      "quote": "your critical strikes grant allies Replenishment",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "measure_actor": "ally",
+      "cast_power": 1000,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 1257670
+      },
+      "expected": 1,
+      "before_expected": 0,
+      "wait_ms": 4000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "observe_source": "300943 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, trigger 1257670 (Replenishment); AscensionSunClericEvents.cpp:117 names 300943 for a critical hit and :254 casts 1257670 on the caster. 1257670 Effect[0] aura 24 periodic energize of mana (MiscValueB 1), BasePoints 4 + 1 = 5 ($s1), EffectAmplitude 5000, DurationIndex 8 (15000 ms), EffectImplicitTargetA 56 TARGET_UNIT_CASTER_AREA_RAID (radius index 12): the allies grouped with the caster receive the aura. A forced-crit Dawnsear 554406 is cast at the dummy before and after the learn; the Replenishment aura read on the grouped ally 500 ms after the 3500 ms cast: 0 before the learn (control: no passive), 1 after. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 300943,
+      "name": "Pious (Replenishment energizes the ally)",
+      "kind": "metric_delta",
+      "variant": "replenish_tick_ally",
+      "label_suffix": "replenish_tick_ally",
+      "quote": "your critical strikes grant allies Replenishment",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_power": 1000,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 1257670,
+        "power": 0,
+        "target": "ally"
+      },
+      "expected": 143,
+      "before_expected": 0,
+      "wait_ms": 9100,
+      "ally_arm": {
+        "allies": 1
+      },
+      "observe_source": "300943 grants 1257670 (AscensionSunClericEvents.cpp:254). 1257670 Effect[0] aura 24 periodic energize of mana (MiscValueB 1), BasePoints 4 + 1 = 5 ($s1), EffectAmplitude 5000, DurationIndex 8 (15000 ms), EffectImplicitTargetA 56 TARGET_UNIT_CASTER_AREA_RAID (radius index 12): the allies grouped with the caster receive the aura. One tick by 5600 ms energizes the ally by 5% of its maximum mana, 5 x 2868 / 100 = 143 (2868 = BaseMana 1363 + 20 + (Intellect 119 - 20) x 15, the grouped ally is the same class fixture as the caster). The energize events of 1257670 given to the ally are read on the caster with fields.target ally. Control: 0 before the learn. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 680656,
+      "name": "Sun's Gift (Replenishment on the ally)",
+      "kind": "metric_delta",
+      "variant": "ally_aura",
+      "label_suffix": "ally_aura",
+      "quote": "grants allies Replenishment.",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "measure_actor": "ally",
+      "cast_power": 1363,
+      "before_expected": 0,
+      "expire_ms": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 1257670
+      },
+      "expected": 1,
+      "wait_ms": 5500,
+      "ally_arm": {
+        "allies": 1
+      },
+      "observe_source": "680656 Sun's Gift Effect[1] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 1257670, class mask word 1 = 64 = Horusath Blast; AscensionSunClericAbilities.cpp:309-310 casts 1257670 on the caster after a Horusath Blast hit. 1257670 Effect[0] aura 24 periodic energize of mana (MiscValueB 1), BasePoints 4 + 1 = 5 ($s1), EffectAmplitude 5000, DurationIndex 8 (15000 ms), EffectImplicitTargetA 56 TARGET_UNIT_CASTER_AREA_RAID (radius index 12): the allies grouped with the caster receive the aura. A real Horusath Blast 572801 is cast at the dummy in both phases (680656 learned between them); the aura read on the grouped ally: 0 before the learn (control: no passive), 1 after. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 680656,
+      "name": "Sun's Gift (Replenishment energizes the ally)",
+      "kind": "metric_delta",
+      "variant": "ally_tick",
+      "label_suffix": "ally_tick",
+      "quote": "grants allies Replenishment.",
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "cast_power": 1363,
+      "before_expected": 0,
+      "expire_ms": 2000,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 1257670,
+        "power": 0,
+        "target": "ally"
+      },
+      "expected": 143.4,
+      "tolerance": 1.5,
+      "wait_ms": 5500,
+      "ally_arm": {
+        "allies": 1
+      },
+      "observe_source": "680656 grants 1257670 (AscensionSunClericAbilities.cpp:309-310). 1257670 Effect[0] aura 24 periodic energize of mana (MiscValueB 1), BasePoints 4 + 1 = 5 ($s1), EffectAmplitude 5000, DurationIndex 8 (15000 ms), EffectImplicitTargetA 56 TARGET_UNIT_CASTER_AREA_RAID (radius index 12): the allies grouped with the caster receive the aura. One tick of 5% of the ally's maximum mana 2868 (BaseMana 1363 + 20 + (Intellect 119 - 20) x 15, the same class fixture) = 143.4 within 1.5, summed 5500 ms after the cast and read on the caster with fields.target ally; 0 before the learn (control). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 504848,
+      "name": "Mercy (grouped allies receive it)",
+      "kind": "metric_delta",
+      "variant": "targets_ally",
+      "label_suffix": "targets_ally",
+      "quote": "Grant mercy to an ally and up to 5 nearby allies,",
+      "trigger_spell": 504848,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_power": 1000,
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 504848
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1000,
+      "ally_arm": {
+        "allies": 5,
+        "arms": [
+          {
+            "actors": [
+              "ally2",
+              "ally3",
+              "ally4",
+              "ally5"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 504848
+            },
+            "before_expected": 0,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Mercy 504848 Effect[0] target 21 TARGET_UNIT_TARGET_ALLY, EffectChainTarget 6, MaxAffectedTargets 6: the four other grouped allies are nearby allies of the target, each holds Mercy; none holds it in the uncast control"
+          }
+        ]
+      },
+      "observe_source": "504848 Mercy Effect[0] aura 23 periodic trigger of 503650, target 21 TARGET_UNIT_TARGET_ALLY, EffectChainTarget[0] 6, MaxAffectedTargets 6 (the target and up to 5 nearby allies). Mercy is cast at the grouped ally with four more allies grouped beside it (grouped allies are capped at 5); the Mercy aura is read on the target and, in one arm, summed over the four others: 0 in the uncast control, 1 on the target and 4 across the others after the cast. The cap of 5 nearby allies needs a seventh candidate and is not reachable with 5 grouped allies and the caster (tool need returned). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (extra heal on the ally affected by Bless)",
+      "kind": "metric_delta",
+      "variant": "ally_bless_heal",
+      "label_suffix": "ally_bless_heal",
+      "quote": "While at or above 30% mana, you sacrifice additional mana with each heal, healing your ally affected by Bless.",
+      "trigger_spell": 503624,
+      "target": "ally2",
+      "measure_actor": "caster",
+      "learn": [
+        804247
+      ],
+      "setup_casts": [
+        805301
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "cast_power": 2868,
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 807994,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 2,
+        "ally_casts": [
+          804247
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "the extra heal goes only to the ally recorded by Bless (:357), never to the unblessed heal target ally2"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally2"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the Daybreak heal itself landed on ally2 in both phases, so the extra heal is not a miscount of it"
+          }
+        ]
+      },
+      "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY (BasePoints 49, $s2 = 50); AscensionSunClericAbilities.cpp:355-372: a heal with Holy Form on and at least 30% of maximum mana, with the ally recorded by Bless alive and holding Bless (:358-359), pays (extra + 3) / 4 mana and casts 807994 on that ally (Copy(player, ally, 807994, extra), :370). Bless 804247 is cast at ally in both phases; Holy Form is cast on the caster only in the treatment phase (control: no form); Daybreak 503624 heals ally2, an unblessed ally, so a heal on ally by 807994 is the extra heal, not Daybreak. The caster's mana is set to its maximum 2868 (BaseMana 1363 + 20 + (Intellect 119 - 20) x 15) before the Daybreak cast, which costs 26% of base mana (about 354) and leaves it far above 30% of 2868 (860). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (no extra heal below 30% mana)",
+      "kind": "metric_delta",
+      "variant": "ally_bless_heal_low_mana",
+      "label_suffix": "ally_bless_heal_low_mana",
+      "quote": "While at or above 30% mana, you sacrifice additional mana with each heal, healing your ally affected by Bless.",
+      "trigger_spell": 503624,
+      "target": "ally2",
+      "measure_actor": "caster",
+      "learn": [
+        804247
+      ],
+      "setup_casts": [
+        805301
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "cast_power": 1100,
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 807994,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 2,
+        "ally_casts": [
+          804247
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally2"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the Daybreak heal itself landed on ally2 in both phases"
+          }
+        ]
+      },
+      "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY (BasePoints 49, $s2 = 50); AscensionSunClericAbilities.cpp:355-372: a heal with Holy Form on and at least 30% of maximum mana, with the ally recorded by Bless alive and holding Bless (:358-359), pays (extra + 3) / 4 mana and casts 807994 on that ally (Copy(player, ally, 807994, extra), :370). Same fixture as the entry above, with the mana set to 1100 before the Daybreak cast: after its cost (26% of base mana 1363, about 354) 746 remain, 26% of the maximum 2868, below the 30% gate (860): no extra heal on the blessed ally with Holy Form on. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 534267,
+      "name": "Heat Wave (nearby allies are healed too)",
+      "kind": "metric_delta",
+      "variant": "nearby_allies",
+      "label_suffix": "nearby_allies",
+      "quote": "additionally heals up to $801215i of the target's lowest health nearby allies for $s1% of the value.",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2868,
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 801215,
+        "target": "ally2"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 5,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 801215,
+              "target": "ally3"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Heat Wave 801215 MaxAffectedTargets 5: with the target ally excluded, the four other grouped allies and the caster are five candidates, within the cap, each healed once (AscensionSunClericEvents.cpp:344-354)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 801215,
+              "target": "ally4"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Heat Wave 801215 MaxAffectedTargets 5: with the target ally excluded, the four other grouped allies and the caster are five candidates, within the cap, each healed once (AscensionSunClericEvents.cpp:344-354)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 801215,
+              "target": "ally5"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Heat Wave 801215 MaxAffectedTargets 5: with the target ally excluded, the four other grouped allies and the caster are five candidates, within the cap, each healed once (AscensionSunClericEvents.cpp:344-354)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 801215,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Heat Wave 801215 MaxAffectedTargets 5: with the target ally excluded, the four other grouped allies and the caster are five candidates, within the cap, each healed once (AscensionSunClericEvents.cpp:344-354)"
+          }
+        ]
+      },
+      "observe_source": "534267 Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT, BasePoints 74 (+1 = 75), EffectTriggerSpell 801215; AscensionSunClericEvents.cpp:136 names Daybreak (root 500147, rank 503624) for a heal and :344-354 collects Allies(player, target, Radius(801215)), removes the target, and heals each of up to MaxAffectedTargets 5 with Copy(player, ally, 801215, 75% of the heal). Daybreak is cast at ally in both phases (534267 learned between them), the four other allies at 5000 of 10000 health; the heal events of 801215 are read on the caster per recipient. The 75% amount is not expressed: Daybreak rolls a 32-sided die, there is no arm-to-arm ratio in the option, and the cap and the lowest-health order need a sixth candidate (tool need returned). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
     }
   ],
   "player_observations": [],

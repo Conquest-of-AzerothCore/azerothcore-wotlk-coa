@@ -632,7 +632,10 @@
       },
       {
         "claim": "to allies (not only the caster)",
-        "labels": []
+        "labels": [
+          "300943 behaviour_metric_delta proc_aura_ally",
+          "300943 behaviour_metric_delta replenish_tick_ally"
+        ]
       }
     ],
     "reason": "Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip; control = passive not learned. Aura 163 scales the whole crit hit (ratio 2.5, measured 2.4973 and 2.5007): that is the native code (Unit.cpp:10654-10663), which docs/coa/sun-cleric-completion.md:53 records as the choice ('native semantics for aura 163, no new total-critical-damage multiplier'); its wording 'critical-bonus-portion' does not describe that code, a bonus-only reading would give 1.5 instead of 2.5. The tooltip says 'critical damage dealt by 150%'. Reference search: coabuildhub 'by 150%', no semantics; Chivalric 705272 is the same aura read the same way. The allies part has no entry: metric_delta has no ally unit (shared tool)."
@@ -1044,9 +1047,26 @@
   {
     "spell": 504848,
     "clause": "Grant mercy to an ally and up to 5 nearby allies,",
-    "labels": [],
     "kind": "claim",
-    "reason": "Open, no entry: metric_delta has no ally unit to read an effect on allies (shared tool, outside this author's files); the count of 5 nearby allies needs it too. Not given a final status."
+    "reason": "Open, no entry: metric_delta has no ally unit to read an effect on allies (shared tool, outside this author's files); the count of 5 nearby allies needs it too. Not given a final status.",
+    "claims": [
+      {
+        "claim": "Grant mercy to an ally",
+        "labels": [
+          "504848 behaviour_metric_delta targets_ally"
+        ]
+      },
+      {
+        "claim": "and to nearby allies (four grouped allies hold it)",
+        "labels": [
+          "504848 behaviour_metric_delta targets_ally"
+        ]
+      },
+      {
+        "claim": "up to 5 nearby allies (the cap)",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 504848,
@@ -1179,11 +1199,26 @@
   {
     "spell": 534267,
     "clause": "Healing with Illumination, Shine, and Daybreak and healing done from Holy Form now additionally heals up to $801215i of the target's lowest health nearby allies for $s1% of the value.",
-    "labels": [
-      "534267 effect_value #0",
-      "534267 effect_value e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "now additionally heals nearby allies",
+        "labels": [
+          "534267 behaviour_metric_delta nearby_allies",
+          "534267 effect_value #0"
+        ]
+      },
+      {
+        "claim": "up to 5 of the target's lowest health nearby allies",
+        "labels": []
+      },
+      {
+        "claim": "for 75% of the value",
+        "labels": [
+          "534267 effect_value e0 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 547214,
@@ -2150,7 +2185,10 @@
       },
       {
         "claim": "and grants allies Replenishment",
-        "labels": []
+        "labels": [
+          "680656 behaviour_metric_delta ally_aura",
+          "680656 behaviour_metric_delta ally_tick"
+        ]
       }
     ]
   },
@@ -3454,9 +3492,6 @@
   {
     "spell": 804247,
     "clause": "Bless yourself and an ally, restoring 5% of their maximum health",
-    "labels": [
-      "804247 behaviour_metric_delta health_tick"
-    ],
     "kind": "claim",
     "dbc_clause": "Bless yourself and an ally, restoring $s1% of their maximum health",
     "text_source": {
@@ -3468,7 +3503,21 @@
       "ruling": "O-4",
       "spell": 804247,
       "dbc_differs": "Description and ToolTip differ from Spell.dbc"
-    }
+    },
+    "claims": [
+      {
+        "claim": "Bless yourself, restoring 5% of their maximum health",
+        "labels": [
+          "804247 behaviour_metric_delta health_tick"
+        ]
+      },
+      {
+        "claim": "Bless an ally, restoring 5% of their maximum health",
+        "labels": [
+          "804247 behaviour_metric_delta health_tick_ally"
+        ]
+      }
+    ]
   },
   {
     "spell": 804247,
@@ -3895,9 +3944,27 @@
   {
     "spell": 805301,
     "clause": "While at or above 30% mana, you sacrifice additional mana with each heal, healing your ally affected by Bless.",
-    "labels": [],
     "kind": "claim",
-    "reason": "Open, no entry: Bless sets the blessed ally only for a target other than the caster (AscensionSunClericAuras.cpp:67) and metric_delta has no ally unit (shared tool). Not given a final status."
+    "reason": "Open, no entry: Bless sets the blessed ally only for a target other than the caster (AscensionSunClericAuras.cpp:67) and metric_delta has no ally unit (shared tool). Not given a final status.",
+    "claims": [
+      {
+        "claim": "you sacrifice additional mana with each heal",
+        "labels": []
+      },
+      {
+        "claim": "While at or above 30% mana",
+        "labels": [
+          "805301 behaviour_metric_delta ally_bless_heal",
+          "805301 behaviour_metric_delta ally_bless_heal_low_mana"
+        ]
+      },
+      {
+        "claim": "healing your ally affected by Bless",
+        "labels": [
+          "805301 behaviour_metric_delta ally_bless_heal"
+        ]
+      }
+    ]
   },
   {
     "spell": 805301,
