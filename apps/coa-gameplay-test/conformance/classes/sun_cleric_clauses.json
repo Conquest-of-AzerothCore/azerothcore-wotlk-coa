@@ -6294,7 +6294,13 @@
           "806980 behaviour_metric_delta threat_control"
         ]
       }
-    ]
+    ],
+    "text_source": {
+      "basis": "owner_ruling",
+      "spell": 806980,
+      "ruling": "O-16 (Q-sc-6, option a, 2026-11-22): the Templar \"High Threat\" = x2 ruling (ADR 0296) is standing for every class"
+    },
+    "reason": "Owner ruling O-16 (Q-sc-6, option a, 2026-11-22), replacing the earlier hold: the five Templar rulings of open scope stand for every class; the rule applied here is High Threat = threat x2 on the damage (ADR 0296), set by spell_threat pctMod 2 (rev_20261026_20, PR #11008). The threat slope and threat_control labels are counted: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3) reads behaviour_threat_slope 806980 and threat_control ok in both runs, no flip. The hit_mean alert of 806980 is a separate lead, not a label of this claim."
   },
   {
     "spell": 806980,
