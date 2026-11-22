@@ -342,7 +342,7 @@
     "spell": 300336,
     "clause": "Healing done by Shine or Illumination now increases the targets movement speed by $300337s1% for $300337d.",
     "kind": "claim",
-    "reason": "Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. Speed: the run speed rate of the caster reads 1.2 after Illumination 500143 and after Shine 800357 heals, 1.0 before the learn (control). Duration: 300337 reads 2377 and 2362 ms (Illumination) and 2382 and 2382 ms (Shine) remaining about 600 ms after the heal, against 2400 within 250, so a total 10% off (2700 or 3300 ms) is excluded on both sides. Reference search 2026-11-22: coa-history spell 300336: 0 events in 186 logs (a passive); 300337 has 4958 SPELL_AURA_APPLIED events on players in 20 logs; nothing else found.",
+    "reason": "Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. Speed: the run speed rate of the caster reads 1.2 after Illumination 500143 and after Shine 800357 heals, 1.0 before the learn (control). Duration: 300337 reads 2377 and 2362 ms (Illumination) and 2382 and 2382 ms (Shine) remaining about 600 ms after the heal, against 2400 within 250, so a total 10% off (2700 or 3300 ms) is excluded on both sides. Reference search 2026-11-22: coa-history spell 300336: 0 events in 186 logs (a passive); 300337 has 4958 SPELL_AURA_APPLIED events on players in 20 logs; nothing else found. Expiry or event labels added in batch 9: counted pair 20261122-103136 / 20261122-103230, build 2ae43243, server commit 516669096f7e+, no flip, 74 of 74 entries ok in both runs, each read with its control.",
     "claims": [
       {
         "claim": "Healing done by Shine or Illumination now increases the targets movement speed by $300337s1%",
@@ -357,7 +357,11 @@
         "labels": [
           "300336 spell_duration 300337 #1",
           "300336 behaviour_metric_delta illumination_duration",
-          "300336 behaviour_metric_delta shine_duration"
+          "300336 behaviour_metric_delta shine_duration",
+          "300336 behaviour_metric_delta illumination_expiry",
+          "300336 behaviour_metric_delta shine_expiry",
+          "300336 behaviour_metric_delta illumination_expiry_control",
+          "300336 behaviour_metric_delta shine_expiry_control"
         ]
       }
     ]
@@ -633,7 +637,8 @@
       "300363 behaviour_metric_delta day_haste"
     ],
     "kind": "claim",
-    "reason": "Control arm = the same read before the learn (1.0) and the night arm; 1/(1.03 x 1.01) = 0.961261 at hour 12. Reference search 2026-11-22: coa-history spell 300363: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
+    "reason": "Control arm = the same read before the learn (1.0) and the night arm; 1/(1.03 x 1.01) = 0.961261 at hour 12. Reference search 2026-11-22: coa-history spell 300363: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip.",
+    "promise_of": "Increases your spell haste by $s1%,"
   },
   {
     "spell": 300365,
@@ -722,7 +727,8 @@
       "300621 behaviour_metric_delta night_haste"
     ],
     "kind": "claim",
-    "reason": "Control arm = the night entry at hour 0 (0.943396) and the reading before the learn (1). Realm-local hour 12: 1/(1.06 x 1.02) = 0.924883 within 0.002, which excludes the night value; the 2% comes from 300364 whose amount the script sets to $s2 = 2 in the day (AscensionSunCleric.cpp:378-382). Reference search 2026-11-22: coa-history spell 300621: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 300621 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
+    "reason": "Control arm = the night entry at hour 0 (0.943396) and the reading before the learn (1). Realm-local hour 12: 1/(1.06 x 1.02) = 0.924883 within 0.002, which excludes the night value; the 2% comes from 300364 whose amount the script sets to $s2 = 2 in the day (AscensionSunCleric.cpp:378-382). Reference search 2026-11-22: coa-history spell 300621: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 300621 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip.",
+    "promise_of": "Increases your spell haste by $s1%,"
   },
   {
     "spell": 300626,
@@ -1812,10 +1818,12 @@
     "spell": 560111,
     "clause": "Casting Horusath Blast now resets the cooldown of Glorious Execution.",
     "labels": [
-      "560111 behaviour_metric_delta ge_reset"
+      "560111 behaviour_metric_delta ge_reset",
+      "560111 cost_gate 800626 ge_gate without",
+      "560111 cost_gate 800626 ge_gate with"
     ],
     "kind": "claim",
-    "reason": "Control arm = the same cast sequence before the learn: Glorious Execution 800626 cast, then Horusath Blast, remaining cooldown 7491 ms; after the learn 0. Scripted reset (AscensionSunClericAbilities.cpp:236-241). Spell chain read: 560111 -> 706870 (aura) -> 2414058 (delayed CDR payload, effect 165), the reset itself is the script. Reference search 2026-11-22: coa-history spell 560111: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 560111 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
+    "reason": "Control arm = the same cast sequence before the learn: Glorious Execution 800626 cast, then Horusath Blast, remaining cooldown 7491 ms; after the learn 0. Scripted reset (AscensionSunClericAbilities.cpp:236-241). Spell chain read: 560111 -> 706870 (aura) -> 2414058 (delayed CDR payload, effect 165), the reset itself is the script. Reference search 2026-11-22: coa-history spell 560111: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 560111 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip. Expiry or event labels added in batch 9: counted pair 20261122-103136 / 20261122-103230, build 2ae43243, server commit 516669096f7e+, no flip, 74 of 74 entries ok in both runs, each read with its control."
   },
   {
     "spell": 560113,
@@ -2170,27 +2178,33 @@
     "clause": "Increases the duration of Radiance by $/1000;s1 sec.",
     "kind": "claim",
     "labels": [
-      "561204 behaviour_metric_delta radiance_duration"
+      "561204 behaviour_metric_delta radiance_duration",
+      "561204 behaviour_metric_delta radiance_expiry",
+      "561204 behaviour_metric_delta radiance_expiry_control"
     ],
-    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Radiance duration 9944 ms without the passive and 15944 with it (10000 + 6000), band 100 ms."
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Radiance duration 9944 ms without the passive and 15944 with it (10000 + 6000), band 100 ms. Expiry or event labels added in batch 9: counted pair 20261122-103136 / 20261122-103230, build 2ae43243, server commit 516669096f7e+, no flip, 74 of 74 entries ok in both runs, each read with its control. Radiance 800054 present 15500..15950 ms and gone 16150..16550 ms after the Radiance cast, control absent. Reference search 2026-11-22: coa-history spell 800054 lists Radiance applied and removed events (22 logs) with no stated duration; nothing else found beyond the tooltip and the DBC."
   },
   {
     "spell": 561204,
     "clause": "Whenever you use Dawn, you gain Radiance for $/1000;302907s1 sec.",
     "kind": "claim",
     "labels": [
-      "561204 behaviour_metric_delta dawn_gain"
+      "561204 behaviour_metric_delta dawn_gain",
+      "561204 behaviour_metric_delta dawn_gain_expiry",
+      "561204 behaviour_metric_delta dawn_gain_expiry_control"
     ],
-    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Radiance applied by Dawn reads 5945 ms (6001 - 50) with the passive and is absent without it; the batch 1b lead (Radiance not applied after a Dawn cast) does not reproduce."
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Radiance applied by Dawn reads 5945 ms (6001 - 50) with the passive and is absent without it; the batch 1b lead (Radiance not applied after a Dawn cast) does not reproduce. Expiry or event labels added in batch 9: counted pair 20261122-103136 / 20261122-103230, build 2ae43243, server commit 516669096f7e+, no flip, 74 of 74 entries ok in both runs, each read with its control. Radiance present 5500..5950 ms and gone 6150..6550 ms after Dawn, control absent. Reference search 2026-11-22: coa-history spell 800054 lists Radiance applied and removed events (22 logs) with no stated duration; nothing else found beyond the tooltip and the DBC."
   },
   {
     "spell": 561204,
     "clause": "If Radiance is already active, its duration is extended by $/1000;302907s1 sec.",
     "kind": "claim",
     "labels": [
-      "561204 behaviour_metric_delta dawn_extend"
+      "561204 behaviour_metric_delta dawn_extend",
+      "561204 behaviour_metric_delta dawn_extend_expiry",
+      "561204 behaviour_metric_delta dawn_extend_expiry_control"
     ],
-    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Radiance cast, Dawn 1600 ms later: duration 8338 without the passive (control, no extension) and 20339 with it (16000 + 6001 - 1650), band 300 ms, no extension would read 14350."
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Radiance cast, Dawn 1600 ms later: duration 8338 without the passive (control, no extension) and 20339 with it (16000 + 6001 - 1650), band 300 ms, no extension would read 14350. Expiry or event labels added in batch 9: counted pair 20261122-103136 / 20261122-103230, build 2ae43243, server commit 516669096f7e+, no flip, 74 of 74 entries ok in both runs, each read with its control. Radiance present 19900..20250 ms and gone 20450..20800 ms after Dawn; the control arm (without the passive Radiance ends at 10000 ms) shows absence only, the learned arm bracket excludes the end without the extension. Reference search 2026-11-22: coa-history spell 800054 lists Radiance applied and removed events (22 logs) with no stated duration; nothing else found beyond the tooltip and the DBC."
   },
   {
     "spell": 561204,
@@ -3200,10 +3214,11 @@
     "clause": "and reduces the duration of movement slowing effects by $s1%.",
     "labels": [
       "680670 effect_value e0 #1",
-      "680670 behaviour_duration_ratio"
+      "680670 behaviour_duration_ratio",
+      "680670 behaviour_expiry"
     ],
     "kind": "claim",
-    "reason": "Control arm = the Hamstring 1715 duration before the learn (14494 ms remaining, read about 500 ms after the last landing). After the learn 11494 ms: a cut of exactly 3000 ms in both runs, 20.0% of the 15000 ms duration from Effect[0] aura 232 MiscValue 11 BasePoints -21 + 1 (18% and 22% would cut 2700 and 3300 ms, 300 ms away; the reads agree to the ms across the two runs). The judge's own margin is 525 ms, wider than the 10% rule: stated as a tool limit (the margin is not an entry field). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence with -20%; nothing else found. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
+    "reason": "Control arm = the Hamstring 1715 duration before the learn (14494 ms remaining, read about 500 ms after the last landing). After the learn 11494 ms: a cut of exactly 3000 ms in both runs, 20.0% of the 15000 ms duration from Effect[0] aura 232 MiscValue 11 BasePoints -21 + 1 (18% and 22% would cut 2700 and 3300 ms, 300 ms away; the reads agree to the ms across the two runs). The judge's own margin is 525 ms, wider than the 10% rule: stated as a tool limit (the margin is not an entry field). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence with -20%; nothing else found. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip. Ledger only in batch 9: the label 680670 behaviour_expiry is ok in both base9 runs (build ad8ea307)."
   },
   {
     "spell": 680700,
@@ -3694,10 +3709,12 @@
     "spell": 704586,
     "clause": "Activating Dawn now grants Shining Shield for $805265d.",
     "labels": [
-      "704586 behaviour_metric_delta duration"
+      "704586 behaviour_metric_delta duration",
+      "704586 behaviour_metric_delta shield_expiry",
+      "704586 behaviour_metric_delta shield_expiry_control"
     ],
     "kind": "claim",
-    "reason": "Control arm = aura 805265 absent after Dawn without the passive; remaining 59494 ms with it. Reference search 2026-11-22: coa-history spell 704586: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
+    "reason": "Control arm = aura 805265 absent after Dawn without the passive; remaining 59494 ms with it. Reference search 2026-11-22: coa-history spell 704586: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip. Expiry or event labels added in batch 9: counted pair 20261122-103136 / 20261122-103230, build 2ae43243, server commit 516669096f7e+, no flip, 74 of 74 entries ok in both runs, each read with its control."
   },
   {
     "spell": 704586,
@@ -5416,10 +5433,12 @@
     "spell": 804625,
     "clause": "and its duration is reduced by $s1%.",
     "labels": [
-      "804625 behaviour_metric_delta scorch_duration"
+      "804625 behaviour_metric_delta scorch_duration",
+      "804625 behaviour_metric_delta scorch_expiry",
+      "804625 behaviour_metric_delta scorch_expiry_control"
     ],
     "kind": "claim",
-    "reason": "Control arm = remaining duration 3700 without the passive (read 300 ms after the cast), 1694 with it (expected 1700, tolerance 80). Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
+    "reason": "Control arm = remaining duration 3700 without the passive (read 300 ms after the cast), 1694 with it (expected 1700, tolerance 80). Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip. Expiry or event labels added in batch 9: counted pair 20261122-103136 / 20261122-103230, build 2ae43243, server commit 516669096f7e+, no flip, 74 of 74 entries ok in both runs, each read with its control."
   },
   {
     "spell": 804628,
@@ -5714,11 +5733,12 @@
       {
         "claim": "for 5 s",
         "labels": [
-          "807870 behaviour_metric_delta stun_duration"
+          "807870 behaviour_metric_delta stun_duration",
+          "807870 behaviour_metric_delta stun_expiry"
         ]
       }
     ],
-    "reason": "Radius: the edge is 8 yd ($a1) + 2.66 yd leeway of a player caster on TARGET_UNIT_SRC_AREA_ENEMY (Spell.cpp:1388-1394, Object.cpp:1787-1808) + 1.275 yd target combat reach (Spell.cpp:9434-9448) = 11.935 yd. The radius_edge entry uses the opt-in leeway term (tool ADR 1020): ok on pair 20261122-055336 / 20261122-055559 (build f58af4a631b7, no flip, control 0); the near / 12.5 yd / 16 yd arms were ok on pair 20261122-051135 / 20261122-051226. The labels come from two builds, so the claim counts at the next base pair. Duration: stun on the dummy read 3982 and 3997 ms against 4000 (5000 minus 1000 after the 1500 ms cast), within 250."
+    "reason": "Radius: the edge is 8 yd ($a1) + 2.66 yd leeway of a player caster on TARGET_UNIT_SRC_AREA_ENEMY (Spell.cpp:1388-1394, Object.cpp:1787-1808) + 1.275 yd target combat reach (Spell.cpp:9434-9448) = 11.935 yd. The radius_edge entry uses the opt-in leeway term (tool ADR 1020): ok on pair 20261122-055336 / 20261122-055559 (build f58af4a631b7, no flip, control 0); the near / 12.5 yd / 16 yd arms were ok on pair 20261122-051135 / 20261122-051226. The radius labels come from two builds, so the radius claim counts at the next base pair. Duration: stun on the dummy read 3982 and 3997 ms against 4000 (5000 minus 1000 after the 1500 ms cast), within 250. Duration: stun_expiry reads the stun on the dummy present 6100..6450 ms and gone 6600..6950 ms after the cast start, control absent (pair 20261122-103136 / 20261122-103230, build 2ae43243, no flip)."
   },
   {
     "spell": 805628,
@@ -5872,11 +5892,12 @@
       {
         "claim": "Scorch Marks lasts 10 s",
         "labels": [
-          "806021 behaviour_metric_delta scorch_duration"
+          "806021 behaviour_metric_delta scorch_duration",
+          "806021 behaviour_metric_delta scorch_marks_expiry"
         ]
       }
     ],
-    "reason": "Sunflare rate: counted pair 20261120-204822 / 20261120-205026, 24024 trials per run, 0.4005 and 0.4052, 99% between-part intervals inside the 2-point band (residual failure probability stated in the proc entry), baseline 0 events. Scorch Marks lasts 10 s: data only, not a behaviour claim and not status 1. Its label 806021 behaviour_metric_delta scorch_duration reads aura_duration_ms, a READBACK metric (coverage.METRIC_EVIDENCE), and its only verdict comes from pair 20261120-205725 / 20261120-205757 on another build than the 20261122 pair (Sun Ray 504764 grants Scorch Marks for real, control = no cast). A held/gone bracket on the live aura would make it behaviour; not built (review b8a I-1). Dawnsear half: a second proc entry with the trigger 500146 (the labels of the two entries take the trigger suffix), counted pair 20261122-065859 / 20261122-070442, build 2e2bdcd22257, server commit f7c27d317a43, no flip, Sunflare 0.3965 and 0.4006, Dawnsear 0.3935 and 0.4000 against 0.4 (the 99% intervals and the residual failure probability at most 0.1% per pair are the proc entry's); baseline 0 events. Reference search: bindmysoul snapshot 'now have a 40% chance ... for 10 seconds', nothing else found. Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip."
+    "reason": "Sunflare rate: counted pair 20261120-204822 / 20261120-205026, 24024 trials per run, 0.4005 and 0.4052, 99% between-part intervals inside the 2-point band (residual failure probability stated in the proc entry), baseline 0 events. Scorch Marks lasts 10 s: behaviour through the event read scorch_expiry / scorch_expiry_control (pair 20261122-103136 / 20261122-103230, build 2ae43243, no flip): 807059 present 9300..9900 ms and gone 10150..10900 ms after Sun Ray, control absent. That read goes through Sun Ray 504764's grant, not the 806021 proc; both run the same Cast(player, player, 807059) (AscensionSunClericAbilities.cpp:243 and :258) and 807059 has DurationIndex 1 = 10000 ms. The old scorch_duration label stays as data. Its label 806021 behaviour_metric_delta scorch_duration reads aura_duration_ms, a READBACK metric (coverage.METRIC_EVIDENCE), and its only verdict comes from pair 20261120-205725 / 20261120-205757 on another build than the 20261122 pair (Sun Ray 504764 grants Scorch Marks for real, control = no cast). A held/gone bracket on the live aura would make it behaviour; not built (review b8a I-1). Dawnsear half: a second proc entry with the trigger 500146 (the labels of the two entries take the trigger suffix), counted pair 20261122-065859 / 20261122-070442, build 2e2bdcd22257, server commit f7c27d317a43, no flip, Sunflare 0.3965 and 0.4006, Dawnsear 0.3935 and 0.4000 against 0.4 (the 99% intervals and the residual failure probability at most 0.1% per pair are the proc entry's); baseline 0 events. Reference search: bindmysoul snapshot 'now have a 40% chance ... for 10 seconds', nothing else found. Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip."
   },
   {
     "spell": 806021,
@@ -5931,11 +5952,13 @@
         "claim": "for $806025d,",
         "labels": [
           "806024 spell_duration 806025 #1",
-          "806024 behaviour_metric_delta debuff_duration"
+          "806024 behaviour_metric_delta debuff_duration",
+          "806024 behaviour_metric_delta debuff_expiry",
+          "806024 behaviour_metric_delta debuff_expiry_control"
         ]
       }
     ],
-    "reason": "Counted pair 20261122-054853 / 20261122-054927, one build (server commit 5279c3b1e64c), no flip, 13 of 13 entries ok in both runs. Control arm = the same scenario without 806024 learned (the before phase, or the control arm with the same five or six Radiant Flame casts): Holy damage (Horusath Blast 500154) +7.84% and +7.85% at the real cap of 8 stacks (99% intervals +7.38 to +8.30 and +7.42 to +8.28, 20 trials per arm; expected +8, band 6 to 10); Fire damage (Dawnsear 500146, a class Fire spell) +7.93% and +7.94% (intervals +7.76 to +8.09 and +7.79 to +8.09); 806025 is real Purgation stacks from real Radiant Flame casts, never set_aura. One cast gives 5 stacks (5 damage hits per cast, Radiant Flame carries SPELL_ATTR5_EXTRA_INITIAL_PERIOD) and the debuff reads 7628 ms 1500 ms after the cast (read bounds 7000 to 7900 exclude 10% off on both sides; 0 before the learn); that read is data, not behaviour. Residual failure probability of the two hit_ratio checks per pair: far below 0.1% (Holy half-width 0.46 against 1.84 to the band edge, Fire 0.17 against 1.9, about 4 times the 99% half-width or more). Fire reading: the engine filters SPELL_AURA_MOD_DAMAGE_FROM_CASTER by the MiscValue school mask (Holy|Fire, SpellAuraEffects.cpp:1218-1220, commit e94d29e22b) and by SpellFamilyName 33 (:1223): Fire is proven for the class's own Fire spells (Dawnsear 500146, family 33); Fire Blast 2136 (family 3) read +0.05% and +0.28% because of the family check (a discarded design). Fire damage of the caster outside family 33 stays an open expectation, not measured. Status of the row: the Holy and Fire claims are behaviour (status 1) and the duration claim 'for $806025d' rests on aura_duration_ms, a readback (coverage.py READBACK), so the clause counts as data until a behaviour duration proof exists. Reference search 2026-11-22: coa-history 806025 has 221 applied, 825 dose and 352 refresh events in 5 logs and no figure; nothing else found. Round 3 pair 20261122-065848 / 20261122-065950, build 534132905680, server commit d26954d5cf31, no flip, 18 of 18 entries ok in both runs. Holy damage resized after base pair 8 read insufficient_trials at 10 trials per arm (99% half-width 1.07 against the 1 point limit; the other run passed it): +7.868% and +7.843% (99% intervals +7.445 to +8.291 and +7.362 to +8.324, 20 trials per arm, pilot-sized; 20 and 18 treatment hits against 18 and 17 control hits) inside the band 6 to 10; half-width 0.42 and 0.48 against about 2 points to the band edge, residual failure probability far below 0.1% per pair."
+    "reason": "Counted pair 20261122-054853 / 20261122-054927, one build (server commit 5279c3b1e64c), no flip, 13 of 13 entries ok in both runs. Control arm = the same scenario without 806024 learned (the before phase, or the control arm with the same five or six Radiant Flame casts): Holy damage (Horusath Blast 500154) +7.84% and +7.85% at the real cap of 8 stacks (99% intervals +7.38 to +8.30 and +7.42 to +8.28, 20 trials per arm; expected +8, band 6 to 10); Fire damage (Dawnsear 500146, a class Fire spell) +7.93% and +7.94% (intervals +7.76 to +8.09 and +7.79 to +8.09); 806025 is real Purgation stacks from real Radiant Flame casts, never set_aura. One cast gives 5 stacks (5 damage hits per cast, Radiant Flame carries SPELL_ATTR5_EXTRA_INITIAL_PERIOD) and the debuff reads 7628 ms 1500 ms after the cast (read bounds 7000 to 7900 exclude 10% off on both sides; 0 before the learn); that read is data, not behaviour. Residual failure probability of the two hit_ratio checks per pair: far below 0.1% (Holy half-width 0.46 against 1.84 to the band edge, Fire 0.17 against 1.9, about 4 times the 99% half-width or more). Fire reading: the engine filters SPELL_AURA_MOD_DAMAGE_FROM_CASTER by the MiscValue school mask (Holy|Fire, SpellAuraEffects.cpp:1218-1220, commit e94d29e22b) and by SpellFamilyName 33 (:1223): Fire is proven for the class's own Fire spells (Dawnsear 500146, family 33); Fire Blast 2136 (family 3) read +0.05% and +0.28% because of the family check (a discarded design). Fire damage of the caster outside family 33 stays an open expectation, not measured. Status of the row: the Holy and Fire claims are behaviour (status 1) and the duration claim 'for $806025d' rests on aura_duration_ms, a readback (coverage.py READBACK), and the duration is also read as an event by debuff_expiry / debuff_expiry_control (pair 20261122-103136 / 20261122-103230, build 2ae43243, no flip): 806025 present 11350..11900 ms and gone 12150..12700 ms after the cast, control absent. The bracket rests on the last Radiant Flame tick at 4000 ms, supported by SPELL_ATTR5_EXTRA_INITIAL_PERIOD and the 4000 ms duration, not stamped. Reference search 2026-11-22: coa-history 806025 has 221 applied, 825 dose and 352 refresh events in 5 logs and no figure; nothing else found. Round 3 pair 20261122-065848 / 20261122-065950, build 534132905680, server commit d26954d5cf31, no flip, 18 of 18 entries ok in both runs. Holy damage resized after base pair 8 read insufficient_trials at 10 trials per arm (99% half-width 1.07 against the 1 point limit; the other run passed it): +7.868% and +7.843% (99% intervals +7.445 to +8.291 and +7.362 to +8.324, 20 trials per arm, pilot-sized; 20 and 18 treatment hits against 18 and 17 control hits) inside the band 6 to 10; half-width 0.42 and 0.48 against about 2 points to the band edge, residual failure probability far below 0.1% per pair."
   },
   {
     "spell": 806024,
@@ -6117,7 +6140,10 @@
       {
         "claim": "and guaranteed to critically strike",
         "labels": [
-          "806159 behaviour_metric_delta guaranteed_crit"
+          "806159 behaviour_metric_delta guaranteed_crit",
+          "806159 behaviour_metric_delta crit_all",
+          "806159 behaviour_metric_delta crit_control",
+          "806159 behaviour_metric_delta crit_control_landed"
         ]
       },
       {
@@ -6127,16 +6153,19 @@
         ]
       }
     ],
-    "reason": "Control arm in each entry = the reading before the cast. Illumination 500143: cast time 2000 then 0 ms; critical strike chance gain 10000 points (flat modifier 9999 + 1; base 4.68 before, 10004.7 after); mana cost 408 then 816 (30% of base mana 1363 = 408.9, doubled), within 2. Reference search 2026-11-22: coa-history spell 806159: 6 casts and 6 applications in 2 logs; git log origin/main --grep 806159 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
+    "reason": "Control arm in each entry = the reading before the cast. Illumination 500143: cast time 2000 then 0 ms; critical strike chance gain 10000 points (flat modifier 9999 + 1; base 4.68 before, 10004.7 after); mana cost 408 then 816 (30% of base mana 1363 = 408.9, doubled), within 2. Reference search 2026-11-22: coa-history spell 806159: 6 casts and 6 applications in 2 logs; git log origin/main --grep 806159 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip. Expiry or event labels added in batch 9: counted pair 20261122-103136 / 20261122-103230, build 2ae43243, server commit 516669096f7e+, no flip, 74 of 74 entries ok in both runs, each read with its control."
   },
   {
     "spell": 806159,
     "clause": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
     "labels": [
-      "806159 behaviour_metric_delta shared_cooldown"
+      "806159 behaviour_metric_delta shared_cooldown",
+      "806159 behaviour_metric_delta shared_refusal_ascension",
+      "806159 behaviour_metric_delta shared_refusal_conquest",
+      "806159 behaviour_metric_delta shared_refusal_revelation"
     ],
     "kind": "claim",
-    "reason": "Control arm = the cooldown of Solar Invocation: Ascension 500152 read before any cast (0); 500 ms after one cast of 806159 it reads 29494 ms (Category 767, CategoryRecoveryTime 30000, within 1500). Reference search 2026-11-22: coa-history spell 806159: 6 casts and 6 applications in 2 logs; git log origin/main --grep 806159 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
+    "reason": "Control arm = the cooldown of Solar Invocation: Ascension 500152 read before any cast (0); 500 ms after one cast of 806159 it reads 29494 ms (Category 767, CategoryRecoveryTime 30000, within 1500). Reference search 2026-11-22: coa-history spell 806159: 6 casts and 6 applications in 2 logs; git log origin/main --grep 806159 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip. Shared refusals: pair 20261122-105413 / 20261122-105449, build 2ae43243, server commit 516669096f7e+, no flip, 28 of 28 entries ok in both runs. Conquest, Revelation and Ascension each read cast_failure 67 on the other root after a real 806159 cast, control 0 before it. The Ascension arm waits 3000 ms so the 2500 ms cast of 500152 has finished and no 806159 failure is recorded (batch 9 review C-1: the first design was refused with reason 105 while 500152 was casting)."
   },
   {
     "spell": 806458,

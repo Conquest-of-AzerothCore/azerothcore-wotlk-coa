@@ -18247,113 +18247,6 @@
     {
       "spell": 561204,
       "trigger_spell": 800054,
-      "target": "dummy",
-      "dummy_distance": 5,
-      "cast_in_before": false,
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "spell_damage_total",
-      "fields": {
-        "spell": 800038,
-        "target": "dummy",
-        "critical": false
-      },
-      "before_expected": 0,
-      "wait_ms": 2500,
-      "expire_ms": 500,
-      "cast_power": 1360,
-      "name": "Hegemony (burst damage at the reference stats)",
-      "variant": "burst_damage",
-      "quote": "@s:800038:0@",
-      "expected": 48,
-      "after_at_least": 47,
-      "after_at_most": 49,
-      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Damage at AP 70: 37..38 + 0.15 x 70 = 47.5..48.5, read within 47..49. Control: no cast, 0. Reference search 2026-11-22: coa-history (800038 SPELL_DAMAGE mean 774) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
-      "kind": "metric_delta",
-      "label_suffix": "burst_damage"
-    },
-    {
-      "spell": 561204,
-      "trigger_spell": 800054,
-      "target": "dummy",
-      "dummy_distance": 5,
-      "cast_in_before": false,
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "spell_damage_total",
-      "fields": {
-        "spell": 800038,
-        "target": "dummy",
-        "critical": false
-      },
-      "before_expected": 0,
-      "wait_ms": 2500,
-      "expire_ms": 500,
-      "cast_power": 1360,
-      "name": "Hegemony (burst damage at +10000 spell power)",
-      "variant": "burst_damage_sp",
-      "quote": "@s:800038:0@",
-      "expected": 4048,
-      "after_at_least": 4047,
-      "after_at_most": 4049,
-      "player_spell_power": {
-        "amount": 10000,
-        "hit_arm": true
-      },
-      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Contrast arm of the spell power term: +10000 spell power (harness rating, hit_arm): 37..38 + 0.4 x 10000 + 0.15 x 70 = 4047.5..4048.5 against 47.5..48.5 at 0. Reference search 2026-11-22: coa-history (800038 SPELL_DAMAGE) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
-      "kind": "metric_delta",
-      "label_suffix": "burst_damage_sp"
-    },
-    {
-      "spell": 561204,
-      "trigger_spell": 800054,
-      "target": "dummy",
-      "dummy_distance": 5,
-      "cast_in_before": false,
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "spell_damage_total",
-      "fields": {
-        "spell": 800038,
-        "target": "dummy",
-        "critical": false
-      },
-      "before_expected": 0,
-      "wait_ms": 2500,
-      "expire_ms": 500,
-      "cast_power": 1360,
-      "name": "Hegemony (burst damage at +20000 attack power)",
-      "variant": "burst_damage_ap",
-      "quote": "@s:800038:0@",
-      "expected": 3048,
-      "after_at_least": 3047,
-      "after_at_most": 3049,
-      "player_attack_power": 20000,
-      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Contrast arm of the attack power term: +20000 attack power (harness fixture): 37..38 + 0.15 x 20070 = 3047.5..3048.5 against 47.5..48.5 at 70. Reference search 2026-11-22: coa-history (800038 SPELL_DAMAGE) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
-      "kind": "metric_delta",
-      "label_suffix": "burst_damage_ap"
-    },
-    {
-      "spell": 561204,
-      "trigger_spell": 800054,
       "target": "caster",
       "cast_in_before": false,
       "phase_auras": [
@@ -25033,6 +24926,987 @@
       "cast_power": 1360,
       "ally_distance": 5,
       "expected_source": "Control of the no_stack entry: Tree of Life 34123 alone (aura 118, EffectBasePoints 5 + 1 = +6%) raises the same Sunlight 704911 heal on the grouped ally by 6%, so a no_stack reading of 1.0 shows a cap, not a partner that does not reach the ally. Residual failure probability per pair: the 99% half-width of a reading is about 0.05 point against a 2-point band, so far below 0.1%."
+    },
+    {
+      "spell": 561204,
+      "trigger_spell": 800054,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800038,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "name": "Hegemony (burst damage at the reference stats)",
+      "variant": "burst_damage",
+      "quote": "@s:800038:0@",
+      "expected": 48,
+      "after_at_least": 47,
+      "after_at_most": 49,
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Damage at AP 70: 37..38 + 0.15 x 70 = 47.5..48.5, read within 47..49. Control: no cast, 0. Crit forced out by fixture 984954 (aura 57 -1000 spell crit, harness precondition) so the non-critical read cannot read 0 from a critical tick; residual failure probability from crit: none beyond the fixture, whose -1000 exceeds the base Holy crit. Reference search 2026-11-22: coa-history (800038 SPELL_DAMAGE mean 774) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "burst_damage"
+    },
+    {
+      "spell": 561204,
+      "trigger_spell": 800054,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800038,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "name": "Hegemony (burst damage at +10000 spell power)",
+      "variant": "burst_damage_sp",
+      "quote": "@s:800038:0@",
+      "expected": 4048,
+      "after_at_least": 4047,
+      "after_at_most": 4049,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Contrast arm of the spell power term: +10000 spell power (harness rating, hit_arm): 37..38 + 0.4 x 10000 + 0.15 x 70 = 4047.5..4048.5 against 47.5..48.5 at 0. Crit forced out by fixture 984954 (aura 57 -1000 spell crit, harness precondition) so the non-critical read cannot read 0 from a critical tick; residual failure probability from crit: none beyond the fixture, whose -1000 exceeds the base Holy crit. Reference search 2026-11-22: coa-history (800038 SPELL_DAMAGE) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "burst_damage_sp"
+    },
+    {
+      "spell": 561204,
+      "trigger_spell": 800054,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800038,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "cast_power": 1360,
+      "name": "Hegemony (burst damage at +20000 attack power)",
+      "variant": "burst_damage_ap",
+      "quote": "@s:800038:0@",
+      "expected": 3048,
+      "after_at_least": 3047,
+      "after_at_most": 3049,
+      "player_attack_power": 20000,
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Contrast arm of the attack power term: +20000 attack power (harness fixture): 37..38 + 0.15 x 20070 = 3047.5..3048.5 against 47.5..48.5 at 70. Crit forced out by fixture 984954 (aura 57 -1000 spell crit, harness precondition) so the non-critical read cannot read 0 from a critical tick; residual failure probability from crit: none beyond the fixture, whose -1000 exceeds the base Holy crit. Reference search 2026-11-22: coa-history (800038 SPELL_DAMAGE) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "kind": "metric_delta",
+      "label_suffix": "burst_damage_ap"
+    },
+    {
+      "spell": 300336,
+      "name": "Light The Way (Illumination heal, aura present then gone around 3 sec)",
+      "kind": "metric_delta",
+      "variant": "illumination_expiry",
+      "label_suffix": "illumination_expiry",
+      "quote": "Healing done by Shine or Illumination now increases the targets movement speed by $300337s1% for $300337d.",
+      "trigger_spell": 500143,
+      "gate_spell": 300336,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health_pct": 50,
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 300337
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 4875,
+      "expire_ms": 500,
+      "observe_source": "300336 Light The Way Effect[0] aura 42 PROC_TRIGGER_SPELL 300337, cast by the script on the healed target after a Shine or Illumination heal (AscensionSunClericEvents.cpp:118, 259); 300337 has DurationIndex 27 (3000 ms, $300337d). Illumination 500143 (2000 ms cast) is cast by the caster on itself at 50% health. The aura 300337 on the caster is an event read (presence), not the remaining-time field: read present 4800..4950 ms of game time after the cast (the heal applies it between 2000 and 2100 ms, so it has lasted at least 2700 ms, 10% under 3000 excluded) and gone 5150..5300 ms after it (at most 3300 ms, 10% over excluded). Control: the same cast before 300336 is learned, aura absent. Reference search 2026-11-22: coa-history spell 300336: 0 events in 186 logs (a passive); 300337 Light The Way as positive control: 4958 SPELL_AURA_APPLIED events on players in 20 logs; nothing found for the end of the aura beyond the tooltip and the DBC.",
+      "expiry_wait_ms": 350,
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "game_time": {
+        "after": [
+          4800,
+          4950
+        ],
+        "expired": [
+          5150,
+          5300
+        ]
+      },
+      "trigger_only_after": true
+    },
+    {
+      "spell": 300336,
+      "kind": "metric_delta",
+      "gate_spell": 300336,
+      "trigger_spell": 800357,
+      "target": "caster",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "caster_health_pct": 50,
+      "cast_power": 1363,
+      "expire_ms": 500,
+      "name": "Light The Way (Shine heal, aura present then gone around 3 sec)",
+      "variant": "shine_expiry",
+      "label_suffix": "shine_expiry",
+      "quote": "Healing done by Shine or Illumination now increases the targets movement speed by $300337s1% for $300337d.",
+      "metric": "aura",
+      "fields": {
+        "spell": 300337
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 4375,
+      "observe_source": "300336 Light The Way Effect[0] aura 42 PROC_TRIGGER_SPELL 300337, cast by the script on the healed target after a Shine or Illumination heal (AscensionSunClericEvents.cpp:118, 259); 300337 has DurationIndex 27 (3000 ms, $300337d). Shine 800357 (SpellCastTimes 16 = 1500 ms) is cast by the caster on itself at 50% health. The aura 300337 on the caster is an event read (presence), not the remaining-time field: read present 4300..4450 ms of game time after the cast (the heal applies it between 1500 and 1600 ms, so it has lasted at least 2700 ms, 10% under 3000 excluded) and gone 4650..4800 ms after it (at most 3300 ms, 10% over excluded). Control: the same cast before 300336 is learned, aura absent. Reference search 2026-11-22: coa-history spell 300336: 0 events in 186 logs (a passive); 300337 Light The Way as positive control: 4958 SPELL_AURA_APPLIED events on players in 20 logs; nothing found for the end of the aura beyond the tooltip and the DBC.",
+      "expiry_wait_ms": 350,
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "game_time": {
+        "after": [
+          4300,
+          4450
+        ],
+        "expired": [
+          4650,
+          4800
+        ]
+      },
+      "trigger_only_after": true
+    },
+    {
+      "spell": 560111,
+      "name": "Blessed Magic (Glorious Execution recast after Horusath Blast)",
+      "kind": "cost_gate",
+      "variant": "ge_gate",
+      "label_suffix": "ge_gate",
+      "quote": "Casting Horusath Blast now resets the cooldown of Glorious Execution.",
+      "gated_spell": 800626,
+      "resource": "cooldown",
+      "reduction": 0,
+      "resets": true,
+      "target": "dummy",
+      "margin_ms": 1600,
+      "after_casts": [
+        [
+          500154,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "cast_power": 1363,
+      "observe_source": "560111 Blessed Magic: the reset is scripted, OnSpellCast of Horusath Blast with the aura calls Reduce(player, 800626, INT32_MAX) (AscensionSunClericAbilities.cpp:236-241). Glorious Execution 800626 has RecoveryTime 8000 ms. The cooldown cost_gate (resets) casts Glorious Execution as the priming cast, Horusath Blast 500154 at the dummy 1600 ms later in every arm, then attempts Glorious Execution again 3200 ms after the priming cast (1600 ms after Horusath Blast, past its 1500 ms global cooldown), inside its 8000 ms cooldown: refused without 560111 (the control, SPELL_FAILED_NOT_READY), accepted with it. The accepted or refused cast is an event (cast_failure), not a cooldown readback. Reference search 2026-11-22: coa-history spell 560111: a passive, no events; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 300336,
+      "name": "Light The Way (Illumination heal, control: no aura without the passive)",
+      "kind": "metric_delta",
+      "variant": "illumination_expiry_control",
+      "label_suffix": "illumination_expiry_control",
+      "quote": "Healing done by Shine or Illumination now increases the targets movement speed by $300337s1% for $300337d.",
+      "trigger_spell": 500143,
+      "gate_spell": 300321,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health_pct": 50,
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 300337
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 4875,
+      "expire_ms": 500,
+      "observe_source": "300336 Light The Way Effect[0] aura 42 PROC_TRIGGER_SPELL 300337, cast by the script on the healed target after a Shine or Illumination heal (AscensionSunClericEvents.cpp:118, 259); 300337 has DurationIndex 27 (3000 ms, $300337d). Illumination 500143 (2000 ms cast) is cast by the caster on itself at 50% health. The aura 300337 on the caster is an event read (presence), not the remaining-time field: read present 4800..4950 ms of game time after the cast (the heal applies it between 2000 and 2100 ms, so it has lasted at least 2700 ms, 10% under 3000 excluded) and gone 5150..5300 ms after it (at most 3300 ms, 10% over excluded). Reference search 2026-11-22: coa-history spell 300337 lists aura applied and removed events with no stated duration; nothing else found; this arm judges only absence. Control: the same heal cast with the unrelated passive Solar Conduit 300321 learned in place of 300336, read at the same time (the heal lands, aura absent: 0).",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 300336,
+      "kind": "metric_delta",
+      "gate_spell": 300321,
+      "trigger_spell": 800357,
+      "target": "caster",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "caster_health_pct": 50,
+      "cast_power": 1363,
+      "expire_ms": 500,
+      "name": "Light The Way (Shine heal, control: no aura without the passive)",
+      "variant": "shine_expiry_control",
+      "label_suffix": "shine_expiry_control",
+      "quote": "Healing done by Shine or Illumination now increases the targets movement speed by $300337s1% for $300337d.",
+      "metric": "aura",
+      "fields": {
+        "spell": 300337
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 4375,
+      "observe_source": "300336 Light The Way Effect[0] aura 42 PROC_TRIGGER_SPELL 300337, cast by the script on the healed target after a Shine or Illumination heal (AscensionSunClericEvents.cpp:118, 259); 300337 has DurationIndex 27 (3000 ms, $300337d). Shine 800357 (SpellCastTimes 16 = 1500 ms) is cast by the caster on itself at 50% health. The aura 300337 on the caster is an event read (presence), not the remaining-time field: read present 4300..4450 ms of game time after the cast (the heal applies it between 1500 and 1600 ms, so it has lasted at least 2700 ms, 10% under 3000 excluded) and gone 4650..4800 ms after it (at most 3300 ms, 10% over excluded). Reference search 2026-11-22: coa-history spell 300337 lists aura applied and removed events with no stated duration; nothing else found; this arm judges only absence. Control: the same heal cast with the unrelated passive Solar Conduit 300321 learned in place of 300336, read at the same time (the heal lands, aura absent: 0).",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 561204,
+      "name": "Hegemony (Radiance ends 16 s after a real cast)",
+      "variant": "radiance_expiry",
+      "quote": "Increases the duration of Radiance by $/1000;s1 sec.",
+      "gate_spell": 561204,
+      "trigger_spell": 800054,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 800054
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 15725,
+      "expire_ms": 500,
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms; Radiance 800054 DurationIndex 1 = 10000 ms; ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms when the caster has 561204. A real Radiance cast ends at 10000 + 6000 = 16000 ms with the passive. The aura 800054 on the caster is an event read (presence), not the remaining-time field: read present 15500..15950 ms of game time after the trigger cast and gone 16150..16550 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, aura absent at the first read.",
+      "kind": "metric_delta",
+      "label_suffix": "radiance_expiry",
+      "expiry_wait_ms": 625,
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          15500,
+          15950
+        ],
+        "expired": [
+          16150,
+          16550
+        ]
+      }
+    },
+    {
+      "spell": 561204,
+      "name": "Hegemony (Radiance ends 16 s after a real cast) (control: without the passive)",
+      "variant": "radiance_expiry_control",
+      "quote": "Increases the duration of Radiance by $/1000;s1 sec.",
+      "gate_spell": 300321,
+      "trigger_spell": 800054,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 800054
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 15725,
+      "expire_ms": 500,
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms; Radiance 800054 DurationIndex 1 = 10000 ms; ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms when the caster has 561204. A real Radiance cast ends at 10000 + 6000 = 16000 ms with the passive. The aura 800054 on the caster is an event read (presence), not the remaining-time field: read present 15500..15950 ms of game time after the trigger cast and gone 16150..16550 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, aura absent at the first read.",
+      "kind": "metric_delta",
+      "label_suffix": "radiance_expiry_control",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 561204,
+      "name": "Hegemony (Dawn-granted Radiance ends at 6 s)",
+      "variant": "dawn_gain_expiry",
+      "quote": "Whenever you use Dawn, you gain Radiance for $/1000;302907s1 sec.",
+      "gate_spell": 561204,
+      "trigger_spell": 804584,
+      "target": "caster",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 800054
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 5725,
+      "expire_ms": 500,
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms; Radiance 800054 DurationIndex 1 = 10000 ms; ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms when the caster has 561204. Dawn 804584 (Solar Power 500149 at 20 stacks, precondition fixture) grants Radiance for 6001 ms. The aura 800054 on the caster is an event read (presence), not the remaining-time field: read present 5500..5950 ms of game time after the trigger cast and gone 6150..6550 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, aura absent at the first read.",
+      "kind": "metric_delta",
+      "label_suffix": "dawn_gain_expiry",
+      "expiry_wait_ms": 625,
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          5500,
+          5950
+        ],
+        "expired": [
+          6150,
+          6550
+        ]
+      }
+    },
+    {
+      "spell": 561204,
+      "name": "Hegemony (Dawn-granted Radiance ends at 6 s) (control: without the passive)",
+      "variant": "dawn_gain_expiry_control",
+      "quote": "Whenever you use Dawn, you gain Radiance for $/1000;302907s1 sec.",
+      "gate_spell": 300321,
+      "trigger_spell": 804584,
+      "target": "caster",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 800054
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 5725,
+      "expire_ms": 500,
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms; Radiance 800054 DurationIndex 1 = 10000 ms; ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms when the caster has 561204. Dawn 804584 (Solar Power 500149 at 20 stacks, precondition fixture) grants Radiance for 6001 ms. The aura 800054 on the caster is an event read (presence), not the remaining-time field: read present 5500..5950 ms of game time after the trigger cast and gone 6150..6550 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, aura absent at the first read.",
+      "kind": "metric_delta",
+      "label_suffix": "dawn_gain_expiry_control",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 561204,
+      "name": "Hegemony (Dawn-extended Radiance ends 6 s later)",
+      "variant": "dawn_extend_expiry",
+      "quote": "If Radiance is already active, its duration is extended by $/1000;302907s1 sec.",
+      "gate_spell": 561204,
+      "trigger_spell": 804584,
+      "target": "caster",
+      "measure_actor": "caster",
+      "setup_casts": [
+        800054
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 800054
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 20075,
+      "expire_ms": 500,
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms; Radiance 800054 DurationIndex 1 = 10000 ms; ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms when the caster has 561204. Radiance is cast, 1600 ms later Dawn extends it: its end is 16000 + 6001 = 22001 ms after the Radiance cast, about 20350 ms after the Dawn cast (the Radiance cast precedes it by 1600 to 1650 ms), against 16000 without the extension. The aura 800054 on the caster is an event read (presence), not the remaining-time field: read present 19900..20250 ms of game time after the trigger cast and gone 20450..20800 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, aura absent at the first read.",
+      "kind": "metric_delta",
+      "label_suffix": "dawn_extend_expiry",
+      "expiry_wait_ms": 550,
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          19900,
+          20250
+        ],
+        "expired": [
+          20450,
+          20800
+        ]
+      }
+    },
+    {
+      "spell": 561204,
+      "name": "Hegemony (Dawn-extended Radiance ends 6 s later) (control: without the passive)",
+      "variant": "dawn_extend_expiry_control",
+      "quote": "If Radiance is already active, its duration is extended by $/1000;302907s1 sec.",
+      "gate_spell": 300321,
+      "trigger_spell": 804584,
+      "target": "caster",
+      "measure_actor": "caster",
+      "setup_casts": [
+        800054
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 800054
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 20075,
+      "expire_ms": 500,
+      "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms; Radiance 800054 DurationIndex 1 = 10000 ms; ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms when the caster has 561204. Radiance is cast, 1600 ms later Dawn extends it: its end is 16000 + 6001 = 22001 ms after the Radiance cast, about 20350 ms after the Dawn cast (the Radiance cast precedes it by 1600 to 1650 ms), against 16000 without the extension. The aura 800054 on the caster is an event read (presence), not the remaining-time field: read present 19900..20250 ms of game time after the trigger cast and gone 20450..20800 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Without the passive Radiance ends at 10000 ms, long before the first read at 19900 ms, so this arm shows absence only; the learned arm's bracket alone excludes the end without the extension. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, aura absent at the first read.",
+      "kind": "metric_delta",
+      "label_suffix": "dawn_extend_expiry_control",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 704586,
+      "name": "Shining Shield (aura present then gone around 60 sec)",
+      "kind": "metric_delta",
+      "variant": "shield_expiry",
+      "label_suffix": "shield_expiry",
+      "quote": "Activating Dawn now grants Shining Shield for $805265d.",
+      "trigger_spell": 804584,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 805265
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 58600,
+      "expire_ms": 2000,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "704586 Shining Shield Effect[0] aura 42 PROC_TRIGGER_SPELL 805265, cast by ActivateDawn when 704586 is known (AscensionSunCleric.cpp:271-272); 805265 has DurationIndex 3 (60000 ms, $805265d). Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture). The aura 805265 on the caster is an event read (presence), not the remaining-time field: read present 57300..59900 ms of game time after the trigger cast and gone 60200..62500 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Preconditions of the scenario, none of them the claim's aura 805265: Dawn 807440 is removed (set_aura stacks 0) and 704396 (20 Solar Power) is added before the cast, besides 500149. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, aura absent at the first read.",
+      "expiry_wait_ms": 2750,
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          57300,
+          59900
+        ],
+        "expired": [
+          60200,
+          62500
+        ]
+      }
+    },
+    {
+      "spell": 704586,
+      "name": "Shining Shield (aura present then gone around 60 sec) (control: without the passive)",
+      "kind": "metric_delta",
+      "variant": "shield_expiry_control",
+      "label_suffix": "shield_expiry_control",
+      "quote": "Activating Dawn now grants Shining Shield for $805265d.",
+      "trigger_spell": 804584,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 805265
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 58600,
+      "expire_ms": 2000,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "704586 Shining Shield Effect[0] aura 42 PROC_TRIGGER_SPELL 805265, cast by ActivateDawn when 704586 is known (AscensionSunCleric.cpp:271-272); 805265 has DurationIndex 3 (60000 ms, $805265d). Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture). The aura 805265 on the caster is an event read (presence), not the remaining-time field: read present 57300..59900 ms of game time after the trigger cast and gone 60200..62500 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, aura absent at the first read.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "gate_spell": 300321
+    },
+    {
+      "spell": 804625,
+      "name": "Harsh Lessons (Radiant Flame ends at 2 s after Dawn)",
+      "kind": "metric_delta",
+      "variant": "scorch_expiry",
+      "label_suffix": "scorch_expiry",
+      "quote": "Casting Dawn now grants Scorch Marks.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "expire_ms": 500,
+      "metric": "aura",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 806060
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1900,
+      "setup_casts": [
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "804625 Harsh Lessons: Dawn grants Scorch Marks 807059 (Effect[0] SPELLMOD_DURATION -51 = -50%), so Radiant Flame 806060 (DurationIndex 35, 4000 ms) lasts 2000 ms; the gate 804625 is learned from the start, Dawn 804584 is cast at the dummy-less caster as the setup cast of the treatment phase (Solar Power 500149 at 20 stacks, precondition fixture). The aura 806060 on the dummy is an event read (presence), not the remaining-time field: read present 1850..1950 ms of game time after the trigger cast and gone 2050..2150 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, read at 2000 ms: aura present.",
+      "expiry_wait_ms": 200,
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          1850,
+          1950
+        ],
+        "expired": [
+          2050,
+          2150
+        ]
+      }
+    },
+    {
+      "spell": 804625,
+      "name": "Harsh Lessons (Radiant Flame ends at 2 s after Dawn) (control: without the passive)",
+      "kind": "metric_delta",
+      "variant": "scorch_expiry_control",
+      "label_suffix": "scorch_expiry_control",
+      "quote": "Casting Dawn now grants Scorch Marks.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "expire_ms": 500,
+      "metric": "aura",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 806060
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2000,
+      "setup_casts": [
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "804625 Harsh Lessons: Dawn grants Scorch Marks 807059 (Effect[0] SPELLMOD_DURATION -51 = -50%), so Radiant Flame 806060 (DurationIndex 35, 4000 ms) lasts 2000 ms; the gate 804625 is learned from the start, Dawn 804584 is cast at the dummy-less caster as the setup cast of the treatment phase (Solar Power 500149 at 20 stacks, precondition fixture). The aura 806060 on the dummy is an event read (presence), not the remaining-time field: read present 1850..1950 ms of game time after the trigger cast and gone 2050..2150 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, read at 2000 ms: aura present.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "gate_spell": 300321
+    },
+    {
+      "spell": 807870,
+      "name": "Glare (stun present then gone around 5 sec)",
+      "kind": "metric_delta",
+      "variant": "stun_expiry",
+      "label_suffix": "stun_expiry",
+      "quote": "and stuns enemies within $a1 yds for $d.",
+      "trigger_spell": 807870,
+      "target": "dummy",
+      "cast_power": 1360,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 807870
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 6275,
+      "expire_ms": 500,
+      "observe_source": "807870 Effect[0] aura 12 SPELL_AURA_MOD_STUN, DurationIndex 28 (5000 ms, $d); Glare has a 1500 ms cast (SpellCastTimes 16), so the stun starts between 1500 and 1550 ms after the cast start. The aura 807870 on the dummy is an event read (presence), not the remaining-time field: read present 6100..6450 ms of game time after the trigger cast and gone 6600..6950 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Preconditions on the caster, neither is the claim's aura 807870: 984954 (+101 weapon crit, -1000 spell crit, so no crit decides the cast) and 823764 (-9999 target resistance, so Glare cannot be resisted). Control: the phase before the cast reads no aura (0).",
+      "expiry_wait_ms": 500,
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          6100,
+          6450
+        ],
+        "expired": [
+          6600,
+          6950
+        ]
+      }
+    },
+    {
+      "spell": 806021,
+      "kind": "metric_delta",
+      "quote": "chance to grant Scorch Marks for $807059d",
+      "name": "Searing Light (Scorch Marks present then gone around 10 sec)",
+      "variant": "scorch_marks_expiry",
+      "label_suffix": "scorch_marks_expiry",
+      "trigger_spell": 504764,
+      "target": "dummy",
+      "cast_power": 1000,
+      "metric": "aura",
+      "fields": {
+        "spell": 807059
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9600,
+      "expire_ms": 500,
+      "observe_source": "$807059d = 10000 ms. Sun Ray 504764 grants Scorch Marks 807059 on the caster by script (AscensionSunClericAbilities.cpp:215-216), at the cast. The aura 807059 on the caster is an event read (presence), not the remaining-time field: read present 9300..9900 ms of game time after the trigger cast and gone 10150..10900 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the phase before the cast reads no aura (0).",
+      "expiry_wait_ms": 925,
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          9300,
+          9900
+        ],
+        "expired": [
+          10150,
+          10900
+        ]
+      },
+      "measure_actor": "caster"
+    },
+    {
+      "spell": 806024,
+      "name": "Purgation (debuff present then gone around 8 sec after the last tick)",
+      "kind": "metric_delta",
+      "variant": "debuff_expiry",
+      "label_suffix": "debuff_expiry",
+      "quote": "for $806025d,",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "metric": "aura",
+      "fields": {
+        "spell": 806025
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "gate_spell": 806024,
+      "wait_ms": 11625,
+      "expire_ms": 500,
+      "observe_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025, cast on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316); 806025 has DurationIndex 31 (8000 ms, $806025d). Radiant Flame 806060 lasts 4000 ms with EffectAmplitude 1000 and an extra tick on apply, so the last tick (supported by AttributesEx5 0x200 and the 4000 ms duration, its time not stamped) at 4000 ms refreshes 806025 to 8000 ms: it ends at about 12000 ms after the cast. The aura 806025 on the dummy is an event read (presence), not the remaining-time field: read present 11350..11900 ms of game time after the trigger cast and gone 12150..12700 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, aura absent at the first read.",
+      "expiry_wait_ms": 800,
+      "after_expiry_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          11350,
+          11900
+        ],
+        "expired": [
+          12150,
+          12700
+        ]
+      }
+    },
+    {
+      "spell": 806024,
+      "name": "Purgation (debuff present then gone around 8 sec after the last tick) (control: without the passive)",
+      "kind": "metric_delta",
+      "variant": "debuff_expiry_control",
+      "label_suffix": "debuff_expiry_control",
+      "quote": "for $806025d,",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1000,
+      "metric": "aura",
+      "fields": {
+        "spell": 806025
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "gate_spell": 300321,
+      "wait_ms": 11625,
+      "expire_ms": 500,
+      "observe_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025, cast on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316); 806025 has DurationIndex 31 (8000 ms, $806025d). Radiant Flame 806060 lasts 4000 ms with EffectAmplitude 1000 and an extra tick on apply, so the last tick (supported by AttributesEx5 0x200 and the 4000 ms duration, its time not stamped) at 4000 ms refreshes 806025 to 8000 ms: it ends at about 12000 ms after the cast. The aura 806025 on the dummy is an event read (presence), not the remaining-time field: read present 11350..11900 ms of game time after the trigger cast and gone 12150..12700 ms after it, which excludes an end 10% of the stated value earlier or later (the stated end is in the window between the two reads). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the end of the aura. Control: the same cast with the unrelated passive Solar Conduit 300321 learned in place, aura absent at the first read.",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 806159,
+      "name": "Solar Invocation: Resplendence (cast refused after Resplendence: Ascension)",
+      "kind": "metric_delta",
+      "variant": "shared_refusal_ascension",
+      "label_suffix": "shared_refusal_ascension",
+      "quote": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
+      "trigger_spell": 500152,
+      "target": "caster",
+      "cast_power": 1360,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 500152
+      },
+      "before_expected": 0,
+      "expected": 67,
+      "setup_casts": [
+        806159
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "806159 and Solar Invocation: Ascension 500152 both carry Category 767 (Spell.dbc, the Ascension cooldown is read by the existing entries of this class). Solar Invocation: Ascension 500152 has CastingTimeIndex 19 = 2500 ms: the first phase waits 3000 ms so the cast has finished and its own cooldown is reset before Resplendence is cast. Without any cast of 806159 the cast of 500152 goes through (cast_failure 0, the control). Resplendence 806159 is cast for real and 1600 ms later, past the 1500 ms global cooldown, 500152 is cast: it is refused with SPELL_FAILED_NOT_READY 67, an event the server decides, not a cooldown readback. Reference search 2026-11-22: coa-history spell 806159: nothing found beyond the tooltip and the DBC for the shared category."
+    },
+    {
+      "spell": 806159,
+      "name": "Solar Invocation: Resplendence (cast refused after Resplendence: Conquest)",
+      "kind": "metric_delta",
+      "variant": "shared_refusal_conquest",
+      "label_suffix": "shared_refusal_conquest",
+      "quote": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
+      "trigger_spell": 800764,
+      "target": "caster",
+      "cast_power": 1360,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 800764
+      },
+      "before_expected": 0,
+      "expected": 67,
+      "setup_casts": [
+        806159
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "806159 and Solar Invocation: Conquest 800764 both carry Category 767 (Spell.dbc, the Conquest cooldown is read by the existing entries of this class). Without any cast of 806159 the cast of 800764 goes through (cast_failure 0, the control). Resplendence 806159 is cast for real and 1600 ms later, past the 1500 ms global cooldown, 800764 is cast: it is refused with SPELL_FAILED_NOT_READY 67, an event the server decides, not a cooldown readback. Reference search 2026-11-22: coa-history spell 806159: nothing found beyond the tooltip and the DBC for the shared category."
+    },
+    {
+      "spell": 806159,
+      "name": "Solar Invocation: Resplendence (cast refused after Resplendence: Revelation)",
+      "kind": "metric_delta",
+      "variant": "shared_refusal_revelation",
+      "label_suffix": "shared_refusal_revelation",
+      "quote": "@ext:Shares a cooldown with other Solar Invocation spells.:ext@",
+      "trigger_spell": 503651,
+      "target": "caster",
+      "cast_power": 1360,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 503651
+      },
+      "before_expected": 0,
+      "expected": 67,
+      "setup_casts": [
+        806159
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "806159 and Solar Invocation: Revelation 503651 both carry Category 767 (Spell.dbc, the Revelation cooldown is read by the existing entries of this class). Without any cast of 806159 the cast of 503651 goes through (cast_failure 0, the control). Resplendence 806159 is cast for real and 1600 ms later, past the 1500 ms global cooldown, 503651 is cast: it is refused with SPELL_FAILED_NOT_READY 67, an event the server decides, not a cooldown readback. Reference search 2026-11-22: coa-history spell 806159: nothing found beyond the tooltip and the DBC for the shared category."
+    },
+    {
+      "spell": 806159,
+      "kind": "metric_delta",
+      "quote": "causing your llluminations to be instant cast and guaranteed to critically strike, but cost $s3% more mana.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_power": 2868,
+      "caster_health_pct": 30,
+      "disable_regeneration": true,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500143,
+        "target": "caster",
+        "critical": true
+      },
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_wait_ms": 1600,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Solar Invocation: Resplendence (three Illuminations all critical)",
+      "variant": "crit_all",
+      "label_suffix": "crit_all",
+      "setup_casts": [
+        806159,
+        500143,
+        500143
+      ],
+      "expected": 3,
+      "after_at_least": 3,
+      "observe_source": "806159 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9999 + 1 = 10000 on Illumination 500143 (mask word 2 = 512). Three real Illumination casts on the caster (health held at 30%) are counted as critical heal events (spell_heal_count of 500143, critical true), 1600 ms apart after a real cast of 806159: all 3 critical (expected 3, at least 3). Failure probability of a server that does not guarantee it: 3 critical in a row at the base chance has probability 0.0468^3 = 1.0e-4 per run, below 0.1% per pair. The phase before the cast has no cast and reads 0. Reference search 2026-11-22: coa-history spell 806159: 6 casts and 6 applications in 2 logs; nothing found beyond the tooltip and the DBC for the guarantee. The base crit chance of Illumination is about 4.68%."
+    },
+    {
+      "spell": 806159,
+      "kind": "metric_delta",
+      "quote": "causing your llluminations to be instant cast and guaranteed to critically strike, but cost $s3% more mana.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_power": 2868,
+      "caster_health_pct": 30,
+      "disable_regeneration": true,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500143,
+        "target": "caster",
+        "critical": true
+      },
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_wait_ms": 2100,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "name": "Solar Invocation: Resplendence (control: three Illuminations without Resplendence)",
+      "variant": "crit_control",
+      "label_suffix": "crit_control",
+      "setup_casts": [
+        500143,
+        500143
+      ],
+      "gate_spell": 300321,
+      "expected": 0,
+      "after_at_most": 2,
+      "observe_source": "806159 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9999 + 1 = 10000 on Illumination 500143 (mask word 2 = 512). Three real Illumination casts on the caster (health held at 30%) are counted as critical heal events (spell_heal_count of 500143, critical true), 1600 ms apart with the unrelated passive Solar Conduit 300321 instead of 806159: at most 2 of the 3 may be critical, i.e. not all 3 (probability that three casts all crit by chance 0.0468^3 = 1.0e-4 per run, below 0.1% per pair). Reference search 2026-11-22: coa-history spell 806159: 6 casts and 6 applications in 2 logs; nothing found beyond the tooltip and the DBC for the guarantee. The base crit chance of Illumination is about 4.68%. Without Resplendence Illumination keeps its 2000 ms cast, so the casts are 2100 ms apart and the last heal is read 2600 ms after its cast.",
+      "after_at_least": 0
+    },
+    {
+      "spell": 806159,
+      "kind": "metric_delta",
+      "quote": "causing your llluminations to be instant cast and guaranteed to critically strike, but cost $s3% more mana.",
+      "trigger_spell": 500143,
+      "target": "caster",
+      "cast_power": 2868,
+      "caster_health_pct": 30,
+      "disable_regeneration": true,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500143,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_wait_ms": 2100,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "name": "Solar Invocation: Resplendence (control: the three Illuminations landed)",
+      "variant": "crit_control_landed",
+      "label_suffix": "crit_control_landed",
+      "setup_casts": [
+        500143,
+        500143
+      ],
+      "gate_spell": 300321,
+      "expected": 3,
+      "observe_source": "806159 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9999 + 1 = 10000 on Illumination 500143 (mask word 2 = 512). Three real Illumination casts on the caster (health held at 30%) are counted as critical heal events (spell_heal_count of 500143, critical true), 1600 ms apart with the unrelated passive Solar Conduit 300321 instead of 806159: all 3 heals land (spell_heal_count of 500143 without the critical filter, expected 3), so the control arm of crit_control counted real heals. Without Resplendence Illumination keeps its 2000 ms cast, so the casts are 2100 ms apart and the last heal is read 2600 ms after its cast. Reference search 2026-11-22: coa-history spell 806159 (6 casts in 2 logs) and the tooltip give nothing on the crit chance; nothing else found; this arm judges only that the heals landed.",
+      "after_at_least": 3
     }
   ],
   "player_observations": [],
