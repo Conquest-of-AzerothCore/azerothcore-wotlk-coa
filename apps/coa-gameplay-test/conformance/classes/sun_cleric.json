@@ -1868,6 +1868,37 @@
       "kind": "metric_delta",
       "target": "dummy",
       "expire_ms": 500,
+      "name": "Vow of the Valkyr (1 Solar Power per auto attack landed)",
+      "variant": "per_swing",
+      "label_suffix": "per_swing",
+      "quote": "Auto attacks generate 1 Solar Power",
+      "attack_swings": 5,
+      "gate_spell": 807749,
+      "gate_cast": true,
+      "trigger_spell": 807749,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500149
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "observe_source": "Vow of the Valkyr 807749 text: \"Auto attacks generate 1 Solar Power\". The count part of the clause, judged in one arm (same_arm_ratio, mentor D-260): right after each Solar Power 500149 reading the caster's melee_damage_count (auto attacks that dealt damage) is read at the same moment; between the control reading and the Vow reading lies only the Vow phase (both phases stop attacking before their reading), so the gain of the 500149 stacks over the gain of the landed auto attacks in that window is the Solar Power per auto attack: expected 1 from the tooltip, within 0.05, so one stack more or less over at least 5 landed attacks alerts. The window must hold at least 5 landed auto attacks, and the stacks must stay below the cap StackAmount 20 of 500149 (Spell.dbc, DurationIndex 21, no expiry), or the trial is unmeasured. Code: AscensionSunClericEvents.cpp:114 (807749 on an automatic damaging hit) and :170-173. A refused cast voids the trial (void_on_cast_failure). Reference search: coa-history 807749 and 506823/506824 (Vow auto attack events), bindmysoul 807749 text identical; nothing found that gives a per-attack Solar Power rate beyond the tooltip.",
+      "void_on_cast_failure": true,
+      "same_arm_ratio": {
+        "metric": "melee_damage_count",
+        "fields": {},
+        "ratio": 1,
+        "tolerance": 0.05,
+        "least": 5,
+        "main_below": 20,
+        "source": "tooltip of 807749 \"Auto attacks generate 1 Solar Power\": 1 stack of 500149 per auto attack landed"
+      }
+    },
+    {
+      "spell": 807749,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
       "name": "Vow of the Valkyr (auto attacks landed)",
       "variant": "swings",
       "label_suffix": "swings",
