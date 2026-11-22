@@ -23,8 +23,9 @@ class UseTimeContrastTests(unittest.TestCase):
                          {'arms': ['712678 behaviour_metric_delta cooldown'], 'gain': -375.0})
         self.assertIn('learned contrast with the arms cooldown', scenario['contract'])
 
-    def test_an_expected_gain_is_the_declared_gain(self):
-        _, [expectation] = behaviour_scenario(load_fixture_class_file(19), cast_time_entry(expected_gain=0))
+    def test_a_zero_gain_arm_declares_a_zero_gain(self):
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(19),
+                                              cast_time_entry(expected=2500, expected_gain=0))
         self.assertEqual(expectation.model['use_time_contrast']['gain'], 0.0)
 
     def test_without_the_option_the_scenario_is_unchanged(self):

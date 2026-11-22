@@ -4,7 +4,7 @@
 contrast (no `setup_only_after`). It lists the `label_suffix` of every arm, on the same spell, that together prove the
 clause: the entry's own suffix, and for a conditional clause the zero-gain arm (for "your next X", the read after the
 modifier is consumed). The judge is unchanged; the verdict detail carries the arm labels and the declared gain
-(`expected_gain`, or `expected - before_expected`).
+(`expected - before_expected`, which an `expected_gain` must equal).
 
 Coverage (`coverage.use_time_partners_hold`) then counts a conformant learned verdict of the entry as behaviour only
 when every named arm is among the ledger row's verdicts as a conformant, learned, opted-in verdict of the same metric;

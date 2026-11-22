@@ -29,8 +29,6 @@ def check(spec, arms):
 
 
 def declared_gain(spec) -> float:
-    if spec.expected_gain is not None:
-        return float(spec.expected_gain)
     return float(spec.expected) - float(spec.before_expected)
 
 

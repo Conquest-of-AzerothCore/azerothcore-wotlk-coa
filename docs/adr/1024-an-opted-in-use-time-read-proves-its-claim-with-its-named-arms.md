@@ -34,8 +34,8 @@ The third option.
 
 - Option module `metric_delta_options/use_time_contrast.py`: the entry field is the list of the arm suffixes (own arm
   included) on the same spell; it is refused on another metric or without the learned contrast. The verdict detail
-  carries the arm labels and the declared gain (`expected_gain`, or `expected - before_expected`). Its promise words are
-  option rows: cast time `cast time|instant|casting time`, cost `cost|mana|free`.
+  carries the arm labels and the declared gain (`expected - before_expected`, which an `expected_gain` must equal).
+  Its promise words are option rows: cast time `cast time|instant|casting time`, cost `cost|mana|free`.
 - `coverage.py`: a verdict that carries the field needs the learned contrast and passes `use_time_partners_hold`:
   every named arm is among the row's verdicts as a conformant, learned, opted-in verdict of the same metric, one gain is
   non-zero, and one is zero unless the sentence fullmatches `PLAIN_USE_TIME_SENTENCE` ("Reduces the cast time of
