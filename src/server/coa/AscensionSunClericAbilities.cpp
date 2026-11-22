@@ -91,6 +91,14 @@ void Finish(Player* player, Spell* spell)
                     Cast(player, player, BurnTheHereticsMagicDamage);
             }
 }
+Aura* SunslamAura(Player* player, Spell* tick)
+{
+    SpellInfo const* channel = tick->GetTriggeredByAuraSpellInfo();
+    Unit* target = tick->m_targets.GetUnitTarget();
+    if (tick->GetSpellInfo()->Id != 805639 || !Named(channel, 805629) || !target)
+        return nullptr;
+    return target->GetAura(channel->Id, player->GetGUID());
+}
 void SpendDawn(Player* player, Spell* spell, SpellInfo const* info)
 {
     Aura* dawn = player->GetAura(Dawn);
@@ -172,12 +180,20 @@ public:
                     origin->SetScriptValue(DawnCast, 0);
                     SpendDawn(player, origin, origin->GetSpellInfo());
                 }
+                Aura* sunslam = SunslamAura(player, spell);
                 for (uint32 key : {Dawn,DawnCast,807523u})
+                {
                     spell->SetScriptValue(key,origin->GetScriptValue(key));
+                    if (sunslam)
+                        sunslam->SetScriptValue(key,origin->GetScriptValue(key));
+                }
             }
             else if (SpellInfo const* channel = spell->GetTriggeredByAuraSpellInfo();
                 info->Id == RadiantFlameTick && Named(channel, RadiantFlame))
                 SpendDawn(player, spell, channel);
+            else if (Aura* sunslam = SunslamAura(player, spell))
+                for (uint32 key : {Dawn,DawnCast,807523u})
+                    spell->SetScriptValue(key,sunslam->GetScriptValue(key));
             return;
         }
         for (uint32 id : SunClericFinite)

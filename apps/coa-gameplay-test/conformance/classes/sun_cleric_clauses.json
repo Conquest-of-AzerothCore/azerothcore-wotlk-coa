@@ -6423,10 +6423,11 @@
       "807749 behaviour_metric_delta gavel_fulfillment_main",
       "807749 behaviour_metric_delta gavel_fulfillment_off",
       "807749 behaviour_metric_delta sunslam_fulfillment_main",
-      "807749 behaviour_metric_delta sunslam_fulfillment_off"
+      "807749 behaviour_metric_delta sunslam_fulfillment_off",
+      "807749 behaviour_metric_delta sunslam_dawn_charges"
     ],
     "kind": "claim",
-    "reason": "Owner ruling O-12 (2026-11-22, Q-sc-1 option b): one auto attack per weapon per ability cast, not per damage event; Sun Cleric ADR 0027. Glorious Execution (two damage events) gains 1 main-hand and 1 off-hand attack, Gavel of Light (one hit) 1 and 1, each against a control phase without the Vow. Pair 20261122-122203 / 20261122-122559, build 045aed9a9367, no flip: each entry reads 0 in the control phase and 1 after the Vow (before the fix, pair 20261121-021237 / -021438, build 4dc152e975e5: fulfillment_main and fulfillment_off gained 2)."
+    "reason": "Owner ruling O-12 (2026-11-22, Q-sc-1 option b): one auto attack per weapon per ability cast, not per damage event; Sun Cleric ADR 0027. Glorious Execution (two damage events) gains 1 main-hand and 1 off-hand attack, Gavel of Light (one hit) 1 and 1, each against a control phase without the Vow. Pair 20261122-122203 / 20261122-122559, build 045aed9a9367, no flip: each entry reads 0 in the control phase and 1 after the Vow (before the fix, pair 20261121-021237 / -021438, build 4dc152e975e5: fulfillment_main and fulfillment_off gained 2). Sunslam (mentor decisions D-148 and D-150): each of its 4 ticks (805629 DurationIndex 35 = 4000 ms, amplitude 1000 ms, AttributesEx5 0) is its own cast, so sunslam_fulfillment_main and sunslam_fulfillment_off gain 4 with sunslam_ticks as control; sunslam_dawn_charges reads one Dawn charge per channel (10 to 9 in each phase). Before the last-tick fix, pair 20261122-124514 / -124620 (build 066088b360f6) read 3 per weapon: the 4th tick fires after the channel has finished (Sun Cleric ADR 0027). After the fix, pair 20261122-130647 / -130722 (build e6ed4b2b5afd, server commit 1024c587e079), no flip: 4 per weapon from 4 ticks, Dawn 9 after each channel; real-clock reference 20261122-130811: the same values."
   },
   {
     "spell": 807749,
