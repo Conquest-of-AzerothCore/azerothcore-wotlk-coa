@@ -506,6 +506,8 @@ class spell_ascension_sun_cleric_ability : public SpellScript
             PreventHitDefaultEffect(index);
         if (id == 800764 && index == 1)
             PreventHitDefaultEffect(index);
+        if ((id == 301268 && !player->HasAura(Sunrise)) || (id == 302899 && !player->HasAura(Sunset)))
+            PreventHitDefaultEffect(index);
         if (done || index)
             return;
         if (id == DawnCast)
