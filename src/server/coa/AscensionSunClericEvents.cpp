@@ -166,9 +166,10 @@ class aura_ascension_sun_cleric_event : public AuraScript
         {
             bool automatic = event.GetTypeMask() & PROC_FLAG_DONE_MELEE_AUTO_ATTACK;
             bool compatible = id != 807749 || !automatic;
+            Spell* tickGuard = raw && (raw->GetSpellInfo()->Id == 805639 || raw->GetSpellInfo()->Id == 807058) ?
+                raw : spell;
             if (fulfillment && compatible)
-                Fulfill(player, spell, raw && (raw->GetSpellInfo()->Id == 805639 || raw->GetSpellInfo()->Id == 807058) ?
-                    raw : spell, target);
+                Fulfill(player, spell, tickGuard, target);
             if (!State(player).dawnEvent)
             {
                 int32 gain = (id == 803489) ? 2 : (id == 803719 || (id == 807749 && !automatic)) ? 0 : 1;
@@ -242,9 +243,9 @@ class aura_ascension_sun_cleric_event : public AuraScript
                     Copy(player, allies.front(), 505197,
                         CalculatePct(amount, Amount(807750, 0, player) * (fulfillment ? 2 : 1)));
             }
-            if (id == 807749 && fulfillment && !automatic && !spell->GetScriptValue(807749))
+            if (id == 807749 && fulfillment && !automatic && !tickGuard->GetScriptValue(807749))
             {
-                spell->SetScriptValue(807749, 1);
+                tickGuard->SetScriptValue(807749, 1);
                 Cast(player, target, 506821);
             }
             State(player).event = old;

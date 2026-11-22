@@ -2195,6 +2195,144 @@
       "kind": "metric_delta",
       "target": "dummy",
       "expire_ms": 500,
+      "name": "Vow of the Valkyr (Fulfillment main hand attack, every Sunslam tick)",
+      "variant": "sunslam_fulfillment_main",
+      "label_suffix": "sunslam_fulfillment_main",
+      "quote": "Fulfillment: Melee ability damage triggers an auto attack with each weapon.",
+      "trigger_spell": 805629,
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 506824,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "wait_ms": 4800,
+      "observe_source": "Count of 506824 damage events on the dummy. Sunslam 805629 is self-channeled (AttributesEx SPELL_ATTR1_IS_SELF_CHANNELED), DurationIndex 35 (4000 ms); Effect[0] aura 227 every 1000 ms triggers 805639 (DmgClass 2 MELEE), so one channel has 4 ticks (scenario 9148). Sun Cleric ADR 0027: owner ruling O-12 (2026-11-22) gives one auto attack per weapon per ability cast, and a channel tick is its own cast (#13027, 90cca54837, from Ascension footage of Sunslam and Radiant Flame; mentor decision D-148). Code: AscensionSunClericEvents.cpp:169-172 and :246-250 mark the raw tick spell 805639 with script value 807749 when 506821 is cast for it (Effect[0] and Effect[1] trigger 506824 main hand and 506823 off hand), the guard Fulfill() uses, not the channel that Origin() (AscensionSunCleric.cpp:175-183) resolves every tick to; each tick is a new spell without the mark. Expected gain 4: one 506821 cast per tick, so one main hand attack for each of the 4 ticks (sunslam_ticks reads the 4 ticks in each phase); control phase without the Vow: 0. Dawn 807440 is a precondition fixture (set_aura, the subject is Fulfillment); 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 and 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. The Vow is cast for real between the phases (setup cast in the after phase only); the phase without it is the control. The harness counters are cumulative over the whole scenario: the effect of a phase is the gain. wait_ms 4800 covers the 4 ticks (1000..4000 ms). Weapons: the Valkyr set (2529 in each hand, Sun Cleric ADR 0025). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives a per-tick Fulfillment count beyond #13027.",
+      "setup_casts": [
+        807749
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "expected_gain": 4
+    },
+    {
+      "spell": 807749,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "name": "Vow of the Valkyr (Fulfillment off hand attack, every Sunslam tick)",
+      "variant": "sunslam_fulfillment_off",
+      "label_suffix": "sunslam_fulfillment_off",
+      "quote": "Fulfillment: Melee ability damage triggers an auto attack with each weapon.",
+      "trigger_spell": 805629,
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 506823,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "wait_ms": 4800,
+      "observe_source": "Count of 506823 damage events on the dummy. Sunslam 805629 is self-channeled (AttributesEx SPELL_ATTR1_IS_SELF_CHANNELED), DurationIndex 35 (4000 ms); Effect[0] aura 227 every 1000 ms triggers 805639 (DmgClass 2 MELEE), so one channel has 4 ticks (scenario 9148). Sun Cleric ADR 0027: owner ruling O-12 (2026-11-22) gives one auto attack per weapon per ability cast, and a channel tick is its own cast (#13027, 90cca54837, from Ascension footage of Sunslam and Radiant Flame; mentor decision D-148). Code: AscensionSunClericEvents.cpp:169-172 and :246-250 mark the raw tick spell 805639 with script value 807749 when 506821 is cast for it (Effect[0] and Effect[1] trigger 506824 main hand and 506823 off hand), the guard Fulfill() uses, not the channel that Origin() (AscensionSunCleric.cpp:175-183) resolves every tick to; each tick is a new spell without the mark. Expected gain 4: one 506821 cast per tick, so one off hand attack for each of the 4 ticks (sunslam_ticks reads the 4 ticks in each phase); control phase without the Vow: 0. Dawn 807440 is a precondition fixture (set_aura, the subject is Fulfillment); 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 and 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. The Vow is cast for real between the phases (setup cast in the after phase only); the phase without it is the control. The harness counters are cumulative over the whole scenario: the effect of a phase is the gain. wait_ms 4800 covers the 4 ticks (1000..4000 ms). Weapons: the Valkyr set (2529 in each hand, Sun Cleric ADR 0025). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives a per-tick Fulfillment count beyond #13027.",
+      "setup_casts": [
+        807749
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "expected_gain": 4
+    },
+    {
+      "spell": 807749,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "name": "Vow of the Valkyr (Sunslam ticks, 805639)",
+      "variant": "sunslam_ticks",
+      "label_suffix": "sunslam_ticks",
+      "quote": "Fulfillment: Melee ability damage triggers an auto attack with each weapon.",
+      "trigger_spell": 805629,
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 805639,
+        "target": "dummy"
+      },
+      "before_expected": 4,
+      "expected": 8,
+      "wait_ms": 4800,
+      "observe_source": "Control for the Sunslam Fulfillment entries: damage events of the tick spell 805639 on the dummy. Sunslam 805629 is self-channeled (AttributesEx SPELL_ATTR1_IS_SELF_CHANNELED), DurationIndex 35 (4000 ms); Effect[0] aura 227 every 1000 ms triggers 805639 (DmgClass 2 MELEE), so one channel has 4 ticks (scenario 9148). The before phase (no Vow) reads 4 ticks, the Vow phase gains 4: the Vow adds no tick, so the 4 attacks per weapon of sunslam_fulfillment_main and sunslam_fulfillment_off come one from each tick (Sun Cleric ADR 0027, D-148). Dawn 807440 is a precondition fixture (set_aura, the subject is Fulfillment); 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 and 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. The Vow is cast for real between the phases (setup cast in the after phase only); the phase without it is the control. The harness counters are cumulative over the whole scenario: the effect of a phase is the gain. wait_ms 4800 covers the 4 ticks (1000..4000 ms). Weapons: the Valkyr set (2529 in each hand, Sun Cleric ADR 0025). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives a per-tick Fulfillment count beyond #13027.",
+      "setup_casts": [
+        807749
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "expected_gain": 4
+    },
+    {
+      "spell": 807749,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
       "name": "Vow of the Valkyr (Glorious Execution damage events, 800691)",
       "variant": "ability_hits",
       "label_suffix": "ability_hits",
