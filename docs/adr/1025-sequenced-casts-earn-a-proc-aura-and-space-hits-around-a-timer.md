@@ -4,16 +4,17 @@
 - Date: 2026-11-22
 - Related: [ADR 0581](0581-behaviour-kinds-are-modules-discovered-at-run-time.md) (kind modules),
   [ADR 0120](0120-two-proof-statuses-computed-by-clause-coverage.md) (evidence tables).
-- Decided by: owner ruling O-17 (Sun Cleric Q-sc-7, both harness actions approved); G-39 note sent to the
-  controller before the harness C++ was edited.
+- Decided by: owner ruling O-17 (Sun Cleric Q-sc-7, both harness actions approved) and owner ruling O-20 (the block
+  fixture); G-39 notes sent to the controller before the harness C++ was edited.
 
 ## Context
 
-Three Sun Cleric claims could not be expressed. Spears of Glory 804629 "Your next Dawnsear is instant cast and deals
+Five Sun Cleric claims could not be expressed. Spears of Glory 804629 "Your next Dawnsear is instant cast and deals
 25% increased damage" was measured with `set_aura` of 807299, the claim's own aura, which guide 3.4 forbids (review b7c
 C1): the aura comes from a 15% roll per Radiant Flame tick, and a fixed sequence of casts leaves too many runs without
 it. Hope 300349 and Censure 300371 "Can occur only once per sec." need two real hits about 1 s apart, but the global
-cooldown (1500 ms) forbids a second real cast that close. The harness steps are a linear list: no repeat, no condition,
+cooldown (1500 ms) forbids a second real cast that close. Paying The Tithe 680647 / 681468 "your Seraphic Bulwark now
+lasts for N additional blocks" was a readback of the aura's charges: no fixture could force real blocks. The harness steps are a linear list: no repeat, no condition,
 and `reset_cooldown` clears only the spell's own cooldown.
 
 ## Options
@@ -38,7 +39,12 @@ and `reset_cooldown` clears only the spell's own cooldown.
   and `(timer, timer + 10%]`; an arm counts only when its measured event spacing lies in its band (10% band of review
   b7a I3). Expected 1 effect blocked, 2 allowed. A cooldown cut is counted as a whole number of cuts in a window bounded
   by the summed step `elapsed_ms` (a `snapshot` carries no game-time stamp).
-- Both kinds use the existing check `behaviour_metric_delta` and existing metrics, so no evidence row is added.
+- Harness, O-20: `set_combat_avoidance` takes an optional `block` percent, applied as a `CR_BLOCK` rating through
+  `Player::ApplyRatingMod` so `UpdateBlockPercentage` keeps it (no engine edit); a repeat replaces the previous
+  fixture, `Dismiss` removes it, and a chance below the key fails the step unless `rejected: true`.
+  `kinds/block_charge_strikes.py` counts the real blocks Seraphic Bulwark lasts without and with Paying The Tithe,
+  one strike past the expected count, every strike required to be a blocked hit.
+- The kinds use the existing check `behaviour_metric_delta` and existing metrics, so no evidence row is added.
 
 ## Consequences
 
