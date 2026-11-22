@@ -48,6 +48,8 @@ TRIGGERING_HITS = 'triggering hits only'
 TRIGGER_SPELLS = 'trigger_spells'
 TRIGGER_SPELLS_SOURCE = 'trigger_spells_source'
 LANDED_HIT_METRIC = 'spell_damage_count'
+TRIGGER_LANDS_NO_HIT = 'trigger_lands_no_hit'
+CODE_LINE = re.compile(r'\b\w+\.(?:cpp|h):\d+')
 WILSON_RULE = f'Wilson {Z_99:g} (99%) interval of the proc rate holds the tooltip chance'
 PER_TRIGGER = 'most_procs_per_trigger'
 PER_TRIGGER_SOURCE = 'most_procs_per_trigger_source'
@@ -415,6 +417,19 @@ def trigger_spells(entry: dict) -> list[int]:
     return spells
 
 
+def trigger_lands_no_hit(entry: dict) -> bool:
+    source = entry.get(TRIGGER_LANDS_NO_HIT)
+    if source is None:
+        return False
+    if not trigger_spells(entry):
+        raise ValueError(f'Proc {entry["aura"]} {TRIGGER_LANDS_NO_HIT} needs {TRIGGER_SPELLS}: the trials are the '
+                         f'landed hits of the spells the trigger adds')
+    if not isinstance(source, str) or not CODE_LINE.search(source):
+        raise ValueError(f'Proc {entry["aura"]} {TRIGGER_LANDS_NO_HIT} cites the code line (File.cpp:N) where the '
+                         f'handler rolls once per landed hit of the added spell')
+    return True
+
+
 def trigger_spell_terms(entry: dict) -> list[dict]:
     return [{'metric': LANDED_HIT_METRIC, 'spell': spell} for spell in trigger_spells(entry)[1:]]
 
@@ -572,6 +587,7 @@ def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> Pro
         raise ValueError(f'Proc {entry["aura"]} counts auto attacks as events, which needs a cast trigger')
     per_trigger_limit(entry)
     trigger_spells(entry)
+    trigger_lands_no_hit(entry)
     chance = proc_chance(class_file, entry)
     needed = band_trials_needed(chance / 100) if entry.get('band') else trials_needed(chance / 100)
     from proc_avoided import is_avoided, strikers
@@ -637,6 +653,11 @@ def trial_rule(entry: dict) -> str:
                 f'caster (spell_damage_count, caster striker, target caster)')
     if trigger_target(entry) == ALLY:
         return f'trials: completed casts of {entry["trigger"]["spell"]} at the ally (spell_cast_count)'
+    if trigger_lands_no_hit(entry):
+        added = ' or '.join(map(str, trigger_spells(entry)[1:]))
+        return (f'trials: damage events of {added} on the target (spell_damage_count of each), one trial per landed '
+                f'hit; the trigger {trigger_spell(entry)} lands no hit of its own, so any landed hit of it alerts'
+                + ('; a baseline arm without a landed hit is not judged' if entry.get('baseline') else ''))
     if trigger_spells(entry):
         return (f'trials: damage events of {" or ".join(map(str, trigger_spells(entry)))} on the target '
                 f'(spell_damage_count of each), one trial per landed hit of any listed spell')
@@ -951,6 +972,8 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
     if trigger_spells(entry):
         contract += (f' Each landed hit of {" or ".join(map(str, trigger_spells(entry)))} rolls the proc and is one '
                      f'trial: {entry[TRIGGER_SPELLS_SOURCE]}')
+    if trigger_lands_no_hit(entry):
+        contract += f' The trigger {trigger_spell(entry)} lands no hit of its own: {entry[TRIGGER_LANDS_NO_HIT]}'
     scenario = scenario_shell(class_file, name, contract, steps)
     if trigger_target(entry) == ALLY:
         scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
@@ -972,6 +995,7 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
              'event_metric': entry['event_metric'], 'events_per_proc': entry.get('events_per_proc', 1),
              'measurements': labels, 'event_labels': event_labels(entry, plan),
              'exclude_trigger_casts': excludes_trigger_casts(entry),
+             **({TRIGGER_LANDS_NO_HIT: True} if trigger_lands_no_hit(entry) else {}),
              **({EVENTS_BASELINE: events_baseline(entry)} if events_baseline(entry) else {}),
              'readings': [{key: reading[key] for key in ('name', 'labels', 'minus_events')}
                           for reading in trial_readings(entry)]}

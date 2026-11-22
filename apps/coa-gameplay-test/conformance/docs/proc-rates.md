@@ -27,6 +27,11 @@ A `procs` entry of the class file describes one proc aura:
 | | other spells; a trial is one landed hit (`spell_damage_count` on the dummy) of any listed spell, the baseline |
 | | hits of each taken out; needs `trigger_spells_source` (which strikes roll the proc, and the residual failure |
 | | probability), written into the scenario contract, and no `trial_readings` (ADR 0684) |
+| `trigger_lands_no_hit` | with `trigger_spells`, for a trigger that deals no damage of its own (a periodic aura whose |
+| | ticks are another spell): the trials are the landed hits of the added spells, any landed hit of the trigger |
+| | alerts, and a baseline arm without a landed hit is not judged. The text must cite the code line (`File.cpp:N`) |
+| | where the handler rolls once per landed hit of the added spell; a handler that rolls per cast or per aura |
+| | application must not use it (ADR 1015) |
 | `readings_question` | the log evidence that tells the readings apart without counting, for `questions.md` |
 | `handler` | the code that rolls a proc without a `spell_proc` or `spell_script_names` row |
 | `dbc` | `ProcChance`, `ProcFlags`, `ProcCharges` of the aura and of the spell of the chance token |
