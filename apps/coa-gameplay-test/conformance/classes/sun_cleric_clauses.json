@@ -7096,8 +7096,9 @@
       {
         "claim": "piercing all immunities",
         "labels": [
-          "807372 behaviour_metric_delta immune_fire",
-          "807372 behaviour_metric_delta immune_fire_control"
+          "807372 behaviour_metric_delta immune_all",
+          "807372 behaviour_metric_delta immune_all_control",
+          "807372 behaviour_metric_delta immune_all_control_open"
         ]
       },
       {

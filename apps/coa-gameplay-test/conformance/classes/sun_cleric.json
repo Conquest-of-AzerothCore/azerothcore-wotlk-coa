@@ -2570,8 +2570,8 @@
       },
       "before_expected": 340,
       "expected": 0,
-      "wait_ms": 300,
-      "observe_source": "Ledger clause 242 of 704908 (the streamed Sun Ray text, not in the Spell.dbc description of 704908, so the quote field names the tooltip sentence the entry hangs under). Radiant Flame 806060 costs ManaCostPercentage 25 of BaseMana 1363 (player_class_stats class 27 level 60) = 340 (control: no Sun Ray cast, read before the cast). Scorch Marks 807059 Effect[2] SPELLMOD_COST misc 14, -101 (-100 as read), so 0 while it is on the caster. Scorch Marks is made by a real cast of Sun Ray 504764 (the harness learns it and casts it at the dummy: AscensionSunClericAbilities.cpp:215-216 casts 807059 on a 504764 cast and Sun Ray Effect[1] triggers 807059), never by set_aura. The cost is read by the engine's own SpellInfo::CalcPowerCost 300 ms after the Sun Ray cast, while the aura is still on the caster (Radiant Flame is not cast, so nothing consumes it). Reference search: coa-history spell 807059 Scorch Marks has 296 applications and 296 removals in 7 logs (no value to read), 806060 Radiant Flame, 800231 Sunflare, 504764 Sun Ray, 803238 and 704908 have 0 events in 186 logs; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing found for the consumption.",
+      "wait_ms": 350,
+      "observe_source": "Ledger clause 242 of 704908 (the streamed Sun Ray text, not in the Spell.dbc description of 704908, so the quote field names the tooltip sentence the entry hangs under). Radiant Flame 806060 costs ManaCostPercentage 25 of BaseMana 1363 (player_class_stats class 27 level 60) = 340 (control: no Sun Ray cast, read before the cast). Scorch Marks 807059 Effect[2] SPELLMOD_COST misc 14, -101 (-100 as read), so 0 while it is on the caster. Scorch Marks is made by a real cast of Sun Ray 504764 (the harness learns it and casts it at the dummy: AscensionSunClericAbilities.cpp:215-216 casts 807059 on a 504764 cast and Sun Ray Effect[1] triggers 807059), never by set_aura. The cost is read by the engine's own SpellInfo::CalcPowerCost 300 ms after the Sun Ray cast, while the aura is still on the caster (Radiant Flame is not cast, so nothing consumes it). Reference search: coa-history spell 807059 Scorch Marks has 296 applications and 296 removals in 7 logs (no value to read), 806060 Radiant Flame, 800231 Sunflare, 504764 Sun Ray, 803238 and 704908 have 0 events in 186 logs; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing found for the consumption. Read timing (d266, mentor D-238/D-240): Radiant Flame 806060 has Speed 25 (Spell.dbc), the dummy stands 3 yd away, so landing = max(distance, 5 yd) / Speed = 5 / 25 = 200 ms after the cast; the read at 350 ms follows it by 150 ms (the first design read at 300 ms, 100 ms past it).",
       "cast_in_before": false
     },
     {
@@ -2593,8 +2593,8 @@
       "before_expected": 1000,
       "expected": 500,
       "tolerance": 10,
-      "wait_ms": 300,
-      "observe_source": "Ledger clause 242/243 of 704908 (the streamed Sun Ray text, not in the Spell.dbc description of 704908, so the quote field names the tooltip sentence the entry hangs under). Radiant Flame 806060 is cast at the dummy and the amplitude of the periodic aura (Effect[0] every 1000 ms, SPELLMOD_ACTIVATION_TIME misc 19, -51, -50 as read: 500 with Scorch Marks, 1000 without; 450 or 550 would be 10% off) of Radiant Flame on the dummy is read. 704908 is known throughout; the before phase (control) casts Radiant Flame alone, the after phase casts Sun Ray first (setup cast, 1600 ms apart) and then Radiant Flame. Scorch Marks is made by a real cast of Sun Ray 504764 (the harness learns it and casts it at the dummy: AscensionSunClericAbilities.cpp:215-216 casts 807059 on a 504764 cast and Sun Ray Effect[1] triggers 807059), never by set_aura. The aura of the first phase is let to expire (5000 ms) so the second cast creates a new aura. Reference search: coa-history spell 807059 Scorch Marks has 296 applications and 296 removals in 7 logs (no value to read), 806060 Radiant Flame, 800231 Sunflare, 504764 Sun Ray, 803238 and 704908 have 0 events in 186 logs; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing found for the consumption. The arm that differs between the phases is the Sun Ray cast: the before phase casts Radiant Flame alone (control), the after phase casts Sun Ray first; 704908 is known in both. Sun Ray is the harness-learned (permanent) one, the direct route: on the player route the Scorch Marks grant is stripped, see scorch_granted.",
+      "wait_ms": 350,
+      "observe_source": "Ledger clause 242/243 of 704908 (the streamed Sun Ray text, not in the Spell.dbc description of 704908, so the quote field names the tooltip sentence the entry hangs under). Radiant Flame 806060 is cast at the dummy and the amplitude of the periodic aura (Effect[0] every 1000 ms, SPELLMOD_ACTIVATION_TIME misc 19, -51, -50 as read: 500 with Scorch Marks, 1000 without; 450 or 550 would be 10% off) of Radiant Flame on the dummy is read. 704908 is known throughout; the before phase (control) casts Radiant Flame alone, the after phase casts Sun Ray first (setup cast, 1600 ms apart) and then Radiant Flame. Scorch Marks is made by a real cast of Sun Ray 504764 (the harness learns it and casts it at the dummy: AscensionSunClericAbilities.cpp:215-216 casts 807059 on a 504764 cast and Sun Ray Effect[1] triggers 807059), never by set_aura. The aura of the first phase is let to expire (5000 ms) so the second cast creates a new aura. Reference search: coa-history spell 807059 Scorch Marks has 296 applications and 296 removals in 7 logs (no value to read), 806060 Radiant Flame, 800231 Sunflare, 504764 Sun Ray, 803238 and 704908 have 0 events in 186 logs; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing found for the consumption. The arm that differs between the phases is the Sun Ray cast: the before phase casts Radiant Flame alone (control), the after phase casts Sun Ray first; 704908 is known in both. Sun Ray is the harness-learned (permanent) one, the direct route: on the player route the Scorch Marks grant is stripped, see scorch_granted. Read timing (d266, mentor D-238/D-240): Radiant Flame 806060 has Speed 25 (Spell.dbc), the dummy stands 3 yd away, so landing = max(distance, 5 yd) / Speed = 5 / 25 = 200 ms after the cast; the read at 350 ms follows it by 150 ms (the first design read at 300 ms, 100 ms past it).",
       "setup_casts": [
         504764
       ],
@@ -2620,8 +2620,8 @@
       "before_expected": 3700,
       "expected": 1700,
       "tolerance": 80,
-      "wait_ms": 300,
-      "observe_source": "Ledger clause 242/243 of 704908 (the streamed Sun Ray text, not in the Spell.dbc description of 704908, so the quote field names the tooltip sentence the entry hangs under). Radiant Flame 806060 is cast at the dummy and the remaining duration 300 ms after the cast (DurationIndex 35, 4000 ms; SPELLMOD_DURATION misc 1, -51, -50 as read: 2000 ms, so 1700 with Scorch Marks, 3700 without; a 10% error on the total reads 1500 or 1900, outside the tolerance of 80) of Radiant Flame on the dummy is read. 704908 is known throughout; the before phase (control) casts Radiant Flame alone, the after phase casts Sun Ray first (setup cast, 1600 ms apart) and then Radiant Flame. Scorch Marks is made by a real cast of Sun Ray 504764 (the harness learns it and casts it at the dummy: AscensionSunClericAbilities.cpp:215-216 casts 807059 on a 504764 cast and Sun Ray Effect[1] triggers 807059), never by set_aura. The aura of the first phase is let to expire (5000 ms) so the second cast creates a new aura. Reference search: coa-history spell 807059 Scorch Marks has 296 applications and 296 removals in 7 logs (no value to read), 806060 Radiant Flame, 800231 Sunflare, 504764 Sun Ray, 803238 and 704908 have 0 events in 186 logs; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing found for the consumption. The arm that differs between the phases is the Sun Ray cast: the before phase casts Radiant Flame alone (control), the after phase casts Sun Ray first; 704908 is known in both. Sun Ray is the harness-learned (permanent) one, the direct route: on the player route the Scorch Marks grant is stripped, see scorch_granted.",
+      "wait_ms": 350,
+      "observe_source": "Ledger clause 242/243 of 704908 (the streamed Sun Ray text, not in the Spell.dbc description of 704908, so the quote field names the tooltip sentence the entry hangs under). Radiant Flame 806060 is cast at the dummy and the remaining duration 300 ms after the cast (DurationIndex 35, 4000 ms; SPELLMOD_DURATION misc 1, -51, -50 as read: 2000 ms, so 1700 with Scorch Marks, 3700 without; a 10% error on the total reads 1500 or 1900, outside the tolerance of 80) of Radiant Flame on the dummy is read. 704908 is known throughout; the before phase (control) casts Radiant Flame alone, the after phase casts Sun Ray first (setup cast, 1600 ms apart) and then Radiant Flame. Scorch Marks is made by a real cast of Sun Ray 504764 (the harness learns it and casts it at the dummy: AscensionSunClericAbilities.cpp:215-216 casts 807059 on a 504764 cast and Sun Ray Effect[1] triggers 807059), never by set_aura. The aura of the first phase is let to expire (5000 ms) so the second cast creates a new aura. Reference search: coa-history spell 807059 Scorch Marks has 296 applications and 296 removals in 7 logs (no value to read), 806060 Radiant Flame, 800231 Sunflare, 504764 Sun Ray, 803238 and 704908 have 0 events in 186 logs; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing found for the consumption. The arm that differs between the phases is the Sun Ray cast: the before phase casts Radiant Flame alone (control), the after phase casts Sun Ray first; 704908 is known in both. Sun Ray is the harness-learned (permanent) one, the direct route: on the player route the Scorch Marks grant is stripped, see scorch_granted. Read timing (d266, mentor D-238/D-240): Radiant Flame 806060 has Speed 25 (Spell.dbc), the dummy stands 3 yd away, so landing = max(distance, 5 yd) / Speed = 5 / 25 = 200 ms after the cast; the read at 350 ms follows it by 150 ms (the first design read at 300 ms, 100 ms past it).",
       "setup_casts": [
         504764
       ],
@@ -2647,8 +2647,8 @@
       "before_expected": 1000,
       "expected": 1000,
       "tolerance": 10,
-      "wait_ms": 300,
-      "observe_source": "Ledger clause 242 of 704908 (\"Your next Radiant Flame\"). After a real Sun Ray cast the first Radiant Flame is consumed (AscensionSunClericAbilities.cpp: Scorch Marks 807059 is a finite aura selected by the next Radiant Flame 806060 and removed after that cast); the second Radiant Flame, the timed one, must tick at the normal 1000 ms: the amplitude of its aura on the dummy is read 4500 ms after the first one ended, 1000 in both phases (a Scorch Marks that outlived its cast would read 500). The scorch_period entry of the same pair reads 500 for the first Radiant Flame after Sun Ray. Scorch Marks is made by a real cast of Sun Ray 504764 (the harness learns it and casts it at the dummy: AscensionSunClericAbilities.cpp:215-216 casts 807059 on a 504764 cast and Sun Ray Effect[1] triggers 807059), never by set_aura. Reference search: coa-history spell 807059 Scorch Marks has 296 applications and 296 removals in 7 logs (no value to read), 806060 Radiant Flame, 800231 Sunflare, 504764 Sun Ray, 803238 and 704908 have 0 events in 186 logs; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing found for the consumption.",
+      "wait_ms": 350,
+      "observe_source": "Ledger clause 242 of 704908 (\"Your next Radiant Flame\"). After a real Sun Ray cast the first Radiant Flame is consumed (AscensionSunClericAbilities.cpp: Scorch Marks 807059 is a finite aura selected by the next Radiant Flame 806060 and removed after that cast); the second Radiant Flame, the timed one, must tick at the normal 1000 ms: the amplitude of its aura on the dummy is read 4500 ms after the first one ended, 1000 in both phases (a Scorch Marks that outlived its cast would read 500). The scorch_period entry of the same pair reads 500 for the first Radiant Flame after Sun Ray. Scorch Marks is made by a real cast of Sun Ray 504764 (the harness learns it and casts it at the dummy: AscensionSunClericAbilities.cpp:215-216 casts 807059 on a 504764 cast and Sun Ray Effect[1] triggers 807059), never by set_aura. Reference search: coa-history spell 807059 Scorch Marks has 296 applications and 296 removals in 7 logs (no value to read), 806060 Radiant Flame, 800231 Sunflare, 504764 Sun Ray, 803238 and 704908 have 0 events in 186 logs; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing found for the consumption. Read timing (d266, mentor D-238/D-240): Radiant Flame 806060 has Speed 25 (Spell.dbc), the dummy stands 3 yd away, so landing = max(distance, 5 yd) / Speed = 5 / 25 = 200 ms after the cast; the read at 350 ms follows it by 150 ms (the first design read at 300 ms, 100 ms past it).",
       "setup_casts": [
         504764,
         806060
@@ -3179,7 +3179,7 @@
       "quote": "chance to grant Scorch Marks for $807059d",
       "trigger_spell": 806060,
       "target": "dummy",
-      "wait_ms": 300,
+      "wait_ms": 350,
       "expire_ms": 5000,
       "name": "Searing Light (Radiant Flame costs no mana)",
       "variant": "free_cast",
@@ -3192,7 +3192,7 @@
       "disable_regeneration": true,
       "before_expected": 660,
       "expected": 919,
-      "observe_source": "Power set to 1000 before each cast, regeneration off. Without Scorch Marks Radiant Flame spends 25 x 1363 / 100 = 340 mana (660 left). With it, the setup Sun Ray 504764 (6% of base mana: 6 x 1363 / 100 = 81, 919 left) grants Scorch Marks for real, and Radiant Flame then costs nothing: 919. 807059 Effect[2] SPELLMOD op 14 -100% on Radiant Flame 806060 (class mask 134217728). Control = the before phase without Scorch Marks.",
+      "observe_source": "Power set to 1000 before each cast, regeneration off. Without Scorch Marks Radiant Flame spends 25 x 1363 / 100 = 340 mana (660 left). With it, the setup Sun Ray 504764 (6% of base mana: 6 x 1363 / 100 = 81, 919 left) grants Scorch Marks for real, and Radiant Flame then costs nothing: 919. 807059 Effect[2] SPELLMOD op 14 -100% on Radiant Flame 806060 (class mask 134217728). Control = the before phase without Scorch Marks. Read timing (d266, mentor D-238/D-240): Radiant Flame 806060 has Speed 25 (Spell.dbc), the dummy stands 3 yd away, so landing = max(distance, 5 yd) / Speed = 5 / 25 = 200 ms after the cast; the read at 350 ms follows it by 150 ms (the first design read at 300 ms, 100 ms past it).",
       "setup_casts": [
         504764
       ],
@@ -4836,10 +4836,10 @@
     },
     {
       "spell": 807372,
-      "name": "Rapture (pierces an immunity (fire-immune target))",
+      "name": "Rapture (pierces a full school immunity: Divine Shield on the dummy)",
       "kind": "metric_delta",
-      "variant": "immune_fire",
-      "label_suffix": "immune_fire",
+      "variant": "immune_all",
+      "label_suffix": "immune_all",
       "quote": "Call down a streak of sun light to smite your target, dealing ${$m1+0+$spfi*1.03734} Fire damage to them and nearby enemies, piercing all immunities, but dealing less damage with each enemy struck.",
       "trigger_spell": 807372,
       "target": "dummy",
@@ -4857,6 +4857,12 @@
           1,
           "caster",
           "caster"
+        ],
+        [
+          642,
+          1,
+          "target",
+          "target"
         ]
       ],
       "metric": "spell_damage_total",
@@ -4870,15 +4876,58 @@
       "expected": 908.5,
       "after_at_least": 876,
       "after_at_most": 941,
-      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, truncated to 21 (SpellInfo.cpp:497), and the roll adds irand(1, 65) (SpellInfo.cpp:509-511): 854 + 21 + 1..65 = 876..940; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. Target Fire Elemental 575 (immunity set -300: school 0x4 FIRE and mechanics): Rapture still deals 876..940, entry bounds 876..941; the contrast (control) is Dawnsear 554406, a Fire spell without the attribute, which deals 0 to the same creature (immune_fire_control). Reference search 2026-11-20: bindmysoul Rapture text reads '111 + 200% fire SP Fire damage' against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; see the fix note in the report.",
-      "target_entry": 575
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, truncated to 21 (SpellInfo.cpp:497), and the roll adds irand(1, 65) (SpellInfo.cpp:509-511): 854 + 21 + 1..65 = 876..940; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, \"piercing all immunities\"); fire (SchoolMask 4), CastingTimeIndex 14 = 3000 ms, Speed 0, 20% mana, 20000 ms cooldown. Fixture 823764 (beeg spellpen) keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts the spell. The immunity is Divine Shield 642 on the dummy (set_aura, caster = the dummy, a named precondition fixture in both phases): Effect[1] aura 39 SPELL_AURA_SCHOOL_IMMUNITY MiscValue 127 (every school), Mechanic 29, DurationIndex 29 = 12000 ms, longer than the 3.8 s of the arm. The earlier design used the Fire Elemental 575 (creature_immunities -300, SchoolMask 4): the CoA rule of commit 212d773dde (#6786, Unit.cpp IsIgnoredCreatureImmunity, scenario creature-partial-school-immunity-removed) drops partial school immunity from creatures not controlled by a player, and only an immunity to all 127 schools stays, so 575 was never immune to Fire on this server and a Fire spell without the attribute hit it for its full damage (Dawnsear 719 / 721, inside its 670..749 roll), which is why that control read 719, not 0. Rapture carries the attribute, so Unit::IsImmunedToSpell returns false before any school check (Unit.cpp:1046) and the hit deals 876..940, entry bounds 876..941; the cast takes 3000 ms and the spell has no flight, so the read at 3500 ms follows the hit by 500 ms (a damage total above 0 proves it landed). The contrast is Dawnsear 554406, a Fire spell without the attribute, which is stopped by the same shield (immune_all_control). Reference search 2026-11-20: bindmysoul Rapture text reads \"111 + 200% fire SP Fire damage\" against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; nothing found about immunities."
     },
     {
       "spell": 807372,
-      "name": "Rapture (a fire spell without the attribute is stopped by the same immunity)",
+      "name": "Rapture (a fire spell without the attribute is stopped by the same full immunity)",
       "kind": "metric_delta",
-      "variant": "immune_fire_control",
-      "label_suffix": "immune_fire_control",
+      "variant": "immune_all_control",
+      "label_suffix": "immune_all_control",
+      "quote": "Call down a streak of sun light to smite your target, dealing ${$m1+0+$spfi*1.03734} Fire damage to them and nearby enemies, piercing all immunities, but dealing less damage with each enemy struck.",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          642,
+          1,
+          "target",
+          "target"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 554406,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 3800,
+      "expire_ms": 500,
+      "expected": 0.0,
+      "after_at_least": 0,
+      "after_at_most": 0,
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, truncated to 21 (SpellInfo.cpp:497), and the roll adds irand(1, 65) (SpellInfo.cpp:509-511): 854 + 21 + 1..65 = 876..940; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, \"piercing all immunities\"); fire (SchoolMask 4), CastingTimeIndex 14 = 3000 ms, Speed 0, 20% mana, 20000 ms cooldown. Fixture 823764 (beeg spellpen) keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts the spell. The immunity is Divine Shield 642 on the dummy (set_aura, caster = the dummy, a named precondition fixture in both phases): Effect[1] aura 39 SPELL_AURA_SCHOOL_IMMUNITY MiscValue 127 (every school), Mechanic 29, DurationIndex 29 = 12000 ms, longer than the 3.8 s of the arm. The earlier design used the Fire Elemental 575 (creature_immunities -300, SchoolMask 4): the CoA rule of commit 212d773dde (#6786, Unit.cpp IsIgnoredCreatureImmunity, scenario creature-partial-school-immunity-removed) drops partial school immunity from creatures not controlled by a player, and only an immunity to all 127 schools stays, so 575 was never immune to Fire on this server and a Fire spell without the attribute hit it for its full damage (Dawnsear 719 / 721, inside its 670..749 roll), which is why that control read 719, not 0. Control: Dawnsear 554406 (SchoolMask 4, Attributes 0x50000, AttributesEx2 0: neither SPELL_ATTR0_NO_IMMUNITIES nor SPELL_ATTR2_NO_SCHOOL_IMMUNITIES) is school immune against the shield (HasSchoolImmunityForMask: 127 covers 4), so the hit is refused SPELL_MISS_IMMUNE and deals 0. Read timing (rc2, mentor D-238/D-240): landing = max(distance, 5 yd) / Spell.Speed from the DBC; the read is at least 150 ms past it. Dawnsear has a 3500 ms cast (CastingTimeIndex 22) and Speed 35: landing 5/35 = 143 ms after the cast ends, so the read at 3800 ms follows it by 157 ms; the delayed hit rechecks immunity at the landing (Spell.cpp:3069). The open contrast immune_all_control_open reads the same spell at the same time without the shield and must see damage, which shows that a 0 here comes from the shield and not from a read before the landing. Reference search 2026-11-20: bindmysoul Rapture text reads \"111 + 200% fire SP Fire damage\" against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; nothing found about immunities."
+    },
+    {
+      "spell": 807372,
+      "name": "Rapture (contrast: the same fire spell without the shield damages the dummy)",
+      "kind": "metric_delta",
+      "variant": "immune_all_control_open",
+      "label_suffix": "immune_all_control_open",
       "quote": "Call down a streak of sun light to smite your target, dealing ${$m1+0+$spfi*1.03734} Fire damage to them and nearby enemies, piercing all immunities, but dealing less damage with each enemy struck.",
       "trigger_spell": 554406,
       "target": "dummy",
@@ -4906,50 +4955,10 @@
       "before_expected": 0,
       "wait_ms": 3800,
       "expire_ms": 500,
-      "expected": 0.0,
-      "after_at_least": 0,
-      "after_at_most": 0,
-      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, truncated to 21 (SpellInfo.cpp:497), and the roll adds irand(1, 65) (SpellInfo.cpp:509-511): 854 + 21 + 1..65 = 876..940; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. Control of immune_fire: Dawnsear 554406 (fire, no SPELL_ATTR0_NO_IMMUNITIES) cast at Fire Elemental 575 deals 0. Reference search 2026-11-20: bindmysoul Rapture text reads '111 + 200% fire SP Fire damage' against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; see the fix note in the report. Read timing (rc2, mentor D-238/D-240): landing = max(distance, 5 yd) / Spell.Speed from the DBC; the read is placed at least 150 ms past it. Dawnsear 554406 has a 3500 ms cast and Speed 35: landing 5/35 = 143 ms after the cast ends, so the read at 3800 ms follows it by 157 ms (the first design read at 3500 ms, before the landing, where a zero damage total proves nothing).",
-      "target_entry": 575
-    },
-    {
-      "spell": 807372,
-      "name": "Rapture (second design: a second Fire spell without the attribute, Sunset 500146, against the same immunity)",
-      "kind": "metric_delta",
-      "variant": "immune_fire_control_second",
-      "label_suffix": "immune_fire_control_second",
-      "quote": "Call down a streak of sun light to smite your target, dealing ${$m1+0+$spfi*1.03734} Fire damage to them and nearby enemies, piercing all immunities, but dealing less damage with each enemy struck.",
-      "trigger_spell": 500146,
-      "target": "dummy",
-      "cast_in_before": false,
-      "cast_power": 1363,
-      "phase_auras": [
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "spell_damage_total",
-      "fields": {
-        "spell": 500146,
-        "target": "dummy"
-      },
-      "before_expected": 0,
-      "wait_ms": 3800,
-      "expire_ms": 500,
-      "expected": 0.0,
-      "after_at_least": 0,
-      "after_at_most": 0,
-      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, truncated to 21 (SpellInfo.cpp:497), and the roll adds irand(1, 65) (SpellInfo.cpp:509-511): 854 + 21 + 1..65 = 876..940; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. Control of immune_fire: Dawnsear 554406 (fire, no SPELL_ATTR0_NO_IMMUNITIES) cast at Fire Elemental 575 deals 0. Reference search 2026-11-20: bindmysoul Rapture text reads '111 + 200% fire SP Fire damage' against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; see the fix note in the report. Read timing (rc2, mentor D-238/D-240): landing = max(distance, 5 yd) / Spell.Speed from the DBC; the read is placed at least 150 ms past it. Dawnsear 554406 has a 3500 ms cast and Speed 35: landing 5/35 = 143 ms after the cast ends, so the read at 3800 ms follows it by 157 ms (the first design read at 3500 ms, before the landing, where a zero damage total proves nothing). Second design (rc2): the first design's control Dawnsear 554406 dealt damage once the read followed its landing, so the same read is repeated with the Fire spell 500146 (SchoolMask 4, Speed 35, 3500 ms cast, no SPELL_ATTR0_NO_IMMUNITIES) to tell a Dawnsear-specific cause from an immunity that does not stop Fire.",
-      "target_entry": 575
+      "expected": 710.0,
+      "after_at_least": 670,
+      "after_at_most": 750,
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, truncated to 21 (SpellInfo.cpp:497), and the roll adds irand(1, 65) (SpellInfo.cpp:509-511): 854 + 21 + 1..65 = 876..940; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, \"piercing all immunities\"); fire (SchoolMask 4), CastingTimeIndex 14 = 3000 ms, Speed 0, 20% mana, 20000 ms cooldown. Fixture 823764 (beeg spellpen) keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts the spell. Contrast arm: no immunity on the dummy. Dawnsear 554406 (rank 8): Effect[0] SCHOOL_DAMAGE, BasePoints 668 + 1, DieSides 80, RealPointsPerLevel 5.64286 x (60 - BaseLevel 60) = 0 (SpellInfo.cpp:497), the roll adds irand(1, 80) (SpellInfo.cpp:509-511): 668 + 1 + 0 + 1..80 = 670..749, entry bounds 670..750 (the tooltip $spfi*0.765222 term needs spell power, which this fixture does not set, as the Rapture bounds assume); CastingTimeIndex 22 = 3500 ms, Speed 35, landing 5/35 = 143 ms after the cast ends, read at 3800 ms (157 ms past it). It proves that the shielded arm's 0 is the shield and that the read is past the landing. Reference search 2026-11-20: bindmysoul Rapture text reads \"111 + 200% fire SP Fire damage\" against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; nothing found about immunities."
     },
     {
       "spell": 804269,
@@ -6421,8 +6430,8 @@
       },
       "before_expected": 0,
       "expected": 10,
-      "wait_ms": 300,
-      "observe_source": "$560856s1 = 10 (560856 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 126 (the magic schools), BasePoints 9 + 1). Scorch Marks 807059 is granted by a real Sun Ray 504764 cast (setup casts, in the after phase only: a second Sun Ray in the before phase is refused by its cooldown) and consumed by the real cast of Radiant Flame 806060 (AscensionSunClericAbilities.cpp Select 807059 and Finish): the amount of 560856 on the caster is read 300 ms after the cast, 0 in the before phase (control: no Scorch Marks, no passive) and 10 after. Reference search 2026-11-22: server DBC 560857 and 560856 descriptions; bindmysoul snapshot (fetched 2026-07-22) and ascension-data advancement.tsv searched for 'Burn The Heretics': nothing found beyond the tooltip; coa-history spell 560856 Burn The Heretics: 22 SPELL_AURA_APPLIED events in 1 log (the aura exists in real play, no figure), 560857 0 events (a passive); nothing found beyond the tooltip and the DBC for the values.Diagnostic of the first attempt: Sun Ray was refused (SPELL_FAILED_NOT_READY 67) by the 1500 ms global cooldown of the before phase's Radiant Flame cast, so no Scorch Marks existed; expire_ms is now 2000 ms.",
+      "wait_ms": 350,
+      "observe_source": "$560856s1 = 10 (560856 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 126 (the magic schools), BasePoints 9 + 1). Scorch Marks 807059 is granted by a real Sun Ray 504764 cast (setup casts, in the after phase only: a second Sun Ray in the before phase is refused by its cooldown) and consumed by the real cast of Radiant Flame 806060 (AscensionSunClericAbilities.cpp Select 807059 and Finish): the amount of 560856 on the caster is read 300 ms after the cast, 0 in the before phase (control: no Scorch Marks, no passive) and 10 after. Reference search 2026-11-22: server DBC 560857 and 560856 descriptions; bindmysoul snapshot (fetched 2026-07-22) and ascension-data advancement.tsv searched for 'Burn The Heretics': nothing found beyond the tooltip; coa-history spell 560856 Burn The Heretics: 22 SPELL_AURA_APPLIED events in 1 log (the aura exists in real play, no figure), 560857 0 events (a passive); nothing found beyond the tooltip and the DBC for the values.Diagnostic of the first attempt: Sun Ray was refused (SPELL_FAILED_NOT_READY 67) by the 1500 ms global cooldown of the before phase's Radiant Flame cast, so no Scorch Marks existed; expire_ms is now 2000 ms. Read timing (d266, mentor D-238/D-240): Radiant Flame 806060 has Speed 25 (Spell.dbc), the dummy stands 3 yd away, so landing = max(distance, 5 yd) / Speed = 5 / 25 = 200 ms after the cast; the read at 350 ms follows it by 150 ms (the first design read at 300 ms, 100 ms past it).",
       "setup_only_after": true
     },
     {
@@ -35217,7 +35226,7 @@
       "before_expected": 1000,
       "expected": 500,
       "tolerance": 10,
-      "wait_ms": 300,
+      "wait_ms": 350,
       "setup_casts": [
         804584
       ],
@@ -35232,7 +35241,7 @@
           "caster"
         ]
       ],
-      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). Radiant Flame 806060 is cast at the dummy and the amplitude of its periodic aura on the dummy is read (Effect[0] every 1000 ms; with Scorch Marks -50% as read: 500; 450 or 550 would be 10% off). The before phase casts Radiant Flame alone (control), the after phase casts Dawn first. 804625 is known throughout. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*).",
+      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). Radiant Flame 806060 is cast at the dummy and the amplitude of its periodic aura on the dummy is read (Effect[0] every 1000 ms; with Scorch Marks -50% as read: 500; 450 or 550 would be 10% off). The before phase casts Radiant Flame alone (control), the after phase casts Dawn first. 804625 is known throughout. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*). Read timing (d266, mentor D-238/D-240): Radiant Flame 806060 has Speed 25 (Spell.dbc), the dummy stands 3 yd away, so landing = max(distance, 5 yd) / Speed = 5 / 25 = 200 ms after the cast; the read at 350 ms follows it by 150 ms (the first design read at 300 ms, 100 ms past it).",
       "after_setup_reads": [
         {
           "spell": 807440,
@@ -35258,7 +35267,7 @@
       "before_expected": 1000,
       "expected": 1000,
       "tolerance": 10,
-      "wait_ms": 300,
+      "wait_ms": 350,
       "setup_casts": [
         804584,
         806060
@@ -35274,7 +35283,7 @@
           "caster"
         ]
       ],
-      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). Dawn grants Scorch Marks, a first Radiant Flame consumes it (setup), and the second Radiant Flame (trigger) is read 4500 ms later: amplitude 1000, the unchanged base. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*).",
+      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). Dawn grants Scorch Marks, a first Radiant Flame consumes it (setup), and the second Radiant Flame (trigger) is read 4500 ms later: amplitude 1000, the unchanged base. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*). Read timing (d266, mentor D-238/D-240): Radiant Flame 806060 has Speed 25 (Spell.dbc), the dummy stands 3 yd away, so landing = max(distance, 5 yd) / Speed = 5 / 25 = 200 ms after the cast; the read at 350 ms follows it by 150 ms (the first design read at 300 ms, 100 ms past it).",
       "after_setup_reads": [
         {
           "spell": 807440,
@@ -35300,7 +35309,7 @@
       "before_expected": 3700,
       "expected": 1700,
       "tolerance": 80,
-      "wait_ms": 300,
+      "wait_ms": 350,
       "setup_casts": [
         804584
       ],
@@ -35315,7 +35324,7 @@
           "caster"
         ]
       ],
-      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). Radiant Flame 806060 (DurationIndex 35, 4000 ms) is cast at the dummy and the remaining duration 300 ms after the cast is read: 3700 without (control), 1700 with Scorch Marks (-50% of 4000, 2000, less 300); a 10% error on the total reads 1500 or 1900, outside the tolerance of 80. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*).",
+      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). Radiant Flame 806060 (DurationIndex 35, 4000 ms) is cast at the dummy and the remaining duration 300 ms after the cast is read: 3700 without (control), 1700 with Scorch Marks (-50% of 4000, 2000, less 300); a 10% error on the total reads 1500 or 1900, outside the tolerance of 80. Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*). Read timing (d266, mentor D-238/D-240): Radiant Flame 806060 has Speed 25 (Spell.dbc), the dummy stands 3 yd away, so landing = max(distance, 5 yd) / Speed = 5 / 25 = 200 ms after the cast; the read at 350 ms follows it by 150 ms (the first design read at 300 ms, 100 ms past it).",
       "after_setup_reads": [
         {
           "spell": 807440,
