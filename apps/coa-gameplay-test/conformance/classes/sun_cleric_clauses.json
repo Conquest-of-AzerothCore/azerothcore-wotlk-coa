@@ -5917,13 +5917,8 @@
     "clause": "and $680911s3% increased damage.",
     "reason": "Behaviour: the ally Gavel of Wrath mean after Blessing of Triumph over the mean before is read by hit_ratio ally_damage (expected 1.1 = 680911 Effect[2] BasePoints 9 + 1) with a control arm without 804250 in the same pair. The data label 680911e2 is dropped: the behaviour label measures the same stated value in the same run (11.1). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found.",
     "kind": "claim",
-    "claims": [
-      {
-        "claim": "$680911s3% increased damage",
-        "labels": [
-          "804250 behaviour_hit_ratio ally_damage"
-        ]
-      }
+    "labels": [
+      "804250 behaviour_hit_ratio ally_damage"
     ]
   },
   {
