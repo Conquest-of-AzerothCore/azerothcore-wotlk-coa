@@ -18404,6 +18404,588 @@
       "observe_source": "Same as cd_cut_503651 with Solar Conduit 300321 learned in place of Hope: 503651 reads 30000 - 2100 = 27900 within 50 ms. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC.",
       "kind": "metric_delta",
       "label_suffix": "cd_cut_control_503651"
+    },
+    {
+      "spell": 301256,
+      "name": "Hot Spot (Illumination still casting at 1470 ms after Daybreak)",
+      "kind": "metric_delta",
+      "variant": "illum_held",
+      "label_suffix": "illum_held",
+      "quote": "Illumination, Radiant Cascade, or Sunflare within $301242d to have a $301242s1% reduced cast time.",
+      "trigger_spell": 500143,
+      "gate_spell": 301256,
+      "target": "caster",
+      "setup_casts": [
+        503624
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 1470,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          1462,
+          1482
+        ]
+      },
+      "observe_source": "301256 Hot Spot Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 301242; 301242 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -26 + 1 = -25 ($301242s1 = 25), DurationIndex 1 ($301242d = 10000 ms). Cast times from SpellCastTimes of the Spell.dbc CastingTimeIndex: Illumination 500143 CastingTimeIndex gives 2000 ms; 25% less is 1500 ms, the stated 25% with the 2-point band of the guide (section 3.5) is 1460..1540 ms. Daybreak 503624 (instant) is cast on the caster in both phases (setup cast, 1600 ms before the trigger); 301256 is learned between them, so the before phase is the control: Illumination keeps its full 2000 ms. The caster is read for `casting`: 1 at about 1470 ms excludes a cast time at or below 1462 ms (a reduction above 27%). Reference search 2026-11-22: server DBC 301256, 301242 and the cast times; bindmysoul snapshot and ascension-data searched for Hot Spot: nothing found beyond the tooltip; coa-history spells 301256 and 301242: 0 casts."
+    },
+    {
+      "spell": 301256,
+      "name": "Hot Spot (Illumination finished by 1530 ms after Daybreak)",
+      "kind": "metric_delta",
+      "variant": "illum_done",
+      "label_suffix": "illum_done",
+      "quote": "Illumination, Radiant Cascade, or Sunflare within $301242d to have a $301242s1% reduced cast time.",
+      "trigger_spell": 500143,
+      "gate_spell": 301256,
+      "target": "caster",
+      "setup_casts": [
+        503624
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1530,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          1522,
+          1540
+        ]
+      },
+      "observe_source": "301256 Hot Spot Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 301242; 301242 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -26 + 1 = -25 ($301242s1 = 25), DurationIndex 1 ($301242d = 10000 ms). Cast times from SpellCastTimes of the Spell.dbc CastingTimeIndex: Illumination 500143 CastingTimeIndex gives 2000 ms; 25% less is 1500 ms, the stated 25% with the 2-point band of the guide (section 3.5) is 1460..1540 ms. Daybreak 503624 (instant) is cast on the caster in both phases (setup cast, 1600 ms before the trigger); 301256 is learned between them, so the before phase is the control: Illumination keeps its full 2000 ms. The caster is read for `casting`: 0 at about 1530 ms excludes a cast time at or above 1540 ms (a reduction below 23%), the before phase reads 1 at the same time (control). Reference search 2026-11-22: server DBC 301256, 301242 and the cast times; bindmysoul snapshot and ascension-data searched for Hot Spot: nothing found beyond the tooltip; coa-history spells 301256 and 301242: 0 casts."
+    },
+    {
+      "spell": 301256,
+      "name": "Hot Spot (Sunflare still casting at 1470 ms after Daybreak)",
+      "kind": "metric_delta",
+      "variant": "sunflare_held",
+      "label_suffix": "sunflare_held",
+      "quote": "Illumination, Radiant Cascade, or Sunflare within $301242d to have a $301242s1% reduced cast time.",
+      "trigger_spell": 800231,
+      "gate_spell": 301256,
+      "target": "dummy",
+      "setup_casts": [
+        503624
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 1470,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          1462,
+          1482
+        ]
+      },
+      "observe_source": "301256 Hot Spot Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 301242; 301242 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -26 + 1 = -25 ($301242s1 = 25), DurationIndex 1 ($301242d = 10000 ms). Cast times from SpellCastTimes of the Spell.dbc CastingTimeIndex: Sunflare 800231 CastingTimeIndex gives 2000 ms; 25% less is 1500 ms, the stated 25% with the 2-point band of the guide (section 3.5) is 1460..1540 ms. Daybreak 503624 (instant) is cast on the caster in both phases (setup cast, 1600 ms before the trigger); 301256 is learned between them, so the before phase is the control: Sunflare keeps its full 2000 ms. The caster is read for `casting`: 1 at about 1470 ms excludes a cast time at or below 1462 ms (a reduction above 27%). Reference search 2026-11-22: server DBC 301256, 301242 and the cast times; bindmysoul snapshot and ascension-data searched for Hot Spot: nothing found beyond the tooltip; coa-history spells 301256 and 301242: 0 casts."
+    },
+    {
+      "spell": 301256,
+      "name": "Hot Spot (Sunflare finished by 1530 ms after Daybreak)",
+      "kind": "metric_delta",
+      "variant": "sunflare_done",
+      "label_suffix": "sunflare_done",
+      "quote": "Illumination, Radiant Cascade, or Sunflare within $301242d to have a $301242s1% reduced cast time.",
+      "trigger_spell": 800231,
+      "gate_spell": 301256,
+      "target": "dummy",
+      "setup_casts": [
+        503624
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1530,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          1522,
+          1540
+        ]
+      },
+      "observe_source": "301256 Hot Spot Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 301242; 301242 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -26 + 1 = -25 ($301242s1 = 25), DurationIndex 1 ($301242d = 10000 ms). Cast times from SpellCastTimes of the Spell.dbc CastingTimeIndex: Sunflare 800231 CastingTimeIndex gives 2000 ms; 25% less is 1500 ms, the stated 25% with the 2-point band of the guide (section 3.5) is 1460..1540 ms. Daybreak 503624 (instant) is cast on the caster in both phases (setup cast, 1600 ms before the trigger); 301256 is learned between them, so the before phase is the control: Sunflare keeps its full 2000 ms. The caster is read for `casting`: 0 at about 1530 ms excludes a cast time at or above 1540 ms (a reduction below 23%), the before phase reads 1 at the same time (control). Reference search 2026-11-22: server DBC 301256, 301242 and the cast times; bindmysoul snapshot and ascension-data searched for Hot Spot: nothing found beyond the tooltip; coa-history spells 301256 and 301242: 0 casts."
+    },
+    {
+      "spell": 301256,
+      "name": "Hot Spot (Shine still casting at 1100 ms after Daybreak)",
+      "kind": "metric_delta",
+      "variant": "shine_held",
+      "label_suffix": "shine_held",
+      "quote": "Casting Daybreak causes your next 2 casts of Shine,",
+      "trigger_spell": 800357,
+      "gate_spell": 301256,
+      "target": "caster",
+      "setup_casts": [
+        503624
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 1100,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          1096,
+          1114
+        ]
+      },
+      "observe_source": "301256 Hot Spot Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 301242; 301242 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -26 + 1 = -25 ($301242s1 = 25), DurationIndex 1 ($301242d = 10000 ms). Cast times from SpellCastTimes of the Spell.dbc CastingTimeIndex: Shine 800357 CastingTimeIndex gives 1500 ms; 25% less is 1125 ms, the stated 25% with the 2-point band of the guide (section 3.5) is 1095..1155 ms. Daybreak 503624 (instant) is cast on the caster in both phases (setup cast, 1600 ms before the trigger); 301256 is learned between them, so the before phase is the control: Shine keeps its full 1500 ms. The caster is read for `casting`: 1 at about 1100 ms excludes a cast time at or below 1096 ms (a reduction above 27%). Reference search 2026-11-22: server DBC 301256, 301242 and the cast times; bindmysoul snapshot and ascension-data searched for Hot Spot: nothing found beyond the tooltip; coa-history spells 301256 and 301242: 0 casts."
+    },
+    {
+      "spell": 301256,
+      "name": "Hot Spot (Shine finished by 1140 ms after Daybreak)",
+      "kind": "metric_delta",
+      "variant": "shine_done",
+      "label_suffix": "shine_done",
+      "quote": "Casting Daybreak causes your next 2 casts of Shine,",
+      "trigger_spell": 800357,
+      "gate_spell": 301256,
+      "target": "caster",
+      "setup_casts": [
+        503624
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1140,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          1144,
+          1154
+        ]
+      },
+      "observe_source": "301256 Hot Spot Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 301242; 301242 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -26 + 1 = -25 ($301242s1 = 25), DurationIndex 1 ($301242d = 10000 ms). Cast times from SpellCastTimes of the Spell.dbc CastingTimeIndex: Shine 800357 CastingTimeIndex gives 1500 ms; 25% less is 1125 ms, the stated 25% with the 2-point band of the guide (section 3.5) is 1095..1155 ms. Daybreak 503624 (instant) is cast on the caster in both phases (setup cast, 1600 ms before the trigger); 301256 is learned between them, so the before phase is the control: Shine keeps its full 1500 ms. The caster is read for `casting`: 0 at about 1149 ms excludes a cast time at or above 1154 ms (a reduction below 23%), the before phase reads 1 at the same time (control). Reference search 2026-11-22: server DBC 301256, 301242 and the cast times; bindmysoul snapshot and ascension-data searched for Hot Spot: nothing found beyond the tooltip; coa-history spells 301256 and 301242: 0 casts."
+    },
+    {
+      "spell": 301256,
+      "name": "Hot Spot (Radiant Cascade still casting at 1835 ms after Daybreak)",
+      "kind": "metric_delta",
+      "variant": "cascade_held",
+      "label_suffix": "cascade_held",
+      "quote": "Illumination, Radiant Cascade, or Sunflare within $301242d to have a $301242s1% reduced cast time.",
+      "trigger_spell": 500141,
+      "gate_spell": 301256,
+      "target": "caster",
+      "setup_casts": [
+        503624
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 1835,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          1831,
+          1851
+        ]
+      },
+      "observe_source": "301256 Hot Spot Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 301242; 301242 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -26 + 1 = -25 ($301242s1 = 25), DurationIndex 1 ($301242d = 10000 ms). Cast times from SpellCastTimes of the Spell.dbc CastingTimeIndex: Radiant Cascade 500141 CastingTimeIndex gives 2500 ms; 25% less is 1875 ms, the stated 25% with the 2-point band of the guide (section 3.5) is 1825..1925 ms. Daybreak 503624 (instant) is cast on the caster in both phases (setup cast, 1600 ms before the trigger); 301256 is learned between them, so the before phase is the control: Radiant Cascade keeps its full 2500 ms. The caster is read for `casting`: 1 at about 1835 ms excludes a cast time at or below 1831 ms (a reduction above 27%). Reference search 2026-11-22: server DBC 301256, 301242 and the cast times; bindmysoul snapshot and ascension-data searched for Hot Spot: nothing found beyond the tooltip; coa-history spells 301256 and 301242: 0 casts."
+    },
+    {
+      "spell": 301256,
+      "name": "Hot Spot (Radiant Cascade finished by 1910 ms after Daybreak)",
+      "kind": "metric_delta",
+      "variant": "cascade_done",
+      "label_suffix": "cascade_done",
+      "quote": "Illumination, Radiant Cascade, or Sunflare within $301242d to have a $301242s1% reduced cast time.",
+      "trigger_spell": 500141,
+      "gate_spell": 301256,
+      "target": "caster",
+      "setup_casts": [
+        503624
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1910,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          1906,
+          1924
+        ]
+      },
+      "observe_source": "301256 Hot Spot Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 301242; 301242 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -26 + 1 = -25 ($301242s1 = 25), DurationIndex 1 ($301242d = 10000 ms). Cast times from SpellCastTimes of the Spell.dbc CastingTimeIndex: Radiant Cascade 500141 CastingTimeIndex gives 2500 ms; 25% less is 1875 ms, the stated 25% with the 2-point band of the guide (section 3.5) is 1825..1925 ms. Daybreak 503624 (instant) is cast on the caster in both phases (setup cast, 1600 ms before the trigger); 301256 is learned between them, so the before phase is the control: Radiant Cascade keeps its full 2500 ms. The caster is read for `casting`: 0 at about 1910 ms excludes a cast time at or above 1924 ms (a reduction below 23%), the before phase reads 1 at the same time (control). Reference search 2026-11-22: server DBC 301256, 301242 and the cast times; bindmysoul snapshot and ascension-data searched for Hot Spot: nothing found beyond the tooltip; coa-history spells 301256 and 301242: 0 casts."
+    },
+    {
+      "spell": 301256,
+      "name": "Hot Spot (the second cast after Daybreak is reduced)",
+      "kind": "metric_delta",
+      "variant": "second_done",
+      "label_suffix": "second_done",
+      "quote": "Casting Daybreak causes your next 2 casts of Shine,",
+      "trigger_spell": 500143,
+      "gate_spell": 301256,
+      "target": "caster",
+      "setup_casts": [
+        503624,
+        500143
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 2100,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1530,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          1522,
+          1540
+        ]
+      },
+      "observe_source": "301256 Hot Spot Effect[0] aura 42, EffectTriggerSpell 301242 (\"your next 2 casts\": the count 2 is the tooltip's; the server DBC 301242 has ProcCharges 0, the 2 comes from the SpellInfo correction at AscensionSunClericContracts.cpp:154-155 and the reapply reset at AscensionSunClericAuras.cpp:97-98). Daybreak 503624 is cast on the caster, then Illumination 500143 casts as stated, in both phases; 301256 is learned between them (before phase = control). Each setup cast is followed by 2100 ms, which holds the full 2000 ms Illumination of the control phase and its GCD; the whole sequence ends well inside the 10000 ms of 301242. The second Illumination (one cast after Daybreak) reads `casting` 0 at about 1530 ms: it is reduced to 1500 ms, the before phase reads 1 (2000 ms). The first cast of each spell is covered by the *_held and *_done entries. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the count."
+    },
+    {
+      "spell": 301256,
+      "name": "Hot Spot (the third cast after Daybreak is not reduced)",
+      "kind": "metric_delta",
+      "variant": "third_held",
+      "label_suffix": "third_held",
+      "quote": "Casting Daybreak causes your next 2 casts of Shine,",
+      "trigger_spell": 500143,
+      "gate_spell": 301256,
+      "target": "caster",
+      "setup_casts": [
+        503624,
+        500143,
+        500143
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 2100,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 1600,
+      "expire_ms": 4500,
+      "game_time": {
+        "after": [
+          1592,
+          1612
+        ]
+      },
+      "observe_source": "301256 Hot Spot Effect[0] aura 42, EffectTriggerSpell 301242 (\"your next 2 casts\": the count 2 is the tooltip's; the server DBC 301242 has ProcCharges 0, the 2 comes from the SpellInfo correction at AscensionSunClericContracts.cpp:154-155 and the reapply reset at AscensionSunClericAuras.cpp:97-98). Daybreak 503624 is cast on the caster, then Illumination 500143 casts as stated, in both phases; 301256 is learned between them (before phase = control). Each setup cast is followed by 2100 ms, which holds the full 2000 ms Illumination of the control phase and its GCD; the whole sequence ends well inside the 10000 ms of 301242. The third Illumination (two casts after Daybreak) reads `casting` 1 at about 1600 ms in both phases: it keeps its full time, a reduced one (1500 ms) would have finished. Together with second_done (0 against 1 of the control) the count of the tooltip, 2, is bracketed on both sides. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the count.",
+      "phase_power": [
+        0,
+        2868,
+        2868
+      ]
+    },
+    {
+      "spell": 301256,
+      "name": "Hot Spot (Daybreak aura still on at 9150 ms)",
+      "kind": "metric_delta",
+      "variant": "aura_held",
+      "label_suffix": "aura_held",
+      "quote": "Illumination, Radiant Cascade, or Sunflare within $301242d to have a $301242s1% reduced cast time.",
+      "trigger_spell": 503624,
+      "gate_spell": 301256,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 301242
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9150,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9100,
+          9250
+        ]
+      },
+      "observe_source": "301256 Hot Spot Effect[0], EffectTriggerSpell 301242, DurationIndex 1 ($301242d = 10000 ms). A real Daybreak 503624 is cast on the caster in both phases (301256 learned between them); the caster is read for the aura 301242 at about 9150 ms of game time: present, so the duration exceeds 9100 ms and excludes 9000 ms (10% below 10000 ms); 0 before the learn (control). Reference search 2026-11-22: server DBC 301242; bindmysoul snapshot and ascension-data searched for Hot Spot: nothing found beyond the tooltip."
+    },
+    {
+      "spell": 301256,
+      "name": "Hot Spot (Daybreak aura gone by 10850 ms)",
+      "kind": "metric_delta",
+      "variant": "aura_gone",
+      "label_suffix": "aura_gone",
+      "quote": "Illumination, Radiant Cascade, or Sunflare within $301242d to have a $301242s1% reduced cast time.",
+      "trigger_spell": 503624,
+      "gate_spell": 301256,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 301242
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 10850,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          10800,
+          10900
+        ]
+      },
+      "observe_source": "301256 Hot Spot Effect[0], EffectTriggerSpell 301242, DurationIndex 1 ($301242d = 10000 ms). A real Daybreak 503624 is cast on the caster in both phases (301256 learned between them); the caster is read for the aura 301242 at about 10850 ms of game time: gone, so the duration is below 10900 ms and excludes 11000 ms (10% above 10000 ms); held and gone bracket it on both sides. Reference search 2026-11-22: server DBC 301242; bindmysoul snapshot and ascension-data searched for Hot Spot: nothing found beyond the tooltip."
+    },
+    {
+      "spell": 804254,
+      "name": "Blessing of Retribution (deflect aura on an ally with Bless)",
+      "kind": "metric_delta",
+      "variant": "bless_ally",
+      "label_suffix": "bless_ally",
+      "quote": "@ext:Only usable on your ally with Bless active.:ext@",
+      "trigger_spell": 804254,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 680888
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 1,
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "control_wait": true
+      },
+      "observe_source": "804254 Blessing of Retribution Effect[0] SPELL_EFFECT_TRIGGER_SPELL 680888, TARGET_UNIT_TARGET_ALLY; 680888 Effect[0] aura 287 SPELL_AURA_DEFLECT_SPELLS, ProcCharges 1, DurationIndex 3 ($680888d = 60000 ms). The tooltip: \"Only usable on your ally with Bless active.\" Bless 804247 is cast at the ally between the phases (the ally_casts arm, the same arm as Blessing of Triumph 804250), then the Blessing is cast at the ally in the after phase only (the before phase leaves the ally untouched): the ally is read for the aura 680888, absent before and present after. The control arm is no_bless: the same Blessing cast at an ally without Bless leaves no aura. Reference search 2026-11-22: server DBC 804254 and 680888; bindmysoul snapshot and ascension-data searched for Blessing of Retribution: nothing found beyond the tooltip.",
+      "wait_ms": 500,
+      "learn": [
+        804247
+      ]
+    },
+    {
+      "spell": 804254,
+      "name": "Blessing of Retribution (control: no aura on an ally without Bless)",
+      "kind": "metric_delta",
+      "variant": "no_bless",
+      "label_suffix": "no_bless",
+      "quote": "@ext:Only usable on your ally with Bless active.:ext@",
+      "trigger_spell": 804254,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 680888
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 1,
+        "ally_casts": [],
+        "control_wait": true
+      },
+      "observe_source": "804254 Blessing of Retribution Effect[0] SPELL_EFFECT_TRIGGER_SPELL 680888, TARGET_UNIT_TARGET_ALLY; 680888 Effect[0] aura 287 SPELL_AURA_DEFLECT_SPELLS, ProcCharges 1, DurationIndex 3 ($680888d = 60000 ms). The tooltip: \"Only usable on your ally with Bless active.\" Control of bless_ally: the Blessing is cast at an ally that has no Bless, and the ally is read for the aura 680888 after 1000 ms: absent, so the cast does not take effect without Bless. Reference search 2026-11-22: nothing found beyond the tooltip.",
+      "wait_ms": 1000
+    },
+    {
+      "spell": 680645,
+      "name": "Judgement (Gavel of Light critical strike chance is guaranteed against an Undead)",
+      "kind": "metric_delta",
+      "variant": "crit_undead_light",
+      "label_suffix": "crit_undead_light",
+      "quote": "Increases the critical damage of Gavels by $s2% and they are now guaranteed to critically strike against Undead enemies.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 800611,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 100,
+      "expected_gain": 100,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "target_entry": 201,
+      "observe_source": "680645 Judgement: \"they are now guaranteed to critically strike against Undead enemies\": a guaranteed critical strike is a critical strike chance of 100 for Gavel of Light 800611 against an Undead target. The use-time function SpellDoneCritChance with its scripted part is read for 800611 on the dummy (creature type Undead, entry 201) before and after 680645 is learned: gain 100 against the Undead; the same read against a Humanoid is the control (gain 0). The three scripted Gavels 800611, 800614 and 800617 share SpellFamilyFlags[1] 32 and are each read (G-23). The hit-level proof of the critical damage part is the existing crit_damage entries. Reference search 2026-11-22: nothing found beyond the tooltip. Limit: the read is a probe of SpellDoneCritChance and the hook, done side only (it omits SpellTakenCritChance, Spell.cpp:8663-8666), and the hook reads only a caster aura and the creature type (AscensionSunClericAbilities.cpp:197-213), no per-cast state: a readback, not a hit."
+    },
+    {
+      "spell": 680645,
+      "name": "Judgement (Gavel of Light critical strike chance is not guaranteed against a Humanoid (control))",
+      "kind": "metric_delta",
+      "variant": "crit_humanoid_light",
+      "label_suffix": "crit_humanoid_light",
+      "quote": "Increases the critical damage of Gavels by $s2% and they are now guaranteed to critically strike against Undead enemies.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 800611,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "target_entry": 6,
+      "observe_source": "680645 Judgement: \"they are now guaranteed to critically strike against Undead enemies\": a guaranteed critical strike is a critical strike chance of 100 for Gavel of Light 800611 against an Undead target. The use-time function SpellDoneCritChance with its scripted part is read for 800611 on the dummy (creature type Humanoid, entry 6) before and after 680645 is learned: gain 0 is the control of the Undead read (gain 100). The three scripted Gavels 800611, 800614 and 800617 share SpellFamilyFlags[1] 32 and are each read (G-23). The hit-level proof of the critical damage part is the existing crit_damage entries. Reference search 2026-11-22: nothing found beyond the tooltip."
+    },
+    {
+      "spell": 680645,
+      "name": "Judgement (Gavel of Grace critical strike chance is guaranteed against an Undead)",
+      "kind": "metric_delta",
+      "variant": "crit_undead_grace",
+      "label_suffix": "crit_undead_grace",
+      "quote": "Increases the critical damage of Gavels by $s2% and they are now guaranteed to critically strike against Undead enemies.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 800614,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 100,
+      "expected_gain": 100,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "target_entry": 201,
+      "observe_source": "680645 Judgement: \"they are now guaranteed to critically strike against Undead enemies\": a guaranteed critical strike is a critical strike chance of 100 for Gavel of Grace 800614 against an Undead target. The use-time function SpellDoneCritChance with its scripted part is read for 800614 on the dummy (creature type Undead, entry 201) before and after 680645 is learned: gain 100 against the Undead; the same read against a Humanoid is the control (gain 0). The three scripted Gavels 800611, 800614 and 800617 share SpellFamilyFlags[1] 32 and are each read (G-23). The hit-level proof of the critical damage part is the existing crit_damage entries. Reference search 2026-11-22: nothing found beyond the tooltip. Limit: the read is a probe of SpellDoneCritChance and the hook, done side only (it omits SpellTakenCritChance, Spell.cpp:8663-8666), and the hook reads only a caster aura and the creature type (AscensionSunClericAbilities.cpp:197-213), no per-cast state: a readback, not a hit."
+    },
+    {
+      "spell": 680645,
+      "name": "Judgement (Gavel of Grace critical strike chance is not guaranteed against a Humanoid (control))",
+      "kind": "metric_delta",
+      "variant": "crit_humanoid_grace",
+      "label_suffix": "crit_humanoid_grace",
+      "quote": "Increases the critical damage of Gavels by $s2% and they are now guaranteed to critically strike against Undead enemies.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 800614,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "target_entry": 6,
+      "observe_source": "680645 Judgement: \"they are now guaranteed to critically strike against Undead enemies\": a guaranteed critical strike is a critical strike chance of 100 for Gavel of Grace 800614 against an Undead target. The use-time function SpellDoneCritChance with its scripted part is read for 800614 on the dummy (creature type Humanoid, entry 6) before and after 680645 is learned: gain 0 is the control of the Undead read (gain 100). The three scripted Gavels 800611, 800614 and 800617 share SpellFamilyFlags[1] 32 and are each read (G-23). The hit-level proof of the critical damage part is the existing crit_damage entries. Reference search 2026-11-22: nothing found beyond the tooltip."
+    },
+    {
+      "spell": 680645,
+      "name": "Judgement (Gavel of Wrath critical strike chance is guaranteed against an Undead)",
+      "kind": "metric_delta",
+      "variant": "crit_undead_wrath",
+      "label_suffix": "crit_undead_wrath",
+      "quote": "Increases the critical damage of Gavels by $s2% and they are now guaranteed to critically strike against Undead enemies.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 800617,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 100,
+      "expected_gain": 100,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "target_entry": 201,
+      "observe_source": "680645 Judgement: \"they are now guaranteed to critically strike against Undead enemies\": a guaranteed critical strike is a critical strike chance of 100 for Gavel of Wrath 800617 against an Undead target. The use-time function SpellDoneCritChance with its scripted part is read for 800617 on the dummy (creature type Undead, entry 201) before and after 680645 is learned: gain 100 against the Undead; the same read against a Humanoid is the control (gain 0). The three scripted Gavels 800611, 800614 and 800617 share SpellFamilyFlags[1] 32 and are each read (G-23). The hit-level proof of the critical damage part is the existing crit_damage entries. Reference search 2026-11-22: nothing found beyond the tooltip. Limit: the read is a probe of SpellDoneCritChance and the hook, done side only (it omits SpellTakenCritChance, Spell.cpp:8663-8666), and the hook reads only a caster aura and the creature type (AscensionSunClericAbilities.cpp:197-213), no per-cast state: a readback, not a hit."
+    },
+    {
+      "spell": 680645,
+      "name": "Judgement (Gavel of Wrath critical strike chance is not guaranteed against a Humanoid (control))",
+      "kind": "metric_delta",
+      "variant": "crit_humanoid_wrath",
+      "label_suffix": "crit_humanoid_wrath",
+      "quote": "Increases the critical damage of Gavels by $s2% and they are now guaranteed to critically strike against Undead enemies.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 800617,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "target_entry": 6,
+      "observe_source": "680645 Judgement: \"they are now guaranteed to critically strike against Undead enemies\": a guaranteed critical strike is a critical strike chance of 100 for Gavel of Wrath 800617 against an Undead target. The use-time function SpellDoneCritChance with its scripted part is read for 800617 on the dummy (creature type Humanoid, entry 6) before and after 680645 is learned: gain 0 is the control of the Undead read (gain 100). The three scripted Gavels 800611, 800614 and 800617 share SpellFamilyFlags[1] 32 and are each read (G-23). The hit-level proof of the critical damage part is the existing crit_damage entries. Reference search 2026-11-22: nothing found beyond the tooltip."
     }
   ],
   "player_observations": [],

@@ -779,17 +779,49 @@
   {
     "spell": 301256,
     "clause": "Casting Daybreak causes your next 2 casts of Shine,",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting Daybreak causes the next cast of Shine to have its cast time reduced",
+        "labels": [
+          "301256 behaviour_metric_delta shine_held",
+          "301256 behaviour_metric_delta shine_done"
+        ]
+      },
+      {
+        "claim": "your next 2 casts: the second cast is reduced and the third is not",
+        "labels": [
+          "301256 behaviour_metric_delta second_done",
+          "301256 behaviour_metric_delta third_held"
+        ]
+      }
+    ]
   },
   {
     "spell": 301256,
     "clause": "Illumination, Radiant Cascade, or Sunflare within $301242d to have a $301242s1% reduced cast time.",
-    "labels": [
-      "301256 spell_duration 301242 #0",
-      "301256 effect_value 301242e0 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Illumination, Radiant Cascade, or Sunflare have a $301242s1% reduced cast time",
+        "labels": [
+          "301256 behaviour_metric_delta illum_held",
+          "301256 behaviour_metric_delta illum_done",
+          "301256 behaviour_metric_delta cascade_held",
+          "301256 behaviour_metric_delta cascade_done",
+          "301256 behaviour_metric_delta sunflare_held",
+          "301256 behaviour_metric_delta sunflare_done"
+        ]
+      },
+      {
+        "claim": "within $301242d",
+        "labels": [
+          "301256 behaviour_metric_delta aura_held",
+          "301256 behaviour_metric_delta aura_gone"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "The 'within $301242d' claim is proven by aura_held (9150 ms) and aura_gone (10850 ms) of the counted pair, which exclude 9000 and 11000 ms (10% off 10000 ms); the data label 'spell_duration 301242 #0' is not emitted by this pair, so it is no longer cited."
   },
   {
     "spell": 301266,
@@ -2493,10 +2525,17 @@
       },
       {
         "claim": "Gavels are guaranteed to critically strike against Undead enemies",
-        "labels": []
+        "labels": [
+          "680645 behaviour_metric_delta crit_undead_light",
+          "680645 behaviour_metric_delta crit_humanoid_light",
+          "680645 behaviour_metric_delta crit_undead_grace",
+          "680645 behaviour_metric_delta crit_humanoid_grace",
+          "680645 behaviour_metric_delta crit_undead_wrath",
+          "680645 behaviour_metric_delta crit_humanoid_wrath"
+        ]
       }
     ],
-    "reason": "Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip; control = passive not learned. Effect 1 is aura 108 SPELL_AURA_ADD_PCT_MODIFIER op 15 (crit damage bonus): +15% of the bonus part, whole-hit ratio 1.075 (+7.5%); the Undead guarantee has no entry (crit_guarantee fires by auto-attack swings, a Gavel is a cast). Reference search: bindmysoul snapshot has the sentence, no figure; nothing else found."
+    "reason": "Crit damage: pair 20261122-053542 / 20261122-053620, build 27df5d8f3e8c, server commit ed294ce1cdae, no flip; control = passive not learned; effect 1 is aura 108 SPELL_AURA_ADD_PCT_MODIFIER op 15 (crit damage bonus): +15% of the bonus part, whole-hit ratio 1.075. Undead guarantee: open, data-level readback only. The six crit-chance reads are a probe of SpellDoneCritChance and omit SpellTakenCritChance, and coverage keeps the claim as data. Route: Gavel casts at Undead entry 201 with spell_damage_count critical equal to the cast count, entry 6 as control; crit_guarantee fires by auto-attack swings (a Gavel is a cast) and a metric_delta control arm reads natural crits, so no existing kind judges it deterministically. Reference search: bindmysoul snapshot has the sentence, no figure; nothing else found."
   },
   {
     "spell": 680646,
@@ -2619,7 +2658,8 @@
           "680656 behaviour_metric_delta ally_tick"
         ]
       }
-    ]
+    ],
+    "reason": "Open, target status 1 (review b7c I2, not status 5). The server adds .25 x attack power to Horusath Blast 500154 effect 0 while 680656 is known (AscensionSunClericContracts.cpp:309-310); the line arrived in e36bc50aad (bulk restore of five classes) with no source for 0.25, and the tooltip, DBC (681471 carries no value), bindmysoul, ascension-data and coa-history give no coefficient. The clause states none, so the claim is that the damage gain exists and grows with attack power. Route: hits learned against not learned at two attack power levels, the AP contrast arm in the same pair. Tool need: no existing judge states 'gain above the control and growing with AP' without an expected figure, and the figure may not come from the code or the run."
   },
   {
     "spell": 680656,
@@ -4511,9 +4551,11 @@
     "spell": 804254,
     "clause": "@ext:Only usable on your ally with Bless active.:ext@",
     "labels": [
-      "804254 effect_value #1"
+      "804254 behaviour_metric_delta bless_ally",
+      "804254 behaviour_metric_delta no_bless"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The arms read the absence of the aura, not a refused cast: the server accepts the cast and does nothing without Bless (AscensionSunClericAbilities.cpp:493-498), so 'Only usable' is read as 'no effect', as for 804250 and 804253."
   },
   {
     "spell": 804257,
@@ -4667,13 +4709,15 @@
           "804629 spell_duration 807299 #1"
         ]
       }
-    ]
+    ],
+    "reason": "Held (review b7c C1): the entries instant, instant_once and damage set the claim's own aura 807299 with set_aura, which guide 3.4 forbids when the aura is the subject, so no label counts. The real route is the 15% Radiant Flame tick proc (proc_rate entry), and the harness has no conditional repeat step: a fixed sequence of Radiant Flame casts reaches at most about one tick per second on one dummy (tick period 1000 ms, 3 ticks landed per cast in the proc entry sizing) inside the 10 s life of 807299, which leaves 0.85^n failures with n near 10, far above 0.1% per pair. Forcing the roll failed once (SPELLMOD_CHANCE_OF_SUCCESS does not reach roll_chance_i, AscensionSunCleric.cpp:196-204). Tool need: a step that repeats a cast until an aura is present on the caster, then continues. Open; the 'within $d' claim carries only its data label (807299 DurationIndex 1 = 10000 ms), a data-level readback with a behaviour route through the same real grant, not status 3 (no second design failed)."
   },
   {
     "spell": 804629,
     "clause": "and deals $s2% increased damage.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Held (review b7c C1): the entries instant, instant_once and damage set the claim's own aura 807299 with set_aura, which guide 3.4 forbids when the aura is the subject, so no label counts. The real route is the 15% Radiant Flame tick proc (proc_rate entry), and the harness has no conditional repeat step: a fixed sequence of Radiant Flame casts reaches at most about one tick per second on one dummy (tick period 1000 ms, 3 ticks landed per cast in the proc entry sizing) inside the 10 s life of 807299, which leaves 0.85^n failures with n near 10, far above 0.1% per pair. Forcing the roll failed once (SPELLMOD_CHANCE_OF_SUCCESS does not reach roll_chance_i, AscensionSunCleric.cpp:196-204). Tool need: a step that repeats a cast until an aura is present on the caster, then continues. Open."
   },
   {
     "spell": 804630,
