@@ -6627,12 +6627,10 @@
       {
         "claim": "for $807523d (10 s, remaining duration read)",
         "labels": [
-          "807343 behaviour_metric_delta light_remaining"
+          "807343 behaviour_metric_delta light_remaining",
+          "807343 behaviour_metric_delta light_held"
         ]
       }
-    ],
-    "labels": [
-      "807343 behaviour_metric_delta light_held"
     ]
   },
   {
