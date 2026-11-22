@@ -2198,6 +2198,8 @@ player ratings, before the striker creature is added). An option that needs anot
 `metric_delta_options/test_<field>.py` (run by `test_kinds.py`), its page `docs/metric_delta_options/<field>.md`.
 Options with a module:
 
+- [`after_start_reads`](metric_delta_options/after_start_reads.md): a caster aura read at the start of the after phase,
+  a mismatch is `unmeasured` (ADR 1039)
 - [`corpse`](metric_delta_options/corpse.md): a creature corpse a real setup cast kills in the treatment phase (ADR
   0493)
 - [`player_spell_power`](metric_delta_options/player_spell_power.md): the caster's spell-power fixture (ADR 0364)
