@@ -2242,6 +2242,8 @@ Options with a module:
   `cast_power` after every setup cast, refused for a claim about a resource (ADR 1038)
 - [`second_strike`](metric_delta_options/second_strike.md): a second strike no table avoids after the treatment
   cast, the state it meets read first, a missing state or strike is unmeasured (ADR 1053, provisional)
+- [`without_item`](metric_delta_options/without_item.md): destroys the equipped item (and resets the trigger's
+  cooldown) before the second cast of a `cast_failure` entry (ADR 1056).
 - [`void_on_cast_failure`](metric_delta_options/void_on_cast_failure.md): the verdict `unmeasured` when a setup, step
   or trigger cast was refused (ADR 1038)
 - [`displacement`](metric_delta_options/displacement.md): the judged readings replaced by the caster's 2D
