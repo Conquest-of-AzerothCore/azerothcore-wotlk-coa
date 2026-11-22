@@ -19,6 +19,9 @@ constexpr uint32 ChosenKing = 707079;
 constexpr uint32 HammerOfKings = 804751;
 constexpr uint32 Anointed = 524998;
 constexpr uint32 SolemnPriest = 804269;
+constexpr uint32 ArbiterOfLight = 302914;
+constexpr uint32 VowOfLight = 807547;
+constexpr uint32 VowOfLightArbiterShare = 807549;
 constexpr uint32 Calm = 804057;
 bool SilenceImmune(Unit const* target)
 {
@@ -315,7 +318,9 @@ public:
         {
             if (Named(info, 800611))
             {
-                int32 const share = Amount(707521) + (player->HasAura(SolemnPriest) ? Amount(SolemnPriest, 1) : 0);
+                bool const arbiter = player->HasAura(ArbiterOfLight) && player->HasAura(VowOfLight);
+                int32 const share = Amount(707521) + (player->HasAura(SolemnPriest) ? Amount(SolemnPriest, 1) : 0) +
+                    (arbiter ? Amount(VowOfLightArbiterShare, 2) : 0);
                 uint32 copied = CalculatePct(damage, share);
                 bool const oldGavelHealing = State(player).gavelHealing;
                 State(player).gavelHealing = true;
