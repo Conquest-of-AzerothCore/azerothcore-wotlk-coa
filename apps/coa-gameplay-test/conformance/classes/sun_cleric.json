@@ -264,7 +264,8 @@
       "baseline": true,
       "base_mana_per_attempt": true,
       "residual_target": 0.001,
-      "min_detectable": 5,
+      "min_detectable": 4,
+      "min_parts": 188,
       "trial": "effective_heal",
       "event_metric": "spell_cast_count",
       "events_per_proc": 1,
@@ -276,7 +277,7 @@
       "trigger_text": "Effectively healing with Radiant Cascade",
       "proc_spell": 301293,
       "proc_spell_source": "AscensionSunClericEvents.cpp:336-338: an effective direct heal of Radiant Cascade rolls the ProcChance of 704920 (20) and casts 301293 on the caster",
-      "handler": "AscensionSunClericEvents.cpp:135 (check: healing && direct && Any(info, {500141, 500143})) and :336-338 (roll and cast). The trials are the heals of the trigger on the ally only (spell_heal_count, target ally): the ally is set to 1 health of a 2000000000 maximum before every cast, so each of its heals is effective and rolls; the caster stays at full health, so a chained heal of it is not effective and does not roll (AscensionSunClericEvents.cpp:51 and :135 take GetEffectiveHeal()), and the overheal on the ally and the effective healing on the caster are read at the end of each part and must be 0, else unmeasured. Radiant Cascade 500141 EffectChainTarget[0] 4 (TARGET_UNIT_TARGET_CHAINHEAL_ALLY): at most the ally and the caster in this setup. Residual failure probability at most 0.1% per pair (residual_target 0.001, min_detectable 5 points). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
+      "handler": "AscensionSunClericEvents.cpp:135 (check: healing && direct && Any(info, {500141, 500143})) and :336-338 (roll and cast). The trials are the heals of the trigger on the ally only (spell_heal_count, target ally): the ally is set to 1 health of a 2000000000 maximum before every cast, so each of its heals is effective and rolls; the caster stays at full health, so a chained heal of it is not effective and does not roll (AscensionSunClericEvents.cpp:51 and :135 take GetEffectiveHeal()), and the overheal on the ally and the effective healing on the caster are read at the end of each part and must be 0, else unmeasured. Radiant Cascade 500141 EffectChainTarget[0] 4 (TARGET_UNIT_TARGET_CHAINHEAL_ALLY): at most the ally and the caster in this setup. Residual: residual_target 0.001 with min_detectable 4 points, twice the 2-point band (ADR 0781), so at the minimum of 19386 trials both the false alert at the chance and the false pass of a 4-point deviation are at most 0.1% per pair (normal approximation); 188 parts schedule 29140 trials. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
     },
     {
       "aura": 704920,
@@ -287,7 +288,8 @@
       "baseline": true,
       "base_mana_per_attempt": true,
       "residual_target": 0.001,
-      "min_detectable": 5,
+      "min_detectable": 4,
+      "min_parts": 230,
       "trial": "effective_heal",
       "event_metric": "spell_cast_count",
       "events_per_proc": 1,
@@ -299,7 +301,7 @@
       "trigger_text": "Effectively healing with Illumination",
       "proc_spell": 300354,
       "proc_spell_source": "AscensionSunClericEvents.cpp:336-338: an effective direct heal of Illumination rolls the ProcChance of 707520 (40) and casts 300354 on the caster",
-      "handler": "AscensionSunClericEvents.cpp:135 (check: healing && direct && Any(info, {500141, 500143})) and :336-338 (roll and cast). The trials are the heals of the trigger on the ally only (spell_heal_count, target ally): the ally is set to 1 health of a 2000000000 maximum before every cast, so each of its heals is effective and rolls; the caster stays at full health, so a chained heal of it is not effective and does not roll (AscensionSunClericEvents.cpp:51 and :135 take GetEffectiveHeal()), and the overheal on the ally and the effective healing on the caster are read at the end of each part and must be 0, else unmeasured. Radiant Cascade 500141 EffectChainTarget[0] 4 (TARGET_UNIT_TARGET_CHAINHEAL_ALLY): at most the ally and the caster in this setup. Residual failure probability at most 0.1% per pair (residual_target 0.001, min_detectable 5 points). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
+      "handler": "AscensionSunClericEvents.cpp:135 (check: healing && direct && Any(info, {500141, 500143})) and :336-338 (roll and cast). The trials are the heals of the trigger on the ally only (spell_heal_count, target ally): the ally is set to 1 health of a 2000000000 maximum before every cast, so each of its heals is effective and rolls; the caster stays at full health, so a chained heal of it is not effective and does not roll (AscensionSunClericEvents.cpp:51 and :135 take GetEffectiveHeal()), and the overheal on the ally and the effective healing on the caster are read at the end of each part and must be 0, else unmeasured. Radiant Cascade 500141 EffectChainTarget[0] 4 (TARGET_UNIT_TARGET_CHAINHEAL_ALLY): at most the ally and the caster in this setup. Residual: residual_target 0.001 with min_detectable 4 points, twice the 2-point band (ADR 0781), so at the minimum of 29084 trials both the false alert at the chance and the false pass of a 4-point deviation are at most 0.1% per pair (normal approximation); 230 parts schedule 43700 trials. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
     }
   ],
   "triggers": [],
@@ -19715,14 +19717,14 @@
       "base_mana_per_attempt": true,
       "trial_casts": true,
       "residual_target": 0.001,
-      "min_detectable": 5,
+      "min_detectable": 4,
       "observe_source": "AscensionSunClericAbilities.cpp:253-254: a non-triggered cast of Horusath Blast or Rapture with Chance(player, 300367) (ProcChance 20) calls Reduce(player, id, INT32_MAX), which sends SMSG_CLEAR_COOLDOWN of every known spell of that name (AscensionSunCleric.cpp:102-111, Player.cpp:3952-3958). The harness reset_cooldown fixture before each cast sends one packet of the same spell (CoAGameplayTest.cpp:8865-8870): the control arm must read exactly one per fixture. A trial is a completed cast (spell_cast_count). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC.",
       "trigger_spell": 572801,
       "reset_spell": 572801,
       "casts": 1900,
       "control_casts": 100,
       "cast_wait_ms": 1700,
-      "parts": 8
+      "parts": 11
     },
     {
       "spell": 300367,
@@ -19737,14 +19739,14 @@
       "base_mana_per_attempt": true,
       "trial_casts": true,
       "residual_target": 0.001,
-      "min_detectable": 5,
+      "min_detectable": 4,
       "observe_source": "AscensionSunClericAbilities.cpp:253-254: a non-triggered cast of Horusath Blast or Rapture with Chance(player, 300367) (ProcChance 20) calls Reduce(player, id, INT32_MAX), which sends SMSG_CLEAR_COOLDOWN of every known spell of that name (AscensionSunCleric.cpp:102-111, Player.cpp:3952-3958). The harness reset_cooldown fixture before each cast sends one packet of the same spell (CoAGameplayTest.cpp:8865-8870): the control arm must read exactly one per fixture. A trial is a completed cast (spell_cast_count). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC.",
       "trigger_spell": 806477,
       "reset_spell": 806477,
       "casts": 1050,
       "control_casts": 50,
       "cast_wait_ms": 3200,
-      "parts": 14
+      "parts": 19
     },
     {
       "spell": 806699,
@@ -19756,9 +19758,9 @@
       "chance_pct": 20,
       "control_ms": 60000,
       "attack_ms": 3400000,
-      "parts": 8,
+      "parts": 9,
       "residual_target": 0.001,
-      "min_detectable": 5,
+      "min_detectable": 4,
       "observe_source": "AscensionSunClericEvents.cpp:124 (damage && automatic && Chance(player, 806699), ProcChance 20) and :285 (Reduce(player, 800626, INT32_MAX), one SMSG_CLEAR_COOLDOWN of Glorious Execution 800626 even off cooldown). Trials are landed damaging auto-attack hits of both Valkyr hands (two 2800 ms weapons, ADR 1017). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
     },
     {
