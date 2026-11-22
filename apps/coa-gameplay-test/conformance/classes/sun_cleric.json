@@ -9523,60 +9523,6 @@
     },
     {
       "spell": 680622,
-      "name": "Fervor of the Sun (stacks after six fulfilled Vows)",
-      "kind": "metric_delta",
-      "variant": "stack_cap",
-      "label_suffix": "stack_cap",
-      "quote": "stacking $680623u times.",
-      "trigger_spell": 500143,
-      "gate_spell": 680622,
-      "target": "caster",
-      "setup_target": "caster",
-      "caster_health_pct": 50,
-      "phase_auras": [
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ],
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "expire_ms": 500,
-      "setup_casts": [
-        803489,
-        804584,
-        500143,
-        500143,
-        500143,
-        500143,
-        500143
-      ],
-      "setup_wait_ms": 2600,
-      "metric": "aura_stacks",
-      "fields": {
-        "spell": 680623
-      },
-      "before_expected": 0,
-      "expected": 5,
-      "wait_ms": 2600,
-      "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). Six fulfilments (five setup heals and the trigger heal) read 5 stacks, the stated cap. Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
-      "cast_in_before": false,
-      "setup_only_after": true
-    },
-    {
-      "spell": 680622,
       "name": "Fervor of the Sun (control: the Vow is fulfilled without the talent)",
       "kind": "metric_delta",
       "variant": "control_stacks",
@@ -38700,6 +38646,218 @@
         ]
       ],
       "observe_source": "Justice 572848 Effect[0] TRIGGER_SPELL 572850 (main hand, Physical, SchoolMask 1) and Effect[1] TRIGGER_SPELL 572045 (off hand, Fire, SchoolMask 4); each strike has Effect[0] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE BasePoints 49 (50%, the $524857s1 of the tooltip) and Effect[1] SCHOOL_DAMAGE flat: 572850 BasePoints 156 (157), 572045 BasePoints 104 (105), EffectDieSides 1 (value = BasePoints + 1). The tooltip token $524857m2 reads 6 (524857 Effect[1] BasePoints 5, a tooltip-only spell), the served flats are 157 and 105: this entry reads the hit the server really deals per hand, and its bounds come from the served DBC values, not from the token. Valkyr weapon set (spell_weapon_sets 572848): 2529 in both hands, 73.62-103.34, 2800 ms; reference attack power 70, so the attack-power part of one hit is 70/14 x 2.8 = 14; spell power 0 so the $spfi*0.2 part is 0; melee and expertise rating 10000, non-critical hits only, Fire resistance of the dummy removed by 823764. Off hand, Fire: 50% of (die roll 73.62..103.34 + 14) + 105 = 148.8..163.7 without an off-hand penalty, 126.9..134.3 if the off-hand weapon part is halved: interval [126, 164]; Fire is not reduced by armor and 823764 removes the dummy's resistance. Control: no cast before, 0 damage. The 6-flat reading (tooltip token) would give 6 + 22..59 = 28..65, outside the interval. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680622,
+      "name": "Fervor of the Sun (stacks after six fulfilled Vows)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "quote": "stacking $680623u times.",
+      "trigger_spell": 500143,
+      "gate_spell": 680622,
+      "target": "caster",
+      "setup_target": "caster",
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "setup_casts": [
+        803489,
+        804584,
+        500143,
+        500143,
+        500143,
+        500143,
+        500143
+      ],
+      "setup_wait_ms": 2600,
+      "cast_power": 1363,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680623
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 2600,
+      "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). Six fulfilments (five setup heals and the trigger heal) read 5 stacks, the stated cap. Illumination 500143 costs 30% of the mana pool (Spell.dbc ManaCostPercentage 30), so six casts need 180%: refill_power_after_setup_casts sets the mana to 1363 again after every setup cast (the claim is not about mana) and void_on_cast_failure voids a run in which any cast is refused (the earlier entry had its trigger cast refused, reason 85, and read 5 after at most five landed heals). Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
+      "cast_in_before": false,
+      "setup_only_after": true,
+      "void_on_cast_failure": true,
+      "refill_power_after_setup_casts": {
+        "power": 0
+      }
+    },
+    {
+      "spell": 680622,
+      "kind": "hit_ratio",
+      "quote": "Fulfilling a Vow now increases the damage of your Sunslam by $680623s1% for $680623d,",
+      "expected": 1.1,
+      "critical": false,
+      "observe_spell": 805639,
+      "cast_spell": 807973,
+      "cast_wait_ms": 4500,
+      "control": {},
+      "treatment": {
+        "auras": [
+          [
+            680623,
+            1
+          ]
+        ]
+      },
+      "fixture": {
+        "attack_power": 10000
+      },
+      "name": "Fervor of the Sun (Sunslam tick damage ratio)",
+      "variant": "tick_ratio",
+      "label_suffix": "tick_ratio",
+      "trials": 14,
+      "expected_source": "680623 Fervor of the Sun Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 9 + 1 = 10 ($680623s1), class mask word 1 = 2097152 = Sunslam 805639/807447 SpellFamilyFlags[1] (/srv/coa/server-data/dbc, Spell.dbc); the tooltip states +10% of Sunslam's damage per stack, so the class contract makes Effect[0] aura 108 ADD_PCT_MODIFIER (Sun Cleric ADR 0035), applied after the attack power term, and the expected ratio of the mean non-crit hit with one Fervor stack to the mean hit without it is 1.10, per damaging component. Sunslam 807973 Effect[0] aura 227 every 1000 ms triggers 805639 (Holy), Effect[1] aura 231 every 988 ms triggers 807447 (weapon-percent effect 31). Control = no Fervor, treatment = 680623 at 1 stack (precondition fixture set_aura each trial; the claim is the damage, its application by a fulfilled Vow is the stack_one entry). Dawn 807440, the caster aura Sunslam requires, is set by the pipeline as a precondition. Attack power fixture 10000 so that a flat +10 on a base of 100 + 0.159426 x AP reads about 1.006, far from 1.10. Non-crit hits only (critical false). Reference search 2026-11-22: coa-history spell 805639 4959 damage events in 11 logs (no Fervor split); spell 680623 aura events only; nothing else found. The resist fixture 823764 on the caster (Effect[0] aura 123 -10000 on schools 126) removes the partial-resist spread that left the attack power 10000 arm at insufficient_trials in pair 20261122-214027 / 20261122-214210.",
+      "cast_unit_auras": [
+        [
+          823764,
+          1
+        ]
+      ]
+    },
+    {
+      "spell": 680622,
+      "kind": "hit_ratio",
+      "quote": "Fulfilling a Vow now increases the damage of your Sunslam by $680623s1% for $680623d,",
+      "expected": 1.1,
+      "critical": false,
+      "observe_spell": 805639,
+      "cast_spell": 807973,
+      "cast_wait_ms": 4500,
+      "control": {},
+      "treatment": {
+        "auras": [
+          [
+            680623,
+            1
+          ]
+        ]
+      },
+      "name": "Fervor of the Sun (Sunslam tick damage ratio, reference attack power)",
+      "variant": "tick_ratio_ref",
+      "label_suffix": "tick_ratio_ref",
+      "trials": 14,
+      "expected_source": "680623 Fervor of the Sun Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 9 + 1 = 10 ($680623s1), class mask word 1 = 2097152 = Sunslam 805639/807447 SpellFamilyFlags[1] (/srv/coa/server-data/dbc, Spell.dbc); the tooltip states +10% of Sunslam's damage per stack, so the class contract makes Effect[0] aura 108 ADD_PCT_MODIFIER (Sun Cleric ADR 0035), applied after the attack power term, and the expected ratio of the mean non-crit hit with one Fervor stack to the mean hit without it is 1.10, per damaging component. Sunslam 807973 Effect[0] aura 227 every 1000 ms triggers 805639 (Holy), Effect[1] aura 231 every 988 ms triggers 807447 (weapon-percent effect 31). Control = no Fervor, treatment = 680623 at 1 stack (precondition fixture set_aura each trial; the claim is the damage, its application by a fulfilled Vow is the stack_one entry). Dawn 807440, the caster aura Sunslam requires, is set by the pipeline as a precondition. Second design: the reference attack power 70 (no fixture), so the hit is 100 + 0.159426 x 70 = 111.16 and a flat +10 would read 1.09; the resist fixture 823764 on the caster (Effect[0] aura 123 -10000 on schools 126, no magic resistance) removes the partial-resist spread of the first design. Non-crit hits only (critical false). Reference search 2026-11-22: coa-history spell 805639 4959 damage events in 11 logs (no Fervor split); spell 680623 aura events only; nothing else found.",
+      "cast_unit_auras": [
+        [
+          823764,
+          1
+        ]
+      ]
+    },
+    {
+      "spell": 680622,
+      "kind": "hit_ratio",
+      "quote": "Fulfilling a Vow now increases the damage of your Sunslam by $680623s1% for $680623d,",
+      "expected": 1.1,
+      "critical": false,
+      "observe_spell": 807447,
+      "cast_spell": 807973,
+      "cast_wait_ms": 4500,
+      "control": {},
+      "treatment": {
+        "auras": [
+          [
+            680623,
+            1
+          ]
+        ]
+      },
+      "fixture": {
+        "attack_power": 10000
+      },
+      "name": "Fervor of the Sun (Sunslam weapon part ratio)",
+      "variant": "weapon_ratio",
+      "label_suffix": "weapon_ratio",
+      "trials": 40,
+      "expected_source": "680623 Fervor of the Sun Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 9 + 1 = 10 ($680623s1), class mask word 1 = 2097152 = Sunslam 805639/807447 SpellFamilyFlags[1] (/srv/coa/server-data/dbc, Spell.dbc); the tooltip states +10% of Sunslam's damage per stack, so the class contract makes Effect[0] aura 108 ADD_PCT_MODIFIER (Sun Cleric ADR 0035), applied after the attack power term, and the expected ratio of the mean non-crit hit with one Fervor stack to the mean hit without it is 1.10, per damaging component. Sunslam 807973 Effect[0] aura 227 every 1000 ms triggers 805639 (Holy), Effect[1] aura 231 every 988 ms triggers 807447 (weapon-percent effect 31). Control = no Fervor, treatment = 680623 at 1 stack (precondition fixture set_aura each trial; the claim is the damage, its application by a fulfilled Vow is the stack_one entry). Dawn 807440, the caster aura Sunslam requires, is set by the pipeline as a precondition. Attack power fixture 10000 so that a flat +10 on a base of 100 + 0.159426 x AP reads about 1.006, far from 1.10. Non-crit hits only (critical false). Reference search 2026-11-22: coa-history spell 807447: 0 events in 186 logs; nothing else found."
+    },
+    {
+      "spell": 680622,
+      "kind": "hit_ratio",
+      "quote": "Fulfilling a Vow now increases the damage of your Sunslam by $680623s1% for $680623d,",
+      "expected": 1.5,
+      "critical": false,
+      "observe_spell": 805639,
+      "cast_spell": 807973,
+      "cast_wait_ms": 4500,
+      "control": {},
+      "treatment": {
+        "auras": [
+          [
+            680623,
+            5
+          ]
+        ]
+      },
+      "fixture": {
+        "attack_power": 10000
+      },
+      "name": "Fervor of the Sun (Sunslam tick damage ratio, five stacks)",
+      "variant": "tick_ratio_max",
+      "label_suffix": "tick_ratio_max",
+      "trials": 14,
+      "expected_source": "680623 Fervor of the Sun Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 9 + 1 = 10 ($680623s1), class mask word 1 = 2097152 = Sunslam 805639/807447 SpellFamilyFlags[1] (/srv/coa/server-data/dbc, Spell.dbc); the tooltip states +10% of Sunslam's damage per stack, so the class contract makes Effect[0] aura 108 ADD_PCT_MODIFIER (Sun Cleric ADR 0035), applied after the attack power term, and the expected ratio of the mean non-crit hit with one Fervor stack to the mean hit without it is 1.10, per damaging component. Sunslam 807973 Effect[0] aura 227 every 1000 ms triggers 805639 (Holy), Effect[1] aura 231 every 988 ms triggers 807447 (weapon-percent effect 31). Control = no Fervor, treatment = 680623 at 1 stack (precondition fixture set_aura each trial; the claim is the damage, its application by a fulfilled Vow is the stack_one entry). Dawn 807440, the caster aura Sunslam requires, is set by the pipeline as a precondition. Attack power fixture 10000 so that a flat +10 on a base of 100 + 0.159426 x AP reads about 1.006, far from 1.10. Non-crit hits only (critical false). Reference search 2026-11-22: coa-history spell 805639 4959 damage events in 11 logs (no Fervor split); spell 680623 aura events only; nothing else found. Maximum-stack arm: treatment = 680623 at 5 stacks (StackAmount 5); the aura amount is 10 x stacks = $w1 = 50 and the percent modifiers of SPELLMOD_EFFECT1 add (Player::ApplySpellMod), so the expected ratio is 1 + 0.10 x 5 = 1.50. The resist fixture 823764 on the caster (Effect[0] aura 123 -10000 on schools 126) removes the partial-resist spread that left the attack power 10000 arm at insufficient_trials in pair 20261122-214027 / 20261122-214210.",
+      "cast_unit_auras": [
+        [
+          823764,
+          1
+        ]
+      ]
+    },
+    {
+      "spell": 680622,
+      "kind": "hit_ratio",
+      "quote": "Fulfilling a Vow now increases the damage of your Sunslam by $680623s1% for $680623d,",
+      "expected": 1.5,
+      "critical": false,
+      "observe_spell": 805639,
+      "cast_spell": 807973,
+      "cast_wait_ms": 4500,
+      "control": {},
+      "treatment": {
+        "auras": [
+          [
+            680623,
+            5
+          ]
+        ]
+      },
+      "name": "Fervor of the Sun (Sunslam tick damage ratio, reference attack power, five stacks)",
+      "variant": "tick_ratio_ref_max",
+      "label_suffix": "tick_ratio_ref_max",
+      "trials": 14,
+      "expected_source": "680623 Fervor of the Sun Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 9 + 1 = 10 ($680623s1), class mask word 1 = 2097152 = Sunslam 805639/807447 SpellFamilyFlags[1] (/srv/coa/server-data/dbc, Spell.dbc); the tooltip states +10% of Sunslam's damage per stack, so the class contract makes Effect[0] aura 108 ADD_PCT_MODIFIER (Sun Cleric ADR 0035), applied after the attack power term, and the expected ratio of the mean non-crit hit with one Fervor stack to the mean hit without it is 1.10, per damaging component. Sunslam 807973 Effect[0] aura 227 every 1000 ms triggers 805639 (Holy), Effect[1] aura 231 every 988 ms triggers 807447 (weapon-percent effect 31). Control = no Fervor, treatment = 680623 at 1 stack (precondition fixture set_aura each trial; the claim is the damage, its application by a fulfilled Vow is the stack_one entry). Dawn 807440, the caster aura Sunslam requires, is set by the pipeline as a precondition. Second design: the reference attack power 70 (no fixture), so the hit is 100 + 0.159426 x 70 = 111.16 and a flat +10 would read 1.09; the resist fixture 823764 on the caster (Effect[0] aura 123 -10000 on schools 126, no magic resistance) removes the partial-resist spread of the first design. Non-crit hits only (critical false). Reference search 2026-11-22: coa-history spell 805639 4959 damage events in 11 logs (no Fervor split); spell 680623 aura events only; nothing else found. Maximum-stack arm: treatment = 680623 at 5 stacks (StackAmount 5); the aura amount is 10 x stacks = $w1 = 50 and the percent modifiers of SPELLMOD_EFFECT1 add (Player::ApplySpellMod), so the expected ratio is 1 + 0.10 x 5 = 1.50.",
+      "cast_unit_auras": [
+        [
+          823764,
+          1
+        ]
+      ]
     }
   ],
   "player_observations": [],

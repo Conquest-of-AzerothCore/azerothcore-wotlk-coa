@@ -3152,7 +3152,12 @@
     "claims": [
       {
         "claim": "Fulfilling a Vow now increases the damage of your Sunslam by 10%",
-        "labels": []
+        "labels": [
+          "680622 behaviour_hit_ratio tick_ratio",
+          "680622 behaviour_hit_ratio tick_ratio_ref",
+          "680622 behaviour_hit_ratio tick_ratio_max",
+          "680622 behaviour_hit_ratio tick_ratio_ref_max"
+        ]
       },
       {
         "claim": "for 60 s",
@@ -3163,7 +3168,7 @@
         ]
       }
     ],
-    "reason": "Duration part: control = the Vow fulfilled without the talent (Sunlight 92136 learned instead): 0 stacks. Fervor 680623 is present 54.6 s after the fulfilling heal and gone 65.4 s after it (60000 ms, DurationIndex 3, 10% on both sides excluded). The 10% damage of Sunslam part has no check: the effect is a flat modifier EFFECT1 (+9 + 1) on mask word 1 = 2097152 (Sunslam strike 807447, weapon-percent effect 31) and no entry measures Sunslam's hit under Fervor stacks; it stays unproven in this pass (needs a Vow fulfilment, Dawn, then a Sunslam hit ratio across stacks). Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs; git log origin/main --grep 680622: nothing; the reference snapshots under ~/CoaServer/reference list the tooltip only; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
+    "reason": "Duration part: control = the Vow fulfilled without the talent (Sunlight 92136 learned instead): 0 stacks. Fervor 680623 is present 54.6 s after the fulfilling heal and gone 65.4 s after it (60000 ms, DurationIndex 3, 10% on both sides excluded). Damage part: 680623 Effect[0] is a flat modifier EFFECT1 (+9 + 1) in the DBC on mask word 1 = 2097152 (Sunslam tick 805639 and weapon part 807447); pair 20261122-212938 / 20261122-213016 read the tick +10 flat (1.0901 at attack power 70, 1.0058 / 0.9957 at 10000), so the class contract makes it a percent modifier (Sun Cleric ADR 0035, mentor D-219); the tick_ratio, tick_ratio_ref and five-stack entries measure it. Observation for the owner list: the weapon part 807447 never lands (0 hits in both arms of the weapon_ratio entry; 807973 Effect[1] is aura 231 PROC_TRIGGER_SPELL_WITH_VALUE with ProcFlags 0 on the spell, no source reference to 807447, coa-history 0 events in 186 logs; 29 of the 80 casts of that entry were refused for mana, reason 85), no change made. Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs; git log origin/main --grep 680622: nothing; the reference snapshots under ~/CoaServer/reference list the tooltip only; nothing else found. Damage part measured in pair 20261122-214416 / 20261122-214521 (build 380ad046, server commit 130914f071): tick_ratio +9.97% and tick_ratio_ref +9.91% with one stack (band 8-12), tick_ratio_max +50.03% and tick_ratio_ref_max +49.55% with five stacks (band 47.5-52.5), no flip. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+ for the duration labels, no flip."
   },
   {
     "spell": 680622,
@@ -3174,7 +3179,7 @@
       "680622 behaviour_metric_delta control_stacks"
     ],
     "kind": "claim",
-    "reason": "Control arm = the Vow fulfilled without the talent: 0 stacks. One fulfilment gives 1 stack and six fulfilments give 5, the stated cap (StackAmount 5). Same Fulfill call as Dawnguard 680672. Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs; git log origin/main --grep 680622: nothing; the reference snapshots under ~/CoaServer/reference list the tooltip only; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
+    "reason": "Control arm = the Vow fulfilled without the talent: 0 stacks. One fulfilment gives 1 stack and six fulfilments give 5, the stated cap (StackAmount 5). Same Fulfill call as Dawnguard 680672. Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs; git log origin/main --grep 680622: nothing; the reference snapshots under ~/CoaServer/reference list the tooltip only; nothing else found. Cap read: 5 stacks after six landed fulfilments with the mana refilled after every setup cast, void_on_cast_failure on, cast_failures none. Pair 20261122-223731 / 20261122-223805, build 380ad046, server commit 130914f071, no flip. Control arm and stack_one: pair 20261122-214416 / 20261122-214521."
   },
   {
     "spell": 680624,
