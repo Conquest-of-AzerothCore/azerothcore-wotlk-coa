@@ -4047,7 +4047,7 @@
       "trigger_spell": 680700,
       "target": "caster",
       "cast_in_before": false,
-      "expire_ms": 10000,
+      "expire_ms": 25000,
       "name": "Sun Stride (frees the caster from a root)",
       "variant": "frees_root",
       "label_suffix": "frees_root",
@@ -4064,11 +4064,11 @@
         "spell": 47021,
         "health": 100000,
         "max_health": 100000,
-        "count": 1,
+        "count": 3,
         "wait_ms": 300,
         "in_before": true
       },
-      "observe_source": "680700 Sun Stride Effect[0] aura 77 MECHANIC_IMMUNITY MiscValue 7 (root) and Effect[2] aura 77 MiscValue 11 (snare). A real cast of Net 47021 by the striker lands on the caster in both phases; the before phase (no Sun Stride cast, control) still shows the root on the caster (read 1), the after phase casts Sun Stride on the caster 300 ms after the strike and reads the root gone (0). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries \"Rush forward at a high speed for 2 seconds.\" and nothing on removal; coa-history spell 680700 382 SPELL_AURA_APPLIED events in 34 logs, no removal reading; nothing found beyond the tooltip and the DBC."
+      "observe_source": "680700 Sun Stride Effect[0] aura 77 MECHANIC_IMMUNITY MiscValue 7 (root) and Effect[2] aura 77 MiscValue 11 (snare). A real cast of Net 47021 by the striker lands on the caster in both phases; the before phase (no Sun Stride cast, control) still shows the root on the caster (read 1), the after phase casts Sun Stride on the caster 300 ms after the strike and reads the root gone (0). Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) carries \"Rush forward at a high speed for 2 seconds.\" and nothing on removal; coa-history spell 680700 382 SPELL_AURA_APPLIED events in 34 logs, no removal reading; nothing found beyond the tooltip and the DBC. Net can miss: the striker casts it three times 300 ms apart in each phase (a landed application is enough, the later ones refresh it), and the phases are 25000 ms apart so the diminishing returns of the root reset between them (first run of this entry: the before-phase Net did not land once in five observations)."
     },
     {
       "spell": 680700,
@@ -4460,7 +4460,7 @@
       "kind": "metric_delta",
       "variant": "instant",
       "label_suffix": "instant",
-      "quote": "Your next Dawnsear within $d is instant cast",
+      "quote": "chance to grant you Spears of Glory.",
       "expected": 0,
       "before_expected": 1,
       "trigger_spell": 554406,
@@ -4488,7 +4488,7 @@
       "kind": "hit_ratio",
       "variant": "damage",
       "label_suffix": "damage",
-      "quote": "and deals $s2% increased damage.",
+      "quote": "chance to grant you Spears of Glory.",
       "expected": 1.25,
       "observe_spell": 554406,
       "control": {
