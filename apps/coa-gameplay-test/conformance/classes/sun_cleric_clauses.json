@@ -376,10 +376,26 @@
   {
     "spell": 300339,
     "clause": "When you critically heal your target, they will be healed for 30% of the amount originally healed the next time they take damage.",
-    "labels": [
-      "300339 behaviour_metric_delta crit_heal_return"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "they will be healed for 30% of the amount originally healed",
+        "labels": [
+          "300339 behaviour_metric_delta crit_heal_return"
+        ]
+      },
+      {
+        "claim": "the next time they take damage",
+        "labels": [
+          "300339 behaviour_metric_delta crit_heal_return_nostrike"
+        ]
+      },
+      {
+        "claim": "When you critically heal your target",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Held open by review I-1: no arm shows that a non-critical heal returns nothing. A critical-only gate (AscensionSunClericEvents.cpp:140) cannot be separated from a server that returns 30% of every heal without a heal that is certainly not critical, and the harness has none: a negative spell_crit_rating clamps at 0 in Player::UpdateRating (PlayerUpdates.cpp:671-672), so the intellect crit stays. Parts proven by behaviour in the entries crit_heal_return (30% band 28 to 32%, 1 return after a strike) and crit_heal_return_nostrike (0 returns without damage); the 'critically' part has no label. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 300339,
@@ -1293,7 +1309,8 @@
           "572801 behaviour_metric_delta ap_duration"
         ]
       }
-    ]
+    ],
+    "reason": "Two token labels replaced by behaviour reads: effect_value 572050e0 #1 was ambiguous_tooltip only by the tooltip's sign convention ('reducing by' a negated value: -235.0 measured against 235.2), and the spell_duration readback 572050 #2 is data; ap_reduction measures the live attack power delta (-235) and ap_duration the presence at 14009 ms and absence at 15718 ms. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 503651,
@@ -2756,7 +2773,7 @@
         ]
       }
     ],
-    "reason": "Control readings of the same scenario: the Dawn state aura 807440 (harness phase_auras fixture, the condition Pendant needs, not the subject) read after two heals and 20 s with no Pendant: 8 charges, 39979 ms; after the Pendant cast 10 charges, 59494 ms against 60000 - 500, within 2000, excludes 54000 and 66000. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
+    "reason": "The Pendant duration is read by two presence windows on the Dawn state aura 807440 (harness phase_auras fixture, the condition Pendant needs, not the subject): present 55.0 to 56.0 s and gone 65 to 66 s after the Pendant cast started, which excludes 54 s and 66 s. No arm without Pendant is read at the same offset (review I-4), so the duration part is not control-armed and the row stays data through the charges claim (aura_charges: 8 charges before, 10 after). Reference search 2026-11-22: coa-history spell 680630 shows 0 events in 186 logs; nothing else found. Pair numbers in the fix report."
   },
   {
     "spell": 680631,
