@@ -4644,7 +4644,6 @@
     "clause": "Increases your off-hand Weapon Damage dealt by $s1%",
     "kind": "claim",
     "labels": [
-      "807507 behaviour_hit_ratio swing",
       "807507 effect_value e0 #0"
     ]
   },

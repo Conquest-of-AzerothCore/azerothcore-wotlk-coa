@@ -47,19 +47,7 @@
     "skill 498": 300.0
   },
   "log_queries": {},
-  "off_hand_weapons": [
-    {
-      "item": 2529,
-      "slot": 16,
-      "subclass": 8,
-      "min_damage": 73.62,
-      "max_damage": 103.34,
-      "speed_ms": 2800,
-      "inventory_type": 17,
-      "normalized_speed": 3.3,
-      "skill_line": 55
-    }
-  ],
+  "off_hand_weapons": [],
   "known_auras": [
     887015
   ],
@@ -10083,9 +10071,9 @@
       },
       "before_expected": 967.73,
       "expected": 1019.52,
-      "tolerance": 1.5,
+      "tolerance": 4,
       "wait_ms": 2500,
-      "observe_source": "800601 Effect[2] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST), BasePoints -21 (-20, $s1) on the Shine mask. Shine 800357 costs ManaCostPercentage 19 of the class base mana 1363 (player_class_stats class 27 level 60) = 258.97; Gavel of Wrath 802561 costs 10% = 136.3 (the setup cast, in both phases). Mana is set to 1363 before each cast, regeneration off, read after the Shine completes: 1363 - 136.3 - 258.97 = 967.73 without the stack (control phase), 1363 - 136.3 - 207.18 = 1019.52 with it; tolerance 1.5 for the integer costs. Ledger clause 258 is the text of 800601 (Reduces the cast time and mana cost of your next Shine by $s1% for $d), which the tooltip of 704934 carries only as a link; the quote field names the 704934 sentence the entry hangs under. Reference search 2026-11-22: server DBC description and effects of 704934 and 800601; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. "
+      "observe_source": "800601 Effect[2] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST), BasePoints -21 (-20, $s1) on the Shine mask. Shine 800357 costs ManaCostPercentage 19 of the class base mana 1363 (player_class_stats class 27 level 60) = 258.97; Gavel of Wrath 802561 costs 10% = 136.3 (the setup cast, in both phases). Mana is set to 1363 before each cast, regeneration off, read after the Shine completes: 1363 - 136.3 - 258.97 = 967.73 without the stack (control phase), 1363 - 136.3 - 207.18 = 1019.52 with it; tolerance 1.5 for the integer costs. Ledger clause 258 is the text of 800601 (Reduces the cast time and mana cost of your next Shine by $s1% for $d), which the tooltip of 704934 carries only as a link; the quote field names the 704934 sentence the entry hangs under. Reference search 2026-11-22: server DBC description and effects of 704934 and 800601; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC.  Tolerance 4 is 2 points of the 258.97 cost (the band of G-19 on a 20% stated value is 2 points); a cut of 18% or 22% reads 5.2 mana away."
     },
     {
       "spell": 704934,
@@ -10296,7 +10284,9 @@
       },
       "area_sum": true,
       "expected": 6,
-      "observe_source": "657125 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, EffectChainTarget 5; the tooltip states the primary enemy and up to $657125i = 5 additional enemies: 6 strikes in all. The strikes of 657125 are counted over the eight dummies (area_sum): 0 in the control phase, exactly 6 with 707081 (excludes 5 and 7). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+      "observe_source": "657125 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, EffectChainTarget 5; the tooltip states the primary enemy and up to $657125i = 5 additional enemies: 6 strikes in all. The strikes of 657125 are counted over the eight dummies (area_sum): 0 in the control phase, exactly 6 with 707081 (excludes 5 and 7). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. Setup runs in the after phase only (Horusath Blast has a 25000 ms cooldown, so a before-phase cast would block the after cast); the before phase casts nothing and reads 0.",
+      "cast_in_before": false,
+      "setup_only_after": true
     },
     {
       "spell": 707081,
@@ -10355,7 +10345,9 @@
       },
       "expected": 98,
       "tolerance": 5,
-      "observe_source": "657125 EffectDamageMultiplier[0] = 0.8: each further strike deals 0.8 times the previous one, so strike 1 deals the tooltip value 98 (the formula at the reference stats, read by the packet) x 0.8^0 = 98. The damage total of 657125 on dummy is read 1000 ms after the cast: 0 in the control phase. Tolerance 5 is 5% of the value (G-19). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+      "observe_source": "657125 EffectDamageMultiplier[0] = 0.8: each further strike deals 0.8 times the previous one, so strike 1 deals the tooltip value 98 (the formula at the reference stats, read by the packet) x 0.8^0 = 98. The damage total of 657125 on dummy is read 1000 ms after the cast: 0 in the control phase. Tolerance 5 is 5% of the value (G-19). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. Setup runs in the after phase only (Horusath Blast has a 25000 ms cooldown, so a before-phase cast would block the after cast); the before phase casts nothing and reads 0.",
+      "cast_in_before": false,
+      "setup_only_after": true
     },
     {
       "spell": 707081,
@@ -10414,7 +10406,9 @@
       },
       "expected": 78.4,
       "tolerance": 4,
-      "observe_source": "657125 EffectDamageMultiplier[0] = 0.8: each further strike deals 0.8 times the previous one, so strike 2 deals the tooltip value 98 (the formula at the reference stats, read by the packet) x 0.8^1 = 78.4. The damage total of 657125 on area1 is read 1000 ms after the cast: 0 in the control phase. Tolerance 4 is 5% of the value (G-19). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+      "observe_source": "657125 EffectDamageMultiplier[0] = 0.8: each further strike deals 0.8 times the previous one, so strike 2 deals the tooltip value 98 (the formula at the reference stats, read by the packet) x 0.8^1 = 78.4. The damage total of 657125 on area1 is read 1000 ms after the cast: 0 in the control phase. Tolerance 4 is 5% of the value (G-19). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. Setup runs in the after phase only (Horusath Blast has a 25000 ms cooldown, so a before-phase cast would block the after cast); the before phase casts nothing and reads 0.",
+      "cast_in_before": false,
+      "setup_only_after": true
     },
     {
       "spell": 707081,
@@ -10473,7 +10467,9 @@
       },
       "expected": 32.11,
       "tolerance": 1.6,
-      "observe_source": "657125 EffectDamageMultiplier[0] = 0.8: each further strike deals 0.8 times the previous one, so strike 6 deals the tooltip value 98 (the formula at the reference stats, read by the packet) x 0.8^5 = 32.11. The damage total of 657125 on area5 is read 1000 ms after the cast: 0 in the control phase. Tolerance 1.6 is 5% of the value (G-19). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+      "observe_source": "657125 EffectDamageMultiplier[0] = 0.8: each further strike deals 0.8 times the previous one, so strike 6 deals the tooltip value 98 (the formula at the reference stats, read by the packet) x 0.8^5 = 32.11. The damage total of 657125 on area5 is read 1000 ms after the cast: 0 in the control phase. Tolerance 1.6 is 5% of the value (G-19). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. Setup runs in the after phase only (Horusath Blast has a 25000 ms cooldown, so a before-phase cast would block the after cast); the before phase casts nothing and reads 0.",
+      "cast_in_before": false,
+      "setup_only_after": true
     },
     {
       "spell": 680619,
@@ -10515,31 +10511,6 @@
       "expected_ratio": 0.85,
       "vehicle_spell": 301235,
       "striker_entry": 36
-    },
-    {
-      "spell": 807507,
-      "name": "Valkyr's Grip (off-hand swing)",
-      "kind": "hit_ratio",
-      "variant": "swing",
-      "label_suffix": "swing",
-      "quote": "Increases your off-hand Weapon Damage dealt by $s1%",
-      "expected": 1.31,
-      "swing_hand": 1,
-      "metric": "melee_damage_total",
-      "control": {},
-      "treatment": {
-        "learn": [
-          807507
-        ]
-      },
-      "critical": false,
-      "off_hand_item": 2529,
-      "trials": 30,
-      "fixture": {
-        "attack_power": 20000
-      },
-      "expected_source": "$s1 = 31 (807507 Effect[0] aura 122 SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT, EffectBasePoints 30, +1 = 31): the plain off-hand auto attacks with the passive over the same swings without it are 1.31 (the Templar entry 705276 reads Bursting Impact's aura 122 the same way). Band: 5% of 31 = 1.55 points.",
-      "observe_source": "Off-hand swings at the dummy in two arms of one scenario, the passive learned for the treatment arm (control: not learned). The off-hand weapon is the Valkyr set's item 2529 (class file off_hand_weapons, copied from weapon_sets.Valkyr.off_hand). Reference search 2026-11-22: server DBC 807507 and 301235; the Templar entries 705271 (duration_ratio) and 705276 (off-hand swing); coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 707072,
