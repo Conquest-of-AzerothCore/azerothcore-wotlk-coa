@@ -129,6 +129,23 @@ class AllyArmScenarioTests(unittest.TestCase):
         self.assertNotIn('ally_arm', expectation.model)
         self.assertEqual([player['id'] for player in scenario['players']], ['caster'])
 
+    def test_an_ally_class_creates_the_allies_of_that_class_and_defaults_off(self):
+        scenario, [expectation] = self.scenario(ally_entry(ally_class=15))
+        run.validate(scenario)
+        self.assertEqual([(player['id'], player['class']) for player in scenario['players']],
+                         [('caster', 19), ('ally', 15), ('ally2', 15)])
+        self.assertEqual(expectation.model['ally_arm']['ally_class'], 15)
+        scenario, [expectation] = self.scenario(ally_entry())
+        self.assertEqual({player['class'] for player in scenario['players']}, {19})
+        self.assertNotIn('ally_class', expectation.model['ally_arm'])
+
+    def test_an_ally_class_outside_the_coa_classes_or_without_an_ally_is_refused(self):
+        for value in (11, 33, True, '15'):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                parse({'allies': 1, 'ally_class': value})
+        with self.assertRaises(ValueError):
+            parse({'allies': 0, 'ally_class': 15, 'arms': [HEALTH_ARM]})
+
     def test_an_ally_becomes_a_measured_unit_and_a_cast_target(self):
         scenario, [expectation] = self.scenario(steed_entry(measure_actor='ally', ally_arm={'allies': 1}))
         run.validate(scenario)
