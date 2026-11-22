@@ -19834,7 +19834,7 @@
       "fields": {
         "spell": 806060
       },
-      "cast_power": 182,
+      "cast_power": 82,
       "before_expected": 0,
       "expected": 1,
       "wait_ms": 400,
@@ -19844,7 +19844,7 @@
       ],
       "setup_only_after": true,
       "setup_wait_ms": 3000,
-      "observe_source": "Ledger clause 242 of 704908 (\"Your next Radiant Flame has no mana cost\"). Radiant Flame 806060 costs 340 mana, Sun Ray 504764 costs 6% of 1363 = 81. The caster's mana is set to 182 before each phase's casts (regeneration off): the before phase cannot pay 340 and casts 0 times; the after phase pays 81 for the Sun Ray, keeps about 101, and Radiant Flame goes through (1 cast of 806060 by the caster) because the next Radiant Flame has no mana cost. Scorch Marks is granted by a real Sun Ray 504764 cast (setup_casts, the harness learns Sun Ray), never by set_aura; 704908 is known throughout and the before phase, without the Sun Ray, is the control. The same shape as the Searing Light 806021 entries of the same pair family (Scorch Marks 807059 Effect[0] aura 108 SPELLMOD op 1 -51 (-50), Effect[1] op 19 -51 (-50), Effect[2] op 14 -101 (-100), class mask 134217728 = Radiant Flame 806060: DurationIndex 35 = 4000 ms, EffectAmplitude 1000, ManaCostPercentage 25 of base mana 1363 = 340). Reference search 2026-11-22: coa-history spells 806060 Radiant Flame, 807058 and 504764 Sun Ray: 0 events in 186 logs; spell 807059 Scorch Marks: 296 applications and 296 removals in 7 logs, no value to read; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing else found.",
+      "observe_source": "Ledger clause 242 of 704908 (\"Your next Radiant Flame has no mana cost\"). Radiant Flame 806060 costs 340 mana, Sun Ray 504764 costs 6% of 1363 = 81. The caster's mana is set to 82 before each phase's casts (regeneration off): the before phase cannot pay 340 and casts 0 times; the after phase pays 81 for the Sun Ray, keeps 1, and Radiant Flame goes through (1 cast of 806060 by the caster) only if its cost is at most 1 mana: a cost of 2 or more fails, so a 90% reduction (34 mana), a 99% one (3 mana) and any other short of 100% are excluded. Scorch Marks is granted by a real Sun Ray 504764 cast (setup_casts, the harness learns Sun Ray), never by set_aura; 704908 is known throughout and the before phase, without the Sun Ray, is the control. The same shape as the Searing Light 806021 entries of the same pair family (Scorch Marks 807059 Effect[0] aura 108 SPELLMOD op 1 -51 (-50), Effect[1] op 19 -51 (-50), Effect[2] op 14 -101 (-100), class mask 134217728 = Radiant Flame 806060: DurationIndex 35 = 4000 ms, EffectAmplitude 1000, ManaCostPercentage 25 of base mana 1363 = 340). Reference search 2026-11-22: coa-history spells 806060 Radiant Flame, 807058 and 504764 Sun Ray: 0 events in 186 logs; spell 807059 Scorch Marks: 296 applications and 296 removals in 7 logs, no value to read; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing else found. Quote: the entry's quote must come from the tooltip of 704908 itself (behaviour_entry), so it is the Horusath Blast sentence; the clause this entry proves is the one named at the start of this text (the Scorch Marks sentence pulled through @s:504764:0@ into the tooltip).",
       "disable_regeneration": true
     },
     {
@@ -19875,8 +19875,8 @@
       ],
       "setup_only_after": true,
       "setup_wait_ms": 3000,
-      "observe_source": "Ledger clause 242 of 704908 (\"ticks $s2% faster\"). Median interval between the damage events of 807058 on the dummy since the last cast of Radiant Flame 806060 (since_spell, so each phase reads its own events): 1000 ms without Scorch Marks, 500 ms with it, within 50 ms (excludes 10% either side). Scorch Marks is granted by a real Sun Ray 504764 cast (setup_casts, the harness learns Sun Ray), never by set_aura; 704908 is known throughout and the before phase, without the Sun Ray, is the control. The same shape as the Searing Light 806021 entries of the same pair family (Scorch Marks 807059 Effect[0] aura 108 SPELLMOD op 1 -51 (-50), Effect[1] op 19 -51 (-50), Effect[2] op 14 -101 (-100), class mask 134217728 = Radiant Flame 806060: DurationIndex 35 = 4000 ms, EffectAmplitude 1000, ManaCostPercentage 25 of base mana 1363 = 340). Reference search 2026-11-22: coa-history spells 806060 Radiant Flame, 807058 and 504764 Sun Ray: 0 events in 186 logs; spell 807059 Scorch Marks: 296 applications and 296 removals in 7 logs, no value to read; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing else found.",
-      "tolerance": 50
+      "observe_source": "Ledger clause 242 of 704908 (\"ticks $s2% faster\"). Median interval between the damage events of 807058 on the dummy since the last cast of Radiant Flame 806060 (since_spell, so each phase reads its own events): 1000 ms without Scorch Marks, 500 ms with it, within 35 ms (band 465 to 535 ms): periods of 550 ms (45% faster) and 450 ms (55% faster), 10% off either side, both fall outside. Scorch Marks is granted by a real Sun Ray 504764 cast (setup_casts, the harness learns Sun Ray), never by set_aura; 704908 is known throughout and the before phase, without the Sun Ray, is the control. The same shape as the Searing Light 806021 entries of the same pair family (Scorch Marks 807059 Effect[0] aura 108 SPELLMOD op 1 -51 (-50), Effect[1] op 19 -51 (-50), Effect[2] op 14 -101 (-100), class mask 134217728 = Radiant Flame 806060: DurationIndex 35 = 4000 ms, EffectAmplitude 1000, ManaCostPercentage 25 of base mana 1363 = 340). Reference search 2026-11-22: coa-history spells 806060 Radiant Flame, 807058 and 504764 Sun Ray: 0 events in 186 logs; spell 807059 Scorch Marks: 296 applications and 296 removals in 7 logs, no value to read; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing else found. Quote: the entry's quote must come from the tooltip of 704908 itself (behaviour_entry), so it is the Horusath Blast sentence; the clause this entry proves is the one named at the start of this text (the Scorch Marks sentence pulled through @s:504764:0@ into the tooltip).",
+      "tolerance": 35
     },
     {
       "spell": 704908,
@@ -19907,7 +19907,7 @@
       ],
       "setup_only_after": true,
       "setup_wait_ms": 4500,
-      "observe_source": "Ledger clause 242 of 704908 (\"Your next Radiant Flame\"). After a real Sun Ray cast the first Radiant Flame 806060 is a setup cast (it consumes Scorch Marks, ticks every 500 ms) and the trigger cast is the second one: the median interval between the damage events of 807058 since the last cast of 806060 (the second) must be the normal 1000 ms in both phases, within 50 ms (a Scorch Marks that outlived its first cast would read 500). Scorch Marks is granted by a real Sun Ray 504764 cast (setup_casts, the harness learns Sun Ray), never by set_aura; 704908 is known throughout and the before phase, without the Sun Ray, is the control. The same shape as the Searing Light 806021 entries of the same pair family (Scorch Marks 807059 Effect[0] aura 108 SPELLMOD op 1 -51 (-50), Effect[1] op 19 -51 (-50), Effect[2] op 14 -101 (-100), class mask 134217728 = Radiant Flame 806060: DurationIndex 35 = 4000 ms, EffectAmplitude 1000, ManaCostPercentage 25 of base mana 1363 = 340). Reference search 2026-11-22: coa-history spells 806060 Radiant Flame, 807058 and 504764 Sun Ray: 0 events in 186 logs; spell 807059 Scorch Marks: 296 applications and 296 removals in 7 logs, no value to read; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing else found.",
+      "observe_source": "Ledger clause 242 of 704908 (\"Your next Radiant Flame\"). After a real Sun Ray cast the first Radiant Flame 806060 is a setup cast (it consumes Scorch Marks, ticks every 500 ms) and the trigger cast is the second one: the median interval between the damage events of 807058 since the last cast of 806060 (the second) must be the normal 1000 ms in both phases, within 50 ms (a Scorch Marks that outlived its first cast would read 500). Scorch Marks is granted by a real Sun Ray 504764 cast (setup_casts, the harness learns Sun Ray), never by set_aura; 704908 is known throughout and the before phase, without the Sun Ray, is the control. The same shape as the Searing Light 806021 entries of the same pair family (Scorch Marks 807059 Effect[0] aura 108 SPELLMOD op 1 -51 (-50), Effect[1] op 19 -51 (-50), Effect[2] op 14 -101 (-100), class mask 134217728 = Radiant Flame 806060: DurationIndex 35 = 4000 ms, EffectAmplitude 1000, ManaCostPercentage 25 of base mana 1363 = 340). Reference search 2026-11-22: coa-history spells 806060 Radiant Flame, 807058 and 504764 Sun Ray: 0 events in 186 logs; spell 807059 Scorch Marks: 296 applications and 296 removals in 7 logs, no value to read; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing else found. Quote: the entry's quote must come from the tooltip of 704908 itself (behaviour_entry), so it is the Horusath Blast sentence; the clause this entry proves is the one named at the start of this text (the Scorch Marks sentence pulled through @s:504764:0@ into the tooltip).",
       "tolerance": 50
     },
     {
@@ -19934,7 +19934,7 @@
       ],
       "setup_only_after": true,
       "setup_wait_ms": 3000,
-      "observe_source": "Ledger clause 243 of 704908 (\"and its duration is reduced by $s1%.\"). Radiant Flame aura 806060 on the dummy (DurationIndex 35 = 4000 ms; 2000 ms with Scorch Marks), read 1900 ms after the cast: present with and without Scorch Marks, so the reduced duration is above 1.9 s and excludes 1.8 s (-10% of 2000 ms). Scorch Marks is granted by a real Sun Ray 504764 cast (setup_casts, the harness learns Sun Ray), never by set_aura; 704908 is known throughout and the before phase, without the Sun Ray, is the control. The same shape as the Searing Light 806021 entries of the same pair family (Scorch Marks 807059 Effect[0] aura 108 SPELLMOD op 1 -51 (-50), Effect[1] op 19 -51 (-50), Effect[2] op 14 -101 (-100), class mask 134217728 = Radiant Flame 806060: DurationIndex 35 = 4000 ms, EffectAmplitude 1000, ManaCostPercentage 25 of base mana 1363 = 340). Reference search 2026-11-22: coa-history spells 806060 Radiant Flame, 807058 and 504764 Sun Ray: 0 events in 186 logs; spell 807059 Scorch Marks: 296 applications and 296 removals in 7 logs, no value to read; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing else found.",
+      "observe_source": "Ledger clause 243 of 704908 (\"and its duration is reduced by $s1%.\"). Radiant Flame aura 806060 on the dummy (DurationIndex 35 = 4000 ms; 2000 ms with Scorch Marks), read 1900 ms after the cast: present with and without Scorch Marks, so the reduced duration is above 1.9 s and excludes 1.8 s (-10% of 2000 ms). Scorch Marks is granted by a real Sun Ray 504764 cast (setup_casts, the harness learns Sun Ray), never by set_aura; 704908 is known throughout and the before phase, without the Sun Ray, is the control. The same shape as the Searing Light 806021 entries of the same pair family (Scorch Marks 807059 Effect[0] aura 108 SPELLMOD op 1 -51 (-50), Effect[1] op 19 -51 (-50), Effect[2] op 14 -101 (-100), class mask 134217728 = Radiant Flame 806060: DurationIndex 35 = 4000 ms, EffectAmplitude 1000, ManaCostPercentage 25 of base mana 1363 = 340). Reference search 2026-11-22: coa-history spells 806060 Radiant Flame, 807058 and 504764 Sun Ray: 0 events in 186 logs; spell 807059 Scorch Marks: 296 applications and 296 removals in 7 logs, no value to read; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing else found. Quote: the entry's quote must come from the tooltip of 704908 itself (behaviour_entry), so it is the Horusath Blast sentence; the clause this entry proves is the one named at the start of this text (the Scorch Marks sentence pulled through @s:504764:0@ into the tooltip).",
       "measure_actor": "dummy",
       "game_time": {
         "after": [
@@ -19967,7 +19967,7 @@
       ],
       "setup_only_after": true,
       "setup_wait_ms": 3000,
-      "observe_source": "Ledger clause 243 of 704908 (\"and its duration is reduced by $s1%.\"). Radiant Flame aura 806060 on the dummy (DurationIndex 35 = 4000 ms; 2000 ms with Scorch Marks), read 2150 ms after the cast: present without Scorch Marks (the 4000 ms control) and gone with it, so the reduced duration is at most 2.15 s and excludes 2.2 s (+10% of 2000 ms). Scorch Marks is granted by a real Sun Ray 504764 cast (setup_casts, the harness learns Sun Ray), never by set_aura; 704908 is known throughout and the before phase, without the Sun Ray, is the control. The same shape as the Searing Light 806021 entries of the same pair family (Scorch Marks 807059 Effect[0] aura 108 SPELLMOD op 1 -51 (-50), Effect[1] op 19 -51 (-50), Effect[2] op 14 -101 (-100), class mask 134217728 = Radiant Flame 806060: DurationIndex 35 = 4000 ms, EffectAmplitude 1000, ManaCostPercentage 25 of base mana 1363 = 340). Reference search 2026-11-22: coa-history spells 806060 Radiant Flame, 807058 and 504764 Sun Ray: 0 events in 186 logs; spell 807059 Scorch Marks: 296 applications and 296 removals in 7 logs, no value to read; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing else found.",
+      "observe_source": "Ledger clause 243 of 704908 (\"and its duration is reduced by $s1%.\"). Radiant Flame aura 806060 on the dummy (DurationIndex 35 = 4000 ms; 2000 ms with Scorch Marks), read 2150 ms after the cast: present without Scorch Marks (the 4000 ms control) and gone with it, so the reduced duration is at most 2.15 s and excludes 2.2 s (+10% of 2000 ms). Scorch Marks is granted by a real Sun Ray 504764 cast (setup_casts, the harness learns Sun Ray), never by set_aura; 704908 is known throughout and the before phase, without the Sun Ray, is the control. The same shape as the Searing Light 806021 entries of the same pair family (Scorch Marks 807059 Effect[0] aura 108 SPELLMOD op 1 -51 (-50), Effect[1] op 19 -51 (-50), Effect[2] op 14 -101 (-100), class mask 134217728 = Radiant Flame 806060: DurationIndex 35 = 4000 ms, EffectAmplitude 1000, ManaCostPercentage 25 of base mana 1363 = 340). Reference search 2026-11-22: coa-history spells 806060 Radiant Flame, 807058 and 504764 Sun Ray: 0 events in 186 logs; spell 807059 Scorch Marks: 296 applications and 296 removals in 7 logs, no value to read; bindmysoul 806021 and 804625 texts read the Scorch Marks sentence as ours (\"no mana cost, ticks -50% faster, duration reduced by -50%\"); nothing else found. Quote: the entry's quote must come from the tooltip of 704908 itself (behaviour_entry), so it is the Horusath Blast sentence; the clause this entry proves is the one named at the start of this text (the Scorch Marks sentence pulled through @s:504764:0@ into the tooltip).",
       "measure_actor": "dummy",
       "game_time": {
         "after": [
@@ -19996,7 +19996,7 @@
       "expected": 1020,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Reduction: the cumulative amount Grave Coil dealt to the caster is read after each phase: 600 in the before phase (no Scroll), and 600 + 600 x (1 - 0.30) = 1020 after the Scroll, tolerance 12 (the 2-point band of 28% to 32%: 1008 to 1032, which excludes 27% and 33%).",
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Reduction: the cumulative amount Grave Coil dealt to the caster is read after each phase, c in the before phase (no Scroll) and c + h after the Scroll (one more hit h). The control hit measured 605 and 606 in the counted pair, not the 600 of the DBC base; the extra 5 to 6 is not explained and its cause is not established. The verdict therefore judges the gain against the measured control hit, as the ratio (c + h) / c = 1 + h / c = 2 - r, expected 1.70 for r = 30% with tolerance 0.02 (the 2-point band of 28% to 32% is 1.68 to 1.72): a 33% reduction reads 1.67 and a 27% reduction 1.73, both outside, and a control hit below 600 fails the floor. Scope: Shadow only (Grave Coil is Shadow); MiscValue 126 covers the six schools, and no other school and no physical control is read here. Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil, so it does not touch the hits read here, and a resisted hit could only lower a reading.",
       "phase_auras": [
         [
           823764,
@@ -20013,7 +20013,8 @@
         "wait_ms": 300,
         "after_trigger_ms": 1600
       },
-      "tolerance": 12
+      "tolerance": 0.02,
+      "expected_ratio": 1.7
     },
     {
       "spell": 680646,
@@ -20113,6 +20114,118 @@
     },
     {
       "spell": 680646,
+      "name": "Scroll of Hope (ally 17.25 yd away holds the aura)",
+      "kind": "metric_delta",
+      "variant": "reach_in_edge",
+      "label_suffix": "reach_in_edge",
+      "quote": "Read from a scroll of hope, reducing Magic damage taken by party and raid members within $a1 yds by $s1% for $d.",
+      "trigger_spell": 680646,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 680646
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Edge: the area aura of Effect[0] selects grouped units with Acore::AnyGroupedUnitInObjectRangeCheck, whose last test is source->IsWithinDistInMap(unit, range) (GridNotifiers.h:1051), 3D and with both object sizes added (Object.cpp:1252-1264 _IsWithinDist with incOwnRadius and incTargetRadius). Radius index 18 = 15 yd; both players are Human (race 1), whose model infos 49 and 50 have combat reach 1.5 (creature_model_info, data/sql/base/db_world), so the object sizes add 3.0 yd and the reach is 18.0 yd between the two units. The caster is moved dx yd along x from the ally before the Scroll cast (relocate_before_trigger; the ally keeps its spawn and the harness relocates with dz 0, so the 3D and the 2D distances agree), and the 2D distance between ally and caster is read in the arm. Bracket 10% either side of 15 yd: a radius of 13.5 yd reaches 16.5 yd and a radius of 16.5 yd reaches 19.5 yd; an ally at 17.25 yd is out of the 13.5 yd reach and an ally at 18.75 yd is inside the 19.5 yd reach. In: the ally at 17.25 yd (2D, read) holds the aura, so the radius is above 14.25 yd (reach above 17.25 yd), which excludes 13.5 yd.",
+      "measure_actor": "ally",
+      "cast_power": 1000,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 17.25,
+            "tolerance": 0.5,
+            "source": "caster moved 17.25 yd along x from the ally (relocate_before_trigger dx 17.25) before the Scroll; the uncast control has no relocation, both players at the spawn: 0"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680646
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the Scroll was cast: its aura is on the caster in the after phase and absent in the uncast control"
+          }
+        ]
+      },
+      "relocate_before_trigger": {
+        "dx": 17.25
+      }
+    },
+    {
+      "spell": 680646,
+      "name": "Scroll of Hope (ally 18.75 yd away has no aura)",
+      "kind": "metric_delta",
+      "variant": "reach_out_edge",
+      "label_suffix": "reach_out_edge",
+      "quote": "Read from a scroll of hope, reducing Magic damage taken by party and raid members within $a1 yds by $s1% for $d.",
+      "trigger_spell": 680646,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 680646
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Edge: the area aura of Effect[0] selects grouped units with Acore::AnyGroupedUnitInObjectRangeCheck, whose last test is source->IsWithinDistInMap(unit, range) (GridNotifiers.h:1051), 3D and with both object sizes added (Object.cpp:1252-1264 _IsWithinDist with incOwnRadius and incTargetRadius). Radius index 18 = 15 yd; both players are Human (race 1), whose model infos 49 and 50 have combat reach 1.5 (creature_model_info, data/sql/base/db_world), so the object sizes add 3.0 yd and the reach is 18.0 yd between the two units. The caster is moved dx yd along x from the ally before the Scroll cast (relocate_before_trigger; the ally keeps its spawn and the harness relocates with dz 0, so the 3D and the 2D distances agree), and the 2D distance between ally and caster is read in the arm. Bracket 10% either side of 15 yd: a radius of 13.5 yd reaches 16.5 yd and a radius of 16.5 yd reaches 19.5 yd; an ally at 17.25 yd is out of the 13.5 yd reach and an ally at 18.75 yd is inside the 19.5 yd reach. Out: the ally at 18.75 yd (2D, read) has no aura while the caster holds it, so the radius is below 15.75 yd (reach below 18.75 yd), which excludes 16.5 yd.",
+      "measure_actor": "ally",
+      "cast_power": 1000,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 18.75,
+            "tolerance": 0.5,
+            "source": "caster moved 18.75 yd along x from the ally (relocate_before_trigger dx 18.75) before the Scroll; the uncast control has no relocation, both players at the spawn: 0"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680646
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the Scroll was cast: its aura is on the caster in the after phase and absent in the uncast control"
+          }
+        ]
+      },
+      "relocate_before_trigger": {
+        "dx": 18.75
+      }
+    },
+    {
+      "spell": 680646,
       "name": "Scroll of Hope (instant heal of 15% of maximum health below 35%)",
       "kind": "metric_delta",
       "variant": "heal_amount",
@@ -20130,7 +20243,7 @@
       "expected": 1500,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Heal: the caster (a party member holding the aura) is set to 3800 of 10000 health; Grave Coil takes it to 3380 (33.8%, below 35%; 3200 without the reduction, also below); the heal 681383 the caster casts at itself is read: 0 in the before phase (no Scroll, no heal) and 15% x 10000 = 1500 after, tolerance 15 (1%, excludes 10% either side). Allies cannot be struck by the harness striker: the caster stands for any ally and the aura reaches the allies in the reach_raid entry.",
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Heal: the caster (a party member holding the aura) is set to 3800 of 10000 health; Grave Coil takes it to 3380 (33.8%, below 35%; 3200 without the reduction, also below); the heal 681383 the caster casts at itself is read: 0 in the before phase (no Scroll, no heal) and 15% x 10000 = 1500 after, tolerance 15 (1%, excludes 10% either side). The harness striker can only target the caster or a creature the caster owns (behaviours.py:1655-1662), so this reads the caster only: it does not show that an ally's aura procs, which stays open as the \"any ally\" claim. The read uses one maximum health (10000): a flat 1500 heal would also pass, so the 15% scaling is not separated from a flat amount here. Threshold: the heal at 33.8% after the hit excludes a threshold at or below 33.8% (33% and 31.5%); heal_close_above is the read from above. Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil, so it does not touch the hits read here, and a resisted hit could only lower a reading.",
       "phase_auras": [
         [
           823764,
@@ -20168,7 +20281,7 @@
       "expected": 1500,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Once: the same start, then five hits 300 ms apart; the health goes 3800 to 3380 (heal +1500), 4460, 4040, 3620 and 3200: the fifth hit is a second fall below 35% (it is below 35% with or without the reduction), so a second heal would read 3000; the sum stays 1500, tolerance 15.",
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Once: the same start, then five hits 300 ms apart; the health goes 3800 to 3380 (heal +1500), 4460, 4040, 3620 and 3200: the fifth hit is a second fall below 35% (it is below 35% with or without the reduction), so a second heal would read 3000; the sum stays 1500, tolerance 15. The five hits are computed from the measured hit, not read: all five striker casts return cast_result 255 and no spell_damage_count read counts the hits, so the second fall below 35% is not read. \"Once\" is read on the caster only; the once flag is the script value of the shared area Aura (AscensionSunClericEvents.cpp:289, checked at :79), so on this server one heal per cast for the whole group is possible, which a caster-only run cannot tell from one heal per ally. Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil, so it does not touch the hits read here, and a resisted hit could only lower a reading.",
       "phase_auras": [
         [
           823764,
@@ -20206,7 +20319,7 @@
       "expected": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Threshold control: the caster starts at 6000 of 10000, Grave Coil takes it to 5580 (55.8%) with the Scroll active: no heal in either phase (the positive reading is heal_amount, which differs only by the starting health).",
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Threshold control: the caster starts at 6000 of 10000, Grave Coil takes it to 5580 (55.8%) with the Scroll active: no heal in either phase (the positive reading is heal_amount, which differs only by the starting health). Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil, so it does not touch the hits read here, and a resisted hit could only lower a reading.",
       "phase_auras": [
         [
           823764,
@@ -20218,6 +20331,44 @@
       "strike": {
         "spell": 47632,
         "health": 6000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 1600
+      },
+      "tolerance": 1
+    },
+    {
+      "spell": 680646,
+      "name": "Scroll of Hope (no heal at 37.9% after the hit)",
+      "kind": "metric_delta",
+      "variant": "heal_close_above",
+      "label_suffix": "heal_close_above",
+      "quote": "If any ally falls below 35% of their maximum health while this is active they are instantly healed once for $681383s1% of their maximum health.",
+      "trigger_spell": 680646,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 681383,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Threshold from above: the caster starts at 4215 of 10000, Grave Coil (about 424 with the Scroll, 420 by the DBC base) takes it to about 3791 (37.9%) with the Scroll active: no heal in either phase. A threshold above 37.9% would heal here, which excludes 38.5% (10% above 35%) and 50%; the heal at 33.8% in heal_amount excludes a threshold at or below 33.8% (31.5% included), so the threshold lies in (33.8%, 37.9%]. The 37% edge of the 2-point band stays inside it. Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil, so it does not touch the hits read here, and a resisted hit could only lower a reading.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "strike": {
+        "spell": 47632,
+        "health": 4215,
         "max_health": 10000,
         "count": 1,
         "wait_ms": 300,

@@ -2616,19 +2616,13 @@
       },
       {
         "claim": "within 15 yds",
-        "labels": []
+        "labels": [
+          "680646 behaviour_metric_delta reach_in_edge",
+          "680646 behaviour_metric_delta reach_out_edge"
+        ]
       }
     ],
-    "reason": "Pair 20261122-074554 / 20261122-074843, build f7a4e43e, server commit 819ed69786ee, no flip. Damage: the Grave Coil 47632 hit (600 Shadow) on the caster, cumulative 600 in the control phase, 1028 and 1030 after the Scroll (420 per hit = 30% less, band 1008 to 1032). Duration: aura on the caster at about 9.1 s and gone by 10.75 s (windows 9050-9400, 10600-10950), excluding 9 and 11 s. Reach: the aura is on ally and on ally2 to ally5 (raid subgroup 2 included), 0 in the control. Radius 15 yd: not proven. An area aura of grouped allies needs allies placed at the edge (15 yd plus both players' object sizes, AnyGroupedUnitInObjectRangeCheck, GridNotifiers.h:1051) with their combat reach read, and neither radius_edge (enemy dummies, spell targeting) nor ally_arm (no ally placement) offers it: tool need returned to the controller. Reference search 2026-11-22: coa-history 0 events for 680646, 681383, 47632; bindmysoul reads -30%, 15 yds, 10 seconds; nothing else found.",
-    "tool_gap": {
-      "reason": "No kind places a grouped ally at the edge of an area aura radius and reads the players' object sizes: radius_edge places enemy dummies for spell targeting, ally_arm places no ally, relocate_before_trigger moves the caster only with the ally at its spawn and without the reach reads, so the edge cannot be bracketed inside 10% of 15 yd.",
-      "attempts": [
-        {
-          "agent": "sc-b8e1",
-          "report": ".agents/plans/sun-cleric-b8e1/report.md"
-        }
-      ]
-    }
+    "reason": "Pair 20261122-080705 / 20261122-080744, build 22d8bd4d, class-file entries on server commit 0610a77c3b (no C++ change since the previous pair f7a4e43e), no flip, 26 of 26 ok in both runs. Damage: judged on the gain against the measured control. The Grave Coil 47632 hit on the caster read 606 in the control phase (DBC base 600; the extra 6 is not explained, cause not established) and 1030 cumulative after the Scroll, a ratio of 1.69967 in both runs against 1.70 within 0.02 (the 2-point band of 28% to 32%: 1.68 to 1.72), so a 33% reduction (1.67) and a 27% one (1.73) fail. Shadow only, no other school and no physical control. Duration: aura on the caster at about 9.1 s and gone by 10.75 s (windows 9050-9400, 10600-10950), excluding 9 and 11 s. Reach: the aura is on ally and on ally2 to ally5 (raid subgroup 2 included), 0 in the control. Radius 15 yd: second design (relocate_before_trigger moves the caster away from the grouped ally, distance_2d read in an ally_arm arm, caster aura read as the cast control). The area check is AnyGroupedUnitInObjectRangeCheck, IsWithinDistInMap with both object sizes (GridNotifiers.h:1051, Object.cpp:1252-1264); the two Human players have combat reach 1.5 each (creature_model_info 49 and 50), so the reach is 18.0 yd. Ally at 17.25 yd (read 17.25 after, 0 before): holds the aura, excluding 13.5 yd (reach 16.5). Ally at 18.75 yd (read 18.75): no aura while the caster holds it, excluding 16.5 yd (reach 19.5). Limit: the 3.0 yd of object sizes comes from the data table, not from a read, because a combat_reach read is not accepted inside ally_arm (no METRIC_EVIDENCE row); a different player size would shift the bracket. Reference search 2026-11-22: coa-history 0 events for 680646, 681383, 47632; bindmysoul reads -30%, 15 yds, 10 seconds; nothing else found."
   },
   {
     "spell": 680646,
@@ -2645,17 +2639,31 @@
         "claim": "when falling below 35% of their maximum health",
         "labels": [
           "680646 behaviour_metric_delta heal_amount",
-          "680646 behaviour_metric_delta heal_above"
+          "680646 behaviour_metric_delta heal_above",
+          "680646 behaviour_metric_delta heal_close_above"
         ]
       },
       {
-        "claim": "healed once",
+        "claim": "healed once (the caster)",
         "labels": [
           "680646 behaviour_metric_delta heal_once"
         ]
+      },
+      {
+        "claim": "any ally, once for each ally",
+        "labels": []
       }
     ],
-    "reason": "Pair 20261122-074554 / 20261122-074843, build f7a4e43e, server commit 819ed69786ee, no flip. Control = the same strike without the Scroll (before phase): no heal. Caster set to 3800 of 10000 health, Grave Coil takes it below 35%: heal 681383 read 1500 = 15% of 10000 after the Scroll. Five hits (a second fall below 35% at the fifth): the heal total stays 1500, once. Starting at 6000 (55.8% after the hit): 0. The harness striker can only hit the caster, so the caster stands for any ally; the aura reaches allies (reach entry of the previous clause). Reference search: as the previous clause; nothing else found."
+    "reason": "Pair 20261122-080705 / 20261122-080744, build 22d8bd4d, class-file entries on server commit 0610a77c3b (no C++ change since the previous pair f7a4e43e), no flip, 26 of 26 ok in both runs. Control = the same strike without the Scroll (before phase): no heal. Caster at 3800 of 10000, Grave Coil takes it to 33.8% (below 35%): heal 681383 read 1500 = 15% of 10000, tolerance 15. Threshold bracket: heal at 33.8% excludes a threshold at or below 33.8% (31.5% included); no heal at 37.9% (start 4215, hit about 424) excludes a threshold above 37.9% (38.5% and 50%); start 6000 (55.8%): 0. So the threshold lies in (33.8%, 37.9%]. Five hits: the heal total stays 1500 (the five hits are computed from the measured hit, not read). One maximum health only (10000): a flat 1500 would also pass. All reads are on the caster; \"any ally\" and \"once for each ally\" stay open as a tool gap, with the shared once flag recorded as a lead. Reference search: as the previous clause; nothing else found.",
+    "tool_gap": {
+      "reason": "The harness striker can only target the caster or a creature the caster owns (behaviours.py:1655-1662), so no read shows an ally falling below 35% and being healed, nor whether \"once\" is per ally. On this server the once flag is the script value of the shared area Aura (AscensionSunClericEvents.cpp:289, SpellAuras.cpp:664), so one heal per cast for the whole group is possible; a caster-only run reads 1500 either way. Lead only: the tooltip is ambiguous, no server change and no owner question yet.",
+      "attempts": [
+        {
+          "agent": "sc-b8e-fix",
+          "report": ".agents/plans/sun-cleric-b8e-fix/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 680647,
@@ -3350,7 +3358,7 @@
         ]
       }
     ],
-    "reason": "Pair 20261122-074554 / 20261122-074843, build f7a4e43e, server commit 819ed69786ee, no flip. Control = Radiant Flame without Scorch Marks (before phase). Free cast: at 182 mana the control casts 0 times, after a real Sun Ray it casts once. Ticks: median interval of the damage events 1000 ms control, 503 and 514 ms with Scorch Marks (tolerance 50). Only the next: the second Radiant Flame after Sun Ray ticks at 990 and 987.5 ms. Scorch Marks from a real Sun Ray cast, no set_aura. Reference search 2026-11-22: coa-history 0 events for 806060, 807058, 504764; bindmysoul 806021 text reads the same sentence; nothing else found."
+    "reason": "Pair 20261122-080705 / 20261122-080744, build 22d8bd4d, class-file entries on server commit 0610a77c3b (no C++ change since the previous pair f7a4e43e), no flip, 26 of 26 ok in both runs. Control = Radiant Flame without Scorch Marks (before phase). Free cast: mana set to 82, the Sun Ray costs 81 and leaves 1, so Radiant Flame (340) casts only at a cost of at most 1 mana: the control casts 0 times, after a real Sun Ray it casts once, excluding any reduction short of 100% (a 90% one leaves 34). Ticks: median interval of the damage events 1000 ms control, 494 and 487 ms with Scorch Marks, band 465 to 535 (tolerance 35), which excludes 550 and 450 ms (10% off). Only the next: the second Radiant Flame after Sun Ray ticks at 1009.5 and 998 ms, band 950 to 1050. Scorch Marks from a real Sun Ray cast, no set_aura. Reference search 2026-11-22: coa-history 0 events for 806060, 807058, 504764; bindmysoul 806021 text reads the same sentence; nothing else found."
   },
   {
     "spell": 704908,
