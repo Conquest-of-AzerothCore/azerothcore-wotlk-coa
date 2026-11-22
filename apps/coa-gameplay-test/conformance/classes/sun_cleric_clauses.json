@@ -5470,7 +5470,8 @@
       {
         "claim": "Doubles the effectiveness of your Holy Form: the threat reduction (Effect[2], -50%)",
         "labels": [
-          "800602 behaviour_metric_delta holy_form_threat_doubled"
+          "800602 behaviour_metric_delta holy_form_threat_doubled",
+          "800602 behaviour_metric_delta holy_form_threat_control"
         ]
       },
       {

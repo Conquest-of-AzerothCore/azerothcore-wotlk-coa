@@ -3814,6 +3814,46 @@
       "observe_source": "800602 Effect[0] aura 108 ADD_PCT_MODIFIER, EffectMiscValue 8 (SPELLMOD_ALL_EFFECTS), EffectBasePoints 99 + 1 = +100%, EffectSpellClassMask word 2 = 1048576 = SpellFamilyFlags[2] of Holy Form 805301 (family 33). 805301 Effect[2] aura 10 MOD_THREAT, EffectMiscValue 127 (all schools), EffectBasePoints -51 + 1 = -50% ($s3); doubled by 800602 the effect is -100%, so the damage threat of a Dawnsear 554406 cast is damage x 0. The flat initial threat of the cast, the SpellLevel 60 of 554406, is added with ignoreModifiers true (Spell.cpp:5736-5737, 5765), so threat per damage reads 0 + 60 / 8360.7 = 0.00718 (damage mean 708.5 + 10000 x 0.765222 = 8360.7, Dawnsear Description ${$m1+0+$spfi*0.765222}), the model of the Holy Form entries 0.50718 and 1.00718. Holy Form is cast for real after 800602 is learned (the before phase has neither the form nor a Dawnsear cast, so it reads 0). Control arm: the entry Holy Form (threat generated), same cast and spell power with the form alone, 0.50718, in the same pair. A threat cut of 10% off the doubled -100% (-90%) reads 0.107 and -50% reads 0.507, both far outside the 0.01 tolerance. The setup casts are spaced by setup_wait_ms 1600 ms (Holy Form global cooldown) and void_on_cast_failure voids a run with a refused cast. Expected from the DBC and the tooltip; nothing from a run. Reference search (G-11), prior round 2026-11-22 (ledger 317 reason): coa-history spell 800602: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries only 'Doubles the effectiveness of your Holy Form.'; nothing else found."
     },
     {
+      "spell": 800602,
+      "name": "Empowered Holy Form (Holy Form threat control, 800602 never learned)",
+      "kind": "metric_delta",
+      "variant": "holy_form_threat_control",
+      "label_suffix": "holy_form_threat_control",
+      "quote": "Doubles the effectiveness of your Holy Form and reduces the tick rate of Ancient Rites by $/1000;s2 sec.",
+      "trigger_spell": 554406,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        805301
+      ],
+      "setup_target": "caster",
+      "setup_only_after": false,
+      "setup_wait_ms": 1600,
+      "cast_power": 1000,
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0.50718,
+      "tolerance": 0.01,
+      "wait_ms": 4500,
+      "expire_ms": 5000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "gate_spell": 807963,
+      "void_on_cast_failure": true,
+      "cast_in_before": false,
+      "player_spell_power": 10000,
+      "observe_source": "Control arm of holy_form_threat_doubled: the same Holy Form cast for real after the unrelated passive 807963 (Radiant Cascade only) is learned in place of 800602, same Dawnsear 554406 cast and spell power 10000. Holy Form 805301 Effect[2] aura 10 MOD_THREAT -51 + 1 = -50% ($s3), so threat per damage = 0.5 + 60 / 8360.7 = 0.50718 (flat 60 = SpellLevel of 554406, Spell.cpp:5736-5737, 5765, ignoreModifiers); the treatment reads 0.00718 with 800602, 0.5 lower. Expected from the DBC and the tooltip; nothing from a run. Reference search (G-11), prior round 2026-11-22: nothing found beyond the tooltip and the DBC."
+    },
+    {
       "spell": 570120,
       "name": "Solar Might (Strength)",
       "kind": "metric_delta",
@@ -12001,11 +12041,11 @@
       "kind": "duration_ratio",
       "quote": "and reduces the duration of disarm effects by $s2%.",
       "expected_ratio": 0.85,
-      "vehicle_spell": 301235,
+      "vehicle_spell": 8379,
       "striker_entry": 36,
       "attempts": 1,
       "margin_ms": 50,
-      "observe_source": "807507 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -16 + 1 = -15 ($s2 = 15): disarm durations on the caster x0.85. Vehicle Melt Weapon 301235 (Mechanic 3, aura 67 MOD_DISARM, DurationIndex 32 = 6000 ms in SpellDuration.dbc, DurationPerLevel 0) landed once per phase (attempts 1) by the striker entry 36. Expected delta = 6000 x (0.85 - 1) = -900 ms between the landing-corrected durations (each read plus its elapsed time since the cast); margin 50 ms plus the run's tick overshoot, unmeasured unless below 10% of the expected delta (90 ms), so a 10% deviation either side is excluded. Control: the before phase without 807507. The gap between the phases exceeds the 15 s diminishing-returns reset. Expected from the installed DBC and the tooltip; nothing from a run. Reference search (G-11), prior rounds 2026-11-22 (ledger 434 reason): coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+      "observe_source": "807507 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -16 + 1 = -15 ($s2 = 15): disarm durations on the caster x0.85. Vehicle Disarm 8379 (Mechanic 3, aura 67 MOD_DISARM, Speed 0, DurationIndex 32 = 6000 ms in SpellDuration.dbc, DurationPerLevel 0) landed once per phase (attempts 1) by the striker entry 36. A first design used Melt Weapon 301235 (Speed 20, same 6000 ms): both runs of pair 1 read the aura 5751 ms 509 ms after the landing, 260 ms more than the full duration, the missile travel (about 5 yd at 20 yd/s) that the landing time does not include, and the margin path voids a trial when the landing offset exceeds the margin (the delta itself read -891 ms against -900 and -1791 ms against -1800); Disarm 8379 has no travel time. Expected delta = 6000 x (0.85 - 1) = -900 ms between the landing-corrected durations (each read plus its elapsed time since the cast); margin 50 ms plus the run's tick overshoot, unmeasured unless below 10% of the expected delta (90 ms), so a 10% deviation either side is excluded. Control: the before phase without 807507. The gap between the phases exceeds the 15 s diminishing-returns reset. Expected from the installed DBC and the tooltip; nothing from a run. Reference search (G-11), prior rounds 2026-11-22 (ledger 434 reason): coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
     },
     {
       "spell": 807873,
@@ -12013,11 +12053,11 @@
       "kind": "duration_ratio",
       "quote": "and reduces the duration of disarm effects by $s2%.",
       "expected_ratio": 0.7,
-      "vehicle_spell": 301235,
+      "vehicle_spell": 8379,
       "striker_entry": 36,
       "attempts": 1,
       "margin_ms": 50,
-      "observe_source": "807873 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -31 + 1 = -30 ($s2 = 30): disarm durations on the caster x0.7. Vehicle Melt Weapon 301235 (Mechanic 3, aura 67 MOD_DISARM, DurationIndex 32 = 6000 ms in SpellDuration.dbc, DurationPerLevel 0) landed once per phase (attempts 1) by the striker entry 36. Expected delta = 6000 x (0.7 - 1) = -1800 ms between the landing-corrected durations (each read plus its elapsed time since the cast); margin 50 ms plus the run's tick overshoot, unmeasured unless below 10% of the expected delta (180 ms), so a 10% deviation either side is excluded. Control: the before phase without 807873. The gap between the phases exceeds the 15 s diminishing-returns reset. Expected from the installed DBC and the tooltip; nothing from a run. Reference search (G-11), prior rounds 2026-11-22 (ledger 434 reason): coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+      "observe_source": "807873 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -31 + 1 = -30 ($s2 = 30): disarm durations on the caster x0.7. Vehicle Disarm 8379 (Mechanic 3, aura 67 MOD_DISARM, Speed 0, DurationIndex 32 = 6000 ms in SpellDuration.dbc, DurationPerLevel 0) landed once per phase (attempts 1) by the striker entry 36. A first design used Melt Weapon 301235 (Speed 20, same 6000 ms): both runs of pair 1 read the aura 5751 ms 509 ms after the landing, 260 ms more than the full duration, the missile travel (about 5 yd at 20 yd/s) that the landing time does not include, and the margin path voids a trial when the landing offset exceeds the margin (the delta itself read -891 ms against -900 and -1791 ms against -1800); Disarm 8379 has no travel time. Expected delta = 6000 x (0.7 - 1) = -1800 ms between the landing-corrected durations (each read plus its elapsed time since the cast); margin 50 ms plus the run's tick overshoot, unmeasured unless below 10% of the expected delta (180 ms), so a 10% deviation either side is excluded. Control: the before phase without 807873. The gap between the phases exceeds the 15 s diminishing-returns reset. Expected from the installed DBC and the tooltip; nothing from a run. Reference search (G-11), prior rounds 2026-11-22 (ledger 434 reason): coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
     },
     {
       "spell": 807507,
