@@ -52,9 +52,38 @@ class AfterTriggerCastsTests(unittest.TestCase):
         for raw in ([], [{'spell': SPLASH}], [{'spell': SPLASH, 'delay_ms': -1}],
                     [{'spell': SPLASH, 'delay_ms': 0, 'destination_unit': 'enemy'}],
                     [{'spell': SPLASH, 'delay_ms': 0, 'other': 1}],
-                    [{'spell': SPLASH, 'delay_ms': 0, 'target': 'dummy'}]):
+                    [{'spell': SPLASH, 'delay_ms': 0, 'target': 'dummy'}],
+                    [{'spell': SPLASH, 'delay_ms': 0, 'in_before': 1}],
+                    [{'spell': SPLASH, 'delay_ms': 0, 'reset_cooldown': 'no'}]):
             with self.subTest(raw=raw), self.assertRaises(ValueError):
                 behaviour_scenario(load_fixture_class_file(23), channel_entry(after_trigger_casts=raw))
+
+    def test_a_cast_in_both_phases_needs_a_cast_control_phase(self):
+        entry = channel_entry(after_trigger_casts=[{'spell': 801661, 'delay_ms': 1700, 'in_before': True}])
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), entry)
+
+    def test_a_control_cast_and_a_running_cooldown(self):
+        juju = 802087
+        entry = {'spell': 705844, 'name': 'Overflowing Juju (the next Bad Juju cooldown)', 'kind': 'metric_delta',
+                 'label_suffix': 'next_cut_late', 'quote': 'reduced cooldown', 'trigger_spell': 500015,
+                 'target': 'dummy', 'measure_actor': 'caster', 'gate_spell': 705844, 'cast_power': 1400,
+                 'after_trigger_casts': [{'spell': juju, 'target': 'dummy', 'delay_ms': 3200, 'in_before': True},
+                                         {'spell': juju, 'target': 'dummy', 'delay_ms': 8000, 'in_before': True,
+                                          'reset_cooldown': False}],
+                 'metric': 'spell_cast_count', 'fields': {'spell': juju}, 'before_expected': 1, 'expected': 3,
+                 'wait_ms': 2800}
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        run.validate(scenario)
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == juju]
+        self.assertEqual(len(casts), 4)
+        resets = [index for index, step in enumerate(steps)
+                  if step['action'] == 'reset_cooldown' and step['spell'] == juju]
+        for first, second in (casts[0:2], casts[2:4]):
+            self.assertTrue(any(index < first for index in resets))
+            self.assertFalse(any(first < index < second for index in resets))
+        self.assertIn('its cooldown left running', scenario['contract'])
 
 
 if __name__ == '__main__':
