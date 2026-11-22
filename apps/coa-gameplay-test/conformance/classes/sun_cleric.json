@@ -13897,7 +13897,12 @@
           "caster"
         ]
       ],
-      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). Radiant Flame 806060 costs ManaCostPercentage 25 of BaseMana 1363 (player_class_stats class 27 level 60) = 340 (control: read after a Dawn cast without the passive); with the passive the engine CalcPowerCost reads 0 while Scorch Marks is on the caster (Effect[2] -101, -100 as read). Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, Dawn activates only with 20 Solar Power, not the subject), and the Dawn aura 807440 left by the first phase is set to 0 stacks before the second cast (Dawn excludes itself while up, ExcludeCasterAuraSpell 807440). Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*)."
+      "observe_source": "Ledger clauses 339/340 of 804625 (the streamed Scorch Marks text, not in the Spell.dbc description of 804625, so the quote field names the tooltip sentence the entry hangs under). 804625 Harsh Lessons Effect[0] aura 42 PROC_TRIGGER_SPELL 807059, cast by ActivateDawn when 804625 is known (AscensionSunCleric.cpp:272-273); Scorch Marks 807059 (DurationIndex 1, 10000 ms) Effect[0] SPELLMOD_DAMAGE misc 1 -51 (duration, SPELLMOD_DURATION), Effect[1] misc 19 -51 (SPELLMOD_ACTIVATION_TIME), Effect[2] misc 14 -101 (SPELLMOD_COST). Radiant Flame 806060 costs ManaCostPercentage 25 of BaseMana 1363 (player_class_stats class 27 level 60) = 340 (control: read after a Dawn cast without the passive); with the passive the engine CalcPowerCost reads 0 while Scorch Marks is on the caster (Effect[2] -101, -100 as read). Dawn 804584 is cast for real after Solar Power 500149 is set to 20 stacks (precondition fixture, Dawn activates only with 20 Solar Power, not the subject), and the Dawn aura 807440 left by the first phase is set to 0 stacks before the second cast (Dawn excludes itself while up, ExcludeCasterAuraSpell 807440). Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries \"Casting Dawn now grants Scorch Marks. ... Your next Radiant Flame has no mana cost, ticks -50% faster, and its duration is reduced by -50%.\" (same figures); nothing else found. Related: Burning Heat 704908 reads the same Scorch Marks effect through a Sun Ray (entries scorch_*).",
+      "use_time_contrast": [
+        "scorch_cost",
+        "scorch_cost_next"
+      ],
+      "expected_gain": -340
     },
     {
       "spell": 804625,
@@ -25635,7 +25640,13 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 2000,
-      "observe_source": "Dawnsear 554406 costs ManaCostPercentage 15 of BaseMana 1363 (player_class_stats class 27 level 60) = 204 before the learn (the reading before is the control). 561329 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -21 (-20, $s1), EffectSpellClassMask word 1 = 1282 (bits 2, 256, 1024) which holds the Dawnsear family flag 2 (SpellFamilyFlags[1] of 554406): 204 x 0.8 = 163.2, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 554406: Dawnsear 74 SPELL_DAMAGE events in 1 log, no cost reading; nothing else found."
+      "observe_source": "Dawnsear 554406 costs ManaCostPercentage 15 of BaseMana 1363 (player_class_stats class 27 level 60) = 204 before the learn (the reading before is the control). 561329 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -21 (-20, $s1), EffectSpellClassMask word 1 = 1282 (bits 2, 256, 1024) which holds the Dawnsear family flag 2 (SpellFamilyFlags[1] of 554406): 204 x 0.8 = 163.2, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 554406: Dawnsear 74 SPELL_DAMAGE events in 1 log, no cost reading; nothing else found.",
+      "use_time_contrast": [
+        "dawnsear_cost",
+        "sunflare_cost",
+        "cascade_cost"
+      ],
+      "expected_gain": -41
     },
     {
       "spell": 561329,
@@ -25656,7 +25667,13 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 2000,
-      "observe_source": "Sunflare 800231 costs ManaCostPercentage 10 of BaseMana 1363 = 136 before the learn (the reading before is the control). 561329 Effect[1] SPELLMOD_COST -20% with class mask word 1 = 1282, which holds the family flag 256 of 800231: 136 x 0.8 = 108.8: the engine truncates the cost to an integer, so 108 or 109 is read within 1 of 108.8, and 110 (a -19% modifier) is excluded. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 800231: 0 events in 186 logs; nothing else found."
+      "observe_source": "Sunflare 800231 costs ManaCostPercentage 10 of BaseMana 1363 = 136 before the learn (the reading before is the control). 561329 Effect[1] SPELLMOD_COST -20% with class mask word 1 = 1282, which holds the family flag 256 of 800231: 136 x 0.8 = 108.8: the engine truncates the cost to an integer, so 108 or 109 is read within 1 of 108.8, and 110 (a -19% modifier) is excluded. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 800231: 0 events in 186 logs; nothing else found.",
+      "use_time_contrast": [
+        "dawnsear_cost",
+        "sunflare_cost",
+        "cascade_cost"
+      ],
+      "expected_gain": -27.200000000000003
     },
     {
       "spell": 561329,
@@ -25677,7 +25694,13 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 2000,
-      "observe_source": "Sunflare 800231 has a 2000 ms cast time (CastingTimeIndex 5, SpellCastTimes.dbc 5 CastTime 2000), read before the learn as the control. 561329 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME) BasePoints -21 (-20, $s1), class mask word 1 = 1282 holding the family flag 256 of 800231: 2000 x 0.8 = 1600 ms, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 800231: 0 events in 186 logs; nothing else found."
+      "observe_source": "Sunflare 800231 has a 2000 ms cast time (CastingTimeIndex 5, SpellCastTimes.dbc 5 CastTime 2000), read before the learn as the control. 561329 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME) BasePoints -21 (-20, $s1), class mask word 1 = 1282 holding the family flag 256 of 800231: 2000 x 0.8 = 1600 ms, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 800231: 0 events in 186 logs; nothing else found.",
+      "use_time_contrast": [
+        "dawnsear_cast_time",
+        "sunflare_cast_time",
+        "cascade_cast_time"
+      ],
+      "expected_gain": -400
     },
     {
       "spell": 561329,
@@ -25698,7 +25721,13 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 2000,
-      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimeIndex 22, SpellCastTimes.dbc 22 CastTime 3500), read before the learn as the control. 561329 Effect[0] SPELLMOD_CASTING_TIME -20% with class mask word 1 = 1282 holding the family flag 2 of 554406: 3500 x 0.8 = 2800 ms, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 554406: Dawnsear 74 SPELL_DAMAGE events in 1 log, no cast-time reading; nothing else found."
+      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimeIndex 22, SpellCastTimes.dbc 22 CastTime 3500), read before the learn as the control. 561329 Effect[0] SPELLMOD_CASTING_TIME -20% with class mask word 1 = 1282 holding the family flag 2 of 554406: 3500 x 0.8 = 2800 ms, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 554406: Dawnsear 74 SPELL_DAMAGE events in 1 log, no cast-time reading; nothing else found.",
+      "use_time_contrast": [
+        "dawnsear_cast_time",
+        "sunflare_cast_time",
+        "cascade_cast_time"
+      ],
+      "expected_gain": -700
     },
     {
       "spell": 561328,
@@ -30021,6 +30050,577 @@
       "expire_ms": 500,
       "observe_source": "AscensionSunCleric.cpp:312: Eclipse casts Blinded 505342 only when the target is not a creature flagged a dungeon boss (Creature::IsDungeonBoss, Creature.cpp:3625-3631; CREATURE_FLAG_EXTRA_DUNGEON_BOSS set for kill-credit creatures of non-raid instance_encounters, ObjectMgr.cpp:6846-6862). Eclipse first copies Vow of the Eclipse 505340 to the target (:308-311), with no boss gate, so 505340 on the same target is the landing control. Target: Harvest Golem 36, a normal creature (rank 0). 505340 lands in both phases (the Vow phase aura 807435 is up in both).",
       "target_entry": 36
+    },
+    {
+      "spell": 561329,
+      "name": "Burning Cascade (Radiant Cascade cast time, outside the mask)",
+      "kind": "metric_delta",
+      "variant": "cascade_cast_time",
+      "label_suffix": "cascade_cast_time",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 804584,
+      "gate_spell": 561329,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 500141
+      },
+      "before_expected": 2500,
+      "expected": 2500,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "observe_source": "Zero arm of the use-time contrast (ADR 1024): Radiant Cascade 500141 (SpellFamilyFlags[0] 32768, [1] 0) is outside the class mask of 561329 (EffectSpellClassMask word 1 = 1282 = 2 + 256 + 1024, words 0 and 2 = 0), so the same learn must change nothing. Radiant Cascade has a 2500 ms cast time (CastingTimeIndex 19, SpellCastTimes.dbc 19), read before and after the real learn: 2500 both times. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 561329 / 500141: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found.",
+      "use_time_contrast": [
+        "dawnsear_cast_time",
+        "sunflare_cast_time",
+        "cascade_cast_time"
+      ],
+      "expected_gain": 0
+    },
+    {
+      "spell": 561329,
+      "name": "Burning Cascade (Radiant Cascade mana cost, outside the mask)",
+      "kind": "metric_delta",
+      "variant": "cascade_cost",
+      "label_suffix": "cascade_cost",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 804584,
+      "gate_spell": 561329,
+      "target": "caster",
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 500141
+      },
+      "before_expected": 422,
+      "expected": 422,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "observe_source": "Zero arm of the use-time contrast (ADR 1024): Radiant Cascade 500141 (SpellFamilyFlags[0] 32768, [1] 0) is outside the class mask of 561329 (EffectSpellClassMask word 1 = 1282 = 2 + 256 + 1024, words 0 and 2 = 0), so the same learn must change nothing. Radiant Cascade costs ManaCostPercentage 31 of BaseMana 1363 (player_class_stats class 27 level 60) = 422 (int32 of 422.53, as 204 for 15% and 136 for 10%), read before and after the real learn: 422 both times. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 561329 / 500141: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found.",
+      "use_time_contrast": [
+        "dawnsear_cost",
+        "sunflare_cost",
+        "cascade_cost"
+      ],
+      "expected_gain": 0
+    },
+    {
+      "spell": 804625,
+      "name": "Harsh Lessons (Radiant Flame costs mana again once Scorch Marks is consumed)",
+      "kind": "metric_delta",
+      "variant": "scorch_cost_next",
+      "label_suffix": "scorch_cost_next",
+      "quote": "Casting Dawn now grants Scorch Marks.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 806060
+      },
+      "before_expected": 340,
+      "expected": 340,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "After-consumption arm of \"Your next Radiant Flame has no mana cost\" (ADR 1024): Dawn 804584 grants Scorch Marks 807059 (Effect[2] SPELLMOD_COST -101) through the learned 804625, a real Radiant Flame 806060 cast consumes it, and the cost of Radiant Flame is read after that cast: 340 (ManaCostPercentage 25 of BaseMana 1363) in both phases, so the second Radiant Flame pays again. Solar Power 500149 at 20 stacks and the Dawn aura reset are the precondition fixtures of the scorch_cost entry. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 804625: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Radiant Flame is cast at the dummy (an enemy spell: Scorch Marks is spent by that cast).",
+      "use_time_contrast": [
+        "scorch_cost",
+        "scorch_cost_next"
+      ],
+      "expected_gain": 0,
+      "setup_casts": [
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600
+    },
+    {
+      "spell": 300339,
+      "name": "The Redeemer (a certainly non-critical heal returns nothing)",
+      "kind": "metric_delta",
+      "variant": "noncrit_heal_return",
+      "label_suffix": "noncrit_heal_return",
+      "quote": "When you critically heal your target, they will be healed for 30% of the amount originally healed the next time they take damage.",
+      "gate_spell": 300339,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "caster_health_pct": 30,
+      "strike": {
+        "spell": 47632,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 3200
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 301004,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "expected": 0,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Contrast arm of \"When you critically heal your target\": the same Illumination 500143 on the caster at 30% health and the same strike of 47632 at 3200 ms as crit_heal_return, but without force_crit and with the precondition fixture 984954 (Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000, so no magic spell crits). 300339 learned, the heal 301004 on the caster stays at 0, where crit_heal_return reads 1 in the same pair; noncrit_heal_landed reads the Illumination heal itself (1). Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 300339: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
+    },
+    {
+      "spell": 300339,
+      "name": "The Redeemer (the non-critical heal landed)",
+      "kind": "metric_delta",
+      "variant": "noncrit_heal_landed",
+      "label_suffix": "noncrit_heal_landed",
+      "quote": "When you critically heal your target, they will be healed for 30% of the amount originally healed the next time they take damage.",
+      "gate_spell": 300339,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "caster_health_pct": 30,
+      "strike": {
+        "spell": 47632,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 3200
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500143,
+        "target": "caster"
+      },
+      "before_expected": 1,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "expected": 2,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Hit-landed arm of noncrit_heal_return: the same scenario reads the Illumination 500143 heal events on the caster (1: the heal under the no-crit fixture 984954 landed). Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 300339: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. The heal counter is cumulative over the scenario: the control phase heals once (1), the treatment phase once more (2)."
+    },
+    {
+      "spell": 300339,
+      "kind": "metric_delta",
+      "quote": "When you critically heal your target, they will be healed for 30% of the amount originally healed the next time they take damage.",
+      "gate_spell": 300339,
+      "trigger_spell": 500143,
+      "target": "caster",
+      "force_crit": "spell",
+      "caster_health_pct": 30,
+      "expire_ms": 500,
+      "name": "The Redeemer (the return aura lasts 15 s)",
+      "variant": "return_window",
+      "label_suffix": "return_window",
+      "metric": "aura",
+      "fields": {
+        "spell": 301005
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 15750,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expiry_wait_ms": 2500,
+      "after_expiry_expected": 0,
+      "game_time": {
+        "after": [
+          15700,
+          15800
+        ],
+        "expired": [
+          18200,
+          18300
+        ]
+      },
+      "observe_source": "300339 The Redeemer: a forced-critical Illumination 500143 (CastingTimeIndex 5 = 2000 ms, SpellCastTimes.dbc 5) on the caster at 30% health makes the script cast 301005 when the heal lands (AscensionSunClericEvents.cpp:373), so the aura starts about 2000 ms after the trigger cast starts; $301005d = 15000 ms (DurationIndex of 301005). With no damage taken the aura 301005 on the caster is read present 15700..15800 ms of game time after the trigger cast (13700..13800 ms after the heal when it lands at 2000 ms: a total 10% shorter, 13500, would be gone) and gone 18200..18300 ms after it (16200..16300 ms after the heal: a total 10% longer, 16500, would still be present). The latency between the cast start and the heal beyond the 2000 ms cast time is not measured; the windows keep 200 ms of margin on the early side and 200 ms on the late side. Control: before phase, no trigger, 0. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 300339 / 301005: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
+    },
+    {
+      "spell": 300369,
+      "kind": "metric_delta",
+      "variant": "flare_expiry",
+      "label_suffix": "flare_expiry",
+      "name": "Fire from the Heavens (Solar Flare lasts 10 s)",
+      "quote": "Damage dealt by Radiant Flame now has a $h% chance to launch a Solar Flare at your target.",
+      "gate_spell": 300369,
+      "gate_timing": "start",
+      "trigger_spell": 807175,
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 807175
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9150,
+      "expire_ms": 500,
+      "expiry_wait_ms": 1700,
+      "after_expiry_expected": 0,
+      "game_time": {
+        "after": [
+          9100,
+          9200
+        ],
+        "expired": [
+          10800,
+          10900
+        ]
+      },
+      "observe_source": "The streamed Solar Flare text (@s:807175:0@, \"and reduces the target's chance to hit by $s1% for $d.\") is not in the Spell.dbc description of 300369, so the quote field names the tooltip sentence the entry hangs under. Solar Flare 807175 (DurationIndex 1 = 10000 ms, $d of the tooltip) cast at the dummy by the player (the spell the passive launches). The aura 807175 on the dummy is read present 9100..9200 ms of game time after the cast and gone 10800..10900 ms after it: a 10% shorter total (9000) is gone before the first read and a 10% longer one (11000) is still present at the second. Control: before phase, no cast, 0. The miss-share part of the sentence is the attacker_miss label of 572752, the same aura 807175 Effect[0] (aura 54 -3). Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 300369 / 807175: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
+    },
+    {
+      "spell": 680624,
+      "kind": "metric_delta",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "setup_casts": [
+        680624
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "before_expected": 0,
+      "expire_ms": 500,
+      "name": "Divine Retribution (the hit is unleashed 8 s after the cast)",
+      "variant": "unleash_timing",
+      "label_suffix": "unleash_timing",
+      "quote": "and unleashes it after $d,",
+      "fields": {
+        "spell": 570147,
+        "target": "dummy"
+      },
+      "expected": 0,
+      "tolerance": 1,
+      "wait_ms": 5700,
+      "gate_timing": "start",
+      "expiry_wait_ms": 1200,
+      "after_expiry_expected": 34,
+      "game_time": {
+        "after": [
+          5650,
+          5750
+        ],
+        "expired": [
+          6850,
+          6950
+        ]
+      },
+      "observe_source": "680624 Divine Retribution aura DurationIndex 31 = 8000 ms ($d); on expiry the script casts 570147 with a quarter of the accumulated hit (AscensionSunClericAuras.cpp:170-178). 680624 is cast at the dummy as the setup cast, 1600 ms later Solar Flare 807175 is cast (the hit, as unleash_quarter), and the unleash damage 570147 on the dummy is read 0 at 5650..5750 ms after the Solar Flare cast (7250..7350 ms after the setup cast at a setup wait of 1600 ms: a duration 10% shorter, 7200, would have fired) and 34 at 6850..6950 ms (8450..8550 ms after the setup cast: a duration 10% longer, 8800, would not have fired). The step offset between the setup cast and the trigger cast beyond the 1600 ms wait is not measured. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 680624 / 570147: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. The setup cast is made in both phases and the trigger hit in the treatment phase only (trigger_only_after): the control phase reads 0 with the aura cast and no hit; the treatment cast refreshes the aura, so the 8000 ms count from the treatment setup cast.",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 680624,
+      "kind": "metric_delta",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "setup_casts": [
+        680624
+      ],
+      "setup_target": "dummy",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "before_expected": 0,
+      "expire_ms": 500,
+      "name": "Divine Retribution (an enemy 12 yd from the target is struck)",
+      "variant": "radius_in",
+      "label_suffix": "radius_in",
+      "quote": "damaging enemies within $570147a1 yds as Holy damage.",
+      "fields": {
+        "spell": 570147,
+        "target": "area1"
+      },
+      "expected": 34,
+      "tolerance": 1,
+      "wait_ms": 8800,
+      "area_dummies": [
+        15.0,
+        16.0
+      ],
+      "observe_source": "Radius 570147 Effect[0] RadiusIndex 13 = 10 yd ($570147a1). The unleash searches Nearby(target, Radius(570147)) (AscensionSunCleric.cpp:137-148), AnyUnitInObjectRangeCheck with IsWithinDistInMap adding both combat reaches (Object.cpp _IsWithinDist): the dummy entry 36 reads 1.275 yd (run 20261112-053731, class file 504734 note), so the edge between two dummies is 10 + 1.275 + 1.275 = 12.55 yd. Dummies stand on the +X axis of the caster (CoAGameplayTest.cpp:3492): the target at 3 yd, area1 at 15 yd (12 yd from the target, inside 12.55 and outside the edge of a 9 yd radius, 11.55), area2 at 16 yd (13 yd, outside 12.55 and inside the edge of an 11 yd radius, 13.55). area1 reads the quarter of the 136 hit (34, as unleash_quarter on the target); radius_out reads 0 on area2. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 680624 / 570147: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
+    },
+    {
+      "spell": 680624,
+      "kind": "metric_delta",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "setup_casts": [
+        680624
+      ],
+      "setup_target": "dummy",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "before_expected": 0,
+      "expire_ms": 500,
+      "name": "Divine Retribution (an enemy 13 yd from the target is not struck)",
+      "variant": "radius_out",
+      "label_suffix": "radius_out",
+      "quote": "damaging enemies within $570147a1 yds as Holy damage.",
+      "fields": {
+        "spell": 570147,
+        "target": "area2"
+      },
+      "expected": 0,
+      "tolerance": 1,
+      "wait_ms": 8800,
+      "area_dummies": [
+        15.0,
+        16.0
+      ],
+      "observe_source": "Radius 570147 Effect[0] RadiusIndex 13 = 10 yd ($570147a1). The unleash searches Nearby(target, Radius(570147)) (AscensionSunCleric.cpp:137-148), AnyUnitInObjectRangeCheck with IsWithinDistInMap adding both combat reaches (Object.cpp _IsWithinDist): the dummy entry 36 reads 1.275 yd (run 20261112-053731, class file 504734 note), so the edge between two dummies is 10 + 1.275 + 1.275 = 12.55 yd. Dummies stand on the +X axis of the caster (CoAGameplayTest.cpp:3492): the target at 3 yd, area1 at 15 yd (12 yd from the target, inside 12.55 and outside the edge of a 9 yd radius, 11.55), area2 at 16 yd (13 yd, outside 12.55 and inside the edge of an 11 yd radius, 13.55). area1 reads the quarter of the 136 hit (34, as unleash_quarter on the target); radius_out reads 0 on area2. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 680624 / 570147: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
+    },
+    {
+      "spell": 704910,
+      "kind": "metric_delta",
+      "variant": "heal_power",
+      "label_suffix": "heal_power",
+      "name": "Sun Worship (a heal carries 15% of Intellect as healing power)",
+      "quote": "Increases your healing power by $s1% of your Intellect",
+      "gate_spell": 704910,
+      "trigger_spell": 806479,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "caster_health": [
+        6000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          48100,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          48100,
+          0,
+          2000
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 806479,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 4373.6,
+      "tolerance": 2,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Solar Prayer 806479 heals 0.8 x (25% of the maximum health 20000 + 150 + healing power x 1) (the heal_sp entry, known aura 887015 -20%). 704910 Effect[0] aura 175 MOD_SPELL_HEALING_OF_STAT_PERCENT, MiscValue 126, MiscValueB 3 (Intellect), BasePoints 14 + 1 = 15 ($s1). Intellect is raised by the fixture 48100 (Effect[0] aura 29 MOD_STAT Intellect, amount set to 2000 on top of the reference 119 = 2119, a precondition fixture, not the subject) in both entries; 984954 keeps the heal from crit. With the passive learned for real the heal is 0.8 x (5000 + 150 + 15% of 2119 = 317) = 4373.6; heal_power_control (an unrelated passive learned in place) reads 4120 in the same pair. A 10% error of the term (16.5%) gives 4399, outside the tolerance of 2. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 704910: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
+    },
+    {
+      "spell": 704910,
+      "kind": "metric_delta",
+      "variant": "heal_power_control",
+      "label_suffix": "heal_power_control",
+      "name": "Sun Worship (control: the same heal without the passive)",
+      "quote": "Increases your healing power by $s1% of your Intellect",
+      "gate_spell": 300321,
+      "trigger_spell": 806479,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "caster_health": [
+        6000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          48100,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          48100,
+          0,
+          2000
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 806479,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 4120,
+      "tolerance": 2,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Solar Prayer 806479 heals 0.8 x (25% of the maximum health 20000 + 150 + healing power x 1) (the heal_sp entry, known aura 887015 -20%). 704910 Effect[0] aura 175 MOD_SPELL_HEALING_OF_STAT_PERCENT, MiscValue 126, MiscValueB 3 (Intellect), BasePoints 14 + 1 = 15 ($s1). Intellect is raised by the fixture 48100 (Effect[0] aura 29 MOD_STAT Intellect, amount set to 2000 on top of the reference 119 = 2119, a precondition fixture, not the subject) in both entries; 984954 keeps the heal from crit. With the passive learned for real the heal is 0.8 x (5000 + 150 + 15% of 2119 = 317) = 4373.6; heal_power_control (an unrelated passive learned in place) reads 4120 in the same pair. A 10% error of the term (16.5%) gives 4399, outside the tolerance of 2. Reference search 2026-11-22 (round 11 chunk d5): coa-history spell 704910: 0 events in 186 logs unless stated; bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
+    },
+    {
+      "spell": 804625,
+      "name": "Harsh Lessons (Radiant Flame ticks every 0.5 s after Dawn)",
+      "kind": "metric_delta",
+      "variant": "scorch_ticks",
+      "label_suffix": "scorch_ticks",
+      "quote": "Casting Dawn now grants Scorch Marks.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "expire_ms": 500,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 807058,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 1025,
+      "setup_casts": [
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Radiant Flame 806060 triggers its tick 807058 every EffectAmplitude 1000 ms; Scorch Marks 807059 Effect[1] SPELLMOD_ACTIVATION_TIME -51 (-50%, $s2) makes it 500 ms (the scorch_period readback). Dawn 804584 is the setup cast (Solar Power 500149 at 20 stacks, precondition fixture), Radiant Flame is the trigger and the damage events of 807058 on the dummy are counted 1010..1040 ms of game time after it (2 at a 500 ms period, ticks at 500 and 1000; a period 10% longer, 550, has ticked once) and again 1370..1410 ms after it (still 2: a period 10% shorter, 450, would have ticked a third time at 1350). The stamp precedes the aura by an unmeasured step latency: a first run read the third tick at a stamp of 1468 ms, so the windows were moved earlier and stay below the third tick of 500 ms (1500) for a latency under 90 ms. Control: scorch_ticks_control, the same cast with the unrelated passive Solar Conduit 300321 in place, counts 1 at 1070 ms (period 1000). Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found.",
+      "expiry_wait_ms": 365,
+      "after_expiry_expected": 2,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          1010,
+          1040
+        ],
+        "expired": [
+          1370,
+          1410
+        ]
+      }
+    },
+    {
+      "spell": 804625,
+      "name": "Harsh Lessons (control: Radiant Flame ticks every 1 s without the passive)",
+      "kind": "metric_delta",
+      "variant": "scorch_ticks_control",
+      "label_suffix": "scorch_ticks_control",
+      "quote": "Casting Dawn now grants Scorch Marks.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "expire_ms": 500,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 807058,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1025,
+      "setup_casts": [
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Radiant Flame 806060 triggers its tick 807058 every EffectAmplitude 1000 ms; Scorch Marks 807059 Effect[1] SPELLMOD_ACTIVATION_TIME -51 (-50%, $s2) makes it 500 ms (the scorch_period readback). Dawn 804584 is the setup cast (Solar Power 500149 at 20 stacks, precondition fixture), Radiant Flame is the trigger and the damage events of 807058 on the dummy are counted 1050..1090 ms of game time after it (2 at a 500 ms period, ticks at 500 and 1000; a period 10% longer, 550, has ticked once) and again 1450..1490 ms after it (still 2: a period 10% shorter, 450, would have ticked a third time at 1350). Control: scorch_ticks_control, the same cast with the unrelated passive Solar Conduit 300321 in place, counts 1 at 1070 ms (period 1000). Reference search 2026-11-22: coa-history spell 804625: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "gate_spell": 300321
     }
   ],
   "player_observations": [],
