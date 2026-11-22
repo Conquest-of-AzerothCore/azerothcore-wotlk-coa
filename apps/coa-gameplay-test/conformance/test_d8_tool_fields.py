@@ -1,9 +1,17 @@
+from pathlib import Path
+import sys
 import unittest
 
-from behaviours import COST_GATE_RESOURCES, NO_CAST_FAILURE, behaviour_scenario
+from behaviours import COST_GATE_RESOURCES, NO_CAST_FAILURE, THREAT_SLOPE_WAIT_MS, behaviour_scenario
+from compare import judge_behaviour
 from profile import DBC_DIR, load_class_file
+from test_behaviours import FakeRun, base_verdict
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+import run
 
 CLASS_FILE = load_class_file(27)
+REFUSED = COST_GATE_RESOURCES['cooldown']
 
 
 def entry_of(spell: int, variant: str) -> dict:
@@ -14,22 +22,122 @@ def results(expectations) -> dict:
     return {expectation.label.rsplit(' ', 1)[1]: expectation.displayed for expectation in expectations}
 
 
+def judged(expectation, values: dict) -> str:
+    return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+
+def assert_labels(scenario) -> list[str]:
+    return [step['label'] for step in scenario['steps'] if step['action'] == 'assert']
+
+
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
 class RefusedWithTests(unittest.TestCase):
     def test_a_reset_expects_the_recast_accepted_by_default(self):
-        _, expectations = behaviour_scenario(CLASS_FILE, entry_of(301266, 'reset_horusath'))
-        self.assertEqual(results(expectations)['with'], str(NO_CAST_FAILURE))
+        scenario, expectations = behaviour_scenario(CLASS_FILE, entry_of(301266, 'reset_horusath'))
+        self.assertEqual(results(expectations), {'without': str(REFUSED), 'with': str(NO_CAST_FAILURE)})
+        self.assertFalse([label for label in assert_labels(scenario) if label.endswith('after_cast')])
 
-    def test_refused_with_expects_the_with_arm_refused_and_keeps_the_without_arm(self):
+    def test_refused_with_expects_the_with_arm_refused_and_the_after_cast_landed(self):
         entry = {**entry_of(301266, 'reset_horusath'), 'refused_with': True}
         _, expectations = behaviour_scenario(CLASS_FILE, entry)
-        refused = str(COST_GATE_RESOURCES['cooldown'])
-        self.assertEqual(results(expectations), {'without': refused, 'with': refused})
+        self.assertEqual(results(expectations),
+                         {'without': str(REFUSED), 'with': str(REFUSED), 'after_cast': str(NO_CAST_FAILURE)})
+
+    def test_the_after_cast_is_read_on_the_reset_spell_just_before_the_with_attempt(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, entry_of(301266, 'reset_horusath_sunset'))
+        run.validate(scenario)
+        steps = scenario['steps']
+        read = next(index for index, step in enumerate(steps)
+                    if step.get('label') == '301266 cost_gate 500154 reset_horusath_sunset with after_cast')
+        self.assertEqual((steps[read]['metric'], steps[read]['spell']), ('cast_failure', 301266))
+        concord = max(index for index, step in enumerate(steps[:read])
+                      if step['action'] == 'cast' and step['spell'] == 301266)
+        attempt = next(index for index, step in enumerate(steps[read:], read)
+                       if step['action'] == 'cast' and step['spell'] == 500154)
+        self.assertLess(concord, read)
+        self.assertFalse([step for step in steps[read:attempt] if step['action'] == 'cast'])
+
+    def test_seeded_refused_concord_alerts_the_after_cast_while_the_with_arm_reads_refused(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, entry_of(301266, 'reset_horusath_sunset'))
+        by_arm = {expectation.label.rsplit(' ', 1)[1]: expectation for expectation in expectations}
+        with_label, after_label = by_arm['with'].label, by_arm['after_cast'].label
+        self.assertEqual(judged(by_arm['with'], {with_label: float(REFUSED)}), 'ok')
+        self.assertEqual(judged(by_arm['after_cast'], {after_label: float(REFUSED)}), 'alert')
+        self.assertEqual(judged(by_arm['after_cast'], {after_label: 172.0}), 'alert')
+        self.assertEqual(judged(by_arm['after_cast'], {after_label: float(NO_CAST_FAILURE)}), 'ok')
 
     def test_refused_with_needs_a_reset(self):
         entry = {**entry_of(805581, 'cd_gate'), 'refused_with': True}
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, entry)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class ThreatSlopeFieldTests(unittest.TestCase):
+    def sunflare(self, **changes) -> dict:
+        entry = {**entry_of(504734, 'threat_slope_sunflare'), **changes}
+        return {key: value for key, value in entry.items() if value is not None}
+
+    def readings(self, model: dict, threat: float, lost: float, extra: dict | None = None) -> dict:
+        return {model['cast_label']: float(NO_CAST_FAILURE), model['health_before_label']: 10000.0,
+                model['health_after_label']: 10000.0 - lost, model['threat_label']: threat, **(extra or {})}
+
+    def test_flat_adds_to_the_dbc_flat_of_the_model(self):
+        _, (stated,) = behaviour_scenario(CLASS_FILE, self.sunflare())
+        _, (bare,) = behaviour_scenario(CLASS_FILE, self.sunflare(flat=None))
+        self.assertEqual(stated.model['flat'] - bare.model['flat'], 1.0)
+
+    def test_seeded_flat_judges_the_slope_and_a_missing_cut_alerts(self):
+        _, (expectation,) = behaviour_scenario(CLASS_FILE, self.sunflare())
+        flat = expectation.model['flat']
+        self.assertEqual(judged(expectation, self.readings(expectation.model, 0.8 * 26 + flat, 26)), 'ok')
+        self.assertEqual(judged(expectation, self.readings(expectation.model, 1.0 * 26 + flat, 26)), 'alert')
+
+    def test_learn_steps_follow_the_hit_spell_and_are_absent_without_learn(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, self.sunflare())
+        learned = [step['spell'] for step in scenario['steps'] if step['action'] == 'learn']
+        self.assertEqual(learned[-2:], [800231, 504734])
+        scenario, _ = behaviour_scenario(CLASS_FILE, self.sunflare(learn=None))
+        self.assertNotIn(504734, [step['spell'] for step in scenario['steps'] if step['action'] == 'learn'])
+
+    def test_label_suffix_names_every_reading_and_the_expectation(self):
+        scenario, (expectation,) = behaviour_scenario(CLASS_FILE, self.sunflare())
+        self.assertEqual(expectation.label, '504734 behaviour_threat_slope 800231 talent')
+        self.assertTrue(all(label.startswith('504734 threat_slope 800231 talent ')
+                            for label in assert_labels(scenario) if 'threat_slope' in label))
+        _, (plain,) = behaviour_scenario(CLASS_FILE, self.sunflare(label_suffix=None))
+        self.assertEqual(plain.label, '504734 behaviour_threat_slope 800231')
+
+    def test_settle_ms_lengthens_the_read_wait_and_defaults_to_none(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, entry_of(504734, 'threat_slope_sundown'))
+        run.validate(scenario)
+        waits = [step['ms'] for step in scenario['steps'] if step['action'] == 'wait' and 'label' not in step]
+        self.assertEqual(waits[-1], 2000 + THREAT_SLOPE_WAIT_MS + 2500)
+        scenario, _ = behaviour_scenario(CLASS_FILE, self.sunflare())
+        waits = [step['ms'] for step in scenario['steps'] if step['action'] == 'wait' and 'label' not in step]
+        self.assertEqual(waits[-1], 2000 + THREAT_SLOPE_WAIT_MS)
+
+    def test_seeded_unlanded_flare_voids_the_trial(self):
+        _, (expectation,) = behaviour_scenario(CLASS_FILE, entry_of(504734, 'threat_slope_sundown'))
+        model = expectation.model
+        (flare,) = model['unlanded_labels']
+        self.assertEqual(flare, '504734 threat_slope 572752 talent 807175_damage_count after')
+        right = 0.8 * 2000 + model['flat']
+        self.assertEqual(judged(expectation, self.readings(model, right, 2000, {flare: 0.0})), 'ok')
+        self.assertEqual(judged(expectation, self.readings(model, 2000 + model['flat'], 2000, {flare: 0.0})),
+                         'alert')
+        self.assertEqual(judged(expectation, self.readings(model, right, 2000, {flare: 1.0})), 'unmeasured')
+
+    def test_unlanded_needs_a_settle_wait(self):
+        entry = {**entry_of(504734, 'threat_slope_sundown')}
+        del entry['settle_ms']
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, entry)
+
+    def test_the_sun_down_flat_is_the_two_spell_levels(self):
+        for variant, expected in (('threat_slope_sundown', 0.8), ('threat_slope_sundown_control', 1.0)):
+            _, (expectation,) = behaviour_scenario(CLASS_FILE, entry_of(504734, variant))
+            self.assertEqual((expectation.model['flat'], expectation.model['expected']), (119.0, expected))
 
 
 if __name__ == '__main__':

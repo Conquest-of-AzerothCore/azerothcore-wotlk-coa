@@ -1,6 +1,6 @@
-# 1030. Cost gate `refused_with`, `post_trigger_casts` and a threat slope flat
+# 1034. Cost gate `refused_with`, `post_trigger_casts` and a threat slope flat
 
-- Status: proposed (provisional number after 1029; renumbered at merge, guide 14.4)
+- Status: proposed (provisional number; 1030 is taken on the class branch, renumbered at merge, guide 14.4)
 - Date: 2026-11-22
 - Related: [ADR 0581](0581-behaviour-kinds-are-modules-discovered-at-run-time.md) (kind modules),
   [ADR 0582](0582-metric-delta-options-are-modules.md) (option modules),
@@ -22,7 +22,10 @@ power term whose expected threat per damage cannot be derived from the DBC.
 
 - `cost_gate` `refused_with` (only with `resets`): the `with` arm expects the refusal code of the resource, as the
   `without` arm does. An entry with the other phase's aura in `cast_auras` states "no reset outside the phase". An
-  accepted recast is an alert and a finding, never a changed expectation.
+  accepted recast is an alert and a finding, never a changed expectation. The `with` arm also reads `cast_failure`
+  of the entry's spell before the attempt (label `... with after_cast`, expected 0): without it, an after cast
+  refused for any reason (a missing checker aura, its own cooldown) would produce the expected refusal and an `ok`
+  (review I-1 of d8).
 - `metric_delta` option `post_trigger_casts` (`{"spell", "count", "gap_ms", "health_pct"}`, named point
   `after_trigger_steps`): casts `spell` on the caster `count` times after the trigger of each phase that casts it.
   Refused with a `strike`.
@@ -30,6 +33,11 @@ power term whose expected threat per damage cannot be derived from the DBC.
   when it has no threat entry), `learn` (spells learned before the cast, the talent) and `label_suffix` (so a talent
   entry and its control entry do not share labels). The control entry reads 1.0; a control off 1.0 means the flat is
   wrong and voids the trial.
+- `threat_slope` fields `settle_ms` (added to the read wait, for a spell whose damage lands after its cast) and
+  `unlanded` (needs `settle_ms`: spells whose damage on the dummy must still be 0 after the threat read; a count above
+  0 makes the trial `unmeasured`, since that hit's threat and damage would enter the slope). Sun Down 572752 deals its
+  damage through 572753 when its 2000 ms aura expires and then lays the ground aura 572754, whose first Solar Flare
+  807175 tick comes 3000 ms later: `settle_ms` 2500 reads between the two, `unlanded` [807175] proves it.
 
 ## Consequences
 

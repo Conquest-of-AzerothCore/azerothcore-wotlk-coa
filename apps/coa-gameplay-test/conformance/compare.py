@@ -4264,6 +4264,13 @@ def behaviour_threat_slope_verdict(base: Verdict, run: Run, model: dict) -> Verd
         return replace(base, explanation=missing_measurement(run, missing))
     cast, before, after, threat = (float(run.values[label]) for label in labels)
     expected = float(model['expected'])
+    for label in model.get('unlanded_labels', ()):
+        if run.values.get(label) is None:
+            return replace(base, explanation=missing_measurement(run, label))
+        if float(run.values[label]) > 0:
+            return replace(base, status='unmeasured', expected=expected,
+                           explanation=f'{label} {float(run.values[label]):g}: a later hit landed before the threat '
+                                       f'read, so the trial is void')
     damage = before - after
     if cast != NO_CAST_FAILURE or damage <= 0:
         return replace(base, status='unmeasured', expected=expected,

@@ -4497,7 +4497,13 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                          if spec.removal_wait_ms is not None else [])
                       + after(arm)
                       + [{'action': 'wait', 'label': f'{arm.name} cooldown wait', 'ms': cooldown_wait(arm)}]
+                      + ([measurement(f'{label} after_cast', CASTER, 'cast_failure', spell=spec.spell)]
+                         if spec.refused_with and arm.with_talent else [])
                       + attempt(label, full_power))
+            if spec.refused_with and arm.with_talent:
+                expectations.append(Expectation(f'{label} after_cast', BEHAVIOUR_CAST_CONDITION, spec.spell,
+                                                spec.spell, None, str(NO_CAST_FAILURE), rule,
+                                                {**model, 'arm': arm.name, 'reading': 'after_cast'}))
         expectations.append(Expectation(label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.gated_spell, None,
                                         str(arm.result), rule,
                                         {**model, 'arm': arm.name, 'level': arm.level, 'held_ms': arm.held_ms}))
@@ -4557,7 +4563,11 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                        f'is no beyond arm.' if removes_cooldown(spec, base) else '')
                     + (f' The talent resets the running cooldown: both arms attempt {spec.gated_spell} '
                        f'{spec.margin_ms} ms after the after casts, refused without {spec.spell}, through with it.'
-                       if spec.resets else '')
+                       if spec.resets and not spec.refused_with else '')
+                    + (f' The cast of {spec.spell} here must not reset the running cooldown: both arms attempt '
+                       f'{spec.gated_spell} {spec.margin_ms} ms after the after casts and both must be refused; the with '
+                       f'arm reads cast_failure 0 of {spec.spell} before the attempt (after_cast), so a refused '
+                       f'{spec.spell} cast alerts instead of reading as a refused reset.' if spec.refused_with else '')
                     + (f' {[spell for spell, _ in spec.after_casts]} are cast {spec.after_wait_ms} ms after the '
                        f'priming cast, in every arm except {spec.spell} itself, which only the arms with it cast and '
                        f'learn.' if spec.after_casts else '')
@@ -5517,6 +5527,8 @@ class ThreatSlopeSpec:
     flat: float = 0.0
     learn: tuple[int, ...] = ()
     label_suffix: str = ''
+    settle_ms: int = 0
+    unlanded: tuple[int, ...] = ()
 
 
 def threat_slope_label(spec: ThreatSlopeSpec, metric: str, moment: str) -> str:
@@ -5538,6 +5550,10 @@ def threat_slope_scenario(class_file: dict, spec: ThreatSlopeSpec) -> tuple[dict
     facts = facts_of(records, spec.hit_spell)
     labels = {key: threat_slope_label(spec, *key.split(' ')) for key in
               ('health before', 'health after', 'threat after', 'cast_failure after')}
+    if spec.settle_ms < 0 or (spec.unlanded and not spec.settle_ms):
+        raise ValueError(f'{spec.spell} threat_slope settle_ms {spec.settle_ms} must be positive to hold unlanded '
+                         f'spells and is never negative')
+    unlanded_labels = {spell: threat_slope_label(spec, f'{spell}_damage_count', 'after') for spell in spec.unlanded}
     steps = (base_steps(class_file)
              + [{'action': 'learn', 'actor': CASTER, 'spell': spec.hit_spell}]
              + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in spec.learn]
@@ -5545,10 +5561,12 @@ def threat_slope_scenario(class_file: dict, spec: ThreatSlopeSpec) -> tuple[dict
                 {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.hit_spell}]
              + cast_gate_power_step(facts) + required_aura_steps(facts)
              + [{'action': 'cast', 'actor': CASTER, 'spell': spec.hit_spell, 'target': TARGET},
-                {'action': 'wait', 'ms': facts.cast_time_ms + THREAT_SLOPE_WAIT_MS},
+                {'action': 'wait', 'ms': facts.cast_time_ms + THREAT_SLOPE_WAIT_MS + spec.settle_ms},
                 measurement(labels['cast_failure after'], CASTER, 'cast_failure', spell=spec.hit_spell),
                 measurement(labels['health after'], TARGET, 'health'),
-                measurement(labels['threat after'], TARGET, 'threat', target=CASTER)])
+                measurement(labels['threat after'], TARGET, 'threat', target=CASTER)]
+             + [measurement(unlanded_labels[spell], CASTER, 'spell_damage_count', spell=spell, target=TARGET)
+                for spell in spec.unlanded])
     flat = (flat_threat(records, spec.hit_spell) + sum(flat_threat(records, spell) for spell in spec.flat_spells)
             + spec.flat)
     scenario = {
@@ -5559,13 +5577,19 @@ def threat_slope_scenario(class_file: dict, spec: ThreatSlopeSpec) -> tuple[dict
                     + (f' and those of {", ".join(str(spell) for spell in spec.flat_spells)}, which it triggers on '
                        f'the dummy' if spec.flat_spells else '')
                     + f', divided by the health it lost, must equal '
-                    f'{spec.expected_slope:g}, proving the "{spec.quote}" clause.',
+                    f'{spec.expected_slope:g}, proving the "{spec.quote}" clause.'
+                    + (f' The read comes {spec.settle_ms} ms later than the cast time and margin, after the delayed '
+                       f'hit.' if spec.settle_ms else '')
+                    + (f' {", ".join(str(spell) for spell in spec.unlanded)} must not have damaged the dummy by the '
+                       f'threat read, else the trial is void.' if spec.unlanded else ''),
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
     model = {'kind': 'threat_slope', 'quote': entry.quote, 'flat': flat, 'expected': spec.expected_slope,
              'health_before_label': labels['health before'], 'health_after_label': labels['health after'],
              'threat_label': labels['threat after'], 'cast_label': labels['cast_failure after']}
+    if spec.unlanded:
+        model['unlanded_labels'] = [unlanded_labels[spell] for spell in spec.unlanded]
     suffix = f' {spec.label_suffix}' if spec.label_suffix else ''
     expectation = Expectation(f'{spec.spell} behaviour_threat_slope {spec.hit_spell}{suffix}', BEHAVIOUR_THREAT_SLOPE,
                               spec.spell, spec.hit_spell, None, f'{spec.expected_slope:g}',
@@ -5577,7 +5601,8 @@ def threat_slope_spec(entry: dict) -> ThreatSlopeSpec:
     return ThreatSlopeSpec(entry['spell'], entry['name'], entry['quote'], entry['hit_spell'],
                            float(entry['expected_slope']), tuple(int(spell) for spell in entry.get('flat_spells', ())),
                            float(entry.get('flat', 0.0)), tuple(int(spell) for spell in entry.get('learn', ())),
-                           entry.get('label_suffix', ''))
+                           entry.get('label_suffix', ''), int(entry.get('settle_ms', 0)),
+                           tuple(int(spell) for spell in entry.get('unlanded', ())))
 
 
 EVENT_DELAY_TRIALS = 3

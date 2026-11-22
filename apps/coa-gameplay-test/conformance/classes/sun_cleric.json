@@ -30373,7 +30373,7 @@
           "reason": "Sunset 500511 and the Sunrise-or-Sunset checker 500643 (CasterAuraSpell of 301266) are set on the caster before the Solar Concord cast: named precondition fixtures; this is the other phase, where the tooltip ('while in Sunrise') says no reset happens."
         }
       ],
-      "observe_source": "301266 Solar Concord: its aura apply handler (AscensionSunClericAuras.cpp:101-106) calls Reduce(player, 500154, INT32_MAX) in Sunrise and Reduce(player, 806477, INT32_MAX) in Sunset; the installed DBC also resets both cooldowns on every cast with no phase gate: Effect[1] TRIGGER_SPELL 302899 and Effect[2] TRIGGER_SPELL 301268 (301268 Effect[0] 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN MiscValue 500154; 302899 Effect[0] 195 MiscValue 806477; neither has a CasterAuraSpell; handler SpellEffects.cpp:1103-1112). Horusath Blast has RecoveryTime 25000 ms. The cooldown cost_gate (resets) casts Horusath Blast as the priming cast, then Solar Concord 1600 ms later (the cast is made in the with arm only), then attempts Horusath Blast again 1600 ms after that (past the global cooldown of the Solar Concord cast), inside its 25000 ms cooldown: refused without the Solar Concord cast (the control, SPELL_FAILED_NOT_READY), accepted with it. The accepted or refused cast is an event (cast_failure), not a cooldown readback. Other-phase arm (tool 1, ADR 1030 provisional): Solar Concord is cast with Sunset 500511 on the caster, so the tooltip words 'while in Sunrise' expect the recast of 500154 refused in the with arm as in the without arm (SPELL_FAILED_NOT_READY). The code gates the reset by phase (AscensionSunClericAuras.cpp:101-106) but the DBC effects 301268 / 302899 reset both cooldowns with no CasterAuraSpell: an accepted recast is a finding for the owner (fix note), never an expectation. Reference search 2026-11-22: coa-history spell 301266 (88 casts, no cooldown event); nothing else found.",
+      "observe_source": "301266 Solar Concord: its aura apply handler (AscensionSunClericAuras.cpp:101-106) calls Reduce(player, 500154, INT32_MAX) in Sunrise and Reduce(player, 806477, INT32_MAX) in Sunset; the installed DBC also resets both cooldowns on every cast with no phase gate: Effect[1] TRIGGER_SPELL 302899 and Effect[2] TRIGGER_SPELL 301268 (301268 Effect[0] 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN MiscValue 500154; 302899 Effect[0] 195 MiscValue 806477; neither has a CasterAuraSpell; handler SpellEffects.cpp:1103-1112). Horusath Blast has RecoveryTime 25000 ms. The cooldown cost_gate (resets) casts Horusath Blast as the priming cast, then Solar Concord 1600 ms later (the cast is made in the with arm only), then attempts Horusath Blast again 1600 ms after that (past the global cooldown of the Solar Concord cast), inside its 25000 ms cooldown: refused without the Solar Concord cast (the control, SPELL_FAILED_NOT_READY), accepted with it. The accepted or refused cast is an event (cast_failure), not a cooldown readback. Other-phase arm (tool 1, ADR 1034 provisional): Solar Concord is cast with Sunset 500511 on the caster, so the tooltip words 'while in Sunrise' expect the recast of 500154 refused in the with arm as in the without arm (SPELL_FAILED_NOT_READY). The code gates the reset by phase (AscensionSunClericAuras.cpp:101-106) but the DBC effects 301268 / 302899 reset both cooldowns with no CasterAuraSpell: an accepted recast is a finding for the owner (fix note), never an expectation. Reference search 2026-11-22: coa-history spell 301266 (88 casts, no cooldown event); nothing else found.",
       "refused_with": true
     },
     {
@@ -30406,7 +30406,7 @@
           "reason": "Sunrise 500477 and the Sunrise-or-Sunset checker 500643 (CasterAuraSpell of 301266) are set on the caster before the Solar Concord cast: named precondition fixtures; this is the other phase, where the tooltip ('while in Sunset') says no reset happens."
         }
       ],
-      "observe_source": "301266 Solar Concord: its aura apply handler (AscensionSunClericAuras.cpp:101-106) calls Reduce(player, 500154, INT32_MAX) in Sunrise and Reduce(player, 806477, INT32_MAX) in Sunset; the installed DBC also resets both cooldowns on every cast with no phase gate: Effect[1] TRIGGER_SPELL 302899 and Effect[2] TRIGGER_SPELL 301268 (301268 Effect[0] 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN MiscValue 500154; 302899 Effect[0] 195 MiscValue 806477; neither has a CasterAuraSpell; handler SpellEffects.cpp:1103-1112). Rapture has RecoveryTime 20000 ms. The cooldown cost_gate (resets) casts Rapture as the priming cast, then Solar Concord 3200 ms later (the cast is made in the with arm only), then attempts Rapture again 1600 ms after that (past the global cooldown of the Solar Concord cast), inside its 20000 ms cooldown: refused without the Solar Concord cast (the control, SPELL_FAILED_NOT_READY), accepted with it. The accepted or refused cast is an event (cast_failure), not a cooldown readback. Other-phase arm (tool 1, ADR 1030 provisional): Solar Concord is cast with Sunrise 500477 on the caster, so the tooltip words 'while in Sunset' expect the recast of 806477 refused in the with arm as in the without arm (SPELL_FAILED_NOT_READY). The code gates the reset by phase (AscensionSunClericAuras.cpp:101-106) but the DBC effects 301268 / 302899 reset both cooldowns with no CasterAuraSpell: an accepted recast is a finding for the owner (fix note), never an expectation. Reference search 2026-11-22: coa-history spell 301266 (88 casts, no cooldown event); nothing else found.",
+      "observe_source": "301266 Solar Concord: its aura apply handler (AscensionSunClericAuras.cpp:101-106) calls Reduce(player, 500154, INT32_MAX) in Sunrise and Reduce(player, 806477, INT32_MAX) in Sunset; the installed DBC also resets both cooldowns on every cast with no phase gate: Effect[1] TRIGGER_SPELL 302899 and Effect[2] TRIGGER_SPELL 301268 (301268 Effect[0] 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN MiscValue 500154; 302899 Effect[0] 195 MiscValue 806477; neither has a CasterAuraSpell; handler SpellEffects.cpp:1103-1112). Rapture has RecoveryTime 20000 ms. The cooldown cost_gate (resets) casts Rapture as the priming cast, then Solar Concord 3200 ms later (the cast is made in the with arm only), then attempts Rapture again 1600 ms after that (past the global cooldown of the Solar Concord cast), inside its 20000 ms cooldown: refused without the Solar Concord cast (the control, SPELL_FAILED_NOT_READY), accepted with it. The accepted or refused cast is an event (cast_failure), not a cooldown readback. Other-phase arm (tool 1, ADR 1034 provisional): Solar Concord is cast with Sunrise 500477 on the caster, so the tooltip words 'while in Sunset' expect the recast of 806477 refused in the with arm as in the without arm (SPELL_FAILED_NOT_READY). The code gates the reset by phase (AscensionSunClericAuras.cpp:101-106) but the DBC effects 301268 / 302899 reset both cooldowns with no CasterAuraSpell: an accepted recast is a finding for the owner (fix note), never an expectation. Reference search 2026-11-22: coa-history spell 301266 (88 casts, no cooldown event); nothing else found.",
       "refused_with": true
     },
     {
@@ -30435,6 +30435,41 @@
       "expected_slope": 1.0,
       "flat": 1,
       "observe_source": "504734 Solar Champion Effect[1] aura 108 MiscValue 2 (SPELLMOD_THREAT) BasePoints -21 + 1 = -20% ($s2) on a mask that Sunflare 800231 (SpellFamilyFlags[1] 256) carries. Sunflare 800231 has no spell power term in its Description (${$m1+0} to ${$M1+0} Holy damage), so no threat per damage can be derived from the DBC; the threat_slope read judges (threat - flat) / health lost instead, with the flat initial threat of the cast stated: Spell.cpp:5733-5737 adds m_spellInfo->SpellLevel when the spell has no threat entry (level 1 for 800231), ignoring modifiers (Spell.cpp:5765). Expected 0.8 from the tooltip figure (-20%); the control entry without the talent must read 1.0 in band, which validates the flat (a control off 1.0 voids the trial). Reference search 2026-11-22: coa-history spell 504734: 0 events in 186 logs (a passive); nothing else found."
+    },
+    {
+      "spell": 504734,
+      "name": "Solar Champion (threat slope, Sun Down)",
+      "kind": "threat_slope",
+      "variant": "threat_slope_sundown",
+      "label_suffix": "talent",
+      "quote": "and reduces the threat generated by them by $s2%.",
+      "hit_spell": 572752,
+      "expected_slope": 0.8,
+      "flat": 119,
+      "settle_ms": 2500,
+      "unlanded": [
+        807175
+      ],
+      "learn": [
+        504734
+      ],
+      "observe_source": "504734 Solar Champion Effect[1] aura 108 MiscValue 2 (SPELLMOD_THREAT) BasePoints -21 + 1 = -20% ($s2) on a mask (word1 0x01080542) that Sun Down 572752 (SpellFamilyFlags[1] 0x01000000) carries; its damage spell 572753 (SpellFamilyFlags[2] 0x40) is outside the mask, and ThreatManager.cpp:713 applies SPELLMOD_THREAT with the spell that deals the damage, so a code reading predicts no cut (untested before this entry). Sun Down casts in 2000 ms and applies an aura of 2000 ms (SpellDuration 39, AscensionSunClericContracts.cpp:279-283); on expiry the class code casts 572753 at the target and the ground aura 572754 (AscensionSunClericAuras.cpp:180-183), whose first Solar Flare 807175 tick comes 3000 ms later (amplitude 3000). settle_ms 2500 reads at about 5000 ms after the cast start, after 572753 and before the first tick; unlanded 807175 voids the trial if a flare landed by the read. Flat 119 = SpellLevel 59 of 572752 + SpellLevel 60 of 572753 (Spell.cpp:5736-5737, no spell_threat row found in data/sql), code reading only: the control without the talent must read 1.0 in band, else the trial is void. Expected 0.8 from the tooltip figure (-20%). Reference search 2026-11-22: coa-history spell 504734: 0 events in 186 logs (a passive); nothing else found."
+    },
+    {
+      "spell": 504734,
+      "name": "Solar Champion (threat slope control, Sun Down without the talent)",
+      "kind": "threat_slope",
+      "variant": "threat_slope_sundown_control",
+      "label_suffix": "control",
+      "quote": "and reduces the threat generated by them by $s2%.",
+      "hit_spell": 572752,
+      "expected_slope": 1.0,
+      "flat": 119,
+      "settle_ms": 2500,
+      "unlanded": [
+        807175
+      ],
+      "observe_source": "504734 Solar Champion Effect[1] aura 108 MiscValue 2 (SPELLMOD_THREAT) BasePoints -21 + 1 = -20% ($s2) on a mask (word1 0x01080542) that Sun Down 572752 (SpellFamilyFlags[1] 0x01000000) carries; its damage spell 572753 (SpellFamilyFlags[2] 0x40) is outside the mask, and ThreatManager.cpp:713 applies SPELLMOD_THREAT with the spell that deals the damage, so a code reading predicts no cut (untested before this entry). Sun Down casts in 2000 ms and applies an aura of 2000 ms (SpellDuration 39, AscensionSunClericContracts.cpp:279-283); on expiry the class code casts 572753 at the target and the ground aura 572754 (AscensionSunClericAuras.cpp:180-183), whose first Solar Flare 807175 tick comes 3000 ms later (amplitude 3000). settle_ms 2500 reads at about 5000 ms after the cast start, after 572753 and before the first tick; unlanded 807175 voids the trial if a flare landed by the read. Flat 119 = SpellLevel 59 of 572752 + SpellLevel 60 of 572753 (Spell.cpp:5736-5737, no spell_threat row found in data/sql), code reading only: the control without the talent must read 1.0 in band, else the trial is void. Expected 0.8 from the tooltip figure (-20%). Reference search 2026-11-22: coa-history spell 504734: 0 events in 186 logs (a passive); nothing else found."
     },
     {
       "spell": 680630,

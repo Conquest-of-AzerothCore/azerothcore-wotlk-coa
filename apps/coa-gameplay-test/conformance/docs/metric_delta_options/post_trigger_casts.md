@@ -1,4 +1,4 @@
-# Post-trigger casts (`metric_delta` `post_trigger_casts`, ADR 1030, provisional)
+# Post-trigger casts (`metric_delta` `post_trigger_casts`, ADR 1034, provisional)
 
 `post_trigger_casts` is `{"spell": ID, "count": 1..20, "gap_ms": >= 1600, "health_pct": 1..99}` (`gap_ms` and
 `health_pct` optional; default gap 1600 ms, the global cooldown). Right after the trigger cast of every phase that
