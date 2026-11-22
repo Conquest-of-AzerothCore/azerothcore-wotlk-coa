@@ -193,7 +193,8 @@ def subgroup_two_units(actors, fields: dict) -> list[str]:
 
 
 def reach_check(spec, ally: AllyArm):
-    reads = [(subgroup_two_units([spec.measure_actor], spec.fields), ally.reach_source, 'its main reading')]
+    reads = [(subgroup_two_units([spec.measure_actor, spec.target], spec.fields), ally.reach_source,
+              'its main reading or cast target')]
     reads += [(subgroup_two_units(arm.actors, arm.fields), arm.reach_source, f'arm {index}')
               for index, arm in enumerate(ally.arms)]
     for units, reach, read in reads:

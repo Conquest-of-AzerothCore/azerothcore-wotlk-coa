@@ -168,7 +168,8 @@ class AllyArmScenarioTests(unittest.TestCase):
         refused = [steed_entry(ally_arm={'allies': 5, 'arms': [{**HEALTH_ARM, 'actors': ['ally', 'ally5']}]}),
                    steed_entry(ally_arm={'allies': 7, 'arms': [heal]}),
                    steed_entry(measure_actor='ally7', ally_arm={'allies': 7}),
-                   steed_entry(fields={'target': 'ally6'}, ally_arm={'allies': 7})]
+                   steed_entry(fields={'target': 'ally6'}, ally_arm={'allies': 7}),
+                   steed_entry(target='ally5', ally_arm={'allies': 5})]
         for entry in refused:
             with self.subTest(entry=entry), self.assertRaisesRegex(ValueError, 'raid subgroup 2, outside'):
                 self.scenario(entry)

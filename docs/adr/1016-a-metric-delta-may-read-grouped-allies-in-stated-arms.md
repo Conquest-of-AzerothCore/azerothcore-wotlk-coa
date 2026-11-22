@@ -91,8 +91,9 @@ a cap of five or a 0 ("does not affect") read there would hold on a party-scoped
   the raid-wide Mercy and Heat Wave reads the amendment above built `allies: 7` for; requiring a stated
   `reach_source` on each such read. The option cannot see a script's target filter, so it cannot prove the reach by
   itself.
-- Decision: the main reading (through the option's `reach_source`) and each arm (through its own `reach_source`)
-  whose units, `actors` or `measure_actor` and `fields.target`, include `ally5`, `ally6` or `ally7` must state the
+- Decision: the main reading and the trigger's cast target (through the option's `reach_source`) and each arm
+  (through its own `reach_source`) whose units, `actors` or `measure_actor`, the cast `target` and `fields.target`,
+  include `ally5`, `ally6` or `ally7` must state the
   code or data line that makes the spell reach raid subgroup 2, or it is refused at load; a `reach_source` on a read
   without such a unit is refused too. A ratio reads two arms and rests on theirs. The contract states each
   `reach_source`; the model does not carry it, so the verdict is unchanged.
