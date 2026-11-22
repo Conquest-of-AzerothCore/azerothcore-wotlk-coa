@@ -308,22 +308,44 @@
   {
     "spell": 300347,
     "clause": "Paragon now has a 1 min cooldown",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "300347 behaviour_metric_delta paragon_cd"
+    ]
   },
   {
     "spell": 300347,
     "clause": "and empowers your Gavels, causing them to have no cooldown and have $562316s1% increased effectiveness.",
-    "labels": [
-      "300347 effect_value 562316e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "empowers your Gavels, causing them to have no cooldown",
+        "labels": [
+          "300347 behaviour_metric_delta gavel_cd"
+        ]
+      },
+      {
+        "claim": "have $562316s1% increased effectiveness",
+        "labels": [
+          "300347 behaviour_hit_ratio effectiveness",
+          "300347 effect_value 562316e0 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 300347,
     "clause": "In addition, your Gavels now have a 40 yd range.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "your Gavels now have a 40 yd range",
+        "labels": [
+          "300347 behaviour_metric_delta range_in",
+          "300347 behaviour_metric_delta range_out"
+        ]
+      }
+    ]
   },
   {
     "spell": 300348,
@@ -2863,23 +2885,50 @@
   {
     "spell": 704934,
     "clause": "Dealing melee damage now generates a stack of Sunwalker.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "704934 behaviour_metric_delta melee_stack"
+    ]
   },
   {
     "spell": 704934,
     "clause": "In addition, the value of Vow of Light is doubled.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "704934 behaviour_metric_delta vow_value"
+    ]
   },
   {
     "spell": 704934,
     "clause": "Reduces the cast time and mana cost of your next Shine by $s1% for $d,",
-    "labels": [
-      "704934 effect_value 800601e0 #0",
-      "704934 spell_duration 800601 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the cast time of your next Shine by $s1%",
+        "labels": [
+          "704934 behaviour_metric_delta shine_held",
+          "704934 behaviour_metric_delta shine_done"
+        ]
+      },
+      {
+        "claim": "mana cost of your next Shine by $s1%",
+        "labels": [
+          "704934 behaviour_metric_delta shine_cost"
+        ]
+      },
+      {
+        "claim": "your next Shine",
+        "labels": [
+          "704934 behaviour_metric_delta shine_consumes"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "704934 spell_duration 800601 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 704934,
@@ -3119,10 +3168,23 @@
   {
     "spell": 707081,
     "clause": "and then bouncing to up to $657125i additional enemies, dealing reduced damage with each strike.",
-    "labels": [
-      "707081 effect_value #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "bouncing to up to $657125i additional enemies",
+        "labels": [
+          "707081 behaviour_metric_delta chain_count"
+        ]
+      },
+      {
+        "claim": "dealing reduced damage with each strike",
+        "labels": [
+          "707081 behaviour_metric_delta strike_0",
+          "707081 behaviour_metric_delta strike_1",
+          "707081 behaviour_metric_delta strike_5"
+        ]
+      }
+    ]
   },
   {
     "spell": 707414,

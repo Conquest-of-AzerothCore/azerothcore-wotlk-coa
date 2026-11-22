@@ -9910,6 +9910,558 @@
         ]
       },
       "observe_source": "572067 DurationIndex 8 = 15000 ms ($572067d): the aura is gone from the dummy 15600 ms after the cast (excludes a duration 10% long, 16500 ms). Reference search 2026-11-22: coa-history spell 806980: coa-history spell 806980: SPELL_DAMAGE 510 events in 4 logs, 146 crits, min 17 max 33355 mean 3458 (players' gear differs; no figure decides); the ascension-data snapshot rows read (advancement, class_spell, talent index) carry the acquisition of 806980 and no value; merged-PR and git log search --grep 806980: nothing beyond the tooltip and the DBC for the value (the first author's search, b4b report)."
+    },
+    {
+      "spell": 704934,
+      "kind": "metric_delta",
+      "gate_spell": 704934,
+      "name": "Sunwalker (a Gavel hit gives a stack)",
+      "variant": "melee_stack",
+      "label_suffix": "melee_stack",
+      "quote": "Dealing melee damage now generates a stack of Sunwalker.",
+      "trigger_spell": 802561,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800601
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "704934 Effect[0] aura 42 PROC_TRIGGER_SPELL 800601 (AscensionSunClericEvents.cpp:123: damage dealt by a melee hit); 800601 StackAmount 5 (Spell.dbc). Gavel of Wrath 802561 (SpellFamilyName 33, melee) is cast once at the dummy in both phases, 704934 learned between them (control phase: no passive, 0 stacks): one hit, one stack. Ledger clause 258 is the text of 800601 (Reduces the cast time and mana cost of your next Shine by $s1% for $d), which the tooltip of 704934 carries only as a link; the quote field names the 704934 sentence the entry hangs under. Reference search 2026-11-22: server DBC description and effects of 704934 and 800601; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. "
+    },
+    {
+      "spell": 704934,
+      "name": "Sunwalker (Vow of Light value doubled)",
+      "kind": "metric_delta",
+      "variant": "vow_value",
+      "label_suffix": "vow_value",
+      "quote": "In addition, the value of Vow of Light is doubled.",
+      "trigger_spell": 804247,
+      "gate_spell": 704934,
+      "target": "caster",
+      "setup_casts": [
+        807547
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "strike": {
+        "spell": 41394,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 505197,
+        "target": "caster"
+      },
+      "before_expected": 50,
+      "expected": 150,
+      "expected_ratio": 3.0,
+      "tolerance": 0.15,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "704934 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 99 (+1 = +100%), the same effect as 807964 Soul of Light Effect[1] on Vow of Light 807750 (Effect[0] BasePoints 9 + 1 = 10). The script (AscensionSunClericEvents.cpp:236-240) heals the nearest ally, the caster alone, for Amount(807750) x 2 when the caster holds 704934. Vow of Light 807547 is cast on the caster in both phases; Light of the Naaru 41394 (1100 Holy) hits the caster (50% health) and the Vow's copy heal 505197 is read. spell_heal_total sums every heal event since the scenario started, so the second reading carries the first: (H + 2H) / H = 3.0 if the value is doubled, 2.0 if not (tolerance 0.15, the 5-point band on +100%). Control: the phase without 704934. Crit forced out by 984954. Fixture 823764 is not applied (its second effect doubles the Vow value). Ledger clause 258 is the text of 800601 (Reduces the cast time and mana cost of your next Shine by $s1% for $d), which the tooltip of 704934 carries only as a link; the quote field names the 704934 sentence the entry hangs under. Reference search 2026-11-22: server DBC description and effects of 704934 and 800601; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. "
+    },
+    {
+      "spell": 704934,
+      "kind": "metric_delta",
+      "gate_spell": 704934,
+      "trigger_spell": 800357,
+      "target": "caster",
+      "setup_casts": [
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "dummy_distance": 5,
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 4500,
+      "name": "Sunwalker (Shine cast still running)",
+      "variant": "shine_held",
+      "label_suffix": "shine_held",
+      "quote": "Dealing melee damage now generates a stack of Sunwalker.",
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 1170,
+      "game_time": {
+        "after": [
+          1165,
+          1180
+        ]
+      },
+      "observe_source": "800601 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -21 (-20, $s1) on class mask word 1 = 262144 = Shine 800357's SpellFamilyFlags[1]. Shine 800357 has CastingTimeIndex 16 = 1500 ms (SpellCastTimes), so one stack makes it 1200 ms. A Gavel of Wrath 802561 hit before each cast gives the stack (after phase, 704934 learned between the phases); the caster's Shine is read still running 1170 ms after it starts (a cast longer than 1170 ms: the cut is under 330 ms, which excludes a 20% cut made 10% larger, 22% = 330 ms). The control phase (no passive, 1500 ms) reads still running. Ledger clause 258 is the text of 800601 (Reduces the cast time and mana cost of your next Shine by $s1% for $d), which the tooltip of 704934 carries only as a link; the quote field names the 704934 sentence the entry hangs under. Reference search 2026-11-22: server DBC description and effects of 704934 and 800601; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. "
+    },
+    {
+      "spell": 704934,
+      "kind": "metric_delta",
+      "gate_spell": 704934,
+      "trigger_spell": 800357,
+      "target": "caster",
+      "setup_casts": [
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "dummy_distance": 5,
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 4500,
+      "name": "Sunwalker (Shine cast finished)",
+      "variant": "shine_done",
+      "label_suffix": "shine_done",
+      "quote": "Dealing melee damage now generates a stack of Sunwalker.",
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1235,
+      "game_time": {
+        "after": [
+          1230,
+          1245
+        ]
+      },
+      "observe_source": "Companion of shine_held: the Shine cast with one stack is read finished 1235 ms after it starts (a cast shorter than 1235 ms: the cut is over 265 ms, which excludes a 20% cut made 10% smaller, 18% = 270 ms); together the two reads put the cast time between 1170 and 1235 ms around the tooltip's 1200 ms (20% of 1500 ms), excluding a cast time 10% off on both sides (1080 and 1320 ms). Control phase: still running at 1500 ms. Ledger clause 258 is the text of 800601 (Reduces the cast time and mana cost of your next Shine by $s1% for $d), which the tooltip of 704934 carries only as a link; the quote field names the 704934 sentence the entry hangs under. Reference search 2026-11-22: server DBC description and effects of 704934 and 800601; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. "
+    },
+    {
+      "spell": 704934,
+      "kind": "metric_delta",
+      "gate_spell": 704934,
+      "trigger_spell": 800357,
+      "target": "caster",
+      "setup_casts": [
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "dummy_distance": 5,
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 4500,
+      "name": "Sunwalker (Shine mana spent)",
+      "variant": "shine_cost",
+      "label_suffix": "shine_cost",
+      "quote": "Dealing melee damage now generates a stack of Sunwalker.",
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 967.73,
+      "expected": 1019.52,
+      "tolerance": 1.5,
+      "wait_ms": 2500,
+      "observe_source": "800601 Effect[2] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST), BasePoints -21 (-20, $s1) on the Shine mask. Shine 800357 costs ManaCostPercentage 19 of the class base mana 1363 (player_class_stats class 27 level 60) = 258.97; Gavel of Wrath 802561 costs 10% = 136.3 (the setup cast, in both phases). Mana is set to 1363 before each cast, regeneration off, read after the Shine completes: 1363 - 136.3 - 258.97 = 967.73 without the stack (control phase), 1363 - 136.3 - 207.18 = 1019.52 with it; tolerance 1.5 for the integer costs. Ledger clause 258 is the text of 800601 (Reduces the cast time and mana cost of your next Shine by $s1% for $d), which the tooltip of 704934 carries only as a link; the quote field names the 704934 sentence the entry hangs under. Reference search 2026-11-22: server DBC description and effects of 704934 and 800601; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. "
+    },
+    {
+      "spell": 704934,
+      "kind": "metric_delta",
+      "gate_spell": 704934,
+      "trigger_spell": 800357,
+      "target": "caster",
+      "setup_casts": [
+        802561
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "dummy_distance": 5,
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 1363,
+      "expire_ms": 4500,
+      "name": "Sunwalker (Shine consumes the stack)",
+      "variant": "shine_consumes",
+      "label_suffix": "shine_consumes",
+      "quote": "Dealing melee damage now generates a stack of Sunwalker.",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800601
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 2500,
+      "setup_only_after": true,
+      "observe_source": "The after phase gives the stack through the Gavel setup (setup_only_after; one stack proven by melee_stack in the same pair), then casts Shine and reads the stacks of 800601 after the cast completes: 0 (the stack is spent, 'your next Shine'). AscensionSunClericAbilities.cpp:40 selects Shine 800357 for aura 800601. Control: the stack read before any Shine is melee_stack's 1. Ledger clause 258 is the text of 800601 (Reduces the cast time and mana cost of your next Shine by $s1% for $d), which the tooltip of 704934 carries only as a link; the quote field names the 704934 sentence the entry hangs under. Reference search 2026-11-22: server DBC description and effects of 704934 and 800601; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC. "
+    },
+    {
+      "spell": 300347,
+      "kind": "metric_delta",
+      "gate_spell": 300347,
+      "expire_ms": 500,
+      "trigger_spell": 802561,
+      "target": "dummy",
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 802561
+      },
+      "before_expected": 97,
+      "wait_ms": 500,
+      "measure_actor": "caster",
+      "name": "Battle Cleric (Gavel cast at 38 yd)",
+      "variant": "range_in",
+      "label_suffix": "range_in",
+      "quote": "In addition, your Gavels now have a 40 yd range.",
+      "dummy_distance": 38,
+      "expected": 0,
+      "observe_source": "300347 Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 5 (SPELLMOD_RANGE), BasePoints 34 (+1 = 35 yd) on the Gavels; Gavel of Wrath 802561 has RangeIndex 2 (SpellRange 'Combat Range', RangeMax 5 yd, melee flag). Gavel is cast at a dummy 38 yd away: refused with SPELL_FAILED_OUT_OF_RANGE (97, SharedDefines.h:1147) without the passive (control phase) and accepted (0) with it, so the range is over 38 yd (excludes 36 yd, 10% under 40). Reference search 2026-11-22: server DBC 300347, 562316, 680639 and 802561 effects; AscensionSunClericBattleCleric.cpp; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 300347,
+      "kind": "metric_delta",
+      "gate_spell": 300347,
+      "expire_ms": 500,
+      "trigger_spell": 802561,
+      "target": "dummy",
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 802561
+      },
+      "before_expected": 97,
+      "wait_ms": 500,
+      "measure_actor": "caster",
+      "name": "Battle Cleric (Gavel cast at 42 yd)",
+      "variant": "range_out",
+      "label_suffix": "range_out",
+      "quote": "In addition, your Gavels now have a 40 yd range.",
+      "dummy_distance": 42,
+      "expected": 97,
+      "observe_source": "Companion of range_in: the Gavel is cast at a dummy 42 yd away and is still refused with SPELL_FAILED_OUT_OF_RANGE (97) with the passive (the control phase is refused as well), so the range is under 42 yd (excludes 44 yd, 10% over 40). Together with range_in: between 38 and 42 yd around the tooltip's 40 yd. Reference search 2026-11-22: server DBC 300347, 562316, 680639 and 802561 effects; AscensionSunClericBattleCleric.cpp; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 300347,
+      "kind": "metric_delta",
+      "gate_spell": 300347,
+      "expire_ms": 500,
+      "name": "Battle Cleric (Paragon cooldown 1 min)",
+      "variant": "paragon_cd",
+      "label_suffix": "paragon_cd",
+      "quote": "Paragon now has a 1 min cooldown",
+      "trigger_spell": 680639,
+      "target": "caster",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 680639
+      },
+      "before_expected": 299500,
+      "expected": 59500,
+      "tolerance": 1500,
+      "wait_ms": 500,
+      "observe_source": "Paragon 680639 RecoveryTime 300000 and CategoryRecoveryTime 300000 (Spell.dbc); the passive's script (AscensionSunClericBattleCleric.cpp:30-31) takes 240000 ms off it when Paragon applies. One cast of Paragon, the remaining cooldown read 500 ms later: 300000 - 500 = 299500 without the passive (control phase), 60000 - 500 = 59500 with it; tolerance 1500 ms (2.5%) excludes a cooldown 10% (6000 ms) off on both sides. Reference search 2026-11-22: server DBC 300347, 562316, 680639 and 802561 effects; AscensionSunClericBattleCleric.cpp; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 300347,
+      "kind": "metric_delta",
+      "gate_spell": 300347,
+      "expire_ms": 500,
+      "name": "Battle Cleric (Gavel has no cooldown under Paragon)",
+      "variant": "gavel_cd",
+      "label_suffix": "gavel_cd",
+      "quote": "empowers your Gavels, causing them to have no cooldown",
+      "trigger_spell": 802561,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "setup_casts": [
+        680639
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "measure_actor": "caster",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 802561
+      },
+      "before_expected": 4500,
+      "expected": 0,
+      "tolerance": 250,
+      "wait_ms": 500,
+      "observe_source": "562316 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -101 (-100%) on the Gavels' class mask (SpellFamilyFlags[1] 32); the script adds it while Paragon and 300347 are both on the caster. Gavel of Wrath 802561 has CategoryRecoveryTime 5000 (category 1207, 'Shares a cooldown with other Gavels'). Paragon is cast in both phases; one Gavel is then cast and its remaining cooldown read 500 ms later: 5000 - 500 = 4500 with Paragon alone (control phase, no passive), 0 with the passive; tolerance 250 ms (5%) excludes a cooldown 10% (500 ms) off on both sides. Reference search 2026-11-22: server DBC 300347, 562316, 680639 and 802561 effects; AscensionSunClericBattleCleric.cpp; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 300347,
+      "name": "Battle Cleric (Gavel effectiveness under Paragon)",
+      "kind": "hit_ratio",
+      "variant": "effectiveness",
+      "label_suffix": "effectiveness",
+      "quote": "causing them to have no cooldown and have $562316s1% increased effectiveness.",
+      "expected": 1.5,
+      "observe_spell": 802561,
+      "control": {
+        "casts": [
+          680639
+        ]
+      },
+      "treatment": {
+        "learn": [
+          300347
+        ],
+        "casts": [
+          680639
+        ]
+      },
+      "critical": false,
+      "trials": 40,
+      "cast_power": 1000,
+      "expected_source": "$562316s1 = 50 (562316 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8, SPELLMOD_ALL_EFFECTS, BasePoints 49, +1 = +50%) on the Gavels' mask: the ratio of Gavel of Wrath damage with the passive to the same cast without it, both arms under a real Paragon cast, is 1.5. The tolerance band is 5% of 50, 2.5 points.",
+      "observe_source": "Gavel of Wrath 802561 damage read in two arms of one scenario, both after a real Paragon 680639 cast; the treatment arm learns 300347 first so the script's helper 562316 is applied. Control arm: Paragon without the passive. Reference search 2026-11-22: server DBC 300347, 562316, 680639 and 802561 effects; AscensionSunClericBattleCleric.cpp; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 707081,
+      "kind": "metric_delta",
+      "gate_spell": 707081,
+      "quote": "and then bouncing to up to $657125i additional enemies, dealing reduced damage with each strike.",
+      "trigger_spell": 500154,
+      "target": "dummy",
+      "dummy_distance": 6,
+      "area_dummies": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "setup_casts": [
+        803719,
+        804584
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "name": "Solar Empowerment (chain strikes counted)",
+      "variant": "chain_count",
+      "label_suffix": "chain_count",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 657125,
+        "target": "dummy"
+      },
+      "area_sum": true,
+      "expected": 6,
+      "observe_source": "657125 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, EffectChainTarget 5; the tooltip states the primary enemy and up to $657125i = 5 additional enemies: 6 strikes in all. The strikes of 657125 are counted over the eight dummies (area_sum): 0 in the control phase, exactly 6 with 707081 (excludes 5 and 7). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 707081,
+      "kind": "metric_delta",
+      "gate_spell": 707081,
+      "quote": "and then bouncing to up to $657125i additional enemies, dealing reduced damage with each strike.",
+      "trigger_spell": 500154,
+      "target": "dummy",
+      "dummy_distance": 6,
+      "area_dummies": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "setup_casts": [
+        803719,
+        804584
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "name": "Solar Empowerment (primary strike damage)",
+      "variant": "strike_0",
+      "label_suffix": "strike_0",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 657125,
+        "target": "dummy"
+      },
+      "expected": 98,
+      "tolerance": 5,
+      "observe_source": "657125 EffectDamageMultiplier[0] = 0.8: each further strike deals 0.8 times the previous one, so strike 1 deals the tooltip value 98 (the formula at the reference stats, read by the packet) x 0.8^0 = 98. The damage total of 657125 on dummy is read 1000 ms after the cast: 0 in the control phase. Tolerance 5 is 5% of the value (G-19). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 707081,
+      "kind": "metric_delta",
+      "gate_spell": 707081,
+      "quote": "and then bouncing to up to $657125i additional enemies, dealing reduced damage with each strike.",
+      "trigger_spell": 500154,
+      "target": "dummy",
+      "dummy_distance": 6,
+      "area_dummies": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "setup_casts": [
+        803719,
+        804584
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "name": "Solar Empowerment (second strike reduced)",
+      "variant": "strike_1",
+      "label_suffix": "strike_1",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 657125,
+        "target": "area1"
+      },
+      "expected": 78.4,
+      "tolerance": 4,
+      "observe_source": "657125 EffectDamageMultiplier[0] = 0.8: each further strike deals 0.8 times the previous one, so strike 2 deals the tooltip value 98 (the formula at the reference stats, read by the packet) x 0.8^1 = 78.4. The damage total of 657125 on area1 is read 1000 ms after the cast: 0 in the control phase. Tolerance 4 is 5% of the value (G-19). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 707081,
+      "kind": "metric_delta",
+      "gate_spell": 707081,
+      "quote": "and then bouncing to up to $657125i additional enemies, dealing reduced damage with each strike.",
+      "trigger_spell": 500154,
+      "target": "dummy",
+      "dummy_distance": 6,
+      "area_dummies": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "setup_casts": [
+        803719,
+        804584
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "name": "Solar Empowerment (sixth strike reduced)",
+      "variant": "strike_5",
+      "label_suffix": "strike_5",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 657125,
+        "target": "area5"
+      },
+      "expected": 32.11,
+      "tolerance": 1.6,
+      "observe_source": "657125 EffectDamageMultiplier[0] = 0.8: each further strike deals 0.8 times the previous one, so strike 6 deals the tooltip value 98 (the formula at the reference stats, read by the packet) x 0.8^5 = 32.11. The damage total of 657125 on area5 is read 1000 ms after the cast: 0 in the control phase. Tolerance 1.6 is 5% of the value (G-19). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
     }
   ],
   "player_observations": [],
