@@ -34,6 +34,7 @@ class LastApplicationSpec:
     no_refresh: bool = False
     forced_roll: int | None = None
     trigger_target: str = TARGET
+    poll_before_cast: bool = False
 
 
 AURA_HOLDERS = {False: TARGET, True: CASTER}
@@ -48,11 +49,12 @@ def last_application_spec(entry: dict) -> LastApplicationSpec:
                                entry.get('caster', False), repeat_of(entry.get('repeat')),
                                entry.get('no_refresh', False),
                                None if entry.get('forced_roll') is None else int(entry['forced_roll']),
-                               entry.get('trigger_target', TARGET))
+                               entry.get('trigger_target', TARGET), entry.get('poll_before_cast', False))
     if spec.trigger_target not in (TARGET, CASTER):
         raise ValueError(f'{spec.spell} last_application_expiry casts its trigger at {TARGET} or {CASTER}')
-    if not isinstance(spec.caster, bool) or not isinstance(spec.no_refresh, bool):
-        raise ValueError(f'{spec.spell} last_application_expiry caster and no_refresh are true or false')
+    if not all(isinstance(flag, bool) for flag in (spec.caster, spec.no_refresh, spec.poll_before_cast)):
+        raise ValueError(f'{spec.spell} last_application_expiry caster, no_refresh and poll_before_cast are true or '
+                         f'false')
     if spec.no_refresh and spec.repeat is None:
         raise ValueError(f'{spec.spell} last_application_expiry judges no refresh only over repeated trigger casts')
     if spec.forced_roll is not None and spec.repeat is None:
@@ -106,7 +108,7 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
                      measurement(row[2], holder, 'aura', spell=spec.aura)]
             return reads + ([measurement(row[3], holder, 'aura_stacks', spell=spec.aura)] if spec.no_refresh else [])
 
-        if spec.no_refresh:
+        if spec.no_refresh or spec.poll_before_cast:
             steps += poll()
         steps.append(cast)
         while elapsed <= window_ms:
@@ -145,6 +147,9 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
     if spec.repeat is not None:
         scenario['contract'] += (f' {spec.trigger_spell} is cast up to {spec.repeat[0]} times per arm (inside its '
                                  f'poll window), {spec.repeat[1]} ms apart.')
+    if spec.poll_before_cast and not spec.no_refresh:
+        scenario['contract'] += (' One poll precedes the cast, so an application at the cast itself is seen as a '
+                                 'rise from that read.')
     if spec.no_refresh:
         scenario['contract'] += (' Its stack count is read at every poll, and one poll precedes the first cast: no '
                                  'refresh means one counted application while the stacks still rise, the duration '
