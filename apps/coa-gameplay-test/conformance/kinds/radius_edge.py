@@ -17,6 +17,15 @@ RADIUS_EDGE_REACH_TOLERANCE_YD = 0.01
 PRIMARY, INSIDE, OUTSIDE = 'primary', 'inside', 'outside'
 DUMMIES = (PRIMARY, INSIDE, OUTSIDE)
 ARMS = ('control', 'treatment')
+LEEWAY_TARGETS = frozenset({15, 20, 56})
+LEEWAY_BONUS_RANGE_YD = 2.66
+LEEWAY_MIN_MOVE_SPEED = 4.97
+PLAYER_BASE_RUN_SPEED = 7.0
+LEEWAY_RULE = ('Spell.cpp:1388-1394 adds GetLeewayBonusRadius to TARGET_UNIT_SRC_AREA_ENEMY, CASTER_AREA_PARTY and '
+               'CASTER_AREA_RAID; Object.cpp:1787-1808 returns LEEWAY_BONUS_RANGE 2.66 yd for a player whose speed '
+               'exceeds LEEWAY_MIN_MOVE_SPEED 4.97 (ObjectDefines.h:50-51), the run speed rate times 7.0 '
+               '(playerBaseMoveSpeed, Unit.cpp:107-110) in run mode; run mode is required by construction: the '
+               'scenario has no movement step and the harness never sets a walking flag')
 
 
 @dataclass(frozen=True)
@@ -43,6 +52,7 @@ class RadiusEdgeSpec:
     primary_yd: float = RADIUS_EDGE_PRIMARY_YD
     center_reach: float = 0.0
     hit_metric: str = RADIUS_EDGE_METRIC
+    leeway: bool = False
 
 
 def radius_edge_spec(entry: dict) -> RadiusEdgeSpec:
@@ -57,7 +67,10 @@ def radius_edge_spec(entry: dict) -> RadiusEdgeSpec:
                           entry.get('label_suffix', 'radius_edge'), entry.get('cast_at', PRIMARY),
                           radius_edge_corpse(entry.get('corpse')),
                           float(entry.get('primary_yd', RADIUS_EDGE_PRIMARY_YD)),
-                          float(entry.get('center_reach', 0.0)), entry.get('hit_metric', RADIUS_EDGE_METRIC))
+                          float(entry.get('center_reach', 0.0)), entry.get('hit_metric', RADIUS_EDGE_METRIC),
+                          entry.get('leeway', False))
+    if not isinstance(spec.leeway, bool) or (spec.leeway and spec.caster_entry is not None):
+        raise ValueError(f'{spec.spell} radius_edge leeway is true or false and needs the player as the caster')
     if spec.cast_at not in (PRIMARY, CASTER):
         raise ValueError(f'{spec.spell} radius_edge casts at the primary or the caster, not {spec.cast_at!r}')
     if spec.hit_metric not in (RADIUS_EDGE_METRIC, 'aura'):
@@ -79,8 +92,13 @@ def radius_edge_corpse(raw: dict | None) -> tuple[int, int, int, float] | None:
     return int(raw['entry']), int(raw['health']), int(raw['kill_spell']), float(raw['reach'])
 
 
+def radius_edge_leeway(run_speed_rate: float) -> float:
+    return LEEWAY_BONUS_RANGE_YD if run_speed_rate * PLAYER_BASE_RUN_SPEED > LEEWAY_MIN_MOVE_SPEED else 0.0
+
+
 def radius_edge_offsets(spec: RadiusEdgeSpec) -> dict[str, float]:
     edge = spec.radius + spec.dummy_reach + (spec.corpse[3] if spec.corpse else 0.0) + spec.center_reach
+    edge += radius_edge_leeway(1.0) if spec.leeway else 0.0
     return {PRIMARY: 0.0, INSIDE: edge - spec.margin_yd, OUTSIDE: edge + spec.margin_yd}
 
 
@@ -92,6 +110,8 @@ def radius_edge_scenario(class_file: dict, spec: RadiusEdgeSpec) -> tuple[dict, 
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, KIND, spec.quote, spec.radius)
     facts = facts_of(records, spec.cast_spell)
+    if spec.leeway and not LEEWAY_TARGETS & {*facts.target_a, *facts.target_b}:
+        raise ValueError(f'{spec.cast_spell} has no area target that takes the leeway (TargetA/B 15, 20 or 56)')
     offsets = radius_edge_offsets(spec)
     creatures = [{**creature_fixture(class_file), 'id': dummy, 'distance': spec.primary_yd + offsets[dummy]}
                  for dummy in DUMMIES]
@@ -114,6 +134,8 @@ def radius_edge_scenario(class_file: dict, spec: RadiusEdgeSpec) -> tuple[dict, 
                      measurement(label(f'{dummy} position_z'), dummy, 'position_z')]
     geometry += [measurement(label(f'{dummy} distance_2d primary'), dummy, 'distance_2d', target=PRIMARY)
                  for dummy in (INSIDE, OUTSIDE)]
+    if spec.leeway:
+        geometry.append(measurement(label(f'{CASTER} run_speed_rate'), CASTER, 'run_speed_rate'))
 
     def arm(name: str) -> list[dict]:
         steps = [step for spell in spec.setup_casts for step in hit_ratio_cast(records, spell, CASTER, CASTER)]
@@ -151,7 +173,11 @@ def radius_edge_scenario(class_file: dict, spec: RadiusEdgeSpec) -> tuple[dict, 
                         f'radii).' if spec.corpse else '')
                      + (f' The primary is a living creature whose object size {spec.center_reach:g} yd the edge adds '
                         f'too (WorldObject::IsWithinDistInMap, both radii); it stands {spec.primary_yd:g} yd from the '
-                        f'caster.' if spec.center_reach else '')),
+                        f'caster.' if spec.center_reach else '')
+                     + (f' The edge adds the player caster\'s area leeway {radius_edge_leeway(1.0):g} yd at the base '
+                        f'run speed rate 1: '
+                        f'{LEEWAY_RULE}; the caster\'s run speed rate is read with the geometry and the judge '
+                        f'recomputes the leeway from it.' if spec.leeway else '')),
         'players': [player_fixture(class_file)],
         'creatures': creatures,
         'steps': steps}
@@ -163,6 +189,8 @@ def radius_edge_scenario(class_file: dict, spec: RadiusEdgeSpec) -> tuple[dict, 
              'arms': {arm_name: {dummy: label(f'{arm_name} {dummy}') for dummy in DUMMIES} for arm_name in ARMS}}
     if spec.center_reach > 0:
         model['center_struck'] = True
+    if spec.leeway:
+        model['leeway'] = label(f'{CASTER} run_speed_rate')
     expectation = Expectation(f'{spec.spell} {BEHAVIOUR_METRIC_DELTA} {spec.label_suffix}', BEHAVIOUR_METRIC_DELTA,
                               spec.spell, spec.hit_spell, None, f'{spec.radius:g}',
                               prose_rule(entry.quote, spec.spell), model)
@@ -172,7 +200,8 @@ def radius_edge_scenario(class_file: dict, spec: RadiusEdgeSpec) -> tuple[dict, 
 def radius_edge_verdict(base, run, model: dict):
     from compare import missing_measurement
     labels = [*model['reach'].values(), *model['height'].values(), *model['distance'].values(),
-              *(label for arm in model['arms'].values() for label in arm.values())]
+              *(label for arm in model['arms'].values() for label in arm.values()),
+              *([model['leeway']] if 'leeway' in model else [])]
     missing = next((label for label in labels if run.values.get(label) is None), None)
     if missing is not None:
         return replace(base, explanation=missing_measurement(run, missing))
@@ -182,7 +211,9 @@ def radius_edge_verdict(base, run, model: dict):
     span = {dummy: hypot(value[model['distance'][dummy]], value[model['height'][dummy]] - primary_z)
             for dummy in (INSIDE, OUTSIDE)}
     center = value[model['reach'][PRIMARY]] if model.get('center_size') else 0.0
-    edge = {dummy: radius + center + value[model['reach'][dummy]] for dummy in (INSIDE, OUTSIDE)}
+    rate = value[model['leeway']] if 'leeway' in model else None
+    leeway = radius_edge_leeway(rate) if rate is not None else 0.0
+    edge = {dummy: radius + center + leeway + value[model['reach'][dummy]] for dummy in (INSIDE, OUTSIDE)}
     if not (span[INSIDE] < edge[INSIDE] and span[OUTSIDE] >= edge[OUTSIDE]):
         return replace(base, status='unmeasured',
                        explanation=f'the layout does not bracket the edge: inside {span[INSIDE]:.2f} yd against '
@@ -191,7 +222,10 @@ def radius_edge_verdict(base, run, model: dict):
     treatment = {dummy: value[label] for dummy, label in model['arms']['treatment'].items()}
     layout = (f'inside {span[INSIDE]:.2f} yd and outside {span[OUTSIDE]:.2f} yd from the primary, edge '
               f'{radius:g} + reach {value[model["reach"][INSIDE]]:g}'
-              + (f' + center {center:g}' if model.get('center_size') else '') + ' yd')
+              + (f' + center {center:g}' if model.get('center_size') else '')
+              + (f' + leeway {leeway:g} (caster run speed rate {rate:g} x {PLAYER_BASE_RUN_SPEED:g} = '
+                 f'{rate * PLAYER_BASE_RUN_SPEED:g} yd/s against {LEEWAY_MIN_MOVE_SPEED:g}, run mode required by '
+                 f'construction: no movement step, no walking flag)' if rate is not None else '') + ' yd')
     if treatment[PRIMARY] < 1 and (not model.get('center_size') or model.get('center_struck')):
         return replace(base, status='unmeasured', explanation=f'the treatment never struck the primary; {layout}')
     if any(control.values()):
