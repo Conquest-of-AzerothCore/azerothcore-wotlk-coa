@@ -8745,9 +8745,10 @@
         "target": "caster"
       },
       "before_expected": 0,
-      "expected": 100,
-      "after_at_least": 100,
-      "observe_source": "806159 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9999 + 1 = 10000, EffectSpellClassMask word 2 = 512 (Illumination 500143). The caster's critical strike chance of Illumination is read before (control, 0) and after a real cast of 806159: at least 100 (a guarantee needs 100 or more)."
+      "expected": 10000,
+      "observe_source": "806159 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9999 + 1 = 10000, EffectSpellClassMask word 2 = 512 (Illumination 500143). The caster's critical strike chance of Illumination is read before (control) and after a real cast of 806159: the gain is 10000 points (the flat modifier), far above the 100 a guarantee needs; the base value before (about 4.7) is not stated, only the gain.",
+      "expected_gain": 10000,
+      "tolerance": 0.01
     },
     {
       "spell": 806159,
@@ -8814,23 +8815,22 @@
       "quote": "Increases the effectiveness of your Devotions by $s2%.",
       "trigger_spell": 300859,
       "gate_spell": 707767,
-      "target": "caster",
+      "target": "ally",
       "metric": "attack_power",
       "fields": {},
-      "before_expected": 105,
+      "before_expected": 70,
       "expected": 112,
       "tolerance": 0.5,
       "wait_ms": 500,
       "expire_ms": 500,
-      "after_auras": [
-        [
-          300859,
-          0,
-          "caster",
-          "caster"
-        ]
-      ],
-      "observe_source": "707767 Devotee Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 32768, the SpellFamilyFlags[1] of every Devotion (24 spells); Effect[0] is made a dummy at load (AscensionSunClericContracts.cpp:174-175). Devotion of Dawn 300859 Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, BasePoints 34 + 1 = 35. The caster's attack power is 70 (reference_stats) plus 35 after a real cast of 300859 without the talent (105, the control), and plus 35 x 1.20 = 42 after a real learn of 707767 and a new cast (112) (the first aura is removed before the second cast). One of three tested shapes of the 24 Devotions (G-23): attack power here, spell power and cost reduction in their own entries, every one a distinct aura type under the one mask."
+      "observe_source": "707767 Devotee Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 32768, the SpellFamilyFlags[1] of every Devotion (24 spells); Effect[0] is made a dummy at load (AscensionSunClericContracts.cpp:174-175). Devotion of Dawn 300859 Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, BasePoints 34 + 1 = 35. The grouped ally's attack power is 70 (reference_stats) before any cast (the control); after a real learn of 707767 and a real cast of 300859 at the ally it is 70 + 35 x 1.20 = 112, a gain of 42 within 0.5, which excludes the 35 of an unchanged Devotion. One of three tested shapes of the 24 Devotions (G-23): attack power here, spell power and cost reduction in their own entries, every one a distinct aura type under the one mask.",
+      "measure_actor": "ally",
+      "disable_regeneration": true,
+      "ally_arm": {
+        "allies": 1
+      },
+      "cast_in_before": false,
+      "expected_gain": 42
     },
     {
       "spell": 707767,
@@ -8841,25 +8841,24 @@
       "quote": "Increases the effectiveness of your Devotions by $s2%.",
       "trigger_spell": 300862,
       "gate_spell": 707767,
-      "target": "caster",
+      "target": "ally",
       "metric": "spell_power",
       "fields": {
         "school": 1
       },
-      "before_expected": 28,
+      "before_expected": 0,
       "expected": 33.6,
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 500,
-      "after_auras": [
-        [
-          300862,
-          0,
-          "caster",
-          "caster"
-        ]
-      ],
-      "observe_source": "707767 Devotee Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 32768, the SpellFamilyFlags[1] of every Devotion (24 spells); Effect[0] is made a dummy at load (AscensionSunClericContracts.cpp:174-175). Devotion of Radiance 300862 Effect[0] aura 345, BasePoints 27 + 1 = 28 (spell power). The caster's Holy spell power is 0 in the reference and 28 after a real cast of 300862 without the talent (the control), 28 x 1.20 = 33.6 after a real learn of 707767 and a new cast (the first aura removed before it), within 1 (excludes +10% and +30%)."
+      "observe_source": "707767 Devotee Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 1 = 32768, the SpellFamilyFlags[1] of every Devotion (24 spells); Effect[0] is made a dummy at load (AscensionSunClericContracts.cpp:174-175). Devotion of Radiance 300862 Effect[0] aura 345, BasePoints 27 + 1 = 28 (spell power). The grouped ally's Holy spell power is 0 before any cast (the control) and 28 x 1.20 = 33.6 after a real learn of 707767 and a real cast of 300862 at the ally, within 1 (excludes the 28 of an unchanged Devotion).",
+      "measure_actor": "ally",
+      "disable_regeneration": true,
+      "ally_arm": {
+        "allies": 1
+      },
+      "cast_in_before": false,
+      "expected_gain": 33.6
     },
     {
       "spell": 300621,
@@ -8925,6 +8924,203 @@
       "expire_ms": 500,
       "cast_power": 1363,
       "observe_source": "560111 Blessed Magic Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL (706870, which triggers 2414058); the reset is scripted: OnSpellCast of Horusath Blast with the aura calls Reduce(player, 800626, INT32_MAX) (AscensionSunClericAbilities.cpp:236-241). Glorious Execution 800626 has RecoveryTime 8000 ms. It is cast, then Horusath Blast 500154 is cast at the dummy: its remaining cooldown is read (about 6000 ms without the talent, the control, within 1500) and 0 after a real learn of 560111 (within 1500, excludes any remaining cooldown above 1500)."
+    },
+    {
+      "spell": 704935,
+      "name": "Clarity of the Heavens (block value from Intellect)",
+      "kind": "metric_delta",
+      "variant": "block_value",
+      "label_suffix": "block_value",
+      "quote": "Increases your block value by 100% of your Intellect.",
+      "trigger_spell": 805301,
+      "gate_spell": 704935,
+      "target": "caster",
+      "metric": "block_value",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 119,
+      "expected_gain": 119,
+      "tolerance": 1,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "704935 Clarity of the Heavens Effect[0] aura 23 periodic trigger of Miraculous 707776 (BasePoints 19 + 1 = 20 is unused; the script makes 707776 a MOD_SHIELD_BLOCKVALUE aura whose amount is the caster's Intellect: AscensionSunCleric.cpp:385-386, AscensionSunClericContracts.cpp:187-190). The tooltip's 100% of the Intellect is the reference Intellect 119 (reference_stats stat 3): the block value is read before the learn (control) and after, gain 119 within 1."
+    },
+    {
+      "spell": 707517,
+      "name": "Sun Strength (Radiant Cascade critical strike on a Blessed ally)",
+      "kind": "metric_delta",
+      "variant": "bless_ally",
+      "label_suffix": "bless_ally",
+      "quote": "Radiant Cascade is now guaranteed to critically strike on allies affected by Bless.",
+      "trigger_spell": 805301,
+      "gate_spell": 707517,
+      "target": "ally",
+      "cast_in_before": false,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "disable_regeneration": true,
+      "learn": [
+        804247
+      ],
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 500141,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 100,
+      "expected_gain": 100,
+      "tolerance": 0.05,
+      "ally_arm": {
+        "allies": 1,
+        "ally_casts": [
+          804247
+        ],
+        "control_wait": true
+      },
+      "observe_source": "AscensionSunClericAbilities.cpp:203-204: with 707517 known, a Radiant Cascade (named 500141) on a target carrying the caster's Bless sets the crit chance to 100. Bless 804247 is cast at the grouped ally in both phases (a real cast); the scripted crit chance of Radiant Cascade on that ally is read before the learn (control, 0) and after (100)."
+    },
+    {
+      "spell": 707517,
+      "name": "Sun Strength (control: an ally without Bless)",
+      "kind": "metric_delta",
+      "variant": "no_bless",
+      "label_suffix": "no_bless",
+      "quote": "Radiant Cascade is now guaranteed to critically strike on allies affected by Bless.",
+      "trigger_spell": 805301,
+      "gate_spell": 707517,
+      "target": "ally",
+      "cast_in_before": false,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "disable_regeneration": true,
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 500141,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.05,
+      "ally_arm": {
+        "allies": 1,
+        "control_wait": true
+      },
+      "observe_source": "Control of bless_ally: the same scenario without the Bless cast on the ally; the scripted crit chance stays 0 after the learn (AscensionSunClericAbilities.cpp:203-204 needs the caster's Bless on the target)."
+    },
+    {
+      "spell": 560123,
+      "name": "Sunwell (party pulse dispel)",
+      "kind": "periodic_dispel",
+      "quote": "that periodically dispels fear, sleep, and charm effects every $560124T1 sec from allies within $853225a1 yds.",
+      "debuffs": [
+        65931,
+        9159,
+        6358
+      ],
+      "period_ms": 3000,
+      "margin_ms": 100,
+      "party_pulse": {
+        "radius_spell": 853225,
+        "pulses": 2,
+        "near_distance": 38.0,
+        "far_margin": 5.7,
+        "near_limit": 41.5,
+        "note": "Spell.dbc 853225 SpellRadius 23 = 40 yd ($853225a1); a stock area spell adds the target's combat reach 1.5 (Spell.cpp:9437-9441), so the member at 38 yd is inside 41.5 and the member at 45.7 yd (6.2% beyond 43) outside it."
+      },
+      "observe_source": "560123 Sunwell Effect[0] aura 4 dummy; 560124 Sun Well EffectAmplitude[0] 3000 ms ($560124T1) periodic trigger of 853225, whose three SPELL_EFFECT_DISPEL_MECHANIC effects (TARGET_UNIT_SRC_AREA_PARTY, SpellRadius 23 = 40 yd) name mechanics 1 charm, 5 fear and 10 sleep. Fear 65931, Sleep 9159 and Seduction 6358 on a party member are all present without the cast (control), gone 100 ms after the cast and after each 3000 ms period, present 100 ms before each period; a member beyond the radius keeps all three. Same shape as Witching Idol 804051 (Witch Hunter, pair 20261116-183539)."
+    },
+    {
+      "spell": 560123,
+      "name": "Sunwell (lasts 30 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Become an embodiment of the sun for $d",
+      "trigger_spell": 560123,
+      "target": "caster",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 560123
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 28000,
+      "expiry_wait_ms": 3200,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          27500,
+          29000
+        ],
+        "expired": [
+          31000,
+          32500
+        ]
+      },
+      "observe_source": "560123 DurationIndex 9 (30000 ms, $d). One real cast of 560123 on the caster: its aura is present when read 27500..29000 ms of game time after the cast (G-19 band, 10% below 30000 excluded) and gone when read 31000..32500 ms after it (10% above excluded); no cast, no aura (control)."
+    },
+    {
+      "spell": 800612,
+      "name": "Champion of the Sun (lasts 25 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Lasts $d.",
+      "trigger_spell": 800612,
+      "target": "caster",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 800612
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 23500,
+      "expiry_wait_ms": 2700,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          23000,
+          24300
+        ],
+        "expired": [
+          25700,
+          27000
+        ]
+      },
+      "observe_source": "800612 DurationIndex 63 (25000 ms, $d). One real cast of 800612 on the caster: its aura is present when read 23000..24300 ms of game time after the cast (10% below 25000 excluded) and gone when read 25700..27000 ms after it (10% above excluded); no cast, no aura (control)."
+    },
+    {
+      "spell": 800612,
+      "name": "Champion of the Sun (a Holy strike per auto attack)",
+      "kind": "metric_delta",
+      "variant": "holy_strikes",
+      "label_suffix": "holy_strikes",
+      "quote": "causing your melee auto attacks to deal an additional $s1% of the damage dealt as Holy damage.",
+      "target": "dummy",
+      "expire_ms": 500,
+      "attack_swings": 5,
+      "gate_spell": 800612,
+      "gate_cast": true,
+      "trigger_spell": 800612,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 807853,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "expected_gain": 10,
+      "observe_source": "800612 Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT, EffectTriggerSpell 807853 (SCHOOL_DAMAGE at the target), the event 'damage && automatic' (AscensionSunClericEvents.cpp:136). Spec Valkyr (two one-hand 2800 ms weapons, spell_weapon_sets): each phase attacks for 5 swing intervals with both hands, 10 damaging auto attacks (as in the swings entry of 807749), so the count of 807853 damage events is 0 in the phase without the aura (control) and 10 in the phase with it. The 100% amount part is not proven by this entry."
     }
   ],
   "player_observations": [],
