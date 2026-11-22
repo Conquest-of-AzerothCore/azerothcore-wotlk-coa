@@ -4516,6 +4516,7 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
         talent_steps = [{'action': 'set_aura', 'actor': CASTER, 'spell': spec.talent_aura, 'stacks': 0}] + talent_steps
     learned = False
     for arm in cost_gate_selected_arms(spec, base):
+        arm_start = len(expectations)
         if arm.with_talent and (not learned or (spec.talent_aura_each_arm and arm.setup)):
             steps += talent_steps
             learned = True
@@ -4572,6 +4573,7 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
             expectations.append(Expectation(f'{label} cooldown', BEHAVIOUR_CAST_CONDITION, spec.spell,
                                             spec.gated_spell, None, '0', rule,
                                             {'kind': 'cost_gate', 'arm': arm.name, 'reading': 'cooldown_ms'}))
+        expectations[arm_start:] = priming_voided(spec, label, arm.name, expectations[arm_start:])
     if spec.forced_roll is not None:
         released = cost_gate_label(spec, 'released')
         steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': FORCED_CHANCE_OWNER_AURA, 'stacks': 0},
@@ -4630,7 +4632,8 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                        f'are read on the caster and judged against {[state for _, state in spec.priming_reads]}: a '
                        f'precondition check, so a mismatch voids the arm.' if spec.priming_reads else '')
                     + (f' Per-arm priming states (arm_expected): {[list(item) for item in spec.priming_arm_states]} '
-                       f'as [aura, arm, state].' if spec.priming_arm_states else '')
+                       f'as [aura, arm, state]; a priming read off its arm\'s state voids every reading of that arm '
+                       f'(unmeasured).' if spec.priming_arm_states else '')
                     + (f' In the without and with arms, {len(spec.extra_reads)} diagnostic reads (after the attempt or around an '
                        f'after cast) are recorded in the result and never judged.' if spec.extra_reads else '')
                     + (f' A forcing fixture raises the roll of {spec.forced_roll} by {FORCED_CHANCE_PERCENT}% (a '
@@ -4701,6 +4704,13 @@ def cost_gate_priming_arm_states(entry: dict) -> tuple[tuple[int, str, int], ...
                              f'{list(COST_GATE_ARM_NAMES)} to 0 or 1')
         found += [(int(read['spell']), arm, state) for arm, state in states.items()]
     return tuple(found)
+
+
+def priming_voided(spec, label: str, arm: str, expectations: list) -> list:
+    if not spec.priming_arm_states:
+        return expectations
+    void = {f'{label} priming {aura}': priming_state(spec, aura, state, arm) for aura, state in spec.priming_reads}
+    return [replace(item, model={**(item.model or {}), 'priming_void': void}) for item in expectations]
 
 
 def priming_state(spec, aura: int, state: int, arm: str) -> int:

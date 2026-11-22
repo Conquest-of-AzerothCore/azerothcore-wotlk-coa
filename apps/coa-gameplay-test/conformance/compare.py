@@ -4302,6 +4302,9 @@ def behaviour_charge_recharge_verdict(base: Verdict, run: Run, model: dict) -> V
 
 
 def behaviour_cast_gate_verdict(base: Verdict, run: Run, expectation: Expectation) -> Verdict:
+    voided = priming_void(base, run, (expectation.model or {}).get('priming_void'))
+    if voided:
+        return voided
     summed = (expectation.model or {}).get('sum_labels')
     if summed:
         missing = next((label for label in summed if run.values.get(label) is None), None)
@@ -4328,6 +4331,18 @@ def behaviour_cast_gate_verdict(base: Verdict, run: Run, expectation: Expectatio
             if (expectation.model or {}).get('reading') == 'cooldown_ms'
             else 'cast_failure SpellCastResult reason compared exactly to the expected code')
     return exact(base, float(measured), expected, what + limit)
+
+
+def priming_void(base: Verdict, run: Run, states: dict | None) -> Verdict | None:
+    for label, state in (states or {}).items():
+        read = run.values.get(label)
+        if read is None:
+            return replace(base, explanation=missing_measurement(run, label))
+        if float(read) != float(state):
+            return replace(base, status='unmeasured', measured=float(read), expected=float(state),
+                           explanation=f'{label} read {float(read):g}, the arm needs {state}: the priming '
+                                       f'precondition did not hold, so the trial is void')
+    return None
 
 
 def behaviour_immunity_verdict(base: Verdict, run: Run, expectation: Expectation) -> Verdict:

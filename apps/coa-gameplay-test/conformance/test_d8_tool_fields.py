@@ -217,19 +217,35 @@ class PrimingArmExpectedTests(unittest.TestCase):
         self.assertEqual({arm: e.displayed for arm, e in arms.items()},
                          {'without': '1', 'with': '1', 'unset': '0', 'beyond': '1'})
 
-    def test_a_mutant_with_dawn_up_in_the_unset_arm_is_not_ok(self):
+    def arm_readings(self, expectations, arm: str) -> list:
+        return [e for e in expectations if e.model.get('arm') == arm and 'priming_void' in e.model]
+
+    def test_a_mutant_with_dawn_up_in_the_unset_arm_voids_every_reading_of_the_arm(self):
         _, expectations = self.scenario()
         unset = self.priming(expectations)['unset']
         self.assertEqual(judged(unset, {unset.label: 0.0}), 'ok')
-        self.assertNotEqual(judged(unset, {unset.label: 1.0}), 'ok')
+        self.assertEqual(judged(unset, {unset.label: 1.0}), 'unmeasured')
+        readings = self.arm_readings(expectations, 'unset')
+        self.assertGreater(len(readings), 1)
+        for reading in readings:
+            values = {unset.label: 1.0, reading.label: float(reading.displayed)}
+            self.assertEqual(judged(reading, values), 'unmeasured', reading.label)
         with_arm = self.priming(expectations)['with']
         self.assertEqual(judged(with_arm, {with_arm.label: 1.0}), 'ok')
-        self.assertNotEqual(judged(with_arm, {with_arm.label: 0.0}), 'ok')
+        self.assertEqual(judged(with_arm, {with_arm.label: 0.0}), 'unmeasured')
+
+    def test_a_held_priming_state_leaves_the_gate_reading_judged(self):
+        _, expectations = self.scenario()
+        unset = self.priming(expectations)['unset']
+        gate = next(e for e in self.arm_readings(expectations, 'unset') if ' priming ' not in e.label)
+        self.assertEqual(judged(gate, {unset.label: 0.0, gate.label: float(gate.displayed)}), 'ok')
+        self.assertEqual(judged(gate, {unset.label: 0.0, gate.label: float(gate.displayed) + 1}), 'alert')
 
     def test_without_arm_expected_every_arm_keeps_one_state(self):
         reads = [{'spell': 807440, 'expected': 1}]
         _, expectations = self.scenario(priming_reads=reads)
         self.assertEqual({e.displayed for e in self.priming(expectations).values()}, {'1'})
+        self.assertFalse(any('priming_void' in e.model for e in expectations))
 
     def test_arm_expected_refuses_an_unknown_arm_or_a_state_other_than_0_or_1(self):
         for bad in ({'nowhere': 0}, {'unset': 2}, {'unset': True}, [0]):
