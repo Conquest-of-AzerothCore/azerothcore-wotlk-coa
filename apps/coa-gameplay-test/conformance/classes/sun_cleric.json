@@ -37472,6 +37472,627 @@
         ]
       },
       "observe_source": "Solar Flare 807175 lasts 10000 ms (DurationIndex 1, Spell.dbc), applied when the Dawnsear 500146 hit finds the Herald marker (AscensionSunClericAbilities.cpp:353-356). Same route as the flare_hit entry. The application lies between the end of the 3500 ms Dawnsear cast and the 4000 ms read of the flare_hit entry, where the aura is already on the dummy (both from Spell.dbc and that entry's presence read). Read 14450 ms after the trigger, at least 10550 ms and at most 10950 ms after the application: gone excludes a duration of 11000 ms (10% long) or more, since the read is at most 10950 ms after the application, and a 10000 ms aura is gone from 10000 ms on. Control: before the learn the Solar Flare is absent (0 before in both entries). Reference search 2026-11-22: coa-history 807175: 2442 SPELL_AURA_APPLIED and 2416 SPELL_AURA_REMOVED in 29 logs, no per-cast duration readable; nothing else found."
+    },
+    {
+      "spell": 680648,
+      "name": "Sacred Vessel (healing done after Illumination consumes Angelic Presence)",
+      "kind": "hit_ratio",
+      "variant": "healing_gain",
+      "label_suffix": "healing_gain",
+      "quote": "Expending Angelic Presence increases your critical strike chance and healing by $681254s1% for $681254d,",
+      "expected": 1.01,
+      "observe_spell": 503624,
+      "metric": "spell_heal_total",
+      "target": "ally",
+      "control": {
+        "auras": [
+          [
+            681254,
+            0
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 800722,
+            "target": "caster",
+            "power": 1363
+          },
+          {
+            "spell": 500143,
+            "target": "caster",
+            "power": 1363
+          }
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            681254,
+            0
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 800722,
+            "target": "caster",
+            "power": 1363
+          },
+          {
+            "spell": 500143,
+            "target": "caster",
+            "power": 1363
+          }
+        ],
+        "learn": [
+          680648
+        ]
+      },
+      "critical": false,
+      "trials": 16,
+      "fixture": {
+        "spell_power": 5000
+      },
+      "cast_power": 1000,
+      "cast_wait_ms": 4000,
+      "control_excluded": {
+        "residual": 0.0001
+      },
+      "expected_source": "681254 Sacred Vessel Effect[1] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT MiscValue 126, EffectBasePoints 0 + 1 = 1 ($681254s1): healing done x 1.01 for one stack. AscensionSunClericAbilities.cpp:91-92: an Illumination 500143 cast that consumes Angelic Presence 800722 while the caster holds 680648 adds one stack of 681254 (StackWithoutRefresh). Both arms, before every trial: 681254 removed (set to 0 stacks, so each trial carries one stack, never a growing count), Angelic Presence 800722 cast at the caster, then Illumination 500143 cast at the caster (Spell.dbc EffectImplicitTargetA 21, an ally-target heal: the first design cast it at the dummy and read 0.99988), each with the caster's mana set to 1363 first (Illumination ManaCostPercentage 30); the treatment arm learns 680648, the control arm does not. The observed heal is Daybreak 503624 at the ally (${$m1+0+$BH*0.595}, bonus healing fixture 5000, cast power 1000), non-critical heals only (681254 Effect[0] also adds 1% critical strike chance). Daybreak holds 2 charges with a 10 s recharge (tooltip), so each trial spans 1600 + 3600 + 1600 + 4000 = 10800 ms, above 10 s. control_excluded residual 1e-4: the 2-point G-19 band of +1% holds 0, so the one-sided bound must exclude 0. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 804250,
+      "name": "Blessing of Triumph (ally damage done)",
+      "kind": "hit_ratio",
+      "variant": "ally_damage",
+      "label_suffix": "ally_damage",
+      "quote": "and $680911s3% increased damage.",
+      "expected": 1.1,
+      "observe_spell": 802561,
+      "caster": "ally",
+      "ally_distance": 0,
+      "control": {
+        "casts": [
+          {
+            "spell": 804247,
+            "target": "ally",
+            "power": 1363
+          }
+        ]
+      },
+      "treatment": {
+        "casts": [
+          {
+            "spell": 804247,
+            "target": "ally",
+            "power": 1363
+          },
+          {
+            "spell": 804250,
+            "target": "ally",
+            "power": 1363
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 40,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "cast_power": 1360,
+      "expected_source": "680911 Effect[2] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 127 (all schools), EffectBasePoints 9 + 1 = 10 ($680911s3): damage done x 1.10 on the redeemed ally. 804250 Effect[0] SPELL_EFFECT_TRIGGER_SPELL 680911 only on an ally holding the caster's Bless (AscensionSunClericAbilities.cpp:541-555). Before every trial the caster casts Bless 804247 at the ally (both arms) and, in the treatment arm, 804250 at the ally, each with the caster's mana set to 1363 first (ManaCostPercentage 20 and 13 of the base mana 1363). The grouped ally (ally_distance 0, on the caster's spot, as March of the Valkyr 560534 reads it) casts Gavel of Wrath 802561 at the dummy (Physical, normalized weapon damage, instant, attack power 20000 so the weapon roll spreads little); only its non-critical hits are read. 680911's haste parts do not change a normalized weapon hit. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 804250,
+      "name": "Blessing of Triumph (ally healed for 10% of its direct damage below 35%)",
+      "kind": "metric_delta",
+      "variant": "ally_damage_heal",
+      "label_suffix": "ally_damage_heal",
+      "quote": "If the ally falls below 35% maximum health they are healed for $680911s3% of their direct damage dealt for the remaining duration.",
+      "trigger_spell": 804250,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "select_dummy": true,
+      "learn": [
+        804247
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 681386,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          3000,
+          10000
+        ],
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "ally_attacks": [
+          {
+            "spell": 802561,
+            "power": 1360,
+            "source": "Gavel of Wrath 802561, an instant Physical direct hit the ally casts at the dummy after the trigger, its damage event read as the ally's own"
+          }
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 681386,
+              "target": "ally"
+            },
+            "source": "the heal 681386 the caster casts at the ally from the ally's damage (AscensionSunClericEvents.cpp:390-392, Copy(player, ally, 681386, CalculatePct(damage, 10)))"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 802561,
+              "target": "dummy"
+            },
+            "source": "the ally's own Gavel of Wrath damage at the dummy"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 0.1,
+            "tolerance": 0.0005,
+            "floor_count": 0,
+            "source": "$680911s3 = 10 (680911 Effect[2] BasePoints 9 + 1): healed for 10% of the direct damage dealt; 681386 carries SPELL_ATTR2_CANT_CRIT and SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (Spell.dbc), and CalculatePct truncates each heal to an integer"
+          }
+        ]
+      },
+      "observe_source": "680911 is applied by 804250 on an ally holding the caster's Bless (AscensionSunClericAbilities.cpp:541-555); its proc (AscensionSunClericEvents.cpp:80-82) accepts a direct damaging hit the ally deals while the ally is below 35% health or once the aura's script value is set, and :390-392 sets the value and heals the ally for 10% of the damage. In both phases Bless 804247 is cast at the ally (ally_casts) and the ally is set to 3000 of 10000 health (30%, below 35%); 804250 is cast at the ally in the after phase only (cast_in_before false), the before phase is the control (no 680911, no heal). The ally then casts Gavel of Wrath 802561 at the dummy in both phases (ally_attacks, spell_go proof). Read on the caster: the heal events of 681386 given to the ally, 0 then 1; the ratio of the heal total to the ally's damage total is 0.10. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 680646,
+      "name": "Scroll of Hope (each ally falling below 35% is healed once)",
+      "kind": "metric_delta",
+      "variant": "heal_each_ally",
+      "label_suffix": "heal_each_ally",
+      "quote": "If any ally falls below 35% of their maximum health while this is active they are instantly healed once for $681383s1% of their maximum health.",
+      "trigger_spell": 680646,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 681383,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1500,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Heal: the caster (a party member holding the aura) is set to 3800 of 10000 health; Grave Coil takes it to 3380 (33.8%, below 35%; 3200 without the reduction, also below); the heal 681383 the caster casts at itself is read: 0 in the before phase (no Scroll, no heal) and 15% x 10000 = 1500 after, tolerance 15 (1%, excludes 10% either side). The harness striker can only target the caster or a creature the caster owns (behaviours.py:1655-1662), so this reads the caster only: it does not show that an ally's aura procs, which stays open as the \"any ally\" claim. The read uses one maximum health (10000): a flat 1500 heal would also pass, so the 15% scaling is not separated from a flat amount here. Threshold: the heal at 33.8% after the hit excludes a threshold at or below 33.8% (33% and 31.5%); heal_close_above is the read from above. Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil, so it does not touch the hits read here, and a resisted hit could only lower a reading. Each ally (ally_arm ally_strikes, ADR 1046): after the caster's strike, ally then ally2 are set to 3800 of 10000 health and struck once by the same Grave Coil; the caster's count of the striker's SPELL_GO of 47632 is read around each ally's strike (a strike that did not land voids the trial). The tooltip says any ally is healed once, so each of the caster, ally and ally2 expects one heal 681383 (read on the caster with fields.target per ally). Code reading: the once flag is the script value of the area Aura (AscensionSunClericEvents.cpp:79, :297), which the caster's application and the allies' applications may share; an ally heal of 0 would then be a finding against the tooltip, not a test fault.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "strike": {
+        "spell": 47632,
+        "health": 3800,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 1600
+      },
+      "tolerance": 15,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 2,
+        "ally_strikes": true,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681383,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "tooltip: any ally falling below 35% while the Scroll is active is healed once; ally struck from 3800 to below 35% after the caster"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681383,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "tooltip: once for each ally; ally2 struck from 3800 to below 35% after ally"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (additional mana spent with the extra heal, mana gate)",
+      "kind": "metric_delta",
+      "variant": "ally_bless_mana",
+      "label_suffix": "ally_bless_mana",
+      "quote": "While at or above 30% mana, you sacrifice additional mana with each heal, healing your ally affected by Bless.",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "caster",
+      "learn": [
+        804247
+      ],
+      "setup_casts": [
+        804247,
+        805301
+      ],
+      "setup_wait_ms": 2000,
+      "phase_power": [
+        0,
+        2021,
+        2043
+      ],
+      "expire_ms": 500,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 850,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "cumulative count: one Daybreak heal on the blessed ally per phase, so 1 after the before phase and 2 after the after phase; the same cast lands in both phases, so a missing extra heal is not a missing Daybreak"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the extra heal 807994 on the Bless ally: none below the gate, one above it"
+          }
+        ]
+      },
+      "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY (BasePoints 49, $s2 = 50); AscensionSunClericAbilities.cpp:355-372: a heal with Holy Form on, at least 30% of maximum mana (:356-357), a non-zero effective heal (healing = Spell::m_healing, Spell.cpp:2856-2862, :3059) and the ally recorded by Bless alive and holding Bless (:358-359) pays (extra + 3) / 4 mana and casts 807994 on that ally (Copy(player, ally, 807994, extra), :370). In both phases the ally is set to 5000 of 10000 health, the caster's mana is set to the phase value, Bless 804247 is cast at the ally and Holy Form 805301 on the caster (setup casts, 2000 ms after each, past the global cooldown), then Daybreak 503624 heals the ally. Mana costs from Spell.dbc, ManaCostPercentage of base mana 1363, truncated by CalculatePct: Bless 20% = 272, Holy Form 40% = 545, Daybreak 26% = 354, taken before the heal (Spell::TakePower before SendSpellGo, Spell.cpp:4026), total 1171. The mana at the hook is the phase value minus 1171: 2021 gives 850 and 2043 gives 872, against a gate at 30% of the maximum mana 2868 (BaseMana 1363 + 20 + (Intellect 119 - 20) x 15) = 860.4, so 850 is 29.6% (below, no extra heal) and 872 is 30.4% (above, one extra heal). The only difference between the phases is the caster's mana, 11 above and 11 below the gate, so the gate is bracketed at 30%, not at the 26% and 88% of the first version. The ally is below full health in both phases so the Daybreak heal is effective. The extra heal is read as the heal events of 807994 given to the ally, on the caster with fields.target ally; the Daybreak arm proves the same heal landed on the ally in both phases. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found. Mana: the caster's mana read after the heal, regeneration off, Holy Form removed at the start of each phase before its setup cast (so the after phase casts it again rather than over the form). Below the gate (850 at the hook) nothing is paid: 850 exactly. Above it (872 at the hook) the extra heal lands (arm 2) and the mana read must be at most 871, below what the heal's own cost leaves: additional mana is spent (direction only, D-165, mentor D-214). Observation, not an expectation: the code pays (extra + 3) / 4 (AscensionSunClericAbilities.cpp:399, set by e36bc50aad, a bulk restore); neither the tooltip nor the DBC states an amount, so the exact value stays open for the mentor.",
+      "tolerance": 0,
+      "after_at_least": 0,
+      "after_at_most": 871,
+      "disable_regeneration": true,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          805301,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 871
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (control without the form: no additional mana, no extra heal)",
+      "kind": "metric_delta",
+      "variant": "ally_bless_mana_no_form",
+      "label_suffix": "ally_bless_mana_no_form",
+      "quote": "While at or above 30% mana, you sacrifice additional mana with each heal, healing your ally affected by Bless.",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "caster",
+      "learn": [
+        804247
+      ],
+      "setup_casts": [
+        804247
+      ],
+      "setup_wait_ms": 2000,
+      "phase_power": [
+        0,
+        2043,
+        2043
+      ],
+      "expire_ms": 500,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1417,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "cumulative count: one Daybreak heal on the blessed ally per phase, so 1 after the before phase and 2 after the after phase; the same cast lands in both phases, so a missing extra heal is not a missing Daybreak"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "without Holy Form no extra heal 807994 reaches the Bless ally in either phase"
+          }
+        ]
+      },
+      "observe_source": "Control of the Holy Form mana clause (mentor D-214 (c)): the same Bless ally, Daybreak 503624 and phases as ally_bless_mana, without the Holy Form setup cast. Mana at the hook: 2043 - Bless 272 - Daybreak 354 = 1417 (Spell.dbc ManaCostPercentage 20 and 26 of base mana 1363, truncated), above the 860.4 gate in both phases; without the form AscensionSunClericAbilities.cpp:390 pays nothing and casts no 807994, so the mana read after the heal is 1417 in both phases and the extra heal count stays 0, while the Daybreak arm shows the heal landed. Regeneration off. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
+      "tolerance": 0,
+      "after_at_least": 1417,
+      "after_at_most": 1417,
+      "disable_regeneration": true,
+      "void_on_cast_failure": true,
+      "expected": 1417
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (the extra heal can critically strike)",
+      "kind": "metric_delta",
+      "variant": "extra_heal_crit",
+      "label_suffix": "extra_heal_crit",
+      "quote": "@ext:This additional healing can critically strike and proc effects like The Redeemer.:ext@",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "caster",
+      "learn": [
+        804247
+      ],
+      "setup_casts": [
+        804247,
+        805301
+      ],
+      "setup_wait_ms": 2000,
+      "phase_power": [
+        0,
+        2021,
+        2043
+      ],
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 807994,
+        "target": "ally",
+        "critical": true
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "cumulative count: one Daybreak heal on the blessed ally per phase, so 1 after the before phase and 2 after the after phase; the same cast lands in both phases, so a missing extra heal is not a missing Daybreak"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "every extra heal 807994: the critical count equals it, so the one extra heal is critical"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally",
+              "critical": true
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the forced crit fixture works: each Daybreak heal reads critical"
+          }
+        ]
+      },
+      "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY (BasePoints 49, $s2 = 50); AscensionSunClericAbilities.cpp:355-372: a heal with Holy Form on, at least 30% of maximum mana (:356-357), a non-zero effective heal (healing = Spell::m_healing, Spell.cpp:2856-2862, :3059) and the ally recorded by Bless alive and holding Bless (:358-359) pays (extra + 3) / 4 mana and casts 807994 on that ally (Copy(player, ally, 807994, extra), :370). In both phases the ally is set to 5000 of 10000 health, the caster's mana is set to the phase value, Bless 804247 is cast at the ally and Holy Form 805301 on the caster (setup casts, 2000 ms after each, past the global cooldown), then Daybreak 503624 heals the ally. Mana costs from Spell.dbc, ManaCostPercentage of base mana 1363, truncated by CalculatePct: Bless 20% = 272, Holy Form 40% = 545, Daybreak 26% = 354, taken before the heal (Spell::TakePower before SendSpellGo, Spell.cpp:4026), total 1171. The mana at the hook is the phase value minus 1171: 2021 gives 850 and 2043 gives 872, against a gate at 30% of the maximum mana 2868 (BaseMana 1363 + 20 + (Intellect 119 - 20) x 15) = 860.4, so 850 is 29.6% (below, no extra heal) and 872 is 30.4% (above, one extra heal). The only difference between the phases is the caster's mana, 11 above and 11 below the gate, so the gate is bracketed at 30%, not at the 26% and 88% of the first version. The ally is below full health in both phases so the Daybreak heal is effective. The extra heal is read as the heal events of 807994 given to the ally, on the caster with fields.target ally; the Daybreak arm proves the same heal landed on the ally in both phases. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found. Crit: force_crit spell sets spell_crit_rating 100000 on the caster's player fixture; the trial reads the heals as critical (fields.critical true), never assumes it. 807994 has no SPELL_ATTR2_CANT_CRIT in Spell.dbc and AscensionSunClericContracts.cpp:85-86 clears it; AscensionSunClericAbilities.cpp:220 lets the crit hook see 807994. Below the gate no extra heal (0), above it one, read critical; the Daybreak arm reads both Daybreak heals critical. Holy Form removed at each phase start before its setup cast.",
+      "tolerance": 0,
+      "disable_regeneration": true,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          805301,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 1,
+      "force_crit": "spell"
+    },
+    {
+      "spell": 805301,
+      "name": "Holy Form (the extra heal procs The Redeemer)",
+      "kind": "metric_delta",
+      "variant": "extra_heal_redeemer",
+      "label_suffix": "extra_heal_redeemer",
+      "quote": "@ext:This additional healing can critically strike and proc effects like The Redeemer.:ext@",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "caster",
+      "learn": [
+        804247,
+        300339
+      ],
+      "setup_casts": [
+        804247,
+        805301
+      ],
+      "setup_wait_ms": 2000,
+      "phase_power": [
+        0,
+        2021,
+        2043
+      ],
+      "expire_ms": 500,
+      "metric": "spell_go_count",
+      "fields": {
+        "spell": 301005
+      },
+      "before_expected": 1,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "cumulative count: one Daybreak heal on the blessed ally per phase, so 1 after the before phase and 2 after the after phase; the same cast lands in both phases, so a missing extra heal is not a missing Daybreak"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "every extra heal 807994: the critical count equals it, so the one extra heal is critical"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally",
+              "critical": true
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the forced crit fixture works: each Daybreak heal reads critical"
+          }
+        ]
+      },
+      "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY (BasePoints 49, $s2 = 50); AscensionSunClericAbilities.cpp:355-372: a heal with Holy Form on, at least 30% of maximum mana (:356-357), a non-zero effective heal (healing = Spell::m_healing, Spell.cpp:2856-2862, :3059) and the ally recorded by Bless alive and holding Bless (:358-359) pays (extra + 3) / 4 mana and casts 807994 on that ally (Copy(player, ally, 807994, extra), :370). In both phases the ally is set to 5000 of 10000 health, the caster's mana is set to the phase value, Bless 804247 is cast at the ally and Holy Form 805301 on the caster (setup casts, 2000 ms after each, past the global cooldown), then Daybreak 503624 heals the ally. Mana costs from Spell.dbc, ManaCostPercentage of base mana 1363, truncated by CalculatePct: Bless 20% = 272, Holy Form 40% = 545, Daybreak 26% = 354, taken before the heal (Spell::TakePower before SendSpellGo, Spell.cpp:4026), total 1171. The mana at the hook is the phase value minus 1171: 2021 gives 850 and 2043 gives 872, against a gate at 30% of the maximum mana 2868 (BaseMana 1363 + 20 + (Intellect 119 - 20) x 15) = 860.4, so 850 is 29.6% (below, no extra heal) and 872 is 30.4% (above, one extra heal). The only difference between the phases is the caster's mana, 11 above and 11 below the gate, so the gate is bracketed at 30%, not at the 26% and 88% of the first version. The ally is below full health in both phases so the Daybreak heal is effective. The extra heal is read as the heal events of 807994 given to the ally, on the caster with fields.target ally; the Daybreak arm proves the same heal landed on the ally in both phases. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found. The Redeemer 300339 (learned in both phases): a critical heal casts 301005 on its target for 30% of the heal (AscensionSunClericEvents.cpp:142, :379; Spell.dbc Description 'When you critically heal your target, they will be healed for 30%...'); the Holy Form heal 807994 is admitted at :109. force_crit spell (spell_crit_rating 100000 on the caster), reads critical. The caster's SPELL_GO count of 301005, cumulative: 1 after the before phase (the Daybreak crit, no extra heal below the gate), 3 after the after phase (Daybreak crit and 807994 crit); a 807994 that did not proc reads 2. Arms read 807994 critical and both Daybreaks critical. Holy Form removed at each phase start before its setup cast. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
+      "tolerance": 0,
+      "disable_regeneration": true,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          805301,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 3,
+      "force_crit": "spell"
     }
   ],
   "player_observations": [],

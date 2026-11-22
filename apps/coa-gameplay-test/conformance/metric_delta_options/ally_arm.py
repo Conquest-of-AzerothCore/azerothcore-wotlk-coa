@@ -559,10 +559,11 @@ def model(spec, ally: AllyArm) -> dict:
                           **({FLOOR_COUNT_KEY: ratio.floor_count} if ratio.floor_count is not None else {})}
                          for ratio in ally.ratios]}
     strikes = {'strike_reads': [[strike_label(spec, moment, unit, 'start'), strike_label(spec, moment, unit, 'end'),
-                                 spec.strike.count] for moment in ('before', 'after') for unit in ally.ally_ids]}
+                                 spec.strike.count] for moment in ('before', 'after') for unit in ally.ally_ids]
+               } if ally.ally_strikes else {}
     return {NAME: {'allies': list(ally.ally_ids), 'arms': [arm_model(spec, index, arm)
                                                             for index, arm in enumerate(ally.arms)],
-                   **(ratios if ally.ratios else {}), **(strikes if ally.ally_strikes else {})}}
+                   **(ratios if ally.ratios else {}), **strikes}}
 
 
 def arm_model(spec, index: int, arm: Arm) -> dict:
