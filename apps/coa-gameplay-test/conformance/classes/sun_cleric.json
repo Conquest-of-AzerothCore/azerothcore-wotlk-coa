@@ -19655,6 +19655,401 @@
       "leeway": true,
       "reach_source": "the dummy entry 36 combat reach 1.275 yd (creature_model_info CombatReach of display 367, world DB; read 1.275 in the Templar 1161 aggro_redirect edge run 20261112-053731), added for a player-controlled caster against a non-player target (Spell.cpp:9434-9442); the caster's own size is not a term; the judge reads each reach again and refuses a layout that does not bracket the edge",
       "observe_source": "807870 Effect[0] aura 12 SPELL_AURA_MOD_STUN, TargetA 22 SRC_CASTER, TargetB 15 TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 14 = 8 yd ($a1, the tooltip resolves 8; SpellEffectInfo::CalcRadius, SpellInfo.cpp:624-639, no SPELLMOD_RADIUS here). Effective radius (guide section 5, G-29): the area search measures from the caster, centre to centre, against 8 yd + the player caster's leeway 2.66 yd (Spell.cpp:1388-1394 for TargetB 15; Object.cpp:1787-1808, LEEWAY_BONUS_RANGE for a run speed above LEEWAY_MIN_MOVE_SPEED 4.97, ObjectDefines.h:50-51, a standing player in run mode at 7.0 yd/s) + the dummy's combat reach 1.275 yd (Spell.cpp:9434-9442) = 11.935 yd, computed by the kind's leeway option from the engine rule and the caster's run speed rate read in the run (ADR 1020), not from a measured edge; earlier diagnostic reads (stunned at about 11.4 yd, not at 12.5 yd, Sun Cleric b7a review I4) agree. The leeway is this core's inherited rule, not evidence about the original server. The primary dummy stands 0.1 yd from the caster and the inside and outside dummies 0.5 yd either side of 11.935 yd. Control arm: the cast is refused before 807870 is learned (gate = cast spell, learned between the arms), no stun on any dummy; treatment: one cast after the learn (120 s cooldown, so one repeat), the stun read per dummy: on the primary and the inside dummy, not on the outside one. Reference search 2026-11-22: coa-history spell 807870: 43 damage events (54 to 425, mean 295, live levels and spell power unknown), 42 aura applications in 5 logs, no amount that isolates a coefficient; bindmysoul snapshot (spell 805583, fetched 2026-07-22) reads \"20 + 27.41% SP Holy damage ... stuns enemies within 8 yds for 5 seconds\" (the radius, duration and coefficient agree, the flat 20 is an older state against Spell.dbc 807870 BasePoints 57 plus 17.7 per level above 58, G-9); nothing else found."
+    },
+    {
+      "spell": 92136,
+      "kind": "metric_delta",
+      "quote": "Fulfilling your Vow now unleashes Sunlight restoring ${$704911m1+$BH*0.15} health to up to $704911i allies within $704911a1 yds, prioritizing the lowest health allies.",
+      "trigger_spell": 500143,
+      "gate_spell": 92136,
+      "target": "caster",
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sunlight (heals at most 5 of 8 players, healthiest caster left out)",
+      "variant": "cap_caster_full",
+      "label_suffix": "cap_caster_full",
+      "fields": {
+        "spell": 704911
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0,
+      "caster_health_pct": 99,
+      "ally_arm": {
+        "allies": 7,
+        "ally_health": [
+          50,
+          100
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 704911,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "The caster at 99% health is the healthiest of the eight, so the five lowest (allies at 50%) are healed and the caster is not: 5 Sunlight heals in all, 0 on the caster (AscensionSunCleric.cpp:155-160 orders by health percentage)."
+          }
+        ]
+      },
+      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; AscensionSunCleric.cpp:298-300 (Fulfill) heals with Sunlight 704911 the allies returned by Allies(player, player, Radius(704911), MaxAffectedTargets of 704911) (AscensionSunCleric.cpp:149-165): the caster and the units of the caster's raid within the radius, sorted by health percentage (lowest first, ties by GUID), cut to MaxAffectedTargets. 704911 MaxAffectedTargets = 5 ($704911i, the tooltip resolves 5 with the reference stats). Eight players stand in the raid (the caster and seven allies, ally_arm allies 7), all within the 40 yd radius, the seven allies held at 50% health. Dawn 804584 cast with 20 Solar Power 500149 set (harness precondition fixture), Vow of Radiance 803489 cast before it, Illumination 500143 (a direct heal) cast on the caster as in the heal entry; 92136 learned between the phases. Control (before): the same casts without 92136, no Sunlight heal. Heals are counted from the caster's own spell_heal_count of 704911, all targets. Reference search 2026-11-22: coa-history spell 92136: 0 casts (a passive); no snapshot in ~/CoaServer/reference carries a target cap or an ordering beyond the tooltip; nothing found. The caster at 99% health is the healthiest of the eight, so the five lowest (allies at 50%) are healed and the caster is not: 5 Sunlight heals in all, 0 on the caster (AscensionSunCleric.cpp:155-160 orders by health percentage)."
+    },
+    {
+      "spell": 92136,
+      "kind": "metric_delta",
+      "quote": "Fulfilling your Vow now unleashes Sunlight restoring ${$704911m1+$BH*0.15} health to up to $704911i allies within $704911a1 yds, prioritizing the lowest health allies.",
+      "trigger_spell": 500143,
+      "gate_spell": 92136,
+      "target": "caster",
+      "setup_casts": [
+        803489,
+        804584
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sunlight (heals at most 5 of 8 players, wounded caster first)",
+      "variant": "cap_caster_low",
+      "label_suffix": "cap_caster_low",
+      "fields": {
+        "spell": 704911
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0,
+      "caster_health_pct": 30,
+      "ally_arm": {
+        "allies": 7,
+        "ally_health": [
+          50,
+          100
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 704911,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "The caster at 30% health is the lowest of the eight, so it is among the five healed (1 heal on the caster) and the total stays 5 (AscensionSunCleric.cpp:155-160 orders by health percentage, then cuts at 5). With the caster_full entry this shows the order by health, not by GUID."
+          }
+        ]
+      },
+      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; AscensionSunCleric.cpp:298-300 (Fulfill) heals with Sunlight 704911 the allies returned by Allies(player, player, Radius(704911), MaxAffectedTargets of 704911) (AscensionSunCleric.cpp:149-165): the caster and the units of the caster's raid within the radius, sorted by health percentage (lowest first, ties by GUID), cut to MaxAffectedTargets. 704911 MaxAffectedTargets = 5 ($704911i, the tooltip resolves 5 with the reference stats). Eight players stand in the raid (the caster and seven allies, ally_arm allies 7), all within the 40 yd radius, the seven allies held at 50% health. Dawn 804584 cast with 20 Solar Power 500149 set (harness precondition fixture), Vow of Radiance 803489 cast before it, Illumination 500143 (a direct heal) cast on the caster as in the heal entry; 92136 learned between the phases. Control (before): the same casts without 92136, no Sunlight heal. Heals are counted from the caster's own spell_heal_count of 704911, all targets. Reference search 2026-11-22: coa-history spell 92136: 0 casts (a passive); no snapshot in ~/CoaServer/reference carries a target cap or an ordering beyond the tooltip; nothing found. The caster at 30% health is the lowest of the eight, so it is among the five healed (1 heal on the caster) and the total stays 5 (AscensionSunCleric.cpp:155-160 orders by health percentage, then cuts at 5). With the caster_full entry this shows the order by health, not by GUID."
+    },
+    {
+      "spell": 504848,
+      "name": "Mercy (the cap: six receive it out of eight players)",
+      "kind": "metric_delta",
+      "variant": "targets_cap",
+      "label_suffix": "targets_cap",
+      "quote": "Grant mercy to an ally and up to 5 nearby allies,",
+      "trigger_spell": 504848,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_power": 1000,
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 504848
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1000,
+      "ally_arm": {
+        "allies": 7,
+        "arms": [
+          {
+            "actors": [
+              "caster",
+              "ally2",
+              "ally3",
+              "ally4",
+              "ally5",
+              "ally6",
+              "ally7"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 504848
+            },
+            "before_expected": 0,
+            "expected": 5,
+            "tolerance": 0,
+            "source": "Mercy 504848 Effect[0] target 21 TARGET_UNIT_TARGET_ALLY, EffectChainTarget 6 (the target and up to 5 more): of the seven units other than the target (the caster and ally2..ally7) exactly 5 hold the aura, whichever the chain picks; none holds it in the uncast control. Uncapped it would be 6.",
+            "reach_source": "The unit filter of the chain search is TARGET_CHECK_ALLY: WorldObjectSpellTargetCheck keeps a unit when _IsValidAssistTarget holds, with no IsInPartyWith or IsInRaidWith test (Spell.cpp:9353-9358, reached through WorldObjectSpellAreaTargetCheck with the Chain reason, :9420-9479, which adds only a distance test; only TARGET_CHECK_PARTY :9359 and TARGET_CHECK_RAID :9373 test the group), so ally5 in raid subgroup 2 stands within the 10 yd hop like the party members. Mercy 504848 Effect[0] target 21 TARGET_UNIT_TARGET_ALLY with EffectChainTarget[0] 6: Spell::SelectImplicitTargetObjectTargets adds the explicit ally and calls Spell::SelectImplicitChainTargets (Spell.cpp:1895-1917, :1919-1939), which asks SearchChainTargets for ChainTarget - 1 = 5 more units (Spell.cpp:2200-2300); the spell is a magic-class spell, so the search radius is the 10 yd jump radius times 5 and each hop is within 10 yd of the previous unit; no spell_jump_distance row and no script for 504848 or 503650 exists (data/sql searched), and Mercy MaxAffectedTargets 6 is read only for cone and area targets (Spell.cpp:1303, :1405)"
+          }
+        ]
+      },
+      "observe_source": "504848 Mercy Effect[0] target 21 TARGET_UNIT_TARGET_ALLY, EffectChainTarget[0] 6: the explicit ally plus ChainTarget - 1 = 5 more units (Spell.cpp:1895-1939, SearchChainTargets :2200-2300; reach_source on the arm). Mercy is cast at ally with six other players (the caster and ally2..ally7, all within the 10 yd hop): the aura is read on the target (1) and summed over the six others plus the caster (5, the cap of the tooltip \"up to 5 nearby allies\"); 0 in the uncast control before. A cap of 6 or more would read 6. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for the count; nothing found."
+    },
+    {
+      "spell": 804257,
+      "name": "Glaring Rays (the caster hastes by 3% + 3%)",
+      "kind": "metric_delta",
+      "variant": "caster_haste",
+      "label_suffix": "caster_haste",
+      "quote": "Increases the spell haste of all party and raid members by $s1% and your spell haste by an additional $s2%.",
+      "trigger_spell": 805301,
+      "gate_spell": 804257,
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0.942596,
+      "tolerance": 0.0001,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "804257 Glaring Rays Effect[0] SPELL_EFFECT_APPLY_AREA_AURA_RAID aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 + 1 = 3 ($s1), TargetA 1 (caster), radius index 287; Effect[1] APPLY_AURA aura 216, BasePoints 2 + 1 = 3 ($s2), TargetA 1. Holy Form 805301 is cast in both phases as the trigger and the passive is learned between them (control: the before reading without it, multiplier 1). The unit's engine cast speed multiplier (the same function as the Swift Justice 300327 spell_haste entry) is read 1500 ms after. Reference search 2026-11-22: coa-history spell 804257: 0 events (a passive leaves no event); nothing else found beyond the tooltip and the DBC. The caster receives both effects. Each aura 216 multiplies the unit's cast speed: AuraEffect::HandleModCastingSpeed (SpellAuraEffects.cpp:5035-5056) calls Unit::ApplyCastTimePercentMod (Unit.cpp:14991-14999) once per effect, and ApplyPercentModFloatVar multiplies by 100 / (100 + 3) (Unit.cpp:14967-14970), so the two effects give 1 / (1.03 x 1.03) = 0.942596, not the additive 1 / 1.06 = 0.943396 (pair 1 read 0.942596 in both runs; this expectation is the engine rule, written from the code before the re-run). The tooltip's additive wording is the 0.08% difference between the two."
+    },
+    {
+      "spell": 804257,
+      "name": "Glaring Rays (a grouped ally hastes by 3%)",
+      "kind": "metric_delta",
+      "variant": "ally_haste",
+      "label_suffix": "ally_haste",
+      "quote": "Increases the spell haste of all party and raid members by $s1% and your spell haste by an additional $s2%.",
+      "trigger_spell": 805301,
+      "gate_spell": 804257,
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0.970874,
+      "tolerance": 0.0001,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "804257 Glaring Rays Effect[0] SPELL_EFFECT_APPLY_AREA_AURA_RAID aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 + 1 = 3 ($s1), TargetA 1 (caster), radius index 287; Effect[1] APPLY_AURA aura 216, BasePoints 2 + 1 = 3 ($s2), TargetA 1. Holy Form 805301 is cast in both phases as the trigger and the passive is learned between them (control: the before reading without it, multiplier 1). The unit's engine cast speed multiplier (the same function as the Swift Justice 300327 spell_haste entry) is read 1500 ms after. Reference search 2026-11-22: coa-history spell 804257: 0 events (a passive leaves no event); nothing else found beyond the tooltip and the DBC. A grouped ally receives Effect[0] only: 1 / 1.03 = 0.970874 (the Swift Justice 300322 entry reads the same aura 216 at 3% as 0.970874).",
+      "measure_actor": "ally",
+      "disable_regeneration": true,
+      "ally_arm": {
+        "allies": 1
+      },
+      "cast_in_before": false
+    },
+    {
+      "spell": 300334,
+      "name": "Blessed Armor (spell power per 125 armor, from an armor gain)",
+      "kind": "metric_delta",
+      "variant": "sp_per_armor",
+      "label_suffix": "sp_per_armor",
+      "quote": "Increases your spell power by 3 for every 125 Armor you have.",
+      "trigger_spell": 805301,
+      "gate_spell": 561023,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 2
+      },
+      "before_expected": 0,
+      "expected": 9.54,
+      "expected_gain": 9.54,
+      "tolerance": 1,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "observe_source": "300334 Blessed Armor Effect[0] aura 23 PERIODIC_TRIGGER_SPELL (2000 ms) of 301006; 301006 Effect[0] aura 345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT misc 127; the script (AscensionSunCleric.cpp:383, AscensionSunClericContracts.cpp:260) sets it to 3 per 125 armor, i.e. 0.024 x armor. Design 3 (designs 1 and 2 in the b3b report failed: live armor not derivable, spell power already set before a read): the armor is raised by a real learned talent whose gain is data-derived, Sun-Touched Armor 561023, +397.5 armor (the 561023 armor entry, 250% of Strength and Intellect of the reference stats), and the Holy spell power read (Unit::SpellBaseDamageBonusDone, the use-time function) is judged on its gain: 397.5 x 3 / 125 = 9.54, tolerance 1 (the truncation of the two readings differs by at most 1). The passive 300334 is learned in both phases (pair 1 without it read 0 before and after). Control: the before reading, taken with 561023 unlearned and the same armor. The gain is read 2600 ms after the learn, after one 2000 ms tick of 301006. Reference search 2026-11-22: bindmysoul snapshot carries an older state (1 per 125 armor) (older reference, G-9); nothing else found.",
+      "learn": [
+        300334
+      ]
+    },
+    {
+      "spell": 503505,
+      "name": "Blessing of Absolution (damage at +20000 spell power, Blessed ally)",
+      "kind": "metric_delta",
+      "variant": "cone_damage",
+      "label_suffix": "cone_damage",
+      "quote": "Empower a Blessed ally to unleash a burst of holy energy in front of them, dealing ${$m1+0+$BH*1.5} Holy damage enemies in a $804252a1 yd frontal cone and generating additional threat.",
+      "trigger_spell": 503505,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "dummy_distance": 5,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_with_resist_total",
+      "fields": {
+        "spell": 804252,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "learn": [
+        804247
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "control_wait": true
+      },
+      "player_spell_power": 20000,
+      "observe_source": "503505 Blessing of Absolution Effect[0] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (680893, then 804252): BasePoints 403, DieSides 53, RealPointsPerLevel 1.8207, BaseLevel 60: at level 60 m1 = 404..456 ($m1). Script (AscensionSunClericAbilities.cpp:495-508): with Bless 804247 on the ally, amount = effect value + 1.5 x SpellBaseHealingBonusDone(Holy) of the caster, dealt as 804252 Holy damage to every attackable enemy within Radius(804252) = 10 yd of the ally (HasInArc(pi) = the front half). Bless is cast at the ally in both phases (a real cast, ally_casts), the 503505 cast at the ally is the trigger; with 20000 spell power (player_spell_power, harness fixture; its contrast is the cone_damage_base entry of the same pair) the damage is 404..456 + int(1.5 x 20000) = 30404..30456 plus 1.5 x the base spell power of the reference character (allowance of 60 damage, 40 spell power, above the DBC range: 30404..30516). Crit forced out by fixture 984954 (spell crit -1000). The read adds each log's resisted amount back (spell_damage_with_resist_total), so the random partial resist of the dummy does not move it (pair 1 read 27378 and 24356 with spell_damage_total). Control (before): the same Bless without the 503505 cast, no damage. Reference search 2026-11-22: coa-history spell 503505: 0 events; the bindmysoul snapshot has no value for this spell; nothing found. ",
+      "expected": 30460,
+      "after_at_least": 30404,
+      "after_at_most": 30516
+    },
+    {
+      "spell": 503505,
+      "name": "Blessing of Absolution (damage without added spell power, Blessed ally)",
+      "kind": "metric_delta",
+      "variant": "cone_damage_base",
+      "label_suffix": "cone_damage_base",
+      "quote": "Empower a Blessed ally to unleash a burst of holy energy in front of them, dealing ${$m1+0+$BH*1.5} Holy damage enemies in a $804252a1 yd frontal cone and generating additional threat.",
+      "trigger_spell": 503505,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "dummy_distance": 5,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_with_resist_total",
+      "fields": {
+        "spell": 804252,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "learn": [
+        804247
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "control_wait": true
+      },
+      "observe_source": "503505 Blessing of Absolution Effect[0] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (680893, then 804252): BasePoints 403, DieSides 53, RealPointsPerLevel 1.8207, BaseLevel 60: at level 60 m1 = 404..456 ($m1). Script (AscensionSunClericAbilities.cpp:495-508): with Bless 804247 on the ally, amount = effect value + 1.5 x SpellBaseHealingBonusDone(Holy) of the caster, dealt as 804252 Holy damage to every attackable enemy within Radius(804252) = 10 yd of the ally (HasInArc(pi) = the front half). Bless is cast at the ally in both phases (a real cast, ally_casts), the 503505 cast at the ally is the trigger; without the spell power fixture (contrast of cone_damage, same pair) (player_spell_power, harness fixture; its contrast is the cone_damage_base entry of the same pair) the damage is 404..456 plus 1.5 x the base spell power of the reference character (allowance of 60 damage, 40 spell power, above the DBC range: 404..516). Crit forced out by fixture 984954 (spell crit -1000). The read adds each log's resisted amount back (spell_damage_with_resist_total), so the random partial resist of the dummy does not move it (pair 1 read 27378 and 24356 with spell_damage_total). Control (before): the same Bless without the 503505 cast, no damage. Reference search 2026-11-22: coa-history spell 503505: 0 events; the bindmysoul snapshot has no value for this spell; nothing found. ",
+      "expected": 460,
+      "after_at_least": 404,
+      "after_at_most": 516
+    },
+    {
+      "spell": 503505,
+      "name": "Blessing of Absolution (control: the ally has no Bless, no damage)",
+      "kind": "metric_delta",
+      "variant": "cone_needs_bless",
+      "label_suffix": "cone_needs_bless",
+      "quote": "Empower a Blessed ally to unleash a burst of holy energy in front of them, dealing ${$m1+0+$BH*1.5} Holy damage enemies in a $804252a1 yd frontal cone and generating additional threat.",
+      "trigger_spell": 503505,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "dummy_distance": 5,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 804252,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 1,
+        "control_wait": true
+      },
+      "observe_source": "Control of cone_damage: the identical cast of 503505 at an ally that does not hold the caster's Bless: the script returns before the damage (AscensionSunClericAbilities.cpp:497-499, !ally->HasAura(Bless, player->GetGUID())), so 0 damage in both phases (tooltip: Only usable on your ally with Bless active). Without the player_spell_power fixture the amount would be 404..456 + 1.5 x base spell power. ntrol (before): the same Bless without the 503505 cast, no damage. Reference search 2026-11-22: coa-history spell 503505: 0 events; the bindmysoul snapshot has no value for this spell; nothing found. "
     }
   ],
   "player_observations": [],

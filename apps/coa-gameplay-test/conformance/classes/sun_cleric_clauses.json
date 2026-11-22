@@ -64,14 +64,24 @@
         ]
       },
       {
-        "claim": "to up to $704911i allies within $704911a1 yds",
+        "claim": "to up to $704911i allies",
+        "labels": [
+          "92136 behaviour_metric_delta cap_caster_full",
+          "92136 behaviour_metric_delta cap_caster_low"
+        ]
+      },
+      {
+        "claim": "within $704911a1 yds",
         "labels": [
           "92136 effect_radius 704911e0 #1"
         ]
       },
       {
         "claim": "prioritizing the lowest health allies.",
-        "labels": []
+        "labels": [
+          "92136 behaviour_metric_delta cap_caster_full",
+          "92136 behaviour_metric_delta cap_caster_low"
+        ]
       }
     ]
   },
@@ -303,7 +313,9 @@
     "clause": "Increases your spell power by 3 for every 125 Armor you have.",
     "kind": "claim",
     "reason": "Not final: two designs tried, see the b3b report. Reference search: bindmysoul snapshot carries an older state (1 per 125); nothing else found.",
-    "labels": []
+    "labels": [
+      "300334 behaviour_metric_delta sp_per_armor"
+    ]
   },
   {
     "spell": 300336,
@@ -1300,7 +1312,9 @@
       },
       {
         "claim": "up to 5 nearby allies (the cap)",
-        "labels": []
+        "labels": [
+          "504848 behaviour_metric_delta targets_cap"
+        ]
       }
     ]
   },
@@ -4507,17 +4521,32 @@
   {
     "spell": 503505,
     "clause": "Empower a Blessed ally to unleash a burst of holy energy in front of them, dealing ${$m1+0+$BH*1.5} Holy damage enemies in a $804252a1 yd frontal cone and generating additional threat.",
-    "labels": [
-      "503505 effect_radius 804252e0 #0",
-      "503505 effect_value #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$BH*1.5} Holy damage",
+        "labels": [
+          "503505 behaviour_metric_delta cone_damage",
+          "503505 behaviour_metric_delta cone_damage_base"
+        ]
+      },
+      {
+        "claim": "enemies in a $804252a1 yd frontal cone",
+        "labels": [
+          "503505 effect_radius 804252e0 #0"
+        ]
+      },
+      {
+        "claim": "and generating additional threat.",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 503505,
     "clause": "@ext:Only usable on your ally with Bless active.:ext@",
     "labels": [
-      "503505 effect_value #2"
+      "503505 behaviour_metric_delta cone_needs_bless"
     ],
     "kind": "claim"
   },
@@ -4620,7 +4649,7 @@
     "spell": 804257,
     "clause": "Increases the spell haste of all party and raid members by $s1%",
     "labels": [
-      "804257 effect_value e0 #0"
+      "804257 behaviour_metric_delta ally_haste"
     ],
     "kind": "claim"
   },
@@ -4628,7 +4657,7 @@
     "spell": 804257,
     "clause": "and your spell haste by an additional $s2%.",
     "labels": [
-      "804257 effect_value e1 #1"
+      "804257 behaviour_metric_delta caster_haste"
     ],
     "kind": "claim"
   },
