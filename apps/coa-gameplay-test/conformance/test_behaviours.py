@@ -12014,6 +12014,73 @@ class ScriptHitReceiverAuraTests(unittest.TestCase):
                 behaviour_scenario(load_fixture_class_file(23), self.entry(**fields))
 
 
+class ScriptHitReceiverAuraRemovalTests(unittest.TestCase):
+    REMOVED = 7743
+    STACKED = 7744
+
+    def entry(self, **fields) -> dict:
+        base = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 531130 and entry.get('label_suffix') == 'damage')
+        return {**base, 'receiver_aura_removals': [[self.REMOVED, 0]], **fields}
+
+    def steps(self, **fields) -> list[dict]:
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.entry(**fields))
+        return scenario['steps']
+
+    def removals(self, steps: list[dict]) -> list[int]:
+        return [index for index, step in enumerate(steps) if step.get('action') == 'set_aura'
+                and step.get('spell') == self.REMOVED and step.get('stacks') == 0]
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_removal_follows_the_last_cast_of_every_trial_in_both_arms(self):
+        steps = self.steps()
+        removals = self.removals(steps)
+        self.assertEqual(len(removals), 2 * self.entry()['trials'])
+        self.assertTrue(all(steps[index]['target'] == 'dummy' for index in removals))
+        self.assertTrue(all(steps[index - 1]['action'] == 'wait' and steps[index - 2]['action'] == 'cast'
+                            for index in removals))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_no_wait_after_casts_puts_the_removal_straight_after_the_cast(self):
+        steps = self.steps(no_wait_after_casts=True)
+        self.assertTrue(all(steps[index - 1]['action'] == 'cast' for index in self.removals(steps)))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_stack_read_precedes_the_removal_in_the_treatment_arm_only(self):
+        steps = self.steps(no_wait_after_casts=True, stacks_read_before_removal=[self.STACKED, 5])
+        reads = [index for index, step in enumerate(steps) if step.get('metric') == 'aura_stacks']
+        self.assertEqual(len(reads), self.entry()['trials'])
+        self.assertTrue(all(steps[index]['equals'] == 5 and steps[index]['actor'] == 'dummy'
+                            and 'SETUP' in steps[index]['label'] for index in reads))
+        removals = self.removals(steps)
+        self.assertEqual([index + 1 for index in reads], removals[len(removals) // 2:])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_delay_waits_before_the_removal_and_the_contract_names_it(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.entry(receiver_aura_removals=[[7743, 700]]))
+        steps = scenario['steps']
+        for index in self.removals(steps):
+            self.assertEqual((steps[index - 1]['action'], steps[index - 1]['ms']), ('wait', 700))
+        self.assertIn('the harness removes the auras [7743]', scenario['contract'])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_entry_without_removals_is_unchanged_by_the_new_fields(self):
+        plain = {key: value for key, value in self.entry().items() if key != 'receiver_aura_removals'}
+        explicit = {**plain, 'receiver_aura_removals': [], 'no_wait_after_casts': False}
+        self.assertEqual(behaviour_scenario(load_fixture_class_file(23), plain)[0],
+                         behaviour_scenario(load_fixture_class_file(23), explicit)[0])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_removal_without_its_conditions_is_refused(self):
+        for fields in ({'no_wait_after_casts': True, 'receiver_aura_removals': []},
+                       {'receiver_aura_removals': [[self.REMOVED, -1]]},
+                       {'stacks_read_before_removal': [self.STACKED, 0]},
+                       {'receiver_auras': [[self.REMOVED, 1]]},
+                       {'casts': []}):
+            with self.subTest(fields=fields), self.assertRaises(ValueError):
+                behaviour_scenario(load_fixture_class_file(23), self.entry(**fields))
+
+
 class HumanoidTargetEntryTests(unittest.TestCase):
     def entry(self, suffix: str) -> dict:
         return next(entry for entry in load_fixture_class_file(23)['behaviours']

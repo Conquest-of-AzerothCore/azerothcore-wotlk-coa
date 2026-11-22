@@ -7708,6 +7708,7 @@ def threat_redirect_spec(entry: dict) -> ThreatRedirectSpec:
 
 
 SCRIPT_HIT_SETTLE_MS = 500
+SCRIPT_HIT_STACKS_WITHIN_MS = 9000
 SCRIPT_HIT_RECEIVERS = (TARGET, STRIKER, CASTER)
 
 
@@ -7750,6 +7751,9 @@ class ScriptHitSpec:
     normalized_percent: bool = False
     value_rolls: bool = False
     strikes_per_cast: int | None = None
+    receiver_aura_removals: tuple[tuple[int, int], ...] = ()
+    no_wait_after_casts: bool = False
+    stacks_read_before_removal: tuple[int, int] | None = None
 
 
 def script_hit_label(spec: ScriptHitSpec) -> str:
@@ -7790,6 +7794,15 @@ def script_hit_validate(spec: ScriptHitSpec):
                                              or not spec.caster_entry or not spec.casts or spec.strike_spell):
         raise ValueError(f'{spec.spell} script_hit counts strikes per cast as a positive integer, for a minion '
                          f'caster_entry whose last cast sets off the strikes, without a strike_spell')
+    if spec.receiver_aura_removals or spec.no_wait_after_casts or spec.stacks_read_before_removal:
+        if spec.receiver != TARGET or not spec.receiver_aura_removals or not spec.casts:
+            raise ValueError(f'{spec.spell} script_hit receiver_aura_removals need casts and the dummy receiver')
+        if any(delay < 0 for _, delay in spec.receiver_aura_removals):
+            raise ValueError(f'{spec.spell} script_hit receiver_aura_removals delays are not negative')
+        if spec.receiver_auras:
+            raise ValueError(f'{spec.spell} script_hit receiver_aura_removals do not combine with receiver_auras')
+        if spec.stacks_read_before_removal and spec.stacks_read_before_removal[1] < 1:
+            raise ValueError(f'{spec.spell} script_hit stacks_read_before_removal expects at least one stack')
     if (spec.receiver_auras or spec.receiver_auras_after_casts) and (
             spec.receiver != TARGET or not spec.receiver_auras or any(stacks < 1 for _, stacks in spec.receiver_auras)):
         raise ValueError(f'{spec.spell} script_hit receiver_auras hold at least one stack on the dummy receiver, and '
@@ -7811,9 +7824,22 @@ def script_hit_trial(records: Records, spec: ScriptHitSpec, arm: str, trial: int
     for index, (spell, target) in enumerate(casts):
         if counted and index == len(casts) - 1:
             steps.append(script_hit_strike_read(spec, trial, BEFORE))
-        steps += hit_ratio_cast(records, spell, CASTER, target, spec.cast_power)
+        cast_steps = hit_ratio_cast(records, spell, CASTER, target, spec.cast_power)
+        if spec.no_wait_after_casts and index == len(casts) - 1:
+            cast_steps = cast_steps[:-1]
+        steps += cast_steps
     if spec.receiver_auras_after_casts:
         steps += held
+    if spec.receiver_aura_removals:
+        if spec.stacks_read_before_removal and arm == 'treatment':
+            read_spell, read_stacks = spec.stacks_read_before_removal
+            steps.append({'action': 'assert', 'label': f'{script_hit_label(spec)} SETUP stacks {trial}',
+                          'actor': TARGET, 'metric': 'aura_stacks', 'spell': read_spell, 'equals': read_stacks,
+                          'within_ms': SCRIPT_HIT_STACKS_WITHIN_MS})
+        for spell, delay in spec.receiver_aura_removals:
+            if delay:
+                steps.append({'action': 'wait', 'label': f'{arm} before removing {spell} {trial}', 'ms': delay})
+            steps.append({'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0, 'target': spec.receiver})
     if spec.strike_spell and spec.strike_owned_entry is None:
         steps += [{'action': 'cast', 'actor': STRIKER, 'spell': spec.strike_spell, 'target': CASTER},
                   {'action': 'wait', 'label': f'{arm} strike {trial}', 'ms': TAKEN_HIT_STRIKE_WAIT_MS}]
@@ -7927,6 +7953,13 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
                     f'tooltip read with the measured stats, its known modifiers and mitigation.'
                     + (f' {[spell for spell, _ in spec.stat_auras]} are set on the caster before its stats are '
                        f'measured.' if spec.stat_auras else '')
+                    + (f' After the casts of every trial of both arms the harness removes the auras '
+                       f'{[spell for spell, _ in spec.receiver_aura_removals]} from the {spec.receiver} '
+                       f'(delays {[delay for _, delay in spec.receiver_aura_removals]} ms)'
+                       + (f'; in the treatment arm it first reads that {spec.stacks_read_before_removal[0]} holds '
+                          f'{spec.stacks_read_before_removal[1]} stacks, and a trial that does not reach them '
+                          f'voids the arm' if spec.stacks_read_before_removal else '') + '.'
+                       if spec.receiver_aura_removals else '')
                     + (f' The auras {list(spec.receiver_auras)} are set on the {spec.receiver} in every trial of both '
                        f'arms, {"after the casts" if spec.receiver_auras_after_casts else "before the casts"}.'
                        if spec.receiver_auras else '')
@@ -8001,7 +8034,11 @@ def script_hit_spec(entry: dict) -> ScriptHitSpec:
                          entry.get('normalized_value', False) is True,
                          entry.get('effective_school', False) is True,
                          entry.get('normalized_percent', False) is True,
-                         entry.get('value_rolls', False) is True, entry.get('strikes_per_cast'))
+                         entry.get('value_rolls', False) is True, entry.get('strikes_per_cast'),
+                         tuple((int(spell), int(delay)) for spell, delay in entry.get('receiver_aura_removals', ())),
+                         entry.get('no_wait_after_casts', False) is True,
+                         None if 'stacks_read_before_removal' not in entry
+                         else tuple(int(value) for value in entry['stacks_read_before_removal']))
 
 
 TAKEN_OUTCOME_ATTACKERS = 8
