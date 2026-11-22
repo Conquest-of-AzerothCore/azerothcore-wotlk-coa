@@ -51,8 +51,8 @@
  *   Void Beam           every 2s      a random player
  *   Waking Tear         every 22.1s   3s cast: a tear at a player for 20s
  *   Waking Nightmare    every 33.1s   six Psychophages rise around a player
- *   Visions of Ny'alotha every 45s    4s cast: everyone, then after 5s a void
- *                                     explosion under each of them (5 yards)
+ *   Visions of Ny'alotha every 45s    4s cast marks everyone; 5s later each
+ *                                     marked player is hit and explodes (5 yards)
  *   Fierce Blow         every 7.8s    tank
  * His health is per player in his map (10 to 40), and only the Normal difficulties
  * are open; his shrine, rewards and portal out are boss_soggoth_instance_coa.cpp.
@@ -1231,11 +1231,7 @@ namespace
             else if (spell->Id == SPELL_VISIONS)
             {
                 for (Player* p : PlayersWithin(me, 200.0f))
-                {
-                    SpellDamage(me, p, SPELL_VISIONS_HIT, uint32(Info(me, SPELL_VISIONS_HIT) * _damage),
-                        SPELL_SCHOOL_MASK_SHADOW);
                     me->CastSpell(p, SPELL_VISIONS_MARK, true);
-                }
                 _clock.ScheduleEvent(TG_REND, 5s);
             }
         }
@@ -1273,6 +1269,8 @@ namespace
                         if (!marked->HasAura(SPELL_VISIONS_MARK))
                             continue;
                         me->CastSpell(marked, SPELL_VOID_REND, true);
+                        SpellDamage(me, marked, SPELL_VISIONS_HIT, uint32(Info(me, SPELL_VISIONS_HIT) * _damage),
+                            SPELL_SCHOOL_MASK_SHADOW);
                         for (Player* p : players)
                             if (p->IsWithinDist3d(marked, VOID_REND_RADIUS))
                                 SpellDamage(me, p, SPELL_VOID_REND,
