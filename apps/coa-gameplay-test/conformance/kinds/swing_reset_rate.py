@@ -3,8 +3,9 @@ from pathlib import Path
 
 from behaviours import BEHAVIOUR_METRIC_DELTA, behaviour_entry, prose_rule, waited_ms
 from hits import MAX_ACCELERATED_SCENARIO_MS, creature_fixture, timed
-from kinds.cooldown_reset_rate import CLEAR_COOLDOWN_OPCODE, cooldown_reset_rate_pooled_verdict
-from procs import band_trials_needed
+from kinds.cooldown_reset_rate import (CLEAR_COOLDOWN_OPCODE, cooldown_reset_rate_pooled_verdict, kind_residual,
+                                       minimum_trials)
+from procs import RESIDUAL_TARGET
 from profile import (CASTER, DBC_DIR, EQUIPMENT_SLOT_MAIN_HAND, EQUIPMENT_SLOT_OFF_HAND, base_steps, equipped_weapons,
                      measurement, player_fixture, with_weapon_set)
 from tooltip import Records
@@ -30,13 +31,15 @@ class SwingResetRateSpec:
     attack_ms: int
     parts: int = 1
     label_suffix: str = 'swing_reset_rate'
+    residual: dict | None = None
 
 
 def swing_reset_rate_spec(entry: dict) -> SwingResetRateSpec:
     spec = SwingResetRateSpec(int(entry['spell']), entry['name'], entry['quote'], int(entry['talent']),
                               int(entry['reset_spell']), float(entry['chance_pct']), int(entry['control_ms']),
                               int(entry['attack_ms']), int(entry.get('parts', 1)),
-                              entry.get('label_suffix', 'swing_reset_rate'))
+                              entry.get('label_suffix', 'swing_reset_rate'),
+                              kind_residual(int(entry['spell']), entry, float(entry['chance_pct'])))
     if not 0 < spec.chance_pct < 100 or spec.control_ms < 1 or spec.attack_ms < 1 or spec.parts < 1:
         raise ValueError(f'{spec.spell} {KIND} needs a chance below 100%, a control and a treatment attack time and '
                          f'at least one part')
@@ -64,7 +67,8 @@ def swing_reset_rate_scenario(class_file: dict, spec: SwingResetRateSpec) -> tup
     speeds = melee_speeds(class_file)
     if not speeds:
         raise ValueError(f'{spec.spell} {KIND} needs a melee weapon with a swing speed')
-    needed = band_trials_needed(spec.chance_pct / 100)
+    needed = minimum_trials(spec.chance_pct, spec.residual)
+    confidence = f'{spec.residual["confidence"]:g}' if spec.residual else '99%'
     bound = swing_bound(spec, speeds)
     if bound < needed:
         raise ValueError(f'{spec.spell} {KIND} swings at most {bound} times in {spec.parts} pooled parts of '
@@ -94,18 +98,24 @@ def swing_reset_rate_scenario(class_file: dict, spec: SwingResetRateSpec) -> tup
                      f'(control: no SMSG_CLEAR_COOLDOWN of {spec.reset_spell}) and for {spec.attack_ms} ms after '
                      f'(weapon speeds {speeds} ms); the clear-cooldown packets of {spec.reset_spell} per landed '
                      f'damaging auto-attack hit of either hand ({HIT_METRIC}: misses, dodges and parries are no '
-                     f'trial) must hold {spec.chance_pct:g}% in a Wilson 99% interval inside the G-20 band.'
+                     f'trial) must hold {spec.chance_pct:g}% in a Wilson {confidence} interval inside the G-20 band.'
                      + (f' This case is one of {spec.parts} identical pooled parts: the rate is judged on the hits '
                         f'and resets summed over every part (at least {needed} landed hits, so a conformant server '
-                        f'fails the Wilson 99% interval inside the band with a probability of at most 1%; fewer '
-                        f'hits leave it insufficient), and a missing part leaves the claim unmeasured.'
-                        if spec.parts > 1 else '')),
+                        f'fails the Wilson {confidence} interval inside the band with a probability of at most 1%; '
+                        f'fewer hits leave it insufficient), and a missing part leaves the claim unmeasured.'
+                        if spec.parts > 1 else '')
+                     + (f' {RESIDUAL_TARGET} {spec.residual["target"]:g} per pair: Wilson confidence '
+                        f'{spec.residual["confidence"]:g} per run instead of 99%, at least {spec.residual["trials"]} '
+                        f'landed hits so that a deviation of {spec.residual["min_detectable"] * 100:g} points is '
+                        f'outside the band.' if spec.residual else '')),
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
     model = {'kind': KIND, 'metric': 'server_packets', 'quote': entry.quote, 'chance_pct': spec.chance_pct,
              'minimum_trials': needed, 'swing_bound': bound,
              'reads': {mark: reset_mark(spec, mark) for mark in MARKS}}
+    if spec.residual:
+        model['residual'] = spec.residual
     expectation = Expectation(reset_mark(spec, '').rstrip(), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.talent,
                               None, f'{spec.chance_pct:g}%', prose_rule(entry.quote, spec.spell), model)
     return timed(scenario, waited_ms(steps), MAX_ACCELERATED_SCENARIO_MS), [expectation]
