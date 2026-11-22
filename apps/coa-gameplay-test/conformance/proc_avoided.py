@@ -8,8 +8,12 @@ DODGED, PARRIED, LANDED, FULL_BLOCKED = 2, 3, 1, 5
 TRIAL_STATES = {'dodged': DODGED, 'parried': PARRIED}
 GUARD_STATES = {'landed': LANDED, 'blocked': FULL_BLOCKED}
 TRIALS_PER_ATTEMPT = 'trials_per_attempt'
-TRIGGER_FIELDS = {'action', 'striker_entry', 'swing_ms', 'dodge', 'parry', 'strikers', 'striker_auras'}
+TRIGGER_FIELDS = {'action', 'striker_entry', 'swing_ms', 'dodge', 'parry', 'strikers', 'striker_auras', 'count_misses'}
 READING_NAME = 'avoided swings (dodged + parried)'
+MISSES_READING_NAME = 'avoided swings (dodged + parried + missed)'
+MISSED = 'missed'
+MISSED_METRIC = 'melee_missed_taken'
+ATTACK_BALANCE = 'attack_balance'
 
 
 def is_avoided(entry: dict) -> bool:
@@ -36,9 +40,15 @@ def checked_trigger(entry: dict) -> dict:
     if not isinstance(auras, list) or any(isinstance(spell, bool) or not isinstance(spell, int) or spell <= 0
                                           for spell in auras):
         raise ValueError(f'Proc {aura} avoided trigger striker_auras must be a list of positive spell ids')
+    if type(trigger.get('count_misses', False)) is not bool:
+        raise ValueError(f'Proc {aura} avoided trigger count_misses is a boolean')
     if entry.get('trial_readings') or entry.get(TRIALS_PER_ATTEMPT):
         raise ValueError(f'Proc {aura} avoided trigger sets its own trial reading and trials per attempt')
     return trigger
+
+
+def counts_misses(entry: dict) -> bool:
+    return entry['trigger'].get('count_misses', False) is True
 
 
 def striker_auras(entry: dict) -> list:
@@ -60,8 +70,9 @@ def striker_fixtures(class_file: dict, entry: dict) -> list[dict]:
             for striker in striker_ids(entry)]
 
 
-def trial_labels(trials_label: str) -> dict[str, str]:
-    return {outcome: trials_label if outcome == 'dodged' else f'{trials_label} {outcome}' for outcome in TRIAL_STATES}
+def trial_labels(trials_label: str, misses: bool = False) -> dict[str, str]:
+    labels = {outcome: trials_label if outcome == 'dodged' else f'{trials_label} {outcome}' for outcome in TRIAL_STATES}
+    return {**labels, MISSED: f'{trials_label} {MISSED}'} if misses else labels
 
 
 def guard_label(aura: int, name: str) -> str:
@@ -106,16 +117,33 @@ def attempt_steps(entry: dict, attempts: int, swing_ms: int) -> list[dict]:
     return [step for _ in range(attempts) for step in avoidance_steps(entry) + [{'action': 'wait', 'ms': swing_ms}]]
 
 
-def trial_steps(trials_label: str, attempts_label: str | None = None) -> list[dict]:
-    steps = [measurement(label, CASTER, 'melee_attacks_taken', victim_state=TRIAL_STATES[outcome])
-             for outcome, label in trial_labels(trials_label).items()]
+def trial_steps(trials_label: str, attempts_label: str | None = None, misses: bool = False) -> list[dict]:
+    steps = [measurement(label, CASTER, MISSED_METRIC) if outcome == MISSED
+             else measurement(label, CASTER, 'melee_attacks_taken', victim_state=TRIAL_STATES[outcome])
+             for outcome, label in trial_labels(trials_label, misses).items()]
     if attempts_label:
         steps.append(measurement(attempts_label, CASTER, 'melee_attacks_taken'))
     return steps
 
 
-def reading(trials_label: str) -> dict:
-    return {'name': READING_NAME, 'labels': list(trial_labels(trials_label).values()), 'minus_events': False}
+def reading(trials_label: str, misses: bool = False) -> dict:
+    return {'name': MISSES_READING_NAME if misses else READING_NAME,
+            'labels': list(trial_labels(trials_label, misses).values()), 'minus_events': False}
+
+
+def attack_balance(trials_label: str, attempts_label: str) -> dict:
+    return {'total': attempts_label, 'parts': list(trial_labels(trials_label, True).values())}
+
+
+def attack_imbalance(balance: dict, values: dict) -> str | None:
+    total = values.get(balance['total'])
+    parts = [values.get(label) for label in balance['parts']]
+    if total is None or None in parts:
+        return 'no attack balance reads'
+    if total != sum(parts):
+        return (f'{total:g} attacks taken against {sum(parts):g} dodged, parried and missed with no landed or '
+                f'blocked swing, so a swing outcome is miscounted')
+    return None
 
 
 def trial_rule(entry: dict) -> str:
@@ -123,7 +151,10 @@ def trial_rule(entry: dict) -> str:
     carried = f', each carrying {striker_auras(entry)} (harness set_aura)' if striker_auras(entry) else ''
     return (f'trials: melee swings of {strikers(entry)} aggressive stationary striker(s) {trigger["striker_entry"]} '
             f'({trigger["swing_ms"]} ms swings{carried}) that the caster dodged or parried (melee_attacks_taken victim states '
-            f'{DODGED} and {PARRIED}, summed); before every swing interval the caster\'s health is set to full and '
+            f'{DODGED} and {PARRIED}, summed)'
+            + (f' or that missed it ({MISSED_METRIC}, added; a part whose attacks taken differ from the dodged, '
+               f'parried and missed swings is void)' if counts_misses(entry) else '')
+            + f'; before every swing interval the caster\'s health is set to full and '
             f'its dodge and parry to {trigger["dodge"]:g}% and {trigger["parry"]:g}% (set_combat_avoidance), so no '
             f'swing lands; the caster engages each striker once, at the same set health and avoidance, before the '
             f'passive is learned and stops attacking; '
@@ -156,15 +187,17 @@ def baseline_steps(entry: dict, plan, swings: bool) -> list[dict]:
     if swings:
         steps += attempt_steps(entry, baseline_swings(entry, plan), plan.attempt_ms)
         steps.append({'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS})
-    return steps + trial_steps(labels['trials']) + [{**event_steps(entry)[0], 'label': labels['events']}]
+    return steps + trial_steps(labels['trials'], misses=counts_misses(entry)) + [
+        {**event_steps(entry)[0], 'label': labels['events']}]
 
 
 def avoided_baseline_model(entry: dict, plan, part: int) -> dict:
     from procs import baseline_labels, proc_measurements
     labels = baseline_labels(entry['aura'])
-    parried = trial_labels(proc_measurements(entry['aura'])['trials'])['parried']
+    misses = counts_misses(entry)
+    own, held = trial_labels(proc_measurements(entry['aura'])['trials'], misses), trial_labels(labels['trials'], misses)
     return {**labels, 'attempts': baseline_swings(entry, plan) if holds_swings(entry, part) else 0,
-            'added_trials': {parried: trial_labels(labels['trials'])['parried']}}
+            'added_trials': {own[outcome]: held[outcome] for outcome in own if outcome != 'dodged'}}
 
 
 def baseline_ms(entry: dict, plan, part: int) -> int:

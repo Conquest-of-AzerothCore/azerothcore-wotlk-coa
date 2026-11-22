@@ -365,7 +365,8 @@
           42716,
           62531,
           2116852
-        ]
+        ],
+        "count_misses": true
       },
       "residual_target": 0.001,
       "min_detectable": 4,
@@ -375,7 +376,7 @@
       "proc_spell": 504877,
       "events_per_proc": 1,
       "proc_spell_source": "AscensionSunClericEvents.cpp:288: case 680663 calls Mana(player, CalculatePct(player->GetCreateMana(), Amount(504876))) with the default source 504877 (Vow of Grace energize, AscensionSunCleric.h:51), so the proc is the Energize events of 504877 on the caster, not of 504876 (a lead for the controller: the tooltip names Energize 504876; compare the 802935 source fix, ADR 0019).",
-      "handler": "aura_ascension_sun_cleric_event (spell_script_names row of 680663, rev_20260909_13_sun_cleric_completion.sql:245): AscensionSunClericEvents.cpp:98 returns avoided && Chance(player, 680663) for a received event; Chance (AscensionSunCleric.cpp:196-205) rolls roll_chance_i(ProcChance 25) once per avoided attack with no internal cooldown (spell_proc row of 680663: Chance 100, so the engine always passes the event on). Trigger: procs avoided trigger (ADR 0900), the 92137 Angelic Presence entry shape: ten aggressive stationary strikers with Self Root Forever 42716, Molten 62531 and Enrage 2116852, dodge 50 and parry 50 before every swing interval, every attempt avoided. Reference search 2026-11-22: coa-history spell 680663 and 504876: no log event of the passive roll; the bindmysoul talents snapshot was not re-read for this entry; nothing else found.",
+      "handler": "aura_ascension_sun_cleric_event (spell_script_names row of 680663, rev_20260909_13_sun_cleric_completion.sql:245): AscensionSunClericEvents.cpp:98 returns avoided && Chance(player, 680663) for a received event; Chance (AscensionSunCleric.cpp:196-205) rolls roll_chance_i(ProcChance 25) once per avoided attack with no internal cooldown (spell_proc row of 680663: Chance 100, so the engine always passes the event on). Trigger: procs avoided trigger (ADR 0900), the 92137 Angelic Presence entry shape: ten aggressive stationary strikers with Self Root Forever 42716, Molten 62531 and Enrage 2116852, dodge 50 and parry 50 before every swing interval, every attempt avoided. Reference search 2026-11-22: coa-history spell 680663 and 504876: no log event of the passive roll; the bindmysoul talents snapshot was not re-read for this entry; nothing else found. Misses are trials too (count_misses, ADR 1041 provisional, mentor D-175): the handler rolls on a Miss as on a Dodge or Parry, so the trials are dodged + parried + missed swings, and a part whose attacks taken differ from that sum is void.",
       "dbc": {
         "680663": {
           "ProcChance": 25,
@@ -37472,6 +37473,113 @@
         ]
       },
       "observe_source": "Solar Flare 807175 lasts 10000 ms (DurationIndex 1, Spell.dbc), applied when the Dawnsear 500146 hit finds the Herald marker (AscensionSunClericAbilities.cpp:353-356). Same route as the flare_hit entry. The application lies between the end of the 3500 ms Dawnsear cast and the 4000 ms read of the flare_hit entry, where the aura is already on the dummy (both from Spell.dbc and that entry's presence read). Read 14450 ms after the trigger, at least 10550 ms and at most 10950 ms after the application: gone excludes a duration of 11000 ms (10% long) or more, since the read is at most 10950 ms after the application, and a 10000 ms aura is gone from 10000 ms on. Control: before the learn the Solar Flare is absent (0 before in both entries). Reference search 2026-11-22: coa-history 807175: 2442 SPELL_AURA_APPLIED and 2416 SPELL_AURA_REMOVED in 29 logs, no per-cast duration readable; nothing else found."
+    },
+    {
+      "spell": 560492,
+      "kind": "script_hit",
+      "quote": "Avoiding an attack now also deals ${$560493m1*$<scalingbp>$spfi*0.12+$AP*0.03} Fire damage to the attacker.",
+      "hit_spell": 560493,
+      "receiver": "striker",
+      "caster_avoidance": {
+        "dodge": 50,
+        "parry": 50
+      },
+      "trials": 30,
+      "minimum_hits": 8,
+      "settle_ms": 1100,
+      "observe_source": "560492 Protector of the Flame Effect[0] aura 42 (ProcChance 100); AscensionSunClericEvents.cpp:100 accepts a received Miss, Dodge or Parry (PROC_HIT_MISS | PROC_HIT_DODGE | PROC_HIT_PARRY, :72) with Chance(player, 560492, 1000), a 1000 ms timer, and :277 casts 560493 at the attacker; 560493 Effect[0] SCHOOL_DAMAGE (2) BasePoints 53, DieSides 1, SchoolMask 4 (Fire), coefficients 0.12 spell power and 0.03 attack power (AscensionSunClericData.h:82). The amount is read from the tooltip as corrected by D-166 (tooltip_corrections). One aggressive, stationary striker 36 swings at the caster, whose dodge and parry are set to 50% and 50% before every 1100 ms trial (beyond the 1000 ms timer); the control arm runs the same trials before 560492 is learned. Reference search 2026-11-22: coa-history spell 560493: 1,083 SPELL_DAMAGE (min 1, max 1052, mean 233.0) and 2 SPELL_MISSED in 6 logs, no coefficient; nothing else found.",
+      "name": "Protector of the Flame (Fire damage to the attacker on an avoided attack)",
+      "variant": "flame",
+      "label_suffix": "flame"
+    },
+    {
+      "spell": 560492,
+      "kind": "script_hit",
+      "quote": "Avoiding an attack now also deals ${$560493m1*$<scalingbp>$spfi*0.12+$AP*0.03} Fire damage to the attacker.",
+      "hit_spell": 560493,
+      "receiver": "striker",
+      "caster_avoidance": {
+        "dodge": 50,
+        "parry": 50
+      },
+      "trials": 30,
+      "minimum_hits": 8,
+      "settle_ms": 1100,
+      "observe_source": "560492 Protector of the Flame Effect[0] aura 42 (ProcChance 100); AscensionSunClericEvents.cpp:100 accepts a received Miss, Dodge or Parry (PROC_HIT_MISS | PROC_HIT_DODGE | PROC_HIT_PARRY, :72) with Chance(player, 560492, 1000), a 1000 ms timer, and :277 casts 560493 at the attacker; 560493 Effect[0] SCHOOL_DAMAGE (2) BasePoints 53, DieSides 1, SchoolMask 4 (Fire), coefficients 0.12 spell power and 0.03 attack power (AscensionSunClericData.h:82). The amount is read from the tooltip as corrected by D-166 (tooltip_corrections). One aggressive, stationary striker 36 swings at the caster, whose dodge and parry are set to 50% and 50% before every 1100 ms trial (beyond the 1000 ms timer); the control arm runs the same trials before 560492 is learned. Reference search 2026-11-22: coa-history spell 560493: 1,083 SPELL_DAMAGE (min 1, max 1052, mean 233.0) and 2 SPELL_MISSED in 6 logs, no coefficient; nothing else found.",
+      "name": "Protector of the Flame (Fire damage, +600 spell power)",
+      "variant": "flame_sp",
+      "label_suffix": "flame_sp",
+      "stat_auras": [
+        [
+          10062,
+          6
+        ]
+      ]
+    },
+    {
+      "spell": 560492,
+      "kind": "script_hit",
+      "quote": "Avoiding an attack now also deals ${$560493m1*$<scalingbp>$spfi*0.12+$AP*0.03} Fire damage to the attacker.",
+      "hit_spell": 560493,
+      "receiver": "striker",
+      "caster_avoidance": {
+        "dodge": 50,
+        "parry": 50
+      },
+      "trials": 30,
+      "minimum_hits": 8,
+      "settle_ms": 1100,
+      "observe_source": "560492 Protector of the Flame Effect[0] aura 42 (ProcChance 100); AscensionSunClericEvents.cpp:100 accepts a received Miss, Dodge or Parry (PROC_HIT_MISS | PROC_HIT_DODGE | PROC_HIT_PARRY, :72) with Chance(player, 560492, 1000), a 1000 ms timer, and :277 casts 560493 at the attacker; 560493 Effect[0] SCHOOL_DAMAGE (2) BasePoints 53, DieSides 1, SchoolMask 4 (Fire), coefficients 0.12 spell power and 0.03 attack power (AscensionSunClericData.h:82). The amount is read from the tooltip as corrected by D-166 (tooltip_corrections). One aggressive, stationary striker 36 swings at the caster, whose dodge and parry are set to 50% and 50% before every 1100 ms trial (beyond the 1000 ms timer); the control arm runs the same trials before 560492 is learned. Reference search 2026-11-22: coa-history spell 560493: 1,083 SPELL_DAMAGE (min 1, max 1052, mean 233.0) and 2 SPELL_MISSED in 6 logs, no coefficient; nothing else found.",
+      "name": "Protector of the Flame (Fire damage, +1000 attack power)",
+      "variant": "flame_ap",
+      "label_suffix": "flame_ap",
+      "stat_auras": [
+        [
+          10031,
+          1
+        ]
+      ]
+    },
+    {
+      "spell": 560492,
+      "kind": "avoided_icd",
+      "name": "Protector of the Flame (once per sec)",
+      "variant": "icd",
+      "label_suffix": "icd",
+      "quote": "Can only occur once per sec.",
+      "hit_spell": 560493,
+      "timer_ms": 1000,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852
+      ],
+      "swing_ms": 500,
+      "control_windows": 10,
+      "windows": 60,
+      "observe_source": "AscensionSunClericEvents.cpp:100 returns avoided && Chance(player, 560492, 1000) for a received Miss, Dodge or Parry (:72), a 1000 ms timer, and :277 casts 560493 at the attacker; 560492 ProcChance 100 (Spell.dbc), so every avoided swing after the timer opens is a hit. Strikers: the 680663 Blessed Bulwark shape, ten aggressive stationary creature 36 with Self Root Forever 42716, Molten 62531 and Enrage 2116852 (harness set_aura), dodge 50 and parry 50 before every 500 ms window. Reference search 2026-11-22: coa-history spell 560493: 1,083 SPELL_DAMAGE in 6 logs, no per-hit time read here; nothing else found."
+    },
+    {
+      "spell": 300371,
+      "name": "Censure (chain to a nearby enemy, with a control arm before the learn)",
+      "kind": "timer_spacing_arms",
+      "variant": "chain_control",
+      "label_suffix": "chain",
+      "quote": "Dealing direct damage to an enemy affected by Chains of Light will now cause it to chain to a nearby enemy.",
+      "timer_ms": 1000,
+      "gaps": [
+        940,
+        1050
+      ],
+      "hit_spell": 572801,
+      "seed_spell": 801524,
+      "aura_spell": 806697,
+      "spares": 6,
+      "radius": 10.0,
+      "cast_power": 1360,
+      "observe_source": "AscensionSunClericEvents.cpp:134 300371: direct && damage && the target carries the caster's 806697 && Chance(player, id, 1000) (ProcChance 100, a 1000 ms timer); :327-334 copies 806697 to the first other enemy within 10 yd without it. Each arm seeds Chains of Light 801524 (TRIGGER_SPELL 806697) on the primary dummy, then two Horusath Blast 572801 hits on it (instant, single target, missile speed 20, cooldown reset between them), the second cast with ignore_gcd (owner ruling O-17) 940 ms (blocked arm) or 1050 ms (allowed arm) after the first. Dawnbreak 502496 was not used: a cone (EffectImplicitTargetA 24) that would hit the spares, with a 6000 ms category cooldown. Expected new copies on the six spares: 1 in the blocked arm, 2 in the allowed arm. The measured spacing of the two damage events must lie in [900, 1000) and (1000, 1100] ms or the run is unmeasured. Reference search 2026-11-22: coa-history spell 300371: 0 events in 186 logs (a passive); Horusath Blast 572801 (872 damage events in 9 logs) and Chains of Light 806697 (10 applications for 10 casts of 801524 in 3 logs) are found, with no copy to a second enemy to time; the coabuildhub snapshot (fetched 2026-09-18) repeats the tooltip; nothing else found. Control arm (variant chain_control, round B, row 51): before 300371 is learned, the same seed and two Horusath Blast 572801 hits 1050 ms apart must give no new copy on the six spares; the opening counts of the later arms shift by one."
     }
   ],
   "player_observations": [],
@@ -37880,5 +37988,11 @@
     "power": 0,
     "value": 1363,
     "source": "player_class_stats class 27 level 60 BaseMana 1363, read in the world database of the in-RAM test MySQL; set before every cast of a rank hit scenario whose cost is a percentage of base mana (hits.base_mana_steps)"
+  },
+  "tooltip_corrections": {
+    "560492": {
+      "text": "Avoiding an attack now also deals ${$560493m1*$<scalingbp>+$spfi*0.12+$AP*0.03} Fire damage to the attacker.\r\n\r\nCan only occur once per sec.",
+      "ruling": "D-166 (mentor, 2026-11-22): the token is read as '+$spfi*0.12'; the client text lacks the operator, every sibling formula of the class adds its spell power term; ledger-only text_correction, no client text change"
+    }
   }
 }

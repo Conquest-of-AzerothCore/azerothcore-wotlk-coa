@@ -1494,6 +1494,8 @@ it, the ally gains none and the caster some: the whole of the ally's threat goes
 
 ### Script-cast hits (`hit_mean`, `kind: "script_hit"`)
 
+The class file key `tooltip_corrections` (`{"<spell>": {"text": ..., "ruling": ...}}`, ADR 1042, provisional) replaces the Description that a script hit reads its amount from, only for a spell with a recorded ruling and only when the text is the DBC Description with `+` operators inserted; anything else is refused. Sun Cleric: Protector of the Flame 560492 (D-166). No finished class uses it.
+
 A tooltip may state the amount of a hit that a class script casts on an event, such as a pulse on a heal or a
 strike when a shield breaks (ADR 0160). `hit_spell` is the spell the script casts and `spell` the passive whose
 tooltip shows its amount. Every trial sets `caster_auras` on the caster, holds the caster at `caster_health_pct`
