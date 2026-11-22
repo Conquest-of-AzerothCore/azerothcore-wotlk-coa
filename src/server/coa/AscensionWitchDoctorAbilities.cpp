@@ -156,6 +156,8 @@ class witch_doctor_casts : public AllSpellScript
         if (IsJuju(info) && player->HasAura(Strings))
             if (Aura* threads = target->GetAura(Threads, player->GetGUID()))
                 threads->SetScriptValue(Strings, 1);
+        if (info->Id == Shock && !target->IsPlayer() && hit.missCondition == SPELL_MISS_NONE)
+            Cast(player, target, ShockInterrupt);
         float factor = 1.0f;
         if (OwnedHex(player, target) && (IsJuju(info) || Family(info, 1, 32768 | 262144)))
         {
@@ -271,8 +273,6 @@ class witch_doctor_casts : public AllSpellScript
             RefreshOwnedHex(player, target);
         if (id == RageBrew)
             Cast(player, target, RageBrewBuff);
-        if (id == Shock && !target->IsPlayer())
-            Cast(player, target, ShockInterrupt);
         if ((damage || healing) && id != Spirit && !Family(info, 0, 8) && !spell->IsTriggered())
             player->RemoveAurasDueToSpell(Mirage);
     }
