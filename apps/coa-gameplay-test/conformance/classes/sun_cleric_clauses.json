@@ -526,19 +526,19 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "Doubles the healing done",
+        "claim": "Doubles the healing done by Bless",
         "labels": [
           "300357 behaviour_metric_delta health_tick_lead"
         ]
       },
       {
-        "claim": "mana restored by Bless",
+        "claim": "Doubles the mana restored by Bless",
         "labels": [
           "804247 behaviour_metric_delta mana_tick_lead"
         ]
       }
     ],
-    "reason": "Pair 20261122-070213 / 20261122-070253, build of server commit 821dc311ea6a, no flip. Mana half: Bless on the caster reads the mana after one tick (mana_tick_lead, both runs ok, control = before the learn). Healing half: ALERT in both runs, the health after one tick reads 5500 before and 5500 after the learn against 6000 expected: 300357 does not double the Bless heal (AscensionSunClericAuras.cpp:219-223 doubles only the mana). Lead, not a verdict: fix note in the report (clause 39). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    "reason": "Pair 20261122-070213 / 20261122-070253, build of server commit 8126dd813259, no flip. Mana half: Bless on the caster reads the mana after one tick (mana_tick_lead, both runs ok, control = before the learn). Healing half: ALERT in both runs, the health after one tick reads 5500 before and 5500 after the learn against 6000 expected: 300357 does not double the Bless heal (AscensionSunClericAuras.cpp:217-218 copies the heal without a 300357 term and only the mana branch doubles, :221-224). Lead, not a verdict: fix note in the report (clause 39). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
   },
   {
     "spell": 300360,
@@ -1231,15 +1231,28 @@
         "labels": []
       },
       {
-        "claim": "reset the cooldown of Gavels and causes the next one to not incur a cooldown",
-        "labels": [
-          "503690 behaviour_metric_delta gavel_reset",
-          "503690 behaviour_metric_delta gavel_free",
-          "503690 behaviour_metric_delta gavel_once"
-        ]
+        "claim": "reset the cooldown of Gavels",
+        "labels": []
+      },
+      {
+        "claim": "causes the next one to not incur a cooldown",
+        "labels": []
       }
     ],
-    "reason": "Pair 20261122-070213 / 20261122-070253, build of server commit 821dc311ea6a, no flip. Reset: gavel_reset reads 1 completed Gavel without 503690 and 2 with it and the roll forced (the trigger Gavel is refused by its 5000 ms cooldown without the reset). Chance: status 5, the pooled proof exceeds the 90 minute limit of G-20 (15,926 landed trials for the band, 43,617 attempts for a residual of 0.1% per pair, one attempt per 6500 ms as Dawnbreak has a 6000 ms category cooldown, about 80 parts); a tool need is returned (a cooldown reset between attempts for the proc kind). Free next Gavel: two designs on spell_cast_count (gavel_free, gavel_once) read more completed Gavels than casts were made (5 and 4 against at most 3 in the treatment, runs 070213 and 070253): the counter is not a valid read of this claim here; open, not given a final status. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    "reason": "Open, no final status. Chance and reset: the entry gavel_reset (a Gavel refused by its 5000 ms cooldown completes after a Dawnbreak; pair 20261122-070213 / 20261122-070253, build of server commit 8126dd813259, no flip: 1 completed Gavel without 503690, 2 with it) is retired, not counted. Its forced_roll adds a SPELLMOD_CHANCE_OF_SUCCESS modifier, but Chance() rolls the raw ProcChance 40 (AscensionSunCleric.cpp:196-205, no ApplySpellMod; git log -L: e36bc50aad, unchanged since) and 503690 is a dummy driver whose proc flags are zeroed (AscensionSunClericContracts.cpp:52-62), so the roll was a natural 40% and a correct server passes both runs with probability 0.16. The reading is a lead that a reset happens, not a proof. A forced roll that reaches Chance(), or at least 15 landed attempts per run judged as \"at least one reset\" (0.6^15 = 0.0005 per run), needs a tool the entry kinds do not have. Rate: G-20 step 1 (about 300 casts per arm) is not run; the band needs 15,926 landed trials (2.576^2 x 0.4 x 0.6 / 0.01^2) and the trigger Dawnbreak 800654 has a 6000 ms category cooldown (Spell.dbc), so the class-file proc and cooldown_reset_rate kinds space casts by it. Tool need: a reset of the trigger cooldown between attempts for the proc kinds (the attacker_miss_share entry of 572752 already resets its cast between attempts with reset_cooldown). Free next Gavel: two designs on spell_cast_count (gavel_free, gavel_once) read more completed Gavels than casts were made (5 and 4, then 6, against at most 3 or 4 in the treatment, pair 20261122-070213 / 20261122-070253): the counter is not a valid read of this claim; entries removed, no label. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
+    "tool_gap": {
+      "reason": "Chance() rolls the raw ProcChance, so forced_roll cannot force it, and no entry kind judges \"at least one reset in N attempts\"; the proc kinds space attempts by the 6000 ms cooldown of Dawnbreak 800654. Needed: a cooldown reset of the trigger between attempts for the class-file proc and cooldown_reset_rate kinds, or a forcing route that reaches Chance().",
+      "attempts": [
+        {
+          "agent": "sc-b8b1 (class 27 batch 8 chunk 1 author)",
+          "report": ".agents/plans/sun-cleric-b8b1/report.md#503690"
+        },
+        {
+          "agent": "sc-b8b-fix (class 27 batch 8 review fixes author)",
+          "report": ".agents/plans/sun-cleric-b8b-fix/report.md#503690"
+        }
+      ]
+    }
   },
   {
     "spell": 504070,
@@ -2336,7 +2349,7 @@
         ]
       }
     ],
-    "reason": "Pair 20261122-070213 / 20261122-070253, build of server commit 821dc311ea6a, no flip. Forced melee crits with Gavel of Wrath 802561 (harness crit rating fixture), control = the same crits before 582832 is learned. Haste: spell cast speed multiplier 1 to 0.952381 at one stack and 0.869565 at three, main-hand attack time 2300 to 2190.48 and 2000 (5% per stack, both haste auras). Healing: Sunlight 704911 heals +14.99% and +14.99% at three stacks (three real casts of 582837 before each heal, ally at 50% health, spell power 20000; the 99% interval lies inside the 2-point band); a one-stack read is not possible as stacks accumulate over trials (a first attempt read +14.6%, test fault, dropped). Stacks 1 then 3 for four crits (cap 3, not 4). Duration: aura present at 9.0 s and gone at 11.0 s (10000 ms, excludes -10% and +10%). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    "reason": "Pair 20261122-070213 / 20261122-070253, build of server commit 8126dd813259, no flip. Forced melee crits with Gavel of Wrath 802561 (harness crit rating fixture), control = the same crits before 582832 is learned. Haste: spell cast speed multiplier 1 to 0.952381 at one stack and 0.869565 at three, main-hand attack time 2300 to 2190.48 and 2000 (5% per stack, both haste auras). Healing: Sunlight 704911 heals +14.99% and +14.99% at three stacks (three real casts of 582837 before each heal, ally at 50% health, spell power 20000; the 99% interval lies inside the 2-point band); a one-stack read is not possible as stacks accumulate over trials (a first attempt read +14.6%, test fault, dropped). Stacks 1 then 3 for four crits (cap 3, not 4). Data label \"582832 effect_value 582837e0 #0\": not emitted by pair 20261122-070213 / 20261122-070253 (its selection has no value-582832 scenario), so it is unproven on this pair and resolves at the next base pair; this row is not claimed proven before then. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
   },
   {
     "spell": 582832,
@@ -2347,7 +2360,7 @@
       "582832 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim",
-    "reason": "Pair 20261122-070213 / 20261122-070253, build of server commit 821dc311ea6a, no flip. Forced melee crits with Gavel of Wrath 802561 (harness crit rating fixture), control = the same crits before 582832 is learned. Haste: spell cast speed multiplier 1 to 0.952381 at one stack and 0.869565 at three, main-hand attack time 2300 to 2190.48 and 2000 (5% per stack, both haste auras). Healing: Sunlight 704911 heals +14.99% and +14.99% at three stacks (three real casts of 582837 before each heal, ally at 50% health, spell power 20000; the 99% interval lies inside the 2-point band); a one-stack read is not possible as stacks accumulate over trials (a first attempt read +14.6%, test fault, dropped). Stacks 1 then 3 for four crits (cap 3, not 4). Duration: aura present at 9.0 s and gone at 11.0 s (10000 ms, excludes -10% and +10%). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    "reason": "Pair 20261122-070213 / 20261122-070253, build of server commit 8126dd813259, no flip. Forced melee crits with Gavel of Wrath 802561 (harness crit rating fixture), control = the same crits before 582832 is learned. Haste: spell cast speed multiplier 1 to 0.952381 at one stack and 0.869565 at three, main-hand attack time 2300 to 2190.48 and 2000 (5% per stack, both haste auras). Healing: Sunlight 704911 heals +14.99% and +14.99% at three stacks (three real casts of 582837 before each heal, ally at 50% health, spell power 20000; the 99% interval lies inside the 2-point band); a one-stack read is not possible as stacks accumulate over trials (a first attempt read +14.6%, test fault, dropped). Stacks 1 then 3 for four crits (cap 3, not 4). Data label \"582832 max_stacks 582837 #1\": not emitted by pair 20261122-070213 / 20261122-070253 (its selection has no value-582832 scenario), so it is unproven on this pair and resolves at the next base pair; this row is not claimed proven before then. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
   },
   {
     "spell": 582832,
@@ -2358,7 +2371,7 @@
       "582832 behaviour_metric_delta duration_gone"
     ],
     "kind": "claim",
-    "reason": "Pair 20261122-070213 / 20261122-070253, build of server commit 821dc311ea6a, no flip. Forced melee crits with Gavel of Wrath 802561 (harness crit rating fixture), control = the same crits before 582832 is learned. Haste: spell cast speed multiplier 1 to 0.952381 at one stack and 0.869565 at three, main-hand attack time 2300 to 2190.48 and 2000 (5% per stack, both haste auras). Healing: Sunlight 704911 heals +14.99% and +14.99% at three stacks (three real casts of 582837 before each heal, ally at 50% health, spell power 20000; the 99% interval lies inside the 2-point band); a one-stack read is not possible as stacks accumulate over trials (a first attempt read +14.6%, test fault, dropped). Stacks 1 then 3 for four crits (cap 3, not 4). Duration: aura present at 9.0 s and gone at 11.0 s (10000 ms, excludes -10% and +10%). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    "reason": "Pair 20261122-070213 / 20261122-070253, build of server commit 8126dd813259, no flip. Forced melee crits with Gavel of Wrath 802561 (harness crit rating fixture), control = the same crits before 582832 is learned. Haste: spell cast speed multiplier 1 to 0.952381 at one stack and 0.869565 at three, main-hand attack time 2300 to 2190.48 and 2000 (5% per stack, both haste auras). Healing: Sunlight 704911 heals +14.99% and +14.99% at three stacks (three real casts of 582837 before each heal, ally at 50% health, spell power 20000; the 99% interval lies inside the 2-point band); a one-stack read is not possible as stacks accumulate over trials (a first attempt read +14.6%, test fault, dropped). Stacks 1 then 3 for four crits (cap 3, not 4). Duration: pair 20261122-073420 / 20261122-073459, one binary (worldserver sha256 f3a767e3eeae, judged commit 81cd6702ab8b+), no flip. duration_held reads the aura present and duration_gone reads it absent, both ok in both runs, after one forced melee crit with 582832 learned (aura 0 before the learn, the control, 1 after for the held read and 0 for the gone read). The reads sit 9.5 s and 10.5 s after the cast, 500 ms inside the 10000 ms interval on each side; Gavel of Wrath 802561 has Speed 0 and CastingTimeIndex 1, so the aura is applied within the same tick as the cast: a 9000 ms (-10%) aura would be gone at the first read and an 11000 ms (+10%) aura still present at the second. The earlier reads at 9.0 s and 11.0 s sat on the +-10% edges and are replaced. Data label \"582832 spell_duration 582837 #2\": not emitted by pair 20261122-070213 / 20261122-070253 (its selection has no value-582832 scenario), so it is unproven on this pair and resolves at the next base pair; this row is not claimed proven before then. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
   },
   {
     "spell": 680618,
@@ -5756,7 +5769,7 @@
       "807873 effect_value e1 #1"
     ],
     "kind": "claim",
-    "reason": "Pair 20261122-070213 / 20261122-070253, build of server commit 821dc311ea6a, no flip. Open, tool need returned: duration_ratio judges a margin of 500 ms plus the tick overshoot on a Melt Weapon 301235 aura read 1272 ms after landing (measured delta -450 ms against -381.6 ms expected, 68 ms apart), which cannot exclude the 10% either side (about 38 ms); a duration_ratio tolerance option is needed. Not given a final status. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    "reason": "Pair 20261122-070213 / 20261122-070253, build of server commit 8126dd813259, no flip. Open, tool need returned: duration_ratio judges a margin of 500 ms plus the tick overshoot on a Melt Weapon 301235 aura read 1272 ms after landing (measured delta -450 ms against -381.6 ms expected, 68 ms apart), which cannot exclude the 10% either side (about 38 ms); a duration_ratio tolerance option is needed. Not given a final status. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
   },
   {
     "spell": 807874,

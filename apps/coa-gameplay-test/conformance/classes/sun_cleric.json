@@ -19681,15 +19681,6 @@
       "gate_spell": 300357
     },
     {
-      "spell": 807873,
-      "name": "Valkyr's Grip (disarm duration)",
-      "kind": "duration_ratio",
-      "quote": "and reduces the duration of disarm effects by $s2%.",
-      "expected_ratio": 0.7,
-      "vehicle_spell": 301235,
-      "striker_entry": 36
-    },
-    {
       "spell": 582832,
       "kind": "metric_delta",
       "quote": "stacking up to $582837u times.",
@@ -19718,7 +19709,7 @@
       "variant": "stack_one",
       "label_suffix": "stack_one",
       "expected": 1,
-      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). One forced crit: 1 stack. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). One forced crit: 1 stack. The harness also sets phase aura 823764 on the caster in both phases (a named precondition fixture: Effect[0] MOD_TARGET_RESISTANCE -9999 on the magic schools, Effect[1] ADD_PCT_MODIFIER op 3 with class mask word 2 0x20000000); 582837 is a family 33 spell with SpellFamilyFlags 0 0 0, so the modifier does not apply to it, and resistance does not touch haste, stacks or aura time. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
     },
     {
       "spell": 582832,
@@ -19754,7 +19745,7 @@
         802561,
         802561
       ],
-      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). Four forced crits (three setup casts and the trigger cast, 5100 ms apart past the 5000 ms Gavel category cooldown): 3 stacks, not 4 (the stated cap). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). Four forced crits (three setup casts and the trigger cast, 5100 ms apart past the 5000 ms Gavel category cooldown): 3 stacks, not 4 (the stated cap). The harness also sets phase aura 823764 on the caster in both phases (a named precondition fixture: Effect[0] MOD_TARGET_RESISTANCE -9999 on the magic schools, Effect[1] ADD_PCT_MODIFIER op 3 with class mask word 2 0x20000000); 582837 is a family 33 spell with SpellFamilyFlags 0 0 0, so the modifier does not apply to it, and resistance does not touch haste, stacks or aura time. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
     },
     {
       "spell": 582832,
@@ -19783,7 +19774,7 @@
       "variant": "spell_haste_one",
       "label_suffix": "spell_haste_one",
       "expected": 0.952381,
-      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). 1 stack(s) of +5% haste read on the caster: cast speed multiplier 1 before, 1 / 1.05 after. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
+      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). 1 stack(s) of +5% haste read on the caster: cast speed multiplier 1 before, 1 / 1.05 after. The harness also sets phase aura 823764 on the caster in both phases (a named precondition fixture: Effect[0] MOD_TARGET_RESISTANCE -9999 on the magic schools, Effect[1] ADD_PCT_MODIFIER op 3 with class mask word 2 0x20000000); 582837 is a family 33 spell with SpellFamilyFlags 0 0 0, so the modifier does not apply to it, and resistance does not touch haste, stacks or aura time. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
       "tolerance": 0.0001
     },
     {
@@ -19815,7 +19806,7 @@
       "variant": "melee_haste_one",
       "label_suffix": "melee_haste_one",
       "expected": 2190.4762,
-      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). 1 stack(s) of +5% haste read on the caster: main-hand attack time (Blessings set, 2300 ms) 2300 before, 2300 / 1.05 after. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
+      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). 1 stack(s) of +5% haste read on the caster: main-hand attack time (Blessings set, 2300 ms) 2300 before, 2300 / 1.05 after. The harness also sets phase aura 823764 on the caster in both phases (a named precondition fixture: Effect[0] MOD_TARGET_RESISTANCE -9999 on the magic schools, Effect[1] ADD_PCT_MODIFIER op 3 with class mask word 2 0x20000000); 582837 is a family 33 spell with SpellFamilyFlags 0 0 0, so the modifier does not apply to it, and resistance does not touch haste, stacks or aura time. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
       "tolerance": 0.001,
       "expected_ratio": 0.952381
     },
@@ -19851,7 +19842,7 @@
         802561,
         802561
       ],
-      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). 3 stack(s) of +5% haste read on the caster: cast speed multiplier 1 before, 1 / 1.15 after. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
+      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). 3 stack(s) of +5% haste read on the caster: cast speed multiplier 1 before, 1 / 1.15 after. The harness also sets phase aura 823764 on the caster in both phases (a named precondition fixture: Effect[0] MOD_TARGET_RESISTANCE -9999 on the magic schools, Effect[1] ADD_PCT_MODIFIER op 3 with class mask word 2 0x20000000); 582837 is a family 33 spell with SpellFamilyFlags 0 0 0, so the modifier does not apply to it, and resistance does not touch haste, stacks or aura time. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
       "tolerance": 0.0001
     },
     {
@@ -19888,7 +19879,7 @@
         802561,
         802561
       ],
-      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). 3 stack(s) of +5% haste read on the caster: main-hand attack time (Blessings set, 2300 ms) 2300 before, 2300 / 1.15 after. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
+      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). 3 stack(s) of +5% haste read on the caster: main-hand attack time (Blessings set, 2300 ms) 2300 before, 2300 / 1.15 after. The harness also sets phase aura 823764 on the caster in both phases (a named precondition fixture: Effect[0] MOD_TARGET_RESISTANCE -9999 on the magic schools, Effect[1] ADD_PCT_MODIFIER op 3 with class mask word 2 0x20000000); 582837 is a family 33 spell with SpellFamilyFlags 0 0 0, so the modifier does not apply to it, and resistance does not touch haste, stacks or aura time. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found.",
       "tolerance": 0.001,
       "expected_ratio": 0.869565
     },
@@ -19948,13 +19939,13 @@
         "spell": 582837
       },
       "before_expected": 0,
-      "wait_ms": 9000,
+      "wait_ms": 9500,
       "expire_ms": 500,
-      "name": "Pure Heart (aura present at 9 s)",
+      "name": "Pure Heart (aura present at 9.5 s)",
       "variant": "duration_held",
       "label_suffix": "duration_held",
       "expected": 1,
-      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). 582837 lasts 10000 ms (DurationIndex 1): after one forced crit the aura is present at 9.0 s (excludes 9.0 s = -10% of 10000 ms); control: the same crit without 582832 leaves no aura. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). 582837 lasts 10000 ms (DurationIndex 1): after one forced crit the aura is present 9.5 s after the cast: Gavel of Wrath 802561 has Speed 0 and CastingTimeIndex 1 (Spell.dbc), so the crit and the aura application follow the cast within the same server tick, and a 9000 ms aura (-10% of 10000 ms) would be gone about 500 ms before the read; control: the same crit without 582832 leaves no aura. The harness also sets phase aura 823764 on the caster in both phases (a named precondition fixture: Effect[0] MOD_TARGET_RESISTANCE -9999 on the magic schools, Effect[1] ADD_PCT_MODIFIER op 3 with class mask word 2 0x20000000); 582837 is a family 33 spell with SpellFamilyFlags 0 0 0, so the modifier does not apply to it, and resistance does not touch haste, stacks or aura time. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
     },
     {
       "spell": 582832,
@@ -19979,43 +19970,13 @@
         "spell": 582837
       },
       "before_expected": 0,
-      "wait_ms": 11000,
+      "wait_ms": 10500,
       "expire_ms": 500,
-      "name": "Pure Heart (aura gone at 11 s)",
+      "name": "Pure Heart (aura gone at 10.5 s)",
       "variant": "duration_gone",
       "label_suffix": "duration_gone",
       "expected": 0,
-      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). 582837 lasts 10000 ms (DurationIndex 1): after one forced crit the aura is gone at 11.0 s (excludes +10%); control: the same crit without 582832 leaves no aura. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
-    },
-    {
-      "spell": 503690,
-      "name": "Dawn's Arrival (gavel reset)",
-      "kind": "metric_delta",
-      "variant": "gavel_reset",
-      "label_suffix": "gavel_reset",
-      "quote": "to reset the cooldown of Gavels and causes the next one to not incur a cooldown.",
-      "trigger_spell": 800611,
-      "target": "dummy",
-      "cast_power": 1363,
-      "setup_casts": [
-        800611,
-        800654
-      ],
-      "setup_wait_ms": 1600,
-      "setup_target": "dummy",
-      "wait_ms": 1500,
-      "expire_ms": 500,
-      "forced_roll": {
-        "talent": 503690
-      },
-      "gate_spell": 503690,
-      "metric": "spell_cast_count",
-      "fields": {
-        "spell": 800611
-      },
-      "before_expected": 1,
-      "expected": 2,
-      "observe_source": "503690 Dawn's Arrival Effect[0] aura 42 (ProcChance 40) -> 503691; AscensionSunClericAbilities.cpp:261-268 resets Gavel of Light/Wrath (800611, 800614, 800617) and casts 503691 when a Dawnbreak 800654 cast rolls Chance(player, 503690); :272-273 removes the cooldown of the next Gavel cast under 503691. Gavel of Light 800611 has a 5000 ms category cooldown (Spell.dbc CategoryRecoveryTime). The harness resets the cooldown of a setup cast before it, so only the trigger cast meets a live cooldown; casts are spaced 1600 ms, past the global cooldown, the roll is forced (forced_roll, SPELLMOD_CHANCE_OF_SUCCESS) after 503690 is learned and the counter is read as a gain (cumulative). Control = the same casts before 503690 is learned. Gavel (cooldown starts), Dawnbreak, then the trigger Gavel 3200 ms after the first: refused by the cooldown without 503690 (1 completed Gavel), completed after the reset (2). Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+      "observe_source": "582832 Pure Heart Effect[0] aura 42 PROC_TRIGGER_SPELL -> 582837 (AscensionSunClericEvents.cpp:127 returns damage && melee && critical, :300 casts 582837 on the caster); 582837 StackAmount 3, DurationIndex 1 (10000 ms), Effect[0] aura 216 HASTE_SPELLS, Effect[1] aura 192 MOD_MELEE_RANGED_HASTE, Effect[2] aura 136 MOD_HEALING_DONE_PERCENT, BasePoints 4 + 1 = 5 ($582837s1) each. Gavel of Wrath 802561 (DmgClass MELEE) is cast at the dummy with forced melee crits (harness crit rating fixture), 582832 learned between the phases (control: the same crits without the passive). 582837 lasts 10000 ms (DurationIndex 1): after one forced crit the aura is gone 10.5 s after the cast: Gavel of Wrath 802561 has Speed 0 and CastingTimeIndex 1 (Spell.dbc), so the aura is applied within the same server tick as the cast, and an 11000 ms aura (+10% of 10000 ms) would still have about 500 ms to run at the read; control: the same crit without 582832 leaves no aura. The harness also sets phase aura 823764 on the caster in both phases (a named precondition fixture: Effect[0] MOD_TARGET_RESISTANCE -9999 on the magic schools, Effect[1] ADD_PCT_MODIFIER op 3 with class mask word 2 0x20000000); 582837 is a family 33 spell with SpellFamilyFlags 0 0 0, so the modifier does not apply to it, and resistance does not touch haste, stacks or aura time. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
     },
     {
       "spell": 572752,
