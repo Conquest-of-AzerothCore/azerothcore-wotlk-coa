@@ -1853,11 +1853,12 @@
       {
         "claim": "for 15 s",
         "labels": [
-          "520647 behaviour_metric_delta circle_duration"
+          "520647 behaviour_metric_delta circle_duration",
+          "520647 behaviour_metric_delta circle_presence"
         ]
       }
     ],
-    "reason": "Pair 20261122-134456 / 20261122-134548 (prove, build e496bda1, server b7e79aca55+), no flip, no alert. Reach written term by term: radius 10 (dynamic_object_radius read 10; EffectRadiusIndex 13) + dynamic object size 0.389 (dynamic_object_size read 0.389) + caster combat reach 1.5 = 11.889 yd from the circle centre (_IsWithinDist adds both sizes, Object.cpp:1257-1264). The caster at 11.4 yd holds the aura, at 12.4 yd does not. Duration: circle_duration (unchanged). Reference search: bindmysoul agrees (10 yd, 15 seconds)."
+    "reason": "Pair 20261122-134456 / 20261122-134548 (prove, build e496bda1, server b7e79aca55+), no flip, no alert. Reach written term by term: radius 10 (dynamic_object_radius read 10; EffectRadiusIndex 13) + dynamic object size 0.389 (dynamic_object_size read 0.389) + caster combat reach 1.5 = 11.889 yd from the circle centre (_IsWithinDist adds both sizes, Object.cpp:1257-1264). The caster at 11.4 yd holds the aura, at 12.4 yd does not. Duration: circle_duration (unchanged). Reference search: bindmysoul agrees (10 yd, 15 seconds). Round 11 chunk d10: the duration part is now an aura present/gone pair (circle_presence): the circle aura is read present 13600..13950 ms and gone 16050..16450 ms of game time after one real cast, which excludes a circle 10% short (13500) and 10% long (16500); control = no cast before it. circle_duration stays a readback."
   },
   {
     "spell": 520647,
@@ -2160,18 +2161,20 @@
     "spell": 560276,
     "clause": "and increase the targets chance to be critically struck by spells by $706733s1% for $706733d.",
     "kind": "claim",
-    "reason": "Control arm = the reading before the learn in each entry. Gain 3 points from Spell.dbc 706733 effect 0 (BasePoints 2 + 1); duration 8000 ms: remaining duration after a direct Solar Flare within 6850..7550, excluding 7200 and 8800 ms. Reference search: bindmysoul snapshot carries the same sentence; nothing else found. Pair 20261122-001533 / 20261122-001615, build aed1b333, server commit 95a06d0da0a6+, no flip.",
+    "reason": "Control arm = the reading before the learn in each entry. Gain 3 points from Spell.dbc 706733 effect 0 (BasePoints 2 + 1); duration 8000 ms: remaining duration after a direct Solar Flare within 6850..7550, excluding 7200 and 8800 ms. Reference search: bindmysoul snapshot carries the same sentence; nothing else found. Pair 20261122-001533 / 20261122-001615, build aed1b333, server commit 95a06d0da0a6+, no flip. Round 11 chunk d10: crit_taken_rate counts the critical share of 13280 Solar Flares per arm (80 parts of 166), 560276 learned in the treatment only (each Flare hit puts 706733 on the dummy for the next one): +2.35 (run 1) and +2.62 (run 2) points in the counted pair 20261122-170323 / -170952 (pilot cmp1: +3.18, 99% interval +2.42 to +3.94) against the stated 3 +-2, which excludes the control. debuff_presence reads the aura 706733 on the dummy present 7500..7960 ms and gone 8390..8850 ms after a Flare cast (excludes 7200 and 8800 ms); control = no cast. The crit_taken and debuff_remaining readbacks stay as data. Reference search 2026-11-22: bindmysoul carries the sentence; nothing else found. Counted pair 20261122-170323 / 20261122-170952 (build 70687b96c2e7, server commit 219375983186+), no flip, 72 of 72 verdicts ok in both runs.",
     "claims": [
       {
         "claim": "increase the targets chance to be critically struck by spells by $706733s1% (3 points)",
         "labels": [
-          "560276 behaviour_metric_delta crit_taken"
+          "560276 behaviour_metric_delta crit_taken",
+          "560276 behaviour_hit_ratio crit_taken_rate"
         ]
       },
       {
         "claim": "for $706733d (8 s, remaining duration read)",
         "labels": [
-          "560276 behaviour_metric_delta debuff_remaining"
+          "560276 behaviour_metric_delta debuff_remaining",
+          "560276 behaviour_metric_delta debuff_presence"
         ]
       }
     ]
@@ -2200,12 +2203,13 @@
     "spell": 560276,
     "clause": "and reduces the target's chance to hit by $s1% for $d.",
     "kind": "claim",
-    "reason": "Same Solar Flare 807175, run in the same pair on the same build through the 301266 entries: flare_hit_chance reads the live amount of effect 0 of the aura on the dummy (-3, aura_amount, a readback: data, no hit roll is observed) and flare_duration reads the aura present when read 9200..9800 ms after the cast and gone when read 10300..10900 ms after it (inside 10% of 10000 on both sides; behaviour). Reference search: bindmysoul snapshot carries the same text; nothing else found. Pair 20261122-001533 / 20261122-001615, build aed1b333, server commit 95a06d0da0a6+, no flip.",
+    "reason": "Same Solar Flare 807175, run in the same pair on the same build through the 301266 entries: flare_hit_chance reads the live amount of effect 0 of the aura on the dummy (-3, aura_amount, a readback: data, no hit roll is observed) and flare_duration reads the aura present when read 9200..9800 ms after the cast and gone when read 10300..10900 ms after it (inside 10% of 10000 on both sides; behaviour). Reference search: bindmysoul snapshot carries the same text; nothing else found. Pair 20261122-001533 / 20261122-001615, build aed1b333, server commit 95a06d0da0a6+, no flip. Round 11 chunk d10: the hit-chance claim is linked to the miss-share entry of Sun Down 572752 (attacker_miss), which applies this same Solar Flare aura 807175 Effect[0] (aura 54, -3) to eight attackers through its ground and reads the share of their melee swings that miss against a control arm; it reads ok in both runs of this pair (the 572752 entries ran in it). The link is by effect, not by a cast of 560276: the aura belongs to Solar Flare 807175 whoever launches it. The controller may prefer a dedicated entry on a direct Flare cast (needs about 9 parts of one attacker, 0.5 swings per second); not written. Counted pair 20261122-170323 / 20261122-170952 (build 70687b96c2e7, server commit 219375983186+), no flip, 72 of 72 verdicts ok in both runs.",
     "claims": [
       {
         "claim": "reduces the target's chance to hit by $s1% (live aura amount, a readback)",
         "labels": [
-          "301266 behaviour_metric_delta flare_hit_chance"
+          "301266 behaviour_metric_delta flare_hit_chance",
+          "572752 behaviour_metric_delta attacker_miss"
         ]
       },
       {
@@ -3288,11 +3292,14 @@
           "680645 behaviour_metric_delta crit_undead_grace",
           "680645 behaviour_metric_delta crit_humanoid_grace",
           "680645 behaviour_metric_delta crit_undead_wrath",
-          "680645 behaviour_metric_delta crit_humanoid_wrath"
+          "680645 behaviour_metric_delta crit_humanoid_wrath",
+          "680645 behaviour_hit_ratio crit_undead_hits_light",
+          "680645 behaviour_hit_ratio crit_undead_hits_grace",
+          "680645 behaviour_hit_ratio crit_undead_hits_wrath"
         ]
       }
     ],
-    "reason": "Crit damage: pair 20261122-053542 / 20261122-053620, build 27df5d8f3e8c, server commit ed294ce1cdae, no flip; control = passive not learned; effect 1 is aura 108 SPELL_AURA_ADD_PCT_MODIFIER op 15 (crit damage bonus): +15% of the bonus part, whole-hit ratio 1.075. Undead guarantee: open, data-level readback only. The six crit-chance reads are a probe of SpellDoneCritChance and omit SpellTakenCritChance, and coverage keeps the claim as data. Route: Gavel casts at Undead entry 201 with spell_damage_count critical equal to the cast count, entry 6 as control; crit_guarantee fires by auto-attack swings (a Gavel is a cast) and a metric_delta control arm reads natural crits, so no existing kind judges it deterministically. Reference search: bindmysoul snapshot has the sentence, no figure; nothing else found."
+    "reason": "Crit damage: pair 20261122-053542 / 20261122-053620, build 27df5d8f3e8c, server commit ed294ce1cdae, no flip; control = passive not learned; effect 1 is aura 108 SPELL_AURA_ADD_PCT_MODIFIER op 15 (crit damage bonus): +15% of the bonus part, whole-hit ratio 1.075. Undead guarantee: open, data-level readback only. The six crit-chance reads are a probe of SpellDoneCritChance and omit SpellTakenCritChance, and coverage keeps the claim as data. Route: Gavel casts at Undead entry 201 with spell_damage_count critical equal to the cast count, entry 6 as control; crit_guarantee fires by auto-attack swings (a Gavel is a cast) and a metric_delta control arm reads natural crits, so no existing kind judges it deterministically. Reference search: bindmysoul snapshot has the sentence, no figure; nothing else found. Round 11 chunk d10: the Undead guarantee is judged by the critical share of landed Gavel hits against an Undead dummy (entry 1501, type 6): crit_undead_hits_light, _grace and _wrath each read 300 of 300 landed hits critical with 680645 learned (treatment) against 0 of 300 without it (control), the natural crit chance removed by fixture 984954 with its Effect[0] set to -1000 in both arms (a precondition fixture, never the subject), difference +100 points. The crit_guarantee kind was not used: it fires by auto-attack swings and a Gavel is a cast. Counted pair 20261122-170323 / 20261122-170952 (build 70687b96c2e7, server commit 219375983186+), no flip, 72 of 72 verdicts ok in both runs."
   },
   {
     "spell": 680646,
@@ -5102,9 +5109,12 @@
     "spell": 707773,
     "clause": "Your Glorious Execution now ignores $s1% of the target's armor while Vow of the Valkyr is active.",
     "labels": [
-      "707773 behaviour_metric_delta armor_ignore"
+      "707773 behaviour_metric_delta armor_ignore",
+      "707773 behaviour_hit_ratio ignores_armor",
+      "707773 behaviour_hit_ratio vow_inactive"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Round 11 chunk d10: ignores_armor casts Glorious Execution 800626 (strike 800691) at a dummy with 5528 armor (Lesser Armor 673 effect 0 set to 5000), Vow of the Valkyr 807749 on the caster in both arms, 707773 learned in the treatment only: ratio 1.1129 (run 1) and 1.1109 (run 2) of the counted pair 20261122-170323 / -170952 over 5200 trials per arm (expected 1.1114 from 20% of the armor and K = 5500, band 1.2 points); vow_inactive (the same without the Vow) reads 1.00. Reference search: bindmysoul carries the older -10% text; nothing else found. Counted pair 20261122-170323 / 20261122-170952 (build 70687b96c2e7, server commit 219375983186+), no flip, 72 of 72 verdicts ok in both runs."
   },
   {
     "spell": 760379,
@@ -6675,9 +6685,11 @@
     "spell": 806116,
     "clause": "stacking $807061u times.",
     "labels": [
-      "806116 max_stacks 807061 #2"
+      "806116 max_stacks 807061 #2",
+      "806116 behaviour_metric_delta sunset_stack_cap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Round 11 chunk d10: sunset_stack_cap casts Solar Flare (Holy and Fire) 30 times in Sunset: 0 stacks of Twin Flames before 806116 is learned (control), 10 after, the DBC StackAmount. Counted pair 20261122-170323 / 20261122-170952 (build 70687b96c2e7, server commit 219375983186+), no flip, 72 of 72 verdicts ok in both runs."
   },
   {
     "spell": 806116,
@@ -6711,9 +6723,11 @@
     "spell": 806116,
     "clause": "stacking $807077u times.",
     "labels": [
-      "806116 max_stacks 807077 #5"
+      "806116 max_stacks 807077 #5",
+      "806116 behaviour_metric_delta sunrise_stack_cap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Round 11 chunk d10: sunrise_stack_cap casts Solar Flare (Holy and Fire) 30 times in Sunrise: 0 stacks of Sun Power before 806116 is learned (control), 10 after, the DBC StackAmount. Counted pair 20261122-170323 / 20261122-170952 (build 70687b96c2e7, server commit 219375983186+), no flip, 72 of 72 verdicts ok in both runs."
   },
   {
     "spell": 806116,
@@ -6787,7 +6801,8 @@
       {
         "claim": "causing your Illuminations to be instant cast",
         "labels": [
-          "806159 behaviour_metric_delta instant_cast"
+          "806159 behaviour_metric_delta instant_cast",
+          "806159 behaviour_metric_delta instant_cast_control"
         ]
       },
       {
@@ -6802,11 +6817,12 @@
       {
         "claim": "but cost 100% more mana",
         "labels": [
-          "806159 behaviour_metric_delta cost"
+          "806159 behaviour_metric_delta cost",
+          "806159 behaviour_metric_delta cost_control"
         ]
       }
     ],
-    "reason": "Control arm in each entry = the reading before the cast. Illumination 500143: cast time 2000 then 0 ms; critical strike chance gain 10000 points (flat modifier 9999 + 1; base 4.68 before, 10004.7 after); mana cost 408 then 816 (30% of base mana 1363 = 408.9, doubled), within 2. Reference search 2026-11-22: coa-history spell 806159: 6 casts and 6 applications in 2 logs; git log origin/main --grep 806159 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip. Expiry or event labels added in batch 9: counted pair 20261122-103136 / 20261122-103230, build 2ae43243, server commit 516669096f7e+, no flip, 74 of 74 entries ok in both runs, each read with its control."
+    "reason": "Control arm in each entry = the reading before the cast. Illumination 500143: cast time 2000 then 0 ms; critical strike chance gain 10000 points (flat modifier 9999 + 1; base 4.68 before, 10004.7 after); mana cost 408 then 816 (30% of base mana 1363 = 408.9, doubled), within 2. Reference search 2026-11-22: coa-history spell 806159: 6 casts and 6 applications in 2 logs; git log origin/main --grep 806159 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only, nothing that differs; nothing else found. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip. Expiry or event labels added in batch 9: counted pair 20261122-103136 / 20261122-103230, build 2ae43243, server commit 516669096f7e+, no flip, 74 of 74 entries ok in both runs, each read with its control. Round 11 chunk d10: the instant-cast and cost parts opt into use_time_contrast (ADR 1024) with a zero-gain arm each (Radiant Cascade 500141, cast time 2500 and cost 422 unchanged under Resplendence): gains -2000 ms and +408.9 mana against the declared ones. Counted pair 20261122-170323 / 20261122-170952 (build 70687b96c2e7, server commit 219375983186+), no flip, 72 of 72 verdicts ok in both runs."
   },
   {
     "spell": 806159,
