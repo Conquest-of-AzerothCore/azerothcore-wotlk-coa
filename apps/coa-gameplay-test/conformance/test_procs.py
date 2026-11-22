@@ -1808,20 +1808,16 @@ class EffectiveHealTrialTest(unittest.TestCase):
 
 
 class EffectiveHealCompareTest(unittest.TestCase):
-    def setUp(self):
-        self.workspace = Workspace()
-
-    def tearDown(self):
-        self.workspace.close()
-
     def verdict(self, events=340, ally_total=5000, ally_effective=5000, caster_effective=0):
+        workspace = Workspace()
+        self.addCleanup(workspace.close)
         expectation = proc_expectation()
         expectation = replace(expectation, model={**expectation.model, 'heal_guards': HEAL_GUARDS})
         steps = proc_steps(1699, events) + [assert_step(HEAL_GUARDS['ally total'], str(ally_total)),
                                             assert_step(HEAL_GUARDS['ally effective'], str(ally_effective)),
                                             assert_step(HEAL_GUARDS['caster effective'], str(caster_effective))]
-        self.workspace.scenario(PROC_KEY, 'proc', [expectation], steps=steps)
-        manifest, results = self.workspace.manifest()
+        workspace.scenario(PROC_KEY, 'proc', [expectation], steps=steps)
+        manifest, results = workspace.manifest()
         from compare import compare
         [verdict] = [verdict for verdict in compare(manifest, results, tooltips=chance_reader())
                      if verdict.check == PROC_CHECK]

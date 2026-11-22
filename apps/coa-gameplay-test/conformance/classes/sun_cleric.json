@@ -19758,7 +19758,7 @@
       "chance_pct": 20,
       "control_ms": 60000,
       "attack_ms": 3400000,
-      "parts": 9,
+      "parts": 14,
       "residual_target": 0.001,
       "min_detectable": 4,
       "observe_source": "AscensionSunClericEvents.cpp:124 (damage && automatic && Chance(player, 806699), ProcChance 20) and :285 (Reduce(player, 800626, INT32_MAX), one SMSG_CLEAR_COOLDOWN of Glorious Execution 800626 even off cooldown). Trials are landed damaging auto-attack hits of both Valkyr hands (two 2800 ms weapons, ADR 1017). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
