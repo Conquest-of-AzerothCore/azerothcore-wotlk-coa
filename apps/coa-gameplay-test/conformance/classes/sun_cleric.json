@@ -15772,23 +15772,22 @@
       "caster_health_pct": 30,
       "strike": {
         "spell": 41394,
-        "health": 10500,
+        "health": 10100,
         "max_health": 100000,
         "count": 1,
         "wait_ms": 300,
         "after_trigger_ms": 2000
       },
-      "metric": "spell_heal_count",
+      "metric": "aura",
       "fields": {
-        "spell": 520648,
-        "target": "caster"
+        "spell": 520647
       },
       "before_expected": 0,
-      "expected": 1,
-      "tolerance": 0.5,
-      "wait_ms": 14000,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 5000,
       "expire_ms": 500,
-      "observe_source": "Circle of Valor 520647: AscensionSunClericContracts.cpp:366-371 removes the caster's dynamic object 520647 when a damage hit leaves the caster's health below 10% of its maximum (health - damage < CountPctFromMaxHealth(10)); the periodic tick (AscensionSunClericAuras.cpp:243-252) heals only while the caster's health percent is 10 or more. The caster stands inside its circle (cast at its own position). Light of the Naaru 41394 (Holy, 1100 damage, EffectBasePoints 1099 + 1, no scaling) strikes the caster once 2000 ms after the cast (strike, after_trigger_ms), the caster's health being set to the stated value of the 100000 maximum right before the strike. The heals of 520648 on the caster (spell_heal_count) are read 16500 ms after the cast. Treatment: the health is set to 10500 (10.5%, at or above the 10% line) and the 1100 strike leaves 9400 (9.4%, below it): one heal tick (1500 ms) lands before the strike and none after, 1. Control: break_control, the same strike from 50000 (leaves 48900, 48.9%): the circle goes on and the count is 10; the before phase has no cast, 0. Reference search 2026-11-22: coa-history spells 520647, 520648 and 560347: 0 events in 186 logs; bindmysoul snapshot (fetched 2026-07-22) reads \"Place a 10 yd holy circle at target location for 15 seconds ... every 2 sec\" (10 yd and 15 s agree, the 2 s period is an older state against DBC 1500 ms, G-9); nothing else found."
+      "observe_source": "Circle of Valor 520647: the circle breaks when a damage hit leaves the caster below 10% of its maximum health. The caster stands inside its circle (cast at its own position) and holds its area aura 520647. Light of the Naaru 41394 (Holy, 1100 damage, EffectBasePoints 1099 + 1, no scaling) strikes the caster once 2000 ms after the cast, the health being set to 10100 of 100000 right before it: the strike leaves 9.0%, below the 10% line: the circle breaks and the caster's area aura 520647 is gone. The read is the presence of aura 520647 on the caster 5000 ms after the strike (the circle lasts 15000 ms), so the break itself is observed, not a suppressed heal. The two arms bracket the 10% line at 9.0% and 11.0% (10% either side of the line); each is the control of the other. The before phase has no cast: 0. Reference search 2026-11-22: coa-history spells 520647, 520648 and 560347: 0 events in 186 logs; bindmysoul snapshot (fetched 2026-07-22) reads \"Place a 10 yd holy circle at target location for 15 seconds\" (the 10% line itself is not in any reference); nothing else found."
     },
     {
       "spell": 520647,
@@ -15804,23 +15803,22 @@
       "caster_health_pct": 30,
       "strike": {
         "spell": 41394,
-        "health": 50000,
+        "health": 12100,
         "max_health": 100000,
         "count": 1,
         "wait_ms": 300,
         "after_trigger_ms": 2000
       },
-      "metric": "spell_heal_count",
+      "metric": "aura",
       "fields": {
-        "spell": 520648,
-        "target": "caster"
+        "spell": 520647
       },
       "before_expected": 0,
-      "expected": 10,
-      "tolerance": 0.5,
-      "wait_ms": 14000,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 5000,
       "expire_ms": 500,
-      "observe_source": "Circle of Valor 520647: AscensionSunClericContracts.cpp:366-371 removes the caster's dynamic object 520647 when a damage hit leaves the caster's health below 10% of its maximum (health - damage < CountPctFromMaxHealth(10)); the periodic tick (AscensionSunClericAuras.cpp:243-252) heals only while the caster's health percent is 10 or more. The caster stands inside its circle (cast at its own position). Light of the Naaru 41394 (Holy, 1100 damage, EffectBasePoints 1099 + 1, no scaling) strikes the caster once 2000 ms after the cast (strike, after_trigger_ms), the caster's health being set to the stated value of the 100000 maximum right before the strike. The heals of 520648 on the caster (spell_heal_count) are read 16500 ms after the cast. Control of break: the health is set to 50000 and the 1100 strike leaves 48900 (48.9%, above 10%), so the circle is not broken and every tick lands: 10 heals of 520648 (15000 ms / 1500 ms). Reference search 2026-11-22: coa-history spells 520647, 520648 and 560347: 0 events in 186 logs; bindmysoul snapshot (fetched 2026-07-22) reads \"Place a 10 yd holy circle at target location for 15 seconds ... every 2 sec\" (10 yd and 15 s agree, the 2 s period is an older state against DBC 1500 ms, G-9); nothing else found."
+      "observe_source": "Circle of Valor 520647: the circle breaks when a damage hit leaves the caster below 10% of its maximum health. The caster stands inside its circle (cast at its own position) and holds its area aura 520647. Light of the Naaru 41394 (Holy, 1100 damage, EffectBasePoints 1099 + 1, no scaling) strikes the caster once 2000 ms after the cast, the health being set to 12100 of 100000 right before it: the strike leaves 11.0%, above the 10% line: the circle stays and the caster's area aura 520647 is still present. The read is the presence of aura 520647 on the caster 5000 ms after the strike (the circle lasts 15000 ms), so the break itself is observed, not a suppressed heal. The two arms bracket the 10% line at 9.0% and 11.0% (10% either side of the line); each is the control of the other. The before phase has no cast: 0. Reference search 2026-11-22: coa-history spells 520647, 520648 and 560347: 0 events in 186 logs; bindmysoul snapshot (fetched 2026-07-22) reads \"Place a 10 yd holy circle at target location for 15 seconds\" (the 10% line itself is not in any reference); nothing else found."
     },
     {
       "spell": 92137,
@@ -16180,8 +16178,8 @@
       "name": "Hope (a critical heal cuts Solar Invocation by 1 s)",
       "variant": "cd_cut",
       "expected": 26900,
-      "tolerance": 100,
-      "observe_source": "Hope 300349 Effect[0] PROC_TRIGGER_SPELL 804512 (Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN, BasePoints -1001, on 806159, 503651 and 800764; $/1000;804512s1 = 1 s). The script (AscensionSunClericEvents.cpp:129, :301) reduces the Solar Invocation cooldowns after a critical heal (Chance(player, id, 1000)). Solar Invocation: Conquest 800764 has RecoveryTime 30000 ms. Conquest 800764 is cast, 1600 ms later Daybreak 503624 (instant) heals the caster at 30% health with a forced spell crit rating, and the cooldown of 800764 is read 500 ms after: 30000 - 1000 - 2100 ms elapsed = 26900, within 100 ms (the 10% band is 100 ms: excludes 0 and 2 s). Control: cd_cut_control. Reference search 2026-11-22: coa-history (804512 0 events) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "tolerance": 50,
+      "observe_source": "Hope 300349 Effect[0] PROC_TRIGGER_SPELL 804512 (Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN, BasePoints -1001, on 806159, 503651 and 800764; $/1000;804512s1 = 1 s). The script (AscensionSunClericEvents.cpp:129, :301) reduces the Solar Invocation cooldowns after a critical heal (Chance(player, id, 1000)). Solar Invocation: Conquest 800764 has RecoveryTime 30000 ms. Conquest 800764 is cast, 1600 ms later Daybreak 503624 (instant) heals the caster at 30% health with a forced spell crit rating, and the cooldown of 800764 is read 500 ms after: 30000 - 1000 - 2100 ms elapsed = 26900, within 50 ms: a cut of 0.9 s reads about 26985 and one of 1.1 s about 26785, both outside the band. Control: cd_cut_control. Reference search 2026-11-22: coa-history (804512 0 events) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
       "kind": "metric_delta",
       "label_suffix": "cd_cut"
     },
@@ -16218,8 +16216,8 @@
       "name": "Hope (control: a critical heal without Hope)",
       "variant": "cd_cut_control",
       "expected": 27900,
-      "tolerance": 100,
-      "observe_source": "Same as cd_cut with an unrelated passive (Solar Conduit 300321, which only changes the Dawn cast time) learned in place of Hope: the cooldown of 800764 reads 30000 - 2100 = 27900 within 100 ms. Reference search 2026-11-22: coa-history (804512 0 events) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "tolerance": 50,
+      "observe_source": "Same as cd_cut with an unrelated passive (Solar Conduit 300321, which only changes the Dawn cast time) learned in place of Hope: the cooldown of 800764 reads 30000 - 2100 = 27900 within 50 ms. Reference search 2026-11-22: coa-history (804512 0 events) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
       "kind": "metric_delta",
       "label_suffix": "cd_cut_control"
     },
@@ -16254,7 +16252,7 @@
       "expected": 1,
       "wait_ms": 500,
       "expire_ms": 61000,
-      "observe_source": "Nysoni's Blessing 520639 Effect[0] aura 4 DUMMY; ActivateDawn (AscensionSunCleric.cpp:263-282) casts the helper of the specialization when the caster has 520639 and the specialization spell: 92137 -> 520641, 500207 -> 520644, 500209 -> 520645, 680627 -> 520646. The tooltip names 800586 for the first branch ($?s800586[..]); 800586 is a second Angelic Presence spell that no server code, SQL or reference grants (advancement.tsv lists 92137 only), and a run with 800586 as the specialization read no helper (prove1 of this chunk), so the obtainable specialization 92137 is the subject. Dawn 804584 is cast with Solar Power 500149 at 20 stacks (precondition fixture) in both phases and the specialization spell is a precondition fixture aura (set_aura, not the subject); 520639 is learned between the phases: the helper aura is read on the caster 500 ms after the cast (0 before: control). Specialization fixture 92137, helper 520641 Seraphim's Light. Reference search 2026-11-22: coa-history (520641 57 applications, 130 refreshes in 4 logs) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "observe_source": "Nysoni's Blessing 520639 Effect[0] aura 4 DUMMY; ActivateDawn (AscensionSunCleric.cpp:263-282) casts the helper of the specialization when the caster has 520639 and the specialization spell: 92137 -> 520641, 500207 -> 520644, 500209 -> 520645, 680627 -> 520646. The tooltip words the first branch on 800586, a client-side condition (observation only): PR #11520 (issue #11431, commit 245856b1c4) changed the server test from 800586 to 92137 on purpose, both being named Angelic Presence; 92137 is the Level 10 Passive this server grants, and the Seraphim blessing never applied before. The mentor ruling D-96 counts the branch on 92137. Dawn 804584 is cast with Solar Power 500149 at 20 stacks (precondition fixture) in both phases and the specialization spell is a precondition fixture aura (set_aura, not the subject); 520639 is learned between the phases: the helper aura is read on the caster 500 ms after the cast (0 before: control). Specialization fixture 92137, helper 520641 Seraphim's Light. Reference search 2026-11-22: coa-history (520641 57 applications, 130 refreshes in 4 logs) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
       "kind": "metric_delta",
       "label_suffix": "helper_92137"
     },
@@ -16289,7 +16287,7 @@
       "expected": 1,
       "wait_ms": 500,
       "expire_ms": 61000,
-      "observe_source": "Nysoni's Blessing 520639 Effect[0] aura 4 DUMMY; ActivateDawn (AscensionSunCleric.cpp:263-282) casts the helper of the specialization when the caster has 520639 and the specialization spell: 92137 -> 520641, 500207 -> 520644, 500209 -> 520645, 680627 -> 520646. The tooltip names 800586 for the first branch ($?s800586[..]); 800586 is a second Angelic Presence spell that no server code, SQL or reference grants (advancement.tsv lists 92137 only), and a run with 800586 as the specialization read no helper (prove1 of this chunk), so the obtainable specialization 92137 is the subject. Dawn 804584 is cast with Solar Power 500149 at 20 stacks (precondition fixture) in both phases and the specialization spell is a precondition fixture aura (set_aura, not the subject); 520639 is learned between the phases: the helper aura is read on the caster 500 ms after the cast (0 before: control). Specialization fixture 500207, helper 520644 Pious Flames. Reference search 2026-11-22: coa-history (520641 57 applications, 130 refreshes in 4 logs) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "observe_source": "Nysoni's Blessing 520639 Effect[0] aura 4 DUMMY; ActivateDawn (AscensionSunCleric.cpp:263-282) casts the helper of the specialization when the caster has 520639 and the specialization spell: 92137 -> 520641, 500207 -> 520644, 500209 -> 520645, 680627 -> 520646. The tooltip words the first branch on 800586, a client-side condition (observation only): PR #11520 (issue #11431, commit 245856b1c4) changed the server test from 800586 to 92137 on purpose, both being named Angelic Presence; 92137 is the Level 10 Passive this server grants, and the Seraphim blessing never applied before. The mentor ruling D-96 counts the branch on 92137. Dawn 804584 is cast with Solar Power 500149 at 20 stacks (precondition fixture) in both phases and the specialization spell is a precondition fixture aura (set_aura, not the subject); 520639 is learned between the phases: the helper aura is read on the caster 500 ms after the cast (0 before: control). Specialization fixture 500207, helper 520644 Pious Flames. Reference search 2026-11-22: coa-history (520641 57 applications, 130 refreshes in 4 logs) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
       "kind": "metric_delta",
       "label_suffix": "helper_500207"
     },
@@ -16324,7 +16322,7 @@
       "expected": 1,
       "wait_ms": 500,
       "expire_ms": 61000,
-      "observe_source": "Nysoni's Blessing 520639 Effect[0] aura 4 DUMMY; ActivateDawn (AscensionSunCleric.cpp:263-282) casts the helper of the specialization when the caster has 520639 and the specialization spell: 92137 -> 520641, 500207 -> 520644, 500209 -> 520645, 680627 -> 520646. The tooltip names 800586 for the first branch ($?s800586[..]); 800586 is a second Angelic Presence spell that no server code, SQL or reference grants (advancement.tsv lists 92137 only), and a run with 800586 as the specialization read no helper (prove1 of this chunk), so the obtainable specialization 92137 is the subject. Dawn 804584 is cast with Solar Power 500149 at 20 stacks (precondition fixture) in both phases and the specialization spell is a precondition fixture aura (set_aura, not the subject); 520639 is learned between the phases: the helper aura is read on the caster 500 ms after the cast (0 before: control). Specialization fixture 500209, helper 520645 Holy Blessing. Reference search 2026-11-22: coa-history (520641 57 applications, 130 refreshes in 4 logs) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "observe_source": "Nysoni's Blessing 520639 Effect[0] aura 4 DUMMY; ActivateDawn (AscensionSunCleric.cpp:263-282) casts the helper of the specialization when the caster has 520639 and the specialization spell: 92137 -> 520641, 500207 -> 520644, 500209 -> 520645, 680627 -> 520646. The tooltip words the first branch on 800586, a client-side condition (observation only): PR #11520 (issue #11431, commit 245856b1c4) changed the server test from 800586 to 92137 on purpose, both being named Angelic Presence; 92137 is the Level 10 Passive this server grants, and the Seraphim blessing never applied before. The mentor ruling D-96 counts the branch on 92137. Dawn 804584 is cast with Solar Power 500149 at 20 stacks (precondition fixture) in both phases and the specialization spell is a precondition fixture aura (set_aura, not the subject); 520639 is learned between the phases: the helper aura is read on the caster 500 ms after the cast (0 before: control). Specialization fixture 500209, helper 520645 Holy Blessing. Reference search 2026-11-22: coa-history (520641 57 applications, 130 refreshes in 4 logs) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
       "kind": "metric_delta",
       "label_suffix": "helper_500209"
     },
@@ -16359,7 +16357,7 @@
       "expected": 1,
       "wait_ms": 500,
       "expire_ms": 61000,
-      "observe_source": "Nysoni's Blessing 520639 Effect[0] aura 4 DUMMY; ActivateDawn (AscensionSunCleric.cpp:263-282) casts the helper of the specialization when the caster has 520639 and the specialization spell: 92137 -> 520641, 500207 -> 520644, 500209 -> 520645, 680627 -> 520646. The tooltip names 800586 for the first branch ($?s800586[..]); 800586 is a second Angelic Presence spell that no server code, SQL or reference grants (advancement.tsv lists 92137 only), and a run with 800586 as the specialization read no helper (prove1 of this chunk), so the obtainable specialization 92137 is the subject. Dawn 804584 is cast with Solar Power 500149 at 20 stacks (precondition fixture) in both phases and the specialization spell is a precondition fixture aura (set_aura, not the subject); 520639 is learned between the phases: the helper aura is read on the caster 500 ms after the cast (0 before: control). Specialization fixture 680627, helper 520646 Power of the Val'kyr. Reference search 2026-11-22: coa-history (520641 57 applications, 130 refreshes in 4 logs) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
+      "observe_source": "Nysoni's Blessing 520639 Effect[0] aura 4 DUMMY; ActivateDawn (AscensionSunCleric.cpp:263-282) casts the helper of the specialization when the caster has 520639 and the specialization spell: 92137 -> 520641, 500207 -> 520644, 500209 -> 520645, 680627 -> 520646. The tooltip words the first branch on 800586, a client-side condition (observation only): PR #11520 (issue #11431, commit 245856b1c4) changed the server test from 800586 to 92137 on purpose, both being named Angelic Presence; 92137 is the Level 10 Passive this server grants, and the Seraphim blessing never applied before. The mentor ruling D-96 counts the branch on 92137. Dawn 804584 is cast with Solar Power 500149 at 20 stacks (precondition fixture) in both phases and the specialization spell is a precondition fixture aura (set_aura, not the subject); 520639 is learned between the phases: the helper aura is read on the caster 500 ms after the cast (0 before: control). Specialization fixture 680627, helper 520646 Power of the Val'kyr. Reference search 2026-11-22: coa-history (520641 57 applications, 130 refreshes in 4 logs) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
       "kind": "metric_delta",
       "label_suffix": "helper_680627"
     },
@@ -16732,6 +16730,158 @@
       "observe_source": "Hegemony 561204 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + 1 = 6000 ms ($/1000;s1). Radiance 800054 DurationIndex 1 = 10000 ms, Effect[0] aura 23 PERIODIC_TRIGGER_SPELL 800038 every 2000 ms ($/1000;800054t1), RecoveryTime 120000. ActivateDawn (AscensionSunCleric.cpp:275-276) extends Radiance by abs(Amount(302907)) = 6001 ms (302907 EffectBasePoints 6000 + 1) when the caster has 561204. 800038 Effect[0] HEAL BasePoints 15, DieSides 2, RealPointsPerLevel 1.0 from BaseLevel 40; Effect[1] SCHOOL_DAMAGE Holy BasePoints 16, DieSides 2, RealPointsPerLevel 1.0; radius index 14 = 8 yd. At level 60 m1 = 15 + 20 + irand(1,2) = 36..37 and m2 = 16 + 20 + irand(1,2) = 37..38 (per-level term SpellInfo.cpp:497). The class aura 887015 multiplies healing done by 0.8 (-1 + int(50 x -0.4) + 1 = -20%). The reference attack power is 70 and spell power 0. One burst is read 2500 ms after the Radiance cast. Contrast arm of the attack power term: 0.8 x (36..37 + 0.1 x 20070) = 1634.4..1635.2 against 34.4..35.2 at 70. Reference search 2026-11-22: coa-history (800038 SPELL_HEAL) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC for the value stated here; the DBC and the tooltip are the expectation.",
       "kind": "metric_delta",
       "label_suffix": "burst_heal_ap"
+    },
+    {
+      "spell": 300349,
+      "quote": "Your critical heals now reduce the cooldown of Solar Invocation spells by $/1000;804512s1 sec.",
+      "gate_spell": 300349,
+      "trigger_spell": 503624,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        806159
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "force_crit": "spell",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 806159
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Hope (a critical heal cuts Solar Invocation: Resplendence by 1 s) (Resplendence)",
+      "variant": "cd_cut_806159",
+      "expected": 26900,
+      "tolerance": 50,
+      "observe_source": "Hope 300349 -> 804512 Effect[1] ASCENSION_MODIFY_COOLDOWN on 806159 (Resplendence); 806159 has RecoveryTime 30000 ms, CastingTimeIndex 1 (instant), Category 767, like Conquest 800764. Same design as cd_cut with 806159 cast in place of 800764 and its cooldown read: 30000 - 1000 - 2100 elapsed = 26900 within 50 ms with Hope (control 27900 with Solar Conduit 300321 in place of Hope). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC.",
+      "kind": "metric_delta",
+      "label_suffix": "cd_cut_806159"
+    },
+    {
+      "spell": 300349,
+      "quote": "Your critical heals now reduce the cooldown of Solar Invocation spells by $/1000;804512s1 sec.",
+      "gate_spell": 300321,
+      "trigger_spell": 503624,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        806159
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "force_crit": "spell",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 806159
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Hope (control: a critical heal without Hope) (Resplendence)",
+      "variant": "cd_cut_control_806159",
+      "expected": 27900,
+      "tolerance": 50,
+      "observe_source": "Same as cd_cut_806159 with Solar Conduit 300321 learned in place of Hope: 806159 reads 30000 - 2100 = 27900 within 50 ms. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC.",
+      "kind": "metric_delta",
+      "label_suffix": "cd_cut_control_806159"
+    },
+    {
+      "spell": 300349,
+      "quote": "Your critical heals now reduce the cooldown of Solar Invocation spells by $/1000;804512s1 sec.",
+      "gate_spell": 300349,
+      "trigger_spell": 503624,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        503651
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "force_crit": "spell",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 503651
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Hope (a critical heal cuts Solar Invocation: Revelation by 1 s) (Revelation)",
+      "variant": "cd_cut_503651",
+      "expected": 26900,
+      "tolerance": 50,
+      "observe_source": "Hope 300349 -> 804512 Effect[2] ASCENSION_MODIFY_COOLDOWN on 503651 (Revelation); 503651 has RecoveryTime 30000 ms, CastingTimeIndex 1 (instant), Category 767, like Conquest 800764. Same design as cd_cut with 503651 cast in place of 800764 and its cooldown read: 30000 - 1000 - 2100 elapsed = 26900 within 50 ms with Hope (control 27900 with Solar Conduit 300321 in place of Hope). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC.",
+      "kind": "metric_delta",
+      "label_suffix": "cd_cut_503651"
+    },
+    {
+      "spell": 300349,
+      "quote": "Your critical heals now reduce the cooldown of Solar Invocation spells by $/1000;804512s1 sec.",
+      "gate_spell": 300321,
+      "trigger_spell": 503624,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        503651
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1360,
+      "caster_health_pct": 30,
+      "force_crit": "spell",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 503651
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Hope (control: a critical heal without Hope) (Revelation)",
+      "variant": "cd_cut_control_503651",
+      "expected": 27900,
+      "tolerance": 50,
+      "observe_source": "Same as cd_cut_503651 with Solar Conduit 300321 learned in place of Hope: 503651 reads 30000 - 2100 = 27900 within 50 ms. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC.",
+      "kind": "metric_delta",
+      "label_suffix": "cd_cut_control_503651"
     }
   ],
   "player_observations": [],

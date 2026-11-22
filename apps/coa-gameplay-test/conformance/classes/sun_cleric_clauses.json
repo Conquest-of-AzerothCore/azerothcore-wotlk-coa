@@ -394,9 +394,13 @@
     "kind": "claim",
     "labels": [
       "300349 behaviour_metric_delta cd_cut",
-      "300349 behaviour_metric_delta cd_cut_control"
+      "300349 behaviour_metric_delta cd_cut_control",
+      "300349 behaviour_metric_delta cd_cut_806159",
+      "300349 behaviour_metric_delta cd_cut_control_806159",
+      "300349 behaviour_metric_delta cd_cut_503651",
+      "300349 behaviour_metric_delta cd_cut_control_503651"
     ],
-    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Solar Invocation: Conquest cooldown read 26885 ms against 26900 expected (30000 - 1000 - 2100) after a forced critical Daybreak, 27885 against 27900 with an unrelated passive in place of Hope (control); the 1 s cut lies within the 100 ms band. The once-per-second clause 31 stays open: two critical heal events within 1 s need a second heal target or a heal faster than the 1500 ms global cooldown."
+    "reason": "Pair 20261122-054615 / 20261122-054649, build b0637b14, no flip. Hope's three Solar Invocation targets (Conquest 800764, Resplendence 806159, Revelation 503651) are each read after a forced critical Daybreak with a control arm (Solar Conduit in place of Hope): cooldown 30000 - 1000 - 2100 elapsed = 26900 within 50 ms, so a 0.9 s or 1.1 s cut fails. Solar Invocation: Ascension 500152 (the fourth spell of category 767) is not a target of 804512 and is not read. The once-per-second clause 31 stays open."
   },
   {
     "spell": 300349,
@@ -1289,7 +1293,7 @@
       "520639 behaviour_metric_delta helper_500209",
       "520639 behaviour_metric_delta helper_680627"
     ],
-    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Helper aura read on the caster 500 ms after Dawn: absent without Nysoni's Blessing, present with it for the four specializations (92137, 500207, 500209, 680627; the tooltip's first id 800586 is granted nowhere in the server or the references, and with 800586 as the specialization no helper is cast, prove1 of this chunk, so 92137 is the subject). Specialization auras are precondition fixtures (set_aura), not the subject. Reference search: coa-history 520641 57 applications in 4 logs, nothing beyond the tooltip."
+    "reason": "Measured with the Seraphim passive 92137 for the first branch: PR #11520 (issue #11431) changed the server test from 800586 to 92137 on purpose, both being named Angelic Presence, 92137 being the Level 10 Passive this server grants (mentor ruling D-96). The tooltip's $?s800586 is a client-side condition (observation only). Pair 20261122-054615 / 20261122-054649, build b0637b14, no flip, control: helper aura absent before Nysoni's Blessing is learned, present after, for 92137, 500207, 500209 and 680627. Specialization auras are precondition fixtures (set_aura), not the subject. Reference search: coa-history 520641 57 applications in 4 logs; nothing beyond the tooltip."
   },
   {
     "spell": 520639,
@@ -1297,7 +1301,7 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "Seraphim's Light with the obtainable specialization 92137 (the tooltip's 800586 is granted nowhere)",
+        "claim": "Seraphim's Light with specialization 92137 (the tooltip's $?s800586 is a client-side condition, PR #11520)",
         "labels": [
           "520639 behaviour_metric_delta helper_92137"
         ]
@@ -1321,7 +1325,7 @@
         ]
       }
     ],
-    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Same entries, one per branch of the specialization conditional."
+    "reason": "Same pair and ruling as the row above (PR #11520, D-96): the 92137 branch is measured on the Seraphim passive; 800586 is a client-side condition (observation only). One entry per branch of the conditional. The helper's own stated values (520641 shield, 520644 damage, 520645 critical strike, 520646 haste) have no row of their own: observation, not proven here."
   },
   {
     "spell": 520647,
@@ -1330,10 +1334,7 @@
     "claims": [
       {
         "claim": "a 10 yd holy circle",
-        "labels": [
-          "520647 behaviour_metric_delta radius_in",
-          "520647 behaviour_metric_delta radius_out"
-        ]
+        "labels": []
       },
       {
         "claim": "for 15 s",
@@ -1342,7 +1343,7 @@
         ]
       }
     ],
-    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Duration: aura on the caster read 9988 ms against 10000 five seconds in (13500 and 16500 ms excluded). Radius: caster at 9 yd from the circle centre holds the aura, at 13 yd does not; only a coarse bracket (the engine adds object sizes), so the 10 yd edge itself is not pinned: tight bracketing needs the dynamic object size (tool need in the report). Reference search: bindmysoul agrees (10 yd, 15 seconds)."
+    "reason": "OPEN: the radius claim has no status. Radius: caster at 9 yd from the circle centre holds the aura, at 13 yd does not (labels radius_in, radius_out ran, not cited): that brackets 9 to 13 yd only and a 9 yd or 11 yd circle passes both, and the area test adds object sizes (AnyFriendlyUnitInObjectRangeCheck, IsWithinDistInMap) with no stock control. Duration: aura on the caster read 9988 ms against 10000 five seconds in (13500 and 16500 ms excluded), a readback. Reference search: bindmysoul agrees (10 yd, 15 seconds)."
   },
   {
     "spell": 520647,
@@ -1382,7 +1383,7 @@
       "520647 behaviour_metric_delta break_control"
     ],
     "kind": "claim",
-    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Strike of 1100 leaving 9.4% breaks the circle (1 heal tick before, none after); the same strike leaving 48.9% leaves all 10 ticks. Reference search: nothing found."
+    "reason": "Pair 20261122-054615 / 20261122-054649, build b0637b14, no flip. Redesigned after review: the caster's area aura 520647 is read 5000 ms after a 1100 strike leaving 9.0% (absent: broken) and one leaving 11.0% (present), bracketing the 10% line; before phase has no cast. Reference search: nothing found."
   },
   {
     "spell": 534267,
@@ -4771,7 +4772,7 @@
         ]
       }
     ],
-    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Duration: stun on the dummy read 3982 and 3997 ms against 4000 (5000 s minus 1000 after the 1500 ms cast), within 250. Radius NOT closed: radius_edge alerted in both runs (dummy stunned at 11.4 yd from the caster, edge expected 8 + 1.275 + 1.5), while one dummy at 7 yd is stunned and one at 12.5 or 16 yd is not; the effective reach lies between 11.4 and 12.5 yd, cause unknown (fix note in the report)."
+    "reason": "OPEN radius: the expected edge is 8 + 2.66 leeway (Spell.cpp:1394, Object.cpp:1787-1808, a player caster on TARGET_UNIT_SRC_AREA_ENEMY) + 1.275 target combat reach = 11.935 yd (Spell.cpp:9434-9448), inside the measured bracket (stunned near 11.4 yd, not at 12.5 yd). radius_edge cannot model the leeway term yet (tool question to the mentor); its entry adds the caster's reach instead and alerts, so the radius labels do not close. Duration: stun on the dummy read 3982 and 3997 ms against 4000 (5000 minus 1000 after the 1500 ms cast), within 250."
   },
   {
     "spell": 805628,
