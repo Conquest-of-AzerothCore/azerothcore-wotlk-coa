@@ -65,6 +65,11 @@ lets it fulfil once per weapon. No Dawn charge is spent on a tick.
 - Sunslam: 4 ticks give 4 attacks per weapon, whichever comes first in the map update: the channel's end or the
   last tick. Dawn loses one charge per Sunslam, at the cast. Radiant Flame keeps ADR 0017's route for its last tick
   (its per-tick Fulfillment count is not measured by these entries).
+- Because the last Sunslam tick now carries Dawn and DawnCast, every active Vow fulfils on it, not only Vow of the
+  Valkyr: Vow of Grace 803489, Vow of the Eclipse 807435 and 807547 (twice), and the Vow of Dawn 803491 bounce count,
+  with the side effects of `Fulfill()` and the Solar Power suppression (`AscensionSunClericEvents.cpp:163-182`,
+  `AscensionSunCleric.cpp:287-303`). This follows D-148 (each tick is its own cast); only the Vow of the Valkyr counts
+  are measured here, the other Vows' per-tick counts are not.
 - The 805629 aura's script values `Dawn` (807440), `DawnCast` (804584) and 807523 are written and read only by this
   branch; no other code reads script values of 805629, and only Sun Cleric code names 805629 and 805639.
 - The key 807749 is a script value of the Spell object only; no other code reads it. No other class reads 807749,
@@ -73,8 +78,8 @@ lets it fulfil once per weapon. No Dawn charge is spent on a tick.
   each), `gavel_fulfillment_main` and `gavel_fulfillment_off` (Gavel of Light 800611, one hit, gain 1 each), each
   against a control phase without the Vow; `sunslam_fulfillment_main` and `sunslam_fulfillment_off` (Sunslam 805629,
   4 ticks, gain 4 each) with the tick count `sunslam_ticks` as their control, and `sunslam_dawn_charges` (Dawn
-  set to 10 charges in each phase, 9 after each channel; a spend on the late tick would read 8); Valkyr weapon set. On the
-  simulated clock the channel's end and the 4th tick land in the same map update with the players first, so the
+  set to 10 charges in each phase, 9 after each channel; a spend on the late tick would read 8); Valkyr weapon set.
+  On the simulated clock the channel's end and the 4th tick land in the same map update with the players first, so the
   entries force the late tick by construction; real-clock reference runs cover the other order. After the fix, pair
   20261122-130647 / -130722 (build e6ed4b2b5afd), no flip: 4 main-hand and 4 off-hand attacks from 4 ticks, Dawn 9
   after each channel; real-clock reference 20261122-130811 the same. Scenarios 9148 and 12951 stay green
