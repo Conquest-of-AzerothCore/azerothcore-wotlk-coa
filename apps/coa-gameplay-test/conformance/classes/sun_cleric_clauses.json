@@ -1699,7 +1699,11 @@
     "clause": "At the end of the duration, you charge back down, dealing ${$570034m1+$570034ppl1+$AP*1+$SP*.225} Holy damage to all enemies within $570034a1 yds.",
     "labels": [
       "520024 effect_value 570034e0 #1",
-      "520024 effect_radius 570034e0 #2"
+      "520024 effect_radius 570034e0 #2",
+      "520024 behaviour_metric_delta charge_hit",
+      "520024 behaviour_metric_delta charge_hit_ap",
+      "520024 behaviour_metric_delta charge_cast",
+      "520024 behaviour_metric_delta charge_cast_sp"
     ],
     "kind": "claim"
   },
