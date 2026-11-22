@@ -60,6 +60,7 @@
 #include "AscensionPyromancerData.h"
 #include "AscensionSpellProgressionData.h"
 #include "AscensionTalentReplacementData.h"
+#include "AscensionTrainerProficiency.h"
 #include "SpellbookCostData.h"
 #include "SpellbookOfferData.h"
 #include "SpellbookRankData.h"
@@ -301,6 +302,11 @@ namespace
             // upgrades are listed, so the window cannot sell back a spell the conversion
             // just took off the bars.
             if (windowView && ReplacedByEchoOfNozdormu(player, spellId))
+                return;
+
+            // A spell a talent currently replaces is held under its replacement, which the
+            // client's own spellbook shows instead, so it would draw the row as learnable.
+            if (windowView && AscensionTrainerProficiency::ReplacedByTalent(player, spellId))
                 return;
 
             if (windowView && !CanLearnTalentReplacement(player, spellId))
@@ -666,6 +672,7 @@ namespace
             if (!AscensionFelsworn::CanLearnRift(player, wanted) ||
                 !CanLearnTalentReplacement(player, wanted) ||
                 ReplacedByEchoOfNozdormu(player, wanted) ||
+                AscensionTrainerProficiency::ReplacedByTalent(player, wanted) ||
                 IsTreeSpell(uint32(player->getClass()), wanted) ||
                 HasRankOrBetter(player, wanted) ||
                 (player->getClass() == CLASS_GUARDIAN && AscensionGuardian::Ballad(wanted)))
@@ -924,7 +931,7 @@ class spellbook_purchased_ranks final : public PlayerScript
 {
 public:
     spellbook_purchased_ranks() : PlayerScript("spellbook_purchased_ranks",
-        {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEARN_TRAINER_SPELL,
+        {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEARN_TRAINER_SPELL, PLAYERHOOK_ON_FORGOT_SPELL,
             PLAYERHOOK_ON_BEFORE_TEMP_SUMMON_INIT_STATS}) { }
 
     void OnPlayerLogin(Player *player) override
@@ -937,6 +944,22 @@ public:
         if (player && IsAscensionClass(player->getClass()) && IsBook(trainer) &&
             Spellbook::OffersSpell(player, spellId))
             RememberLearned(player, spellId);
+    }
+
+    // The ranks in SpellbookRankData.h have no spell_ranks rows, so Player::removeSpell's
+    // chain walk does not take them with the rank they require. They are remembered first,
+    // so the book gives them back for free once that rank returns.
+    void OnPlayerForgotSpell(Player *player, uint32 spellId) override
+    {
+        if (!player || !IsAscensionClass(player->getClass()))
+            return;
+        for (SpellbookRankData::Rank const &rank : SpellbookRankData::Ranks)
+            if (rank.ClassId == player->getClass() && rank.RequiredSpellId == spellId &&
+                player->HasSpell(rank.SpellId))
+            {
+                RememberLearned(player, rank.SpellId);
+                player->removeSpell(rank.SpellId, SPEC_MASK_ALL, false);
+            }
     }
 
     void OnPlayerBeforeTempSummonInitStats(Player *player, TempSummon *summon, uint32 & /*duration*/) override

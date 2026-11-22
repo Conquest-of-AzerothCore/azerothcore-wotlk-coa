@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "name": "Heartbreak buffs the party only when empowered (#12381)",
+  "contract": [
+    "Heartbreak 520314 effect 1 is TRIGGER_SPELL_WITH_VALUE for the party buff Heartbreak 807563 (raid area",
+    "around the caster). Its tooltip and #12381 say an ordinary cast grants no buff, and an empowered cast",
+    "(ten Pooled Vitality 680687 stacks with Pooled Vitality 681078) grants 807563 to the party and Visceral",
+    "Power 807687 to the caster only. spell_ascension_bloodmage_empowered::HeartbreakPower prevented the default",
+    "effect in LAUNCH_TARGET, but 807563 needs no caster-side trigger, so Spell::EffectTriggerSpell casts it in",
+    "LAUNCH mode, and every cast buffed the party. The handler now runs in LAUNCH. An ordinary cast must leave",
+    "807563 off both the caster and the grouped ally; an empowered cast must put 807563 on both and 807687 on",
+    "the caster but not on the ally."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "bm", "race": 1, "class": 20, "level": 60, "spell_hit_rating": 10000, "allow_regeneration": false },
+    { "id": "ally", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "bm", "entry": 36, "level": 60, "health": 1000000, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "group", "actor": "bm", "target": "ally" },
+    { "action": "learn", "actor": "bm", "spell": 520314 },
+    { "action": "set_power", "actor": "bm", "power": 1, "value": 1000 },
+    { "action": "cast", "label": "An ordinary Heartbreak", "actor": "bm", "spell": 520314, "target": "target" },
+    { "action": "assert", "actor": "bm", "metric": "cast_failure", "spell": 520314, "equals": 0 },
+    {
+      "action": "assert",
+      "label": "SETUP: the ordinary cast landed",
+      "actor": "target",
+      "metric": "health",
+      "max": 999999,
+      "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let any triggered buff land", "ms": 1000 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: an ordinary cast gives the caster no Heartbreak buff",
+      "actor": "bm",
+      "metric": "aura",
+      "spell": 807563,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: an ordinary cast gives the ally no Heartbreak buff",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 807563,
+      "equals": 0
+    },
+    { "action": "assert", "actor": "bm", "metric": "aura", "spell": 807687, "equals": 0 },
+    { "action": "learn", "actor": "bm", "spell": 681078 },
+    { "action": "set_aura", "label": "Ten stacks of Pooled Vitality", "actor": "bm", "spell": 680687, "stacks": 10 },
+    {
+      "action": "assert",
+      "label": "SETUP: the next cast is empowered",
+      "actor": "bm",
+      "metric": "aura",
+      "spell": 524899,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    { "action": "set_power", "actor": "bm", "power": 1, "value": 1000 },
+    { "action": "cast", "label": "An empowered Heartbreak", "actor": "bm", "spell": 520314, "target": "target" },
+    { "action": "assert", "actor": "bm", "metric": "cast_failure", "spell": 520314, "equals": 0 },
+    {
+      "action": "assert",
+      "label": "The empowered cast spends the stacks",
+      "actor": "bm",
+      "metric": "aura_stacks",
+      "spell": 680687,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "An empowered cast buffs the caster",
+      "actor": "bm",
+      "metric": "aura",
+      "spell": 807563,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "An empowered cast buffs the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 807563,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Visceral Power goes to the caster",
+      "actor": "bm",
+      "metric": "aura",
+      "spell": 807687,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Visceral Power stays off the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 807687,
+      "equals": 0
+    }
+  ]
+}

@@ -404,6 +404,12 @@ struct npc_ascension_animated_blood : public ScriptedAI
 
     void UpdateAI(uint32 diff) override
     {
+        if (Player* owner = ObjectAccessor::GetPlayer(*me, me->GetOwnerGUID()))
+            if (bool travelling = owner->IsMounted() || owner->IsInFlight(); travelling != Travelling)
+            {
+                Travelling = travelling;
+                me->SetImmuneToNPC(travelling);
+            }
         if (!UpdateVictim())
             return;
         if (BloodStrikeTimer <= diff)
@@ -425,6 +431,7 @@ struct npc_ascension_animated_blood : public ScriptedAI
     }
 
     uint32 BloodStrikeTimer = 2000;
+    bool Travelling = false;
 };
 
 void HunterAndHuntedCharge(Player* player)
