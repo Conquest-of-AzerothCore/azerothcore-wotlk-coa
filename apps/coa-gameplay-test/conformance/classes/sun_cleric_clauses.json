@@ -1721,7 +1721,7 @@
         ]
       }
     ],
-    "reason": "Pair 20261122 (b11d9, build 3c76856cb93e, no flip): the formula arms read on a direct cast of 570034 (the hit arm reads the school of the cast spell, and 520024 has none): 497 at the reference stats, 4997 at 20000 spell power (4997.6 expected), judged in the same pair; the real charge-back reads 0 damage of 570034 on the dummy 5000 ms after a real 520024 cast (charge_hit, charge_hit_ap): an alert, a lead for the fix note, not a verdict on the server."
+    "reason": "Counted pair 20261122-164354 / -164437 (b11d9, build 8ecfd900abf2, no flip): the formula arms read on a direct cast of 570034 (the hit arm reads the school of the cast spell, and 520024 has none): 497 at the reference stats, 4997 at 20000 spell power (4997.6 expected), judged in the same pair; the real charge-back reads 0 damage of 570034 on the dummy 5000 ms after a real 520024 cast (charge_hit, charge_hit_ap): an alert, a lead for the fix note, not a verdict on the server."
   },
   {
     "spell": 572848,
