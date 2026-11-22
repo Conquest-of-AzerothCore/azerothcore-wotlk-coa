@@ -32853,7 +32853,8 @@
           12900
         ]
       },
-      "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20, DurationIndex 1 = 10000 ms ($301265d). The script gives the aura 3 charges on application (AscensionSunClericAuras.cpp:97-99) and each finished Holy or Fire family 33 casting spell that was started under it spends one, removing it at the last (AscensionSunClericAbilities.cpp:49, Finish at :83-88). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, any Dawn left by the first phase removed first (set_aura 807440 at 0 stacks). Illumination 500143 (Holy, 2000 ms cast, heals the caster) is cast for real each time: the first cast spends Dawn and enters Sunrise, which grants 301265 only when 300360 is learned between the phases (control: the same casts before the learn read the haste multiplier 1). One real Illumination cast (2000 ms cast time, the aura is granted when it completes) with no later cast: the aura is present when read 11100..11700 ms after the cast started (game time), at least 9100 ms after it was granted, and gone when read 12400..12900 ms after it, at most 10900 ms after, so the duration lies inside 10% of 10000 ms (9000..11000) on both sides. Control: before the cast, absent. Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the aura exists in real play, no amount or charge in the events), 300360 0 events (a passive); bindmysoul snapshot and ascension-data: nothing found beyond the tooltip."
+      "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20, DurationIndex 1 = 10000 ms ($301265d). The script gives the aura 3 charges on application (AscensionSunClericAuras.cpp:97-99) and each finished Holy or Fire family 33 casting spell that was started under it spends one, removing it at the last (AscensionSunClericAbilities.cpp:49, Finish at :83-88). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, any Dawn left by the first phase removed first (set_aura 807440 at 0 stacks). Illumination 500143 (Holy, 2000 ms cast, heals the caster) is cast for real each time: the first cast spends Dawn and enters Sunrise, which grants 301265 only when 300360 is learned between the phases (control: the same casts before the learn read the haste multiplier 1). One real Illumination cast (2000 ms cast time, the aura is granted when it completes) with no later cast: the aura is present when read 11100..11700 ms after the cast started (game time), at least 9100 ms after it was granted, and gone when read 12400..12900 ms after it, at most 10900 ms after, so the duration lies inside 10% of 10000 ms (9000..11000) on both sides. Control: before the cast, absent. Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the aura exists in real play, no amount or charge in the events), 300360 0 events (a passive); bindmysoul snapshot and ascension-data: nothing found beyond the tooltip.",
+      "void_on_cast_failure": true
     },
     {
       "spell": 300360,
@@ -32885,7 +32886,7 @@
       "disable_regeneration": true,
       "quote": "Lasts for $301265d or 3 casts.",
       "setup_target": "caster",
-      "setup_wait_ms": 1600,
+      "setup_wait_ms": 2100,
       "expire_ms": 500,
       "metric": "aura",
       "fields": {
@@ -32893,7 +32894,7 @@
       },
       "measure_actor": "caster",
       "before_expected": 0,
-      "wait_ms": 1600,
+      "wait_ms": 2600,
       "name": "Learning Light (the aura is still held after the second cast)",
       "variant": "charges_two_held",
       "label_suffix": "charges_two_held",
@@ -32903,7 +32904,60 @@
         500143
       ],
       "expected": 1,
-      "observe_source": "301265 Learning Light carries no ProcCharges in Spell.dbc; the count 3 is the tooltip's ('Lasts for $301265d or 3 casts') and the server counts it: the SpellInfo correction ProcCharges 3 (AscensionSunClericContracts.cpp:162-163), the reapply reset to 3 charges (AscensionSunClericAuras.cpp:101-103) and the decrement after every finished Family 33 magic spell cast while the aura is present, removal at the last charge (Finish and Select, AscensionSunClericAbilities.cpp:49 and :85-88). The count is level independent. The aura is granted only when a Dawn-spending Holy or Fire cast enters Sunrise or Sunset (AscensionSunClericAbilities.cpp:94-128); Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject), any Dawn left by the first phase removed first (set_aura 807440 at 0 stacks). Shine 500143 (Holy) enters Sunrise in the setup and each further Shine is one cast; the aura is read on the caster 1600 ms after the second Shine after the entering one cast, about 8 s into the 10 s duration, so a time expiry (9 to 11 s) cannot explain the reading. Control: the same casts without 300360 learned read no aura. Reference search 2026-11-22: coa-history spell 301265: aura applied and removed events in 3 logs, no charge count; bindmysoul snapshot (2026-07-22) carries 'Lasts for 10 seconds or 3 casts.'; nothing else found."
+      "observe_source": "301265 Learning Light carries no ProcCharges in Spell.dbc; the count 3 is the tooltip's ('Lasts for $301265d or 3 casts') and the server counts it: the SpellInfo correction ProcCharges 3 (AscensionSunClericContracts.cpp:162-163), the reapply reset to 3 charges (AscensionSunClericAuras.cpp:101-103) and the decrement after every finished Family 33 magic spell cast while the aura is present, removal at the last charge (Finish and Select, AscensionSunClericAbilities.cpp:49 and :85-88). The count is level independent. The aura is granted only when a Dawn-spending Holy or Fire cast enters Sunrise or Sunset (AscensionSunClericAbilities.cpp:94-128); Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject), any Dawn left by the first phase removed first (set_aura 807440 at 0 stacks). Timing: Illumination 500143 has CastingTimeIndex 5 = 2000 ms (Spell.dbc, SpellCastTimes row 4, /srv/coa/server-data/dbc), so every cast is submitted 2100 ms after the previous one (setup_wait_ms 2100 = 2000 + 100) and none is refused for a cast still in progress (an earlier design waited 1600 ms, a refused cast (reason 105, SPELL_FAILED_SPELL_IN_PROGRESS) left one cast uncounted and misread the count); the trigger cast is read 2600 ms after it started (wait_ms), after it finished. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured). Shine 500143 (Holy) enters Sunrise in the setup and each further Shine is one cast; the aura is read on the caster after the second Shine after the entering one finished, about 5 s after it was granted, so a time expiry (9 to 11 s) cannot explain the reading. Control: the same casts without 300360 learned read no aura. Reference search 2026-11-22: coa-history spell 301265: aura applied and removed events in 3 logs, no charge count; bindmysoul snapshot (2026-07-22) carries 'Lasts for 10 seconds or 3 casts.'; nothing else found.",
+      "void_on_cast_failure": true
+    },
+    {
+      "spell": 300360,
+      "kind": "metric_delta",
+      "gate_spell": 300360,
+      "target": "caster",
+      "trigger_spell": 500143,
+      "phase_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          92135,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "quote": "Lasts for $301265d or 3 casts.",
+      "setup_target": "caster",
+      "setup_wait_ms": 2100,
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 301265
+      },
+      "measure_actor": "caster",
+      "before_expected": 0,
+      "wait_ms": 2600,
+      "name": "Learning Light (the aura is gone after the third cast)",
+      "variant": "charges_three_gone",
+      "label_suffix": "charges_three_gone",
+      "setup_casts": [
+        804584,
+        500143,
+        500143,
+        500143
+      ],
+      "expected": 0,
+      "observe_source": "301265 Learning Light carries no ProcCharges in Spell.dbc; the count 3 is the tooltip's ('Lasts for $301265d or 3 casts') and the server counts it: the SpellInfo correction ProcCharges 3 (AscensionSunClericContracts.cpp:162-163), the reapply reset to 3 charges (AscensionSunClericAuras.cpp:101-103) and the decrement after every finished Family 33 magic spell cast while the aura is present, removal at the last charge (Finish and Select, AscensionSunClericAbilities.cpp:49 and :85-88). The count is level independent. The aura is granted only when a Dawn-spending Holy or Fire cast enters Sunrise or Sunset (AscensionSunClericAbilities.cpp:94-128); Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject), any Dawn left by the first phase removed first (set_aura 807440 at 0 stacks). Timing: Illumination 500143 has CastingTimeIndex 5 = 2000 ms (Spell.dbc, SpellCastTimes row 4, /srv/coa/server-data/dbc), so every cast is submitted 2100 ms after the previous one (setup_wait_ms 2100 = 2000 + 100) and none is refused for a cast still in progress (an earlier design waited 1600 ms, a refused cast (reason 105, SPELL_FAILED_SPELL_IN_PROGRESS) left one cast uncounted and misread the count); the trigger cast is read 2600 ms after it started (wait_ms), after it finished. void_on_cast_failure: a refused cast in the run voids the trial (unmeasured). Shine 500143 (Holy) enters Sunrise in the setup and each further Shine is one cast; the aura is read on the caster after the third Shine after the entering one finished, about 7 s after it was granted, so a time expiry (9 to 11 s) cannot explain the reading. Control: the same casts without 300360 learned read no aura. Reference search 2026-11-22: coa-history spell 301265: aura applied and removed events in 3 logs, no charge count; bindmysoul snapshot (2026-07-22) carries 'Lasts for 10 seconds or 3 casts.'; nothing else found.",
+      "void_on_cast_failure": true
     },
     {
       "spell": 503690,

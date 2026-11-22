@@ -2236,6 +2236,8 @@ Options with a module:
   strike (ADR 0735)
 - [`expiry_below_after`](metric_delta_options/expiry_below_after.md): the expired reading judged below the after
   reading and at or above its floor, for a decay without a stated rate (ADR 0738)
+- [`void_on_cast_failure`](metric_delta_options/void_on_cast_failure.md): the verdict `unmeasured` when a setup, step
+  or trigger cast was refused (ADR 1038)
 - [`displacement`](metric_delta_options/displacement.md): the judged readings replaced by the caster's 2D
   displacement from right before each trigger cast (ADR 0739)
 - [`before_absent_recipient`](metric_delta_options/before_absent_recipient.md): a target-pet heal or energize total
