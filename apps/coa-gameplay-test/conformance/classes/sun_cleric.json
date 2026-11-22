@@ -15993,6 +15993,104 @@
       "label_suffix": "gate_gone"
     },
     {
+      "spell": 802161,
+      "name": "Sun Gate (an ally interacting with the gate blinks 25 yd forward)",
+      "kind": "metric_delta",
+      "variant": "ally_blink",
+      "label_suffix": "ally_blink",
+      "quote": "This leaves behind a Sun Gate for $d that allies can interact with to blink themselves the same distance forward.",
+      "trigger_spell": 802161,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "measure_actor": "ally",
+      "metric": "position_x",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 25,
+      "tolerance": 1.0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 802145
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the gate's interaction makes the ally cast 802145 on itself once, which applies its aura (802145 Effect[1] aura 77 MECHANIC_IMMUNITY), so its application on the ally is counted (AscensionSunClericSummons.cpp:106-117): 0 in the before phase (no gate), 1 after the interaction, so the interaction landed"
+          }
+        ]
+      },
+      "ally_offsets": {
+        "ally": 3
+      },
+      "ally_interact": {
+        "entry": 50331,
+        "bearing": 0
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Code: SunGate (AscensionSunClericSummons.cpp:22-43) summons the gate 50331 at the caster's origin, then leaps the caster; npc_ascension_sun_gate::sGossipHello (:106-117) requires the interacting player alive, within INTERACTION_DISTANCE, friendly to and in a group with the owner, and without 802148, then removes impairing auras and casts 802145 (Effect[0] radius index 20 = 25 yd, $802145a1) and 802148 (DurationIndex 23 = 90000 ms, $802148d = 90 sec). The grouped ally (ally_arm) stands 3 yd from the caster's origin along x (ally_offsets), inside the 5 yd interaction distance, so the harness gossip_hello with entry 50331 does not walk it (calibration read rb7 2026-11-22, a throwaway probe, never counted: an ungrouped ally 3 yd from the gate kept its position, a grouped one moved 25.0 yd). Before phase (control): no Sun Gate cast and no interaction, ally displacement 0. After phase: Sun Gate, 1500 ms later the ally interacts, and its 2D displacement from right before the interaction to the reading 1500 ms later is the same distance forward the caster shifts, $802145a1 = 25 yd (the DBC radius, never from a run), within 1 yd as the shift entry, pointing along the ally's facing within 15 degrees (forward). Judged arm: the ally's 802145 application count 0 then 1. Deterministic: no roll, residual 0 per pair. Reference search 2026-11-22: coa-history (802161 casts only, no ally interaction recorded) and the bindmysoul snapshot give nothing beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 802161,
+      "name": "Sun Gate (an ally can use a gate only every 90 s)",
+      "kind": "metric_delta",
+      "variant": "ally_lockout",
+      "label_suffix": "ally_lockout",
+      "quote": "Allies can only use Sun Gate every $802148d.",
+      "trigger_spell": 802161,
+      "target": "caster",
+      "cast_in_before": true,
+      "cast_power": 1363,
+      "measure_actor": "ally",
+      "metric": "aura_apply_count",
+      "fields": {
+        "spell": 802145
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 14500,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 802145
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "each accepted interaction makes the ally cast 802145 on itself once, which applies its aura (802145 Effect[1] aura 77 MECHANIC_IMMUNITY), so its application on the ally is counted (AscensionSunClericSummons.cpp:106-117): 1 after the first interaction and the refused one, 2 after the accepted one"
+          }
+        ]
+      },
+      "ally_offsets": {
+        "ally": 3
+      },
+      "ally_interact": {
+        "entry": 50331,
+        "lockout_aura": 802148,
+        "return_yd": 25,
+        "judged_spell": 802145
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Code: SunGate (AscensionSunClericSummons.cpp:22-43) summons the gate 50331 at the caster's origin, then leaps the caster; npc_ascension_sun_gate::sGossipHello (:106-117) requires the interacting player alive, within INTERACTION_DISTANCE, friendly to and in a group with the owner, and without 802148, then removes impairing auras and casts 802145 (Effect[0] radius index 20 = 25 yd, $802145a1) and 802148 (DurationIndex 23 = 90000 ms, $802148d = 90 sec). The grouped ally (ally_arm) stands 3 yd from the caster's origin along x (ally_offsets), inside the 5 yd interaction distance, so the harness gossip_hello with entry 50331 does not walk it (calibration read rb7 2026-11-22, a throwaway probe, never counted: an ungrouped ally 3 yd from the gate kept its position, a grouped one moved 25.0 yd). The before phase casts Sun Gate and the ally interacts (lockout 802148 applied, count 1); the caster and the ally are moved back 25 yd along x after the blink, so the next gate stands 3 yd from the ally; 81000 ms after the first interaction (0.9 x the DBC 90000 ms) a new Sun Gate (reset_cooldown, a named precondition fixture: 802161 RecoveryTime 90000) and the ally's interaction is refused (count stays 1); 99000 ms after the first (1.1 x 90000) another gate and the interaction is accepted (count 2). The 99 s acceptance with the same geometry is the control for the 81 s refusal; a lockout of 81 s or less, or of 99 s or more, alerts. Judged reading: the ally's 802145 application count (each accepted interaction casts it once, :115), 1 then 2; the ally's 802148 count is recorded beside it and not judged (owner observation: it reads 2 then 4, a double application per accepted interaction for one cast at :116, see the ledger reason). cast_power refills the mana for each Sun Gate (27% of base mana; not a mana claim). Deterministic: no roll, residual 0 per pair. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC."
+    },
+    {
       "spell": 300349,
       "quote": "Your critical heals now reduce the cooldown of Solar Invocation spells by $/1000;804512s1 sec.",
       "gate_spell": 300349,
@@ -17480,6 +17578,17 @@
       "settle_ms": 13000,
       "parts": 5,
       "observe_source": "Solar Flare 807175 Effect[0] aura 54 SPELL_AURA_MOD_HIT_CHANCE BasePoints -3 ($s1 = 3), DurationIndex 10000 ms ($d), applied every 3000 ms by the ground aura 572754 of Sun Down 572752 (CastingTimeIndex 5 = 2000 ms, ground 9000 ms starting 4000 ms after the cast starts). Eight aggressive stationary attackers (Harvest Golem 36, class level) melee the caster; the control arm counts their swings and misses with no cast, the treatment arm recasts Sun Down every 8000 ms (reset_cooldown and set_power are named precondition fixtures, G-21 point 6) and counts after 13000 ms, once the aura from the caster is read on every attacker; the aura is read on every attacker at each cycle end. Expected: the miss share rises by 3 points (the stated 3% of the DBC amount, never from a run); the judge takes the 99% interval of the difference of the two shares against the band of 2 points (the larger of 5% of 3 and 2), a verdict needing a half-width of at most half the band, so a correct server fails by chance with probability under 1e-6 and one 3 points off is excluded. Reference search 2026-11-22: coa-history spell 572752/572753/572754/807175: Sun Down in one log (2026-08-01, 7 casts, no combat-table data on the attackers' swings); the bindmysoul snapshot carries the same sentence; nothing else found."
+    },
+    {
+      "spell": 300348,
+      "name": "Sun Shield (attackers' spells hit 3 points less often)",
+      "kind": "attacker_miss_share",
+      "variant": "spell_clamp",
+      "label_suffix": "spell_hit_taken",
+      "quote": "Reduces your chance to be hit by spells by",
+      "attacker_spell": 585,
+      "expected": 3,
+      "observe_source": "300348 Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE (EffectApplyAuraName[0] 186), EffectBasePoints[0] -4 + EffectDieSides[0] 1 = -3 points (server DBC set /srv/coa/server-data/dbc, read rb7 2026-11-22; the expected 3 is this value, never a run), EffectMiscValue[0] 126 (every magic school, Holy included), so an attacker's spell hit chance against the caster drops by 3 points (the DBC amount, never from a run). Path: Unit::MagicSpellHitResult (Unit.cpp:3951-4049): modHitChance = 96 - levelDiff for levelDiff < 3, plus the victim's aura 186 total for the school, HitChance = modHitChance x 100 plus the attacker's m_modSpellHitChance x 100 (the creature fixture spell_hit_bonus), clamped to [100, 10000], a miss when irand(1, 10000) < 10000 - HitChance. Four stationary Harvest Golems 36 at the class level (levelDiff 0, base 96%) cast Smite 585 (Holy, magic damage class, the harness creature cast with TRIGGERED_FULL_MASK; calibration read rb7 2026-11-22, a throwaway probe never counted: a level 50 attacker missed 6 of 30 such casts, so the triggered creature cast rolls hit) at the caster 826 times each: control (300348 not learned) at hit bonus 4 (100%: no miss) and 3 (99%: at least one miss), treatment (300348 learned, its aura read) at 7 (100% with the 3-point reduction) and 6 (99%). The control arms fix the base at 96 (else unmeasured); the treatment arms then fix the reduction at exactly 3 points, so 2 and 4 are excluded (+-33%). Misses = SPELL_GO count less damage logs, and every arm must read its 826 casts (else unmeasured). Residual: an edge arm without a miss on a correct server 0.99^826 = 2.5e-4 per arm and run, at most 1.0e-3 per pair over the four edge readings. A refused creature cast fails its step, so the run is missing readings and unmeasured (the kind's equivalent of void_on_cast_failure, a metric_delta option). Reference search 2026-11-22: coa-history spell 300348: 0 events in 186 logs (a passive); the bindmysoul and sidekick snapshots under ~/CoaServer/reference carry the tooltip words only; nothing found beyond the tooltip and the DBC for the value."
     },
     {
       "spell": 534267,
@@ -20380,6 +20489,56 @@
       "expected": 0,
       "expire_ms": 500,
       "observe_source": "681472 (Valiance Trigger): Effect[0] 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531 (EffectBasePoints 199, 200 ms), ExcludeTargetAuraSpell 681531; 681531 (Valiance Debuff): Effect[0] aura 4 SPELL_AURA_DUMMY on the enemy target, DurationIndex 6 = 600000 ms. 680643 Effect[1] aura 42 PROC_TRIGGER_SPELL 681472. AscensionSunClericEvents.cpp lets the default action run for 680643 and gates it on an own damaging automatic attack; the per-target 'first' is the caster's own marker (owner ruling O-21, Sun Cleric ADR 0024): the class contracts clear 681472's ExcludeTargetAuraSpell and give 681531 SPELL_ATTR3_DOT_STACKING_RULE (one marker per caster), and the 680643 proc condition refuses a target holding the caster's own 681531. Each phase attacks the dummy for 3 reference swing intervals (7500 ms of the Seraphim main hand 2524, 2500 ms) with no spell cast, the gate learned between the phases (control: before). Class file ratings (hit and expertise 10000) leave no miss, dodge or parry: residual failure probability 0 per pair. The caster's casts of 506824 (Vow of the Valkyr (Mainhand), the strike the code cast before ADR 0024) read 0 without the passive (control) and 0 with it over 3 swing intervals. Positive control: coa-history 506824 SPELL_DAMAGE 1388 events in 11 logs, none from the Valiance player. Reference search 2026-11-22: coa-history log 161 (2026-08-22, one Sun Cleric player): SPELL_EXTRA_ATTACKS 681472 36 events (self-target), each followed in the same millisecond by a second SWING_DAMAGE on the same target, and SPELL_AURA_APPLIED 681531 DEBUFF on the target about 300 ms later 35 events on 35 distinct target GUIDs (none twice), removed with the mob's death or later; that player has 0 events of 506824 in all 186 logs; 680643 0 events (a passive)."
+    },
+    {
+      "spell": 680643,
+      "name": "Valiance (a second target gets its own extra attack)",
+      "kind": "metric_delta",
+      "variant": "second_target",
+      "label_suffix": "second_target",
+      "quote": "your first auto attack on a target hits twice",
+      "attack_swings": 3,
+      "target": "dummy",
+      "trigger_spell": 681472,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 681472
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "expire_ms": 500,
+      "area_dummies": [
+        3.0
+      ],
+      "second_swing_target": "area1",
+      "void_on_cast_failure": true,
+      "observe_source": "681472 (Valiance Trigger): Effect[0] 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531 (EffectBasePoints 199, 200 ms); 681531 (Valiance Debuff): Effect[0] aura 4 SPELL_AURA_DUMMY on the enemy target, DurationIndex 6 = 600000 ms. 680643 Effect[1] aura 42 PROC_TRIGGER_SPELL 681472. The per-target 'first' is the caster's own marker (owner ruling O-21, Sun Cleric ADR 0024): the class contracts clear 681472's ExcludeTargetAuraSpell and give 681531 SPELL_ATTR3_DOT_STACKING_RULE (one marker per caster), and the 680643 proc condition refuses a target holding the caster's own 681531. Each phase attacks the dummy for 3 reference swing intervals (7500 ms of the main hand 2524, 2500 ms), stops, then attacks area1, a copy of the dummy at the same 3 yd melee placement (area_dummies, second_swing_target, tool ADR 1050), for the same 7500 ms, with no spell cast; the gate is learned between the phases (control: the before phase without 680643). Class file ratings (hit and expertise 10000) leave no miss, dodge or parry: residual failure probability 0 per pair. The caster's casts of 681472 read 0 without the passive and exactly 2 with it: one extra attack on the dummy and one on area1 (the tooltip's 'on a target': each target's first auto attack), so a single extra attack per caster (1) or one per swing (6 or more) alerts. Reference search 2026-11-22: coa-history log 161 (2026-08-22, one Sun Cleric player): 681531 DEBUFF applied on 35 distinct target GUIDs after 36 SPELL_EXTRA_ATTACKS 681472 events, one per target, consistent with the tooltip; nothing else found."
+    },
+    {
+      "spell": 680643,
+      "name": "Valiance (the second target is marked too)",
+      "kind": "metric_delta",
+      "variant": "second_marker",
+      "label_suffix": "second_marker",
+      "quote": "your first auto attack on a target hits twice",
+      "attack_swings": 3,
+      "target": "dummy",
+      "trigger_spell": 681472,
+      "metric": "aura",
+      "fields": {
+        "spell": 681531,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "area_dummies": [
+        3.0
+      ],
+      "second_swing_target": "area1",
+      "void_on_cast_failure": true,
+      "observe_source": "681472 (Valiance Trigger): Effect[0] 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531 (EffectBasePoints 199, 200 ms); 681531 (Valiance Debuff): Effect[0] aura 4 SPELL_AURA_DUMMY on the enemy target, DurationIndex 6 = 600000 ms. 680643 Effect[1] aura 42 PROC_TRIGGER_SPELL 681472. The per-target 'first' is the caster's own marker (owner ruling O-21, Sun Cleric ADR 0024): the class contracts clear 681472's ExcludeTargetAuraSpell and give 681531 SPELL_ATTR3_DOT_STACKING_RULE (one marker per caster), and the 680643 proc condition refuses a target holding the caster's own 681531. Each phase attacks the dummy for 3 reference swing intervals (7500 ms of the main hand 2524, 2500 ms), stops, then attacks area1, a copy of the dummy at the same 3 yd melee placement (area_dummies, second_swing_target, tool ADR 1050), for the same 7500 ms, with no spell cast; the gate is learned between the phases (control: the before phase without 680643). Class file ratings (hit and expertise 10000) leave no miss, dodge or parry: residual failure probability 0 per pair. The caster's 681531 marker on area1 reads 0 without the passive and 1 with it: the second target's first auto attack marks it as the first target's does (first_marker entry). Reference search 2026-11-22: coa-history log 161: 681531 applied once on each of 35 distinct targets; nothing else found.",
+      "measure_actor": "area1"
     },
     {
       "spell": 803913,
@@ -24485,6 +24644,30 @@
       "observe_source": "807299 Effect[1] aura 108 ADD_PCT_MODIFIER on SPELLMOD_DAMAGE (EffectMiscValue[1] 0) +25% (BasePoints 24 + 1, $s2) on Dawnsear's SpellFamilyFlags[1] = 2, so the fed Dawnsear 554406 hits 1.25 times the control (the stated 25%, from the DBC, never from the ratio; figure_effect 1). The modifier multiplies the whole hit, spell power part included (Unit::SpellDamageBonusDone, Unit.cpp:9969-9973: tmpDamage = (base + spell power bonus) x done mods, then ApplySpellMod SPELLMOD_DAMAGE), so the spell power fixture of 20000 narrows the dice share without changing what is tested. Sized judge (aura_fed_effect sized damage, mentor D-183 and D-186): 14 control Dawnsear trials (807299 cancelled) and 14 fed trials, non-critical hits only; the 99% Welch-t interval of the ratio of the mean fed hit to the mean control hit must lie inside 1.225 to 1.275 (the DBC figure 25% +-10%, G-19); an arm with fewer than 4 non-critical hits makes the run unmeasured. The tooltip says 'Your next Dawnsear within $d', so consumed is true: a second Dawnsear cast right after each fed one must be back at the control mean within EffectDieSides[0] / control mean (the aura is consumed once). Sizing, before the run, from the earlier pair 20261122-123610 / 20261122-123655 (spell power 10000): control hits 10672 to 10733 (standard deviation 15.7 and 21.5 of 10703), fed hits 13338 to 13427 (23.6 and 39.9), 3 of 24 trials without a non-critical hit; at spell power 20000 the dice part keeps its absolute spread, so the coefficient of variation is taken at most 0.25% per hit. A seeded model of the Welch interval (.agents/plans/dmgjudge/scratch/size2.py and size3.py) gives, at 4 non-critical hits per arm and a coefficient of variation of 0.25%, a false alert of 3e-4 per run at the figure (6e-4 per pair, less with more hits), and every 1 + 0.85 f and 1 + 0.5 f arm alerts; 14 trials per arm keep an arm below 4 hits at 9.9e-4 per pair for a 30% chance of losing a trial (1.2e-7 at the observed 12.5%). Treatment: Radiant Flame 806060 (instant channel, DurationIndex 35 = 4000 ms, Effect[0] aura 227 amplitude 1000, AttributesEx5 0x200 SPELL_ATTR5_EXTRA_INITIAL_PERIOD: 4000 / 1000 + 1 = 5 ticks of 807058) is cast every 4300 ms by the harness step cast_until_aura (owner ruling O-17) until Spears of Glory 807299 is on the caster; AscensionSunClericEvents.cpp:115 rolls Chance(player, 804629) (ProcChance 15) once per landed 807058 tick and :319 casts 807299 on the player. The harness never sets 807299; its presence is read right before every judged Dawnsear and a fed trial without it (cap reached) makes the run unmeasured. The kind sizes max_casts from the DBC ProcChance and tick count for a residual of at most 0.1% per pair. 823764 removes the dummy's resistance so every tick lands. Replaces the held set_aura entry (review b7c C1). Tool: aura_fed_effect sized damage (ADR 1033). Reference search 2026-11-22: coa-history spells 804629 and 807299: 0 events in 186 logs (the aura is not logged); Dawnsear 554406 is found in 1 log (52 SPELL_CAST_START, 74 SPELL_DAMAGE) with no event naming Spears of Glory, so a fed cast cannot be told apart; the coabuildhub and bindmysoul snapshots (fetched 2026-09-18) repeat the tooltip (\"within 10 sec is instant cast and deals 25% increased damage\"); nothing else found. Conversion round D-195 / D-198 (2026-11-22): trials raised from 14 to 30 per arm, min_hits stays 14. Pair 20261122-184335 / -191406 read 11 of 14 non-critical fed hits in run 1 (unmeasured, the flip), 14 in run 2. The caster has spell_hit_rating 10000 (class file ratings) and 823764 removes the dummy's resistance, so a trial loses its hit only to a critical strike. Loss rate: 8 of 112 trial-arms lost their non-critical hit in the four earlier runs (pairs 20261122-175034 / -175108 and -184335 / -191406: control 14, 12, 14, 14 and fed 12, 13, 11, 14 non-critical hits of 14 trials), whose one-sided 99.9% Clopper-Pearson upper bound is 17.8%, taken as 20% (a bound on the whole loss, crit or other). P(fewer than 14 of 30 land at 80%) = 1.05e-5 per arm, 4 arms per pair: 1 - (1 - 1.05e-5)^4 = 4.2e-5; at 14 trials it is 0.956 per arm. Feed residual 9e-4 per pair (residual_target 0.0009, the kind sizes max_casts from the DBC ProcChance). Total residual failure probability per pair at most 9.4e-4, under 0.1%."
     },
     {
+      "spell": 804629,
+      "name": "Spears of Glory (the instant Dawnsear lasts its 10 s)",
+      "kind": "aura_fed_effect",
+      "variant": "window",
+      "label_suffix": "fed_window",
+      "quote": "Your next Dawnsear within $d is instant cast",
+      "feed_spell": 806060,
+      "aura": 807299,
+      "effect_spell": 554406,
+      "every_ms": 1600,
+      "residual_target": 0.001,
+      "feed_power": 1000,
+      "effect_power": 1363,
+      "trials": 6,
+      "min_judged": 5,
+      "held_ms": 9300,
+      "gone_ms": 10700,
+      "caster_auras": [
+        823764
+      ],
+      "observe_source": "The 804629 tooltip embeds 807299 (@s:807299:0@), whose text carries the quote. 807299 Spears of Glory DurationIndex 1 = 10000 ms ($d = 10 sec), Effect[0] aura 108 SPELLMOD CASTING_TIME -100% on Dawnsear 554406 (3500 ms cast). The aura is earned for real: Radiant Flame 806060 every 1600 ms (cast_until_aura, owner ruling O-17); AscensionSunClericEvents.cpp:115 rolls Chance(player, 804629) (ProcChance 15, raw DBC) on each 807058 tick and casts 807299. The clock is the cast_until_aura stop: the step checks HasAura on every world update (CoAGameplayTest.cpp:7416-7447), so the grant is 0 to 25 ms old at the stop (calibration rb7 2026-11-22, throwaway probes never counted: remaining 9981 ms at the stop in 6 of 6 trials; 807299 sends no SPELL_GO, so no event dating is possible; set_moving does not stop the channel: 3 more ticks after it). Chance() rolls only while the caster holds 804629 (AscensionSunCleric.cpp:199), so 804629 is unlearned at the stop (no later tick of the running channel may refresh 807299) and relearned 4500 ms later, once the channel is over, so the talent is known when Dawnsear is cast; 807299 is read present after the unlearn and its application count unchanged up to the judged cast. Judged reads (mentor D-234): the Dawnsear cast itself 300 ms after it starts: 6 held trials at 9300 ms after the stop (age 9300 to 9325 ms, inside 9000 to 9650, -10% excluded) are instant (casting 0), 6 gone trials at 10700 ms (age 10700 to 10725, inside 10400 to 11000, +10% excluded) are a normal cast (casting 1); each cast must go off; at least 5 judged trials per side (mentor D-227, fixed before the run), fewer is unmeasured. Expectations from the DBC duration and the tooltip, never from a run. Residual: max_casts from the 15% chance and one tick per feed (conservative), a trial left unfed at most 0.001 per pair. void_on_cast_failure is a metric_delta option; here a refused judged cast fails its 'went' read and voids the trial. 823764 removes the dummy's resistance so every tick lands. Reference search 2026-11-22: coa-history spell 807299 and the snapshots under ~/CoaServer/reference give nothing beyond the tooltip and the DBC for the duration.",
+      "quote_spell": 807299
+    },
+    {
       "spell": 300349,
       "name": "Hope (once per sec: critical heals 940 and 1050 ms apart)",
       "kind": "timer_spacing_arms",
@@ -26345,6 +26528,33 @@
       "dummy_distance": 5,
       "cast_power": 1363,
       "observe_source": "524858 Seraphim's Light CD reduc Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165) BasePoints -1001 (1000 ms, $/1000;524858s1 = 1 sec) on 800764 Conquest, 503651 Revelation and 806159 Resplendence; the class code casts 524858 per target struck. Conquest 800764 is cast, Solar Nova strikes one dummy 1600 ms later, and the gated spell is attempted 1000 ms less its cooldown plus 60 ms after the priming cast (refused without the cut, the control arm, accepted with it) and 60 ms before that time (refused again): the cut lies within 60 ms (6%) of 1000 ms, inside 10% on both sides. One target is struck, so this arm proves the 1 sec cut; the per-target multiplication stays with the cd_refund readbacks. Reference search 2026-11-22: coa-history spell 681433: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; nothing found beyond the tooltip and the DBC for the value."
+    },
+    {
+      "spell": 681433,
+      "name": "Solar Nova (Solar Invocation: Conquest cooldown cut by 1 s for each of three targets struck)",
+      "kind": "cost_gate",
+      "variant": "cd_conquest_area",
+      "label_suffix": "cd_conquest_area",
+      "quote": "Reduces the cooldown of your Solar Invocation spells by $/1000;524858s1 sec for each target struck.",
+      "gated_spell": 800764,
+      "resource": "cooldown",
+      "reduction": 3000,
+      "target": "caster",
+      "margin_ms": 60,
+      "after_casts": [
+        [
+          681433,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "dummy_distance": 5,
+      "area_dummies": [
+        5.0,
+        5.0
+      ],
+      "cast_power": 1363,
+      "observe_source": "524858 Seraphim's Light CD reduc Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165) BasePoints -1001 (1000 ms, $/1000;524858s1 = 1 sec) on 800764 Conquest, 503651 Revelation and 806159 Resplendence; HandleAscensionClassMechanics26To32Hit (AscensionClassMechanics26To32.cpp:54-77) casts 524858 once per successful offensive hit of Solar Nova, so per target struck. Conquest 800764 (RecoveryTime 30000 ms) is cast, Solar Nova strikes the dummy and two copies of it standing at the same 5 yd (cost_gate area_dummies, tool ADR 1049), three targets, 1600 ms later, so the stated cut is 3 x 1000 = 3000 ms (the DBC per-target amount times the targets struck, never from a run). The gated spell is attempted 3000 ms less its cooldown plus 60 ms after the priming cast (refused without Solar Nova, the control arm; accepted with it) and 60 ms before that time (refused again): the cut lies within 60 ms of 3000 ms, so a cut for two targets (2000 ms) or four (4000 ms) is excluded, as is any cut outside 3000 +-10%. The one-target entry cd_conquest (1000 ms) runs in the same pair. cost_gate judges the cast result itself, so void_on_cast_failure (a metric_delta option refused for a cast_failure reading) does not apply. Deterministic: no roll, residual 0 per pair. Reference search 2026-11-22: coa-history spell 681433: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; nothing found beyond the tooltip and the DBC for the value."
     },
     {
       "spell": 681433,

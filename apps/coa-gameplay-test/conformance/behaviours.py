@@ -4218,6 +4218,7 @@ class CostGateSpec:
     extra_reads: tuple[tuple[str, int | None, str | None, int | None], ...] = ()
     only_arm: str | None = None
     priming_reads: tuple[tuple[int, int], ...] = ()
+    area_dummies: tuple[float, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -4647,6 +4648,11 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
     if spec.target_entry is not None:
         scenario['creatures'][0]['entry'] = spec.target_entry
         scenario['contract'] += f' The dummy is creature entry {spec.target_entry}.'
+    if spec.area_dummies:
+        from metric_delta_options import area_dummies
+        area_dummies.fixtures(class_file, spec, spec.area_dummies, scenario)
+        scenario['contract'] += (f' The after casts strike the dummy and the {len(spec.area_dummies)} area dummies, '
+                                 f'{1 + len(spec.area_dummies)} targets, in the arms that make them.')
     limit = MAX_ACCELERATED_SCENARIO_MS if spec.resource == 'cooldown' else MAX_SCENARIO_MS
     return timed(scenario, waited_ms(steps), limit), expectations
 
@@ -4672,7 +4678,20 @@ def cost_gate_spec(entry: dict) -> CostGateSpec:
                         metric_delta_strike(entry.get('strike')),
                         tuple((int(aura), int(stacks)) for aura, stacks in entry.get('strike_victim_auras', ())),
                         entry.get('caster_health_pct'), bool(entry.get('refused_with', False)),
-                        cost_gate_extra_reads(entry), entry.get('only_arm'), cost_gate_priming_reads(entry))
+                        cost_gate_extra_reads(entry), entry.get('only_arm'), cost_gate_priming_reads(entry),
+                        cost_gate_area_dummies(entry))
+
+
+def cost_gate_area_dummies(entry: dict) -> tuple[float, ...]:
+    if entry.get('area_dummies') is None:
+        return ()
+    from metric_delta_options import area_dummies
+    distances = area_dummies.parse(entry['area_dummies'])
+    if entry.get('resource') != 'cooldown' or not entry.get('after_casts') or entry.get('resets') or any(
+            target != TARGET for _, target in entry['after_casts']):
+        raise ValueError(f'{entry["spell"]} cost_gate area_dummies needs a cooldown gate cut by after_casts at the '
+                         f'dummy, with no reset')
+    return distances
 
 
 def cost_gate_priming_reads(entry: dict) -> tuple[tuple[int, int], ...]:

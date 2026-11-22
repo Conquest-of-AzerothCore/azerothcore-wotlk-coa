@@ -59,3 +59,31 @@ Sun Cleric: Dawn's Arrival 503690 (`cooldown` with `evidence_metric`, label `fed
 Dawnsear 554406 instant and +25%, the
 +25% sized with `figure_effect` 1, `min_hits` 4, 14 trials and `consumed`); Cultivate
 Divinity 704920 (`heal` and `heal_cascade`: Radiant Cascade 500141 and Illumination 500143 feeding each other's +20%).
+
+## Window variant (`variant: "window"`, ADR 1052, provisional)
+
+Judges an earned aura's stated duration through the effect it enables, on both sides of it. Fields: `feed_spell`,
+`aura`, `effect_spell`, `every_ms` (at least the 1600 ms global cooldown wait), `residual_target`, `feed_power`,
+`effect_power`, `trials` (per side), `min_judged` (the least judged trials per side, fixed before the run),
+`held_ms` and `gone_ms` (the judged cast's delay after the stop), optional `caster_auras` and `quote_spell` (a
+spell whose tooltip the entry's tooltip embeds, `@s:N:`). Each trial cancels the aura, relearns the entry's spell
+(the proc talent), feeds with `cast_until_aura` until the aura is on, then unlearns the talent at once (the running
+channel keeps ticking and `Chance()` rolls only while the talent is held, `AscensionSunCleric.cpp:199`), waits
+4500 ms for the channel to end, relearns the talent and casts `effect_spell` at its delay. The clock is the stop:
+`CastUntilAura` checks the aura on every world update, so the grant is 0 to 25 ms old there. The judged read is the
+cast itself 300 ms in: instant (casting 0) at `held_ms`, its normal cast (casting 1) at `gone_ms`; the ages must lie
+in 0.9 to 0.965 and 1.04 to 1.1 of the DBC duration, else that side is unmeasured. A trial is void when the talent is
+not known at its start or after the relearn, the feed did not grant once, the aura is gone right after the unlearn,
+the channel still runs, a tick or a re-application follows the relearn, or the cast did not go off; fewer than
+`min_judged` judged trials on a side is unmeasured. `max_casts` assumes one tick per feed (conservative).
+
+Evidence: the verdict carries the metric `aura_fed_window_casting` with the contrast `aura_window` (aura held against
+aura gone), declared in the kind's `METRIC_EVIDENCE`, `CONTRAST_PROOF` and `STATE_PROMISES` rows; an ok verdict is
+behaviour on a clause that says "within" and data otherwise (ADR 1052 addendum).
+
+Calibration reads rb7 (2026-11-22, throwaway probes, never counted): 9981 ms of 10000 left at the stop in 6 of 6
+trials; 807299 sends no SPELL_GO (so no event dating); `set_moving` does not stop Radiant Flame; a 1600 ms feed gives
+two ticks per cast.
+
+Sun Cleric: Spears of Glory 804629 (ledger row 364, claim 1, "Your next Dawnsear within $d is instant cast", quoted
+from 807299): `fed_window`, Dawnsear 554406 at 9300 and 10700 ms, 6 trials and at least 5 judged per side.

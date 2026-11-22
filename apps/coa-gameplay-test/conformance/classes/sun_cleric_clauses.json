@@ -570,9 +570,11 @@
     "spell": 300348,
     "clause": "Reduces your chance to be hit by spells by $s1%.",
     "labels": [
-      "300348 effect_value e0 #0"
+      "300348 effect_value e0 #0",
+      "300348 behaviour_metric_delta spell_hit_taken"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "School split (G-23): 300348 Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, MiscValue 126 (Holy, Fire, Nature, Frost, Shadow, Arcane), BasePoints -4 (DBC); the entry spell_hit_taken casts Smite 585 (SchoolMask 2, Holy) only, so Holy is measured in game and the five other schools rest on the same aura and its MiscValue. Reference search 2026-11-22: coa-history spell 300348: 0 events in 186 logs (a passive); the bindmysoul and sidekick snapshots under ~/CoaServer/reference carry the tooltip words only; nothing found beyond the tooltip and the DBC for the value."
   },
   {
     "spell": 300349,
@@ -3120,10 +3122,14 @@
           "681433 effect_value 524858e0 #2",
           "681433 behaviour_metric_delta cd_refund_one",
           "681433 behaviour_metric_delta cd_refund_three",
-          "681433 behaviour_metric_delta cd_refund_none"
+          "681433 behaviour_metric_delta cd_refund_none",
+          "681433 cost_gate 800764 cd_conquest_area without",
+          "681433 cost_gate 800764 cd_conquest_area with",
+          "681433 cost_gate 800764 cd_conquest_area beyond"
         ]
       }
-    ]
+    ],
+    "reason": "Reference search 2026-11-22: coa-history spell 681433: no event in the logs beyond the cast; the bindmysoul snapshot and the other snapshots under ~/CoaServer/reference were not found to differ from the DBC; for the per-target refund, coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found."
   },
   {
     "spell": 681433,
@@ -3411,9 +3417,10 @@
         ]
       },
       {
-        "claim": "on a target: a second target gets its own extra attack, and the extra attack lands as a second white swing",
+        "claim": "on a target: a second target gets its own extra attack (681472 cast) and its own 681531 marker",
         "labels": [
-          "680643 behaviour_metric_delta second_target"
+          "680643 behaviour_metric_delta second_target",
+          "680643 behaviour_metric_delta second_marker"
         ]
       }
     ],
@@ -5724,17 +5731,22 @@
       },
       {
         "claim": "that allies can interact with to blink themselves the same distance forward",
-        "labels": []
+        "labels": [
+          "802161 behaviour_metric_delta ally_blink"
+        ]
       }
-    ]
+    ],
+    "reason": "Reference search 2026-11-22: coa-history (802161 casts and summon events, no ally interaction recorded) and the bindmysoul snapshot give no figure beyond the tooltip and the DBC; the DBC and the tooltip are the expectation."
   },
   {
     "spell": 802161,
     "clause": "Allies can only use Sun Gate every $802148d.",
     "labels": [
-      "802161 spell_duration 802148 #2"
+      "802161 spell_duration 802148 #2",
+      "802161 behaviour_metric_delta ally_lockout"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Counted: the entry ally_lockout reads ok in both runs of pair 20261122-221318 / 20261122-221359 (judged build 8576ef7bd7ce, worldserver 10ee6279a3d1, no flip, 6 of 6 scenarios ok in each run) with the judged_spell key (a60d67ec76, ADR 1051 addendum, mentor D-239): the judged reading is the ally's 802145 application count, 1 after the first interaction and 2 after the accepted try, with the refused try at 81 s = 0.9 x 90000 ms and the accepted try at 99 s = 1.1 x 90000 ms, so a lockout of 81 s or less or of 99 s or more would alert. Lockout timing from the DBC: 802148 Sunstroke DurationIndex 23 = 90000 ms ($802148d), one effect (Effect[0] aura 4 DUMMY, no trigger spell). 802148's application count is recorded only, unjudged: 2 before and 4 after in both runs. Owner observation (not a change): each accepted gossip interaction counts 802148 twice in the harness. The gossip handler casts 802148 once (AscensionSunClericSummons.cpp:116, after 802145 at :115, refusing while 802148 is held at :112) and no other source line references 802148 (grep over src/); the engine reports OnAuraApply at a new application (Unit.cpp:5607) and at a stack or refresh of an existing aura (Unit.cpp:5466), and which of the two fired twice was not isolated. Probes (rb7, throwaway, never counted): set_aura, a player cast and a creature triggered self-cast of 802148 each read 1; the gossip path reads 2 with one stack and 88464 ms remaining 1500 ms later (one 90 s aura) and no SPELL_GO of 802148 at the ally, so no visible effect. The pair before the judged_spell key (214833 / 214945) ran an older scenario and is not used. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found."
   },
   {
     "spell": 802935,
@@ -6298,7 +6310,8 @@
       {
         "claim": "within $d",
         "labels": [
-          "804629 spell_duration 807299 #1"
+          "804629 spell_duration 807299 #1",
+          "804629 behaviour_metric_delta fed_window"
         ]
       }
     ],

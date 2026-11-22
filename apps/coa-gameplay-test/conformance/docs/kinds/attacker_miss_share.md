@@ -35,3 +35,23 @@ The verdict stamps the metric `melee_attacks_taken`, already an event read in `c
 
 Sun Cleric: Sun Down 572752 (Solar Flare 807175 from the 572754 ground, claim "reduces the target's chance to hit by
 $s1%"), label `572752 behaviour_metric_delta attacker_miss`.
+
+## Spell clamp variant (`variant: "spell_clamp"`, ADR 1048, provisional)
+
+For an aura 186 (`SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE`) on the caster: fields `spell` (the aura's spell, also
+the quoted tooltip), `quote`, `attacker_spell` (a magic damage spell of a school in the aura's MiscValue mask),
+`expected` (whole points, equal to minus BasePoints plus DieSides), optional `aura_effect` (0), `attacker_entry`
+and `label_suffix` (`spell_hit_taken`). Four stationary hostile attackers at the class level (base spell hit 96%,
+`Unit::MagicSpellHitResult`) each cast `attacker_spell` at the caster N times, 300 ms apart (the harness creature
+`cast`); their fixture `spell_hit_bonus` places the hit chance on the 100% clamp or one point under it: control
+(the spell not learned) 4 and 3, treatment (learned, its aura read on the caster) 4 + expected and 3 + expected.
+Misses are `spell_go_count` less `spell_log_count`. N is the smallest count with four edge arms missless on a
+correct server at most 0.1% per pair (826). A control arm off its expectation, an arm short of N casts or an aura
+read off is unmeasured; a treatment clamp miss or a missless treatment edge alerts (the reduction is more or less
+than stated). The verdict stamps `spell_log_count`, an event read.
+
+Calibration read rb7 (2026-11-22, a throwaway probe, never counted): a level 50 attacker's triggered Smite 585 missed
+6 of 30 casts at the level 60 caster, so the creature cast rolls hit; a level 64 attacker missed none of 100.
+
+Sun Cleric: Sun Shield 300348 "Reduces your chance to be hit by spells by $s1%" (3), label
+`300348 behaviour_metric_delta spell_hit_taken`.

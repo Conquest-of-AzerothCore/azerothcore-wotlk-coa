@@ -1105,6 +1105,13 @@ Interdict 560116). The arms are then `without` (through `margin_ms` after the ba
 (refused `margin_ms` before it). An increase not above twice `margin_ms` is `NotModelled`; next, duration and
 after-cast arms are refused.
 
+`area_dummies` (ADR 1049, provisional; a list of 1 to 9 distances in yd, cooldown gates whose `after_casts` all
+target the dummy, no `resets`) adds the copies of the dummy that the `metric_delta` option of the same name adds
+(`area1`, `area2`, ...), so an area after cast strikes several targets in the arms that make it. The entry states the
+whole cut in `reduction` (the DBC per-target amount times the targets struck). Solar Nova 681433 `cd_conquest_area`:
+three targets, 3000 ms of Conquest 800764's 30000 ms, `margin_ms` 60 excludes the cuts of two and four targets.
+Absent, the scenario keeps its one dummy.
+
 `resets: true` (cooldown gates with `after_casts` only) states a reset of the running cooldown: the two arms attempt
 the gated spell `margin_ms` after the after casts, `without` refused (the control) and `with` through; there is no
 `beyond` arm, since any later attempt goes through. Tome of Light 805422 resets Barrier of Light 805417
