@@ -29,6 +29,8 @@ void ApplyContracts(SpellInfo* info)
         info->ExcludeTargetAuraSpell = 0;
     if (id == ValianceMarker)
         info->AttributesEx3 |= SPELL_ATTR3_DOT_STACKING_RULE;
+    if (id == 572886)
+        info->Effects[EFFECT_0].MiscValue = SPELL_SCHOOL_MASK_ALL;
     if (id == Rejuvenating)
         for (auto& effect : info->Effects)
             if (effect.IsAura())

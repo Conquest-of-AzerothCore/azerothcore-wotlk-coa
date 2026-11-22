@@ -32993,6 +32993,189 @@
           1711
         ]
       }
+    },
+    {
+      "spell": 300347,
+      "name": "Battle Cleric (Paragon is ready again after 1 min, not before)",
+      "kind": "cost_gate",
+      "variant": "paragon_gate",
+      "label_suffix": "paragon_gate",
+      "quote": "Paragon now has a 1 min cooldown",
+      "gated_spell": 680639,
+      "resource": "cooldown",
+      "reduction": 240000,
+      "target": "caster",
+      "margin_ms": 5000,
+      "observe_source": "Paragon 680639 RecoveryTime 300000 and CategoryRecoveryTime 300000 (Spell.dbc); the tooltip states 1 min, a cut of 240000 ms (Sun Cleric ADR 0012 for the script that takes it off after the cast). Paragon is cast and cast again 55000 ms later (the beyond arm, 8.3% under 60000) and 65000 ms later (the with arm, 8.3% over): refused at 55 s and through at 65 s with 300347, refused at 65 s without it (control, 300000 ms). The 1 min figure is read from whether the second cast is accepted, not from a remaining-cooldown readback, so a cooldown 10% off (54000 or 66000 ms) is excluded on both sides. Reference search 2026-11-22: server DBC 300347, 562316 and 680639; AscensionSunClericBattleCleric.cpp; the cooldown_ms entry paragon_cd of this clause; coa-history spell 680639: 60 casts in 15 logs, and raw lines of player Sunofabetch (log 2026-08-22) show recasts 62.3 s apart (23:43:59 to 23:45:01), far under the 300 s base cooldown, consistent with the 1 min claim; no log records a cooldown, so it supports the direction only."
+    },
+    {
+      "spell": 300347,
+      "name": "Battle Cleric (Gavel is ready again at once under Paragon)",
+      "kind": "cost_gate",
+      "variant": "gavel_gate",
+      "label_suffix": "gavel_gate",
+      "quote": "empowers your Gavels, causing them to have no cooldown",
+      "gated_spell": 802561,
+      "resource": "cooldown",
+      "reduction": 5000,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "unset_arm": true,
+      "arm_wait_ms": 20000,
+      "setup_casts": [
+        [
+          680639,
+          "caster"
+        ]
+      ],
+      "observe_source": "Arms: without (300347 unlearned, Paragon cast first), with (300347 learned, Paragon cast first), unset (300347 learned, Paragon not cast: the passive alone must not remove the cooldown, so a server that drops the cooldown whenever 300347 is known fails here, expected refused 67). Every arm waits 20000 ms more before it starts so that the 20 s Paragon aura (562316, DurationIndex 18) of the previous arm has expired: without it the unset arm would still carry the aura of the with arm. 562316 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -101 (-100%) on the Gavels' class mask; Gavel of Wrath 802561 has CategoryRecoveryTime 5000 (category 1207). Paragon is cast before the priming Gavel in every arm; the second Gavel is attempted one global cooldown plus the margin after the first: refused without 300347 (control, the 5000 ms cooldown is running), through with it. There is no beyond arm: every later wait is allowed. Reference search 2026-11-22: server DBC 300347, 562316 and 802561; AscensionSunClericBattleCleric.cpp; the cooldown_ms entry gavel_cd of this clause; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 572885,
+      "name": "Touch of Light (a struck enemy deals 20% less Physical damage)",
+      "kind": "taken_hit",
+      "variant": "struck_damage",
+      "label_suffix": "struck_damage",
+      "judge": "damage_ratio",
+      "expected": 0.8,
+      "quote": "Enemies struck by Blessing of Absolution now deal $572886s1% reduced damage",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "cast_power": 1363,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            572885
+          ],
+          "casts": [
+            [
+              804247,
+              "caster"
+            ],
+            [
+              804249,
+              "caster"
+            ]
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            572885
+          ],
+          "casts": [
+            [
+              804247,
+              "caster"
+            ],
+            [
+              804249,
+              "caster"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "Touch of Light 572886 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, DBC MiscValue 1 (Physical) widened to 127 (all schools) by the class contract (owner ruling O-25, Sun Cleric ADR 0032), BasePoints -21 + 1 = -20, DurationIndex 28 (5000 ms); 572885 casts it on the enemy damaged by the strike 804252 of Blessing of Absolution 804249 (AscensionSunClericEvents.cpp:119, :266). Every trial the caster casts Bless 804247 and Blessing of Absolution 804249 on itself, then the striker (the struck enemy) casts Void Zone 92559 (1000 Physical, DmgClass 0: it neither misses nor crits) at the caster, inside the 5 s of the debuff: the damage ratio of the treatment arm (572885 learned) to the control arm (unlearned, same casts) is judged against 0.8, a hit actually applied. Reference search 2026-11-22: coa-history spell 572886: 0 events in 186 logs; the bindmysoul snapshot carries deal -20% reduced damage for 5 seconds; nothing else found."
+    },
+    {
+      "spell": 572885,
+      "name": "Touch of Light (a struck enemy deals 20% less Holy damage, owner ruling O-25)",
+      "kind": "taken_hit",
+      "variant": "struck_damage_magic",
+      "label_suffix": "struck_damage_magic",
+      "judge": "damage_ratio",
+      "expected": 0.8,
+      "quote": "Enemies struck by Blessing of Absolution now deal $572886s1% reduced damage",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "cast_power": 1363,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            572885
+          ],
+          "casts": [
+            [
+              804247,
+              "caster"
+            ],
+            [
+              804249,
+              "caster"
+            ]
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            572885
+          ],
+          "casts": [
+            [
+              804247,
+              "caster"
+            ],
+            [
+              804249,
+              "caster"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "Same sequence and trials as struck_damage, with the striker (the struck enemy) casting Light of the Naaru 41394 (SPELL_EFFECT_SCHOOL_DAMAGE, Holy, EffectBasePoints 1099 + 1, DmgClass magic, instant) at the caster instead of the Physical Void Zone 92559. Expected 0.8 from the tooltip (\"reduced damage\", no school) and owner ruling O-25 (the debuff 572886 reduces ALL damage dealt by 20%); 572886 Effect[0] is aura 79 with DBC MiscValue 1 (Physical only), widened to 127 (all schools) by the class contract (Sun Cleric ADR 0032); before that fix the pair 20261122-164341 / 20261122-164658 read 1.0 here. Non-critical hits only, as struck_damage. Reference search 2026-11-22: coa-history spell 572886: 0 events in 186 logs; nothing else found."
+    },
+    {
+      "spell": 680648,
+      "name": "Sacred Vessel (stacks stop at 10 after 11 consumptions)",
+      "kind": "metric_delta",
+      "variant": "max_stacks",
+      "label_suffix": "max_stacks",
+      "quote": "stacking up to $681254u times.",
+      "trigger_spell": 500143,
+      "gate_spell": 680648,
+      "target": "caster",
+      "setup_casts": [
+        800722,
+        500143,
+        800722,
+        500143,
+        800722,
+        500143,
+        800722,
+        500143,
+        800722,
+        500143,
+        800722,
+        500143,
+        800722,
+        500143,
+        800722,
+        500143,
+        800722,
+        500143,
+        800722,
+        500143,
+        800722
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 800,
+      "cast_power": 1363,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 681254
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "wait_ms": 500,
+      "expire_ms": 22000,
+      "tolerance": 0,
+      "observe_source": "681254 StackAmount 10, DurationIndex 18 (20000 ms) (server DBC). Angelic Presence 800722 is instant with no global cooldown (CastingTimeIndex 1, StartRecoveryTime 0), so it does not use the Illumination cast time: with it up Illumination 500143 is instant (800722 Effect[0] aura 108 MiscValue 10 SPELLMOD_CASTING_TIME -100% on the Illumination mask, the 2000 ms cast time of 500143 otherwise, as the entry of the 92137 grant reads it) and costs one 1500 ms global cooldown, so one cycle (800722, then 500143) takes 2 x 800 ms = 1600 ms and 11 consumptions fit in 16.8 s, inside the 20 s of the first stack, with no haste fixture and no ignore_gcd. Eleven consumptions, the last the trigger cast: an uncapped counter would read 11, the cap reads 10; the same sequence without 680648 is the control (0 stacks). Reference search 2026-11-22: coa-history spell 681254: 0 events in 186 logs (an aura of a passive; positive control: Paragon 680639 has 60 casts in 15 logs); nothing else found."
     }
   ],
   "player_observations": [],
