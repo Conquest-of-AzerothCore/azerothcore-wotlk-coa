@@ -32,3 +32,4 @@ numbers ([ADR 0583](../../0583-class-conformance-adrs-live-in-a-per-class-folder
 | [0023](0023-spirit-out-of-the-bottle-reaches-three-additional-allies.md) | Spirit Out Of The Bottle reaches three additional allies | accepted |
 | [0024](0024-voodoo-strings-strikes-total-thirty-percent.md) | Voodoo Strings strikes total 30% over 3 sec | accepted; decision M-70 |
 | [0025](0025-slither-makes-ranged-attacks-and-spells-miss.md) | Slither makes ranged attacks and spells miss | proposed (owner question); engine file `Unit.cpp` |
+| [0026](0026-hireeks-jinx-lasts-eight-seconds-against-players.md) | Hir'eek's Jinx lasts eight seconds against players | proposed (owner question); engine file `SpellMgr.cpp` |
