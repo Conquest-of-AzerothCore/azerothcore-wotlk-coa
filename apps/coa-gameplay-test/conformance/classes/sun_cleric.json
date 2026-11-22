@@ -9045,8 +9045,8 @@
           706735
         ]
       },
-      "trials": 100,
-      "parts": 3,
+      "trials": 130,
+      "parts": 4,
       "cast_power": 1363,
       "expected_source": "706735 Divine Vision Effect[0] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT and Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (MiscValue 3, Physical and Holy), BasePoints 3 + 1 = 4 ($s1). Glorious Execution 803913 is cast and its main-hand strike 800691 (Physical, SchoolMask 1) is read in a control arm and an arm with 706735 learned: the mean hit ratio is 1.04 (band 2 points)."
     },
@@ -12801,8 +12801,8 @@
           707770
         ]
       },
-      "trials": 100,
-      "parts": 3,
+      "trials": 130,
+      "parts": 4,
       "cast_power": 1363,
       "expected_source": "707770 Divine Vision Effect[0] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT and Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (MiscValue 3, Physical and Holy), BasePoints 7 + 1 = 8 ($s1). Glorious Execution 803913 is cast and its main-hand strike 800691 (Physical, SchoolMask 1) is read in a control arm and an arm with 707770 learned: the mean hit ratio is 1.08 (band 2 points). Reference search 2026-11-22: coa-history spell 707770: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) carries the rank 1 text \"Increases your Holy damage and healing done by 4%\" (spell 706735 figure, no Physical, an older state); the installed DBC governs; nothing else found."
     },

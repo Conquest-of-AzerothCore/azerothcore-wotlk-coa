@@ -787,7 +787,12 @@
       "300723 behaviour_hit_ratio fire_damage"
     ],
     "kind": "claim",
-    "reason": "HELD, not status 1: uncertain expectation sent to the mentor (no server change). Full tooltip: Increases your Holy and Fire spell damage by $s3% and your spell hit rating by $s1% of your Intellect. HELD, uncertain expectation sent to the mentor: the value has three readings and no source picks one. (1) Tooltip text with ruling G-13 ('spell damage' names the spell power stat): spell power x 1.30, which adds 0 at the reference spell power 0 and +3000 at a 10000 spell power fixture (Justicar's Wrath 806980, spell power coefficient 0.55: +1650 on 6036, +27%). (2) DBC 300723 Effect[2] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, BasePoints 29 (+1 = 30), MiscValue 6 (Holy|Fire), MiscValueB 3 (Intellect): 30% of the reference Intellect 119 = 35.7 spell power (x 0.55 = +19.6 on the 536 hit, +3.7%). (3) Server rewrite at load: AscensionSunClericContracts.cpp:185-186 replaces Effect[2] with aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire (commit e36bc50aad, which gives no source): 536 x 1.30 = 696.8 (+160.8, +30%). This arm measures reading 3 only, so it shows what the server does, not what the tooltip or the DBC say. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found for the value."
+    "reason": "Owner ruling O-19 (Q-sc-9, option b, 2026-11-22), replacing the earlier hold: the tooltip's Holy and Fire spell damage increase is the +30% Holy and Fire damage the server applies, and the Intellect-based effect is only for the spell hit rating (clause 66). Owner's words: \"On conserve +30% de spell damage pour le feu et le sacré. Le buff qui prend l'intelligence en compte n'est que pour le taux de toucher\". Expected value: x1.30 of the Holy and Fire hit (the ruling's 30%, not a measured value). The server rewrite at load (AscensionSunClericContracts.cpp:185-186, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30, Holy|Fire) is the ruled behaviour; no change. Counted on the b9d arms: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3), holy_damage, holy_damage_control and fire_damage hit_ratio and the effect_value e2 read ok in both runs, no flip, control arm holy_damage_control. Reference search 2026-11-22 (guide section 4): bindmysoul, coabuildhub and ascension-data carry the same tooltip text and none states a damage percent or a share of Intellect; nothing found beyond the ruling.",
+    "text_source": {
+      "basis": "owner_ruling",
+      "spell": 300723,
+      "ruling": "O-19 (Q-sc-9, option b, 2026-11-22): Struck by the Sun keeps +30% Holy and Fire spell damage; the Intellect buff is only for the hit rating"
+    }
   },
   {
     "spell": 300723,
@@ -4312,7 +4317,7 @@
         ]
       }
     ],
-    "reason": "Control arm in each entry = the same hits without the passive. Holy (Horusath Blast) +3.995% and +3.989% (99% interval 3.98..4.01, 180 trials per arm), Physical (Glorious Execution strike 800691) +4.03% and +4.20% (interval 3.50..4.73, 498 trials), healing (Sunlight 704911) +3.98% and +4.01% (20 trials), all inside the 2-point band around +4% (Spell.dbc 706735 effect 0 aura 136 and effect 1 aura 79, BasePoints 3 + 1). Reference search 2026-11-22: coa-history spell 706735: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 706735 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only; nothing else found. Snapshot coabuildhub (spells_master_index.json, local copy dated 2026-09-18, README trust level context) reads: \"Increases your Holy damage and healing done by 4%\" (no Physical) against the installed DBC Holy and Physical (effects 0 and 1); the installed DBC governs (older reference), and the Physical part is measured. Pair 20261122-020146 / 20261122-020228, build 33138890, server commit e4de133c5551+, no flip."
+    "reason": "Control arm in each entry = the same hits without the passive. Holy (Horusath Blast) +3.995% and +3.996% (99% interval 3.99..4.01, 180 trials per arm), Physical (Glorious Execution strike 800691) +4.11% and +4.604% (intervals 3.40..4.82 and 3.89..5.32, 664 trials), healing (Sunlight 704911) +4.004% and +3.949% (20 trials), all inside the 2-point band around +4% (Spell.dbc 706735 effect 0 aura 136 and effect 1 aura 79, BasePoints 3 + 1). Reference search 2026-11-22: coa-history spell 706735: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 706735 and the reference snapshots under ~/CoaServer/reference (bindmysoul, sidekick, ascension-data): the tooltip figures only; nothing else found. Snapshot coabuildhub (spells_master_index.json, local copy dated 2026-09-18, README trust level context) reads: \"Increases your Holy damage and healing done by 4%\" (no Physical) against the installed DBC Holy and Physical (effects 0 and 1); the installed DBC governs (older reference), and the Physical part is measured. Re-proven for the 2.50 s Truncheon 2524 (O-10 weapon sets) after base pair 10 read the Physical entry insufficient_trials on 300 trials per arm (99% half-width 1.04 points, above half the band): counted pair 20261122-121938 / 20261122-122021, build 5a7aeb1ad61f, server commit cc341b6b0c60, no flip, control arm in every entry (the same hits without the passive learned), 4 parts pooled to 664 trials per arm, half-width at most 0.72 points in both runs; the residual failure probability of the Physical check (a reading more than 2 points off the true bonus) is below 1e-10 per pair, computed from the 99% half-width as a normal law."
   },
   {
     "spell": 707072,
@@ -4622,7 +4627,7 @@
         ]
       }
     ],
-    "reason": "Control arm = the same hits without the passive; Holy +7.998%, Physical +8.043%, healing +7.972%, inside the 2-point band around +8%. Reference search 2026-11-22: coa-history spell 707770: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
+    "reason": "Control arm = the same hits without the passive; Holy +7.996% and +7.997%, Physical +7.805% and +7.751% (664 trials per arm, intervals 7.10..8.51 and 7.03..8.47), healing +8.034% and +7.994%, inside the 2-point band around +8%. Reference search 2026-11-22: coa-history spell 707770: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Re-proven for the 2.50 s Truncheon 2524 (O-10 weapon sets) after base pair 10 read the Physical entry insufficient_trials on 300 trials per arm (99% half-width 1.04 points, above half the band): counted pair 20261122-121938 / 20261122-122021, build 5a7aeb1ad61f, server commit cc341b6b0c60, no flip, control arm in every entry (the same hits without the passive learned), 4 parts pooled to 664 trials per arm, half-width at most 0.72 points in both runs; the residual failure probability of the Physical check (a reading more than 2 points off the true bonus) is below 1e-10 per pair, computed from the 99% half-width as a normal law."
   },
   {
     "spell": 707771,
@@ -6262,7 +6267,12 @@
       "806699 behaviour_metric_delta swing_reset_rate"
     ],
     "kind": "claim",
-    "reason": "The earlier tool gap (sc-b2b, .agents/plans/sun-cleric-b2b/report.md#806699) is closed by swing_reset_rate (ADR 1017) with residual_target 0.001 / min_detectable 4, twice the 2-point band, so the false alert at the chance and the false pass of a 4-point deviation are each at most 0.1% per pair (ADR 1022, provisional): 0.2004 / 0.2013 over 33992 landed auto-attack hits (14 parts, Valkyr set, false alert 1.92e-08 per pair), no reset in the control. The chance value label 806699 effect_value #0 is unmodelled and points at the rate, so it is dropped: the rate label measures the stated $h. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-082433 / 20261122-082531, build b9a881db0cfb, server commit 5fb28e465107, no flip."
+    "reason": "The earlier tool gap (sc-b2b, .agents/plans/sun-cleric-b2b/report.md#806699) is closed by swing_reset_rate (ADR 1017) with residual_target 0.001 / min_detectable 4, twice the 2-point band, so the false alert at the chance and the false pass of a 4-point deviation are each at most 0.1% per pair (ADR 1022, provisional): 0.2004 / 0.2013 over 33992 landed auto-attack hits (14 parts, Valkyr set, false alert 1.92e-08 per pair), no reset in the control. The chance value label 806699 effect_value #0 is unmodelled and points at the rate, so it is dropped: the rate label measures the stated $h. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-082433 / 20261122-082531, build b9a881db0cfb, server commit 5fb28e465107, no flip. Owner ruling O-14 (Q-sc-4, option a, 2026-11-22): \"Melee attacks\" means auto attacks only, as the server does (AscensionSunClericEvents.cpp:124 `damage && automatic && Chance`); no change, counted on the measured rate. Base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3) reads swing_reset_rate ok in both runs.",
+    "text_source": {
+      "basis": "owner_ruling",
+      "spell": 806699,
+      "ruling": "O-14 (Q-sc-4, option a, 2026-11-22): Odyn's Vanguard rolls on auto attacks only, as the server does"
+    }
   },
   {
     "spell": 806980,
@@ -6284,7 +6294,13 @@
           "806980 behaviour_metric_delta threat_control"
         ]
       }
-    ]
+    ],
+    "text_source": {
+      "basis": "owner_ruling",
+      "spell": 806980,
+      "ruling": "O-16 (Q-sc-6, option a, 2026-11-22): the Templar \"High Threat\" = x2 ruling (ADR 0296) is standing for every class"
+    },
+    "reason": "Owner ruling O-16 (Q-sc-6, option a, 2026-11-22), replacing the earlier hold: the five Templar rulings of open scope stand for every class; the rule applied here is High Threat = threat x2 on the damage (ADR 0296), set by spell_threat pctMod 2 (rev_20261026_20, PR #11008). The threat slope and threat_control labels are counted: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3) reads behaviour_threat_slope 806980 and threat_control ok in both runs, no flip. The hit_mean alert of 806980 is a separate lead, not a label of this claim."
   },
   {
     "spell": 806980,
