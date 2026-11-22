@@ -24,6 +24,12 @@ bool SilenceImmune(Unit const* target)
 {
     return target->m_spellImmune[IMMUNITY_MECHANIC].count(MECHANIC_SILENCE) > 0;
 }
+bool TemporarilyKnown(Player const* player, uint32 spellId)
+{
+    auto const& spells = player->GetSpellMap();
+    auto itr = spells.find(spellId);
+    return itr != spells.end() && itr->second->State == PLAYERSPELL_TEMPORARY;
+}
 bool Select(uint32 id, SpellInfo const* info)
 {
     switch (id)
@@ -137,6 +143,8 @@ public:
         if (info->Id == Calm)
             if (Unit* target = spell->m_targets.GetUnitTarget(); target && SilenceImmune(target))
                 result = SPELL_FAILED_IMMUNE;
+        if (info->Id == 504764 && !player->HasAura(803238) && TemporarilyKnown(player, 504764))
+            result = SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
     }
     void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
     {

@@ -19,6 +19,7 @@ leaves alone, read 1. Live logs hold 296 applications of 807059 by players.
 
 Mentor decision D-43 (2026-11-22) approved a fix in the class code only, with `Player::removeSpell` untouched, the
 granted aura keeping its own duration and stacks, and a design that avoids the strip preferred over a re-apply.
+Mentor decision D-46 (2026-11-22) added a cast check and an unlearn on the aura's end to that design (see Decision).
 
 ## Options
 
@@ -31,18 +32,35 @@ granted aura keeping its own duration and stacks, and a design that avoids the s
 ## Decision
 
 `Refresh` unlearns the temporary Sun Ray only when the replacement is over and the player holds no 807059 aura. The
-aura the cast granted is never touched, so its duration and stacks are those of the direct route. `Refresh` runs
-every 500 ms from the class's player update, so Sun Ray is unlearned within 500 ms of Scorch Marks ending.
+aura the cast granted is never touched, so its duration and stacks are those of the direct route.
+
+D-46 adds two parts in the class code:
+- The removal of 807059, by expiry, consumption or any other removal, runs `Refresh` from the class's aura removal
+  handler, so the temporary Sun Ray ends with the aura instead of on the next 500 ms refresh.
+- The Sun Cleric cast check refuses a non-triggered Sun Ray 504764 with `SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW` when
+  the marker 803238 is gone and the player's 504764 entry is the temporary one (`PLAYERSPELL_TEMPORARY`).
 
 ## Consequences
 
 - The Sunflare button is restored as soon as the marker is consumed, as before; only the spell-map entry of Sun Ray
   stays while Scorch Marks is up (10 s, longer while another source refreshes 807059: a 500146 or Sunflare cast with
   806021, Dawn with 804625).
-- During that window the server would accept a crafted client packet casting 504764 directly (`HasActiveSpell`); the
-  normal client has no Sun Ray button then. Recorded for the mentor, not changed here: a cast check on 504764 would
-  also refuse the harness's direct Sun Ray entries.
+- Exploit concern, from code reading, not reproduced: without the cast check, the server would accept a crafted
+  client packet casting the still-learned 504764 directly (`HasActiveSpell`, SpellHandler.cpp:461). Sun Ray is
+  instant with no cooldown and no global cooldown in Spell.dbc, and each cast grants 807059 again, which would keep
+  the unlearn deferred without end. The cast check closes it; the normal client has no Sun Ray button in that window.
+- The check keys on the temporary entry, so a permanently learned Sun Ray is not refused. The harness `learn` action
+  is a permanent `learnSpell`, so the class entries that learn 504764 and cast it without the marker are not refused
+  and keep their route: for 704908 `scorch_granted_sunray`, `scorch_cost`, `scorch_period`, `scorch_duration`,
+  `scorch_next`; for 806021 `free_cast`, `free_gate`, `faster_ticks`, `shorter_duration`, `shorter_held`,
+  `shorter_gone`, `scorch_duration`. No hand-written scenario casts 504764. None is moved or dropped.
+- The D-43 control is unchanged: the before phase of `scorch_granted` and `scorch_granted_early` lacks 704908,
+  places no marker, keeps the Sunflare a Sunflare and reads 807059 = 0.
 - Keyed to 504764 and 807059, both Sun Cleric spells only; no other class or engine file is changed.
 - Regression: the 704908 entries `scorch_granted_early` (read 100 ms after the cast) and `scorch_granted` (6500 ms)
   of `apps/coa-gameplay-test/conformance/classes/sun_cleric.json`, both expecting 1 on the player route; control: the
   before phase without 704908 places no marker, the Sunflare stays a Sunflare and 807059 reads 0.
+- Regression (D-46): `apps/coa-gameplay-test/scenarios/sun-cleric-sun-ray-temporary-cast-check.json`. On the player
+  route, the temporary Sun Ray stays learned with Scorch Marks, a direct 504764 cast without the marker is refused
+  (173) and completes no second Sun Ray; control: the same direct cast with the marker up completes. Removing 807059
+  unlearns Sun Ray at once, and so does its expiry.

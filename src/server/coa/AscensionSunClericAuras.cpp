@@ -156,7 +156,7 @@ class aura_ascension_sun_cleric_lifecycle : public AuraScript
             State(player).blessed.Clear();
         if (id == 520647)
             target->RemoveAurasDueToSpell(560347,player->GetGUID());
-        if (id == 803238)
+        if (id == 803238 || id == 807059)
             Refresh(player);
         if (!player->IsAlive() || !player->IsInWorld())
             return;
