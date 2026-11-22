@@ -2,9 +2,20 @@
 
 `ally_arm` is an object of these keys, at least one:
 
-- `allies`: 1 to 5 (default 1). Grouped ally players `ally`, `ally2` .. `ally5` (the class's player fixture,
+- `allies`: 1 to 7 (default 1). Grouped ally players `ally`, `ally2` .. `ally7` (the class's player fixture,
   regeneration off with `disable_regeneration`), grouped right after the base steps. `measure_actor`, `target` and
-  `fields.target` may name them.
+  `fields.target` may name them. The harness `group` step converts a full party to a raid
+  (`CoAGameplayTest.cpp` `action == "group"`), and a raid member joins the first subgroup with fewer than five
+  (`Group::AddMember`): from `ally5` on, the allies stand in raid subgroup 2, outside the caster's party (code
+  reading only), where a party-scoped spell (`TARGET_CHECK_PARTY`, `IsInPartyWith`, `GetPartyMembers`) reads 0.
+  Seven allies and the caster fill the scenario schema 1 cap of 8 players (`run.py` `MAX_PLAYERS`), so a scenario
+  that adds another player, such as an enemy player, is refused at validation.
+- `reach_source`: text, required on the option when the main reading's `measure_actor` or `fields.target`, or the
+  trigger's cast `target`, is `ally5`, `ally6` or `ally7`, and refused otherwise. It cites the code or data line that makes the spell reach raid
+  subgroup 2 (for example a script filter by `IsInRaidWith`, or a DBC implicit target checked by `TARGET_CHECK_ALLY`),
+  never a run's reading. The contract states it. On each use, the reviewer opens the cited lines and checks that the
+  spell's whole target selection (DBC implicit targets and every script filter) reaches the raid, not only the party
+  (mentor D-56).
 - `ally_health`: `[value, maximum]`, set on every ally in both phases, ahead of the trigger.
 - `ally_casts`: spells the caster casts at `ally` in both phases ahead of the trigger, 2000 ms after each (global
   cooldown). Each spell must be in the entry's `learn` and must not be its trigger or a setup cast; a cast time above
@@ -12,6 +23,12 @@
   the spell's flat power cost, its required caster aura and its reagents, as for a setup cast (a percentage or
   per-level cost is paid by the caster's power at that point). After each settle an `assert` reads the caster's
   `spell_go_count` of the spell at its running total, so the scenario fails when an ally cast did not go off.
+  An item is a spell id (one SPELL_GO per cast) or `{spell, spell_go_per_cast, source}` for a cast that also makes
+  the caster cast the same spell: `spell_go_per_cast` is an integer of at least 2 and `source` cites the code or data
+  line that casts the extra SPELL_GO (never a run's count). The running total is then the casts so far times that
+  count, still asserted with `equals`, so a count too high or too low fails the scenario as a cast that did not go
+  off does. Every item of one spell states the same count and source. On each use, the reviewer opens the cited
+  lines and checks that they say what `source` claims (mentor D-57).
 - `control_wait`: `true`. The uncast before phase waits the entry's `wait_ms` before its reading (timed no-cast
   control). Only with `cast_in_before` false, the default gate timing and no strike, swings, `setup_only_after`,
   `setup_in_before`, `target_casts_before` or `enemy_casts_in_before`; and, since the before phase has no trigger,
@@ -19,11 +36,18 @@
   `target_casts`. At load the waits from the ally fixture to each reading are compared (the treatment's less the
   option phase steps' own waits); any other difference, such as another option's waits after the trigger, is
   refused.
-- `arms`: a list of `{actors, metric, fields?, before_expected, expected, tolerance, source}`. Each arm reads `metric`
-  on every unit of `actors` (the caster, the allies, the dummy when the scenario has it) with the arm's `fields`,
-  right after the main before and after readings, and judges the sums: `|sum - expected| <= tolerance`. Every value
-  is a finite number stated with its `source`; no default tolerance. The metric needs a `METRIC_EVIDENCE` row that is
-  not a readback.
+- `ratios`: a non-empty list of `{numerator, denominator, expected, tolerance, source}`, two distinct arm indices.
+  Each arm reads as its after sum less its before sum, and the ratio `numerator / denominator` is judged
+  `|ratio - expected| <= tolerance`; `expected` is above 0 and stated with its `source`. A denominator arm that did not
+  move makes the ratio off, never ok. Each arm keeps its own absolute expectation.
+- `arms`: a list of `{actors, metric, fields?, before_expected, expected, tolerance, source, reach_source?}`. Each
+  arm reads `metric` on every unit of `actors` (the caster, the allies, the dummy when the scenario has it) with the
+  arm's `fields`, right after the main before and after readings, and judges the sums:
+  `|sum - expected| <= tolerance`. Every value is a finite number stated with its `source`; no default tolerance. The
+  metric needs a `METRIC_EVIDENCE` row that is not a readback. An arm whose `actors` or `fields.target` name `ally5`,
+  `ally6` or `ally7` states its own `reach_source`, as the option's main reading does, with the same review duty; on
+  any other arm it is refused. A ratio reads two arms, so a ratio over such an arm rests on that arm's
+  `reach_source`.
 
 Heal and energize totals (`spell_heal_count`, `spell_heal_total`, `spell_effective_heal_total`,
 `spell_energize_count`, `spell_energize_total`), and the spell damage, log and count reads (`spell_damage_count`,
@@ -34,9 +58,9 @@ arm or the main reading with one of them on a unit other than the caster is refu
 `caster_entry`. Read a heal the caster gives an ally on the caster with `fields.target` set to that ally, one arm per
 ally.
 
-Verdict: the main verdict, then alert when an arm is off; a missing arm read makes it unmeasured, or keeps an alert
-the main verdict already gives. Without arms the verdict is the plain one. One `tolerance` serves both phases, so a
-random value whose band differs between phases (G-19) cannot be stated in one arm. The evidence class stays the main
+Verdict: the main verdict, then alert when an arm or a ratio is off; a missing arm read makes it unmeasured, or keeps an
+alert the main verdict already gives. Without arms the verdict is the plain one. One `tolerance` serves both phases, so
+a random value whose band differs between phases (G-19) cannot be stated in one arm. The evidence class stays the main
 metric's: an arm does not pass through the clause gates (`CONTRAST_PROOF`, `STATE_PROMISES`, `EVENT_PROMISES`), so a
 ledger row an arm proves needs its arm checked against the clause by the class reviewer.
 
