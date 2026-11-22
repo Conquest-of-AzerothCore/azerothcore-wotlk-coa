@@ -378,6 +378,49 @@
         }
       },
       "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 802935,
+      "name": "Sunsworn",
+      "tooltip": "Increases your Physical damage dealt by $s1% and auto attacks now have a $h% chance to restore $504619s1% of your maximum mana.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "attack"
+      },
+      "residual_target": 0.001,
+      "min_detectable": 5,
+      "trigger_text": "auto attacks",
+      "event_metric": "spell_energize_count",
+      "proc_spell": 504619,
+      "events_per_proc": 1,
+      "proc_spell_source": "AscensionSunClericEvents.cpp:323: case 802935 calls Mana(player, CalculatePct(player->GetMaxPower(POWER_MANA), Amount(504619)), 504619): the proc is the Energize events of 504619 on the caster (Sun Cleric ADR 0019).",
+      "handler": "aura_ascension_sun_cleric_event (spell_script_names row of 802935): AscensionSunClericEvents.cpp:124 returns damage && automatic && Chance(player, 802935); Chance (AscensionSunCleric.cpp:196-205) rolls roll_chance_i(ProcChance 10) once per automatic damage event of either hand with no internal cooldown (spell_proc row of 802935: Chance 100).",
+      "dbc": {
+        "802935": {
+          "ProcChance": 10,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {
+        "802935": {
+          "ProcFlags": 1048575,
+          "Chance": 100,
+          "ProcsPerMinute": 0,
+          "Cooldown": 0,
+          "Charges": 0
+        }
+      },
+      "internal_cooldown_ms": 0,
+      "energize_amounts": [
+        {
+          "power": 0,
+          "percent_of_max": 3,
+          "source": "504619 Effect[0] SPELL_EFFECT_ENERGIZE_PCT BasePoints 2 + 1 = 3 ($504619s1), the percent of the caster's maximum mana"
+        }
+      ]
     }
   ],
   "triggers": [],
@@ -25907,6 +25950,70 @@
       "expected": 3,
       "observe_source": "806159 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9999 + 1 = 10000 on Illumination 500143 (mask word 2 = 512). Three real Illumination casts on the caster (health held at 30%) are counted as critical heal events (spell_heal_count of 500143, critical true), 1600 ms apart with the unrelated passive Solar Conduit 300321 instead of 806159: all 3 heals land (spell_heal_count of 500143 without the critical filter, expected 3), so the control arm of crit_control counted real heals. Without Resplendence Illumination keeps its 2000 ms cast, so the casts are 2100 ms apart and the last heal is read 2600 ms after its cast. Reference search 2026-11-22: coa-history spell 806159 (6 casts in 2 logs) and the tooltip give nothing on the crit chance; nothing else found; this arm judges only that the heals landed.",
       "after_at_least": 3
+    },
+    {
+      "spell": 301266,
+      "name": "Solar Concord (Horusath Blast recast in Sunrise)",
+      "kind": "cost_gate",
+      "variant": "reset_horusath",
+      "label_suffix": "reset_horusath",
+      "quote": "Resets the cooldown of Horusath Blast while in Sunrise and Rapture while in Sunset and causes their damage dealt to launch a Solar Flare.",
+      "gated_spell": 500154,
+      "resource": "cooldown",
+      "reduction": 0,
+      "resets": true,
+      "target": "dummy",
+      "margin_ms": 1600,
+      "after_casts": [
+        [
+          301266,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "cast_power": 1363,
+      "cast_auras": [
+        {
+          "spell": 301266,
+          "auras": [
+            500477
+          ],
+          "reason": "Sunrise 500477 is set on the caster before the Solar Concord cast: the claim is the cooldown reset the cast applies while in the phase, a precondition fixture (the phase is a condition, not the subject)."
+        }
+      ],
+      "observe_source": "301266 Solar Concord: its aura apply handler (AscensionSunClericAuras.cpp:101-106) calls Reduce(player, 500154, INT32_MAX) in Sunrise and Reduce(player, 806477, INT32_MAX) in Sunset. Horusath Blast has RecoveryTime 25000 ms. The cooldown cost_gate (resets) casts Horusath Blast as the priming cast, then Solar Concord 1600 ms later (the cast is made in the with arm only), then attempts Horusath Blast again 1600 ms after that (past the global cooldown of the Solar Concord cast), inside its 25000 ms cooldown: refused without the Solar Concord cast (the control, SPELL_FAILED_NOT_READY), accepted with it. The accepted or refused cast is an event (cast_failure), not a cooldown readback. The Sunrise/Sunset contrast (the same cast outside the phase) is not an arm of the cost_gate kind and stays unproven."
+    },
+    {
+      "spell": 301266,
+      "name": "Solar Concord (Rapture recast in Sunset)",
+      "kind": "cost_gate",
+      "variant": "reset_rapture",
+      "label_suffix": "reset_rapture",
+      "quote": "Resets the cooldown of Horusath Blast while in Sunrise and Rapture while in Sunset and causes their damage dealt to launch a Solar Flare.",
+      "gated_spell": 806477,
+      "resource": "cooldown",
+      "reduction": 0,
+      "resets": true,
+      "target": "dummy",
+      "margin_ms": 1600,
+      "after_casts": [
+        [
+          301266,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 3200,
+      "cast_power": 1363,
+      "cast_auras": [
+        {
+          "spell": 301266,
+          "auras": [
+            500511
+          ],
+          "reason": "Sunset 500511 is set on the caster before the Solar Concord cast: the claim is the cooldown reset the cast applies while in the phase, a precondition fixture (the phase is a condition, not the subject)."
+        }
+      ],
+      "observe_source": "301266 Solar Concord: its aura apply handler (AscensionSunClericAuras.cpp:101-106) calls Reduce(player, 500154, INT32_MAX) in Sunrise and Reduce(player, 806477, INT32_MAX) in Sunset. Rapture has RecoveryTime 20000 ms. The cooldown cost_gate (resets) casts Rapture as the priming cast, then Solar Concord 3200 ms later (the cast is made in the with arm only), then attempts Rapture again 1600 ms after that (past the global cooldown of the Solar Concord cast), inside its 20000 ms cooldown: refused without the Solar Concord cast (the control, SPELL_FAILED_NOT_READY), accepted with it. The accepted or refused cast is an event (cast_failure), not a cooldown readback. The Sunrise/Sunset contrast (the same cast outside the phase) is not an arm of the cost_gate kind and stays unproven."
     }
   ],
   "player_observations": [],

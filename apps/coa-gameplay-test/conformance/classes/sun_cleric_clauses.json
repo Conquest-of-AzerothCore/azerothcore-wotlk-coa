@@ -971,8 +971,18 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "Resets the cooldown of Horusath Blast while in Sunrise and Rapture while in Sunset",
-        "labels": []
+        "claim": "Resets the cooldown of Horusath Blast while in Sunrise",
+        "labels": [
+          "301266 cost_gate 500154 reset_horusath without",
+          "301266 cost_gate 500154 reset_horusath with"
+        ]
+      },
+      {
+        "claim": "and Rapture while in Sunset",
+        "labels": [
+          "301266 cost_gate 806477 reset_rapture without",
+          "301266 cost_gate 806477 reset_rapture with"
+        ]
       },
       {
         "claim": "and causes their damage dealt to launch a Solar Flare",
@@ -981,7 +991,8 @@
           "301266 behaviour_metric_delta flare_damage_rapture"
         ]
       }
-    ]
+    ],
+    "reason": "Reset arms: cost_gate resets, Solar Concord cast with the phase aura set as a named precondition fixture; control = the same sequence without the Solar Concord cast. Reference search 2026-11-22: coa-history spell 301266 (88 casts, no cooldown event); nothing else found."
   },
   {
     "spell": 301266,
@@ -5034,12 +5045,24 @@
   {
     "spell": 802935,
     "clause": "and auto attacks now have a $h% chance to restore $504619s1% of your maximum mana.",
-    "labels": [
-      "802935 effect_value #1",
-      "802935 effect_value 504619e0 #2"
-    ],
     "kind": "claim",
-    "reason": "Energize source fixed (Sun Cleric ADR 0019, mentor D-93): the proc's mana is logged as Energize 3% 504619, threat-free, no longer as Vow of Grace 504877; regression sun-cleric-sunsworn-mana-source-504619.json (control without Sunsworn). Rate and amount not entered: the procs kind divides both hands' events by the main-hand trials (batch 6 chunk a3, tool need 1)."
+    "reason": "Energize source fixed (Sun Cleric ADR 0019, mentor D-93): the proc's mana is logged as Energize 3% 504619, threat-free, no longer as Vow of Grace 504877; regression sun-cleric-sunsworn-mana-source-504619.json (control without Sunsworn). Rate and amount not entered: the procs kind divides both hands' events by the main-hand trials (batch 6 chunk a3, tool need 1).",
+    "claims": [
+      {
+        "claim": "auto attacks now have a $h% chance",
+        "labels": [
+          "802935 effect_value #1",
+          "802935 proc_rate"
+        ]
+      },
+      {
+        "claim": "to restore $504619s1% of your maximum mana",
+        "labels": [
+          "802935 effect_value 504619e0 #2",
+          "802935 proc_energize_amount 0"
+        ]
+      }
+    ]
   },
   {
     "spell": 804032,
