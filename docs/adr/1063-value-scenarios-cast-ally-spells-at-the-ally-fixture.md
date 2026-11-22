@@ -8,7 +8,8 @@
 
 The value scenario of a rank has one cast step. `values.py` gave it a target only for hostile spells and resurrections.
 An ally-target spell (TargetA 21) was cast without a target and the server refused it: 12 `BAD_TARGETS` (503498..503508,
-804249, 804253) and 2 `TARGET_AURASTATE` (804250, 804254, which need a Blessed ally). The cast exists to produce the
+804249, 804253) and 2 `TARGET_AURASTATE` (804250, 804254); a first run with the ally target alone still refused
+13 of them with `BAD_TARGETS` because the target must be Blessed by the caster. The cast exists to produce the
 `cast_failure`, `cooldown_ms` and aura reads, so those reads followed a cast that did not happen.
 
 ## Options
@@ -24,8 +25,9 @@ The class-file list `value_ally_casts` (`[{spell, setup_casts?}]`, default absen
 rank cast it with `target: ally` on the ALLY player fixture the scenario already uses, after `setup_casts`: each is
 learned, cast at the ally with its mana set, and followed by a 2000 ms settle (past the GCD). No listed spell leaves
 the generated scenarios unchanged; finished classes 15, 19 (and `--stack`) and 23 were generated before and after and
-the outputs compared. Sun Cleric lists the 15 ranks; 804250 and 804254 set up the Blessed ally with a real Bless 804247
-at the ally, the same fixture as the 804250 `duration` entry.
+the outputs compared. Sun Cleric lists the 15 ranks, each with a real Bless 804247 cast at the ally (the server refuses
+804249, 804250, 804253, 804254 and their ranks unless the target carries the caster's Bless,
+AscensionSunClericAbilities.cpp:154-159), the same fixture as the 804250 `duration` entry.
 
 ## Consequences
 

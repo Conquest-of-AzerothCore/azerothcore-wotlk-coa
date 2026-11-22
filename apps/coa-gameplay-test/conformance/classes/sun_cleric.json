@@ -4913,6 +4913,45 @@
       "target_entry": 575
     },
     {
+      "spell": 807372,
+      "name": "Rapture (second design: a second Fire spell without the attribute, Sunset 500146, against the same immunity)",
+      "kind": "metric_delta",
+      "variant": "immune_fire_control_second",
+      "label_suffix": "immune_fire_control_second",
+      "quote": "Call down a streak of sun light to smite your target, dealing ${$m1+0+$spfi*1.03734} Fire damage to them and nearby enemies, piercing all immunities, but dealing less damage with each enemy struck.",
+      "trigger_spell": 500146,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 500146,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 3800,
+      "expire_ms": 500,
+      "expected": 0.0,
+      "after_at_least": 0,
+      "after_at_most": 0,
+      "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, truncated to 21 (SpellInfo.cpp:497), and the roll adds irand(1, 65) (SpellInfo.cpp:509-511): 854 + 21 + 1..65 = 876..940; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. Control of immune_fire: Dawnsear 554406 (fire, no SPELL_ATTR0_NO_IMMUNITIES) cast at Fire Elemental 575 deals 0. Reference search 2026-11-20: bindmysoul Rapture text reads '111 + 200% fire SP Fire damage' against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; see the fix note in the report. Read timing (rc2, mentor D-238/D-240): landing = max(distance, 5 yd) / Spell.Speed from the DBC; the read is placed at least 150 ms past it. Dawnsear 554406 has a 3500 ms cast and Speed 35: landing 5/35 = 143 ms after the cast ends, so the read at 3800 ms follows it by 157 ms (the first design read at 3500 ms, before the landing, where a zero damage total proves nothing). Second design (rc2): the first design's control Dawnsear 554406 dealt damage once the read followed its landing, so the same read is repeated with the Fire spell 500146 (SchoolMask 4, Speed 35, 3500 ms cast, no SPELL_ATTR0_NO_IMMUNITIES) to tell a Dawnsear-specific cause from an immunity that does not stop Fire.",
+      "target_entry": 575
+    },
+    {
       "spell": 804269,
       "name": "Solemn Priest (Gavel of Light heals twice as much)",
       "kind": "metric_delta",
@@ -39732,43 +39771,82 @@
   },
   "value_ally_casts": [
     {
-      "spell": 503498
+      "spell": 503498,
+      "setup_casts": [
+        804247
+      ]
     },
     {
-      "spell": 503499
+      "spell": 503499,
+      "setup_casts": [
+        804247
+      ]
     },
     {
-      "spell": 503500
+      "spell": 503500,
+      "setup_casts": [
+        804247
+      ]
     },
     {
-      "spell": 503501
+      "spell": 503501,
+      "setup_casts": [
+        804247
+      ]
     },
     {
-      "spell": 503502
+      "spell": 503502,
+      "setup_casts": [
+        804247
+      ]
     },
     {
-      "spell": 503503
+      "spell": 503503,
+      "setup_casts": [
+        804247
+      ]
     },
     {
-      "spell": 503504
+      "spell": 503504,
+      "setup_casts": [
+        804247
+      ]
     },
     {
-      "spell": 503505
+      "spell": 503505,
+      "setup_casts": [
+        804247
+      ]
     },
     {
-      "spell": 503506
+      "spell": 503506,
+      "setup_casts": [
+        804247
+      ]
     },
     {
-      "spell": 503507
+      "spell": 503507,
+      "setup_casts": [
+        804247
+      ]
     },
     {
-      "spell": 503508
+      "spell": 503508,
+      "setup_casts": [
+        804247
+      ]
     },
     {
-      "spell": 804249
+      "spell": 804249,
+      "setup_casts": [
+        804247
+      ]
     },
     {
-      "spell": 804253
+      "spell": 804253,
+      "setup_casts": [
+        804247
+      ]
     },
     {
       "spell": 804250,
