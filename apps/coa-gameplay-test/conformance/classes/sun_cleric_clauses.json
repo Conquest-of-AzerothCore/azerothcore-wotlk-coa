@@ -308,11 +308,26 @@
   {
     "spell": 300336,
     "clause": "Healing done by Shine or Illumination now increases the targets movement speed by $300337s1% for $300337d.",
-    "labels": [
-      "300336 effect_value 300337e0 #0",
-      "300336 spell_duration 300337 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. Speed: the run speed rate of the caster reads 1.2 after Illumination 500143 and after Shine 800357 heals, 1.0 before the learn (control). Duration: 300337 reads 2377 and 2362 ms (Illumination) and 2382 and 2382 ms (Shine) remaining about 600 ms after the heal, against 2400 within 250, so a total 10% off (2700 or 3300 ms) is excluded on both sides. Reference search 2026-11-22: coa-history spell 300336: 0 events in 186 logs (a passive); 300337 has 4958 SPELL_AURA_APPLIED events on players in 20 logs; nothing else found.",
+    "claims": [
+      {
+        "claim": "Healing done by Shine or Illumination now increases the targets movement speed by $300337s1%",
+        "labels": [
+          "300336 effect_value 300337e0 #0",
+          "300336 behaviour_metric_delta illumination_speed",
+          "300336 behaviour_metric_delta shine_speed"
+        ]
+      },
+      {
+        "claim": "for $300337d",
+        "labels": [
+          "300336 spell_duration 300337 #1",
+          "300336 behaviour_metric_delta illumination_duration",
+          "300336 behaviour_metric_delta shine_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 300339,
@@ -1248,10 +1263,12 @@
     "spell": 504734,
     "clause": "Increases the range of your Piety spells by $s1%",
     "labels": [
-      "504734 effect_value e0 #0"
+      "504734 effect_value e0 #0",
+      "504734 behaviour_metric_delta range_in",
+      "504734 behaviour_metric_delta range_out"
     ],
     "kind": "claim",
-    "reason": "ON HOLD, status not counted: the range labels range_in and range_out are withdrawn from this row until a redesign is run. Pair 20261122-040627 / 20261122-040658, build b3e613641105, server commit 68e7af248b64+, no flip: Horusath Blast 500154 (30 yd, RangeIndex 4) at a dummy was refused (97) at 38 yd before the learn and cast (0) after, and refused (97) at 40 yd in both phases. With the combat reaches (dummy 1.275 from a recorded read, player 1.5 assumed from DEFAULT_COMBAT_REACH, not read from the server) the effective range lies between 35.225 and 37.225 yd, a bonus of +17.4% to +24.1%. The arms at 38 and 40 yd do not exclude +-10% of the +20% claim (+18% = 35.4 yd and +22% = 36.6 yd both lie inside that bracket). Redesign carried to the next batch: arms near 38.5 yd (inside, excludes +18%) and 39.0 yd (outside, excludes +22%) around the predicted edge 36 + 2.775 = 38.775 yd. Subset: range tested on Horusath Blast 500154 only, no N-of-M split of the Piety spells yet (G-23). Reference search: coa-history 0 events (passive), sidekick carries the tooltip only; nothing else found."
+    "reason": "Redesigned arms (b6a review I-1). Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. Horusath Blast 500154 (30 yd, RangeIndex 4) at a dummy: refused (97) before the learn and cast (0) after at 38.5 yd (range_in), refused (97) in both phases at 39.0 yd (range_out). With the combat reaches (dummy 1.275 from a recorded read, player 1.5 assumed from DEFAULT_COMBAT_REACH, not read from the server) the effective range lies between 38.5 - 2.775 = 35.725 and 39.0 - 2.775 = 36.225 yd, a bonus of +19.1% to +20.75%, which excludes -10% and +10% of the +20% claim (+18% = 35.4 yd, +22% = 36.6 yd). Control arm: the same cast before the learn is refused at 38.5 yd (32.775 yd boundary without the talent). Subset: range tested on Horusath Blast 500154 only, no N-of-M split of the Piety spells yet (G-23). Reference search: coa-history 0 events (passive), sidekick carries the tooltip only; nothing else found."
   },
   {
     "spell": 504734,
@@ -1261,7 +1278,7 @@
       "504734 behaviour_metric_delta threat"
     ],
     "kind": "claim",
-    "reason": "Pair 20261122-040627 / 20261122-040658, build b3e613641105, server commit 68e7af248b64+, no flip. Dawnsear 554406 at spell power 10000: threat per damage 0.8056 and 0.8056 after the learn against 0.80718 expected (0.8 + 60/8360.7), control threat_base 1.0056 and 1.0056 against 1.00718 (the flat 60 initial threat is unmodified, as in Holy Form 805301). The first design read a cumulative ratio over two casts and alerted (0.9245, 0.9057); that was a test fault, fixed by one cast per entry. Reference search: coa-history 0 events (passive); nothing else found. Subset: threat tested on Dawnsear 554406 only, no N-of-M split of the Piety spells (G-23). Note: the control reads 1.0056, so the 60 flat term implies a damage of about 10.7k against the modelled mean 8360.7; the 0.01 tolerance absorbs it and a 10% or 30% cut would read 0.1 off."
+    "reason": "Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. Dawnsear 554406 at spell power 10000: threat per damage 0.8056 and 0.8056 after the learn against 0.80718 expected (0.8 + 60/8360.7), control threat_base 1.0056 and 1.0056 against 1.00718 (the flat 60 initial threat is unmodified, as in Holy Form 805301). The first design read a cumulative ratio over two casts and alerted (0.9245, 0.9057); that was a test fault, fixed by one cast per entry. Reference search: coa-history 0 events (passive); nothing else found. Subset: threat tested on Dawnsear 554406 only, no N-of-M split of the Piety spells (G-23). Note: the control reads 1.0056, so the 60 flat term implies a damage of about 10.7k against the modelled mean 8360.7; the 0.01 tolerance absorbs it and a 10% or 30% cut would read 0.1 off."
   },
   {
     "spell": 504848,
@@ -1519,6 +1536,7 @@
     "spell": 547214,
     "clause": "and causes Horusath Blast to interrupt the target for $547217d.",
     "kind": "claim",
+    "reason": "Data, no status: the interrupt claim is a STATE metric read (casting) and the clause words do not carry the promise word cast, so the audit counts it as data (coverage.py:486, :689). Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. Interrupt: with the dummy channelling Evocation 12051, Horusath Blast 572801 without 547214 leaves casting 1 (control) and with it casting 0. Lockout, not counted: a metric_delta over school_prohibited fails test_coverage.py's cross-class guard because the metric has no evidence class: tool need returned; the lockout evidence is in the round report. Reference search 2026-11-22: coa-history 0 events (a passive); nothing else found.",
     "claims": [
       {
         "claim": "and causes Horusath Blast to interrupt the target",
@@ -2887,7 +2905,8 @@
     "labels": [
       "681436 effect_value 504679e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Observation, not a status: Pair 20261122-055541 / 20261122-055630, build d315b5c8443e, server commit b7eb91294725, no flip. energize_conquest reads 79 against 79 derived from the DBC (Conquest 800764 refunds 10% of the 2868 maximum mana, 286, before Devoted gives 5% of the 2868 - 1286 missing, 79.1); energize_resplendence, energize_revelation and energize_ascension read 93 (none of the three has an energize effect, so no refund precedes Devoted); cost_resplendence, cost_revelation and cost_ascension read 1093; no cost entry exists for Conquest. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs; nothing else found. The behaviour labels are not cited by this clause (a claim split over the cost and the energize halves is a later ledger decision)."
   },
   {
     "spell": 681448,
@@ -4244,7 +4263,7 @@
     "spell": 504580,
     "clause": "Radiate holy light from your shield on enemies in front of you, dealing ${$m1+0+$SP*0.25+$AP*0.1} Holyfire Damage, scaling with your block value.",
     "kind": "claim",
-    "reason": "Awaiting owner (status 5), question in the report: damage = m1 207..240 + AP term 7 + the shield block value x 1.0 (AscensionSunClericContracts.cpp:311-312); the tooltip says 'scaling with your block value' with no coefficient. Pair 20261120-221023 / 20261120-221237 (the earlier pair 20261120-220241 / 20261120-220458, archive pair3-with-block-value-entries, holds the block_value reads: 11 = 1 + 40 x 0.5 - 10, and 1011 at +2000 Strength; the metric block_value has no coverage.py row, so no class-file entry keeps it): damage 246 and 253 against the tooltip's own [214, 247] and inside [225, 258] with the term; at +2000 Strength (block value 1011, attack power 4070) damage_block reads 1632 and 1642 against [1625, 1658] at 1.0 (0 would give [614, 647]). Reference search: bindmysoul and coabuildhub carry the same sentence (23 + 25% SP + 10% AP at rank 1, 'scaling with your block value'), no coefficient; 638 live Dawnbreak 504580 damage events in the combat logs, mean 1155, max 2467, gear unknown."
+    "reason": "Unproven until the cause of the run-1 zero read in base pair 7 is proven, crit or miss (mentor D-95); no status is given. The expectation under test: damage = m1 207..240 + AP term 7 + the shield block value x 1.0 (AscensionSunClericContracts.cpp:311-312); the tooltip says 'scaling with your block value' with no coefficient. Pair 20261120-221023 / 20261120-221237 (the earlier pair 20261120-220241 / 20261120-220458, archive pair3-with-block-value-entries, holds the block_value reads: 11 = 1 + 40 x 0.5 - 10, and 1011 at +2000 Strength; the metric block_value has no coverage.py row, so no class-file entry keeps it): damage 246 and 253 against the tooltip's own [214, 247] and inside [225, 258] with the term; at +2000 Strength (block value 1011, attack power 4070) damage_block reads 1632 and 1642 against [1625, 1658] at 1.0 (0 would give [614, 647]). Reference search: bindmysoul and coabuildhub carry the same sentence (23 + 25% SP + 10% AP at rank 1, 'scaling with your block value'), no coefficient; 638 live Dawnbreak 504580 damage events in the combat logs, mean 1155, max 2467, gear unknown. Flip lead (base pair 7, run 1): damage 0 after a completed cast, ok in 5 of 6 runs. The read filters critical false (CoAGameplayTest.cpp:5268-5277), so a critical hit of the cast would read 0, and so would a miss (Unit.cpp:3992 base hit 96 against a same-level target; 504580 has neither ALWAYS_HIT nor NO_ATTACK_MISS), although the fixture sets spell hit rating 10000; the run-1 result records neither a crit nor a miss, so the cause is not established (crit, miss or another). The fixture 984954 has two effects: Effect[0] +101% weapon crit (aura 52, MiscValue 127), which does not enter this spell-filtered read, and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE, BasePoints -1001 (-1000% spell crit), while 504580 is DmgClass MAGIC, so the fixture removes spell crit for this spell and a crit is not supported as the lead without a mechanism; the residual probability of a zero read is not stated."
   },
   {
     "spell": 800764,
@@ -4975,7 +4994,7 @@
         ]
       }
     ],
-    "reason": "OPEN radius: the expected edge is 8 + 2.66 leeway (Spell.cpp:1394, Object.cpp:1787-1808, a player caster on TARGET_UNIT_SRC_AREA_ENEMY) + 1.275 target combat reach = 11.935 yd (Spell.cpp:9434-9448), inside the measured bracket (stunned near 11.4 yd, not at 12.5 yd). radius_edge cannot model the leeway term yet (tool question to the mentor); its entry adds the caster's reach instead and alerts, so the radius labels do not close. Duration: stun on the dummy read 3982 and 3997 ms against 4000 (5000 minus 1000 after the 1500 ms cast), within 250."
+    "reason": "Radius: the edge is 8 yd ($a1) + 2.66 yd leeway of a player caster on TARGET_UNIT_SRC_AREA_ENEMY (Spell.cpp:1388-1394, Object.cpp:1787-1808) + 1.275 yd target combat reach (Spell.cpp:9434-9448) = 11.935 yd. The radius_edge entry uses the opt-in leeway term (tool ADR 1020): ok on pair 20261122-055336 / 20261122-055559 (build f58af4a631b7, no flip, control 0); the near / 12.5 yd / 16 yd arms were ok on pair 20261122-051135 / 20261122-051226. The labels come from two builds, so the claim counts at the next base pair. Duration: stun on the dummy read 3982 and 3997 ms against 4000 (5000 minus 1000 after the 1500 ms cast), within 250."
   },
   {
     "spell": 805628,
