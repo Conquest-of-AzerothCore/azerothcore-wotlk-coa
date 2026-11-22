@@ -617,13 +617,13 @@
         ]
       },
       {
-        "claim": "every $t1 sec (1000 ms: the five ticks that fit in the read are the ones the expected value counts)",
+        "claim": "every $t1 sec (the aura amplitude is read as data; the cooldown read does not exclude a period 10% off)",
         "labels": [
-          "300361 aura_amplitude_ms #1",
-          "300361 behaviour_metric_delta sunrise_horusath"
+          "300361 aura_amplitude_ms #1"
         ]
       }
-    ]
+    ],
+    "reason": "Data only, not behaviour and not a final status (review c5 I-1): both claims are read on cooldown_ms, a READBACK metric (coverage.METRIC_EVIDENCE). The tick-grid read does not measure the period either: with the entry's model a period of 1100 ms reads 10421, inside 10536 +- 300 (900 ms reads 9016, excluded), so only the lower side is excluded. A tick-aligned cooldown read is tool group 5 item 5 (tool need, returned); the clause stays open. The entries keep emitting the labels as evidence."
   },
   {
     "spell": 300361,
@@ -639,13 +639,13 @@
         ]
       },
       {
-        "claim": "every $t1 sec (1000 ms: the five ticks that fit in the read are the ones the expected value counts)",
+        "claim": "every $t1 sec (the aura amplitude is read as data; the cooldown read does not exclude a period 10% off)",
         "labels": [
-          "300361 aura_amplitude_ms #3",
-          "300361 behaviour_metric_delta sunset_rapture"
+          "300361 aura_amplitude_ms #3"
         ]
       }
-    ]
+    ],
+    "reason": "Data only, not behaviour and not a final status (review c5 I-1): both claims are read on cooldown_ms, a READBACK metric (coverage.METRIC_EVIDENCE). The tick-grid read does not measure the period either: with the entry's model a period of 900 ms reads 7993 and 1100 ms reads 7887, both inside 7838 +- 300, so neither side is excluded. A tick-aligned cooldown read is tool group 5 item 5 (tool need, returned); the clause stays open. The entries keep emitting the labels as evidence."
   },
   {
     "spell": 300363,
@@ -2382,7 +2382,8 @@
           "561329 behaviour_metric_delta sunflare_cost"
         ]
       }
-    ]
+    ],
+    "reason": "Data only, not behaviour and not a final status (review c5 I-4): every label reads spell_cast_time_ms, spell_power_cost or an effect value, all READBACK metrics (coverage.METRIC_EVIDENCE), so the values (3500 to 2800, 2000 to 1600, 204 to 163, 136 to 108 against 108.8 within 1) are data conformant, not behaviour proven. A behaviour route exists in principle (cast duration from the cast timeline, mana drop after a real cast) and has not been built, so no status 3 reason (G-24) is written and the clause stays open."
   },
   {
     "spell": 570027,
@@ -3737,7 +3738,7 @@
         ]
       }
     ],
-    "reason": "The 80% literal is held open (I-2 of the b9a review). A 78% arm cannot bracket it: AscensionSunCleric.cpp:366-370 (b2ad6f76d6, fixes #5763 and #5783) enters the helper above 80% and leaves it at or below 75%, so inside 75% to 80% the previous state holds, and a first attempt at 78% failed its own check (helper 707769 still present, aura check 1 of the treatment arm, both runs). Tool need returned to the controller: a taken_hit pre-step that sets the health below 75% and lets the helper clear before the health is raised to 79% and 81%."
+    "reason": "The 80% literal is held open (I-2 of the b9a review). A 78% arm cannot bracket it: AscensionSunCleric.cpp:366-370 (b2ad6f76d6, fixes #5763 and #5783) enters the helper above 80% and leaves it at or below 75%, so inside 75% to 80% the previous state holds, and a first attempt at 78% failed its own check (helper 707769 still present, aura check 1 of the treatment arm, both runs). Resolved by claim 2: each arm first sets 70% (below 75%), waits 1600 ms for the helper to clear, then raises the health to 79% (helper absent) or 81% (helper present), read 1500 ms later; the helper aura 707769 is read, and the damage effect of the helper is linked through the taken_above labels at 82%."
   },
   {
     "spell": 704586,
@@ -4889,10 +4890,14 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "Doubles the effectiveness of your Holy Form",
+        "claim": "Doubles the effectiveness of your Holy Form: the healing done (Effect[0], +10% to +20%, Daybreak heal ratio 1.090909)",
         "labels": [
           "800602 behaviour_hit_ratio holy_form_doubled"
         ]
+      },
+      {
+        "claim": "Doubles the effectiveness of your Holy Form: the threat reduction (Effect[2], -50%) and the mana sacrifice of the Blessed ally (Effect[1])",
+        "labels": []
       },
       {
         "claim": "and reduces the tick rate of Ancient Rites by $/1000;s2 sec",
@@ -4906,7 +4911,7 @@
         ]
       }
     ],
-    "reason": "Open: no label covers the Holy Form doubling; the Ancient Rites tick-rate part has its own labels."
+    "reason": "Open: the Holy Form doubling is measured on its healing effect only (Effect[0]; Holy Form is cast for real in both arms); no label covers the threat (Effect[2]) and the Bless mana sacrifice (Effect[1]) parts, so the clause is not status 1. The Ancient Rites tick-rate part has its own labels."
   },
   {
     "spell": 800612,
