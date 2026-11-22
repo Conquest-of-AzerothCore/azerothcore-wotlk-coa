@@ -16535,7 +16535,7 @@
     },
     {
       "spell": 806024,
-      "name": "Purgation (one Radiant Flame cast gives four stacks)",
+      "name": "Purgation (one Radiant Flame cast gives five stacks)",
       "kind": "metric_delta",
       "variant": "stacks_one_cast",
       "label_suffix": "stacks_one_cast",
@@ -16549,11 +16549,11 @@
         "spell": 806025
       },
       "before_expected": 0,
-      "expected": 4,
+      "expected": 5,
       "gate_spell": 806024,
       "wait_ms": 4700,
       "expire_ms": 9000,
-      "observe_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 four times. Four ticks (4000 ms / 1000 ms) give four stacks, read 4700 ms after the cast on the dummy (the debuff lasts 8000 ms after the last tick). Control: the phase before 806024 is learned, with the same Radiant Flame cast, reads 0. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found."
+      "observe_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U).  Five ticks give five stacks, read 4700 ms after the cast on the dummy (the debuff lasts 8000 ms after the last tick). Control: the phase before 806024 is learned, with the same Radiant Flame cast, reads 0. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found. Radiant Flame 806060 AttributesEx5 8704 = 0x2200 includes SPELL_ATTR5_EXTRA_INITIAL_PERIOD 0x200 (SharedDefines.h:651, an immediate periodic tick on apply), so DurationIndex 35 (4000 ms) with EffectAmplitude 1000 gives five ticks (at 0, 1000, 2000, 3000 and 4000 ms), not four; a first design expected four and both runs read five."
     },
     {
       "spell": 806024,
@@ -16605,7 +16605,7 @@
       "expire_ms": 9000,
       "after_at_least": 7000,
       "after_at_most": 7900,
-      "observe_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 four times. The first tick of Radiant Flame lands one EffectAmplitude (1000 ms) after the cast and applies 806025 for 8000 ms, so the remaining duration read 1500 ms after the cast is 8000 - 500 = 7500 ms; the read is judged from 7000 to 7900 ms, which excludes a duration 10% off on both sides (7200 and 8800 ms give reads near 6700 and 8300 ms). Control: the phase before 806024 is learned reads 0. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found."
+      "observe_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 four times. The ticks of Radiant Flame land at 0 and then every 1000 ms (extra initial tick, AttributesEx5 0x200) and each refreshes 806025 to 8000 ms, so the last tick before the read, at 1000 ms, leaves 8000 - 500 = 7500 ms at the read 1500 ms after the cast; the read is judged from 7000 to 7900 ms, which excludes a duration 10% off on both sides (7200 and 8800 ms give reads near 6700 and 8300 ms). Control: the phase before 806024 is learned reads 0. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found."
     },
     {
       "spell": 704568,
@@ -16857,11 +16857,11 @@
         "target": "dummy"
       },
       "before_expected": 0,
-      "expected": 4,
+      "expected": 5,
       "cast_in_before": false,
       "wait_ms": 4700,
       "expire_ms": 500,
-      "observe_source": "Radiant Flame 806060 DurationIndex 35 = 4000 ms, EffectAmplitude 1000: four damage hits of 807058 per cast are expected from the DBC. The count is read on the dummy 4700 ms after one real cast, with no 806024 involved; it explains the stack count of the stacks_one_cast entry (one stack per Radiant Flame damage hit). Reference search 2026-11-22: coa-history spell 807058 (Radiant Flame ticks): 2281 SPELL_DAMAGE events (517 crits) and 22 SPELL_MISSED in 7 of 186 logs, no per-cast count; nothing else found."
+      "observe_source": "Radiant Flame 806060 DurationIndex 35 = 4000 ms, EffectAmplitude 1000: five damage hits of 807058 per cast are expected from the DBC (see the extra initial tick below). The count is read on the dummy 4700 ms after one real cast, with no 806024 involved; it explains the stack count of the stacks_one_cast entry (one stack per Radiant Flame damage hit). Reference search 2026-11-22: coa-history spell 807058 (Radiant Flame ticks): 2281 SPELL_DAMAGE events (517 crits) and 22 SPELL_MISSED in 7 of 186 logs, no per-cast count; nothing else found. Radiant Flame 806060 AttributesEx5 8704 = 0x2200 includes SPELL_ATTR5_EXTRA_INITIAL_PERIOD 0x200 (SharedDefines.h:651, an immediate periodic tick on apply), so DurationIndex 35 (4000 ms) with EffectAmplitude 1000 gives five ticks (at 0, 1000, 2000, 3000 and 4000 ms), not four; a first design expected four and both runs read five."
     }
   ],
   "player_observations": [],
