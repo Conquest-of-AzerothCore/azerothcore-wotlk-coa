@@ -30093,107 +30093,6 @@
       "setup_wait_ms": 2100,
       "expire_ms": 500,
       "tolerance": 0.0001,
-      "name": "Learning Light (haste still held after two casts)",
-      "variant": "haste_two_casts",
-      "label_suffix": "haste_two_casts",
-      "metric": "cast_speed_multiplier",
-      "fields": {},
-      "measure_actor": "caster",
-      "before_expected": 1,
-      "expected": 0.833333,
-      "setup_casts": [
-        804584,
-        500143,
-        804584,
-        500143
-      ],
-      "wait_ms": 2600,
-      "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20, DurationIndex 1 = 10000 ms ($301265d). The script gives the aura 3 charges on application (AscensionSunClericAuras.cpp:97-99) and each finished Holy or Fire family 33 casting spell that was started under it spends one, removing it at the last (AscensionSunClericAbilities.cpp:49, Finish at :83-88). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, any Dawn left by the first phase removed first (set_aura 807440 at 0 stacks). Illumination 500143 (Holy, 2000 ms cast, heals the caster) is cast for real each time: the first cast spends Dawn and enters Sunrise, which grants 301265 only when 300360 is learned between the phases (control: the same casts before the learn read the haste multiplier 1). Casts after the entering one: the setup cast and the trigger cast, two spells started under the aura, so one of the 3 charges is left and the engine cast speed multiplier is 100 / (100 + 20) = 0.833333 (Unit.cpp:14967-14970). Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the aura exists in real play, no amount or charge in the events), 300360 0 events (a passive); bindmysoul snapshot and ascension-data: nothing found beyond the tooltip. Design 2: Dawn has 10 charges and every Holy or Fire cast under it enters the other state and grants 301265 again, so the first design (Dawn left active) kept re-granting the aura; here a second Dawn cast cancels the active Dawn right after the entering cast (the cancel is the replaced Dawn button, AscensionSunCleric.cpp:399-410) so that the later casts only spend charges. The read waits 2600 ms after the trigger cast starts: Illumination has a 2000 ms cast time and a read earlier than its completion would not count the cast it reads after (a first run read 500 ms after the start and saw one charge too many)."
-    },
-    {
-      "spell": 300360,
-      "kind": "metric_delta",
-      "gate_spell": 300360,
-      "target": "caster",
-      "trigger_spell": 500143,
-      "phase_auras": [
-        [
-          807440,
-          0,
-          "caster",
-          "caster"
-        ],
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ],
-        [
-          92135,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "cast_power": 1363,
-      "disable_regeneration": true,
-      "quote": "Lasts for $301265d or 3 casts.",
-      "setup_target": "caster",
-      "setup_wait_ms": 2100,
-      "expire_ms": 500,
-      "tolerance": 0.0001,
-      "name": "Learning Light (haste gone after three casts)",
-      "variant": "haste_three_casts",
-      "label_suffix": "haste_three_casts",
-      "metric": "cast_speed_multiplier",
-      "fields": {},
-      "measure_actor": "caster",
-      "before_expected": 1,
-      "expected": 1,
-      "setup_casts": [
-        804584,
-        500143,
-        804584,
-        500143,
-        500143
-      ],
-      "wait_ms": 2600,
-      "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20, DurationIndex 1 = 10000 ms ($301265d). The script gives the aura 3 charges on application (AscensionSunClericAuras.cpp:97-99) and each finished Holy or Fire family 33 casting spell that was started under it spends one, removing it at the last (AscensionSunClericAbilities.cpp:49, Finish at :83-88). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, any Dawn left by the first phase removed first (set_aura 807440 at 0 stacks). Illumination 500143 (Holy, 2000 ms cast, heals the caster) is cast for real each time: the first cast spends Dawn and enters Sunrise, which grants 301265 only when 300360 is learned between the phases (control: the same casts before the learn read the haste multiplier 1). Casts after the entering one: two setup casts and the trigger cast, three spells started under the aura, so the third charge is spent and the aura is gone: multiplier 1, read about 6 s after the aura was granted, well inside its 10 s, so the 3 casts and not the duration ended it. Its partner haste_two_casts reads 0.833333 with one cast fewer, so a zero here is a consumed aura, not an aura that never came. Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the aura exists in real play, no amount or charge in the events), 300360 0 events (a passive); bindmysoul snapshot and ascension-data: nothing found beyond the tooltip. Design 2: Dawn has 10 charges and every Holy or Fire cast under it enters the other state and grants 301265 again, so the first design (Dawn left active) kept re-granting the aura; here a second Dawn cast cancels the active Dawn right after the entering cast (the cancel is the replaced Dawn button, AscensionSunCleric.cpp:399-410) so that the later casts only spend charges. The read waits 2600 ms after the trigger cast starts: Illumination has a 2000 ms cast time and a read earlier than its completion would not count the cast it reads after (a first run read 500 ms after the start and saw one charge too many)."
-    },
-    {
-      "spell": 300360,
-      "kind": "metric_delta",
-      "gate_spell": 300360,
-      "target": "caster",
-      "trigger_spell": 500143,
-      "phase_auras": [
-        [
-          807440,
-          0,
-          "caster",
-          "caster"
-        ],
-        [
-          500149,
-          20,
-          "caster",
-          "caster"
-        ],
-        [
-          92135,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "cast_power": 1363,
-      "disable_regeneration": true,
-      "quote": "Lasts for $301265d or 3 casts.",
-      "setup_target": "caster",
-      "setup_wait_ms": 2100,
-      "expire_ms": 500,
-      "tolerance": 0.0001,
       "name": "Learning Light (aura lasts 10 s)",
       "variant": "haste_duration_window",
       "label_suffix": "haste_duration_window",
@@ -30318,7 +30217,7 @@
       },
       "critical": false,
       "trials": 50,
-      "parts": 8,
+      "parts": 40,
       "cast_power": 1363,
       "refresh": true,
       "stated": {

@@ -691,14 +691,11 @@
         ]
       },
       {
-        "claim": "or 3 casts",
-        "labels": [
-          "300360 behaviour_metric_delta haste_two_casts",
-          "300360 behaviour_metric_delta haste_three_casts"
-        ]
+        "claim": "or 3 casts (open: no consumption read judged, see the reason)",
+        "labels": []
       }
     ],
-    "reason": "Haste aura held after two casts (0.833333) and gone after three (1.0) inside its 10 s, and present 9100 ms after being granted and gone by 10900 ms (guide 3.5 time bands). Reference search 2026-11-22: coa-history 301265: aura applied and removed events in 3 logs, no charge or amount; nothing else found."
+    "reason": "Duration part measured by the window entry (aura present 9100 ms after being granted, gone by 10900 ms, pair PAIR). The '3 casts' part is open after two designs. Design 1 (Dawn left active): the aura did not read as consumed because Dawn holds 10 charges and every Holy or Fire cast under it enters the other state and grants 301265 again (AscensionSunClericAbilities.cpp:94-120, :202-216), and the reads came out 1.0 after 3 spells and 0.833333 after 4. Design 2 (a second Dawn cast right after the entering one, meant to cancel Dawn, and each count read after its last cast completed, 2600 ms after it started): two finished casts left the aura (0.833333, ok) and three finished casts left it too (0.833333, expected 1.0, alert in both runs of pair 3). Whether the second Dawn cast cancels Dawn is not shown, so the alert is a lead, not a defect: the entries were removed from the class file, nothing was changed in the server. A route would need a consumer spell that does not spend Dawn, or a Dawn-free way to enter Sunrise. Reference search 2026-11-22: coa-history 301265: aura applied and removed events in 3 logs, no charge or amount; nothing else found."
   },
   {
     "spell": 300361,
