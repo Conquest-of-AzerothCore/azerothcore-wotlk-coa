@@ -34,3 +34,4 @@ numbers ([ADR 0583](../../0583-class-conformance-adrs-live-in-a-per-class-folder
 | [0025](0025-slither-makes-ranged-attacks-and-spells-miss.md) | Slither makes ranged attacks and spells miss | proposed (owner question); engine file `Unit.cpp` |
 | [0026](0026-hireeks-jinx-lasts-eight-seconds-against-players.md) | Hir'eek's Jinx lasts eight seconds against players | proposed (owner question); engine file `SpellMgr.cpp` |
 | [0027](0027-spirit-shock-locks-a-creatures-school.md) | Spirit Shock locks a creature's school | accepted |
+| [0028](0028-voodoo-cauldron-heals-allies-within-fifteen-yards.md) | Voodoo Cauldron heals allies within 15 yd | accepted |

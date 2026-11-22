@@ -554,7 +554,7 @@ class npc_ascension_witch_doctor : public ScriptedAI
         }
         if (entry == NpcCauldron)
         {
-            for (Unit* ally : Allies(player, me, 10.0f))
+            for (Unit* ally : Allies(player, me, Radius(VoodooCauldron, EFFECT_2)))
             {
                 Field(ally, CauldronBuff);
                 Copy(player, ally, LoaEchoHeal, Amount(VoodooCauldron, EFFECT_2, player));
