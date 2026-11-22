@@ -378,45 +378,6 @@
         }
       },
       "internal_cooldown_ms": 0
-    },
-    {
-      "aura": 805647,
-      "name": "Knight of Dawn",
-      "tooltip": "Your |cFFFFFFFFGlorious Execution|r now has a $h% chance to strike 1 additional time.",
-      "chance_token": "$h",
-      "band": true,
-      "baseline": true,
-      "trigger": {
-        "action": "cast",
-        "spell": 800626
-      },
-      "trigger_text": "Your Glorious Execution",
-      "trigger_spells": [
-        800626,
-        800691
-      ],
-      "trigger_spells_source": "Glorious Execution 800626 Effect[0] 142 TRIGGER_SPELL_WITH_VALUE casts 800691 (main hand) and Effect[2] casts 802566 (off hand) at the target (Spell.dbc); 800626 deals no damage itself. The handler rolls Chance(player, 805647) (ProcChance 20) once per landed damage event of 800691 only (AscensionSunClericEvents.cpp:128), never for 802566, so a trial is one landed 800691 hit on the dummy; the extra strike is a new cast of the highest rank of 800626 (AscensionSunClericEvents.cpp:303), and its own 800691 hit rolls again, so chained procs are counted by their own trials. Events are the completed casts of 800626 beyond the player's own. Residual failure probability at most 0.1% per pair (residual_target).",
-      "trigger_lands_no_hit": "AscensionSunClericEvents.cpp:128: case 805647 return damage && info && info->Id == 800691 && Chance(player,id): the handler rolls once per landed 800691 hit, never per cast of 800626 or for the off-hand 802566",
-      "residual_target": 0.001,
-      "min_detectable": 5,
-      "trials_per_attempt": 1,
-      "min_parts": 26,
-      "event_metric": "spell_cast_count",
-      "proc_spell": 800626,
-      "proc_spell_source": "AscensionSunClericEvents.cpp:303: case 805647 casts Highest(player,800626) at the target; the tooltip says Glorious Execution strikes 1 additional time",
-      "events_per_proc": 1,
-      "handler": "AscensionSunClericEvents.cpp:128 rolls Chance(player, 805647) (ProcChance 20) on each landed 800691 damage event; :303 casts the highest rank of 800626 at the target. Reference search 2026-11-22: coa-history spell 805647 and Glorious Execution casts not read for a rate; nothing found beyond the tooltip and Spell.dbc.",
-      "dbc": {
-        "805647": {
-          "ProcChance": 20,
-          "ProcFlags": 0,
-          "ProcCharges": 0
-        }
-      },
-      "spell_proc": {},
-      "internal_cooldown_ms": 0,
-      "base_mana_per_attempt": true,
-      "events_exclude_trigger_casts": true
     }
   ],
   "triggers": [],
@@ -15031,62 +14992,6 @@
       "observe_source": "Control of reset_800622: Chosen of the Light is cast, then Holy Form 805301 (no cooldown effect) instead of New Day; the cooldown of Chosen of the Light reads 180000 ms minus the 1600 ms setup wait and the 500 ms read wait, within 2500 ms, far from 0. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
     },
     {
-      "spell": 800600,
-      "kind": "metric_delta",
-      "quote": "Start anew, reseting the cooldown of Paragon, Chosen of the Light, and Judgement Day spells.",
-      "gate_spell": 800600,
-      "setup_casts": [
-        806121
-      ],
-      "setup_target": "dummy",
-      "setup_wait_ms": 1600,
-      "setup_only_after": true,
-      "cast_power": 1363,
-      "target": "dummy",
-      "metric": "cooldown_ms",
-      "fields": {
-        "spell": 806121
-      },
-      "before_expected": 0,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "name": "New Day (Judgement Day cooldown reset)",
-      "variant": "reset_806121",
-      "label_suffix": "reset_806121",
-      "trigger_spell": 800600,
-      "expected": 0,
-      "tolerance": 1,
-      "observe_source": "New Day 800600 Effect[2] SPELL_EFFECT_ASCENSION_RESET_COOLDOWN (195) EffectMiscValue 806121 Judgement Day (Spell.dbc). Judgement Day 806121 has RecoveryTime 60000 ms (Spell.dbc). With New Day known in both phases, the first phase casts New Day with Judgement Day not on cooldown, the second casts Judgement Day first and New Day after: the cooldown of Judgement Day reads 0 after New Day. Control entry reset_806121_control: the same second phase with Holy Form 805301 cast instead of New Day, the cooldown stays. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
-    },
-    {
-      "spell": 800600,
-      "kind": "metric_delta",
-      "quote": "Start anew, reseting the cooldown of Paragon, Chosen of the Light, and Judgement Day spells.",
-      "gate_spell": 800600,
-      "setup_casts": [
-        806121
-      ],
-      "setup_target": "dummy",
-      "setup_wait_ms": 1600,
-      "setup_only_after": true,
-      "cast_power": 1363,
-      "target": "dummy",
-      "metric": "cooldown_ms",
-      "fields": {
-        "spell": 806121
-      },
-      "before_expected": 0,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "name": "New Day (control: Judgement Day keeps its cooldown without it)",
-      "variant": "reset_806121_control",
-      "label_suffix": "reset_806121_control",
-      "trigger_spell": 805301,
-      "expected": 58400,
-      "tolerance": 2500,
-      "observe_source": "Control of reset_806121: Judgement Day is cast, then Holy Form 805301 (no cooldown effect) instead of New Day; the cooldown of Judgement Day reads 60000 ms minus the 1600 ms setup wait and the 500 ms read wait, within 2500 ms, far from 0. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
-    },
-    {
       "spell": 680670,
       "name": "Blessed One (slow duration)",
       "kind": "duration_ratio",
@@ -16252,77 +16157,6 @@
         ]
       },
       "observe_source": "704579 Twilight Effect[0] aura 42 PROC_TRIGGER_SPELL 506637 (Blind), which triggers Blinded 505342 (DurationIndex 32 = 6000 ms, StackAmount 5, Effect[0] aura 54 MOD_HIT_CHANCE BasePoints -11 + 1 = -10); the class code casts 505342 at the target of every direct own damage hit while Vow of the Eclipse 807435 is up, Twilight is known and the target is not a dungeon boss (AscensionSunCleric.cpp:304-312, AscensionSunClericEvents.cpp, vow 807435 proc rule direct && (damage || healing)). Vow of the Eclipse 807435 is set on the caster in both phases (set_aura, a named precondition fixture of both phases, never the subject); 704579 is learned between the phases and the reading before is the control. One Sunflare 800231 hit at the dummy (CastingTimeIndex 5 = 2000 ms) read 2500 ms after the cast started (game time 2450..2550 ms), about 500 ms into the aura: the remaining duration of 505342 is 0 before the learn (control) and 6000 - 500 = 5500 ms after it, within 250 ms, which excludes a duration 10% (600 ms) off on both sides (5400 and 6600 ms give reads near 4900 and 6100). Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); the sidekick and bindmysoul snapshots under ~/CoaServer/reference carry the same tooltip words and figures; nothing else found."
-    },
-    {
-      "spell": 704579,
-      "name": "Twilight (Blinded not applied to a dungeon boss)",
-      "kind": "metric_delta",
-      "variant": "boss_blind",
-      "label_suffix": "boss_blind",
-      "quote": "Does not work on bosses.",
-      "gate_spell": 704579,
-      "trigger_spell": 800231,
-      "target": "dummy",
-      "phase_auras": [
-        [
-          807435,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "cast_power": 1363,
-      "metric": "aura_duration_ms",
-      "measure_actor": "dummy",
-      "fields": {
-        "spell": 505342,
-        "caster": "caster"
-      },
-      "before_expected": 0,
-      "expected": 0,
-      "tolerance": 1,
-      "wait_ms": 2500,
-      "expire_ms": 500,
-      "game_time": {
-        "after": [
-          2450,
-          2550
-        ]
-      },
-      "observe_source": "Ramstein the Gorger 10439 (Stratholme) is the credit creature of a non-raid instance_encounters row, so ObjectMgr.cpp:6846-6862 sets CREATURE_FLAG_EXTRA_DUNGEON_BOSS on its template at load and Creature::IsDungeonBoss() is true for a summon without a player owner (Creature.cpp:3625-3631); AscensionSunCleric.cpp:312 skips Blinded 505342 on a dungeon boss (tooltip 'Does not work on bosses.'). Same set-up as blind_duration (Vow of the Eclipse 807435 set as a precondition fixture in both phases, 704579 learned between the phases, one Sunflare 800231 hit at the target): the remaining duration of 505342 on the boss reads 0 after the learn, where the same read on the training dummy 31146 (label blind_duration) reads 5500 ms. The hit that landed is the label boss_hit_landed. Reference search 2026-11-22: coa-history spell 704579: 0 events in 186 logs (a passive); nothing found beyond the tooltip and Spell.dbc.",
-      "target_entry": 10439
-    },
-    {
-      "spell": 704579,
-      "name": "Twilight (Sunflare lands on the dungeon boss)",
-      "kind": "metric_delta",
-      "variant": "boss_hit_landed",
-      "label_suffix": "boss_hit_landed",
-      "quote": "Does not work on bosses.",
-      "gate_spell": 704579,
-      "trigger_spell": 800231,
-      "target": "dummy",
-      "phase_auras": [
-        [
-          807435,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "cast_power": 1363,
-      "metric": "spell_damage_count",
-      "fields": {
-        "spell": 800231,
-        "target": "dummy"
-      },
-      "before_expected": 0,
-      "expected": 1,
-      "tolerance": 0.01,
-      "wait_ms": 2500,
-      "expire_ms": 500,
-      "observe_source": "Ramstein the Gorger 10439 (Stratholme) is the credit creature of a non-raid instance_encounters row, so ObjectMgr.cpp:6846-6862 sets CREATURE_FLAG_EXTRA_DUNGEON_BOSS on its template at load and Creature::IsDungeonBoss() is true for a summon without a player owner (Creature.cpp:3625-3631); AscensionSunCleric.cpp:312 skips Blinded 505342 on a dungeon boss (tooltip 'Does not work on bosses.'). Landing proof of boss_blind: the same Sunflare 800231 at the same boss, counting its damage events on the target, 0 before the learn and 1 after it, so the 0 of boss_blind is a landed hit without a Blinded, not a miss.",
-      "target_entry": 10439
     },
     {
       "spell": 704909,
