@@ -6,6 +6,7 @@ import re
 from bonus import POINT_BAND, bonus_band
 import control_excluded
 import hit_ratio_versus
+import hit_ratio_void
 from hits import (ARMOR_LABEL, DRAIN_MS, HEAL_KINDS, MAIN_HAND, MAX_ACCELERATED_SCENARIO_MS, MAX_SCENARIO_MS,
                   TIMEOUT_MARGIN_MS, VIEW_LEVEL_LABEL, Unmodelled, aura_modifiers, cast_steps, creature_fixture,
                   SCHOOL_DAMAGE, magic_schools, model_record, reference_script_hit_model, resistance_label, timed)
@@ -6578,6 +6579,7 @@ class HitRatioSpec:
     caster_entry: int | None = None
     owned_auras: tuple[tuple[int, int, int], ...] = ()
     band_points: float | None = None
+    void_on_cast_failure: bool = False
 
 
 ENGINE_AMOUNT_EPSILON = 1e-6
@@ -6981,6 +6983,9 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
         model['expected_delta'] = delta
     if spec.band_points is not None:
         model['band_points'] = spec.band_points
+    if spec.void_on_cast_failure:
+        model[hit_ratio_void.NAME] = True
+        scenario['contract'] += hit_ratio_void.CONTRACT
     if spec.versus is not None:
         mask = hit_ratio_versus.versus_mask(records, spec.versus)
         model[hit_ratio_versus.NAME] = hit_ratio_versus.model(spec.versus, mask, hit_ratio_label(spec.spell,
@@ -7067,7 +7072,7 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         hit_ratio_versus.parse(entry.get(hit_ratio_versus.NAME)), entry.get('caster_entry'),
                         tuple((int(spell), int(stacks), int(owned))
                               for spell, stacks, owned in entry.get('owned_auras', ())),
-                        hit_ratio_band_points(entry))
+                        hit_ratio_band_points(entry), hit_ratio_void.parse(entry.get(hit_ratio_void.NAME)))
 
 
 def hit_ratio_band_points(entry: dict) -> float | None:
@@ -8069,6 +8074,29 @@ def script_hit_trial(records: Records, spec: ScriptHitSpec, arm: str, trial: int
     return steps + ([script_hit_strike_read(spec, trial, AFTER)] if counted else [])
 
 
+def script_hit_engage(spec: ScriptHitSpec) -> list[dict]:
+    if spec.caster_avoidance is None:
+        return []
+    dodge, parry = spec.caster_avoidance
+    return [{'action': 'set_combat_avoidance', 'actor': CASTER, 'dodge': dodge, 'parry': parry},
+            {'action': 'attack', 'actor': CASTER, 'target': STRIKER},
+            {'action': 'wait', 'label': f'{script_hit_label(spec)} engage', 'ms': AVOIDING_ENGAGE_MS},
+            {'action': 'stop_attack', 'actor': CASTER},
+            {'action': 'snapshot', 'actor': CASTER, 'metric': 'melee_attack_count',
+             'save_as': script_hit_engage_snapshot(spec)}]
+
+
+def script_hit_engage_snapshot(spec: ScriptHitSpec) -> str:
+    return f'hit_{spec.spell}_{spec.hit_spell}_engaged'
+
+
+def script_hit_engage_guard(spec: ScriptHitSpec) -> list[dict]:
+    if spec.caster_avoidance is None:
+        return []
+    return [{'action': 'assert', 'label': f'{script_hit_label(spec)} SETUP own swings', 'actor': CASTER,
+             'metric': 'melee_attack_count', 'equals': 0, 'relative_to': script_hit_engage_snapshot(spec)}]
+
+
 def script_hit_strike_label(spec: ScriptHitSpec, trial: int, moment: str) -> str:
     return f'{script_hit_label(spec)} strikes {trial} {moment}'
 
@@ -8118,6 +8146,7 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
                              *(spell for spell, _ in spec.control_casts or ()),
                              *((spec.spell,) if spec.control_casts is not None else ())))
     steps = [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in learned] + reads
+    steps += script_hit_engage(spec)
     for trial in range(1, spec.trials + 1):
         steps += script_hit_trial(records, spec, 'control', trial)
     steps += [{'action': 'wait', 'label': 'control drain', 'ms': DRAIN_MS},
@@ -8129,6 +8158,7 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
     for trial in range(1, spec.trials + 1):
         steps += script_hit_trial(records, spec, 'treatment', trial)
     steps.append({'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS})
+    steps += script_hit_engage_guard(spec)
     for part in ('total', 'count'):
         steps.append(measurement(labels[part], CASTER, f'{family}_{part}', spell=spec.hit_spell, **receiver,
                                  critical=False, **unblocked))
@@ -8162,7 +8192,9 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
          is not None else []) + \
         ([f'has its dodge and parry set to {spec.caster_avoidance[0]:g}% and {spec.caster_avoidance[1]:g}% '
           f'(set_combat_avoidance) while a hostile, stationary melee striker (creature entry {spec.striker_entry}) '
-          f'swings at it'] if spec.caster_avoidance is not None else [])
+          f'swings at it, engaged once by the caster\'s auto attack for {AVOIDING_ENGAGE_MS} ms before the control '
+          f'trials; the caster\'s own melee swings after that engage must be 0, otherwise the run fails before '
+          f'its reads'] if spec.caster_avoidance is not None else [])
     if spec.control_casts is None:
         control_text, control_rule = f'without {spec.spell} known', f'without {spec.spell}'
     else:

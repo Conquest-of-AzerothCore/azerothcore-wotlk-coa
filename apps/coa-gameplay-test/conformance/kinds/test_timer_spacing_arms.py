@@ -125,5 +125,56 @@ class TimerSpacingArmsTests(unittest.TestCase):
                 self.generated({**COOLDOWN, 'gaps': gaps})
 
 
+    def control_run(self, control_copies, copies=(1, 2), control_spacing=1060.0, control_opened=1.0):
+        _, expectation = self.generated({**CHAIN, 'variant': 'chain_control', 'label_suffix': 'chain_control'})
+        model = expectation.model
+        control, reads, values = model['control'], model['reads'], {}
+        for index, label in enumerate(control['start']):
+            values[label] = 0.0
+        for index, label in enumerate(control['end']):
+            values[label] = 1.0 if index < control_copies else 0.0
+        values[control['spacing']], values[control['opened']] = control_spacing, control_opened
+        held = control_copies
+        for count, (name, gained) in enumerate(zip(('blocked', 'allowed'), copies), 2):
+            for index, label in enumerate(reads[name]['start']):
+                values[label] = 1.0 if index < held else 0.0
+            for index, label in enumerate(reads[name]['end']):
+                values[label] = 1.0 if index < held + gained else 0.0
+            values[reads[name]['spacing']] = 950.0 if name == 'blocked' else 1060.0
+            values[reads[name]['opened']] = float(count)
+            held += gained
+        return judge_behaviour(base_verdict(expectation), FakeRun(values, STEP_MS), expectation)
+
+    def test_the_control_arm_runs_before_the_learn(self):
+        scenario, expectation = self.generated({**CHAIN, 'variant': 'chain_control', 'label_suffix': 'chain_control'})
+        run.validate(scenario)
+        steps, labels = scenario['steps'], [step.get('label') for step in scenario['steps']]
+        learn = next(index for index, step in enumerate(steps)
+                     if step['action'] == 'learn' and step['spell'] == CHAIN['spell'])
+        self.assertLess(labels.index(expectation.model['control']['opened']), learn)
+        hits = [step for step in steps if step['action'] == 'cast' and step['spell'] == CHAIN['hit_spell']]
+        self.assertEqual(len(hits), 6)
+        self.assertEqual(expectation.label, '300371 behaviour_metric_delta chain_control')
+
+    def test_no_copy_before_the_learn_and_the_timer_arms_is_ok(self):
+        self.assertEqual(self.control_run(0).status, 'ok')
+
+    def test_a_mutant_that_chains_without_the_passive_alerts(self):
+        verdict = self.control_run(1)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('control arm without 300371', verdict.explanation)
+
+    def test_a_mutant_that_never_chains_alerts(self):
+        self.assertEqual(self.control_run(0, copies=(0, 0)).status, 'alert')
+
+    def test_a_control_arm_outside_its_band_or_not_opened_is_unmeasured(self):
+        self.assertEqual(self.control_run(0, control_spacing=1000.0).status, 'unmeasured')
+        self.assertEqual(self.control_run(0, control_opened=0.0).status, 'unmeasured')
+
+    def test_the_chain_copy_variant_has_no_control_arm(self):
+        _, expectation = self.generated(CHAIN)
+        self.assertNotIn('control', expectation.model)
+
+
 if __name__ == '__main__':
     unittest.main()

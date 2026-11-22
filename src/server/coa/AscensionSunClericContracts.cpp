@@ -14,6 +14,7 @@ namespace AscensionSunCleric
 constexpr uint32 SpellRangeAnywhere = 13;
 constexpr uint32 SunDownDuration = 39;
 constexpr uint32 SunwellVisual = 560124;
+constexpr uint32 FervorOfTheSunProc = 680623;
 void ApplyContracts(SpellInfo* info)
 {
     if (!info || info->SpellFamilyName != 33)
@@ -290,6 +291,8 @@ void ApplyContracts(SpellInfo* info)
         }
     if (id == 504734)
         info->Effects[EFFECT_1].SpellClassMask |= flag96(0, 0, 0x8 | 0x40);
+    if (id == FervorOfTheSunProc)
+        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
     info->_InitializeExplicitTargetMask();
 }
 }

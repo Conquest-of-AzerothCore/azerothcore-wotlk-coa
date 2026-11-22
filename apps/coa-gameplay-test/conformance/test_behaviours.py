@@ -12130,7 +12130,8 @@ class ScriptHitCasterAvoidanceTests(unittest.TestCase):
         run.validate(scenario)
         steps = scenario['steps']
         avoidance = [index for index, step in enumerate(steps) if step['action'] == 'set_combat_avoidance']
-        self.assertEqual(len(avoidance), 2 * entry['trials'])
+        self.assertEqual(len(avoidance), 2 * entry['trials'] + 1)
+        self.assertEqual(steps[avoidance[0] + 1], {'action': 'attack', 'actor': CASTER, 'target': 'striker'})
         self.assertTrue(all(steps[index] == {'action': 'set_combat_avoidance', 'actor': CASTER, 'dodge': 100.0,
                                              'parry': 0.0} for index in avoidance))
         casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
