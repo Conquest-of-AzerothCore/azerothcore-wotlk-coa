@@ -188,42 +188,52 @@ class CooldownResetRateResidualTests(unittest.TestCase):
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
 class CooldownResetRateFixtureResetTests(unittest.TestCase):
-    SELF_RESET = {**ENTRY, 'trigger_spell': PERCENT_COST_TRIGGER, 'reset_spell': PERCENT_COST_TRIGGER,
-                  'casts': 3200, 'control_casts': 100, 'reset_between_attempts': True,
-                  'base_mana_per_attempt': True, 'trial_casts': True}
+    SELF_RESET = {**ENTRY, 'reset_spell': 500237, 'casts': 3200, 'control_casts': 10, 'reset_between_attempts': True,
+                  'trial_casts': True}
+    PERCENT_COST = {**ENTRY, 'trigger_spell': PERCENT_COST_TRIGGER, 'reset_spell': PERCENT_COST_TRIGGER,
+                    'casts': 1600, 'control_casts': 10, 'parts': 2, 'reset_between_attempts': True,
+                    'base_mana_per_attempt': True}
 
     def judged(self, control_packets: float, treatment_packets: float):
-        _, [expectation] = behaviour_scenario(with_base_mana(), self.SELF_RESET)
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), self.SELF_RESET)
         reads = expectation.model['reads']
-        values = {reads['control hits']: 100.0, reads['control resets']: control_packets,
-                  reads['treatment hits']: 3300.0, reads['treatment resets']: control_packets + treatment_packets}
+        values = {reads['control hits']: 10.0, reads['control resets']: control_packets,
+                  reads['treatment hits']: 3210.0, reads['treatment resets']: control_packets + treatment_packets}
         return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
 
-    def test_each_cast_is_preceded_by_base_mana_and_a_cooldown_reset_and_casts_are_the_trials(self):
-        scenario, [expectation] = behaviour_scenario(with_base_mana(), self.SELF_RESET)
+    def test_each_cast_is_preceded_by_a_cooldown_reset_and_casts_are_the_trials(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), self.SELF_RESET)
         run.validate(scenario, run.SIMULATED_CLOCK)
         steps = scenario['steps']
         casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
-        self.assertEqual(len(casts), 3300)
-        self.assertTrue(all(steps[index - 1] == {'action': 'reset_cooldown', 'actor': 'caster',
-                                                 'spell': PERCENT_COST_TRIGGER}
-                            and steps[index - 2] == {'action': 'set_power', 'actor': 'caster', 'power': 0,
-                                                     'value': 1500} for index in casts))
+        self.assertEqual(len(casts), 3210)
+        self.assertTrue(all(steps[index - 1] == {'action': 'reset_cooldown', 'actor': 'caster', 'spell': 500237}
+                            for index in casts))
         trials = [step for step in steps if step.get('label', '').endswith(' hits')]
         self.assertEqual({step['metric'] for step in trials}, {'spell_cast_count'})
-        self.assertEqual(expectation.model['fixture_resets'], {'control': 100, 'treatment': 3200})
+        self.assertEqual(expectation.model['fixture_resets'], {'control': 10, 'treatment': 3200})
         self.assertIn('exactly one packet per fixture reset', scenario['contract'])
 
+    def test_base_mana_is_set_before_every_cast_of_a_percent_cost_trigger(self):
+        scenario, _ = behaviour_scenario(with_base_mana(), self.PERCENT_COST)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        self.assertEqual(len(casts), 1610)
+        self.assertTrue(all(steps[index - 2] == {'action': 'set_power', 'actor': 'caster', 'power': 0, 'value': 1500}
+                            and steps[index - 1]['action'] == 'reset_cooldown' for index in casts))
+        self.assertIn('set to the base mana before each cast', scenario['contract'])
+
     def test_the_fixture_packets_are_subtracted_from_the_resets(self):
-        verdict = self.judged(100.0, 3200.0 + 160.0)
+        verdict = self.judged(10.0, 3200.0 + 160.0)
         self.assertEqual(verdict.status, 'ok')
         self.assertEqual(verdict.detail, {'resets': 160.0, 'hits': 3200.0})
 
-    def test_a_reset_rate_counted_without_the_fixture_offset_alerts(self):
-        self.assertEqual(self.judged(100.0, 3200.0 + 640.0).status, 'alert')
+    def test_mutant_a_reset_rate_off_the_band_alerts(self):
+        self.assertEqual(self.judged(10.0, 3200.0 + 640.0).status, 'alert')
 
     def test_a_control_without_one_packet_per_fixture_alerts(self):
-        for control in (0.0, 99.0, 101.0):
+        for control in (0.0, 9.0, 11.0):
             with self.subTest(control=control):
                 verdict = self.judged(control, 3200.0 + 160.0)
                 self.assertEqual(verdict.status, 'alert')
@@ -235,8 +245,8 @@ class CooldownResetRateFixtureResetTests(unittest.TestCase):
 
     def test_a_percent_cost_trigger_without_base_mana_stays_refused(self):
         with self.assertRaises(ValueError):
-            behaviour_scenario(with_base_mana(), {**self.SELF_RESET, 'base_mana_per_attempt': False})
+            behaviour_scenario(with_base_mana(), {**self.PERCENT_COST, 'base_mana_per_attempt': False})
 
     def test_a_reset_of_another_spell_than_the_counted_row_is_no_offset(self):
-        _, [expectation] = behaviour_scenario(with_base_mana(), {**self.SELF_RESET, 'reset_spell': 533236})
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), {**self.SELF_RESET, 'reset_spell': 533236})
         self.assertNotIn('fixture_resets', expectation.model)
