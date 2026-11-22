@@ -570,7 +570,8 @@
     "spell": 300348,
     "clause": "Reduces your chance to be hit by spells by $s1%.",
     "labels": [
-      "300348 effect_value e0 #0"
+      "300348 effect_value e0 #0",
+      "300348 behaviour_metric_delta spell_hit_taken"
     ],
     "kind": "claim"
   },
@@ -3073,7 +3074,10 @@
           "681433 effect_value 524858e0 #2",
           "681433 behaviour_metric_delta cd_refund_one",
           "681433 behaviour_metric_delta cd_refund_three",
-          "681433 behaviour_metric_delta cd_refund_none"
+          "681433 behaviour_metric_delta cd_refund_none",
+          "681433 cost_gate 800764 cd_conquest_area without",
+          "681433 cost_gate 800764 cd_conquest_area with",
+          "681433 cost_gate 800764 cd_conquest_area beyond"
         ]
       }
     ]
@@ -3361,7 +3365,8 @@
       {
         "claim": "on a target: a second target gets its own extra attack, and the extra attack lands as a second white swing",
         "labels": [
-          "680643 behaviour_metric_delta second_target"
+          "680643 behaviour_metric_delta second_target",
+          "680643 behaviour_metric_delta second_marker"
         ]
       }
     ],
@@ -5653,7 +5658,9 @@
       },
       {
         "claim": "that allies can interact with to blink themselves the same distance forward",
-        "labels": []
+        "labels": [
+          "802161 behaviour_metric_delta ally_blink"
+        ]
       }
     ]
   },
@@ -5661,9 +5668,11 @@
     "spell": 802161,
     "clause": "Allies can only use Sun Gate every $802148d.",
     "labels": [
-      "802161 spell_duration 802148 #2"
+      "802161 spell_duration 802148 #2",
+      "802161 behaviour_metric_delta ally_lockout"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, no final status: the entry ally_lockout alerts in both runs of pair build/pair (rb7 2026-11-22) on its main reading, 802148 aura_apply_count 2 before and 4 after against 1 and 2 stated, while the use itself behaves: the ally's 802145 application count reads 1 then 2 (first interaction, refused try at 81 s = 0.9 x 90000 ms, accepted try at 99 s = 1.1 x 90000 ms), so a lockout of 81 s or less or of 99 s or more would alert. Lockout timing from the DBC: 802148 Sunstroke DurationIndex 23 = 90000 ms ($802148d), one effect (Effect[0] aura 4 DUMMY, no trigger spell). Observation (not a change): each accepted gossip interaction counts 802148 twice in the harness. The gossip handler casts 802148 once (AscensionSunClericSummons.cpp:116, after 802145 at :115, refusing while 802148 is held at :112) and no other source line references 802148 (grep over src/), so the second count is not a second cast or a script apply in this code; the engine reports OnAuraApply at a new application (Unit.cpp:5607) and at a stack or refresh of an existing aura (Unit.cpp:5466), and which of the two fired twice was not isolated. Probes (rb7, throwaway, never counted): set_aura, a player cast and a creature triggered self-cast of 802148 each read 1; the gossip path reads 2 with one stack and 88464 ms remaining 1500 ms later (one 90 s aura) and no SPELL_GO of 802148 at the ally, so no visible effect and no change; it goes on the owner's observation list. Tool need (mentor D-239, not written): ally_interact.check ties the main reading to the lockout aura (ally_interact.py:80-83: spec.fields == {'spell': lockout_aura}, whose DBC duration also sizes the waits), so making the 802145 use the judged reading and 802148 record-only needs a new ally_interact key, which needs approval. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found."
   },
   {
     "spell": 802935,
@@ -6215,7 +6224,8 @@
       {
         "claim": "within $d",
         "labels": [
-          "804629 spell_duration 807299 #1"
+          "804629 spell_duration 807299 #1",
+          "804629 behaviour_metric_delta fed_window"
         ]
       }
     ],
