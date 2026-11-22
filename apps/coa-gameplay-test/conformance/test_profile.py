@@ -444,5 +444,26 @@ class ServerInventoryMaskDataTest(unittest.TestCase):
                              f'EquippedItemInventoryTypeMask {mask} excludes the reference weapon inventory type 26')
 
 
+class OffHandGrantTests(unittest.TestCase):
+    WEAPON = {'item': 30754, 'slot': 16, 'subclass': 4, 'min_damage': 51.63, 'max_damage': 82.65, 'speed_ms': 1800,
+              'inventory_type': 13, 'normalized_speed': 2.4, 'skill_line': 54}
+
+    def test_grants_are_learned_before_the_off_hand_is_equipped(self):
+        steps = profile.off_hand_steps(30754, (707072,))
+        self.assertEqual([(step['action'], step.get('spell', step.get('item'))) for step in steps],
+                         [('learn', 707072), ('add_item', 30754), ('equip', 30754)])
+
+    def test_mutant_without_grants_the_steps_are_today_s(self):
+        self.assertEqual(profile.off_hand_steps(30754), profile.off_hand_steps(30754, ()))
+        self.assertNotIn('learn', [step['action'] for step in profile.off_hand_steps(30754)])
+
+    def test_off_hand_grants_are_a_list_of_spell_ids(self):
+        class_file = {'off_hand_weapons': [{**self.WEAPON, 'grants': [707072]}]}
+        self.assertEqual(profile.off_hand_weapon(class_file, 30754)['grants'], [707072])
+        for grants in (707072, [0], ['707072'], [True]):
+            with self.subTest(grants=grants), self.assertRaisesRegex(ValueError, 'grants'):
+                profile.off_hand_weapon({'off_hand_weapons': [{**self.WEAPON, 'grants': grants}]}, 30754)
+
+
 if __name__ == '__main__':
     unittest.main()

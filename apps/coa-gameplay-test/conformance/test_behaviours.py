@@ -1591,6 +1591,27 @@ class MechanicDurationScenarioTests(unittest.TestCase):
             self.assertEqual(step['actor'], 'striker')
             self.assertEqual(step['target'], 'caster')
 
+    def test_a_single_landing_casts_once_per_phase_and_carries_its_margin(self):
+        spec = mechanic_duration_spec({**finesse_rank_1_entry(), 'attempts': 1, 'margin_ms': 50})
+        scenario, [expectation] = mechanic_duration_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        actions = [step.get('action') for step in scenario['steps'] if step.get('action') in ('cast', 'learn')]
+        self.assertEqual(actions, ['cast', 'learn', 'cast'])
+        self.assertEqual(expectation.model['margin_ms'], 50)
+        self.assertGreater(expectation.model['full_duration_ms'], 0)
+        labels = [step.get('label') for step in scenario['steps']]
+        for moment in ('before', 'after'):
+            cast, read = expectation.model['times'][moment]
+            self.assertLess(labels.index(cast), labels.index(expectation.model[f'{moment}_label']))
+            self.assertLess(labels.index(expectation.model[f'{moment}_label']), labels.index(read))
+        self.assertIn('up to 1 times', scenario['contract'])
+        self.assertIn('unmeasured unless that margin stays below 10%', scenario['contract'])
+        default = mechanic_duration_scenario(CLASS_FILE, mechanic_duration_spec(finesse_rank_1_entry()))
+        self.assertNotIn('margin_ms', default[1][0].model)
+        for change in ({'attempts': 0}, {'attempts': 4}, {'attempts': True}, {'margin_ms': -1}, {'margin_ms': 1.5}):
+            with self.subTest(change=change), self.assertRaisesRegex(ValueError, 'duration_ratio'):
+                mechanic_duration_spec({**finesse_rank_1_entry(), **change})
+
     def test_learn_happens_between_the_two_phases(self):
         spec = mechanic_duration_spec(finesse_rank_1_entry())
         scenario, _ = mechanic_duration_scenario(CLASS_FILE, spec)
@@ -4511,6 +4532,84 @@ class JudgeDurationRatioTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 6000.0, 'after': 4590.0}),
                                   expectation)
         self.assertEqual(verdict.status, 'alert')
+
+    def margined(self, margin_ms: int):
+        expectation = self.expectation()
+        times = {moment: [f'{moment} cast time', f'{moment} read time'] for moment in ('before', 'after')}
+        return replace(expectation, model={**expectation.model, 'expected': 0.8, 'margin_ms': margin_ms,
+                                           'full_duration_ms': 10000, 'times': times})
+
+    def timed_run(self, before: float, after: float, elapsed=(506.0, 506.0)):
+        return FakeRun({'before': before, 'after': after, 'before cast time': 1000.0,
+                        'before read time': 1000.0 + elapsed[0], 'after cast time': 30000.0,
+                        'after read time': 30000.0 + elapsed[1]}, max_step_ms=25.0)
+
+    def test_a_stated_margin_judges_the_delta_of_the_full_dbc_duration(self):
+        expectation = self.margined(50)
+        for after, status in ((7494.0, 'ok'), (7494.0 + 60.0, 'ok'), (7494.0 + 100.0, 'alert')):
+            with self.subTest(after=after):
+                verdict = judge_behaviour(base_verdict(expectation), self.timed_run(9494.0, after), expectation)
+                self.assertEqual(verdict.status, status)
+        verdict = judge_behaviour(base_verdict(expectation), self.timed_run(9494.0, 7494.0), expectation)
+        self.assertIn('expected delta -2000 ms = the full 10000 ms DBC duration x (0.8 - 1)', verdict.explanation)
+
+    def test_mutant_a_stated_margin_still_alerts_ten_percent_off_or_an_absent_reduction(self):
+        expectation = self.margined(50)
+        for after in (9494.0 - 1800.0, 9494.0 - 2200.0, 9494.0):
+            with self.subTest(after=after):
+                verdict = judge_behaviour(base_verdict(expectation), self.timed_run(9494.0, after), expectation)
+                self.assertEqual(verdict.status, 'alert')
+
+    def test_a_trial_off_the_full_duration_or_with_uneven_landing_offsets_is_void(self):
+        expectation = self.margined(50)
+        for before, elapsed in ((9000.0, (506.0, 506.0)), (9494.0, (506.0, 606.0))):
+            with self.subTest(before=before, elapsed=elapsed):
+                verdict = judge_behaviour(base_verdict(expectation),
+                                          self.timed_run(before, before - 2000.0, elapsed), expectation)
+                self.assertEqual(verdict.status, 'unmeasured')
+                self.assertIn('void trial', verdict.explanation)
+
+    def test_a_stated_margin_not_below_ten_percent_of_the_delta_is_unmeasured(self):
+        expectation = self.margined(180)
+        verdict = judge_behaviour(base_verdict(expectation), self.timed_run(9494.0, 7494.0), expectation)
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('cannot exclude a 10% deviation', verdict.explanation)
+
+    def test_a_margin_of_exactly_ten_percent_of_the_delta_is_refused_even_on_a_perfect_read(self):
+        expectation = self.margined(175)
+        verdict = judge_behaviour(base_verdict(expectation), self.timed_run(9494.0, 7494.0), expectation)
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('cannot exclude a 10% deviation', verdict.explanation)
+
+    def test_mutant_uneven_landing_offsets_within_the_margin_cannot_pass_a_ten_percent_deviation(self):
+        expectation = self.margined(125)
+        verdict = judge_behaviour(base_verdict(expectation), self.timed_run(9500.0, 7550.0, (500.0, 650.0)),
+                                  expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertAlmostEqual(verdict.measured, 0.82)
+
+    def test_an_ok_margined_verdict_always_reads_inside_its_own_band(self):
+        expectation = self.margined(50)
+        oks = 0
+        for after in range(7394, 7600, 7):
+            for offsets in ((506.0, 506.0), (506.0, 540.0), (480.0, 506.0), (520.0, 470.0)):
+                before = 10000.0 - offsets[0]
+                verdict = judge_behaviour(base_verdict(expectation),
+                                          self.timed_run(before, float(after), offsets), expectation)
+                if verdict.status == 'ok':
+                    oks += 1
+                    with self.subTest(after=after, offsets=offsets):
+                        self.assertLessEqual(verdict.low - 1e-9, verdict.measured)
+                        self.assertLessEqual(verdict.measured, verdict.high + 1e-9)
+        self.assertGreater(oks, 0)
+
+    def test_the_margined_verdict_measures_the_landing_corrected_ratio(self):
+        expectation = self.margined(50)
+        verdict = judge_behaviour(base_verdict(expectation), self.timed_run(9494.0, 7494.0, (509.0, 509.0)),
+                                  expectation)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 8003.0 / 10003.0)
+        self.assertIn('landing-corrected durations 10003 and 8003 ms', verdict.explanation)
 
     def test_tick_overshoot_widens_the_margin_enough_to_cover_that_same_diff(self):
         expectation = self.expectation()
@@ -7696,6 +7795,18 @@ class OffHandHitRatioTests(unittest.TestCase):
         self.assertEqual(expectation.label, f'{BLADE_SERMON} behaviour_hit_ratio off_hand')
         self.assertIn(f'off-hand item {ANCIENT_BONE_MACE} equipped', scenario['contract'])
 
+    def test_an_off_hand_grant_is_learned_before_the_off_hand_equip(self):
+        class_file = {**CLASS_FILE, 'off_hand_weapons': [
+            {**weapon, 'grants': [674]} if weapon['item'] == ANCIENT_BONE_MACE else weapon
+            for weapon in CLASS_FILE['off_hand_weapons']]}
+        scenario, _ = behaviour_scenario(class_file, variant_entry(BLADE_SERMON, 'hit_ratio', 'off_hand'))
+        steps = run.validate(scenario)['steps']
+        grant = next(index for index, step in enumerate(steps) if step['action'] == 'learn' and step['spell'] == 674)
+        off = next(index for index, step in enumerate(steps) if step['action'] == 'equip' and step['slot'] == 16)
+        self.assertLess(grant, off)
+        plain, _ = behaviour_scenario(CLASS_FILE, variant_entry(BLADE_SERMON, 'hit_ratio', 'off_hand'))
+        self.assertNotIn(674, [step.get('spell') for step in plain['steps'] if step['action'] == 'learn'])
+
     def test_a_swing_hit_ratio_reads_plain_off_hand_hits_of_one_stopped_swing_interval_per_trial(self):
         entry = variant_entry(BURSTING_IMPACT, 'hit_ratio', 'swing')
         scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
@@ -8285,6 +8396,46 @@ class DispelCountScenarioTests(unittest.TestCase):
         values[expectation.model['reads'][0][0][0]] = 0.0
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status,
                          'unmeasured')
+
+    def learned_and_uncast_entry(self) -> dict:
+        entry = dispel_count_entry(681483)
+        control, treated = entry['arms']
+        return {**entry, 'arms': [{**control, 'name': 'no_cast', 'cast': False},
+                                  {**{key: value for key, value in treated.items() if key != 'auras'},
+                                   'learns': [681483]}]}
+
+    def test_a_learn_arm_learns_and_unlearns_and_a_no_cast_arm_skips_the_cast(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, self.learned_and_uncast_entry())
+        steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
+        self.assertEqual([step['action'] for step in steps if step['action'] in ('learn', 'unlearn', 'cast')
+                          and step.get('spell') in (681483, 578276)],
+                         ['learn', 'learn', 'cast', 'cast', 'cast', 'unlearn'])
+        self.assertIn('Arm no_cast does not cast', scenario['contract'])
+        self.assertIn('Arm rank_2 learns [681483] first', scenario['contract'])
+        uncast = next(expectation for expectation in expectations if expectation.model['arm'] == 'no_cast')
+        self.assertIs(uncast.model['cast'], False)
+        self.assertNotIn('cast', next(expectation for expectation in expectations
+                                      if expectation.model['arm'] == 'rank_2').model)
+        for expectation in behaviour_scenario(CLASS_FILE, dispel_count_entry(681483))[1]:
+            self.assertNotIn('cast', expectation.model)
+
+    def test_mutant_a_no_cast_arm_that_lost_a_debuff_alerts_and_one_expecting_removals_is_refused(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, self.learned_and_uncast_entry())
+        uncast = next(expectation for expectation in expectations if expectation.model['arm'] == 'no_cast')
+        values = {label: 1.0 for trial in uncast.model['reads'] for pair in trial for label in pair}
+        self.assertEqual(judge_behaviour(base_verdict(uncast), FakeRun(values), uncast).status, 'ok')
+        values[uncast.model['reads'][0][0][1]] = 0.0
+        verdict = judge_behaviour(base_verdict(uncast), FakeRun(values), uncast)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('per wait with no cast', verdict.explanation)
+        entry = self.learned_and_uncast_entry()
+        entry['arms'][0] = {**entry['arms'][0], 'expected': entry['arms'][1]['expected']}
+        with self.assertRaisesRegex(ValueError, 'does not cast, so it expects no removal'):
+            behaviour_scenario(CLASS_FILE, entry)
+        entry = self.learned_and_uncast_entry()
+        entry['arms'][0] = {**entry['arms'][0], 'cast': True, 'learns': [681483]}
+        with self.assertRaisesRegex(ValueError, 'needs a control arm'):
+            behaviour_scenario(CLASS_FILE, entry)
 
     def test_a_debuff_of_the_wrong_dispel_type_is_refused(self):
         entry = {**dispel_count_entry(680399), 'debuffs': [[3, [55095, 2818]], [4, [2818, 25810]]]}
@@ -11964,6 +12115,43 @@ class ScriptHitCastPowerTests(unittest.TestCase):
     def test_without_cast_power_the_cost_is_set(self):
         entry = {key: value for key, value in self.entry().items() if key != 'cast_power'}
         self.assertTrue(all(step['value'] == 300 for step in self.power_steps(entry)))
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class ScriptHitCasterAvoidanceTests(unittest.TestCase):
+    def entry(self, **fields) -> dict:
+        base = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 501997 and entry['kind'] == 'script_hit')
+        return {**base, **fields}
+
+    def test_each_trial_sets_the_avoidance_before_its_casts_with_a_hostile_melee_striker(self):
+        entry = self.entry(caster_avoidance={'dodge': 100, 'parry': 0})
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        run.validate(scenario)
+        steps = scenario['steps']
+        avoidance = [index for index, step in enumerate(steps) if step['action'] == 'set_combat_avoidance']
+        self.assertEqual(len(avoidance), 2 * entry['trials'])
+        self.assertTrue(all(steps[index] == {'action': 'set_combat_avoidance', 'actor': CASTER, 'dodge': 100.0,
+                                             'parry': 0.0} for index in avoidance))
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        self.assertLess(avoidance[0], casts[0])
+        strikers = [creature for creature in scenario['creatures'] if creature['id'] == 'striker']
+        self.assertEqual([(creature['reaction'], creature['stationary']) for creature in strikers], [(2, True)])
+        self.assertIn('dodge and parry set to 100% and 0%', scenario['contract'])
+
+    def test_mutant_without_caster_avoidance_there_is_no_striker_and_no_avoidance_step(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.entry())
+        self.assertNotIn('set_combat_avoidance', [step['action'] for step in scenario['steps']])
+        self.assertFalse(any(creature.get('reaction') == 2 for creature in scenario['creatures']))
+
+    def test_a_strike_spell_or_a_bad_avoidance_is_refused(self):
+        refused = [self.entry(caster_avoidance={'dodge': 100, 'parry': 0}, strike_spell=133),
+                   self.entry(caster_avoidance={'dodge': 101, 'parry': 0}),
+                   self.entry(caster_avoidance={'dodge': True, 'parry': 0}),
+                   self.entry(caster_avoidance={'dodge': 50})]
+        for entry in refused:
+            with self.subTest(entry=entry.get('caster_avoidance')), self.assertRaisesRegex(ValueError, 'script_hit'):
+                behaviour_scenario(load_fixture_class_file(23), entry)
 
 
 class ScriptHitReceiverAuraTests(unittest.TestCase):

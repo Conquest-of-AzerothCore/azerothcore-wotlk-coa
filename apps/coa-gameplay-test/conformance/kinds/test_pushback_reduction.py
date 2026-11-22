@@ -92,7 +92,7 @@ class PushbackReductionTests(unittest.TestCase):
         stamped = replace(found, detail={**found.detail, **observed(expectation)})
         self.assertEqual(stamped.detail['metric'], 'pushback_casting')
         self.assertEqual(metric_evidence()['pushback_casting'], STATE)
-        self.assertEqual(state_promises()['casting'], r'\bcast\w*|haste|all actions')
+        self.assertEqual(state_promises()['casting'], r'\bcast\w*|haste|all actions|interrupt\w*')
         self.assertTrue(promised_state(stamped, 'and reduces your spell pushback suffered from taking damage by 50%.'))
         self.assertFalse(promised_state(stamped, 'Increases your Intellect by 5%'))
 

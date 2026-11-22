@@ -39,7 +39,14 @@
 - `ratios`: a non-empty list of `{numerator, denominator, expected, tolerance, source}`, two distinct arm indices.
   Each arm reads as its after sum less its before sum, and the ratio `numerator / denominator` is judged
   `|ratio - expected| <= tolerance`; `expected` is above 0 and stated with its `source`. A denominator arm that did not
-  move makes the ratio off, never ok. Each arm keeps its own absolute expectation.
+  move makes the ratio off, never ok. Each arm keeps its own absolute expectation. `denominator` may instead be a
+  list of two or more arm indices (without the numerator) whose deltas are summed; each listed arm is a ratio-only
+  arm. An optional `floor_count` names an arm that counts the events whose amounts are truncated to an integer one by
+  one (a ratio-only arm gives its count, another arm its delta): the low end of the band widens by that count over the
+  denominator, one unit per event, the high end does not move; `tolerance` must stay below 10% of `expected`, and a
+  widened low end at or below 90% of `expected` makes the ratio unmeasured, never ok (ADR 1028).
+- `allies: 0` (from 0 to 7, default 1) adds no ally player and no group step, for arms on the caster or the dummy
+  only; it needs arms and refuses `ally_health` and `ally_casts`.
 - `arms`: a list of `{actors, metric, fields?, before_expected, expected, tolerance, source, reach_source?,
   precondition?}`. Each
   arm reads `metric` on every unit of `actors` (the caster, the allies, the dummy when the scenario has it) with the
@@ -49,10 +56,15 @@
   `ally6` or `ally7` states its own `reach_source`, as the option's main reading does, with the same review duty; on
   any other arm it is refused. A ratio reads two arms, so a ratio over such an arm rests on that arm's
   `reach_source`.
+- A ratio-only arm `{actors, metric, count_metric, fields?, source, reach_source?}` omits `before_expected`,
+  `expected` and `tolerance` together, for totals no data states (a heal or damage amount). It reads `count_metric`
+  with the same fields beside `metric`, is judged only through the ratios that name it (an arm no ratio names is
+  refused), and any ratio over it is unmeasured unless its count moved, or when its denominator did not move.
 - `precondition: true` on an arm (ADR 1029, mentor D-169): the arm states a premise of the trial, never behaviour.
   Its metric must be a state metric; `combat_reach` (`METRIC_EVIDENCE` row `state` declared by this option, the
-  harness `GetCombatReach()` read) is accepted only on such an arm. A ratio may not name a precondition arm. Any other
-  value than `true` is refused; the key is written to the model and the contract only when set.
+  harness `GetCombatReach()` read) is accepted only on such an arm. A precondition arm is never ratio-only, and no
+  ratio names it as numerator, in a denominator or list, or as `floor_count` (ADR 1028, ADR 1029). Any other value
+  than `true` is refused; the key is written to the model and the contract only when set.
 
 Heal and energize totals (`spell_heal_count`, `spell_heal_total`, `spell_effective_heal_total`,
 `spell_energize_count`, `spell_energize_total`), and the spell damage, log and count reads (`spell_damage_count`,

@@ -1,12 +1,14 @@
+from dataclasses import replace
 import unittest
 
 from behaviours import behaviour_scenario
 from compare import judge_behaviour
-from coverage import EVENT, READBACK, STATE, metric_evidence
+from coverage import EVENT, READBACK, STATE, UNPROVEN, metric_evidence
 from metric_delta_options.ally_arm import parse
 from profile import DBC_DIR, load_fixture_class_file
 import run
 from test_behaviours import FakeRun, base_verdict
+from test_coverage import BUILD, claim, evidence_of
 
 SPELL = 527023
 ALLY_SPELL = 572769
@@ -25,6 +27,14 @@ PRIMARY_ARM = {'actors': ['ally2'], 'metric': 'health', 'before_expected': 5000,
                'source': 'a seeded primary heal'}
 REACH = 'a seeded Allies() filter by IsInRaidWith'
 RATIO = {'numerator': 0, 'denominator': 1, 'expected': 0.75, 'tolerance': 0.01, 'source': 'a seeded 75% copy'}
+ENERGIZE_ARM = {'actors': ['caster'], 'metric': 'spell_energize_total', 'count_metric': 'spell_energize_count',
+                'fields': {'spell': SPELL}, 'source': 'a seeded 5% mana return per strike'}
+DAMAGE_ARM = {'actors': ['caster'], 'metric': 'spell_damage_total', 'count_metric': 'spell_damage_count',
+              'fields': {'spell': SPELL}, 'source': 'a seeded strike'}
+COUNT_ARM = {'actors': ['caster'], 'metric': 'spell_energize_count', 'fields': {'spell': SPELL}, 'before_expected': 0,
+             'expected': 4, 'tolerance': 0, 'source': 'a seeded four strikes'}
+FLOOR_RATIO = {'numerator': 0, 'denominator': 1, 'expected': 0.05, 'tolerance': 0.001, 'floor_count': 2,
+               'source': 'a seeded floor(5% of each strike)'}
 REACH_ARM = {'actors': ['ally'], 'metric': 'combat_reach', 'before_expected': 1.5, 'expected': 1.5, 'tolerance': 0.01,
              'source': 'a seeded player combat reach', 'precondition': True}
 
@@ -50,6 +60,22 @@ def ally_entry(**option) -> dict:
 
 def ratio_entry(**ratio) -> dict:
     return steed_entry(ally_arm={'allies': 2, 'arms': [COPY_ARM, PRIMARY_ARM], 'ratios': [{**RATIO, **ratio}]})
+
+
+STRIKE_ARM = {'actors': ['caster'], 'metric': 'spell_damage_total', 'count_metric': 'spell_damage_count',
+              'fields': {'spell': ALLY_SPELL}, 'source': 'a seeded second strike'}
+SUMMED_RATIO = {'numerator': 0, 'denominator': [1, 2], 'expected': 0.05, 'tolerance': 0.001, 'floor_count': 0,
+                'source': 'a seeded floor(5% of each of two strikes)'}
+
+
+def summed_ratio_entry(**ratio) -> dict:
+    return steed_entry(ally_arm={'allies': 0, 'arms': [ENERGIZE_ARM, DAMAGE_ARM, STRIKE_ARM],
+                                 'ratios': [{**SUMMED_RATIO, **ratio}]})
+
+
+def caster_ratio_entry(**ratio) -> dict:
+    return steed_entry(ally_arm={'allies': 0, 'arms': [ENERGIZE_ARM, DAMAGE_ARM, COUNT_ARM],
+                                 'ratios': [{**FLOOR_RATIO, **ratio}]})
 
 
 def labels_of(scenario: dict) -> list:
@@ -180,6 +206,19 @@ class AllyArmScenarioTests(unittest.TestCase):
         for option in options:
             with self.subTest(option=option), self.assertRaises(ValueError):
                 self.scenario(steed_entry(ally_arm=option))
+
+    def test_a_precondition_arm_is_never_ratio_only_and_never_named_by_a_ratio(self):
+        reach = {**REACH_ARM, 'actors': ['caster']}
+        ratio_only_reach = {key: value for key, value in reach.items()
+                            if key not in ('before_expected', 'expected', 'tolerance')}
+        ratio_only_reach['count_metric'] = 'spell_go_count'
+        with self.assertRaisesRegex(ValueError, 'never ratio-only'):
+            self.scenario(steed_entry(ally_arm={'allies': 0, 'arms': [ENERGIZE_ARM, DAMAGE_ARM, ratio_only_reach],
+                                                'ratios': [FLOOR_RATIO]}))
+        for arms, ratio in (([ENERGIZE_ARM, DAMAGE_ARM, reach], {**SUMMED_RATIO, 'denominator': [1, 2]}),
+                            ([ENERGIZE_ARM, DAMAGE_ARM, reach], FLOOR_RATIO)):
+            with self.subTest(ratio=ratio), self.assertRaisesRegex(ValueError, 'never a precondition arm'):
+                self.scenario(steed_entry(ally_arm={'allies': 0, 'arms': arms, 'ratios': [ratio]}))
 
     def test_seven_allies_are_grouped_players(self):
         scenario, [expectation] = self.scenario(steed_entry(
@@ -312,6 +351,40 @@ class AllyArmScenarioTests(unittest.TestCase):
             with self.subTest(option=option), self.assertRaisesRegex(ValueError, 'ally_arm'):
                 self.scenario(steed_entry(ally_arm={'allies': 2, **option}))
 
+    def test_allies_zero_reads_caster_arms_with_no_ally_player_or_group_step(self):
+        scenario, [expectation] = self.scenario(caster_ratio_entry())
+        run.validate(scenario)
+        self.assertEqual([player['id'] for player in scenario['players']], ['caster'])
+        self.assertNotIn('group', [step['action'] for step in scenario['steps']])
+        arms = expectation.model['ally_arm']['arms']
+        self.assertEqual(arms[0]['count_after'], [f'{arms[0]["after"][0]} count'])
+        self.assertNotIn('expected', arms[0])
+        self.assertEqual(expectation.model['ally_arm']['ratios'][0]['floor_count'], 2)
+        self.assertIn(arms[0]['count_after'][0], labels_of(scenario))
+        self.assertIn('judged only through its ratio', scenario['contract'])
+        self.assertIn('one unit per counted event', scenario['contract'])
+
+    def test_allies_zero_without_caster_arms_and_a_bad_floor_count_are_refused(self):
+        refused = [steed_entry(ally_arm={'allies': 0}),
+                   steed_entry(ally_arm={'allies': 0, 'arms': [HEALTH_ARM], 'ally_health': [1, 2]}),
+                   steed_entry(ally_arm={'allies': -1, 'arms': [HEALTH_ARM]}),
+                   steed_entry(ally_arm={'allies': 0, 'arms': [ENERGIZE_ARM, DAMAGE_ARM]}),
+                   steed_entry(ally_arm={'allies': 0, 'arms': [{**ENERGIZE_ARM, 'count_metric': 'no_such_metric'},
+                                                               DAMAGE_ARM], 'ratios': [RATIO]}),
+                   steed_entry(ally_arm={'allies': 0, 'arms': [{**ENERGIZE_ARM, 'expected': 1}, DAMAGE_ARM],
+                                         'ratios': [RATIO]}),
+                   caster_ratio_entry(floor_count=3), summed_ratio_entry(denominator=[1]),
+                   summed_ratio_entry(denominator=[0, 1]), summed_ratio_entry(denominator=[1, 1]),
+                   summed_ratio_entry(denominator=[1, 3]),
+                   steed_entry(ally_arm={'allies': 0, 'arms': [ENERGIZE_ARM, DAMAGE_ARM, COUNT_ARM],
+                                         'ratios': [{**SUMMED_RATIO, 'denominator': [1, 2]}]}),
+                   steed_entry(ally_arm={'allies': 2, 'arms': [COPY_ARM, PRIMARY_ARM],
+                                         'ratios': [{**RATIO, 'floor_count': 0, 'tolerance': 0.05}]}),
+                   caster_ratio_entry(floor_count=True), caster_ratio_entry(tolerance=0.01)]
+        for entry in refused:
+            with self.subTest(entry=entry['ally_arm']), self.assertRaisesRegex(ValueError, 'ally_arm'):
+                self.scenario(entry)
+
     def test_an_ally_cast_the_scenario_cannot_prove_is_refused(self):
         entries = [ally_entry(ally_casts=[ALLY_SPELL]),
                    {**ally_entry(ally_casts=[SPELL]), 'learn': [SPELL]},
@@ -421,6 +494,79 @@ class AllyArmVerdictTests(unittest.TestCase):
         verdict = self.judged(ratio_entry(), self.ratio_values(copy_after=5000, primary_after=5000))
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('none, the denominator arm did not move', verdict.explanation)
+
+    def floor_values(self, energize=200, damage=4000, strikes=4, landed=(4, 4)) -> dict:
+        return {'values': {(0, 'before'): 0, (0, 'after'): energize, (1, 'before'): 0, (1, 'after'): damage,
+                           (2, 'before'): 0, (2, 'after'): strikes},
+                'counts': {0: landed[0], 1: landed[1]}}
+
+    def judged_counted(self, entry: dict, readings: dict, main=(1.0, 2.0)):
+        _, [expectation] = behaviour_scenario(templar(), entry)
+        values = {expectation.model['before_label']: main[0], expectation.model['after_label']: main[1]}
+        for index, arm in enumerate(expectation.model['ally_arm']['arms']):
+            for moment in ('before', 'after'):
+                for label in arm[moment]:
+                    values[label] = readings['values'][(index, moment)]
+            if 'count_metric' in arm:
+                values[arm['count_before'][0]] = 0
+                values[arm['count_after'][0]] = readings['counts'][index]
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+    def test_a_floor_count_widens_only_the_low_end_by_one_unit_per_event(self):
+        exact = self.judged_counted(caster_ratio_entry(), self.floor_values())
+        self.assertEqual(exact.status, 'ok')
+        self.assertIn('0.048 to 0.051, the low end widened by 0.001', exact.explanation)
+        truncated = self.judged_counted(caster_ratio_entry(), self.floor_values(energize=196))
+        self.assertEqual(truncated.status, 'ok')
+        self.assertEqual(self.judged_counted(caster_ratio_entry(), self.floor_values(energize=205)).status, 'alert')
+
+    def test_mutant_a_ratio_ten_percent_low_or_high_still_alerts_with_the_widening(self):
+        for energize in (180, 220):
+            with self.subTest(energize=energize):
+                verdict = self.judged_counted(caster_ratio_entry(), self.floor_values(energize=energize))
+                self.assertEqual(verdict.status, 'alert')
+
+    def test_a_widening_that_reaches_ten_percent_below_is_unmeasured(self):
+        verdict = self.judged_counted(caster_ratio_entry(), self.floor_values(energize=20, damage=400, strikes=4))
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('no longer excluding 10% below 0.05', verdict.explanation)
+
+    def test_a_ratio_only_arm_without_landed_events_is_unmeasured(self):
+        for landed in ((0, 4), (4, 0)):
+            with self.subTest(landed=landed):
+                verdict = self.judged_counted(caster_ratio_entry(), self.floor_values(landed=landed))
+                self.assertEqual(verdict.status, 'unmeasured')
+                self.assertIn('no event of ratio-only arm(s)', verdict.explanation)
+        unmoved = self.judged_counted(caster_ratio_entry(), self.floor_values(energize=0, damage=0))
+        self.assertEqual(unmoved.status, 'unmeasured')
+
+    def summed_values(self, energize=200, first=2000, second=2000, landed=(4, 2, 2)) -> dict:
+        return {'values': {(0, 'before'): 0, (0, 'after'): energize, (1, 'before'): 0, (1, 'after'): first,
+                           (2, 'before'): 0, (2, 'after'): second},
+                'counts': dict(enumerate(landed))}
+
+    def test_a_denominator_list_sums_its_arms_and_widens_by_the_numerator_count(self):
+        verdict = self.judged_counted(summed_ratio_entry(), self.summed_values())
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('200 / 4000 = 0.05', verdict.explanation)
+        self.assertIn('the low end widened by 0.001', verdict.explanation)
+        self.assertEqual(self.judged_counted(summed_ratio_entry(), self.summed_values(energize=100)).status, 'alert')
+        single = self.judged_counted(caster_ratio_entry(), self.floor_values())
+        self.assertIn('200 / 4000 = 0.05', single.explanation)
+
+    def test_a_denominator_list_with_an_arm_whose_events_did_not_land_is_unmeasured(self):
+        for landed in ((4, 0, 2), (4, 2, 0)):
+            with self.subTest(landed=landed):
+                verdict = self.judged_counted(summed_ratio_entry(), self.summed_values(landed=landed))
+                self.assertEqual(verdict.status, 'unmeasured')
+
+    def test_an_unmeasured_ratio_never_counts_as_behaviour_in_coverage(self):
+        ok = self.judged_counted(caster_ratio_entry(), self.floor_values())
+        unmeasured = self.judged_counted(caster_ratio_entry(), self.floor_values(landed=(0, 4)))
+        clauses = [claim('regenerate mana equal to 5% of the damage dealt', ok.label, spell=SPELL)]
+        self.assertEqual((ok.status, unmeasured.status), ('ok', 'unmeasured'))
+        self.assertNotEqual(evidence_of(clauses, [replace(ok, build=BUILD)])[0], [UNPROVEN])
+        self.assertEqual(evidence_of(clauses, [replace(unmeasured, build=BUILD)])[0], [UNPROVEN])
 
     def reach_entry(self) -> dict:
         return steed_entry(ally_arm={'allies': 2, 'arms': [HEALTH_ARM, AURA_ARM, REACH_ARM]})

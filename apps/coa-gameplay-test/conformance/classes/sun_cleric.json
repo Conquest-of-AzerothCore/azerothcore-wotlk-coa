@@ -47,7 +47,22 @@
     "skill 498": 300.0
   },
   "log_queries": {},
-  "off_hand_weapons": [],
+  "off_hand_weapons": [
+    {
+      "item": 30754,
+      "slot": 16,
+      "subclass": 4,
+      "min_damage": 51.63,
+      "max_damage": 82.65,
+      "speed_ms": 1800,
+      "inventory_type": 13,
+      "normalized_speed": 2.4,
+      "skill_line": 54,
+      "grants": [
+        707072
+      ]
+    }
+  ],
   "known_auras": [
     887015
   ],
@@ -7566,6 +7581,14 @@
       "observe_source": "760379 Sunstorm Effect[1] aura 147 SPELL_AURA_MECHANIC_IMMUNITY_MASK MiscValue 1733, Effect[2] aura 263 SPELL_AURA_ALLOW_ONLY_ABILITY, DurationIndex 32 = 6000 ms. Glare 807870 is attempted at the dummy in both phases: accepted before Sunstorm (control: failure 0) and refused after a real Sunstorm cast 1600 ms earlier with SPELL_FAILED_SPELL_IN_PROGRESS (105, the refusal of every non-triggered cast while the aura 263 flag is set, Spell.cpp:5825). Moving is not covered by this entry. Reference search 2026-11-22: server DBC 760379 description; ascension-data advancement.tsv lists Sunstorm as a Valkyr node only; bindmysoul snapshot has no entry; coa-history spell 760379 0 events in 186 logs; nothing found beyond the tooltip and the DBC."
     },
     {
+      "spell": 760379,
+      "name": "Sunstorm (you can move)",
+      "kind": "move_under_aura",
+      "label_suffix": "move",
+      "quote": "While under the effects of Sunstorm, you can move but cannot perform any other abilities",
+      "observe_source": "760379 Sunstorm (installed DBC): ChannelInterruptFlags 0, a 6000 ms self aura. Movement is driven through the existing client_packet action (MSG_MOVE_START_FORWARD then MSG_MOVE_STOP reach WorldSession::HandleMovementOpcodes, consumed false), no harness action (mentor D-171). Control: without the aura the same packets move the player 2 yd, which proves the packet moves the player; under the aura the player must move 2 yd and the aura must stay. t10 probe 2026-11-22 (build 0df866d2): 2389.03 -> 2391.03 without and 2391.03 -> 2393.03 under the aura, aura 1 at start, moved and stopped. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); 760379 appears only in the grant tables (skill_line_ability, advancement) and has 0 logged events; nothing found beyond the tooltip and the DBC."
+    },
+    {
       "spell": 804629,
       "name": "Spears of Glory (Dawnsear is instant cast)",
       "kind": "metric_delta",
@@ -9873,6 +9896,64 @@
       "before_expected": 0,
       "expected": 1,
       "observe_source": "800612 Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT, EffectTriggerSpell 807853 (SCHOOL_DAMAGE at the target), the event 'damage && automatic' (AscensionSunClericEvents.cpp:136). Spec Valkyr (two one-hand 2800 ms weapons): each phase attacks for 5 swing intervals with both hands, about 10 damaging auto attacks. The count of 807853 damage events is 0 in the phase without the aura (control) and at least 1 in the phase with it. This entry proves only that Holy strikes follow auto attacks under the aura, not one per swing: the swings of the same window are not read by any kind, so no count is expected (tool need, returned). Residual: a proc rate of 50% or more leaves at least 1 strike in about 10 swings with probability 1 - 0.5^10 = 0.999; the control phase reads 0 by construction (no aura, no 807853 source).",
+      "after_at_least": 1
+    },
+    {
+      "spell": 800612,
+      "name": "Champion of the Sun (Holy strike amount is 100% of the auto attack damage)",
+      "kind": "metric_delta",
+      "variant": "holy_amount",
+      "label_suffix": "holy_amount",
+      "quote": "causing your melee auto attacks to deal an additional $s1% of the damage dealt as Holy damage.",
+      "target": "dummy",
+      "expire_ms": 500,
+      "attack_swings": 5,
+      "gate_spell": 800612,
+      "gate_cast": true,
+      "trigger_spell": 800612,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 807853,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_with_resist_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 807853,
+              "target": "dummy"
+            },
+            "source": "Copy(player, target, 807853, CalculatePct(damage, Amount(800612))) on each damaging auto attack (AscensionSunClericEvents.cpp:376), read with its resisted part (spell_damage_with_resist_total): the copy sets the amount before the target's mitigation, and 823764 cannot remove resists in an attack_swings phase"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "melee_damage_total",
+            "count_metric": "melee_damage_count",
+            "fields": {},
+            "source": "the caster's damaging auto attacks, both hands, that the Holy strikes take their amount from"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 1.0,
+            "tolerance": 0.02,
+            "source": "800612 Effect[0] BasePoints 99 + 1 = 100 ($s1): each Holy strike is 100% of the auto attack damage dealt; CalculatePct of 100% truncates nothing; the band 0.98 to 1.02 excludes 0.9 and 1.1"
+          }
+        ]
+      },
+      "observe_source": "Amount half of the 800612 clause. Same phases as holy_strikes (5 swing intervals with both hands at the dummy, the before phase without the aura is the control and reads 0 Holy strikes), with two ratio-only arms read after each main reading: the 807853 damage total with its resisted part at the dummy (with its count) and the caster's melee damage total (with its damaging-hit count). The main reading expects 1 or more Holy strikes after (expected 1 as a floor through the count arm). The ratio of the after-phase deltas must be 1.0 within 0.02, unmeasured unless both landed. Expected from 800612 Effect[0] BasePoints 99 + 1 (installed DBC) and the tooltip; nothing from a run. The resisted part is the CoA linear monster resistance: a creature victim and a non-physical school (Unit.cpp:120-124, CoA.MonsterResistance.Enable default true, WorldConfig.cpp:387), resistance = level x PerLevel 1.0 (Unit.cpp:2566-2587), 60 for the level-60 dummy, 60 / PerPercent 5 = 12% (WorldConfig.cpp:388-394), which 823764 cannot remove; the numerator sums damage and resisted part. 807853 is DmgClass 2 without SPELL_ATTR2_CANT_CRIT: a critical Holy copy would read above 1.02 and alert, so a crit can only give a false alert, never a false ok. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); bindmysoul gives \"an additional 50%\", an older text; the installed DBC Effect[0] BasePoints 99 + 1 = 100 wins (trust order). coa-history holds 2114 SPELL_DAMAGE events of 807853 in 11 logs, not paired with their swings, so no ratio is read from them.",
       "after_at_least": 1
     },
     {
@@ -12668,6 +12749,54 @@
       "striker_entry": 36
     },
     {
+      "spell": 807507,
+      "name": "Valkyr's Grip (off-hand swing)",
+      "kind": "hit_ratio",
+      "variant": "offhand_swing",
+      "label_suffix": "offhand_swing",
+      "quote": "Increases your off-hand Weapon Damage dealt by $s1%",
+      "expected": 1.31,
+      "swing_hand": 1,
+      "metric": "melee_damage_total",
+      "control": {},
+      "treatment": {
+        "learn": [
+          807507
+        ]
+      },
+      "critical": false,
+      "off_hand_item": 30754,
+      "trials": 30,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "expected_source": "807507 Effect[0] aura 122 (off-hand damage percent), EffectBasePoints 30 + EffectDieSides 1 = 31 ($s1, installed DBC): off-hand auto attack damage x1.31. The off-hand item 30754 (one-hand mace, the Templar class file's record) is equipped after its grant 707072 (Effect[2] SPELL_EFFECT_DUAL_WIELD, the class's own dual-wield grant, Valkyr weapon_set_spells) is learned, so the equip is not refused (the earlier error 20). Control: the same off-hand swings before the learn. Residual chance: the two pair2 runs (20 trials each) read sampling half-widths of 0.42 to 0.50 points against bands of +-2 (807507) and +-3.05 (807873) points, and their excluded limits (28.55 to 33.45, 57.45 to 64.55) stay inside a 10% deviation of the expected bonus. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); bindmysoul gives \"by 20%\", an older text; the installed DBC Effect[0] BasePoints 30 + 1 = 31 wins (trust order). 0 logged events; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 807873,
+      "name": "Valkyr's Grip (rank 2) (off-hand swing)",
+      "kind": "hit_ratio",
+      "variant": "offhand_swing",
+      "label_suffix": "offhand_swing",
+      "quote": "Increases your off-hand Weapon Damage dealt by $s1%",
+      "expected": 1.61,
+      "swing_hand": 1,
+      "metric": "melee_damage_total",
+      "control": {},
+      "treatment": {
+        "learn": [
+          807873
+        ]
+      },
+      "critical": false,
+      "off_hand_item": 30754,
+      "trials": 30,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "expected_source": "807873 Effect[0] aura 122 (off-hand damage percent), EffectBasePoints 60 + EffectDieSides 1 = 61 ($s1, installed DBC): off-hand auto attack damage x1.61. The off-hand item 30754 (one-hand mace, the Templar class file's record) is equipped after its grant 707072 (Effect[2] SPELL_EFFECT_DUAL_WIELD, the class's own dual-wield grant, Valkyr weapon_set_spells) is learned, so the equip is not refused (the earlier error 20). Control: the same off-hand swings before the learn. Residual chance: the two pair2 runs (20 trials each) read sampling half-widths of 0.42 to 0.50 points against bands of +-2 (807507) and +-3.05 (807873) points, and their excluded limits (28.55 to 33.45, 57.45 to 64.55) stay inside a 10% deviation of the expected bonus. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); bindmysoul and sidekick do not hold it; it appears only in the grant tables (mind_of_ascension_talent, advancement). 0 logged events; nothing found beyond the tooltip and the DBC."
+    },
+    {
       "spell": 707072,
       "name": "Valkyr's Grip (melee hit chance)",
       "kind": "metric_delta",
@@ -12706,6 +12835,40 @@
       "metric": "spell_hit_chance",
       "fields": {},
       "observe_source": "707072 Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 5 (+1 = 6, $707072s2); StatSystem.cpp:1042 m_modSpellHitChance = GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE, SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT). The caster's live value (STATE read) around a Bless 804247 cast, before 707072 is learned (control, gain 0) and after: gain 6. The scenario wears the default weapon set: 707072 is mapped to no set in spell_weapon_sets, so the learn between the phases is the only change. Reference search 2026-11-22: server DBC 707072; the Necromancer entry 803291 (aura 333 hit chance reads); weapon_set_spells.Valkyr; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 707072,
+      "name": "Valkyr's Grip (dual wield and two-handers in each hand)",
+      "kind": "equip_grant",
+      "label_suffix": "equip",
+      "quote": "Allows you to dual wield and to wield a Two-Handed Mace, Sword, or Polearm in each hand",
+      "pairs": [
+        {
+          "main_hand": 2524,
+          "off_hand": 30754,
+          "skill_line": 54,
+          "source": "dual wield: the class one-hand mace 2524 with the one-hand mace 30754 (off_hand_weapons)"
+        },
+        {
+          "main_hand": 2529,
+          "off_hand": 2529,
+          "skill_line": 55,
+          "source": "Two-Handed Sword: 2529, the Valkyr weapon set item"
+        },
+        {
+          "main_hand": 1197,
+          "off_hand": 1197,
+          "skill_line": 160,
+          "source": "Two-Handed Mace: Giant Mace 1197 (data/sql/base item_template class 2 subclass 5 InventoryType 17, RequiredLevel 10)"
+        },
+        {
+          "main_hand": 11864,
+          "off_hand": 11864,
+          "skill_line": 229,
+          "source": "Polearm: White Bone Spear 11864 (data/sql/base item_template class 2 subclass 6 InventoryType 17, RequiredLevel 0)"
+        }
+      ],
+      "observe_source": "707072 Effect[2] SPELL_EFFECT_DUAL_WIELD (40) and Effect[0] SPELL_EFFECT_TITAN_GRIP (155) (installed DBC). Control: the same four off-hand equips with 707072 unlearned are refused (the harness fails the step if one is accepted); learned, each is accepted and both hands hold their items. Skill lines 55, 160 and 229 are set so proficiency is not what refuses the equip. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); bindmysoul gives the same text (\"Allows you to dual wield ...\"); 0 logged events; nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 804247,
@@ -16035,7 +16198,10 @@
       "quote": "Reduces the duration of stun effects on you by $s2%.",
       "expected_ratio": 0.8,
       "vehicle_spell": 2880,
-      "striker_entry": 36
+      "striker_entry": 36,
+      "attempts": 1,
+      "margin_ms": 50,
+      "observe_source": "704581 Effect[1] $s2 = 20: stun durations on the caster x0.8. Vehicle Stun 2880 (installed DBC duration 10000 ms) cast once per phase (attempts 1) so the read is a single, undiminished landing: the earlier design landed it three times 500 ms apart and read a diminished re-application (1994 ms before). Expected delta = 10000 x (0.8 - 1) = -2000 ms between the landing-corrected durations (each read plus its elapsed time since the cast); margin 50 ms plus the run's tick overshoot, unmeasured unless below 10% of the expected delta (200 ms), so a 10% deviation either side is excluded. The 27 s gap between the phases exceeds the 15 s diminishing-returns reset. Control: the before phase without 704581. Expected from the installed DBC and the tooltip; nothing from a run. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); bindmysoul gives the same -20%; 0 logged events; nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 805581,
@@ -22967,6 +23133,121 @@
       "observe_source": "504848 Mercy Effect[0] target 21 TARGET_UNIT_TARGET_ALLY, EffectChainTarget[0] 6: the explicit ally plus ChainTarget - 1 = 5 more units (Spell.cpp:1895-1939, SearchChainTargets :2200-2300; reach_source on the arm). Mercy is cast at ally with six other players (the caster and ally2..ally7, all within the 10 yd hop): the aura is read on the target (1) and summed over the six others, the caster and ally2..ally7 (5, the cap of the tooltip \"up to 5 nearby allies\"); 0 in the uncast control before. Uncapped, the six others would all read 1 (6, and 7 with the target), so a cap of 6 or more would read 6 on the others. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for the count; nothing found."
     },
     {
+      "spell": 504848,
+      "name": "Mercy (abolishes 2 of 3 disease effects per pulse)",
+      "kind": "dispel_count",
+      "label_suffix": "abolish",
+      "quote": "abolishing $503650s1 disease effects,",
+      "cast_spell": 504848,
+      "debuffs": [
+        [
+          3,
+          [
+            55095,
+            55078,
+            3427
+          ]
+        ]
+      ],
+      "trials": 1,
+      "arms": [
+        {
+          "name": "no_cast",
+          "cast": false,
+          "expected": [
+            [
+              3,
+              0
+            ]
+          ]
+        },
+        {
+          "name": "cast",
+          "expected": [
+            [
+              3,
+              2
+            ]
+          ]
+        }
+      ],
+      "expected_source": "503650 Effect[0] SPELL_EFFECT_DISPEL EffectMiscValue 3 (DISPEL_DISEASE), $503650s1 = 2 (installed DBC); Mercy 504848 Effect[0] aura 23 periodic trigger of 503650, the first 503650 cast on application (period_held reads 1 cast at 2750 ms). The ally carries three diseases (Frost Fever 55095, Blood Plague 55078, Infected Wound 3427, each Dispel 3) so two removed is not all; the read is 800 ms after the cast, before the 3000 ms pulse. Control: the no_cast arm waits and reads the same way with no Mercy cast and expects 0, so a removal by anything else alerts. One trial per arm: a dispel count is not random and a recast would refresh a running aura. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); bindmysoul gives the same \"abolishing 2 disease effects\"; 0 logged events of 504848 and 503650; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 300341,
+      "name": "Exorcism (Sanctify dispels one more effect of each type)",
+      "kind": "dispel_count",
+      "label_suffix": "additional",
+      "quote": "Sanctify now dispels $s1 additional effect.",
+      "cast_spell": 524968,
+      "debuffs": [
+        [
+          3,
+          [
+            55095,
+            55078,
+            3427
+          ]
+        ],
+        [
+          4,
+          [
+            2818,
+            25810,
+            3409
+          ]
+        ],
+        [
+          1,
+          [
+            31589,
+            15487,
+            1130
+          ]
+        ]
+      ],
+      "arms": [
+        {
+          "name": "base",
+          "expected": [
+            [
+              3,
+              1
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        },
+        {
+          "name": "learned",
+          "learns": [
+            300341
+          ],
+          "expected": [
+            [
+              3,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              1,
+              2
+            ]
+          ]
+        }
+      ],
+      "expected_source": "Mentor D-172. Sanctify 524968 (installed DBC) has three SPELL_EFFECT_DISPEL effects, EffectMiscValue 3 (disease), 4 (poison) and 1 (magic), EffectBasePoints 0 + EffectDieSides 1 = 1 each; Exorcism 300341 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 8 (all effects) +1 on Sanctify's class mask (family 33, flags word 1 = 16384), so each type goes 1 -> 2. The ally carries three debuffs of each type Sanctify dispels: diseases Frost Fever 55095, Blood Plague 55078, Infected Wound 3427 (Dispel 3), poisons Deadly Poison 2818, 25810, Crippling Poison 3409 (Dispel 4), magic Slow 31589, Silence 15487, Hunter's Mark 1130 (Dispel 1, installed DBC): without Exorcism one of each type is removed per cast (control arm, nothing learned), with it learned two of each type and one of each remains, so a removal of more than two of a type alerts as one of fewer does. Exorcism is learned, never set with set_aura. A learned arm that removes only one more in total is a finding against the data, not adapted. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); bindmysoul gives the same \"1 additional effect\"; coa-history holds 1376 SPELL_DISPEL events of Sanctify 524968 in 28 logs, not paired with a known debuff load, so no count per cast is read from them; nothing found beyond the tooltip and the DBC."
+    },
+    {
       "spell": 804257,
       "name": "Glaring Rays (the caster hastes by 3% + 3%)",
       "kind": "metric_delta",
@@ -23747,6 +24028,83 @@
       "observe_source": "301011 Effect[0] aura 354 ASCENSION_PROC_PERCENT_EVENT (BasePoints 99 +1 = 100, $s1), trigger 301012 (Effect[0] SPELL_EFFECT_HEAL, TargetA 31 TARGET_UNIT_DEST_AREA_ALLY, EffectRadiusIndex 9). AscensionSunClericAbilities.cpp:289-300: when the caster's own Gavel of Light heal 707522 (State.gavelHealing, set by the Gavel of Light 800611 branch at :326-335) lands on the caster with 301011 known, Allies(player, player, Radius(301012)) minus the caster is cut to 5 (allies.resize(5)) and each receives Copy(player, ally, 301012, CalculatePct(healing, Amount(301011))). Allies() keeps units in the caster's raid and friendly (AscensionSunCleric.cpp:149-157), so 3 grouped allies stand within range and the count read is the number of 301012 heal events the caster cast: 3. The count is read as the caster's spell_heal_count of 301012 (events the caster itself cast, any target), 0 in the before phase (control: 301011 not learned, Gavel of Light cast the same way) and 3 after the learn; the counter is cumulative and the before reading is 0, so the after reading is the gain. Gavel of Light 800611 at the dummy at 5 yd with the caster held at 50% health (so the self heal is not zero); 984954 makes the Gavel hit a critical strike in both phases, 823764 removes resists; class file ratings leave no miss: residual failure probability 0 per pair. Weapon set Blessings (spell_weapon_sets 301011). The amount (100% of the self heal) is not read here (see the ledger row). Reference search 2026-11-22: coa-history spell 301012 Holy Knight: SPELL_HEAL 714 events in 4 logs (mean 949); 301011: 0 events in 186 logs (a passive); ascension-data advancement rows carry the acquisition only. The independent review of this batch (.agents/plans/sun-cleric-b8d-review/report.md, M5; not re-read here) found in one raid log (2026-08-22, 15 players, three fights) that each 707522 self heal is followed by 301012 heals in groups of 5 (69 of 73 groups, the others 3 or 4) and that each 301012 amount equals the 707522 amount (ratio 1.000 in 245 of 245 heals): both agree with the tooltip (up to 5 allies, 100% of the amount), and are not a measurement of ours."
     },
     {
+      "spell": 301011,
+      "name": "Holy Knight (each ally heal is 100% of the Gavel of Light self heal)",
+      "kind": "metric_delta",
+      "variant": "amount_ratio",
+      "label_suffix": "amount_ratio",
+      "quote": "Your Gavel of Light now additionally heals up to 5 nearby allies for $s1% of the amount it heals you.",
+      "trigger_spell": 800611,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 301012
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 6,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 301012
+            },
+            "source": "Copy(player, ally, 301012, CalculatePct(healing, Amount(301011))) for each of the first 5 allies (AscensionSunClericAbilities.cpp:289-300): the 301012 heals the caster cast, any target"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 707522,
+              "target": "caster"
+            },
+            "source": "the Gavel of Light self heal 707522 that the copies take their amount from"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 5.0,
+            "tolerance": 0.05,
+            "source": "301011 Effect[0] BasePoints 99 + 1 = 100 ($s1): each of the 5 healed allies receives 100% of the self heal, so the after-phase 301012 total is 5 x the after-phase 707522 total; CalculatePct of 100% truncates nothing; the band 4.95 to 5.05 excludes 4.5 and 5.5 (-10% and +10%)"
+          }
+        ]
+      },
+      "observe_source": "Amount half of the 301011 clause. Same scenario as allies_cap (Gavel of Light 800611 at the dummy at 5 yd, caster at 50% health, 984954 forced critical and 823764 no resist in both phases, 6 grouped allies at 5000 of 10000 health), with two ratio-only arms read after each main reading: the 301012 heal total the caster cast (with its count) and the 707522 self heal total on the caster (with its count). Control: the before phase (301011 not learned) casts Gavel of Light the same way and reads 0 of 301012. The ratio of the after-phase deltas must be 5 (5 allies x 100%) within 0.05; it is unmeasured unless both heals landed in the after phase. Expected from 301011 Effect[0] BasePoints 99 + 1 (installed DBC) and the tooltip; nothing from a run. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); 301011 appears only in the advancement grant table; coa-history holds 714 SPELL_HEAL events of 301012 in 4 logs, not paired with the Gavel of Light self heals, so no ratio is read from them; nothing found beyond the tooltip and the DBC."
+    },
+    {
       "spell": 680643,
       "name": "Valiance (melee attack speed)",
       "kind": "metric_delta",
@@ -23889,6 +24247,96 @@
       "minimum_hits": 15,
       "cast_power": 1363,
       "observe_source": "Tooltip 803913: 'Strike with both weapons dealing Weapon Damage plus $s1 Physical damage'; $s1 = 76 (803913 EffectBasePoints[0] 75 + 1, EffectDieSides 1), passed to each hand's strike by SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (803913 Effect[0] 142 -> 800691 main hand, Effect[2] 142 -> 802566 off hand). Each strike is one SPELL_EFFECT_NORMALIZED_WEAPON_DMG (121), SchoolMask 1 (Physical). Model part normalized_value (ADR 0762): the hand's weapon roll (Valkyr set, two 2529 Zweihander 73.62 to 103.34, 2800 ms, normalized speed 3.3, learned 707072 Titan's Grip) plus attack power / 14 x its normalized speed, times 0.5 for the off hand, plus the value points (halved and truncated on the off hand), then armor mitigation; the 99% interval of the mean of 40 non-critical hits is judged, and the control arm (no cast) must count 0 hits of 802566. The strikes 800691 and 802566 are mapped to the Valkyr weapon set in spell_weapon_sets so that the judged weapon is the one the scenario wears (the spell 803913 maps to Valkyr). Class file ratings leave no miss. Reference search 2026-11-22: coa-history 800691 SPELL_DAMAGE 3417 events in 14 logs (mean 731) and 802566 3362 events (mean 503). Per player (coa-history spell_events, SPELL_DAMAGE mean of 802566 over 800691, players with 20 or more hits of each) the off-hand to main-hand ratio is 227.0/354.8 = 0.64, 820.0/1266.6 = 0.65, 618.8/866.5 = 0.71, 342.1/432.6 = 0.79, 203.7/255.4 = 0.80 and 374.8/440.6 = 0.85 for six players (23 to 1406 hits each), against 0.50 here by model and measure (the engine's UNIT_MOD_DAMAGE_OFFHAND 0.5 on the weapon and the fixed bonus, SpellEffects.cpp:4689-4706, ADR 0762; the off hand measures plus 38 where the tooltip states 'plus $s1' for each strike). The live ratio is above ours for every player: a lead on the off-hand share, not an agreement and not a proven difference (live gear, off-hand talents and crits are unknown), held open for the owner; no value is taken from the live figures; bindmysoul has no Glorious Execution value; coabuildhub index lists the name only; nothing found for the flat 76 beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 803913,
+      "name": "Glorious Execution (mana restored is 5% of the damage of both strikes)",
+      "kind": "metric_delta",
+      "variant": "mana_ratio",
+      "label_suffix": "mana_ratio",
+      "quote": "and regenerate mana equal to $807451s1% of the damage dealt.",
+      "trigger_spell": 803913,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 807552
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "player_attack_power": 20000,
+      "cast_power": 1363,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_energize_total",
+            "count_metric": "spell_energize_count",
+            "fields": {
+              "spell": 807552
+            },
+            "source": "Mana(player, CalculatePct(dealt, Amount(807451)), 807552) for each Glorious Execution strike 800691 and 802566 (AscensionSunClericAbilities.cpp:377-382)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 800691,
+              "target": "dummy"
+            },
+            "source": "the main-hand strike 800691"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 802566,
+              "target": "dummy"
+            },
+            "source": "the off-hand strike 802566"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": [
+              1,
+              2
+            ],
+            "expected": 0.05,
+            "tolerance": 0.001,
+            "floor_count": 0,
+            "source": "807451 Effect[0] BasePoints 4 + 1 = 5 ($807451s1): 5% of the damage of each strike, truncated to an integer per strike by CalculatePct, so the low end widens by one mana per energize event; with +20000 attack power each forced-critical strike deals thousands, so the widened band stays far inside 0.045 to 0.055 (-10% and +10%), and the verdict is unmeasured if it does not"
+          }
+        ],
+        "control_wait": true
+      },
+      "observe_source": "Behaviour half of the 803913 mana clause. Glorious Execution 803913 is cast at the dummy in the after phase only (Amount(807451) is read from the data without a caster, Sun Cleric ADR 0018); the before phase is the control without the cause: no 803913 cast, the same timed wait (control_wait), so it reads 0 energize events of 807552 and 0 strike damage, +20000 attack power, 984954 forced critical, 823764 no resist; the class ratings (hit, expertise 10000) leave no miss, dodge or parry, so each cast lands two strikes and two 807552 energize events (main reading: 0 in the control, 2 after). Three ratio-only arms read after each main reading: the 807552 mana total (with its count) over the damage totals of 800691 and 802566 (each with its count), summed. The ratio of the after-phase deltas must be 5% within 0.001, the low end widened by one mana per energize event for the per-strike truncation. Expected from 807451 Effect[0] BasePoints 4 + 1 (installed DBC) and the tooltip; nothing from a run. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); 803913 appears only in skill_line_ability; coa-history holds 6772 SPELL_ENERGIZE events of 807552 in 14 logs (1 to 195 mana), not paired with the strike damage, so no ratio is read from them; nothing found beyond the tooltip and the DBC.",
+      "cast_in_before": false
     },
     {
       "spell": 92135,

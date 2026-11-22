@@ -33,7 +33,8 @@ Option 2, inside `metric_delta_options/ally_arm.py` so the registration stays in
 
 - `METRIC_EVIDENCE = {'combat_reach': 'state'}` (an option row, merged by `coverage.metric_evidence()`).
 - An arm may carry `precondition: true`; any other value is refused. A precondition arm needs a state metric, and
-  `combat_reach` is accepted only on a precondition arm. A ratio may not name a precondition arm.
+  `combat_reach` is accepted only on a precondition arm. A ratio may not name a precondition arm: not as numerator,
+  denominator, denominator list entry or `floor_count` (ADR 1028), and a precondition arm is never ratio-only.
 - The verdict judges the precondition arms first: one off or unread returns `unmeasured` with "a precondition
   failed: the trial is void, not judged", whatever the main verdict says. Held, they leave the status unchanged and
   add their reads to the explanation.

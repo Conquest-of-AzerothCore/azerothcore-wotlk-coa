@@ -368,11 +368,16 @@ def off_hand_weapon(class_file: dict, item: int) -> dict:
     weapon = next((weapon for weapon in class_file.get('off_hand_weapons', []) if weapon['item'] == item), None)
     if weapon is None:
         raise ValueError(f'off-hand item {item} is not in the class file off_hand_weapons')
+    grants = weapon.get('grants', [])
+    if not isinstance(grants, list) or not all(type(spell) is int and spell > 0 for spell in grants):
+        raise ValueError(f'off-hand item {item} grants is a list of spell ids learned before it is equipped, not '
+                         f'{grants!r}')
     return weapon
 
 
-def off_hand_steps(item: int) -> list[dict]:
-    return [{'action': 'add_item', 'actor': CASTER, 'item': item},
+def off_hand_steps(item: int, grants: tuple[int, ...] = ()) -> list[dict]:
+    return [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in grants] + [
+            {'action': 'add_item', 'actor': CASTER, 'item': item},
             {'action': 'equip', 'actor': CASTER, 'item': item, 'slot': EQUIPMENT_SLOT_OFF_HAND}]
 
 

@@ -619,6 +619,16 @@ class EvidenceStatusTest(unittest.TestCase):
         self.assertEqual(evidence_of([claim('this spell is instant cast.', label)], [read])[0], [BEHAVIOUR])
         self.assertEqual(evidence_of([claim('Only affects Humanoids.', label)], [read])[0], [DATA])
 
+    def test_a_cast_state_is_a_state_read_where_the_clause_promises_an_interrupt(self):
+        label = '547214 behaviour_metric_delta interrupted'
+        read = judged(label, BEHAVIOUR_METRIC_DELTA, 'casting', contrast=LEARNED_CONTRAST)
+        interrupt = 'and causes Horusath Blast to interrupt the target for $547217d.'
+        self.assertEqual(evidence_of([claim(interrupt, label)], [read])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('and causes Horusath Blast to stun the target.', label)], [read])[0],
+                         [DATA])
+        unlearned = judged(label, BEHAVIOUR_METRIC_DELTA, 'casting')
+        self.assertEqual(evidence_of([claim(interrupt, label)], [unlearned])[0], [DATA])
+
     def test_a_school_lockout_is_a_state_read_where_the_clause_promises_an_interrupt(self):
         label = '547214 behaviour_metric_delta lockout_held'
         read = judged(label, BEHAVIOUR_METRIC_DELTA, 'school_prohibited', contrast=LEARNED_CONTRAST)
