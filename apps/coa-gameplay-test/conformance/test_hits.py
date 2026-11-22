@@ -1907,7 +1907,8 @@ class DamageFromCasterAndLevelPointsTest(unittest.TestCase):
         self.assertAlmostEqual(server.sigma, client.sigma)
 
     def test_the_record_names_the_taken_auras_and_the_measured_model_reads_them(self):
-        entry = next(dict(entry) for entry in self.witch_doctor['behaviours']
+        entry = next({key: value for key, value in entry.items() if key != 'model_auras'}
+                     for entry in self.witch_doctor['behaviours']
                      if entry['spell'] == self.VEIL and entry.get('variant') == 'veil_tick')
         _, [plain] = behaviour_scenario(self.witch_doctor, entry)
         _, [veiled] = behaviour_scenario(self.witch_doctor, {**entry, 'model_auras': [self.VEIL]})

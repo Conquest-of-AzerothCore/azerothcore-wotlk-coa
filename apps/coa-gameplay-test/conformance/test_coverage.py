@@ -850,7 +850,8 @@ class EvidenceTablesTest(unittest.TestCase):
 
     def test_cross_class_guard_a_metric_without_its_evidence_row_is_found(self):
         seeded = {metric: kind for metric, kind in metric_evidence().items() if metric != 'owned_creature_distance_2d'}
-        self.assertEqual(self.unclassed_metrics(seeded), {'necromancer.json': ['owned_creature_distance_2d']})
+        self.assertEqual(self.unclassed_metrics(seeded), {'necromancer.json': ['owned_creature_distance_2d'],
+                                                          'witch_doctor.json': ['owned_creature_distance_2d']})
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
     def test_cross_class_guard_every_metric_classed_expectation_of_the_class_files_carries_its_metric(self):
