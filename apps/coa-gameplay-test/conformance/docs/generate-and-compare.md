@@ -372,13 +372,15 @@ python3 -B conformance.py aura354 --class-map CLASS-MAP.json --class 23 [--out A
 ```
 
 `audit` merges the verdicts of `--base-results` and then of each `--results` directory in order (a later directory
-replaces the labels of the earlier ones) and runs `coverage.clause_coverage` on the ledger. With no directory it runs
+replaces the labels of the earlier ones, except with a verdict whose `runs` list is empty: a label its run did not
+select keeps the earlier verdict, ADR 1032) and runs `coverage.clause_coverage` on the ledger. With no directory it runs
 on no verdicts, as for a new class: every claim comes out unproven. `--manifest` stamps the observed metric of a
 generated manifest on a metric verdict that carries none (verdicts written before the metric was stamped);
 `--hooked` turns the listed labels into `not_measured`; `--build` stamps one audit build on every merged verdict,
 and without it the merged verdicts must come from one build (`coverage.require_build`). The output keeps the inputs,
-`results_replaced` and `results_added` (labels of `--results` over the base), `results_disagree` (labels whose status
-class, conformant or the status itself plus `data_only`, differs between `--results` directories), `figures`
+`results_replaced` and `results_added` (labels of `--results` over the base), `results_not_selected` (labels of
+`--results` skipped over an earlier verdict because their run did not select them), `results_disagree` (labels whose
+status class, conformant or the status itself plus `data_only`, differs between `--results` directories), `figures`
 (`claims`, `behaviour`, `data`, `unproven`, `resolved`, `not_measured`, `tool_gaps_pending`), `no_claim_entries`,
 `statuses` (label to status) and one row per claim: `index` (the claim's position among the ledger's claims),
 `spell`, `clause`, `evidence`, `claim_evidence`, `labels`, `missing_labels`, `label_statuses`, `alert_labels` and

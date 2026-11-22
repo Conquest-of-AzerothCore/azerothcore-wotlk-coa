@@ -1,3 +1,4 @@
+from dataclasses import replace
 import json
 from pathlib import Path
 import tempfile
@@ -88,6 +89,28 @@ class AuditTest(unittest.TestCase):
         self.assertEqual(document['results_added'], [PASSIVE])
         self.assertEqual(document['figures']['unproven'], 0)
 
+    def test_a_layered_label_its_run_did_not_select_keeps_the_earlier_verdict(self):
+        base = self.results('base', [replace(verdict(HIT), runs=['b1']),
+                                     replace(verdict(VALUE, check='effect_value'), runs=['b1'])])
+        latest = self.results('latest', [replace(verdict(HIT, 'unmeasured'), runs=[]),
+                                         replace(verdict(VALUE, 'alert', check='effect_value'), runs=['l1']),
+                                         replace(verdict(PASSIVE, 'unmeasured', spell=OTHER_SPELL), runs=[])])
+        document = audit_document(23, self.ledger, [latest], base_results=base)
+        self.assertEqual(document['statuses'][HIT], 'ok')
+        self.assertEqual(document['statuses'][VALUE], 'alert')
+        self.assertEqual(document['statuses'][PASSIVE], 'unmeasured')
+        self.assertEqual(document['results_replaced'], [VALUE])
+        self.assertEqual(document['results_not_selected'], [HIT])
+        self.assertEqual(document['results_added'], [PASSIVE])
+        self.assertEqual(document['clauses'][0]['evidence'], 'behaviour')
+
+    def test_a_later_results_directory_that_did_not_select_a_label_keeps_the_earlier_one(self):
+        first = self.results('first', [replace(verdict(HIT), runs=['f1'])])
+        second = self.results('second', [replace(verdict(HIT, 'unmeasured'), runs=[])])
+        document = audit_document(23, self.ledger, [first, second])
+        self.assertEqual(document['statuses'][HIT], 'ok')
+        self.assertEqual(document['results_not_selected'], [HIT])
+
     def test_mixed_builds_are_refused_unless_a_build_is_named(self):
         first = self.results('first', [verdict(HIT)])
         second = self.results('second', [verdict(VALUE, check='effect_value', build=OTHER_BUILD)])
@@ -118,6 +141,12 @@ class AuditTest(unittest.TestCase):
     def test_merge_keeps_first_seen_order(self):
         merged = merged_verdicts([[verdict('a'), verdict('b')], [verdict('b', 'alert'), verdict('c')]])
         self.assertEqual([(item.label, item.status) for item in merged], [('a', 'ok'), ('b', 'alert'), ('c', 'ok')])
+
+    def test_merge_skips_an_unselected_verdict_only_over_an_earlier_layer(self):
+        merged = merged_verdicts([[verdict('a')], [replace(verdict('a', 'unmeasured'), runs=[]),
+                                                  replace(verdict('b', 'unmeasured'), runs=[]),
+                                                  replace(verdict('b', 'alert'), runs=[])]])
+        self.assertEqual([(item.label, item.status) for item in merged], [('a', 'ok'), ('b', 'alert')])
 
     def test_audit_command_writes_the_document(self):
         out = self.root / 'out' / 'coverage.json'

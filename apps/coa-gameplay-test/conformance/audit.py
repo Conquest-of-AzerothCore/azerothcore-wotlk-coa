@@ -40,14 +40,32 @@ def hooked_labels(document) -> set[str]:
     return {label for item in document for label in (item['labels'] if isinstance(item, dict) else [item])}
 
 
+def selected(verdict: Verdict) -> bool:
+    return verdict.runs is None or bool(verdict.runs)
+
+
 def merged_verdicts(runs: list[list[Verdict]]) -> list[Verdict]:
     order, latest = [], {}
     for run in runs:
+        earlier = set(latest)
         for verdict in run:
+            if verdict.label in earlier and not selected(verdict):
+                continue
             if verdict.label not in latest:
                 order.append(verdict.label)
             latest[verdict.label] = verdict
     return [latest[label] for label in order]
+
+
+def layered_labels(layers: list[list[Verdict]]) -> tuple[set[str], set[str]]:
+    seen, taken, skipped = set(), set(), set()
+    for index, layer in enumerate(layers):
+        earlier = set(seen)
+        for verdict in layer:
+            seen.add(verdict.label)
+            if index:
+                (skipped if verdict.label in earlier and not selected(verdict) else taken).add(verdict.label)
+    return taken, skipped
 
 
 def disagreements(runs: list[tuple[str, list[Verdict]]]) -> list[dict]:
@@ -112,7 +130,7 @@ def audit_document(class_id: int, ledger: Path, results: list[Path], base_result
     rows = load_consumption(consumption) if consumption else ()
     result = clause_coverage(clauses, verdicts, build or single_build(verdicts), rows)
     base_labels = {verdict.label for verdict in base}
-    latest = {verdict.label for _, run in runs for verdict in run}
+    latest, skipped = layered_labels([base] + [run for _, run in runs])
     return {'class_id': class_id,
             'inputs': {'ledger': str(ledger), 'results': [name for name, _ in runs],
                        'base_results': str(base_results) if base_results else None,
@@ -120,6 +138,7 @@ def audit_document(class_id: int, ledger: Path, results: list[Path], base_result
                        'consumption': str(consumption) if consumption else None, 'build': build,
                        'result_builds': sorted({str(verdict.build) for _, run in runs for verdict in run})},
             'results_replaced': sorted(latest & base_labels), 'results_added': sorted(latest - base_labels),
+            'results_not_selected': sorted(skipped),
             'results_disagree': disagreements(runs), 'figures': figures(result),
             'no_claim_entries': sum(entry.get('kind') == 'no_claim' for entry in clauses),
             'clauses': clause_rows(result, verdicts),
