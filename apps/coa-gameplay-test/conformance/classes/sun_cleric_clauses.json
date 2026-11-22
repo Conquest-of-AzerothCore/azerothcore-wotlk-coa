@@ -2246,17 +2246,19 @@
     "spell": 681064,
     "clause": "Increases your Holy critical strike chance by $s1%",
     "labels": [
-      "681064 effect_value e0 #0"
+      "681064 behaviour_metric_delta holy_crit"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the reading before the learn. Gain 2 points of Holy spell crit from Spell.dbc 681064 effect 0 (BasePoints 1 + 1). Reference search: coa-history spell 681064: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 681064: #4516 only (native handlers at data level); bindmysoul and other reference snapshots under ~/CoaServer/reference list the spell without a figure that differs; nothing else found. The bindmysoul snapshot carries rank 1 (2%, 50% less pushback), the same figures. Pair 20261122-011232 / 20261122-011524, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 681064,
     "clause": "and reduces spell pushback suffered from damaging attacks by $s3%.",
     "labels": [
-      "681064 effect_value e2 #1"
+      "681064 behaviour_metric_delta pushback_game_time"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the hit cast without the passive (it is pushed back 495 ms), compared with the hit cast after the learn. Spell.dbc 681064 effect 2 REDUCE_PUSHBACK BasePoints 49 + 1 = 50%. Measured 50.5% (16 casts of each kind), judged in the G-19 band 47.5..52.5. Reference search: coa-history spell 681064: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 681064: #4516 only (native handlers at data level); bindmysoul and other reference snapshots under ~/CoaServer/reference list the spell without a figure that differs; nothing else found. Pair 20261122-011232 / 20261122-011524, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 681066,
@@ -2373,9 +2375,10 @@
     "spell": 681469,
     "clause": "and your spell hit chance by $s3%.",
     "labels": [
-      "681469 effect_value e2 #1"
+      "681469 behaviour_metric_delta spell_hit"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the reading before the learn (1250 then 1260): gain 10 from Spell.dbc 681469 effect 2 aura 55 BasePoints 9 + 1. Reference search: coa-history spell 681469: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 681469: #4516 only (native handlers at data level); bindmysoul and other reference snapshots under ~/CoaServer/reference list the spell without a figure that differs; nothing else found. Pair 20261122-011232 / 20261122-011524, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 681470,
@@ -3141,18 +3144,31 @@
   {
     "spell": 707772,
     "clause": "Increases your Strength and maximum mana by $s1%",
-    "labels": [
-      "707772 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your Strength by 10%",
+        "labels": [
+          "707772 behaviour_metric_delta strength"
+        ]
+      },
+      {
+        "claim": "and maximum mana by 10%",
+        "labels": [
+          "707772 behaviour_metric_delta max_mana"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Control arm in each entry = the reading before the learn (Strength 40 then 44; maximum mana 2868 then 3154, ratio 1.0997 within 0.002 of 1.10). Expected from Spell.dbc 707772 effect 0 aura 137 and effect 2 aura 132, BasePoints 9 + 1 = 10. Reference search: coa-history spell 707772: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 707772: none; bindmysoul and other reference snapshots under ~/CoaServer/reference list the spell without a figure that differs; nothing else found. Pair 20261122-011232 / 20261122-011524, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 707772,
     "clause": "and your expertise by $s2.",
     "labels": [
-      "707772 effect_value e1 #1"
+      "707772 behaviour_metric_delta expertise"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the reading before the learn (4003, the expertise rating fixture), then 4013: gain 10 from Spell.dbc 707772 effect 1 aura 240 BasePoints 9 + 1. Reference search: coa-history spell 707772: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 707772: none; bindmysoul and other reference snapshots under ~/CoaServer/reference list the spell without a figure that differs; nothing else found. Pair 20261122-011232 / 20261122-011524, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 707773,
@@ -4526,9 +4542,10 @@
     "spell": 807874,
     "clause": "Reduces the cast time of Radiant Cascade by $s1%.",
     "labels": [
-      "807874 effect_value e0 #0"
+      "807874 behaviour_metric_delta cast_time"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm = the cast time before the learn: Radiant Cascade 2500 ms (SpellCastTimes 19), 2125 ms after (-15% from Spell.dbc 807874 effect 0, BasePoints -16 + 1). Reference search: coa-history spell 807874: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 807874: #4516 only (native handlers at data level); bindmysoul and other reference snapshots under ~/CoaServer/reference list the spell without a figure that differs; nothing else found. Pair 20261122-011232 / 20261122-011524, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 807963,
