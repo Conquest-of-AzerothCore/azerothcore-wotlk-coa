@@ -21,7 +21,36 @@ def groups(members, rules=None):
 class SignatureTests(unittest.TestCase):
     def test_every_listed_aura_name_exists(self):
         known = set(model.enum_values('AuraType'))
-        self.assertEqual(set(), (set(model.STAT_KEYS) | model.IGNORED_AURAS) - known)
+        listed = set(model.STAT_KEYS) | model.IGNORED_AURAS | model.NON_STAT_AURAS
+        self.assertEqual(set(), listed - known)
+
+    def test_aura_lists_do_not_overlap(self):
+        self.assertEqual(set(), set(model.STAT_KEYS) & model.NON_STAT_AURAS)
+        self.assertEqual(set(), set(model.STAT_KEYS) & model.IGNORED_AURAS)
+        self.assertEqual(set(), model.IGNORED_AURAS & model.NON_STAT_AURAS)
+
+    def test_flat_attack_power_gives_melee_and_ranged(self):
+        flat = buff(1, 24, aura('SPELL_AURA_ASCENSION_MOD_ATTACK_POWER_FLAT'),
+                    aura('SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT', 127))
+        self.assertEqual(frozenset({'ap:melee', 'ap:ranged', 'spell_power:127'}), model.signature(flat))
+
+    def test_hit_chance_and_cost_keys(self):
+        self.assertEqual(frozenset({'hit:all'}),
+                         model.signature(buff(1, 22, aura('SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT'))))
+        self.assertEqual(frozenset({'cost_pct:127'}),
+                         model.signature(buff(1, 19, aura('SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT', 127))))
+
+    def test_non_stat_effects_do_not_change_signature(self):
+        plain = buff(1, 20, aura('SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE', 32))
+        shielded = buff(1, 20, aura('SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE', 32), aura('SPELL_AURA_DAMAGE_SHIELD', 32))
+        self.assertEqual(model.signature(plain), model.signature(shielded))
+
+    def test_only_non_stat_effects_is_not_a_stat_buff(self):
+        heal = buff(1, 20, aura('SPELL_AURA_PERIODIC_HEAL'), aura('SPELL_AURA_PROC_TRIGGER_SPELL'))
+        self.assertEqual(frozenset(), model.signature(heal))
+
+    def test_dummy_without_stat_is_unclassified_next_to_non_stat_effect(self):
+        self.assertIsNone(model.signature(buff(1, 20, aura('SPELL_AURA_DUMMY'), aura('SPELL_AURA_PERIODIC_HEAL'))))
 
     def test_signature_keys(self):
         beetle = buff(803657, 29, aura('SPELL_AURA_MOD_RESISTANCE', 1), aura('SPELL_AURA_MOD_STAT', -1))
@@ -38,7 +67,8 @@ class SignatureTests(unittest.TestCase):
         self.assertEqual(model.signature(plain), model.signature(with_dummy))
 
     def test_unknown_aura_is_unclassified(self):
-        self.assertIsNone(model.signature(buff(1, 20, aura('SPELL_AURA_MOD_STAT', 1), aura('SPELL_AURA_MOD_SCALE'))))
+        unknown = aura('SPELL_AURA_OVERRIDE_CLASS_SCRIPTS')
+        self.assertIsNone(model.signature(buff(1, 20, aura('SPELL_AURA_MOD_STAT', 1), unknown)))
 
     def test_no_stat_effect_is_unclassified(self):
         self.assertIsNone(model.signature(buff(1, 20, aura('SPELL_AURA_DUMMY'))))
@@ -156,6 +186,13 @@ class PlanTests(unittest.TestCase):
     def test_unclassified_without_decision_is_listed(self):
         plan = self.plan([buff(70, 19, aura('SPELL_AURA_DUMMY'))])
         self.assertEqual([70], plan.unclassified)
+
+    def test_non_stat_buffs_get_no_category(self):
+        heals = [buff(80, 19, aura('SPELL_AURA_PERIODIC_HEAL')), buff(81, 22, aura('SPELL_AURA_PERIODIC_HEAL'))]
+        plan = self.plan(heals)
+        self.assertEqual({}, {key: value for key, value in plan.members.items() if 80 in value or 81 in value})
+        self.assertEqual([], plan.unclassified)
+        self.assertEqual({}, plan.single_class)
 
     def test_apply_plan_adds_members_and_rules(self):
         buffs = [buff(10, 19, aura('SPELL_AURA_MOD_RESISTANCE', 4)), buff(11, 22, aura('SPELL_AURA_MOD_RESISTANCE', 4)),

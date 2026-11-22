@@ -103,22 +103,37 @@ class Plan(NamedTuple):
 
 
 def _stat(misc):
-    return 'stat:all' if misc == -1 else f'stat:{misc}'
+    return frozenset({'stat:all' if misc == -1 else f'stat:{misc}'})
 
 
 def _resistance(misc):
-    return 'armor' if misc == 1 else f'resistance:{misc}'
+    return frozenset({'armor' if misc == 1 else f'resistance:{misc}'})
 
 
-def _fixed(key):
-    return lambda misc: key
+def _fixed(*keys):
+    return lambda misc: frozenset(keys)
 
 
 def _by_misc(prefix):
-    return lambda misc: f'{prefix}:{misc}'
+    return lambda misc: frozenset({f'{prefix}:{misc}'})
 
 
 STAT_KEYS = {
+    'SPELL_AURA_ASCENSION_MOD_ATTACK_POWER_FLAT': _fixed('ap:melee', 'ap:ranged'),
+    'SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT': _fixed('hit:all'),
+    'SPELL_AURA_MOD_HIT_CHANCE': _fixed('hit:melee'),
+    'SPELL_AURA_MOD_SPELL_HIT_CHANCE': _fixed('hit:spell'),
+    'SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT': _by_misc('cost_pct'),
+    'SPELL_AURA_MOD_POWER_REGEN_PERCENT': _by_misc('regen_pct'),
+    'SPELL_AURA_MOD_MANA_REGEN_INTERRUPT': _fixed('regen_casting'),
+    'SPELL_AURA_MOD_RESISTANCE_PCT': _by_misc('resistance_pct'),
+    'SPELL_AURA_MOD_BASE_RESISTANCE_PCT': _by_misc('base_resistance_pct'),
+    'SPELL_AURA_MOD_HEALING_PCT': _fixed('healing_taken_pct'),
+    'SPELL_AURA_ASCENSION_MOD_HEALING_RECEIVED_PCT': _fixed('healing_taken_pct'),
+    'SPELL_AURA_MOD_HEALING_DONE_PERCENT': _fixed('healing_pct'),
+    'SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT': _by_misc('power_pct'),
+    'SPELL_AURA_MOD_DODGE_PERCENT': _fixed('dodge'),
+    'SPELL_AURA_MOD_EXPERTISE': _fixed('expertise'),
     'SPELL_AURA_MOD_STAT': _stat,
     'SPELL_AURA_MOD_RESISTANCE': _resistance,
     'SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE': _resistance,
@@ -141,16 +156,35 @@ STAT_KEYS = {
 for _name in ['SPELL_AURA_MOD_SPELL_CRIT_CHANCE', 'SPELL_AURA_MOD_CRIT_PCT', 'SPELL_AURA_MOD_WEAPON_CRIT_PERCENT']:
     STAT_KEYS[_name] = _fixed(f'crit:{_name}')
 for _name in ['SPELL_AURA_MOD_MELEE_HASTE', 'SPELL_AURA_MOD_MELEE_RANGED_HASTE',
-              'SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK', 'SPELL_AURA_HASTE_SPELLS']:
+              'SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK', 'SPELL_AURA_HASTE_SPELLS', 'SPELL_AURA_MOD_RANGED_HASTE']:
     STAT_KEYS[_name] = _fixed(f'haste:{_name}')
 
-IGNORED_AURAS = frozenset({
+SCRIPTED_AURAS = frozenset({'SPELL_AURA_DUMMY', 'SPELL_AURA_PERIODIC_DUMMY'})
+
+IGNORED_AURAS = SCRIPTED_AURAS | frozenset({
     'SPELL_AURA_NONE',
-    'SPELL_AURA_DUMMY',
-    'SPELL_AURA_PERIODIC_DUMMY',
     'SPELL_AURA_PROC_TRIGGER_SPELL',
     'SPELL_AURA_PERIODIC_TRIGGER_SPELL',
 })
+
+NON_STAT_AURAS = frozenset(f'SPELL_AURA_{name}' for name in [
+    'PERIODIC_HEAL', 'OBS_MOD_HEALTH', 'OBS_MOD_POWER', 'PERIODIC_ENERGIZE', 'PERIODIC_MANA_LEECH',
+    'SCHOOL_ABSORB', 'DAMAGE_SHIELD', 'SPLIT_DAMAGE_PCT', 'REFLECT_SPELLS', 'DEFLECT_SPELLS',
+    'MOD_DAMAGE_PERCENT_TAKEN', 'MOD_DAMAGE_TAKEN', 'MOD_AOE_DAMAGE_AVOIDANCE', 'MOD_DAMAGE_FROM_CASTER',
+    'MOD_HEALING', 'MOD_HEALING_RECEIVED',
+    'MECHANIC_IMMUNITY', 'MECHANIC_IMMUNITY_MASK', 'DISPEL_IMMUNITY', 'DAMAGE_IMMUNITY', 'SCHOOL_IMMUNITY',
+    'EFFECT_IMMUNITY', 'MOD_DEBUFF_RESISTANCE', 'MOD_MECHANIC_RESISTANCE', 'MECHANIC_DURATION_MOD',
+    'MECHANIC_DURATION_MOD_NOT_STACK', 'REDUCE_PUSHBACK',
+    'PERIODIC_TRIGGER_SPELL_WITH_VALUE', 'PROC_TRIGGER_SPELL_WITH_VALUE', 'PROC_TRIGGER_DAMAGE',
+    'ASCENSION_PROC_PERCENT_EVENT', 'ADD_CASTER_HIT_TRIGGER', 'ADD_PCT_MODIFIER', 'ADD_FLAT_MODIFIER',
+    'MOD_DAMAGE_DONE_VERSUS', 'MOD_MELEE_ATTACK_POWER_VERSUS', 'MOD_CRIT_CHANCE_FOR_CASTER',
+    'MOD_INCREASE_SPEED', 'MOD_MINIMUM_SPEED', 'MOD_INCREASE_SWIM_SPEED', 'MOD_MOUNTED_SPEED_NOT_STACK',
+    'MOD_MOUNTED_SPEED_ALWAYS', 'MOD_FLIGHT_SPEED_NOT_STACKING', 'MOD_FLIGHT_SPEED_MOUNTED_NOT_STACKING',
+    'WATER_WALK', 'FEATHER_FALL', 'SAFE_FALL', 'HOVER',
+    'MOD_STEALTH', 'MOD_STEALTH_DETECT', 'MOD_DETECTED_RANGE', 'MOD_TOTAL_THREAT', 'MOD_THREAT',
+    'MOD_STUN', 'TRANSFORM', 'MOD_SCALE', 'PHASE', 'BIND_SIGHT', 'EMPATHY', 'CONTROL_VEHICLE',
+    'MOD_IGNORE_SHAPESHIFT', 'MOD_REPUTATION_GAIN', 'MOD_XP_PCT',
+])
 
 
 def enum_values(name, root=ROOT):
@@ -159,14 +193,19 @@ def enum_values(name, root=ROOT):
 
 def signature(buff):
     keys = set()
+    scripted = False
     for effect in buff.effects:
-        if effect.aura in IGNORED_AURAS:
+        if effect.aura in SCRIPTED_AURAS:
+            scripted = True
+        if effect.aura in IGNORED_AURAS or effect.aura in NON_STAT_AURAS:
             continue
         builder = STAT_KEYS.get(effect.aura)
         if builder is None:
             return None
-        keys.add(builder(effect.misc))
-    return frozenset(keys) if keys else None
+        keys |= builder(effect.misc)
+    if keys:
+        return frozenset(keys)
+    return None if scripted else frozenset()
 
 
 def _contains(groups, group_id, spell_id, seen=frozenset()):
@@ -245,7 +284,7 @@ def plan_categories(buffs, groups, first_rank, exceptions, manual):
         keys = signature(buff)
         if keys is None:
             unclassified.append(buff.spell_id)
-        else:
+        elif keys:
             signatures[buff.spell_id] = keys
 
     placed = {rank(member) for group_id in EXISTING_CATEGORIES for member in groups.members.get(group_id, ())}
