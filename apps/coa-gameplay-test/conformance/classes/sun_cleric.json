@@ -30052,9 +30052,9 @@
       "label_suffix": "consume_12",
       "quote": "Allows Dawn to affect $s1 additional casts.",
       "gate_spell": 300324,
-      "trigger_spell": 500143,
-      "target": "caster",
-      "setup_target": "caster",
+      "trigger_spell": 805301,
+      "target": "dummy",
+      "setup_target": "dummy",
       "measure_actor": "caster",
       "metric": "aura",
       "fields": {
@@ -30070,17 +30070,18 @@
       ],
       "setup_casts": [
         804584,
-        500143,
-        500143,
-        500143,
-        500143,
-        500143,
-        500143,
-        500143,
-        500143,
-        500143,
-        500143,
-        500143
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617
       ],
       "setup_wait_ms": 2600,
       "setup_in_before": true,
@@ -30089,7 +30090,8 @@
       "expected": 1,
       "wait_ms": 500,
       "expire_ms": 61000,
-      "observe_source": "300324 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 4 (SPELLMOD_CHARGES), BasePoints 2 (+1 = 3, $s1), class mask word 0 = 64 = the Dawn state aura 807440 (ProcCharges 10). Each Useful cast under Dawn spends one charge (SpendDawn, AscensionSunClericAbilities.cpp:105-118 and :212-214: a spell with a heal or damage effect other than Dawn itself and Radiant Flame), and the aura ends on the last. Real cast route: Dawn 804584 is cast for real with 20 Solar Power 500149 set first (precondition fixture, the condition of Dawn, not the claim's subject), then 12 Illumination 500143 casts on the caster, each its own heal; the aura 807440 is read 500 ms after the last cast. Both phases make the same casts; 300324 is learned between them (the harness waits 61000 ms so the first Dawn has expired and the second cast activates rather than cancels it). Control (before): without the passive Dawn holds 10 charges and ends on the 10th cast, so it is gone after 12 casts. With it Dawn holds 13 charges: after 12 casts one remains (aura present, 1), so the passive adds at least 2 casts and, with consume_13, exactly 3. Together the 12-cast and 13-cast entries give exactly 13 = 10 + 3 affected casts, one more than the base figure and not 14. Reference search 2026-11-22: bindmysoul talents snapshot carries 'Allows Dawn to affect 3 additional casts.' for rank 1; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value."
+      "observe_source": "300324 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 4 (SPELLMOD_CHARGES), BasePoints 2 (+1 = 3, $s1), class mask word 0 = 64 = the Dawn state aura 807440 (ProcCharges 10). Each Useful cast under Dawn spends one charge (SpendDawn, AscensionSunClericAbilities.cpp:105-118 and :212-214: a spell with a heal or damage effect other than Dawn itself and Radiant Flame), and the aura ends on the last. Real cast route: Dawn 804584 is cast for real with 20 Solar Power 500149 set first (precondition fixture, the condition of Dawn, not the claim's subject), then 12 Gavel of Wrath 800617 casts at the dummy; the aura 807440 is read 500 ms after the last cast. Both phases make the same casts; 300324 is learned between them (the harness waits 61000 ms so the first Dawn has expired and the second cast activates rather than cancels it). Control (before): without the passive Dawn holds 10 charges and ends on the 10th cast, so it is gone after 12 casts. With it Dawn holds 13 charges: after 12 casts one remains (aura present, 1), so the passive adds at least 2 casts and, with consume_13, exactly 3. Together the 12-cast and 13-cast entries give exactly 13 = 10 + 3 affected casts, one more than the base figure and not 14. Reference search 2026-11-22: bindmysoul talents snapshot carries 'Allows Dawn to affect 3 additional casts.' for rank 1; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value. Design 2: run 1 (20261122-154829) with Illumination 500143 read the aura present in both phases, so the casts were not all made (Illumination costs 30% of base mana, ManaCostPercentage 30, and the setup casts refill only flat costs); Gavel of Wrath costs a flat 3 mana (ManaCost 3), which each setup cast refills, and a Gavel is Useful for SpendDawn (Gavel(info), AscensionSunCleric.cpp:171-174). Dawn is cast at the dummy: its effects target the caster. Run 2 (20261122-155337): consume_12 read present and consume_13 present as well; the trigger Gavel is not preceded by a cooldown reset (only setup casts reset), so it fell inside the 5000 ms category cooldown and the count was one short. Now all 12 Gavels are setup casts (each resets its cooldown) and the trigger is Holy Form 805301 (no damage or heal effect, not Useful: no charge spent), the read-only closing cast.",
+      "dummy_distance": 3
     },
     {
       "spell": 300324,
@@ -30099,9 +30101,9 @@
       "label_suffix": "consume_13",
       "quote": "Allows Dawn to affect $s1 additional casts.",
       "gate_spell": 300324,
-      "trigger_spell": 500143,
-      "target": "caster",
-      "setup_target": "caster",
+      "trigger_spell": 805301,
+      "target": "dummy",
+      "setup_target": "dummy",
       "measure_actor": "caster",
       "metric": "aura",
       "fields": {
@@ -30117,18 +30119,19 @@
       ],
       "setup_casts": [
         804584,
-        500143,
-        500143,
-        500143,
-        500143,
-        500143,
-        500143,
-        500143,
-        500143,
-        500143,
-        500143,
-        500143,
-        500143
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617
       ],
       "setup_wait_ms": 2600,
       "setup_in_before": true,
@@ -30137,7 +30140,8 @@
       "expected": 0,
       "wait_ms": 500,
       "expire_ms": 61000,
-      "observe_source": "300324 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 4 (SPELLMOD_CHARGES), BasePoints 2 (+1 = 3, $s1), class mask word 0 = 64 = the Dawn state aura 807440 (ProcCharges 10). Each Useful cast under Dawn spends one charge (SpendDawn, AscensionSunClericAbilities.cpp:105-118 and :212-214: a spell with a heal or damage effect other than Dawn itself and Radiant Flame), and the aura ends on the last. Real cast route: Dawn 804584 is cast for real with 20 Solar Power 500149 set first (precondition fixture, the condition of Dawn, not the claim's subject), then 13 Illumination 500143 casts on the caster, each its own heal; the aura 807440 is read 500 ms after the last cast. Both phases make the same casts; 300324 is learned between them (the harness waits 61000 ms so the first Dawn has expired and the second cast activates rather than cancels it). Control (before): without the passive Dawn holds 10 charges and ends on the 10th cast, so it is gone after 13 casts. With it Dawn holds 13 charges and ends on the 13th cast: gone after 13 casts (0), not still present as with 14 or more charges. Together the 12-cast and 13-cast entries give exactly 13 = 10 + 3 affected casts, one more than the base figure and not 14. Reference search 2026-11-22: bindmysoul talents snapshot carries 'Allows Dawn to affect 3 additional casts.' for rank 1; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value."
+      "observe_source": "300324 Guiding Glow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 4 (SPELLMOD_CHARGES), BasePoints 2 (+1 = 3, $s1), class mask word 0 = 64 = the Dawn state aura 807440 (ProcCharges 10). Each Useful cast under Dawn spends one charge (SpendDawn, AscensionSunClericAbilities.cpp:105-118 and :212-214: a spell with a heal or damage effect other than Dawn itself and Radiant Flame), and the aura ends on the last. Real cast route: Dawn 804584 is cast for real with 20 Solar Power 500149 set first (precondition fixture, the condition of Dawn, not the claim's subject), then 13 Gavel of Wrath 800617 casts at the dummy; the aura 807440 is read 500 ms after the last cast. Both phases make the same casts; 300324 is learned between them (the harness waits 61000 ms so the first Dawn has expired and the second cast activates rather than cancels it). Control (before): without the passive Dawn holds 10 charges and ends on the 10th cast, so it is gone after 13 casts. With it Dawn holds 13 charges and ends on the 13th cast: gone after 13 casts (0), not still present as with 14 or more charges. Together the 12-cast and 13-cast entries give exactly 13 = 10 + 3 affected casts, one more than the base figure and not 14. Reference search 2026-11-22: bindmysoul talents snapshot carries 'Allows Dawn to affect 3 additional casts.' for rank 1; coa-history and merged PRs give nothing beyond the tooltip and the DBC for this value. Design 2: run 1 (20261122-154829) with Illumination 500143 read the aura present in both phases, so the casts were not all made (Illumination costs 30% of base mana, ManaCostPercentage 30, and the setup casts refill only flat costs); Gavel of Wrath costs a flat 3 mana (ManaCost 3), which each setup cast refills, and a Gavel is Useful for SpendDawn (Gavel(info), AscensionSunCleric.cpp:171-174). Dawn is cast at the dummy: its effects target the caster. Run 2 (20261122-155337): consume_12 read present and consume_13 present as well; the trigger Gavel is not preceded by a cooldown reset (only setup casts reset), so it fell inside the 5000 ms category cooldown and the count was one short. Now all 13 Gavels are setup casts (each resets its cooldown) and the trigger is Holy Form 805301 (no damage or heal effect, not Useful: no charge spent), the read-only closing cast.",
+      "dummy_distance": 3
     },
     {
       "spell": 800600,
@@ -30302,7 +30306,7 @@
       "before_expected": 0,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "name": "Sunlight (ally at 39 yd healed, ally at 41 yd not)",
+      "name": "Sunlight (ally at 42.5 yd healed, ally at 43.5 yd not: 40 yd plus both combat reaches)",
       "variant": "radius_edge",
       "label_suffix": "radius_edge",
       "expected": 1,
@@ -30326,7 +30330,7 @@
             "before_expected": 0,
             "expected": 0,
             "tolerance": 0,
-            "source": "ally2 stands 41 yd from the caster, outside the 40 yd radius of 704911 (SpellRadius 23, RadiusMin and RadiusMax 40 yd; Radius(704911) of AscensionSunCleric.cpp:298-300 feeds Nearby, an AnyUnitInObjectRangeCheck at that range); it would be healed (it is at 50% health, among the lowest) if the edge reached it"
+            "source": "ally2 stands 43.5 yd from the caster, 0.5 yd beyond the engine edge of 43.0 yd (40 + 1.5 + 1.5); it is at 50% health, among the lowest, so it would be healed if the edge reached it"
           },
           {
             "actors": [
@@ -30336,10 +30340,10 @@
             "fields": {
               "target": "caster"
             },
-            "before_expected": 39,
-            "expected": 39,
+            "before_expected": 42.5,
+            "expected": 42.5,
             "tolerance": 0.25,
-            "source": "ally_offsets moves ally 39 yd along x from the shared spawn, dz 0; the caster stays"
+            "source": "ally_offsets moves ally 42.5 yd along x from the shared spawn, dz 0; the caster stays"
           },
           {
             "actors": [
@@ -30349,10 +30353,10 @@
             "fields": {
               "target": "caster"
             },
-            "before_expected": 41,
-            "expected": 41,
+            "before_expected": 43.5,
+            "expected": 43.5,
             "tolerance": 0.25,
-            "source": "ally_offsets moves ally2 41 yd along x from the shared spawn, dz 0; the caster stays"
+            "source": "ally_offsets moves ally2 43.5 yd along x from the shared spawn, dz 0; the caster stays"
           },
           {
             "actors": [
@@ -30371,10 +30375,10 @@
         ]
       },
       "ally_offsets": {
-        "ally": 39,
-        "ally2": 41
+        "ally": 42.5,
+        "ally2": 43.5
       },
-      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; Fulfill (AscensionSunCleric.cpp:298-300) heals the allies of Allies(player, player, Radius(704911), MaxAffectedTargets) (:149-165: Nearby(center, range) then raid and friendly filters, sorted by health percentage). 704911 EffectRadiusIndex 23 = 40 yd ($704911a1 = 40; SpellRadius 23 RadiusMin = RadiusMax = 40; the blocker table's 9/11 yd does not match the DBC, so the edge is 39 and 41 yd as for 807343 ally_radius, ADR 1026). Same casts as the sunlight_heal entry (Dawn 804584 with 20 Solar Power 500149 set as a precondition fixture, Vow of Radiance 803489 before it, Illumination 500143 on the caster at 50% health, 92136 learned between the phases); the two allies are grouped and moved by ally_offsets (39 and 41 yd, dz 0, caster at the spawn, 2D distances read in arms), held at 5000 of 10000 health in each phase, a pool that regeneration does not refill. Expected: 1 Sunlight heal on the ally at 39 yd, 0 on the ally at 41 yd, 1 on the caster; the cap of five is not reached (three candidates). Control: before the learn, no Sunlight heal. Reference search 2026-11-22: coa-history spell 92136: a passive, no events; nothing beyond the tooltip and the DBC."
+      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; Fulfill (AscensionSunCleric.cpp:298-300) heals the allies of Allies(player, player, Radius(704911), MaxAffectedTargets): Nearby(center, range) uses AnyUnitInObjectRangeCheck -> IsWithinDistInMap(u, range) (GridNotifiers.h:1065-1067), whose defaults add both object sizes (Object.h:550, _IsWithinDist adds GetObjectSize() of each unit, = combat reach, Object.cpp:2898-2901). 704911 EffectRadiusIndex 23 = 40 yd (SpellRadius 23 RadiusMin = RadiusMax = 40; the blocker table's 9/11 yd does not match the DBC). Engine edge between two players: 40 + 1.5 + 1.5 = 43.0 yd (known engine behaviour, guide section 5 effective radius; there is no player leeway here, the radius comes from Radius(), not from a SRC_AREA target). Run 1 (pair-less exploratory run 20261122-154829) with allies at 39 and 41 yd healed the 41 yd ally: the lead that showed the reach term; the arms are now 42.5 and 43.5 yd, 0.5 yd on each side. Same casts as the sunlight_heal entry (Dawn 804584 with 20 Solar Power 500149 set as a precondition fixture, Vow of Radiance 803489, Illumination 500143 on the caster at 50% health, 92136 learned between the phases). Expected: 1 Sunlight heal on the ally at 42.5 yd, 0 on the ally at 43.5 yd, 1 on the caster; the cap of five is not reached. The combat reach terms (1.5 each, Player.h:1110 and ObjectDefines.h:45) are cited from the code, not read: an arm cannot read combat_reach, a limit stated in the report. Control: before the learn, no Sunlight heal. Reference search 2026-11-22: coa-history spell 92136: a passive, no events; nothing beyond the tooltip and the DBC."
     }
   ],
   "player_observations": [],
