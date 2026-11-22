@@ -5587,10 +5587,23 @@
   {
     "spell": 804254,
     "clause": "Guard a Blessed ally, deflecting the next harmful spell cast on them within $680888d.",
-    "labels": [
-      "804254 spell_duration 680888 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "deflecting the next harmful spell cast on them",
+        "labels": [
+          "804254 behaviour_metric_delta deflect_next",
+          "804254 behaviour_metric_delta deflect_control"
+        ]
+      },
+      {
+        "claim": "within $680888d",
+        "labels": [
+          "804254 behaviour_metric_delta deflect_duration_window"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Control and treatment read on the caster as its own Blessed ally (strike spells can only target the caster in this tool; an ally struck by the striker is not available), see the entries."
   },
   {
     "spell": 804254,
@@ -5871,11 +5884,11 @@
       {
         "claim": "for $d",
         "labels": [
-          "804632 spell_duration 807175 #4"
+          "804632 behaviour_metric_delta flare_duration_direct"
         ]
       }
     ],
-    "reason": "Hit chance part measured as the attackers' miss share (+3 points, pair). The duration part stays a data label: a first window design (aura on the dummy read 9300-9800 ms and 10300-10900 ms after the cast) read the aura still held at 10518 ms, which cannot be judged because the hit lands after the cast and its delay is not read, so the window bounds do not bound the duration; a delay-aware read of the aura's apply time would be a tool need."
+    "reason": "Hit chance part measured as the attackers' miss share (+3 points, pair). The duration part is read on a Solar Flare cast directly at a dummy 5 yd away (flight at most 0.2 s from the DBC speed); the first window design launched it through Horusath Blast and could not bound the flight delay."
   },
   {
     "spell": 804751,

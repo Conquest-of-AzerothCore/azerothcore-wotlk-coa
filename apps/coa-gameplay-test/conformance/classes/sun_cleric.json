@@ -30437,6 +30437,98 @@
       "attackers": 5,
       "parts": 8,
       "observe_source": "Solar Flare 807175 Effect[0] aura 54 SPELL_AURA_MOD_HIT_CHANCE BasePoints -4 + DieSides 1 = -3 ($s1 = 3), DurationIndex 1 = 10000 ms ($d), launched by Flames of Absolution 804632 at the target of a Horusath Blast 500154 hit and at up to 5 enemies near it. Five aggressive stationary attackers (Harvest Golem 36, class level) melee the caster; the control arm counts their swings and misses with no cast, the treatment arm casts Horusath Blast at the first attacker every 8000 ms (reset_cooldown and the mana fixture are named precondition fixtures, G-21 point 6) and counts after 3000 ms, once the aura from the caster is read on every attacker; the aura is read on every attacker at each cycle end. Expected: the miss share rises by 3 points (the stated 3% of the DBC amount, never from a run); the judge takes the 99% interval of the difference of the two shares against the band of 2 points. A lapsed or absent treatment aura is unmeasured, never ok. Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 SPELL_DAMAGE (3 to 3191, mean 520, with spell power and crits), 2442 SPELL_AURA_APPLIED and 2416 SPELL_AURA_REMOVED in 29 logs (no hit chance readable); nothing else found."
+    },
+    {
+      "spell": 804254,
+      "name": "Blessing of Retribution (deflect aura lasts 60 s)",
+      "kind": "metric_delta",
+      "variant": "deflect_duration_window",
+      "label_suffix": "deflect_duration_window",
+      "quote": "Guard a Blessed ally, deflecting the next harmful spell cast on them within $680888d.",
+      "trigger_spell": 804254,
+      "target": "caster",
+      "cast_power": 1363,
+      "setup_casts": [
+        804247
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "metric": "aura",
+      "fields": {
+        "spell": 680888
+      },
+      "measure_actor": "caster",
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "trigger_only_after": true,
+      "gate_timing": "start",
+      "wait_ms": 55500,
+      "expiry_wait_ms": 9000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          55000,
+          56000
+        ],
+        "expired": [
+          64000,
+          65500
+        ]
+      },
+      "observe_source": "680888 DurationIndex 3 = 60000 ms ($680888d), Speed 0 (no flight time). Bless 804247 is cast at the caster first (precondition, not the subject), then one real Blessing of Retribution 804254 at the caster, with no strike afterwards: the aura is present when read 55000..56000 ms after the cast (game time), at least 55000 ms after it was applied, and gone when read 64000..65500 ms after it, at most 65500 ms, so the duration lies inside 10% of 60000 ms (54000..66000) on both sides. Control: before the cast, absent. Reference search 2026-11-22: coa-history spells 804254 and 680888: 0 events in 186 logs; nothing else found."
+    },
+    {
+      "spell": 804632,
+      "name": "Flames of Absolution (Solar Flare lasts 10 s, cast directly)",
+      "kind": "metric_delta",
+      "variant": "flare_duration_direct",
+      "label_suffix": "flare_duration_direct",
+      "quote": "launches a Solar Flare",
+      "trigger_spell": 807175,
+      "gate_spell": 804632,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 807175,
+        "caster": "caster"
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "trigger_only_after": true,
+      "gate_timing": "start",
+      "wait_ms": 9500,
+      "expiry_wait_ms": 1000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9300,
+          9800
+        ],
+        "expired": [
+          10300,
+          10900
+        ]
+      },
+      "observe_source": "Solar Flare 807175 DurationIndex 1 = 10000 ms ($d), instant cast, Speed 25 yd/s, so the aura lands at most 5 / 25 = 0.2 s after the cast at the dummy 5 yd away. It is cast directly at the dummy (the launch by 804632 is the subject of entries flare_cap and attacker_miss; a first window entry that launched it through Horusath Blast, Speed 20, read the aura still held at 10518 ms because the two flights add a delay the entry could not bound): the aura from the caster is present when read 9300..9800 ms after the cast (game time), at least 9100 ms after it was applied, and gone when read 10300..10900 ms after it, at most 10900 ms, so the duration lies inside 10% of 10000 ms (9000..11000) on both sides. Control: before the cast, absent. 984954 and 823764 are precondition fixtures. Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher), 807175 Solar Flare: 2442 SPELL_AURA_APPLIED and 2416 SPELL_AURA_REMOVED in 29 logs without a duration; nothing else found."
     }
   ],
   "player_observations": [],
