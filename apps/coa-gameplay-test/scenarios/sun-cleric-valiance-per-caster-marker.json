@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Valiance gives each Sun Cleric its own first-auto-attack extra attack on a shared target (owner ruling O-21)",
-  "contract": "Valiance 680643 reads 'Increases your melee attack speed by $s1% and your first auto attack on a target hits twice.' Its Effect[1] aura 42 PROC_TRIGGER_SPELL casts 681472 (Effect[0] 19 ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531 after 200 ms); 681531 is an enemy DUMMY debuff of 600000 ms, cast by the Sun Cleric (SpellEffects.cpp EffectAscensionTriggerSpellDelayed casts from m_caster). Owner ruling O-21 makes the marker per caster (Sun Cleric ADR 0024): the class contracts clear 681472's ExcludeTargetAuraSpell 681531, which SpellInfo::CheckTarget checked without a caster, give 681531 SPELL_ATTR3_DOT_STACKING_RULE so the markers of two casters coexist (Aura::CanStackWith would otherwise let the newer replace the older), and the 680643 proc condition refuses a target holding the caster's own 681531. Three level 60 Sun Clerics with the class file's Valkyr weapon set (707072, two 2529 two-handed swords) and the class file ratings (hit and expertise 10000: no miss, dodge or parry) attack one passive dummy. The first learns Valiance and attacks until its marker is on the dummy. The second learns Valiance and attacks the dummy marked by the first: it must cast its own 681472 exactly once and mark the dummy too, while the first's marker stays. Before the fix its cast was refused by the first's marker and read 0. The first then attacks the same dummy again and must not cast 681472 a second time. The control Sun Cleric has no Valiance: it swings at the same dummy and casts no 681472 and leaves no marker of its own.",
+  "contract": "Valiance 680643 reads 'Increases your melee attack speed by $s1% and your first auto attack on a target hits twice.' Its Effect[1] aura 42 PROC_TRIGGER_SPELL casts 681472 (Effect[0] 19 ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531 after 200 ms); 681531 is an enemy DUMMY debuff of 600000 ms, cast by the Sun Cleric (SpellEffects.cpp EffectAscensionTriggerSpellDelayed casts from m_caster). Owner ruling O-21 makes the marker per caster (Sun Cleric ADR 0024): the class contracts clear 681472's ExcludeTargetAuraSpell 681531, which SpellInfo::CheckTarget checked without a caster, give 681531 SPELL_ATTR3_DOT_STACKING_RULE so the markers of two casters coexist (Aura::CanStackWith would otherwise let the newer replace the older), and the 680643 proc condition refuses a target holding the caster's own 681531. Three level 60 Sun Clerics with the class file's Valkyr weapon set (707072, two 2529 two-handed swords) and the class file ratings (hit and expertise 10000: no miss, dodge or parry) attack one passive dummy. The first learns Valiance and attacks until its marker is on the dummy. The second learns Valiance and attacks the dummy marked by the first: it must cast its own 681472 exactly once and mark the dummy too, while the first's marker stays. Before the fix its cast was refused by the first's marker (code reading, SpellInfo.cpp:2158, not measured). The first then attacks the same dummy again and must not cast 681472 a second time. The control Sun Cleric has no Valiance: it swings at the same dummy and casts no 681472 and leaves no marker of its own.",
   "timeout_ms": 90000,
   "players": [
     { "id": "cleric", "race": 1, "class": 27, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 },
@@ -66,6 +66,7 @@
       "action": "assert", "label": "DISCRIMINATING: the first Sun Cleric got one extra attack over all its swings",
       "actor": "cleric", "metric": "spell_cast_count", "spell": 681472, "equals": 1
     },
+    { "action": "snapshot", "actor": "cleric", "metric": "melee_attack_count", "save_as": "swings_before_reattack" },
     { "action": "attack", "label": "The first Sun Cleric attacks the same dummy again", "actor": "cleric", "target": "dummy" },
     { "action": "wait", "label": "three Valkyr swing intervals", "ms": 7500 },
     { "action": "stop_attack", "actor": "cleric" },
@@ -75,7 +76,7 @@
     },
     {
       "action": "assert", "label": "SETUP: the first Sun Cleric swung again", "actor": "cleric",
-      "metric": "melee_attack_count", "min": 2
+      "metric": "melee_attack_count", "relative_to": "swings_before_reattack", "min": 2
     },
     { "action": "attack", "label": "CONTROL: a Sun Cleric without Valiance attacks the dummy", "actor": "control", "target": "dummy" },
     { "action": "wait", "label": "three Valkyr swing intervals", "ms": 7500 },

@@ -69,8 +69,23 @@ Decision: the second. `AscensionSunClericContracts.cpp` clears 681472's `Exclude
 `SPELL_ATTR3_DOT_STACKING_RULE`, so the markers of different casters stack (`SpellAuras.cpp:2093`) while the same
 caster's marker refreshes. The 680643 proc condition refuses a target that holds the caster's own 681531
 (`HasAura(681531, caster)`); 681531 is cast by the Sun Cleric (`Spell::EffectAscensionTriggerSpellDelayed`). For one
-caster nothing changes: the DBC extra attack 681472 and the 681531 marker run as before, refused on a target the caster
-already marked, now by the proc condition instead of `CheckTarget`.
+caster the extra attack 681472 and the refusal on an already marked target stay (now by the proc condition instead of
+`CheckTarget`), but the marker timing changes (code reading): for a spell with a non-zero family,
+`Spell::PrepareTriggersExecutedOnHit` sets the pre-cast spell to a negative `ExcludeTargetAuraSpell`
+(`Spell.cpp:9119-9121`), and `Spell::DoTriggersOnSpellHit` adds it to each hit unit with `AddAura`
+(`Spell.cpp:3330-3345`). 681531 is negative (Effect[0] target 6, `SpellInfo.cpp:3621`, `:3651`,
+`SpellMgr.cpp:3942-3943`), so before the amendment the marker was added at the 681472 hit (0 ms) on the target and
+on the Sun Cleric itself, then recast at +200 ms by Effect[1] 183. With the exclusion cleared it comes only from the
+delayed trigger (`SpellEffects.cpp:1061-1100`), at +200 ms and on the target only; the live log has 681531 on the
+target about 300 ms after the extra attack and never on the player.
+
+The single-caster gate therefore rests on the marker's +200 ms window being closed before the next proc. For dual
+wield, the off-hand swing is held to at least `ATTACK_DISPLAY_DELAY` (200 ms, `PlayerUpdates.cpp:207-213`, `Unit.h:641`)
+and the marker delay is 199 + 1 = 200 ms (`SpellEffects.cpp:1093`). Both expire in the same update, and
+`Unit::Update` runs the event queue before the melee block (`PlayerUpdates.cpp:81`, `:181-235`), so the marker is cast
+before that off-hand swing and refuses its proc. The extra attack cannot proc again while it is the last extra attack
+spell (`SpellAuraEffects.cpp:1425-1435`). The tie of the two 200 ms values and the update order are code reading; no
+scenario forces them.
 
 Consequences:
 
