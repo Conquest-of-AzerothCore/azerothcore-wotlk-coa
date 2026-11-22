@@ -11990,18 +11990,18 @@
       "fields": {
         "spell": 8379
       },
-      "before_expected": 0,
+      "before_expected": 1,
       "expected": 1,
       "wait_ms": 25,
       "expire_ms": 21000,
       "game_time": {
         "after": [
-          1,
-          20000
+          5120,
+          5175
         ],
         "expired": [
-          1,
-          20000
+          5225,
+          5300
         ]
       },
       "void_on_cast_failure": true,
@@ -12069,18 +12069,18 @@
       "fields": {
         "spell": 8379
       },
-      "before_expected": 0,
+      "before_expected": 1,
       "expected": 1,
       "wait_ms": 25,
       "expire_ms": 21000,
       "game_time": {
         "after": [
-          1,
-          20000
+          4200,
+          4255
         ],
         "expired": [
-          1,
-          20000
+          4350,
+          4425
         ]
       },
       "void_on_cast_failure": true,
