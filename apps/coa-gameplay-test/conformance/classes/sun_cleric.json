@@ -9432,6 +9432,7 @@
         500143
       ],
       "setup_wait_ms": 2600,
+      "cast_power": 1363,
       "metric": "aura_stacks",
       "fields": {
         "spell": 680623
@@ -9439,9 +9440,13 @@
       "before_expected": 0,
       "expected": 5,
       "wait_ms": 2600,
-      "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). Six fulfilments (five setup heals and the trigger heal) read 5 stacks, the stated cap. Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
+      "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). Six fulfilments (five setup heals and the trigger heal) read 5 stacks, the stated cap. Illumination 500143 costs 30% of the mana pool (Spell.dbc ManaCostPercentage 30), so six casts need 180%: refill_power_after_setup_casts sets the mana to 1363 again after every setup cast (the claim is not about mana) and void_on_cast_failure voids a run in which any cast is refused (the earlier entry had its trigger cast refused, reason 85, and read 5 after at most five landed heals). Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
       "cast_in_before": false,
-      "setup_only_after": true
+      "setup_only_after": true,
+      "void_on_cast_failure": true,
+      "refill_power_after_setup_casts": {
+        "power": 0
+      }
     },
     {
       "spell": 680622,
