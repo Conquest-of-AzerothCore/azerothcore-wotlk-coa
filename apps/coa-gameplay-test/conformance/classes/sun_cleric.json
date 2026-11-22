@@ -382,7 +382,7 @@
         {
           "power": 0,
           "expected": 68,
-          "source": "680663 names 504876 Effect[0] SPELL_EFFECT_ASCENSION_RESTORE_BASE_MANA_PCT (166) BasePoints 4 + 1 = 5 ($504876s1%) of the base mana; the base mana of class 27 at level 60 is 1363 (player_class_stats, the value Bless 804247 costs 20% of: 272), 5% of 1363 = 68.15, whole mana 68 per energize"
+          "source": "680663 names 504876 Effect[0] SPELL_EFFECT_ASCENSION_RESTORE_BASE_MANA_PCT (166) BasePoints 4 + 1 = 5 ($504876s1%) of the base mana; the base mana of class 27 at level 60 is 1363 (player_class_stats row; the effective table may be ascension_class_stats when CoA.ClassLevelSixtyStats.Enable is 1, rev_20261105_95_coa_class_level_sixty_stats.sql:19, not read here), 5% of 1363 = 68.15, whole mana 68 per energize. Reference search 2026-11-22: coa-history spell 504876: 0 events"
         }
       ]
     }
@@ -26083,7 +26083,7 @@
       "after_at_least": 990,
       "after_at_most": 996,
       "wait_ms": 4000,
-      "observe_source": "806116 Duality of Light Effect[0] aura 42 PROC_TRIGGER_SPELL 807061 (Twin Flames, DurationIndex 8 = 15000 ms, StackAmount 10, Effect[0] aura 354 BasePoints 7 + 1 = 8, EffectTriggerSpell 807078); 807077 Sun Power is its Fire twin (trigger 807215). The class handler AscensionSunClericEvents.cpp:272-282 casts 807061 on a damage event of the caster in Sunset when the school is Holy, and 807077 in Sunrise when it is Fire, and AscensionSunClericEvents.cpp:261-263 makes the next Rapture 806477 / Horusath Blast 500154 strike again for Amount x stacks percent of its damage. Sunset 500511 and Sunrise 500477 are precondition fixtures (set_aura, the claim's subject is the grant); 984954 and 823764 are the damage fixtures of the Rapture entries. One Horusath Blast 572801 in Sunset (setup cast, treatment phase only) gives one Twin Flames stack, then Rapture 807372 hits the dummy: the strike 807078 is expected at 8% x 1 stack of the Rapture damage. At 10000 spell power Rapture reads ${$m1+$spfi*1.03734} = 876.7..940.7 + 10373.4 = 11250.1..11314.1 (damage_sp entry of Rapture), and in Sunset it is done at +10% (Sunset 500511 Effect[1] aura 79 MOD_DAMAGE_PERCENT_DONE MiscValue 4 (Fire) BasePoints 9 + 1 = +10% (its text: Fire Damage by $s2%)): 12375.1..12445.5, so 8% is 990.0..995.6, read as 990..996: 7% (866.3..871.2) and 9% (1113.8..1120.1) are excluded. Control: the phase before has no passive and no stack, same Rapture, reads 0 strike damage. Reference search 2026-11-22: coa-history spells 806116, 807061, 807077, 807078 and 807215: 0 events in 186 logs (the talent family never appears in the recorded logs); nothing else found beyond the tooltip and the DBC."
+      "observe_source": "806116 Duality of Light Effect[0] aura 42 PROC_TRIGGER_SPELL 807061 (Twin Flames, DurationIndex 8 = 15000 ms, StackAmount 10, Effect[0] aura 354 BasePoints 7 + 1 = 8, EffectTriggerSpell 807078); 807077 Sun Power is its Fire twin (trigger 807215). The class handler AscensionSunClericEvents.cpp:272-282 casts 807061 on a damage event of the caster in Sunset when the school is Holy, and 807077 in Sunrise when it is Fire, and AscensionSunClericEvents.cpp:261-263 makes the next Rapture 806477 / Horusath Blast 500154 strike again for Amount x stacks percent of its damage. Sunset 500511 and Sunrise 500477 are precondition fixtures (set_aura, the claim's subject is the grant); 984954 and 823764 are the damage fixtures of the Rapture entries. One Horusath Blast 572801 in Sunset (setup cast, treatment phase only) gives one Twin Flames stack, then Rapture 807372 hits the dummy: the strike 807078 is expected at 8% x 1 stack of the Rapture damage. At 10000 spell power Rapture reads ${$m1+$spfi*1.03734} = 876.7..940.7 + 10373.4 = 11250.1..11314.1 (damage_sp entry of Rapture), and in Sunset it is done at +10% (Sunset 500511 Effect[1] aura 79 MOD_DAMAGE_PERCENT_DONE MiscValue 4 (Fire) BasePoints 9 + 1 = +10% (its text: Fire Damage by $s2%)): 12375.1..12445.5, so 8% is 990.0..995.6, read as 990..996: 7% (866.3..871.2) and 9% (1113.8..1120.1) are excluded. Control: the phase before the strike, passive learned, no setup cast and no stack, same Rapture, reads 0 strike damage. The minimum Rapture roll truncates to 989 at integer damage (CalculatePct), so a read of 989 is a lead on rounding, not a failure of the 8%. Reference search 2026-11-22: coa-history spells 806116, 807061, 807077, 807078 and 807215: 0 events in 186 logs (the talent family never appears in the recorded logs); nothing else found beyond the tooltip and the DBC."
     },
     {
       "spell": 806116,
@@ -26133,7 +26133,7 @@
       "after_at_least": 1034,
       "after_at_most": 1046,
       "wait_ms": 1500,
-      "observe_source": "806116 Duality of Light Effect[0] aura 42 PROC_TRIGGER_SPELL 807061 (Twin Flames, DurationIndex 8 = 15000 ms, StackAmount 10, Effect[0] aura 354 BasePoints 7 + 1 = 8, EffectTriggerSpell 807078); 807077 Sun Power is its Fire twin (trigger 807215). The class handler AscensionSunClericEvents.cpp:272-282 casts 807061 on a damage event of the caster in Sunset when the school is Holy, and 807077 in Sunrise when it is Fire, and AscensionSunClericEvents.cpp:261-263 makes the next Rapture 806477 / Horusath Blast 500154 strike again for Amount x stacks percent of its damage. Sunset 500511 and Sunrise 500477 are precondition fixtures (set_aura, the claim's subject is the grant); 984954 and 823764 are the damage fixtures of the Rapture entries. One Rapture 807372 in Sunrise (setup cast, treatment phase only) gives one Sun Power stack, then Horusath Blast 572801 hits the dummy: the strike 807215 is expected at 8% x 1 stack of the Horusath Blast damage. At 10000 spell power Horusath Blast reads ${$m1+0+$sph*1} = 782.64..888.64 + 10000 = 10782.6..10888.6 (roll 770..876 of effect 0 at level 60), and in Sunrise it is done at +20% (Sunrise 500477 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE MiscValue 2 (Holy) BasePoints 19 + 1 = +20% (its text: all Holy Damage dealt by $s1%)): 12939.1..13066.3, so 8% is 1035.1..1045.3, read as 1034..1046: 7% (905.7..914.6) and 9% (1164.5..1175.9) are excluded. Control: the phase before has no passive and no stack, same Horusath Blast, reads 0 strike damage. Reference search 2026-11-22: coa-history spells 806116, 807061, 807077, 807078 and 807215: 0 events in 186 logs (the talent family never appears in the recorded logs); nothing else found beyond the tooltip and the DBC."
+      "observe_source": "806116 Duality of Light Effect[0] aura 42 PROC_TRIGGER_SPELL 807061 (Twin Flames, DurationIndex 8 = 15000 ms, StackAmount 10, Effect[0] aura 354 BasePoints 7 + 1 = 8, EffectTriggerSpell 807078); 807077 Sun Power is its Fire twin (trigger 807215). The class handler AscensionSunClericEvents.cpp:272-282 casts 807061 on a damage event of the caster in Sunset when the school is Holy, and 807077 in Sunrise when it is Fire, and AscensionSunClericEvents.cpp:261-263 makes the next Rapture 806477 / Horusath Blast 500154 strike again for Amount x stacks percent of its damage. Sunset 500511 and Sunrise 500477 are precondition fixtures (set_aura, the claim's subject is the grant); 984954 and 823764 are the damage fixtures of the Rapture entries. One Rapture 807372 in Sunrise (setup cast, treatment phase only) gives one Sun Power stack, then Horusath Blast 572801 hits the dummy: the strike 807215 is expected at 8% x 1 stack of the Horusath Blast damage. At 10000 spell power Horusath Blast reads ${$m1+0+$sph*1} = 782.64..888.64 + 10000 = 10782.6..10888.6 (roll 770..876 of effect 0 at level 60), and in Sunrise it is done at +20% (Sunrise 500477 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE MiscValue 2 (Holy) BasePoints 19 + 1 = +20% (its text: all Holy Damage dealt by $s1%)): 12939.1..13066.3, so 8% is 1035.1..1045.3, read as 1034..1046: 7% (905.7..914.6) and 9% (1164.5..1175.9) are excluded. Control: the phase before the strike, passive learned, no setup cast and no stack, same Horusath Blast, reads 0 strike damage. Reference search 2026-11-22: coa-history spells 806116, 807061, 807077, 807078 and 807215: 0 events in 186 logs (the talent family never appears in the recorded logs); nothing else found beyond the tooltip and the DBC."
     },
     {
       "spell": 806116,
@@ -26251,22 +26251,16 @@
     },
     {
       "spell": 806116,
-      "name": "Duality of Light (a Twin Flames grant removes Sun Power)",
+      "name": "Duality of Light (a Holy hit in Sunset removes a Sun Power that Horusath Blast did not consume)",
       "kind": "metric_delta",
       "variant": "exclusive_swap",
       "label_suffix": "exclusive_swap",
       "quote": "@ext:Only one aura can be active at a time.:ext@",
       "target": "dummy",
       "cast_power": 1363,
-      "before_expected": 0,
+      "before_expected": 1,
       "expire_ms": 500,
-      "trigger_spell": 572801,
-      "setup_casts": [
-        807372
-      ],
-      "setup_target": "dummy",
-      "setup_only_after": true,
-      "setup_wait_ms": 4000,
+      "trigger_spell": 800231,
       "gate_spell": 806116,
       "phase_auras": [
         [
@@ -26276,7 +26270,7 @@
           "caster"
         ],
         [
-          500477,
+          807077,
           1,
           "caster",
           "caster"
@@ -26301,7 +26295,7 @@
       },
       "expected": 0,
       "wait_ms": 1500,
-      "observe_source": "806116 Duality of Light Effect[0] aura 42 PROC_TRIGGER_SPELL 807061 (Twin Flames, DurationIndex 8 = 15000 ms, StackAmount 10, Effect[0] aura 354 BasePoints 7 + 1 = 8, EffectTriggerSpell 807078); 807077 Sun Power is its Fire twin (trigger 807215). The class handler AscensionSunClericEvents.cpp:272-282 casts 807061 on a damage event of the caster in Sunset when the school is Holy, and 807077 in Sunrise when it is Fire, and AscensionSunClericEvents.cpp:261-263 makes the next Rapture 806477 / Horusath Blast 500154 strike again for Amount x stacks percent of its damage. Sunset 500511 and Sunrise 500477 are precondition fixtures (set_aura, the claim's subject is the grant); 984954 and 823764 are the damage fixtures of the Rapture entries. Both states are set (the Sunset branch needs a Holy school, so a Fire hit still takes the Sunrise branch). Rapture 807372 first grants Sun Power for real (setup cast, treatment phase only: the sunrise_grant entry reads that aura present 1 under the same Fire hit), then Horusath Blast 572801 in Sunset grants Twin Flames and the aura 807077 is read 1500 ms later: 0, so only one of the two stays. Reading 0 after the removal and 1 in sunrise_grant with the same preceding Fire hit is the contrast; the Twin Flames side is read present by sunset_grant. Reference search 2026-11-22: coa-history spells 806116, 807061, 807077, 807078 and 807215: 0 events in 186 logs (the talent family never appears in the recorded logs); nothing else found beyond the tooltip and the DBC.",
+      "observe_source": "806116 Duality of Light, the clause 'Only one aura can be active at a time.': the Sunset branch of AscensionSunClericEvents.cpp:272-276 removes 807077 Sun Power and casts 807061 Twin Flames on a Holy damage event of the caster. The removing hit is Sunflare 800231 (SchoolMask 2 Holy, Effect[0] school damage), which is not in the Horusath Blast 500154 chain, the only spell that selects and consumes Sun Power (AscensionSunClericAbilities.cpp:53), so nothing but the swap can remove the aura. Fixtures (set_aura, named preconditions, the claim's subject is the removal): Sunset 500511 and Sun Power 807077 are set in both phases; 984954 and 823764 are the damage fixtures. Control: the phase before the passive is learned, same Sunset, same Sunflare hit, same Sun Power fixture, reads the aura present 1 (no handler runs), against 0 after the passive is learned, so the passive's swap is the only difference. Reference search 2026-11-22: coa-history spells 806116, 807061, 807077, 807078 and 807215: 0 events in 186 logs; nothing else found beyond the tooltip and the DBC.",
       "measure_actor": "caster"
     },
     {
