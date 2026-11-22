@@ -11808,6 +11808,136 @@
       "expected_source": "Mentor D-60: this entry's claim is not counted until the mentor settles the cause of the low readings. The expectation below is the D-54 model as written and is not refitted. The reproduced model, with its source lines, is returned to the mentor in .agents/plans/sun-cleric-b4t-fix/report.md and proposed in ADR sun-cleric 0008: Horusath +19.34%, Gavel of Wrath +27.14%, Gavel of Grace +23.85%, Gavel of Light +21.67%. 805628 Fanaticism Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20%, Effect[1] aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -21 + 1 = -20% ($s2), both on EffectSpellClassMask word index 1 (the second word) = 96, SpellFamilyFlags[1] bits 32 and 64 (Gavels, Horusath Blast). The effectiveness figure is not in the tooltip; it is Effect[0] of the DBC, +20%, so the mean non-critical hit of Gavel of Grace 800614 is judged against the expected ratio stated below (band 2 points, G-19: the larger of 5% of the bonus and 2 points). Control: passive not learned. The reference character has no spell power or attack power fixture (reference_stats). Reference search: coa-history spell 805628 and the three Gavel roots 800611, 800614, 800617: 0 events (the passive and the roots are not logged); the rank spells Gavel of Wrath 802561 (677 SPELL_DAMAGE, mean 568, 203 crits, 4 logs) and 802560 (13), Gavel of Light 502467 (2) carry no talent attribution, so they cannot settle the effectiveness; git log origin/main --grep and gh pr list --search (805628, Fanaticism, Gavel of Light, Gavel of Grace, Gavel of Wrath): merged PR #4516 (scenario sun-cleric-fanaticism: Player::ApplySpellMod reads 1000 back as 1200 and 1000 as 800, data level, no Gavel hit measured), PRs #8988 and #9558 (Gavel dodge and extra strikes, no effectiveness figure); the community snapshots carry the tooltip with no effectiveness figure (guide section 4). Cause of a bonus above +20% (Spell::EffectWeaponDmg, SpellEffects.cpp:4676 and :4681): SPELLMOD_ALL_EFFECTS (+20%) is applied by CalculateSpellDamage to the flat effect 0 and to the weapon percent effect 1, and the loop at :4729-4741 adds the flat value before it applies the percent, in DBC order. The treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, which is +20% plus 0.24 x B x (1 - r) / C (C = the control mean hit, r = the armor reduction, B = the flat value). B comes from the DBC (Gavel of Wrath 800617: BasePoints 44, DieSides 11 = 45..55, mean 50; Gavel of Grace 800614: BasePoints 22, DieSides 4 = 23..26, mean 24.5; Gavel of Light 800611: BasePoints 11 + 1 = 12, the per-level term 0.1505 x (MaxLevel 8 - SpellLevel 4) = 0.6 truncated to 0). r = x / (1 + x) with x = armor / (85 x 60 + 400) = 528 / 5500 (Unit::CalcArmorReducedDamage, classic branch, ClassicPlusCombat::ArmorConstant), so r = 8.76%; the dummy armor 528 is read by the dummy_armor entry (creature_classlevelstats basearmor 528 at level 11, class 1, ArmorModifier 1). The model is stated before the pair and holds no fitted term. Governing precedent: docs/adr/0010-argent-blade-flat-bonus-after-weapon-percent.md (SpellInfo::AscensionFlatAfterWeaponPercent, SpellEffects.cpp:4724, set for Templar 804929 and Xoroth 800340; its Consequences: each class needs its own Ascension evidence before the flag is used elsewhere). The Sun Cleric weapon_percent_before_flat list is empty. Status 5: the owner question is in the batch 3c fix report. Expectation as engine arithmetic (mentor D-54, ruling (a); docs/adr/conformance/sun-cleric/0007): the treatment hit is 1.2 x (W + 1.2 x B) against W + B in the control, so the bonus is 20% + 24% x B / (W + B). Inputs, none of them a measured bonus: B = 24.5 (Gavel of Grace 800614 flat mean from the DBC, see above); armor read 528 (dummy_armor entry), r = x / (1 + x) with x = 528 / (85 x 60 + 400), r = 8.76%; W + B = the control mean hit 118.173 read in the counted pair f1 20261122-004435 (build 8de1aad63b12, 498 non-critical hits per arm, a baseline reading of the control arm) divided by (1 - r) = 129.52. Expected ratio 1.2 + 0.24 x 24.5 / 129.52 = 1.2454, a bonus of 24.54%, judged in the G-19 band (the larger of 5% of it and 2 points). The compounding in words: Fanaticism raises the flat part of the Gavel twice, once inside the +20% effect value and once through the +20% weapon percent that scales the sum, and the weapon part once, so a Gavel gains more than 20% in proportion to its flat part. Sizing: the judge reports insufficient_trials when the 99% half-width of the bonus exceeds its limit. The counted pair 20261122-013639 / -013852 ran 1000 trials per arm at 0.933 and 0.955 of the limit and sized 1361 and 1426 trials per arm; the entry now runs 16 parts, 1600 trials per arm, at least 1.1 times the larger sized count (1426). At 1600 trials the half-width is at most 0.755 of the limit (the worse run scaled by the square root of the trial ratio). Residual probability of insufficient_trials per pair: the half-width's relative standard deviation is 1 / sqrt(2 x trials) = 1.77%, and the limit lies 32% above it, 18 standard deviations, below 1e-9."
     },
     {
+      "spell": 805628,
+      "name": "Fanaticism (Gavel of Wrath effectiveness, out-of-sample: attack power 280, armor 3750)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel_oos",
+      "label_suffix": "effect_gavel_oos",
+      "quote": "Increases the effectiveness of",
+      "expected": 1.2537,
+      "observe_spell": 800617,
+      "fixture": {
+        "attack_power": 210
+      },
+      "target_entry": 603,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          805628
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 14,
+      "cast_power": 1363,
+      "expected_source": "Out-of-sample test of ADR sun-cleric 0008 (mentor D-61, condition 2). The expectation is the model's pre-registered prediction (.agents/plans/fanaticism-oos/prediction.md, predict.py): the ADR 0008 arithmetic with the attack power 280 (70 + the fixture's 210, read in the scenario) and the creature 603 armor 3750 (creature_classlevelstats level 60 class 1 basearmor 3750 x ArmorModifier 1). Band 2 points (G-19). Control: passive not learned. Non-critical hits only. The label stays out of the clause ledger: it proves no claim by itself."
+    },
+    {
+      "spell": 805628,
+      "name": "Fanaticism (Gavel of Grace effectiveness, out-of-sample: attack power 280, armor 3750)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel_grace_oos",
+      "label_suffix": "effect_gavel_grace_oos",
+      "quote": "Increases the effectiveness of",
+      "expected": 1.227,
+      "observe_spell": 800614,
+      "fixture": {
+        "attack_power": 210
+      },
+      "target_entry": 603,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          805628
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 16,
+      "cast_power": 1363,
+      "expected_source": "Out-of-sample test of ADR sun-cleric 0008 (mentor D-61, condition 2). The expectation is the model's pre-registered prediction (.agents/plans/fanaticism-oos/prediction.md, predict.py): the ADR 0008 arithmetic with the attack power 280 (70 + the fixture's 210, read in the scenario) and the creature 603 armor 3750 (creature_classlevelstats level 60 class 1 basearmor 3750 x ArmorModifier 1). Band 2 points (G-19). Control: passive not learned. Non-critical hits only. The label stays out of the clause ledger: it proves no claim by itself."
+    },
+    {
+      "spell": 805628,
+      "name": "Fanaticism (Gavel of Light effectiveness, out-of-sample: attack power 280, armor 3750)",
+      "kind": "hit_ratio",
+      "variant": "effect_gavel_light_oos",
+      "label_suffix": "effect_gavel_light_oos",
+      "quote": "Increases the effectiveness of",
+      "expected": 1.2111,
+      "observe_spell": 800611,
+      "fixture": {
+        "attack_power": 210
+      },
+      "target_entry": 603,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          805628
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 19,
+      "cast_power": 1363,
+      "expected_source": "Out-of-sample test of ADR sun-cleric 0008 (mentor D-61, condition 2). The expectation is the model's pre-registered prediction (.agents/plans/fanaticism-oos/prediction.md, predict.py): the ADR 0008 arithmetic with the attack power 280 (70 + the fixture's 210, read in the scenario) and the creature 603 armor 3750 (creature_classlevelstats level 60 class 1 basearmor 3750 x ArmorModifier 1). Band 2 points (G-19). Control: passive not learned. Non-critical hits only. The label stays out of the clause ledger: it proves no claim by itself."
+    },
+    {
+      "spell": 805628,
+      "name": "Fanaticism (Horusath Blast effectiveness, out-of-sample: attack power 280, armor 3750)",
+      "kind": "hit_ratio",
+      "variant": "effect_horusath_oos",
+      "label_suffix": "effect_horusath_oos",
+      "quote": "Increases the effectiveness of",
+      "expected": 1.1934,
+      "observe_spell": 500154,
+      "fixture": {
+        "attack_power": 210
+      },
+      "target_entry": 603,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          805628
+        ]
+      },
+      "critical": false,
+      "trials": 100,
+      "parts": 35,
+      "cast_power": 1363,
+      "expected_source": "Out-of-sample test of ADR sun-cleric 0008 (mentor D-61, condition 2). The expectation is the model's pre-registered prediction (.agents/plans/fanaticism-oos/prediction.md, predict.py): the ADR 0008 arithmetic with the attack power 280 (70 + the fixture's 210, read in the scenario) and the creature 603 armor 3750 (creature_classlevelstats level 60 class 1 basearmor 3750 x ArmorModifier 1). Band 2 points (G-19). Control: passive not learned. Non-critical hits only. The label stays out of the clause ledger: it proves no claim by itself."
+    },
+    {
+      "spell": 805628,
+      "name": "Fanaticism (diagnostic: the armor of the out-of-sample target 603)",
+      "kind": "metric_delta",
+      "variant": "dummy_armor_oos",
+      "label_suffix": "dummy_armor_oos",
+      "quote": "and reduces their mana cost by $s2%.",
+      "trigger_spell": 800617,
+      "gate_spell": 805628,
+      "target": "dummy",
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 3750,
+      "expected": 3750,
+      "tolerance": 0.5,
+      "wait_ms": 300,
+      "expire_ms": 5000,
+      "observe_source": "Diagnostic, no claim: the armor of creature 603 read from the live unit. Expected 3750 = creature_classlevelstats level 60 class 1 basearmor times ArmorModifier 1 (CreatureData.h:336, min_level_armor).",
+      "dummy_distance": 5,
+      "measure_actor": "dummy",
+      "target_entry": 603
+    },
+    {
       "spell": 804247,
       "name": "Bless (health per tick on the ally)",
       "kind": "metric_delta",
