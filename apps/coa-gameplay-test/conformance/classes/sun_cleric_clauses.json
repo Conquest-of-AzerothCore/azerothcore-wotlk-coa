@@ -3719,18 +3719,32 @@
   {
     "spell": 804253,
     "clause": "Protect a Blessed ally, making them immune to all damage for $680889d.",
-    "labels": [
-      "804253 spell_duration 680889 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Protect a Blessed ally, making them immune to all damage (the immunity aura 680889 on the target)",
+        "labels": [
+          "804253 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "for 6 s",
+        "labels": [
+          "804253 behaviour_metric_delta duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Control arm = no cast, no aura (0 before). The aura 680889 (aura 40 DAMAGE_IMMUNITY, all schools) is present 5450..5900 ms after a real cast on a caster blessed by a real Bless, gone 6150..6550 ms (6000 ms, 10% on both sides excluded). The immunity itself (a strike taking no damage) is not proven: the taken_hit entry failed its own check, its casts have no mana (tool need, in the report). The target is the Blessed caster, not a second ally (ally Bless casts fail in ally_arm, see 707517). Reference search 2026-11-22: coa-history spell 804253: 11 casts in 5 logs, no aura events; git log origin/main --grep 804253: nothing; the reference snapshots list the tooltip only; nothing else found. Pair 20261122-013201 / 20261122-013234, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 804253,
     "clause": "@ext:Only usable on your ally with Bless active.:ext@",
     "labels": [
-      "804253 effect_value #1"
+      "804253 behaviour_metric_delta no_bless",
+      "804253 behaviour_metric_delta duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Control arm in this entry: a cast at a caster without Bless leaves no 680889 (0 and 0); with Bless the duration entry reads the aura present. The script returns when the target lacks the caster's Bless (AscensionSunClericAbilities.cpp:478-481). Reference search 2026-11-22: coa-history spell 804253: 11 casts in 5 logs, no aura events; git log origin/main --grep 804253: nothing; the reference snapshots list the tooltip only; nothing else found. Pair 20261122-013201 / 20261122-013234, build 33138890, server commit e4de133c5551+, no flip."
   },
   {
     "spell": 804254,

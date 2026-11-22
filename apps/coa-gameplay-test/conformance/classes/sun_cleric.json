@@ -9664,59 +9664,6 @@
       "gate_timing": "start",
       "trigger_only_after": true,
       "observe_source": "804253 Blessing of Purity Effect[0] SPELL_EFFECT_TRIGGER_SPELL 680889, whose aura 40 SPELL_AURA_DAMAGE_IMMUNITY (MiscValue 127, all schools) lasts 6000 ms (DurationIndex 32, $680889d); Spell.dbc TargetAuraSpell 804247 (Bless); the script casts it only on a target carrying the caster's own Bless (AscensionSunClericAbilities.cpp:478-492). Bless is not cast. Control of the duration entry: 804253 cast at a caster without Bless leaves no 680889 (the script returns when the target lacks the caster's Bless); the duration entry shows the aura present with Bless. Reference search as the duration entry."
-    },
-    {
-      "spell": 804253,
-      "name": "Blessing of Purity (immune to all damage)",
-      "kind": "taken_hit",
-      "variant": "immune",
-      "label_suffix": "immune",
-      "judge": "damage_ratio",
-      "expected": 0.0,
-      "quote": "Protect a Blessed ally, making them immune to all damage for $680889d.",
-      "strike_spell": 47632,
-      "caster_health_pct": 100,
-      "caster_max_health": 100000,
-      "trials": 10,
-      "arms": [
-        {
-          "name": "control",
-          "casts": [
-            [
-              804247,
-              "caster"
-            ]
-          ],
-          "checks": [
-            {
-              "metric": "aura",
-              "spell": 680889,
-              "equals": 0
-            }
-          ]
-        },
-        {
-          "name": "treatment",
-          "casts": [
-            [
-              804247,
-              "caster"
-            ],
-            [
-              804253,
-              "caster"
-            ]
-          ],
-          "checks": [
-            {
-              "metric": "aura",
-              "spell": 680889,
-              "equals": 1
-            }
-          ]
-        }
-      ],
-      "observe_source": "680889 aura 40 SPELL_AURA_DAMAGE_IMMUNITY, MiscValue 127 (every school), 6000 ms. Grave Coil 47632 (600 Shadow, DmgClass 1) strikes the caster, blessed by a real Bless 804247 on itself, without (control) and with a real cast of 804253 on itself; the ratio of the damage taken is judged against 0."
     }
   ],
   "player_observations": [],
