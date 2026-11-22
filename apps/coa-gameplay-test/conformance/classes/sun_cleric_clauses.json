@@ -282,10 +282,21 @@
   {
     "spell": 300323,
     "clause": "Increases the effectiveness of Sunrise and Sunset by $s1%.",
-    "labels": [
-      "300323 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the effectiveness of Sunrise by $s1%",
+        "labels": [
+          "300323 behaviour_hit_ratio effect_sunrise"
+        ]
+      },
+      {
+        "claim": "Increases the effectiveness of Sunset by $s1% (Fire damage; the critical strike chance part is open)",
+        "labels": [
+          "300323 behaviour_hit_ratio effect_sunset"
+        ]
+      }
+    ]
   },
   {
     "spell": 300324,
@@ -671,10 +682,23 @@
   {
     "spell": 300360,
     "clause": "Lasts for $301265d or 3 casts.",
-    "labels": [
-      "300360 spell_duration 301265 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Lasts for $301265d",
+        "labels": [
+          "300360 behaviour_metric_delta haste_duration_window"
+        ]
+      },
+      {
+        "claim": "or 3 casts",
+        "labels": [
+          "300360 behaviour_metric_delta haste_two_casts",
+          "300360 behaviour_metric_delta haste_three_casts"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Haste aura held after two casts (0.833333) and gone after three (1.0) inside its 10 s, and present 9100 ms after being granted and gone by 10900 ms (guide 3.5 time bands). Reference search 2026-11-22: coa-history 301265: aura applied and removed events in 3 logs, no charge or amount; nothing else found."
   },
   {
     "spell": 300361,
@@ -2489,7 +2513,7 @@
     "spell": 561328,
     "clause": "Removes the cast time of Glare while above 80% health.",
     "kind": "claim",
-    "reason": "Pair 20261122-134456 / 20261122-134548 (prove, build e496bda1, server b7e79aca55+), no flip, no alert. Glare 807870 cast time after the learn: 0 ms at 81% entered from 50%, 1500 ms at 79% entered from 90% or from 50% and at 75% entered from 90% (the four edges D-153 named, judged by the tooltip literal). The #5963 band (AscensionSunCleric.cpp:366-371, b2ad6f76d6) keeps the helper aura between 75% and 80%, but not its effect: the helper carries CasterAuraState 28 (ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT, HealthAbovePct(80) each update, Unit.cpp:766, 3f8e071750), and ModifyAuraState unapplies the effects of owned auras with that state (Unit.cpp:8541-8553). Mentor D-157: the tooltip literal holds, no status 2, no server change. Data conformant, not status 1: the arms read spell_cast_time_ms, a readback in coverage.METRIC_EVIDENCE, so coverage counts both claims as data; status 1 waits for a behaviour route (an observed cast duration). Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state found #5963; nothing else found.",
+    "reason": "Pair PAIR (prove, build BUILD): Glare 807870 cast time read with the engine's own use-time function after the learn, judged as a learned contrast on the named arms (ADR 1024, use_time_contrast): 1500 -> 0 ms (gain -1500) at 90% health and at 81% entered from 50%, 1500 -> 1500 ms (gain 0) at 50%, at 79% entered from 90% or from 50% and at 75% entered from 90% (the four edges D-153 named, judged by the tooltip literal D-157). The #5963 band (AscensionSunCleric.cpp:366-371, b2ad6f76d6) keeps the helper aura between 75% and 80%, but not its effect: the helper carries CasterAuraState 28 (ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT, HealthAbovePct(80) each update, Unit.cpp:766, 3f8e071750), and ModifyAuraState unapplies the effects of owned auras with that state (Unit.cpp:8541-8553). Mentor D-157: the tooltip literal holds, no status 2, no server change. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state found #5963; nothing else found.",
     "claims": [
       {
         "claim": "Removes the cast time of Glare",
@@ -3787,10 +3811,21 @@
   {
     "spell": 704565,
     "clause": "Your Radiant Cascade now bounces to $s1 additional allies.",
-    "labels": [
-      "704565 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Radiant Cascade heals 4 allies without the passive (control)",
+        "labels": [
+          "704565 behaviour_metric_delta bounce_count"
+        ]
+      },
+      {
+        "claim": "bounces to $s1 additional allies",
+        "labels": [
+          "704565 behaviour_metric_delta bounce_count"
+        ]
+      }
+    ]
   },
   {
     "spell": 704568,
@@ -5809,19 +5844,40 @@
   {
     "spell": 804632,
     "clause": "Deals ${$m2+$ppl2+$SP*0.26} Holyflame Damage",
-    "labels": [
-      "804632 effect_value 807175e1 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Deals ${$m2+$ppl2} Holyflame damage (no spell power)",
+        "labels": [
+          "804632 behaviour_metric_delta flare_sp_zero"
+        ]
+      },
+      {
+        "claim": "+ $SP*0.26 (spell power term)",
+        "labels": [
+          "804632 behaviour_metric_delta flare_sp"
+        ]
+      }
+    ]
   },
   {
     "spell": 804632,
     "clause": "and reduces the target's chance to hit by $s1% for $d.",
-    "labels": [
-      "804632 effect_value 807175e0 #3",
-      "804632 spell_duration 807175 #4"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reduces the target's chance to hit by $s1%",
+        "labels": [
+          "804632 behaviour_metric_delta attacker_miss"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "804632 behaviour_metric_delta flare_duration_window"
+        ]
+      }
+    ]
   },
   {
     "spell": 804751,
