@@ -16609,7 +16609,7 @@
       "fields": {},
       "before_expected": 1,
       "expected": 0,
-      "wait_ms": 1148,
+      "wait_ms": 1140,
       "expire_ms": 4500,
       "game_time": {
         "after": [
@@ -16617,7 +16617,7 @@
           1154
         ]
       },
-      "observe_source": "301256 Hot Spot Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 301242; 301242 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -26 + 1 = -25 ($301242s1 = 25), DurationIndex 1 ($301242d = 10000 ms). Cast times from SpellCastTimes of the Spell.dbc CastingTimeIndex: Shine 800357 CastingTimeIndex gives 1500 ms; 25% less is 1125 ms, the stated 25% with the 2-point band of the guide (section 3.5) is 1095..1155 ms. Daybreak 503624 (instant) is cast on the caster in both phases (setup cast, 1600 ms before the trigger); 301256 is learned between them, so the before phase is the control: Shine keeps its full 1500 ms. The caster is read for `casting`: 0 at about 1148 ms excludes a cast time at or above 1154 ms (a reduction below 23%), the before phase reads 1 at the same time (control). Reference search 2026-11-22: server DBC 301256, 301242 and the cast times; bindmysoul snapshot and ascension-data searched for Hot Spot: nothing found beyond the tooltip; coa-history spells 301256 and 301242: 0 casts."
+      "observe_source": "301256 Hot Spot Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 301242; 301242 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -26 + 1 = -25 ($301242s1 = 25), DurationIndex 1 ($301242d = 10000 ms). Cast times from SpellCastTimes of the Spell.dbc CastingTimeIndex: Shine 800357 CastingTimeIndex gives 1500 ms; 25% less is 1125 ms, the stated 25% with the 2-point band of the guide (section 3.5) is 1095..1155 ms. Daybreak 503624 (instant) is cast on the caster in both phases (setup cast, 1600 ms before the trigger); 301256 is learned between them, so the before phase is the control: Shine keeps its full 1500 ms. The caster is read for `casting`: 0 at about 1149 ms excludes a cast time at or above 1154 ms (a reduction below 23%), the before phase reads 1 at the same time (control). Reference search 2026-11-22: server DBC 301256, 301242 and the cast times; bindmysoul snapshot and ascension-data searched for Hot Spot: nothing found beyond the tooltip; coa-history spells 301256 and 301242: 0 casts."
     },
     {
       "spell": 301256,
@@ -16735,7 +16735,6 @@
       "setup_wait_ms": 2100,
       "measure_actor": "caster",
       "disable_regeneration": true,
-      "cast_power": 1363,
       "metric": "casting",
       "fields": {},
       "before_expected": 1,
@@ -16748,7 +16747,12 @@
           1612
         ]
       },
-      "observe_source": "301256 Hot Spot Effect[0] aura 42, EffectTriggerSpell 301242 (\"your next 2 casts\": 301242 ProcCharges is the count the tooltip states). Daybreak 503624 is cast on the caster, then Illumination 500143 casts as stated, in both phases; 301256 is learned between them (before phase = control). Each setup cast is followed by 2100 ms, which holds the full 2000 ms Illumination of the control phase and its GCD; the whole sequence ends well inside the 10000 ms of 301242. The third Illumination (two casts after Daybreak) reads `casting` 1 at about 1600 ms in both phases: it keeps its full time, a reduced one (1500 ms) would have finished. Together with second_done (0 against 1 of the control) the count of the tooltip, 2, is bracketed on both sides. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the count."
+      "observe_source": "301256 Hot Spot Effect[0] aura 42, EffectTriggerSpell 301242 (\"your next 2 casts\": 301242 ProcCharges is the count the tooltip states). Daybreak 503624 is cast on the caster, then Illumination 500143 casts as stated, in both phases; 301256 is learned between them (before phase = control). Each setup cast is followed by 2100 ms, which holds the full 2000 ms Illumination of the control phase and its GCD; the whole sequence ends well inside the 10000 ms of 301242. The third Illumination (two casts after Daybreak) reads `casting` 1 at about 1600 ms in both phases: it keeps its full time, a reduced one (1500 ms) would have finished. Together with second_done (0 against 1 of the control) the count of the tooltip, 2, is bracketed on both sides. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC for the count.",
+      "phase_power": [
+        0,
+        2868,
+        2868
+      ]
     },
     {
       "spell": 301256,
