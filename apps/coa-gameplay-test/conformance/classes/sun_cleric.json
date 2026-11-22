@@ -23695,50 +23695,6 @@
       "observe_source": "300723 Effect[2] is rewritten at load to aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30 (the $s3), MiscValue Holy|Fire (AscensionSunClericContracts.cpp:185-186), so the 30% is a damage percent, not a share of Intellect. Justicar's Wrath 806980 (Holy) is read as its existing damage entry reads it (unmodified 531..541 at the reference stats, dummy Holy resistance removed by 823764). Control: the same hit with 704582 learned instead of 300723 reads 531..541. Tooltip and DBC settle the value; the references add nothing for it."
     },
     {
-      "spell": 300723,
-      "name": "Struck by the Sun (Fire damage +30%, same hit before and after the learn)",
-      "kind": "metric_delta",
-      "variant": "fire_damage",
-      "label_suffix": "fire_damage",
-      "quote": "Increases your Holy and Fire spell damage by $s3%",
-      "trigger_spell": 500146,
-      "gate_spell": 300723,
-      "target": "dummy",
-      "cast_power": 1363,
-      "cast_in_before": true,
-      "phase_auras": [
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "spell_damage_total",
-      "fields": {
-        "spell": 500146,
-        "target": "dummy",
-        "critical": false
-      },
-      "before_expected": 5000,
-      "wait_ms": 4500,
-      "expire_ms": 500,
-      "expected": 6500,
-      "observe_source": "300723 Effect[2] is rewritten at load to aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30 (the $s3), MiscValue Holy|Fire (AscensionSunClericContracts.cpp:185-186). Dawnsear 500146 (Fire, SchoolMask 4) is cast at the dummy in both phases, before and after a real learn of 300723, with 10000 spell power (player_spell_power fixture) so the roll spread is under 2%, crit and resist fixtures 984954 and 823764: the ratio of the two Fire hits is 1.30 within 0.02 (28% to 32%, the 2-point band; excludes +25% and +35%); the before phase is the control. The floor of the before reading is 5000. Tooltip and DBC settle the value; the references add nothing for it.",
-      "player_spell_power": {
-        "amount": 10000,
-        "hit_arm": true
-      },
-      "expected_ratio": 1.3,
-      "tolerance": 0.02
-    },
-    {
       "spell": 704932,
       "name": "Heat Death (the Solar Eclipse debuff is held to 13.6 s and gone by 16.4 s)",
       "kind": "metric_delta",
@@ -23922,6 +23878,31 @@
           4350
         ]
       }
+    },
+    {
+      "spell": 300723,
+      "name": "Struck by the Sun (Fire damage +30%)",
+      "kind": "hit_ratio",
+      "variant": "fire_damage",
+      "label_suffix": "fire_damage",
+      "quote": "Increases your Holy and Fire spell damage by $s3%",
+      "expected": 1.3,
+      "observe_spell": 500146,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "learn": [
+          300723
+        ]
+      },
+      "critical": false,
+      "trials": 40,
+      "cast_power": 1363,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "expected_source": "300723 Effect[2] is rewritten at load to aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, 30 (the $s3), MiscValue Holy|Fire (AscensionSunClericContracts.cpp:185-186). Dawnsear 500146 (Fire, SchoolMask 4) is cast at the dummy 40 times without and 40 times with 300723 learned, non-critical hits at 20000 spell power: the mean ratio is 1.30 within the 2-point band (G-19), the control arm being the casts without the passive. A first design that read one cumulative total over both phases read 2.30 (10099 then 23230): the second read included the first hit, a fault of the design, not of the server. Tooltip and DBC settle the value; the references add nothing for it."
     }
   ],
   "player_observations": [],
