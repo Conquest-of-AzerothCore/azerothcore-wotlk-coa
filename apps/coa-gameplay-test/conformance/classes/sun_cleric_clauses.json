@@ -962,8 +962,20 @@
   {
     "spell": 301266,
     "clause": "Resets the cooldown of Horusath Blast while in Sunrise and Rapture while in Sunset and causes their damage dealt to launch a Solar Flare.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Resets the cooldown of Horusath Blast while in Sunrise and Rapture while in Sunset",
+        "labels": []
+      },
+      {
+        "claim": "and causes their damage dealt to launch a Solar Flare",
+        "labels": [
+          "301266 behaviour_metric_delta flare_damage",
+          "301266 behaviour_metric_delta flare_damage_rapture"
+        ]
+      }
+    ]
   },
   {
     "spell": 301266,
@@ -2016,7 +2028,10 @@
   {
     "spell": 560547,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "560547 behaviour_hit_ratio no_stack",
+      "560547 behaviour_hit_ratio partner_alone"
+    ],
     "kind": "claim"
   },
   {
@@ -2291,8 +2306,21 @@
   {
     "spell": 561328,
     "clause": "Removes the cast time of Glare while above 80% health.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The 80% literal is not measured: the arms read 90% (cast time 0) and 50% (control, 1500 ms), which any threshold between 50% and 90% passes, and the code keeps Fortuitous on above 80% and off only at or below 75% (AscensionSunCleric.cpp:366-371, hysteresis set on purpose by b2ad6f76d6, #5963, Fixes #5763/#5783). Tool need: a pre-step that clears the state below 75% before the reads at 79% (1500 ms expected) and 81% (0 ms expected), and a drop from full health to 76-79% that records the hysteresis. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive); git log -L on the health state found #5963; nothing else found.",
+    "claims": [
+      {
+        "claim": "Removes the cast time of Glare",
+        "labels": [
+          "561328 behaviour_metric_delta glare_healthy",
+          "561328 behaviour_metric_delta glare_wounded"
+        ]
+      },
+      {
+        "claim": "while above 80% health",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 561329,
@@ -2302,12 +2330,17 @@
       {
         "claim": "Reduces the cast time of Dawnsear and Sunflare by $s1%",
         "labels": [
-          "561329 effect_value e0 #0"
+          "561329 effect_value e0 #0",
+          "561329 behaviour_metric_delta dawnsear_cast_time",
+          "561329 behaviour_metric_delta sunflare_cast_time"
         ]
       },
       {
         "claim": "and mana cost by $s1%",
-        "labels": []
+        "labels": [
+          "561329 behaviour_metric_delta dawnsear_cost",
+          "561329 behaviour_metric_delta sunflare_cost"
+        ]
       }
     ]
   },
@@ -2623,8 +2656,18 @@
   {
     "spell": 681433,
     "clause": "This ability is guaranteed to critically strike against Undead or Demons.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "guaranteed to critically strike against Undead",
+        "labels": []
+      },
+      {
+        "claim": "guaranteed to critically strike against Demons",
+        "labels": []
+      }
+    ],
+    "reason": "Withdrawn. The scripted crit metric is judged on the gain between the two phases only (behaviours.py require_scripted_crit_probe, expected_gain), and Solar Nova has no learnable that changes its crit chance, so an Undead or Demon arm reads 100 in both phases (gain 0) and a Humanoid control would also read a gain of 0: no arm tells a script that sets 100 for every creature type from the real one. Tool need: an absolute read of the scripted crit chance, or a target swap between the phases, with a non-Undead non-Demon control (entry 6 Humanoid). Reference search 2026-11-22: coa-history spell 681433: 271 SPELL_DAMAGE events (67 crits) in 3 logs, no target creature type in the index; nothing else found."
   },
   {
     "spell": 680622,
@@ -3335,8 +3378,20 @@
   {
     "spell": 681337,
     "clause": "Doubles the effectiveness of Vow of the Valkyr and Vow of Light.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The Valkyr half is measured on its damage row only (valkyr_damage, the doubling of the increased damage); the Solar Power generation row of Vow of the Valkyr is not measured, and the Vow of Light half has no label. Reference search 2026-11-22: nothing found beyond the tooltip.",
+    "claims": [
+      {
+        "claim": "Doubles the effectiveness of Vow of the Valkyr",
+        "labels": [
+          "681337 behaviour_hit_ratio valkyr_damage"
+        ]
+      },
+      {
+        "claim": "Doubles the effectiveness of Vow of Light",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 681436,

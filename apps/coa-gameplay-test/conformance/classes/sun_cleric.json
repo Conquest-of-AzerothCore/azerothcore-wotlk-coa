@@ -24784,6 +24784,255 @@
       "learn": [
         560628
       ]
+    },
+    {
+      "spell": 301266,
+      "name": "Solar Concord (Solar Flare damage from Rapture in Sunset)",
+      "kind": "metric_delta",
+      "variant": "flare_damage_rapture",
+      "label_suffix": "flare_damage_rapture",
+      "quote": "and causes their damage dealt to launch a Solar Flare.",
+      "trigger_spell": 807372,
+      "target": "dummy",
+      "setup_casts": [
+        301266
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          500511,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807175,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "observe_source": "301266 Solar Concord: Effect[0] PROC_TRIGGER_SPELL 807175 (Solar Flare); AscensionSunClericEvents.cpp:131-132 rolls the proc on a damaging hit of Rapture (root 806477; rank 4 807372 is the maximum rank at level 60, as in the Rapture damage entry, and Named resolves the rank chain) while the caster has Sunset 500511 (the Sunrise 500477 path with Horusath Blast 500154 is the flare_damage entry). Sunset 500511 is set on the caster (a precondition fixture by harness set_aura, the state the clause names, not its subject), fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out (both in both phases, preconditions). Solar Concord 301266 is learned at the start of both phases and cast for real in the second phase only (setup_only_after); the first phase, with Rapture 807372 alone, is the control. Solar Flare 807175 Effect[1] SCHOOL_DAMAGE, BasePoints 50 (+1), RealPointsPerLevel 1.9, DieSides 1: $m2+$ppl2 = 136.5 at the reference level and spell power 0 (the tooltip reading of the reference character). Solar Flare 807175 has SchoolMask 6 (Holy and Fire, 'Holyflame'), and Sunset 500511 Effect[1] aura 79 MOD_DAMAGE_PERCENT_DONE MiscValue 4 (Fire), BasePoints 9 (+1 = +10% Fire damage dealt, DBC /srv/coa/server-data/dbc), so the tooltip value is times 1.10: 136.5 x 1.10 = 150.15, read as 149 or 150 (the integer step: 136 x 1.10 = 149.6, truncated, as the Sunrise entry reads 163 for 163.8). Order of revision: the first run read 149 against an expectation without the Sunset factor (136.5, window 136..137); the factor was found afterwards from the SchoolMask of 807175 and the aura data of 500511, not from the measured value. Rapture has a 3000 ms cast time (CastingTimeIndex 14), so the read waits 4000 ms after the cast. Rapture and Sunset are the second path of the clause 'their damage dealt'. Reference search 2026-11-22: bindmysoul snapshot (fetched 2026-07-22) repeats the Solar Concord tooltip; nothing else found.",
+      "expected": 150.15,
+      "after_at_least": 149,
+      "after_at_most": 150
+    },
+    {
+      "spell": 561329,
+      "name": "Burning Cascade (Dawnsear mana cost)",
+      "kind": "metric_delta",
+      "variant": "dawnsear_cost",
+      "label_suffix": "dawnsear_cost",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 804584,
+      "gate_spell": 561329,
+      "target": "caster",
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 554406
+      },
+      "before_expected": 204,
+      "expected": 163,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "observe_source": "Dawnsear 554406 costs ManaCostPercentage 15 of BaseMana 1363 (player_class_stats class 27 level 60) = 204 before the learn (the reading before is the control). 561329 Effect[1] aura 108 ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -21 (-20, $s1), EffectSpellClassMask word 1 = 1282 (bits 2, 256, 1024) which holds the Dawnsear family flag 2 (SpellFamilyFlags[1] of 554406): 204 x 0.8 = 163.2, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 554406: Dawnsear 74 SPELL_DAMAGE events in 1 log, no cost reading; nothing else found."
+    },
+    {
+      "spell": 561329,
+      "name": "Burning Cascade (Sunflare mana cost)",
+      "kind": "metric_delta",
+      "variant": "sunflare_cost",
+      "label_suffix": "sunflare_cost",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 804584,
+      "gate_spell": 561329,
+      "target": "caster",
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 800231
+      },
+      "before_expected": 136,
+      "expected": 108.8,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "observe_source": "Sunflare 800231 costs ManaCostPercentage 10 of BaseMana 1363 = 136 before the learn (the reading before is the control). 561329 Effect[1] SPELLMOD_COST -20% with class mask word 1 = 1282, which holds the family flag 256 of 800231: 136 x 0.8 = 108.8: the engine truncates the cost to an integer, so 108 or 109 is read within 1 of 108.8, and 110 (a -19% modifier) is excluded. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 800231: 0 events in 186 logs; nothing else found."
+    },
+    {
+      "spell": 561329,
+      "name": "Burning Cascade (Sunflare cast time)",
+      "kind": "metric_delta",
+      "variant": "sunflare_cast_time",
+      "label_suffix": "sunflare_cast_time",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 804584,
+      "gate_spell": 561329,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 800231
+      },
+      "before_expected": 2000,
+      "expected": 1600,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "observe_source": "Sunflare 800231 has a 2000 ms cast time (CastingTimeIndex 5, SpellCastTimes.dbc 5 CastTime 2000), read before the learn as the control. 561329 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME) BasePoints -21 (-20, $s1), class mask word 1 = 1282 holding the family flag 256 of 800231: 2000 x 0.8 = 1600 ms, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 800231: 0 events in 186 logs; nothing else found."
+    },
+    {
+      "spell": 561329,
+      "name": "Burning Cascade (Dawnsear cast time)",
+      "kind": "metric_delta",
+      "variant": "dawnsear_cast_time",
+      "label_suffix": "dawnsear_cast_time",
+      "quote": "Reduces the cast time and mana cost of Dawnsear and Sunflare by $s1%.",
+      "trigger_spell": 804584,
+      "gate_spell": 561329,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 554406
+      },
+      "before_expected": 3500,
+      "expected": 2800,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "observe_source": "Dawnsear 554406 has a 3500 ms cast time (CastingTimeIndex 22, SpellCastTimes.dbc 22 CastTime 3500), read before the learn as the control. 561329 Effect[0] SPELLMOD_CASTING_TIME -20% with class mask word 1 = 1282 holding the family flag 2 of 554406: 3500 x 0.8 = 2800 ms, read within 1. Reference search 2026-11-22: coa-history spell 561329: 0 events in 186 logs (a passive), spell 554406: Dawnsear 74 SPELL_DAMAGE events in 1 log, no cast-time reading; nothing else found."
+    },
+    {
+      "spell": 561328,
+      "kind": "metric_delta",
+      "quote": "Removes the cast time of Glare while above 80% health.",
+      "trigger_spell": 804584,
+      "gate_spell": 561328,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 807870
+      },
+      "tolerance": 1,
+      "wait_ms": 1600,
+      "expire_ms": 2000,
+      "name": "Fortuitous (Glare cast time above 80% health)",
+      "variant": "glare_healthy",
+      "label_suffix": "glare_healthy",
+      "caster_health_pct": 90,
+      "before_expected": 1500,
+      "expected": 0,
+      "observe_source": "Glare 807870 (highest rank usable at level 60, SpellLevel 58) has a 1500 ms cast time (CastingTimeIndex 16, SpellCastTimes.dbc 16 CastTime 1500), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (Effect[0] ADD_PCT_MODIFIER MiscValue 10 SPELLMOD_CASTING_TIME BasePoints -101, class mask word 1 = 8388608 = the family flag of Glare) up while the caster is above 80% health, so the cast time is 0 ms. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive), spell 807870 Glare: 43 SPELL_DAMAGE events in 5 logs, no cast-time reading; git log -L on the health state (AscensionSunCleric.cpp) shows b2ad6f76d6 (#5963) set a hysteresis, on above 80%, off at or below 75%; nothing else found."
+    },
+    {
+      "spell": 561328,
+      "kind": "metric_delta",
+      "quote": "Removes the cast time of Glare while above 80% health.",
+      "trigger_spell": 804584,
+      "gate_spell": 561328,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 807870
+      },
+      "tolerance": 1,
+      "wait_ms": 1600,
+      "expire_ms": 2000,
+      "name": "Fortuitous (control: Glare cast time at 50% health)",
+      "variant": "glare_wounded",
+      "label_suffix": "glare_wounded",
+      "caster_health_pct": 50,
+      "before_expected": 1500,
+      "expected": 1500,
+      "observe_source": "Control arm of glare_healthy: the caster is held at 50% health, below 80%, so the helper is not kept and Glare keeps its 1500 ms cast time after the learn (CastingTimeIndex 16, CastTime 1500). Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive), spell 807870 Glare: 43 SPELL_DAMAGE events in 5 logs, no cast-time reading; git log -L on the health state (AscensionSunCleric.cpp) shows b2ad6f76d6 (#5963) set a hysteresis, on above 80%, off at or below 75%; nothing else found."
+    },
+    {
+      "spell": 560547,
+      "name": "Sun Disc (does not stack with Tree of Life, ally healing)",
+      "kind": "hit_ratio",
+      "variant": "no_stack",
+      "label_suffix": "no_stack",
+      "quote": "Does not stack with similar effects.",
+      "expected": 1.0,
+      "critical": false,
+      "metric": "spell_heal_total",
+      "observe_spell": 704911,
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "control": {
+        "auras": [
+          [
+            34123,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            34123,
+            1
+          ]
+        ],
+        "learn": [
+          560547
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1360,
+      "ally_distance": 5,
+      "expected_source": "Two sources of aura 118 SPELL_AURA_MOD_HEALING_PCT reach the grouped ally: Sun Disc 560547 (+6%, BasePoints 5 + 1) and Tree of Life 34123 (+6%, EffectBasePoints 5 + 1, set on the caster as harness setup only, a different effect from the claim's subject). Unit::SpellHealingBonusTaken takes the largest positive aura 118 (GetMaxPositiveAuraModifier, Unit.cpp:10953, SpellHealingBonusTaken), so Sunlight 704911 heals read the same with 560547 learned on top of 34123 as with 34123 alone: 1.0, not 1.06 (summed 1.12). The partner_alone entry is the control: it shows 34123 reaches the ally and raises the same heal by 6%. Same ratio shape as the Templar Fortified Body 300515 no_stack entry. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence 'Does not stack with similar effects.'; nothing else found. Residual failure probability per pair: the 99% half-width of a reading is about 0.05 point against a 2-point band, so far below 0.1%."
+    },
+    {
+      "spell": 560547,
+      "name": "Sun Disc (control: Tree of Life alone raises the ally's healing)",
+      "kind": "hit_ratio",
+      "variant": "partner_alone",
+      "label_suffix": "partner_alone",
+      "quote": "Does not stack with similar effects.",
+      "expected": 1.06,
+      "critical": false,
+      "metric": "spell_heal_total",
+      "observe_spell": 704911,
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "control": {},
+      "treatment": {
+        "auras": [
+          [
+            34123,
+            1
+          ]
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1360,
+      "ally_distance": 5,
+      "expected_source": "Control of the no_stack entry: Tree of Life 34123 alone (aura 118, EffectBasePoints 5 + 1 = +6%) raises the same Sunlight 704911 heal on the grouped ally by 6%, so a no_stack reading of 1.0 shows a cap, not a partner that does not reach the ally. Residual failure probability per pair: the 99% half-width of a reading is about 0.05 point against a 2-point band, so far below 0.1%."
     }
   ],
   "player_observations": [],
