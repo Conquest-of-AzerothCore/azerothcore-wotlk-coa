@@ -1405,7 +1405,7 @@
     "spell": 547214,
     "clause": "and causes Horusath Blast to interrupt the target for $547217d.",
     "kind": "claim",
-    "reason": "Pair 20261122-054957 / 20261122-055034, build 8311715fc2da, server commit e3cdc48aa475, no flip. Interrupt: with the dummy channelling Evocation 12051, Horusath Blast 572801 without 547214 leaves casting 1 (control) and with it casting 0. Lockout: Horusath Blast is a missile (Speed 20, 5 yd minimum travel, Spell.cpp:2474-2476), so the Arcane lockout begins 250 ms after the cast; a real attempt by the dummy to cast Evocation 3000 ms after the cast is refused (casting 0, duration above 2725 ms, excludes -10%) and one 3475 ms after it is accepted (casting 1, duration below 3250 ms, excludes +10%); before the learn both read 1 (no interrupt). The first design (school_lockout kind timed from the cast, pair 20261122-054512 / 20261122-054726) alerted in both runs because it ignored the missile's 250 ms; reference search 2026-11-22: coa-history 0 events (a passive); nothing else found.",
+    "reason": "Pair 20261122-054957 / 20261122-055034, build 8311715fc2da, server commit e3cdc48aa475, no flip. Interrupt: with the dummy channelling Evocation 12051, Horusath Blast 572801 without 547214 leaves casting 1 (control) and with it casting 0. Lockout, not counted: the 'for 3 s' arm is proven by a design kept outside the class file (.agents/plans/sun-cleric-b8i/547214-lockout-entries.json: school_prohibited on the Arcane school read at 3000 and 3475 ms after the cast; pair 20261122-054957 / 20261122-055034, build 8311715fc2da, server commit e3cdc48aa475, 19 ok, no flip), but a metric_delta over school_prohibited fails test_coverage.py's cross-class guard because the metric has no evidence class: tool need returned. Horusath Blast is a missile (Speed 20, 5 yd minimum travel, Spell.cpp:2474-2476), so the lockout begins 250 ms after the cast and ends at 3250 ms; the reads exclude a duration 10% off (held at 3000 ms means above 2725 ms, free at 3475 ms below 3250 ms). Two other designs failed: the school_lockout kind timed from the cast alerted in both runs (pair 20261122-054512 / 20261122-054726, the missile's 250 ms), and a real Evocation attempt read casting 1 at 3000 ms (pair 20261122-055332 / 20261122-055428) although school_prohibited read 1 at that time in the pair above, so the harness cast does not honour the lockout. Reference search 2026-11-22: coa-history 0 events (a passive); nothing else found.",
     "claims": [
       {
         "claim": "and causes Horusath Blast to interrupt the target",
@@ -1416,9 +1416,7 @@
       {
         "claim": "for $547217d",
         "labels": [
-          "547214 spell_duration 547217 #1",
-          "547214 behaviour_metric_delta lockout_held",
-          "547214 behaviour_metric_delta lockout_free"
+          "547214 spell_duration 547217 #1"
         ]
       }
     ]
