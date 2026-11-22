@@ -7108,7 +7108,8 @@
           "807372 behaviour_metric_delta second_enemy_primary"
         ]
       }
-    ]
+    ],
+    "reason": "Piercing part: the count recorded before 2026-11-23 for the labels immune_fire and immune_fire_control rested on an invalid proof: the Fire Elemental 575 was never Fire immune on this server (partial school immunity is dropped from NPCs, #6786, commit 212d773dde), so the 876..941 treatment read did not discriminate and the Dawnsear control read 719 / 721 (669 on rc7), not 0; the 'second design' 500146 was Dawnsear rank 1, the same spell family. The proof now stands Divine Shield 642 (aura 39 school immunity, MiscValue 127, DurationIndex 29 = 12000 ms) on the dummy as a named set_aura fixture read present before each judged cast (before_trigger_reads, ADR 1064; absent: unmeasured): Rapture (Attributes 0x20000000) lands its tooltip damage 876..941, Dawnsear 554406 through the shield deals 0, Dawnsear without it deals 670..750 (668 + 1 + roll 1..80), every read past the landing. 'and nearby enemies' and 'but dealing less damage with each enemy struck' are separate claims carried by second_enemy and second_enemy_primary, not by the immunity arms. Reference search 2026-11-20 (class entries): coa-history spell 807372 has 24 SPELL_DAMAGE events in 1 log, nothing about immunities; nothing else found."
   },
   {
     "spell": 806479,
