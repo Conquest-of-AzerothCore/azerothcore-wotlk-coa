@@ -441,7 +441,7 @@ METRIC_EVIDENCE = {
                      'owned_creature_react_state', 'nearest_creature_distance', 'casting',
                      'item_count', 'track_creature_type', 'owned_creature_stat', 'owned_creature_display',
                      'distance_2d', 'point_distance_2d', 'can_detect', 'temporary_spell_replacement',
-                     'owned_creature_remaining_ms', 'block_value'), STATE),
+                     'owned_creature_remaining_ms', 'block_value', 'school_prohibited'), STATE),
     'enemy_player_aura_duration_ms': READBACK,
 }
 CRIT_WORDS = r'critical strike chance|chance to critically'
@@ -490,6 +490,7 @@ STATE_PROMISES = {
     'can_detect': r'seen|detect\w*|stealth\w*',
     'temporary_spell_replacement': r'transform\w*|replac\w*|last \w+ consumed',
     'owned_creature_remaining_ms': r'lasts?|duration',
+    'school_prohibited': r'interrupt\w*|lock(?:s|ed|ing)? out|lockout',
 }
 EVENT_PROMISES = {'spell_go_count': r'unleash\w*|cast\w*'}
 CONTRAST_CHECKS = frozenset({PASSIVE_DELTA, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_PARTY_STAT_RATIO})

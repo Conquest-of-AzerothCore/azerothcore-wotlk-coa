@@ -619,6 +619,19 @@ class EvidenceStatusTest(unittest.TestCase):
         self.assertEqual(evidence_of([claim('this spell is instant cast.', label)], [read])[0], [BEHAVIOUR])
         self.assertEqual(evidence_of([claim('Only affects Humanoids.', label)], [read])[0], [DATA])
 
+    def test_a_school_lockout_is_a_state_read_where_the_clause_promises_an_interrupt(self):
+        label = '547214 behaviour_metric_delta lockout_held'
+        read = judged(label, BEHAVIOUR_METRIC_DELTA, 'school_prohibited', contrast=LEARNED_CONTRAST)
+        interrupt = 'and causes Horusath Blast to interrupt the target for $547217d.'
+        self.assertEqual(METRIC_EVIDENCE['school_prohibited'], STATE)
+        self.assertEqual(evidence_of([claim(interrupt, label)], [read])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('locks out that school of magic.', label)], [read])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('Increases the mana restored by $s1%', label)], [read])[0], [DATA])
+        unlearned = judged(label, BEHAVIOUR_METRIC_DELTA, 'school_prohibited')
+        self.assertEqual(evidence_of([claim(interrupt, label)], [unlearned])[0], [DATA])
+        with mock.patch.dict(METRIC_EVIDENCE, {'school_prohibited': READBACK}):
+            self.assertEqual(evidence_of([claim(interrupt, label)], [read])[0], [DATA])
+
     def test_a_cast_state_is_a_state_read_where_the_clause_promises_haste(self):
         label = '1 behaviour_metric_delta cast_done'
         read = judged(label, BEHAVIOUR_METRIC_DELTA, 'casting', contrast=LEARNED_CONTRAST)
