@@ -50,6 +50,12 @@ by any data, and the mana is truncated per strike.
   (`MSG_MOVE_START_FORWARD`, `MSG_MOVE_STOP`, consumed false), with a control move without the aura that must move the
   player, then the same move under the aura (Sunstorm 760379). No harness action is added.
 - `coverage` (mentor D-171): the `casting` state read is promised by `interrupt\w*` as well (547214 c110).
+- Harness read `melee_missed_taken` (mentor D-175, tool note for the owner, G-39): the attacker-state packets whose
+  victim is the player and whose hit info carries `HITINFO_MISS`, counted per attacker beside
+  `meleeVictimStatesTakenFrom` in the packet handler that already parses them; optional `target` (the attacker). It
+  touches no game state and changes no existing read. The opt-in `proc_avoided` field `count_misses` (misses in the
+  avoided-swing denominator, with a trial voided unless attacks taken = hits + misses + avoided) is approved but not
+  built on this branch: the balance check needs a hook in the shared proc trial judge.
 
 ## Consequences
 
