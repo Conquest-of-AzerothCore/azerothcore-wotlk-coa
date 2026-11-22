@@ -101,6 +101,8 @@ ORDINAL = re.compile(r'#(\d+)$')
 BASE_ROLL_ONLY = 'base_roll_only'
 POWER_TERM_LABEL = 'power_term_label'
 CONTRAST_LABEL = 'contrast_label'
+BASE_ROLL_READ_STATUS = 'read_status'
+BASE_ROLL_REFUSED = f'; {BASE_ROLL_ONLY} not accepted: '
 DIVIDED_TOKEN = re.compile(r'\$/(\d+);')
 PLAIN_TOKEN = re.compile(r'\$(?:/\d+;)?(?P<spell>\d*)(?P<letter>[sSmM])(?P<digit>[1-3])')
 TRUNCATED_READ = 1.0
@@ -202,6 +204,7 @@ class Verdict:
     server_commit: str | None = None
     build: str | None = None
     runs: list[str] | None = field(default=None, hash=False)
+    selected: bool | None = None
 
 
 @dataclass(frozen=True)
@@ -978,14 +981,23 @@ def judge_base_roll(base: Verdict, expectation: Expectation, measured: float, to
         'full_value': full, 'power_term': term, 'judged_base': judged, **links}})
 
 
-def resolve_base_roll_links(verdicts: list[Verdict]) -> list[Verdict]:
+def base_roll_references(verdict: Verdict) -> list[str]:
+    roll = (verdict.detail or {}).get(BASE_ROLL_ONLY) or {}
+    return [roll[field] for field in (POWER_TERM_LABEL, CONTRAST_LABEL) if roll.get(field)]
+
+
+def resolve_base_roll_links(verdicts: list[Verdict], labels: set[str] | None = None) -> list[Verdict]:
     by_label = {verdict.label: verdict for verdict in verdicts}
     resolved = []
     for verdict in verdicts:
         roll = (verdict.detail or {}).get(BASE_ROLL_ONLY)
-        if roll is None:
+        if roll is None or (labels is not None and verdict.label not in labels):
             resolved.append(verdict)
             continue
+        own = roll.get(BASE_ROLL_READ_STATUS, verdict.status)
+        alone = verdict.explanation.split(BASE_ROLL_REFUSED)[0]
+        read = replace(verdict, status=own, explanation=alone,
+                       detail={**verdict.detail, BASE_ROLL_ONLY: {**roll, BASE_ROLL_READ_STATUS: own}})
         reasons = []
         for field in (POWER_TERM_LABEL, CONTRAST_LABEL):
             linked = by_label.get(roll[field])
@@ -996,12 +1008,11 @@ def resolve_base_roll_links(verdicts: list[Verdict]) -> list[Verdict]:
             elif linked.status not in CONFORMANT:
                 reasons.append(f'{field} "{roll[field]}" is {linked.status}')
         if not reasons:
-            resolved.append(verdict)
+            resolved.append(read)
             continue
-        resolved.append(replace(verdict, status='alert',
-                                explanation=f'{verdict.explanation}; {BASE_ROLL_ONLY} not accepted: '
-                                            f'{"; ".join(reasons)} (D-57, D-198; the base roll read alone would be '
-                                            f'{verdict.status})'))
+        resolved.append(replace(read, status='alert',
+                                explanation=f'{alone}{BASE_ROLL_REFUSED}{"; ".join(reasons)} (D-57, D-198; the base '
+                                            f'roll read alone would be {own})'))
     return resolved
 
 
@@ -5679,6 +5690,8 @@ def calc_amount_verdict(verdict: Verdict, run: Run, expectation: Expectation) ->
 
 LINKED_VERDICT_REFERENCE = re.compile(r'"([^"]+)" \(status \w+\)')
 VALUE_LINK = 'value_link'
+LINKED_FROM = 'linked_from'
+RULE_PREFIXES = (CLOSED, UNMODELLED, UNMEASURABLE, GENERIC, UNREADABLE, AMBIGUOUS_TOOLTIP)
 VALUE_LINK_STATUSES = frozenset({'unmodelled', NOT_MEASURED, 'ambiguous_tooltip'})
 
 
@@ -5698,8 +5711,19 @@ def apply_value_links(verdicts: list[Verdict], class_file: dict | None) -> list[
     return linked
 
 
-def resolve_linked_statuses(verdicts: list[Verdict]) -> list[Verdict]:
-    by_label = {verdict.label: verdict.status for verdict in verdicts}
+def linked_references(verdict: Verdict) -> list[str]:
+    if (verdict.check != 'unmodelled' and VALUE_LINK not in (verdict.detail or {})) or \
+            'checked by' not in verdict.explanation:
+        return []
+    return LINKED_VERDICT_REFERENCE.findall(verdict.explanation)
+
+
+def own_status(verdict: Verdict) -> str:
+    return (verdict.detail or {}).get(LINKED_FROM, verdict.status)
+
+
+def resolve_linked_statuses(verdicts: list[Verdict], labels: set[str] | None = None) -> list[Verdict]:
+    by_label = {verdict.label: own_status(verdict) for verdict in verdicts}
 
     def live_text(match: re.Match) -> str:
         label = match.group(1)
@@ -5707,19 +5731,31 @@ def resolve_linked_statuses(verdicts: list[Verdict]) -> list[Verdict]:
 
     resolved = []
     for verdict in verdicts:
-        value_link = VALUE_LINK in (verdict.detail or {})
-        referenced = (LINKED_VERDICT_REFERENCE.findall(verdict.explanation)
-                     if (verdict.check == 'unmodelled' or value_link) and 'checked by' in verdict.explanation
-                     else [])
+        referenced = linked_references(verdict) if labels is None or verdict.label in labels else []
         if not referenced:
             resolved.append(verdict)
             continue
+        own = own_status(verdict)
         explanation = LINKED_VERDICT_REFERENCE.sub(live_text, verdict.explanation)
-        status = 'closed' if all(by_label.get(label) in CONFORMANT for label in referenced) else verdict.status
-        if value_link and any(by_label.get(label) == 'alert' for label in referenced):
+        status = 'closed' if all(by_label.get(label) in CONFORMANT for label in referenced) else own
+        if VALUE_LINK in (verdict.detail or {}) and any(by_label.get(label) == 'alert' for label in referenced):
             status = 'alert'
-        resolved.append(replace(verdict, status=status, explanation=explanation))
+        resolved.append(replace(verdict, status=status, explanation=explanation,
+                                detail={**(verdict.detail or {}), LINKED_FROM: own}))
     return resolved
+
+
+def rule_only(expectation: Expectation) -> bool:
+    return not pooled_parts(expectation.check, expectation.model) and (
+        expectation.check == 'unmodelled' or expectation.rule.startswith(RULE_PREFIXES))
+
+
+def rule_only_labels(manifest: dict) -> set[str]:
+    found: dict[str, bool] = {}
+    for entry in manifest['scenarios']:
+        for data in entry['expectations']:
+            found[data['label']] = found.get(data['label'], True) and rule_only(Expectation(**data))
+    return {label for label, only in found.items() if only}
 
 
 POOLED_CHECKS = frozenset({BEHAVIOUR_HIT_RATIO, BEHAVIOUR_TAKEN_HIT})
@@ -5820,7 +5856,9 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
     verdicts += [server_question(manifest, parts[0][2], trigger_judges[parts[0][2].check](parts), tooltips)
                  for parts in trigger_parts.values()]
     verdicts += judge_stack(manifest, stack_parts, tooltips, hit_model)
-    stamped = [with_provenance(verdict, judged, label_runs.get(verdict.label) or scenario_runs(runs, verdict))
+    by_rule = rule_only_labels(manifest)
+    stamped = [with_provenance(verdict, judged, label_runs.get(verdict.label) or scenario_runs(runs, verdict),
+                               verdict.label in by_rule)
                for verdict in resolve_base_roll_links(
                    resolve_linked_statuses(apply_value_links(verdicts, manifest['class_file'])))]
     return Comparison(manifest, runs, missing, stamped, judged, other_build)
@@ -5830,9 +5868,10 @@ def scenario_runs(runs: Mapping[str, Run], verdict: Verdict) -> list[Run]:
     return [runs[key] for key in verdict.scenario.split(' + ') if key in runs]
 
 
-def with_provenance(verdict: Verdict, build: Build, runs: list[Run]) -> Verdict:
+def with_provenance(verdict: Verdict, build: Build, runs: list[Run], by_rule: bool = False) -> Verdict:
     run_ids = sorted({run.run_id or run.key for run in runs})
-    return replace(verdict, server_commit=build.server_commit, build=build.binary_sha256, runs=run_ids)
+    return replace(verdict, server_commit=build.server_commit, build=build.binary_sha256, runs=run_ids,
+                   selected=bool(run_ids) or by_rule)
 
 
 def verdicts_build(verdicts: list[Verdict]) -> Build | None:

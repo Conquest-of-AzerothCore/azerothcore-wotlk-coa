@@ -43,7 +43,10 @@ Each run carries its build: the server commit parsed from `server_version` of `r
 (no verdict, listed in `report.md` under "Runs refused"); without `--build` the results must hold one build,
 otherwise `compare` stops with exit 5 and no verdict. Every verdict, alerts included, then carries `server_commit`,
 `build` (the worldserver sha256) and `runs` (the run ids it was judged from, empty for a verdict decided by rule), in
-`verdicts.json` and as the last three `alerts.tsv` columns (ADR 0118).
+`verdicts.json` and as the last three `alerts.tsv` columns (ADR 0118). `verdicts.json` also carries `selected` per
+verdict (a scenario behind the label ran, or the label is judged by rule alone; ADR 1032) and, on a linking verdict,
+`detail.linked_from` (its status before its links were resolved); a `base_roll_only` verdict carries its base-roll
+read status in `detail.base_roll_only.read_status`.
 
 `alerts.tsv`
 (default: the manifest directory) has one row per verdict that is neither `ok`, `measured`, `closed` nor
@@ -372,13 +375,25 @@ python3 -B conformance.py aura354 --class-map CLASS-MAP.json --class 23 [--out A
 ```
 
 `audit` merges the verdicts of `--base-results` and then of each `--results` directory in order (a later directory
-replaces the labels of the earlier ones) and runs `coverage.clause_coverage` on the ledger. With no directory it runs
+replaces the labels of the earlier ones, except with a verdict whose `selected` marker is false: a label its run did
+not select keeps the earlier verdict, ADR 1032). `compare` writes `selected` true when a scenario behind the label ran
+or every manifest expectation of the label is judged from its rule alone (`closed`, `unmodelled`, `unmeasurable`,
+`generic`, `unreadable` or `ambiguous_tooltip` rules and `unmodelled` checks, pooled checks excluded); a verdict
+written before the marker counts as selected when its `runs` list is absent or not empty. After the merge, a linking
+verdict (`checked by ... "label" (status ...)`) whose referenced labels came from another layer is resolved again
+from its own status (`detail.linked_from`, or `unmodelled` for a link-closed verdict written before that field) and
+the merged statuses of those labels. A `base_roll_only` verdict whose `power_term_label` or `contrast_label` came from
+another layer is accepted or refused again from its own read (`detail.base_roll_only.read_status`, or its status for
+a verdict written before that field) and the merged verdicts of those labels. Then it runs
+`coverage.clause_coverage` on the ledger. With no directory it runs
 on no verdicts, as for a new class: every claim comes out unproven. `--manifest` stamps the observed metric of a
 generated manifest on a metric verdict that carries none (verdicts written before the metric was stamped);
 `--hooked` turns the listed labels into `not_measured`; `--build` stamps one audit build on every merged verdict,
 and without it the merged verdicts must come from one build (`coverage.require_build`). The output keeps the inputs,
-`results_replaced` and `results_added` (labels of `--results` over the base), `results_disagree` (labels whose status
-class, conformant or the status itself plus `data_only`, differs between `--results` directories), `figures`
+`results_replaced` and `results_added` (labels of `--results` over the base), `results_not_selected` (labels of
+`--results` skipped over an earlier verdict because their run did not select them; a label one directory added can
+also be listed there for a later directory), `results_disagree` (labels whose status class, conformant or the status
+itself plus `data_only`, differs between the selected verdicts of the `--results` directories), `figures`
 (`claims`, `behaviour`, `data`, `unproven`, `resolved`, `not_measured`, `tool_gaps_pending`), `no_claim_entries`,
 `statuses` (label to status) and one row per claim: `index` (the claim's position among the ledger's claims),
 `spell`, `clause`, `evidence`, `claim_evidence`, `labels`, `missing_labels`, `label_statuses`, `alert_labels` and
