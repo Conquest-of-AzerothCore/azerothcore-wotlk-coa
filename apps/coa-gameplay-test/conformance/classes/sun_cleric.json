@@ -16501,7 +16501,6 @@
           806060,
           806060,
           806060,
-          806060,
           806060
         ],
         "learn": [
@@ -16520,7 +16519,6 @@
           806060,
           806060,
           806060,
-          806060,
           806060
         ],
         "learn": [
@@ -16533,7 +16531,7 @@
       "fixture": {
         "spell_power": 10000
       },
-      "expected_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 four times. Eight stacks of 1% = +8% (band 2 points, G-19: the larger of 5% of 8 and 2 points; the interval excludes the control 1.0 and a 2% or 0.5% per stack aura). Fire damage: Dawnsear 500146 (SchoolMask 4 Fire, SpellFamilyName 33, learned by the harness for both arms) is read per arm after six Radiant Flame casts at about 1.5 s intervals (at least nine ticks, the stack cap is 8). Fixtures: spell penetration 823764 on the caster (precondition fixture, never the subject); Radiant Flame 806060 is cast for real six times before every observed cast in both arms (the real Purgation stacks are the subject, no set_aura of 806025); the control arm makes the same six casts without 806024 learned. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found. Design note: a first design with the stock Fire Blast 2136 read +0.05% and +0.28% because the engine filters SPELL_AURA_MOD_DAMAGE_FROM_CASTER by the aura's class mask and family (Unit.cpp:10113-10117, :11703-11706, IsAffectedOnSpell), not by the school in MiscValue, so a family 3 spell is outside it; the claim is read on a class Fire spell."
+      "expected_source": "806024 Purgation Effect[0] aura 42 PROC_TRIGGER_SPELL 806025 (Purgation debuff); the class code casts 806025 on the target of every own damage hit of Radiant Flame 807058 (AscensionSunClericEvents.cpp:116, :316). 806025 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER MiscValue 6 (Holy 2 + Fire 4), BasePoints 0 + 1 = 1 ($806025s1), DurationIndex 31 (8000 ms, $806025d), StackAmount 8 ($806025U). Radiant Flame 806060 lasts DurationIndex 35 = 4000 ms with EffectAmplitude 1000, so one cast ticks 807058 four times. Eight stacks of 1% = +8% (band 2 points, G-19: the larger of 5% of 8 and 2 points; the interval excludes the control 1.0 and a 2% or 0.5% per stack aura). Fire damage: Dawnsear 500146 (SchoolMask 4 Fire, SpellFamilyName 33, learned by the harness for both arms) is read per arm after five Radiant Flame casts at about 1.5 s intervals, the 3500 ms Dawnsear cast landing about 11 s after the first cast, when at least nine ticks have landed (the stack cap is 8). Fixtures: spell penetration 823764 on the caster (precondition fixture, never the subject); Radiant Flame 806060 is cast for real five times before every observed cast in both arms (the real Purgation stacks are the subject, no set_aura of 806025); the control arm makes the same five casts without 806024 learned. Reference search 2026-11-22: coa-history spell 806025 (the Purgation debuff): 221 SPELL_AURA_APPLIED, 825 SPELL_AURA_APPLIED_DOSE, 352 SPELL_AURA_REFRESH and 221 SPELL_AURA_REMOVED in 5 of 186 logs, no amount or stack figure in them; 806024 itself: 0 events (a passive); the bindmysoul talents snapshot in ~/CoaServer/reference lists the name only; nothing else found. Design note: a first design with the stock Fire Blast 2136 read +0.05% and +0.28% because the engine filters SPELL_AURA_MOD_DAMAGE_FROM_CASTER by the aura's class mask and family (Unit.cpp:10113-10117, :11703-11706, IsAffectedOnSpell), not by the school in MiscValue, so a family 3 spell is outside it; the claim is read on a class Fire spell."
     },
     {
       "spell": 806024,
