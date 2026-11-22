@@ -1242,7 +1242,9 @@
     "clause": "Invoke An'she to root an enemy for $680702d with holy shackles or heal an ally for ${$680701m1+$680701ppl1}% maximum health",
     "labels": [
       "503651 spell_duration 680702 #0",
-      "503651 effect_value 680701e0 #1"
+      "503651 effect_value 680701e0 #1",
+      "503651 behaviour_metric_delta root_held",
+      "503651 behaviour_metric_delta heal_pct"
     ],
     "kind": "claim"
   },
@@ -1251,7 +1253,9 @@
     "clause": "and increase their movement speed by $680701s2% for $680701d.",
     "labels": [
       "503651 effect_value 680701e1 #2",
-      "503651 spell_duration 680701 #3"
+      "503651 spell_duration 680701 #3",
+      "503651 behaviour_metric_delta speed",
+      "503651 behaviour_metric_delta speed_held"
     ],
     "kind": "claim"
   },
@@ -4216,7 +4220,8 @@
     "spell": 707081,
     "clause": "Fulfilling your Vow now unleashes a chain of light at your target, dealing ${$657125m1+$657125ppl1+$sph*0.23+$AP*.1} Holy damage",
     "labels": [
-      "707081 effect_value 657125e0 #0"
+      "707081 effect_value 657125e0 #0",
+      "707081 behaviour_metric_delta strike_0"
     ],
     "kind": "claim"
   },

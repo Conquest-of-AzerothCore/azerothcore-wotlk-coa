@@ -23841,6 +23841,119 @@
         ]
       },
       "observe_source": "704932 Effect[0] aura 107 SPELLMOD_DURATION, BasePoints 14999 (+1 = 15000 ms, $/1000;s1 = 15 s); Solar Eclipse 704931 carries no DurationIndex. Dawnbreak 800654 is cast at the dummy with 704929 learned (the Solar Eclipse passive). Control: 704582 is learned instead of 704932, and the aura is absent on the dummy at the same read (no duration, no debuff). Tooltip and DBC settle the value; the references add nothing for it."
+    },
+    {
+      "spell": 503651,
+      "name": "Solar Invocation: Revelation (the root on an enemy is held to 3.65 s and gone by 4.35 s)",
+      "kind": "metric_delta",
+      "variant": "root_held",
+      "label_suffix": "root_held",
+      "quote": "Invoke An'she to root an enemy for $680702d with holy shackles or heal an ally for ${$680701m1+$680701ppl1}% maximum health",
+      "trigger_spell": 503651,
+      "target": "dummy",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 680702
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3800,
+      "expire_ms": 500,
+      "observe_source": "503651 Revelation Effect[0] and Effect[1] trigger 680702 (root, aura 26, DurationIndex 35 = 4000 ms) and 680701 (Effect[0] HEAL_PCT BasePoints 9 + 1 = 10, Effect[1] aura 31 MOD_INCREASE_SPEED BasePoints 49 + 1 = 50, DurationIndex 35 = 4000 ms). One real cast at the dummy: the root aura 680702 is present on the dummy when read 3650..3950 ms after the cast (game time) and gone when read 4050..4350 ms after it, so the duration lies in (3650, 4350), excluding 3600 and 4400 (10% off 4000 on both sides). Control: the before phase casts nothing and reads no root. Tooltip and DBC settle the value; the references add nothing for it.",
+      "measure_actor": "dummy",
+      "trigger_only_after": true,
+      "gate_timing": "start",
+      "expiry_wait_ms": 450,
+      "after_expiry_expected": 0,
+      "game_time": {
+        "after": [
+          3650,
+          3950
+        ],
+        "expired": [
+          4050,
+          4350
+        ]
+      }
+    },
+    {
+      "spell": 503651,
+      "name": "Solar Invocation: Revelation (heals 10% of maximum health)",
+      "kind": "metric_delta",
+      "variant": "heal_pct",
+      "label_suffix": "heal_pct",
+      "quote": "Invoke An'she to root an enemy for $680702d with holy shackles or heal an ally for ${$680701m1+$680701ppl1}% maximum health",
+      "trigger_spell": 503651,
+      "target": "caster",
+      "cast_power": 1363,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 680701,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1000,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "503651 Revelation Effect[0] and Effect[1] trigger 680702 (root, aura 26, DurationIndex 35 = 4000 ms) and 680701 (Effect[0] HEAL_PCT BasePoints 9 + 1 = 10, Effect[1] aura 31 MOD_INCREASE_SPEED BasePoints 49 + 1 = 50, DurationIndex 35 = 4000 ms). One real cast at the caster held at 50% of its 10000 health fixture (caster_health_pct): the heal of 680701 lands for 10% of 10000 = 1000, within 50 (0.5 point; excludes 800 and 1200 and the 10% off figures 900 and 1100). Control: the before phase casts nothing and reads 0. Tooltip and DBC settle the value; the references add nothing for it.",
+      "cast_in_before": false,
+      "tolerance": 50,
+      "caster_health_pct": 50
+    },
+    {
+      "spell": 503651,
+      "name": "Solar Invocation: Revelation (movement speed +50%)",
+      "kind": "metric_delta",
+      "variant": "speed",
+      "label_suffix": "speed",
+      "quote": "and increase their movement speed by $680701s2% for $680701d.",
+      "trigger_spell": 503651,
+      "target": "caster",
+      "cast_power": 1363,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "503651 Revelation Effect[0] and Effect[1] trigger 680702 (root, aura 26, DurationIndex 35 = 4000 ms) and 680701 (Effect[0] HEAL_PCT BasePoints 9 + 1 = 10, Effect[1] aura 31 MOD_INCREASE_SPEED BasePoints 49 + 1 = 50, DurationIndex 35 = 4000 ms). The caster's run speed rate (STATE read, Unit::GetSpeedRate) is 1 in the before phase (nothing cast, the control) and 1.5 after a real cast at the caster, within 0.001 (excludes 1.45 and 1.55, 10% off the 50% on both sides). Tooltip and DBC settle the value; the references add nothing for it.",
+      "cast_in_before": false,
+      "tolerance": 0.001
+    },
+    {
+      "spell": 503651,
+      "name": "Solar Invocation: Revelation (the speed aura is held to 3.65 s and gone by 4.35 s)",
+      "kind": "metric_delta",
+      "variant": "speed_held",
+      "label_suffix": "speed_held",
+      "quote": "and increase their movement speed by $680701s2% for $680701d.",
+      "trigger_spell": 503651,
+      "target": "caster",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 680701
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3800,
+      "expire_ms": 500,
+      "observe_source": "503651 Revelation Effect[0] and Effect[1] trigger 680702 (root, aura 26, DurationIndex 35 = 4000 ms) and 680701 (Effect[0] HEAL_PCT BasePoints 9 + 1 = 10, Effect[1] aura 31 MOD_INCREASE_SPEED BasePoints 49 + 1 = 50, DurationIndex 35 = 4000 ms). One real cast at the caster: the aura 680701 is present when read 3650..3950 ms after the cast (game time) and gone when read 4050..4350 ms after it, so the duration lies in (3650, 4350), excluding 3600 and 4400. Control: the before phase casts nothing and reads no aura. Tooltip and DBC settle the value; the references add nothing for it.",
+      "trigger_only_after": true,
+      "gate_timing": "start",
+      "expiry_wait_ms": 450,
+      "after_expiry_expected": 0,
+      "game_time": {
+        "after": [
+          3650,
+          3950
+        ],
+        "expired": [
+          4050,
+          4350
+        ]
+      }
     }
   ],
   "player_observations": [],
