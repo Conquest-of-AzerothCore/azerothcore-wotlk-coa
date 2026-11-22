@@ -11,11 +11,11 @@
   Seven allies and the caster fill the scenario schema 1 cap of 8 players (`run.py` `MAX_PLAYERS`), so a scenario
   that adds another player, such as an enemy player, is refused at validation.
 - `reach_source`: text, required on the option when the main reading's `measure_actor` or `fields.target`, or the
-  trigger's cast `target`, is `ally5`, `ally6` or `ally7`, and refused otherwise. It cites the code or data line that makes the spell reach raid
-  subgroup 2 (for example a script filter by `IsInRaidWith`, or a DBC implicit target checked by `TARGET_CHECK_ALLY`),
-  never a run's reading. The contract states it. On each use, the reviewer opens the cited lines and checks that the
-  spell's whole target selection (DBC implicit targets and every script filter) reaches the raid, not only the party
-  (mentor D-56).
+  trigger's cast `target`, is `ally5`, `ally6` or `ally7`, and refused otherwise. It cites the code or data line that
+  makes the spell reach raid subgroup 2 (for example a script filter by `IsInRaidWith`, or a DBC implicit target checked
+  by `TARGET_CHECK_ALLY`), never a run's reading. The contract states it. On each use, the reviewer opens the cited
+  lines and checks that the spell's whole target selection (DBC implicit targets and every script filter) reaches the
+  raid, not only the party (mentor D-56).
 - `ally_health`: `[value, maximum]`, set on every ally in both phases, ahead of the trigger.
 - `ally_casts`: spells the caster casts at `ally` in both phases ahead of the trigger, 2000 ms after each (global
   cooldown). Each spell must be in the entry's `learn` and must not be its trigger or a setup cast; a cast time above
