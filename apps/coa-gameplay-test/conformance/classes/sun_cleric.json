@@ -26124,16 +26124,22 @@
       "metric": "spell_heal_total",
       "target": "ally",
       "control": {
-        "casts": [
-          805301
+        "auras": [
+          [
+            805301,
+            1
+          ]
         ]
       },
       "treatment": {
         "learn": [
           800602
         ],
-        "casts": [
-          805301
+        "auras": [
+          [
+            805301,
+            1
+          ]
         ]
       },
       "critical": false,
@@ -26142,8 +26148,8 @@
         "spell_power": 5000
       },
       "cast_power": 1000,
-      "cast_wait_ms": 10500,
-      "expected_source": "800602 Effect[0] aura 108 ADD_PCT_MODIFIER, EffectMiscValue 8 (SPELLMOD_ALL_EFFECTS), EffectBasePoints 99 + 1 = +100%, EffectSpellClassMask word 2 = 1048576 = SpellFamilyFlags[2] of Holy Form 805301 (family 33). 805301 Effect[0] aura 136 MOD_HEALING_DONE_PERCENT, EffectBasePoints 9 + 1 = +10% healing, so with 800602 the effect is +20%: a Daybreak 503624 heal (non-critical, bonus healing fixture 5000) is x1.20 with the passive and x1.10 without, ratio 1.20 / 1.10 = 1.090909. Control arm: Holy Form cast for real, 800602 not known; treatment: 800602 learned, Holy Form cast again before every heal. The 10-trial pair of the Holy Form healing entry holds the same shape (805301 healing, expected 1.1). Reference search 2026-11-22: coa-history spell 800602: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries only \"Doubles the effectiveness of your Holy Form.\" (agrees; the Ancient Rites sentence is a later state)."
+      "cast_wait_ms": 1700,
+      "expected_source": "800602 Effect[0] aura 108 ADD_PCT_MODIFIER, EffectMiscValue 8 (SPELLMOD_ALL_EFFECTS), EffectBasePoints 99 + 1 = +100%, EffectSpellClassMask word 2 = 1048576 = SpellFamilyFlags[2] of Holy Form 805301 (family 33). 805301 Effect[0] aura 136 MOD_HEALING_DONE_PERCENT, EffectBasePoints 9 + 1 = +10% healing, so with 800602 the effect is +20%: a Daybreak 503624 heal (non-critical, bonus healing fixture 5000) is x1.20 with the passive and x1.10 without, ratio 1.20 / 1.10 = 1.090909. Holy Form is set on the caster before every heal as a named precondition (set_aura of 805301, not the claim's own aura 800602; a real cast every trial would wait out its 10 s cooldown, beyond one scenario at the 20-trial pilot): its effect amount is computed with the spell modifiers in force. Control arm: 800602 not known; treatment: 800602 learned. The 10-trial pair of the Holy Form healing entry holds the same shape (805301 healing, expected 1.1). Reference search 2026-11-22: coa-history spell 800602: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22) carries only \"Doubles the effectiveness of your Holy Form.\" (agrees; the Ancient Rites sentence is a later state)."
     },
     {
       "spell": 680648,
