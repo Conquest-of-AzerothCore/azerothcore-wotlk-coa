@@ -4,6 +4,8 @@ NAME = 'dummy_casts_at_caster'
 ORDER = 29
 MAXIMUM_CASTS = 20
 MINIMUM_GAP_MS = 1000
+REQUIRED = frozenset({'spell', 'casts', 'gap_ms', 'lead_ms'})
+RECIPIENTS = ('caster', 'ally')
 
 
 @dataclass(frozen=True)
@@ -12,14 +14,15 @@ class DummyCasts:
     casts: int
     gap_ms: int
     lead_ms: int
+    target: str = 'caster'
 
 
 def parse(raw) -> DummyCasts:
-    if not isinstance(raw, dict) or set(raw) != {'spell', 'casts', 'gap_ms', 'lead_ms'} \
-            or any(type(raw[key]) is not int for key in raw):
-        raise ValueError(f'dummy_casts_at_caster is {{"spell", "casts", "gap_ms", "lead_ms"}} of whole numbers, not '
-                         f'{raw!r}')
-    value = DummyCasts(raw['spell'], raw['casts'], raw['gap_ms'], raw['lead_ms'])
+    if not isinstance(raw, dict) or not REQUIRED <= set(raw) <= REQUIRED | {'target'} \
+            or any(type(raw[key]) is not int for key in REQUIRED) or raw.get('target', 'caster') not in RECIPIENTS:
+        raise ValueError(f'dummy_casts_at_caster is {{"spell", "casts", "gap_ms", "lead_ms"}} of whole numbers and an '
+                         f'optional "target" of {RECIPIENTS}, not {raw!r}')
+    value = DummyCasts(raw['spell'], raw['casts'], raw['gap_ms'], raw['lead_ms'], raw.get('target', 'caster'))
     if value.spell < 1 or not 1 <= value.casts <= MAXIMUM_CASTS or value.gap_ms < MINIMUM_GAP_MS \
             or value.lead_ms < 0:
         raise ValueError(f'dummy_casts_at_caster casts a spell 1 to {MAXIMUM_CASTS} times at least '
@@ -31,9 +34,14 @@ def check(spec, value):
     if value is None:
         return
     from behaviours import TARGET
-    if spec.target != TARGET or spec.attack_swings:
-        raise ValueError(f'{spec.spell} dummy_casts_at_caster has the trigger\'s dummy cast, so the trigger targets '
-                         f'the dummy and is a cast')
+    from profile import CASTER
+    if spec.target not in (TARGET, CASTER) or spec.attack_swings or (
+            spec.target == CASTER and not spec.select_dummy
+            and TARGET not in (spec.measure_actor, spec.fields.get('target'))):
+        raise ValueError(f'{spec.spell} dummy_casts_at_caster has the dummy cast, so the trigger is a cast at the '
+                         f'dummy, or at the caster with the dummy read or selected')
+    if value.target != CASTER and 'grouped_ally' not in dict(spec.options):
+        raise ValueError(f'{spec.spell} dummy_casts_at_caster casts at the ally only with grouped_ally')
 
 
 def uncast_before(spec) -> bool:
@@ -42,10 +50,10 @@ def uncast_before(spec) -> bool:
 
 def cast_steps(value: DummyCasts) -> list[dict]:
     from behaviours import TARGET
-    from profile import CASTER
     steps = []
     for index in range(value.casts):
-        steps += [{'action': 'cast', 'actor': TARGET, 'spell': value.spell, 'target': CASTER, 'triggered': False},
+        steps += [{'action': 'cast', 'actor': TARGET, 'spell': value.spell, 'target': value.target,
+                   'triggered': False},
                   {'action': 'wait', 'label': f'dummy cast {index + 1} of {value.casts}', 'ms': value.gap_ms}]
     return steps
 
@@ -62,7 +70,7 @@ def after_trigger_steps(spec, value: DummyCasts, after: bool) -> list[dict]:
 
 
 def fixtures(class_file: dict, spec, value: DummyCasts, scenario: dict):
-    scenario['contract'] += (f' In each phase the dummy casts {value.spell} at the caster {value.casts} times, '
+    scenario['contract'] += (f' In each phase the dummy casts {value.spell} at the {value.target} {value.casts} times, '
                              f'{value.gap_ms} ms apart, as an ordinary cast (no trigger flags, so script hooks that '
                              f'skip triggered casts see it)' +
                              (f', {value.lead_ms} ms after the trigger cast' if value.lead_ms else '') +

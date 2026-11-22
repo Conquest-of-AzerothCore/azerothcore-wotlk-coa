@@ -2256,6 +2256,12 @@ Options with a module:
   treatment cast created, with the gameobject reads' evidence rows (ADR 1139, provisional)
 - [`dummy_casts_at_caster`](metric_delta_options/dummy_casts_at_caster.md): the dummy casts a spell at the caster in
   each phase as an ordinary, untriggered cast (ADR 1112, provisional)
+- [`before_reference`](metric_delta_options/before_reference.md): the before read of an absent summon replaced by a
+  reference read, the summon count 0 before and 1 at the after read (ADR 1172, provisional)
+- [`dummy_power_after_trigger`](metric_delta_options/dummy_power_after_trigger.md): the dummy's power set after each
+  trigger cast, for a regeneration read (ADR 1173, provisional)
+- [`grouped_ally`](metric_delta_options/grouped_ally.md): a second friendly player beside the caster, grouped or
+  not (ADR 1174, provisional)
 - [`enemy_casts_before`](metric_delta_options/enemy_casts_before.md): the enemy player casts spells at itself once,
   before any trigger cast, for a form or lasting state the trigger needs (ADR 1113, provisional)
 - [`action_buttons`](metric_delta_options/action_buttons.md): spells put on the caster's action buttons in the

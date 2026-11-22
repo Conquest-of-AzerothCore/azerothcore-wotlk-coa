@@ -58,7 +58,22 @@ class DummyCastsAtCasterTests(unittest.TestCase):
             with self.subTest(raw=raw), self.assertRaises(ValueError):
                 behaviour_scenario(load_fixture_class_file(23), mirror_entry(dummy_casts_at_caster=raw))
         with self.assertRaises(ValueError):
-            behaviour_scenario(load_fixture_class_file(23), mirror_entry(target='caster'))
+            behaviour_scenario(load_fixture_class_file(23), mirror_entry(target='enemy', enemy_player_race=2))
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23),
+                               mirror_entry(target='caster', fields={'spell': 2653, 'target': 'caster'}))
+
+    def test_a_self_cast_trigger_keeps_the_dummy_that_casts_at_the_caster(self):
+        entry = mirror_entry(target='caster', measure_actor='dummy', metric='aura',
+                             fields={'spell': 504762, 'caster': 'caster'})
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        run.validate(scenario)
+        steps = scenario['steps']
+        trigger = next(index for index, step in enumerate(steps) if step['action'] == 'cast'
+                       and step['spell'] == 681007)
+        self.assertEqual(steps[trigger]['target'], 'caster')
+        self.assertEqual(len(scenario['creatures']), 1)
+        self.assertEqual(sum(index > trigger for index in dummy_casts(scenario)), 3)
 
 
 if __name__ == '__main__':

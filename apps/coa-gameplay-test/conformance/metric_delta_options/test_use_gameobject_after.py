@@ -35,6 +35,24 @@ class UseGameObjectAfterTests(unittest.TestCase):
         scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
         self.assertNotIn('destroy_item', [step['action'] for step in scenario['steps']])
 
+    def test_an_ally_uses_the_object_of_the_caster(self):
+        entry = cauldron_entry(grouped_ally={'dy': -1, 'grouped': True},
+                               use_gameobject_after={'entry': 129364, 'uses': 1, 'gap_ms': 300,
+                                                     'destroy_item': 576135, 'user': 'ally'})
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        run.validate(scenario)
+        used = [step for step in scenario['steps'] if step['action'] in ('use_gameobject', 'destroy_item')]
+        self.assertEqual([(step['action'], step['actor'], step.get('owner')) for step in used],
+                         [('use_gameobject', 'ally', 'caster'), ('destroy_item', 'ally', None)])
+
+    def test_an_ally_user_needs_the_ally(self):
+        entry = cauldron_entry(use_gameobject_after={'entry': 129364, 'uses': 1, 'gap_ms': 300, 'user': 'ally'})
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), entry)
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), cauldron_entry(
+                use_gameobject_after={'entry': 129364, 'uses': 1, 'gap_ms': 300, 'user': 'dummy'}))
+
     def test_the_gameobject_reads_have_evidence_rows(self):
         self.assertEqual(metric_evidence()['owned_gameobject_count'], 'event')
         self.assertEqual(metric_evidence()['gameobject_remaining_ms'], 'state')
