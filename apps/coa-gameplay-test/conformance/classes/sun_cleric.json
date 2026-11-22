@@ -23500,6 +23500,78 @@
       "expected": 100,
       "tolerance": 0.05,
       "observe_source": "Source AscensionSunClericAbilities.cpp OnSpellCritChance: chance = 100 for any Solar Nova rank (Named 680621) when the target creature type is Undead or Demon. The reading is the scripted critical chance of Solar Nova 681433 against the target. creature_template.type of entry 416 is 3 Demon (data/sql/base/db_world/creature_template.sql)."
+    },
+    {
+      "spell": 560547,
+      "name": "Sun Disc (does not stack with Tree of Life, ally healing)",
+      "kind": "hit_ratio",
+      "variant": "no_stack",
+      "label_suffix": "no_stack",
+      "quote": "Does not stack with similar effects.",
+      "expected": 1.0,
+      "critical": false,
+      "metric": "spell_heal_total",
+      "observe_spell": 704911,
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "control": {
+        "auras": [
+          [
+            34123,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            34123,
+            1
+          ]
+        ],
+        "learn": [
+          560547
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1360,
+      "ally_distance": 5,
+      "expected_source": "Two sources of aura 118 SPELL_AURA_MOD_HEALING_PCT reach the grouped ally: Sun Disc 560547 (+6%, BasePoints 5 + 1) and Tree of Life 34123 (+6%, EffectBasePoints 5 + 1, set on the caster as harness setup only, a different effect from the claim's subject). Unit::SpellHealingBonusTaken takes the largest positive aura 118 (GetMaxPositiveAuraModifier, Unit.cpp:10880-10895), so Sunlight 704911 heals read the same with 560547 learned on top of 34123 as with 34123 alone: 1.0, not 1.06 (summed 1.12). The partner_alone entry is the control: it shows 34123 reaches the ally and raises the same heal by 6%. Same ratio shape as the Templar Fortified Body 300515 no_stack entry. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence 'Does not stack with similar effects.'; nothing else found."
+    },
+    {
+      "spell": 560547,
+      "name": "Sun Disc (control: Tree of Life alone raises the ally's healing)",
+      "kind": "hit_ratio",
+      "variant": "partner_alone",
+      "label_suffix": "partner_alone",
+      "quote": "Does not stack with similar effects.",
+      "expected": 1.06,
+      "critical": false,
+      "metric": "spell_heal_total",
+      "observe_spell": 704911,
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "control": {},
+      "treatment": {
+        "auras": [
+          [
+            34123,
+            1
+          ]
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 1360,
+      "ally_distance": 5,
+      "expected_source": "Control of the no_stack entry: Tree of Life 34123 alone (aura 118, EffectBasePoints 5 + 1 = +6%) raises the same Sunlight 704911 heal on the grouped ally by 6%, so a no_stack reading of 1.0 shows a cap, not a partner that does not reach the ally."
     }
   ],
   "player_observations": [],

@@ -1920,7 +1920,10 @@
   {
     "spell": 560547,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "560547 behaviour_hit_ratio no_stack",
+      "560547 behaviour_hit_ratio partner_alone"
+    ],
     "kind": "claim"
   },
   {
