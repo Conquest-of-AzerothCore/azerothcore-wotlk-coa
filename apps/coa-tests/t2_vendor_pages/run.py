@@ -86,6 +86,23 @@ for tier in range(4):
 snapshot = list(db.iterdump())
 db.executescript(sql)
 assert list(db.iterdump()) == snapshot
+faith_offers = db.execute("""
+    SELECT v.entry, v.slot, v.item FROM npc_vendor v JOIN item_template i ON i.entry = v.item
+    WHERE v.entry BETWEEN 91000005 AND 91000008 AND i.ItemSet = 525
+""").fetchall()
+for vendor, slot, item in faith_offers:
+    db.execute("INSERT INTO npc_vendor VALUES (?,?,?,?,?,?,?)",
+               (vendor + 4, slot, item, 0, 0, 40700 + slot, 0))
+db.commit()
+expected = db.execute("""
+    SELECT v.* FROM npc_vendor v LEFT JOIN item_template i ON i.entry = v.item
+    WHERE COALESCE(i.ItemSet, 0) <> 525 OR v.entry BETWEEN 91000009 AND 91000012
+    ORDER BY v.entry, v.item, v.ExtendedCost
+""").fetchall()
+cleanup = (ROOT / "data/sql/updates/pending_db_world/rev_20261122_02_coa_faith_tier3_vendor_exclusivity.sql").read_text()
+for _ in range(2):
+    db.executescript(cleanup)
+    assert db.execute("SELECT * FROM npc_vendor ORDER BY entry,item,ExtendedCost").fetchall() == expected
 print("PASS: T2 sets completed across all four difficulties, including absent Mythic variants; "
       "existing prices/stock and T1 preserved; incorrect variants excluded; complete-set pages below 150; "
-      "repeated migration unchanged")
+      "Faith exclusive to T3; repeated migrations unchanged")
