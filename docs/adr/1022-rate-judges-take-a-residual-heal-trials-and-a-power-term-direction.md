@@ -39,7 +39,10 @@ finished-class snapshots regenerate unchanged).
 
 - `residual_target` and `min_detectable` on `cooldown_reset_rate` and `swing_reset_rate` entries go through
   `procs.residual_sizing` (ADR 0781): the judge takes Wilson at `residual_z(target)`, the minimum trials are the larger
-  of the band's and the residual's, and the verdict appends `residual_note`.
+  of the band's and the residual's, and the verdict appends `residual_note`. `residual_target` sizes the false pass
+  of a `min_detectable` deviation; the per-pair false alert at the chance stays within the same target only when
+  `min_detectable` is at least twice the band (ADR 0781, Witch Hunter 804192), so the Sun Cleric entries take 4
+  points against their 2-point band.
 - `cooldown_reset_rate` takes `reset_between_attempts` (a harness `reset_cooldown` of the trigger before each cast),
   `base_mana_per_attempt` (`hits.base_mana_steps`, which lifts the percent-cost refusal only when set) and
   `trial_casts` (the trials are the trigger's `spell_cast_count`). When the reset fixture's spell is the counted
@@ -56,12 +59,23 @@ finished-class snapshots regenerate unchanged).
   one sample. It judges the interaction `(learned high - control high) - (learned low - control low) > 0` at one-sided
   z 3.09 (Welch standard error) and alerts when the control arms change with attack power: the term belongs to the
   passive. `ok` says "direction only: no figure judged"; an entry with an expected figure or a quote with a figure is
-  refused (a figure goes to `stat_gain` or `hit_ratio` with its own proof).
+  refused (a figure goes to `stat_gain` or `hit_ratio` with its own proof). The verdict names its fixtures (the attack
+  power aura and the `attempt_auras`, set by harness `set_aura`), and the contract states the control check's false
+  alert: two-sided at z 3.09, 0.2% per run and 0.4% per pair under the normal law, more under the t law of the
+  arms' samples.
 
 ## Consequences
 
 - Sun Cleric entries: 704920 x2 (procs), 300367 x2 (`cooldown_reset_rate`, Horusath Blast 572801 and Rapture
-  806477), 806699 (`swing_reset_rate`) and 680656 (`power_term_direction`, attack power aura 35785).
+  806477), 806699 (`swing_reset_rate`) and 680656 (`power_term_direction`, attack power aura 35785). Each rate entry
+  has `residual_target` 0.001 and `min_detectable` 4: at least 19386 trials at 20% and 29084 at 40%, where the
+  false alert at the chance is at most 0.1% per pair (normal approximation). 300367 runs 11 parts of 1900 Horusath
+  Blast casts and 19 parts of 1050 Rapture casts, 806699 9 parts, 704920 188 and 230 parts (the 1.5x outcome margin
+  of the proc plan).
+- The rate proves the chance of 704920, not the healing increase of the next Illumination or Radiant Cascade: the
+  ledger splits each clause into the chance claim and the increase claim, which stays open.
+- The control check of `power_term_direction` exceeds the 0.1% per-pair false-alert bound of D-197 (0.4% per pair
+  under the normal law); its threshold is unchanged here and stated in the contract.
 - The residual sizing does not shorten a run: the band's own minimum still applies.
 - The direction judge's false alert rests on the measured spread and is printed as the z of the interaction; the
   0.25 x AP stays an owner observation.

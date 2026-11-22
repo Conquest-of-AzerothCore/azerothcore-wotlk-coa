@@ -42,4 +42,5 @@ Options for a trigger with a cooldown and a percent cost (ADR 1022, provisional)
 - `trial_casts`: the trials are the trigger's completed casts (`spell_cast_count`), for a handler that rolls on the
   cast, hit or not.
 
-Sun Cleric: Piety 300367 on Horusath Blast 572801 (8 parts) and Rapture 806477 (14 parts), 20%, with all four.
+Sun Cleric: Piety 300367 on Horusath Blast 572801 (11 parts) and Rapture 806477 (19 parts), 20%, with all four,
+`residual_target` 0.001 and `min_detectable` 4 (twice the 2-point band).

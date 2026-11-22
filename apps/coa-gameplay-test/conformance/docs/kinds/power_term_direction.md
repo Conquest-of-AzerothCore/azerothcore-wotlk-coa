@@ -22,6 +22,11 @@ The verdict:
 - otherwise `ok`, worded "direction only: no figure judged", with the means, the attack powers, the growths and the
   z in the text.
 
+Every judged verdict ends with "fixture: <power aura name> <id> set by harness set_aura on the caster for the high
+arms", followed by each `attempt_auras` spell with its stacks. The contract states the control check's false alert:
+two-sided at z 3.09, 0.2% per run and 0.4% per pair under the normal law, more under the t law of the arms' samples
+(about 0.8% per pair at 36 degrees of freedom); a false pass needs the interaction above z 3.09 in both runs.
+
 Entry fields: `spell`, `name`, `quote`, `talent`, `cast_spell`, `power_aura` (a spell with aura 99
 `SPELL_AURA_MOD_ATTACK_POWER`), `power_aura_source`, `casts` (at least 10), `cast_wait_ms`, optional `attempt_auras`
 (`[{"spell", "stacks", "source"}]`) and `label_suffix` (default `power_direction`). An entry with `expected`,

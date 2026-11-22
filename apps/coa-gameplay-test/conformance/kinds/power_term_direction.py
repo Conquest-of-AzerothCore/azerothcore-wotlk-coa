@@ -14,6 +14,8 @@ from values import Expectation, TARGET, dataset, facts_of
 KIND = 'power_term_direction'
 ORDER = 47
 ONE_SIDED_Z = NormalDist().inv_cdf(0.999)
+CONTROL_FALSE_ALERT_PER_RUN = 2 * (1 - NormalDist().cdf(ONE_SIDED_Z))
+CONTROL_FALSE_ALERT_PER_PAIR = 1 - (1 - CONTROL_FALSE_ALERT_PER_RUN) ** 2
 MIN_SAMPLES = 10
 MAXIMUM_STEPS = 10000
 ATTACK_POWER_AURA = 99
@@ -84,6 +86,10 @@ def power_term_direction_scenario(class_file: dict, spec: PowerTermDirectionSpec
         raise ValueError(f'{spec.spell} {KIND} casts {spec.cast_spell}, whose cost is not a percentage of base mana')
     fixtures = [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
                 for spell, stacks in spec.attempt_auras]
+    named = (f'{records.field("Spell", spec.power_aura, "SpellName[enUS]")} {spec.power_aura} set by harness set_aura '
+             f'on the caster for the high arms' + ''.join(
+                 f', {records.field("Spell", spell, "SpellName[enUS]")} {spell} ({stacks} stacks) before each cast'
+                 for spell, stacks in spec.attempt_auras))
     reads = {arm: arm_reads(spec, arm) for arm in ARMS}
 
     def sample(arm: str, cast: int) -> list[dict]:
@@ -118,14 +124,18 @@ def power_term_direction_scenario(class_file: dict, spec: PowerTermDirectionSpec
                      f'with {spec.talent} after the aura is removed. The attack power is read before each arm and '
                      f'each non-critical hit is one sample. The interaction (learned high - control high) - '
                      f'(learned low - control low) must exceed 0 at one-sided z {ONE_SIDED_Z:.2f} (Welch standard '
-                     f'error) while the control arms do not grow with attack power: {OK_TEXT}.'
+                     f'error) while the control arms do not grow with attack power: {OK_TEXT}. The control check '
+                     f'is two-sided at the same z: its false alert is {CONTROL_FALSE_ALERT_PER_RUN:.1%} per run and '
+                     f'{CONTROL_FALSE_ALERT_PER_PAIR:.1%} per pair under the normal law, more under the t law of '
+                     f'{spec.casts} samples per arm; a false pass needs the interaction above z '
+                     f'{ONE_SIDED_Z:.2f} in both runs.'
                      + ''.join(f' Aura {spell} is set on the caster at {stacks} stacks before each cast.'
                                for spell, stacks in spec.attempt_auras)),
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
     model = {'kind': KIND, 'metric': 'spell_damage_total', 'quote': entry.quote, 'z': ONE_SIDED_Z,
-             'minimum_samples': MIN_SAMPLES, 'power_aura': spec.power_aura, 'reads': reads}
+             'minimum_samples': MIN_SAMPLES, 'power_aura': spec.power_aura, 'fixture': named, 'reads': reads}
     expectation = Expectation(mark(spec, '').rstrip(), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.talent, None,
                               'direction', prose_rule(entry.quote, spec.spell), model)
     return timed(scenario, waited_ms(steps), MAX_ACCELERATED_SCENARIO_MS), [expectation]
@@ -172,7 +182,8 @@ def power_term_direction_verdict(base: Verdict, run: Run, model: dict) -> Verdic
               f'{power["learned low"]:g} / {power["learned high"]:g} (learned); mean non-critical hit '
               + ', '.join(f'{arm} {mean:.2f} ({len(samples[arm])})' for arm, mean in means.items())
               + f'; control growth {control:.2f} (z {control_z:.2f}), learned growth {learned:.2f}, interaction '
-                f'{interaction:.2f} (Welch standard error {error:.2f}, z {z:.2f} against {threshold:.2f})')
+                f'{interaction:.2f} (Welch standard error {error:.2f}, z {z:.2f} against {threshold:.2f}); '
+                f'fixture: {model["fixture"]}')
     detail = {'interaction': interaction, 'standard_error': error, 'z': z, 'control_growth': control,
               'learned_growth': learned, 'means': means, 'attack_power': power}
     if abs(control_z) >= threshold:

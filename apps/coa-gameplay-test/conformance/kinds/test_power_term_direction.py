@@ -67,11 +67,14 @@ class PowerTermDirectionTests(unittest.TestCase):
         self.assertEqual(reads[expectation.model['reads']['control low']['power']]['metric'], 'attack_power')
         self.assertEqual(expectation.label, '680656 behaviour_metric_delta power_direction')
         self.assertIn('direction only: no figure judged', scenario['contract'])
+        self.assertIn('its false alert is 0.2% per run and 0.4% per pair under the normal law', scenario['contract'])
 
     def test_a_term_that_grows_with_attack_power_only_with_the_passive_passes(self):
         verdict = judged(WITH_TERM)
         self.assertEqual(verdict.status, 'ok')
         self.assertTrue(verdict.explanation.startswith('direction only: no figure judged'))
+        self.assertIn('fixture: Attack Power 980 35785 set by harness set_aura on the caster for the high arms, '
+                      'beeg spellpen 823764 (1 stacks) before each cast', verdict.explanation)
         self.assertIsNone(verdict.expected)
 
     def test_mutant_without_the_term_alerts(self):
