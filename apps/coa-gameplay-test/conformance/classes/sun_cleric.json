@@ -30187,6 +30187,51 @@
     },
     {
       "spell": 804628,
+      "name": "Suncharged (release at 1 stack, Judgement Day ended by the harness)",
+      "kind": "script_hit",
+      "variant": "release_1stack",
+      "label_suffix": "release_1stack",
+      "quote": "At the end of the duration, or when Judgement Day ends, the enemy takes ${$807064m1*$<scalingbp>+$AP*.3+$sph*.5} Holy damage, increased for each stack on the target.",
+      "hit_spell": 807064,
+      "value_spell": 807064,
+      "value_effect": 0,
+      "casts": [
+        [
+          806121,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "trials": 12,
+      "minimum_hits": 5,
+      "settle_ms": 4000,
+      "cast_power": 1363,
+      "observe_source": "804628 Suncharged lets Judgement Day apply Suncharge 807080 to the target every 0.5 s up to 10 stacks (entries suncharge_period and suncharge_cap). When Judgement Day 570125 ends (DurationIndex 9 = 30000 ms) the class script casts Suncharge 807064 at the target with the stacks read from 807080 (AscensionSunClericAuras.cpp:187-191, ReleaseSuncharge AscensionSunCleric.cpp:326-334; 807064 Effect[0] SCHOOL_DAMAGE BasePoints 476). The treatment casts Judgement Day 806121 at the dummy and waits for its end; every landed, unresisted, non-critical 807064 hit on the dummy is read against the tooltip at the measured stats (base term with $<scalingbp>, 0.3 x attack power, 0.5 x holy spell power); 984954 removes spell crits (Effect[1] aura 57 BasePoints -1001) and adds weapon crit (Effect[0] aura 52 BasePoints 100) and 823764 partial resists on the caster (precondition fixtures). Control arm: the same cast without 804628 learned must show no 807064 hit. The spell-power and attack-power arms raise the caster's stat (10062, 10031) before it is measured and are judged in the same pair against the same control. The hit is read at the stacks cap, so the tooltip figure is multiplied by two factors of data, not of the measurement: 1 + 10 stacks x 0.25 (807080 Effect[0] aura 271 BasePoints 24 + 1 = 25% per stack; 10 = $807080u, the cap proven by suncharge_cap) = 3.5, and Judgement Day's own damage taken from the caster, 570125 Effect[1] aura 271 BasePoints 49 + 1 = 50% (the aura is still on the target when the release is cast), = 1.5; multiplier 5.25. The tooltip states no figure for the stack increase; the 25% is the data value the server applies (AscensionSunClericContracts.cpp:315-316). The exploratory read (the three arms at 5.25 times the tooltip figure) preceded this derivation. Sizing: 24 of 24 exploratory trials landed; at 0.85 per trial, 12 trials with a minimum of 5 usable hits fail with probability about 7e-5 per run, 1.4e-4 per pair. OUT OF SAMPLE arm (D-165, D-167): the harness removes Judgement Day 570125 from the dummy (set_aura stacks 0) as soon as 807080 reads exactly 1 stack on the dummy, which exercises the tooltip's 'when Judgement Day ends' branch (AscensionSunClericAuras.cpp:187-189, any removal mode, Judgement Day still on the target: x1.5); a trial that never reads 1 stack voids the arm (SETUP assert) and is not judged. Prediction committed in e23cddb195 before this arm existed: 492.0 x (1 + 1 x 0.25) x 1.5 = 922.5, tolerated band 5%; multiplier 1.875 = (1 + 1 x 0.25) x 1.5 from 807080 Effect[0] BasePoints 24 + 1 and 570125 Effect[1] BasePoints 49 + 1 (data). Clean start (D-174, fix2): 806121 lands Judgement Day about 150 ms after the cast (Effect[0] 183 delayed trigger, BasePoints 149; Spell::EffectAscensionTriggerSpellDelayed, SpellEffects.cpp:1061-1100), so a removal straight after the cast removes nothing and the control arm leaves Judgement Day (30000 ms) on the dummy. The harness therefore removes Judgement Day once more after the control drain and before 804628 is learned, every treatment trial starts only if 570125 is absent and 807080 holds no stack on the dummy, and each removal follows a read that 570125 is present; a trial that breaks one of these voids the arm (SETUP asserts).",
+      "multiplier": 1.875,
+      "receiver_aura_removals": [
+        [
+          570125,
+          0
+        ]
+      ],
+      "no_wait_after_casts": true,
+      "stacks_read_before_removal": [
+        807080,
+        1
+      ]
+    },
+    {
+      "spell": 804628,
       "name": "Suncharged (release at 5 stacks, Judgement Day ended by the harness)",
       "kind": "script_hit",
       "variant": "release_5stack",
@@ -30216,7 +30261,7 @@
       "minimum_hits": 5,
       "settle_ms": 4000,
       "cast_power": 1363,
-      "observe_source": "804628 Suncharged lets Judgement Day apply Suncharge 807080 to the target every 0.5 s up to 10 stacks (entries suncharge_period and suncharge_cap). When Judgement Day 570125 ends (DurationIndex 9 = 30000 ms) the class script casts Suncharge 807064 at the target with the stacks read from 807080 (AscensionSunClericAuras.cpp:187-191, ReleaseSuncharge AscensionSunCleric.cpp:326-334; 807064 Effect[0] SCHOOL_DAMAGE BasePoints 476). The treatment casts Judgement Day 806121 at the dummy and waits for its end; every landed, unresisted, non-critical 807064 hit on the dummy is read against the tooltip at the measured stats (base term with $<scalingbp>, 0.3 x attack power, 0.5 x holy spell power); 984954 removes spell crits (Effect[1] aura 57 BasePoints -1001) and adds weapon crit (Effect[0] aura 52 BasePoints 100) and 823764 partial resists on the caster (precondition fixtures). Control arm: the same cast without 804628 learned must show no 807064 hit. The spell-power and attack-power arms raise the caster's stat (10062, 10031) before it is measured and are judged in the same pair against the same control. The hit is read at the stacks cap, so the tooltip figure is multiplied by two factors of data, not of the measurement: 1 + 10 stacks x 0.25 (807080 Effect[0] aura 271 BasePoints 24 + 1 = 25% per stack; 10 = $807080u, the cap proven by suncharge_cap) = 3.5, and Judgement Day's own damage taken from the caster, 570125 Effect[1] aura 271 BasePoints 49 + 1 = 50% (the aura is still on the target when the release is cast), = 1.5; multiplier 5.25. The tooltip states no figure for the stack increase; the 25% is the data value the server applies (AscensionSunClericContracts.cpp:315-316). The exploratory read (the three arms at 5.25 times the tooltip figure) preceded this derivation. Sizing: 24 of 24 exploratory trials landed; at 0.85 per trial, 12 trials with a minimum of 5 usable hits fail with probability about 7e-5 per run, 1.4e-4 per pair. OUT OF SAMPLE arm (D-165, D-167): the harness removes Judgement Day 570125 from the dummy (set_aura stacks 0) as soon as 807080 reads exactly 5 stacks on the dummy, which exercises the tooltip's 'when Judgement Day ends' branch (AscensionSunClericAuras.cpp:187-189, any removal mode, Judgement Day still on the target: x1.5); a trial that never reads 5 stacks voids the arm (SETUP assert) and is not judged. Prediction committed in e23cddb195 before this arm existed: 492.0 x (1 + 5 x 0.25) x 1.5 = 1660.5, tolerated band 5%; multiplier 3.375 = (1 + 5 x 0.25) x 1.5 from 807080 Effect[0] BasePoints 24 + 1 and 570125 Effect[1] BasePoints 49 + 1 (data).",
+      "observe_source": "804628 Suncharged lets Judgement Day apply Suncharge 807080 to the target every 0.5 s up to 10 stacks (entries suncharge_period and suncharge_cap). When Judgement Day 570125 ends (DurationIndex 9 = 30000 ms) the class script casts Suncharge 807064 at the target with the stacks read from 807080 (AscensionSunClericAuras.cpp:187-191, ReleaseSuncharge AscensionSunCleric.cpp:326-334; 807064 Effect[0] SCHOOL_DAMAGE BasePoints 476). The treatment casts Judgement Day 806121 at the dummy and waits for its end; every landed, unresisted, non-critical 807064 hit on the dummy is read against the tooltip at the measured stats (base term with $<scalingbp>, 0.3 x attack power, 0.5 x holy spell power); 984954 removes spell crits (Effect[1] aura 57 BasePoints -1001) and adds weapon crit (Effect[0] aura 52 BasePoints 100) and 823764 partial resists on the caster (precondition fixtures). Control arm: the same cast without 804628 learned must show no 807064 hit. The spell-power and attack-power arms raise the caster's stat (10062, 10031) before it is measured and are judged in the same pair against the same control. The hit is read at the stacks cap, so the tooltip figure is multiplied by two factors of data, not of the measurement: 1 + 10 stacks x 0.25 (807080 Effect[0] aura 271 BasePoints 24 + 1 = 25% per stack; 10 = $807080u, the cap proven by suncharge_cap) = 3.5, and Judgement Day's own damage taken from the caster, 570125 Effect[1] aura 271 BasePoints 49 + 1 = 50% (the aura is still on the target when the release is cast), = 1.5; multiplier 5.25. The tooltip states no figure for the stack increase; the 25% is the data value the server applies (AscensionSunClericContracts.cpp:315-316). The exploratory read (the three arms at 5.25 times the tooltip figure) preceded this derivation. Sizing: 24 of 24 exploratory trials landed; at 0.85 per trial, 12 trials with a minimum of 5 usable hits fail with probability about 7e-5 per run, 1.4e-4 per pair. OUT OF SAMPLE arm (D-165, D-167): the harness removes Judgement Day 570125 from the dummy (set_aura stacks 0) as soon as 807080 reads exactly 5 stacks on the dummy, which exercises the tooltip's 'when Judgement Day ends' branch (AscensionSunClericAuras.cpp:187-189, any removal mode, Judgement Day still on the target: x1.5); a trial that never reads 5 stacks voids the arm (SETUP assert) and is not judged. Prediction committed in e23cddb195 before this arm existed: 492.0 x (1 + 5 x 0.25) x 1.5 = 1660.5, tolerated band 5%; multiplier 3.375 = (1 + 5 x 0.25) x 1.5 from 807080 Effect[0] BasePoints 24 + 1 and 570125 Effect[1] BasePoints 49 + 1 (data). Clean start (D-174, fix2): 806121 lands Judgement Day about 150 ms after the cast (Effect[0] 183 delayed trigger, BasePoints 149; Spell::EffectAscensionTriggerSpellDelayed, SpellEffects.cpp:1061-1100), so a removal straight after the cast removes nothing and the control arm leaves Judgement Day (30000 ms) on the dummy. The harness therefore removes Judgement Day once more after the control drain and before 804628 is learned, every treatment trial starts only if 570125 is absent and 807080 holds no stack on the dummy, and each removal follows a read that 570125 is present; a trial that breaks one of these voids the arm (SETUP asserts).",
       "multiplier": 3.375,
       "receiver_aura_removals": [
         [
