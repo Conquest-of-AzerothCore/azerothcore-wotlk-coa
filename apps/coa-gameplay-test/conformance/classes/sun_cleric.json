@@ -25424,50 +25424,6 @@
       "after_at_most": 150
     },
     {
-      "spell": 561328,
-      "kind": "metric_delta",
-      "quote": "Removes the cast time of Glare while above 80% health.",
-      "trigger_spell": 804584,
-      "gate_spell": 561328,
-      "target": "caster",
-      "metric": "spell_cast_time_ms",
-      "fields": {
-        "spell": 807870
-      },
-      "tolerance": 1,
-      "wait_ms": 1600,
-      "expire_ms": 2000,
-      "name": "Fortuitous (Glare cast time above 80% health)",
-      "variant": "glare_healthy",
-      "label_suffix": "glare_healthy",
-      "caster_health_pct": 90,
-      "before_expected": 1500,
-      "expected": 0,
-      "observe_source": "Glare 807870 (highest rank usable at level 60, SpellLevel 58) has a 1500 ms cast time (CastingTimeIndex 16, SpellCastTimes.dbc 16 CastTime 1500), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (Effect[0] ADD_PCT_MODIFIER MiscValue 10 SPELLMOD_CASTING_TIME BasePoints -101, class mask word 1 = 8388608 = the family flag of Glare) up while the caster is above 80% health, so the cast time is 0 ms. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive), spell 807870 Glare: 43 SPELL_DAMAGE events in 5 logs, no cast-time reading; git log -L on the health state (AscensionSunCleric.cpp) shows b2ad6f76d6 (#5963) set a hysteresis, on above 80%, off at or below 75%; nothing else found."
-    },
-    {
-      "spell": 561328,
-      "kind": "metric_delta",
-      "quote": "Removes the cast time of Glare while above 80% health.",
-      "trigger_spell": 804584,
-      "gate_spell": 561328,
-      "target": "caster",
-      "metric": "spell_cast_time_ms",
-      "fields": {
-        "spell": 807870
-      },
-      "tolerance": 1,
-      "wait_ms": 1600,
-      "expire_ms": 2000,
-      "name": "Fortuitous (control: Glare cast time at 50% health)",
-      "variant": "glare_wounded",
-      "label_suffix": "glare_wounded",
-      "caster_health_pct": 50,
-      "before_expected": 1500,
-      "expected": 1500,
-      "observe_source": "Control arm of glare_healthy: the caster is held at 50% health, below 80%, so the helper is not kept and Glare keeps its 1500 ms cast time after the learn (CastingTimeIndex 16, CastTime 1500). Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive), spell 807870 Glare: 43 SPELL_DAMAGE events in 5 logs, no cast-time reading; git log -L on the health state (AscensionSunCleric.cpp) shows b2ad6f76d6 (#5963) set a hysteresis, on above 80%, off at or below 75%; nothing else found."
-    },
-    {
       "spell": 560547,
       "name": "Sun Disc (does not stack with Tree of Life, ally healing)",
       "kind": "hit_ratio",
@@ -29208,102 +29164,6 @@
       ],
       "observe_source": "704585 Gleaming Vigil: Effect[0] aura 87 Physical -5% always; the helper 707769 (aura 87 -5%) is kept only while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 90% and read at 79%: helper present, its effect off, ratio 0.95. Measured in the pilot: entered from 90% the helper aura stays (the script's 75-80% band keeps it), but its effect is off: the helper carries CasterAuraState 28 (ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT, set by HealthAbovePct(80) each update, Unit.cpp:766, 3f8e071750) and ModifyAuraState unapplies the effects of owned auras with that state (Unit.cpp:8541-8553). Mentor D-157: the tooltip literal 'while above 80% health' holds, off at 79% from either side.",
       "caster_health_from_pct": 90
-    },
-    {
-      "spell": 561328,
-      "kind": "metric_delta",
-      "quote": "Removes the cast time of Glare while above 80% health.",
-      "trigger_spell": 804584,
-      "gate_spell": 561328,
-      "target": "caster",
-      "metric": "spell_cast_time_ms",
-      "fields": {
-        "spell": 807870
-      },
-      "tolerance": 1,
-      "wait_ms": 1600,
-      "expire_ms": 2000,
-      "name": "Fortuitous (on above 80%: Glare cast time at 81% entered from 50%)",
-      "variant": "glare_edge_on_above_80",
-      "label_suffix": "glare_edge_on_above_80",
-      "caster_health_pct": 81,
-      "before_expected": 1500,
-      "expected": 0,
-      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 50% and read at 81%: 0 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157).",
-      "caster_health_from": 50,
-      "disable_regeneration": true
-    },
-    {
-      "spell": 561328,
-      "kind": "metric_delta",
-      "quote": "Removes the cast time of Glare while above 80% health.",
-      "trigger_spell": 804584,
-      "gate_spell": 561328,
-      "target": "caster",
-      "metric": "spell_cast_time_ms",
-      "fields": {
-        "spell": 807870
-      },
-      "tolerance": 1,
-      "wait_ms": 1600,
-      "expire_ms": 2000,
-      "name": "Fortuitous (off inside the band from above (aura state 28): Glare cast time at 79% entered from 90%)",
-      "variant": "glare_edge_off_band_from_above",
-      "label_suffix": "glare_edge_off_band_from_above",
-      "caster_health_pct": 79,
-      "before_expected": 1500,
-      "expected": 1500,
-      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 90% and read at 79%: 1500 ms. Measured in the pilot: entered from 90% the helper aura stays (the script's 75-80% band keeps it), but its effect is off: the helper carries CasterAuraState 28 (ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT, set by HealthAbovePct(80) each update, Unit.cpp:766, 3f8e071750) and ModifyAuraState unapplies the effects of owned auras with that state (Unit.cpp:8541-8553). Mentor D-157: the tooltip literal 'while above 80% health' holds, off at 79% from either side.",
-      "caster_health_from": 90,
-      "disable_regeneration": true
-    },
-    {
-      "spell": 561328,
-      "kind": "metric_delta",
-      "quote": "Removes the cast time of Glare while above 80% health.",
-      "trigger_spell": 804584,
-      "gate_spell": 561328,
-      "target": "caster",
-      "metric": "spell_cast_time_ms",
-      "fields": {
-        "spell": 807870
-      },
-      "tolerance": 1,
-      "wait_ms": 1600,
-      "expire_ms": 2000,
-      "name": "Fortuitous (off at or below 75%: Glare cast time at 75% entered from 90%)",
-      "variant": "glare_edge_off_at_75",
-      "label_suffix": "glare_edge_off_at_75",
-      "caster_health_pct": 75,
-      "before_expected": 1500,
-      "expected": 1500,
-      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 90% and read at 75%: 1500 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157).",
-      "caster_health_from": 90,
-      "disable_regeneration": true
-    },
-    {
-      "spell": 561328,
-      "kind": "metric_delta",
-      "quote": "Removes the cast time of Glare while above 80% health.",
-      "trigger_spell": 804584,
-      "gate_spell": 561328,
-      "target": "caster",
-      "metric": "spell_cast_time_ms",
-      "fields": {
-        "spell": 807870
-      },
-      "tolerance": 1,
-      "wait_ms": 1600,
-      "expire_ms": 2000,
-      "name": "Fortuitous (off inside the band from below: Glare cast time at 79% entered from 50%)",
-      "variant": "glare_edge_off_band_from_below",
-      "label_suffix": "glare_edge_off_band_from_below",
-      "caster_health_pct": 79,
-      "before_expected": 1500,
-      "expected": 1500,
-      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 50% and read at 79%: 1500 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157).",
-      "caster_health_from": 50,
-      "disable_regeneration": true
     },
     {
       "spell": 520024,
@@ -33176,6 +33036,654 @@
       "expire_ms": 22000,
       "tolerance": 0,
       "observe_source": "681254 StackAmount 10, DurationIndex 18 (20000 ms) (server DBC). Angelic Presence 800722 is instant with no global cooldown (CastingTimeIndex 1, StartRecoveryTime 0), so it does not use the Illumination cast time: with it up Illumination 500143 is instant (800722 Effect[0] aura 108 MiscValue 10 SPELLMOD_CASTING_TIME -100% on the Illumination mask, the 2000 ms cast time of 500143 otherwise, as the entry of the 92137 grant reads it) and costs one 1500 ms global cooldown, so one cycle (800722, then 500143) takes 2 x 800 ms = 1600 ms and 11 consumptions fit in 16.8 s, inside the 20 s of the first stack, with no haste fixture and no ignore_gcd. Eleven consumptions, the last the trigger cast: an uncapped counter would read 11, the cap reads 10; the same sequence without 680648 is the control (0 stacks). Reference search 2026-11-22: coa-history spell 681254: 0 events in 186 logs (an aura of a passive; positive control: Paragon 680639 has 60 casts in 15 logs); nothing else found."
+    },
+    {
+      "spell": 561328,
+      "kind": "metric_delta",
+      "quote": "Removes the cast time of Glare while above 80% health.",
+      "trigger_spell": 804584,
+      "gate_spell": 561328,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 807870
+      },
+      "tolerance": 1,
+      "wait_ms": 1600,
+      "expire_ms": 2000,
+      "name": "Fortuitous (Glare cast time above 80% health)",
+      "variant": "glare_healthy",
+      "label_suffix": "glare_healthy",
+      "caster_health_pct": 90,
+      "before_expected": 1500,
+      "expected": 0,
+      "observe_source": "Glare 807870 (highest rank usable at level 60, SpellLevel 58) has a 1500 ms cast time (CastingTimeIndex 16, SpellCastTimes.dbc 16 CastTime 1500), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (Effect[0] ADD_PCT_MODIFIER MiscValue 10 SPELLMOD_CASTING_TIME BasePoints -101, class mask word 1 = 8388608 = the family flag of Glare) up while the caster is above 80% health, so the cast time is 0 ms. Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive), spell 807870 Glare: 43 SPELL_DAMAGE events in 5 logs, no cast-time reading; git log -L on the health state (AscensionSunCleric.cpp) shows b2ad6f76d6 (#5963) set a hysteresis, on above 80%, off at or below 75%; nothing else found.",
+      "use_time_contrast": [
+        "glare_healthy",
+        "glare_wounded"
+      ],
+      "expected_gain": -1500
+    },
+    {
+      "spell": 561328,
+      "kind": "metric_delta",
+      "quote": "Removes the cast time of Glare while above 80% health.",
+      "trigger_spell": 804584,
+      "gate_spell": 561328,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 807870
+      },
+      "tolerance": 1,
+      "wait_ms": 1600,
+      "expire_ms": 2000,
+      "name": "Fortuitous (control: Glare cast time at 50% health)",
+      "variant": "glare_wounded",
+      "label_suffix": "glare_wounded",
+      "caster_health_pct": 50,
+      "before_expected": 1500,
+      "expected": 1500,
+      "observe_source": "Control arm of glare_healthy: the caster is held at 50% health, below 80%, so the helper is not kept and Glare keeps its 1500 ms cast time after the learn (CastingTimeIndex 16, CastTime 1500). Reference search 2026-11-22: coa-history spell 561328: 0 events in 186 logs (a passive), spell 807870 Glare: 43 SPELL_DAMAGE events in 5 logs, no cast-time reading; git log -L on the health state (AscensionSunCleric.cpp) shows b2ad6f76d6 (#5963) set a hysteresis, on above 80%, off at or below 75%; nothing else found.",
+      "use_time_contrast": [
+        "glare_healthy",
+        "glare_wounded"
+      ],
+      "expected_gain": 0
+    },
+    {
+      "spell": 561328,
+      "kind": "metric_delta",
+      "quote": "Removes the cast time of Glare while above 80% health.",
+      "trigger_spell": 804584,
+      "gate_spell": 561328,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 807870
+      },
+      "tolerance": 1,
+      "wait_ms": 1600,
+      "expire_ms": 2000,
+      "name": "Fortuitous (on above 80%: Glare cast time at 81% entered from 50%)",
+      "variant": "glare_edge_on_above_80",
+      "label_suffix": "glare_edge_on_above_80",
+      "caster_health_pct": 81,
+      "before_expected": 1500,
+      "expected": 0,
+      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 50% and read at 81%: 0 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157).",
+      "caster_health_from": 50,
+      "disable_regeneration": true,
+      "use_time_contrast": [
+        "glare_edge_on_above_80",
+        "glare_edge_off_band_from_above",
+        "glare_edge_off_band_from_below",
+        "glare_edge_off_at_75"
+      ],
+      "expected_gain": -1500
+    },
+    {
+      "spell": 561328,
+      "kind": "metric_delta",
+      "quote": "Removes the cast time of Glare while above 80% health.",
+      "trigger_spell": 804584,
+      "gate_spell": 561328,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 807870
+      },
+      "tolerance": 1,
+      "wait_ms": 1600,
+      "expire_ms": 2000,
+      "name": "Fortuitous (off inside the band from above (aura state 28): Glare cast time at 79% entered from 90%)",
+      "variant": "glare_edge_off_band_from_above",
+      "label_suffix": "glare_edge_off_band_from_above",
+      "caster_health_pct": 79,
+      "before_expected": 1500,
+      "expected": 1500,
+      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 90% and read at 79%: 1500 ms. Measured in the pilot: entered from 90% the helper aura stays (the script's 75-80% band keeps it), but its effect is off: the helper carries CasterAuraState 28 (ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT, set by HealthAbovePct(80) each update, Unit.cpp:766, 3f8e071750) and ModifyAuraState unapplies the effects of owned auras with that state (Unit.cpp:8541-8553). Mentor D-157: the tooltip literal 'while above 80% health' holds, off at 79% from either side.",
+      "caster_health_from": 90,
+      "disable_regeneration": true,
+      "use_time_contrast": [
+        "glare_edge_on_above_80",
+        "glare_edge_off_band_from_above",
+        "glare_edge_off_band_from_below",
+        "glare_edge_off_at_75"
+      ],
+      "expected_gain": 0
+    },
+    {
+      "spell": 561328,
+      "kind": "metric_delta",
+      "quote": "Removes the cast time of Glare while above 80% health.",
+      "trigger_spell": 804584,
+      "gate_spell": 561328,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 807870
+      },
+      "tolerance": 1,
+      "wait_ms": 1600,
+      "expire_ms": 2000,
+      "name": "Fortuitous (off at or below 75%: Glare cast time at 75% entered from 90%)",
+      "variant": "glare_edge_off_at_75",
+      "label_suffix": "glare_edge_off_at_75",
+      "caster_health_pct": 75,
+      "before_expected": 1500,
+      "expected": 1500,
+      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 90% and read at 75%: 1500 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157).",
+      "caster_health_from": 90,
+      "disable_regeneration": true,
+      "use_time_contrast": [
+        "glare_edge_on_above_80",
+        "glare_edge_off_band_from_above",
+        "glare_edge_off_band_from_below",
+        "glare_edge_off_at_75"
+      ],
+      "expected_gain": 0
+    },
+    {
+      "spell": 561328,
+      "kind": "metric_delta",
+      "quote": "Removes the cast time of Glare while above 80% health.",
+      "trigger_spell": 804584,
+      "gate_spell": 561328,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 807870
+      },
+      "tolerance": 1,
+      "wait_ms": 1600,
+      "expire_ms": 2000,
+      "name": "Fortuitous (off inside the band from below: Glare cast time at 79% entered from 50%)",
+      "variant": "glare_edge_off_band_from_below",
+      "label_suffix": "glare_edge_off_band_from_below",
+      "caster_health_pct": 79,
+      "before_expected": 1500,
+      "expected": 1500,
+      "observe_source": "Glare 807870 has a 1500 ms cast time (CastingTimeIndex 16), read before the learn as the control. 561328 Fortuitous keeps its helper 561396 (SPELLMOD_CASTING_TIME -101 on Glare's family flag) while the health state is on. AscensionSunCleric.cpp:366-371 Refresh (every 500 ms SolarPower timer and on a cast of 561328/704585/805267/300314): health above 80% sets healthyAbove80, at or below 75% clears it, 76-80% keeps it (hysteresis set on purpose by b2ad6f76d6, #5963, fixes #5763/#5783; mentor D-153). The caster enters the read percent from another percent with 1000 ms settles (two timer periods), regeneration off. Entered from 50% and read at 79%: 1500 ms. One of the four edges named by D-153, judged by the tooltip literal (D-157).",
+      "caster_health_from": 50,
+      "disable_regeneration": true,
+      "use_time_contrast": [
+        "glare_edge_on_above_80",
+        "glare_edge_off_band_from_above",
+        "glare_edge_off_band_from_below",
+        "glare_edge_off_at_75"
+      ],
+      "expected_gain": 0
+    },
+    {
+      "spell": 300360,
+      "kind": "metric_delta",
+      "gate_spell": 300360,
+      "target": "caster",
+      "trigger_spell": 500143,
+      "phase_auras": [
+        [
+          807440,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500149,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          92135,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 1363,
+      "disable_regeneration": true,
+      "quote": "Lasts for $301265d or 3 casts.",
+      "setup_target": "caster",
+      "setup_wait_ms": 2100,
+      "expire_ms": 500,
+      "tolerance": 0.0001,
+      "name": "Learning Light (aura lasts 10 s)",
+      "variant": "haste_duration_window",
+      "label_suffix": "haste_duration_window",
+      "metric": "aura",
+      "fields": {
+        "spell": 301265
+      },
+      "measure_actor": "caster",
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "setup_casts": [
+        804584
+      ],
+      "trigger_only_after": true,
+      "gate_timing": "start",
+      "wait_ms": 11400,
+      "expiry_wait_ms": 1200,
+      "game_time": {
+        "after": [
+          11100,
+          11700
+        ],
+        "expired": [
+          12400,
+          12900
+        ]
+      },
+      "observe_source": "300360 Learning Light Effect[0] aura 4 DUMMY; 301265 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 19 + 1 = 20, DurationIndex 1 = 10000 ms ($301265d). The script gives the aura 3 charges on application (AscensionSunClericAuras.cpp:97-99) and each finished Holy or Fire family 33 casting spell that was started under it spends one, removing it at the last (AscensionSunClericAbilities.cpp:49, Finish at :83-88). Dawn 804584 is cast for real with 20 Solar Power 500149 and the specialization 92135 as precondition fixtures (set_aura, neither is the subject) in both phases, any Dawn left by the first phase removed first (set_aura 807440 at 0 stacks). Illumination 500143 (Holy, 2000 ms cast, heals the caster) is cast for real each time: the first cast spends Dawn and enters Sunrise, which grants 301265 only when 300360 is learned between the phases (control: the same casts before the learn read the haste multiplier 1). One real Illumination cast (2000 ms cast time, the aura is granted when it completes) with no later cast: the aura is present when read 11100..11700 ms after the cast started (game time), at least 9100 ms after it was granted, and gone when read 12400..12900 ms after it, at most 10900 ms after, so the duration lies inside 10% of 10000 ms (9000..11000) on both sides. Control: before the cast, absent. Reference search 2026-11-22: coa-history spell 301265 Learning Light: 101 SPELL_AURA_APPLIED and 102 SPELL_AURA_REMOVED in 3 logs (the aura exists in real play, no amount or charge in the events), 300360 0 events (a passive); bindmysoul snapshot and ascension-data: nothing found beyond the tooltip."
+    },
+    {
+      "spell": 300323,
+      "name": "Holy Fervor (Sunrise effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_sunrise",
+      "label_suffix": "effect_sunrise",
+      "quote": "Increases the effectiveness of Sunrise and Sunset by $s1%.",
+      "expected": 1.0333,
+      "observe_spell": 500154,
+      "learn": [],
+      "control": {
+        "auras": [
+          [
+            500477,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          300323
+        ],
+        "auras": [
+          [
+            500477,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 50,
+      "parts": 8,
+      "cast_power": 1363,
+      "refresh": true,
+      "stated": {
+        "bonus": 20,
+        "parts": [
+          20
+        ]
+      },
+      "control_residual": 0.001,
+      "expected_source": "300323 Holy Fervor Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% ($s1). Sunrise 500477 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE Holy, BasePoints 19 + 1 = 20%; Sunset 500511 Effect[1] aura 79 Fire, BasePoints 9 + 1 = 10% and Effect[0] aura 71 crit chance 20%. With the modifier the damage terms are 20% x 1.2 = 24%, so the ratio of a Holy (Horusath Blast 500154) hit with against without the passive is 1.24 / 1.20 = 1.0333 (from the DBC amounts and the stated 20%, never from a run). Both arms hold the Sunrise 500477 aura by harness set_aura each trial (precondition fixture, the subject is the passive's effect on its value) and 823764 (no magic resistance, precondition), the passive is learned in the treatment arm before the aura is set. Only the non-critical hits are compared. Reference search 2026-11-22: coa-history spell 300323: 0 events in 186 logs (a passive); nothing else found. The Sunset critical strike chance part of the effectiveness is not measured by this entry. Spell power 20000 is a precondition fixture in both arms: it makes the spell power term, identical in both arms, dominate the hit so that the per-hit spread of the damage roll does not decide the sample size; the percent modifier scales the whole hit.",
+      "observe_source": "300323 Holy Fervor Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% ($s1). Sunrise 500477 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE Holy, BasePoints 19 + 1 = 20%; Sunset 500511 Effect[1] aura 79 Fire, BasePoints 9 + 1 = 10% and Effect[0] aura 71 crit chance 20%. With the modifier the damage terms are 20% x 1.2 = 24%, so the ratio of a Holy (Horusath Blast 500154) hit with against without the passive is 1.24 / 1.20 = 1.0333 (from the DBC amounts and the stated 20%, never from a run). Both arms hold the Sunrise 500477 aura by harness set_aura each trial (precondition fixture, the subject is the passive's effect on its value) and 823764 (no magic resistance, precondition), the passive is learned in the treatment arm before the aura is set. Only the non-critical hits are compared. Reference search 2026-11-22: coa-history spell 300323: 0 events in 186 logs (a passive); nothing else found. The Sunset critical strike chance part of the effectiveness is not measured by this entry. Spell power 20000 is a precondition fixture in both arms: it makes the spell power term, identical in both arms, dominate the hit so that the per-hit spread of the damage roll does not decide the sample size; the percent modifier scales the whole hit.",
+      "fixture": {
+        "spell_power": 20000
+      }
+    },
+    {
+      "spell": 300323,
+      "name": "Holy Fervor (Sunset effectiveness)",
+      "kind": "hit_ratio",
+      "variant": "effect_sunset",
+      "label_suffix": "effect_sunset",
+      "quote": "Increases the effectiveness of Sunrise and Sunset by $s1%.",
+      "expected": 1.0182,
+      "observe_spell": 500146,
+      "learn": [],
+      "control": {
+        "auras": [
+          [
+            500511,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          300323
+        ],
+        "auras": [
+          [
+            500511,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 50,
+      "parts": 40,
+      "cast_power": 1363,
+      "refresh": true,
+      "stated": {
+        "bonus": 20,
+        "parts": [
+          10
+        ],
+        "truncated": true,
+        "band": true
+      },
+      "control_residual": 0.001,
+      "expected_source": "300323 Holy Fervor Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% ($s1). Sunrise 500477 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE Holy, BasePoints 19 + 1 = 20%; Sunset 500511 Effect[1] aura 79 Fire, BasePoints 9 + 1 = 10% and Effect[0] aura 71 crit chance 20%. With the modifier the damage terms are 10% x 1.2 = 12%, so the ratio of a Fire (Dawnsear 500146) hit with against without the passive is 1.12 / 1.10 = 1.0182 (from the DBC amounts and the stated 20%, never from a run). Both arms hold the Sunset 500511 aura by harness set_aura each trial (precondition fixture, the subject is the passive's effect on its value) and 823764 (no magic resistance, precondition), the passive is learned in the treatment arm before the aura is set. Only the non-critical hits are compared. Reference search 2026-11-22: coa-history spell 300323: 0 events in 186 logs (a passive); nothing else found. The Sunset critical strike chance part of the effectiveness is not measured by this entry. Spell power 20000 is a precondition fixture in both arms: it makes the spell power term, identical in both arms, dominate the hit so that the per-hit spread of the damage roll does not decide the sample size; the percent modifier scales the whole hit.",
+      "observe_source": "300323 Holy Fervor Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 + 1 = +20% ($s1). Sunrise 500477 Effect[0] aura 79 MOD_DAMAGE_PERCENT_DONE Holy, BasePoints 19 + 1 = 20%; Sunset 500511 Effect[1] aura 79 Fire, BasePoints 9 + 1 = 10% and Effect[0] aura 71 crit chance 20%. With the modifier the damage terms are 10% x 1.2 = 12%, so the ratio of a Fire (Dawnsear 500146) hit with against without the passive is 1.12 / 1.10 = 1.0182 (from the DBC amounts and the stated 20%, never from a run). Both arms hold the Sunset 500511 aura by harness set_aura each trial (precondition fixture, the subject is the passive's effect on its value) and 823764 (no magic resistance, precondition), the passive is learned in the treatment arm before the aura is set. Only the non-critical hits are compared. Reference search 2026-11-22: coa-history spell 300323: 0 events in 186 logs (a passive); nothing else found. The Sunset critical strike chance part of the effectiveness is not measured by this entry. Spell power 20000 is a precondition fixture in both arms: it makes the spell power term, identical in both arms, dominate the hit so that the per-hit spread of the damage roll does not decide the sample size; the percent modifier scales the whole hit.",
+      "fixture": {
+        "spell_power": 20000
+      }
+    },
+    {
+      "spell": 704565,
+      "name": "Everglow (Radiant Cascade heals two more allies)",
+      "kind": "metric_delta",
+      "variant": "bounce_count",
+      "label_suffix": "bounce_count",
+      "quote": "Your Radiant Cascade now bounces to $s1 additional allies.",
+      "trigger_spell": 500141,
+      "gate_spell": 704565,
+      "target": "ally",
+      "cast_power": 1360,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500141
+      },
+      "measure_actor": "caster",
+      "before_expected": 5,
+      "expected": 12,
+      "tolerance": 0,
+      "ally_arm": {
+        "allies": 7,
+        "ally_health": [
+          5000,
+          10000
+        ]
+      },
+      "observe_source": "704565 Everglow Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 17 (SPELLMOD_JUMP_TARGETS) BasePoints 1 + DieSides 1 = 2 jump targets (the tooltip $s1). Radiant Cascade 500141 Effect[0] SPELL_EFFECT_HEAL TargetA 45 (chain heal), EffectChainTarget 4 in the DBC, but AscensionSunClericContracts.cpp:226 sets Effects[0].ChainTarget = 5 for Radiant Cascade (the effective value; the tooltip is silent on the base count), so the control cast heals 5 units (primary plus 4: Spell::SelectImplicitChainTargets, Spell.cpp:1921-1935). The tooltip $s1 = 2 additional allies (DBC EffectBasePoints 1 + EffectDieSides 1), so 7 heals per cast with it. Seven grouped allies at 50% health stand at the caster's spawn, so the pool (7 injured allies plus the caster) is larger than the cap and the cap decides. The cast is made at the ally once before and once after the passive is learned (control: the first cast, 5 heals); the heal events of 500141 on every target are counted by the caster and the counter is cumulative: 5 after the first cast, 5 + 7 = 12 after the second. Reference search 2026-11-22: coa-history spell 704565: 0 events in 186 logs (a passive); Radiant Cascade 500141: 143 SPELL_HEAL events and 41 SPELL_CAST_START in 2 logs (no chain size readable from aggregates); nothing else found. The claim is the +2; the base 5 is the control reading, not part of the claim."
+    },
+    {
+      "spell": 804254,
+      "kind": "metric_delta",
+      "quote": "Guard a Blessed ally, deflecting the next harmful spell cast on them within $680888d.",
+      "trigger_spell": 804254,
+      "target": "caster",
+      "cast_power": 1363,
+      "setup_casts": [
+        804247
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "trigger_only_after": true,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 47632,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "measure_actor": "caster",
+      "before_expected": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Blessing of Retribution (deflects the next harmful spell only)",
+      "variant": "deflect_next",
+      "label_suffix": "deflect_next",
+      "expected": 3,
+      "strike": {
+        "spell": 47632,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 2,
+        "wait_ms": 300,
+        "after_trigger_ms": 1600
+      },
+      "observe_source": "804254 Blessing of Retribution Effect[0] SPELL_EFFECT_TRIGGER_SPELL 680888, TARGET_UNIT_TARGET_ALLY; 680888 Effect[0] aura 287 SPELL_AURA_DEFLECT_SPELLS BasePoints 99 + 1 = 100, ProcCharges 1, DurationIndex 3 = 60000 ms. The caster is its own Blessed ally: Bless 804247 is cast at the caster in both phases (precondition, not the subject), then Blessing of Retribution 804254 at the caster in the after phase only. The striker (creature, spell 47632 Grave Coil, an enemy harmful spell cast at the caster) strikes twice, 300 ms apart. With the Blessing cast first, the first strike is deflected and the second lands: 1 damage event of 47632 on the caster (the deflect is not a damage event; the aura has 1 charge). Reference search 2026-11-22: coa-history spell 804254 and 680888: 0 events in 186 logs; nothing else found. The damage counter is cumulative over the scenario: the first phase strikes twice with no Blessing cast (control, 2 damage events), the after phase adds its own strikes (cumulative 3 with the Blessing: one deflected, one landed; cumulative 4 in the control cast without Bless: both landed)."
+    },
+    {
+      "spell": 804254,
+      "kind": "metric_delta",
+      "quote": "Guard a Blessed ally, deflecting the next harmful spell cast on them within $680888d.",
+      "trigger_spell": 804254,
+      "target": "caster",
+      "cast_power": 1363,
+      "trigger_only_after": true,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 47632,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "measure_actor": "caster",
+      "before_expected": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Blessing of Retribution (control: cast without Bless, the same two strikes land)",
+      "variant": "deflect_control",
+      "label_suffix": "deflect_control",
+      "expected": 4,
+      "strike": {
+        "spell": 47632,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 2,
+        "wait_ms": 300,
+        "after_trigger_ms": 1600
+      },
+      "observe_source": "804254 Blessing of Retribution Effect[0] SPELL_EFFECT_TRIGGER_SPELL 680888, TARGET_UNIT_TARGET_ALLY; 680888 Effect[0] aura 287 SPELL_AURA_DEFLECT_SPELLS BasePoints 99 + 1 = 100, ProcCharges 1, DurationIndex 3 = 60000 ms. The caster is its own Blessed ally: Bless 804247 is cast at the caster in both phases (precondition, not the subject), then Blessing of Retribution 804254 at the caster in the after phase only. The striker (creature, spell 47632 Grave Coil, an enemy harmful spell cast at the caster) strikes twice, 300 ms apart. Control: no Bless is cast, so the Blessing, usable only on an ally with Bless active (the tooltip condition, entry no_bless), takes no hold and both strikes land: 2 damage events. It shows the strikes land when nothing deflects them. Reference search 2026-11-22: coa-history spell 804254 and 680888: 0 events in 186 logs; nothing else found. The damage counter is cumulative over the scenario: the first phase strikes twice with no Blessing cast (control, 2 damage events), the after phase adds its own strikes (cumulative 3 with the Blessing: one deflected, one landed; cumulative 4 in the control cast without Bless: both landed)."
+    },
+    {
+      "spell": 804632,
+      "kind": "metric_delta",
+      "trigger_spell": 500154,
+      "gate_spell": 804632,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807175,
+        "target": "dummy"
+      },
+      "quote": "launches a Solar Flare",
+      "name": "Flames of Absolution (Solar Flare damage at 10000 spell power)",
+      "variant": "flare_sp",
+      "label_suffix": "flare_sp",
+      "expected": 2736.5,
+      "tolerance": 137,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "observe_source": "804632 Flames of Absolution launches Solar Flare 807175 (Effect[1] SCHOOL_DAMAGE, Holy) at the target of Horusath Blast 500154 damage (AscensionSunClericEvents.cpp:126, :303-312, and the core proc row 804632 -> 573449 Effect 64). The tooltip text resolves to 136.5 at no spell power (the packet token) and adds 0.26 per spell power. Horusath Blast is cast at the dummy in both phases and 804632 is learned between them (control: the first phase, no Solar Flare damage). 984954 (Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT +101%, no effect on this magic Solar Flare 807175; Effect[1] aura 57, spell crit -1001, the effective one) and 823764 (no magic resistance) are precondition fixtures in both phases. Hit arm at 10000 spell power: 136.5 + 0.26 x 10000 = 2736.5 for the one Solar Flare on the dummy, band 5% (137), which excludes the zero-power value 136.5 by a factor of 20. Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 SPELL_DAMAGE (3 to 3191, mean 520, with spell power and crits), 2442 SPELL_AURA_APPLIED and 2416 SPELL_AURA_REMOVED in 29 logs (no hit chance readable); nothing else found."
+    },
+    {
+      "spell": 804632,
+      "kind": "metric_delta",
+      "trigger_spell": 500154,
+      "gate_spell": 804632,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807175,
+        "target": "dummy"
+      },
+      "quote": "launches a Solar Flare",
+      "name": "Flames of Absolution (Solar Flare damage with no spell power, the contrast arm)",
+      "variant": "flare_sp_zero",
+      "label_suffix": "flare_sp_zero",
+      "expected": 136.5,
+      "tolerance": 7,
+      "observe_source": "804632 Flames of Absolution launches Solar Flare 807175 (Effect[1] SCHOOL_DAMAGE, Holy) at the target of Horusath Blast 500154 damage (AscensionSunClericEvents.cpp:126, :303-312, and the core proc row 804632 -> 573449 Effect 64). The tooltip text resolves to 136.5 at no spell power (the packet token) and adds 0.26 per spell power. Horusath Blast is cast at the dummy in both phases and 804632 is learned between them (control: the first phase, no Solar Flare damage). 984954 (Effect[0] aura 52 MOD_WEAPON_CRIT_PERCENT +101%, no effect on this magic Solar Flare 807175; Effect[1] aura 57, spell crit -1001, the effective one) and 823764 (no magic resistance) are precondition fixtures in both phases. Contrast arm of flare_sp on the same build: the same cast with no spell power added reads 136.5 (5% band 7), so the hit landed and the 0.26 spell power term is the difference between the two arms. Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 SPELL_DAMAGE (3 to 3191, mean 520, with spell power and crits), 2442 SPELL_AURA_APPLIED and 2416 SPELL_AURA_REMOVED in 29 logs (no hit chance readable); nothing else found."
+    },
+    {
+      "spell": 804632,
+      "name": "Flames of Absolution (attackers swing under Solar Flare)",
+      "kind": "attacker_miss_share",
+      "variant": "attacker_miss",
+      "label_suffix": "attacker_miss",
+      "quote": "reduces the target's chance to hit by",
+      "quote_spell": 807175,
+      "cast_spell": 500154,
+      "learn": [
+        804632
+      ],
+      "aura": 807175,
+      "aura_effect": 0,
+      "expected": 3,
+      "arm_ms": 640000,
+      "cycle_ms": 8000,
+      "settle_ms": 3000,
+      "attackers": 5,
+      "parts": 8,
+      "observe_source": "Solar Flare 807175 Effect[0] aura 54 SPELL_AURA_MOD_HIT_CHANCE BasePoints -4 + DieSides 1 = -3 ($s1 = 3), DurationIndex 1 = 10000 ms ($d), launched by Flames of Absolution 804632 at the target of a Horusath Blast 500154 hit and at up to 5 enemies near it. Five aggressive stationary attackers (Harvest Golem 36, class level) melee the caster; the control arm counts their swings and misses with no cast, the treatment arm casts Horusath Blast at the first attacker every 8000 ms (reset_cooldown and the mana fixture are named precondition fixtures, G-21 point 6) and counts after 3000 ms, once the aura from the caster is read on every attacker; the aura is read on every attacker at each cycle end. Expected: the miss share rises by 3 points (the stated 3% of the DBC amount, never from a run); the judge takes the 99% interval of the difference of the two shares against the band of 2 points. A lapsed or absent treatment aura is unmeasured, never ok. Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher); 807175 Solar Flare: 15499 SPELL_DAMAGE (3 to 3191, mean 520, with spell power and crits), 2442 SPELL_AURA_APPLIED and 2416 SPELL_AURA_REMOVED in 29 logs (no hit chance readable); nothing else found."
+    },
+    {
+      "spell": 804254,
+      "name": "Blessing of Retribution (deflect aura lasts 60 s)",
+      "kind": "metric_delta",
+      "variant": "deflect_duration_window",
+      "label_suffix": "deflect_duration_window",
+      "quote": "Guard a Blessed ally, deflecting the next harmful spell cast on them within $680888d.",
+      "trigger_spell": 804254,
+      "target": "caster",
+      "cast_power": 1363,
+      "setup_casts": [
+        804247
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "metric": "aura",
+      "fields": {
+        "spell": 680888
+      },
+      "measure_actor": "caster",
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "trigger_only_after": true,
+      "gate_timing": "start",
+      "wait_ms": 55500,
+      "expiry_wait_ms": 9000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          55000,
+          56000
+        ],
+        "expired": [
+          64000,
+          65500
+        ]
+      },
+      "observe_source": "680888 DurationIndex 3 = 60000 ms ($680888d), Speed 0 (no flight time). Bless 804247 is cast at the caster first (precondition, not the subject), then one real Blessing of Retribution 804254 at the caster, with no strike afterwards: the aura is present when read 55000..56000 ms after the cast (game time), at least 55000 ms after it was applied, and gone when read 64000..65500 ms after it, at most 65500 ms, so the duration lies inside 10% of 60000 ms (54000..66000) on both sides. Control: before the cast, absent. Reference search 2026-11-22: coa-history spells 804254 and 680888: 0 events in 186 logs; nothing else found."
+    },
+    {
+      "spell": 804632,
+      "name": "Flames of Absolution (Solar Flare lasts 10 s, cast directly)",
+      "kind": "metric_delta",
+      "variant": "flare_duration_direct",
+      "label_suffix": "flare_duration_direct",
+      "quote": "launches a Solar Flare",
+      "trigger_spell": 807175,
+      "gate_spell": 804632,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 807175,
+        "caster": "caster"
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "trigger_only_after": true,
+      "gate_timing": "start",
+      "wait_ms": 9500,
+      "expiry_wait_ms": 1000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9300,
+          9800
+        ],
+        "expired": [
+          10300,
+          10900
+        ]
+      },
+      "observe_source": "Solar Flare 807175 DurationIndex 1 = 10000 ms ($d), instant cast, Speed 25 yd/s, so the aura lands at most 5 / 25 = 0.2 s after the cast at the dummy 5 yd away. It is cast directly at the dummy (the launch by 804632 is the subject of entries flare_cap and attacker_miss; a first window entry that launched it through Horusath Blast, Speed 20, read the aura still held at 10518 ms because the two flights add a delay the entry could not bound): the aura from the caster is present when read 9300..9800 ms after the cast (game time), at least 9100 ms after it was applied, and gone when read 10300..10900 ms after it, at most 10900 ms, so the duration lies inside 10% of 10000 ms (9000..11000) on both sides. Control: before the cast, absent. 984954 and 823764 are precondition fixtures. Reference search 2026-11-22: coa-history spells 804632 and 573449: 0 events in 186 logs (a passive and a launcher), 807175 Solar Flare: 2442 SPELL_AURA_APPLIED and 2416 SPELL_AURA_REMOVED in 29 logs without a duration; nothing else found."
     }
   ],
   "player_observations": [],
