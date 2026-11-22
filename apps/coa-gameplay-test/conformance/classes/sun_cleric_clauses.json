@@ -1876,8 +1876,10 @@
   {
     "spell": 680619,
     "clause": "Fervor of the Sun now stacks up to 3 additional times.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "680619 behaviour_metric_delta stack_cap"
+    ]
   },
   {
     "spell": 680620,
@@ -3079,10 +3081,21 @@
   {
     "spell": 707072,
     "clause": "Allows you to dual wield and to wield a Two-Handed Mace, Sword, or Polearm in each hand and your chance to hit is increased by $707072s2%.",
-    "labels": [
-      "707072 effect_value e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Allows you to dual wield and to wield a Two-Handed Mace, Sword, or Polearm in each hand",
+        "labels": []
+      },
+      {
+        "claim": "your chance to hit is increased by $707072s2%",
+        "labels": [
+          "707072 behaviour_metric_delta melee_hit_chance",
+          "707072 behaviour_metric_delta spell_hit_chance",
+          "707072 effect_value e1 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 707077,
@@ -4634,18 +4647,20 @@
   {
     "spell": 807507,
     "clause": "Increases your off-hand Weapon Damage dealt by $s1%",
+    "kind": "claim",
     "labels": [
+      "807507 behaviour_hit_ratio swing",
       "807507 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    ]
   },
   {
     "spell": 807507,
     "clause": "and reduces the duration of disarm effects by $s2%.",
+    "kind": "claim",
     "labels": [
+      "807507 behaviour_duration_ratio",
       "807507 effect_value e1 #1"
-    ],
-    "kind": "claim"
+    ]
   },
   {
     "spell": 807654,

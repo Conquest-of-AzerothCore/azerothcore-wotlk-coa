@@ -47,7 +47,19 @@
     "skill 498": 300.0
   },
   "log_queries": {},
-  "off_hand_weapons": [],
+  "off_hand_weapons": [
+    {
+      "item": 2529,
+      "slot": 16,
+      "subclass": 8,
+      "min_damage": 73.62,
+      "max_damage": 103.34,
+      "speed_ms": 2800,
+      "inventory_type": 17,
+      "normalized_speed": 3.3,
+      "skill_line": 55
+    }
+  ],
   "known_auras": [
     887015
   ],
@@ -10462,6 +10474,112 @@
       "expected": 32.11,
       "tolerance": 1.6,
       "observe_source": "657125 EffectDamageMultiplier[0] = 0.8: each further strike deals 0.8 times the previous one, so strike 6 deals the tooltip value 98 (the formula at the reference stats, read by the packet) x 0.8^5 = 32.11. The damage total of 657125 on area5 is read 1000 ms after the cast: 0 in the control phase. Tolerance 1.6 is 5% of the value (G-19). The fulfilment is set up as the Final Vows entry does (707528 cd): Vow of Grace 803719 and Dawn 804584 cast on the caster, 20 Solar Power 500149 (precondition fixture), crit and resist fixtures 984954 and 823764, then Horusath Blast 500154 at the dummy spends Dawn and fulfils the Vow. Both phases run the same setup; 707081 is learned between them (control phase: no chain, 0). Eight dummies stand 6 to 13 yd from the caster, 1 yd apart. Reference search 2026-11-22: server DBC 707081 and 657125 (EffectChainTarget 5, EffectDamageMultiplier 0.8); AscensionSunCleric.cpp:301-302; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 680619,
+      "kind": "metric_delta",
+      "gate_spell": 680619,
+      "name": "Atone, Or Else (Fervor of the Sun cap raised to 8)",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "quote": "Fervor of the Sun now stacks up to 3 additional times.",
+      "trigger_spell": 680623,
+      "target": "caster",
+      "setup_casts": [
+        680623,
+        680623,
+        680623,
+        680623,
+        680623,
+        680623,
+        680623,
+        680623
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680623
+      },
+      "before_expected": 5,
+      "expected": 8,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "680619 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 31 (spell max stacks), BasePoints 2 (+1 = 3), class mask word 0 = 524288 = Fervor of the Sun 680623's SpellFamilyFlags[0]; 680623 StackAmount 5 (Spell.dbc), so the cap is 5 + 3 = 8. The stacks of 680623 are produced by casting it nine times on the caster (the script casts it once per Vow fulfilment under 680622, AscensionSunCleric.cpp:294-295; the nine casts are the same spell and apply the same cap): 5 stacks without the passive (control phase, the cap of the DBC), exactly 8 with it, so the cap is neither 5 nor 9. Reference search 2026-11-22: server DBC 680619, 680622, 680623; coa-history, merged PRs (PR #4516 read spell_max_stacks only) and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 807507,
+      "name": "Valkyr's Grip (disarm duration)",
+      "kind": "duration_ratio",
+      "quote": "and reduces the duration of disarm effects by $s2%.",
+      "expected_ratio": 0.85,
+      "vehicle_spell": 301235,
+      "striker_entry": 36
+    },
+    {
+      "spell": 807507,
+      "name": "Valkyr's Grip (off-hand swing)",
+      "kind": "hit_ratio",
+      "variant": "swing",
+      "label_suffix": "swing",
+      "quote": "Increases your off-hand Weapon Damage dealt by $s1%",
+      "expected": 1.31,
+      "swing_hand": 1,
+      "metric": "melee_damage_total",
+      "control": {},
+      "treatment": {
+        "learn": [
+          807507
+        ]
+      },
+      "critical": false,
+      "off_hand_item": 2529,
+      "trials": 30,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "expected_source": "$s1 = 31 (807507 Effect[0] aura 122 SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT, EffectBasePoints 30, +1 = 31): the plain off-hand auto attacks with the passive over the same swings without it are 1.31 (the Templar entry 705276 reads Bursting Impact's aura 122 the same way). Band: 5% of 31 = 1.55 points.",
+      "observe_source": "Off-hand swings at the dummy in two arms of one scenario, the passive learned for the treatment arm (control: not learned). The off-hand weapon is the Valkyr set's item 2529 (class file off_hand_weapons, copied from weapon_sets.Valkyr.off_hand). Reference search 2026-11-22: server DBC 807507 and 301235; the Templar entries 705271 (duration_ratio) and 705276 (off-hand swing); coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 707072,
+      "name": "Valkyr's Grip (melee hit chance)",
+      "kind": "metric_delta",
+      "variant": "melee_hit_chance",
+      "label_suffix": "melee_hit_chance",
+      "quote": "and your chance to hit is increased by $707072s2%.",
+      "expected": 6,
+      "before_expected": 0,
+      "expected_gain": 6,
+      "tolerance": 0.0001,
+      "trigger_spell": 804247,
+      "gate_spell": 707072,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "metric": "melee_hit_chance",
+      "fields": {},
+      "observe_source": "707072 Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 5 (+1 = 6, $707072s2); StatSystem.cpp:1030 m_modMeleeHitChance = GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE, SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT). The caster's live value (STATE read) around a Bless 804247 cast, before 707072 is learned (control, gain 0) and after: gain 6. The scenario wears the default weapon set: 707072 is mapped to no set in spell_weapon_sets, so the learn between the phases is the only change. Reference search 2026-11-22: server DBC 707072; the Necromancer entry 803291 (aura 333 hit chance reads); weapon_set_spells.Valkyr; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 707072,
+      "name": "Valkyr's Grip (spell hit chance)",
+      "kind": "metric_delta",
+      "variant": "spell_hit_chance",
+      "label_suffix": "spell_hit_chance",
+      "quote": "and your chance to hit is increased by $707072s2%.",
+      "expected": 6,
+      "before_expected": 0,
+      "expected_gain": 6,
+      "tolerance": 0.0001,
+      "trigger_spell": 804247,
+      "gate_spell": 707072,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "metric": "spell_hit_chance",
+      "fields": {},
+      "observe_source": "707072 Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 5 (+1 = 6, $707072s2); StatSystem.cpp:1042 m_modSpellHitChance = GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE, SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT). The caster's live value (STATE read) around a Bless 804247 cast, before 707072 is learned (control, gain 0) and after: gain 6. The scenario wears the default weapon set: 707072 is mapped to no set in spell_weapon_sets, so the learn between the phases is the only change. Reference search 2026-11-22: server DBC 707072; the Necromancer entry 803291 (aura 333 hit chance reads); weapon_set_spells.Valkyr; coa-history, merged PRs and ascension-data: see the report; nothing found beyond the tooltip and the DBC."
     }
   ],
   "player_observations": [],
