@@ -172,6 +172,9 @@ public:
                 for (uint32 key : {Dawn,DawnCast,807523u})
                     spell->SetScriptValue(key,origin->GetScriptValue(key));
             }
+            else if (SpellInfo const* channel = spell->GetTriggeredByAuraSpellInfo();
+                info->Id == RadiantFlameTick && Named(channel, RadiantFlame))
+                SpendDawn(player, spell, channel);
             return;
         }
         for (uint32 id : SunClericFinite)
