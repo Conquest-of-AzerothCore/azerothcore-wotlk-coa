@@ -3204,9 +3204,10 @@
         "labels": []
       },
       {
-        "claim": "$504876s1% (5%) of your base mana (data read of the percent; the amount of the restore is not measured)",
+        "claim": "$504876s1% (5) of your base mana: the amount restored per proc",
         "labels": [
-          "680663 effect_value 504876e0 #1"
+          "680663 effect_value 504876e0 #1",
+          "680663 proc_energize_amount 0"
         ]
       }
     ],
@@ -4421,7 +4422,7 @@
         ]
       },
       {
-        "claim": "by $524998s1%",
+        "claim": "increases your critical strike chance by $524998s1%",
         "labels": [
           "707079 behaviour_metric_delta crit_gain"
         ]
@@ -5187,7 +5188,7 @@
         ]
       },
       {
-        "claim": "every 10 sec",
+        "claim": "restores mana every 10 sec",
         "labels": [
           "804247 behaviour_metric_delta mana_tick",
           "804247 behaviour_metric_delta mana_period"
@@ -5196,7 +5197,8 @@
       {
         "claim": "for 5 min",
         "labels": [
-          "804247 behaviour_metric_delta bless_duration"
+          "804247 behaviour_metric_delta bless_duration",
+          "804247 behaviour_metric_delta bless_expiry"
         ]
       }
     ]
@@ -6041,17 +6043,30 @@
   {
     "spell": 806116,
     "clause": "While in Sunset, your Holy damage dealt grants Twin Flame.",
-    "labels": [],
+    "labels": [
+      "806116 behaviour_metric_delta sunset_grant"
+    ],
     "kind": "claim"
   },
   {
     "spell": 806116,
     "clause": "Your next Rapture within $807061d strikes again for $s1% of the damage dealt,",
-    "labels": [
-      "806116 spell_duration 807061 #0",
-      "806116 effect_value 807061e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Your next Rapture strikes again for $s1% (8) of the damage dealt",
+        "labels": [
+          "806116 behaviour_metric_delta twin_flame_strike"
+        ]
+      },
+      {
+        "claim": "within $807061d (15 sec)",
+        "labels": [
+          "806116 spell_duration 807061 #0",
+          "806116 behaviour_metric_delta twin_flame_expiry"
+        ]
+      }
+    ]
   },
   {
     "spell": 806116,
@@ -6064,17 +6079,30 @@
   {
     "spell": 806116,
     "clause": "While in Sunrise, your Fire damage dealt grants Sun Power",
-    "labels": [],
+    "labels": [
+      "806116 behaviour_metric_delta sunrise_grant"
+    ],
     "kind": "claim"
   },
   {
     "spell": 806116,
     "clause": "Your next Horusath Blast within $807077d strikes again for $s1% of the damage dealt,",
-    "labels": [
-      "806116 spell_duration 807077 #3",
-      "806116 effect_value 807077e0 #4"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Your next Horusath Blast strikes again for $s1% (8) of the damage dealt",
+        "labels": [
+          "806116 behaviour_metric_delta sun_power_strike"
+        ]
+      },
+      {
+        "claim": "within $807077d (15 sec)",
+        "labels": [
+          "806116 spell_duration 807077 #3",
+          "806116 behaviour_metric_delta sun_power_expiry"
+        ]
+      }
+    ]
   },
   {
     "spell": 806116,
@@ -6088,7 +6116,9 @@
     "spell": 806116,
     "clause": "@ext:Only one aura can be active at a time.:ext@",
     "labels": [
-      "806116 effect_value #6"
+      "806116 behaviour_metric_delta exclusive_swap",
+      "806116 behaviour_metric_delta exclusive_precondition",
+      "806116 behaviour_metric_delta sunset_grant"
     ],
     "kind": "claim"
   },
