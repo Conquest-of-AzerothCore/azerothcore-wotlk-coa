@@ -22477,6 +22477,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -22539,6 +22545,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -22618,6 +22630,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -22697,6 +22715,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -28150,6 +28174,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -28190,6 +28220,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -28230,6 +28266,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -31128,6 +31170,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -31962,6 +32010,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -31997,6 +32051,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -32032,6 +32092,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -32067,6 +32133,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -32102,6 +32174,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -32137,6 +32215,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -32989,6 +33073,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -33024,6 +33114,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -33063,6 +33159,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -33102,6 +33204,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -33141,6 +33249,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
@@ -33180,6 +33294,12 @@
           "caster",
           "caster"
         ]
+      ],
+      "after_start_reads": [
+        {
+          "spell": 807440,
+          "expected": 0
+        }
       ]
     },
     {
