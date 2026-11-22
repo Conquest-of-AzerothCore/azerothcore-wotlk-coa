@@ -2544,8 +2544,21 @@
   {
     "spell": 681433,
     "clause": "This ability is guaranteed to critically strike against Undead or Demons.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "guaranteed to critically strike against Undead",
+        "labels": [
+          "681433 behaviour_metric_delta crit_undead"
+        ]
+      },
+      {
+        "claim": "guaranteed to critically strike against Demons",
+        "labels": [
+          "681433 behaviour_metric_delta crit_demon"
+        ]
+      }
+    ]
   },
   {
     "spell": 680622,

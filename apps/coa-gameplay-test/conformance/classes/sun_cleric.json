@@ -23452,6 +23452,54 @@
       "before_expected": 1500,
       "expected": 1500,
       "observe_source": "Control arm of glare_healthy: the caster is held at 50% health, below 80%, so the helper is not kept and Glare keeps its 1500 ms cast time after the learn (CastingTimeIndex 16, CastTime 1500)."
+    },
+    {
+      "spell": 681433,
+      "kind": "metric_delta",
+      "quote": "This ability is guaranteed to critically strike against Undead or Demons.",
+      "trigger_spell": 681433,
+      "target": "dummy",
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 681433,
+        "target": "dummy"
+      },
+      "cast_in_before": false,
+      "name": "Solar Nova (critical chance against an Undead, entry 1501 Mindless Zombie)",
+      "variant": "crit_undead",
+      "label_suffix": "crit_undead",
+      "target_entry": 1501,
+      "before_expected": 100,
+      "expected_gain": 0,
+      "expected": 100,
+      "tolerance": 0.05,
+      "observe_source": "Source AscensionSunClericAbilities.cpp OnSpellCritChance: chance = 100 for any Solar Nova rank (Named 680621) when the target creature type is Undead or Demon. The reading is the scripted critical chance of Solar Nova 681433 against the target. creature_template.type of entry 1501 is 6 Undead (data/sql/base/db_world/creature_template.sql)."
+    },
+    {
+      "spell": 681433,
+      "kind": "metric_delta",
+      "quote": "This ability is guaranteed to critically strike against Undead or Demons.",
+      "trigger_spell": 681433,
+      "target": "dummy",
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 681433,
+        "target": "dummy"
+      },
+      "cast_in_before": false,
+      "name": "Solar Nova (critical chance against a Demon, entry 416 Imp)",
+      "variant": "crit_demon",
+      "label_suffix": "crit_demon",
+      "target_entry": 416,
+      "before_expected": 100,
+      "expected_gain": 0,
+      "expected": 100,
+      "tolerance": 0.05,
+      "observe_source": "Source AscensionSunClericAbilities.cpp OnSpellCritChance: chance = 100 for any Solar Nova rank (Named 680621) when the target creature type is Undead or Demon. The reading is the scripted critical chance of Solar Nova 681433 against the target. creature_template.type of entry 416 is 3 Demon (data/sql/base/db_world/creature_template.sql)."
     }
   ],
   "player_observations": [],
