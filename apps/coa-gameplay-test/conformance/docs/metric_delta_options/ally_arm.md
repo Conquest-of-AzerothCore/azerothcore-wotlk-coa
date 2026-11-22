@@ -2,12 +2,13 @@
 
 `ally_arm` is an object of these keys, at least one:
 
-- `allies`: 1 to 9 (default 1). Grouped ally players `ally`, `ally2` .. `ally9` (the class's player fixture,
+- `allies`: 1 to 7 (default 1). Grouped ally players `ally`, `ally2` .. `ally7` (the class's player fixture,
   regeneration off with `disable_regeneration`), grouped right after the base steps. `measure_actor`, `target` and
   `fields.target` may name them. The harness `group` step converts a full party to a raid
   (`CoAGameplayTest.cpp` `action == "group"`), and a raid member joins the first subgroup with fewer than five
   (`Group::AddMember`): from `ally5` on, the allies stand in raid subgroup 2, outside the caster's party (code
-  reading only).
+  reading only). Seven allies and the caster fill the scenario schema 1 cap of 8 players (`run.py` `MAX_PLAYERS`),
+  so a scenario that adds another player, such as an enemy player, is refused at validation.
 - `ally_health`: `[value, maximum]`, set on every ally in both phases, ahead of the trigger.
 - `ally_casts`: spells the caster casts at `ally` in both phases ahead of the trigger, 2000 ms after each (global
   cooldown). Each spell must be in the entry's `learn` and must not be its trigger or a setup cast; a cast time above

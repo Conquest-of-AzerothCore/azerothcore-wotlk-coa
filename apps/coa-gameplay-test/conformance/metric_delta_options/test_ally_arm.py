@@ -139,7 +139,7 @@ class AllyArmScenarioTests(unittest.TestCase):
 
     def test_a_malformed_option_or_an_arm_without_its_stated_expectation_is_refused(self):
         readback = next(metric for metric, kind in metric_evidence().items() if kind == READBACK)
-        options = [True, {}, {'allies': 0}, {'allies': 10}, {'control_wait': False}, {'ally_health': [0, 10]},
+        options = [True, {}, {'allies': 0}, {'allies': 8}, {'control_wait': False}, {'ally_health': [0, 10]},
                    {'ally_health': [11, 10]}, {'ally_casts': ['x']}, {'surplus': 1}]
         options += [{'arms': [{key: value for key, value in HEALTH_ARM.items() if key != missing}]}
                     for missing in ('actors', 'metric', 'before_expected', 'expected', 'tolerance', 'source')]
@@ -151,11 +151,11 @@ class AllyArmScenarioTests(unittest.TestCase):
             with self.subTest(option=option), self.assertRaises(ValueError):
                 self.scenario(steed_entry(ally_arm=option))
 
-    def test_nine_allies_are_grouped_players(self):
+    def test_seven_allies_are_grouped_players(self):
         scenario, [expectation] = self.scenario(steed_entry(
-            ally_arm={'allies': 9, 'arms': [{**HEALTH_ARM, 'actors': ['ally6', 'ally9']}]}))
+            ally_arm={'allies': 7, 'arms': [{**HEALTH_ARM, 'actors': ['ally6', 'ally7']}]}))
         run.validate(scenario)
-        allies = ['ally', 'ally2', 'ally3', 'ally4', 'ally5', 'ally6', 'ally7', 'ally8', 'ally9']
+        allies = ['ally', 'ally2', 'ally3', 'ally4', 'ally5', 'ally6', 'ally7']
         self.assertEqual([player['id'] for player in scenario['players']], ['caster', *allies])
         self.assertEqual([step['target'] for step in scenario['steps'] if step['action'] == 'group'], allies)
         self.assertEqual(expectation.model['ally_arm']['allies'], allies)

@@ -3,7 +3,7 @@ import math
 
 NAME = 'ally_arm'
 ORDER = 24
-ALLY_IDS = ('ally', 'ally2', 'ally3', 'ally4', 'ally5', 'ally6', 'ally7', 'ally8', 'ally9')
+ALLY_IDS = ('ally', 'ally2', 'ally3', 'ally4', 'ally5', 'ally6', 'ally7')
 ALLY_CAST_SETTLE_MS = 2000
 ALLY_CAST_PROOF_METRIC = 'spell_go_count'
 CASTER_SCOPED_METRICS = {'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',

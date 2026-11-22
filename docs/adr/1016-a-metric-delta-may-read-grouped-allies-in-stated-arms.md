@@ -69,8 +69,10 @@ heal, which one arm's absolute band cannot state.
   expectation. The plain spell id keeps one per cast. On each use, the reviewer opens the cited lines and checks that
   they say what `source` claims. The harness `spell_go_count` has no target filter, so a target-scoped count would
   need a harness edit; this does not.
-- `allies` goes to 9 (`ally6` .. `ally9`, two full raid subgroups with the caster). The harness converts the group to
-  a raid when the party is full, so from `ally5` on the allies stand in raid subgroup 2 (code reading only).
+- `allies` goes to 7 (`ally6`, `ally7`): with the caster, the schema 1 cap of 8 players (`run.py` `MAX_PLAYERS`,
+  `CoAGameplayTest.cpp` `MaximumPlayers`); schema 2 would take 25 but changes the scenario's schema and timeout cap,
+  so it is left out. The harness converts the group to a raid when the party is full, so from `ally5` on the allies
+  stand in raid subgroup 2 (code reading only).
 - `ratios`: `{numerator, denominator, expected > 0, tolerance, source}` over two arm indices, judged on the arms'
   after-less-before deltas. A denominator that did not move is off. The arms keep their absolute expectations, and
   without `ratios` the model and the verdict are unchanged.
