@@ -5787,8 +5787,7 @@
     "clause": "and reduces the target's chance to hit by $s1% for $d.",
     "labels": [
       "804630 behaviour_metric_delta flare_hit",
-      "804630 behaviour_metric_delta flare_duration",
-      "804630 behaviour_metric_delta herald_miss"
+      "804630 behaviour_metric_delta flare_duration"
     ],
     "kind": "claim",
     "reason": "Data only, not behaviour: the Solar Flare hit chance (aura amount of effect 0) and duration (remaining aura duration) are readbacks of the applied aura on the dummy (aura_amount and aura_duration_ms are classed READBACK in coverage.py, no behaviour consumption row). They read 0 before the learn (control) and -3 after, and 9958 ms after against 10000 expected (tolerance 400, which excludes 9000 and 11000 ms). That the aura then lowers the target's chance to hit by 3%, and expires after 10 s, is not measured: the tooling has routes for both (attacker_miss_share for the hit chance, the aura expiry kinds for the duration) and none was attempted here; both stay open. Pair 20261122-075442 / 20261122-075522, build 81028c380373, server commit c0716cc8aa6a+, no flip. Reference search 2026-11-22: coa-history 807175 Solar Flare: 15499 damage events in 29 logs; 804630: 0 events; bindmysoul (fetched 2026-07-22) reads 'reduces the target's chance to hit by -3% for 10 seconds' on Adjudication 804630; nothing else found."
