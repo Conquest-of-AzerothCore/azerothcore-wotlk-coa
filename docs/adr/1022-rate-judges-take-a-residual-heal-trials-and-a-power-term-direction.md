@@ -68,7 +68,7 @@ finished-class snapshots regenerate unchanged).
 
 - Sun Cleric entries: 704920 x2 (procs), 300367 x2 (`cooldown_reset_rate`, Horusath Blast 572801 and Rapture
   806477), 806699 (`swing_reset_rate`) and 680656 (`power_term_direction`, attack power aura 35785). Each rate entry
-  has `residual_target` 0.001 and `min_detectable` 4: at least 19386 trials at 20% and 29084 at 40%, where the
+  has `residual_target` 0.001 and `min_detectable` 4: at least 19386 trials at 20% and 29078 at 40%, where the
   false alert at the chance is at most 0.1% per pair (normal approximation). 300367 runs 11 parts of 1900 Horusath
   Blast casts and 19 parts of 1050 Rapture casts, 806699 9 parts, 704920 188 and 230 parts (the 1.5x outcome margin
   of the proc plan).

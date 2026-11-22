@@ -604,7 +604,7 @@
       "300367 behaviour_metric_delta rapture_reset_rate"
     ],
     "kind": "claim",
-    "reason": "Judged by cooldown_reset_rate with reset_between_attempts, base_mana_per_attempt, trial_casts and residual_target 0.001 / min_detectable 5 (ADR 1022, provisional): Horusath Blast 572801 0.2013 / 0.2028 over 15200 casts (8 parts), Rapture 806477 0.2016 / 0.1962 over 14700 casts (14 parts), each control exactly one clear-cooldown packet per fixture reset. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-071431 / 20261122-072022, build a106dc81599f, server commit 46b292ee9fd8, no flip."
+    "reason": "Judged by cooldown_reset_rate with reset_between_attempts, base_mana_per_attempt, trial_casts and residual_target 0.001 / min_detectable 4, twice the 2-point band, so the false alert at the chance and the false pass of a 4-point deviation are each at most 0.1% per pair (ADR 1022, provisional): Horusath Blast 572801 0.1966 / 0.2003 over 20900 casts (11 parts, false alert 3.57e-04 per pair), Rapture 806477 0.2005 / 0.1990 over 19950 casts (19 parts, 6.83e-04), each control exactly one clear-cooldown packet per fixture reset. The chance value label 300367 effect_value #0 is unmodelled and points at the rate, so it is dropped: the rate labels measure the stated $h. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-080523 / 20261122-081232, build 614be08400d8, server commit d043cfebbc4f, no flip."
   },
   {
     "spell": 300369,
@@ -2704,7 +2704,7 @@
         ]
       }
     ],
-    "reason": "Direction proven, figure not stated by the tooltip, server value 0.25 unsourced (mentor D-106; power_term_direction, ADR 1022, provisional). Horusath Blast 572801 at attack power 70 and 1050 (Attack Power 980 35785), with and without 680656: interaction 219.6 / 257.4 at z 17.3 / 17.8 against 3.09, control growth 6.2 / -9.8 (z 0.80 / -1.04); the 0.25 x AP at AscensionSunClericContracts.cpp:309-310 stays an owner observation. Pair 20261122-071431 / 20261122-072022, build a106dc81599f, server commit 46b292ee9fd8, no flip."
+    "reason": "Direction proven, figure not stated by the tooltip, server value 0.25 unsourced (mentor D-106; power_term_direction, ADR 1022, provisional). Horusath Blast 572801 at attack power 70 and 1050 (fixture: Attack Power 980 35785 set by harness set_aura), with and without 680656: interaction 235.4 / 227.6 at z 16.47 / 15.98 against 3.09, control growth -4.46 / 11.99 (z -0.43 / 1.19), control check false alert 0.4% per pair under the normal law; the 0.25 x AP at AscensionSunClericContracts.cpp:309-310 stays an owner observation. Reference search 2026-11-22: the tooltip, the DBC (681471 carries no value), the bindmysoul snapshot (fetched 2026-07-22, the same sentence with no coefficient), ascension-data and coa-history give no coefficient. Pair 20261122-080523 / 20261122-081232, build 614be08400d8, server commit d043cfebbc4f, no flip."
   },
   {
     "spell": 680656,
@@ -3381,7 +3381,7 @@
         ]
       }
     ],
-    "reason": "Rate judged on effective heals of Radiant Cascade 500141 on the ally only (proc trial effective_heal, ADR 1022, provisional): 0.2004 / 0.1976 over 15965 heals (103 parts), no event in the baseline without 704920, no ally overheal and no caster effective heal. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-072517 / 20261122-072823, build 1acfebec876b, server commit 81cfed96d444, no flip."
+    "reason": "Chance claim: rate judged on effective heals of Radiant Cascade 500141 on the ally only (proc trial effective_heal, ADR 1022, provisional): 0.1977 / 0.1984 over 29140 heals (188 parts), residual_target 0.001 / min_detectable 4, twice the 2-point band, so the false alert at the chance and the false pass of a 4-point deviation are each at most 0.1% per pair, false alert at the chance below 1e-6 per pair at these trials, no event in the baseline without 704920, no ally overheal and no caster effective heal. The chance value label is unmodelled and points at the rate, so it is dropped. Increase claim open: the rate proves the chance, not the healing increase of the next Illumination; 704920 effect_value 301293e0 #1 reads the stated value only, not a heal, and no heal proof was built. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-080523 / 20261122-081232, build 614be08400d8, server commit d043cfebbc4f, no flip."
   },
   {
     "spell": 704920,
@@ -3401,7 +3401,7 @@
         ]
       }
     ],
-    "reason": "Rate judged on effective heals of Illumination 500143 on the ally only (proc trial effective_heal, ADR 1022, provisional): 0.4027 / 0.3978 over 23940 heals (126 parts), $707520h = ProcChance 40, no event in the baseline without 704920, no ally overheal and no caster effective heal. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-072517 / 20261122-072823, build 1acfebec876b, server commit 81cfed96d444, no flip."
+    "reason": "Chance claim: rate judged on effective heals of Illumination 500143 on the ally only (proc trial effective_heal, ADR 1022, provisional): 0.4031 / 0.3954 over 43700 heals (230 parts), $707520h = ProcChance 40, residual_target 0.001 / min_detectable 4, twice the 2-point band, so the false alert at the chance and the false pass of a 4-point deviation are each at most 0.1% per pair, false alert at the chance below 1e-6 per pair at these trials, no event in the baseline without 704920, no ally overheal and no caster effective heal. The chance value label is unmodelled and points at the rate, so it is dropped. Increase claim open: the rate proves the chance, not the healing increase of the next Radiant Cascade; 704920 effect_value 300354e0 #3 reads the stated value only, not a heal, and no heal proof was built. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-080523 / 20261122-081232, build 614be08400d8, server commit d043cfebbc4f, no flip."
   },
   {
     "spell": 704928,
@@ -5542,7 +5542,7 @@
       "806699 behaviour_metric_delta swing_reset_rate"
     ],
     "kind": "claim",
-    "reason": "The earlier tool gap (sc-b2b, .agents/plans/sun-cleric-b2b/report.md#806699) is closed by swing_reset_rate (ADR 1017) with residual_target 0.001 / min_detectable 5 (ADR 1022, provisional): 0.1956 / 0.1996 over 19352 landed auto-attack hits (8 parts, Valkyr set), no reset in the control. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-071431 / 20261122-072022, build a106dc81599f, server commit 46b292ee9fd8, no flip."
+    "reason": "The earlier tool gap (sc-b2b, .agents/plans/sun-cleric-b2b/report.md#806699) is closed by swing_reset_rate (ADR 1017) with residual_target 0.001 / min_detectable 4, twice the 2-point band, so the false alert at the chance and the false pass of a 4-point deviation are each at most 0.1% per pair (ADR 1022, provisional): 0.1991 / 0.1967 over 21762 / 21771 landed auto-attack hits (9 parts, Valkyr set, false alert 1.96e-04 / 1.95e-04 per pair), no reset in the control. The chance value label 806699 effect_value #0 is unmodelled and points at the rate, so it is dropped: the rate label measures the stated $h. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-080523 / 20261122-081232, build 614be08400d8, server commit d043cfebbc4f, no flip."
   },
   {
     "spell": 806980,
