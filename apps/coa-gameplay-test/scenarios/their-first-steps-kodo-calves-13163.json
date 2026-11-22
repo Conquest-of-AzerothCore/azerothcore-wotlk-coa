@@ -1,0 +1,244 @@
+{
+  "schema": 1,
+  "name": "Their First Steps: leashed Baby Thunderheads follow the player home to Elder Thunderhoof (#13163)",
+  "contract": "Quest 500007, Elder Thunderhoof 764578 and the Baby Thunderheads 764666 did not exist, so the Leash 661322 (Kodo Leash 993024) had no quest and no target. rev_20261122_73 restores them. The elder offers the quest and hands out the Leash; each leashed calf follows the player through its SmartAI and gives one Baby Thunderhead Escorted credit when it reaches the elder. Three calves complete the quest and the elder rewards it. Before the fix the accept fails, so every later assertion fails too. The elder and calf spawns stand on the ground.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 1,
+    "x": -2936.0,
+    "y": -2138.0,
+    "z": 91.7,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 24
+    }
+  ],
+  "creatures": [
+    {
+      "id": "elder",
+      "owner": "p",
+      "entry": 764578,
+      "distance": 1.5,
+      "faction": 7,
+      "level": 25
+    },
+    {
+      "id": "calf_1",
+      "owner": "p",
+      "entry": 764666,
+      "distance": 10,
+      "faction": 7,
+      "level": 20
+    },
+    {
+      "id": "calf_2",
+      "owner": "p",
+      "entry": 764666,
+      "distance": 13,
+      "faction": 7,
+      "level": 20
+    },
+    {
+      "id": "calf_3",
+      "owner": "p",
+      "entry": 764666,
+      "distance": 16,
+      "faction": 7,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "label": "Elder Thunderhoof stands on the ground",
+      "action": "assert",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9012572,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "label": "calf 9012573 stands on the ground",
+      "action": "assert",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9012573,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "label": "calf 9012574 stands on the ground",
+      "action": "assert",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9012574,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "label": "calf 9012575 stands on the ground",
+      "action": "assert",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9012575,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "label": "calf 9012576 stands on the ground",
+      "action": "assert",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9012576,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "label": "calf 9012577 stands on the ground",
+      "action": "assert",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9012577,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "label": "calf 9012578 stands on the ground",
+      "action": "assert",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9012578,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "label": "DISCRIMINATING: Elder Thunderhoof offers Their First Steps",
+      "action": "quest_accept",
+      "actor": "p",
+      "quest": 500007,
+      "entry": 764578
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 500007,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "label": "the elder hands out the Leash",
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 661322,
+      "equals": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "p",
+      "item": 661322,
+      "spell": 993024,
+      "target": "calf_1"
+    },
+    {
+      "label": "the Leash takes the first calf",
+      "action": "assert",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 993024,
+      "equals": 0
+    },
+    {
+      "label": "DISCRIMINATING: the first calf follows the player to the elder and counts",
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 500007,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "use_item",
+      "actor": "p",
+      "item": 661322,
+      "spell": 993024,
+      "target": "calf_2"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 500007,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 15000
+    },
+    {
+      "action": "use_item",
+      "actor": "p",
+      "item": 661322,
+      "spell": 993024,
+      "target": "calf_3"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 500007,
+      "index": 0,
+      "equals": 3,
+      "within_ms": 15000
+    },
+    {
+      "label": "three escorted calves complete the quest",
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 500007,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "Elder Thunderhoof takes the quest in",
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 500007,
+      "entry": 764578
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 500007,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "the reward includes the Adventurer's Cache",
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1397885,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}
