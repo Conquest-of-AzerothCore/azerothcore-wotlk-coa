@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Sunwalker doubles Vow of Light's copied heal once, from 10% to 20%",
+  "contract": [
+    "Sunwalker 704934 reads 'Dealing melee damage now generates a stack of Sunwalker. In addition, the value of Vow of",
+    "Light is doubled.' Its effect 1 is SPELL_AURA_ADD_PCT_MODIFIER, SPELLMOD_ALL_EFFECTS, BasePoints 99 (+100%), on class",
+    "mask word 2 0x20000000, which only Vow of Light 807750 carries in family 33. Vow of Light 807547 heals the nearest",
+    "ally, a lone caster included, as 505197 for Amount(807750, 0, caster) percent of the effective direct healing received;",
+    "807750 effect 0 resolves to 10 and the caster argument applies the +100%. The script also multiplied that value by 2",
+    "for 704934, so the copy was 40% (batch 4, build f9da39a93c31). Two solo level-60 Sun Clerics heal themselves with",
+    "Greater Heal rank 11 (10965, 746-852 base); a received heal of at least 700 keeps integer truncation of the copy",
+    "within 0.0015 of the ratio. The copied heal ignores caster and health modifiers, so it never crits. The copy over the",
+    "effective heal must be 0.10 without Sunwalker and 0.20 with it (Sun Cleric ADR 0009)."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 60, "spell_power": 1500 },
+    { "id": "sunwalker", "race": 1, "class": 27, "level": 60, "spell_power": 1500 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 7000 },
+    { "action": "learn", "actor": "sunwalker", "spell": 704934 },
+    { "action": "learn", "actor": "control", "spell": 807547 },
+    { "action": "learn", "actor": "control", "spell": 10965 },
+    { "action": "learn", "actor": "sunwalker", "spell": 807547 },
+    { "action": "learn", "actor": "sunwalker", "spell": 10965 },
+    { "action": "assert", "label": "SETUP: Sunwalker is active", "actor": "sunwalker", "metric": "aura", "spell": 704934, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTROL: the control caster has no Sunwalker", "actor": "control", "metric": "aura", "spell": 704934, "equals": 0 },
+    { "action": "cast", "actor": "control", "spell": 807547 },
+    { "action": "cast", "actor": "sunwalker", "spell": 807547 },
+    { "action": "assert", "label": "SETUP: control Vow of Light is active", "actor": "control", "metric": "aura", "spell": 807547, "caster": "control", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: Sunwalker Vow of Light is active", "actor": "sunwalker", "metric": "aura", "spell": 807547, "caster": "sunwalker", "equals": 1, "within_ms": 2000 },
+    { "action": "set_health", "actor": "control", "value": 100 },
+    { "action": "set_health", "actor": "sunwalker", "value": 100 },
+    { "action": "wait", "label": "Let the global cooldown from Vow of Light clear", "ms": 1600 },
+    { "action": "cast", "actor": "control", "spell": 10965, "target": "control" },
+    { "action": "cast", "actor": "sunwalker", "spell": 10965, "target": "sunwalker" },
+    { "action": "assert", "label": "SETUP: the control copy lands", "actor": "control", "metric": "spell_heal_count", "spell": 505197, "target": "control", "min": 1, "within_ms": 6000 },
+    { "action": "assert", "label": "SETUP: the Sunwalker copy lands", "actor": "sunwalker", "metric": "spell_heal_count", "spell": 505197, "target": "sunwalker", "min": 1, "within_ms": 6000 },
+    { "action": "snapshot", "actor": "control", "metric": "spell_effective_heal_total", "spell": 10965, "target": "control", "save_as": "control_received" },
+    { "action": "snapshot", "actor": "sunwalker", "metric": "spell_effective_heal_total", "spell": 10965, "target": "sunwalker", "save_as": "sunwalker_received" },
+    { "action": "assert", "label": "SETUP: the control heal is large enough to resolve the ratio", "actor": "control", "metric": "spell_effective_heal_total", "spell": 10965, "target": "control", "min": 700 },
+    { "action": "assert", "label": "SETUP: the Sunwalker heal is large enough to resolve the ratio", "actor": "sunwalker", "metric": "spell_effective_heal_total", "spell": 10965, "target": "sunwalker", "min": 700 },
+    {
+      "action": "assert", "label": "CONTROL: without Sunwalker the copy is 10% of the healing received",
+      "actor": "control", "metric": "spell_heal_total", "spell": 505197, "target": "control",
+      "ratio_to": "control_received", "min": 0.098, "max": 0.102
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Sunwalker doubles the copy once, to 20% of the healing received",
+      "actor": "sunwalker", "metric": "spell_heal_total", "spell": 505197, "target": "sunwalker",
+      "ratio_to": "sunwalker_received", "min": 0.197, "max": 0.203
+    }
+  ]
+}
