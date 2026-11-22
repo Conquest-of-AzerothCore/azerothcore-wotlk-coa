@@ -1,4 +1,6 @@
+import tempfile
 import unittest
+from pathlib import Path
 
 import coa_class_buffs as model
 from coa_class_buffs import Buff, Effect, Groups
@@ -166,6 +168,132 @@ class PlanTests(unittest.TestCase):
         self.assertIn(-2110714, after.members[1083])
         self.assertEqual({40}, after.members[2110714])
         self.assertNotIn(2113001, state.members)
+
+
+def area(name, misc=0, effect='SPELL_EFFECT_APPLY_AREA_AURA_RAID'):
+    return Effect(effect, name, misc, 1, 'TARGET_UNIT_CASTER', 'TARGET_NONE', 0)
+
+
+def self_aura(name, misc=0):
+    return aura(name, misc, 'TARGET_UNIT_CASTER')
+
+
+def trigger(spell_id):
+    return Effect('SPELL_EFFECT_TRIGGER_SPELL', 'SPELL_AURA_NONE', 0, 0, 'TARGET_UNIT_CASTER', 'TARGET_NONE',
+                  spell_id)
+
+
+def record(family, *effects, passive=False, name='Spell'):
+    return model.Record(name, family, model.PASSIVE_ATTRIBUTE if passive else 0, tuple(effects))
+
+
+class SelectionTests(unittest.TestCase):
+    def test_every_listed_target_and_effect_name_exists(self):
+        self.assertEqual(set(), model.ALLIED_TARGETS - set(model.enum_values('Targets')))
+        self.assertEqual(set(), (model.AREA_AURA_EFFECTS | {model.APPLY_AURA}) - set(model.enum_values('SpellEffects')))
+
+    def test_selection_rules(self):
+        records = {
+            1: record(20, aura('SPELL_AURA_MOD_STAT', 1)),
+            2: record(10, aura('SPELL_AURA_MOD_STAT', 1)),
+            3: record(20, self_aura('SPELL_AURA_MOD_STAT', 1)),
+            4: record(20, aura('SPELL_AURA_MOD_STAT', 1), passive=True),
+            5: record(20, aura('SPELL_AURA_MOD_STAT', 1)),
+            6: record(21, area('SPELL_AURA_MOD_ATTACK_POWER_PCT', 0), passive=True),
+            7: record(22, aura('SPELL_AURA_MOD_STAT', 1, 'TARGET_UNIT_CASTER_AREA_RAID')),
+            8: record(23, area('SPELL_AURA_MOD_STAT', 1, 'SPELL_EFFECT_APPLY_AREA_AURA_PARTY')),
+            9: record(24, area('SPELL_AURA_MOD_STAT', 1, 'SPELL_EFFECT_PERSISTENT_AREA_AURA')),
+        }
+        selected = model.select_buffs(records, {1, 2, 3, 4, 6, 7, 8, 9})
+        self.assertEqual([1, 6, 7, 8], [buff.spell_id for buff in selected])
+
+    def test_signature_uses_only_effects_that_reach_others(self):
+        dark_aura = record(21, area('SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE', 32),
+                           self_aura('SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE', 2), passive=True)
+        void = record(31, area('SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE', 32), passive=True)
+        selected = model.select_buffs({1: dark_aura, 2: void}, {1, 2})
+        self.assertEqual([frozenset({'resistance:32'})] * 2, [model.signature(buff) for buff in selected])
+
+    def test_triggered_spell_inherits_learnability(self):
+        records = {1: record(20, trigger(2)), 2: record(20, trigger(3)), 3: record(20, aura('SPELL_AURA_MOD_STAT', 1)),
+                   4: record(20, aura('SPELL_AURA_MOD_STAT', 1))}
+        self.assertEqual({1, 2, 3}, model.learnable_spells({1}, set(), records))
+
+    def test_higher_rank_of_learnable_spell_is_learnable(self):
+        records = {1: record(20), 2: record(20)}
+        self.assertEqual({1, 2, 5}, model.learnable_spells(set(), {1, 5}, records, {2: 1}))
+
+    def test_spell_dbc_row_replaces_dbc_effects(self):
+        records = {10: record(25, aura('SPELL_AURA_MOD_STAT', 1))}
+        row = {'ID': 10, 'Name_Lang_enUS': 'Override', 'SpellClassSet': 25, 'Attributes': 0,
+               'Effect_1': 6, 'EffectAura_1': 29, 'EffectMiscValue_1': 2, 'EffectBasePoints_1': 9,
+               'ImplicitTargetA_1': 21, 'ImplicitTargetB_1': 0, 'EffectTriggerSpell_1': 0}
+        for index in (2, 3):
+            row.update({f'Effect_{index}': 0, f'EffectAura_{index}': 0, f'EffectMiscValue_{index}': 0,
+                        f'EffectBasePoints_{index}': 0, f'ImplicitTargetA_{index}': 0,
+                        f'ImplicitTargetB_{index}': 0, f'EffectTriggerSpell_{index}': 0})
+        result = model.apply_overrides(records, [row])
+        selected = model.select_buffs(result, {10})
+        self.assertEqual('Override', result[10].name)
+        self.assertEqual(frozenset({'stat:2'}), model.signature(selected[0]))
+        self.assertEqual(frozenset({'stat:1'}), model.signature(model.select_buffs(records, {10})[0]))
+
+
+class PendingFileTests(unittest.TestCase):
+    def test_unapplied_pending_world_file_reported(self):
+        with tempfile.TemporaryDirectory() as folder:
+            pending = Path(folder)
+            for name in ('rev_1.sql', 'rev_2.sql', 'create_sql.sh', '.dummy'):
+                (pending / name).write_text('', encoding='utf-8')
+            self.assertEqual(['rev_2.sql'], model.pending_world_files_applied({'rev_1.sql'}, pending))
+
+
+class OutputTests(unittest.TestCase):
+    def state(self):
+        return Groups({2110001: {300857}, 1083: {-2110710}, 2110710: {300255}},
+                      {2110001: 1, 1083: 4}, {2110001: 'Strength', 1083: "Intellect, 'highest'"})
+
+    def buffs(self):
+        return [buff(300857, 23, aura('SPELL_AURA_MOD_STAT', 1)), buff(20, 30, aura('SPELL_AURA_MOD_STAT', 1)),
+                buff(21, 30, aura('SPELL_AURA_MOD_STAT', 1)), buff(30, 19, area('SPELL_AURA_MOD_RESISTANCE', 4)),
+                buff(31, 22, aura('SPELL_AURA_MOD_RESISTANCE', 4)), buff(40, 33, aura('SPELL_AURA_MOD_STAT', 3))]
+
+    def plan(self):
+        return model.plan_categories(self.buffs(), self.state(), {}, {}, {})
+
+    def test_migration_sql_shape(self):
+        sql = model.migration_sql(self.plan(), self.state())
+        lines = sql.splitlines()
+        self.assertTrue(sql.endswith('\n'))
+        self.assertTrue(all(len(line) <= 120 for line in lines))
+        group_delete = 'DELETE FROM `spell_group` WHERE `id` IN (1083, 2110001, 2110711, 2113001);'
+        rule_delete = 'DELETE FROM `spell_group_stack_rules` WHERE `group_id` IN (1083, 2110001, 2113001);'
+        self.assertIn(group_delete, lines)
+        self.assertIn(rule_delete, lines)
+        self.assertLess(lines.index(group_delete), lines.index(rule_delete))
+        self.assertIn('INSERT INTO `spell_group` (`id`, `spell_id`) VALUES', lines)
+        self.assertIn('INSERT INTO `spell_group_stack_rules` (`group_id`, `stack_rule`, `description`) VALUES', lines)
+        self.assertIn('(1083, 4, \'Intellect, \\\'highest\\\'\'),', lines)
+        self.assertIn("(2113001, 1, 'CoA class buffs: resistance:4');", lines)
+        member_rows = [line for line in lines if line.startswith('(') and "'" not in line]
+        self.assertEqual(['(1083, -2110711),', '(1083, -2110710),', '(2110001, 20),', '(2110001, 21),',
+                          '(2110001, 300857),', '(2110711, 40),', '(2113001, 30),', '(2113001, 31);'], member_rows)
+
+    def test_review_lists_changed_pairs(self):
+        before = self.state()
+        plan = self.plan()
+        after = model.apply_plan(before, plan)
+        text = model.review_markdown(self.buffs(), plan, before, after, {}, plan.unclassified)
+        self.assertIn('| Spell 20 (20, family 30) | Spell 300857 (300857, family 23) | stacks | exclusive 2110001 |', text)
+        self.assertIn('| Spell 20 (20, family 30) | Spell 21 (21, family 30) | family | exclusive 2110001 | same-class |',
+                      text)
+        self.assertNotIn('| Spell 300857 (300857, family 23) | Spell 40', text)
+
+    def test_review_flags_area_aura_next_to_cast_buff(self):
+        before = self.state()
+        plan = self.plan()
+        text = model.review_markdown(self.buffs(), plan, before, model.apply_plan(before, plan), {}, [])
+        self.assertIn('2113001', text.split('## Area auras next to cast buffs')[1].split('##')[0])
 
 
 if __name__ == '__main__':
