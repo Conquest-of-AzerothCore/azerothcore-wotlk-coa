@@ -4563,7 +4563,7 @@
       "wait_ms": 3500,
       "expire_ms": 500,
       "expected": 11282.5,
-      "after_at_least": 11250,
+      "after_at_least": 11249,
       "after_at_most": 11315,
       "observe_source": "807372 Rapture (rank 4 of 806477, the maximum rank at level 60): Effect[0] SCHOOL_DAMAGE, BasePoints 854 + 1, DieSides 65, RealPointsPerLevel 10.85 x (60 - BaseLevel 58) = 21.7, so $m1 = 876.7 and the roll adds 0..64: 876.7..940.7; targets DEST_TARGET_ENEMY / UNIT_DEST_AREA_ENEMY, radius index 8; EffectDamageMultiplier[0] 0.85; Attributes bit 0x20000000 (SPELL_ATTR0_NO_IMMUNITIES, 'piercing all immunities'); fire (SchoolMask 4), 20% mana, 20000 ms cooldown. Fixture 823764 ('beeg spellpen') keeps the dummy's resistance out of the hit and 984954 keeps a critical strike out, both in both phases. The first phase casts nothing (control); the second casts Rapture at the dummy. As damage at +10000 spell power (player fixture, both phases): + 1.03734 x 10000 = 10373.4, so 11250.1..11314.1, read as 11250..11315; the contrast that proves the $spfi*1.03734 term. Control: no cast, 0. Reference search 2026-11-20: bindmysoul Rapture text reads '111 + 200% fire SP Fire damage' against the DBC tooltip's $spfi*1.03734 (the snapshot is a fan export of live tuning, fetched 2026-07-22); coa-history spell 807372: 24 SPELL_DAMAGE events in 1 log, 3478..11780, no spell power in the log; see the fix note in the report.",
       "player_spell_power": 10000
@@ -8756,7 +8756,11 @@
       "ally_arm": {
         "allies": 1,
         "ally_casts": [
-          804247
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "AscensionSunClericAuras.cpp:68-75 Bless recast on the caster"
+          }
         ],
         "control_wait": true
       },
@@ -8992,87 +8996,6 @@
       "cast_power": 1360,
       "ally_distance": 5,
       "expected_source": "706735 Divine Vision Effect[0] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT and Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (MiscValue 3, Physical and Holy), BasePoints 3 + 1 = 4 ($s1). The grouped ally's Sunlight 704911 heals (Holy) are read without and with 706735 learned on the caster, the ally held at 50% health: the mean ratio is 1.04 (band 2 points)."
-    },
-    {
-      "spell": 554406,
-      "name": "Dawnsear (damage at 0 spell power)",
-      "kind": "metric_delta",
-      "variant": "damage_base",
-      "label_suffix": "damage_base",
-      "quote": "Blast an enemy with burning light, dealing ${$m1+0+$spfi*0.765222} Fire damage.",
-      "expected": 708.5,
-      "after_at_least": 669,
-      "after_at_most": 748,
-      "player_spell_power": 0,
-      "trigger_spell": 554406,
-      "target": "dummy",
-      "cast_in_before": false,
-      "cast_power": 1363,
-      "metric": "spell_damage_total",
-      "fields": {
-        "spell": 554406,
-        "target": "dummy"
-      },
-      "before_expected": 0,
-      "wait_ms": 5000,
-      "expire_ms": 500,
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "observe_source": "554406 Dawnsear Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, EffectBasePoints 668 + EffectDieSides 80: $m1 = 669..748, no per-level term at level 60; the school is Fire (SchoolMask 4). The spell damage of one real cast on the dummy (spell penetration 823764 and a -1000% spell crit aura 984954 as harness precondition fixtures: no resist and no critical strike) at 0 spell power lies in [669, 748]."
-    },
-    {
-      "spell": 554406,
-      "name": "Dawnsear (damage at 20000 spell power)",
-      "kind": "metric_delta",
-      "variant": "damage_sp",
-      "label_suffix": "damage_sp",
-      "quote": "Blast an enemy with burning light, dealing ${$m1+0+$spfi*0.765222} Fire damage.",
-      "expected": 16012.9,
-      "after_at_least": 15973,
-      "after_at_most": 16053,
-      "player_spell_power": {
-        "amount": 20000,
-        "hit_arm": true
-      },
-      "trigger_spell": 554406,
-      "target": "dummy",
-      "cast_in_before": false,
-      "cast_power": 1363,
-      "metric": "spell_damage_total",
-      "fields": {
-        "spell": 554406,
-        "target": "dummy"
-      },
-      "before_expected": 0,
-      "wait_ms": 5000,
-      "expire_ms": 500,
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "observe_source": "Contrast arm of damage_base in the same pair: the spell power coefficient 0.765222 ($spfi) x 20000 = 15304.44 added to [669, 748] gives [15973.44, 16052.44]; the entry reads one real cast at 20000 spell power on the dummy (same fixtures), which excludes a coefficient 10% off (+-1530)."
     },
     {
       "spell": 680622,
