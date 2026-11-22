@@ -36,6 +36,14 @@ Every trial reads `aura` right before the judged cast: 0 in the control, 1 in th
   `EffectDieSides[0] / control mean` (consumed once). Size `trials` before the run from the heal's measured spread; a
   `fixture` spell power narrows the dice share.
 
+- `variant: "cooldown"` (ADR 1037, opt-in): a real `effect_spell` cast (cooldown from `CategoryRecoveryTime`) is
+  followed by the feed every `every_ms` until `aura`; the cooldown read right after the aura is the reset, judged only
+  when at most two feed casts went off (`spell_go_count` of the feed); control trials read the natural cooldown at the
+  same times. The effect cooldown is then reset as a fixture and the effect is cast (A), read 500 ms later
+  (`cooldown_ms`, readback) and cast again (B): B goes off in the treatment and is refused in the control, and a third
+  cast (C) is refused. `trials` must keep a run without a judged reset trial at most `residual_target` per pair;
+  `expected` is 0.
+
 Sun Cleric: Spears of Glory 804629 (Radiant Flame 806060 feeding 807299, Dawnsear 554406 instant and +25%, the
 +25% sized with `figure_effect` 1, `min_hits` 4, 14 trials and `consumed`); Cultivate
 Divinity 704920 (`heal` and `heal_cascade`: Radiant Cascade 500141 and Illumination 500143 feeding each other's +20%).

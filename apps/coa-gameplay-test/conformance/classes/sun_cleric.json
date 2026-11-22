@@ -32936,6 +32936,24 @@
       "observe_source": "503691 Dawn's Arrival free-Gavel aura: AscensionSunClericAbilities.cpp:291-292 reduces the cooldown of a Gavel (800611, 800614, 800617, AscensionSunCleric.cpp:172-175) to none (Reduce at INT32_MAX removes the spell cooldown, AscensionSunCleric.cpp:103-113) when the cast carried 503691 (Select, :47). Gavel of Light 800611 has CategoryRecoveryTime 5000 and Category 1207 (Spell.dbc). 503691 is set on the caster as a named precondition fixture in the after phase only (after_auras); the grant by Dawnbreak 800654 rides the 40% chance and is not claimed here. Control: the same Gavel cast without 503691 leaves its cooldown (5000 ms less the 500 ms read delay, 4500); with it the remaining cooldown reads 0; the 10% bands are 500 ms either side of 0 and 450 ms either side of 4500. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
     },
     {
+      "spell": 503690,
+      "name": "Dawn's Arrival (free Gavel earned from Dawnbreak)",
+      "kind": "aura_fed_effect",
+      "variant": "cooldown",
+      "label_suffix": "fed_cooldown",
+      "quote": "causes the next one to not incur a cooldown.",
+      "feed_spell": 800654,
+      "aura": 503691,
+      "effect_spell": 800611,
+      "every_ms": 1700,
+      "residual_target": 0.001,
+      "feed_power": 1363,
+      "effect_power": 1363,
+      "expected": 0,
+      "trials": 8,
+      "observe_source": "Route: real Dawnbreak 800654 casts every 1700 ms (cast_until_aura, owner ruling O-17) until the free-Gavel aura 503691 is on the caster; the harness never sets it (D-145). Code: the grant and the reset sit in one block, one roll: AscensionSunClericAbilities.cpp:282-287 (if Chance(player, 503690): Reduce INT32_MAX on Gavel roots 800611, 800614, 800617, then Cast 503691); Chance() rolls the raw ProcChance 40 of 503690 (AscensionSunCleric.cpp:196-205), so the trials that read the aura also read the reset. The free cast: :291-292 (a Gavel carrying script value 503691 is reduced to no cooldown). Reads: cooldown_ms is readback data (the server cooldown map), so the behaviour is the recast: a second real Gavel 1600 ms after the first goes off (spell_go_count, cast_failure 0) in the treatment and is refused with SPELL_FAILED_NOT_READY 67 in the control (no aura), and a third in the treatment is refused (only the next cast is free). Reset: a Gavel of Light 800611 is cast first (CategoryRecoveryTime 5000 in Spell.dbc), 1600 ms later the feed starts; a feed that reaches the aura at its first or second cast finds the Gavel still cooling naturally (3400 or 1700 ms left), so a read of 0 right after the aura appeared is the reset; later casts find it over and are not judged (spell_go_count of 800654 gives the casts per trial). Control: the same Gavel without the feed reads 3400 and 1700 ms left (natural cooldown, within 10%). The free read starts from a Gavel reset as a precondition fixture so it does not depend on the reset claim. Sizing: ProcChance 40, so a trial is judged for the reset with probability 1 - 0.6^2 = 0.64; 8 trials leave a run with no judged trial at 0.36^8 = 2.8e-4 (5.7e-4 per pair, unmeasured, never a false verdict); max_casts 19 keeps an unfed trial at most 0.001 per pair. A correct server has no random outcome in a judged trial. Reference search 2026-11-22: coa-history spell 503690: 0 events in 186 logs (a passive); 503691: 280 SPELL_AURA_APPLIED and 280 SPELL_AURA_REMOVED in 5 logs, no cooldown or cast event, so a free Gavel is not told apart there; Dawnbreak 800654: 284 SPELL_CAST_SUCCESS in 4 logs; nothing found beyond the tooltip and the DBC. Tool: aura_fed_effect cooldown variant (Sun Cleric tool ADR 1037)."
+    },
+    {
       "spell": 300323,
       "name": "Holy Fervor (Sunrise effectiveness)",
       "kind": "hit_ratio",

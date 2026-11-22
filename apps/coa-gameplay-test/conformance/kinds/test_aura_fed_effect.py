@@ -23,6 +23,11 @@ SIZED_HEAL = {**HEAL, 'name': 'Cultivate Divinity (Radiant Cascade)', 'variant':
               'fixture': {'spell_power': 20000}}
 SIZED_DAMAGE = {**DAMAGE, 'name': 'Spears of Glory (sized damage)', 'sized': True, 'figure_effect': 1,
                 'min_hits': 4, 'consumed': True, 'trials': 14, 'fixture': {'spell_power': 20000}}
+COOLDOWN = {'spell': 503690, 'name': 'Dawn\'s Arrival (free Gavel)', 'kind': 'aura_fed_effect',
+            'variant': 'cooldown', 'label_suffix': 'fed_cooldown', 'feed_spell': 800654, 'aura': 503691,
+            'effect_spell': 800611, 'every_ms': 1700, 'residual_target': 0.001, 'feed_power': 1363,
+            'effect_power': 1363, 'expected': 0, 'trials': 8,
+            'quote': 'causes the next one to not incur a cooldown'}
 CONTROL_HIT = 8800.0
 SEED = 704920
 
@@ -200,6 +205,56 @@ class AuraFedEffectTests(unittest.TestCase):
         _, expectation = self.generated(DAMAGE)
         self.assertNotIn('figure', expectation.model)
         self.assertNotIn('next_hits', expectation.model['reads']['treatment'][0])
+
+    def cooldown_values(self, attempts=1, reset=0.0, free=0.0, second=0.0, third=67.0, control_second=67.0,
+                        fed_aura=1.0):
+        _, expectation = self.generated(COOLDOWN)
+        values, fed = {}, 0.0
+        for arm in ('control', 'treatment'):
+            for trial in expectation.model['reads'][arm]:
+                treated = arm == 'treatment'
+                values.update({trial['pre']: 3400.0, trial['aura']: fed_aura if treated else 0.0,
+                               trial['reset']: reset if treated else 1700.0, trial['free']: free if treated else 4500.0,
+                               trial['second_go']: 3.0 if treated else 2.0,
+                               trial['second_failure']: second if treated else control_second})
+                if treated:
+                    fed += attempts
+                    values.update({trial['fed']: fed, trial['third_go']: 3.0, trial['third_failure']: third})
+        return values
+
+    def test_the_cooldown_variant_feeds_for_real_and_never_sets_the_aura(self):
+        scenario, _ = self.generated(COOLDOWN)
+        run.validate(scenario)
+        feeds = [step for step in scenario['steps'] if step['action'] == 'cast_until_aura']
+        self.assertEqual([(step['spell'], step['aura']) for step in feeds], [(800654, 503691)] * 8)
+        self.assertFalse(any(step['action'] == 'set_aura' and step['spell'] == 503691 for step in scenario['steps']))
+
+    def test_the_cooldown_variant_is_ok_when_the_reset_and_the_free_cast_hold(self):
+        self.assertEqual(self.judged(COOLDOWN, self.cooldown_values()), 'ok')
+        self.assertEqual(self.judged(COOLDOWN, self.cooldown_values(attempts=2, reset=0.0)), 'ok')
+
+    def test_a_cooldown_that_survives_the_roll_alerts(self):
+        self.assertEqual(self.judged(COOLDOWN, self.cooldown_values(reset=3400.0)), 'alert')
+
+    def test_a_gavel_that_still_has_its_cooldown_after_the_aura_alerts(self):
+        self.assertEqual(self.judged(COOLDOWN, self.cooldown_values(free=4500.0)), 'alert')
+        self.assertEqual(self.judged(COOLDOWN, self.cooldown_values(second=67.0)), 'alert')
+
+    def test_a_free_cast_that_is_not_one_only_alerts(self):
+        self.assertEqual(self.judged(COOLDOWN, self.cooldown_values(third=0.0)), 'alert')
+
+    def test_a_control_without_a_refused_second_cast_alerts(self):
+        self.assertEqual(self.judged(COOLDOWN, self.cooldown_values(control_second=0.0)), 'alert')
+
+    def test_a_late_feed_leaves_the_reset_unjudged(self):
+        self.assertEqual(self.judged(COOLDOWN, self.cooldown_values(attempts=3, reset=3400.0)), 'unmeasured')
+
+    def test_a_missing_aura_is_unmeasured_and_too_few_trials_are_refused(self):
+        self.assertEqual(self.judged(COOLDOWN, self.cooldown_values(fed_aura=0.0)), 'unmeasured')
+        with self.assertRaises(ValueError):
+            self.generated({**COOLDOWN, 'trials': 2})
+        with self.assertRaises(ValueError):
+            self.generated({**COOLDOWN, 'expected': 1})
 
     def test_a_missing_read_is_unmeasured(self):
         self.assertEqual(self.judged(DAMAGE, {}), 'unmeasured')
