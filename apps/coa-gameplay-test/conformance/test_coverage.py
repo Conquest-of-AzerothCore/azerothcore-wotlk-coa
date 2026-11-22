@@ -887,8 +887,9 @@ class EvidenceTablesTest(unittest.TestCase):
     def test_a_promise_beyond_the_state_metrics_gates_a_contrast_proof(self):
         states = {metric for metric, kind in METRIC_EVIDENCE.items() if kind == STATE}
         self.assertEqual({metric for metric in STATE_PROMISES if metric not in states},
-                         {'spell_done_crit_chance', 'spell_taken_crit_chance'})
+                         {'spell_done_crit_chance', 'spell_done_crit_chance_scripted', 'spell_taken_crit_chance'})
         self.assertEqual(METRIC_EVIDENCE['spell_done_crit_chance'], READBACK)
+        self.assertEqual(METRIC_EVIDENCE['spell_done_crit_chance_scripted'], READBACK)
         self.assertEqual(METRIC_EVIDENCE['spell_taken_crit_chance'], READBACK)
         self.assertEqual(METRIC_EVIDENCE['aura'], EVENT)
 
@@ -1710,7 +1711,7 @@ class ScriptedCritPartnerTest(unittest.TestCase):
         self.assertEqual(self.evidence(damage, self.arm(self.ABOVE, 50), self.arm(self.BELOW, 0)), [DATA])
 
     def test_a_partner_of_another_metric_does_not_count(self):
-        other = self.arm(self.BELOW, 0, metric='spell_done_crit_chance')
+        other = self.arm(self.BELOW, 0, metric='spell_critical_damage')
         self.assertEqual(self.evidence(self.GIFT, self.arm(self.ABOVE, 50), other), [DATA])
 
     def test_the_partner_arm_may_sit_in_another_claim_of_the_same_row(self):
