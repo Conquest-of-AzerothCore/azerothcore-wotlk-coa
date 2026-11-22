@@ -9402,7 +9402,7 @@
       "label_suffix": "control_stacks",
       "quote": "Fulfilling a Vow now increases the damage of your Sunslam by $680623s1% for $680623d,",
       "trigger_spell": 500143,
-      "gate_spell": 680622,
+      "gate_spell": 92136,
       "target": "caster",
       "setup_target": "caster",
       "caster_health_pct": 50,
@@ -9439,7 +9439,7 @@
       "before_expected": 0,
       "expected": 0,
       "wait_ms": 2600,
-      "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). The control without the talent: 0 stacks (the Vow is fulfilled, 680622 never learned). Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
+      "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). The control without the talent: 0 stacks (the Vow is fulfilled, 680622 never learned; Sunlight 92136 is learned as the fulfilling talent, as in the Dawnguard control). Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
       "cast_in_before": false,
       "setup_only_after": true
     },
@@ -9540,6 +9540,130 @@
       "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). 680623 is gone 66400 ms after the fulfilling heal: its duration is below 66.4 s, which excludes 66 s (+10% of 60 s). Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
       "cast_in_before": false,
       "setup_only_after": true
+    },
+    {
+      "spell": 707613,
+      "name": "Radiant Power (1 stack of Sunwalker, Shine critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "stacks_1",
+      "label_suffix": "stacks_1",
+      "quote": "Each stack of Sunwalker now increases the critical strike chance of Shine by $s1%.",
+      "trigger_spell": 805301,
+      "gate_spell": 707613,
+      "target": "caster",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 800357,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 15,
+      "expected_gain": 15,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800601,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "707613 Radiant Power Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2), EffectSpellClassMask word 0 = 128 (Sunwalker 800601, whose Effect[1] is the flat critical chance modifier of Shine), BasePoints 14 + 1 = 15 ($s1). Sunwalker 800601 StackAmount 5 is set on the caster with the stated stacks as a harness precondition fixture in both phases (its generation by melee hits is the subject of 704934, not of this clause). The caster's critical strike chance of Shine 800357 (healing the caster) is read before the learn (control) and after: the gain is 15 per stack. Gain 15 points with 1 stack(s); the one-stack and three-stack entries are the contrast of each other. Reference search 2026-11-22: coa-history spell 707613: 0 events in 186 logs; git log origin/main --grep 707613: #4516 only (native handlers at data level); the reference snapshots list the tooltip only; nothing else found."
+    },
+    {
+      "spell": 707613,
+      "name": "Radiant Power (3 stacks of Sunwalker, Shine critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "stacks_3",
+      "label_suffix": "stacks_3",
+      "quote": "Each stack of Sunwalker now increases the critical strike chance of Shine by $s1%.",
+      "trigger_spell": 805301,
+      "gate_spell": 707613,
+      "target": "caster",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 800357,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 45,
+      "expected_gain": 45,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800601,
+          3,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "707613 Radiant Power Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2), EffectSpellClassMask word 0 = 128 (Sunwalker 800601, whose Effect[1] is the flat critical chance modifier of Shine), BasePoints 14 + 1 = 15 ($s1). Sunwalker 800601 StackAmount 5 is set on the caster with the stated stacks as a harness precondition fixture in both phases (its generation by melee hits is the subject of 704934, not of this clause). The caster's critical strike chance of Shine 800357 (healing the caster) is read before the learn (control) and after: the gain is 15 per stack. Gain 45 points with 3 stack(s); the one-stack and three-stack entries are the contrast of each other. Reference search 2026-11-22: coa-history spell 707613: 0 events in 186 logs; git log origin/main --grep 707613: #4516 only (native handlers at data level); the reference snapshots list the tooltip only; nothing else found."
+    },
+    {
+      "spell": 804253,
+      "name": "Blessing of Purity (immunity aura lasts 6 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Protect a Blessed ally, making them immune to all damage for $680889d.",
+      "trigger_spell": 804253,
+      "target": "caster",
+      "setup_casts": [
+        804247
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "setup_only_after": false,
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 680889
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 5700,
+      "expiry_wait_ms": 700,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          5450,
+          5900
+        ],
+        "expired": [
+          6150,
+          6550
+        ]
+      },
+      "observe_source": "804253 Blessing of Purity Effect[0] SPELL_EFFECT_TRIGGER_SPELL 680889, whose aura 40 SPELL_AURA_DAMAGE_IMMUNITY (MiscValue 127, all schools) lasts 6000 ms (DurationIndex 32, $680889d); Spell.dbc TargetAuraSpell 804247 (Bless); the script casts it only on a target carrying the caster's own Bless (AscensionSunClericAbilities.cpp:478-492). The caster is blessed by a real cast of Bless 804247 on itself (Bless always blesses the caster), then 804253 is cast on the caster. The immunity aura 680889 is present when read 5450..5900 ms of game time after the cast (above 5400 ms, -10% excluded) and gone when read 6150..6550 ms after it (below 6600 ms, +10% excluded); no cast, no aura (control). Reference search 2026-11-22: coa-history spell 804253: 11 casts in 5 logs, no aura events; git log origin/main --grep 804253: nothing; the reference snapshots list the tooltip only; nothing else found."
+    },
+    {
+      "spell": 804253,
+      "name": "Blessing of Purity (control: no immunity on a target without Bless)",
+      "kind": "metric_delta",
+      "variant": "no_bless",
+      "label_suffix": "no_bless",
+      "quote": "@ext:Only usable on your ally with Bless active.:ext@",
+      "trigger_spell": 804253,
+      "target": "caster",
+      "cast_power": 1363,
+      "metric": "aura",
+      "fields": {
+        "spell": 680889
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "observe_source": "804253 Blessing of Purity Effect[0] SPELL_EFFECT_TRIGGER_SPELL 680889, whose aura 40 SPELL_AURA_DAMAGE_IMMUNITY (MiscValue 127, all schools) lasts 6000 ms (DurationIndex 32, $680889d); Spell.dbc TargetAuraSpell 804247 (Bless); the script casts it only on a target carrying the caster's own Bless (AscensionSunClericAbilities.cpp:478-492). Bless is not cast. Control of the duration entry: 804253 cast at a caster without Bless leaves no 680889 (the script returns when the target lacks the caster's Bless); the duration entry shows the aura present with Bless. Reference search as the duration entry."
     }
   ],
   "player_observations": [],
