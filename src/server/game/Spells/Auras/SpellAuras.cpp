@@ -627,6 +627,16 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
             // Allow only 1 persistent area aura to affect our targets if a custom flag is set.
             if (itr->first->HasAura(GetId()) && GetSpellInfo()->HasAttribute(SPELL_ATTR0_CU_ONLY_ONE_AREA_AURA))
                 addUnit = false;
+
+            // CoA: keep the application an overlapping same caster ground effect already holds instead of swapping it.
+            Unit::AuraApplicationMapBounds same = itr->first->GetAppliedAuras().equal_range(GetId());
+            for (Unit::AuraApplicationMap::const_iterator iter = same.first; addUnit && iter != same.second; ++iter)
+            {
+                Aura const* other = iter->second->GetBase();
+                if (other != this && other->GetType() == DYNOBJ_AURA_TYPE && other->GetCasterGUID() == GetCasterGUID() &&
+                    !CanStackWith(other))
+                    addUnit = false;
+            }
             }
             // unit auras can not stack with each other
             else // (GetType() == UNIT_AURA_TYPE)
