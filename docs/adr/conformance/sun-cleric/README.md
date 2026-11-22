@@ -14,3 +14,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0008](0008-fanaticism-expectation-is-the-reproduced-engine-arithmetic.md) | Fanaticism expectation is the reproduced engine arithmetic (supersedes the figures of 0007) |
 | [0009](0009-sunwalker-doubles-vow-of-light-once.md) | Sunwalker doubles the value of Vow of Light once |
 | [0010](0010-arbiter-of-light-adds-its-share-while-vow-of-light-is-active.md) | Arbiter of Light adds its Gavel of Light heal share while Vow of Light is active |
+| [0011](0011-luminary-mendicant-raises-vow-of-grace-mana-once.md) | Luminary Mendicant raises the Vow of Grace mana once |
