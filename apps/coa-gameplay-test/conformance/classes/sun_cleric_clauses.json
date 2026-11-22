@@ -3061,10 +3061,11 @@
     "spell": 680647,
     "clause": "and your Seraphic Bulwark now lasts for $s1 additional blocks.",
     "labels": [
-      "680647 behaviour_metric_delta bulwark_charges"
+      "680647 behaviour_metric_delta bulwark_charges",
+      "680647 behaviour_metric_delta bulwark_blocks"
     ],
     "kind": "claim",
-    "reason": "Control arm = 5 charges before the learn, 7 after. Reference search 2026-11-22: coa-history spell 680647: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
+    "reason": "Control arm = 5 charges before the learn, 7 after. Reference search 2026-11-22: coa-history spell 680647: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip. Real blocks: pair 20261122-124706 / 20261122-124902, build 3724ebb1057c (commit 5cbfbbf637f1), no flip: with block forced to 100% (set_combat_avoidance block, owner ruling O-20) Seraphic Bulwark 560095 ends on block 5 before the learn and on block 7 after, one blocked Speed Slash per strike. Tool: kind block_charge_strikes, ADR 1025 (provisional)."
   },
   {
     "spell": 680648,
@@ -3463,9 +3464,10 @@
     "spell": 681468,
     "clause": "and your Seraphic Bulwark now lasts for $s1 additional blocks.",
     "kind": "claim",
-    "reason": "Control arm = the 5 charges before the learn (ProcCharges 5), 9 after (+4, BasePoints 3 + 1). Reference search: bindmysoul snapshot has the older rank 1 figure (2 blocks); nothing else found. Pair 20261122-001533 / 20261122-001615, build aed1b333, server commit 95a06d0da0a6+, no flip.",
+    "reason": "Control arm = the 5 charges before the learn (ProcCharges 5), 9 after (+4, BasePoints 3 + 1). Reference search: bindmysoul snapshot has the older rank 1 figure (2 blocks); nothing else found. Pair 20261122-001533 / 20261122-001615, build aed1b333, server commit 95a06d0da0a6+, no flip. Real blocks: pair 20261122-124706 / 20261122-124902, build 3724ebb1057c (commit 5cbfbbf637f1), no flip: with block forced to 100% (set_combat_avoidance block, owner ruling O-20) Seraphic Bulwark 560095 ends on block 5 before the learn and on block 9 after, one blocked Speed Slash per strike. Tool: kind block_charge_strikes, ADR 1025 (provisional).",
     "labels": [
-      "681468 behaviour_metric_delta bulwark_charges"
+      "681468 behaviour_metric_delta bulwark_charges",
+      "681468 behaviour_metric_delta bulwark_blocks"
     ]
   },
   {
