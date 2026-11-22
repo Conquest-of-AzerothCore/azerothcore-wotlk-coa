@@ -144,8 +144,8 @@ class SwingResetRateTests(unittest.TestCase):
         self.assertIn('speeds [2800, 2800]', scenario['contract'])
         equips = [step['item'] for step in scenario['steps'] if step['action'] == 'equip']
         self.assertEqual(equips, [2529, 2529])
-        scenario, [default] = self.built({**ENTRY, 'parts': 5}, two_sets(False))
-        self.assertEqual(default.model['swing_bound'], 5 * (3400000 // 2500))
+        scenario, [default] = self.built(class_file=two_sets(False))
+        self.assertEqual(default.model['swing_bound'], PARTS * (3400000 // 2500))
         self.assertIn('speeds [2500]', scenario['contract'])
         self.assertEqual([step['item'] for step in scenario['steps'] if step['action'] == 'equip'], [2524, 2129])
 
