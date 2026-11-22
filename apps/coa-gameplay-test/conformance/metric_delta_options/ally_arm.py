@@ -3,7 +3,7 @@ import math
 
 NAME = 'ally_arm'
 ORDER = 24
-ALLY_IDS = ('ally', 'ally2', 'ally3', 'ally4', 'ally5')
+ALLY_IDS = ('ally', 'ally2', 'ally3', 'ally4', 'ally5', 'ally6', 'ally7', 'ally8', 'ally9')
 ALLY_CAST_SETTLE_MS = 2000
 ALLY_CAST_PROOF_METRIC = 'spell_go_count'
 CASTER_SCOPED_METRICS = {'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',
@@ -13,8 +13,10 @@ CASTER_SCOPED_METRICS = {'spell_heal_count', 'spell_heal_total', 'spell_effectiv
 CASTER_ENTRY_METRICS = {'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total'}
 CONTROL_LABEL = 'timed no-cast control'
 EXPIRE_LABEL = 'let the first effect fully expire'
-KEYS = {'allies', 'ally_health', 'ally_casts', 'control_wait', 'arms'}
+KEYS = {'allies', 'ally_health', 'ally_casts', 'control_wait', 'arms', 'ratios'}
 ARM_KEYS = {'actors', 'metric', 'fields', 'before_expected', 'expected', 'tolerance', 'source'}
+ALLY_CAST_KEYS = {'spell', 'spell_go_per_cast', 'source'}
+RATIO_KEYS = {'numerator', 'denominator', 'expected', 'tolerance', 'source'}
 
 
 @dataclass(frozen=True)
@@ -29,16 +31,30 @@ class Arm:
 
 
 @dataclass(frozen=True)
+class Ratio:
+    numerator: int
+    denominator: int
+    expected: float
+    tolerance: float
+    source: str
+
+
+@dataclass(frozen=True)
 class AllyArm:
     allies: int
     ally_health: tuple[int, int] | None
     ally_casts: tuple[int, ...]
     control_wait: bool
     arms: tuple[Arm, ...]
+    go_per_cast: tuple[tuple[int, int, str], ...] = ()
+    ratios: tuple[Ratio, ...] = ()
 
     @property
     def ally_ids(self) -> tuple[str, ...]:
         return ALLY_IDS[:self.allies]
+
+    def spell_go_per_cast(self, spell: int) -> int:
+        return next((count for stated, count, _ in self.go_per_cast if stated == spell), 1)
 
 
 def number(value) -> bool:
@@ -61,6 +77,29 @@ def parse_arm(raw) -> Arm:
                float(raw['expected']), float(raw['tolerance']), raw['source'])
 
 
+def parse_ally_cast(raw) -> tuple[int, int, str]:
+    if type(raw) is int and raw > 0:
+        return raw, 1, ''
+    if not isinstance(raw, dict) or set(raw) != ALLY_CAST_KEYS or type(raw['spell']) is not int or raw['spell'] <= 0 \
+            or type(raw['spell_go_per_cast']) is not int or raw['spell_go_per_cast'] < 2 \
+            or not isinstance(raw['source'], str) or not raw['source'].strip():
+        raise ValueError(f'an ally_arm ally cast is a spell id (one SPELL_GO per cast) or {{spell, spell_go_per_cast: '
+                         f'integer >= 2, source: the code or data line that casts the extra SPELL_GO}}, not {raw!r}')
+    return raw['spell'], raw['spell_go_per_cast'], raw['source']
+
+
+def parse_ratio(raw, arms: int) -> Ratio:
+    if not isinstance(raw, dict) or set(raw) != RATIO_KEYS \
+            or not all(type(raw[key]) is int and 0 <= raw[key] < arms for key in ('numerator', 'denominator')) \
+            or raw['numerator'] == raw['denominator'] \
+            or not all(number(raw[key]) for key in ('expected', 'tolerance')) \
+            or raw['expected'] <= 0 or raw['tolerance'] < 0 \
+            or not isinstance(raw['source'], str) or not raw['source'].strip():
+        raise ValueError(f'an ally_arm ratio is {{numerator, denominator: two distinct arm indices below {arms}, '
+                         f'expected > 0, tolerance >= 0, source: text}}, finite numbers, not {raw!r}')
+    return Ratio(raw['numerator'], raw['denominator'], float(raw['expected']), float(raw['tolerance']), raw['source'])
+
+
 def parse(raw) -> AllyArm:
     if not isinstance(raw, dict) or not raw or not set(raw) <= KEYS:
         raise ValueError(f'ally_arm is a non-empty object of {sorted(KEYS)}, not {raw!r}')
@@ -73,15 +112,25 @@ def parse(raw) -> AllyArm:
                                or not all(type(value) is int for value in health) or not 1 <= health[0] <= health[1]):
         raise ValueError(f'ally_arm ally_health is [value, maximum], integers with 1 <= value <= maximum, '
                          f'not {health!r}')
-    if not isinstance(casts, list) or not all(type(spell) is int and spell > 0 for spell in casts):
-        raise ValueError(f'ally_arm ally_casts is a list of spell ids, not {casts!r}')
+    if not isinstance(casts, list):
+        raise ValueError(f'ally_arm ally_casts is a list of spell ids or stated casts, not {casts!r}')
+    stated = [parse_ally_cast(cast) for cast in casts]
+    for spell, count, source in stated:
+        if any(other == spell and (other_count, other_source) != (count, source)
+               for other, other_count, other_source in stated):
+            raise ValueError(f'ally_arm ally_casts states {spell} with different SPELL_GO counts or sources')
     if raw.get('control_wait', True) is not True:
         raise ValueError(f'ally_arm control_wait is true, not {raw["control_wait"]!r}')
     arms = raw.get('arms', [])
     if not isinstance(arms, list):
         raise ValueError(f'ally_arm arms is a list, not {arms!r}')
-    return AllyArm(allies, tuple(health) if health is not None else None, tuple(casts),
-                   'control_wait' in raw, tuple(parse_arm(arm) for arm in arms))
+    ratios = raw.get('ratios', [])
+    if not isinstance(ratios, list) or ('ratios' in raw and not ratios):
+        raise ValueError(f'ally_arm ratios is a non-empty list, not {ratios!r}')
+    return AllyArm(allies, tuple(health) if health is not None else None, tuple(spell for spell, _, _ in stated),
+                   'control_wait' in raw, tuple(parse_arm(arm) for arm in arms),
+                   tuple(dict.fromkeys(cast for cast in stated if cast[1] > 1)),
+                   tuple(parse_ratio(ratio, len(arms)) for ratio in ratios))
 
 
 def check(spec, ally):
@@ -141,7 +190,8 @@ def phase_steps(spec, ally: AllyArm, after: bool) -> list[dict]:
     moment = 'after' if after else 'before'
     steps = []
     for index, spell in enumerate(ally.ally_casts):
-        landed = ally.ally_casts[:index + 1].count(spell) + (ally.ally_casts.count(spell) if after else 0)
+        landed = (ally.ally_casts[:index + 1].count(spell) + (ally.ally_casts.count(spell) if after else 0)) \
+            * ally.spell_go_per_cast(spell)
         steps += [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spell}, ally_cast_step(spell),
                   {'action': 'wait', 'label': f'{spell} at the ally, past the global cooldown',
                    'ms': ALLY_CAST_SETTLE_MS},
@@ -230,6 +280,8 @@ def fixtures(class_file: dict, spec, ally: AllyArm, scenario: dict):
                      f'cost, required caster aura and reagents set first), waiting {ALLY_CAST_SETTLE_MS} ms after '
                      f'each, and asserts the caster\'s {ALLY_CAST_PROOF_METRIC} of each, so the scenario fails when '
                      f'an ally cast did not go off.')
+        for spell, count, source in ally.go_per_cast:
+            contract += f' Each {spell} cast at {ALLY_IDS[0]} counts {count} SPELL_GO ({source}).'
     if ally.ally_health is not None:
         contract += f' Each phase sets the allies\' health to {ally.ally_health[0]} of {ally.ally_health[1]}.'
     if ally.control_wait:
@@ -239,16 +291,21 @@ def fixtures(class_file: dict, spec, ally: AllyArm, scenario: dict):
         contract += (f' Arm {index}: {arm.metric} {arm.fields} summed over {list(arm.actors)}, read right after each '
                      f'main reading, expected {arm.before_expected:g} then {arm.expected:g} within '
                      f'{arm.tolerance:g} ({arm.source}).')
+    for ratio in ally.ratios:
+        contract += (f' Ratio: arm {ratio.numerator} over arm {ratio.denominator}, each read as its after sum less '
+                     f'its before sum, expected {ratio.expected:g} within {ratio.tolerance:g} ({ratio.source}).')
     scenario['contract'] += contract
 
 
 def model(spec, ally: AllyArm) -> dict:
+    ratios = {'ratios': [{'numerator': ratio.numerator, 'denominator': ratio.denominator, 'expected': ratio.expected,
+                          'tolerance': ratio.tolerance, 'source': ratio.source} for ratio in ally.ratios]}
     return {NAME: {'allies': list(ally.ally_ids), 'arms': [
         {'metric': arm.metric, 'before_expected': arm.before_expected, 'expected': arm.expected,
          'tolerance': arm.tolerance, 'source': arm.source,
          'before': [arm_label(spec, 'before', index, actor) for actor in arm.actors],
          'after': [arm_label(spec, 'after', index, actor) for actor in arm.actors]}
-        for index, arm in enumerate(ally.arms)]}}
+        for index, arm in enumerate(ally.arms)], **(ratios if ally.ratios else {})}}
 
 
 def verdict(verdict, run, ally: dict):
@@ -256,6 +313,7 @@ def verdict(verdict, run, ally: dict):
         return verdict
     texts = []
     off = False
+    deltas = []
     for index, arm in enumerate(ally['arms']):
         missing = next((label for label in (*arm['before'], *arm['after']) if run.values.get(label) is None), None)
         if missing is not None:
@@ -263,11 +321,21 @@ def verdict(verdict, run, ally: dict):
                            explanation=f'{verdict.explanation}; ally arm {index}: {missing} was not read')
         before = sum(run.values[label] for label in arm['before'])
         after = sum(run.values[label] for label in arm['after'])
+        deltas.append(after - before)
         held = (abs(before - arm['before_expected']) <= arm['tolerance']
                 and abs(after - arm['expected']) <= arm['tolerance'])
         off = off or not held
         texts.append(f'ally arm {index} {arm["metric"]}: {before:g} before (expected {arm["before_expected"]:g}) '
                      f'and {after:g} after (expected {arm["expected"]:g}), within {arm["tolerance"]:g}: '
                      f'{"ok" if held else "off"} ({arm["source"]})')
+    for ratio in ally.get('ratios', []):
+        numerator, denominator = deltas[ratio['numerator']], deltas[ratio['denominator']]
+        measured = numerator / denominator if denominator else None
+        held = measured is not None and abs(measured - ratio['expected']) <= ratio['tolerance']
+        off = off or not held
+        read = f'{measured:g}' if measured is not None else 'none, the denominator arm did not move'
+        texts.append(f'ally ratio arm {ratio["numerator"]} / arm {ratio["denominator"]}: {numerator:g} / '
+                     f'{denominator:g} = {read} (expected {ratio["expected"]:g} within {ratio["tolerance"]:g}): '
+                     f'{"ok" if held else "off"} ({ratio["source"]})')
     explanation = '; '.join([verdict.explanation, *texts])
     return replace(verdict, status='alert' if off else verdict.status, explanation=explanation)

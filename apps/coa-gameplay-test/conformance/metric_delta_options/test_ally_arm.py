@@ -17,6 +17,12 @@ HEALTH_ARM = {'actors': ['ally'], 'metric': 'health', 'before_expected': 5000, '
               'source': 'the ally fixture health, no heal in the scenario'}
 AURA_ARM = {'actors': ['ally', 'ally2'], 'metric': 'aura', 'fields': {'spell': SPELL}, 'before_expected': 0,
             'expected': 0, 'tolerance': 0, 'source': 'Divine Charge is a self aura, so no ally holds it'}
+TWICE = {'spell': ALLY_SPELL, 'spell_go_per_cast': 2, 'source': 'a seeded script line that recasts it on the caster'}
+COPY_ARM = {'actors': ['ally'], 'metric': 'health', 'before_expected': 5000, 'expected': 5750, 'tolerance': 1000,
+            'source': 'a seeded copy heal'}
+PRIMARY_ARM = {'actors': ['ally2'], 'metric': 'health', 'before_expected': 5000, 'expected': 6000, 'tolerance': 1000,
+               'source': 'a seeded primary heal'}
+RATIO = {'numerator': 0, 'denominator': 1, 'expected': 0.75, 'tolerance': 0.01, 'source': 'a seeded 75% copy'}
 
 
 def templar():
@@ -36,6 +42,10 @@ def parry_entry() -> dict:
 
 def ally_entry(**option) -> dict:
     return steed_entry(ally_arm={'allies': 2, 'arms': [HEALTH_ARM, AURA_ARM], **option})
+
+
+def ratio_entry(**ratio) -> dict:
+    return steed_entry(ally_arm={'allies': 2, 'arms': [COPY_ARM, PRIMARY_ARM], 'ratios': [{**RATIO, **ratio}]})
 
 
 def labels_of(scenario: dict) -> list:
@@ -129,7 +139,7 @@ class AllyArmScenarioTests(unittest.TestCase):
 
     def test_a_malformed_option_or_an_arm_without_its_stated_expectation_is_refused(self):
         readback = next(metric for metric, kind in metric_evidence().items() if kind == READBACK)
-        options = [True, {}, {'allies': 0}, {'allies': 6}, {'control_wait': False}, {'ally_health': [0, 10]},
+        options = [True, {}, {'allies': 0}, {'allies': 10}, {'control_wait': False}, {'ally_health': [0, 10]},
                    {'ally_health': [11, 10]}, {'ally_casts': ['x']}, {'surplus': 1}]
         options += [{'arms': [{key: value for key, value in HEALTH_ARM.items() if key != missing}]}
                     for missing in ('actors', 'metric', 'before_expected', 'expected', 'tolerance', 'source')]
@@ -140,6 +150,15 @@ class AllyArmScenarioTests(unittest.TestCase):
         for option in options:
             with self.subTest(option=option), self.assertRaises(ValueError):
                 self.scenario(steed_entry(ally_arm=option))
+
+    def test_nine_allies_are_grouped_players(self):
+        scenario, [expectation] = self.scenario(steed_entry(
+            ally_arm={'allies': 9, 'arms': [{**HEALTH_ARM, 'actors': ['ally6', 'ally9']}]}))
+        run.validate(scenario)
+        allies = ['ally', 'ally2', 'ally3', 'ally4', 'ally5', 'ally6', 'ally7', 'ally8', 'ally9']
+        self.assertEqual([player['id'] for player in scenario['players']], ['caster', *allies])
+        self.assertEqual([step['target'] for step in scenario['steps'] if step['action'] == 'group'], allies)
+        self.assertEqual(expectation.model['ally_arm']['allies'], allies)
 
     def test_the_timed_control_needs_an_uncast_before_phase(self):
         for changes in ({'cast_in_before': True}, {'gate_timing': 'start'}):
@@ -172,6 +191,56 @@ class AllyArmScenarioTests(unittest.TestCase):
         failed = ran_report(scenario, lambda step: 0 if step['metric'] == 'spell_go_count' else honest(step))
         with self.assertRaisesRegex(ValueError, 'Equality assertion failed'):
             run.check_report(failed, 'r', scenario, 0)
+
+    def test_a_stated_spell_go_count_per_cast_scales_the_landed_proof(self):
+        scenario, _ = self.scenario({**ally_entry(ally_casts=[TWICE, TWICE]), 'learn': [ALLY_SPELL]})
+        run.validate(scenario)
+        steps = scenario['steps']
+        proofs = [step['equals'] for step in steps if step['action'] == 'assert'
+                  and step.get('metric') == 'spell_go_count' and step.get('spell') == ALLY_SPELL]
+        self.assertEqual(proofs, [2, 4, 6, 8])
+        self.assertIn(f'Each {ALLY_SPELL} cast at ally counts 2 SPELL_GO ({TWICE["source"]}).', scenario['contract'])
+        run.check_report(ran_report(scenario), 'r', scenario, 0)
+
+    def test_mutant_a_wrong_spell_go_count_fails_the_scenario(self):
+        stated, _ = self.scenario({**ally_entry(ally_casts=[TWICE]), 'learn': [ALLY_SPELL]})
+        plain, _ = self.scenario({**ally_entry(ally_casts=[ALLY_SPELL]), 'learn': [ALLY_SPELL]})
+        for scenario, wrong in ((stated, lambda step: step['equals'] // 2), (plain, lambda step: step['equals'] * 2),
+                                (stated, lambda step: 0)):
+            failed = ran_report(scenario, lambda step: wrong(step) if step.get('metric') == 'spell_go_count'
+                                else honest(step))
+            with self.subTest(contract=scenario['contract'][-80:]), \
+                    self.assertRaisesRegex(ValueError, 'Equality assertion failed'):
+                run.check_report(failed, 'r', scenario, 0)
+
+    def test_a_spell_go_count_without_its_stated_source_is_refused(self):
+        casts = [[{**TWICE, 'spell_go_per_cast': count}] for count in (1, 0, -2, 2.0, '2', True)]
+        casts += [[{**TWICE, 'source': source}] for source in ('', '  ', 7)]
+        casts += [[{key: value for key, value in TWICE.items() if key != missing}] for missing in TWICE]
+        casts += [[{**TWICE, 'surplus': 1}], [TWICE, ALLY_SPELL], [TWICE, {**TWICE, 'spell_go_per_cast': 3}],
+                  [TWICE, {**TWICE, 'source': 'another line'}], [{**TWICE, 'spell': 0}]]
+        for cast in casts:
+            with self.subTest(cast=cast), self.assertRaisesRegex(ValueError, 'ally_arm'):
+                self.scenario({**ally_entry(ally_casts=cast), 'learn': [ALLY_SPELL]})
+
+    def test_a_ratio_names_two_arms_and_states_its_expectation(self):
+        scenario, [expectation] = self.scenario(ratio_entry())
+        run.validate(scenario)
+        self.assertEqual(expectation.model['ally_arm']['ratios'], [{**RATIO, 'expected': 0.75, 'tolerance': 0.01}])
+        self.assertIn('Ratio: arm 0 over arm 1', scenario['contract'])
+        self.assertNotIn('ratios', self.scenario(ally_entry())[1][0].model['ally_arm'])
+        refused = [{'numerator': 1}, {'numerator': 2}, {'denominator': -1}, {'denominator': True}, {'expected': 0},
+                   {'expected': -0.75}, {'expected': float('inf')}, {'tolerance': -0.1}, {'tolerance': '0'},
+                   {'source': ' '}, {'surplus': 1}]
+        for change in refused:
+            with self.subTest(change=change), self.assertRaisesRegex(ValueError, 'ally_arm'):
+                self.scenario(ratio_entry(**change))
+        for option in ({'arms': [COPY_ARM], 'ratios': [RATIO]}, {'arms': [COPY_ARM, PRIMARY_ARM], 'ratios': []},
+                       {'arms': [COPY_ARM, PRIMARY_ARM], 'ratios': RATIO},
+                       {'arms': [COPY_ARM, PRIMARY_ARM],
+                        'ratios': [{key: value for key, value in RATIO.items() if key != 'source'}]}):
+            with self.subTest(option=option), self.assertRaisesRegex(ValueError, 'ally_arm'):
+                self.scenario(steed_entry(ally_arm={'allies': 2, **option}))
 
     def test_an_ally_cast_the_scenario_cannot_prove_is_refused(self):
         entries = [ally_entry(ally_casts=[ALLY_SPELL]),
@@ -257,6 +326,26 @@ class AllyArmVerdictTests(unittest.TestCase):
         values = {key: value for key, value in self.held().items() if key != (0, 'after')}
         self.assertEqual(self.judged(ally_entry(), values).status, 'unmeasured')
         self.assertEqual(self.judged(ally_entry(), values, main=(1.0, 1.0)).status, 'alert')
+
+    def ratio_values(self, copy_after=5750, primary_after=6000) -> dict:
+        return {(0, 'before'): 5000, (0, 'after'): copy_after, (1, 'before'): 5000, (1, 'after'): primary_after}
+
+    def test_a_held_ratio_keeps_the_main_status(self):
+        verdict = self.judged(ratio_entry(), self.ratio_values())
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('ally ratio arm 0 / arm 1: 750 / 1000 = 0.75 (expected 0.75 within 0.01): ok',
+                      verdict.explanation)
+
+    def test_mutant_a_ratio_off_alerts_while_both_arms_hold(self):
+        verdict = self.judged(ratio_entry(), self.ratio_values(copy_after=6000))
+        self.assertEqual(verdict.status, 'alert')
+        self.assertNotIn(': off (a seeded copy heal)', verdict.explanation)
+        self.assertIn('= 1 (expected 0.75 within 0.01): off', verdict.explanation)
+
+    def test_a_denominator_arm_that_did_not_move_is_off(self):
+        verdict = self.judged(ratio_entry(), self.ratio_values(copy_after=5000, primary_after=5000))
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('none, the denominator arm did not move', verdict.explanation)
 
     def test_without_arms_the_verdict_is_the_plain_one(self):
         plain = self.judged(steed_entry(), {})
