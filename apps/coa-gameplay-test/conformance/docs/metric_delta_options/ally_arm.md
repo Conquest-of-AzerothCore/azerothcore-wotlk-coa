@@ -48,8 +48,8 @@ arm or the main reading with one of them on a unit other than the caster is refu
 ally.
 
 Verdict: the main verdict, then alert when an arm or a ratio is off; a missing arm read makes it unmeasured, or
-keeps an alert the main verdict already gives. Without arms the verdict is the plain one. One `tolerance` serves both phases, so a
-random value whose band differs between phases (G-19) cannot be stated in one arm. The evidence class stays the main
+keeps an alert the main verdict already gives. Without arms the verdict is the plain one. One `tolerance` serves
+both phases, so a random value whose band differs between phases (G-19) cannot be stated in one arm. The evidence class stays the main
 metric's: an arm does not pass through the clause gates (`CONTRAST_PROOF`, `STATE_PROMISES`, `EVENT_PROMISES`), so a
 ledger row an arm proves needs its arm checked against the clause by the class reviewer.
 
