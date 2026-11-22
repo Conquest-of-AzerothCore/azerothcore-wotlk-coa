@@ -183,6 +183,9 @@ def attacker_miss_share_scenario(class_file: dict, spec: AttackerMissShareSpec) 
     pre_text = f' after {", ".join(str(spell) for spell in spec.pre_cast)}' if spec.pre_cast else ''
     fixture = (f'reset_cooldown {spec.cast_spell} before every cast (RecoveryTime {facts.recast_ms} ms), a named '
                f'precondition fixture, not the subject (G-21 point 6)')
+    if spec.pre_cast:
+        fixture += (f'; reset_cooldown of {", ".join(str(spell) for spell in spec.pre_cast)} before every pre cast, '
+                    f'the same named fixture')
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour attacker miss share',
@@ -191,8 +194,9 @@ def attacker_miss_share_scenario(class_file: dict, spec: AttackerMissShareSpec) 
                      f'the swings the caster takes and those with victim state {MISS_VICTIM_STATE} (a miss) over '
                      f'{spec.arm_ms} ms with no cast; the caster\'s health is set every {spec.cycle_ms} ms and aura '
                      f'{spec.aura} is read on every attacker at each cycle end. The treatment arm casts '
-                     f'{spec.cast_spell} at {attackers[0]}{pre_text} every {spec.cycle_ms} ms ({fixture}); counting starts '
-                     f'{spec.settle_ms} ms after the first cast, once aura {spec.aura} from the caster is read on '
+                     f'{spec.cast_spell} at {attackers[0]}{pre_text} every {spec.cycle_ms} ms ({fixture}); counting '
+                     f'starts {spec.settle_ms} ms after the first cast, once aura {spec.aura} from the caster is read '
+                     f'on '
                      f'every attacker, and the aura is read again on every attacker at each cycle end. The miss '
                      f'shares of the two arms are compared against the stated {expected:+g} points with the '
                      f'taken-outcome 99% interval; a lapsed treatment aura, a control aura or a control share '

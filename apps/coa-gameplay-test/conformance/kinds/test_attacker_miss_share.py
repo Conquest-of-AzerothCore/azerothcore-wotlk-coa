@@ -14,7 +14,8 @@ ENTRY = {'spell': 572752, 'name': 'Sun Down (attackers swing inside the scorched
          'aura': 807175, 'expected': 3,
          'arm_ms': 64000, 'cycle_ms': 8000, 'settle_ms': 7500}
 HERALD = {'spell': 804630, 'name': 'Herald of Dawn (attacker swings under the Solar Flare)',
-          'kind': 'attacker_miss_share', 'quote': "reduces the target's chance to hit by", 'quote_spell': 807175, 'cast_spell': 500146,
+          'kind': 'attacker_miss_share', 'quote': "reduces the target's chance to hit by", 'quote_spell': 807175,
+          'cast_spell': 500146,
           'pre_cast': [806477], 'learn': [804630, 806477], 'aura': 807175, 'expected': 3, 'attackers': 1,
           'arm_ms': 64000, 'cycle_ms': 8000, 'settle_ms': 7500, 'label_suffix': 'herald_miss'}
 BASE_MANA = {'power': 0, 'value': 1363, 'source': 'seeded test value'}
