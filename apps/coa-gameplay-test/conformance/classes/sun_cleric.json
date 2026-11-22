@@ -4861,8 +4861,8 @@
         [
           642,
           1,
-          "target",
-          "target"
+          "dummy",
+          "dummy"
         ]
       ],
       "metric": "spell_damage_total",
@@ -4905,8 +4905,8 @@
         [
           642,
           1,
-          "target",
-          "target"
+          "dummy",
+          "dummy"
         ]
       ],
       "metric": "spell_damage_total",
