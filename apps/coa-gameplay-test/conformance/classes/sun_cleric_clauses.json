@@ -86,17 +86,42 @@
     "spell": 92137,
     "clause": "Avoiding an attack now has a $h% chance to grant you Angelic Presence.",
     "labels": [
-      "92137 effect_value #0"
+      "92137 proc_rate avoided"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Avoided-swing proc rate 21.2% against 20% (band 2 points, min_detectable 4, residual 0.001 per pair); bindmysoul agrees (20%)."
   },
   {
     "spell": 92137,
     "clause": "Your next Illumination within $d is instant cast and free of cost.",
-    "labels": [
-      "92137 spell_duration 800722 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "your next Illumination is instant cast",
+        "labels": [
+          "92137 behaviour_metric_delta instant"
+        ]
+      },
+      {
+        "claim": "and free of cost",
+        "labels": [
+          "92137 behaviour_metric_delta free"
+        ]
+      },
+      {
+        "claim": "the buff is spent by one Illumination (next)",
+        "labels": [
+          "92137 behaviour_metric_delta consumed"
+        ]
+      },
+      {
+        "claim": "within $d (15 s)",
+        "labels": [
+          "92137 spell_duration 800722 #1"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Instant cast 0 ms and free 0 mana against 2000 ms and 408.9 in the control, after 40 real parried strikes (0.8^40 = 1.3e-4 residual per run); the consumed entry reads 2000 after one Illumination. The 15 s window stays a data check (aura remaining time after a random last proc cannot be stated exactly): needs a design with a known proc time."
   },
   {
     "spell": 300314,
@@ -368,10 +393,16 @@
   {
     "spell": 300349,
     "clause": "Your critical heals now reduce the cooldown of Solar Invocation spells by $/1000;804512s1 sec.",
+    "kind": "claim",
     "labels": [
-      "300349 effect_value 804512e0 #0"
+      "300349 behaviour_metric_delta cd_cut",
+      "300349 behaviour_metric_delta cd_cut_control",
+      "300349 behaviour_metric_delta cd_cut_806159",
+      "300349 behaviour_metric_delta cd_cut_control_806159",
+      "300349 behaviour_metric_delta cd_cut_503651",
+      "300349 behaviour_metric_delta cd_cut_control_503651"
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-054615 / 20261122-054649, build b0637b14, no flip. Hope's three Solar Invocation targets (Conquest 800764, Resplendence 806159, Revelation 503651) are each read after a forced critical Daybreak with a control arm (Solar Conduit in place of Hope): cooldown 30000 - 1000 - 2100 elapsed = 26900 within 50 ms, so a 0.9 s or 1.1 s cut fails. Solar Invocation: Ascension 500152 (the fourth spell of category 767) is not a target of 804512 and is not read. The once-per-second clause 31 stays open."
   },
   {
     "spell": 300349,
@@ -1273,23 +1304,64 @@
   {
     "spell": 520639,
     "clause": "Dawn will now provide an additional effect based on your specialization.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "520639 behaviour_metric_delta helper_92137",
+      "520639 behaviour_metric_delta helper_500207",
+      "520639 behaviour_metric_delta helper_500209",
+      "520639 behaviour_metric_delta helper_680627"
+    ],
+    "reason": "Measured with the Seraphim passive 92137 for the first branch: PR #11520 (issue #11431) changed the server test from 800586 to 92137 on purpose, both being named Angelic Presence, 92137 being the Level 10 Passive this server grants (mentor ruling D-96). The tooltip's $?s800586 is a client-side condition (observation only). Pair 20261122-054615 / 20261122-054649, build b0637b14, no flip, control: helper aura absent before Nysoni's Blessing is learned, present after, for 92137, 500207, 500209 and 680627. Specialization auras are precondition fixtures (set_aura), not the subject. Reference search: coa-history 520641 57 applications in 4 logs; nothing beyond the tooltip."
   },
   {
     "spell": 520639,
     "clause": "$?s800586[][]$?s500207[][]$?s500209[][]$?s680627[][]",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Seraphim's Light with specialization 92137 (the tooltip's $?s800586 is a client-side condition, PR #11520)",
+        "labels": [
+          "520639 behaviour_metric_delta helper_92137"
+        ]
+      },
+      {
+        "claim": "Pious Flames with specialization 500207",
+        "labels": [
+          "520639 behaviour_metric_delta helper_500207"
+        ]
+      },
+      {
+        "claim": "Holy Blessing with specialization 500209",
+        "labels": [
+          "520639 behaviour_metric_delta helper_500209"
+        ]
+      },
+      {
+        "claim": "Power of the Val'kyr with specialization 680627",
+        "labels": [
+          "520639 behaviour_metric_delta helper_680627"
+        ]
+      }
+    ],
+    "reason": "Same pair and ruling as the row above (PR #11520, D-96): the 92137 branch is measured on the Seraphim passive; 800586 is a client-side condition (observation only). One entry per branch of the conditional. The helper's own stated values (520641 shield, 520644 damage, 520645 critical strike, 520646 haste) have no row of their own: observation, not proven here."
   },
   {
     "spell": 520647,
     "clause": "Place a $a1 yd holy circle at target location for $d.",
-    "labels": [
-      "520647 effect_radius e0 #0",
-      "520647 aura_duration_ms #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "a 10 yd holy circle",
+        "labels": []
+      },
+      {
+        "claim": "for 15 s",
+        "labels": [
+          "520647 behaviour_metric_delta circle_duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "OPEN: the radius claim has no status. Radius: caster at 9 yd from the circle centre holds the aura, at 13 yd does not (labels radius_in, radius_out ran, not cited): that brackets 9 to 13 yd only and a 9 yd or 11 yd circle passes both, and the area test adds object sizes (AnyFriendlyUnitInObjectRangeCheck, IsWithinDistInMap) with no stock control. Duration: aura on the caster read 9988 ms against 10000 five seconds in (13500 and 16500 ms excluded), a readback. Reference search: bindmysoul agrees (10 yd, 15 seconds)."
   },
   {
     "spell": 520647,
@@ -1325,9 +1397,11 @@
     "spell": 520647,
     "clause": "@ext:Damage which reduces the caster below 10% maximum health will break the effect.:ext@",
     "labels": [
-      "520647 effect_value #5"
+      "520647 behaviour_metric_delta break",
+      "520647 behaviour_metric_delta break_control"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261122-054615 / 20261122-054649, build b0637b14, no flip. Redesigned after review: the caster's area aura 520647 is read 5000 ms after a 1100 strike leaving 9.0% (absent: broken) and one leaving 11.0% (present), bracketing the 10% line; before phase has no cast. Reference search: nothing found."
   },
   {
     "spell": 534267,
@@ -1814,50 +1888,91 @@
   {
     "spell": 561204,
     "clause": "Increases the duration of Radiance by $/1000;s1 sec.",
+    "kind": "claim",
     "labels": [
-      "561204 effect_value e0 #0"
+      "561204 behaviour_metric_delta radiance_duration"
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Radiance duration 9944 ms without the passive and 15944 with it (10000 + 6000), band 100 ms."
   },
   {
     "spell": 561204,
     "clause": "Whenever you use Dawn, you gain Radiance for $/1000;302907s1 sec.",
+    "kind": "claim",
     "labels": [
-      "561204 effect_value 302907e0 #1"
+      "561204 behaviour_metric_delta dawn_gain"
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Radiance applied by Dawn reads 5945 ms (6001 - 50) with the passive and is absent without it; the batch 1b lead (Radiance not applied after a Dawn cast) does not reproduce."
   },
   {
     "spell": 561204,
     "clause": "If Radiance is already active, its duration is extended by $/1000;302907s1 sec.",
+    "kind": "claim",
     "labels": [
-      "561204 effect_value 302907e0 #2"
+      "561204 behaviour_metric_delta dawn_extend"
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Radiance cast, Dawn 1600 ms later: duration 8338 without the passive (control, no extension) and 20339 with it (16000 + 6001 - 1650), band 300 ms, no extension would read 14350."
   },
   {
     "spell": 561204,
     "clause": "Every $/1000;800054t1 sec you burst with light,",
+    "kind": "claim",
     "labels": [
-      "561204 effect_value #5"
+      "561204 behaviour_metric_delta burst_upper",
+      "561204 behaviour_metric_delta burst_lower"
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Damage events of the burst: none by 1.85 s, one by 2.15 s (game time), so the period lies in (1.8, 2.2) s around 2 s."
   },
   {
     "spell": 561204,
     "clause": "healing nearby allies for ${$800038m1+$800038ppl1+$SP*0.2+$AP*0.1}",
-    "labels": [
-      "561204 effect_value 800038e0 #3"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "the base healing",
+        "labels": [
+          "561204 behaviour_metric_delta burst_heal"
+        ]
+      },
+      {
+        "claim": "the spell power term",
+        "labels": [
+          "561204 behaviour_metric_delta burst_heal_sp"
+        ]
+      },
+      {
+        "claim": "the attack power term",
+        "labels": [
+          "561204 behaviour_metric_delta burst_heal_ap"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Burst heal 35 at the reference stats (expected 34.4..35.2), 1634-1635 at +10000 spell power and 1634 at +20000 attack power (expected 1634.4..1635.2): the heal terms 0.2 SP and 0.1 AP are proven by their contrast arms against the base."
   },
   {
     "spell": 561204,
     "clause": "and damaging nearby enemies for ${$800038m2+$800038ppl2+$SP*0.4+$AP*0.15}.",
-    "labels": [
-      "561204 effect_value 800038e1 #4"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "the base damage",
+        "labels": [
+          "561204 behaviour_metric_delta burst_damage"
+        ]
+      },
+      {
+        "claim": "the spell power term",
+        "labels": [
+          "561204 behaviour_metric_delta burst_damage_sp"
+        ]
+      },
+      {
+        "claim": "the attack power term",
+        "labels": [
+          "561204 behaviour_metric_delta burst_damage_ap"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Burst damage 48 at the reference stats (expected 47.5..48.5), 4047 at +10000 spell power (4047.5..4048.5) and 3048 at +20000 attack power (3047.5..3048.5): the damage terms 0.4 SP and 0.15 AP are proven by their contrast arms against the base."
   },
   {
     "spell": 561327,
@@ -2726,17 +2841,19 @@
     "spell": 681467,
     "clause": "Increases your armor contribution from plate items by $s1%",
     "labels": [
-      "681467 effect_value e0 #0"
+      "681467 behaviour_metric_delta plate_armor"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Plate armor gain read 80 against 80.2 (20% of the Reborn armor 401 of item 8094 from ItemAddon.dbc), within 1.5; control = before the learn with the same item. Reference search: bindmysoul has rank 1 680652 (10%) only; nothing else found."
   },
   {
     "spell": 681467,
     "clause": "and reduces Shadow damage taken by $s2%.",
     "labels": [
-      "681467 effect_value e1 #1"
+      "681467 behaviour_hit_ratio shadow_taken"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Shadow damage ratio read -6.1% against -6.0% over 20 trials, control = passive unlearned. Reference search: nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 681468,
@@ -4079,10 +4196,22 @@
   {
     "spell": 802161,
     "clause": "Shift $802145a1 yds forward at light speed, removing all root effects.",
-    "labels": [
-      "802161 effect_radius 802145e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "shift 25 yds forward",
+        "labels": [
+          "802161 behaviour_metric_delta shift"
+        ]
+      },
+      {
+        "claim": "removing all root effects",
+        "labels": [
+          "802161 behaviour_metric_delta frees_root"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-052552 / 20261122-052627, build b0637b14, server commit ee4a62f00b8d, no flip, every entry reads its control before the cause. Caster displacement 25 yd after the cast (0 without it), and the Entangling Roots 339 root on the caster gone after Sun Gate (present in the control phase, application counted)."
   },
   {
     "spell": 802161,
@@ -4724,19 +4853,45 @@
   {
     "spell": 807870,
     "clause": "Flash powerful light that deals ${$m2+0+$SP*0.274099} Holy damage",
-    "labels": [
-      "807870 effect_value e1 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "deals $m2 (93..94 at level 60) Holy damage",
+        "labels": [
+          "807870 behaviour_metric_delta damage"
+        ]
+      },
+      {
+        "claim": "+ $SP*0.274099: 10000 spell power adds 2740",
+        "labels": [
+          "807870 behaviour_metric_delta damage_sp"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Pair 20261122-051135 / 20261122-051226, build b0637b14, server commit ee4a62f00b8d, no flip, control arm in every entry. Damage 93 read in [93,94] (93 + 0 at the reference spell power); +10000 spell power read 2833 (expected 2833..2835, 0.274099 x 10000 = 2740): contrast on the same pair. Reference search: coa-history 43 events, bindmysoul 805583 reads 20 + 27.41% SP (older flat base, G-9); nothing else found."
   },
   {
     "spell": 807870,
     "clause": "and stuns enemies within $a1 yds for $d.",
-    "labels": [
-      "807870 effect_radius e0 #1",
-      "807870 aura_duration_ms #2"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "stuns enemies within 8 yds",
+        "labels": [
+          "807870 behaviour_metric_delta radius_edge_stun",
+          "807870 behaviour_metric_delta stun_near",
+          "807870 behaviour_metric_delta stun_far",
+          "807870 behaviour_metric_delta stun_far2"
+        ]
+      },
+      {
+        "claim": "for 5 s",
+        "labels": [
+          "807870 behaviour_metric_delta stun_duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "OPEN radius: the expected edge is 8 + 2.66 leeway (Spell.cpp:1394, Object.cpp:1787-1808, a player caster on TARGET_UNIT_SRC_AREA_ENEMY) + 1.275 target combat reach = 11.935 yd (Spell.cpp:9434-9448), inside the measured bracket (stunned near 11.4 yd, not at 12.5 yd). radius_edge cannot model the leeway term yet (tool question to the mentor); its entry adds the caster's reach instead and alerts, so the radius labels do not close. Duration: stun on the dummy read 3982 and 3997 ms against 4000 (5000 minus 1000 after the 1500 ms cast), within 250."
   },
   {
     "spell": 805628,
