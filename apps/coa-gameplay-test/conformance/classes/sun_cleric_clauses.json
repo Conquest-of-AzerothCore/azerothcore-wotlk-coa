@@ -600,7 +600,6 @@
     "spell": 300367,
     "clause": "Horusath Blast or Rapture now have a $h% chance to not incur a cooldown on cast.",
     "labels": [
-      "300367 effect_value #0",
       "300367 behaviour_metric_delta horusath_reset_rate",
       "300367 behaviour_metric_delta rapture_reset_rate"
     ],
@@ -3367,23 +3366,41 @@
   {
     "spell": 704920,
     "clause": "Effectively healing with Radiant Cascade has a $h% chance to increase the healing of your next Illumination by $301293s1%.",
-    "labels": [
-      "704920 effect_value #0",
-      "704920 effect_value 301293e0 #1",
-      "704920 proc_rate 301293"
-    ],
     "kind": "claim",
+    "claims": [
+      {
+        "claim": "Effectively healing with Radiant Cascade has a $h% chance",
+        "labels": [
+          "704920 proc_rate 301293"
+        ]
+      },
+      {
+        "claim": "to increase the healing of your next Illumination by $301293s1%",
+        "labels": [
+          "704920 effect_value 301293e0 #1"
+        ]
+      }
+    ],
     "reason": "Rate judged on effective heals of Radiant Cascade 500141 on the ally only (proc trial effective_heal, ADR 1022, provisional): 0.2004 / 0.1976 over 15965 heals (103 parts), no event in the baseline without 704920, no ally overheal and no caster effective heal. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-072517 / 20261122-072823, build 1acfebec876b, server commit 81cfed96d444, no flip."
   },
   {
     "spell": 704920,
     "clause": "Effectively healing with Illumination has a $707520h% chance to increase the healing of your next Radiant Cascade by $300354s1%.",
-    "labels": [
-      "704920 effect_value #2",
-      "704920 effect_value 300354e0 #3",
-      "704920 proc_rate 300354"
-    ],
     "kind": "claim",
+    "claims": [
+      {
+        "claim": "Effectively healing with Illumination has a $707520h% chance",
+        "labels": [
+          "704920 proc_rate 300354"
+        ]
+      },
+      {
+        "claim": "to increase the healing of your next Radiant Cascade by $300354s1%",
+        "labels": [
+          "704920 effect_value 300354e0 #3"
+        ]
+      }
+    ],
     "reason": "Rate judged on effective heals of Illumination 500143 on the ally only (proc trial effective_heal, ADR 1022, provisional): 0.4027 / 0.3978 over 23940 heals (126 parts), $707520h = ProcChance 40, no event in the baseline without 704920, no ally overheal and no caster effective heal. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-072517 / 20261122-072823, build 1acfebec876b, server commit 81cfed96d444, no flip."
   },
   {
@@ -5522,7 +5539,6 @@
     "spell": 806699,
     "clause": "Melee attacks now have a $h% chance to reset the cooldown of Glorious Execution.",
     "labels": [
-      "806699 effect_value #0",
       "806699 behaviour_metric_delta swing_reset_rate"
     ],
     "kind": "claim",
