@@ -37739,9 +37739,9 @@
               "target": "dummy"
             },
             "before_expected": 1,
-            "expected": 1,
+            "expected": 2,
             "tolerance": 0,
-            "source": "the ally casts Gavel of Wrath 802561 once at the dummy in each phase (ally_attacks), an instant Physical direct hit: one damage event proves the ally struck"
+            "source": "the ally casts Gavel of Wrath 802561 once at the dummy in each phase (ally_attacks), an instant Physical direct hit, and the harness counts events over both phases: 1 after the first phase and 2 after the second prove the ally struck in each"
           }
         ]
       },
