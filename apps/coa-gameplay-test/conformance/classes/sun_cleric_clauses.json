@@ -2538,7 +2538,7 @@
       "681448 behaviour_metric_delta aura_done"
     ],
     "kind": "claim",
-    "reason": "Control arm = aura 520025 without the passive: gone at 2740 ms. ALERT: with the passive the remaining duration reads 2694 at 300 ms (3000 total) but the aura is absent at 2740 ms (aura_held 0, expected 1), both runs; AscensionSunClericSummons.cpp:50-57 schedules the landing and RemoveAurasDueToSpell(520025) at SpellInfo(520024)->GetDuration() (2000 ms, no spell mod): fix note in the report. Reference search 2026-11-22: coa-history spell 681448: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found. Pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, no flip."
+    "reason": "Control arm = aura 520025 without the passive: gone at 2740 ms. Fixed (mentor D-69, Sun Cleric ADR 0010): the landing and the removal of 520025 were scheduled at SpellInfo(520024)->GetDuration() (2000 ms, no spell mod) and now follow the 520025 aura's maximum duration. Before: pair 20261122-025000 / 20261122-025043, build c1653c52, server commit 4430490d5045, remaining 2694 at 300 ms but aura_held 0 (expected 1), both runs. After: pair 20261122-032735 / 20261122-032813, build f3246ca665fc, server commit e7b060192998, duration 2694, aura_held 1, aura_done 0, both runs, no flip. Reference search 2026-11-22: coa-history spell 681448: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) repeats the tooltip figures; nothing else found."
   },
   {
     "spell": 681467,

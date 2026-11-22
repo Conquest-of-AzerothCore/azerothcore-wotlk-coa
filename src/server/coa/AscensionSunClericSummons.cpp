@@ -48,7 +48,9 @@ void Valkyr(Player* player, Unit* target, bool dawn, bool fulfillment)
     ObjectGuid owner = player->GetGUID(), victim = target->GetGUID();
     uint32 map = player->GetMapId();
     Cast(player,player,520025);
-    State(player).scheduler.Schedule(Milliseconds(sSpellMgr->GetSpellInfo(520024)->GetDuration()),
+    Aura const* flight = player->GetAura(520025);
+    int32 flightDuration = flight ? flight->GetMaxDuration() : sSpellMgr->GetSpellInfo(520024)->GetDuration();
+    State(player).scheduler.Schedule(Milliseconds(flightDuration),
         [owner,victim,map,dawn,fulfillment](TaskContext)
         {
             Player* caster = ObjectAccessor::FindPlayer(owner);
