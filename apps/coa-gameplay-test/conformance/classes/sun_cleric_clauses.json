@@ -5146,7 +5146,7 @@
         ]
       }
     ],
-    "reason": "On block: 24 strikes at block 100% grant Hammer of Kings 804751 at least once after 707629 is learned and never before; unblocked hits grant it never: kind block_extension_trials mode grant (D-228), block 0% with the shield on, each trial removes the aura, reads it absent, strikes once and reads the damage log; a strike blocked anyway voids its trial (about 4%), at least 24 judged trials, 0.7^24 = 1.9e-4 per run. The 30% chance: 6 pooled parts of 950 trials at block 100% (5700, 5444 judged needed for a 99% half-width of 1.6 points), share inside 28.4..31.6% (mentor band D-228), 24 control trials per part before the learn show no aura. The 4 sec duration stays data."
+    "reason": "On block: 24 strikes at block 100% grant Hammer of Kings 804751 at least once after 707629 is learned and never before; unblocked hits grant it never: kind block_extension_trials mode grant (D-228), block 0% with the shield on, each trial removes the aura, reads it absent, strikes once and reads the damage log; a strike blocked anyway voids its trial (about 4%), at least 24 judged trials, 0.7^24 = 1.9e-4 per run. The 30% chance: 38 pooled parts of 950 trials at block 100% (36100, D-236: the 99% Wilson half-width is 0.62 points at p = 0.30, so each run's whole interval must lie inside 28.4..31.6%; the 5700 of D-228 gave 1.56 points and low ends 28.03 and 28.29), mentor band 28.4..31.6%, 24 control trials per part before the learn show no aura. The 4 sec duration stays data."
   },
   {
     "spell": 707629,
