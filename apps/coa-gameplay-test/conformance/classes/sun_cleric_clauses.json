@@ -604,7 +604,8 @@
       "300367 behaviour_metric_delta horusath_reset_rate",
       "300367 behaviour_metric_delta rapture_reset_rate"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Judged by cooldown_reset_rate with reset_between_attempts, base_mana_per_attempt, trial_casts and residual_target 0.001 / min_detectable 5 (ADR 1022, provisional): Horusath Blast 572801 0.2013 / 0.2028 over 15200 casts (8 parts), Rapture 806477 0.2016 / 0.1962 over 14700 casts (14 parts), each control exactly one clear-cooldown packet per fixture reset. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-071431 / 20261122-072022, build a106dc81599f, server commit 46b292ee9fd8, no flip."
   },
   {
     "spell": 300369,
@@ -2704,7 +2705,7 @@
         ]
       }
     ],
-    "reason": "Open, target status 1 (review b7c I2, not status 5). The server adds .25 x attack power to Horusath Blast 500154 effect 0 while 680656 is known (AscensionSunClericContracts.cpp:309-310); the line arrived in e36bc50aad (bulk restore of five classes) with no source for 0.25, and the tooltip, DBC (681471 carries no value), bindmysoul, ascension-data and coa-history give no coefficient. The clause states none, so the claim is that the damage gain exists and grows with attack power. Route: hits learned against not learned at two attack power levels, the AP contrast arm in the same pair. Tool need: no existing judge states 'gain above the control and growing with AP' without an expected figure, and the figure may not come from the code or the run."
+    "reason": "Direction proven, figure not stated by the tooltip, server value 0.25 unsourced (mentor D-106; power_term_direction, ADR 1022, provisional). Horusath Blast 572801 at attack power 70 and 1050 (Attack Power 980 35785), with and without 680656: interaction 219.6 / 257.4 at z 17.3 / 17.8 against 3.09, control growth 6.2 / -9.8 (z 0.80 / -1.04); the 0.25 x AP at AscensionSunClericContracts.cpp:309-310 stays an owner observation. Pair 20261122-071431 / 20261122-072022, build a106dc81599f, server commit 46b292ee9fd8, no flip."
   },
   {
     "spell": 680656,
@@ -3371,7 +3372,8 @@
       "704920 effect_value 301293e0 #1",
       "704920 proc_rate 301293"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Rate judged on effective heals of Radiant Cascade 500141 on the ally only (proc trial effective_heal, ADR 1022, provisional): 0.2004 / 0.1976 over 15965 heals (103 parts), no event in the baseline without 704920, no ally overheal and no caster effective heal. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-072517 / 20261122-072823, build 1acfebec876b, server commit 81cfed96d444, no flip."
   },
   {
     "spell": 704920,
@@ -3381,7 +3383,8 @@
       "704920 effect_value 300354e0 #3",
       "704920 proc_rate 300354"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Rate judged on effective heals of Illumination 500143 on the ally only (proc trial effective_heal, ADR 1022, provisional): 0.4027 / 0.3978 over 23940 heals (126 parts), $707520h = ProcChance 40, no event in the baseline without 704920, no ally overheal and no caster effective heal. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-072517 / 20261122-072823, build 1acfebec876b, server commit 81cfed96d444, no flip."
   },
   {
     "spell": 704928,
@@ -5523,15 +5526,7 @@
       "806699 behaviour_metric_delta swing_reset_rate"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The proc is rolled only on a landed automatic melee hit (AscensionSunClericEvents.cpp:124, damage && automatic && Chance) and its only effect is RemoveSpellCooldown of Glorious Execution, so the only behaviour read is whether a cast of Glorious Execution goes through before its cooldown has run. Tried: a procs entry counting the marker 806700 over 170 landed swings read 0 casts (the marker is never cast); proc_reset is refused (NotModelled: no plain power cost to read, no cost modifier on 806700); cooldown_reset_rate rolls its proc on a cast, not on an automatic hit. Not built: a swing-driven cooldown read of the shape cooldown_clear_time already has for minion events: cast Glorious Execution, let one automatic hit land (the harness counts melee_damage_count), attempt Glorious Execution once and read cast_failure (a cast goes through only after a reset, the arm without the talent is refused every time), repeated about 300 cycles per arm (G-20, $h = ProcChance 20). It needs a new kind and its seeded tests; this is a tool gap, not a final status.",
-      "attempts": [
-        {
-          "agent": "sc-b2b (class 27 batch 2 chunk 2 author)",
-          "report": ".agents/plans/sun-cleric-b2b/report.md#806699"
-        }
-      ]
-    }
+    "reason": "The earlier tool gap (sc-b2b, .agents/plans/sun-cleric-b2b/report.md#806699) is closed by swing_reset_rate (ADR 1017) with residual_target 0.001 / min_detectable 5 (ADR 1022, provisional): 0.1956 / 0.1996 over 19352 landed auto-attack hits (8 parts, Valkyr set), no reset in the control. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Pair 20261122-071431 / 20261122-072022, build a106dc81599f, server commit 46b292ee9fd8, no flip."
   },
   {
     "spell": 806980,
