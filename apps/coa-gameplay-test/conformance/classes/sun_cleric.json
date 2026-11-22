@@ -8796,15 +8796,15 @@
       "trigger_only_after": true,
       "game_time": {
         "after": [
-          7200,
+          7300,
           7760
         ],
         "expired": [
           8240,
-          8800
+          8700
         ]
       },
-      "observe_source": "806159 DurationIndex 31 (8000 ms, $d). One real cast of 806159 on the caster: its aura is present when read 7200..7760 ms of game time after the cast (G-19 band, 10% below 8000 excluded) and gone when read 8240..8800 ms after it (10% above excluded); no cast, no aura (control)."
+      "observe_source": "806159 DurationIndex 31 (8000 ms, $d). One real cast of 806159 on the caster: its aura is present when read 7300..7760 ms of game time after the cast (G-19 band, 10% below 8000 excluded) and gone when read 8240..8700 ms after it (10% above excluded); no cast, no aura (control)."
     },
     {
       "spell": 707767,
@@ -8917,13 +8917,13 @@
       "fields": {
         "spell": 800626
       },
-      "before_expected": 6000,
+      "before_expected": 7500,
       "expected": 0,
       "tolerance": 1500,
       "wait_ms": 500,
       "expire_ms": 500,
       "cast_power": 1363,
-      "observe_source": "560111 Blessed Magic Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL (706870, which triggers 2414058); the reset is scripted: OnSpellCast of Horusath Blast with the aura calls Reduce(player, 800626, INT32_MAX) (AscensionSunClericAbilities.cpp:236-241). Glorious Execution 800626 has RecoveryTime 8000 ms. It is cast, then Horusath Blast 500154 is cast at the dummy: its remaining cooldown is read (about 6000 ms without the talent, the control, within 1500) and 0 after a real learn of 560111 (within 1500, excludes any remaining cooldown above 1500)."
+      "observe_source": "560111 Blessed Magic Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL (706870, which triggers 2414058); the reset is scripted: OnSpellCast of Horusath Blast with the aura calls Reduce(player, 800626, INT32_MAX) (AscensionSunClericAbilities.cpp:236-241). Glorious Execution 800626 has RecoveryTime 8000 ms. It is cast, then Horusath Blast 500154 is cast at the dummy: its remaining cooldown is read (about 7500 ms without the talent, the control: RecoveryTime 8000 less the 500 ms wait, within 1500) and 0 after a real learn of 560111 (within 1500, excludes any remaining cooldown above 1500)."
     },
     {
       "spell": 704935,
@@ -9023,9 +9023,9 @@
         "radius_spell": 853225,
         "pulses": 2,
         "near_distance": 38.0,
-        "far_margin": 5.7,
-        "near_limit": 41.5,
-        "note": "Spell.dbc 853225 SpellRadius 23 = 40 yd ($853225a1); a stock area spell adds the target's combat reach 1.5 (Spell.cpp:9437-9441), so the member at 38 yd is inside 41.5 and the member at 45.7 yd (6.2% beyond 43) outside it."
+        "far_margin": 2.0,
+        "near_limit": 40.0,
+        "note": "Spell.dbc 853225 SpellRadius 23 = 40 yd ($853225a1). Target type TARGET_UNIT_SRC_AREA_PARTY, both members are players: the target's combat reach is added only for a target that is not player-controlled (Spell.cpp:9439-9441) and the leeway only for SRC_AREA_ENEMY, CASTER_AREA_PARTY and CASTER_AREA_RAID (Spell.cpp:1391-1394), so the edge is 40.0 yd. The near member at 38 yd excludes a 36 yd radius (-10%), the far member at 42 yd excludes a 44 yd radius (+10%)."
       },
       "observe_source": "560123 Sunwell Effect[0] aura 4 dummy; 560124 Sun Well EffectAmplitude[0] 3000 ms ($560124T1) periodic trigger of 853225, whose three SPELL_EFFECT_DISPEL_MECHANIC effects (TARGET_UNIT_SRC_AREA_PARTY, SpellRadius 23 = 40 yd) name mechanics 1 charm, 5 fear and 10 sleep. Fear 65931, Sleep 9159 and Seduction 6358 on a party member are all present without the cast (control), gone 100 ms after the cast and after each 3000 ms period, present 100 ms before each period; a member beyond the radius keeps all three. Same shape as Witching Idol 804051 (Witch Hunter, pair 20261116-183539)."
     },
@@ -9099,7 +9099,7 @@
     },
     {
       "spell": 800612,
-      "name": "Champion of the Sun (a Holy strike per auto attack)",
+      "name": "Champion of the Sun (Holy strikes appear on auto attacks)",
       "kind": "metric_delta",
       "variant": "holy_strikes",
       "label_suffix": "holy_strikes",
@@ -9116,10 +9116,9 @@
         "target": "dummy"
       },
       "before_expected": 0,
-      "expected": 10,
-      "observe_source": "800612 Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT, EffectTriggerSpell 807853 (SCHOOL_DAMAGE at the target), the event 'damage && automatic' (AscensionSunClericEvents.cpp:136). Spec Valkyr (two one-hand 2800 ms weapons, spell_weapon_sets): each phase attacks for 5 swing intervals with both hands, 10 damaging auto attacks (as in the swings entry of 807749), so the count of 807853 damage events is 0 in the phase without the aura (control) and 10 in the phase with it; a swing landing at the edge of the window makes 11 (the first pair read 10 then 11, a flip of an exact read), so the count is judged in 10..12. The 100% amount part is not proven by this entry.",
-      "after_at_least": 10,
-      "after_at_most": 12
+      "expected": 1,
+      "observe_source": "800612 Effect[0] aura 354 SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT, EffectTriggerSpell 807853 (SCHOOL_DAMAGE at the target), the event 'damage && automatic' (AscensionSunClericEvents.cpp:136). Spec Valkyr (two one-hand 2800 ms weapons): each phase attacks for 5 swing intervals with both hands, about 10 damaging auto attacks. The count of 807853 damage events is 0 in the phase without the aura (control) and at least 1 in the phase with it. This entry proves only that Holy strikes follow auto attacks under the aura, not one per swing: the swings of the same window are not read by any kind, so no count is expected (tool need, returned). Residual: a proc rate of 50% or more leaves at least 1 strike in about 10 swings with probability 1 - 0.5^10 = 0.999; the control phase reads 0 by construction (no aura, no 807853 source).",
+      "after_at_least": 1
     },
     {
       "spell": 706735,
@@ -9494,7 +9493,7 @@
     },
     {
       "spell": 680622,
-      "name": "Fervor of the Sun (gone at 66.4 s)",
+      "name": "Fervor of the Sun (gone at 65.4 s)",
       "kind": "metric_delta",
       "variant": "duration_gone",
       "label_suffix": "duration_gone",
@@ -9536,8 +9535,8 @@
       },
       "before_expected": 0,
       "expected": 0,
-      "wait_ms": 68400,
-      "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). 680623 is gone 66400 ms after the fulfilling heal: its duration is below 66.4 s, which excludes 66 s (+10% of 60 s). Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
+      "wait_ms": 67400,
+      "observe_source": "680622 Fervor of the Sun Effect[0] aura 4 SPELL_AURA_DUMMY; AscensionSunCleric.cpp:294-295 (Fulfill) casts Fervor of the Sun 680623 on the caster when a Vow is fulfilled (the same Fulfill call as Dawnguard 680672 at :296-297): a damaging or healing spell cast under Dawn 807440 with a Vow aura, here Vow of Radiance 803489 cast before Dawn 804584, Illumination 500143 on the caster at 50% health as the fulfilling heal. 680623 Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 3, BasePoints 9 + 1 = 10 ($680623s1), DurationIndex 3 = 60000 ms ($680623d), StackAmount 5 ($680623u). Dawn is cast with 20 Solar Power set as in the Dawnguard entries (harness precondition fixture). 680623 is gone 65400 ms after the fulfilling heal (wait 2000 ms cast + 65400): its duration is below 65.4 s, which excludes 66 s (+10% of 60 s). Reference search 2026-11-22: coa-history spell 680622: 0 events in 186 logs (a passive leaves no event); git log origin/main --grep 680622: nothing; the reference snapshots list the tooltip only; nothing else found.",
       "cast_in_before": false,
       "setup_only_after": true
     },
@@ -9664,6 +9663,42 @@
       "gate_timing": "start",
       "trigger_only_after": true,
       "observe_source": "804253 Blessing of Purity Effect[0] SPELL_EFFECT_TRIGGER_SPELL 680889, whose aura 40 SPELL_AURA_DAMAGE_IMMUNITY (MiscValue 127, all schools) lasts 6000 ms (DurationIndex 32, $680889d); Spell.dbc TargetAuraSpell 804247 (Bless); the script casts it only on a target carrying the caster's own Bless (AscensionSunClericAbilities.cpp:478-492). Bless is not cast. Control of the duration entry: 804253 cast at a caster without Bless leaves no 680889 (the script returns when the target lacks the caster's Bless); the duration entry shows the aura present with Bless. Reference search as the duration entry."
+    },
+    {
+      "spell": 804253,
+      "name": "Blessing of Purity (immune to all damage)",
+      "kind": "metric_delta",
+      "variant": "immune_strike",
+      "label_suffix": "immune_strike",
+      "quote": "Protect a Blessed ally, making them immune to all damage for $680889d.",
+      "trigger_spell": 804253,
+      "setup_casts": [
+        804247
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "strike": {
+        "spell": 47632,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 1500
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 47632,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "680889 aura 40 SPELL_AURA_DAMAGE_IMMUNITY, MiscValue 127 (every school), 6000 ms. Grave Coil 47632 (600 Shadow, DmgClass 1) is cast by a creature striker (spell hit bonus 100) at the caster. Before phase (control): the strike lands on the caster without 804253 and the cumulative count of 47632 damage events on the caster reads 1. After phase: the caster is blessed by a real Bless 804247 on itself, casts 804253 on itself (mana set), and 1500 ms later the same strike is cast: the count still reads 1, so the strike dealt no damage under the immunity (immunity lasts 6000 ms, the strike is inside it). The struck unit is the Blessed caster, not a second ally: a taken_hit strike at an ally is available only to the absorb judge, and the damage_ratio judge refuses an arm with no landed hit (tool need, returned). Reference search 2026-11-22: coa-history spell 804253: 11 casts in 5 logs, no aura events; git log origin/main --grep 804253: nothing; Snapshot coabuildhub (spells_master_index.json, local copy dated 2026-09-18, context) reads \"for 4 sec but reducing their damage and healing done by 25%\" against the installed DBC 6 s and no reduction; the installed DBC governs. "
     }
   ],
   "player_observations": [],
