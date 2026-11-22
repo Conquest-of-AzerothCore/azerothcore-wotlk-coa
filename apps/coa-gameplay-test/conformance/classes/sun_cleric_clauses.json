@@ -4281,7 +4281,10 @@
   {
     "spell": 707517,
     "clause": "Radiant Cascade is now guaranteed to critically strike on allies affected by Bless.",
-    "labels": [],
+    "labels": [
+      "707517 behaviour_metric_delta bless_ally",
+      "707517 behaviour_metric_delta no_bless"
+    ],
     "kind": "claim"
   },
   {
