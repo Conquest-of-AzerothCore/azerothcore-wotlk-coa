@@ -3,7 +3,7 @@ import math
 from pathlib import Path
 
 from behaviours import (BEHAVIOUR_METRIC_DELTA, SPELL_FAILED_NOT_READY, ally_group_steps, ally_players,
-                        behaviour_entry, dummy_fixture, dummy_id, prose_rule, waited_ms)
+                        behaviour_entry, cleaned_tooltip, dummy_fixture, dummy_id, prose_rule, waited_ms)
 from bonus import bonus_of, per_event_sample
 from compare import FLOAT_EPSILON, Run, Verdict, missing_measurement
 from hits import MAX_ACCELERATED_SCENARIO_MS, MAX_SCENARIO_MS, timed
@@ -427,6 +427,8 @@ def cooldown_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
 
 
 def aura_fed_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    if model.get('variant') == WINDOW_VARIANT:
+        return window_verdict(base, run, model)
     labels = [label for arm in ARMS for trial in model['reads'][arm] for label in trial.values()]
     missing = next((label for label in labels if run.values.get(label) is None), None)
     if missing is not None:
@@ -515,7 +517,215 @@ def figure_verdict(base: Verdict, model: dict, hits: dict, next_hits: list[float
                    expected=model['expected'], low=1 + low / 100, high=1 + high / 100, explanation=explanation)
 
 
+WINDOW_VARIANT = 'window'
+WINDOW_SIDES = ('held', 'gone')
+WINDOW_SHARES = {'held': (0.9, 0.965), 'gone': (1.04, 1.1)}
+WINDOW_DETECTION_MS = 25
+WINDOW_FEED_TICKS = 1
+WINDOW_CHANNEL_CLEAR_MS = 4500
+WINDOW_TRIAL_READS = ('known start', 'grants start', 'aura stop', 'grants stop', 'casting clear', 'ticks relearn',
+                      'known relearn', 'ticks cast', 'grants cast', 'aura cast', 'casting', 'went')
+
+
+@dataclass(frozen=True)
+class WindowSpec:
+    spell: int
+    name: str
+    quote: str
+    feed_spell: int
+    aura: int
+    effect_spell: int
+    every_ms: int
+    residual_target: float
+    feed_power: int
+    effect_power: int
+    trials: int
+    min_judged: int
+    held_ms: int
+    gone_ms: int
+    caster_auras: tuple[int, ...]
+    label_suffix: str
+    quote_spell: int | None = None
+
+
+def window_spec(entry: dict) -> WindowSpec:
+    spec = WindowSpec(int(entry['spell']), entry['name'], entry['quote'], int(entry['feed_spell']), int(entry['aura']),
+                      int(entry['effect_spell']), int(entry['every_ms']), float(entry['residual_target']),
+                      int(entry['feed_power']), int(entry['effect_power']), int(entry['trials']),
+                      int(entry['min_judged']), int(entry['held_ms']), int(entry['gone_ms']),
+                      tuple(int(spell) for spell in entry.get('caster_auras', ())), entry.get('label_suffix', KIND),
+                      int(entry['quote_spell']) if 'quote_spell' in entry else None)
+    if not 0 < spec.residual_target < 1 or not 1 <= spec.min_judged <= spec.trials:
+        raise ValueError(f'{spec.spell} {KIND} {WINDOW_VARIANT} needs a residual_target in (0, 1) and min_judged '
+                         f'from 1 to trials per side')
+    if spec.every_ms < GCD_WAIT_MS or not WINDOW_CHANNEL_CLEAR_MS < spec.held_ms < spec.gone_ms:
+        raise ValueError(f'{spec.spell} {KIND} {WINDOW_VARIANT} feeds past the global cooldown and judges after the '
+                         f'{WINDOW_CHANNEL_CLEAR_MS} ms channel clearance, held_ms before gone_ms')
+    return spec
+
+
+def window_mark(spec: WindowSpec, read: str) -> str:
+    return f'{spec.spell} {BEHAVIOUR_METRIC_DELTA} {spec.label_suffix} {read}'
+
+
+def window_bounds(duration_ms: int, side: str) -> tuple[float, float]:
+    low, high = WINDOW_SHARES[side]
+    return duration_ms * low, duration_ms * high
+
+
+def window_scenario(class_file: dict, spec: WindowSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    quoted = spec.spell
+    if spec.quote_spell is not None and spec.quote_spell != spec.spell:
+        if f'@s:{spec.quote_spell}:' not in cleaned_tooltip(records, spec.spell):
+            raise ValueError(f'{spec.spell} {KIND} {WINDOW_VARIANT} quotes {spec.quote_spell}, whose tooltip the '
+                             f'{spec.spell} tooltip does not embed')
+        quoted = spec.quote_spell
+    entry = behaviour_entry(records, quoted, spec.name, KIND, spec.quote, 0.0)
+    duration = int(records.duration_ms(spec.aura))
+    tick_spell = int(records.field('Spell', spec.feed_spell, 'EffectTriggerSpell[0]'))
+    chance = records.field('Spell', spec.spell, 'ProcChance') / 100
+    if duration <= 0 or not tick_spell or not 0 < chance < 1:
+        raise ValueError(f'{spec.spell} {KIND} {WINDOW_VARIANT} needs a timed aura, a periodic trigger on the feed '
+                         f'and a proc chance between 0 and 100%')
+    miss = (1 - chance) ** WINDOW_FEED_TICKS
+    max_casts = math.ceil(math.log(spec.residual_target / (PAIR_RUNS * len(WINDOW_SIDES) * spec.trials))
+                          / math.log(miss))
+    effect = facts_of(records, spec.effect_spell)
+    distance = cast_distance(records, spec.effect_spell)
+    speed = records.field('Spell', spec.effect_spell, 'Speed')
+    travel_ms = math.ceil(distance / speed * 1000) if speed else 0
+    target = dummy_id(0)
+    offsets = {'held': spec.held_ms, 'gone': spec.gone_ms}
+
+    def read(side: str, index: int, name: str, metric: str, **fields) -> dict:
+        return measurement(window_mark(spec, f'{side} {index} {name}'), CASTER, metric, **fields)
+
+    def trial(side: str, index: int) -> list[dict]:
+        grants = {'spell': spec.aura}
+        ticks = {'spell': tick_spell, 'target': target}
+        return [{'action': 'cancel_aura', 'actor': CASTER, 'spell': spec.aura},
+                {'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
+                read(side, index, 'known start', 'knows_spell', spell=spec.spell),
+                read(side, index, 'grants start', 'aura_apply_count', **grants),
+                {'action': 'cast_until_aura', 'label': window_mark(spec, f'{side} {index} feed'), 'actor': CASTER,
+                 'spell': spec.feed_spell, 'target': target, 'aura': spec.aura, 'every_ms': spec.every_ms,
+                 'max_casts': max_casts, 'cast_power': spec.feed_power, 'reset_cooldown': True},
+                {'action': 'unlearn', 'actor': CASTER, 'spell': spec.spell},
+                read(side, index, 'aura stop', 'aura', spell=spec.aura),
+                read(side, index, 'grants stop', 'aura_apply_count', **grants),
+                {'action': 'wait', 'label': f'{side} {index} channel clears', 'ms': WINDOW_CHANNEL_CLEAR_MS},
+                read(side, index, 'casting clear', 'casting'),
+                read(side, index, 'ticks relearn', 'spell_damage_count', **ticks),
+                {'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
+                read(side, index, 'known relearn', 'knows_spell', spell=spec.spell),
+                {'action': 'wait', 'label': f'{side} {index} window', 'ms': offsets[side] - WINDOW_CHANNEL_CLEAR_MS},
+                read(side, index, 'ticks cast', 'spell_damage_count', **ticks),
+                read(side, index, 'grants cast', 'aura_apply_count', **grants),
+                read(side, index, 'aura cast', 'aura', spell=spec.aura),
+                {'action': 'set_power', 'actor': CASTER, 'power': effect.power_type, 'value': spec.effect_power},
+                {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.effect_spell},
+                {'action': 'cast', 'actor': CASTER, 'spell': spec.effect_spell, 'target': target},
+                {'action': 'wait', 'label': f'{side} {index} casting read', 'ms': CASTING_READ_MS},
+                read(side, index, 'casting', 'casting'),
+                {'action': 'wait', 'label': f'{side} {index} cast ends',
+                 'ms': effect.cast_time_ms + travel_ms + GCD_WAIT_MS},
+                read(side, index, 'went', 'spell_go_count', spell=spec.effect_spell),
+                {'action': 'cancel_aura', 'actor': CASTER, 'spell': spec.aura}]
+
+    steps = (base_steps(class_file)
+             + [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': 1} for aura in spec.caster_auras]
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spell}
+                for spell in dict.fromkeys((spec.feed_spell, spec.effect_spell, spec.spell))])
+    for side in WINDOW_SIDES:
+        for index in range(spec.trials):
+            steps += trial(side, index)
+    reads = {side: [{name: window_mark(spec, f'{side} {index} {name}') for name in WINDOW_TRIAL_READS}
+                    for index in range(spec.trials)] for side in WINDOW_SIDES}
+    bounds = {side: window_bounds(duration, side) for side in WINDOW_SIDES}
+    ages = {side: (offsets[side], offsets[side] + WINDOW_DETECTION_MS) for side in WINDOW_SIDES}
+    windows = len(WINDOW_SIDES) * spec.trials * max_casts * spec.every_ms
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour aura fed window',
+        'contract': (
+            f'{spec.aura} lasts {duration} ms (DBC). Each trial casts {spec.feed_spell} every {spec.every_ms} ms '
+            f'(cast_until_aura, at most {max_casts} casts) until {spec.aura} is on the caster; the step checks the '
+            f'aura on every world update (CoAGameplayTest.cpp CastUntilAura), so the grant is at most '
+            f'{WINDOW_DETECTION_MS} ms old when it stops, and the harness never sets the aura. {spec.spell} is then '
+            f'unlearned, because the running channel keeps ticking (set_moving does not stop it) and Chance() rolls '
+            f'only while the caster holds {spec.spell} (AscensionSunCleric.cpp:199): no later tick may refresh '
+            f'{spec.aura}. {spec.aura} is read present right after the unlearn and its application count is read '
+            f'unchanged up to the judged cast; {spec.spell} is relearned {WINDOW_CHANNEL_CLEAR_MS} ms after the stop, '
+            f'once the channel is over (casting 0, no new {tick_spell} tick up to the judged cast), so the talent is '
+            f'known at cast time. The judged read is the {spec.effect_spell} cast itself, {CASTING_READ_MS} ms after '
+            f'it starts: held trials cast it {spec.held_ms} ms after the stop (age {ages["held"][0]} to '
+            f'{ages["held"][1]} ms, window {bounds["held"][0]:g} to {bounds["held"][1]:g}): instant (casting 0); '
+            f'gone trials {spec.gone_ms} ms after it (age {ages["gone"][0]} to {ages["gone"][1]} ms, window '
+            f'{bounds["gone"][0]:g} to {bounds["gone"][1]:g}): its normal {effect.cast_time_ms} ms cast (casting 1). '
+            f'Each cast must go off. A trial off a precondition is void; an age outside its window voids its side; '
+            f'fewer than {spec.min_judged} judged trials on a side is unmeasured. Aura presence is supporting data.'),
+        'players': [player_fixture(class_file)],
+        'creatures': [dummy_fixture(0, class_file, distance)],
+        'steps': steps}
+    model = {'kind': KIND, 'variant': WINDOW_VARIANT, 'metric': 'casting', 'quote': entry.quote,
+             'expected': float(duration), 'reads': reads, 'bounds': bounds, 'ages': ages,
+             'min_judged': spec.min_judged, 'max_casts': max_casts}
+    expectation = Expectation(window_mark(spec, '').rstrip(), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.aura, None,
+                              f'{duration}', prose_rule(entry.quote, spec.spell), model)
+    return timed(scenario, waited_ms(steps) + windows, MAX_ACCELERATED_SCENARIO_MS), [expectation]
+
+
+def window_usable(values: dict, trial: dict, went_before: float) -> str | None:
+    checks = (('known start', values[trial['known start']] == 1),
+              ('one grant', values[trial['grants stop']] - values[trial['grants start']] == 1),
+              ('aura after the unlearn', values[trial['aura stop']] == 1),
+              ('channel over', values[trial['casting clear']] == 0),
+              ('relearned', values[trial['known relearn']] == 1),
+              ('no tick after the relearn', values[trial['ticks cast']] == values[trial['ticks relearn']]),
+              ('no refresh', values[trial['grants cast']] == values[trial['grants stop']]),
+              ('went off', values[trial['went']] - went_before == 1))
+    return next((name for name, held in checks if not held), None)
+
+
+def window_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    labels = [label for side in WINDOW_SIDES for trial in model['reads'][side] for label in trial.values()]
+    missing = next((label for label in labels if run.values.get(label) is None), None)
+    if missing is not None:
+        return replace(base, status='unmeasured', explanation=missing_measurement(run, missing))
+    judged = {side: [] for side in WINDOW_SIDES}
+    void = []
+    went_before = 0.0
+    for side in WINDOW_SIDES:
+        low, high = model['bounds'][side]
+        youngest, oldest = model['ages'][side]
+        inside = low < youngest and oldest < high
+        for index, trial in enumerate(model['reads'][side]):
+            reason = window_usable(run.values, trial, went_before)
+            went_before = run.values[trial['went']]
+            if reason is not None:
+                void.append(f'{side} {index}: {reason}')
+            elif not inside:
+                void.append(f'{side} {index}: age {youngest} to {oldest} ms outside {low:g} to {high:g}')
+            else:
+                judged[side].append(run.values[trial['casting']])
+    text = (f'held casting {judged["held"]}, gone casting {judged["gone"]} (ages {model["ages"]["held"]} and '
+            f'{model["ages"]["gone"]} ms against the {model["expected"]:g} ms duration)'
+            + (f'; void: {", ".join(void)}' if void else ''))
+    short = [side for side in WINDOW_SIDES if len(judged[side]) < model['min_judged']]
+    if short:
+        return replace(base, status='unmeasured', explanation=f'{text}; fewer than {model["min_judged"]} judged '
+                                                              f'trials on {", ".join(short)}')
+    wrong = ([value for value in judged['held'] if value != 0] + [value for value in judged['gone'] if value != 1])
+    status = 'alert' if wrong else 'ok'
+    return replace(base, status=status, measured=model['expected'] if status == 'ok' else None,
+                   expected=model['expected'], low=model['bounds']['held'][0], high=model['bounds']['gone'][1],
+                   explanation=f'{text}; instant inside the window and a normal cast past it: {status}')
+
+
 def scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
+    if entry.get('variant') == WINDOW_VARIANT:
+        return window_scenario(class_file, window_spec(entry))
     return aura_fed_scenario(class_file, aura_fed_spec(entry))
 
 

@@ -266,5 +266,81 @@ class AuraFedEffectTests(unittest.TestCase):
             self.generated({**INSTANT, 'trials': 2})
 
 
+WINDOW = {'spell': 804629, 'name': 'Spears of Glory (window)', 'kind': 'aura_fed_effect', 'variant': 'window',
+          'label_suffix': 'fed_window', 'quote': 'Your next Dawnsear within $d is instant cast', 'quote_spell': 807299,
+          'feed_spell': 806060, 'aura': 807299, 'effect_spell': 554406, 'every_ms': 1600, 'residual_target': 0.001,
+          'feed_power': 1000, 'effect_power': 1363, 'trials': 3, 'min_judged': 2, 'held_ms': 9300, 'gone_ms': 10700,
+          'caster_auras': [823764]}
+
+
+def window_values(expectation, held=0.0, gone=1.0, broken=None) -> dict:
+    values, went = {}, 0.0
+    for side, casting in (('held', held), ('gone', gone)):
+        for index, trial in enumerate(expectation.model['reads'][side]):
+            went += 1
+            values.update({trial['known start']: 1.0, trial['grants start']: 2.0 * went, trial['aura stop']: 1.0,
+                           trial['grants stop']: 2.0 * went + 1, trial['casting clear']: 0.0,
+                           trial['ticks relearn']: 10.0 * went, trial['known relearn']: 1.0,
+                           trial['ticks cast']: 10.0 * went, trial['grants cast']: 2.0 * went + 1,
+                           trial['aura cast']: 1.0, trial['casting']: casting, trial['went']: went})
+            if broken and broken[0] == side and broken[1] >= index:
+                values[trial[broken[2]]] = broken[3](values[trial[broken[2]]])
+    return values
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class WindowTests(unittest.TestCase):
+    def built(self, **changes):
+        return behaviour_scenario(load_fixture_class_file(23), {**WINDOW, **changes})
+
+    def judged(self, expectation, **kwargs):
+        return judge_behaviour(base_verdict(expectation), FakeRun(window_values(expectation, **kwargs)), expectation)
+
+    def test_the_talent_is_unlearned_at_the_stop_and_relearned_before_a_cast_at_the_stated_age(self):
+        scenario, [expectation] = self.built()
+        steps = scenario['steps']
+        stops = [index for index, step in enumerate(steps) if step['action'] == 'cast_until_aura']
+        self.assertEqual(len(stops), 6)
+        for stop, offset in zip(stops, [9300] * 3 + [10700] * 3):
+            self.assertEqual(steps[stop + 1], {'action': 'unlearn', 'actor': 'caster', 'spell': 804629})
+            cast = next(index for index in range(stop, len(steps)) if steps[index]['action'] == 'cast')
+            relearn = next(index for index in range(stop + 2, cast) if steps[index]['action'] == 'learn')
+            self.assertEqual(sum(step['ms'] for step in steps[stop:cast] if step['action'] == 'wait'), offset)
+            self.assertEqual(sum(step['ms'] for step in steps[stop:relearn] if step['action'] == 'wait'), 4500)
+            self.assertEqual(steps[stop]['every_ms'], 1600)
+        self.assertEqual(expectation.model['ages'], {'held': (9300, 9325), 'gone': (10700, 10725)})
+        self.assertEqual(expectation.model['bounds'], {'held': (9000.0, 9650.0), 'gone': (10400.0, 11000.0)})
+
+    def test_instant_inside_and_a_normal_cast_past_the_window_pass_and_mutants_alert(self):
+        _, [expectation] = self.built()
+        self.assertEqual(self.judged(expectation).status, 'ok', self.judged(expectation).explanation)
+        self.assertEqual(self.judged(expectation, held=1.0).status, 'alert')
+        self.assertEqual(self.judged(expectation, gone=0.0).status, 'alert')
+
+    def test_an_aura_lost_at_the_unlearn_a_refresh_or_a_late_tick_voids_down_to_unmeasured(self):
+        _, [expectation] = self.built()
+        for broken in (('held', 1, 'aura stop', lambda value: 0.0), ('gone', 1, 'grants cast', lambda value: value + 1),
+                       ('held', 1, 'ticks cast', lambda value: value + 1), ('gone', 2, 'known relearn', lambda v: 0.0)):
+            with self.subTest(broken=broken[2]):
+                verdict = self.judged(expectation, held=1.0, broken=broken)
+                self.assertEqual(verdict.status, 'unmeasured', verdict.explanation)
+        one_void = self.judged(expectation, broken=('held', 0, 'aura stop', lambda value: 0.0))
+        self.assertEqual(one_void.status, 'ok', one_void.explanation)
+
+    def test_an_age_outside_its_window_is_unmeasured_not_ok(self):
+        for changes in ({'held_ms': 8800}, {'gone_ms': 11200}, {'held_ms': 9640}):
+            with self.subTest(changes=changes):
+                _, [expectation] = self.built(**changes)
+                verdict = self.judged(expectation)
+                self.assertEqual(verdict.status, 'unmeasured', verdict.explanation)
+                self.assertIn('outside', verdict.explanation)
+
+    def test_a_window_entry_needs_its_minimum_and_a_feed_past_the_global_cooldown(self):
+        for changes in ({'min_judged': 0}, {'min_judged': 4}, {'every_ms': 1000}, {'held_ms': 11000},
+                        {'quote_spell': 554406}):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                self.built(**changes)
+
+
 if __name__ == '__main__':
     unittest.main()
