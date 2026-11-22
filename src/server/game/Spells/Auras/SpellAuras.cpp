@@ -633,8 +633,8 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
             for (Unit::AuraApplicationMap::const_iterator iter = same.first; addUnit && iter != same.second; ++iter)
             {
                 Aura const* other = iter->second->GetBase();
-                if (other != this && other->GetType() == DYNOBJ_AURA_TYPE && other->GetCasterGUID() == GetCasterGUID() &&
-                    !CanStackWith(other))
+                if (other != this && other->GetType() == DYNOBJ_AURA_TYPE &&
+                    other->GetCasterGUID() == GetCasterGUID() && !CanStackWith(other))
                     addUnit = false;
             }
             }
