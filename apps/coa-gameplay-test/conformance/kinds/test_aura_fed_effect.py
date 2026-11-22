@@ -59,7 +59,7 @@ class AuraFedEffectTests(unittest.TestCase):
 
     def test_the_heal_variant_feeds_and_heals_the_ally_with_a_second_cast(self):
         scenario, expectation = self.generated(HEAL)
-        run.validate(scenario)
+        run.validate(scenario, run.SIMULATED_CLOCK)
         steps = scenario['steps']
         feeds = [step for step in steps if step['action'] == 'cast_until_aura']
         self.assertEqual([(step['spell'], step['aura'], step['target']) for step in feeds], [(500141, 301293, 'ally')] * 4)
