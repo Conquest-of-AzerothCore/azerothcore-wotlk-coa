@@ -13659,6 +13659,923 @@
       "disable_regeneration": true,
       "gate_spell": 681436,
       "observe_source": "681436 Devoted to the Light Effect[0] aura 108 ADD_PCT_MODIFIER misc 14 (SPELLMOD_COST) BasePoints -101 + 1 = -100% on class mask word 0 = 262144 (the flag of Solar Invocation: Resplendence 806159 and Revelation 503651); Effect[1] aura 42 PROC_TRIGGER_SPELL 504858 (Energize 5% Missing, ENERGIZE_PCT, BasePoints 4 + 1 = 5 = $504679s1) on class mask word 1 = 128 (Solar Invocation: Ascension 500152); the script gives 5% of the missing mana after any of the four Invocations (AscensionSunClericAbilities.cpp:221-224, AscensionSunCleric.cpp:167-170, source 504877). ManaCostPercentage of the base mana 1363 (player_class_stats class 27 level 60): Resplendence 19 = 258.97, Revelation 14 = 190.82, Conquest 5 = 68.15, Ascension 35 = 477.05; the maximum mana of the reference character is 2868 (the Conquest refund entry). Ascension 500152 is cast with the mana set to 1000, regeneration off, and the mana is read 500 ms later: 1000 - 477.05 = 522.95 before the learn (control, the cost is paid) and 1000 + 93.4 = 1093 after (no cost, 5% of the 1868 missing mana generated), within 2. Reference search 2026-11-22: coa-history spell 681436: 0 events in 186 logs (a passive); the positive control 504858 Energize 5% Missing has 678 SPELL_ENERGIZE events in 30 logs, 1 to 466, mean 56; bindmysoul snapshot not consulted for a value; nothing else found."
+    },
+    {
+      "spell": 302914,
+      "name": "Arbiter of Light (Gavel of Light heal while Vow of Light is active)",
+      "kind": "metric_delta",
+      "variant": "gavel_heal_vow",
+      "label_suffix": "gavel_heal_vow",
+      "quote": "While Vow of Light is active, your Gavel of Light now restores an additional $807549s3% health equal to the damage dealt.",
+      "trigger_spell": 800611,
+      "gate_spell": 302914,
+      "target": "dummy",
+      "setup_casts": [
+        807547
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 707522,
+        "target": "caster"
+      },
+      "before_expected": 100,
+      "expected": 400,
+      "expected_ratio": 4.0,
+      "tolerance": 0.15,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Gavel of Light 800611 copies a share of its damage to the caster as 707522; the share is the 50 of 707521 ($707521s1) plus the spell modifiers that reach it. Arbiter of Light 302914 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1) on 707521's class mask (SpellFamilyFlags[0] 2097152), BasePoints -1 (read 0 in Spell.dbc), and Vow of Light 807549 Effect[2] aura 107 MiscValue 3 BasePoints 99 + 1 = 100 ($807549s3) on Arbiter's own class mask (4194304) supply the 100 while Vow of Light is active. Vow of Light 807547 is cast on the caster before both phases (setup_casts, the same real cast as Soul of Light's vow_value entry). Expected: 100% of the damage with Arbiter's tooltip share against 50% without, so after = H + 3H with the 4H of 150% (50 + 100) against H: ratio 4.0, tolerance 0.15. Fixture 984954 makes every Gavel hit a critical strike in both phases and +20000 attack power makes the hit the same to 0.4%; the heal is a share of the damage, so the ratio is unaffected. Control: the first phase without the passive; the arm without Vow of Light is the entry gavel_heal_no_vow. Reference search 2026-11-22: ADR Sun Cleric 0004 and the four-arm scenario sun-cleric-solemn-priest-gavel-heal.json measured Arbiter alone at ratio 1 without Vow; nothing found beyond the tooltip, the DBC and that ADR."
+    },
+    {
+      "spell": 302914,
+      "name": "Arbiter of Light (no extra Gavel of Light heal without Vow of Light)",
+      "kind": "metric_delta",
+      "variant": "gavel_heal_no_vow",
+      "label_suffix": "gavel_heal_no_vow",
+      "quote": "While Vow of Light is active, your Gavel of Light now restores an additional $807549s3% health equal to the damage dealt.",
+      "trigger_spell": 800611,
+      "gate_spell": 302914,
+      "target": "dummy",
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 707522,
+        "target": "caster"
+      },
+      "before_expected": 100,
+      "expected": 200,
+      "expected_ratio": 2.0,
+      "tolerance": 0.15,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Control arm of gavel_heal_vow: the same two phases with no Vow of Light cast. The tooltip adds the 100% only while Vow of Light is active, so learning Arbiter changes nothing: after = H + H, ratio 2.0, tolerance 0.15 (excludes 4.0)."
+    },
+    {
+      "spell": 800039,
+      "name": "Sun Warrior's Guidance (Gavel of Light critical chance)",
+      "kind": "metric_delta",
+      "variant": "crit_gavel_light",
+      "label_suffix": "crit_gavel_light",
+      "quote": "Increases the critical strike chance of Gavels and Dawnbreak by $s1%.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 800611,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "expected_gain": 5,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Gavel of Light 800611 SpellFamilyFlags[1] 32 is in the mask; its done crit chance reads 0 without the passive and 5 with it after a real learn (spell_done_crit_chance, a learned contrast, ADR 0691). Shape 1 of 4 covered spells (G-23): a weapon-percent Gavel."
+    },
+    {
+      "spell": 800039,
+      "name": "Sun Warrior's Guidance (Gavel of Wrath critical chance)",
+      "kind": "metric_delta",
+      "variant": "crit_gavel_wrath",
+      "label_suffix": "crit_gavel_wrath",
+      "quote": "Increases the critical strike chance of Gavels and Dawnbreak by $s1%.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 802561,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "expected_gain": 5,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Gavel of Wrath 802561 SpellFamilyFlags[1] 32 is in the mask. Shape 2: the Gavel whose class flags also carry word 2 (4) and whose third effect is a dispel (38)."
+    },
+    {
+      "spell": 800039,
+      "name": "Sun Warrior's Guidance (Gavel of Grace critical chance)",
+      "kind": "metric_delta",
+      "variant": "crit_gavel_grace",
+      "label_suffix": "crit_gavel_grace",
+      "quote": "Increases the critical strike chance of Gavels and Dawnbreak by $s1%.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 807987,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "expected_gain": 5,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Gavel of Grace 807987 SpellFamilyFlags[1] 32 is in the mask. Shape 3: the Gavel whose third effect is a trigger-spell effect (142)."
+    },
+    {
+      "spell": 800039,
+      "name": "Sun Warrior's Guidance (Dawnbreak critical chance)",
+      "kind": "metric_delta",
+      "variant": "crit_dawnbreak",
+      "label_suffix": "crit_dawnbreak",
+      "quote": "Increases the critical strike chance of Gavels and Dawnbreak by $s1%.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 504580,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "expected_gain": 5,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Dawnbreak 504580 SpellFamilyFlags[1] 1073741824 is in the mask. Shape 4: the area Dawnbreak."
+    },
+    {
+      "spell": 800039,
+      "name": "Sun Warrior's Guidance (Dawnsear is not raised (control))",
+      "kind": "metric_delta",
+      "variant": "crit_dawnsear_control",
+      "label_suffix": "crit_dawnsear_control",
+      "quote": "Increases the critical strike chance of Gavels and Dawnbreak by $s1%.",
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 500146,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Sun Warrior's Guidance 800039 Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 7 (SPELLMOD_CRIT_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask word 1 = 1073745952 (bits 32, 4096, 1073741824 of SpellFamilyFlags[1]). Control arm: Dawnsear 500146 carries none of the three mask bits in its SpellFamilyFlags[1]; the tooltip names Gavels and Dawnbreak only, so its done crit chance must stay 0 after the learn (zero expected gain)."
+    },
+    {
+      "spell": 572801,
+      "name": "Horusath Blast (attack power reduction)",
+      "kind": "metric_delta",
+      "variant": "ap_reduction",
+      "label_suffix": "ap_reduction",
+      "quote": "and reducing their attack power by ${-($572050m1+$572050ppl1)} for $572050d.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "attack_power",
+      "fields": {},
+      "phase_auras": [
+        [
+          56412,
+          1,
+          "dummy",
+          "dummy"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 801,
+      "expected": 566,
+      "expected_gain": -235,
+      "tolerance": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Horusath Blast 572801 applies 572050 to the target (AscensionSunClericAbilities.cpp:304): Effect[0] aura 344 SPELL_AURA_ASCENSION_MOD_ATTACK_POWER_FLAT, BasePoints -25 DieSides 1, RealPointsPerLevel -4.4 from SpellLevel 12 (Spell.dbc): at caster level 60, -25 + 1 - 4.4 x 48 = -235.2 (${-($572050m1+$572050ppl1)} = 235.2), so the dummy loses 235 or 236 (tolerance 1). The dummy (Harvest Golem 36 at level 60) carries AP Test 56412 (aura 99, +801 attack power, a precondition fixture by harness set_aura in both phases, so the floor of the metric cannot hide the reduction); the caster carries 823764 (spell penetration fixture). The reading before the learn-and-cast is the control (801, no Horusath Blast landed); after one real cast it reads 801 - 235. Same shape as Necromancer Bone Ward's attack_power entry. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 572801,
+      "name": "Horusath Blast (attack power reduction duration)",
+      "kind": "metric_delta",
+      "variant": "ap_duration",
+      "label_suffix": "ap_duration",
+      "quote": "and reducing their attack power by ${-($572050m1+$572050ppl1)} for $572050d.",
+      "gate_spell": 572801,
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 572050
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expected": 14500,
+      "tolerance": 500,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "572050 DurationIndex 8 (15000 ms, $572050d). The remaining duration of 572050 on the dummy is read 500 ms after one real Horusath Blast: 15000 - 500 = 14500, tolerance 500, an interval [14000, 15000] that excludes the 13500 and 16500 of a 10% error. Control: the reading before the cast is 0 (no aura). gate_spell 572801 is the spell itself, learned for the cast; the claim's subject is the duration of the aura it applies."
+    },
+    {
+      "spell": 302914,
+      "name": "Arbiter of Light (Vow of Light aura is up in the Vow arm)",
+      "kind": "metric_delta",
+      "variant": "vow_aura_active",
+      "label_suffix": "vow_aura_active",
+      "quote": "While Vow of Light is active, your Gavel of Light now restores an additional $807549s3% health equal to the damage dealt.",
+      "trigger_spell": 800611,
+      "gate_spell": 302914,
+      "target": "dummy",
+      "setup_casts": [
+        807547
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 807547,
+        "target": "caster"
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Precondition read of gavel_heal_vow: the caster carries Vow of Light 807547 (DurationIndex 21) after the real cast, in the phase before and after Arbiter of Light is learned, so the 4.0 of gavel_heal_vow is measured with Vow of Light active."
+    },
+    {
+      "spell": 547214,
+      "kind": "metric_delta",
+      "quote": "and causes Horusath Blast to interrupt the target for $547217d.",
+      "gate_spell": 547214,
+      "trigger_spell": 572801,
+      "target": "dummy",
+      "cast_in_before": false,
+      "target_casts_before": [
+        12051
+      ],
+      "measure_actor": "dummy",
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Luminary Mendicant (Horusath Blast interrupts the channel)",
+      "variant": "interrupt",
+      "label_suffix": "interrupt",
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 600,
+      "observe_source": "Luminary Mendicant 547214 Effect[1] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 547217; the handler casts 547217 at the target on a Horusath Blast 500154 damage event (AscensionSunClericEvents.cpp:126, :323). 547217 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 (3000 ms, $547217d). The dummy channels Evocation 12051 (Arcane, silence-prevented, interruptible, 8 s) right before the cast (target_casts_before). Control: the reading before the learn and the cast (channel running, 1); after one Horusath Blast with Luminary Mendicant learned the dummy no longer channels (0). Horusath Blast alone does not interrupt (the control phase carries no cast)."
+    },
+    {
+      "spell": 707433,
+      "name": "Blightbreaker (Mercy period)",
+      "kind": "metric_delta",
+      "variant": "mercy_period",
+      "label_suffix": "mercy_period",
+      "quote": "Increases the tick rate of Mercy by $s1%,",
+      "gate_spell": 707433,
+      "trigger_spell": 504848,
+      "target": "caster",
+      "metric": "aura_amplitude_ms",
+      "fields": {
+        "spell": 504848
+      },
+      "before_expected": 3000,
+      "expected": 1500,
+      "tolerance": 10,
+      "wait_ms": 300,
+      "expire_ms": 20000,
+      "observe_source": "Blightbreaker 707433 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 19 (SPELLMOD_ACTIVATION_TIME, the period of a periodic aura), BasePoints -51 + 1 = -50 ($s1 shown unsigned), and Effect[1] MiscValue 14 (SPELLMOD_COST), BasePoints 99 + 1 = 100 ($s2), both on Mercy 504848's class mask (SpellFamilyFlags[0] 32). Mercy 504848 Effect[0] aura 23 PERIODIC_TRIGGER_SPELL, EffectAmplitude 3000, ManaCostPercentage 21 of the reference base mana 1363 (286.23). The period of the Mercy aura on the caster is read after a real cast before the learn (3000, the control) and after a real cast with Blightbreaker learned: the SPELLMOD period of -50% gives 1500 ms. Expectation note: the tooltip says the tick rate rises by $s1 = 50%, which is a period of 2000 ms read literally and 1500 ms (a rate of +100%) read as the stated modifier on the period; the DBC value is the period modifier, so 1500 is judged and the wording is returned as an owner question if the reading is 1500."
+    },
+    {
+      "spell": 707433,
+      "name": "Blightbreaker (Mercy mana cost)",
+      "kind": "metric_delta",
+      "variant": "mercy_cost",
+      "label_suffix": "mercy_cost",
+      "quote": "but increases its mana cost by $s2%.",
+      "gate_spell": 707433,
+      "trigger_spell": 504848,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 504848
+      },
+      "before_expected": 286.23,
+      "expected": 572.46,
+      "tolerance": 2,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Blightbreaker 707433 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 19 (SPELLMOD_ACTIVATION_TIME, the period of a periodic aura), BasePoints -51 + 1 = -50 ($s1 shown unsigned), and Effect[1] MiscValue 14 (SPELLMOD_COST), BasePoints 99 + 1 = 100 ($s2), both on Mercy 504848's class mask (SpellFamilyFlags[0] 32). Mercy 504848 Effect[0] aura 23 PERIODIC_TRIGGER_SPELL, EffectAmplitude 3000, ManaCostPercentage 21 of the reference base mana 1363 (286.23). The use-time cost function of Mercy is read before the learn (21% x 1363 = 286.23, the control) and after it (+100%: 572.46), the same shape as Resplendence's cost entry (spell 806159)."
+    },
+    {
+      "spell": 800602,
+      "name": "Empowered Holy Form (Ancient Rites first tick by 10.8 s)",
+      "kind": "metric_delta",
+      "variant": "period_upper",
+      "label_suffix": "period_upper",
+      "quote": "Doubles the effectiveness of your Holy Form and reduces the tick rate of Ancient Rites by $/1000;s2 sec.",
+      "gate_spell": 300351,
+      "learn": [
+        800602
+      ],
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 301368
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 10300,
+      "observe_source": "800602 Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 19 (SPELLMOD_ACTIVATION_TIME, SpellDefines.h:95, the period of a periodic aura), BasePoints -5001 = -5000 ms ($/1000;s2 = 5 s); Ancient Rites 300351 (rank 1, the rank the class code reduces: AscensionSunClericAuras.cpp:133 Named(GetSpellInfo(),300351)) Effect[0] aura 227 EffectAmplitude 15000 triggers the energize 301368, so the period is 15000 - 5000 = 10000 ms. 800602 is known from the start (learn) and Ancient Rites 300351 is the gate learned between the phases: the periodic aura is created with the modifier in place and the before phase has no Ancient Rites at all (its energize count is 0). The energize events of 301368 are counted a set time after the Holy Form cast of the second phase, which follows the gate learn by 500 ms (expire_ms) plus no cast delay (the cast is instant). Read 10300 ms after the cast, 10.8 to 10.9 s after the gate learn: exactly 1 energize, so the period is at most 10.9 s (excludes 11 s, +10%). Control entry period_control: the same two phases without 800602, 0 energize at the same time. Reference search 2026-11-22: coa-history and merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 800602,
+      "name": "Empowered Holy Form (Ancient Rites no tick by 9.1 s)",
+      "kind": "metric_delta",
+      "variant": "period_lower",
+      "label_suffix": "period_lower",
+      "quote": "Doubles the effectiveness of your Holy Form and reduces the tick rate of Ancient Rites by $/1000;s2 sec.",
+      "gate_spell": 300351,
+      "learn": [
+        800602
+      ],
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 301368
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 8600,
+      "observe_source": "800602 Effect[1] aura 107 ADD_FLAT_MODIFIER MiscValue 19 (SPELLMOD_ACTIVATION_TIME, SpellDefines.h:95, the period of a periodic aura), BasePoints -5001 = -5000 ms ($/1000;s2 = 5 s); Ancient Rites 300351 (rank 1, the rank the class code reduces: AscensionSunClericAuras.cpp:133 Named(GetSpellInfo(),300351)) Effect[0] aura 227 EffectAmplitude 15000 triggers the energize 301368, so the period is 15000 - 5000 = 10000 ms. 800602 is known from the start (learn) and Ancient Rites 300351 is the gate learned between the phases: the periodic aura is created with the modifier in place and the before phase has no Ancient Rites at all (its energize count is 0). The energize events of 301368 are counted a set time after the Holy Form cast of the second phase, which follows the gate learn by 500 ms (expire_ms) plus no cast delay (the cast is instant). Read 8600 ms after the cast, 9.1 to 9.2 s after the gate learn: 0 energize, so the period is above 9.2 s (excludes 9 s, -10%). With period_upper the period lies in (9.2 s, 10.9 s]. Control entry period_control. Reference search 2026-11-22: coa-history and merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 800602,
+      "name": "Empowered Holy Form (control: no tick by 10.8 s without it)",
+      "kind": "metric_delta",
+      "variant": "period_control",
+      "label_suffix": "period_control",
+      "quote": "Doubles the effectiveness of your Holy Form and reduces the tick rate of Ancient Rites by $/1000;s2 sec.",
+      "gate_spell": 300351,
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 301368
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 10300,
+      "observe_source": "Control arm of period_upper: the same two phases with 800602 not known. Ancient Rites keeps its 15000 ms period (301345 Effect[0] EffectAmplitude 15000), so no energize of 301368 lands by 10.8 s after the gate learn: 0, where period_upper reads 1. Reference search 2026-11-22: coa-history and merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 800602,
+      "name": "Empowered Holy Form (Ancient Rites 301345 first tick by 10.8 s)",
+      "kind": "metric_delta",
+      "variant": "period_upper_301345",
+      "label_suffix": "period_upper_301345",
+      "quote": "Doubles the effectiveness of your Holy Form and reduces the tick rate of Ancient Rites by $/1000;s2 sec.",
+      "gate_spell": 301345,
+      "learn": [
+        800602
+      ],
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 301368
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 10300,
+      "observe_source": "Same as period_upper for the other rank of the talent Ancient Rites: 301345 has the same Effect[0] aura 227 EffectAmplitude 15000 and the same name and tooltip words, and the tooltip of 800602 says only 'Ancient Rites'. Read 10300 ms after the cast: the period of 301345 is expected at most 10.9 s. Reference search 2026-11-22: coa-history and merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 800602,
+      "name": "Empowered Holy Form (Ancient Rites 301817 first tick by 10.8 s)",
+      "kind": "metric_delta",
+      "variant": "period_upper_301817",
+      "label_suffix": "period_upper_301817",
+      "quote": "Doubles the effectiveness of your Holy Form and reduces the tick rate of Ancient Rites by $/1000;s2 sec.",
+      "gate_spell": 301817,
+      "learn": [
+        800602
+      ],
+      "trigger_spell": 805301,
+      "target": "caster",
+      "expire_ms": 500,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 301368
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 10300,
+      "observe_source": "Same as period_upper for the other rank of the talent Ancient Rites: 301817 has the same Effect[0] aura 227 EffectAmplitude 15000 and the same name and tooltip words, and the tooltip of 800602 says only 'Ancient Rites'. Read 10300 ms after the cast: the period of 301817 is expected at most 10.9 s. Reference search 2026-11-22: coa-history and merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 547214,
+      "name": "Luminary Mendicant (mana restored by Vow of Grace)",
+      "kind": "metric_delta",
+      "variant": "vow_grace_mana",
+      "label_suffix": "vow_grace_mana",
+      "quote": "Increases the mana restored by Vow of Grace by $s1%",
+      "gate_spell": 547214,
+      "trigger_spell": 500154,
+      "target": "dummy",
+      "setup_casts": [
+        803719
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 504877
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "expected_ratio": 3.0,
+      "tolerance": 0.05,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "Vow of Grace 803719 (cast on the caster before each phase) restores CalculatePct(missing mana, 5%) plus 504877 m1 on a direct ability hit (AscensionSunClericEvents.cpp:214-219); 547214 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 8, BasePoints 99 + 1 = 100 ($s1), and the handler adds AddPct(mana, Amount(547214)) when the caster has it. Horusath Blast 500154 is cast at the dummy in both phases with the same starting mana; the energize events of 504877 (the Mana() source) are totalled. The energize totals are cumulative over the scenario: the first reading is one event of X (the first phase, no 547214), the second reading is X plus one event of 2X (+100% by the tooltip), so the stated ratio is (X + 2X) / X = 3.0, tolerance 0.05 (excludes 2.95 and 3.05; the first reading must be above 0, the event count of 504877 is 1 then 2). Control: the first phase without 547214. Reference search 2026-11-22: coa-history and merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 560095,
+      "name": "Seraphic Bulwark (5 blocks)",
+      "kind": "metric_delta",
+      "variant": "charges",
+      "label_suffix": "charges",
+      "quote": "Raise your blessed shield, increasing your block value by $s1%. Lasts for $n blocks or $d.",
+      "gate_spell": 560095,
+      "trigger_spell": 560095,
+      "target": "caster",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "aura_charges",
+      "fields": {
+        "spell": 560095
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "shield_after_learn": {
+        "item": 231296,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "observe_source": "Seraphic Bulwark 560095 ProcCharges 5 (Spell.dbc), the '$n blocks'. The aura is read 500 ms after a real cast with shield 231296 equipped in both phases; the before phase does not cast (control: no aura, 0 charges). Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 560095,
+      "name": "Seraphic Bulwark (block value doubled)",
+      "kind": "metric_delta",
+      "variant": "block_value",
+      "label_suffix": "block_value",
+      "quote": "Raise your blessed shield, increasing your block value by $s1%. Lasts for $n blocks or $d.",
+      "gate_spell": 560095,
+      "trigger_spell": 560095,
+      "target": "caster",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "block_value",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 2,
+      "expected_ratio": 2.0,
+      "tolerance": 0.03,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "shield_after_learn": {
+        "item": 231296,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "observe_source": "560095 Effect[0] aura 150 SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT, BasePoints 99 + 1 = 100 ($s1): +100% of the block value. The caster's block value is read with shield 231296 equipped before the cast (control, no aura) and 500 ms after a real cast: ratio 2.0, tolerance 0.03 (excludes 1.97 and 2.03; the block value is an integer of at least 33 so a rounding of 0.5 is below 0.015). Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 560095,
+      "name": "Seraphic Bulwark (still active at 9.5 s)",
+      "kind": "metric_delta",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "Raise your blessed shield, increasing your block value by $s1%. Lasts for $n blocks or $d.",
+      "gate_spell": 560095,
+      "trigger_spell": 560095,
+      "target": "caster",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 560095
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "shield_after_learn": {
+        "item": 231296,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "observe_source": "Seraphic Bulwark 560095 DurationIndex 1 (10 s, $d). Present 9500 ms after the cast: the duration is above 9.5 s (excludes 9 s, -10%). Control: no cast before, absent. With duration_gone it brackets 10 s. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 560095,
+      "name": "Seraphic Bulwark (gone by 10.5 s)",
+      "kind": "metric_delta",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "quote": "Raise your blessed shield, increasing your block value by $s1%. Lasts for $n blocks or $d.",
+      "gate_spell": 560095,
+      "trigger_spell": 560095,
+      "target": "caster",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 560095
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 10500,
+      "expire_ms": 500,
+      "shield_after_learn": {
+        "item": 231296,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "observe_source": "Absent 10500 ms after the cast: the duration is below 10.5 s (excludes 11 s, +10%); no block was taken, so the aura ends by its duration. Control: absent before the cast. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 681433,
+      "kind": "metric_delta",
+      "quote": "Emit a powerful holy light in an $a1 yd radius, dealing ${$m1+0+$sph*0.5+$AP*0.050575} Holy damage to all nearby enemies. Reduces the cooldown of your Solar Invocation spells by $/1000;524858s1 sec for each target struck.",
+      "gate_spell": 681433,
+      "trigger_spell": 681433,
+      "target": "dummy",
+      "cast_in_before": false,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800764
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Solar Nova (cooldown reduced by 1 s for each of 3 targets struck)",
+      "variant": "cd_refund_three",
+      "label_suffix": "cd_refund_three",
+      "dummy_distance": 3,
+      "area_dummies": [
+        7,
+        8
+      ],
+      "expected": 24900,
+      "tolerance": 300,
+      "observe_source": "Solar Nova 681433 Effect[0] SCHOOL_DAMAGE on the enemies within 8 yd; 524858 Effect[0..2] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165) BasePoints -1001 on 800764 Conquest, 503651 Revelation and 806159 Resplendence ($/1000;524858s1 = 1 s each; the class code HandleAscensionClassMechanics26To32Hit casts 524858 per target). Solar Invocation: Conquest 800764 (cooldown 30000 ms, Category 767) is cast, 1600 ms later Solar Nova strikes the primary dummy and two more within 8 yd, and the cooldown of 800764 is read 500 ms after: 30000 - 3 x 1000 - 2100 ms elapsed = 24900, tolerance 300 (excludes the 1000 ms steps of 2 or 4 targets). Control: cd_refund_none (no target in range) reads 30000 - 2100. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 681433,
+      "kind": "metric_delta",
+      "quote": "Emit a powerful holy light in an $a1 yd radius, dealing ${$m1+0+$sph*0.5+$AP*0.050575} Holy damage to all nearby enemies. Reduces the cooldown of your Solar Invocation spells by $/1000;524858s1 sec for each target struck.",
+      "gate_spell": 681433,
+      "trigger_spell": 681433,
+      "target": "dummy",
+      "cast_in_before": false,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800764
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Solar Nova (cooldown reduced by 1 s for one target struck)",
+      "variant": "cd_refund_one",
+      "label_suffix": "cd_refund_one",
+      "dummy_distance": 3,
+      "expected": 26900,
+      "tolerance": 300,
+      "observe_source": "Same as cd_refund_three with only the primary dummy at 3 yd, inside the 8 yd radius: one target struck, 30000 - 1000 - 2100 ms elapsed = 26900, tolerance 300 (excludes 0 and 2 targets). Control: cd_refund_none. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 681433,
+      "kind": "metric_delta",
+      "quote": "Emit a powerful holy light in an $a1 yd radius, dealing ${$m1+0+$sph*0.5+$AP*0.050575} Holy damage to all nearby enemies. Reduces the cooldown of your Solar Invocation spells by $/1000;524858s1 sec for each target struck.",
+      "gate_spell": 681433,
+      "trigger_spell": 681433,
+      "target": "dummy",
+      "cast_in_before": false,
+      "setup_casts": [
+        800764
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 1363,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800764
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Solar Nova (control: no target struck, no reduction)",
+      "variant": "cd_refund_none",
+      "label_suffix": "cd_refund_none",
+      "dummy_distance": 20,
+      "expected": 27900,
+      "tolerance": 300,
+      "observe_source": "Control of cd_refund_three: the only dummy stands 20 yd away, outside the 8 yd radius, so no target is struck and the cooldown of Solar Invocation: Conquest 800764 reads 30000 - 2100 ms elapsed = 27900, tolerance 300. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 704910,
+      "name": "Sun Worship (spell haste rating from Intellect)",
+      "kind": "metric_delta",
+      "variant": "haste_rating",
+      "label_suffix": "haste_rating",
+      "quote": "Increases your healing power by $s1% of your Intellect and your spell haste rating by $s2% of your Intellect.",
+      "trigger_spell": 804247,
+      "gate_spell": 704910,
+      "target": "caster",
+      "phase_auras": [
+        [
+          48100,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 19
+      },
+      "before_expected": 0,
+      "expected": 41.75,
+      "tolerance": 1.0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "704910 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 524288 (1 << 19, CR_HASTE_SPELL), MiscValueB 3 (Intellect), BasePoints 24 + 1 = 25 ($s2). Intellect 48100 is set by harness set_aura in both phases as a precondition fixture (the same fixture as Solar Discernment 807654; Intellect reads 167 against the reference 119); the passive is the subject and is learned for real between the phases. Combat rating 19 read before the learn (control, 0) and after: 25% of 167 = 41.75, within 1 for the integer rounding. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 301239,
+      "name": "City of Light (3% of missing health restored by a Radiant Flame tick)",
+      "kind": "metric_delta",
+      "variant": "heal_missing",
+      "label_suffix": "heal_missing",
+      "quote": "Damage dealt by Radiant Flame now restores $302896s1% of your missing health and mana.",
+      "gate_spell": 301239,
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 707522,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 150,
+      "tolerance": 2,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "301239 Effect[0] aura 42 PROC_TRIGGER_SPELL 302896 (Effect[0] HEAL_PCT BasePoints 2 + 1 = 3 ($302896s1), Effect[1] ENERGIZE_PCT 3); AscensionSunClericEvents.cpp:116 accepts an own damage hit of Radiant Flame's tick 807058 and :255-258 gives CalculatePct(max mana - mana, 3) mana and a heal of 3% of the missing health (Copy 707522). Radiant Flame 806060 (no mana cost, period 1000 ms, 4000 ms) is cast at the dummy with the caster held at 50% of its 10000 health (caster_health_pct): the first tick lands when the aura is applied (the first run of this entry read two heals, 150 and 145, with a 1500 ms read, so the aura ticks at once and again at 1000 ms) and the read is at 500 ms, so one heal of 3% x 5000 = 150, tolerance 2 for the health regeneration between the set and the tick. The before phase does not cast (cast_in_before false), so no earlier Radiant Flame aura can tick in the second phase; the control entry heal_missing_control is the same scenario with the unrelated passive 300341 as the gate. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 301239,
+      "name": "City of Light (control: no heal without it)",
+      "kind": "metric_delta",
+      "variant": "heal_missing_control",
+      "label_suffix": "heal_missing_control",
+      "quote": "Damage dealt by Radiant Flame now restores $302896s1% of your missing health and mana.",
+      "gate_spell": 300341,
+      "trigger_spell": 806060,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 707522,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Control arm of heal_missing: the same two phases and the same Radiant Flame cast with 301239 not known; the passive learned between the phases is Exorcism 300341 (an unrelated Sanctify modifier). No heal of 707522 lands: 0. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 800600,
+      "kind": "metric_delta",
+      "quote": "Start anew, reseting the cooldown of Paragon, Chosen of the Light, and Judgement Day spells.",
+      "gate_spell": 800600,
+      "setup_casts": [
+        680639
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "setup_only_after": true,
+      "cast_power": 1363,
+      "target": "caster",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 680639
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "New Day (Paragon cooldown reset)",
+      "variant": "reset_680639",
+      "label_suffix": "reset_680639",
+      "trigger_spell": 800600,
+      "expected": 0,
+      "tolerance": 1,
+      "observe_source": "New Day 800600 Effect[0..2] SPELL_EFFECT_ASCENSION_RESET_COOLDOWN (195) on 680639 Paragon, 800622 Chosen of the Light and 806121 Judgement Day. Paragon 680639 has RecoveryTime 300000 ms (Spell.dbc). With New Day known in both phases, the first phase casts New Day with Paragon not on cooldown, the second casts Paragon first and New Day after: the cooldown of Paragon reads 0 after New Day. Control entry reset_680639_control: the same second phase with Holy Form 805301 cast instead of New Day, the cooldown stays. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 800600,
+      "kind": "metric_delta",
+      "quote": "Start anew, reseting the cooldown of Paragon, Chosen of the Light, and Judgement Day spells.",
+      "gate_spell": 800600,
+      "setup_casts": [
+        680639
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "setup_only_after": true,
+      "cast_power": 1363,
+      "target": "caster",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 680639
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "New Day (control: Paragon keeps its cooldown without it)",
+      "variant": "reset_680639_control",
+      "label_suffix": "reset_680639_control",
+      "trigger_spell": 805301,
+      "expected": 298400,
+      "tolerance": 2500,
+      "observe_source": "Control of reset_680639: Paragon is cast, then Holy Form 805301 (no cooldown effect) instead of New Day; the cooldown of Paragon reads 300000 ms minus the 1600 ms setup wait and the 500 ms read wait, within 2500 ms, far from 0. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 800600,
+      "kind": "metric_delta",
+      "quote": "Start anew, reseting the cooldown of Paragon, Chosen of the Light, and Judgement Day spells.",
+      "gate_spell": 800600,
+      "setup_casts": [
+        800622
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "setup_only_after": true,
+      "cast_power": 1363,
+      "target": "caster",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800622
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "New Day (Chosen of the Light cooldown reset)",
+      "variant": "reset_800622",
+      "label_suffix": "reset_800622",
+      "trigger_spell": 800600,
+      "expected": 0,
+      "tolerance": 1,
+      "observe_source": "New Day 800600 Effect[0..2] SPELL_EFFECT_ASCENSION_RESET_COOLDOWN (195) on 680639 Paragon, 800622 Chosen of the Light and 806121 Judgement Day. Chosen of the Light 800622 has RecoveryTime 180000 ms (Spell.dbc). With New Day known in both phases, the first phase casts New Day with Chosen of the Light not on cooldown, the second casts Chosen of the Light first and New Day after: the cooldown of Chosen of the Light reads 0 after New Day. Control entry reset_800622_control: the same second phase with Holy Form 805301 cast instead of New Day, the cooldown stays. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 800600,
+      "kind": "metric_delta",
+      "quote": "Start anew, reseting the cooldown of Paragon, Chosen of the Light, and Judgement Day spells.",
+      "gate_spell": 800600,
+      "setup_casts": [
+        800622
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "setup_only_after": true,
+      "cast_power": 1363,
+      "target": "caster",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800622
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "New Day (control: Chosen of the Light keeps its cooldown without it)",
+      "variant": "reset_800622_control",
+      "label_suffix": "reset_800622_control",
+      "trigger_spell": 805301,
+      "expected": 178400,
+      "tolerance": 2500,
+      "observe_source": "Control of reset_800622: Chosen of the Light is cast, then Holy Form 805301 (no cooldown effect) instead of New Day; the cooldown of Chosen of the Light reads 180000 ms minus the 1600 ms setup wait and the 500 ms read wait, within 2500 ms, far from 0. Reference search 2026-11-22: coa-history, merged PRs and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
     }
   ],
   "player_observations": [],

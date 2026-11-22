@@ -720,7 +720,9 @@
       {
         "claim": "Damage dealt by Radiant Flame now restores $302896s1% of your missing health",
         "labels": [
-          "301239 effect_value 302896e0 #0"
+          "301239 effect_value 302896e0 #0",
+          "301239 behaviour_metric_delta heal_missing",
+          "301239 behaviour_metric_delta heal_missing_control"
         ]
       },
       {
@@ -931,10 +933,23 @@
   {
     "spell": 302914,
     "clause": "While Vow of Light is active, your Gavel of Light now restores an additional $807549s3% health equal to the damage dealt.",
-    "labels": [
-      "302914 effect_value 807549e2 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "While Vow of Light is active, your Gavel of Light now restores an additional $807549s3% health",
+        "labels": [
+          "302914 behaviour_metric_delta gavel_heal_vow",
+          "302914 behaviour_metric_delta gavel_heal_no_vow",
+          "302914 behaviour_metric_delta vow_aura_active"
+        ]
+      },
+      {
+        "claim": "$807549s3% health equal to the damage dealt",
+        "labels": [
+          "302914 effect_value 807549e2 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 554406,
@@ -1005,11 +1020,23 @@
   {
     "spell": 572801,
     "clause": "and reducing their attack power by ${-($572050m1+$572050ppl1)} for $572050d.",
-    "labels": [
-      "572801 effect_value 572050e0 #1",
-      "572801 spell_duration 572050 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and reducing their attack power by ${-($572050m1+$572050ppl1)}",
+        "labels": [
+          "572801 behaviour_metric_delta ap_reduction",
+          "572801 effect_value 572050e0 #1"
+        ]
+      },
+      {
+        "claim": "for $572050d",
+        "labels": [
+          "572801 behaviour_metric_delta ap_duration",
+          "572801 spell_duration 572050 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 503651,
@@ -1311,17 +1338,29 @@
     "spell": 547214,
     "clause": "Increases the mana restored by Vow of Grace by $s1%",
     "labels": [
-      "547214 effect_value e0 #0"
+      "547214 effect_value e0 #0",
+      "547214 behaviour_metric_delta vow_grace_mana"
     ],
     "kind": "claim"
   },
   {
     "spell": 547214,
     "clause": "and causes Horusath Blast to interrupt the target for $547217d.",
-    "labels": [
-      "547214 spell_duration 547217 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and causes Horusath Blast to interrupt the target",
+        "labels": [
+          "547214 behaviour_metric_delta interrupt"
+        ]
+      },
+      {
+        "claim": "for $547217d",
+        "labels": [
+          "547214 spell_duration 547217 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 560094,
@@ -1350,18 +1389,32 @@
     "clause": "Raise your blessed shield, increasing your block value by $s1%.",
     "labels": [
       "560095 effect_value e0 #0",
-      "560095 aura_amount e0 #0"
+      "560095 aura_amount e0 #0",
+      "560095 behaviour_metric_delta block_value"
     ],
     "kind": "claim"
   },
   {
     "spell": 560095,
     "clause": "Lasts for $n blocks or $d.",
-    "labels": [
-      "560095 aura_duration_ms #1",
-      "560095 effect_value #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Lasts for $n blocks",
+        "labels": [
+          "560095 behaviour_metric_delta charges",
+          "560095 effect_value #2"
+        ]
+      },
+      {
+        "claim": "or $d",
+        "labels": [
+          "560095 behaviour_metric_delta duration_held",
+          "560095 behaviour_metric_delta duration_gone",
+          "560095 aura_duration_ms #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 560111,
@@ -2041,7 +2094,10 @@
     "spell": 681433,
     "clause": "Reduces the cooldown of your Solar Invocation spells by $/1000;524858s1 sec for each target struck.",
     "labels": [
-      "681433 effect_value 524858e0 #2"
+      "681433 effect_value 524858e0 #2",
+      "681433 behaviour_metric_delta cd_refund_one",
+      "681433 behaviour_metric_delta cd_refund_three",
+      "681433 behaviour_metric_delta cd_refund_none"
     ],
     "kind": "claim"
   },
@@ -2908,7 +2964,8 @@
     "spell": 704910,
     "clause": "and your spell haste rating by $s2% of your Intellect.",
     "labels": [
-      "704910 effect_value e1 #1"
+      "704910 effect_value e1 #1",
+      "704910 behaviour_metric_delta haste_rating"
     ],
     "kind": "claim"
   },
@@ -3426,18 +3483,40 @@
   {
     "spell": 707433,
     "clause": "Increases the tick rate of Mercy by $s1%,",
-    "labels": [
-      "707433 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the tick rate of Mercy",
+        "labels": [
+          "707433 behaviour_metric_delta mercy_period"
+        ]
+      },
+      {
+        "claim": "by $s1%",
+        "labels": [
+          "707433 effect_value e0 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 707433,
     "clause": "but increases its mana cost by $s2%.",
-    "labels": [
-      "707433 effect_value e1 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "but increases its mana cost",
+        "labels": [
+          "707433 behaviour_metric_delta mercy_cost"
+        ]
+      },
+      {
+        "claim": "by $s2%",
+        "labels": [
+          "707433 effect_value e1 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 707517,
@@ -3651,10 +3730,30 @@
   {
     "spell": 800039,
     "clause": "Increases the critical strike chance of Gavels and Dawnbreak by $s1%.",
-    "labels": [
-      "800039 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the critical strike chance of Gavels",
+        "labels": [
+          "800039 behaviour_metric_delta crit_gavel_light",
+          "800039 behaviour_metric_delta crit_gavel_wrath",
+          "800039 behaviour_metric_delta crit_gavel_grace",
+          "800039 behaviour_metric_delta crit_dawnsear_control"
+        ]
+      },
+      {
+        "claim": "and Dawnbreak",
+        "labels": [
+          "800039 behaviour_metric_delta crit_dawnbreak"
+        ]
+      },
+      {
+        "claim": "by $s1%",
+        "labels": [
+          "800039 effect_value e0 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 800054,
@@ -3691,16 +3790,49 @@
   {
     "spell": 800600,
     "clause": "Start anew, reseting the cooldown of Paragon, Chosen of the Light, and Judgement Day spells.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Start anew, reseting the cooldown of Paragon",
+        "labels": [
+          "800600 behaviour_metric_delta reset_680639",
+          "800600 behaviour_metric_delta reset_680639_control"
+        ]
+      },
+      {
+        "claim": "Chosen of the Light",
+        "labels": [
+          "800600 behaviour_metric_delta reset_800622",
+          "800600 behaviour_metric_delta reset_800622_control"
+        ]
+      },
+      {
+        "claim": "and Judgement Day spells",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 800602,
     "clause": "Doubles the effectiveness of your Holy Form and reduces the tick rate of Ancient Rites by $/1000;s2 sec.",
-    "labels": [
-      "800602 effect_value e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Doubles the effectiveness of your Holy Form",
+        "labels": []
+      },
+      {
+        "claim": "and reduces the tick rate of Ancient Rites by $/1000;s2 sec",
+        "labels": [
+          "800602 behaviour_metric_delta period_upper",
+          "800602 behaviour_metric_delta period_lower",
+          "800602 behaviour_metric_delta period_control",
+          "800602 behaviour_metric_delta period_upper_301345",
+          "800602 behaviour_metric_delta period_upper_301817",
+          "800602 effect_value e1 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 800612,
