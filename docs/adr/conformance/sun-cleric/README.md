@@ -29,3 +29,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0023](0023-a-triggered-strike-takes-its-cast-spells-weapon-set.md) | A triggered strike takes its cast spell's weapon set |
 | [0024](0024-valiance-first-auto-attack-is-the-dbc-extra-swing.md) | Valiance's first auto attack on a target is the DBC extra attack, gated by its debuff |
 | [0025](0025-mace-and-shield-replace-the-sword-and-staff-weapon-sets.md) | Mace and shield replace the sword and staff reference weapon sets (supersedes 0001 for the sets) |
+| [0027](0027-vow-of-the-valkyr-fulfils-once-per-ability-cast.md) | Vow of the Valkyr's Fulfillment triggers one auto attack per weapon per ability cast |

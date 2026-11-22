@@ -6417,9 +6417,14 @@
   {
     "spell": 807749,
     "clause": "Fulfillment: Melee ability damage triggers an auto attack with each weapon.",
-    "labels": [],
+    "labels": [
+      "807749 behaviour_metric_delta fulfillment_main",
+      "807749 behaviour_metric_delta fulfillment_off",
+      "807749 behaviour_metric_delta gavel_fulfillment_main",
+      "807749 behaviour_metric_delta gavel_fulfillment_off"
+    ],
     "kind": "claim",
-    "reason": "Owner point open: per damage event or per cast. The entries fulfillment_main, fulfillment_off, ability_hits and ability_hits_second measure the per-damage-event reading and are not cited until the owner rules."
+    "reason": "Owner ruling O-12 (2026-11-22, Q-sc-1 option b): one auto attack per weapon per ability cast, not per damage event; Sun Cleric ADR 0027. Glorious Execution (two damage events) gains 1 main-hand and 1 off-hand attack, Gavel of Light (one hit) 1 and 1, each against a control phase without the Vow. Pair 20261122-122203 / 20261122-122559, build 045aed9a9367, no flip: each entry reads 0 in the control phase and 1 after the Vow (before the fix, pair 20261121-021237 / -021438, build 4dc152e975e5: fulfillment_main and fulfillment_off gained 2)."
   },
   {
     "spell": 807749,

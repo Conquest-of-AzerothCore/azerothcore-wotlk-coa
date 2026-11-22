@@ -2026,15 +2026,15 @@
         "target": "dummy"
       },
       "before_expected": 0,
-      "expected": 2,
+      "expected": 1,
       "wait_ms": 1500,
-      "observe_source": "Count of 506824 damage events on the dummy. Glorious Execution 800626 is a melee ability that strikes with both weapons: Effect[0] and Effect[2] trigger the main-hand damage spell 800691 and the off-hand damage spell 802566, so one cast has 2 melee ability damage events (the entries ability_hits and ability_hits_second read one each). A measurement, not a proof: the tooltip \"Melee ability damage triggers an auto attack with each weapon\" can be read per damage event or per cast, an owner point that is open (nothing found settles it). The per-damage-event reading gives one auto attack per weapon for each of the 2 events: gain 2 = 1 (800691) + 1 (802566), derived from Spell.dbc, not from the measurement; the per-cast reading would be 1. The ledger row carries no label until the owner rules. The harness counters (melee_damage_count, spell_damage_count) are cumulative over the whole scenario: the after reading includes the before phase, so the effect of a phase is the gain. Code: AscensionSunClericEvents.cpp:163-171 and :242-243 casts 506821 (Effect[0] and Effect[1] trigger 506824 main hand and 506823 off hand) once per damage event of a direct melee ability under Dawn. Dawn 807440 is a precondition fixture (set_aura, the subject is Fulfillment); 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits) and 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. The Vow is cast for real between the phases (setup cast in the after phase only), the phase without it is the control (0 events). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives the per-event or per-cast Fulfillment count or an auto attack Solar Power rate.",
+      "observe_source": "Count of 506824 damage events on the dummy. Glorious Execution 800626 strikes with both weapons: Effect[0] and Effect[2] trigger the main-hand damage spell 800691 and the off-hand damage spell 802566, so one cast has 2 melee ability damage events (the entries ability_hits and ability_hits_second read one each). Sun Cleric ADR 0027, owner ruling O-12 (2026-11-22, Q-sc-1 option b): Fulfillment triggers one auto attack per weapon per ability cast, not per damage event. Code: AscensionSunClericEvents.cpp:245-249 casts 506821 (Effect[0] and Effect[1] trigger 506824 main hand and 506823 off hand) once per ability cast under Dawn, marked by script value 807749 on the cast that Origin() (AscensionSunCleric.cpp:175) resolves: a triggered damage spell (800691, 802566) resolves to its parent cast, so the second damage event of one cast finds the mark. Expected gain 1: one 506821 cast per Glorious Execution, so one main hand attack, not one per damage event (2, measured before the fix on pair 20261121-021237 / -021438, build 4dc152e975e5). Dawn 807440 is a precondition fixture (set_aura, the subject is Fulfillment); 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits) and 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. The Vow is cast for real between the phases (setup cast in the after phase only); the phase without it is the control (0 events). The harness counters are cumulative over the whole scenario: the effect of a phase is the gain. Weapons: the Valkyr set (2529 in each hand, Sun Cleric ADR 0025). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives the per-event or per-cast Fulfillment count.",
       "setup_casts": [
         807749
       ],
       "setup_only_after": true,
       "setup_wait_ms": 1600,
-      "expected_gain": 2
+      "expected_gain": 1
     },
     {
       "spell": 807749,
@@ -2088,15 +2088,107 @@
         "target": "dummy"
       },
       "before_expected": 0,
-      "expected": 2,
+      "expected": 1,
       "wait_ms": 1500,
-      "observe_source": "Count of 506823 damage events on the dummy. Glorious Execution 800626 is a melee ability that strikes with both weapons: Effect[0] and Effect[2] trigger the main-hand damage spell 800691 and the off-hand damage spell 802566, so one cast has 2 melee ability damage events (the entries ability_hits and ability_hits_second read one each). A measurement, not a proof: the tooltip \"Melee ability damage triggers an auto attack with each weapon\" can be read per damage event or per cast, an owner point that is open (nothing found settles it). The per-damage-event reading gives one auto attack per weapon for each of the 2 events: gain 2 = 1 (800691) + 1 (802566), derived from Spell.dbc, not from the measurement; the per-cast reading would be 1. The ledger row carries no label until the owner rules. The harness counters (melee_damage_count, spell_damage_count) are cumulative over the whole scenario: the after reading includes the before phase, so the effect of a phase is the gain. Code: AscensionSunClericEvents.cpp:163-171 and :242-243 casts 506821 (Effect[0] and Effect[1] trigger 506824 main hand and 506823 off hand) once per damage event of a direct melee ability under Dawn. Dawn 807440 is a precondition fixture (set_aura, the subject is Fulfillment); 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits) and 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. The Vow is cast for real between the phases (setup cast in the after phase only), the phase without it is the control (0 events). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives the per-event or per-cast Fulfillment count or an auto attack Solar Power rate.",
+      "observe_source": "Count of 506823 damage events on the dummy. Glorious Execution 800626 strikes with both weapons: Effect[0] and Effect[2] trigger the main-hand damage spell 800691 and the off-hand damage spell 802566, so one cast has 2 melee ability damage events (the entries ability_hits and ability_hits_second read one each). Sun Cleric ADR 0027, owner ruling O-12 (2026-11-22, Q-sc-1 option b): Fulfillment triggers one auto attack per weapon per ability cast, not per damage event. Code: AscensionSunClericEvents.cpp:245-249 casts 506821 (Effect[0] and Effect[1] trigger 506824 main hand and 506823 off hand) once per ability cast under Dawn, marked by script value 807749 on the cast that Origin() (AscensionSunCleric.cpp:175) resolves: a triggered damage spell (800691, 802566) resolves to its parent cast, so the second damage event of one cast finds the mark. Expected gain 1: one 506821 cast per Glorious Execution, so one off hand attack, not one per damage event (2, measured before the fix on pair 20261121-021237 / -021438, build 4dc152e975e5). Dawn 807440 is a precondition fixture (set_aura, the subject is Fulfillment); 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits) and 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. The Vow is cast for real between the phases (setup cast in the after phase only); the phase without it is the control (0 events). The harness counters are cumulative over the whole scenario: the effect of a phase is the gain. Weapons: the Valkyr set (2529 in each hand, Sun Cleric ADR 0025). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives the per-event or per-cast Fulfillment count.",
       "setup_casts": [
         807749
       ],
       "setup_only_after": true,
       "setup_wait_ms": 1600,
-      "expected_gain": 2
+      "expected_gain": 1
+    },
+    {
+      "spell": 807749,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "name": "Vow of the Valkyr (Fulfillment main hand attack, one-hit Gavel of Light)",
+      "variant": "gavel_fulfillment_main",
+      "label_suffix": "gavel_fulfillment_main",
+      "quote": "Fulfillment: Melee ability damage triggers an auto attack with each weapon.",
+      "trigger_spell": 800611,
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 506824,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "observe_source": "Count of 506824 damage events on the dummy. Gavel of Light 800611 (rank 502476 at level 60) is a one-hit melee ability: Effect[0] 121 SPELL_EFFECT_NORMALIZED_WEAPON_DMG and Effect[1] 31 SPELL_EFFECT_WEAPON_PERCENT_DAMAGE on one main-hand hit, DmgClass 2 MELEE, EquippedItemSubClassMask 173555 (holds the two-hand sword subclass 8), so one cast has 1 melee ability damage event. Sun Cleric ADR 0027, owner ruling O-12 (2026-11-22, Q-sc-1 option b): Fulfillment triggers one auto attack per weapon per ability cast, not per damage event. Code: AscensionSunClericEvents.cpp:245-249 casts 506821 (Effect[0] and Effect[1] trigger 506824 main hand and 506823 off hand) once per ability cast under Dawn, marked by script value 807749 on the cast that Origin() (AscensionSunCleric.cpp:175) resolves: a triggered damage spell (800691, 802566) resolves to its parent cast, so the second damage event of one cast finds the mark. Expected gain 1: one 506821 cast, so one main hand attack. Dawn 807440 is a precondition fixture (set_aura, the subject is Fulfillment); 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits) and 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. The Vow is cast for real between the phases (setup cast in the after phase only); the phase without it is the control (0 events). The harness counters are cumulative over the whole scenario: the effect of a phase is the gain. Weapons: the Valkyr set (2529 in each hand, Sun Cleric ADR 0025). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives the per-event or per-cast Fulfillment count.",
+      "setup_casts": [
+        807749
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "expected_gain": 1
+    },
+    {
+      "spell": 807749,
+      "kind": "metric_delta",
+      "target": "dummy",
+      "expire_ms": 500,
+      "name": "Vow of the Valkyr (Fulfillment off hand attack, one-hit Gavel of Light)",
+      "variant": "gavel_fulfillment_off",
+      "label_suffix": "gavel_fulfillment_off",
+      "quote": "Fulfillment: Melee ability damage triggers an auto attack with each weapon.",
+      "trigger_spell": 800611,
+      "phase_auras": [
+        [
+          807440,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 506823,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "observe_source": "Count of 506823 damage events on the dummy. Gavel of Light 800611 (rank 502476 at level 60) is a one-hit melee ability: Effect[0] 121 SPELL_EFFECT_NORMALIZED_WEAPON_DMG and Effect[1] 31 SPELL_EFFECT_WEAPON_PERCENT_DAMAGE on one main-hand hit, DmgClass 2 MELEE, EquippedItemSubClassMask 173555 (holds the two-hand sword subclass 8), so one cast has 1 melee ability damage event. Sun Cleric ADR 0027, owner ruling O-12 (2026-11-22, Q-sc-1 option b): Fulfillment triggers one auto attack per weapon per ability cast, not per damage event. Code: AscensionSunClericEvents.cpp:245-249 casts 506821 (Effect[0] and Effect[1] trigger 506824 main hand and 506823 off hand) once per ability cast under Dawn, marked by script value 807749 on the cast that Origin() (AscensionSunCleric.cpp:175) resolves: a triggered damage spell (800691, 802566) resolves to its parent cast, so the second damage event of one cast finds the mark. Expected gain 1: one 506821 cast, so one off hand attack. Dawn 807440 is a precondition fixture (set_aura, the subject is Fulfillment); 984954 Reg\u2019s Test Aura: Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT +101 (EquippedItemClass -1, so every melee or ranged class spell crits) and Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (no magic spell crits) and 823764: Effect[0] aura 123 -10000 on schools 126 (no magic resistance) and Effect[1] aura 108 SPELLMOD_EFFECT1 +100% on family 33 class mask word 2 bit 29, which none of the tested spells carries. The Vow is cast for real between the phases (setup cast in the after phase only); the phase without it is the control (0 events). The harness counters are cumulative over the whole scenario: the effect of a phase is the gain. Weapons: the Valkyr set (2529 in each hand, Sun Cleric ADR 0025). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives the per-event or per-cast Fulfillment count.",
+      "setup_casts": [
+        807749
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "expected_gain": 1
     },
     {
       "spell": 807749,
@@ -2136,7 +2228,7 @@
       "before_expected": 1,
       "expected": 2,
       "wait_ms": 1500,
-      "observe_source": "Control for the Fulfillment entries: Glorious Execution damage events of 800691 on the dummy. The before phase (no Vow) reads 1 event for one cast; The harness counters (melee_damage_count, spell_damage_count) are cumulative over the whole scenario: the after reading includes the before phase, so the effect of a phase is the gain. The gain of the Vow phase is expected 1: the Vow adds no ability damage event, so the 2 Fulfillment events per weapon come from the 2 damage events of the ability, not from a duplicated hit. Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives the per-event or per-cast Fulfillment count or an auto attack Solar Power rate.",
+      "observe_source": "Control for the Fulfillment entries: Glorious Execution damage events of 800691 on the dummy. The before phase (no Vow) reads 1 event for one cast; The harness counters (melee_damage_count, spell_damage_count) are cumulative over the whole scenario: the after reading includes the before phase, so the effect of a phase is the gain. The gain of the Vow phase is expected 1: the Vow adds no ability damage event, so the cast keeps its 2 damage events while Fulfillment gives 1 attack per weapon for the cast (owner ruling O-12, Sun Cleric ADR 0027). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives the per-event or per-cast Fulfillment count or an auto attack Solar Power rate.",
       "setup_casts": [
         807749
       ],
@@ -2182,7 +2274,7 @@
       "before_expected": 1,
       "expected": 2,
       "wait_ms": 1500,
-      "observe_source": "Control for the Fulfillment entries: Glorious Execution damage events of 802566 on the dummy. The before phase (no Vow) reads 1 event for one cast; The harness counters (melee_damage_count, spell_damage_count) are cumulative over the whole scenario: the after reading includes the before phase, so the effect of a phase is the gain. The gain of the Vow phase is expected 1: the Vow adds no ability damage event, so the 2 Fulfillment events per weapon come from the 2 damage events of the ability, not from a duplicated hit. Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives the per-event or per-cast Fulfillment count or an auto attack Solar Power rate.",
+      "observe_source": "Control for the Fulfillment entries: Glorious Execution damage events of 802566 on the dummy. The before phase (no Vow) reads 1 event for one cast; The harness counters (melee_damage_count, spell_damage_count) are cumulative over the whole scenario: the after reading includes the before phase, so the effect of a phase is the gain. The gain of the Vow phase is expected 1: the Vow adds no ability damage event, so the cast keeps its 2 damage events while Fulfillment gives 1 attack per weapon for the cast (owner ruling O-12, Sun Cleric ADR 0027). Reference search: coa-history spell 807749 (138 casts in 11 logs) and 506823/506824 (1391 and 1388 off-hand and main-hand Vow auto attack events, equal in count); bindmysoul 807749 text identical to the streamed one; nothing found that gives the per-event or per-cast Fulfillment count or an auto attack Solar Power rate.",
       "setup_casts": [
         807749
       ],

@@ -242,8 +242,11 @@ class aura_ascension_sun_cleric_event : public AuraScript
                     Copy(player, allies.front(), 505197,
                         CalculatePct(amount, Amount(807750, 0, player) * (fulfillment ? 2 : 1)));
             }
-            if (id == 807749 && fulfillment && !automatic)
+            if (id == 807749 && fulfillment && !automatic && !spell->GetScriptValue(807749))
+            {
+                spell->SetScriptValue(807749, 1);
                 Cast(player, target, 506821);
+            }
             State(player).event = old;
             State(player).dawnEvent = oldDawn;
             return;
