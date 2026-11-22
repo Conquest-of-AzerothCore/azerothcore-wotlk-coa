@@ -2493,7 +2493,7 @@
       "680670 behaviour_duration_ratio"
     ],
     "kind": "claim",
-    "reason": "Control arm = the Hamstring 1715 duration before the learn (14494 ms). After the learn 11494 ms: ratio 0.793 against 0.8 from Effect[0] aura 232 BasePoints -21 + 1, delta -3000 ms read within the entry margin (excludes 10% off on both sides, 0.72 and 0.88). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
+    "reason": "Control arm = the Hamstring 1715 duration before the learn (14494 ms remaining, read about 500 ms after the last landing). After the learn 11494 ms: a cut of exactly 3000 ms in both runs, 20.0% of the 15000 ms duration from Effect[0] aura 232 MiscValue 11 BasePoints -21 + 1 (18% and 22% would cut 2700 and 3300 ms, 300 ms away; the reads agree to the ms across the two runs). The judge's own margin is 525 ms, wider than the 10% rule: stated as a tool limit (the margin is not an entry field). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence with -20%; nothing else found. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
   },
   {
     "spell": 680700,
@@ -2862,7 +2862,7 @@
       "704581 behaviour_duration_ratio"
     ],
     "kind": "claim",
-    "reason": "Control arm = the stun 2880 duration before the learn (1994 ms read); after 1494 ms: ratio 0.749 against 0.8 from Effect[1] aura 232 MiscValue 12 BasePoints -21 + 1, delta -500 ms against the expected -398.8 ms inside the entry margin of 525 ms. The ratio read is wide because the read is taken late in a 10 s stun (stated by the judge). Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the sentence and figure; coa-history and merged-PR search: nothing beyond the tooltip and the DBC. Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
+    "reason": "Not closed. Hammer-of-Justice-style vehicle Stun 2880 (10000 ms) read 1994 ms before and 1494 ms after the learn (ratio 0.749 against 0.8); the harness lands the stun three times 500 ms apart, so the aura read is a diminished re-application, and the judge's 525 ms margin does not exclude 10% off (450 and 550 ms around the stated 500 ms delta). The 10% rule is not met; a single-landing or exact-total design is needed (tool need, returned). Pair 20261122-040816 / 20261122-040851, build f50fb5fce072, server commit 68e7af248b64+, no flip."
   },
   {
     "spell": 704582,
