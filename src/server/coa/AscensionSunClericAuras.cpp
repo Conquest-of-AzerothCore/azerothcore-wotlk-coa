@@ -130,7 +130,8 @@ class aura_ascension_sun_cleric_lifecycle : public AuraScript
     void Period(AuraEffect const* effect, bool& periodic, int32& amplitude)
     {
         Player* player = Owner(GetCaster());
-        if (player && effect->GetEffIndex() == 0 && Named(GetSpellInfo(),300351) && player->HasAura(800602))
+        if (player && effect->GetEffIndex() == 0 && Any(GetSpellInfo(), {300351, 301345, 301817}) &&
+            player->HasAura(800602))
         {
             periodic = true;
             amplitude = std::max(1000, amplitude - std::abs(Amount(800602,1)));

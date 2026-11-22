@@ -15,3 +15,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0009](0009-sunwalker-doubles-vow-of-light-once.md) | Sunwalker doubles the value of Vow of Light once |
 | [0010](0010-arbiter-of-light-adds-its-share-while-vow-of-light-is-active.md) | Arbiter of Light adds its Gavel of Light heal share while Vow of Light is active |
 | [0011](0011-luminary-mendicant-raises-vow-of-grace-mana-once.md) | Luminary Mendicant raises the Vow of Grace mana once |
+| [0012](0012-empowered-holy-form-shortens-every-rank-of-ancient-rites.md) | Empowered Holy Form shortens every rank of Ancient Rites |
