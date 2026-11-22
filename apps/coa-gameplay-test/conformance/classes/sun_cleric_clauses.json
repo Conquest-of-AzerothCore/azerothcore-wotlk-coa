@@ -337,14 +337,9 @@
     "spell": 300347,
     "clause": "In addition, your Gavels now have a 40 yd range.",
     "kind": "claim",
-    "claims": [
-      {
-        "claim": "your Gavels now have a 40 yd range",
-        "labels": [
-          "300347 behaviour_metric_delta range_in",
-          "300347 behaviour_metric_delta range_out"
-        ]
-      }
+    "labels": [
+      "300347 behaviour_metric_delta range_in",
+      "300347 behaviour_metric_delta range_out"
     ]
   },
   {
