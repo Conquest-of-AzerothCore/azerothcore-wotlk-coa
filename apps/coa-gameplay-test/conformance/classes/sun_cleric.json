@@ -20708,29 +20708,6 @@
       ],
       "dummy_distance": 3,
       "observe_source": "760379 Sunstorm Effect[1] aura 147 MECHANIC_IMMUNITY_MASK MiscValue 1733, Effect[2] aura 263 ALLOW_ONLY_ABILITY, DurationIndex 32 = 6000 ms. Piercing Howl 12323 (aura 33, Mechanic 11) is the refused control and Disarm 676 (Mechanic 3, aura 67 MOD_DISARM, range index 2, DurationIndex 32 = 6000 ms) the effect the clause leaves out: each is cast by the dummy at the caster three times, 500 ms apart, inside the 6000 ms; the slow is absent and the disarm present after them, and the slow lands again after the expiry (control that the cast route lands). Reference search 2026-11-22: server DBC 760379; coa-history spell 760379: 0 events in 186 logs; ascension-data advancement.tsv lists Sunstorm as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC."
-    },
-    {
-      "spell": 760379,
-      "name": "Sunstorm (the caster can move)",
-      "kind": "metric_delta",
-      "variant": "move",
-      "label_suffix": "move",
-      "quote": "While under the effects of Sunstorm, you can move but cannot perform any other abilities but you do not feel pity or remorse or fear and you cannot be stopped unless disarmed or killed.",
-      "trigger_spell": 760379,
-      "target": "caster",
-      "cast_in_before": false,
-      "expire_ms": 500,
-      "metric": "position_x",
-      "fields": {},
-      "before_expected": 0,
-      "expected": 14,
-      "tolerance": 4,
-      "wait_ms": 2000,
-      "observe_source": "The caster runs forward from the Sunstorm cast: the 2D displacement over the 2000 ms wait is read in the phase with Sunstorm (the base run speed is 7 yd/s: 14 yd within 4) and is 0 in the phase before the cast, where the movement is not started (the flag is set at the trigger cast). Reference search 2026-11-22: server DBC 760379; coa-history spell 760379: 0 events in 186 logs; ascension-data advancement.tsv lists Sunstorm as a talent node by name only; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC.",
-      "displacement": {},
-      "moving_before_trigger": {
-        "flag": "forward"
-      }
     }
   ],
   "player_observations": [],

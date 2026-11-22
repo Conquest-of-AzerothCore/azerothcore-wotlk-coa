@@ -4154,9 +4154,7 @@
     "claims": [
       {
         "claim": "While under the effects of Sunstorm, you can move",
-        "labels": [
-          "760379 behaviour_metric_delta move"
-        ]
+        "labels": []
       },
       {
         "claim": "but cannot perform any other abilities",
