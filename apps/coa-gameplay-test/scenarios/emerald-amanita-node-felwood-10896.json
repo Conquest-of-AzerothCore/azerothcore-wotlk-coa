@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Emerald Amanita grows in northern Felwood (#10896)",
+  "contract": "#10896 reported no source for Emerald Amanita (item 354288). The node template 254477 was missing. Expected: one Emerald Amanita node (guid 9936000) stands at the AscensionDB sighting 6455.252, -1485.986, 439.477 on map 1, rests on the ground and is not under water.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 6456.252,
+    "y": -1485.986,
+    "z": 439.977,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: an Emerald Amanita node grows here",
+      "metric": "nearby_gameobject_count",
+      "entry": 254477,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the node stands at the sighting",
+      "metric": "spawn_distance",
+      "x": 6455.252,
+      "y": -1485.986,
+      "z": 439.477,
+      "max": 0.3,
+      "guid": 9936000,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the node rests on the ground",
+      "metric": "spawn_ground_gap",
+      "min": -0.35,
+      "max": 0.35,
+      "guid": 9936000,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the node is not under water",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 9936000,
+      "spawn_type": "gameobject"
+    }
+  ]
+}

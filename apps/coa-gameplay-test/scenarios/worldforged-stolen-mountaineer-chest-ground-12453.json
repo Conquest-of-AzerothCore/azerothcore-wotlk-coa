@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Stolen Mountaineer Chest pickup rests on the ground (#12453)",
+  "contract": "#12453 reported the Worldforged Stolen Mountaineer Chest pickup (entry 517340, guid 6941151) under the ground. The map-pass point -5903.8, -2958.7, 367.932 was 4.39 yd under the ground. Expected: the pickup stands at its first-pass realm point -5898.9, -2955.43, 367.932, rests on the ground, is not under water and opens with loot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -5898.91,
+    "y": -2955.43,
+    "z": 368.432,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: the pickup is in the area",
+      "metric": "nearby_gameobject_count",
+      "entry": 517340,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the pickup stands at its restored spot",
+      "metric": "spawn_distance",
+      "x": -5898.9,
+      "y": -2955.43,
+      "z": 367.932,
+      "max": 0.3,
+      "guid": 6941151,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup rests on the ground (-0.35 to 0.35 yd)",
+      "metric": "spawn_ground_gap",
+      "min": -0.35,
+      "max": 0.35,
+      "guid": 6941151,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is not under water",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6941151,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 517340
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is within reach and opens",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "its loot is shown",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}
