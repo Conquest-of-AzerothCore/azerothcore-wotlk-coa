@@ -53,12 +53,31 @@ Every trial reads `aura` right before the judged cast: 0 in the control, 1 in th
   selection on the aura timing, never on R). A refused feed cast or a primer read not natural within 10% voids the
   run (unmeasured); the control's refusal of R is the judged read. The verdict is stamped `cast_failure`. `trials`
   must keep a run without a selected trial at most `residual_target` per pair (15 at ProcChance 40 and 0.001).
+- `variant: "heal_rate"` or `"heal_rate_<suffix>"` (ADR 1066, opt-in): a proc rate per feed heal, no control arm.
+  `feed_target` is `ally` or `self`, set once to 1 health of a 2000000000 maximum; each of `rolls` rolls cancels
+  `aura` on the caster, casts `feed_spell` once at the target and, after the cast time + 500 ms, reads `aura` on the
+  caster. At the end, `spell_heal_count` of the feed on the target must equal the rolls, its effective healing must
+  equal its healing, the last feed cast failure must be 0 and (ally) the feed must not heal the full-health caster
+  effectively, else the run is void (unmeasured). The Wilson interval at `residual_z(residual_target)` must lie
+  inside the G-20 band (`procs.rate_band`) around ProcChance of `chance_spell`; wholly outside alerts, straddling is
+  unmeasured with the needed roll count (`residual_sizing`, `min_detectable`). `haste_aura` (opt-in) sets a
+  casting-speed-only aura (`SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK`, no proc, family or class mask, else refused)
+  before the rolls, reads it at the start and end (1, else void), reads the feed's cast time and casts with
+  `ignore_gcd`; the roll step shrinks to the hasted cast time + 500 ms. A roll is 5 steps: at most about 1900 rolls
+  fit the 10000-step scenario limit.
+- `heal_rate` pooled (`parts` > 1, ADR 1066, opt-in, the kind's `POOLED_JUDGE`): `parts` identical scenarios of
+  `rolls` each, `spare_parts` (1 or more) fixed before the run, and `(parts - spare_parts) * rolls` must reach the
+  band's roll count or the entry is refused. A part with any void or missing read is excluded whole; the kept parts'
+  rolls pool into one Wilson interval, judged as above, and fewer pooled rolls than the band needs is unmeasured. A
+  pooled hasted entry names `haste_agreement`, the step 1 agreement that justifies the haste aura, in its contract.
 
 Sun Cleric: Dawn's Arrival 503690 (`cooldown` with `evidence_metric`, label `fed_cooldown`;
 `cooldown_reset_recast`, label `fed_reset`); Spears of Glory 804629 (Radiant Flame 806060 feeding 807299,
 Dawnsear 554406 instant and +25%, the
 +25% sized with `figure_effect` 1, `min_hits` 4, 14 trials and `consumed`); Cultivate
-Divinity 704920 (`heal` and `heal_cascade`: Radiant Cascade 500141 and Illumination 500143 feeding each other's +20%).
+Divinity 704920 (`heal` and `heal_cascade`: Radiant Cascade 500141 and Illumination 500143 feeding each other's +20%;
+`heal_rate_*` self and ally rate arms of both tiers, with and without Fast Cast 50336, and the hasted
+`_pooled` arms sized for the G-20 band: 17 parts of 1900 rolls at 40%, 12 at 20%, one spare each).
 
 ## Window variant (`variant: "window"`, ADR 1052, provisional)
 

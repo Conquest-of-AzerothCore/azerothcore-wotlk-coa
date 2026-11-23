@@ -4,6 +4,7 @@ from pathlib import Path
 
 from behaviours import (BEHAVIOUR_METRIC_DELTA, SPELL_FAILED_NOT_READY, ally_group_steps, ally_players,
                         behaviour_entry, cleaned_tooltip, dummy_fixture, dummy_id, prose_rule, waited_ms)
+from aura_fed_rate import HEAL_RATE, is_rate, pooled_rate_verdict, rate_scenario, rate_verdict
 from bonus import bonus_of, per_event_sample
 from compare import FLOAT_EPSILON, NO_CAST_FAILURE, Run, Verdict, describe_failures, missing_measurement
 from hits import MAX_ACCELERATED_SCENARIO_MS, MAX_SCENARIO_MS, timed
@@ -564,6 +565,8 @@ def cooldown_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
 def aura_fed_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     if model.get('variant') == WINDOW_VARIANT:
         return window_verdict(base, run, model)
+    if model.get('variant') == HEAL_RATE:
+        return rate_verdict(base, run, model)
     labels = [label for arm in ARMS for trial in model['reads'][arm] for label in trial.values()]
     missing = next((label for label in labels if run.values.get(label) is None), None)
     if missing is not None:
@@ -866,6 +869,8 @@ def window_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
 def scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
     if entry.get('variant') == WINDOW_VARIANT:
         return window_scenario(class_file, window_spec(entry))
+    if is_rate(entry):
+        return rate_scenario(class_file, entry)
     return aura_fed_scenario(class_file, aura_fed_spec(entry))
 
 
@@ -877,3 +882,12 @@ JUDGES = {BEHAVIOUR_METRIC_DELTA: aura_fed_verdict}
 METRIC_EVIDENCE = {WINDOW_EVIDENCE_METRIC: 'state'}
 CONTRAST_PROOF = {WINDOW_EVIDENCE_METRIC: WINDOW_CONTRAST}
 STATE_PROMISES = {WINDOW_EVIDENCE_METRIC: r'within'}
+
+
+def pooled_verdict(base: Verdict, runs: list[Run], model: dict) -> Verdict:
+    if model['variant'] != HEAL_RATE:
+        return replace(base, status='unmeasured', explanation=f'{KIND} pools only the {HEAL_RATE} variant')
+    return pooled_rate_verdict(base, runs, model)
+
+
+POOLED_JUDGE = pooled_verdict
