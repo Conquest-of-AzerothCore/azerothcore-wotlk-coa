@@ -2316,7 +2316,7 @@
     },
     {
       "spell": 800355,
-      "name": "Sargeras Embrace (uncounted: channel aura at 3700 ms without the power hold)",
+      "name": "Sargeras Embrace (cost: channel aura at 3700 ms from 100 Energy without the power hold)",
       "kind": "metric_delta",
       "variant": "free_3700",
       "label_suffix": "free_3700",
@@ -2340,12 +2340,12 @@
           3800
         ]
       },
-      "observe_source": "Uncounted observation for the owner (mentor D-16): without hold_power_during_wait, from full Energy (cast_power 100) with ManaPerSecond 30 Energy, the aura 800355 on the dummy is read 3700 ms after the cast, to bracket how long the channel lasts. No ledger label.",
+      "observe_source": "Without hold_power_during_wait, from full Energy (cast_power 100), the aura 800355 on the dummy is read 3700 ms after the cast: present. Expected from the DBC and the stock engine, not from a run (Felsworn ADR 0014, owner ruling O-24: the cost '30 Energy, plus 30 per sec' is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted). Spell.dbc 800355: PowerType 3 Energy, ManaCost 30, ManaPerSecond 30, DurationIndex 571 = 5500 ms. Cast from 100 Energy (cast_power 100): 70 after the up-front cost; untalented Energy regeneration 10 per second (Player.cpp Energy regeneration, Rate.Energy 1); Aura::Update charges 30 every 1000 ms and removes the aura when the pool is below 30 (SpellAuras.cpp:771-801). Pool before the drains at 1000, 2000, 3000 and 4000 ms: 80, 60, 40, 20, so the channel ends at the fourth drain, 4000 ms: the aura 800355 on the dummy is present at 3700 and 3900 ms and gone at 4100 and 4300 ms. A server without the per-second drain keeps the aura to 5500 ms; one that drained more ends before 3900 ms. Bracket only, no ledger label.",
       "measure_actor": "dummy"
     },
     {
       "spell": 800355,
-      "name": "Sargeras Embrace (uncounted: channel aura at 3900 ms without the power hold)",
+      "name": "Sargeras Embrace (cost: channel aura at 3900 ms from 100 Energy without the power hold)",
       "kind": "metric_delta",
       "variant": "free_3900",
       "label_suffix": "free_3900",
@@ -2369,12 +2369,12 @@
           4000
         ]
       },
-      "observe_source": "Uncounted observation for the owner (mentor D-16): without hold_power_during_wait, from full Energy (cast_power 100) with ManaPerSecond 30 Energy, the aura 800355 on the dummy is read 3900 ms after the cast, to bracket how long the channel lasts. No ledger label.",
+      "observe_source": "Without hold_power_during_wait, from full Energy (cast_power 100), the aura 800355 on the dummy is read 3900 ms after the cast: present. Expected from the DBC and the stock engine, not from a run (Felsworn ADR 0014, owner ruling O-24: the cost '30 Energy, plus 30 per sec' is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted). Spell.dbc 800355: PowerType 3 Energy, ManaCost 30, ManaPerSecond 30, DurationIndex 571 = 5500 ms. Cast from 100 Energy (cast_power 100): 70 after the up-front cost; untalented Energy regeneration 10 per second (Player.cpp Energy regeneration, Rate.Energy 1); Aura::Update charges 30 every 1000 ms and removes the aura when the pool is below 30 (SpellAuras.cpp:771-801). Pool before the drains at 1000, 2000, 3000 and 4000 ms: 80, 60, 40, 20, so the channel ends at the fourth drain, 4000 ms: the aura 800355 on the dummy is present at 3700 and 3900 ms and gone at 4100 and 4300 ms. A server without the per-second drain keeps the aura to 5500 ms; one that drained more ends before 3900 ms. Counted for the cost line claim with free_3900 and free_4100.",
       "measure_actor": "dummy"
     },
     {
       "spell": 800355,
-      "name": "Sargeras Embrace (uncounted: channel aura at 4100 ms without the power hold)",
+      "name": "Sargeras Embrace (cost: channel aura at 4100 ms from 100 Energy without the power hold)",
       "kind": "metric_delta",
       "variant": "free_4100",
       "label_suffix": "free_4100",
@@ -2391,19 +2391,19 @@
       "before_expected": 0,
       "wait_ms": 4100,
       "expire_ms": 500,
-      "expected": 1,
+      "expected": 0,
       "game_time": {
         "after": [
           4050,
           4200
         ]
       },
-      "observe_source": "Uncounted observation for the owner (mentor D-16): without hold_power_during_wait, from full Energy (cast_power 100) with ManaPerSecond 30 Energy, the aura 800355 on the dummy is read 4100 ms after the cast, to bracket how long the channel lasts. No ledger label.",
+      "observe_source": "Without hold_power_during_wait, from full Energy (cast_power 100), the aura 800355 on the dummy is read 4100 ms after the cast: gone. Expected from the DBC and the stock engine, not from a run (Felsworn ADR 0014, owner ruling O-24: the cost '30 Energy, plus 30 per sec' is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted). Spell.dbc 800355: PowerType 3 Energy, ManaCost 30, ManaPerSecond 30, DurationIndex 571 = 5500 ms. Cast from 100 Energy (cast_power 100): 70 after the up-front cost; untalented Energy regeneration 10 per second (Player.cpp Energy regeneration, Rate.Energy 1); Aura::Update charges 30 every 1000 ms and removes the aura when the pool is below 30 (SpellAuras.cpp:771-801). Pool before the drains at 1000, 2000, 3000 and 4000 ms: 80, 60, 40, 20, so the channel ends at the fourth drain, 4000 ms: the aura 800355 on the dummy is present at 3700 and 3900 ms and gone at 4100 and 4300 ms. A server without the per-second drain keeps the aura to 5500 ms; one that drained more ends before 3900 ms. Counted for the cost line claim with free_3900 and free_4100.",
       "measure_actor": "dummy"
     },
     {
       "spell": 800355,
-      "name": "Sargeras Embrace (uncounted: channel aura at 4300 ms without the power hold)",
+      "name": "Sargeras Embrace (cost: channel aura at 4300 ms from 100 Energy without the power hold)",
       "kind": "metric_delta",
       "variant": "free_4300",
       "label_suffix": "free_4300",
@@ -2420,14 +2420,14 @@
       "before_expected": 0,
       "wait_ms": 4300,
       "expire_ms": 500,
-      "expected": 1,
+      "expected": 0,
       "game_time": {
         "after": [
           4250,
           4400
         ]
       },
-      "observe_source": "Uncounted observation for the owner (mentor D-16): without hold_power_during_wait, from full Energy (cast_power 100) with ManaPerSecond 30 Energy, the aura 800355 on the dummy is read 4300 ms after the cast, to bracket how long the channel lasts. No ledger label.",
+      "observe_source": "Without hold_power_during_wait, from full Energy (cast_power 100), the aura 800355 on the dummy is read 4300 ms after the cast: gone. Expected from the DBC and the stock engine, not from a run (Felsworn ADR 0014, owner ruling O-24: the cost '30 Energy, plus 30 per sec' is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted). Spell.dbc 800355: PowerType 3 Energy, ManaCost 30, ManaPerSecond 30, DurationIndex 571 = 5500 ms. Cast from 100 Energy (cast_power 100): 70 after the up-front cost; untalented Energy regeneration 10 per second (Player.cpp Energy regeneration, Rate.Energy 1); Aura::Update charges 30 every 1000 ms and removes the aura when the pool is below 30 (SpellAuras.cpp:771-801). Pool before the drains at 1000, 2000, 3000 and 4000 ms: 80, 60, 40, 20, so the channel ends at the fourth drain, 4000 ms: the aura 800355 on the dummy is present at 3700 and 3900 ms and gone at 4100 and 4300 ms. A server without the per-second drain keeps the aura to 5500 ms; one that drained more ends before 3900 ms. Bracket only, no ledger label.",
       "measure_actor": "dummy"
     },
     {
