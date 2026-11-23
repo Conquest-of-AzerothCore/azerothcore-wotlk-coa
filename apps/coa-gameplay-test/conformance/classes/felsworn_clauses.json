@@ -856,7 +856,8 @@
       {
         "claim": "for $560646d",
         "labels": [
-          "560645 behaviour_metric_delta haste_duration"
+          "560645 behaviour_metric_delta haste_duration_present",
+          "560645 behaviour_metric_delta haste_duration_absent"
         ]
       }
     ]

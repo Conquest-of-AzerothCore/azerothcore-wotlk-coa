@@ -505,22 +505,22 @@
     },
     {
       "spell": 560645,
-      "name": "Fel Instincts (haste duration)",
+      "name": "Fel Instincts (haste duration, present at 4600 ms, excludes 4500 ms)",
       "kind": "metric_delta",
-      "variant": "haste_duration",
-      "label_suffix": "haste_duration",
+      "variant": "haste_duration_present",
+      "label_suffix": "haste_duration_present",
       "quote": "for $560646d",
       "trigger_spell": 803475,
       "gate_spell": 560645,
       "target": "dummy",
-      "metric": "aura_duration_ms",
+      "metric": "aura",
       "fields": {
         "spell": 560646
       },
       "before_expected": 0,
-      "expected": 4500,
-      "tolerance": 250,
-      "wait_ms": 500,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 4600,
       "expire_ms": 500,
       "phase_auras": [
         [
@@ -536,7 +536,42 @@
           "caster"
         ]
       ],
-      "observe_source": "560646 DurationIndex 28 = 5000 ms ($560646d). The remaining duration of 560646 on the caster is read 500 ms after a real Assault cast: 5000 - 500 = 4500 ms, tolerance 250 so totals of 5500 or 4500 ms (10% off) read 5000 or 4000 and are excluded; the control phase (560645 not learned) reads 0. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and At Least 2 Felfury 803468 on the caster before each cast (Azzinoth's Assault 801904 needs 803468 and consumes 2 Felfury; AscensionFelsworn.cpp:219-228), in both arms and phases. Reference search 2026-11-23: coa-history spell 560645 and 560646: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says Assault damage +10% where the DBC tooltip and Effect[1] say 20% (an older state, the tooltip prevails, G-9) and repeats the 20% haste for 5 seconds."
+      "observe_source": "560646 DurationIndex 28 = 5000 ms ($560646d). The presence of 560646 on the caster (metric aura) is read 4600 ms after a real Azzinoth's Assault 803475 cast, before (control: 560645 not learned, reads 0) and after the learn: present at 4600 ms, excludes 4500 ms. Together with the other duration entry (present at 4600 ms, absent at 5400 ms) the reads exclude a duration 10% off on both sides (4500 and 5500 ms). Fixtures: Felfury 800058 x6 and 803468 set by harness set_aura before each cast as named preconditions. Reference search 2026-11-23: coa-history spell 560646: 0 events in 186 logs (positive control 801904: 21 casts); the bindmysoul snapshot repeats 5 seconds."
+    },
+    {
+      "spell": 560645,
+      "name": "Fel Instincts (haste duration, absent at 5400 ms, excludes 5500 ms)",
+      "kind": "metric_delta",
+      "variant": "haste_duration_absent",
+      "label_suffix": "haste_duration_absent",
+      "quote": "for $560646d",
+      "trigger_spell": 803475,
+      "gate_spell": 560645,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 560646
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 5400,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "560646 DurationIndex 28 = 5000 ms ($560646d). The presence of 560646 on the caster (metric aura) is read 5400 ms after a real Azzinoth's Assault 803475 cast, before (control: 560645 not learned, reads 0) and after the learn: absent at 5400 ms, excludes 5500 ms. Together with the other duration entry (present at 4600 ms, absent at 5400 ms) the reads exclude a duration 10% off on both sides (4500 and 5500 ms). Fixtures: Felfury 800058 x6 and 803468 set by harness set_aura before each cast as named preconditions. Reference search 2026-11-23: coa-history spell 560646: 0 events in 186 logs (positive control 801904: 21 casts); the bindmysoul snapshot repeats 5 seconds."
     }
   ],
   "player_observations": [],
