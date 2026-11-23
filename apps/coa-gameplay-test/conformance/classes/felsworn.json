@@ -15937,45 +15937,6 @@
       ],
       "observe_source": "Hellfire Carver 707444 Description (server DBC set): 'Casting Carve now makes your next Fel Fireball instant cast and causes it to strike 1 additional enemy near the primary target based on how long you channeled, up to a maximum of 10 enemies, dealing less damage with each target struck.' Reading of 'up to a maximum of 10 enemies': 10 ADDITIONAL enemies, the count that grows by 1 per channel tick (controller ruling of 2026-11-23), from two sources: the aura 807424 the channel leaves has StackAmount 10 in the DBC, and the server sets the extra targets to the channel's ticks, clamped to 10 at the channel's end (AscensionFelswornAuras.cpp:224-228, AscensionFelswornAbilities.cpp:136-147: every valid enemy within 10 yd of the primary while extra > 0). Carve 800206 is a 2500 ms channel (DurationIndex 66, ten 250 ms ticks). A real Carve is cast first (a setup cast, kept in both phases) and its channel ends after 3000 ms; then one real Fel Fireball at the primary dummy at 3 yd, with eleven more dummies at 3.2 to 5.2 yd from the caster (all within 2.2 yd of the primary, inside the 10 yd search), one more than the cap. The hits of Fel Fireball on the primary and the eleven area dummies are summed, cumulative over the scenario: before (control: Hellfire Carver not learned) 1, the primary only; after the learn 12, that 1 plus 11 in the second cast (the primary and 10 additional enemies; one offered dummy stays unhit), a gain of 11, which excludes a missing cap (12 in the cast, 13 summed). The 'less damage with each target struck' part is not judged here. Reference search 2026-11-23: coa-history spell 807424 (the Carve aura): SPELL_AURA_APPLIED 171 and SPELL_AURA_APPLIED_DOSE 1516 events in 4 logs, about 9 doses per application; spells 707444 and 801312: 0 events under those ids; bindmysoul snapshot has no value beyond the tooltip; nothing else found.",
       "expected_gain": 11
-    },
-    {
-      "spell": 800220,
-      "name": "Taskmaster's Army (Infernal Whipcrack affects all allies: 10 friendly creatures beyond the 8-ally cap)",
-      "kind": "metric_delta",
-      "variant": "all_allies",
-      "label_suffix": "all_allies",
-      "quote": "and it now affects all allies and its radius is increased by $s2 yds.",
-      "trigger_spell": 805243,
-      "gate_spell": 800220,
-      "target": "caster",
-      "measure_actor": "caster",
-      "metric": "aura",
-      "fields": {
-        "spell": 805243
-      },
-      "before_expected": 1,
-      "expected": 11,
-      "tolerance": 0,
-      "cast_power": 100,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "friendly_creatures": {
-        "entry": 631,
-        "faction": 35,
-        "distances": [
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-        ]
-      },
-      "observe_source": "Infernal Whipcrack 805243 (server DBC set): 'Enrage $?s800220[all][up to $i] allies within $a yds', MaxAffectedTargets 8 ($i), EffectImplicitTargetA 22 TARGET_SRC_CASTER and TargetB 56 TARGET_UNIT_CASTER_AREA_RAID on its three effects, EffectRadiusIndex 9 (20 yd, SpellRadius.dbc). Taskmaster's Army 800220 says 'and it now affects all allies'; with 800220 the class script adds every friendly unit within the radius as a target of the cast (AscensionFelswornAbilities.cpp:149-154, IsFriendlyTo). Ten friendly creatures (entry 631, faction 35, the heal_sum creature fixture of ADR 1118) stand 3 to 12 yd from the caster, outside the caster's party: precondition fixtures, never the claim. The aura 805243 is read on the caster and on each creature and summed, 500 ms after a real Whipcrack cast in each phase. Before (control, 800220 not learned): 1, the caster only: the stock raid-area target type leaves non-party units out, which is the stock behaviour the '$i allies' branch states. After the learn: 11, the caster and all ten creatures, more than the 8 ($i) the stock text caps: 'all allies'. Reference search 2026-11-23: coa-history spells 805243 and 800220: 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],
