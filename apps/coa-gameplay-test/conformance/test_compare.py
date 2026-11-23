@@ -287,6 +287,31 @@ class CompareTest(unittest.TestCase):
         verdicts = self.value_run([item], ['$s2'], [assert_step(label, '-50')], reader)
         self.assertEqual((verdicts[label].status, verdicts[label].expected), ('ok', -50.0))
 
+    def per_tick_verdict(self, read, ticks=6):
+        label = '1001 effect_value 2002e0 #0'
+        text = '${($d*1000/$T1)*($m1+0+$SP*.05)}'
+        model = {'effect_spell': 2002, 'effect': 0, **({'ticks': ticks} if ticks else {})}
+        item = expectation(label, 'effect_value', text, 'read flat', model=model)
+        reader = constant_reader(Displayed(text, 54.0, None, 'flat', 2002))
+        return self.value_run([item], [text], [assert_step(label, read)], reader)[label]
+
+    def test_a_per_tick_foreign_total_is_judged_against_its_per_tick_part(self):
+        verdict = self.per_tick_verdict('9')
+        self.assertEqual((verdict.status, verdict.expected), ('ok', 9.0))
+        self.assertIn('divided by its 6 ticks', verdict.explanation)
+
+    def test_a_per_tick_foreign_total_read_above_its_per_tick_part_alerts(self):
+        verdict = self.per_tick_verdict('34')
+        self.assertEqual((verdict.status, verdict.expected), ('alert', 9.0))
+
+    def test_seeded_mutant_reading_the_whole_total_per_tick_alerts(self):
+        verdict = self.per_tick_verdict('54')
+        self.assertEqual((verdict.status, verdict.expected), ('alert', 9.0))
+
+    def test_an_unlisted_total_token_keeps_its_undivided_expectation(self):
+        verdict = self.per_tick_verdict('54', ticks=None)
+        self.assertEqual((verdict.status, verdict.expected), ('ok', 54.0))
+
     def rolled_verdict(self, reads, value_of_roll=lambda roll: roll, samples=None):
         text = '${$m1+0+$AP*0.45}'
         label = '1001 effect_value e0 #0'
