@@ -78,3 +78,7 @@ Pair 20261123-080621 / -080716, build 0361bbda8f2f, server commit 93da3b7e0ffa (
 b2a2ea1baa), no flip, 18/18 ok. No pre-fix run of these arms exists and the pre-fix tree is not rebuilt; the stock
 figures come from code reading (`Spell::EffectEnergizePct`, SpellEffects.cpp:3040-3044) and match the full-pool
 before pair.
+
+No pre-fix run exists for the partial-pool arms: their after readings discriminate by themselves (10/10/1/1/0 on
+half-empty pools is 2% of the missing amount and cannot be 2% of the maximum, 20/20/2/2/57, which the full-pool arms
+measured before the fix).
