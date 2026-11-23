@@ -31,7 +31,7 @@ the control holds a critical hit, too few non-critical hits or a missing read. T
 
 ## Consequences
 
-- Tests: `CriticalTrialsScenarioTest` and `CriticalControlVerdictTest` (test_proc_critical.py); the seeded mutant is a
+- Tests: `CriticalTrialsScenarioTest` and `CriticalControlVerdictTest` (test_procs.py); the seeded mutant is a
   crit-blind handler, seen as a control event, which alerts.
 - Shared core files touched: `procs.py` (the trial reads and the control arm hook) and `compare.py` (the verdict
   hook); the rest lives in `proc_critical.py`. Entries without the key generate unchanged scenarios, so the
