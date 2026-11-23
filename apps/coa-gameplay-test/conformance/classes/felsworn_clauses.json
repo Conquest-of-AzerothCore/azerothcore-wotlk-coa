@@ -2680,8 +2680,14 @@
   {
     "spell": 803478,
     "clause": "Casting Sunder causes you to cast Fel Explosion twice over the next 4 sec.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "803478 behaviour_metric_delta cast_early",
+      "803478 behaviour_metric_delta cast_twice",
+      "803478 behaviour_metric_delta cast_only_twice"
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 803645,
@@ -2954,26 +2960,55 @@
   {
     "spell": 805235,
     "clause": "Unleash fel energy upon enemies at target location, fearing them and slowing their movement speed by $s3% for $d.",
-    "labels": [
-      "805235 effect_value e2 #0",
-      "805235 aura_amount e2 #0",
-      "805235 aura_duration_ms #1"
+    "claims": [
+      {
+        "claim": "fearing them",
+        "labels": [
+          "805235 behaviour_metric_delta fear"
+        ],
+        "evidence": "behaviour"
+      },
+      {
+        "claim": "slowing their movement speed by $s3%",
+        "labels": [
+          "805235 behaviour_metric_delta slow"
+        ],
+        "evidence": "behaviour"
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "805235 behaviour_metric_delta held",
+          "805235 behaviour_metric_delta gone"
+        ],
+        "evidence": "behaviour"
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 805235,
     "clause": "Damage caused may interrupt the effect.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "805235 behaviour_metric_delta broken",
+      "805235 behaviour_metric_delta unbroken"
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 805236,
     "clause": "While Inner Demon is active, your melee haste is now increased by $s2%",
     "labels": [
-      "805236 effect_value e1 #0"
+      "805236 behaviour_metric_delta haste",
+      "805236 behaviour_metric_delta haste_no_inner_demon"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 805236,
@@ -3195,14 +3230,24 @@
   {
     "spell": 805248,
     "clause": "Burn an enemy's mana equal to 200% of your Stamina.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "805248 behaviour_metric_delta drain_base",
+      "805248 behaviour_metric_delta drain_stamina"
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 805248,
     "clause": "Deals damage equal to the mana drained.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "805248 behaviour_metric_delta damage_base",
+      "805248 behaviour_metric_delta damage_stamina"
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 805249,
@@ -3334,10 +3379,27 @@
   {
     "spell": 806111,
     "clause": "Critical strikes with Sargeron Smite now cause the target to bleed for an additional 50% of the damage dealt over $806112d.",
-    "labels": [
-      "806111 spell_duration 806112 #0"
+    "claims": [
+      {
+        "claim": "Critical strikes with Sargeron Smite now cause the target to bleed for an additional 50% of the damage dealt",
+        "labels": [
+          "806111 behaviour_metric_delta bleed_ratio",
+          "806111 behaviour_metric_delta bleed_noncrit"
+        ],
+        "evidence": "behaviour"
+      },
+      {
+        "claim": "over $806112d",
+        "labels": [
+          "806111 behaviour_metric_delta bleed_held",
+          "806111 behaviour_metric_delta bleed_gone"
+        ],
+        "evidence": "behaviour"
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 806235,
@@ -3418,21 +3480,26 @@
   {
     "spell": 807461,
     "clause": "Damage dealt by Bane of Chaos now radiates fel energy around the enemy, dealing $s1% of the damage dealt to up to $807554i nearby enemies.",
-    "kind": "claim",
     "claims": [
       {
-        "claim": "dealing $s1% of the damage dealt",
+        "claim": "Damage dealt by Bane of Chaos now radiates fel energy around the enemy, dealing $s1% of the damage dealt",
         "labels": [
-          "807461 effect_value e0 #0"
-        ]
+          "807461 behaviour_metric_delta nearby_ratio"
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "to up to $807554i nearby enemies",
         "labels": [
-          "807461 effect_value #1"
-        ]
+          "807461 behaviour_metric_delta nearby_count",
+          "807461 behaviour_metric_delta nearby_count_control"
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 807901,
