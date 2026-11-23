@@ -4615,6 +4615,78 @@
     },
     {
       "spell": 300468,
+      "name": "Illidari Barrier (ally inside 15 yd shielded, ally outside not)",
+      "kind": "metric_delta",
+      "variant": "ally_radius",
+      "label_suffix": "ally_radius",
+      "quote": "within $300469a yds",
+      "trigger_spell": 705129,
+      "gate_spell": 300468,
+      "target": "caster",
+      "measure_actor": "ally",
+      "ally_arm": {
+        "allies": 2,
+        "arms": [
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 300469,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally2 stands 16 yd from the caster, outside the 15 yd edge of 300469 (SpellRadius 18, TARGET_UNIT_SRC_AREA_ALLY, TargetB 30: no leeway, no reach for a player target); it would carry the shield if the edge reached it"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 14,
+            "expected": 14,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally 14 yd along x from the shared spawn, dz 0; the caster stays"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 16,
+            "expected": 16,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally2 16 yd along x from the shared spawn, dz 0; the caster stays"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 300469,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 300,
+      "expire_ms": 5500,
+      "void_on_cast_failure": true,
+      "observe_source": "$300469a = 15 yd: 300469 Effect[0] EffectRadiusIndex 18 = SpellRadius 15.0 (SpellRadius.dbc), TargetA 22 / TargetB 30 (area ally around the caster). Hateforged Barrier 705129 is cast with 300468 learned (524635 absent): the ally at 14 yd must carry 300469 cast by the caster, the ally2 at 16 yd must not (read on the same cast), the distances are read on both. The aura on the ally at 14 yd is the positive control of the one on ally2 at 16 yd. Reference search 2026-11-23: coa-history spell 300468 and 300469: 0 events in 186 logs; nothing else found. Precedent: Sun Cleric 807343 ally_radius.",
+      "ally_offsets": {
+        "ally": 14,
+        "ally2": 16
+      }
+    },
+    {
+      "spell": 300468,
       "name": "Illidari Barrier (shield amount)",
       "kind": "taken_hit",
       "variant": "amount",
@@ -4796,6 +4868,84 @@
       ]
     },
     {
+      "spell": 570158,
+      "name": "Scars of Suffering (scar present at 9200 ms)",
+      "kind": "metric_delta",
+      "variant": "scar_held",
+      "label_suffix": "scar_held",
+      "quote": "for $570159d",
+      "trigger_spell": 801904,
+      "gate_spell": 570158,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 570159,
+        "caster": "caster"
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 9200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          9150,
+          9350
+        ]
+      },
+      "observe_source": "$570159d = 10000 ms: 570159 DurationIndex 1 (SpellDuration.dbc), the scar proc fired by 570158 Effect[0] PROC_TRIGGER_SPELL on a cast of Azzinoth's Assault 801904 (AscensionFelswornEvents.cpp:214). Reference search 2026-11-23: coa-history spell 570158 and 570159: 0 events in 186 logs (never logged); bindmysoul talents snapshot (fetched 2026-07-22): Scars of Suffering 570158 'Casting Azzinoth's Assault now scars the enemy, increasing your allies' attack power against them by 15% Agility for 10 seconds.', the same 15% of Agility and 10 s; nothing else found. Azzinoth's Assault 801904 consumes 2 Felfury (the aura 800058): it is set to 6 stacks on the caster before each cast as a named precondition fixture (phase_auras), the claim's subject being the scar, not the resource. Design 2 (design 1, kind last_application_expiry, was unmeasured in run 20261123-202642: its apply count is already 1 at the first read, applied during the cast, and never rises): the aura is read present at 9200 ms and absent at 10800 ms of game time after a real cast, so a duration 10% off (9000 or 11000 ms) never passes; no count is used."
+    },
+    {
+      "spell": 570158,
+      "name": "Scars of Suffering (scar absent at 10800 ms)",
+      "kind": "metric_delta",
+      "variant": "scar_gone",
+      "label_suffix": "scar_gone",
+      "quote": "for $570159d",
+      "trigger_spell": 801904,
+      "gate_spell": 570158,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 570159,
+        "caster": "caster"
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 10800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          10750,
+          10950
+        ]
+      },
+      "observe_source": "$570159d = 10000 ms: 570159 DurationIndex 1 (SpellDuration.dbc), the scar proc fired by 570158 Effect[0] PROC_TRIGGER_SPELL on a cast of Azzinoth's Assault 801904 (AscensionFelswornEvents.cpp:214). Reference search 2026-11-23: coa-history spell 570158 and 570159: 0 events in 186 logs (never logged); bindmysoul talents snapshot (fetched 2026-07-22): Scars of Suffering 570158 'Casting Azzinoth's Assault now scars the enemy, increasing your allies' attack power against them by 15% Agility for 10 seconds.', the same 15% of Agility and 10 s; nothing else found. Azzinoth's Assault 801904 consumes 2 Felfury (the aura 800058): it is set to 6 stacks on the caster before each cast as a named precondition fixture (phase_auras), the claim's subject being the scar, not the resource. Design 2 (design 1, kind last_application_expiry, was unmeasured in run 20261123-202642: its apply count is already 1 at the first read, applied during the cast, and never rises): the aura is read present at 9200 ms and absent at 10800 ms of game time after a real cast, so a duration 10% off (9000 or 11000 ms) never passes; no count is used."
+    },
+    {
       "spell": 803903,
       "name": "Fel Haze (all enemy armor ignored under Blood of Mannoroth)",
       "kind": "hit_ratio",
@@ -4968,86 +5118,299 @@
     },
     {
       "spell": 525001,
-      "name": "Felbane (curse lasts 4 seconds, stamped)",
-      "kind": "last_application_expiry",
-      "variant": "curse_expiry",
-      "label_suffix": "curse_expiry",
+      "name": "Felbane (curse present at 3700 ms)",
+      "kind": "metric_delta",
+      "variant": "curse_held",
+      "label_suffix": "curse_held",
       "quote": "Curse an enemy, causing the next spell they cast within $d to be reflected onto them.",
-      "gate_spell": 525001,
       "trigger_spell": 525001,
-      "aura": 525001,
-      "expected_ms": 4000,
-      "control_window_ms": 500,
-      "window_ms": 6000,
-      "poll_ms": 25,
-      "observe_source": "$d = 4000 ms: Felbane 525001 DurationIndex 35 (SpellDuration.dbc), Effect[0] aura 4 SPELL_AURA_DUMMY on TARGET_UNIT_TARGET_ENEMY. The curse aura on the dummy is polled with game-time stamps every 25 ms after a real cast; the removal bracket must lie in 4000 ms +- the G-19 band (5%), so a duration 10% off never passes; the control cast before 525001 is learned applies none. Reference search 2026-11-23: coa-history spell 525001 Felbane: SPELL_CAST_SUCCESS 10 events in 5 logs, SPELL_AURA_APPLIED 7 and SPELL_AURA_REMOVED 7 in 5 logs (no timestamps used here); bindmysoul talents snapshot (fetched 2026-07-22): Felbane 525001 'Curse an enemy, causing the next spell they cast within 4 seconds to be reflected onto them.', same figure; nothing else found."
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 525001,
+        "caster": "caster"
+      },
+      "cast_power": 100,
+      "metric": "aura",
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3700,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          3650,
+          3850
+        ]
+      },
+      "observe_source": "$d = 4000 ms: Felbane 525001 DurationIndex 35 (SpellDuration.dbc), Effect[0] aura 4 SPELL_AURA_DUMMY on TARGET_UNIT_TARGET_ENEMY. Reference search 2026-11-23: coa-history spell 525001 Felbane: SPELL_CAST_SUCCESS 10 events in 5 logs, SPELL_AURA_APPLIED 7 and SPELL_AURA_REMOVED 7 in 5 logs (no timestamps used here); bindmysoul talents snapshot (fetched 2026-07-22): Felbane 525001 'Curse an enemy, causing the next spell they cast within 4 seconds to be reflected onto them.', same figure; nothing else found. Design 2 (design 1, kind last_application_expiry, was unmeasured in run 20261123-202642: its apply count is already 1 at the first read, applied during the cast, and never rises): the aura is read present at 3700 ms and absent at 4300 ms of game time after a real cast, so a duration 10% off (3600 or 4400 ms) never passes; no count is used."
+    },
+    {
+      "spell": 525001,
+      "name": "Felbane (curse absent at 4300 ms)",
+      "kind": "metric_delta",
+      "variant": "curse_gone",
+      "label_suffix": "curse_gone",
+      "quote": "Curse an enemy, causing the next spell they cast within $d to be reflected onto them.",
+      "trigger_spell": 525001,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 525001,
+        "caster": "caster"
+      },
+      "cast_power": 100,
+      "metric": "aura",
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 4300,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          4250,
+          4450
+        ]
+      },
+      "observe_source": "$d = 4000 ms: Felbane 525001 DurationIndex 35 (SpellDuration.dbc), Effect[0] aura 4 SPELL_AURA_DUMMY on TARGET_UNIT_TARGET_ENEMY. Reference search 2026-11-23: coa-history spell 525001 Felbane: SPELL_CAST_SUCCESS 10 events in 5 logs, SPELL_AURA_APPLIED 7 and SPELL_AURA_REMOVED 7 in 5 logs (no timestamps used here); bindmysoul talents snapshot (fetched 2026-07-22): Felbane 525001 'Curse an enemy, causing the next spell they cast within 4 seconds to be reflected onto them.', same figure; nothing else found. Design 2 (design 1, kind last_application_expiry, was unmeasured in run 20261123-202642: its apply count is already 1 at the first read, applied during the cast, and never rises): the aura is read present at 3700 ms and absent at 4300 ms of game time after a real cast, so a duration 10% off (3600 or 4400 ms) never passes; no count is used."
     },
     {
       "spell": 804823,
-      "name": "Tyrannical Resolve (taunt lasts 4 seconds, stamped)",
-      "kind": "last_application_expiry",
-      "variant": "taunt_expiry",
-      "label_suffix": "taunt_expiry",
+      "name": "Tyrannical Resolve (taunt present at 3700 ms)",
+      "kind": "metric_delta",
+      "variant": "taunt_held",
+      "label_suffix": "taunt_held",
       "quote": "Taunt nearby enemies for $704233d",
-      "gate_spell": 804823,
       "trigger_spell": 804823,
-      "aura": 704233,
-      "expected_ms": 4000,
-      "control_window_ms": 500,
-      "window_ms": 6000,
-      "poll_ms": 25,
-      "observe_source": "$704233d = 4000 ms: 704233 DurationIndex 35, Effect[0] aura 11 SPELL_AURA_MOD_TAUNT. Cast by the server on every valid enemy within 10 yd of the caster when 804823 is applied (AscensionFelswornAuras.cpp:92-98). The taunt aura on the dummy is polled with game-time stamps every 25 ms after a real cast of 804823; the removal bracket must lie in 4000 ms +- 5%. The control cast before 804823 is learned applies none. Reference search 2026-11-23: coa-history spell 804823 and 704233: 0 events in 186 logs (never logged); bindmysoul talents snapshot (fetched 2026-07-22): Tyrannical Resolve 804823 'Taunt nearby enemies for 4 seconds and ignore -50% of all damage taken for 30 seconds, up to 100% of your maximum health.', the same durations and the same 50 (the sign of the snapshot text is an artefact of its own template); nothing else found."
+      "target": "caster",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 704233
+      },
+      "metric": "aura",
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3700,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          3650,
+          3850
+        ]
+      },
+      "observe_source": "$704233d = 4000 ms: 704233 DurationIndex 35, Effect[0] aura 11 SPELL_AURA_MOD_TAUNT, cast by the server on every valid enemy within 10 yd of the caster when 804823 is applied (AscensionFelswornAuras.cpp:92-98). Reference search 2026-11-23: coa-history spell 804823 and 704233: 0 events in 186 logs (never logged); bindmysoul talents snapshot (fetched 2026-07-22): Tyrannical Resolve 804823 'Taunt nearby enemies for 4 seconds and ignore -50% of all damage taken for 30 seconds, up to 100% of your maximum health.', the same durations and the same 50 (the sign of the snapshot text is an artefact of its own template); nothing else found. Design 2 (design 1, kind last_application_expiry, was unmeasured in run 20261123-202642: its apply count is already 1 at the first read, applied during the cast, and never rises): the aura is read present at 3700 ms and absent at 4300 ms of game time after a real cast, so a duration 10% off (3600 or 4400 ms) never passes; no count is used."
     },
     {
       "spell": 804823,
-      "name": "Tyrannical Resolve (the effect lasts 30 seconds, stamped)",
-      "kind": "last_application_expiry",
-      "variant": "effect_expiry",
-      "label_suffix": "effect_expiry",
-      "quote": "and ignore $s3% of all damage taken for $d,",
-      "gate_spell": 804823,
+      "name": "Tyrannical Resolve (taunt absent at 4300 ms)",
+      "kind": "metric_delta",
+      "variant": "taunt_gone",
+      "label_suffix": "taunt_gone",
+      "quote": "Taunt nearby enemies for $704233d",
       "trigger_spell": 804823,
-      "aura": 804823,
-      "expected_ms": 30000,
-      "control_window_ms": 500,
-      "window_ms": 36000,
-      "poll_ms": 100,
-      "observe_source": "$d = 30000 ms: 804823 DurationIndex 9 (SpellDuration.dbc), the aura read on the caster (caster: true) every 100 ms with game-time stamps after a real cast; the removal bracket must lie in 30000 ms +- 5% (1500 ms). Reference search 2026-11-23: coa-history spell 804823 and 704233: 0 events in 186 logs (never logged); bindmysoul talents snapshot (fetched 2026-07-22): Tyrannical Resolve 804823 'Taunt nearby enemies for 4 seconds and ignore -50% of all damage taken for 30 seconds, up to 100% of your maximum health.', the same durations and the same 50 (the sign of the snapshot text is an artefact of its own template); nothing else found.",
-      "caster": true
+      "target": "caster",
+      "measure_actor": "dummy",
+      "fields": {
+        "spell": 704233
+      },
+      "metric": "aura",
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 4300,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          4250,
+          4450
+        ]
+      },
+      "observe_source": "$704233d = 4000 ms: 704233 DurationIndex 35, Effect[0] aura 11 SPELL_AURA_MOD_TAUNT, cast by the server on every valid enemy within 10 yd of the caster when 804823 is applied (AscensionFelswornAuras.cpp:92-98). Reference search 2026-11-23: coa-history spell 804823 and 704233: 0 events in 186 logs (never logged); bindmysoul talents snapshot (fetched 2026-07-22): Tyrannical Resolve 804823 'Taunt nearby enemies for 4 seconds and ignore -50% of all damage taken for 30 seconds, up to 100% of your maximum health.', the same durations and the same 50 (the sign of the snapshot text is an artefact of its own template); nothing else found. Design 2 (design 1, kind last_application_expiry, was unmeasured in run 20261123-202642: its apply count is already 1 at the first read, applied during the cast, and never rises): the aura is read present at 3700 ms and absent at 4300 ms of game time after a real cast, so a duration 10% off (3600 or 4400 ms) never passes; no count is used."
+    },
+    {
+      "spell": 804823,
+      "name": "Tyrannical Resolve (effect present at 28200 ms)",
+      "kind": "metric_delta",
+      "variant": "effect_held",
+      "label_suffix": "effect_held",
+      "quote": "and ignore $s3% of all damage taken for $d,",
+      "trigger_spell": 804823,
+      "target": "caster",
+      "measure_actor": "caster",
+      "fields": {
+        "spell": 804823
+      },
+      "metric": "aura",
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 28200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          28150,
+          28350
+        ]
+      },
+      "observe_source": "$d = 30000 ms: 804823 DurationIndex 9 (SpellDuration.dbc), the aura read on the caster. Reference search 2026-11-23: coa-history spell 804823 and 704233: 0 events in 186 logs (never logged); bindmysoul talents snapshot (fetched 2026-07-22): Tyrannical Resolve 804823 'Taunt nearby enemies for 4 seconds and ignore -50% of all damage taken for 30 seconds, up to 100% of your maximum health.', the same durations and the same 50 (the sign of the snapshot text is an artefact of its own template); nothing else found. Design 2 (design 1, kind last_application_expiry, was unmeasured in run 20261123-202642: its apply count is already 1 at the first read, applied during the cast, and never rises): the aura is read present at 28200 ms and absent at 31800 ms of game time after a real cast, so a duration 10% off (27000 or 33000 ms) never passes; no count is used."
+    },
+    {
+      "spell": 804823,
+      "name": "Tyrannical Resolve (effect absent at 31800 ms)",
+      "kind": "metric_delta",
+      "variant": "effect_gone",
+      "label_suffix": "effect_gone",
+      "quote": "and ignore $s3% of all damage taken for $d,",
+      "trigger_spell": 804823,
+      "target": "caster",
+      "measure_actor": "caster",
+      "fields": {
+        "spell": 804823
+      },
+      "metric": "aura",
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 31800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          31750,
+          31950
+        ]
+      },
+      "observe_source": "$d = 30000 ms: 804823 DurationIndex 9 (SpellDuration.dbc), the aura read on the caster. Reference search 2026-11-23: coa-history spell 804823 and 704233: 0 events in 186 logs (never logged); bindmysoul talents snapshot (fetched 2026-07-22): Tyrannical Resolve 804823 'Taunt nearby enemies for 4 seconds and ignore -50% of all damage taken for 30 seconds, up to 100% of your maximum health.', the same durations and the same 50 (the sign of the snapshot text is an artefact of its own template); nothing else found. Design 2 (design 1, kind last_application_expiry, was unmeasured in run 20261123-202642: its apply count is already 1 at the first read, applied during the cast, and never rises): the aura is read present at 28200 ms and absent at 31800 ms of game time after a real cast, so a duration 10% off (27000 or 33000 ms) never passes; no count is used."
     },
     {
       "spell": 707513,
-      "name": "Felstrider (Energy regeneration aura lasts 5 seconds, stamped)",
-      "kind": "last_application_expiry",
-      "variant": "regen_expiry",
-      "label_suffix": "regen_expiry",
+      "name": "Felstrider (Energy regeneration aura present at 4600 ms)",
+      "kind": "metric_delta",
+      "variant": "regen_held",
+      "label_suffix": "regen_held",
       "quote": "now increases your Energy regeneration by $525042s1% for $525042d,",
-      "gate_spell": 707513,
       "trigger_spell": 500610,
-      "aura": 525042,
-      "expected_ms": 5000,
-      "control_window_ms": 500,
-      "window_ms": 7000,
-      "poll_ms": 25,
-      "observe_source": "$525042d = 5000 ms: 525042 DurationIndex 28 (SpellDuration.dbc), applied on the caster by the Felsworn Rush hook after a real Fel Torpedo 500610 cast with 707513 learned (AscensionFelswornAbilities.cpp:263-267). The aura is polled on the caster every 25 ms with game-time stamps; the removal bracket must lie in 5000 ms +- 5%; the control cast before 707513 is learned applies none. Reference search 2026-11-23: coa-history spell 707513: 0 events in 186 logs (passive); spell 525042 Felstrider: SPELL_AURA_APPLIED 40 events in 3 logs, SPELL_AURA_APPLIED_DOSE 14, SPELL_AURA_REFRESH 11 (positive control: it stacks and refreshes in real play, no timing used); bindmysoul talents snapshot (fetched 2026-07-22): Felstrider 707513 'Your Chaos Rush now increases your Energy regeneration by 10% for 5 seconds, stacking 2 times.', same figures; nothing else found.",
-      "caster": true
+      "gate_spell": 707513,
+      "target": "caster",
+      "fields": {
+        "spell": 525042
+      },
+      "metric": "aura",
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 4600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          4550,
+          4750
+        ]
+      },
+      "observe_source": "$525042d = 5000 ms: 525042 DurationIndex 28 (SpellDuration.dbc), applied on the caster by the Felsworn Rush hook after a real Fel Torpedo 500610 cast with 707513 learned (AscensionFelswornAbilities.cpp:263-267). Reference search 2026-11-23: coa-history spell 707513: 0 events in 186 logs (passive); spell 525042 Felstrider: SPELL_AURA_APPLIED 40 events in 3 logs, SPELL_AURA_APPLIED_DOSE 14, SPELL_AURA_REFRESH 11 (positive control: it stacks and refreshes in real play, no timing used); bindmysoul talents snapshot (fetched 2026-07-22): Felstrider 707513 'Your Chaos Rush now increases your Energy regeneration by 10% for 5 seconds, stacking 2 times.', same figures; nothing else found. Design 2 (design 1, kind last_application_expiry, was unmeasured in run 20261123-202642: its apply count is already 1 at the first read, applied during the cast, and never rises): the aura is read present at 4600 ms and absent at 5400 ms of game time after a real cast, so a duration 10% off (4500 or 5500 ms) never passes; no count is used."
+    },
+    {
+      "spell": 707513,
+      "name": "Felstrider (Energy regeneration aura absent at 5400 ms)",
+      "kind": "metric_delta",
+      "variant": "regen_gone",
+      "label_suffix": "regen_gone",
+      "quote": "now increases your Energy regeneration by $525042s1% for $525042d,",
+      "trigger_spell": 500610,
+      "gate_spell": 707513,
+      "target": "caster",
+      "fields": {
+        "spell": 525042
+      },
+      "metric": "aura",
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 5400,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          5350,
+          5550
+        ]
+      },
+      "observe_source": "$525042d = 5000 ms: 525042 DurationIndex 28 (SpellDuration.dbc), applied on the caster by the Felsworn Rush hook after a real Fel Torpedo 500610 cast with 707513 learned (AscensionFelswornAbilities.cpp:263-267). Reference search 2026-11-23: coa-history spell 707513: 0 events in 186 logs (passive); spell 525042 Felstrider: SPELL_AURA_APPLIED 40 events in 3 logs, SPELL_AURA_APPLIED_DOSE 14, SPELL_AURA_REFRESH 11 (positive control: it stacks and refreshes in real play, no timing used); bindmysoul talents snapshot (fetched 2026-07-22): Felstrider 707513 'Your Chaos Rush now increases your Energy regeneration by 10% for 5 seconds, stacking 2 times.', same figures; nothing else found. Design 2 (design 1, kind last_application_expiry, was unmeasured in run 20261123-202642: its apply count is already 1 at the first read, applied during the cast, and never rises): the aura is read present at 4600 ms and absent at 5400 ms of game time after a real cast, so a duration 10% off (4500 or 5500 ms) never passes; no count is used."
     },
     {
       "spell": 300468,
-      "name": "Illidari Barrier (shield lasts 5 seconds, stamped)",
-      "kind": "last_application_expiry",
-      "variant": "shield_expiry",
-      "label_suffix": "shield_expiry",
+      "name": "Illidari Barrier (shield present at 4600 ms)",
+      "kind": "metric_delta",
+      "variant": "shield_held",
+      "label_suffix": "shield_held",
       "quote": "absorbing ${$STA*1+$300469m1+$300469ppl1+$SP*.2+$AP*.08} damage for $300469d.",
-      "gate_spell": 300468,
       "trigger_spell": 705129,
-      "aura": 300469,
-      "expected_ms": 5000,
-      "control_window_ms": 500,
-      "window_ms": 7000,
-      "poll_ms": 25,
-      "observe_source": "$300469d = 5000 ms: 300469 DurationIndex 28 (SpellDuration.dbc), applied on the caster by the Hateforged Barrier hook while 300468 is learned and 524635 is absent (AscensionFelswornAbilities.cpp:256-259). The shield aura on the caster is polled every 25 ms with game-time stamps after a real Hateforged Barrier 705129 cast; the removal bracket must lie in 5000 ms +- 5% (no damage lands, so only the duration ends it); the control cast before 300468 is learned applies none. Reference search 2026-11-23: coa-history spell 300468 and 300469: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22): Illidari Barrier 300468 '... absorbing 328 + 100% Stamina + 20% SP + 8% AP damage for 5 seconds.'; nothing else found.",
-      "caster": true
+      "gate_spell": 300468,
+      "target": "caster",
+      "fields": {
+        "spell": 300469,
+        "caster": "caster"
+      },
+      "metric": "aura",
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 4600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          4550,
+          4750
+        ]
+      },
+      "observe_source": "$300469d = 5000 ms: 300469 DurationIndex 28 (SpellDuration.dbc), applied on the caster by the Hateforged Barrier hook while 300468 is learned and 524635 is absent (AscensionFelswornAbilities.cpp:256-259); no damage lands, so only the duration ends it. Reference search 2026-11-23: coa-history spell 300468 and 300469: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22): Illidari Barrier 300468 '... absorbing 328 + 100% Stamina + 20% SP + 8% AP damage for 5 seconds.'; nothing else found. Design 2 (design 1, kind last_application_expiry, was unmeasured in run 20261123-202642: its apply count is already 1 at the first read, applied during the cast, and never rises): the aura is read present at 4600 ms and absent at 5400 ms of game time after a real cast, so a duration 10% off (4500 or 5500 ms) never passes; no count is used."
+    },
+    {
+      "spell": 300468,
+      "name": "Illidari Barrier (shield absent at 5400 ms)",
+      "kind": "metric_delta",
+      "variant": "shield_gone",
+      "label_suffix": "shield_gone",
+      "quote": "absorbing ${$STA*1+$300469m1+$300469ppl1+$SP*.2+$AP*.08} damage for $300469d.",
+      "trigger_spell": 705129,
+      "gate_spell": 300468,
+      "target": "caster",
+      "fields": {
+        "spell": 300469,
+        "caster": "caster"
+      },
+      "metric": "aura",
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 5400,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          5350,
+          5550
+        ]
+      },
+      "observe_source": "$300469d = 5000 ms: 300469 DurationIndex 28 (SpellDuration.dbc), applied on the caster by the Hateforged Barrier hook while 300468 is learned and 524635 is absent (AscensionFelswornAbilities.cpp:256-259); no damage lands, so only the duration ends it. Reference search 2026-11-23: coa-history spell 300468 and 300469: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22): Illidari Barrier 300468 '... absorbing 328 + 100% Stamina + 20% SP + 8% AP damage for 5 seconds.'; nothing else found. Design 2 (design 1, kind last_application_expiry, was unmeasured in run 20261123-202642: its apply count is already 1 at the first read, applied during the cast, and never rises): the aura is read present at 4600 ms and absent at 5400 ms of game time after a real cast, so a duration 10% off (4500 or 5500 ms) never passes; no count is used."
     },
     {
       "spell": 572617,
@@ -12375,6 +12738,38 @@
         "hit_arm": true
       },
       "observe_source": "Spell.dbc 802678 (server set /srv/coa/server-data/dbc) Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 1000, DurationIndex 32 = 6000 ms (6 ticks), EffectBasePoints 8, EffectDieSides 1, EffectRealPointsPerLevel 0.5, BaseLevel 10, SpellLevel 10, MaxLevel 0. Expected per tick at level 60: 8 + 1 (DieSides 1 adds 1) + int(0.5 x (60 - 10)) = 34 (SpellInfo.cpp CalcValue), plus the tooltip term $SP*.05 = int(0.05 x spell power). The displayed ${($d*1000/$T1)*($m1+0+$SP*.05)} reads 54 = 6 x 9 on the client (ADR 0006: no SkillLineAbility row, base points only); owner ruling O-19: the server keeps 34 per tick and the displayed text is to be corrected in a client patch, so the value is counted on the server formula, not on the displayed 54. Behaviour read: the caster casts Felstrike 802678 on the dummy and the dummy's spell_damage_total of 802678 is read 1500 ms later, one tick (EffectAmplitude 1000, the second tick at 2000 ms); the unread arm before the cast reads 0 (control). Criticals are made impossible (64481) and the dummy's magic resistance is removed (823764), as the Immolation Aura tick entries do. Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and the Felstrike tick events of coa-history (spell 802678, gear and level differ, no figure decides). Contrast arm of the spell power term: +10000 spell power must move the tick by int(0.05 x 10000) = 500 to 534; a server that dropped the term or used another coefficient cannot pass both arms."
+    },
+    {
+      "spell": 804613,
+      "name": "Doomstride (the next Curse or Magic effect is resisted at full health)",
+      "kind": "taken_hit",
+      "variant": "resist_next",
+      "label_suffix": "resist_next",
+      "judge": "resist_rate",
+      "expected_points": 100,
+      "quote": "While at full health, your chance to resist the next Curse or Magic effect on you is increased by 100%.",
+      "strike_spell": 702,
+      "trials": 800,
+      "parts": 5,
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              804613,
+              1
+            ],
+            [
+              706818,
+              0
+            ]
+          ]
+        }
+      ],
+      "observe_source": "804613 tooltip: 'increased by 100%' read as 100 points added to the resist chance, the reading the Templar precedent Holy Constitution 706323 uses ('increases your chance to resist disease effects by 30%' judged as 30 points, ADR 0196). A level 60 striker (entry 36) casts Curse of Weakness 702 (Dispel 2 curse, DmgClass 1 magic, two SPELL_EFFECT_APPLY_AURA effects, SpellDuration.dbc index 4) at the caster; each trial reads whether 702 took hold on the caster 300 ms later and removes it. The control arm's resisted share is the same-level spell miss chance; the treatment arm sets the passive aura 804613 (the precondition fixture; the caster stays at full health, the fixture default) and removes the 706818 aura before every trial, so each trial is the first Curse after a rest (the 10 s rule belongs to clause 282, not measured here), and must resist it 100 points more often. 800 trials per arm in each of 5 pooled parts. Reference search 2026-11-23: coa-history spell 804613 and 706818: 0 events in 186 logs; bindmysoul talents snapshot (~/CoaServer/reference/snapshots/bindmysoul): spellId 804613 Doomstride reads 'Using Chaos Rush twice in a row now refreshes a charge of Chaos Rush.', a different text from the installed DBC tooltip; the installed DBC wins over a snapshot (general rules), so the expectation is the DBC tooltip; nothing else found."
     }
   ],
   "player_observations": [],
