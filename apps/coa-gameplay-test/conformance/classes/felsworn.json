@@ -12315,7 +12315,7 @@
       "before_expected": 0,
       "expected": 0,
       "tolerance": 0,
-      "observe_source": "525027 is set on the caster by harness set_aura as a named precondition, with the Felfury and weapon fixtures Sargeron Smite 802060 needs. Learned design tried first (Chaos Rush 500028 as setup cast after the learn): the Smite cast was refused twice with SPELL_FAILED_UNIT_NOT_INFRONT because the dash leaves the caster past the dummy, the same refusal that voided the first hit_ratio design of this passive. The learned grant is shown by aura_held (525027 present after a real Chaos Rush at the learned passive) and grant_amount (its amount 25). The server removes it after a cast of a spell it selects (AscensionFelswornAbilities.cpp:19-33, 239-245). The Smite is cast at the dummy and the aura is read gone 500 ms later; both phases carry the fixture, so the read before the learn is also 0 and the kept control proves the aura was present. Reference search 2026-11-23: coa-history spell 525027: 1 log, 9 applied and 9 removed, no value in a log event; expected values come from the tooltip and the DBC only. Both phases cast the consumer with the fixture set, so the read before the learn is also 0: the consumption does not depend on the gate; the kept control (aura still held after Demonic Will) shows the removal is the consumer cast.",
+      "observe_source": "Learned route, no set_aura (mentor D-67). Chaos Rush 500028 is cast for real at the dummy after the learn (setup cast; the grant of 525027 is also shown by aura_held and grant_amount); the aura is read present right after the setup (after_setup_reads, a precondition: a refused dash or a consumption by the dash itself would make the run unmeasured). The first learned design failed once on SPELL_FAILED_UNIT_NOT_INFRONT (134): Chaos Rush 500028 triggers Chaos Rush Jump 802028, Effect[0] CHARGE_DEST on TARGET_DEST_CASTER_FRONT with radius index 13 = 10 yd (SpellRadius.dbc), so the dash carries the caster 10 yd along its facing, past the dummy that stands 3 yd ahead; Sargeron Smite 802060 has FacingCasterFlags 1. The fix is relocate_before_trigger dx -10 (the caster returns to its start before the Smite). Select for 525027 is Direct || Named 801904 || Twin (AscensionFelswornAbilities.cpp:30-31): the Smite is the only consumer cast, and the kept control casts Demonic Will 800209, which is not one. The read after the Smite is 0 against 1 in the kept control with the identical setup. Reference search 2026-11-23: coa-history spell 525027: 1 log, 9 applied and 9 removed, no value in a log event; expected values come from the tooltip and the DBC only.",
       "phase_auras": [
         [
           800058,
@@ -12334,14 +12334,23 @@
           1,
           "caster",
           "caster"
-        ],
-        [
-          525027,
-          1,
-          "caster",
-          "caster"
         ]
-      ]
+      ],
+      "setup_casts": [
+        500028
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1700,
+      "setup_only_after": true,
+      "after_setup_reads": [
+        {
+          "spell": 525027,
+          "expected": 1
+        }
+      ],
+      "relocate_before_trigger": {
+        "dx": -10
+      }
     },
     {
       "spell": 524947,
@@ -12362,10 +12371,10 @@
       "variant": "kept",
       "label_suffix": "kept",
       "trigger_spell": 800209,
-      "before_expected": 1,
+      "before_expected": 0,
       "expected": 1,
       "tolerance": 0,
-      "observe_source": "525027 is set on the caster by harness set_aura as a named precondition, with the Felfury and weapon fixtures Sargeron Smite 802060 needs. Learned design tried first (Chaos Rush 500028 as setup cast after the learn): the Smite cast was refused twice with SPELL_FAILED_UNIT_NOT_INFRONT because the dash leaves the caster past the dummy, the same refusal that voided the first hit_ratio design of this passive. The learned grant is shown by aura_held (525027 present after a real Chaos Rush at the learned passive) and grant_amount (its amount 25). The server removes it after a cast of a spell it selects (AscensionFelswornAbilities.cpp:19-33, 239-245). Control: Demonic Will 800209 (no damage, not selected) is cast and the aura stays: the consumed entry's removal is the Smite. Reference search 2026-11-23: coa-history spell 525027: 1 log, 9 applied and 9 removed, no value in a log event; expected values come from the tooltip and the DBC only.",
+      "observe_source": "Learned route, no set_aura (mentor D-67). Same setup as the consumed entry: Chaos Rush 500028 cast for real after the learn, 525027 read present after the setup (after_setup_reads), the caster moved back 10 yd before the trigger. Control: Demonic Will 800209 (no damage, not selected by AscensionFelswornAbilities.cpp:30-31) is cast and the aura stays: the consumed entry's removal is the Smite. Reference search 2026-11-23: coa-history spell 525027: 1 log, 9 applied and 9 removed, no value in a log event; expected values come from the tooltip and the DBC only.",
       "phase_auras": [
         [
           800058,
@@ -12384,14 +12393,23 @@
           1,
           "caster",
           "caster"
-        ],
-        [
-          525027,
-          1,
-          "caster",
-          "caster"
         ]
-      ]
+      ],
+      "setup_casts": [
+        500028
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1700,
+      "setup_only_after": true,
+      "after_setup_reads": [
+        {
+          "spell": 525027,
+          "expected": 1
+        }
+      ],
+      "relocate_before_trigger": {
+        "dx": -10
+      }
     },
     {
       "spell": 706425,
@@ -12407,7 +12425,6 @@
       },
       "wait_ms": 500,
       "expire_ms": 500,
-      "void_on_cast_failure": true,
       "name": "Fury of Archimonde (consumed by the next Sargeron Smite)",
       "variant": "consumed",
       "label_suffix": "consumed",
@@ -12415,7 +12432,7 @@
       "before_expected": 0,
       "expected": 0,
       "tolerance": 0,
-      "observe_source": "706269 is set on the caster by harness set_aura as a named precondition, with the Felfury and weapon fixtures Sargeron Smite 802060 needs. Learned design tried first (the five real generators as setup casts, then the Smite): the Smite 800200 was refused twice with SPELL_FAILED_DONT_REPORT (27), the control Demonic Will with SPELL_FAILED_NOT_READY (67); the cause was not isolated. The learned grant is shown by ten_felfury (706269 present after the real generators with the passive learned) and crit_amount/damage_amount (50 and 50). The server removes it after a cast of a spell it selects (AscensionFelswornAbilities.cpp:19-33, 239-245). The Smite is cast at the dummy and the aura is read gone 500 ms later; both phases carry the fixture, so the read before the learn is also 0 and the kept control proves the aura was present. Reference search 2026-11-23: coa-history spell 706269 and 706425: 0 events in 186 logs (a passive and its aura leave no event); expected values come from the tooltip and the DBC only. Both phases cast the consumer with the fixture set, so the read before the learn is also 0: the consumption does not depend on the gate; the kept control (aura still held after Demonic Will) shows the removal is the consumer cast.",
+      "observe_source": "Learned route, no set_aura (mentor D-67). The five real generators Burning Hatred 805239, Demonic Will 800209 twice, Felhoof Charge 800204 and Bane of Chaos 706420 are cast after the learn (6 + 1 + 1 + 1 + 1 = 10 Felfury, the ten_felfury entry), Energy refilled after each; 706269 is read present after the setup (after_setup_reads, a precondition). The earlier failed attempt recorded Smite 800200 as refused: the cast_failures list names spell 800200 = Felhoof Charge (Spell.dbc), the secondary cast of Felhoof Charge 800204, reason 27 SPELL_FAILED_DONT_REPORT; it recurs in every 706425 entry, the passing ten_felfury included, so it does not stop the generation, and it made the old void_on_cast_failure flag void the trial. The first attempt lacked Bane of Chaos (9 generated, aura absent); the second removed the Felfury fixture 800058 and the Smite was refused SPELL_FAILED_NO_POWER (85) in that run (cause not isolated further); with the fixture restored the refusal did not recur. The fixture is a precondition of the Smite (consumes 2 Felfury), not the subject. void_on_cast_failure is dropped: a refused Smite would leave the aura at 1 and read as an alert, not a pass. Select for 706269 is Named 802060 (AscensionFelswornAbilities.cpp:22-24). The read after the Smite is 0 against 1 in the kept control. Reference search 2026-11-23: coa-history spell 706269 and 706425: 0 events in 186 logs (a passive and its aura leave no event); expected values come from the tooltip and the DBC only.",
       "phase_auras": [
         [
           800058,
@@ -12434,14 +12451,26 @@
           1,
           "caster",
           "caster"
-        ],
-        [
-          706269,
-          1,
-          "caster",
-          "caster"
         ]
-      ]
+      ],
+      "setup_casts": [
+        805239,
+        800209,
+        800204,
+        800209,
+        706420
+      ],
+      "setup_wait_ms": 1700,
+      "setup_only_after": true,
+      "after_setup_reads": [
+        {
+          "spell": 706269,
+          "expected": 1
+        }
+      ],
+      "refill_power_after_setup_casts": {
+        "power": 3
+      }
     },
     {
       "spell": 706425,
@@ -12457,15 +12486,14 @@
       },
       "wait_ms": 500,
       "expire_ms": 500,
-      "void_on_cast_failure": true,
       "name": "Fury of Archimonde (kept by a cast it does not consume, control)",
       "variant": "kept",
       "label_suffix": "kept",
-      "trigger_spell": 800209,
-      "before_expected": 1,
+      "trigger_spell": 800210,
+      "before_expected": 0,
       "expected": 1,
       "tolerance": 0,
-      "observe_source": "706269 is set on the caster by harness set_aura as a named precondition, with the Felfury and weapon fixtures Sargeron Smite 802060 needs. Learned design tried first (the five real generators as setup casts, then the Smite): the Smite 800200 was refused twice with SPELL_FAILED_DONT_REPORT (27), the control Demonic Will with SPELL_FAILED_NOT_READY (67); the cause was not isolated. The learned grant is shown by ten_felfury (706269 present after the real generators with the passive learned) and crit_amount/damage_amount (50 and 50). The server removes it after a cast of a spell it selects (AscensionFelswornAbilities.cpp:19-33, 239-245). Control: Demonic Will 800209 (no damage, not selected) is cast and the aura stays: the consumed entry's removal is the Smite. Reference search 2026-11-23: coa-history spell 706269 and 706425: 0 events in 186 logs (a passive and its aura leave no event); expected values come from the tooltip and the DBC only.",
+      "observe_source": "Learned route, no set_aura (mentor D-67). Same setup as the consumed entry (five real generators, 706269 read present after the setup). Control: Felrend 800210 is cast instead of the Smite and the aura stays (Select for 706269 is Named 802060 only). Demonic Will was refused as trigger (NOT_READY: it is cast in the setup) and Chaos Rush as trigger carried the caster past the dummy for the next phase (UNIT_NOT_INFRONT), hence Felrend. Reference search 2026-11-23: coa-history spell 706269 and 706425: 0 events in 186 logs; expected values come from the tooltip and the DBC only.",
       "phase_auras": [
         [
           800058,
@@ -12484,14 +12512,26 @@
           1,
           "caster",
           "caster"
-        ],
-        [
-          706269,
-          1,
-          "caster",
-          "caster"
         ]
-      ]
+      ],
+      "setup_casts": [
+        805239,
+        800209,
+        800204,
+        800209,
+        706420
+      ],
+      "setup_wait_ms": 1700,
+      "setup_only_after": true,
+      "after_setup_reads": [
+        {
+          "spell": 706269,
+          "expected": 1
+        }
+      ],
+      "refill_power_after_setup_casts": {
+        "power": 3
+      }
     },
     {
       "spell": 705145,
@@ -12807,14 +12847,14 @@
       "variant": "fireball_targets",
       "label_suffix": "fireball_targets",
       "expected": 3,
-      "auras": [
+      "radius_reason": "Fel Fireball 801312 Effect[0] SCHOOL_DAMAGE on TARGET_UNIT_TARGET_ENEMY with ChainTarget 1 (a single target); 802058 Effect[1] BasePoints 3 + EffectDieSides 1 = 4 ($s2) targets; AscensionFelswornAbilities.cpp:137-150 adds up to 3 further enemies within Nearby(target, 10 yd), so the extra dummies stand inside 8 yd of the primary and one beyond it",
+      "observe_source": "Reckoning 802058 is cast for real on the caster once before the three Fel Fireballs (setup cast, aura 10000 ms, enough for three instant casts), which it makes free and instant; no aura is set by the harness; the dummies struck (spell_damage_count) are read: the primary and exactly 3 more of the offered ones (a fourth extra would show). The control entry casts the same Fel Fireball without 802058. Reference search 2026-11-23: coa-history spell 802058: 78 casts, 78 aura applied and 78 removed in 6 logs, no value in a log event; Fel Fireball 801312 target counts are not logged per cast here; expected values come from the tooltip and the DBC only.",
+      "setup_casts": [
         [
           802058,
-          1
+          "caster"
         ]
-      ],
-      "radius_reason": "Fel Fireball 801312 Effect[0] SCHOOL_DAMAGE on TARGET_UNIT_TARGET_ENEMY with ChainTarget 1 (a single target); 802058 Effect[1] BasePoints 3 + EffectDieSides 1 = 4 ($s2) targets; AscensionFelswornAbilities.cpp:137-150 adds up to 3 further enemies within Nearby(target, 10 yd), so the extra dummies stand inside 8 yd of the primary and one beyond it",
-      "observe_source": "Reckoning 802058 is held on the caster by harness set_aura (an active whose real cast, aura and duration have their own entries held/gone/instant) before each Fel Fireball, which it makes free and instant; the dummies struck (spell_damage_count) are read: the primary and exactly 3 more of the offered ones (a fourth extra would show). The control entry casts the same Fel Fireball without 802058. Reference search 2026-11-23: coa-history spell 802058: 78 casts, 78 aura applied and 78 removed in 6 logs, no value in a log event; Fel Fireball 801312 target counts are not logged per cast here; expected values come from the tooltip and the DBC only."
+      ]
     },
     {
       "spell": 802058,
