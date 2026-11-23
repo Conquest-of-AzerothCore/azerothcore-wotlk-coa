@@ -12375,6 +12375,505 @@
         "hit_arm": true
       },
       "observe_source": "Spell.dbc 802678 (server set /srv/coa/server-data/dbc) Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 1000, DurationIndex 32 = 6000 ms (6 ticks), EffectBasePoints 8, EffectDieSides 1, EffectRealPointsPerLevel 0.5, BaseLevel 10, SpellLevel 10, MaxLevel 0. Expected per tick at level 60: 8 + 1 (DieSides 1 adds 1) + int(0.5 x (60 - 10)) = 34 (SpellInfo.cpp CalcValue), plus the tooltip term $SP*.05 = int(0.05 x spell power). The displayed ${($d*1000/$T1)*($m1+0+$SP*.05)} reads 54 = 6 x 9 on the client (ADR 0006: no SkillLineAbility row, base points only); owner ruling O-19: the server keeps 34 per tick and the displayed text is to be corrected in a client patch, so the value is counted on the server formula, not on the displayed 54. Behaviour read: the caster casts Felstrike 802678 on the dummy and the dummy's spell_damage_total of 802678 is read 1500 ms later, one tick (EffectAmplitude 1000, the second tick at 2000 ms); the unread arm before the cast reads 0 (control). Criticals are made impossible (64481) and the dummy's magic resistance is removed (823764), as the Immolation Aura tick entries do. Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and the Felstrike tick events of coa-history (spell 802678, gear and level differ, no figure decides). Contrast arm of the spell power term: +10000 spell power must move the tick by int(0.05 x 10000) = 500 to 534; a server that dropped the term or used another coefficient cannot pass both arms."
+    },
+    {
+      "spell": 524947,
+      "kind": "metric_delta",
+      "gate_spell": 524947,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "quote": "increases the next instance of direct spell or ability damage within $525027d by $525027s1%",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 525027
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Mark of Chaos (consumed by the next Sargeron Smite)",
+      "variant": "consumed",
+      "label_suffix": "consumed",
+      "trigger_spell": 802060,
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "observe_source": "525027 is set on the caster by harness set_aura as a named precondition, with the Felfury and weapon fixtures Sargeron Smite 802060 needs. Learned design tried first (Chaos Rush 500028 as setup cast after the learn): the Smite cast was refused twice with SPELL_FAILED_UNIT_NOT_INFRONT because the dash leaves the caster past the dummy, the same refusal that voided the first hit_ratio design of this passive. The learned grant is shown by aura_held (525027 present after a real Chaos Rush at the learned passive) and grant_amount (its amount 25). The server removes it after a cast of a spell it selects (AscensionFelswornAbilities.cpp:19-33, 239-245). The Smite is cast at the dummy and the aura is read gone 500 ms later; both phases carry the fixture, so the read before the learn is also 0 and the kept control proves the aura was present. Reference search 2026-11-23: coa-history spell 525027: 1 log, 9 applied and 9 removed, no value in a log event; expected values come from the tooltip and the DBC only. Both phases cast the consumer with the fixture set, so the read before the learn is also 0: the consumption does not depend on the gate; the kept control (aura still held after Demonic Will) shows the removal is the consumer cast.",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          525027,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 524947,
+      "kind": "metric_delta",
+      "gate_spell": 524947,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "quote": "increases the next instance of direct spell or ability damage within $525027d by $525027s1%",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 525027
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Mark of Chaos (kept by a cast it does not consume, control)",
+      "variant": "kept",
+      "label_suffix": "kept",
+      "trigger_spell": 800209,
+      "before_expected": 1,
+      "expected": 1,
+      "tolerance": 0,
+      "observe_source": "525027 is set on the caster by harness set_aura as a named precondition, with the Felfury and weapon fixtures Sargeron Smite 802060 needs. Learned design tried first (Chaos Rush 500028 as setup cast after the learn): the Smite cast was refused twice with SPELL_FAILED_UNIT_NOT_INFRONT because the dash leaves the caster past the dummy, the same refusal that voided the first hit_ratio design of this passive. The learned grant is shown by aura_held (525027 present after a real Chaos Rush at the learned passive) and grant_amount (its amount 25). The server removes it after a cast of a spell it selects (AscensionFelswornAbilities.cpp:19-33, 239-245). Control: Demonic Will 800209 (no damage, not selected) is cast and the aura stays: the consumed entry's removal is the Smite. Reference search 2026-11-23: coa-history spell 525027: 1 log, 9 applied and 9 removed, no value in a log event; expected values come from the tooltip and the DBC only.",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          525027,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 706425,
+      "kind": "metric_delta",
+      "gate_spell": 706425,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "quote": "your next Sargeron Smite within $706269d gains $706269s1% increased critical strike chance and damage.",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706269
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Fury of Archimonde (consumed by the next Sargeron Smite)",
+      "variant": "consumed",
+      "label_suffix": "consumed",
+      "trigger_spell": 802060,
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "observe_source": "706269 is set on the caster by harness set_aura as a named precondition, with the Felfury and weapon fixtures Sargeron Smite 802060 needs. Learned design tried first (the five real generators as setup casts, then the Smite): the Smite 800200 was refused twice with SPELL_FAILED_DONT_REPORT (27), the control Demonic Will with SPELL_FAILED_NOT_READY (67); the cause was not isolated. The learned grant is shown by ten_felfury (706269 present after the real generators with the passive learned) and crit_amount/damage_amount (50 and 50). The server removes it after a cast of a spell it selects (AscensionFelswornAbilities.cpp:19-33, 239-245). The Smite is cast at the dummy and the aura is read gone 500 ms later; both phases carry the fixture, so the read before the learn is also 0 and the kept control proves the aura was present. Reference search 2026-11-23: coa-history spell 706269 and 706425: 0 events in 186 logs (a passive and its aura leave no event); expected values come from the tooltip and the DBC only. Both phases cast the consumer with the fixture set, so the read before the learn is also 0: the consumption does not depend on the gate; the kept control (aura still held after Demonic Will) shows the removal is the consumer cast.",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          706269,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 706425,
+      "kind": "metric_delta",
+      "gate_spell": 706425,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "quote": "your next Sargeron Smite within $706269d gains $706269s1% increased critical strike chance and damage.",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706269
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Fury of Archimonde (kept by a cast it does not consume, control)",
+      "variant": "kept",
+      "label_suffix": "kept",
+      "trigger_spell": 800209,
+      "before_expected": 1,
+      "expected": 1,
+      "tolerance": 0,
+      "observe_source": "706269 is set on the caster by harness set_aura as a named precondition, with the Felfury and weapon fixtures Sargeron Smite 802060 needs. Learned design tried first (the five real generators as setup casts, then the Smite): the Smite 800200 was refused twice with SPELL_FAILED_DONT_REPORT (27), the control Demonic Will with SPELL_FAILED_NOT_READY (67); the cause was not isolated. The learned grant is shown by ten_felfury (706269 present after the real generators with the passive learned) and crit_amount/damage_amount (50 and 50). The server removes it after a cast of a spell it selects (AscensionFelswornAbilities.cpp:19-33, 239-245). Control: Demonic Will 800209 (no damage, not selected) is cast and the aura stays: the consumed entry's removal is the Smite. Reference search 2026-11-23: coa-history spell 706269 and 706425: 0 events in 186 logs (a passive and its aura leave no event); expected values come from the tooltip and the DBC only.",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          706269,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 705145,
+      "kind": "metric_delta",
+      "gate_spell": 705145,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "quote": "Triggering Dancing Blades now increases the damage of next Sargeron Smite",
+      "metric": "aura",
+      "fields": {
+        "spell": 705146
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Nether Champion (consumed by the next Sargeron Smite)",
+      "variant": "consumed",
+      "label_suffix": "consumed",
+      "trigger_spell": 802060,
+      "before_expected": 0,
+      "expected": 0,
+      "observe_source": "The passive is learned and the aura 705146 is granted by its real path (setup casts [801901, 801901, 801901, 801901]; the grant has its own entries). The server removes it after a cast of a spell it selects (AscensionFelswornAbilities.cpp:19-33, 239-245). The consumer is cast at the dummy and the aura is read gone 500 ms later; the read before the learn is 0 because no grant happens without the passive, and the kept control proves the aura was present. Reference search 2026-11-23: coa-history spell 705145 and 705146: 0 events in 186 logs (a passive and its aura leave no event); expected values come from the tooltip and the DBC only. Both phases cast the consumer with the fixture set, so the read before the learn is also 0: the consumption does not depend on the gate; the kept control (aura still held after Demonic Will) shows the removal is the consumer cast.",
+      "setup_casts": [
+        801901,
+        801901,
+        801901,
+        801901
+      ],
+      "setup_wait_ms": 1700,
+      "learn": [
+        92087
+      ],
+      "force_crit": "melee"
+    },
+    {
+      "spell": 705145,
+      "kind": "metric_delta",
+      "gate_spell": 705145,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "quote": "Triggering Dancing Blades now increases the damage of next Sargeron Smite",
+      "metric": "aura",
+      "fields": {
+        "spell": 705146
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Nether Champion (kept by a cast it does not consume, control)",
+      "variant": "kept",
+      "label_suffix": "kept",
+      "trigger_spell": 800209,
+      "before_expected": 0,
+      "expected": 1,
+      "observe_source": "The passive is learned and the aura 705146 is granted by its real path (setup casts [801901, 801901, 801901, 801901]; the grant has its own entries). The server removes it after a cast of a spell it selects (AscensionFelswornAbilities.cpp:19-33, 239-245). Control: Demonic Will 800209 (no damage, not selected) is cast and the aura stays: the consumed entry's removal is the consumer cast. Reference search 2026-11-23: coa-history spell 705145 and 705146: 0 events in 186 logs (a passive and its aura leave no event); expected values come from the tooltip and the DBC only.",
+      "setup_casts": [
+        801901,
+        801901,
+        801901,
+        801901
+      ],
+      "setup_wait_ms": 1700,
+      "learn": [
+        92087
+      ],
+      "force_crit": "melee"
+    },
+    {
+      "spell": 555277,
+      "kind": "metric_delta",
+      "gate_spell": 801235,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "quote": "Your next Ruin",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 555277
+      },
+      "wait_ms": 500,
+      "expire_ms": 3000,
+      "void_on_cast_failure": true,
+      "name": "Sculptor of Doom (consumed by the next Ruin 501298)",
+      "variant": "consumed",
+      "label_suffix": "consumed",
+      "trigger_spell": 501298,
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "observe_source": "The passive is learned and the aura 555277 is granted by its real path (setup casts [801312, 801312, 801312]; the grant has its own entries). The server removes it after a cast of a spell it selects (AscensionFelswornAbilities.cpp:19-33, 239-245). The consumer is cast at the dummy and the aura is read gone 500 ms later; the read before the learn is 0 because no grant happens without the passive, and the kept control proves the aura was present. Reference search 2026-11-23: coa-history spell 555277: 0 events in 186 logs (a passive and its aura leave no event); expected values come from the tooltip and the DBC only. Both phases cast the consumer with the fixture set, so the read before the learn is also 0: the consumption does not depend on the gate; the kept control (aura still held after Demonic Will) shows the removal is the consumer cast.",
+      "setup_casts": [
+        801312,
+        801312,
+        801312
+      ],
+      "setup_wait_ms": 2200,
+      "force_crit": "spell"
+    },
+    {
+      "spell": 555277,
+      "kind": "metric_delta",
+      "gate_spell": 801235,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "quote": "Your next Ruin",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 555277
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Sculptor of Doom (kept by a cast it does not consume, control)",
+      "variant": "kept",
+      "label_suffix": "kept",
+      "trigger_spell": 800209,
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "observe_source": "The passive is learned and the aura 555277 is granted by its real path (setup casts [801312, 801312, 801312]; the grant has its own entries). The server removes it after a cast of a spell it selects (AscensionFelswornAbilities.cpp:19-33, 239-245). Control: Demonic Will 800209 (no damage, not selected) is cast and the aura stays: the consumed entry's removal is the consumer cast. Reference search 2026-11-23: coa-history spell 555277: 0 events in 186 logs (a passive and its aura leave no event); expected values come from the tooltip and the DBC only.",
+      "setup_casts": [
+        801312,
+        801312,
+        801312
+      ],
+      "setup_wait_ms": 2200,
+      "force_crit": "spell"
+    },
+    {
+      "spell": 705145,
+      "kind": "metric_delta",
+      "gate_spell": 705145,
+      "trigger_spell": 801901,
+      "learn": [
+        92087
+      ],
+      "target": "dummy",
+      "measure_actor": "caster",
+      "force_crit": "melee",
+      "wait_ms": 19000,
+      "expire_ms": 500,
+      "before_expected": 0,
+      "quote": "for $705146d,",
+      "name": "Nether Champion (aura held 19000 ms)",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "metric": "aura",
+      "fields": {
+        "spell": 705146
+      },
+      "expected": 1,
+      "setup_casts": [
+        801901,
+        801901,
+        801901
+      ],
+      "setup_wait_ms": 1700,
+      "cast_power": 100,
+      "observe_source": "705146 DurationIndex 18 = 20000 ms (SpellDuration.dbc, $705146d). Four Twin Slice 801901 casts with Dancing Blades 92087 learned in both phases (as the stack_amount entry) apply it; the read is taken 19000 ms after the last cast (held: a duration 10% short, 18000 ms, is excluded) and 21000 ms after (gone: 22000 ms is excluded); the before phase, without 705145, is the control (absent). Reference search 2026-11-23: coa-history spell 705146: 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 705145,
+      "kind": "metric_delta",
+      "gate_spell": 705145,
+      "trigger_spell": 801901,
+      "learn": [
+        92087
+      ],
+      "target": "dummy",
+      "measure_actor": "caster",
+      "force_crit": "melee",
+      "wait_ms": 21000,
+      "expire_ms": 500,
+      "before_expected": 0,
+      "quote": "for $705146d,",
+      "name": "Nether Champion (aura gone 21000 ms)",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "metric": "aura",
+      "fields": {
+        "spell": 705146
+      },
+      "expected": 0,
+      "setup_casts": [
+        801901,
+        801901,
+        801901
+      ],
+      "setup_wait_ms": 1700,
+      "cast_power": 100,
+      "observe_source": "705146 DurationIndex 18 = 20000 ms (SpellDuration.dbc, $705146d). Four Twin Slice 801901 casts with Dancing Blades 92087 learned in both phases (as the stack_amount entry) apply it; the read is taken 19000 ms after the last cast (held: a duration 10% short, 18000 ms, is excluded) and 21000 ms after (gone: 22000 ms is excluded); the before phase, without 705145, is the control (absent). Reference search 2026-11-23: coa-history spell 705146: 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 555277,
+      "kind": "metric_delta",
+      "gate_spell": 801235,
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "force_crit": "spell",
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 501298
+      },
+      "before_expected": 2500,
+      "name": "Sculptor of Doom (Ruin is instant cast)",
+      "variant": "instant",
+      "label_suffix": "instant",
+      "quote": "Your next Ruin within $d is instant cast.",
+      "setup_casts": [
+        801312,
+        801312
+      ],
+      "setup_wait_ms": 1700,
+      "expected": 0,
+      "observe_source": "801235 Effect[0] PROC_TRIGGER_SPELL 555276; AscensionFelswornAbilities.cpp:372-376 grants Sculptor of Doom 555277 (DurationIndex 31 = 8000 ms, SpellDuration.dbc) at the third forced-crit Fel Fireball 801312 (the grant is proven by three_crits). Ruin 501298 CastingTimeIndex 19 = 2500 ms (SpellCastTimes.dbc) is read before the learn (the control, 2500) and after the three crits (0). Reference search 2026-11-23: coa-history spell 801235 and 555277: 0 events in 186 logs; Ruin 501298: 2522 casts in 6 logs, no value in a log event; expected values come from the tooltip and the DBC only.",
+      "tolerance": 1
+    },
+    {
+      "spell": 555277,
+      "kind": "metric_delta",
+      "gate_spell": 801235,
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "force_crit": "spell",
+      "wait_ms": 9100,
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 555277
+      },
+      "before_expected": 0,
+      "name": "Sculptor of Doom (aura held)",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "within $d",
+      "setup_casts": [
+        801312,
+        801312
+      ],
+      "setup_wait_ms": 1700,
+      "expected": 1,
+      "observe_source": "801235 Effect[0] PROC_TRIGGER_SPELL 555276; AscensionFelswornAbilities.cpp:372-376 grants Sculptor of Doom 555277 (DurationIndex 31 = 8000 ms, SpellDuration.dbc) at the third forced-crit Fel Fireball 801312 (the grant is proven by three_crits). Read taken 9100 ms after the trigger cast starts, i.e. about 7600 ms after the grant (Fel Fireball cast time 1500 ms): held excludes 10% short (7200). Reference search 2026-11-23: coa-history spell 801235 and 555277: 0 events in 186 logs; Ruin 501298: 2522 casts in 6 logs, no value in a log event; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 555277,
+      "kind": "metric_delta",
+      "gate_spell": 801235,
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "force_crit": "spell",
+      "wait_ms": 9900,
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 555277
+      },
+      "before_expected": 0,
+      "name": "Sculptor of Doom (aura gone)",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "within $d",
+      "setup_casts": [
+        801312,
+        801312
+      ],
+      "setup_wait_ms": 1700,
+      "expected": 0,
+      "observe_source": "801235 Effect[0] PROC_TRIGGER_SPELL 555276; AscensionFelswornAbilities.cpp:372-376 grants Sculptor of Doom 555277 (DurationIndex 31 = 8000 ms, SpellDuration.dbc) at the third forced-crit Fel Fireball 801312 (the grant is proven by three_crits). Read taken 9900 ms after the trigger cast starts, about 8400 ms after the grant: gone excludes 10% long (8800). Reference search 2026-11-23: coa-history spell 801235 and 555277: 0 events in 186 logs; Ruin 501298: 2522 casts in 6 logs, no value in a log event; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 524947,
+      "name": "Mark of Chaos (granted aura amount 25)",
+      "kind": "metric_delta",
+      "variant": "grant_amount",
+      "label_suffix": "grant_amount",
+      "quote": "within $525027d",
+      "trigger_spell": 500028,
+      "gate_spell": 524947,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 525027,
+        "effect": 0
+      },
+      "before_expected": 0,
+      "expected": 25,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "observe_source": "525027 Effect[0] aura 108 ADD_PCT_MODIFIER, BasePoints 24 + 1 = 25 ($525027s1, Spell.dbc). The amount of effect 0 of 525027 on the caster is read 500 ms after a real Chaos Rush cast at the dummy with 524947 learned (absent before: the control). Reference search 2026-11-23: coa-history spell 525027: 1 log, 9 applied and 9 removed, no value in a log event; expected values come from the tooltip and the DBC only.",
+      "expire_ms": 500
     }
   ],
   "player_observations": [],

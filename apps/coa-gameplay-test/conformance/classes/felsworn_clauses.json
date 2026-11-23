@@ -863,12 +863,16 @@
       {
         "claim": "by $525027s1%",
         "labels": [
-          "524947 behaviour_hit_ratio damage"
+          "524947 behaviour_hit_ratio damage",
+          "524947 behaviour_metric_delta grant_amount"
         ]
       },
       {
         "claim": "the next instance of direct spell or ability damage",
-        "labels": []
+        "labels": [
+          "524947 behaviour_metric_delta consumed",
+          "524947 behaviour_metric_delta kept"
+        ]
       }
     ]
   },
@@ -2241,7 +2245,10 @@
     "claims": [
       {
         "claim": "Triggering Dancing Blades now increases the damage of next Sargeron Smite",
-        "labels": []
+        "labels": [
+          "705145 behaviour_metric_delta consumed",
+          "705145 behaviour_metric_delta kept"
+        ]
       },
       {
         "claim": "by $705146s1%",
@@ -2251,7 +2258,10 @@
       },
       {
         "claim": "for $705146d,",
-        "labels": []
+        "labels": [
+          "705145 behaviour_metric_delta duration_held",
+          "705145 behaviour_metric_delta duration_gone"
+        ]
       }
     ]
   },
@@ -2337,7 +2347,10 @@
     "claims": [
       {
         "claim": "your next Sargeron Smite",
-        "labels": []
+        "labels": [
+          "706425 behaviour_metric_delta consumed",
+          "706425 behaviour_metric_delta kept"
+        ]
       },
       {
         "claim": "within $706269d",
@@ -2960,15 +2973,23 @@
     "claims": [
       {
         "claim": "Your next Ruin",
-        "labels": []
+        "labels": [
+          "555277 behaviour_metric_delta consumed",
+          "555277 behaviour_metric_delta kept"
+        ]
       },
       {
         "claim": "within $d",
-        "labels": []
+        "labels": [
+          "555277 behaviour_metric_delta held",
+          "555277 behaviour_metric_delta gone"
+        ]
       },
       {
         "claim": "is instant cast.",
-        "labels": []
+        "labels": [
+          "555277 behaviour_metric_delta instant"
+        ]
       }
     ]
   },
