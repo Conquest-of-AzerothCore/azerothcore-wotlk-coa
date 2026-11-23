@@ -32,7 +32,9 @@ that needs an eleventh candidate (Hellfire Carver 707444); and a new option `fri
 creatures outside the party (faction 35, entry 631) and sums the judged `aura` reading over them, for "all allies"
 beyond a spell's party cap. Its first target, Infernal Whipcrack 805243 under Taskmaster's Army 800220, carries
 SPELL_ATTR3_ONLY_ON_PLAYER and refused the creatures, so no entry uses the option yet. Both are opt-in; no existing
-scenario changes and no evidence row is added.
+scenario changes and no evidence row is added. The cross-class guard
+`test_cross_class_guard_the_sun_cleric_lockout_read_without_its_evidence_row_is_found` now expects Felsworn beside
+Sun Cleric among the users of `school_prohibited` (Felbreak 800203 lockout reads; controller go, guard logic unchanged).
 
 ## Consequences
 

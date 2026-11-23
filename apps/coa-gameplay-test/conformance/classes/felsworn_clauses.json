@@ -2562,7 +2562,8 @@
           "report": ".agents/plans/fw-ea5/report.md"
         }
       ]
-    }
+    },
+    "reason": "HELD (fw-l2, controller t5 2026-11-23): the cap is judged (extras_cap: primary + 10 additional enemies struck of 11 offered, ok in both runs of prove3); 'dealing less damage with each target struck' is not judged: no judge compares the damage of one cast across its targets (the code factor is max(0.2, 1 - 0.1 x index), AscensionFelswornAbilities.cpp:208-218). The row stays held until that read exists."
   },
   {
     "spell": 707513,
@@ -2724,7 +2725,8 @@
       "800203 behaviour_metric_delta lockout_held",
       "800203 behaviour_metric_delta lockout_free"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "HELD (fw-l2, controller t5 2026-11-23): the interrupt and the school lockout window are judged (interrupt, lockout_held, lockout_free ok in both runs of prove2, 20261123-225953 / -230029); 'draining mana from the target based on your Spirit' is not judged: an entry on Scarlet Magi 1832 channelling Evocation read an unset control mana (5206 / 5340), so it was removed. The row stays held until a drain read with a fixed target mana exists."
   },
   {
     "spell": 800203,
