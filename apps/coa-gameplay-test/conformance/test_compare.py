@@ -18,7 +18,7 @@ from compare import (ALERT_COLUMNS, CONFORMANT, DATA_ONLY, EFFECT_VALUE_SCOPE, E
                      BuildMismatch, DbcTooltips, ScenarioDrift, Verdict, evaluate,
                      alert_rows, banded_status, compare, delta_margin, log_query_of, measured_values,
                      observation_lines, owner_fallback, question_detail, read_verdicts, resolve_linked_statuses,
-                     apply_value_links, resolve_base_roll_links,
+                     apply_value_links, resolve_base_roll_links, SUPERSEDED_BY, judge_expectation, resolve_superseded,
                      write_outputs)
 from behaviours import BEHAVIOUR_METRIC_DELTA
 from bonus_data import BonusRow, BonusTable
@@ -2190,6 +2190,90 @@ class GenerateTest(unittest.TestCase):
                                                   if item['check'] == 'hit_mean'])
         finally:
             shutil.rmtree(out)
+
+
+SUPERSEDING = ['572027 hit_mean gate stacks 0', '572027 hit_mean gate']
+SUPERSEDED_ENTRY = {'spell': 572027, 'reason': 'seeded: its hits land on the debuff it applies',
+                    'replaced_by': SUPERSEDING}
+
+
+def superseded_generate(out: Path, entries) -> dict:
+    from conformance import generate
+
+    def listed(class_id):
+        return {**load_fixture_class_file(class_id), 'superseded_hits': entries}
+
+    with mock.patch('conformance.load_class_file', listed):
+        return json.loads(generate(CLASS_FILE['class_id'], out, spells=[RIGHTEOUS_UPHEAVAL]).read_text(
+            encoding='utf-8'))
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class SupersededHitTest(unittest.TestCase):
+    def test_a_superseded_hit_is_a_closed_record_without_a_scenario_naming_its_replacements(self):
+        out = Path(tempfile.mkdtemp(prefix='conformance-superseded-'))
+        try:
+            manifest = superseded_generate(out, [SUPERSEDED_ENTRY])
+            [entry] = [entry for entry in manifest['scenarios'] if entry['kind'] == 'hit']
+            [item] = entry['expectations']
+            self.assertEqual((entry['key'], entry['file'], item['label'], item['check']),
+                             ('conformance-templar-hit-572027', None, '572027 hit_mean', 'unmodelled'))
+            self.assertEqual(item['rule'], 'closed: no check needed: seeded: its hits land on the debuff it applies')
+            self.assertEqual(item['model'], {SUPERSEDED_BY: SUPERSEDING})
+            verdict = judge_expectation(manifest, entry, None, Expectation(**item), None, None, None)
+            self.assertEqual((verdict.status, verdict.detail), ('closed', {SUPERSEDED_BY: SUPERSEDING}))
+        finally:
+            shutil.rmtree(out)
+
+    def test_mutant_without_the_key_the_plain_hit_is_generated_as_before(self):
+        out = Path(tempfile.mkdtemp(prefix='conformance-superseded-'))
+        try:
+            manifest = superseded_generate(out, [])
+            hits = [entry for entry in manifest['scenarios'] if entry['kind'] == 'hit']
+            self.assertEqual([entry['key'] for entry in hits],
+                             ['conformance-templar-hit-572027-part-1', 'conformance-templar-hit-572027-part-2'])
+            self.assertTrue(all(entry['file'] for entry in hits))
+        finally:
+            shutil.rmtree(out)
+
+    def test_an_entry_without_its_replacing_labels_is_refused(self):
+        for broken in ({key: value for key, value in SUPERSEDED_ENTRY.items() if key != 'replaced_by'},
+                       {**SUPERSEDED_ENTRY, 'replaced_by': []},
+                       {**SUPERSEDED_ENTRY, 'replaced_by': ['572027 hit_mean']},
+                       {**SUPERSEDED_ENTRY, 'reason': ' '}):
+            out = Path(tempfile.mkdtemp(prefix='conformance-superseded-'))
+            try:
+                with self.subTest(broken=sorted(broken)), self.assertRaises(ValueError):
+                    superseded_generate(out, [broken])
+            finally:
+                shutil.rmtree(out)
+
+
+class ResolveSupersededTest(unittest.TestCase):
+    def closed(self):
+        return Verdict('572027 hit_mean', 'closed', None, None, None, None, 'closed: no check needed: seeded',
+                       check='unmodelled', detail={SUPERSEDED_BY: SUPERSEDING})
+
+    def test_a_superseded_hit_stays_closed_only_with_every_replacement_ok(self):
+        resolved = resolve_superseded([self.closed(), verdict(SUPERSEDING[0], 'ok'), verdict(SUPERSEDING[1], 'ok')])
+        self.assertEqual(resolved[0].status, 'closed')
+        self.assertIn(f'replaced by "{SUPERSEDING[0]}" (ok), "{SUPERSEDING[1]}" (ok)', resolved[0].explanation)
+
+    def test_mutant_a_missing_replacement_alerts(self):
+        resolved = resolve_superseded([self.closed(), verdict(SUPERSEDING[0], 'ok')])
+        self.assertEqual(resolved[0].status, 'alert')
+        self.assertIn(f'"{SUPERSEDING[1]}" (missing)', resolved[0].explanation)
+
+    def test_mutant_an_alerting_or_unmeasured_replacement_alerts(self):
+        for status in ('alert', 'unmeasured', 'tolerated'):
+            with self.subTest(status=status):
+                resolved = resolve_superseded([self.closed(), verdict(SUPERSEDING[0], status),
+                                               verdict(SUPERSEDING[1], 'ok')])
+                self.assertEqual(resolved[0].status, 'alert')
+
+    def test_a_closed_verdict_without_replacements_is_left_alone(self):
+        plain = Verdict('1 hit_mean', 'closed', None, None, None, None, 'closed: no check needed: x')
+        self.assertEqual(resolve_superseded([plain]), [plain])
 
 
 def verdict(label: str, status: str) -> Verdict:

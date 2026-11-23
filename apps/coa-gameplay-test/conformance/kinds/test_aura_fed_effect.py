@@ -158,6 +158,41 @@ class AuraFedEffectTests(unittest.TestCase):
 
     def test_cap_reached_without_the_aura_is_unmeasured_not_ok(self):
         self.assertEqual(self.judged(INSTANT, self.instant_values(fed_aura=0.0)), 'unmeasured')
+
+    def instant_verdict(self, entry, values):
+        _, expectation = self.generated(entry)
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+    def test_the_opted_instant_contrast_is_behaviour_on_an_instant_clause_only(self):
+        opted = {**INSTANT, 'evidence_metric': 'aura_fed_instant_casting'}
+        verdict = self.instant_verdict(opted, self.instant_values())
+        self.assertEqual((verdict.status, verdict.detail), ('ok', {'metric': 'aura_fed_instant_casting',
+                                                                   'contrast': 'aura_fed'}))
+        self.assertEqual(verdict_evidence(verdict, 'Your next Dawnsear is instant cast', {}), BEHAVIOUR)
+        self.assertEqual(verdict_evidence(verdict, 'within $d', {}), DATA)
+        unstamped = replace(verdict, detail={'metric': 'aura_fed_instant_casting'})
+        self.assertEqual(verdict_evidence(unstamped, 'Your next Dawnsear is instant cast', {}), DATA)
+        plain = self.instant_verdict(INSTANT, self.instant_values())
+        self.assertEqual((plain.status, plain.detail), ('ok', {'metric': 'casting'}))
+        self.assertEqual(verdict_evidence(plain, 'Your next Dawnsear is instant cast', {}), DATA)
+
+    def test_mutant_instant_contrast_without_its_control_arm_is_not_behaviour(self):
+        opted = {**INSTANT, 'evidence_metric': 'aura_fed_instant_casting'}
+        _, expectation = self.generated(opted)
+        control = expectation.model['reads']['control'][0]['casting']
+        missing = {label: value for label, value in self.instant_values().items() if label != control}
+        for values in (missing, self.instant_values(control=0.0)):
+            verdict = self.instant_verdict(opted, values)
+            self.assertEqual(verdict.status, 'unmeasured', verdict.explanation)
+            self.assertEqual(verdict_evidence(verdict, 'Your next Dawnsear is instant cast', {}), UNPROVEN)
+        self.assertEqual(self.instant_verdict(opted, self.instant_values(fed=1.0)).status, 'alert')
+
+    def test_the_instant_evidence_metric_is_refused_off_the_instant_variant(self):
+        for entry in (DAMAGE, COOLDOWN):
+            with self.subTest(variant=entry['variant']), self.assertRaises(ValueError):
+                self.generated({**entry, 'evidence_metric': 'aura_fed_instant_casting'})
+        with self.assertRaises(ValueError):
+            self.generated({**INSTANT, 'evidence_metric': 'cast_failure'})
         self.assertEqual(self.judged(DAMAGE, self.damage_values(1.25, fed_aura=0.0)), 'unmeasured')
 
     def test_damage_ratio(self):

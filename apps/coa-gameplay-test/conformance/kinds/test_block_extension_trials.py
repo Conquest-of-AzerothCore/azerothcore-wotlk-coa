@@ -234,5 +234,76 @@ class BlockGrantTrialsTests(unittest.TestCase):
                 self.generated({**GRANT, **changes})
 
 
+
+DURATION = {**GRANT, 'variant': 'block_grant_duration', 'label_suffix': 'block_grant_duration', 'trials': 47,
+            'parts': 1, 'control_trials': 0, 'chance_pct': None, 'half_width_points': None, 'duration_spell': 712448,
+            'duration_effect': 0, 'min_granted': 5, 'residual_target': 0.001}
+GRANTED = frozenset({0, 3, 6, 9, 12})
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class BlockGrantDurationTests(unittest.TestCase):
+    generated = BlockGrantTrialsTests.generated
+    judge = BlockGrantTrialsTests.judge
+
+    def timed(self, expectation, grants=GRANTED, held=1.0, gone=0.0, age_shift=0.0, strike_ms=20.0):
+        values = {}
+        for index, trial in enumerate(expectation.model['arms']['treatment']):
+            start = 100000.0 * (index + 1)
+            granted = index in grants
+            values.update({trial['blocked']: index + 1.0, trial['unblocked']: 0.0, trial['aura before']: 0.0,
+                           trial['aura after']: 1.0 if granted else 0.0, trial['strike start']: start,
+                           trial['strike end']: start + strike_ms, trial['held time']: start + 3720 + age_shift,
+                           trial['held aura']: held if granted else 0.0, trial['gone time']: start + 4280 + age_shift,
+                           trial['gone aura']: gone if granted else 0.0})
+        return values
+
+    def test_the_duration_scenario_brackets_the_strike_and_reads_around_the_dbc_duration(self):
+        scenario, expectation = self.generated(DURATION)
+        duration = expectation.model['duration']
+        self.assertEqual((duration['expected_ms'], duration['min_granted']), (4000, 5))
+        for side, (low, high) in (('held', (3600, 3860)), ('gone', (4140, 4400))):
+            self.assertAlmostEqual(duration[side][0], low)
+            self.assertAlmostEqual(duration[side][1], high)
+        steps = scenario['steps']
+        strike = next(index for index, step in enumerate(steps) if step.get('actor') == 'striker')
+        self.assertEqual([steps[strike - 1]['metric'], steps[strike + 1]['metric']], ['game_time_ms'] * 2)
+        waits = [step['ms'] for step in steps if step.get('label') in ('treatment 0 held read',
+                                                                        'treatment 0 gone read')]
+        self.assertEqual(waits, [3420, 560])
+        self.assertEqual(len(expectation.model['arms']['treatment']), 47)
+
+    def test_a_grant_on_at_the_first_read_and_gone_at_the_second_is_ok(self):
+        _, expectation = self.generated(DURATION)
+        verdict = self.judge(expectation, [self.timed(expectation)])
+        self.assertEqual(verdict.status, 'ok', verdict.explanation)
+        self.assertEqual(verdict.detail, {'ok': 5, 'alert': 0, 'void': 42})
+
+    def test_mutant_grants_of_the_aura_duration_or_gone_early_alert(self):
+        _, expectation = self.generated(DURATION)
+        for changes in ({'gone': 1.0}, {'held': 0.0}):
+            with self.subTest(changes=changes):
+                verdict = self.judge(expectation, [self.timed(expectation, **changes)])
+                self.assertEqual(verdict.status, 'alert', verdict.explanation)
+
+    def test_too_few_grants_or_ages_outside_the_windows_are_unmeasured_never_alert(self):
+        _, expectation = self.generated(DURATION)
+        for changes in ({'grants': frozenset({0, 1, 2, 3})}, {'age_shift': 200.0, 'gone': 1.0},
+                        {'age_shift': -200.0, 'held': 0.0}, {'strike_ms': 400.0}):
+            with self.subTest(changes=changes):
+                verdict = self.judge(expectation, [self.timed(expectation, **changes)])
+                self.assertEqual(verdict.status, 'unmeasured', verdict.explanation)
+
+    def test_the_duration_entry_is_sized_from_the_proc_chance_and_needs_its_keys(self):
+        self.generated(DURATION)
+        for changes in ({'trials': 46}, {'block': 0}, {'chance_pct': 30, 'half_width_points': 1.6},
+                        {'control_trials': 24}, {'min_granted': 0}, {'residual_target': 0}):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                self.generated({**DURATION, **changes})
+        without = {key: value for key, value in DURATION.items() if key != 'min_granted'}
+        with self.assertRaises(ValueError):
+            self.generated(without)
+
+
 if __name__ == '__main__':
     unittest.main()

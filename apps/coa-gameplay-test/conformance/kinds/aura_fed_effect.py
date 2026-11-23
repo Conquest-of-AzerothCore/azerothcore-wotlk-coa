@@ -31,7 +31,9 @@ COOLDOWN_READ_MS = 500
 RESET_TOLERANCE_MS = 100
 RESET_ATTEMPTS = 2
 COOLDOWN_BAND = 0.1
-EVIDENCE_METRICS = ('', 'cast_failure')
+INSTANT_EVIDENCE_METRIC = 'aura_fed_instant_casting'
+INSTANT_CONTRAST = 'aura_fed'
+EVIDENCE_METRICS = {'cast_failure': 'cooldown', INSTANT_EVIDENCE_METRIC: 'instant'}
 RECAST_ATTEMPTS = 1
 
 
@@ -91,8 +93,9 @@ def aura_fed_spec(entry: dict) -> AuraFedSpec:
                          f'least one trial')
     if spec.family == 'cooldown' and spec.expected != 0:
         raise ValueError(f'{spec.spell} {KIND} cooldown reads the remaining cooldown, expected 0 (no cooldown)')
-    if spec.evidence_metric not in EVIDENCE_METRICS or spec.evidence_metric and spec.variant != 'cooldown':
-        raise ValueError(f'{spec.spell} {KIND} evidence_metric is one of {EVIDENCE_METRICS}, on the cooldown variant')
+    if spec.evidence_metric and EVIDENCE_METRICS.get(spec.evidence_metric) != spec.variant:
+        raise ValueError(f'{spec.spell} {KIND} evidence_metric is cast_failure on the cooldown variant or '
+                         f'{INSTANT_EVIDENCE_METRIC} on the instant variant')
     if spec.variant == 'instant' and (spec.trials != 1 or spec.expected != 0):
         raise ValueError(f'{spec.spell} {KIND} instant reads casting 0 after one fed cast')
     if spec.sized and (spec.family != 'damage' or not 2 <= spec.min_hits <= spec.trials
@@ -296,6 +299,8 @@ def aura_fed_scenario(class_file: dict, spec: AuraFedSpec) -> tuple[dict, list[E
         model['figure'] = figure
     if spec.sized:
         model.update({'sized': True, 'figure': figure, 'min_hits': spec.min_hits, 'consumed': spec.consumed})
+    if spec.evidence_metric == INSTANT_EVIDENCE_METRIC:
+        model.update({'evidence_metric': INSTANT_EVIDENCE_METRIC, 'contrast': INSTANT_CONTRAST})
     expectation = Expectation(mark(spec, '').rstrip(), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.effect_spell, None,
                               f'{spec.expected:g}', prose_rule(entry.quote, spec.spell), model)
     limit = MAX_ACCELERATED_SCENARIO_MS if spec.judged_figure else MAX_SCENARIO_MS
@@ -879,9 +884,9 @@ def label(entry: dict) -> list[str]:
 
 
 JUDGES = {BEHAVIOUR_METRIC_DELTA: aura_fed_verdict}
-METRIC_EVIDENCE = {WINDOW_EVIDENCE_METRIC: 'state'}
-CONTRAST_PROOF = {WINDOW_EVIDENCE_METRIC: WINDOW_CONTRAST}
-STATE_PROMISES = {WINDOW_EVIDENCE_METRIC: r'within'}
+METRIC_EVIDENCE = {WINDOW_EVIDENCE_METRIC: 'state', INSTANT_EVIDENCE_METRIC: 'state'}
+CONTRAST_PROOF = {WINDOW_EVIDENCE_METRIC: WINDOW_CONTRAST, INSTANT_EVIDENCE_METRIC: INSTANT_CONTRAST}
+STATE_PROMISES = {WINDOW_EVIDENCE_METRIC: r'within', INSTANT_EVIDENCE_METRIC: r'instant'}
 
 
 def pooled_verdict(base: Verdict, runs: list[Run], model: dict) -> Verdict:

@@ -25150,6 +25150,7 @@
       "feed_power": 1000,
       "effect_power": 1363,
       "expected": 0,
+      "evidence_metric": "aura_fed_instant_casting",
       "caster_auras": [
         823764
       ],
@@ -34680,6 +34681,26 @@
     {
       "spell": 707629,
       "kind": "block_extension_trials",
+      "mode": "grant",
+      "name": "Sunflare Aegis (a blocked strike grants Hammer of Kings for 4 sec)",
+      "variant": "block_grant_duration",
+      "label_suffix": "block_grant_duration",
+      "quote": "Blocking attacks now has a $h% chance to grant you Hammer of Kings for $/1000;712448s1 sec.",
+      "aura": 804751,
+      "shield": 231296,
+      "strike_spell": 2118233,
+      "trials": 47,
+      "block": 100,
+      "duration_spell": 712448,
+      "duration_effect": 0,
+      "min_granted": 5,
+      "residual_target": 0.001,
+      "void_on_cast_failure": true,
+      "observe_source": "Expected duration: the tooltip's $/1000;712448s1 sec, 712448 Effect[0] BasePoints 3999 + 1 = 4000 ms (Records.single_value), against 804751's own DurationIndex 12000 ms. The script grants it through Extend(player, 804751, 4000) (AscensionSunClericEvents.cpp:309, AscensionSunCleric.cpp:219-231: an absent aura is cast and set to 4000 ms), after Chance(player, 707629) rolls ProcChance 30 itself (AscensionSunCleric.cpp:197), so the grant cannot be forced (lr1 TN-3). Each of 47 trials removes 804751, reads it absent, forces block 100% (dodge and parry 0, owner ruling O-20), reads game time right before and right after the passive striker's 2118233 and reads 804751 3720 and 4280 ms after the strike: a granted trial must show it on at an age inside 3600..3860 ms and gone at an age inside 4140..4400 ms (ADR 1052 window shares, both reads inside +-10%); an age outside voids the trial, a trial with no grant is void. At least 5 judged granted trials: 47 trials at 30% give fewer with probability 7.9e-4 per pair (two runs), inside the 0.1% residual target the kind checks."
+    },
+    {
+      "spell": 707629,
+      "kind": "block_extension_trials",
       "name": "Sunflare Aegis (a block extends an active Hammer of Kings)",
       "label_suffix": "block_extension",
       "quote": "If Hammer of Kings is already active, you increase the duration by 4 sec.",
@@ -43720,7 +43741,21 @@
   ],
   "self_stack_bonus": [],
   "dual_target_effects": [],
-  "target_aura_gates": [],
+  "target_aura_gates": [
+    {
+      "spell": 806980,
+      "name": "Justicar's Wrath",
+      "quote": "and increasing the target's spell damage taken by $572067s1% for $572067d.",
+      "rank": 806980,
+      "gate_spell": 572067,
+      "percent": 10.0,
+      "label_suffix": "wrath_taken",
+      "stack_arms": [
+        0
+      ],
+      "reason": "Cause of the plain 806980 hit_mean alert (lr1 TN-5): every judged hit lands on the same dummy, and each landed hit casts Justicar's Wrath's debuff 572067 on it (AscensionSunClericAbilities.cpp:341-342, info->Id == 806980: Cast(player, target, 572067)): 572067 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 126 (Holy, Fire, Nature, Frost, Shadow, Arcane), BasePoints 9 + DieSides 1 = 10% ($572067s1), DurationIndex 8 = 15000 ms, StackAmount 0, while the hit scenario casts every 2000 ms; so every hit after the first is +10%: the model 472.05 x 1.10 = 519.26 against the measured 518.3 (846 hits). The model's 472.05 sits 12.1% under the tooltip mean 536.81 because the tooltip mean carries no mitigation and the model applies the linear monster resistance the server uses for a creature (Unit::GetEffectiveResistChance, Unit.cpp:2563-2606, CoA.MonsterResistance.PerLevel 1.0 x dummy level 60 = 60 resistance, PerPercent 5: 12% average resist, the 11 partial-resist steps of CalcAbsorbResist): neither figure is computed wrongly. These arms give each hit a clean target: the gate fixture sets 572067 at 0 stacks on the dummy before every cast (stacks 0 arm, expected the model mean) and at 1 stack (the cap arm, StackAmount 0 counts as 1, expected the model mean x 1.10 from $572067s1). The plain 806980 hit_mean stays an alert of the scenario design, cited by no clause."
+    }
+  ],
   "learned_hits": [],
   "cast_auras": [],
   "hit_casts": [],
@@ -44196,6 +44231,23 @@
       "spell": 800654,
       "effect": 0,
       "source": "AscensionSunClericContracts.cpp:324-325, ModifySpellEffectBaseValue adds Player::GetShieldBlockValue() (Player.cpp:5611-5618, flat + Strength x 0.5 - 10, times the block percent) to effect 0 of every rank named 800654, before the int32 truncation of CalcValue (SpellInfo.cpp:592); read as the harness metric block_value (CoAGameplayTest.cpp:5152-5153, the same GetShieldBlockValue); a code-level term, the tooltip states only scaling with your block value"
+    }
+  ],
+  "heal_pct_terms": [
+    {
+      "spell": 806479,
+      "effect": 0,
+      "source": "806479 Solar Prayer Effect[0] SPELL_EFFECT_HEAL_PCT, BasePoints 24 + DieSides 1 = 25 ($s1, percent of the maximum health of the healed unit, the caster): Spell::EffectHealPct heals SpellHealingBonusDone(CountPctFromMaxHealth(25)) beside Effect[1] SPELL_EFFECT_HEAL in the same heal event; spell_bonus_data 806479 is all zero, so the spell power term stays on Effect[1] (behaviour entries heal_base 4120, heal_half_health 2120 and heal_sp 5720 read 0.8 x (25% of the maximum health + 150 + spell power))"
+    }
+  ],
+  "superseded_hits": [
+    {
+      "spell": 806980,
+      "reason": "the plain hit scenario casts Justicar's Wrath every 2000 ms on one dummy, and each landed hit re-applies 572067 (+10% spell damage taken, 15 s; AscensionSunClericAbilities.cpp:342), so its hits mix one clean hit with debuffed ones by design; replaced by the two target_aura_gates arms, which set 572067 at 0 and at 1 stack before every cast (mentor D-288, lr3)",
+      "replaced_by": [
+        "806980 hit_mean wrath_taken stacks 0",
+        "806980 hit_mean wrath_taken"
+      ]
     }
   ]
 }

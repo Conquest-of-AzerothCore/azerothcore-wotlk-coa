@@ -637,7 +637,17 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   alert naming the engine mean; an engine model that cannot be built (an effect read from a sibling token) leaves
   the rank as before. A class-file `block_value_terms` entry (`{spell, effect, source}`, ADR 1070) adds the run's
   `block_value` read to each per-roll value of that effect, in `effect_value` and in the rank hit model, for a code
-  term the tooltip names only in words (the Sun Cleric Dawnbreak chain); a missing read is `unmeasured`. A `melee_mean`, `periodic_total` or other hit alert on a rank with such a term says
+  term the tooltip names only in words (the Sun Cleric Dawnbreak chain); a missing read is `unmeasured`. A
+  class-file `heal_pct_terms` entry (`{spell, effect, source}` on the rank, ADR 1074) adds a `SPELL_EFFECT_HEAL_PCT`
+  effect to a single-target heal model: the hit scenario reads the healed unit's `max_health`
+  (`heal target max_health`), and the judge adds `floor(max_health x percent / 100)` (float, as
+  `Unit::CountPctFromMaxHealth`) under the same healing modifiers, the percent from the DBC (BasePoints + DieSides,
+  fixed values only); a missing read is reported as a missing measurement (the Sun Cleric Solar Prayer 806479). A
+  class-file `superseded_hits` entry (`{spell, reason, replaced_by}`, ADR 1074 addendum) closes a rank's generated
+  plain hit: `add_hit` writes no scenario and a `closed: no check needed: <reason>` record whose model names the
+  replacing labels (`replaced_by`, required, never the hit itself). `compare` keeps it `closed` only when every
+  replacing label is in the same comparison and `ok`; a missing or non-ok replacement makes it an `alert`. A finished
+  class may not use the key: its use needs a mentor ruling (the Sun Cleric Justicar's Wrath 806980, D-288). A `melee_mean`, `periodic_total` or other hit alert on a rank with such a term says
   "per-level truncation, engine computation not modelled" and stays an alert. Fewer reads than the count the mean
   needs at the measured stats (`detail['reads_needed']`), or a mean of 0, give `measured`. A single read inside the
   roll range proves nothing about a constant offset smaller than the range: the fix round of the phase-2 Templar

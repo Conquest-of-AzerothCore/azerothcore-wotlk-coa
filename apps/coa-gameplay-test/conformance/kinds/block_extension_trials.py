@@ -29,7 +29,11 @@ EXTENSION_MODE = 'extension'
 GRANT_MODE = 'grant'
 GRANT_KEYS = frozenset({'spell', 'kind', 'mode', 'name', 'quote', 'aura', 'shield', 'strike_spell', 'trials',
                        'control_trials', 'parts', 'block', 'chance_pct', 'half_width_points', 'label_suffix',
-                       'void_on_cast_failure', 'observe_source', 'variant'})
+                       'void_on_cast_failure', 'observe_source', 'variant', 'duration_spell', 'duration_effect',
+                       'min_granted', 'residual_target'})
+DURATION_WINDOWS = {'held': (0.9, 0.965), 'gone': (1.035, 1.1)}
+DURATION_READS = {'held': 0.93, 'gone': 1.07}
+PAIR_RUNS = 2
 MAXIMUM_STEPS = 10000
 GRANT_STEPS_PER_TRIAL = 9
 CONTROL_ARM = 'control'
@@ -282,6 +286,10 @@ class BlockGrantSpec:
     half_width_points: float | None
     label_suffix: str
     void_on_cast_failure: bool
+    duration_spell: int = 0
+    duration_effect: int = 0
+    min_granted: int = 0
+    residual_target: float = 0.0
 
 
 def block_grant_spec(entry: dict) -> BlockGrantSpec:
@@ -303,12 +311,21 @@ def block_grant_spec(entry: dict) -> BlockGrantSpec:
         raise ValueError(f'{entry["spell"]} {KIND} mode grant at block 0 needs {MIN_UNBLOCKED_TRIALS} trials')
     if entry.get('void_on_cast_failure', False) not in (True, False):
         raise ValueError(f'{entry["spell"]} {KIND} void_on_cast_failure is true or false')
+    timed_keys = {'duration_spell', 'min_granted', 'residual_target'}
+    if timed_keys & set(entry) and not (
+            timed_keys <= set(entry) and block == 100 and chance is None and counts['control_trials'] == 0
+            and counts['parts'] == 1 and isinstance(entry['min_granted'], int) and entry['min_granted'] >= 1
+            and 0 < entry['residual_target'] < 1):
+        raise ValueError(f'{entry["spell"]} {KIND} mode grant duration needs duration_spell, min_granted >= 1 and '
+                         f'residual_target in (0, 1), at block 100, without chance_pct, control_trials or parts')
     return BlockGrantSpec(int(entry['spell']), entry['name'], entry['quote'], int(entry['aura']),
                           int(entry['shield']), int(entry['strike_spell']), counts['trials'],
                           counts['control_trials'], counts['parts'], block,
                           None if chance is None else float(chance),
                           None if half_width is None else float(half_width), entry.get('label_suffix', KIND),
-                          bool(entry.get('void_on_cast_failure', False)))
+                          bool(entry.get('void_on_cast_failure', False)), int(entry.get('duration_spell', 0)),
+                          int(entry.get('duration_effect', 0)), int(entry.get('min_granted', 0)),
+                          float(entry.get('residual_target', 0.0)))
 
 
 def needed_blocks(chance_pct: float, half_width_points: float) -> int:
@@ -318,6 +335,34 @@ def needed_blocks(chance_pct: float, half_width_points: float) -> int:
 
 def grant_mark(spec: BlockGrantSpec, arm: str, index: int, read: str) -> str:
     return f'{spec.spell} {BEHAVIOUR_METRIC_DELTA} {spec.label_suffix} {arm} {index} {read}'
+
+
+def granted_trials_needed(chance: float, granted: int, residual_target: float) -> int:
+    trials = granted
+    while PAIR_RUNS * sum(math.comb(trials, count) * chance ** count * (1 - chance) ** (trials - count)
+                          for count in range(granted)) > residual_target:
+        trials += 1
+    return trials
+
+
+def duration_offsets(duration: int) -> dict[str, int]:
+    return {side: round(duration * share) for side, share in DURATION_READS.items()}
+
+
+def timed_grant_trial(spec: BlockGrantSpec, arm: str, index: int, duration: int) -> list[dict]:
+    offsets = duration_offsets(duration)
+    steps = grant_trial(spec, arm, index)
+    strike = next(position for position, step in enumerate(steps) if step.get('actor') == STRIKER)
+    steps[strike:strike + 1] = [measurement(grant_mark(spec, arm, index, 'strike start'), CASTER, TIME_METRIC),
+                                steps[strike],
+                                measurement(grant_mark(spec, arm, index, 'strike end'), CASTER, TIME_METRIC)]
+    elapsed = STRIKE_SETTLE_MS
+    for side, offset in offsets.items():
+        steps += [{'action': 'wait', 'label': f'{arm} {index} {side} read', 'ms': offset - elapsed},
+                  measurement(grant_mark(spec, arm, index, f'{side} time'), CASTER, TIME_METRIC),
+                  measurement(grant_mark(spec, arm, index, f'{side} aura'), CASTER, 'aura', spell=spec.aura)]
+        elapsed = offset
+    return steps
 
 
 def grant_trial(spec: BlockGrantSpec, arm: str, index: int) -> list[dict]:
@@ -334,7 +379,21 @@ def grant_trial(spec: BlockGrantSpec, arm: str, index: int) -> list[dict]:
             measurement(grant_mark(spec, arm, index, 'aura after'), CASTER, 'aura', spell=spec.aura)]
 
 
-def grant_contract(spec: BlockGrantSpec) -> str:
+def duration_contract(spec: BlockGrantSpec, duration: int) -> str:
+    offsets = duration_offsets(duration)
+    windows = {side: (duration * low, duration * high) for side, (low, high) in DURATION_WINDOWS.items()}
+    return (f'{spec.trials} trials: game time is read right before and right after the strike, and the aura with '
+            f'game-time stamps {offsets["held"]} and {offsets["gone"]} ms after the strike. On a trial whose strike '
+            f'granted the aura, it must be on at the first read and gone at the second; their ages from the strike '
+            f'must lie in {windows["held"][0]:g}..{windows["held"][1]:g} and {windows["gone"][0]:g}..'
+            f'{windows["gone"][1]:g} ms ({duration} ms, {spec.duration_spell} Effect[{spec.duration_effect}], both '
+            f'reads inside +-10%), else the trial is void. A trial with no grant is void. A granted trial with the '
+            f'aura gone early or still on alerts; fewer than {spec.min_granted} judged granted trials is unmeasured '
+            f'({spec.trials} trials at ProcChance leave fewer with probability at most {spec.residual_target:g} per '
+            f'pair).')
+
+
+def grant_contract(spec: BlockGrantSpec, duration: int = 0) -> str:
     wanted = 'blocked' if spec.block else 'an unblocked hit'
     text = (f'Shield {spec.shield} equipped and Block {BLOCK_SPELL} learned. Each trial removes {spec.aura} from the '
             f'caster, reads that it is absent, forces block to {spec.block}% with dodge and parry at 0 '
@@ -346,6 +405,8 @@ def grant_contract(spec: BlockGrantSpec) -> str:
     if spec.control_trials:
         text += (f'Control: {spec.control_trials} trials per part before {spec.spell} is learned; none may show the '
                  f'aura. Then {spec.spell} is learned. ')
+    if duration:
+        return text + duration_contract(spec, duration)
     if spec.chance_pct is None:
         return text + (f'{spec.trials * spec.parts} trials: no judged trial may show the aura (an unblocked strike '
                        f'grants nothing), and fewer than {MIN_UNBLOCKED_TRIALS} judged trials is unmeasured (a 30% '
@@ -370,23 +431,34 @@ def block_grant_scenario(class_file: dict, spec: BlockGrantSpec) -> tuple[dict, 
                 {'action': 'add_item', 'actor': CASTER, 'item': spec.shield},
                 {'action': 'equip', 'actor': CASTER, 'item': spec.shield, 'slot': OFF_HAND_SLOT}])
     steps = list(setup)
+    duration = int(records.single_value(spec.duration_spell, spec.duration_effect)) if spec.duration_spell else 0
+    if spec.duration_spell:
+        chance = records.field('Spell', spec.spell, 'ProcChance') / 100
+        needed = granted_trials_needed(chance, spec.min_granted, spec.residual_target)
+        if duration <= 0 or not 0 < chance < 1 or spec.trials < needed:
+            raise ValueError(f'{spec.spell} {KIND} mode grant duration needs a positive {spec.duration_spell} '
+                             f'Effect[{spec.duration_effect}], a ProcChance in (0, 100) and {needed} trials: at '
+                             f'ProcChance {chance:g} fewer than {spec.min_granted} grants come with probability at '
+                             f'most {spec.residual_target:g} per pair')
     for arm, count in arms:
         if arm == TREATMENT_ARM:
             steps.append({'action': 'learn', 'actor': CASTER, 'spell': spec.spell})
         for index in range(count):
-            steps += grant_trial(spec, arm, index)
+            steps += timed_grant_trial(spec, arm, index, duration) if duration else grant_trial(spec, arm, index)
     if len(steps) > MAXIMUM_STEPS:
         raise ValueError(f'{spec.spell} {KIND} mode grant needs {len(steps)} steps, more than {MAXIMUM_STEPS}')
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour block grant trials',
-        'contract': grant_contract(spec) + (' A refused cast voids the run: the verdict is unmeasured, never ok or '
-                                            'alert.' if spec.void_on_cast_failure else ''),
+        'contract': grant_contract(spec, duration) + (' A refused cast voids the run: the verdict is unmeasured, never '
+                                                      'ok or alert.' if spec.void_on_cast_failure else ''),
         'players': [player_fixture(class_file)],
         'creatures': [striker_creature(class_file, MetricDeltaStrike(spec.strike_spell, STRIKE_HEALTH,
                                                                      STRIKE_MAX_HEALTH, reaction=PASSIVE))],
         'steps': steps}
     reads = ('aura before', 'blocked', 'unblocked', 'aura after')
+    if duration:
+        reads += ('strike start', 'strike end', 'held time', 'held aura', 'gone time', 'gone aura')
     model = {'kind': KIND, 'mode': GRANT_MODE, 'metric': 'aura', 'quote': entry.quote, 'block': spec.block,
              'chance_pct': spec.chance_pct, 'half_width_points': spec.half_width_points,
              'minimum_judged': (MIN_UNBLOCKED_TRIALS if spec.chance_pct is None
@@ -396,7 +468,10 @@ def block_grant_scenario(class_file: dict, spec: BlockGrantSpec) -> tuple[dict, 
              'void_on_cast_failure': spec.void_on_cast_failure}
     if spec.parts > 1:
         model['parts'] = spec.parts
-    expected = '0' if spec.chance_pct is None else f'{spec.chance_pct:g}%'
+    if duration:
+        windows = {side: [duration * low, duration * high] for side, (low, high) in DURATION_WINDOWS.items()}
+        model['duration'] = {'expected_ms': duration, 'min_granted': spec.min_granted, **windows}
+    expected = (f'{duration}' if duration else '0') if spec.chance_pct is None else f'{spec.chance_pct:g}%'
     expectation = Expectation(f'{spec.spell} {BEHAVIOUR_METRIC_DELTA} {spec.label_suffix}', BEHAVIOUR_METRIC_DELTA,
                               spec.spell, spec.aura, None, expected, prose_rule(entry.quote, spec.spell), model)
     return timed(scenario, waited_ms(steps)), [expectation]
@@ -422,7 +497,59 @@ def grant_tally(run: Run, model: dict) -> tuple[dict, str | None]:
     return tally, None
 
 
+def timed_outcome(values: dict, trial: dict, windows: dict) -> str:
+    if values[trial['aura after']] == 0:
+        return 'void'
+    for side in ('held', 'gone'):
+        youngest = values[trial[f'{side} time']] - values[trial['strike end']]
+        oldest = values[trial[f'{side} time']] - values[trial['strike start']]
+        if youngest < windows[side][0] or oldest > windows[side][1]:
+            return 'void'
+    return 'ok' if values[trial['held aura']] != 0 and values[trial['gone aura']] == 0 else 'alert'
+
+
+def timed_grant_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    duration = model['duration']
+    wanted = (1, 0)
+    counts = {'ok': 0, 'alert': 0, 'void': 0}
+    notes = []
+    previous = None
+    for index, trial in enumerate(model['arms'][TREATMENT_ARM]):
+        missing = next((label for label in trial.values() if run.values.get(label) is None), None)
+        if missing is not None:
+            return replace(base, status='unmeasured', explanation=missing_measurement(run, missing))
+        hits = tuple(run.values[trial[key]] - (run.values[previous[key]] if previous else 0.0)
+                     for key in ('blocked', 'unblocked'))
+        previous = trial
+        outcome = ('void' if hits != wanted or run.values[trial['aura before']] != 0
+                   else timed_outcome(run.values, trial, duration))
+        counts[outcome] += 1
+        if outcome == 'alert':
+            notes.append(f'trial {index}: on {run.values[trial["held aura"]]:g} at '
+                         f'{run.values[trial["held time"]] - run.values[trial["strike start"]]:g} ms, on '
+                         f'{run.values[trial["gone aura"]]:g} at '
+                         f'{run.values[trial["gone time"]] - run.values[trial["strike start"]]:g} ms')
+    refused = [reason for reasons in run.cast_failures.values() for reason in reasons if reason != NO_CAST_FAILURE]
+    text = (f'granted trials judged on the {duration["expected_ms"]:g} ms grant: {counts["ok"]} ok, '
+            f'{counts["alert"]} alert, {counts["void"]} void (no grant, a strike not blocked once, or a read age '
+            f'outside {duration["held"]} / {duration["gone"]} ms)' + ''.join(f'; {note}' for note in notes))
+    if model.get('void_on_cast_failure') and refused:
+        return replace(base, status='unmeasured', detail=counts,
+                       explanation=f'{text}; refused casts void the run: {describe_failures(refused)}')
+    judged = counts['ok'] + counts['alert']
+    status = ('alert' if counts['alert'] else 'unmeasured' if judged < duration['min_granted'] else 'ok')
+    return replace(base, status=status, measured=float(counts['ok']), expected=float(duration['expected_ms']),
+                   low=duration['held'][0], high=duration['gone'][1], detail=counts,
+                   explanation=text + ('' if judged >= duration['min_granted'] else
+                                       f'; fewer than the {duration["min_granted"]} judged granted trials needed'))
+
+
 def block_grant_verdict(base: Verdict, runs: list[Run], model: dict) -> Verdict:
+    if 'duration' in model:
+        if len(runs) != 1:
+            return replace(base, status='unmeasured',
+                           explanation=f'{KIND} grant duration judges one run, not {len(runs)}')
+        return timed_grant_verdict(base, runs[0], model)
     total = {arm: {'judged': 0, 'granted': 0, 'void': 0} for arm in model['arms']}
     refused = []
     for run in runs:

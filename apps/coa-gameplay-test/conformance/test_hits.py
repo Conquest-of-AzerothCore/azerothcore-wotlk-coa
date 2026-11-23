@@ -1,4 +1,5 @@
 from dataclasses import replace
+from fractions import Fraction
 import json
 import math
 from pathlib import Path
@@ -10,6 +11,7 @@ from unittest import mock
 from classes import ClassSpell, class_spells
 from behaviours import STRIKER, NotModelled, behaviour_scenario
 from block_value import BLOCK_VALUE_LABEL, BLOCK_VALUE_TERMS
+from heal_pct import HEAL_PCT_LABEL, HEAL_PCT_TERMS, heal_pct_amount, heal_pct_percent
 from compare import PER_LEVEL_ROUNDING, Run, Verdict, judge_hit
 from conformance import target_gate_arms
 from hits import (CLOSED, HIT_CHECKS, MAX_SCENARIO_MS, UNMODELLED, HitModel, Modifier, Unmodelled, WeaponProfile,
@@ -46,6 +48,8 @@ HUNTER_RANGE = 114
 HEAVY_CROSSBOW = 15809
 RANGED_SLOT = 17
 SCIMITAR = 2027
+SOLAR_PRAYER = 806479
+SOLAR_PRAYER_MAX_HEALTH = 1788
 MAIN_HAND_SLOT, OFF_HAND_SLOT = 15, 16
 CROSSBOWS_SKILL_LINE = 226
 HEAVY_CROSSBOW_WEAPON = {'item': HEAVY_CROSSBOW, 'slot': RANGED_SLOT, 'subclass': 18, 'min_damage': 49.0,
@@ -1098,6 +1102,45 @@ class HitScenarioTest(unittest.TestCase):
 
         self.assertEqual(verdict(raised.mean).status, 'ok')
         self.assertEqual(verdict(plain.mean).status, 'alert')
+
+    def test_a_listed_heal_pct_term_adds_the_read_percent_of_maximum_health_under_the_heal_modifiers(self):
+        solar = ClassSpell(SOLAR_PRAYER, 'Solar Prayer', (SOLAR_PRAYER,), SOLAR_PRAYER, 0, False)
+        listed = {**self.templar, HEAL_PCT_TERMS: [{'spell': SOLAR_PRAYER, 'effect': 0, 'source': 'seeded code term'}]}
+        read = measurement(HEAL_PCT_LABEL, CASTER, 'max_health')
+        parts = hit_parts(listed, solar, 1)
+        self.assertTrue(all(read in scenario['steps'] for scenario, _ in parts))
+        self.assertTrue(all(read not in scenario['steps'] for scenario, _ in hit_parts(self.templar, solar, 1)))
+        scenario, expectations = parts[0]
+        hit = hit_expectation(expectations)
+        self.assertEqual((hit.model['kind'], hit.model['measurements']['max_health']), ('heal', HEAL_PCT_LABEL))
+        self.assertIn('25% of the healed unit', hit.rule)
+        measured = {**self.templar['reference_stats'], f'known_aura {CLASS_TUNING_AURA}': 1}
+        with self.assertRaises(KeyError):
+            measured_hit_model(listed, hit, measured)
+        healthy = {**measured, HEAL_PCT_LABEL: SOLAR_PRAYER_MAX_HEALTH}
+        raised = measured_hit_model(listed, hit, healthy)
+        plain = measured_hit_model(self.templar, hit, measured)
+        factor = math.prod(Fraction(100 + modifier.percent, 100) for modifier in raised.modifiers)
+        self.assertEqual(raised.mean - plain.mean, math.floor(447 * factor))
+        self.assertEqual((raised.sigma, raised.displayed), (plain.sigma, plain.displayed))
+        labels, count = hit.model['measurements'], 40
+        base = Verdict(label=hit.label, status='unmeasured', measured=None, expected=None, low=None, high=None,
+                       explanation='')
+
+        def verdict(mean):
+            found = Run(key='seeded', status='ok', message='', steps=[], max_step_ms=None,
+                        values={**healthy, labels['total']: mean * count, labels['count']: count})
+            return judge_hit(base, listed, [(scenario, found, hit)], measured_hit_model)
+
+        self.assertEqual(verdict(raised.mean).status, 'ok')
+        self.assertEqual(verdict(plain.mean).status, 'alert')
+
+    def test_the_heal_pct_term_truncates_like_count_pct_from_max_health_and_needs_its_effect(self):
+        records = records_of(self.templar)
+        self.assertEqual(heal_pct_percent(records, SOLAR_PRAYER, 0), 25)
+        self.assertEqual([heal_pct_amount(health, 25) for health in (1788, 1791, 1792)], [447, 447, 448])
+        with self.assertRaises(ValueError):
+            heal_pct_percent(records, SOLAR_PRAYER, 1)
 
     def test_vindication_equips_the_one_hand_weapon(self):
         scenario, expectations = hit_scenario(self.templar, self.spells[VINDICATION], 1)
