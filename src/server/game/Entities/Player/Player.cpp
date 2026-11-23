@@ -10616,8 +10616,9 @@ void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, Spell* s
                 AuraAlsoModifiesCastingTime(mod->ownerAura))
                 return;
 
-            // xinef: those two mods should be multiplicative (Glyph of Renew)
-            if (mod->op == SPELLMOD_DAMAGE || mod->op == SPELLMOD_DOT)
+            // xinef: those two mods should be multiplicative (Glyph of Renew); Ascension's damage-by-victim mods too
+            if (mod->op == SPELLMOD_DAMAGE || mod->op == SPELLMOD_DOT ||
+                mod->op == SPELLMOD_DAMAGE_VS_PLAYERS || mod->op == SPELLMOD_DAMAGE_VS_CREATURES)
                 totalmul *= CalculatePct(1.0f, 100.0f + mod->value);
             else
                 totalmul += CalculatePct(1.0f, mod->value);
@@ -10664,13 +10665,21 @@ void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, Spell* s
         if (uint64 const nightmare = spell->GetScriptValue(AscensionBloodmage::NightmareTalent))
             totalmul *= CalculatePct(1.0f, 100.0f + float(nightmare));
 
+    int32 reachFlat = 0;
     for (auto mod : m_spellMods[op])
     {
         if (!IsAffectedBySpellmod(spellInfo, mod, spell))
             continue;
 
+        if (op == SPELLMOD_RANGE && AscensionReach::IsReachModifier(mod))
+        {
+            reachFlat = std::max(reachFlat, mod->value);
+            continue;
+        }
+
         calculateSpellMod(mod);
     }
+    totalflat += reachFlat;
 
     if (op == SPELLMOD_CASTING_TIME || op == SPELLMOD_DURATION)
         basevalue = (basevalue + totalflat) > 0 ? (basevalue + totalflat) * totalmul : 0;
@@ -10682,6 +10691,24 @@ template AC_GAME_API void Player::ApplySpellMod(uint32 spellId, SpellModOp op, i
 template AC_GAME_API void Player::ApplySpellMod(uint32 spellId, SpellModOp op, uint32& basevalue, Spell* spell, bool temporaryPet);
 template AC_GAME_API void Player::ApplySpellMod(uint32 spellId, SpellModOp op, float& basevalue, Spell* spell, bool temporaryPet);
 
+SpellSchoolMask Player::GetAscensionSchoolOverride(SpellInfo const* spellInfo, Spell* spell)
+{
+    for (SpellModifier* mod : m_spellMods[SPELLMOD_SCHOOL_OVERRIDE])
+    {
+        if (!IsAffectedBySpellmod(spellInfo, mod, spell))
+            continue;
+
+        if (SpellInfo const* carrier = sSpellMgr->GetSpellInfo(mod->spellId))
+        {
+            // recorded on the cast, so a charged carrier spends its charge on it
+            ApplyModToSpell(mod, spell);
+            return carrier->GetSchoolMask();
+        }
+    }
+
+    return SPELL_SCHOOL_MASK_NONE;
+}
+
 bool Player::UsesAscensionSpellModifierLayout() const
 {
     return GetSession() && GetSession()->IsAscensionCompatEnabled();
@@ -10689,7 +10716,7 @@ bool Player::UsesAscensionSpellModifierLayout() const
 
 uint32 Player::GetClientSpellModCount() const
 {
-    return UsesAscensionSpellModifierLayout() ? MAX_SPELLMOD : MAX_CLIENT_SPELLMOD;
+    return UsesAscensionSpellModifierLayout() ? MAX_ASCENSION_CLIENT_SPELLMOD : MAX_CLIENT_SPELLMOD;
 }
 
 void Player::SendSpellModifier(uint16 opcode, uint8 eff, uint8 op, int32 value, uint32 spellFamily) const

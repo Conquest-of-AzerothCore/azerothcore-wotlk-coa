@@ -6406,6 +6406,8 @@ private:
             Item const* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, uint8(slot));
             return item ? item->GetEntry() : 0;
         }
+        if (metric == "vanity_owned")
+            return AscensionVanityOwnership::OwnsItem(player, step.get<uint32>("item")) ? 1.0 : 0.0;
         if (metric == "visible_item")
         {
             uint32 slot = step.get<uint32>("slot");
@@ -7434,6 +7436,8 @@ private:
             if (!CastUntilAura(step, record))
                 return;
         }
+        else if (action == "forget_vanity" && !VanityRowStored(step))
+            return;
         else
             Act(step, record);
         record.put("status", "completed");
@@ -7488,6 +7492,17 @@ private:
         record.put("attempts", _untilAuraAttempts);
         record.put("stopped", present ? "aura" : "cap");
         return true;
+    }
+
+    bool VanityRowStored(Tree const& step)
+    {
+        Player* player = _actors.at(step.get<std::string>("actor")).session->GetPlayer();
+        uint32 const item = step.get<uint32>("item");
+        if (!player || !AscensionVanityOwnership::OwnsItem(player, item))
+            return true;
+        return bool(CharacterDatabase.Query(
+            "SELECT 1 FROM `account_vanity_collection` WHERE `account_id` = {} AND `item_id` = {}",
+            player->GetSession()->GetAccountId(), item));
     }
 
     bool QueuedCharacterWorkDone()
@@ -8484,6 +8499,8 @@ private:
                 .SendMailTo(trans, MailReceiver(player, player->GetGUID().GetCounter()), sender);
             CharacterDatabase.CommitTransaction(trans);
         }
+        else if (action == "forget_vanity")
+            AscensionVanityOwnership::ForgetItemForTest(player, step.get<uint32>("item"));
         else if (action == "destroy_item")
         {
             Item* item = player->GetItemByEntry(step.get<uint32>("item"));
