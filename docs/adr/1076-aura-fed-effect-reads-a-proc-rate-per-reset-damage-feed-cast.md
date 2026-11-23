@@ -1,4 +1,4 @@
-# 1075. `aura_fed_effect` reads a proc rate per reset damage feed cast
+# 1076. `aura_fed_effect` reads a proc rate per reset damage feed cast
 
 - Status: proposed (provisional number, numbered at merge)
 - Date: 2026-11-23

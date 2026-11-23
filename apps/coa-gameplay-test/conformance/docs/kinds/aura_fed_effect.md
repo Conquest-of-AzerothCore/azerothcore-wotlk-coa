@@ -75,14 +75,14 @@ Every trial reads `aura` right before the judged cast: 0 in the control, 1 in th
   band's roll count or the entry is refused. A part with any void or missing read is excluded whole; the kept parts'
   rolls pool into one Wilson interval, judged as above, and fewer pooled rolls than the band needs is unmeasured. A
   pooled hasted entry names `haste_agreement`, the step 1 agreement that justifies the haste aura, in its contract.
-- `variant: "damage_rate"` or `"damage_rate_<suffix>"` (ADR 1075, opt-in): the `heal_rate` judge, sizing and pooling
+- `variant: "damage_rate"` or `"damage_rate_<suffix>"` (ADR 1076, opt-in): the `heal_rate` judge, sizing and pooling
   for a damage feed with a cooldown, no control arm. `feed_target` is `dummy` (one stationary dummy at the feed's cast
   distance); the feed needs a SCHOOL_DAMAGE effect and no travel, and `haste_aura` is refused. Each of `rolls` rolls
   cancels `aura` on the caster, sets the feed power, resets the feed's cooldown (`reset_cooldown`), casts it at the
   dummy with `ignore_gcd` and, after the cast time + 500 ms, reads `aura` on the caster. At the end `spell_go_count` of
   the feed and its `spell_damage_count` on the dummy must equal the rolls, the last feed cast failure must be 0 and the
   dummy must read `alive` 1 with `health` above 0, else the part is void (excluded whole when pooled). A roll is 6
-  steps: at most about 1600 rolls fit the 10000-step scenario limit. `learn_talent: false` (single part, ADR 1075
+  steps: at most about 1600 rolls fit the 10000-step scenario limit. `learn_talent: false` (single part, ADR 1076
   addendum) is the control arm: the talent is unlearned, the judge is `ok` only with 0 grants of `aura` over `rolls`
   rolls, any grant alerts.
 
