@@ -65,8 +65,7 @@ def fixtures(class_file: dict, spec, value: dict, scenario: dict):
     names = labels(spec)
     reads = [measurement(names['read_upper'], CASTER, 'game_time_ms'),
              measurement(names['count'], CASTER, 'timeline_count', **applied(spec, value)),
-             measurement(names['clock'], CASTER, 'timeline_first_ms', event='cast', spell=spec.trigger_spell,
-                         target_actors=[CASTER]),
+             measurement(names['clock'], CASTER, 'timeline_first_ms', event='cast', spell=spec.trigger_spell),
              measurement(names['first'], CASTER, 'timeline_first_ms', **applied(spec, value))]
     after_label = metric_delta_label(spec, AFTER)
     scenario['steps'] = [step for original in scenario['steps']
