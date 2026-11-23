@@ -33,6 +33,7 @@ GAP_CLOSER_MARGIN_YD = 2.0
 GAP_CLOSER_DISTANCE = 'gap_closer_distance'
 POWER_DISPLAY_DIVISOR = {0: 1, 1: 10, 2: 1, 3: 1, 4: 1000, 5: 1, 6: 10}
 MANA = 0
+HEALTH_POWER = 4294967294
 CAST_MARGIN_MS = 500
 GCD_WAIT_MS = 1600
 CAST_WAIT_LABEL = 'cast time'
@@ -259,13 +260,20 @@ def summon_aura_setup_steps(records: Records, carrier: dict) -> list[dict]:
     steps = [{'action': 'learn', 'actor': CASTER, 'spell': spell}
              for spell in [*carrier.get('learn', []), carrier['summon']]]
     if facts.mana_cost > 0 and facts.power_type != MANA:
-        steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost})
+        steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
     cast = {'action': 'cast', 'actor': CASTER, 'spell': carrier['summon']}
     if is_hostile(facts):
         cast['target'] = TARGET
     return steps + [cast, {'action': 'assert', 'label': f'SETUP: the {carrier["entry"]} summon carries the aura read',
                            'actor': CASTER, 'metric': 'owned_creature_count', 'entry': carrier['entry'],
                            'equals': carrier.get('count', 1), 'within_ms': SUMMON_AURA_SETTLE_MS}]
+
+
+def pay_power_steps(power_type: int, cost: int, actor: str = CASTER) -> list[dict]:
+    if power_type == HEALTH_POWER:
+        return [{'action': 'assert', 'label': f'SETUP: {actor} health pays the {cost} health cost', 'actor': actor,
+                 'metric': 'health', 'min': cost + 1}]
+    return [{'action': 'set_power', 'actor': actor, 'power': power_type, 'value': cost}]
 
 
 def required_aura_steps(facts: RankFacts) -> list[dict]:
@@ -674,8 +682,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
                     ally_grant_proofs.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': rank_id})
                     ally_grant_proofs.append({'action': 'wait', 'label': 'Global cooldown', 'ms': GCD_WAIT_MS})
                     if facts.mana_cost > 0 and facts.power_type != MANA:
-                        ally_grant_proofs.append({'action': 'set_power', 'actor': CASTER,
-                                                  'power': facts.power_type, 'value': facts.mana_cost})
+                        ally_grant_proofs.extend(pay_power_steps(facts.power_type, facts.mana_cost))
                     ally_grant_proofs.append({'action': 'cast', 'actor': CASTER, 'spell': rank_id,
                                               'target': ALLY})
                     ally_grant_proofs.append(measurement(f'{rank_id} cast_failure {duration_spell} #{ordinal}',
@@ -762,8 +769,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             cast_wanted = True
     if cast_wanted:
         if facts.mana_cost > 0 and facts.power_type != MANA:
-            cast_steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                               'value': facts.mana_cost})
+            cast_steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
         cast = {'action': 'cast', 'actor': CASTER, 'spell': rank_id}
         if is_hostile(facts):
             cast['target'] = TARGET
