@@ -141,6 +141,8 @@ def add_values(writer: ManifestWriter, spell: ClassSpell, dbc_dir: Path):
 
 
 SUPERSEDED_HITS = 'superseded_hits'
+SUPERSEDED_HITS_CLASS = 27
+MENTOR_DECISION = re.compile(r'\bD-\d+\b')
 
 
 def superseded_hit(class_file: dict, rank_id: int) -> dict | None:
@@ -148,12 +150,19 @@ def superseded_hit(class_file: dict, rank_id: int) -> dict | None:
     if entry is None:
         return None
     replaced_by = entry.get('replaced_by')
-    if (set(entry) != {'spell', 'reason', 'replaced_by'} or not isinstance(entry['reason'], str)
+    if (not {'spell', 'reason', 'replaced_by'} <= set(entry) <= {'spell', 'reason', 'replaced_by', 'ruling'}
+            or not isinstance(entry['reason'], str)
             or not entry['reason'].strip() or not isinstance(replaced_by, list) or not replaced_by
             or not all(isinstance(label, str) and label.strip() for label in replaced_by)
             or f'{rank_id} hit_mean' in replaced_by):
         raise ValueError(f'{SUPERSEDED_HITS} {rank_id} takes spell, a non-blank reason and replaced_by, the labels '
-                         f'that replace the hit (not the hit itself), not {entry!r}')
+                         f'that replace the hit (not the hit itself), and for a class other than '
+                         f'{SUPERSEDED_HITS_CLASS} a ruling, not {entry!r}')
+    ruling = entry.get('ruling')
+    if class_file['class_id'] != SUPERSEDED_HITS_CLASS and not (
+            isinstance(ruling, str) and MENTOR_DECISION.search(ruling)):
+        raise ValueError(f'{SUPERSEDED_HITS} {rank_id} in class {class_file["class_id"]} needs a ruling field naming '
+                         f'a mentor decision (D-<number>), not {ruling!r}')
     return entry
 
 

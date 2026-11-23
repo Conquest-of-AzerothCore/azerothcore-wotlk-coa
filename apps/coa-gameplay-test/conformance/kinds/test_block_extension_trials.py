@@ -262,7 +262,7 @@ class BlockGrantDurationTests(unittest.TestCase):
         scenario, expectation = self.generated(DURATION)
         duration = expectation.model['duration']
         self.assertEqual((duration['expected_ms'], duration['min_granted']), (4000, 5))
-        for side, (low, high) in (('held', (3600, 3860)), ('gone', (4140, 4400))):
+        for side, (low, high) in (('held', (3620, 3860)), ('gone', (4140, 4380))):
             self.assertAlmostEqual(duration[side][0], low)
             self.assertAlmostEqual(duration[side][1], high)
         steps = scenario['steps']
@@ -285,6 +285,16 @@ class BlockGrantDurationTests(unittest.TestCase):
             with self.subTest(changes=changes):
                 verdict = self.judge(expectation, [self.timed(expectation, **changes)])
                 self.assertEqual(verdict.status, 'alert', verdict.explanation)
+
+    def test_the_windows_exclude_a_duration_exactly_ten_percent_off(self):
+        _, expectation = self.generated(DURATION)
+        duration = expectation.model['duration']
+        self.assertGreater(duration['held'][0], 0.9 * duration['expected_ms'])
+        self.assertLess(duration['gone'][1], 1.1 * duration['expected_ms'])
+        for changes in ({'age_shift': -100.0}, {'age_shift': 120.0}):
+            with self.subTest(changes=changes):
+                verdict = self.judge(expectation, [self.timed(expectation, **changes)])
+                self.assertEqual(verdict.status, 'unmeasured', verdict.explanation)
 
     def test_too_few_grants_or_ages_outside_the_windows_are_unmeasured_never_alert(self):
         _, expectation = self.generated(DURATION)
