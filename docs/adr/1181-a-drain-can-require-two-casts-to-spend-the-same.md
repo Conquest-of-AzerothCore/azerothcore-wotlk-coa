@@ -21,4 +21,4 @@ must spend the same power within the check's `tolerance`; the verdict shows the 
 ## Consequences
 
 Classes 19 (with and without `--stack`) and 23 generate byte-identical scenarios (no `equal` drain). Class 13 changes
-the expectation model of `501117 beam_drain`; its scenario file is unchanged.
+the expectation model of `501117 beam_drain`; its scenario file changes only its name.

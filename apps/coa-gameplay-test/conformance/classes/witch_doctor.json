@@ -24367,7 +24367,7 @@
       "spell": 501117,
       "kind": "ally_heal_reach",
       "variant": "beam_drain",
-      "name": "Mojo Beam (each branch raises the mana drain)",
+      "name": "Mojo Beam (the drain does not depend on the branch count)",
       "quote": "For every sprouted the branch, you consume more and more mana.",
       "allies": [
         {
@@ -24409,10 +24409,12 @@
           "judge": "drain",
           "spell": 501117,
           "low_cast": 0,
-          "high_cast": 1
+          "high_cast": 1,
+          "relation": "equal",
+          "tolerance": 1
         }
       ],
-      "observe_source": "Brewing.cpp:191-197: every tick costs max(1, $m2) x branches x (100 + 10 x (tick - 1)) / 200 ($m2 = 316 at level 60), the branch count taken before the tick grows new ones. Two real Mojo Beams 501117 in one phase, each with the caster's mana read right before the cast (after the 1497 base mana fixture) and 1250 ms after it (ticks at 500 and 1000 ms, 250 ms clear of both and of the 1500 ms tick). Cast 0 at drain_lone (-10, -30), the beam_far point, 31.6 yd from the caster and 36 yd or more from every other ally: no branch can grow, so it spends the opening 224 plus 158 plus 174 = 556. Cast 1 at drain_a (22, 0) with drain_b (22, -12) 12 yd away (the cleared beam_a to beam_b ray): tick 1 grows drain_b, tick 2 pays for two branches, 224 + 158 + 348 = 730. The tooltip states no amount, so the check is the direction: cast 1 must spend more than cast 0 (a flat cost reads equal); the code amounts are for the reader. After cast 0 the caster waits 2500 ms without a refill: its channel stops for lack of mana at the 7th tick (3500 ms) before cast 1, so no tick of the first channel falls inside the second read; the 1500 ms GCD has passed. No refill in either window. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md."
+      "observe_source": "Brewing.cpp:191-197: every tick costs max(1, $m2) x branches x (100 + 10 x (tick - 1)) / 200 ($m2 = 316 at level 60), the branch count taken before the tick grows new ones. Two real Mojo Beams 501117 in one phase, each with the caster's mana read right before the cast (after the 1497 base mana fixture) and 1250 ms after it (ticks at 500 and 1000 ms, 250 ms clear of both and of the 1500 ms tick). Cast 0 at drain_lone (-10, -30), the beam_far point, 31.6 yd from the caster and 36 yd or more from every other ally: no branch can grow, so it spends the opening 224 plus 158 plus 174 = 556. Cast 1 at drain_a (22, 0) with drain_b (22, -12) 12 yd away (the cleared beam_a to beam_b ray): tick 1 grows drain_b, tick 2 pays for two branches, 224 + 158 + 348 = 730. The tooltip states no amount, so the check is the direction: cast 1 must spend more than cast 0 (a flat cost reads equal); the code amounts are for the reader. After cast 0 the caster waits 2500 ms without a refill: its channel stops for lack of mana at the 7th tick (3500 ms) before cast 1, so no tick of the first channel falls inside the second read; the 1500 ms GCD has passed. No refill in either window. Player reports: none open on this spell in cycle5/PLAN.md or cycle6/PLAN.md. Contributor decision 2026-11-23 (class ADR witch-doctor/0033): a tick costs max(1, $m2) x (100 + 10 x (tick - 1)) / 200 whatever the branch count, so a full beam costs 14 x $m2 (4424 at level 60) plus its cast. Live, a raid Witch Doctor with about 10k mana channelled full 8 s beams over 15 to 17 targets with potions inside about every 18 s (combat log 2026-08-31, aggregates), which a per-branch drain of 20k to 32k per beam cannot pay; the tooltip gives no amount. The two casts must now spend the same within 1 mana (ADR 1181): the final11 pair read 555 and 729 on the per-branch code."
     },
     {
       "spell": 300660,

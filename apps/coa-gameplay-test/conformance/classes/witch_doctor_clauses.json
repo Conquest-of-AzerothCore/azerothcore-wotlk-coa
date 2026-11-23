@@ -698,7 +698,7 @@
       "501117 behaviour_metric_delta beam_drain"
     ],
     "kind": "claim",
-    "reason": "Cycle 11 author A: \"501117 behaviour_metric_delta beam_drain\" (ally_heal_reach drain, ADR 1100) reads the caster's mana around two real Mojo Beams in one window: one at an ally no branch can reach from, one at an ally with a neighbour 12 yd away; the second must spend more over the same 1250 ms (code 730 against 556). The tooltip gives no amount, so only the direction is judged."
+    "reason": "Contributor decision 2026-11-23 (class ADR witch-doctor/0033, needs further investigation): the drain rises over the channel but not with the branch count, the cost that fits the live combat logs; the tooltip names no amount, and its \"for every sprouted branch\" wording is not followed. \"501117 behaviour_metric_delta beam_drain\" (ally_heal_reach drain, relation equal, ADR 1181) reads the caster's mana around a beam at a lone ally and a beam that grows a branch and requires the same spend. Earlier: Cycle 11 author A: \"501117 behaviour_metric_delta beam_drain\" (ally_heal_reach drain, ADR 1100) reads the caster's mana around two real Mojo Beams in one window: one at an ally no branch can reach from, one at an ally with a neighbour 12 yd away; the second must spend more over the same 1250 ms (code 730 against 556). The tooltip gives no amount, so only the direction is judged."
   },
   {
     "spell": 501117,

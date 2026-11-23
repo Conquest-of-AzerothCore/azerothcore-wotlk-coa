@@ -39,3 +39,4 @@ numbers ([ADR 0583](../../0583-class-conformance-adrs-live-in-a-per-class-folder
 | [0030](0030-soul-marionette-roots-for-eight-seconds.md) | Soul Marionette roots for 8 sec | accepted (contributor decision 2026-11-22) |
 | [0031](0031-overflowing-juju-scales-malefic-arrow.md) | Overflowing Juju scales Malefic Arrow | accepted (contributor decision 2026-11-22); amends 0016 |
 | [0032](0032-voodoo-fire-strikes-up-to-three-enemies.md) | Voodoo Fire strikes up to three enemies | accepted |
+| [0033](0033-mojo-beam-drain-does-not-scale-with-branches.md) | Mojo Beam's drain does not scale with its branches | accepted, needs further investigation |

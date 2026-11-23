@@ -189,7 +189,7 @@ class aura_ascension_witch_doctor_beam : public AuraScript
                         _branches.end());
         ++_ticks;
         uint32 cost = uint32(uint64(std::max(1, GetSpellInfo()->Effects[EFFECT_1].CalcValue(player))) *
-                             std::max<size_t>(1, _branches.size()) * (100 + 10 * (_ticks - 1)) / 200);
+                             (100 + 10 * (_ticks - 1)) / 200);
         if (player->GetPower(POWER_MANA) < int32(cost))
         {
             player->InterruptSpell(CURRENT_CHANNELED_SPELL);
