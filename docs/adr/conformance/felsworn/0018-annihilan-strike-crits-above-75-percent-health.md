@@ -36,13 +36,14 @@ defence and resilience terms after that hook, so the strike would not be guarant
 - Procs that read these crits fire more often above 75%: Twin Fury 801892 (one more Felfury per critical Annihilan
   strike), and the generic critical-strike procs Dancing Blades 92087, Chaotic 574143, Oblivion 572889, Malice of
   Gul'dan 800214, Sculptor of Doom 801235 and Bane of Power 707902 charges.
-- Regressions (`felsworn.json`, spell 572804), critical share of 801913: `crit_guarantee_76_74` (76% against 74%)
-  and `crit_strict_76_75` (76% against exactly 75%), both with Cruelty 705109 set to -100 critical chance in both
-  arms, so the normal roll reads 0 and only the guarantee reads 100; and `crit_normal_74` (both arms at 74%, Cruelty
-  set to 0 against 90): the normal roll keeps its 90-point difference, so it is neither forced nor suppressed below
-  75%. The two Reckless Assault 804610 Annihilan entries now set the dummy to 50% health, where non-critical hits
+- Regressions (`felsworn.json`, spell 572804), critical share of 801913: `crit_guarantee_76_74` (76% against 74%) and
+  `crit_strict_76_75` (76% against exactly 75%), both with Cruelty 705109 set to -100 critical chance in both arms, so
+  the normal roll reads 0 and only the guarantee reads 100; `crit_guarantee_offhand_76_74`, the same 76% against 74%
+  arms read on the off-hand strike 801914 (the reference character dual-wields); and `crit_normal_74` (both arms at 74%,
+  Cruelty set to 0 against 90): the normal roll keeps its 90-point difference, so it is neither forced nor suppressed
+  below 75%. The two Reckless Assault 804610 Annihilan entries now set the dummy to 50% health, where non-critical hits
   remain.
-- Without a critical aura the reference character's critical field read 0 in these scenarios (A-3 and the first runs
-  of this fix), while Cruelty set to +90 read 92.8 and 95.2 (928 strikes per run) instead of 90: the field is
-  recomputed with the character's own chance once a critical aura changes. The fixtures make the entries independent
-  of it.
+- Without a critical aura the reference character's critical field read 0 in these scenarios (A-3 and the first runs of
+  this fix), while Cruelty set to +90 read 92.8 and 95.2 in pair 2 (928 strikes per run) instead of 90, and with Cruelty
+  set to 0 the control read 4.21% and 4.40% (pair 3, 2160 strikes per run): measured, the character's own chance appears
+  once a critical aura is present. No code path was traced for it. The fixtures make the entries independent of it.
