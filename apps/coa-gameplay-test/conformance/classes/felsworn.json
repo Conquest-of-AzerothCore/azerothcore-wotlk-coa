@@ -1586,6 +1586,66 @@
       "observe_source": "805239 DurationIndex 8 = 15000 ms ($d). The aura is gone 15900 ms after the cast (excludes a duration 10% long, 16500 ms). Reference search 2026-11-23: coa-history spells 805239 and 807347: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
     },
     {
+      "spell": 805239,
+      "name": "Burning Hatred (Chaos copy is 50% of the swing damage)",
+      "kind": "metric_delta",
+      "variant": "leech_damage",
+      "label_suffix": "leech_damage",
+      "quote": "causing your melee damage to leech health to you equal to $s1% of the damage dealt as Chaos damage",
+      "trigger_spell": 805239,
+      "gate_spell": 805239,
+      "gate_cast": true,
+      "target": "dummy",
+      "attack_swings": 5,
+      "measure_actor": "caster",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807347,
+        "target": "dummy"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {},
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.5,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "The Chaos damage of 807347 on the dummy over the caster's swing damage. 805239 Effect[0] aura 354, BasePoints 49 + 1 = 50 ($s1), DurationIndex 8 = 15000 ms ($d). The event script (AscensionFelswornEvents.cpp: Check case 805239 returns melee, Proc case 805239 calls Copy(player, target, 807347, damage * 50 / 100), :243-244) casts 807347 with that amount as BasePoint0 (AscensionFelsworn.cpp:158-163). 807347 is SPELL_EFFECT_HEALTH_LEECH with EffectValueMultiplier 1.0, school mask 127 (Chaos), NO_ACTIVE_DEFENSE, NO_ATTACK_MISS, CANT_CRIT, IGNORE_CASTER_MODIFIERS and IGNORE_DAMAGE_TAKEN_MODIFIERS, and as a Felsworn copy it ignores armor (AscensionFelswornContracts.cpp:61-67) and never procs the script again (Derived). The caster auto-attacks the dummy for 5 swing intervals (14000 ms) before and after a real cast of 805239; the after phase starts its attack 500 ms after the cast and stops it 14500 ms after it, inside the 15000 ms aura, so every swing the ratio divides by ran under Burning Hatred. Misses, dodges and parries add nothing to either side: the harness adds a swing to melee_damage_total only with damage (CoAGameplayTest.cpp:1778-1783, the SMSG_ATTACKERSTATEUPDATE damage, the sum of both sub-damages after absorb and resist, Unit.cpp:7800-7829) and the script copies only a damaging hit (Check: !damage returns false). the ratio divides the increase of the read over the after phase by the increase of the caster's own swing damage (melee_damage_total, both hands). The before arm reads 0 (no Burning Hatred, so no copy). Expected 0.5 from $s1; tolerance 0.02 (0.48 to 0.52) excludes 45%, 55%, a full copy (1.0) and no copy (0), and holds the integer division (at most half a point per odd swing). Reference search 2026-11-23: coa-history spells 805239 and 807347: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 805239,
+      "name": "Burning Hatred (leech heal is 50% of the swing damage)",
+      "kind": "metric_delta",
+      "variant": "leech_heal",
+      "label_suffix": "leech_heal",
+      "quote": "causing your melee damage to leech health to you equal to $s1% of the damage dealt as Chaos damage",
+      "trigger_spell": 805239,
+      "gate_spell": 805239,
+      "gate_cast": true,
+      "target": "dummy",
+      "attack_swings": 5,
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 807347,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {},
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.5,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "The heal of 807347 on the caster (the leech of the copy) over the caster's swing damage. 805239 Effect[0] aura 354, BasePoints 49 + 1 = 50 ($s1), DurationIndex 8 = 15000 ms ($d). The event script (AscensionFelswornEvents.cpp: Check case 805239 returns melee, Proc case 805239 calls Copy(player, target, 807347, damage * 50 / 100), :243-244) casts 807347 with that amount as BasePoint0 (AscensionFelsworn.cpp:158-163). 807347 is SPELL_EFFECT_HEALTH_LEECH with EffectValueMultiplier 1.0, school mask 127 (Chaos), NO_ACTIVE_DEFENSE, NO_ATTACK_MISS, CANT_CRIT, IGNORE_CASTER_MODIFIERS and IGNORE_DAMAGE_TAKEN_MODIFIERS, and as a Felsworn copy it ignores armor (AscensionFelswornContracts.cpp:61-67) and never procs the script again (Derived). The caster auto-attacks the dummy for 5 swing intervals (14000 ms) before and after a real cast of 805239; the after phase starts its attack 500 ms after the cast and stops it 14500 ms after it, inside the 15000 ms aura, so every swing the ratio divides by ran under Burning Hatred. Misses, dodges and parries add nothing to either side: the harness adds a swing to melee_damage_total only with damage (CoAGameplayTest.cpp:1778-1783, the SMSG_ATTACKERSTATEUPDATE damage, the sum of both sub-damages after absorb and resist, Unit.cpp:7800-7829) and the script copies only a damaging hit (Check: !damage returns false). the ratio divides the increase of the read over the after phase by the increase of the caster's own swing damage (melee_damage_total, both hands). The before arm reads 0 (no Burning Hatred, so no copy). Expected 0.5 from $s1; tolerance 0.02 (0.48 to 0.52) excludes 45%, 55%, a full copy (1.0) and no copy (0), and holds the integer division (at most half a point per odd swing). Reference search 2026-11-23: coa-history spells 805239 and 807347: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
       "spell": 805240,
       "name": "Tyrant's Gaze (usable only below 35% health)",
       "kind": "cast_gate",

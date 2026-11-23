@@ -3806,7 +3806,9 @@
         "claim": "causing your melee damage to leech health to you equal to $s1% of the damage dealt as Chaos damage (50%)",
         "labels": [
           "805239 effect_value e0 #0",
-          "805239 aura_amount e0 #0"
+          "805239 aura_amount e0 #0",
+          "805239 behaviour_metric_delta leech_damage",
+          "805239 behaviour_metric_delta leech_heal"
         ]
       },
       {
