@@ -8183,23 +8183,293 @@
     },
     {
       "spell": 563268,
-      "name": "Felrend (strikes enemies within 6 yd)",
-      "kind": "radius_edge",
-      "label_suffix": "radius_edge",
+      "name": "Felrend (main hand 563268 at 0.1 yd)",
+      "kind": "metric_delta",
+      "variant": "main_0_1",
+      "label_suffix": "main_0_1",
       "quote": "Erupt in a whirlwind of felfury, striking all enemies within $a1 yds with both weapons,",
-      "gate_spell": 563268,
-      "cast_spell": 563268,
-      "cast_at": "caster",
-      "hit_spell": 803476,
-      "power": 100,
-      "radius": 6,
-      "dummy_reach": 1.275,
-      "primary_yd": 0.1,
-      "repeats": 1,
-      "settle_ms": 2000,
-      "leeway": false,
-      "reach_source": "the dummy entry 36 combat reach 1.275 yd (creature_model_info CombatReach of display 367, world DB; read 1.275 in the Templar 1161 aggro_redirect edge run 20261112-053731), added for a player-controlled caster against a non-player target (Spell.cpp:9434-9442); the caster's own size is not a term; the judge reads each reach again and refuses a layout that does not bracket the edge",
-      "observe_source": "563268 Felrend: Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG and Effect[1] TRIGGER_SPELL_WITH_VALUE (803476, the logged damage spell), TargetA 22 SRC_CASTER / TargetB 15 SRC_AREA_ENEMY, EffectRadiusIndex 193 = 6 yd ($a1), 40 Energy, BasePoints 49 + 1 = 50 ($s1). The damage hits of 803476 per dummy are read after Felrend is cast at the caster, before (control) and after it is learned; the inside dummy is struck, the one beyond 6 yd plus reach is not. Reference search 2026-11-23: coa-history spell 563268: 0 events; spell 803476 Felrend (the logged damage id): SPELL_DAMAGE 1580 events in 5 logs (positive control, min 25 max 492 mean 141, gear differs so no figure decides); nothing else found; expected values come from the tooltip and the DBC only. The first run with the caster leeway (2.66 yd) struck only the primary (prove9): the leeway is not part of this edge, so it is run without it."
+      "trigger_spell": 563268,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 563268,
+        "target": "area1"
+      },
+      "area_dummies": [
+        0.1,
+        5.5,
+        6.5,
+        9.435,
+        10.435
+      ],
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "expected": 1
+    },
+    {
+      "spell": 563268,
+      "name": "Felrend (main hand 563268 at 5.5 yd)",
+      "kind": "metric_delta",
+      "variant": "main_5_5",
+      "label_suffix": "main_5_5",
+      "quote": "Erupt in a whirlwind of felfury, striking all enemies within $a1 yds with both weapons,",
+      "trigger_spell": 563268,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 563268,
+        "target": "area2"
+      },
+      "area_dummies": [
+        0.1,
+        5.5,
+        6.5,
+        9.435,
+        10.435
+      ],
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "expected": 1
+    },
+    {
+      "spell": 563268,
+      "name": "Felrend (main hand 563268 at 6.5 yd, recorded not judged)",
+      "kind": "metric_delta",
+      "variant": "main_6_5",
+      "label_suffix": "main_6_5",
+      "quote": "Erupt in a whirlwind of felfury, striking all enemies within $a1 yds with both weapons,",
+      "trigger_spell": 563268,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 563268,
+        "target": "area3"
+      },
+      "area_dummies": [
+        0.1,
+        5.5,
+        6.5,
+        9.435,
+        10.435
+      ],
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "expected": 1,
+      "after_at_least": 0,
+      "after_at_most": 1
+    },
+    {
+      "spell": 563268,
+      "name": "Felrend (main hand 563268 at 9.435 yd, recorded not judged)",
+      "kind": "metric_delta",
+      "variant": "main_9_435",
+      "label_suffix": "main_9_435",
+      "quote": "Erupt in a whirlwind of felfury, striking all enemies within $a1 yds with both weapons,",
+      "trigger_spell": 563268,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 563268,
+        "target": "area4"
+      },
+      "area_dummies": [
+        0.1,
+        5.5,
+        6.5,
+        9.435,
+        10.435
+      ],
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "expected": 1,
+      "after_at_least": 0,
+      "after_at_most": 1
+    },
+    {
+      "spell": 563268,
+      "name": "Felrend (main hand 563268 at 10.435 yd)",
+      "kind": "metric_delta",
+      "variant": "main_10_435",
+      "label_suffix": "main_10_435",
+      "quote": "Erupt in a whirlwind of felfury, striking all enemies within $a1 yds with both weapons,",
+      "trigger_spell": 563268,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 563268,
+        "target": "area5"
+      },
+      "area_dummies": [
+        0.1,
+        5.5,
+        6.5,
+        9.435,
+        10.435
+      ],
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "expected": 0,
+      "tolerance": 0
+    },
+    {
+      "spell": 563268,
+      "name": "Felrend (off hand 803476 at 0.1 yd)",
+      "kind": "metric_delta",
+      "variant": "off_0_1",
+      "label_suffix": "off_0_1",
+      "quote": "Erupt in a whirlwind of felfury, striking all enemies within $a1 yds with both weapons,",
+      "trigger_spell": 563268,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 803476,
+        "target": "area1"
+      },
+      "area_dummies": [
+        0.1,
+        5.5,
+        6.5,
+        9.435,
+        10.435
+      ],
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "expected": 1
+    },
+    {
+      "spell": 563268,
+      "name": "Felrend (off hand 803476 at 5.5 yd)",
+      "kind": "metric_delta",
+      "variant": "off_5_5",
+      "label_suffix": "off_5_5",
+      "quote": "Erupt in a whirlwind of felfury, striking all enemies within $a1 yds with both weapons,",
+      "trigger_spell": 563268,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 803476,
+        "target": "area2"
+      },
+      "area_dummies": [
+        0.1,
+        5.5,
+        6.5,
+        9.435,
+        10.435
+      ],
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "expected": 1
+    },
+    {
+      "spell": 563268,
+      "name": "Felrend (off hand 803476 at 6.5 yd, recorded not judged)",
+      "kind": "metric_delta",
+      "variant": "off_6_5",
+      "label_suffix": "off_6_5",
+      "quote": "Erupt in a whirlwind of felfury, striking all enemies within $a1 yds with both weapons,",
+      "trigger_spell": 563268,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 803476,
+        "target": "area3"
+      },
+      "area_dummies": [
+        0.1,
+        5.5,
+        6.5,
+        9.435,
+        10.435
+      ],
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "expected": 1,
+      "after_at_least": 0,
+      "after_at_most": 1
+    },
+    {
+      "spell": 563268,
+      "name": "Felrend (off hand 803476 at 9.435 yd, recorded not judged)",
+      "kind": "metric_delta",
+      "variant": "off_9_435",
+      "label_suffix": "off_9_435",
+      "quote": "Erupt in a whirlwind of felfury, striking all enemies within $a1 yds with both weapons,",
+      "trigger_spell": 563268,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 803476,
+        "target": "area4"
+      },
+      "area_dummies": [
+        0.1,
+        5.5,
+        6.5,
+        9.435,
+        10.435
+      ],
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "expected": 1,
+      "after_at_least": 0,
+      "after_at_most": 1
+    },
+    {
+      "spell": 563268,
+      "name": "Felrend (off hand 803476 at 10.435 yd)",
+      "kind": "metric_delta",
+      "variant": "off_10_435",
+      "label_suffix": "off_10_435",
+      "quote": "Erupt in a whirlwind of felfury, striking all enemies within $a1 yds with both weapons,",
+      "trigger_spell": 563268,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 803476,
+        "target": "area5"
+      },
+      "area_dummies": [
+        0.1,
+        5.5,
+        6.5,
+        9.435,
+        10.435
+      ],
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "expected": 0,
+      "tolerance": 0
     },
     {
       "spell": 572804,
