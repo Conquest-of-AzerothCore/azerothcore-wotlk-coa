@@ -197,20 +197,25 @@ class aura_ascension_witch_doctor_beam : public AuraScript
         }
         player->ModifyPower(POWER_MANA, -int32(cost));
         std::vector<ObjectGuid> previous = _branches;
+        Unit* sprout = nullptr;
         for (ObjectGuid guid : previous)
             if (Unit* target = ObjectAccessor::GetUnit(*player, guid))
             {
                 Heal(player, target, std::max(0, effect->GetAmount()));
-                if (_branches.size() < 8)
+                if (!sprout)
                     for (Unit* ally : Allies(player, target, 15.0f))
                         if (std::find(_branches.begin(), _branches.end(), ally->GetGUID()) == _branches.end() &&
                             player->IsWithinDistInMap(ally, 40.0f))
                         {
-                            _branches.push_back(ally->GetGUID());
-                            Heal(player, ally, std::max(0, effect->GetAmount()));
+                            sprout = ally;
                             break;
                         }
             }
+        if (sprout)
+        {
+            _branches.push_back(sprout->GetGUID());
+            Heal(player, sprout, std::max(0, effect->GetAmount()));
+        }
     }
     void Removed(AuraEffect const*, AuraEffectHandleModes)
     {

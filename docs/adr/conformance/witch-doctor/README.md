@@ -40,3 +40,4 @@ numbers ([ADR 0583](../../0583-class-conformance-adrs-live-in-a-per-class-folder
 | [0031](0031-overflowing-juju-scales-malefic-arrow.md) | Overflowing Juju scales Malefic Arrow | accepted (contributor decision 2026-11-22); amends 0016 |
 | [0032](0032-voodoo-fire-strikes-up-to-three-enemies.md) | Voodoo Fire strikes up to three enemies | accepted |
 | [0033](0033-mojo-beam-drain-does-not-scale-with-branches.md) | Mojo Beam's drain does not scale with its branches | accepted, needs further investigation |
+| [0034](0034-mojo-beam-grows-one-branch-per-tick.md) | Mojo Beam grows one branch per tick, with no cap of 8 | accepted |
