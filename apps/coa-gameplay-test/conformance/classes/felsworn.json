@@ -5507,6 +5507,68 @@
       "poll_ms": 50,
       "caster": false,
       "observe_source": "704370 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 707511 (Effect[0] aura 271 MOD_DAMAGE_FROM_CASTER, BasePoints 0 + 1 = 1 per stack, DurationIndex 8 = 15000 ms in the packet's Spell.dbc? read below, StackAmount 20); AscensionFelswornEvents.cpp:211-212 casts 707511 on the target of each damage event of Bane of Chaos 704368 or Chaos 802676. Timed by polling 707511 on the dummy with game-time stamps after a real Bane of Chaos cast; the last application ends the Bane's damage. Reference search 2026-11-23: coa-history spell 704370: 0 events in 186 logs (a passive leaves no event); spell 707511 Curse of Argus: SPELL_AURA_APPLIED_DOSE 690 events in 4 logs (positive control: it stacks in real play); nothing else found."
+    },
+    {
+      "spell": 560822,
+      "name": "Anti-Magic (the reduction aura follows the removal of the Barrier)",
+      "kind": "metric_delta",
+      "variant": "applies",
+      "label_suffix": "applies",
+      "quote": "When Hateforged Barrier is removed from you, you now reduce $561203s% of all Magic damage taken for $561203d.",
+      "trigger_spell": 705129,
+      "gate_spell": 560822,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 561203,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 31000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "560822 Effect[0] aura 4 dummy; AscensionFelswornAuras.cpp:206-207 casts Anti-Magic 561203 on the caster when a Hateforged Barrier 705129 aura is removed while the caster is alive and 560822 is known. 561203 Effect[0] aura 87 MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (all magic schools), BasePoints -16 + 1 = -15 ($561203s), DurationIndex 31 = 8000 ms ($561203d). Hateforged Barrier 705129 lasts 30000 ms (DurationIndex 9) unless its absorb is spent, so a real removal is the expiry after a real cast. Hateforged Barrier is cast on the caster; 31000 ms later (after its expiry at 30000 ms) the aura 561203 is on the caster (control: 560822 not learned, absent). Reference search 2026-11-23: coa-history spell 560822: 0 events in 186 logs (a passive leaves no event); spell 561203 Anti-Magic: SPELL_AURA_APPLIED 1 event in 1 log (the logged result of the proc, no figure); bindmysoul talents snapshot (fetched 2026-07-22): Anti-Magic 560822 'reduce -10% of all Magic damage taken for 8 seconds', an older state (our Spell.dbc 561203 says 15%); the tooltip and the DBC prevail (G-9); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 560822,
+      "name": "Anti-Magic (reduces Magic damage taken by 15%)",
+      "kind": "metric_delta",
+      "variant": "amount",
+      "label_suffix": "amount",
+      "quote": "When Hateforged Barrier is removed from you, you now reduce $561203s% of all Magic damage taken for $561203d.",
+      "trigger_spell": 705129,
+      "gate_spell": 560822,
+      "target": "caster",
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 561203,
+        "effect": 0
+      },
+      "before_expected": 0,
+      "expected": -15,
+      "tolerance": 0.01,
+      "wait_ms": 31000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "560822 Effect[0] aura 4 dummy; AscensionFelswornAuras.cpp:206-207 casts Anti-Magic 561203 on the caster when a Hateforged Barrier 705129 aura is removed while the caster is alive and 560822 is known. 561203 Effect[0] aura 87 MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (all magic schools), BasePoints -16 + 1 = -15 ($561203s), DurationIndex 31 = 8000 ms ($561203d). Hateforged Barrier 705129 lasts 30000 ms (DurationIndex 9) unless its absorb is spent, so a real removal is the expiry after a real cast. The amount of Effect[0] of 561203 on the caster 31000 ms after the Barrier cast is -15. Reference search 2026-11-23: coa-history spell 560822: 0 events in 186 logs (a passive leaves no event); spell 561203 Anti-Magic: SPELL_AURA_APPLIED 1 event in 1 log (the logged result of the proc, no figure); bindmysoul talents snapshot (fetched 2026-07-22): Anti-Magic 560822 'reduce -10% of all Magic damage taken for 8 seconds', an older state (our Spell.dbc 561203 says 15%); the tooltip and the DBC prevail (G-9); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 560822,
+      "name": "Anti-Magic (the aura lasts 8 seconds, stamped)",
+      "kind": "last_application_expiry",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "When Hateforged Barrier is removed from you, you now reduce $561203s% of all Magic damage taken for $561203d.",
+      "trigger_spell": 705129,
+      "gate_spell": 560822,
+      "aura": 561203,
+      "expected_ms": 8000,
+      "control_window_ms": 500,
+      "window_ms": 45000,
+      "poll_ms": 100,
+      "caster": true,
+      "observe_source": "560822 Effect[0] aura 4 dummy; AscensionFelswornAuras.cpp:206-207 casts Anti-Magic 561203 on the caster when a Hateforged Barrier 705129 aura is removed while the caster is alive and 560822 is known. 561203 Effect[0] aura 87 MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (all magic schools), BasePoints -16 + 1 = -15 ($561203s), DurationIndex 31 = 8000 ms ($561203d). Hateforged Barrier 705129 lasts 30000 ms (DurationIndex 9) unless its absorb is spent, so a real removal is the expiry after a real cast. Timed by polling 561203 on the caster with game-time stamps after a real Barrier cast; the aura is applied when the Barrier ends at 30000 ms. Reference search 2026-11-23: coa-history spell 560822: 0 events in 186 logs (a passive leaves no event); spell 561203 Anti-Magic: SPELL_AURA_APPLIED 1 event in 1 log (the logged result of the proc, no figure); bindmysoul talents snapshot (fetched 2026-07-22): Anti-Magic 560822 'reduce -10% of all Magic damage taken for 8 seconds', an older state (our Spell.dbc 561203 says 15%); the tooltip and the DBC prevail (G-9); expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],
