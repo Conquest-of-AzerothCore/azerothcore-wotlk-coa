@@ -1,4 +1,4 @@
-# 0039. Valkyr's Calling's charge-back lands on its stored victim, whatever the selection
+# 0043. Valkyr's Calling's charge-back lands on its stored victim, whatever the selection
 
 - Status: accepted (owner ruling O-32, mentor D-302, 2026-11-23)
 - Date: 2026-11-23

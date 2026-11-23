@@ -13,7 +13,7 @@
     "dummy 20 yd away selected (17 yd from the victim, outside the 8 yd area) and the control with the victim selected,",
     "which landed before the change. Each 520024 cast must be accepted; 5000 ms after it (2000 ms flight, then the",
     "charge) the victim has taken 570034 damage from its caster, 570034 has no refusal and the decoy has taken none",
-    "(Sun Cleric ADR 0039)."
+    "(Sun Cleric ADR 0043)."
   ],
   "timeout_ms": 90000,
   "players": [
