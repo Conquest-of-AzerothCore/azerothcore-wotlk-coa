@@ -78,22 +78,26 @@
   {
     "spell": 300466,
     "clause": "Increases the damage and threat generated from Carve by $s1%.",
-    "kind": "claim",
     "claims": [
       {
         "claim": "Increases the damage",
         "labels": [
           "300466 behaviour_hit_ratio damage"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "and threat generated from Carve by $s1%",
         "labels": [
           "300466 behaviour_threat_slope 803715 threat",
           "300466 behaviour_threat_slope 803715 control"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
   },
   {
     "spell": 300467,
