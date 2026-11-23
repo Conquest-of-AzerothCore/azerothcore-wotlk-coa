@@ -32757,6 +32757,174 @@
       "observe_source": "Control arm of the below-35% entry ally_damage_heal, same cast sequence: the ally stays above 35% (4200 of 10000, 42%; its Gavel of Wrath 802561 hit read in the damage arm leaves it above 35%) and 804250 is cast at it in the after phase: no 681386 heal event is expected (0 then 0) while the damage arm proves the ally struck. 680911 proc (AscensionSunClericEvents.cpp:80-82) accepts a hit while the ally is below 35% health or once the aura script value is set. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found."
     },
     {
+      "spell": 804250,
+      "name": "Blessing of Triumph (ally at 33% is healed: the below-35% bracket from the ally health set)",
+      "kind": "metric_delta",
+      "variant": "ally_damage_heal_close_below",
+      "label_suffix": "ally_damage_heal_close_below",
+      "quote": "If the ally falls below 35% maximum health they are healed for $680911s3% of their direct damage dealt for the remaining duration.",
+      "trigger_spell": 804250,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "select_dummy": true,
+      "learn": [
+        804247
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 681386,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          3300,
+          10000
+        ],
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "ally_attacks": [
+          {
+            "spell": 802561,
+            "power": 1360,
+            "source": "Gavel of Wrath 802561, an instant Physical direct hit the ally casts at the dummy after the trigger, its damage event read as the ally's own"
+          }
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 681386,
+              "target": "ally"
+            },
+            "source": "the heal 681386 the caster casts at the ally from the ally's damage (AscensionSunClericEvents.cpp:390-392, Copy(player, ally, 681386, CalculatePct(damage, 10)))"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 802561,
+              "target": "dummy"
+            },
+            "source": "the ally's own Gavel of Wrath damage at the dummy"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 0.1,
+            "tolerance": 0.0005,
+            "floor_count": 0,
+            "source": "$680911s3 = 10 (680911 Effect[2] BasePoints 9 + 1): healed for 10% of the direct damage dealt; 681386 carries SPELL_ATTR2_CANT_CRIT and SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (Spell.dbc), and CalculatePct truncates each heal to an integer"
+          }
+        ]
+      },
+      "observe_source": "Same cast sequence as ally_damage_heal, the ally set to 3300 of 10000 health (33%) in both phases ahead of the trigger (ally_arm.ally_health, a fixture the harness sets, regeneration off): the 680911 proc accepts the ally's direct damaging hit while its health is below 35% (AscensionSunClericEvents.cpp:80-82), and the hit is cast after the settle with no damage taken, so the ally holds 3300 at the trigger. Control: the before phase casts Bless but not 804250: no 681386 heal (0), then 1 heal event after 804250. Bracket: a heal at 33% excludes a threshold at or below 33% (31.5% included); the existing ally_damage_heal_above reads no heal at 42%; the side just above 35% (36 to 38%) needs its own health value and is not in this entry, so the bracket read here is the lower one. Reference search 2026-11-23: coa-history spells 804250, 680911 and 681386: 0 events in 186 logs (no log records this blessing); nothing found for the 35% threshold beyond the tooltip and the DBC. Residual failure probability: none stated as probabilistic, the heal count is deterministic (a direct Physical hit by the ally on a 33% ally).",
+      "disable_regeneration": true
+    },
+    {
+      "spell": 804250,
+      "name": "Blessing of Triumph (ally at 38% is not healed: the above-35% bracket from the ally health set)",
+      "kind": "metric_delta",
+      "variant": "ally_damage_heal_close_above",
+      "label_suffix": "ally_damage_heal_close_above",
+      "quote": "If the ally falls below 35% maximum health they are healed for $680911s3% of their direct damage dealt for the remaining duration.",
+      "trigger_spell": 804250,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 1363,
+      "select_dummy": true,
+      "learn": [
+        804247
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 681386,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          3800,
+          10000
+        ],
+        "ally_casts": [
+          {
+            "spell": 804247,
+            "spell_go_per_cast": 2,
+            "source": "Bless 804247 cast at the ally also blesses the caster (AscensionSunClericAuras.cpp:67-74, id == Bless && target != player casts Bless on the caster): two SPELL_GO events per cast, counted in the harness proof"
+          }
+        ],
+        "ally_attacks": [
+          {
+            "spell": 802561,
+            "power": 1360,
+            "source": "Gavel of Wrath 802561, an instant Physical direct hit the ally casts at the dummy after the trigger, its damage event read as the ally's own"
+          }
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681386,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "no 681386 heal event is given to the ally that stays above 35% health: the 680911 proc accepts a hit only while the ally is below 35% health or once the aura script value is set (AscensionSunClericEvents.cpp:80-82)"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 802561,
+              "target": "dummy"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the ally casts Gavel of Wrath 802561 once at the dummy in each phase (ally_attacks), an instant Physical direct hit, and the harness counts events over both phases: 1 after the first phase and 2 after the second prove the ally struck in each"
+          }
+        ]
+      },
+      "observe_source": "Same cast sequence as ally_damage_heal_close_below with the ally set to 3800 of 10000 health (38%) in both phases ahead of the trigger (ally_arm.ally_health, a harness fixture, regeneration off). 38% is above 35% and below 38.5% (35 plus 10%): the 680911 proc accepts the ally's direct hit only while its health is below 35% or once the aura script value is set (AscensionSunClericEvents.cpp:80-82), so no heal is expected; the Gavel of Wrath the ally casts at the dummy takes no health from it, and the damage arm proves the ally struck (1 then 2 events). Control: the before phase casts Bless without 804250 (0 heal events), and ally_damage_heal_close_below is the same sequence at 33% where the heal lands. Bracket: no heal at 38% excludes a threshold above 38% (38.5% included); with the heal at 33% the threshold lies in (33%, 38%]. Reference search 2026-11-23: coa-history spells 804250, 680911, 681386: 0 events in 186 logs; nothing found beyond the tooltip and the DBC. Residual failure probability: deterministic counts, none stated as probabilistic.",
+      "disable_regeneration": true
+    },
+    {
       "spell": 805301,
       "name": "Holy Form (additional mana spent with the extra heal: below-30% arm 850 pays nothing, above-30% arm 872 pays)",
       "kind": "metric_delta",
