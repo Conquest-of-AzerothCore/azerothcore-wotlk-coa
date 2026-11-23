@@ -213,14 +213,15 @@
         "spell": 801312
       },
       "residual_target": 0.001,
-      "min_detectable": 5,
+      "min_detectable": 4,
+      "sized_attempts": 13377,
       "min_parts": 10,
       "trigger_text": "Dealing damage",
       "event_metric": "spell_cast_count",
       "proc_spell": 572782,
       "events_per_proc": 1,
       "proc_spell_source": "EffectTriggerSpell[0] of 681376; the handler casts it on the caster (AscensionFelswornEvents.cpp:148-149).",
-      "handler": "aura_ascension_felsworn_event: Check case 681376 (AscensionFelswornEvents.cpp:56-57) rolls Chance(player, 681376) once per outgoing damage event of a non-derived spell (periodic included); Proc casts 572782 on the caster. Trigger: a cast of Fel Fireball 801312 (Effect[0] SCHOOL_DAMAGE, one landed hit per cast); a trial is the landed hit. Reference search 2026-11-23: coa-history spell 681376 and 572782 and ~/CoaServer/reference snapshots: nothing found that decides the chance. Only the chance is entered here; the stack cap is owned by a tool group.",
+      "handler": "aura_ascension_felsworn_event: Check case 681376 (AscensionFelswornEvents.cpp:56-57) rolls Chance(player, 681376) once per outgoing damage event of a non-derived spell (periodic included); Proc casts 572782 on the caster. Trigger: a cast of Fel Fireball 801312 (Effect[0] SCHOOL_DAMAGE, one landed hit per cast); a trial is the landed hit. Reference search 2026-11-23: coa-history spell 681376 and 572782 and ~/CoaServer/reference snapshots: nothing found that decides the chance. Only the chance is entered here; the stack cap is owned by a tool group. Sizing (mentor D-70, tool ADR 1254): residual_target 0.001 with min_detectable 4 points needs 8918 trials, 13377 attempts with the 1.5x outcome margin, above the 7326 the band sizing schedules; sized_attempts 13377 sets them (65 parts of 206 attempts, each within the scenario budget, pooled as every proc part); false alert at the chance <= 1.0e-03 per pair at 8918 trials (normal approximation).",
       "dbc": {
         "681376": {
           "ProcChance": 8,
@@ -343,6 +344,89 @@
           "Charges": 0
         }
       },
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 705137,
+      "name": "Azzinoth's Battery",
+      "tooltip": "Your |cffffffffAzzinoth's Assault|r now has a $h% chance to not consume |cff32cd32Felfury|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 801904
+      },
+      "trial_casts": true,
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "sized_attempts": 38165,
+      "trigger_text": "Azzinoth's Assault",
+      "event_metric": "aura_stacks",
+      "stack_aura": 800058,
+      "stack_set": 2,
+      "stack_per_cast": -2,
+      "attempt_auras": [
+        {
+          "spell": 800058,
+          "stacks": 2,
+          "source": "precondition fixture, not the subject: Azzinoth's Assault 801904 costs 2 Felfury (aura 800058 stacks, ResourceCostRules AscensionCustomResourceData.h:520) and is refused with SPELL_FAILED_NO_POWER below it, so 2 stacks are set before every cast; the subject is whether the cast removes them"
+        }
+      ],
+      "proc_spell": 800058,
+      "events_per_proc": 2,
+      "proc_spell_source": "No proc spell is cast: the 801904 cost rule names 705137 as its preserve aura with PreserveCostChancePercent 30 (AscensionCustomResourceData.h:520-521); on a success the consumption is skipped (AscensionCompat.cpp:3475-3479), so a preserved cast leaves the 2 Felfury stacks of aura 800058 and a consumed one leaves 0. The EffectTriggerSpell 801024 of 705137 (aura 42, ProcFlags 0) is not what the server runs.",
+      "handler": "705137 has no scripted OnProc case; the resource rule of Azzinoth's Assault rolls 30% (PreserveCostChancePercent, AscensionCustomResourceData.h:520-521; AscensionCompat.cpp:3475-3479) on each cast while 705137 is on the caster; the tooltip $h reads ProcChance 30 of 705137 (Spell.dbc), the same 30. Trial: a completed 801904 cast (trial_casts); event: the 800058 stacks read after the cast equal the 2 set before it (aura_stacks event metric, tool ADR 1254), the cast changing them by -2 when consumed. Baseline arm: the same casts before 705137 is learned must read no event. The first design counted 801024 casts and was refused on every cast for want of Felfury (fw-b1d, p5). Reference search 2026-11-23: coa-history spells 705137 and 801024: 801024 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc.",
+      "dbc": {
+        "705137": {
+          "ProcChance": 30,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 560639,
+      "name": "Illidari Magi",
+      "tooltip": "Your periodic damage now has a $h% chance to generate 1 |cff32cd32Felfury|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 704368
+      },
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "sized_attempts": 29079,
+      "min_parts": 10,
+      "trials_per_attempt": 2,
+      "trigger_text": "Your periodic damage",
+      "event_metric": "aura_stacks",
+      "stack_aura": 800058,
+      "stack_set": 1,
+      "stack_per_cast": 1,
+      "attempt_auras": [
+        {
+          "spell": 800058,
+          "stacks": 1,
+          "source": "precondition fixture, not the subject: Felfury (aura 800058) is set to 1 stack before every Bane of Chaos cast so that each attempt starts from a known count below the 6-stack cap; the subject is the gains the periodic ticks add"
+        }
+      ],
+      "proc_spell": 800058,
+      "events_per_proc": 1,
+      "proc_spell_source": "Proc of 560639 calls Gain(player, 1) (AscensionFelswornEvents.cpp:172-176), which adds one stack of aura 800058 (AscensionFelsworn.cpp:219-229); no spell is cast.",
+      "handler": "aura_ascension_felsworn_event: Check case 560639 (AscensionFelswornEvents.cpp:86-88) returns periodic && Chance(player, 560639), one roll per periodic damage event; Proc calls Gain(player, 1). Trigger: a cast of Bane of Chaos 704368 (Effect[0] aura 3 periodic damage every 3000 ms; recasts spaced two ticks apart by the generator); a trial is a damage tick (trials_per_attempt 2: each attempt waits two 3000 ms tick periods, so it holds about two ticks; the trials are the ticks read, the 2 only schedules the attempts) (spell_damage_count of 704368 on the dummy). The completed cast itself gains 1 Felfury (ResourceGainRules AscensionCustomResourceData.h:116, FirstSuccessfulHostileTarget), so stack_per_cast is +1 (aura_stacks event metric, tool ADR 1254). Baseline arm: the same casts before 560639 is learned must read no event. Reference search 2026-11-23: coa-history spell 560639: nothing found that decides the chance; ProcChance 20 (Spell.dbc).",
+      "dbc": {
+        "560639": {
+          "ProcChance": 20,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
       "internal_cooldown_ms": 0
     }
   ],
@@ -1628,6 +1712,66 @@
       "observe_source": "805239 DurationIndex 8 = 15000 ms ($d). The aura is gone 15900 ms after the cast (excludes a duration 10% long, 16500 ms). Reference search 2026-11-23: coa-history spells 805239 and 807347: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
     },
     {
+      "spell": 805239,
+      "name": "Burning Hatred (Chaos copy is 50% of the swing damage)",
+      "kind": "metric_delta",
+      "variant": "leech_damage",
+      "label_suffix": "leech_damage",
+      "quote": "causing your melee damage to leech health to you equal to $s1% of the damage dealt as Chaos damage",
+      "trigger_spell": 805239,
+      "gate_spell": 805239,
+      "gate_cast": true,
+      "target": "dummy",
+      "attack_swings": 5,
+      "measure_actor": "caster",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807347,
+        "target": "dummy"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {},
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.5,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "The Chaos damage of 807347 on the dummy over the caster's swing damage. 805239 Effect[0] aura 354, BasePoints 49 + 1 = 50 ($s1), DurationIndex 8 = 15000 ms ($d). The event script (AscensionFelswornEvents.cpp: Check case 805239 returns melee, Proc case 805239 calls Copy(player, target, 807347, damage * 50 / 100), :243-244) casts 807347 with that amount as BasePoint0 (AscensionFelsworn.cpp:158-163). 807347 is SPELL_EFFECT_HEALTH_LEECH with EffectValueMultiplier 1.0, school mask 127 (Chaos), NO_ACTIVE_DEFENSE, NO_ATTACK_MISS, CANT_CRIT, IGNORE_CASTER_MODIFIERS and IGNORE_DAMAGE_TAKEN_MODIFIERS, and as a Felsworn copy it ignores armor (AscensionFelswornContracts.cpp:61-67) and never procs the script again (Derived). The caster auto-attacks the dummy for 5 swing intervals (14000 ms) before and after a real cast of 805239; the after phase starts its attack 500 ms after the cast and stops it 14500 ms after it, inside the 15000 ms aura, so every swing the ratio divides by ran under Burning Hatred. Misses, dodges and parries add nothing to either side: the harness adds a swing to melee_damage_total only with damage (CoAGameplayTest.cpp:1778-1783, the SMSG_ATTACKERSTATEUPDATE damage, the sum of both sub-damages after absorb and resist, Unit.cpp:7800-7829) and the script copies only a damaging hit (Check: !damage returns false). the ratio divides the increase of the read over the after phase by the increase of the caster's own swing damage (melee_damage_total, both hands). The before arm reads 0 (no Burning Hatred, so no copy). Expected 0.5 from $s1; tolerance 0.02 (0.48 to 0.52) excludes 45%, 55%, a full copy (1.0) and no copy (0), and holds the integer division (at most half a point per odd swing). Reference search 2026-11-23: coa-history spells 805239 and 807347: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 805239,
+      "name": "Burning Hatred (leech heal is 50% of the swing damage)",
+      "kind": "metric_delta",
+      "variant": "leech_heal",
+      "label_suffix": "leech_heal",
+      "quote": "causing your melee damage to leech health to you equal to $s1% of the damage dealt as Chaos damage",
+      "trigger_spell": 805239,
+      "gate_spell": 805239,
+      "gate_cast": true,
+      "target": "dummy",
+      "attack_swings": 5,
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 807347,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {},
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.5,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "The heal of 807347 on the caster (the leech of the copy) over the caster's swing damage. 805239 Effect[0] aura 354, BasePoints 49 + 1 = 50 ($s1), DurationIndex 8 = 15000 ms ($d). The event script (AscensionFelswornEvents.cpp: Check case 805239 returns melee, Proc case 805239 calls Copy(player, target, 807347, damage * 50 / 100), :243-244) casts 807347 with that amount as BasePoint0 (AscensionFelsworn.cpp:158-163). 807347 is SPELL_EFFECT_HEALTH_LEECH with EffectValueMultiplier 1.0, school mask 127 (Chaos), NO_ACTIVE_DEFENSE, NO_ATTACK_MISS, CANT_CRIT, IGNORE_CASTER_MODIFIERS and IGNORE_DAMAGE_TAKEN_MODIFIERS, and as a Felsworn copy it ignores armor (AscensionFelswornContracts.cpp:61-67) and never procs the script again (Derived). The caster auto-attacks the dummy for 5 swing intervals (14000 ms) before and after a real cast of 805239; the after phase starts its attack 500 ms after the cast and stops it 14500 ms after it, inside the 15000 ms aura, so every swing the ratio divides by ran under Burning Hatred. Misses, dodges and parries add nothing to either side: the harness adds a swing to melee_damage_total only with damage (CoAGameplayTest.cpp:1778-1783, the SMSG_ATTACKERSTATEUPDATE damage, the sum of both sub-damages after absorb and resist, Unit.cpp:7800-7829) and the script copies only a damaging hit (Check: !damage returns false). the ratio divides the increase of the read over the after phase by the increase of the caster's own swing damage (melee_damage_total, both hands). The before arm reads 0 (no Burning Hatred, so no copy). Expected 0.5 from $s1; tolerance 0.02 (0.48 to 0.52) excludes 45%, 55%, a full copy (1.0) and no copy (0), and holds the integer division (at most half a point per odd swing). Reference search 2026-11-23: coa-history spells 805239 and 807347: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
       "spell": 805240,
       "name": "Tyrant's Gaze (usable only below 35% health)",
       "kind": "cast_gate",
@@ -2141,6 +2285,21 @@
       "setup_target": "caster",
       "setup_wait_ms": 1600,
       "observe_source": "807421 Effect[2] aura 107 ADD_FLAT_MODIFIER BasePoints 999 + 1 = 1000 ms ($/1000;807421s3 = 1 s); AscensionFelswornSummons.cpp:22 adds 1000 ms when Inner Demon 804216 is on the caster. Inner Demon is a real precondition: Burning Hatred 805239 gives 6 Felfury, then Inner Demon 804216 (CasterAuraSpell 800058) is cast; the aura lasts 5000 ms per Felfury, so it covers the 16 s window. With Inner Demon the Infernal is gone 16100 ms after the cast: the lifetime is below 16100 ms, so 16000 +- 100 ms with the read above. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 300480,
+      "name": "Infernal Summoner (Infernal swing reset rate)",
+      "kind": "swing_reset_rate",
+      "quote": "Direct damage dealt now has a $h% chance to reset the cooldown of Infernal.",
+      "talent": 300480,
+      "reset_spell": 560284,
+      "chance_pct": 5,
+      "control_ms": 60000,
+      "attack_ms": 3400000,
+      "parts": 6,
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "observe_source": "300480 ProcChance 5 ($h, server DBC set). spell_proc 300480 has ProcFlags 1048575 and Chance 100 (rev_20260909_05_felsworn_completion.sql:9, restored to 100 by rev_20261003_10_coa_script_rolled_proc_chance.sql), so every outgoing non-periodic damaging hit reaches the event script: Check case 300480 is !periodic && Chance(player, 300480) (AscensionFelswornEvents.cpp:54-55, a 5% roll on the DBC ProcChance, AscensionFelsworn.cpp:231-239), and Proc case 300480 calls Reduce(player, 560284, INT32_MAX) (AscensionFelswornEvents.cpp:145-146), which calls Player::RemoveSpellCooldown(id, true) for every known Infernal rank (AscensionFelsworn.cpp:241-249) and so sends one SMSG_CLEAR_COOLDOWN of 560284 whether a cooldown ran or not (Player.cpp:3953-3959). Infernal 560284 is learned and read with server_packets opcode 0x1DE row 560284. A landed auto-attack hit is direct damage (white swings carry no spell, so Derived is false): trials are the landed damaging auto-attack hits of the 2027 main hand (2300 ms; the generated scenario lists that one weapon speed, a bound of 1478 swings per part). Control: 60 s of swings before 300480 is learned: no packet. Treatment: 300480 learned (mentor D-67), 6 pooled parts of 3400 s (8868 swings at most, for at least 5755 landed hits), judged with residual_target 0.001 per pair and min_detectable 4 points (5755 landed hits, the class's residual sizing). Reference search 2026-11-23: coa-history spell 300480: 0 events in 186 logs (the reset casts nothing); Infernal 560284: 156 SPELL_CAST_SUCCESS by players in 6 logs, not usable as a rate (the talent of each caster is unknown); nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 800355,
@@ -3086,8 +3245,9 @@
       },
       "target_health_pct": 76,
       "critical": false,
-      "trials": 30,
-      "expected_source": "520833 Effect[1] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, MiscValue 20007, EffectSpellClassMask word 1 = 2048 (Sargeron Smite 802060), BasePoints 24 + 1 = 25 ($s2). Sargeron Smite is cast at the dummy trials times in a control arm without 520833 and a treatment arm with it learned (a real learn), the dummy held at 76% of its health, one point above the 75% edge, non-critical hits only: ratio 1.25 within the band of 2 points (above 75% of their maximum health, read at 76%: +25%). Reference search 2026-11-23: coa-history spell 520833: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Sargeron Smite now deals 25% increased damage to enemies above 75% of their maximum health.'. Residual failure probability (my derivation, not a tool output): the pilot sizes the arm so the 99% half-width is 0.8 of half the band; a correct server then fails only as insufficient_trials, when the sample variance exceeds 1.5625 times the true one (chi-square, 2(n-1) degrees of freedom); at the 50 trials per arm of pair P2 (fw-b3g1c) that is 3.1e-04 per run and 6.3e-04 per pair; this is within the 0.1% per pair limit; a false alert needs an error beyond band plus half-width, under 1e-12, and a false pass is excluded by the interval."
+      "trials": 47,
+      "min_trials": 47,
+      "expected_source": "520833 Effect[1] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, MiscValue 20007, EffectSpellClassMask word 1 = 2048 (Sargeron Smite 802060), BasePoints 24 + 1 = 25 ($s2). Sargeron Smite is cast at the dummy trials times in a control arm without 520833 and a treatment arm with it learned (a real learn), the dummy held at 76% of its health, one point above the 75% edge, non-critical hits only: ratio 1.25 within the band of 2 points (above 75% of their maximum health, read at 76%: +25%). Reference search 2026-11-23: coa-history spell 520833: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Sargeron Smite now deals 25% increased damage to enemies above 75% of their maximum health.'. Residual failure probability (tool ADR 1255): the pilot sizes the arm so the 99% half-width is 0.8 of half the band; a correct server then fails only as insufficient_trials, when the sample variance exceeds 1.5625 times the true one (chi-square, 2(n-1) degrees of freedom); min_trials 47 floors every sized or unsized run at 47 trials per arm, where that tail is 4.55e-04 per run and 9.1e-04 per pair, within the 0.1% per pair limit (20 trials per arm gave 1.48e-02 per run); a false alert needs an error beyond band plus half-width, under 1e-12, and a false pass is excluded by the interval."
     },
     {
       "spell": 520833,
@@ -3137,8 +3297,9 @@
       },
       "target_health_pct": 74,
       "critical": false,
-      "trials": 30,
-      "expected_source": "520833 Effect[1] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, MiscValue 20007, EffectSpellClassMask word 1 = 2048 (Sargeron Smite 802060), BasePoints 24 + 1 = 25 ($s2). Sargeron Smite is cast at the dummy trials times in a control arm without 520833 and a treatment arm with it learned (a real learn), the dummy held at 74% of its health, one point below the 75% edge, non-critical hits only: ratio 1.0 within the band of 2 points (at 74%, below the 75% condition: no change; with the 76% arm this brackets the edge). Reference search 2026-11-23: coa-history spell 520833: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Sargeron Smite now deals 25% increased damage to enemies above 75% of their maximum health.'. Residual failure probability (my derivation, not a tool output): the pilot sizes the arm so the 99% half-width is 0.8 of half the band; a correct server then fails only as insufficient_trials, when the sample variance exceeds 1.5625 times the true one (chi-square, 2(n-1) degrees of freedom); at the 20 trials per arm of pair P2 (fw-b3g1c) that is 1.5e-02 per run and 3.0e-02 per pair; this exceeds the 0.1% per pair limit (a false alert needs an error beyond band plus half-width, under 1e-12, and a false pass is excluded by the interval)."
+      "trials": 47,
+      "min_trials": 47,
+      "expected_source": "520833 Effect[1] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, MiscValue 20007, EffectSpellClassMask word 1 = 2048 (Sargeron Smite 802060), BasePoints 24 + 1 = 25 ($s2). Sargeron Smite is cast at the dummy trials times in a control arm without 520833 and a treatment arm with it learned (a real learn), the dummy held at 74% of its health, one point below the 75% edge, non-critical hits only: ratio 1.0 within the band of 2 points (at 74%, below the 75% condition: no change; with the 76% arm this brackets the edge). Reference search 2026-11-23: coa-history spell 520833: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Sargeron Smite now deals 25% increased damage to enemies above 75% of their maximum health.'. Residual failure probability (tool ADR 1255): the pilot sizes the arm so the 99% half-width is 0.8 of half the band; a correct server then fails only as insufficient_trials, when the sample variance exceeds 1.5625 times the true one (chi-square, 2(n-1) degrees of freedom); min_trials 47 floors every sized or unsized run at 47 trials per arm, where that tail is 4.55e-04 per run and 9.1e-04 per pair, within the 0.1% per pair limit (20 trials per arm gave 1.48e-02 per run); a false alert needs an error beyond band plus half-width, under 1e-12, and a false pass is excluded by the interval."
     },
     {
       "spell": 525079,
@@ -3222,8 +3383,9 @@
         ]
       },
       "critical": false,
-      "trials": 20,
-      "expected_source": "525079 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 22 (SPELLMOD_DOT), BasePoints 19 + 1 = 20 ($s1), EffectSpellClassMask word 0 = 32, the SpellFamilyFlags word 0 of Bane of Chaos 706420 (Effect[0] aura 3 PERIODIC_DAMAGE, EffectAmplitude 3000). Bane of Chaos is cast at the dummy trials times; each trial waits 3500 ms so one tick of its own periodic damage lands (the Blade of Faith 803880 precedent of hit_ratio cast_wait_ms), in a control arm without 525079 and a treatment arm with it learned: ratio 1.20 within the band of 2 points on the non-critical ticks. Reference search 2026-11-23: coa-history spell 525079: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says '(not listed by the snapshot)'. Residual failure probability (my derivation, not a tool output): the pilot sizes the arm so the 99% half-width is 0.8 of half the band; a correct server then fails only as insufficient_trials, when the sample variance exceeds 1.5625 times the true one (chi-square, 2(n-1) degrees of freedom); at the 20 trials per arm of pair P2 (fw-b3g1c) that is 1.5e-02 per run and 3.0e-02 per pair; this exceeds the 0.1% per pair limit (a false alert needs an error beyond band plus half-width, under 1e-12, and a false pass is excluded by the interval)."
+      "trials": 47,
+      "min_trials": 47,
+      "expected_source": "525079 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 22 (SPELLMOD_DOT), BasePoints 19 + 1 = 20 ($s1), EffectSpellClassMask word 0 = 32, the SpellFamilyFlags word 0 of Bane of Chaos 706420 (Effect[0] aura 3 PERIODIC_DAMAGE, EffectAmplitude 3000). Bane of Chaos is cast at the dummy trials times; each trial waits 3500 ms so one tick of its own periodic damage lands (the Blade of Faith 803880 precedent of hit_ratio cast_wait_ms), in a control arm without 525079 and a treatment arm with it learned: ratio 1.20 within the band of 2 points on the non-critical ticks. Reference search 2026-11-23: coa-history spell 525079: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says '(not listed by the snapshot)'. Residual failure probability (tool ADR 1255): the pilot sizes the arm so the 99% half-width is 0.8 of half the band; a correct server then fails only as insufficient_trials, when the sample variance exceeds 1.5625 times the true one (chi-square, 2(n-1) degrees of freedom); min_trials 47 floors every sized or unsized run at 47 trials per arm, where that tail is 4.55e-04 per run and 9.1e-04 per pair, within the 0.1% per pair limit (20 trials per arm gave 1.48e-02 per run); a false alert needs an error beyond band plus half-width, under 1e-12, and a false pass is excluded by the interval."
     },
     {
       "spell": 520831,
@@ -3642,8 +3804,9 @@
         ]
       },
       "critical": false,
-      "trials": 30,
-      "expected_source": "524947 Effect[0] aura 42 PROC_TRIGGER_SPELL 525027; 525027 Effect[0] aura 108 ADD_PCT_MODIFIER, BasePoints 24 + 1 = 25 ($525027s1), DurationIndex 28 = 5000 ms, a mask over the direct damage spells (Spell.dbc). The first design cast Chaos Rush 500028 before each observed Sargeron Smite 802060 and read no hit at all in either arm: the harness reported cast_failures reason 134 (SPELL_FAILED_UNIT_NOT_INFRONT, SharedDefines.h:1184) on every Smite, because the dash leaves the caster facing away from the dummy (pair C, run 20261123-164430). The grant of 525027 by a real Chaos Rush cast is proven by the aura_held and aura_gone labels of this spell, so here 525027 is set on the caster before every treatment trial as a named precondition fixture (harness set_aura, the control arm without it), and the cumulative non-critical Smite damage is read per trial: the mean non-critical hit of the treatment arm is 1.25 times the control's within the band of 2 points. The consumption of the buff by the first instance is not read. Reference search 2026-11-23: coa-history spell 524947: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Using Chaos Rush increases the next instance of direct spell or ability damage within 5 seconds by 25%.'. Residual failure probability (my derivation, not a tool output): the pilot sizes the arm so the 99% half-width is 0.8 of half the band; a correct server then fails only as insufficient_trials, when the sample variance exceeds 1.5625 times the true one (chi-square, 2(n-1) degrees of freedom); at the 40 trials per arm of pair P2 (fw-b3g1c) that is 1.1e-03 per run and 2.2e-03 per pair; this exceeds the 0.1% per pair limit (a false alert needs an error beyond band plus half-width, under 1e-12, and a false pass is excluded by the interval)."
+      "trials": 47,
+      "min_trials": 47,
+      "expected_source": "524947 Effect[0] aura 42 PROC_TRIGGER_SPELL 525027; 525027 Effect[0] aura 108 ADD_PCT_MODIFIER, BasePoints 24 + 1 = 25 ($525027s1), DurationIndex 28 = 5000 ms, a mask over the direct damage spells (Spell.dbc). The first design cast Chaos Rush 500028 before each observed Sargeron Smite 802060 and read no hit at all in either arm: the harness reported cast_failures reason 134 (SPELL_FAILED_UNIT_NOT_INFRONT, SharedDefines.h:1184) on every Smite, because the dash leaves the caster facing away from the dummy (pair C, run 20261123-164430). The grant of 525027 by a real Chaos Rush cast is proven by the aura_held and aura_gone labels of this spell, so here 525027 is set on the caster before every treatment trial as a named precondition fixture (harness set_aura, the control arm without it), and the cumulative non-critical Smite damage is read per trial: the mean non-critical hit of the treatment arm is 1.25 times the control's within the band of 2 points. The consumption of the buff by the first instance is not read. Reference search 2026-11-23: coa-history spell 524947: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Using Chaos Rush increases the next instance of direct spell or ability damage within 5 seconds by 25%.'. Residual failure probability (tool ADR 1255): the pilot sizes the arm so the 99% half-width is 0.8 of half the band; a correct server then fails only as insufficient_trials, when the sample variance exceeds 1.5625 times the true one (chi-square, 2(n-1) degrees of freedom); min_trials 47 floors every sized or unsized run at 47 trials per arm, where that tail is 4.55e-04 per run and 9.1e-04 per pair, within the 0.1% per pair limit (20 trials per arm gave 1.48e-02 per run); a false alert needs an error beyond band plus half-width, under 1e-12, and a false pass is excluded by the interval."
     },
     {
       "spell": 555738,
@@ -7856,6 +8019,73 @@
         ]
       },
       "observe_source": "803904 duration $d = 12000 ms (Spell.dbc DurationIndex). The aura is gone 12100 ms after the cast (excludes a duration 10% long, 13200 ms). Reference search 2026-11-23: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS, 281 SPELL_AURA_APPLIED and 280 SPELL_AURA_REMOVED by players in 15 of 186 logs. Applied-to-removed intervals of the 280 pairs: longest 12.07 to 12.44 s (the $d = 12000 ms expiry), the others 1.37 s and up (the aura also ends after $n attacks, so a shorter interval is not an expiry); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 802076,
+      "name": "Pit Lord's Strength 802076 (Annihilation attacks)",
+      "kind": "metric_delta",
+      "variant": "charges",
+      "label_suffix": "charges",
+      "quote": "Your Annihilation now affects $s1 additional attack",
+      "trigger_spell": 803904,
+      "gate_spell": 802076,
+      "target": "caster",
+      "metric": "aura_script_value",
+      "fields": {
+        "spell": 803904,
+        "key": 803904
+      },
+      "before_expected": 5,
+      "expected": 6,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "802076 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 0 + 1 = 1 ($s1), on Annihilation 803904 (ProcCharges 5). The charges of Annihilation on the caster are read 500 ms after a real cast, before a learn of 802076 (the control, 5) and after it: 6. Reference search 2026-11-23: coa-history spell 802076: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only. Read without the script_count opt-in: the stored count right after the cast is data, not consumption (the attacks the aura lasts are not read)."
+    },
+    {
+      "spell": 802110,
+      "name": "Pit Lord's Strength 802110 (Annihilation attacks)",
+      "kind": "metric_delta",
+      "variant": "charges",
+      "label_suffix": "charges",
+      "quote": "Your Annihilation now affects $s1 additional attack",
+      "trigger_spell": 803904,
+      "gate_spell": 802110,
+      "target": "caster",
+      "metric": "aura_script_value",
+      "fields": {
+        "spell": 803904,
+        "key": 803904
+      },
+      "before_expected": 5,
+      "expected": 7,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "802110 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 1 + 1 = 2 ($s1), on Annihilation 803904 (ProcCharges 5). The charges of Annihilation on the caster are read 500 ms after a real cast, before a learn of 802110 (the control, 5) and after it: 7. Reference search 2026-11-23: coa-history spell 802110: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only. Read without the script_count opt-in: the stored count right after the cast is data, not consumption (the attacks the aura lasts are not read)."
+    },
+    {
+      "spell": 803904,
+      "name": "Annihilation (attacks)",
+      "kind": "metric_delta",
+      "variant": "charges",
+      "label_suffix": "charges",
+      "quote": "Lasts for $n attacks or $d.",
+      "trigger_spell": 803904,
+      "gate_spell": 803904,
+      "target": "caster",
+      "metric": "aura_script_value",
+      "fields": {
+        "spell": 803904,
+        "key": 803904
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "803904 ProcCharges 5 (Spell.dbc; $n attacks). The charges of the aura on the caster (script value 803904, set to 5 plus the SPELLMOD_CHARGES mods, AscensionFelswornAuras.cpp:68-72) are read 500 ms after a real cast: 0 before the cast (control) and 5 after. Reference search 2026-11-23: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS, 281 SPELL_AURA_APPLIED and 280 SPELL_AURA_REMOVED by players in 15 of 186 logs. Applied-to-removed intervals of the 280 pairs: longest 12.07 to 12.44 s (the $d = 12000 ms expiry), the others 1.37 s and up (the aura also ends after $n attacks, so a shorter interval is not an expiry); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only. Read without the script_count opt-in: the stored count right after the cast is data, not consumption (the attacks the aura lasts are not read)."
     },
     {
       "spell": 806109,
@@ -12358,7 +12588,14 @@
       "expected": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "Bane of Fire 707901 (SpellFamilyFlags[0] 32, the Bane family mask of Bane of Chaos 706420) is cast at the dummy in both phases. The before phase casts no second Bane: Bane of Fire is on the dummy (the control, read 1). The after phase casts Bane of Chaos at the same dummy 1700 ms later: Bane of Fire is gone (read 0), so a second Bane replaces the first. Reference search 2026-11-23: coa-history spell 706420: 324 casts, 206 aura applied and 206 removed in 2 logs (113 refreshes), no figure for the exclusivity; nothing else found."
+      "observe_source": "Bane of Fire 707901 (SpellFamilyFlags[0] 32, the Bane family mask of Bane of Chaos 706420) is cast at the dummy in both phases. The before phase casts no second Bane: Bane of Fire is on the dummy (the control, read 1). The after phase casts Bane of Chaos at the same dummy 1700 ms later: Bane of Fire is gone (read 0), so a second Bane replaces the first. Reference search 2026-11-23: coa-history spell 706420: 324 casts, 206 aura applied and 206 removed in 2 logs (113 refreshes), no figure for the exclusivity; nothing else found. Precondition (after_setup_stacks, ADR 1257): Bane of Fire 707901 is read on the dummy at exactly 1 stack right after its setup cast in each phase, before the before reading and before the Bane of Chaos cast; a run where it did not land is void, not judged (the run-1 flip read 0 before the learn). No roll decides the judged reading: the removal is the aura apply handler AscensionFelswornAuras.cpp:48-58, which removes every other Bane of the same caster on the target when a Bane (AscensionFelsworn.cpp:114-117) applies, with no chance; the caster's spell hit rating 10000 (class file ratings) lifts HitChance to the 10000 clamp of Unit::MagicSpellHitResult (Unit.cpp:4039-4053), so the miss roll threshold is 0.",
+      "after_setup_stacks": [
+        {
+          "spell": 707901,
+          "actor": "dummy",
+          "stacks": 1
+        }
+      ]
     },
     {
       "spell": 706267,
@@ -13764,12 +14001,12 @@
       "expected_source": "570159 Effect[0] aura 165 SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS carries 0.15 x Agility (ADR felsworn/0010): int32(0.15 x 130) = 19 at the class file reference Agility 130 (stat 1). The engine consumes it in Unit::MeleeDamageBonusDone (Unit.cpp:11525, 11540): a plain white swing gains int32(19 / 14 x weapon speed 2.3) = int32(3.12) = 3 flat before armor, while the weapon roll already holds the reference attack power. Weapon 2027 (class file weapon: 17.25-28.75, mean 23, speed 2300 ms) at reference attack power 312: control mean 23 + 312 / 14 x 2.3 = 74.257; with the scar 77.257; expected mean ratio 1.0404 (armor multiplies both arms alike); 1.0 if the white swing does not read the scar, 1.0943 with the pre-fix scar of 45 (int32(7.39) = 7). Band: the larger of 5% of the stated bonus and 2 points (+2.04% to +6.04%), which excludes both no gain and the pre-fix scar. Treatment: Azzinoth's Assault 801904 is cast at the dummy before every swing with 570158 learned (the scar is cast by it, AscensionFelswornEvents.cpp:214); control: no learn and no cast. Felfury 800058 x6 and At Least 2 Felfury 803468 are set on the caster in both arms before every trial (named precondition fixtures: Azzinoth's Assault needs 803468 and consumes Felfury; Felfury carries haste auras 192/216 and 214 only, no damage term), and the plain (not critical, not glancing) main-hand hits are read, as in the Witch Hunter precedent 804068 ap_melee_swing (WH ADR 0024). A second Agility value is not run: +30 Agility (58451) gives int32(24 / 14 x 2.3) = 3 flat as well, so the white swing cannot separate it from 19 (the Agility slope stays on scar_amount_agility, data). The aura amount entries scar_amount and scar_amount_agility stay as the value readback. Reference search 2026-11-23: see scar_amount (coa-history 570158 / 570159: 0 events in 186 logs; bindmysoul talents snapshot: 15% of Agility for 10 seconds); nothing else found."
     },
     {
-      "spell": 805240,
-      "name": "Scars of Suffering (Tyrant's Gaze against the scarred target, D-61 diagnostic)",
+      "spell": 570158,
+      "name": "Scars of Suffering (Tyrant's Gaze against the scarred target)",
       "kind": "hit_ratio",
       "variant": "scar_ap_gaze",
       "label_suffix": "scar_ap_gaze",
-      "quote": "dealing ${$m1+0+$AP*0.35} Shadowflame Damage to them.",
+      "quote": "increasing your allies' attack power against them by ${$m1+0+$AGI*0.15}",
       "expected": 1.01325,
       "observe_spell": 805240,
       "critical": false,
@@ -13834,7 +14071,148 @@
       "control_excluded": {
         "residual": 0.0001
       },
-      "expected_source": "Mentor D-61 diagnostic (report the measured gain, change nothing): tooltip of 805240 reads ${$m1+0+$AP*0.35}; m1 = 219 + 1 + 4.0 x (60 - 29) = 344 and attack power 312 give 344 + int(0.35 x 312 = 109.2) = 453 in the control arm. With the scar the victim carries int32(0.15 x 130) = 19 attack power against it: 344 + int(0.35 x 331 = 115.85) = 459, expected mean ratio 1.01325 (+6 per hit); 1.0 if the class scaling hook reads attack power without the victim (AscensionFelswornContracts.cpp:342). Same fixtures as the 805240 damage entry (crit removed by 984954, partial resists by 823764, dummy below 35% health: 30%). Azzinoth's Assault 801904 is cast at the dummy before every Gaze in the treatment arm with 570158 learned. Reference search 2026-11-23: see the 805240 damage entry (coa-history: 13 casts, no decisive figure); nothing found on the scar."
+      "expected_source": "Regression of Felsworn ADR 0015 (mentor D-68). The entry is keyed to 570158 so it runs with the Slayer set (spell_weapon_sets): under the Tyrant set of 805240 (item 2529, subclass 8) Azzinoth's Assault 801904 fails with SPELL_FAILED_EQUIPPED_ITEM_CLASS (29; 801904 EquippedItemClass 2, SubClassMask 41105), so the D-61 diagnostic keyed to 805240 (453 in both arms, pair 20261123-194225 / 20261123-194305) never scarred the dummy (fw-fixvap diagnostic: 570159 absent at all 80 treatment casts, cast_failure 29). Tyrant's Gaze has no weapon requirement (EquippedItemClass -1). The quote is the scar's (570158); the observed Gaze 805240 tooltip reads ${$m1+0+$AP*0.35}; m1 = 219 + 1 + 4.0 x (60 - 29) = 344 and attack power 312 give 344 + int(0.35 x 312 = 109.2) = 453 in the control arm. With the scar the victim carries int32(0.15 x 130) = 19 attack power against it: 344 + int(0.35 x 331 = 115.85) = 459, expected mean ratio 1.01325 (+6 per hit); 1.0 if the class reads attack power without the victim, as the scaling hook alone does (felsworn_scaling::ModifySpellEffectBaseValue has no target); the victim term is added per target in felsworn_casts::OnSpellCalculatedTarget. The +6 per hit is int(0.35 x 19 = 6.65) with no damage modifier in either arm (control 453 = 344 + 109 exactly), so truncation cannot hide it: a single hit separates 453 from 459. Same fixtures as the 805240 damage entry (crit removed by 984954, partial resists by 823764, dummy below 35% health: 30%). Azzinoth's Assault 801904 is cast at the dummy before every Gaze in the treatment arm with 570158 learned. Reference search 2026-11-23: see the 805240 damage entry (coa-history: 13 casts, no decisive figure); nothing found on the scar."
+    },
+    {
+      "spell": 570158,
+      "name": "Scars of Suffering (Tyrant's Gaze against the scarred target, exact per-hit gain)",
+      "kind": "metric_delta",
+      "variant": "scar_ap_gaze_pin",
+      "label_suffix": "scar_ap_gaze_pin",
+      "quote": "increasing your allies' attack power against them by ${$m1+0+$AGI*0.15}",
+      "trigger_spell": 805240,
+      "gate_spell": 570158,
+      "target": "dummy",
+      "cast_power": 100,
+      "setup_casts": [
+        801904
+      ],
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805240,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 453,
+      "expected": 912,
+      "expected_gain": 459,
+      "tolerance": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "phase_target_health_pct": [
+        34,
+        30
+      ],
+      "expected_source": "Pin of the scar_ap_gaze term (Felsworn ADR 0015, mentor D-68; review fw-rfvap M2: the hit_ratio band would also pass a doubled term, 465 / 453 = +2.65%). Both phases cast Azzinoth's Assault 801904 at the dummy, wait 1600 ms (its global cooldown) and cast one Tyrant's Gaze 805240; 570158 is learned between the phases, so only the after phase's Assault scars the dummy (570158 Effect[0] PROC_TRIGGER_SPELL 570159, AscensionFelswornEvents.cpp:91-92, 214). Keyed to 570158 so it runs with the Slayer set: 801904 EquippedItemClass 2, SubClassMask 41105 excludes the Tyrant set's item 2529 (subclass 8). Gaze tooltip ${$m1+0+$AP*0.35}: m1 = 219 + 1 + 4.0 x (60 - 29) = 344, attack power 312: before (no scar) 344 + int(0.35 x 312 = 109.2) = 453 (the 805240 damage entry); after, the scar int32(0.15 x 130) = 19 (570159 row {570159, 0, agility 0.15}, reference Agility 130): 344 + int(0.35 x 331 = 115.85) = 459. spell_damage_total is cumulative, so the after reading is 453 + 459 = 912 and the judged gain is the after phase's single hit, 459 within 1: no victim term gives 453, a doubled term 344 + int(0.35 x 350 = 122.5) = 466. Fixtures as in the 805240 damage entry (984954 spell crit removed, 823764 no partial resist, dummy at 34% then 30% health); Felfury 800058 x6 and 803468 are the 801904 preconditions. Reference search 2026-11-23: see the 805240 damage entry and scar_amount; nothing found on the scar."
+    },
+    {
+      "spell": 570158,
+      "name": "Scars of Suffering (off-hand Azzinoth's Assault strike against the scarred target)",
+      "kind": "metric_delta",
+      "variant": "scar_ap_offhand",
+      "label_suffix": "scar_ap_offhand",
+      "quote": "increasing your allies' attack power against them by ${$m1+0+$AGI*0.15}",
+      "trigger_spell": 801904,
+      "gate_spell": 801904,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          300482,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          853,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          570159,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          984954,
+          0,
+          -1000
+        ],
+        [
+          300482,
+          0,
+          -100
+        ],
+        [
+          570159,
+          0,
+          200100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572585,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 68,
+      "expected": 48948,
+      "expected_gain": 48880,
+      "tolerance": 3,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected_source": "Regression of review fw-rfvap I1 (Felsworn ADR 0015): the victim term of a NORMALIZED_WEAPON_DMG row follows the spell's attack type as Spell.cpp:597-603 sets it. Off-hand strike 572585 (AttributesEx3 0x1000200 with SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON, DmgClass 2, SchoolMask 1, Effect[0] 121, row {572585, 0, ap 0.145}) is cast by Azzinoth's Assault 801904 Effect[1] (TRIGGER_SPELL_WITH_VALUE, BasePoints 21 + 1 = 22) with the Slayer set (two swords 2027, 17.25-28.75, normalized speed 2.4). Both phases cast one 801904 at the dummy; the after phase adds the scar 570159 (aura 165) on the dummy with its amount set to 200100 instead of the 19 of the talent (570158 is not learned: gate_spell 801904 is already known, so no real scar replaces the fixture). Victim term: int32(0.145 x 200100 = 29014.5) = 29014, times UNIT_MOD_DAMAGE_OFFHAND TOTAL_PCT 0.5 (Unit.cpp:519; SpellEffects.cpp:4689-4708 for the fixed bonus) = 14507; the main-hand modifier would give 29014. Strike without the scar, C (Spell::EffectWeaponDmg): fixed bonus CalcValue(22 - 1 + 1 = 22) + 0.145 x 312 = 67.24, int 67, times 0.5 = 33 (int); normalized off-hand weapon damage (StatSystem CalculateMinMaxDamage) ((312 / 14 x 2.4 = 53.49) + 17.25 to 28.75) x 0.5 = 35.37 to 41.12, urand(35, 41); C = 68 to 74, no Felsworn damage factor applies (DamageFactor needs auras the fixture lacks). Stock adds its own victim term to a weapon spell in Unit::MeleeDamageBonusDone (Unit.cpp:11527-11542): int32(200100 / 14 x GetAPMultiplier = normalized speed 2.4 = 34302.86) = 34302 flat, not scaled by the off-hand percent; the class share is a marginal share of the same function (Share: bonus(2x) - bonus(x)), so it does not repeat that flat. The before reading is one strike, at least 68; the judged gain is the after phase's strike C + 34302 + 14507 = 48877 to 48883: 48880 within 3. Without the class victim term the gain is 34370 to 34376; with the main-hand modifier 63384 to 63390. The first pair of this entry (prove4, expected 14578 without the stock flat term) read 70 and 73 before and a gain of 48882 in both runs. Fixtures named as preconditions in both phases: Felfury 800058 x6 and 803468 (801904 needs 803468 and consumes 2 Felfury); 984954 Effect[0] aura 52 set to -1000 (no melee crit, as the Witch Doctor precedent); Fel Blades 300482 (aura 101 armor) set to -100 on the dummy (armor 0, so armor cannot scale the term); Hammer of Justice 853 on the dummy (a stunned target cannot block, Unit.cpp:3937-3940); hit and expertise ratings 10000 from the class file remove misses, dodges and parries. Reference search 2026-11-23: see scar_amount (coa-history 570158 / 570159: 0 events in 186 logs); nothing found on an off-hand share of the scar."
     },
     {
       "spell": 520693,
@@ -14939,6 +15317,88 @@
         }
       ],
       "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK without snare and daze (SharedDefines.h:1469), the list of the CoA spell with the same tooltip wording, Vial of Moonwell Water 804652 'Immune to crowd control effects.' (SpellInfo.cpp:2788-2790, ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Piercing Howl 12323 (Mechanic 11 snare, aura 33), outside the list: snare and daze are not in the same-wording source, so the snare must land while the aura is on. Whether 'crowd control' covers snare is an open owner question; this entry reads the list as built, not that answer. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 520853,
+      "name": "Fel Torpedo (Chaos Rush is cast as Fel Torpedo once the talent is learned)",
+      "kind": "metric_delta",
+      "variant": "transform",
+      "label_suffix": "transform",
+      "quote": "Transforms your Chaos Rush into Fel Torpedo",
+      "trigger_spell": 500028,
+      "gate_spell": 520853,
+      "target": "dummy",
+      "cast_power": 100,
+      "specialization": 9,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "The replacement is TalentReplacements row { 14, 9, 520853, 500028, 500610 } (AscensionTalentReplacementData.h:29): with specialization 9 active and 520853 known, SynchronizeTalentReplacements (AscensionCompat.cpp:1133) sets Chaos Rush 500028 to be cast as Fel Torpedo 500610, and the cast opcode applies Player::GetCastReplacement (SpellHandler.cpp:411); the harness casts through HandleCastSpellOpcode. The caster switches to specialization 9 before the before phase (specialization option, ADR 1102, a precondition fixture) and casts Chaos Rush 500028 at the dummy in both phases. Fel Torpedo gives Gain(player, 1) on its cast (AscensionFelswornAbilities.cpp:286, '|cff32cd32Generates 1 Felfury' in its tooltip), Chaos Rush gives none (the felfury_chaos_rush contrast): the Felfury 800058 stacks read 1500 ms after the cast are 0 before the learn of 520853 (Chaos Rush cast) and 1 after it (the same Chaos Rush key casts Fel Torpedo). Reference search: coa-history spell 520853 0 events in 186 logs, recorded on the felfury entry (2026-11-23)."
+    },
+    {
+      "spell": 520805,
+      "name": "Scars of the Past (Fel Torpedo Energy cost: a Chaos Rush modifier carried by Fel Torpedo)",
+      "kind": "cost_gate",
+      "variant": "torpedo_cost",
+      "gated_spell": 500610,
+      "resource": "power",
+      "reduction": 5,
+      "quote": "Reduces the Energy cost of Chaos Rush by $s2",
+      "observe_source": "Claim of 520853 'Scales with modifiers to Chaos Rush'. 520805 Effect[1] aura 107 ADD_FLAT_MODIFIER, MiscValue 14 (SPELLMOD_COST), BasePoints -6 + 1 = -5, EffectSpellClassMask word 2 = 268435456: a modifier to Chaos Rush 500028 (SpellFamilyFlags 0, 524288, 268435456). Fel Torpedo 500610 carries the same words 1 and 2 (SpellFamilyFlags 33554432, 524288, 268435456; ManaCost 50 Energy), so the Chaos Rush modifier must apply to it. The caster's Energy is set to the reduced cost 45 before an attempt of Fel Torpedo: refused without 520805, through with it, refused at 44 with it. Reference search 2026-11-23: same sources as the 500028 cost_gate entry of 520805; nothing states the Fel Torpedo cost."
+    },
+    {
+      "spell": 520257,
+      "name": "Demonic Embrace (Inner Demon with five Felfury restores no Energy)",
+      "kind": "metric_delta",
+      "variant": "below_six",
+      "label_suffix": "below_six",
+      "quote": "Casting Inner Demon with at least 6 Felfury",
+      "trigger_spell": 804216,
+      "gate_spell": 520257,
+      "target": "caster",
+      "select_dummy": true,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 520258
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "setup_casts": [
+        805239,
+        802060,
+        707901
+      ],
+      "setup_cast_targets": [
+        "caster",
+        "dummy",
+        "dummy"
+      ],
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 800058,
+          "actor": "caster",
+          "stacks": 5
+        }
+      ],
+      "after_auras": [
+        [
+          804216,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Below-six arm of energy_at_six (50 Energy at six Felfury). The caster builds a real count of 5 Felfury 800058 (StackAmount 6) before each Inner Demon 804216 cast: Burning Hatred 805239 at the caster ('instantly generating 6 Felfury'), Sargeron Smite 802060 at the dummy ('Consumes 2 Felfury'), Bane of Fire 707901 at the dummy (a Bane hit on an enemy gives Gain(player, 1), AscensionFelswornAbilities.cpp:329-333; Fel Torpedo was dropped because its dash carried the caster past the dummy and the next Sargeron Smite was refused with SPELL_FAILED_UNIT_NOT_INFRONT, pair fw-tg1 proveP1); the per-cast targets are the setup_cast_targets option (ADR 1256) and the count is read at exactly 5 after the last setup cast of each phase (after_setup_stacks, ADR 1257), a mismatch voids the run. Inner Demon's own aura from the before phase is removed at the start of the after phase (after_auras), so both arms cast it the same way. The handler casts 520258 only when the Felfury consumed is at least 6 (AscensionFelswornAbilities.cpp:265-266): the energize events of 520258 on the caster are 0 before the learn of 520257 and 0 after it at five, where a threshold of 5 would restore 50. Reference search: as energy_at_six (2026-11-23)."
     },
     {
       "spell": 300476,

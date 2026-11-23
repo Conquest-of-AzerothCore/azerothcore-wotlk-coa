@@ -609,6 +609,25 @@ class HitRatioPilotTest(unittest.TestCase):
         pilot.sized(Path('/tmp/out'), trials)
         self.assertEqual(calls[-1], (Path('/tmp/out'), {'a': 60, 'b': 111}))
 
+    def test_a_trial_floor_lifts_the_sized_count_and_stays_under_the_scenario_limit(self):
+        calls, make = self.made()
+        pilot = hit_ratio_pilot(['a', 'b', 'c'], make, make, pilot_trials=20, floors={'a': 47, 'b': 47})
+        trials, records = pilot.size([self.verdict('a', status='ok', sized_trials=5, trial_limit=83),
+                                      self.verdict('b', status='ok', sized_trials=5, trial_limit=40),
+                                      self.verdict('c', status='ok', sized_trials=5, trial_limit=83)])
+        self.assertEqual(trials, {'a': 47, 'b': 40, 'c': 20})
+        self.assertEqual([record.get('min_trials') for record in records], [47, 47, None])
+        self.assertEqual([record['capped'] for record in records], [False, True, False])
+
+    def test_trial_floors_come_from_hit_ratio_entries_with_trials_at_the_floor(self):
+        from pilot import trial_floors
+        entry = {'spell': 1, 'kind': 'hit_ratio', 'name': 'n', 'label_suffix': 'x', 'trials': 47, 'min_trials': 47}
+        self.assertEqual(list(trial_floors([entry, {**entry, 'min_trials': None, 'kind': 'metric_delta'}]).values()),
+                         [47])
+        for changes in ({'trials': 30}, {'min_trials': 19}, {'min_trials': True}):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                trial_floors([{**entry, **changes}])
+
     def test_a_sized_count_below_the_pilot_keeps_the_pilot_trials(self):
         calls, make = self.made()
         pilot = hit_ratio_pilot(['a'], make, make, pilot_trials=20)

@@ -1021,7 +1021,8 @@ to +22%, "+100%" from +95% to +105%):
 Every judged verdict states the interval it actually excludes: a true bonus below `stated - band - half` or above
 `stated + band + half` reads `ok` with less than a 0.5% chance (`bonus.excluded_text`). `detail.sized_trials` is the
 trial count whose half-width would be 0.8 of the power limit; the `prove` pilot (`pilot.hit_ratio_pilot`) runs the
-hit-ratio entries at 20 trials, then generates the judged runs at that size, capped at the trial limit. Fewer hits
+hit-ratio entries at 20 trials, then generates the judged runs at that size, capped at the trial limit; an entry's
+`min_trials` floors that size (ADR 1255). Fewer hits
 than half the trials in either arm is `unmeasured`.
 
 The other ratio checks (`behaviour_ratio`, `behaviour_party_stat_ratio`, `behaviour_duration_ratio`,
@@ -2287,6 +2288,10 @@ Options with a module:
   a mismatch is `unmeasured` (ADR 1208)
 - [`after_setup_reads`](metric_delta_options/after_setup_reads.md): a caster aura read after the last setup cast of
   each phase, a mismatch is `unmeasured` (ADR 1227)
+- [`after_setup_stacks`](metric_delta_options/after_setup_stacks.md): an exact stack count on the caster or the dummy
+  after the last setup cast of each phase, a mismatch is `unmeasured` (ADR 1257)
+- [`setup_cast_targets`](metric_delta_options/setup_cast_targets.md): one target per setup cast, the named point
+  `setup_cast_target` (ADR 1256)
 - [`before_trigger_reads`](metric_delta_options/before_trigger_reads.md): a unit aura (caster or dummy) read before the
   trigger cast of each phase that casts, a mismatch is `unmeasured` (ADR 1233, provisional)
 - [`same_arm_ratio`](metric_delta_options/same_arm_ratio.md): a second metric read right after each reading, the
@@ -2368,6 +2373,9 @@ Options with a module:
   an uncast control window and again under the trigger, its casts read, void trials stated (ADR 1209)
 - [`use_time_contrast`](metric_delta_options/use_time_contrast.md): an opt-in learned contrast for a cast time or
   power cost read, judged with the partner arms the entry names (ADR 1194)
+- [`script_count`](metric_delta_options/script_count.md): an opt-in count read of an aura script value, refused unless
+  the quote states the count, real casts drive it and the before arm lacks or changes the driving cast (ADR 1258,
+  provisional)
 - [`ended_read`](metric_delta_options/ended_read.md): a third reading after unlearning the gate, past the triggered
   aura's DBC duration, that must equal the before reading of the same scenario (ADR 1247)
 - [`ratio_to_metric`](metric_delta_options/ratio_to_metric.md): each judged reading divided by a second metric of the
