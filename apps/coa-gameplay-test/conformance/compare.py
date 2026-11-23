@@ -33,6 +33,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         engine_amount, stated_ratio,
                         strongest_percent)
 from behaviours import DURATION_RATIO_DISCRIMINATED
+from block_value import BLOCK_VALUE_LABEL, block_value_terms, block_value_text
 from bonus_data import (POWER_TERM, SPELL_RANK_FILE, NotModelled, bonus_row, bonus_table, bonus_terms,
                         client_first_ranks, coefficient_modifiers)
 from bonus import (RELATIVE_BAND, Bonus, band_excluded_text, band_status, bonus_band, bonus_detail, bonus_of,
@@ -658,6 +659,18 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
         return replace(base, status='unmodelled', measured=measured,
                        explanation=f'{token.text} is not monotone in the roll {rolls.start}..{rolls.stop - 1} of '
                                    f'effect {effect}')
+    class_file = getattr(tooltips, 'class_file', None) or {}
+    try:
+        own = spell_id == expectation.rank_id
+        flat = block_value_terms(class_file, expectation.spell_id, run.values) if own else {}
+    except KeyError:
+        return replace(base, status='unmeasured', measured=measured,
+                       explanation=f'{token.text}: {expectation.spell_id} adds the block value to effect {effect} '
+                                   f'and the run reads no {BLOCK_VALUE_LABEL!r}')
+    block_note = ''
+    if effect in flat:
+        values = [value + flat[effect] for value in values]
+        block_note = '; ' + block_value_text(class_file, expectation.spell_id, effect, flat[effect])
     labels = sample_labels(base.label, (expectation.model or {}).get('samples', 1))
     reads = [run.values[label] for label in labels if label in run.values]
     terms = modelled_bonus(tooltips, spell_id, effect, token.text, tokens.caster)
@@ -673,7 +686,8 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
     if needed is not None and placeholder_sample_count(tooltips, spell_id, effect):
         needed = min(needed, planned_reads(expectation, tokens, tooltips, index, spell_id, effect, rolls))
     roll = (f'{token.text} over the roll {rolls.start}..{rolls.stop - 1} of effect {effect}: {min(values):g} to '
-            f'{max(values):g}, uniform mean {expected:.3f} sigma {sigma:.3f}; {len(reads)} spell_effect_value reads '
+            f'{max(values):g}{block_note}, uniform mean {expected:.3f} sigma {sigma:.3f}; {len(reads)} '
+            f'spell_effect_value reads '
             f'(each one SpellEffectInfo::CalcValue roll{"; " + terms.text() if terms else ""}), mean {mean:.3f}')
     detail = {'reads': len(reads), 'reads_needed': needed, **({BONUS_DATA: terms.detail()} if terms else {})}
     if needed is None:

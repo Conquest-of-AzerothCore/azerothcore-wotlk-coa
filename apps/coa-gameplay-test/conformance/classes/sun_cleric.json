@@ -44073,5 +44073,12 @@
         804247
       ]
     }
+  ],
+  "block_value_terms": [
+    {
+      "spell": 800654,
+      "effect": 0,
+      "source": "AscensionSunClericContracts.cpp:324-325, ModifySpellEffectBaseValue adds Player::GetShieldBlockValue() (Player.cpp:5611-5618, flat + Strength x 0.5 - 10, times the block percent) to effect 0 of every rank named 800654, before the int32 truncation of CalcValue (SpellInfo.cpp:592); read as the harness metric block_value (CoAGameplayTest.cpp:5152-5153, the same GetShieldBlockValue); a code-level term, the tooltip states only scaling with your block value"
+    }
   ]
 }

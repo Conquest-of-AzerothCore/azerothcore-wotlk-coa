@@ -5,6 +5,7 @@ import re
 from statistics import fmean, pstdev
 from typing import Mapping, Sequence
 
+from block_value import block_value_steps
 from classes import PASSIVE_ATTRIBUTE, ClassSpell, DataSet, dataset
 from profile import (CASTER, DBC_DIR, EQUIP_FIELDS, WEAPON_REQUIREMENT_FIELDS, armed, base_steps, character_of,
                      known_aura_label, measurement, player_fixture, server_requirement, skill_target)
@@ -792,7 +793,8 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
     for aura in class_file.get('known_auras', []):
         expectations.append(Expectation(
             known_aura_label(aura), 'known_aura', aura, aura, None, str(aura), 'reference profile aura'))
-    learn = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': rank_id}]
+    learn = (base_steps(class_file) + block_value_steps(class_file, spell.spell_id)
+            + [{'action': 'learn', 'actor': CASTER, 'spell': rank_id}]
             + [{'action': 'learn', 'actor': CASTER, 'spell': gating} for gating in sorted(known_spells)]
             + [{'action': 'learn', 'actor': CASTER, 'spell': setup} for setup in ally_cast or ()])
     budget = min(MAX_SCENARIO_STEPS - len(learn) - len(measured) - len(cast_steps) - len(after_cast)

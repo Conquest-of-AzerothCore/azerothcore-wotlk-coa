@@ -25,6 +25,8 @@ A rank hit (`hits.rank_hit`, the default `hit_mean` path) had none, so Dawnbreak
   `heal` kind. With a loss, it builds the engine model from the same rolls less the loss (`engine_rolls`), so each
   value is `floor(base + trunc(term) + roll + bonus)`, and sets `engine` and `engine_rule`.
 - The tooltip model (mean, sigma, `minimum_hits`) is unchanged: generation does not move.
+- When the engine model cannot be built (`engine_rolls` raises `Unmodelled`, as for Temple Guardian 803792, whose
+  heal reads a sibling effect's token), the rank keeps its model without an engine variant, as before.
 - Periodic, weapon and triggered-weapon kinds keep ADR 0147's label.
 
 ## Consequences
