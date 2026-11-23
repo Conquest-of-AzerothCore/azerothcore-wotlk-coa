@@ -95,9 +95,7 @@
         "evidence": "behaviour"
       }
     ],
-    "kind": "claim",
-    "evidence": "behaviour",
-    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
+    "kind": "claim"
   },
   {
     "spell": 300467,

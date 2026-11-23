@@ -2194,13 +2194,21 @@
       "target": "caster",
       "metric": "parry_chance",
       "fields": {},
-      "before_expected": 0,
-      "expected": 4,
+      "before_expected": 9,
+      "expected": 13,
       "expected_gain": 4,
       "tolerance": 0.01,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "560576 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT, BasePoints 3 + 1 = 4 ($s1), TARGET_UNIT_CASTER. The caster's live parry chance is read before (control) and after a real learn of 560576: gain 4 points; a reference character that cannot parry starts at 0 (docs/generate-and-compare.md). Reference search 2026-11-23: coa-history spell 560576: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); ~/CoaServer/reference snapshots and the bindmysoul snapshot add nothing beyond the tooltip; expected values come from the tooltip and the DBC only."
+      "observe_source": "560576 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT, BasePoints 3 + 1 = 4 ($s1), TARGET_UNIT_CASTER. The caster's live parry chance is read before (control) and after a real learn of 560576: gain 4 points; a reference character that cannot parry starts at 0 (docs/generate-and-compare.md). Reference search 2026-11-23: coa-history spell 560576: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); ~/CoaServer/reference snapshots and the bindmysoul snapshot add nothing beyond the tooltip; expected values come from the tooltip and the DBC only. Design 2 (run 1 read 0 before and 9 / 13 after: the first parry aura unlocks CanParry and the 5% base parry, so the unprimed gain is aura + 5): Divine Right 681469 (Effect[1] aura 47 SPELL_AURA_MOD_PARRY_PERCENT, BasePoints 3 + 1 = 4, set by harness set_aura as a named precondition fixture in both phases) unlocks CanParry in the control reading too; the judged gain is then only this spell's own parry, 4. before_expected 9 is the floor-reach value (base 5 from the engine's unlock + the fixture's 4), not the judged quantity.",
+      "phase_auras": [
+        [
+          681469,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 561343,
@@ -2214,13 +2222,21 @@
       "target": "caster",
       "metric": "parry_chance",
       "fields": {},
-      "before_expected": 0,
-      "expected": 8,
+      "before_expected": 9,
+      "expected": 17,
       "expected_gain": 8,
       "tolerance": 0.01,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "561343 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT, BasePoints 7 + 1 = 8 ($s1), TARGET_UNIT_CASTER. The caster's live parry chance is read before (control) and after a real learn of 561343: gain 8 points. Reference search 2026-11-23: coa-history spell 561343: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); ~/CoaServer/reference snapshots and the bindmysoul snapshot add nothing beyond the tooltip; expected values come from the tooltip and the DBC only."
+      "observe_source": "561343 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT, BasePoints 7 + 1 = 8 ($s1), TARGET_UNIT_CASTER. The caster's live parry chance is read before (control) and after a real learn of 561343: gain 8 points. Reference search 2026-11-23: coa-history spell 561343: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); ~/CoaServer/reference snapshots and the bindmysoul snapshot add nothing beyond the tooltip; expected values come from the tooltip and the DBC only. Design 2 (run 1 read 0 before and 9 / 13 after: the first parry aura unlocks CanParry and the 5% base parry, so the unprimed gain is aura + 5): Divine Right 681469 (Effect[1] aura 47 SPELL_AURA_MOD_PARRY_PERCENT, BasePoints 3 + 1 = 4, set by harness set_aura as a named precondition fixture in both phases) unlocks CanParry in the control reading too; the judged gain is then only this spell's own parry, 8. before_expected 9 is the floor-reach value (base 5 from the engine's unlock + the fixture's 4), not the judged quantity.",
+      "phase_auras": [
+        [
+          681469,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 561345,
