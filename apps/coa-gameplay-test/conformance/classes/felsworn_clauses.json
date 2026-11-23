@@ -2044,8 +2044,7 @@
       {
         "claim": "within $801902d",
         "labels": [
-          "801899 spell_duration 801902 #1",
-          "801899 behaviour_metric_delta legionfall_duration"
+          "801899 spell_duration 801902 #1"
         ]
       }
     ]

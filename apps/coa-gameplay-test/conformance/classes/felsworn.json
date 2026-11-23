@@ -115,27 +115,6 @@
       "reset_spell": 801903,
       "marker_spell": 801902,
       "reason": "Annihilan Strike 801903 costs 40 Energy with a 10000 ms category cooldown (Spell.dbc). 801902 Effect[0] aura 108 SPELLMOD_COST, EffectBasePoints -51 (-50%), is the marker; Effect[1] 195 resets the cooldown of 801903. A proc is read as a rise of the 801902 cast count; the cooldown must read 0 after a fired cast, the next cast must cost the reduced amount (20 Energy) and every other cast the full cost (40); the 20 casts without the passive are the control arm. Script path AscensionFelswornEvents.cpp:84, :201-203."
-    },
-    {
-      "spell": 801899,
-      "name": "Legionfall (the cost reduction lasts $801902d)",
-      "kind": "last_application_expiry",
-      "label_suffix": "legionfall_duration",
-      "quote": "within $801902d",
-      "gate_spell": 801899,
-      "trigger_spell": 801903,
-      "aura": 801902,
-      "expected_ms": 15000,
-      "control_window_ms": 500,
-      "window_ms": 26000,
-      "poll_ms": 50,
-      "caster": true,
-      "repeat": {
-        "count": 4,
-        "every_ms": 1600
-      },
-      "forced_roll": 801899,
-      "observe_source": "801902 is applied only by the 801899 proc (EffectTriggerSpell[0] of 801899, self cast by the handler), so the proc is the trigger. Expected 15000 ms: Spell.dbc 801902 DurationIndex 8, SpellDuration.dbc row 8 Duration 15000 (the $801902d of the tooltip). Annihilan Strike 801903 (strikes 801913 and 801914) is cast at the dummy 4 times 1600 ms apart with its Energy refilled before each; the roll of 801899 is forced by the ADR 0588 mutant, released at the end and read gone. Every 50 ms the caster's game time, the 801902 application count and its presence are read: the aura must be gone 15000 ms after the last application, the bracket inside the band (5% of 15000 = 750 ms), which excludes a duration 10% off (13500 or 16500 ms) on both sides. Control (801899 not learned): strikes, no proc, no 801902 application. Residual failure probability: at the forced roll, the chance of no proc in 8 landed hits is below 0.1% per pair (forced roll; the run reads the application count and is unmeasured, not ok, if none). Reference search: coa-history spell 801899 and 801902: 0 events in 186 logs; ~/CoaServer/reference snapshots (ascension-data advancement.tsv, bindmysoul talents) list the talent Legionfall 801899 without a rate or duration; nothing found for the value."
     }
   ],
   "player_observations": [],
