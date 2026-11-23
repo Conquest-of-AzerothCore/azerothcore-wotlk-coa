@@ -130,6 +130,8 @@ void ApplyContracts(SpellInfo* info)
         dummy(0);
     if (id == 800203)
         info->Effects[2].Effect = 0;
+    if (id == 800209)
+        info->Effects[EFFECT_2].MiscValue = SPELL_SCHOOL_MASK_NORMAL;
     if (id == BurningCommander)
     {
         periodic(1, 3000);

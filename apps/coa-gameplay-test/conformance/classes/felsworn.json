@@ -1456,20 +1456,20 @@
           ]
         }
       ],
-      "observe_source": "800209 Effect[2] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127, BasePoints -31 + 1 = -30 ($s3). Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) strikes the caster six times in each arm; the control arm has Demonic Will unlearned and absent, the treatment arm casts it for real (opening cast) and the aura reads present. Expected ratio 0.70. Reference search 2026-11-23: coa-history spell 800209: 13 casts, 13 aura applied and 13 removed in 4 logs, no value in a log event; nothing found beyond the tooltip and Spell.dbc.",
+      "observe_source": "800209 Effect[2] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, DBC MiscValue 127 set to 1 (Physical) by the Felsworn contract (owner ruling O-12, Felsworn ADR 0007), BasePoints -31 + 1 = -30 ($s3). Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) strikes the caster six times in each arm; the control arm has Demonic Will unlearned and absent, the treatment arm casts it for real (opening cast) and the aura reads present. Expected ratio 0.70. Reference search 2026-11-23: coa-history spell 800209: 13 casts, 13 aura applied and 13 removed in 4 logs, no value in a log event; nothing found beyond the tooltip and Spell.dbc.",
       "strikes": 1,
       "settle_ms": 50
     },
     {
       "spell": 800209,
-      "name": "Demonic Will (Shadow damage taken)",
+      "name": "Demonic Will (Holy damage taken)",
       "kind": "taken_hit",
-      "variant": "shadow_taken",
-      "label_suffix": "shadow_taken",
+      "variant": "holy_taken",
+      "label_suffix": "holy_taken",
       "judge": "damage_ratio",
       "expected": 1.0,
       "quote": "reducing Physical damage taken by $s3%",
-      "strike_spell": 47632,
+      "strike_spell": 41394,
       "caster_health_pct": 100,
       "caster_max_health": 100000,
       "trials": 20,
@@ -1507,7 +1507,7 @@
           ]
         }
       ],
-      "observe_source": "800209 Effect[2] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127 (every school mask), BasePoints -31 + 1 = -30 ($s3). The tooltip words only Physical damage ('reducing Physical damage taken'), so the expected ratio for a Shadow hit is 1.0 (no reduction). Grave Coil 47632 (Shadow, DmgClass 1 magic, the Sun Cleric 680652 shadow_taken strike) strikes the caster in each arm; the control arm has Demonic Will unlearned and absent, the treatment arm casts it for real (opening cast) and the aura reads present. Reference search 2026-11-23: coa-history spell 800209: 13 casts, 13 aura applied and 13 removed in 4 logs, no value in a log event; nothing found beyond the tooltip and Spell.dbc.",
+      "observe_source": "800209 Effect[2] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, DBC MiscValue 127 (every school mask) set to 1 (Physical) by the Felsworn contract, BasePoints -31 + 1 = -30 ($s3). The tooltip words only Physical damage ('reducing Physical damage taken') and the owner ruled Physical only (O-12, Felsworn ADR 0007), so the expected ratio for a magic hit is 1.0 (no reduction). Light of the Naaru 41394 (1100 Holy, DmgClass 1 magic; Holy against a player takes no partial resist, Unit::CalcAbsorbResist) strikes the caster in each arm; Grave Coil 47632 (Shadow) was dropped: its partial and full resists (605, 454 or 0 per strike, alike in both arms) left 20 trials a +/-6.2% band, 767 trials needed (fw-f800209 run 20261123-182133); the control arm has Demonic Will unlearned and absent, the treatment arm casts it for real (opening cast) and the aura reads present. Reference search 2026-11-23: coa-history spell 800209: 13 casts, 13 aura applied and 13 removed in 4 logs, no value in a log event; nothing found beyond the tooltip and Spell.dbc.",
       "strikes": 1,
       "settle_ms": 50
     },

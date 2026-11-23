@@ -2182,7 +2182,7 @@
         "claim": "reducing Physical damage taken by $s3% (30%)",
         "labels": [
           "800209 behaviour_hit_ratio physical_taken",
-          "800209 behaviour_hit_ratio shadow_taken"
+          "800209 behaviour_hit_ratio holy_taken"
         ]
       },
       {
