@@ -3024,7 +3024,9 @@
     "claims": [
       {
         "claim": "and it now affects all allies",
-        "labels": []
+        "labels": [
+          "800220 behaviour_metric_delta all_allies"
+        ]
       },
       {
         "claim": "its radius is increased by $s2 yds.",
