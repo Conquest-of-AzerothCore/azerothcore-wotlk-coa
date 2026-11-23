@@ -2716,8 +2716,7 @@
       "800203 aura_duration_ms #0",
       "800203 behaviour_metric_delta interrupt",
       "800203 behaviour_metric_delta lockout_held",
-      "800203 behaviour_metric_delta lockout_free",
-      "800203 behaviour_metric_delta drain"
+      "800203 behaviour_metric_delta lockout_free"
     ],
     "kind": "claim"
   },

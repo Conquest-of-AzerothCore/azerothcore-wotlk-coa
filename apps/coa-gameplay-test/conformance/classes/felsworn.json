@@ -15762,35 +15762,6 @@
       "observe_source": "Felbreak 800203 (server DBC set): CastingTimeIndex 3 = 500 ms, Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 = 3000 ms ($d, SpellDuration.dbc), RangeIndex 3; the class contract clears Effect[2] (AscensionFelswornContracts.cpp:136-137) and the class script casts Spellbreak 804809 (SPELL_EFFECT_POWER_DRAIN) at the target on a successful interrupt (AscensionFelswornAbilities.cpp:396-400). Spell::EffectInterruptCast stops a channel whose ChannelInterruptFlags hold CHANNEL_INTERRUPT_FLAG_INTERRUPT and locks that spell's school for the duration (ProhibitSpellSchool, SpellEffects.cpp). The target channels Evocation 12051 (Arcane, SchoolMask 64, 8000 ms) on itself right before the trigger (target_casts_before), the same fixture as the counted moving_cast entry. The before phase casts nothing (the control). The Arcane lockout is read 3650 ms after the cast starts, 3150 ms after the 500 ms cast lands: gone (0), which excludes a lockout 10% long (3300 ms); the lockout_held arm shows it was applied. Reference search 2026-11-23: coa-history spell 800203: SPELL_CAST_START 8 events and SPELL_INTERRUPT 6 events by players in 1 log (no lockout or drain figure); the bindmysoul snapshot has no value beyond the tooltip; expected values come from the tooltip and the DBC only. Residual risk, code reading only: a missed Felbreak leaves the channel running and alerts; the counted moving_cast entry carries the same single landing."
     },
     {
-      "spell": 800203,
-      "kind": "metric_delta",
-      "quote": "Interrupt a spell from being cast, preventing the target from casting spells of that school for $d and draining mana from the target based on your Spirit.",
-      "trigger_spell": 800203,
-      "target": "dummy",
-      "cast_power": 100,
-      "cast_in_before": false,
-      "measure_actor": "dummy",
-      "void_on_cast_failure": true,
-      "target_casts_before": [
-        12051
-      ],
-      "expire_ms": 500,
-      "name": "Felbreak (mana drained from the interrupted target)",
-      "variant": "drain",
-      "label_suffix": "drain",
-      "target_entry": 1832,
-      "metric": "power",
-      "fields": {
-        "power": 0
-      },
-      "before_expected": 1000,
-      "expected": 999,
-      "after_at_least": 0,
-      "after_at_most": 999,
-      "wait_ms": 800,
-      "observe_source": "Felbreak 800203 (server DBC set): CastingTimeIndex 3 = 500 ms, Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 = 3000 ms ($d, SpellDuration.dbc), RangeIndex 3; the class contract clears Effect[2] (AscensionFelswornContracts.cpp:136-137) and the class script casts Spellbreak 804809 (SPELL_EFFECT_POWER_DRAIN) at the target on a successful interrupt (AscensionFelswornAbilities.cpp:396-400). Spell::EffectInterruptCast stops a channel whose ChannelInterruptFlags hold CHANNEL_INTERRUPT_FLAG_INTERRUPT and locks that spell's school for the duration (ProhibitSpellSchool, SpellEffects.cpp). The target channels Evocation 12051 (Arcane, SchoolMask 64, 8000 ms) on itself right before the trigger (target_casts_before), the same fixture as the counted moving_cast entry. The before phase casts nothing (the control). Scarlet Magi 1832, a mana-using mage at 1000 mana (the counted 805248 drain entries read 1000 on it), channels the same Evocation. The tooltip gives no amount ('based on your Spirit'), so the entry proves a drain happened, not its size: the control (no Felbreak) reads full mana (1000), and 800 ms after the cast starts the target holds less (at most 999). The Spirit scaling is not judged here (code reading: AscensionFelswornContracts.cpp sets 804809's Effect[0] to the caster's Spirit). Reference search 2026-11-23: coa-history spell 800203: SPELL_CAST_START 8 events and SPELL_INTERRUPT 6 events by players in 1 log (no lockout or drain figure); the bindmysoul snapshot has no value beyond the tooltip; expected values come from the tooltip and the DBC only. Residual risk, code reading only: a missed Felbreak leaves the channel running and alerts; the counted moving_cast entry carries the same single landing."
-    },
-    {
       "spell": 800355,
       "name": "Sargeras Embrace (Fel Fireball is instant while channeling)",
       "kind": "metric_delta",
