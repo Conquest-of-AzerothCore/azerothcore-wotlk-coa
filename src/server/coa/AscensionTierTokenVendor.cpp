@@ -44,6 +44,7 @@ public:
     bool OnGossipHello(Player* player, Creature* creature) override
     {
         ClearGossipMenuFor(player);
+        player->PrepareQuestMenu(creature->GetGUID());
         for (uint32 i = 0; i < TierVendorEntryCount; ++i)
             AddGossipItemFor(player, GOSSIP_ICON_VENDOR, TierVendorLabels[i], GOSSIP_SENDER_MAIN, i + 1);
         for (uint32 i = 0; i < TierFourVendorEntries.size(); ++i)

@@ -62,6 +62,8 @@ using uint32 = std::uint32_t;
 constexpr uint32 GOSSIP_ICON_VENDOR = 1, GOSSIP_SENDER_MAIN = 1, DEFAULT_GOSSIP_MESSAGE = 1;
 struct WorldSession { uint32 inventory = 0; void SendListInventory(uint32, uint32 entry) { inventory = entry; } };
 struct Player { WorldSession session; std::vector<uint32> actions; std::vector<std::string> labels;
+    uint32 questgiver = 0;
+    void PrepareQuestMenu(uint32 guid) { questgiver = guid; }
     WorldSession* GetSession() { return &session; } };
 struct Creature { uint32 GetGUID() const { return 14394; } };
 struct CreatureScript {
@@ -83,9 +85,11 @@ int main() {
     Player player;
     Creature creature;
     assert(script.OnGossipHello(&player, &creature));
-    assert(player.actions.size() == 21);
-    std::array<uint32, 21> expected = {91000101,91000102,91000103,91000104,91000105,91000106,91000107,91000108,
-        91000109,91000110,91000111,91000112,91000113,91000114,91000115,91000116,91000009,91000010,91000011,91000012,91000013};
+    assert(player.questgiver == creature.GetGUID());
+    assert(player.actions.size() == 25);
+    std::array<uint32, 25> expected = {91000101,91000102,91000103,91000104,91000105,91000106,91000107,91000108,
+        91000109,91000110,91000111,91000112,91000113,91000114,91000115,91000116,91000009,91000010,91000011,91000012,91000013,
+        91000014,91000015,91000016,91000017};
     for (uint32 i = 0; i < expected.size(); ++i) {
         script.OnGossipHello(&player, &creature);
         assert(player.actions[i] == i + 1);
@@ -93,7 +97,7 @@ int main() {
         script.OnGossipSelect(&player, &creature, 0, player.actions[i]);
         assert(player.session.inventory == expected[i]);
     }
-    for (uint32 action : {0u, 22u, 0xFFFFFFFFu}) {
+    for (uint32 action : {0u, 26u, 0xFFFFFFFFu}) {
         player.session.inventory = 0;
         script.OnGossipSelect(&player, &creature, 0, action);
         assert(player.session.inventory == 0);
@@ -107,4 +111,4 @@ with tempfile.TemporaryDirectory(prefix="coa-tier-vendor-") as directory:
     subprocess.run(["g++", "-std=c++20", "-Wall", "-Wextra", "-Werror", "-fsanitize=undefined",
                     str(target / "check.cpp"), "-o", str(target / "check")], check=True)
     subprocess.run([str(target / "check")], check=True)
-print("PASS: all 21 gossip actions open the intended inventory; T1/T2 split pages and T3 preserved and invalid actions ignored")
+print("PASS: quest menu prepared, all 25 gossip actions open the intended inventory, and invalid actions are ignored")
