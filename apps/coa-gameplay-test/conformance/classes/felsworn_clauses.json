@@ -110,19 +110,13 @@
   {
     "spell": 300468,
     "clause": "Casting Hateforged Barrier now also creates a damage absorption shield on all nearby allies within $300469a yds,",
+    "claim": "creates a damage absorption shield on all nearby allies",
+    "labels": [
+      "300468 behaviour_metric_delta ally_shield"
+    ],
     "kind": "claim",
-    "claims": [
-      {
-        "claim": "creates a damage absorption shield on all nearby allies",
-        "labels": [
-          "300468 behaviour_metric_delta ally_shield"
-        ]
-      },
-      {
-        "claim": "within $300469a yds",
-        "labels": []
-      }
-    ]
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
   },
   {
     "spell": 300468,
@@ -1707,11 +1701,13 @@
   {
     "spell": 707513,
     "clause": "stacking $525042u times.",
-    "kind": "claim",
     "labels": [
       "707513 behaviour_metric_delta stack_cap",
       "707513 behaviour_metric_delta one_stack"
-    ]
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
   },
   {
     "spell": 707842,
@@ -2329,22 +2325,26 @@
   {
     "spell": 803905,
     "clause": "Reduces the cooldown of Annihilation by $/1000;s1 sec",
-    "kind": "claim",
     "labels": [
       "803905 cost_gate 803904 annihilation_cd without",
       "803905 cost_gate 803904 annihilation_cd with",
       "803905 cost_gate 803904 annihilation_cd beyond"
-    ]
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
   },
   {
     "spell": 803905,
     "clause": "and Sunder by $/1000;s2 sec.",
-    "kind": "claim",
     "labels": [
       "803905 cost_gate 705121 sunder_cd without",
       "803905 cost_gate 705121 sunder_cd with",
       "803905 cost_gate 705121 sunder_cd beyond"
-    ]
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
   },
   {
     "spell": 804219,
@@ -2357,20 +2357,24 @@
   {
     "spell": 804609,
     "clause": "Increases the effectiveness of your Skull of Gul'dan by $s1%,",
-    "kind": "claim",
     "labels": [
       "804609 behaviour_metric_delta skull_energy"
-    ]
+    ],
+    "kind": "claim",
+    "evidence": "data",
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
   },
   {
     "spell": 804609,
     "clause": "but its cooldown is increased by $/1000;s2 sec.",
-    "kind": "claim",
     "labels": [
       "804609 cost_gate 800225 skull_cd without",
       "804609 cost_gate 800225 skull_cd with",
       "804609 cost_gate 800225 skull_cd beyond"
-    ]
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
   },
   {
     "spell": 804610,
@@ -2597,25 +2601,13 @@
   {
     "spell": 805244,
     "clause": "Increases the range of $?s520853[Fel Torpedo][Chaos Rush] by $s2 yds$?s520853[ and its critical strike chance by $s1%][].",
+    "claim": "Increases the range of Fel Torpedo by $s2 yds",
+    "labels": [
+      "805244 behaviour_metric_delta torpedo_range"
+    ],
     "kind": "claim",
-    "claims": [
-      {
-        "claim": "Increases the range of Fel Torpedo by $s2 yds",
-        "labels": [
-          "805244 behaviour_metric_delta torpedo_range"
-        ]
-      },
-      {
-        "claim": "Increases the range of Chaos Rush by $s2 yds",
-        "labels": [
-          "805244 behaviour_metric_delta chaos_range"
-        ]
-      },
-      {
-        "claim": "and its critical strike chance by $s1%",
-        "labels": []
-      }
-    ]
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
   },
   {
     "spell": 805245,
