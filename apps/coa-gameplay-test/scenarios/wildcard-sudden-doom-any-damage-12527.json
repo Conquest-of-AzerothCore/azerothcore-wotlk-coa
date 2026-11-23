@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Wildcard: Sudden Doom procs from any direct damage ability or spell (#12527)",
+  "contract": [
+    "Sudden Doom rank 3 (49530) reads 'Direct damage abilities and spells have a 9% chance to cast a free Grave Coil",
+    "at your target.' The spell_proc row -49018 kept the stock Death Knight family mask (Blood Strike and Heart Strike",
+    "only) and the DBC melee-ability flag, so a Wildcard hero without those strikes never procced it, and no spell",
+    "could. The row now accepts direct ability and spell damage of every family. aura_proc_rate replays the aura's",
+    "full native proc decision 40000 times: about 9% for a Mage Fire Blast (2136) and a Warrior Heroic Strike (78),",
+    "zero for an auto attack and for a periodic Corruption tick (172). Before the fix both direct rates read 0."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "hero", "spell": 47541 },
+    { "action": "learn", "actor": "hero", "spell": 49530 },
+    {
+      "action": "assert", "label": "SETUP: the Sudden Doom talent is active",
+      "actor": "hero", "metric": "aura", "spell": 49530, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT (#12527): a direct damage spell from another class procs about 9%",
+      "actor": "hero", "metric": "aura_proc_rate", "spell": 49530, "target": "dummy",
+      "trigger_spell": 2136, "type_mask": 65536, "min": 7.5, "max": 10.5
+    },
+    {
+      "action": "assert", "label": "CONTRACT (#12527): a melee ability that is not Blood or Heart Strike procs about 9%",
+      "actor": "hero", "metric": "aura_proc_rate", "spell": 49530, "target": "dummy",
+      "trigger_spell": 78, "type_mask": 16, "min": 7.5, "max": 10.5
+    },
+    {
+      "action": "assert", "label": "CONTROL: an auto attack is not a direct damage ability",
+      "actor": "hero", "metric": "aura_proc_rate", "spell": 49530, "target": "dummy",
+      "type_mask": 4, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: a periodic tick is not direct damage",
+      "actor": "hero", "metric": "aura_proc_rate", "spell": 49530, "target": "dummy",
+      "trigger_spell": 172, "type_mask": 262144, "equals": 0
+    }
+  ]
+}

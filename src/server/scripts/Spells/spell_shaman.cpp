@@ -32,6 +32,7 @@
 enum ShamanSpells
 {
     SPELL_SHAMAN_GLYPH_OF_FERAL_SPIRIT          = 63271,
+    SPELL_SHAMAN_GLYPH_OF_FERAL_SPIRIT_HERO     = 118767, // classless glyph
     SPELL_SHAMAN_ANCESTRAL_AWAKENING_PROC       = 52752,
     SPELL_SHAMAN_BIND_SIGHT                     = 6277,
     SPELL_SHAMAN_CLEANSING_TOTEM_EFFECT         = 52025,
@@ -46,6 +47,7 @@ enum ShamanSpells
     SPELL_SHAMAN_GLYPH_OF_EARTH_SHIELD          = 63279,
     SPELL_SHAMAN_GLYPH_OF_HEALING_STREAM_TOTEM  = 55456,
     SPELL_SHAMAN_GLYPH_OF_MANA_TIDE             = 55441,
+    SPELL_SHAMAN_GLYPH_OF_MANA_TIDE_HERO        = 118126, // classless glyph
     SPELL_SHAMAN_GLYPH_OF_STONECLAW_TOTEM       = 63298,
     SPELL_SHAMAN_GLYPH_OF_THUNDERSTORM          = 62132,
     SPELL_SHAMAN_ITEM_LIGHTNING_SHIELD          = 23552,
@@ -65,6 +67,7 @@ enum ShamanSpells
     SPELL_SHAMAN_TOTEM_EARTHEN_POWER            = 59566,
     SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL      = 52042,
     SPELL_SHAMAN_BLESSING_OF_THE_ETERNALS_R1    = 51554,
+    SPELL_SHAMAN_BLESSING_OF_THE_ETERNALS_HERO  = 951554, // classless copy, another layout
     SPELL_SHAMAN_STORMSTRIKE                    = 17364,
     SPELL_SHAMAN_LAVA_LASH                      = 60103,
     SPELL_SHAMAN_LIGHTNING_BOLT_OVERLOAD        = 45284,
@@ -235,7 +238,10 @@ class spell_sha_feral_spirit_scaling : public AuraScript
         if (Unit* owner = GetUnitOwner()->GetOwner())
         {
             int32 modifier = 30;
+            // the twin lookup already finds the classless copy when it is registered as a twin; count it once
             if (AuraEffect const* gofsEff = owner->GetAuraEffectOfRankedSpellOrTwin(SPELL_SHAMAN_GLYPH_OF_FERAL_SPIRIT, EFFECT_0))
+                modifier += gofsEff->GetAmount();
+            else if (AuraEffect const* gofsEff = owner->GetAuraEffect(SPELL_SHAMAN_GLYPH_OF_FERAL_SPIRIT_HERO, EFFECT_0))
                 modifier += gofsEff->GetAmount();
 
             amount = CalculatePct(std::max<int32>(0, owner->GetTotalAttackPowerValue(BASE_ATTACK)), modifier);
@@ -248,7 +254,10 @@ class spell_sha_feral_spirit_scaling : public AuraScript
         if (Unit* owner = GetUnitOwner()->GetOwner())
         {
             int32 modifier = 30;
+            // the twin lookup already finds the classless copy when it is registered as a twin; count it once
             if (AuraEffect const* gofsEff = owner->GetAuraEffectOfRankedSpellOrTwin(SPELL_SHAMAN_GLYPH_OF_FERAL_SPIRIT, EFFECT_0))
+                modifier += gofsEff->GetAmount();
+            else if (AuraEffect const* gofsEff = owner->GetAuraEffect(SPELL_SHAMAN_GLYPH_OF_FERAL_SPIRIT_HERO, EFFECT_0))
                 modifier += gofsEff->GetAmount();
 
             amount = CalculatePct(std::max<int32>(0, owner->GetTotalAttackPowerValue(BASE_ATTACK)), modifier);
@@ -736,7 +745,10 @@ class spell_sha_earthliving_weapon : public AuraScript
             }
         }
 
-        if (AuraEffect const* aurEff = caster->GetAuraEffectOfRankedSpellOrTwin(SPELL_SHAMAN_BLESSING_OF_THE_ETERNALS_R1, EFFECT_1, caster->GetGUID()))
+        AuraEffect const* aurEff = caster->GetAuraEffectOfRankedSpellOrTwin(SPELL_SHAMAN_BLESSING_OF_THE_ETERNALS_R1, EFFECT_1, caster->GetGUID());
+        if (!aurEff)
+            aurEff = caster->GetAuraEffect(SPELL_SHAMAN_BLESSING_OF_THE_ETERNALS_HERO, EFFECT_1, caster->GetGUID());
+        if (aurEff)
         {
             if (eventInfo.GetProcTarget()->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
             {
@@ -1134,8 +1146,12 @@ class spell_sha_mana_tide_totem : public SpellScript
                     int32 effValue = GetEffectValue();
                     // Glyph of Mana Tide
                     if (Unit* owner = caster->GetOwner())
+                    {
                         if (AuraEffect* dummy = owner->GetAuraEffect(SPELL_SHAMAN_GLYPH_OF_MANA_TIDE, 0))
                             effValue += dummy->GetAmount();
+                        if (AuraEffect* dummy = owner->GetAuraEffect(SPELL_SHAMAN_GLYPH_OF_MANA_TIDE_HERO, 0))
+                            effValue += dummy->GetAmount();
+                    }
                     // Regenerate 6% of Total Mana Every 3 secs
                     int32 effBasePoints0 = int32(CalculatePct(unitTarget->GetMaxPower(POWER_MANA), effValue));
                     caster->CastCustomSpell(unitTarget, SPELL_SHAMAN_MANA_TIDE_TOTEM, &effBasePoints0, nullptr, nullptr, true, nullptr, nullptr, GetOriginalCaster()->GetGUID());

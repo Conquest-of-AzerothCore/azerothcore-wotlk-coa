@@ -15,7 +15,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CellImpl.h"
 #include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 #include "Player.h"
 #include "SpellAuraEffects.h"
 #include "SpellMgr.h"
@@ -1018,6 +1020,61 @@ class spell_pri_shadowfiend_death : public AuraScript
     }
 };
 
+// Ascension talents that change Vampiric Embrace
+enum PriestAscensionVampiricEmbrace
+{
+    SPELL_PRIEST_VAMPIRIC_EMBRACE                   = 15286,
+    SPELL_PRIEST_VAMPIRISM                          = 277003,
+    SPELL_PRIEST_TWILIGHT                           = 84471
+};
+
+// Vampirism's heal adds healing power at the coefficient of an instant direct heal (1.5 sec / 3.5 sec): the talent
+// names no coefficient (tools/dummy_census/SYSTEMS-ASSUMPTIONS.md)
+constexpr float VAMPIRISM_HEALING_POWER_COEFFICIENT = 1500.0f / 3500.0f;
+constexpr int32 VAMPIRISM_HEAL_CAP_PCT = 5;
+
+// Vampiric Embrace heals pct% of `damage`: the priest pct% and the party a fifth of that. With Vampirism it "scales
+// with Healing Power and heals the lowest-health ally in your party or raid. It no longer provides additional healing
+// to you. Targets do not need to be in your party or raid. Each heal cannot exceed 5% of your maximum health."
+static void HealFromVampiricEmbrace(Unit* priest, uint32 damage, int32 pct, AuraEffect const* embrace)
+{
+    int32 selfHeal = CalculatePct(static_cast<int32>(damage), pct);
+    if (!priest->HasAura(SPELL_PRIEST_VAMPIRISM))
+    {
+        int32 partyHeal = selfHeal / 5;
+        priest->CastCustomSpell(priest, SPELL_PRIEST_VAMPIRIC_EMBRACE_HEAL, &partyHeal, &selfHeal, nullptr, true, nullptr, embrace);
+        return;
+    }
+
+    SpellInfo const* healSpell = sSpellMgr->GetSpellInfo(sSpellMgr->GetSpellTwinFor(SPELL_PRIEST_VAMPIRIC_EMBRACE_HEAL, embrace->GetId()));
+    if (!healSpell)
+        return;
+
+    float const radius = healSpell->Effects[EFFECT_0].CalcRadius(priest);
+    std::list<Unit*> allies;
+    Acore::AnyFriendlyUnitInObjectRangeCheck check(priest, priest, radius);
+    Acore::UnitListSearcher<Acore::AnyFriendlyUnitInObjectRangeCheck> searcher(priest, allies, check);
+    Cell::VisitObjects(priest, searcher, radius);
+
+    Unit* lowest = nullptr;
+    for (Unit* ally : allies)
+        if (ally != priest && ally->IsControlledByPlayer() && !ally->IsFullHealth() &&
+            (!lowest || ally->GetHealthPct() < lowest->GetHealthPct()))
+            lowest = ally;
+    if (!lowest)
+        return;
+
+    int32 heal = selfHeal + int32(priest->SpellBaseHealingBonusDone(healSpell->GetSchoolMask()) * VAMPIRISM_HEALING_POWER_COEFFICIENT);
+    if (heal > 0)
+        heal = int32(lowest->SpellHealingBonusTaken(priest, healSpell, uint32(heal), HEAL));
+    heal = std::min<int32>(heal, priest->CountPctFromMaxHealth(VAMPIRISM_HEAL_CAP_PCT));
+    if (heal <= 0)
+        return;
+
+    HealInfo healInfo(priest, lowest, heal, healSpell, healSpell->GetSchoolMask());
+    priest->HealBySpell(healInfo);
+}
+
 // 15286 - Vampiric Embrace
 class spell_pri_vampiric_embrace : public AuraScript
 {
@@ -1045,15 +1102,64 @@ class spell_pri_vampiric_embrace : public AuraScript
         if (!damageInfo || !damageInfo->GetDamage())
             return;
 
-        int32 selfHeal = CalculatePct(static_cast<int32>(damageInfo->GetDamage()), aurEff->GetAmount());
-        int32 partyHeal = selfHeal / 5;
-        GetTarget()->CastCustomSpell(GetTarget(), SPELL_PRIEST_VAMPIRIC_EMBRACE_HEAL, &partyHeal, &selfHeal, nullptr, true, nullptr, aurEff);
+        HealFromVampiricEmbrace(GetTarget(), damageInfo->GetDamage(), aurEff->GetAmount(), aurEff);
     }
 
     void Register() override
     {
         DoCheckProc += AuraCheckProcFn(spell_pri_vampiric_embrace::CheckProc);
         OnEffectProc += AuraEffectProcFn(spell_pri_vampiric_embrace::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+    }
+};
+
+// 15290 - Vampiric Embrace (heal): effect 0 heals "other party members" a fifth, effect 1 the priest. The party
+// search includes the caster, who was healed by both (18% instead of 15%).
+class spell_pri_vampiric_embrace_target : public SpellScript
+{
+    PrepareSpellScript(spell_pri_vampiric_embrace_target);
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        targets.remove(GetCaster());
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pri_vampiric_embrace_target::FilterTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_PARTY);
+    }
+};
+
+// 84471 - Twilight (Ascension Mystic Enchant): "Your Vampiric Embrace now also heals from your bleeds"; the heal is
+// Twilight's s1% of the bleed damage, given out the way Vampiric Embrace gives out its own
+class spell_pri_twilight : public AuraScript
+{
+    PrepareAuraScript(spell_pri_twilight);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_PRIEST_VAMPIRIC_EMBRACE, SPELL_PRIEST_VAMPIRIC_EMBRACE_HEAL });
+    }
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        SpellInfo const* procSpell = eventInfo.GetSpellInfo();
+        DamageInfo* damageInfo = eventInfo.GetDamageInfo();
+        return procSpell && damageInfo && damageInfo->GetDamage() &&
+            (procSpell->GetAllEffectsMechanicMask() & (1ULL << MECHANIC_BLEED)) &&
+            GetTarget()->GetAuraEffectOfRankedSpellOrTwin(SPELL_PRIEST_VAMPIRIC_EMBRACE, EFFECT_0);
+    }
+
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        if (AuraEffect const* embrace = GetTarget()->GetAuraEffectOfRankedSpellOrTwin(SPELL_PRIEST_VAMPIRIC_EMBRACE, EFFECT_0))
+            HealFromVampiricEmbrace(GetTarget(), eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount(), embrace);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_pri_twilight::CheckProc);
+        OnEffectProc += AuraEffectProcFn(spell_pri_twilight::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
     }
 };
 
@@ -1456,6 +1562,8 @@ void AddSC_priest_spell_scripts()
     RegisterSpellScript(spell_pri_t4_4p_bonus);
     RegisterSpellScript(spell_pri_shadowfiend_death);
     RegisterSpellScript(spell_pri_vampiric_embrace);
+    RegisterSpellScript(spell_pri_vampiric_embrace_target);
+    RegisterSpellScript(spell_pri_twilight);
     RegisterSpellScript(spell_pri_glyph_of_dispel_magic);
     RegisterSpellScript(spell_pri_body_and_soul);
     RegisterSpellScript(spell_pri_improved_shadowform);

@@ -49,6 +49,7 @@
 #include "AscensionWarcraftRebornHunter.h"
 #include "AscensionWarcraftRebornMage.h"
 #include "AscensionWarcraftRebornShaman.h"
+#include "AscensionDummyFixes.h"
 #include "AscensionWarcraftRebornPaladin.h"
 #include "AscensionWarcraftRebornPriest.h"
 #include "AscensionWarcraftRebornRogue.h"
@@ -1121,6 +1122,21 @@ void ApplyAscensionClassMechanics(SpellInfo* spellInfo)
     ApplyAscensionWarcraftRebornWarlockContracts(spellInfo);
     ApplyAscensionWarcraftRebornDruidContracts(spellInfo);
     ApplyAscensionWarcraftRebornShamanContracts(spellInfo);
+    ApplyAscensionDummyFixDeathKnightContracts(spellInfo);
+    ApplyAscensionDummyFixDruidContracts(spellInfo);
+    ApplyAscensionDummyFixGenericContracts(spellInfo);
+    ApplyAscensionDummyFixHunterContracts(spellInfo);
+    ApplyAscensionDummyFixMageContracts(spellInfo);
+    ApplyAscensionDummyFixPaladinContracts(spellInfo);
+    ApplyAscensionDummyFixPriestContracts(spellInfo);
+    ApplyAscensionDummyFixRogueContracts(spellInfo);
+    ApplyAscensionDummyFixShamanContracts(spellInfo);
+    ApplyAscensionDummyFixWarlockContracts(spellInfo);
+    ApplyAscensionDummyFixWarriorContracts(spellInfo);
+    ApplyAscensionDummySystemMeleeContracts(spellInfo);
+    ApplyAscensionDummySystemCasterContracts(spellInfo);
+    ApplyAscensionDummySystemTimeContracts(spellInfo);
+    ApplyAscensionDummySystemHealingContracts(spellInfo);
     ApplyAscensionHeroHunterContracts(spellInfo);
     ApplyAscensionHeroRogueContracts(spellInfo); ApplyAscensionHeroPriestContracts(spellInfo); ApplyAscensionHeroWarlockContracts(spellInfo); ApplyAscensionHeroPaladinContracts(spellInfo);
     ApplyTinkerScrapResourceContract(spellInfo);

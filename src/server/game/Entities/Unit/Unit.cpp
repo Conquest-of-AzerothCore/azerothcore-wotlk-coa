@@ -9749,6 +9749,39 @@ float Unit::GetSpellAttackPowerCoefficientFlatBonus(SpellInfo const* spellInfo) 
     })) / 100.0f;
 }
 
+float Unit::ApplyAscensionCoefficientMods(SpellInfo const* spellInfo, bool periodic, bool attackPower, float coeff) const
+{
+    Player* modOwner = GetSpellModOwner();
+    if (!spellInfo || !modOwner)
+        return coeff;
+
+    // The modifiers work in percent of power: a flat one adds points ("additional damage equal to 20% of your attack
+    // power"), a percent one scales the coefficient. Ascension has two equivalent attack power pairs.
+    coeff *= 100.0f;
+    if (attackPower)
+    {
+        modOwner->ApplySpellMod(spellInfo->Id, periodic ? SPELLMOD_AP_DOT_COEFFICIENT : SPELLMOD_AP_COEFFICIENT, coeff);
+        modOwner->ApplySpellMod(spellInfo->Id, periodic ? SPELLMOD_AP_DOT_COEFFICIENT_2 : SPELLMOD_AP_COEFFICIENT_2, coeff);
+    }
+    else
+    {
+        modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_SP_COEFFICIENT, coeff);
+        if (periodic)
+            modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_SP_DOT_COEFFICIENT, coeff);
+    }
+    return coeff / 100.0f;
+}
+
+void Unit::ApplyAscensionVictimDamageMods(SpellInfo const* spellInfo, Unit const* victim, float& damage) const
+{
+    if (!spellInfo || !victim)
+        return;
+
+    if (Player* modOwner = GetSpellModOwner())
+        modOwner->ApplySpellMod(spellInfo->Id, victim->IsControlledByPlayer() ? SPELLMOD_DAMAGE_VS_PLAYERS :
+            SPELLMOD_DAMAGE_VS_CREATURES, damage);
+}
+
 uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint8 effIndex, float TotalMod, uint32 stack)
 {
     if (!spellProto || !victim || damagetype == DIRECT_DAMAGE)
@@ -9913,41 +9946,31 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     // Check for table values
     float coeff = spellProto->Effects[effIndex].BonusMultiplier;
     SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id);
+    float apCoeff = 0.0f;
     if (bonus)
     {
-        if (damagetype == DOT)
-        {
-            coeff = bonus->dot_damage;
-            if (bonus->ap_dot_bonus > 0)
-            {
-                WeaponAttackType attType = (spellProto->UseRangedAttackPowerForDamage || (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE)) ? RANGED_ATTACK : BASE_ATTACK;
-                float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
-                APbonus += GetTotalAttackPowerValue(attType);
-                DoneTotal += int32(bonus->ap_dot_bonus * stack * ApCoeffMod * APbonus);
-            }
-        }
-        else
-        {
-            coeff = bonus->direct_damage;
-            float const apCoeff = bonus->ap_bonus + GetSpellAttackPowerCoefficientFlatBonus(spellProto);
-            if (apCoeff > 0)
-            {
-                WeaponAttackType attType = (spellProto->UseRangedAttackPowerForDamage || (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE)) ? RANGED_ATTACK : BASE_ATTACK;
-                float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
-                APbonus += GetTotalAttackPowerValue(attType);
-                DoneTotal += int32(apCoeff * stack * ApCoeffMod * APbonus);
-            }
-        }
+        coeff = damagetype == DOT ? bonus->dot_damage : bonus->direct_damage;
+        apCoeff = damagetype == DOT ? bonus->ap_dot_bonus : bonus->ap_bonus;
     }
-    else
+    if (damagetype != DOT)
+        apCoeff += GetSpellAttackPowerCoefficientFlatBonus(spellProto);
+    // Ascension's attack power coefficient modifiers can also give a spell without a table row an attack power term
+    apCoeff = ApplyAscensionCoefficientMods(spellProto, damagetype == DOT, true, apCoeff);
+    if (apCoeff > 0)
     {
-        // No bonus damage for SPELL_DAMAGE_CLASS_NONE class spells by default
-        if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE)
-            return uint32(std::max((float(pdamage) + DoneTotal) * DoneTotalMod, 0.0f));
+        WeaponAttackType attType = (spellProto->UseRangedAttackPowerForDamage || (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE)) ? RANGED_ATTACK : BASE_ATTACK;
+        float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
+        APbonus += GetTotalAttackPowerValue(attType);
+        DoneTotal += int32(apCoeff * stack * ApCoeffMod * APbonus);
     }
+
+    // No bonus damage for SPELL_DAMAGE_CLASS_NONE class spells by default
+    if (!bonus && spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE)
+        return uint32(std::max((float(pdamage) + DoneTotal) * DoneTotalMod, 0.0f));
 
     // Default calculation
     coeff += GetSpellPowerCoefficientFlatBonus(spellProto);
+    coeff = ApplyAscensionCoefficientMods(spellProto, damagetype == DOT, false, coeff);
     // Unleashed Frost Glyph has no base SP term, but Unleashed Power supplies
     // one through the native flat coefficient modifier. Preserve every other
     // zero-coefficient spell's admission and the normal spellmod calculation.
@@ -9971,6 +9994,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     // apply spellmod to Done damage (flat and pct)
     if (Player* modOwner = GetSpellModOwner())
         modOwner->ApplySpellMod(spellProto->Id, damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, tmpDamage);
+    ApplyAscensionVictimDamageMods(spellProto, victim, tmpDamage);
 
     // Elemental Berserker's copied mask covers the repeated area helper only. Include the
     // original Smash area, including its AP term, without increasing the primary weapon strike.
@@ -10619,6 +10643,13 @@ float Unit::SpellTakenCritChance(Unit const* caster, SpellInfo const* spellProto
         if (AuraEffect const* lowTide = caster->GetAuraEffect(270391, EFFECT_0))
             crit_chance += lowTide->GetAmount();
 
+    // Guiding Heal (831842, the Holy Guidance capstone on an ally): "Chance to be critically healed by spells increased
+    // by $s1%". The victim-side crit auras above only reach harmful spells, so the carrier's bonus is added here.
+    if (spellProto->IsPositive() &&
+        (spellProto->HasEffect(SPELL_EFFECT_HEAL) || spellProto->HasAura(SPELL_AURA_PERIODIC_HEAL)))
+        if (AuraEffect const* guidingHeal = GetAuraEffect(831842, EFFECT_0))
+            crit_chance += guidingHeal->GetAmount();
+
     // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE
     // xinef: should be calculated at the end
     if (caster)
@@ -10705,7 +10736,10 @@ uint32 Unit::SpellCriticalHealingBonus(Unit const* caster, SpellInfo const* spel
         // adds additional damage to critBonus (from talents)
         // xinef: used for death knight death coil
         if (Player* modOwner = caster->GetSpellModOwner())
+        {
             modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
+            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_HEALING_BONUS, crit_bonus);
+        }
     }
 
     if (crit_bonus > 0)
@@ -10871,22 +10905,11 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
 
     // Check for table values
     SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id);
+    float apCoeff = 0.0f;
     if (bonus)
     {
-        if (damagetype == DOT)
-        {
-            coeff = bonus->dot_damage;
-            if (bonus->ap_dot_bonus > 0)
-                DoneTotal += int32(bonus->ap_dot_bonus * ApCoeffMod * stack * GetTotalAttackPowerValue(
-                                       (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK));
-        }
-        else
-        {
-            coeff = bonus->direct_damage;
-            if (bonus->ap_bonus > 0)
-                DoneTotal += int32(bonus->ap_bonus * ApCoeffMod * stack * GetTotalAttackPowerValue(
-                                       (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK));
-        }
+        coeff = damagetype == DOT ? bonus->dot_damage : bonus->direct_damage;
+        apCoeff = damagetype == DOT ? bonus->ap_dot_bonus : bonus->ap_bonus;
     }
     else
     {
@@ -10894,6 +10917,12 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
         if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE)
             return healamount;
     }
+
+    apCoeff = ApplyAscensionCoefficientMods(spellProto, damagetype == DOT, true, apCoeff);
+    if (apCoeff > 0)
+        DoneTotal += int32(apCoeff * ApCoeffMod * stack * GetTotalAttackPowerValue(
+                               (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK));
+    coeff = ApplyAscensionCoefficientMods(spellProto, damagetype == DOT, false, coeff);
 
     // Default calculation
     if (DoneAdvertisedBenefit)
@@ -11665,6 +11694,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
     if (spellProto)
         if (Player* modOwner = GetSpellModOwner())
             modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, tmpDamage);
+    ApplyAscensionVictimDamageMods(spellProto, victim, tmpDamage);
 
     // bonus result can be negative
     return uint32(std::max(tmpDamage, 0.0f));

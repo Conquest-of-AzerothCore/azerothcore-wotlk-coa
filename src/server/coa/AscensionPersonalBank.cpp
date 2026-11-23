@@ -3,6 +3,7 @@
 
 #include "AscensionItemLadder.h"
 #include "AscensionNativeItemScaling.h"
+#include "AscensionVanityOwnership.h"
 #include "Bag.h"
 #include "Chat.h"
 #include "DatabaseEnv.h"
@@ -455,8 +456,14 @@ void RemoveFromInventory(CharacterDatabaseTransaction trans, Player* player, uin
 
 void MoveIntoInventory(CharacterDatabaseTransaction trans, Player* player, ItemPosCountVec const& dest, Item* item)
 {
+    ObjectGuid const guid = item->GetGUID();
+    AscensionVanityOwnership::CollectItem(player, item);
     player->MoveItemToInventory(dest, item, true);
     player->SaveInventoryAndGoldToDB(trans);
+    Item* stored = player->GetItemByGuid(guid);
+    if (!stored && !dest.empty())
+        stored = player->GetItemByPos(dest.front().pos);
+    AscensionVanityOwnership::CollectItem(player, stored);
 }
 
 void DepositToBank(Player* player, OpenBank& bank, uint8 bag, uint8 slot, uint8 tab, uint8 bankSlot,
@@ -657,10 +664,12 @@ void WithdrawToPlayer(Player* player, OpenBank& bank, uint8 tab, uint8 bankSlot,
                 uint32 const room = destItem->GetMaxStackCount() - destItem->GetCount();
                 uint32 const amount = std::min<uint32>(room, source->GetCount());
 
+                AscensionVanityOwnership::CollectItem(player, source);
                 destItem->SetCount(destItem->GetCount() + amount);
                 destItem->SetState(ITEM_CHANGED, player);
                 ReduceBankItem(trans, bank, tab, bankSlot, source, amount);
                 player->SaveInventoryAndGoldToDB(trans);
+                AscensionVanityOwnership::CollectItem(player, destItem);
                 finish(ObjectGuid::Empty, 0);
                 return;
             }
@@ -1050,6 +1059,26 @@ bool CanAccess(Player* player, uint8 kind)
         if (!guard(player, kind))
             return false;
     return true;
+}
+
+std::vector<StoredItem> StoredItems(Player const* player)
+{
+    std::vector<StoredItem> stored;
+    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_ASCENSION_BANK_STORED_ITEMS);
+    stmt->SetData(0, OWNER_CHARACTER);
+    stmt->SetData(1, BankOwnerId(player, PERSONAL));
+    stmt->SetData(2, OWNER_REALM);
+    stmt->SetData(3, BankOwnerId(player, REALM));
+    PreparedQueryResult result = CharacterDatabase.Query(stmt);
+    if (!result)
+        return stored;
+
+    do
+    {
+        Field* fields = result->Fetch();
+        stored.push_back({fields[0].Get<uint32>(), (fields[1].Get<uint32>() & ITEM_FIELD_FLAG_SOULBOUND) != 0});
+    } while (result->NextRow());
+    return stored;
 }
 
 void SendKindHint(Player* player, uint8 kind)
