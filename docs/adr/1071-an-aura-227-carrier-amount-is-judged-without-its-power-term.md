@@ -22,7 +22,8 @@ labels while the hit labels that carry the term pass.
 
 ## Decision
 
-`compare.judge_token` judges a fixed-roll `effect_value` or `aura_amount` whose effect has `EffectApplyAuraName` 227
+`compare.judge_token` (`compare.py:913`) hands a fixed-roll `effect_value` or `aura_amount` whose effect has
+`EffectApplyAuraName` 227 to `judge_trigger_with_value` (`compare.py:940`, defined at `:972`), which judges it
 against the token read with attack, ranged attack and spell power at 0 (`unpowered`, as `base_roll_only` does). The
 power term stays claimed on the triggered spell's hit labels. A token that reads differently without power alerts;
 a token without a power term at the measured stats keeps its previous judgement and text. Rolled carriers
