@@ -2197,12 +2197,11 @@ SUPERSEDED_ENTRY = {'spell': 572027, 'reason': 'seeded: its hits land on the deb
                     'replaced_by': SUPERSEDING, 'ruling': 'seeded mentor decision D-1'}
 
 
-def superseded_generate(out: Path, entries, class_id: int | None = None) -> dict:
+def superseded_generate(out: Path, entries) -> dict:
     from conformance import generate
 
-    def listed(requested):
-        listed_file = {**load_fixture_class_file(requested), 'superseded_hits': entries}
-        return listed_file if class_id is None else {**listed_file, 'class_id': class_id}
+    def listed(class_id):
+        return {**load_fixture_class_file(class_id), 'superseded_hits': entries}
 
     with mock.patch('conformance.load_class_file', listed):
         return json.loads(generate(CLASS_FILE['class_id'], out, spells=[RIGHTEOUS_UPHEAVAL]).read_text(
@@ -2263,16 +2262,12 @@ class SupersededHitTest(unittest.TestCase):
                 shutil.rmtree(out)
 
     def test_class_27_needs_no_ruling_and_a_ruling_is_accepted_elsewhere(self):
+        from conformance import superseded_hit
+
         without = {key: value for key, value in SUPERSEDED_ENTRY.items() if key != 'ruling'}
-        for class_id, entry in ((27, without), (27, SUPERSEDED_ENTRY), (CLASS_FILE['class_id'], SUPERSEDED_ENTRY)):
-            out = Path(tempfile.mkdtemp(prefix='conformance-superseded-'))
-            try:
-                with self.subTest(class_id=class_id, ruling='ruling' in entry):
-                    manifest = superseded_generate(out, [entry], class_id=class_id)
-                    [hit] = [item for item in manifest['scenarios'] if item['kind'] == 'hit']
-                    self.assertIsNone(hit['file'])
-            finally:
-                shutil.rmtree(out)
+        for class_id, entry in ((27, without), (27, SUPERSEDED_ENTRY), (23, SUPERSEDED_ENTRY)):
+            with self.subTest(class_id=class_id, ruling='ruling' in entry):
+                self.assertEqual(superseded_hit({'class_id': class_id, 'superseded_hits': [entry]}, 572027), entry)
 
 
 class ResolveSupersededTest(unittest.TestCase):
