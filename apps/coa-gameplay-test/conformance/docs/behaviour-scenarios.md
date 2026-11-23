@@ -1021,7 +1021,8 @@ to +22%, "+100%" from +95% to +105%):
 Every judged verdict states the interval it actually excludes: a true bonus below `stated - band - half` or above
 `stated + band + half` reads `ok` with less than a 0.5% chance (`bonus.excluded_text`). `detail.sized_trials` is the
 trial count whose half-width would be 0.8 of the power limit; the `prove` pilot (`pilot.hit_ratio_pilot`) runs the
-hit-ratio entries at 20 trials, then generates the judged runs at that size, capped at the trial limit. Fewer hits
+hit-ratio entries at 20 trials, then generates the judged runs at that size, capped at the trial limit; an entry's
+`min_trials` floors that size (ADR 1255). Fewer hits
 than half the trials in either arm is `unmeasured`.
 
 The other ratio checks (`behaviour_ratio`, `behaviour_party_stat_ratio`, `behaviour_duration_ratio`,
