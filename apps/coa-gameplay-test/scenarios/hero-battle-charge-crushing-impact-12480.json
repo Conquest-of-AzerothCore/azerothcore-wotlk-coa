@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Hero: Battle Charge applies Crushing Impact like Charge (#12480)",
+  "contract": [
+    "Crushing Impact 270706: 'Charge now applies Crushing Impact to all enemies within 10 yards' (270700, 500 ms delay, then the 10 yd aura 270698). Battle Charge 270697 says 'This uses Charge modifiers' and shares Charge's family flag 0x1 and cooldown category 1158.",
+    "The coa_mystic_enchant_proc rule for 270706 listed only Charge 100, 6178 and 11578, so AscensionMysticEnchantProcs::Matches rejected a Battle Charge cast and the enemy never received 270698.",
+    "A level 60 Hero with Crushing Impact Battle Charges a dummy 15 yd away (range 0-25 yd). After the 500 ms delay the dummy must carry 270698. Battle Charge is usable out of combat only, so the scenario casts it once; with the old spell list the same assertion reads 0."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hero", "race": 1, "class": 10, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "enemy", "owner": "hero", "entry": 36, "level": 60, "health": 1000000, "distance": 15, "reaction": 0,
+     "stationary": true}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "learn", "actor": "hero", "spell": 201},
+    {"action": "add_item", "actor": "hero", "item": 25},
+    {"action": "equip", "actor": "hero", "item": 25, "slot": 15},
+    {"action": "learn", "label": "Battle Charge", "actor": "hero", "spell": 270697},
+    {"action": "learn", "label": "Crushing Impact", "actor": "hero", "spell": 270706},
+    {"action": "assert", "label": "SETUP: Crushing Impact is active", "actor": "hero", "metric": "aura",
+     "spell": 270706, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "SETUP: the enemy has no Crushing Impact yet", "actor": "enemy", "metric": "aura",
+     "spell": 270698, "equals": 0},
+    {"action": "cast", "label": "Battle Charge the enemy", "actor": "hero", "spell": 270697, "target": "enemy"},
+    {"action": "assert", "label": "SETUP: Battle Charge is cast", "actor": "hero", "metric": "cast_failure",
+     "spell": 270697, "equals": 0},
+    {"action": "assert", "label": "SETUP: the hero reached the enemy", "actor": "hero", "metric": "distance",
+     "target": "enemy", "max": 6, "within_ms": 3000},
+    {"action": "assert", "label": "DISCRIMINATING: Battle Charge applies Crushing Impact to the enemy",
+     "actor": "enemy", "metric": "aura", "spell": 270698, "equals": 1, "within_ms": 3000}
+  ]
+}

@@ -461,3 +461,15 @@ source fails the part instead of being judged. Trials per attempt are the strike
 `count_misses: true` in the trigger (ADR 1041, provisional; mentor D-175) adds the swings that missed the caster (`melee_missed_taken`, read beside the dodged and parried swings and held in the baseline) to the trials, for a handler that rolls on a miss as well. Each counted part must then read as many attacks taken (`melee_attacks_taken`) as dodged, parried and missed swings, the guards having ruled out landed and blocked ones; otherwise the rate is `unmeasured` (void). Absent, the trials are the dodged and parried swings only.
 
 `miss_exclusion: {"min_share": s}` (ADR 1060, provisional; mentor D-252, D-253) needs `count_misses`. It reads the miss share m of the counted parts: under `s` the rate is `unmeasured`, otherwise expected x (1 - m), the rate of a server that ignores misses, must lie below the Wilson interval or the verdict is `alert`. Absent, nothing changes.
+
+### Caster streams (ADR 1048, provisional)
+
+A cast-trigger entry at the dummy may set `streams` (default 1) with an `isolation` (`reach_yd`, `source`, optional
+`wards`), as the chance rate kinds do (`docs/kinds/flat_chance_rate.md`): stream k is `casterk` and `dummyk` on one
+flat 100 yd line at the Shimmering Flats, every step of the part copied per stream and every read suffixed with its
+stream (` s0` to ` sN-1`). The plan, its parts and `scheduled_attempts` are unchanged; each stream makes ceil(attempts
+per part / streams) attempts and ceil(baseline attempts / streams) baseline attempts, and the model's `part_attempts`
+and baseline `attempts` count all streams. The judge is unchanged: it first reads the isolation bounds (a cross-stream
+damage read alerts, a placement breach is `unmeasured`), then sums every listed read over the streams per part
+(`summed_labels`, `compare.stream_summed`). An entry with charges, extra dummies, minion events, excluded trial spells
+or another trigger is refused with streams.

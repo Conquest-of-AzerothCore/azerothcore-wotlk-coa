@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "Wildcard: Everlasting Fire extends every Holy Fire rank from the five Paladin abilities (#13097)",
+  "contract": [
+    "Everlasting Fire (281571) reads 'Your Crusader Strike, Divine Storm, Exorcism, Hammer of Wrath and Judgement",
+    "abilities increase the duration of your Holy Fire by 3 seconds.' The DBC proc mask matched Exorcism only, and",
+    "its helper 281572 refreshed Holy Fire rank 1 (14914) by exact id and set the remaining time to 3 s. The card",
+    "now procs on the five named abilities and adds the helper's 3000 ms to the caster's Holy Fire of any rank.",
+    "aura_proc_rate replays the native proc decision for each ability (100%) and for a Mage Fire Blast and a",
+    "Holy Fire tick (0%). Live, rank 8 Holy Fire (15261) is snapshotted once it lands; Exorcism then lands about",
+    "1.6 s later, so the remaining time must exceed the snapshot by at least 1000 ms. Without the fix it only shrinks."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "h",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "h",
+      "entry": 36,
+      "level": 60,
+      "health": 5000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "learn", "label": "h fixture: Everlasting Fire", "actor": "h", "spell": 281571 },
+    { "action": "learn", "label": "h fixture: Holy Fire rank 8", "actor": "h", "spell": 15261 },
+    { "action": "learn", "label": "h fixture: Exorcism", "actor": "h", "spell": 879 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "h has the Everlasting Fire aura", "actor": "h", "metric": "aura", "spell": 281571, "equals": 1 },
+    {
+      "action": "assert", "label": "CONTRACT (#13097) Exorcism procs Everlasting Fire",
+      "actor": "h", "metric": "aura_proc_rate", "spell": 281571, "target": "d", "trigger_spell": 879, "type_mask": 65536,
+      "equals": 100
+    },
+    {
+      "action": "assert", "label": "CONTRACT (#13097) Crusader Strike procs Everlasting Fire",
+      "actor": "h", "metric": "aura_proc_rate", "spell": 281571, "target": "d", "trigger_spell": 35395, "type_mask": 16,
+      "equals": 100
+    },
+    {
+      "action": "assert", "label": "CONTRACT (#13097) Divine Storm procs Everlasting Fire",
+      "actor": "h", "metric": "aura_proc_rate", "spell": 281571, "target": "d", "trigger_spell": 53385, "type_mask": 16,
+      "equals": 100
+    },
+    {
+      "action": "assert", "label": "CONTRACT (#13097) Hammer of Wrath procs Everlasting Fire",
+      "actor": "h", "metric": "aura_proc_rate", "spell": 281571, "target": "d", "trigger_spell": 24275, "type_mask": 256,
+      "equals": 100
+    },
+    {
+      "action": "assert", "label": "CONTRACT (#13097) Judgement of Righteousness procs Everlasting Fire",
+      "actor": "h", "metric": "aura_proc_rate", "spell": 281571, "target": "d", "trigger_spell": 20187, "type_mask": 256,
+      "equals": 100
+    },
+    {
+      "action": "assert", "label": "CONTROL a Mage spell is not one of the five abilities",
+      "actor": "h", "metric": "aura_proc_rate", "spell": 281571, "target": "d", "trigger_spell": 2136, "type_mask": 65536,
+      "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL a Holy Fire tick is not one of the five abilities",
+      "actor": "h", "metric": "aura_proc_rate", "spell": 281571, "target": "d", "trigger_spell": 15261, "type_mask": 262144,
+      "equals": 0
+    },
+    { "action": "set_power", "actor": "h", "power": 0, "value": 1000 },
+    { "action": "cast", "actor": "h", "spell": 15261, "target": "d" },
+    {
+      "action": "assert", "label": "SETUP rank 8 Holy Fire is on the target",
+      "actor": "d", "metric": "aura", "spell": 15261, "caster": "h", "equals": 1, "within_ms": 4000
+    },
+    { "action": "snapshot", "actor": "d", "metric": "aura_duration_ms", "spell": 15261, "caster": "h", "save_as": "holy_fire_before" },
+    { "action": "set_power", "actor": "h", "power": 0, "value": 1000 },
+    { "action": "cast", "actor": "h", "spell": 879, "target": "d" },
+    {
+      "action": "assert", "label": "SETUP Exorcism hit the target",
+      "actor": "h", "metric": "spell_damage_count", "spell": 879, "target": "d", "min": 1, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "CONTRACT (#13097) Exorcism added 3 s to rank 8 Holy Fire",
+      "actor": "d", "metric": "aura_duration_ms", "spell": 15261, "caster": "h", "relative_to": "holy_fire_before",
+      "min": 1000, "max": 3000
+    }
+  ]
+}

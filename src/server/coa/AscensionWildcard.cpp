@@ -252,6 +252,7 @@ constexpr char ACTIVE_SPEC_SETTING[] = "core.wildcard.spec";
 constexpr char ACTION_BARS_SETTING[] = "core.wildcard.bars";
 constexpr char TRAINED_RANKS_SETTING[] = "core.wildcard.trainedranks";
 constexpr char REPURCHASE_SETTING[] = "core.wildcard.repurchase";
+constexpr std::array<uint32, 2> FORTUNE_CASES = { 1278048, 1278049 };
 constexpr std::array<uint32, 8> PRESTIGE_DELETED_ITEMS = { 1278048, 1278049, 98453, 98454, 98465, 98466, 1478051,
     1478052 };
 constexpr std::array<std::uint32_t, 7> SCHOOL_TAGS = { 17, 18, 19, 20, 21, 22, 126 };
@@ -2476,6 +2477,37 @@ public:
     }
 };
 
+class AscensionWildcardFortuneCase final : public PlayerScript
+{
+public:
+    AscensionWildcardFortuneCase() : PlayerScript("AscensionWildcardFortuneCase", { PLAYERHOOK_ON_BEFORE_OPEN_ITEM }) { }
+
+    bool OnPlayerBeforeOpenItem(Player* player, Item* item) override
+    {
+        if (!item || std::find(FORTUNE_CASES.begin(), FORTUNE_CASES.end(), item->GetEntry()) == FORTUNE_CASES.end())
+            return true;
+
+        ObjectGuid const guid = item->GetGUID();
+        WorldSession* session = player->GetSession();
+        player->SendLoot(guid, LOOT_CORPSE);
+        uint8 const slots = uint8(item->loot.items.size());
+        for (uint8 slot = 0; slot < slots && player->GetLootGUID() == guid; ++slot)
+        {
+            WorldPacket take(CMSG_AUTOSTORE_LOOT_ITEM, 1);
+            take << slot;
+            session->HandleAutostoreLootItemOpcode(take);
+        }
+
+        if (player->GetLootGUID() == guid)
+        {
+            WorldPacket release(CMSG_LOOT_RELEASE, 8);
+            release << guid;
+            session->HandleLootReleaseOpcode(release);
+        }
+        return false;
+    }
+};
+
 class AscensionWildcardSpecializationCache final : public ItemScript
 {
 public:
@@ -3693,6 +3725,7 @@ void AddAscensionWildcardScripts()
     new AscensionWildcard::AscensionWildcardPlayer();
     new AscensionWildcard::AscensionWildcardItemSpells();
     new AscensionWildcard::AscensionWildcardItems();
+    new AscensionWildcard::AscensionWildcardFortuneCase();
     new AscensionWildcard::AscensionWildcardSpecializationCache();
     new AscensionWildcard::AscensionWildcardPeteArr();
     new AscensionWildcard::AscensionWildcardPeteArrSale();

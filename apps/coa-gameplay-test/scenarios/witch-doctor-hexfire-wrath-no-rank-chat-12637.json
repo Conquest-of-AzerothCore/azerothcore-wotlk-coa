@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Hexfire Wrath prints no Malefic Wrath rank lines (#12637)",
+  "contract": [
+    "Report #12637: with Hexfire Adept, every Hexfire Wrath cast printed 'You have learned a new spell: Malefic Wrath",
+    "(Rank N)' for every rank. Hexfire Adept 704500: 'Casting Hexfire transforms your next Malefic Wrath within",
+    "$503626d into Hexfire Wrath.' SyncReplacements used to stand Hexfire Wrath 807480 in for every known rank; when",
+    "Hexfire Ready 503626 ended, Player::SetTemporarySpellReplacement found the replacement shared by the other ranks",
+    "and sent SMSG_LEARNED_SPELL for each restored rank. Since the #12539 fix only the top rank 572336 is transformed,",
+    "so its restore is a single SMSG_SUPERCEDED_SPELL. Expected over two Hexfire and Hexfire Wrath uses with all nine",
+    "ranks known: the top rank turns into Hexfire Wrath and back, Hexfire Wrath uses up Hexfire Ready, no lower rank",
+    "is transformed, and neither a Malefic Wrath rank nor Hexfire Wrath gets a new chat line. Control: learning a",
+    "rank does print its line."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "doctor", "race": 2, "class": 13, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "doctor", "entry": 36, "level": 60, "health": 4000000, "distance": 4 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let login, spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "label": "Malefic Wrath rank 1", "actor": "doctor", "spell": 807037 },
+    { "action": "learn", "label": "Malefic Wrath rank 2", "actor": "doctor", "spell": 807211 },
+    { "action": "learn", "label": "Malefic Wrath rank 3", "actor": "doctor", "spell": 807477 },
+    { "action": "learn", "label": "Malefic Wrath rank 4", "actor": "doctor", "spell": 808002 },
+    { "action": "learn", "label": "Malefic Wrath rank 5", "actor": "doctor", "spell": 808057 },
+    { "action": "learn", "label": "Malefic Wrath rank 6", "actor": "doctor", "spell": 808648 },
+    { "action": "learn", "label": "Malefic Wrath rank 7", "actor": "doctor", "spell": 808876 },
+    { "action": "learn", "label": "Malefic Wrath rank 8", "actor": "doctor", "spell": 809365 },
+    { "action": "learn", "label": "Malefic Wrath rank 9", "actor": "doctor", "spell": 572336 },
+    { "action": "learn", "label": "Hexfire Adept", "actor": "doctor", "spell": 704500 },
+    { "action": "learn", "label": "Hexfire", "actor": "doctor", "spell": 573026 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "CONTROL: learning a rank prints its line, so the read sees rank lines",
+      "actor": "doctor", "metric": "client_chat_lines_for", "spell": 809365, "min": 1
+    },
+    {
+      "action": "assert", "label": "CONTROL: the top rank stands for itself before Hexfire", "actor": "doctor",
+      "metric": "temporary_spell_replacement", "spell": 572336, "equals": 572336
+    },
+    { "action": "snapshot", "actor": "doctor", "metric": "client_chat_lines_for", "spell": 807037, "save_as": "r1" },
+    { "action": "snapshot", "actor": "doctor", "metric": "client_chat_lines_for", "spell": 807211, "save_as": "r2" },
+    { "action": "snapshot", "actor": "doctor", "metric": "client_chat_lines_for", "spell": 807477, "save_as": "r3" },
+    { "action": "snapshot", "actor": "doctor", "metric": "client_chat_lines_for", "spell": 808002, "save_as": "r4" },
+    { "action": "snapshot", "actor": "doctor", "metric": "client_chat_lines_for", "spell": 808057, "save_as": "r5" },
+    { "action": "snapshot", "actor": "doctor", "metric": "client_chat_lines_for", "spell": 808648, "save_as": "r6" },
+    { "action": "snapshot", "actor": "doctor", "metric": "client_chat_lines_for", "spell": 808876, "save_as": "r7" },
+    { "action": "snapshot", "actor": "doctor", "metric": "client_chat_lines_for", "spell": 809365, "save_as": "r8" },
+    { "action": "snapshot", "actor": "doctor", "metric": "client_chat_lines_for", "spell": 572336, "save_as": "r9" },
+    { "action": "snapshot", "actor": "doctor", "metric": "client_chat_lines_for", "spell": 807480, "save_as": "hw" },
+    { "action": "cast", "label": "First Hexfire", "actor": "doctor", "spell": 573026, "target": "dummy" },
+    {
+      "action": "assert", "label": "SETUP: Hexfire Ready is on the Witch Doctor", "actor": "doctor",
+      "metric": "aura", "spell": 503626, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The top rank turns into Hexfire Wrath", "actor": "doctor",
+      "metric": "temporary_spell_replacement", "spell": 572336, "equals": 807480, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The rank below the top is not transformed", "actor": "doctor",
+      "metric": "temporary_spell_replacement", "spell": 809365, "equals": 809365
+    },
+    { "action": "cast", "label": "First Hexfire Wrath", "actor": "doctor", "spell": 807480, "target": "dummy" },
+    {
+      "action": "assert", "label": "Hexfire Wrath uses up Hexfire Ready", "actor": "doctor",
+      "metric": "aura", "spell": 503626, "equals": 0, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "The top rank is restored", "actor": "doctor",
+      "metric": "temporary_spell_replacement", "spell": 572336, "equals": 572336, "within_ms": 2000
+    },
+    { "action": "reset_cooldown", "actor": "doctor", "spell": 573026 },
+    { "action": "reset_cooldown", "actor": "doctor", "spell": 807480 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "cast", "label": "Second Hexfire", "actor": "doctor", "spell": 573026, "target": "dummy" },
+    {
+      "action": "assert", "label": "SETUP: Hexfire Ready again", "actor": "doctor",
+      "metric": "aura", "spell": 503626, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The top rank turns into Hexfire Wrath again", "actor": "doctor",
+      "metric": "temporary_spell_replacement", "spell": 572336, "equals": 807480, "within_ms": 2000
+    },
+    { "action": "wait", "ms": 1600 },
+    { "action": "cast", "label": "Second Hexfire Wrath", "actor": "doctor", "spell": 807480, "target": "dummy" },
+    {
+      "action": "assert", "label": "Hexfire Wrath uses up Hexfire Ready again", "actor": "doctor",
+      "metric": "aura", "spell": 503626, "equals": 0, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "The top rank is restored again", "actor": "doctor",
+      "metric": "temporary_spell_replacement", "spell": 572336, "equals": 572336, "within_ms": 2000
+    },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "THE FIX: no new line for rank 1", "actor": "doctor",
+      "metric": "client_chat_lines_for", "spell": 807037, "relative_to": "r1", "equals": 0
+    },
+    {
+      "action": "assert", "label": "THE FIX: no new line for rank 2", "actor": "doctor",
+      "metric": "client_chat_lines_for", "spell": 807211, "relative_to": "r2", "equals": 0
+    },
+    {
+      "action": "assert", "label": "THE FIX: no new line for rank 3", "actor": "doctor",
+      "metric": "client_chat_lines_for", "spell": 807477, "relative_to": "r3", "equals": 0
+    },
+    {
+      "action": "assert", "label": "THE FIX: no new line for rank 4", "actor": "doctor",
+      "metric": "client_chat_lines_for", "spell": 808002, "relative_to": "r4", "equals": 0
+    },
+    {
+      "action": "assert", "label": "THE FIX: no new line for rank 5", "actor": "doctor",
+      "metric": "client_chat_lines_for", "spell": 808057, "relative_to": "r5", "equals": 0
+    },
+    {
+      "action": "assert", "label": "THE FIX: no new line for rank 6", "actor": "doctor",
+      "metric": "client_chat_lines_for", "spell": 808648, "relative_to": "r6", "equals": 0
+    },
+    {
+      "action": "assert", "label": "THE FIX: no new line for rank 7", "actor": "doctor",
+      "metric": "client_chat_lines_for", "spell": 808876, "relative_to": "r7", "equals": 0
+    },
+    {
+      "action": "assert", "label": "THE FIX: no new line for rank 8", "actor": "doctor",
+      "metric": "client_chat_lines_for", "spell": 809365, "relative_to": "r8", "equals": 0
+    },
+    {
+      "action": "assert", "label": "THE FIX: no new line for the top rank", "actor": "doctor",
+      "metric": "client_chat_lines_for", "spell": 572336, "relative_to": "r9", "equals": 0
+    },
+    {
+      "action": "assert", "label": "No line for Hexfire Wrath over both uses", "actor": "doctor",
+      "metric": "client_chat_lines_for", "spell": 807480, "relative_to": "hw", "equals": 0
+    }
+  ]
+}

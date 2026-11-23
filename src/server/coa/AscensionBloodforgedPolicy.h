@@ -17,7 +17,7 @@ constexpr float DefaultEliteHeroicUpgradePercent = 2.5f;
 
 constexpr unsigned DefaultHighRiskReleaseStage = 3;
 constexpr unsigned MinimumBlueMaxItemLevel = 57;
-constexpr std::array<unsigned, 9> DefaultBlueMaxItemLevelByStage = {57, 57, 57, 57, 57, 57, 57, 57, 57};
+constexpr std::array<unsigned, 9> DefaultBlueMaxItemLevelByStage = {60, 60, 60, 60, 60, 60, 60, 60, 60};
 
 constexpr unsigned RaisedBlueCap(unsigned itemLevel)
 {
@@ -51,6 +51,7 @@ constexpr std::array<unsigned, 2> DefaultHighRiskEliteRespawnMinutes = {45, 60};
 constexpr char const* DefaultHighRiskEliteEntries = "918530 918547 918550 918555 918562 918563 918578 918588 918589 "
     "918590 918591 918647 918648 918690 919448 919450";
 constexpr unsigned DefaultEndgameRareMinRequiredLevel = 60;
+constexpr unsigned DefaultHiddenCacheBlueMinRequiredLevel = 55;
 constexpr std::array<std::uint32_t, 3> HiddenCacheLoot = {9670, 9671, 9672};
 constexpr std::uint32_t EphemeralKey = 967680;
 constexpr std::array<std::uint32_t, 3> EphemeralKeys = {967680, 967681, 967682};

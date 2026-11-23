@@ -1,0 +1,1787 @@
+{
+  "schema": 1,
+  "name": "Harness melee hit bonus makes every Hamstring of a fixture striker land on a Witch Doctor",
+  "contract": [
+    "ADR 1049 (provisional) adds the creature fixture field melee_hit_bonus, which sets m_modMeleeHitChance.",
+    "Hamstring 1715 is DmgClass 2 (melee): Unit::SpellHitResult sends it to MeleeSpellHitResult, whose miss",
+    "chance (MeleeSpellMissChance) starts near 5% against a level 60 player and subtracts only the attacker's",
+    "m_modMeleeHitChance; spell_hit_bonus (m_modSpellHitChance) does not reach it. The striker carries",
+    "melee_hit_bonus 100 and the caster's dodge and parry are forced to 0 before every attempt (no shield, so",
+    "no block). Each of 60 triggered Hamstring casts must land (the snare 1715 on the caster, removed before",
+    "the next attempt); without the bonus all 60 land with probability 0.95^60, about 5%."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "striker",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 1,
+      "melee_hit_bonus": 100
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "doctor",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 1",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 1",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 1 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 2",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 2",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 2 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 3",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 3",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 3 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 4",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 4",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 4 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 5",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 5",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 5 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 6",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 6",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 6 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 7",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 7",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 7 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 8",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 8",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 8 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 9",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 9",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 9 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 10",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 10",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 10 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 11",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 11",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 11 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 12",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 12",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 12 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 13",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 13",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 13 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 14",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 14",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 14 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 15",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 15",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 15 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 16",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 16",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 16 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 17",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 17",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 17 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 18",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 18",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 18 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 19",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 19",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 19 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 20",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 20",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 20 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 21",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 21",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 21 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 22",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 22",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 22 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 23",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 23",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 23 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 24",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 24",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 24 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 25",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 25",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 25 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 26",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 26",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 26 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 27",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 27",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 27 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 28",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 28",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 28 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 29",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 29",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 29 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 30",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 30",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 30 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 31",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 31",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 31 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 32",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 32",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 32 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 33",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 33",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 33 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 34",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 34",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 34 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 35",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 35",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 35 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 36",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 36",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 36 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 37",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 37",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 37 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 38",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 38",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 38 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 39",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 39",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 39 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 40",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 40",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 40 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 41",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 41",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 41 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 42",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 42",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 42 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 43",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 43",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 43 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 44",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 44",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 44 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 45",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 45",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 45 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 46",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 46",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 46 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 47",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 47",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 47 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 48",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 48",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 48 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 49",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 49",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 49 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 50",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 50",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 50 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 51",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 51",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 51 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 52",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 52",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 52 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 53",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 53",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 53 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 54",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 54",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 54 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 55",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 55",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 55 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 56",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 56",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 56 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 57",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 57",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 57 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 58",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 58",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 58 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 59",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 59",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 59 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "doctor",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the snare before attempt 60",
+      "actor": "doctor",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "Hamstring attempt 60",
+      "actor": "striker",
+      "spell": 1715,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Hamstring attempt 60 lands",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 1715,
+      "equals": 1,
+      "within_ms": 500
+    }
+  ]
+}

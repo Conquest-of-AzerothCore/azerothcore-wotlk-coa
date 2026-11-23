@@ -150,6 +150,11 @@ class aura_ascension_witch_doctor_event : public AuraScript
                 break;
             case Eye:
                 Cast(owner, target, EyeDebuff);
+                if (target && target->HasAura(EyeDebuff))
+                {
+                    target->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+                    target->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
+                }
                 break;
             case Hexplosion:
                 buff(HasteBuff);
@@ -166,7 +171,7 @@ class aura_ascension_witch_doctor_event : public AuraScript
                 buff(OverflowBuff);
                 break;
             case MaliciousGolems:
-                Reduce(player, WarGolem, 1000);
+                Reduce(player, WarGolem, std::abs(Amount(GolemsVigilCut)));
                 break;
             case HollowSpirit:
                 Cast(owner, target, HollowDebuff);
@@ -213,21 +218,9 @@ class aura_ascension_witch_doctor_event : public AuraScript
                 break;
             }
             case GrowingMalice:
-            {
-                Aura* hex = OwnedHex(player, target);
-                AuraEffect* dot = hex ? hex->GetEffect(EFFECT_0) : nullptr;
-                if (!dot)
-                    break;
-                Aura* growth = target->GetAura(GrowingDebuff, player->GetGUID());
-                uint32 stacks = growth ? growth->GetStackAmount() : 0;
-                uint32 percent = Amount(GrowingDebuff);
-                Cast(player, target, GrowingDebuff);
-                growth = target->GetAura(GrowingDebuff, player->GetGUID());
-                if (growth)
-                    dot->ChangeAmount(int64(dot->GetAmount()) * (100 + percent * growth->GetStackAmount()) /
-                                      (100 + percent * stacks));
+                if (Aura* hex = OwnedHex(player, target); hex && hex->GetEffect(EFFECT_0))
+                    Cast(player, target, GrowingDebuff);
                 break;
-            }
             case HexfireMass:
                 Summon(player, SerpentMass, target, target->GetPosition());
                 break;

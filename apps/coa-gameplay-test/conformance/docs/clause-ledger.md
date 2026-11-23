@@ -43,8 +43,10 @@ A JSON array. Each entry is one clause:
 - `effectiveness_of` (optional, a `"claim"` entry without `claims`, ADR 0268): the spell id of the buff X in a clause
   that increases "the effectiveness of X". When X's entries, of any `kind`, state exactly one value in all (a `${...}`
   formula, a `$` token other than a duration, radius or range, or a literal number), the entries carrying it are added
-  to the claim's words for the state-promise match; with two or more values, or none, nothing changes. Templar:
-  Martyr 300530 names Gift of Zeal 300923.
+  to the claim's words for the state-promise match; with two or more values, or none, nothing changes. An entry of
+  X that is a whole `@ext:...:ext@` extension text is left out of the count and the words (ADR 1135, provisional): its
+  literal numbers ("Can only have 1 ...") restate a rule, not the buff's value. Templar: Martyr 300530 names Gift of
+  Zeal 300923; Witch Doctor: Loa Empowerment 706368 names Power Wuju 707676.
 - `promise_of` (optional, a `"claim"` entry, ADR 0707): the exact text of an earlier clause of the same spell. Its
   words join every claim's words for the state-promise match only (`STATE_PROMISES` and the contrast rows), so a
   clause that continues a sentence ("increasing by $s1% every ...") is promised the state its subject clause names
