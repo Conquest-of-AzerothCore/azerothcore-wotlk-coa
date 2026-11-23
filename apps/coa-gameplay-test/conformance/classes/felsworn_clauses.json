@@ -423,17 +423,10 @@
   {
     "spell": 500067,
     "clause": "and size by $s2%.",
-    "labels": [],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "The size read is a harness metric object_scale (and unit_scale): both read the caster's object scale after a real learn of 500067 and the 9999 ms period of its trigger 500076, but coverage.METRIC_EVIDENCE has no evidence class for either, so conformance.py prove stops with an EvidenceError. The smallest extension is a state row for object_scale with a size/scale state promise in coverage.METRIC_EVIDENCE and STATE_PROMISES (a shared tool, not changed by this author).",
-      "attempts": [
-        {
-          "agent": "fw-b1c",
-          "report": ".agents/plans/fw-b1c/report.md (design 1: metric_delta object_scale, ratio 1.10 at 11500 ms after the learn; design 2: the same read as unit_scale; both runs executed, both rejected at coverage)"
-        }
-      ]
-    }
+    "labels": [
+      "500067 behaviour_metric_delta size"
+    ],
+    "kind": "claim"
   },
   {
     "spell": 520693,
