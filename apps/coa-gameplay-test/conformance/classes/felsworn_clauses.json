@@ -1,0 +1,2590 @@
+[
+  {
+    "spell": 92087,
+    "clause": "Level 10 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 92087,
+    "clause": "Critical strikes with melee abilities now trigger Dancing Blades, dealing off-hand Weapon Damage to up to $800598i nearby enemies.",
+    "labels": [
+      "92087 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92088,
+    "clause": "Level 10 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 92088,
+    "clause": "While Inner Demon is active, your Fel Fireball will now unleash a Felstrike on your target.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 92088,
+    "clause": "Burn an enemy for ${($d*1000/$T1)*($m1+0+$SP*.05)} Shadowflame Damage over $d,",
+    "labels": [
+      "92088 effect_value 802678e0 #0",
+      "92088 spell_duration 802678 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92088,
+    "clause": "stacking $u times.",
+    "labels": [
+      "92088 max_stacks 802678 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92089,
+    "clause": "Level 10 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 92089,
+    "clause": "Allows you to wield a Two-Handed Axe, Mace, Polearm or Sword in each hand and grants you additional Armor and magic resistance based on your attack power.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 300465,
+    "clause": "Reduces the duration of movement impairing effects on you by $s1%.",
+    "labels": [
+      "300465 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300466,
+    "clause": "Increases the damage and threat generated from Carve by $s1%.",
+    "labels": [
+      "300466 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300467,
+    "clause": "Reduces the cooldown of your Hateforged Barrier by $/1000;s1 sec.",
+    "labels": [
+      "300467 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300468,
+    "clause": "Casting Hateforged Barrier now also creates a damage absorption shield on all nearby allies within $300469a yds,",
+    "labels": [
+      "300468 effect_value #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300468,
+    "clause": "absorbing ${$STA*1+$300469m1+$300469ppl1+$SP*.2+$AP*.08} damage for $300469d.",
+    "labels": [
+      "300468 effect_value 300469e0 #0",
+      "300468 spell_duration 300469 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300468,
+    "clause": "@ext:Absorption shield scales with Stamina.:ext@",
+    "labels": [
+      "300468 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300470,
+    "clause": "While above 75% health,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 300470,
+    "clause": "your damage taken is reduced by $801573s1%",
+    "labels": [
+      "300470 effect_value 801573e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300470,
+    "clause": "and damage dealt is increased by $801573s2%.",
+    "labels": [
+      "300470 effect_value 801573e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300474,
+    "clause": "Direct Fire and Shadow spell damage dealt now applies Expose to enemies.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 300474,
+    "clause": "Damage taken from the Felsworn increased by $s1%",
+    "labels": [
+      "300474 effect_value 300475e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300474,
+    "clause": "and the critical strike chance of all allies against this target is increased by $s2% for $d.",
+    "labels": [
+      "300474 effect_value 300475e1 #1",
+      "300474 spell_duration 300475 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300476,
+    "clause": "Dodging attacks causes $804336s2% off-hand Weapon Damage to attackers",
+    "labels": [
+      "300476 effect_value 804336e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300476,
+    "clause": "and enrages your party and raid members within $520256a1 yds,",
+    "labels": [
+      "300476 effect_radius 520256e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300476,
+    "clause": "increasing their critical strike chance by $520256s1% for $520256d.",
+    "labels": [
+      "300476 effect_value 520256e0 #2",
+      "300476 spell_duration 520256 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300477,
+    "clause": "Increases your spell critical strike rating by $s1% of your Spirit.",
+    "labels": [
+      "300477 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300478,
+    "clause": "Critically striking with Fel Fireball now increases the critical strike chance of your next Fel Fireball within $300486d by $300486s1%.",
+    "labels": [
+      "300478 spell_duration 300486 #0",
+      "300478 effect_value 300486e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300478,
+    "clause": "Can occur only once every 5 seconds.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 300480,
+    "clause": "Direct damage dealt now has a $h% chance to reset the cooldown of Infernal.",
+    "labels": [
+      "300480 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300483,
+    "clause": "Damage dealt by Felstrikes now extends the duration of Cripple on the target by $/1000;560643s1 sec",
+    "labels": [
+      "300483 effect_value 560643e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300483,
+    "clause": "and grants you $300481s1% increased spell critical damage for $300481d,",
+    "labels": [
+      "300483 effect_value 300481e0 #1",
+      "300483 spell_duration 300481 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300483,
+    "clause": "stacking $300481u times.",
+    "labels": [
+      "300483 max_stacks 300481 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300484,
+    "clause": "Damage dealt by Azzinoth's Assault now reduces the enemy's armor by $300482s1% for $300482d,",
+    "labels": [
+      "300484 effect_value 300482e0 #0",
+      "300484 spell_duration 300482 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300484,
+    "clause": "stacking $300482u times.",
+    "labels": [
+      "300484 max_stacks 300482 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300485,
+    "clause": "Increases the tick rate of Immolation Aura by $s2%.",
+    "labels": [
+      "300485 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300489,
+    "clause": "Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.",
+    "labels": [
+      "300489 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300490,
+    "clause": "Periodic damage dealt now has a $h% chance to grant you Felforged for $806104d.",
+    "labels": [
+      "300490 effect_value #0",
+      "300490 spell_duration 806104 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300490,
+    "clause": "Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.",
+    "labels": [
+      "300490 effect_value 806104e0 #2",
+      "300490 spell_duration 806104 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301287,
+    "clause": "Each Felfury active now increases your haste by $s1%.",
+    "labels": [
+      "301287 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500067,
+    "clause": "Level 50 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 500067,
+    "clause": "Increases your Stamina by $s1%,",
+    "labels": [
+      "500067 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500067,
+    "clause": "your Agility by $s3%,",
+    "labels": [
+      "500067 effect_value e2 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500067,
+    "clause": "and size by $s2%.",
+    "labels": [
+      "500067 effect_value e1 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520693,
+    "clause": "Consumes 2 Felfury",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 520693,
+    "clause": "Blast an enemy and all enemies near them with fel magic, dealing ${$m1+0+$SP*0.4} Shadowflame Damage.",
+    "labels": [
+      "520693 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520693,
+    "clause": "Inner Demon: Striking at least 5 enemies with this spell causes it to deal an additional ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d,",
+    "labels": [
+      "520693 effect_value 520832e0 #1",
+      "520693 spell_duration 520832 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520693,
+    "clause": "stacking $520832u times.",
+    "labels": [
+      "520693 max_stacks 520832 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520240,
+    "clause": "Casting Felfury spenders now reduces the cooldown of Burning Hatred, Hateforged Barrier, and Demonic Will by $/1000;520830S1 sec.",
+    "labels": [
+      "520240 effect_value 520830e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520244,
+    "clause": "Dealing damage with Dancing Blades reduces the cooldown of Fury Unleashed by $/1000;520816S1 sec.",
+    "labels": [
+      "520244 effect_value 520816e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520246,
+    "clause": "Critical strikes with Fel Fireball now generate 1 Felfury.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 520249,
+    "clause": "Increases your critical strike chance by $s1%",
+    "labels": [
+      "520249 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520249,
+    "clause": "and an additional $s2% against Demons.",
+    "labels": [
+      "520249 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520251,
+    "clause": "Increases the effectiveness of your Intuitions by $s2%.",
+    "labels": [
+      "520251 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520252,
+    "clause": "While Inner Demon is active, your Armor contribution from cloth and leather items is increased by $s1%.",
+    "labels": [
+      "520252 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520253,
+    "clause": "While Inner Demon is active, your Armor contribution from cloth and leather items is increased by $s1%.",
+    "labels": [
+      "520253 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520254,
+    "clause": "Carve now channels 1 sec faster.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 520257,
+    "clause": "Casting Inner Demon with at least 6 Felfury now restores $520258s1 Energy.",
+    "labels": [
+      "520257 effect_value 520258e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520592,
+    "clause": "Removes the Energy cost of your Felbane and Manaburn and your Manaburn now strikes 4 additional enemies near the primary target.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 520805,
+    "clause": "Reduces the Energy cost of Chaos Rush by $s2",
+    "labels": [
+      "520805 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520805,
+    "clause": "and casting $?s520853[Fel Torpedo][Chaos Rush] now heals you for ${$520806m1+$520806ppl1+$STA*0.2+$AP*.33}.",
+    "labels": [
+      "520805 effect_value 520806e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520817,
+    "clause": "Your Twin Slice and Felrend now have a $h% chance to generate 1 additional Felfury.",
+    "labels": [
+      "520817 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520831,
+    "clause": "Fully channeling Carve now refunds 1 Felfury.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 520833,
+    "clause": "Critical strikes with Sargeron Smite now refund 1 Felfury.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 520833,
+    "clause": "In addition, Sargeron Smite now deals $s2% increased damage to enemies above 75% of their maximum health.",
+    "labels": [
+      "520833 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520853,
+    "clause": "Transforms your Chaos Rush into Fel Torpedo.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 520853,
+    "clause": "Generates 1 Felfury",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 520853,
+    "clause": "Torpedo forward in the direction you're running and deal ${$500761m1+$500761ppl1+$AP*.35} Shadowflame Damage to enemies in your path.",
+    "labels": [
+      "520853 effect_value 500761e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520853,
+    "clause": "Generates a large amount of threat.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 520853,
+    "clause": "Scales with modifiers to Chaos Rush",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 520885,
+    "clause": "Reduces the Energy cost of Twin Slice and Sunder by $s1.",
+    "labels": [
+      "520885 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 524947,
+    "clause": "Using $?s520853[Fel Torpedo][Chaos Rush] increases the next instance of direct spell or ability damage within $525027d by $525027s1%.",
+    "labels": [
+      "524947 spell_duration 525027 #0",
+      "524947 effect_value 525027e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 524950,
+    "clause": "Increases the damage of your Bane of Chaos and Ruin by $s1%.",
+    "labels": [
+      "524950 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 525001,
+    "clause": "Curse an enemy, causing the next spell they cast within $d to be reflected onto them.",
+    "labels": [
+      "525001 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 525079,
+    "clause": "Increases the damage of your Bane of Chaos and Ruin by $s1%.",
+    "labels": [
+      "525079 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 555738,
+    "clause": "Spin your glaives for $d,",
+    "labels": [
+      "555738 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 555738,
+    "clause": "increasing movement speed by $s2%",
+    "labels": [
+      "555738 effect_value e1 #1",
+      "555738 aura_amount e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 555738,
+    "clause": "and dealing $806095s1% Weapon Damage every $t1 sec with both weapons to all nearby enemies.",
+    "labels": [
+      "555738 effect_value 806095e0 #2",
+      "555738 aura_amplitude_ms #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 555738,
+    "clause": "You are immune to movement impairing and loss of control effects.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560057,
+    "clause": "Increases the critical strike chance of Azzinoth's Assault and Sargeron Smite by $s1%.",
+    "labels": [
+      "560057 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560284,
+    "clause": "Drop an infernal from the sky with grotesque magic, dealing ${$m2+0+$spfi*1.05} Fire damage to enemies in the radius,",
+    "labels": [
+      "560284 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560284,
+    "clause": "horrifying them for $d,",
+    "labels": [
+      "560284 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560284,
+    "clause": "and spawning an Infernal to fight by your side for $572163d.",
+    "labels": [
+      "560284 spell_duration 572163 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560284,
+    "clause": "Inner Demon: Lasts $/1000;807421s3 additional sec.",
+    "labels": [
+      "560284 effect_value 807421e2 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560503,
+    "clause": "While Inner Demon is active, Carve and Sargeron Smite now leeches $s1% of the damage dealt from the initial strike as Shadowflame Damage.",
+    "labels": [
+      "560503 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560533,
+    "clause": "Increases critical strike chance of all party and raid members within $a1 by $s1%.",
+    "labels": [
+      "560533 effect_radius e0 #0",
+      "560533 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560533,
+    "clause": "Does not stack with similar effects.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560533,
+    "clause": "In addition, increases your critical strike chance by $s2%.",
+    "labels": [
+      "560533 effect_value e1 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560542,
+    "clause": "Emanate a powerful aura, granting $s1% increased melee",
+    "labels": [
+      "560542 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560542,
+    "clause": "and ranged haste to party and raid members within $a1 yds.",
+    "labels": [
+      "560542 effect_radius e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560542,
+    "clause": "Does not stack with similar effects.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560542,
+    "clause": "In addition, while Inner Demon is active, you now heal for $s2% of all melee damage dealt.",
+    "labels": [
+      "560542 effect_value e1 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560549,
+    "clause": "Grant $s1% increased melee",
+    "labels": [
+      "560549 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560549,
+    "clause": "and ranged haste to party and raid members within $a1 yds.",
+    "labels": [
+      "560549 effect_radius e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560549,
+    "clause": "Does not stack with similar effects.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560549,
+    "clause": "In addition, your Stamina and attack power is increased by $s2%.",
+    "labels": [
+      "560549 effect_value e1 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560573,
+    "clause": "Reduces the Energy cost of Cripple and Consume Magic by $s1.",
+    "labels": [
+      "560573 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560576,
+    "clause": "Increases your parry chance by $s1%.",
+    "labels": [
+      "560576 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560578,
+    "clause": "Increases the damage dealt and reduces the Energy cost of Fury Unleashed by $s1%.",
+    "labels": [
+      "560578 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560637,
+    "clause": "While Inner Demon is active, casting Ruin, Sunder, or Felwrath now refunds 20 Energy.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560639,
+    "clause": "Your periodic damage now has a $h% chance to generate 1 Felfury.",
+    "labels": [
+      "560639 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560641,
+    "clause": "Cripple now causes the enemy target to be unable to critically strike for $704397d.",
+    "labels": [
+      "560641 spell_duration 704397 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560645,
+    "clause": "Increases the damage of Azzinoth's Assault by $s2%",
+    "labels": [
+      "560645 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560645,
+    "clause": "and causes it to increase your melee haste by $560646s1% for $560646d.",
+    "labels": [
+      "560645 effect_value 560646e0 #1",
+      "560645 spell_duration 560646 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560822,
+    "clause": "When Hateforged Barrier is removed from you, you now reduce $561203s% of all Magic damage taken for $561203d.",
+    "labels": [
+      "560822 spell_duration 561203 #0",
+      "560822 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560836,
+    "clause": "Increases the critical strike chance of Sargeron Smite by $s1%.",
+    "labels": [
+      "560836 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560838,
+    "clause": "Casting Annihilation now grants you Sculptor of Doom.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560838,
+    "clause": "Your next Ruin within $d is instant cast.",
+    "labels": [
+      "560838 spell_duration 555277 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560840,
+    "clause": "Every 3rd Ruin or Felwrath now spawns an Infernal to fight by your side for $572163d.",
+    "labels": [
+      "560840 spell_duration 572163 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561201,
+    "clause": "Damage dealt by Ruin now absorbs the next ${$801895m2+$801895ppl2} healing on the target based on rank,",
+    "labels": [
+      "561201 effect_value 801895e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561201,
+    "clause": "up to ${$501297m2+$501297ppl2} at rank 7,",
+    "labels": [
+      "561201 effect_value 501297e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561201,
+    "clause": "for $/1000;s1 sec.",
+    "labels": [
+      "561201 effect_value e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561216,
+    "clause": "2 Charges,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 561216,
+    "clause": "1.5 min recharge",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 561216,
+    "clause": "Move quickly from enemy to enemy, attacking them every $t1 sec with both weapons until 6 assaults are made,",
+    "labels": [
+      "561216 aura_amplitude_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561216,
+    "clause": "generating 1 Felfury with each strike.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 561216,
+    "clause": "While active you are immune to crowd control effects.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 561216,
+    "clause": "Can hit the same target multiple times.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 561216,
+    "clause": "Cannot hit invisible or stealthed targets.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 561216,
+    "clause": "@ext:Requires a nearby enemy to cast.:ext@",
+    "labels": [
+      "561216 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561343,
+    "clause": "Increases your parry chance by $s1%.",
+    "labels": [
+      "561343 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561345,
+    "clause": "Increases the critical strike chance of Sargeron Smite by $s1%.",
+    "labels": [
+      "561345 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 570077,
+    "clause": "While Inner Demon is active your melee attacks reduce the target's healing received by $567578s1% for $567578d,",
+    "labels": [
+      "570077 effect_value 567578e0 #0",
+      "570077 spell_duration 567578 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 570077,
+    "clause": "stacking $567578u times.",
+    "labels": [
+      "570077 max_stacks 567578 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 570158,
+    "clause": "Casting Azzinoth's Assault now scars the enemy, increasing your allies' attack power against them by ${$m1+0+$AGI*0.15} for $570159d.",
+    "labels": [
+      "570158 effect_value e0 #0",
+      "570158 spell_duration 570159 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572889,
+    "clause": "Critically striking now increases your damage dealt by $705148s1% for $705148d,",
+    "labels": [
+      "572889 effect_value 705148e0 #0",
+      "572889 spell_duration 705148 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572889,
+    "clause": "stacking $705148u times.",
+    "labels": [
+      "572889 max_stacks 705148 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 574140,
+    "clause": "Level 20 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 574140,
+    "clause": "Your Inner Demon now grants $800707s1% increased dodge chance and critical damage dealt while active.",
+    "labels": [
+      "574140 effect_value 800707e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 574143,
+    "clause": "Level 40 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 574143,
+    "clause": "While Inner Demon is active, direct melee ability critical strikes now refund $592521s1 Energy.",
+    "labels": [
+      "574143 effect_value 592521e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 574145,
+    "clause": "Level 50 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 574145,
+    "clause": "Twin Slice and Sargeron Smite now additionally scale with your Agility.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 574145,
+    "clause": "In addition, your critical auto attacks now deal $s2% additional damage as Chaos damage.",
+    "labels": [
+      "574145 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 574146,
+    "clause": "Level 40 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 574146,
+    "clause": "Damage dealt by Fel Fireball, Sargeron Smite, and Twin Slice now additionally scales with your Agility.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 574153,
+    "clause": "Level 30 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 574153,
+    "clause": "Increases your dodge and critical strike rating by $s1% of your Agility",
+    "labels": [
+      "574153 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 574153,
+    "clause": "and your hit rating by $s2% of your Agility.",
+    "labels": [
+      "574153 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681376,
+    "clause": "Dealing damage now has an $h% chance to increase your damage by $572782s1% for $572782d,",
+    "labels": [
+      "681376 effect_value #0",
+      "681376 effect_value 572782e0 #1",
+      "681376 spell_duration 572782 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681376,
+    "clause": "stacking $572782u times.",
+    "labels": [
+      "681376 max_stacks 572782 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 685321,
+    "clause": "Twin Slice now deals an additional ${$m2+0+$AP*0.3} Physical damage",
+    "labels": [
+      "685321 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 685321,
+    "clause": "and scars enemies for $563271d,",
+    "labels": [
+      "685321 spell_duration 563271 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 685321,
+    "clause": "increasing your allies' attack power against them by ${$563271m1+$563271ppl1+$AGI*0.15}.",
+    "labels": [
+      "685321 effect_value 563271e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704360,
+    "clause": "Your $?s520853[Fel Torpedo][Chaos Rush] now reduces all damage taken by $524633s1% for $524633d,",
+    "labels": [
+      "704360 effect_value 524633e0 #0",
+      "704360 spell_duration 524633 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704360,
+    "clause": "stacking $524633u times.",
+    "labels": [
+      "704360 max_stacks 524633 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704361,
+    "clause": "Increases your off-hand weapon damage by $s1%",
+    "labels": [
+      "704361 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704361,
+    "clause": "and reduces the Energy cost of Twin Slice by $s2.",
+    "labels": [
+      "704361 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706420,
+    "clause": "Generates 1 Felfury",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 706420,
+    "clause": "Unleash fel magic on an enemy, dealing $o1 Chaos damage over $d.",
+    "labels": [
+      "706420 aura_duration_ms #0",
+      "706420 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706420,
+    "clause": "Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.",
+    "labels": [
+      "706420 effect_value 802676e0 #1",
+      "706420 aura_amplitude_ms #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706420,
+    "clause": "Can only have 1 Bane active on a target at a time.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 706420,
+    "clause": "@ext:Periodic damage dealt by this effect can critically strike.:ext@",
+    "labels": [
+      "706420 effect_value #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704370,
+    "clause": "Each time Bane of Chaos deals damage its damage is increased on the target by $707511s1% for $707511d,",
+    "labels": [
+      "704370 effect_value 707511e0 #0",
+      "704370 spell_duration 707511 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704370,
+    "clause": "stacking $707511u times.",
+    "labels": [
+      "704370 max_stacks 707511 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704374,
+    "clause": "Every 3rd Twin Slice or Fel Fireball within $707518d now generates 1 additional Felfury.",
+    "labels": [
+      "704374 spell_duration 707518 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704378,
+    "clause": "Reduces Energy cost and cast time of Fel Fireball by $s3%.",
+    "labels": [
+      "704378 effect_value e2 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704602,
+    "clause": "Reduces the cooldown of Fury Unleashed by $/1000;S1 sec.",
+    "labels": [
+      "704602 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704602,
+    "clause": "When Fury Unleashed ends, you strike all nearby enemies for ${$806096m1+$806096ppl1+$AP*0.5614286} Shadowflame Damage",
+    "labels": [
+      "704602 effect_value 806096e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704602,
+    "clause": "and increase their damage taken from Sunder by $806096s2% for $806096d.",
+    "labels": [
+      "704602 effect_value 806096e1 #2",
+      "704602 spell_duration 806096 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704606,
+    "clause": "Direct magical critical strikes now generate $524898s1 Energy.",
+    "labels": [
+      "704606 effect_value 524898e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704607,
+    "clause": "Increases your critical damage by $s2%",
+    "labels": [
+      "704607 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704607,
+    "clause": "and additionally increases your critical strike chance by $s1% while fighting Elementals.",
+    "labels": [
+      "704607 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704610,
+    "clause": "Azzinoth's Assault now has a $h% chance to hit an additional time with your main-hand Weapon.",
+    "labels": [
+      "704610 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704611,
+    "clause": "While channeling Carve, your chance to dodge is now increased by $s1% based on how long you channel,",
+    "labels": [
+      "704611 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704611,
+    "clause": "up to a maximum of 10%.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 704612,
+    "clause": "Increases the effectiveness of your Pacts by $s1%.",
+    "labels": [
+      "704612 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704613,
+    "clause": "Increases the amount of beneficial magic effects stolen by your Consume Magic by $s1.",
+    "labels": [
+      "704613 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705102,
+    "clause": "Increases your Energy regeneration by $s1%.",
+    "labels": [
+      "705102 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705105,
+    "clause": "Increases your maximum Energy by $s1.",
+    "labels": [
+      "705105 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705108,
+    "clause": "Increases your chance to dodge by $s1%.",
+    "labels": [
+      "705108 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705109,
+    "clause": "Increases your critical strike chance by $s1%",
+    "labels": [
+      "705109 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705109,
+    "clause": "and an additional $s2% against Demons.",
+    "labels": [
+      "705109 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705122,
+    "clause": "Inner Demon now also reduces your damage taken by $500031s1%.",
+    "labels": [
+      "705122 effect_value 500031e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705123,
+    "clause": "Reduces the cost of your Felrend and Fel Fireball by $s1",
+    "labels": [
+      "705123 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705123,
+    "clause": "and increases their damage dealt by $s2%.",
+    "labels": [
+      "705123 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705125,
+    "clause": "Reduces the cooldown of Mana Burn and Illidan's Guile by $s1%.",
+    "labels": [
+      "705125 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705127,
+    "clause": "Increases your critical damage by $s2% against enemies above 75% health.",
+    "labels": [
+      "705127 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707527,
+    "clause": "Manifest a barrier of pure hatred, absorbing ${$m1+0+$STA*1} damage,",
+    "labels": [
+      "707527 effect_value e0 #0",
+      "707527 aura_amount e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707527,
+    "clause": "scaling with your Stamina, for $d.",
+    "labels": [
+      "707527 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707527,
+    "clause": "While the barrier holds, you take $s2% reduced Physical Damage.",
+    "labels": [
+      "707527 effect_value e1 #2",
+      "707527 aura_amount e1 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705131,
+    "clause": "Increases the critical strike chance of Fel Fireball by $s1%",
+    "labels": [
+      "705131 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705131,
+    "clause": "and it's damage dealt now reduces the enemy's chance to hit by $707360s1% for $707360d.",
+    "labels": [
+      "705131 effect_value 707360e0 #1",
+      "705131 spell_duration 707360 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705135,
+    "clause": "Casting Chaos Rush now reduces the cooldown of Felhoof Charge by $/1000;680318s1 sec.",
+    "labels": [
+      "705135 effect_value 680318e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705137,
+    "clause": "Your Azzinoth's Assault now has a $h% chance to not consume Felfury.",
+    "labels": [
+      "705137 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705141,
+    "clause": "Casting $?s520853[Fel Torpedo][Chaos Rush] now increases your Physical damage by $705142s1% for $705142d.",
+    "labels": [
+      "705141 effect_value 705142e0 #0",
+      "705141 spell_duration 705142 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705141,
+    "clause": "Casting Felhoof Charge increases your critical strike chance by $705143s1% for $705143d.",
+    "labels": [
+      "705141 effect_value 705143e0 #2",
+      "705141 spell_duration 705143 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705145,
+    "clause": "Triggering Dancing Blades now increases the damage of next Sargeron Smite by $705146s1% for $705146d,",
+    "labels": [
+      "705145 effect_value 705146e0 #0",
+      "705145 spell_duration 705146 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705145,
+    "clause": "stacking $705146u times.",
+    "labels": [
+      "705145 max_stacks 705146 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705150,
+    "clause": "Level 50 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 705150,
+    "clause": "Increases your critical damage dealt by $s1%.",
+    "labels": [
+      "705150 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706266,
+    "clause": "Reduces your chance to be hit by spells by $s1%",
+    "labels": [
+      "706266 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706266,
+    "clause": "and increases the absorption value of Hateforged Barrier by $s2%.",
+    "labels": [
+      "706266 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706267,
+    "clause": "Generating Felfury now leeches ${$AP*0.1} health from $555742i nearby enemies within $555742a1 yds, scaling with your attack power.",
+    "labels": [
+      "706267 effect_value #0",
+      "706267 effect_value #1",
+      "706267 effect_radius 555742e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706425,
+    "clause": "After generating 10 Felfury,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 706425,
+    "clause": "your next Sargeron Smite within $706269d gains $706269s1% increased critical strike chance and damage.",
+    "labels": [
+      "706425 spell_duration 706269 #0",
+      "706425 effect_value 706269e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707416,
+    "clause": "Your Fel Fireballs used with Felforged active now deal $s1% increased damage.",
+    "labels": [
+      "707416 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707444,
+    "clause": "Level 30 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 707444,
+    "clause": "Casting Carve now makes your next Fel Fireball instant cast and causes it to strike 1 additional enemy near the primary target based on how long you channeled,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 707444,
+    "clause": "up to a maximum of 10 enemies, dealing less damage with each target struck.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 707513,
+    "clause": "Your $?s520853[Fel Torpedo][Chaos Rush] now increases your Energy regeneration by $525042s1% for $525042d,",
+    "labels": [
+      "707513 effect_value 525042e0 #0",
+      "707513 spell_duration 525042 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707513,
+    "clause": "stacking $525042u times.",
+    "labels": [
+      "707513 max_stacks 525042 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707842,
+    "clause": "Increases your Energy regeneration by $s1%.",
+    "labels": [
+      "707842 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707844,
+    "clause": "Reduces your chance to be hit by spells by $s1%",
+    "labels": [
+      "707844 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707844,
+    "clause": "and increases the absorption value of Hateforged Barrier by $s2%.",
+    "labels": [
+      "707844 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707845,
+    "clause": "Increases your off-hand weapon damage by $s1%",
+    "labels": [
+      "707845 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707845,
+    "clause": "and reduces the Energy cost of Twin Slice by $s2.",
+    "labels": [
+      "707845 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707846,
+    "clause": "Reduces the cost of your Felrend and Fel Fireball by $s1",
+    "labels": [
+      "707846 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707846,
+    "clause": "and increases their damage dealt by $s2%.",
+    "labels": [
+      "707846 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707907,
+    "clause": "Increases the damage and reduces the cost of Sunder and Immolation Aura by $s1%.",
+    "labels": [
+      "707907 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800188,
+    "clause": "Increases your Agility by $s1%",
+    "labels": [
+      "800188 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800188,
+    "clause": "and dodge chance by $s2%.",
+    "labels": [
+      "800188 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800203,
+    "clause": "Interrupt a spell from being cast, preventing the target from casting spells of that school for $d and draining mana from the target based on your Spirit.",
+    "labels": [
+      "800203 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800203,
+    "clause": "Usable while moving.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 800204,
+    "clause": "Generates 1 Felfury",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 800204,
+    "clause": "Charge an enemy, dealing ${$m2+0+$AP*0.285} Physical damage.",
+    "labels": [
+      "800204 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800206,
+    "clause": "Consumes 2 Felfury",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 800206,
+    "clause": "Charge up a powerful attack over $d.",
+    "labels": [
+      "800206 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800206,
+    "clause": "Upon ending the channel, slash in front of you, dealing increased Weapon Damage with both weapons based on how long you channel, dealing less damage with each target struck.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 800206,
+    "clause": "Inner Demon: Reduces affected enemies melee and ranged haste by $578317s1% for $578317d.",
+    "labels": [
+      "800206 effect_value 578317e0 #1",
+      "800206 spell_duration 578317 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800206,
+    "clause": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
+    "labels": [
+      "800206 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572617,
+    "clause": "Wreathe yourself in fire for up to $d,",
+    "labels": [
+      "572617 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572617,
+    "clause": "dealing ${$m1+0+$spfi*.3+$AP*.23} Fire Damage to nearby enemies every $t1 sec.",
+    "labels": [
+      "572617 effect_value e0 #1",
+      "572617 aura_amount e0 #1",
+      "572617 aura_amplitude_ms #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800209,
+    "clause": "Generates 1 Felfury",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 800209,
+    "clause": "Strengthen your will, reducing Physical damage taken by $s3% for $d.",
+    "labels": [
+      "800209 effect_value e2 #0",
+      "800209 aura_amount e2 #0",
+      "800209 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 563268,
+    "clause": "Generates 1 Felfury",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 563268,
+    "clause": "Erupt in a whirlwind of felfury, striking all enemies within $a1 yds with both weapons,",
+    "labels": [
+      "563268 effect_radius e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 563268,
+    "clause": "dealing Weapon Damage plus $s1.",
+    "labels": [
+      "563268 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800214,
+    "clause": "Direct critical strikes now have a $h% chance to trigger a Felstrike and generate a Fragment of Malice.",
+    "labels": [
+      "800214 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800214,
+    "clause": "Burn an enemy for ${($d*1000/$T1)*($m1+0+$SP*.05)} Shadowflame Damage over $d,",
+    "labels": [
+      "800214 effect_value 802678e0 #1",
+      "800214 spell_duration 802678 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800214,
+    "clause": "stacking $u times.",
+    "labels": [
+      "800214 max_stacks 802678 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800214,
+    "clause": "Restores $s2 Energy",
+    "labels": [
+      "800214 effect_value 800239e1 #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800214,
+    "clause": "and increases your critical strike chance by $s1% for $d.",
+    "labels": [
+      "800214 effect_value 800239e0 #5",
+      "800214 spell_duration 800239 #6"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800220,
+    "clause": "Reduces the cooldown of Infernal Whipcrack by $/1000;s3 sec",
+    "labels": [
+      "800220 effect_value e2 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800220,
+    "clause": "and it now affects all allies and its radius is increased by $s2 yds.",
+    "labels": [
+      "800220 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800225,
+    "clause": "Consume the essence of the skull of Gul'dan, increasing your maximum health and Energy by $s1% for $d.",
+    "labels": [
+      "800225 effect_value e0 #0",
+      "800225 aura_amount e0 #0",
+      "800225 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800352,
+    "clause": "Increases the duration and reduces the Energy cost of Banes by $s1%.",
+    "labels": [
+      "800352 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800355,
+    "clause": "Channel a beam of fel magic upon an enemy, slowing your target's movement speed by $800833s1% for $d",
+    "labels": [
+      "800355 effect_value 800833e0 #0",
+      "800355 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800355,
+    "clause": "and dealing ${$cond($gt($spfi, $sps), $m2+0+$spfi*0.85, $m2+0+$sps*0.85)} Shadowflame Damage at the end of the duration.",
+    "labels": [
+      "800355 effect_value e1 #2",
+      "800355 aura_amount e1 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800355,
+    "clause": "For the duration, you may instant cast Fel Fireball and Ruin while channeling and they refund their cost.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 801235,
+    "clause": "Landing 3 direct critical strikes now grants Sculptor of Doom.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 801235,
+    "clause": "Your next Ruin within $d is instant cast.",
+    "labels": [
+      "801235 spell_duration 555277 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801892,
+    "clause": "Critically striking with Twin Slice or Annihilan Strike now generates an additional 1 Felfury.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 501298,
+    "clause": "Consumes 2 Felfury",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 501298,
+    "clause": "Bring doom upon an enemy, dealing ${$cond($gt($spfi, $sps), $m1+0+$spfi*1, $m1+0+$sps*1.32)} Shadowflame Damage to an enemy, piercing all absorption effects.",
+    "labels": [
+      "501298 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501298,
+    "clause": "Inner Demon: Deals an additional 30% of the damage dealt over $805748d.",
+    "labels": [
+      "501298 spell_duration 805748 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801899,
+    "clause": "Melee ability damage now has a $h% chance to reset the cooldown of Annihilan Strike",
+    "labels": [
+      "801899 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801899,
+    "clause": "and cause your next Annihilan Strike within $801902d to cost $801902s1% reduced Energy.",
+    "labels": [
+      "801899 spell_duration 801902 #1",
+      "801899 effect_value 801902e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572804,
+    "clause": "Generates 2 Felfury",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 572804,
+    "clause": "Unleash a devastating attack, dealing $s2% Weapon Damage to your target with both weapons.",
+    "labels": [
+      "572804 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572804,
+    "clause": "This ability is guaranteed to critically strike against enemies above 75% health.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 803475,
+    "clause": "Consumes 2 Felfury",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 803475,
+    "clause": "Strike an enemy for Weapon Damage plus ${$m1+0+$AP*.145} with both weapons, additionally scaling with your attack power.",
+    "labels": [
+      "803475 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803475,
+    "clause": "$?s804216[\r\n\r\nInner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 802058,
+    "clause": "For $d,",
+    "labels": [
+      "802058 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802058,
+    "clause": "your Fel Fireball is free of cost, instant cast, and strikes up to $s2 targets.",
+    "labels": [
+      "802058 effect_value e1 #1",
+      "802058 aura_amount e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802058,
+    "clause": "For the duration, your falling speed is slowed and damage dealt by your Fel Fireball increases your damage dealt by $524632s2% for $524632d,",
+    "labels": [
+      "802058 effect_value 524632e1 #2",
+      "802058 spell_duration 524632 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802058,
+    "clause": "stacking $524632u times.",
+    "labels": [
+      "802058 max_stacks 524632 #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802076,
+    "clause": "Your Annihilation now affects $s1 additional attack",
+    "labels": [
+      "802076 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802076,
+    "clause": "and your Physical damage dealt is now increased by $s2%.",
+    "labels": [
+      "802076 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802108,
+    "clause": "Level 20 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 802108,
+    "clause": "Increases your spell damage by $s1% of your Intellect and Spirit.",
+    "labels": [
+      "802108 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802108,
+    "clause": "In addition, Inner Demon now increases your spell damage and critical strike rating by an additional $801208s2% of your Spirit.",
+    "labels": [
+      "802108 effect_value 801208e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802110,
+    "clause": "Your Annihilation now affects $s1 additional attack",
+    "labels": [
+      "802110 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802110,
+    "clause": "and your Physical damage dealt is now increased by $s2%.",
+    "labels": [
+      "802110 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802180,
+    "clause": "Increases the critical strike chance of Fel Fireball and Ruin by $s1% on enemies above 75% health.",
+    "labels": [
+      "802180 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803478,
+    "clause": "Your Hateforged Barrier now also scales with your maximum health.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 803478,
+    "clause": "Casting Sunder causes you to cast Fel Explosion twice over the next 4 sec.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 803645,
+    "clause": "Level 40 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 803645,
+    "clause": "Increases your spell penetration by ${-($m1+0)}, scaling with your level.",
+    "labels": [
+      "803645 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803645,
+    "clause": "In addition, reduces spell pushback suffered from damaging attacks by $s2% while Inner Demon is active.",
+    "labels": [
+      "803645 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803840,
+    "clause": "Increases your Agility by $s1%",
+    "labels": [
+      "803840 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803840,
+    "clause": "and dodge chance by $s2%.",
+    "labels": [
+      "803840 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803903,
+    "clause": "While active, Blood of Mannoroth now also causes you to ignore all enemy Armor.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 803904,
+    "clause": "Gorge on fel energy, guaranteeing your next direct instance of damage to critically strike, but causing it to consume 5% of your maximum health.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 803904,
+    "clause": "Lasts for $n attacks or $d.",
+    "labels": [
+      "803904 aura_duration_ms #0",
+      "803904 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803905,
+    "clause": "Reduces the cooldown of Annihilation by $/1000;s1 sec",
+    "labels": [
+      "803905 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803905,
+    "clause": "and Sunder by $/1000;s2 sec.",
+    "labels": [
+      "803905 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804219,
+    "clause": "Ruin now has a $s1% chance not to consume Felfury.",
+    "labels": [
+      "804219 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804609,
+    "clause": "Increases the effectiveness of your Skull of Gul'dan by $s1%,",
+    "labels": [
+      "804609 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804609,
+    "clause": "but its cooldown is increased by $/1000;s2 sec.",
+    "labels": [
+      "804609 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804610,
+    "clause": "Increases the damage of Azzinoth's Assault, Annihilan Strike, and Twin Slice by $s1% against slowed enemies.",
+    "labels": [
+      "804610 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804611,
+    "clause": "Increases your Armor penetration by $s1%",
+    "labels": [
+      "804611 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804611,
+    "clause": "and your expertise by $s2.",
+    "labels": [
+      "804611 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804613,
+    "clause": "While at full health, your chance to resist the next Curse or Magic effect on you is increased by 100%.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 804613,
+    "clause": "Can only occur once every 10 sec.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 804822,
+    "clause": "Dodging or parrying an attack now gives you a $h% chance to make your next 10 instances of damage with Twin Slice deal $807163s1% increased damage",
+    "labels": [
+      "804822 effect_value #0",
+      "804822 effect_value 807163e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804822,
+    "clause": "and generate 1 Felfury.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 804823,
+    "clause": "Taunt nearby enemies for $704233d",
+    "labels": [
+      "804823 spell_duration 704233 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804823,
+    "clause": "and ignore $s3% of all damage taken for $d,",
+    "labels": [
+      "804823 effect_value #1",
+      "804823 aura_duration_ms #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804823,
+    "clause": "up to 100% of your maximum health.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 804823,
+    "clause": "When this ends, you unleash a Felfire Blast that leeches health from nearby enemies based on how many times you took damage with the effect active.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 805235,
+    "clause": "Unleash fel energy upon enemies at target location, fearing them and slowing their movement speed by $s3% for $d.",
+    "labels": [
+      "805235 effect_value e2 #0",
+      "805235 aura_amount e2 #0",
+      "805235 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805235,
+    "clause": "Damage caused may interrupt the effect.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 805236,
+    "clause": "While Inner Demon is active, your melee haste is now increased by $s2%",
+    "labels": [
+      "805236 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805236,
+    "clause": "and you now heal equal to $807426s1% of all damage dealt by critical strikes with auto attacks.",
+    "labels": [
+      "805236 effect_value 807426e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805236,
+    "clause": "In addition, critical strikes with Carve deal $807427s1% increased damage,",
+    "labels": [
+      "805236 effect_value 807427e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805236,
+    "clause": "increasing up to 60% with each strike based on how long you channel.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 805239,
+    "clause": "Enrages you, instantly generating 6 Felfury",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 805239,
+    "clause": "and causing your melee damage to leech health to you equal to $s1% of the damage dealt as Chaos damage for $d.",
+    "labels": [
+      "805239 effect_value e0 #0",
+      "805239 aura_amount e0 #0",
+      "805239 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805240,
+    "clause": "Set your fiery gaze upon an enemy and all enemies nearby, intimidating them and causing them to combust, dealing ${$m1+0+$AP*0.35} Shadowflame Damage to them.",
+    "labels": [
+      "805240 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805240,
+    "clause": "Damaging an enemy in this way heals you for ${$805241m1+$AP*.5}",
+    "labels": [
+      "805240 effect_value 805241e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805240,
+    "clause": "and generates 1 Felfury.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 805240,
+    "clause": "Only usable on enemies below 35% health.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 805243,
+    "clause": "Enrage $?s800220[all][up to $i] allies within $a yds,",
+    "labels": [
+      "805243 effect_value #0",
+      "805243 effect_value #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805243,
+    "clause": "reducing their damage taken by $s1%",
+    "labels": [
+      "805243 effect_value e0 #1",
+      "805243 aura_amount e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805243,
+    "clause": "and increasing their haste by $s2% for $d.",
+    "labels": [
+      "805243 effect_value e1 #2",
+      "805243 aura_amount e1 #2",
+      "805243 aura_duration_ms #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805244,
+    "clause": "Increases the range of $?s520853[Fel Torpedo][Chaos Rush] by $s2 yds$?s520853[ and its critical strike chance by $s1%][].",
+    "labels": [
+      "805244 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805245,
+    "clause": "While Demonic Will or Hateforged Barrier are active, all damage taken or avoided now has a $h% chance to generate 1 Felfury.",
+    "labels": [
+      "805245 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805246,
+    "clause": "Level 20 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 805246,
+    "clause": "Increases your attack power by $s1% of your Stamina",
+    "labels": [
+      "805246 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805246,
+    "clause": "and your hit rating by $s2% of your Agility.",
+    "labels": [
+      "805246 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805248,
+    "clause": "Burn an enemy's mana equal to 200% of your Stamina.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 805248,
+    "clause": "Deals damage equal to the mana drained.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 805249,
+    "clause": "Dodging an attack now generates $521210s1 Energy.",
+    "labels": [
+      "805249 effect_value 521210e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805255,
+    "clause": "Reduces the cooldown of Burning Hatred by $/1000;s1 sec.",
+    "labels": [
+      "805255 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805256,
+    "clause": "Increases your maximum health by $s1%",
+    "labels": [
+      "805256 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805256,
+    "clause": "and increases your off-hand weapon damage by $s2%.",
+    "labels": [
+      "805256 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805998,
+    "clause": "Damage dealt by Sargeron Smite now spreads your Cripple to 2 nearby enemies.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 806103,
+    "clause": "Increases your Magic damage dealt by $s1%",
+    "labels": [
+      "806103 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806103,
+    "clause": "and your spell hit chance by $s2%.",
+    "labels": [
+      "806103 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806109,
+    "clause": "Gorge on fel energy, becoming immune to all physical attacks and spells for $d, but during that time you cannot attack, move or cast spells.",
+    "labels": [
+      "806109 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806109,
+    "clause": "At the end of the duration, your next $?s520853[Fel Torpedo][Chaos Rush] within $806128d now dashes an additional 20 yds.",
+    "labels": [
+      "806109 spell_duration 806128 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806111,
+    "clause": "Critical strikes with Sargeron Smite now cause the target to bleed for an additional 50% of the damage dealt over $806112d.",
+    "labels": [
+      "806111 spell_duration 806112 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806235,
+    "clause": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+    "labels": [
+      "806235 effect_value 806236e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806235,
+    "clause": "and cause enemies struck to have a $572792s1% increased chance to be hit by spells for $572792d.",
+    "labels": [
+      "806235 effect_value 572792e0 #1",
+      "806235 spell_duration 572792 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807430,
+    "clause": "Increases the duration of Skull of Gul'dan by $/1000;S1 sec.",
+    "labels": [
+      "807430 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807431,
+    "clause": "Casting Felfury spenders now increases your Energy regeneration by $521234s1% for $521234d,",
+    "labels": [
+      "807431 effect_value 521234e0 #0",
+      "807431 spell_duration 521234 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807431,
+    "clause": "stacking up to $521234u times.",
+    "labels": [
+      "807431 max_stacks 521234 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807438,
+    "clause": "Generating Felfury now extends the duration of Inner Demon by 0.5 sec.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 807461,
+    "clause": "Damage dealt by Bane of Chaos now radiates fel energy around the enemy, dealing $s1% of the damage dealt to up to $807554i nearby enemies.",
+    "labels": [
+      "807461 effect_value e0 #0",
+      "807461 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807901,
+    "clause": "Increases your Armor penetration by $s1%",
+    "labels": [
+      "807901 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807901,
+    "clause": "and your expertise by $s2.",
+    "labels": [
+      "807901 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807902,
+    "clause": "Increases your Magic damage dealt by $s1%",
+    "labels": [
+      "807902 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807902,
+    "clause": "and your spell hit chance by $s2%.",
+    "labels": [
+      "807902 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807914,
+    "clause": "Increases your Armor penetration by $s1%",
+    "labels": [
+      "807914 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807914,
+    "clause": "and your expertise by $s2.",
+    "labels": [
+      "807914 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  }
+]
