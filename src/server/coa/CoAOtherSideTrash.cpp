@@ -18,6 +18,7 @@
 #include "Random.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "Spell.h"
 #include "SpellAuraEffects.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
@@ -141,6 +142,9 @@ std::unordered_map<uint32, SpellDamage> const Damages =
 constexpr float FissureLength = 20.0f;
 constexpr float FissureHalfWidth = 2.0f;
 constexpr float BroodRange = 30.0f;
+constexpr float BreathSweep = float(M_PI) / 2.0f;
+constexpr uint32 BreathChannelMs = 5000;
+constexpr uint32 BreathFacingStepMs = 100;
 std::atomic<uint32> TrapActiveMs = 1500;
 std::atomic<uint32> TrapPauseMs = 6000;
 constexpr uint32 TrapTickMs = 500;
@@ -256,18 +260,26 @@ struct npc_coa_other_side_trash : public ScriptedAI
         if (!UpdateVictim())
             return;
 
-        if (_turnedAway)
+        if (_aimingBreath)
         {
             if (me->HasUnitState(UNIT_STATE_CASTING))
             {
-                if (me->GetOrientation() != _breathFacing)
+                Spell const* channel = me->GetCurrentSpell(CURRENT_CHANNELED_SPELL);
+                if (channel && channel->getState() == SPELL_STATE_CASTING)
                 {
-                    me->SetOrientation(_breathFacing);
+                    _breathFacing = Position::NormalizeOrientation(_breathFacing
+                        + _breathTurn * BreathSweep * float(diff) / float(BreathChannelMs));
+                    _facingIn = _facingIn > diff ? _facingIn - diff : 0;
+                }
+                me->SetOrientation(_breathFacing);
+                if (!_facingIn)
+                {
                     me->SetFacingTo(_breathFacing);
+                    _facingIn = BreathFacingStepMs;
                 }
                 return;
             }
-            _turnedAway = false;
+            _aimingBreath = false;
             if (Unit* victim = me->GetVictim())
             {
                 me->SetTarget(victim->GetGUID());
@@ -292,7 +304,7 @@ struct npc_coa_other_side_trash : public ScriptedAI
                         break;
                     case Aim::Self:
                         if (ability.spell == SPELL_VENOMOUS_BREATH)
-                            TurnAway();
+                            AimBreath();
                         DoCastSelf(ability.spell);
                         break;
                     case Aim::Random:
@@ -311,16 +323,21 @@ struct npc_coa_other_side_trash : public ScriptedAI
     }
 
 private:
-    void TurnAway()
+    void AimBreath()
     {
-        _breathFacing = frand(0.0f, 2.0f * float(M_PI));
+        Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 0.0f, true);
+        if (!target)
+            target = me->GetVictim();
+        _breathFacing = target ? me->GetAngle(target) : me->GetOrientation();
+        _breathTurn = urand(0, 1) ? 1.0f : -1.0f;
+        _facingIn = BreathFacingStepMs;
         me->GetMotionMaster()->Clear();
         me->GetMotionMaster()->MoveIdle();
         me->StopMoving();
         me->SetTarget(ObjectGuid::Empty);
         me->SetOrientation(_breathFacing);
         me->SetFacingTo(_breathFacing);
-        _turnedAway = true;
+        _aimingBreath = true;
     }
 
     bool IsWanderer() const
@@ -335,8 +352,10 @@ private:
         uint32 left;
     };
     std::vector<Timer> _timers;
-    bool _turnedAway = false;
+    bool _aimingBreath = false;
     float _breathFacing = 0.0f;
+    float _breathTurn = 1.0f;
+    uint32 _facingIn = 0;
 };
 
 struct BreathCheck
