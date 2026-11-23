@@ -896,6 +896,7 @@ class SummonAuraCarrierTest(unittest.TestCase):
         self.assertTrue(expectations[f'{DECIMATE} aura_amount e0 #1'].rule.startswith('read '))
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class ValueAllyCastTest(unittest.TestCase):
     ALLY_ONLY = 503498
     BLESSED_ONLY = 804250

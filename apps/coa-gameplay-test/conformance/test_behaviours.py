@@ -13802,6 +13802,7 @@ class ScriptedCritProbeRefusalTests(unittest.TestCase):
         entry = self.entry(metric='aura_duration_ms', evidence_metric='enemy_player_aura_duration_ms')
         require_scripted_crit_probe(self.records(damage_class=3), metric_delta_spec(entry))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_scenario_generator_runs_the_refusals(self):
         entry = next(entry for entry in load_class_file(27)['behaviours']
                      if entry.get('spell') == 680618 and entry.get('variant') == 'above')

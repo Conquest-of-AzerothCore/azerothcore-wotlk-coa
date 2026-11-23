@@ -1772,6 +1772,7 @@ def effective_heal_entry(**changes):
     return {**entry, **changes}
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class EffectiveHealTrialTest(unittest.TestCase):
     def test_the_ally_heals_are_the_trials_and_the_ally_is_low_before_each_cast(self):
         entry = effective_heal_entry()
