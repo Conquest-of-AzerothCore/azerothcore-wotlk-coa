@@ -18,14 +18,15 @@ from hits import (CLOSED, HIT_CHECKS, MAX_SCENARIO_MS, UNMODELLED, HitModel, Mod
                   measured_hit_model, melee_parts, melee_scenario, records_of, periodic_tick_readout, ranged_weapon_attack,
                   rank_hit, reference_caster, reference_hit_model, reference_melee_model, reference_script_hit_model,
                   rolled_values, script_hit_model, rank_hit_effect, hit_measurements,
-                  scheduled_casts, self_stack_multiplier, weapon_attacker, weapon_profile, base_mana_steps)
+                  scheduled_casts, self_stack_multiplier, weapon_attacker, weapon_profile, base_mana_steps,
+                  taken_by, taken_modifiers)
 from custom_attr import CustomAttributes
 from mitigation import (REFERENCE_TARGET, MitigationModel, TargetProfile, armor_reduction, average_resist,
                         expected_mitigation, partial_resist_shares)
 from profile import load_class_file, load_fixture_class_file
 from tooltip import CasterStats, Displayed, Readout, read_tooltip, weapon_skill_spells
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, GAP_CLOSER_DISTANCE, NOMINAL_MELEE_RANGE_YD,
-                    TARGET, UNREADABLE, armed_for, cast_distance, missile_wait_ms)
+                    TARGET, UNREADABLE, Expectation, armed_for, cast_distance, missile_wait_ms)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -1740,6 +1741,35 @@ class RankHitEffectsFieldTest(unittest.TestCase):
             self.assertTrue(all(step['periodic'] is periodic for step in damage))
 
 
+class MeasuredHitModelRoleTest(unittest.TestCase):
+    MODEL = HitModel(kind='periodic_damage', mean=140.6, sigma=12.7, tooltip_mean=159.06)
+
+    def roles(self, check: str) -> list[str]:
+        roles = []
+
+        def modelled(class_file, rank_id, caster, target, auras, learned=None, role='hit_mean'):
+            roles.append(role)
+            return types.SimpleNamespace(model=self.MODEL)
+
+        expectation = Expectation(label=f'{TORMENTOR_TOP_RANK} effect_value #1', check=check,
+                                  spell_id=TORMENTOR_TOP_RANK, rank_id=TORMENTOR_TOP_RANK, effect_index=0,
+                                  displayed='$o1', rule='', model={'kind': 'periodic_damage', 'measurements': {}})
+        with (mock.patch('hits.armed_for', side_effect=lambda class_file, records, rank_id: class_file),
+              mock.patch('hits.records_of'), mock.patch('hits.caster_stats_from'),
+              mock.patch('hits.rank_hit', side_effect=modelled)):
+            self.assertEqual(measured_hit_model({}, expectation, {}), self.MODEL)
+        return roles
+
+    def test_a_periodic_total_models_its_own_hit_role(self):
+        self.assertEqual(self.roles('periodic_total'), ['periodic_total'])
+
+    def test_a_direct_hit_models_the_direct_role(self):
+        self.assertEqual(self.roles('hit_mean'), ['hit_mean'])
+
+    def test_another_check_keeps_the_direct_role(self):
+        self.assertEqual(self.roles('script_hit'), ['hit_mean'])
+
+
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class RankHitEffectsDataTest(unittest.TestCase):
     @classmethod
@@ -1838,6 +1868,58 @@ class ValueSpellRollTest(unittest.TestCase):
         self.assertAlmostEqual(rolled.model['reference']['sigma'], 0.5, places=6)
         with self.assertRaises(ValueError):
             behaviour_scenario(self.witch_hunter, self.entry(value_rolls='yes'))
+
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class DamageFromCasterAndLevelPointsTest(unittest.TestCase):
+    VEIL, VEIL_PULSE = 802100, 806473
+    VOLLEY_TALENT, VOLLEY = 503712, 504582
+
+    @classmethod
+    def setUpClass(cls):
+        cls.witch_doctor = load_class_file(13)
+
+    def test_the_casters_damage_from_caster_aura_raises_its_own_family_hit_after_the_done_truncation(self):
+        plain = reference_script_hit_model(self.witch_doctor, self.VEIL, self.VEIL_PULSE, unresisted=True)
+        veiled = reference_script_hit_model(self.witch_doctor, self.VEIL, self.VEIL_PULSE, model_auras=(self.VEIL,),
+                                            unresisted=True, taken_auras=(self.VEIL,))
+        self.assertEqual((plain.mean, plain.engine.mean), (206.0, 205.0))
+        self.assertEqual((veiled.mean, veiled.engine.mean), (236.0, 235.0))
+        self.assertEqual([(modifier.aura, modifier.percent) for modifier in veiled.modifiers], [(271, 15)])
+
+    def test_a_damage_from_caster_aura_skips_a_hit_of_another_family(self):
+        records = records_of(self.witch_doctor)
+        self.assertEqual(taken_modifiers(records, [self.VEIL], 60, 133), ())
+        self.assertEqual(len(taken_modifiers(records, [self.VEIL], 60, self.VEIL_PULSE)), 1)
+
+    def test_a_damage_from_caster_aura_never_changes_a_heal(self):
+        modifier = Modifier(self.VEIL, 0, 271, 15, 'damage_taken', 127)
+        self.assertEqual(taken_by([modifier], 'heal'), ())
+        self.assertEqual(taken_by([modifier], 'school'), (modifier,))
+
+    def test_level_points_read_the_per_level_term_at_the_caster_level(self):
+        client = reference_script_hit_model(self.witch_doctor, self.VOLLEY_TALENT, self.VOLLEY, unresisted=True)
+        server = reference_script_hit_model(self.witch_doctor, self.VOLLEY_TALENT, self.VOLLEY, unresisted=True,
+                                            level_points=True)
+        self.assertEqual(client.mean, 371.0)
+        self.assertEqual((server.mean, server.engine.mean), (389.0, 389.0))
+        self.assertAlmostEqual(server.sigma, client.sigma)
+
+    def test_the_record_names_the_taken_auras_and_the_measured_model_reads_them(self):
+        entry = next({key: value for key, value in entry.items() if key != 'model_auras'}
+                     for entry in self.witch_doctor['behaviours']
+                     if entry['spell'] == self.VEIL and entry.get('variant') == 'veil_tick')
+        _, [plain] = behaviour_scenario(self.witch_doctor, entry)
+        _, [veiled] = behaviour_scenario(self.witch_doctor, {**entry, 'model_auras': [self.VEIL]})
+        self.assertNotIn('taken_auras', plain.model)
+        self.assertEqual(veiled.model['taken_auras'], [self.VEIL])
+        self.assertEqual(veiled.model['reference']['mean'], 236.0)
+
+    def test_level_points_refuse_a_weapon_hit(self):
+        with self.assertRaises(Unmodelled):
+            script_hit_model(self.witch_doctor, self.VOLLEY_TALENT, self.VOLLEY, reference_caster(self.witch_doctor),
+                             REFERENCE_TARGET, [], weapon_only=True, level_points=True)
 
 
 if __name__ == '__main__':

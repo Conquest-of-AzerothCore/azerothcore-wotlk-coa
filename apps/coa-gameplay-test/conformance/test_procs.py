@@ -1423,6 +1423,95 @@ class OffHandTrialTests(unittest.TestCase):
                 proc_plan(self.dual_wielding(), self.entry(**changes))
 
 
+class ProcStreamTests(unittest.TestCase):
+    TUNDRA_WARRIORS = 92122
+    ISOLATION = {'reach_yd': 0, 'source': 'seeded: a single-target trigger cast at the own dummy'}
+
+    def entry(self, **changes) -> dict:
+        from profile import load_fixture_class_file
+        entry = next(entry for entry in load_fixture_class_file(23)['procs'] if entry['aura'] == self.TUNDRA_WARRIORS)
+        return {**entry, **changes}
+
+    def scenario(self, entry: dict, part: int = 0):
+        from procs import proc_scenario
+        from profile import load_fixture_class_file
+        return proc_scenario(load_fixture_class_file(23), entry, part)
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
+    def test_a_single_stream_keeps_one_caster_and_no_stream_model(self):
+        scenario, (expectation, *_) = self.scenario(self.entry())
+        self.assertEqual([player['id'] for player in scenario['players']], ['caster'])
+        self.assertNotIn('stream_suffixes', expectation.model)
+        self.assertNotIn('location', scenario)
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
+    def test_streams_split_the_attempts_and_suffix_every_read(self):
+        from procs import proc_plan
+        from profile import load_fixture_class_file
+        single = self.entry()
+        streamed = self.entry(streams=4, isolation=self.ISOLATION)
+        scenario, (expectation, *_) = self.scenario(streamed)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        plan = proc_plan(load_fixture_class_file(23), single)
+        model = expectation.model
+        self.assertEqual([player['id'] for player in scenario['players']], ['caster', 'caster1', 'caster2', 'caster3'])
+        self.assertEqual([creature['id'] for creature in scenario['creatures']],
+                         ['dummy', 'dummy1', 'dummy2', 'dummy3'])
+        self.assertEqual(model['stream_suffixes'], [' s0', ' s1', ' s2', ' s3'])
+        self.assertEqual(model['part_attempts'], math.ceil(plan.per_part / 4) * 4)
+        self.assertGreaterEqual(model['part_attempts'], plan.per_part)
+        self.assertEqual(model['scheduled_attempts'], plan.scheduled)
+        labels = {step['label'] for step in scenario['steps'] if step['action'] == 'assert'}
+        for label in model['summed_labels']:
+            self.assertTrue(all(f'{label}{suffix}' in labels for suffix in model['stream_suffixes']), label)
+            self.assertNotIn(label, labels)
+        trigger = streamed['trigger']['spell']
+        casters = [step['actor'] for step in scenario['steps'] if step['action'] == 'cast' and step['spell'] == trigger]
+        self.assertEqual({actor: casters.count(actor) for actor in set(casters)},
+                         dict.fromkeys(('caster', 'caster1', 'caster2', 'caster3'), casters.count('caster')))
+        crossing = [item for item in model['isolation'] if item['status'] == 'alert']
+        self.assertTrue(crossing)
+        self.assertTrue(all(item['min'] == item['max'] == 0 for item in crossing))
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
+    def test_streams_need_an_isolation_and_a_cast_at_the_dummy(self):
+        for entry in (self.entry(streams=4), self.entry(streams=4, isolation=self.ISOLATION,
+                                                         trigger={'action': 'attack'})):
+            with self.subTest(entry=entry.get('trigger')), self.assertRaises(ValueError):
+                self.scenario(entry)
+
+    def test_stream_reads_are_summed_before_the_judge(self):
+        from compare import stream_summed
+        model = {'stream_suffixes': [' s0', ' s1'], 'summed_labels': ['t', 'e']}
+        run_values = FakeRunValues({'t s0': 3.0, 't s1': 4.0, 'e s0': 1.0, 'other': 9.0})
+        summed = stream_summed(run_values, model)
+        self.assertEqual(summed.values, {'t': 7.0, 't s0': 3.0, 't s1': 4.0, 'e s0': 1.0, 'other': 9.0})
+        self.assertNotIn('t', run_values.values)
+        self.assertIs(stream_summed(run_values, {}), run_values)
+
+    def test_a_crossing_read_alerts_and_a_placement_breach_is_unmeasured(self):
+        from compare import Verdict, stream_isolation
+        base = Verdict('l', 'alert', None, None, None, None, '', 'k', 1, 1, PROC_CHECK)
+        bounds = [{'label': 'x isolation s0 dummy 1 from s1', 'min': 0, 'max': 0, 'status': 'alert'},
+                  {'label': 'x isolation s0 caster position_z', 'min': -59.25, 'max': -58.25, 'status': 'unmeasured'}]
+        model = Expectation('l', PROC_CHECK, 1, 1, None, '', '', {'isolation': bounds})
+        held = FakeRunValues({'x isolation s0 dummy 1 from s1': 0.0, 'x isolation s0 caster position_z': -58.75})
+        crossed = FakeRunValues({'x isolation s0 dummy 1 from s1': 2.0, 'x isolation s0 caster position_z': -58.75})
+        moved = FakeRunValues({'x isolation s0 dummy 1 from s1': 0.0, 'x isolation s0 caster position_z': -40.0})
+        self.assertIsNone(stream_isolation([({}, held, model)], base))
+        self.assertEqual(stream_isolation([({}, crossed, model)], base).status, 'alert')
+        self.assertEqual(stream_isolation([({}, moved, model)], base).status, 'unmeasured')
+
+
+class FakeRunValues:
+    def __init__(self, values):
+        self.values = values
+        self.key = 'fake'
+        self.status = 'completed'
+        self.message = ''
+        self.steps = []
+
+
 class BaseManaPerAttemptTests(unittest.TestCase):
     TUNDRA_WARRIORS = 92122
     PERCENT_COST_TRIGGER = 707402

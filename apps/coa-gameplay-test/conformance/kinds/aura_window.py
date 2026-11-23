@@ -3,7 +3,7 @@ from pathlib import Path
 
 from behaviours import BEHAVIOUR_METRIC_DELTA, behaviour_entry, prose_rule, waited_ms
 from bonus import bonus_band
-from hits import creature_fixture, timed
+from hits import base_mana_steps, creature_fixture, timed
 from kinds.cast_period import cast_period_label
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
@@ -30,6 +30,31 @@ class AuraWindowSpec:
     trigger_power: int | None = None
     poll_ms: int = 5
     label_suffix: str = 'aura_window'
+    setup_casts: tuple[tuple[int, str, int], ...] = ()
+    treatment_band_ms: int | None = None
+
+
+SETUP_TARGETS = (CASTER, TARGET)
+
+
+def setup_cast(raw: dict) -> tuple[int, str, int]:
+    target = raw.get('target', CASTER)
+    if target not in SETUP_TARGETS or int(raw['wait_ms']) < 0:
+        raise ValueError(f'aura_window setup cast {raw!r}: target is one of {list(SETUP_TARGETS)}, wait_ms >= 0')
+    return int(raw['spell']), target, int(raw['wait_ms'])
+
+
+def setup_steps(class_file: dict, records: Records, spec: 'AuraWindowSpec') -> list[dict]:
+    steps = []
+    for spell, target, wait_ms in spec.setup_casts:
+        facts = facts_of(records, spell)
+        steps += base_mana_steps(class_file, facts) or (
+            [{'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost}]
+            if facts.mana_cost > 0 else [])
+        steps += [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spell},
+                  {'action': 'cast', 'actor': CASTER, 'spell': spell, 'target': target},
+                  {'action': 'wait', 'label': 'treatment setup', 'ms': wait_ms}]
+    return steps
 
 
 def aura_window_spec(entry: dict) -> AuraWindowSpec:
@@ -38,7 +63,11 @@ def aura_window_spec(entry: dict) -> AuraWindowSpec:
                           int(entry['aura']), int(entry['control_ms']), int(entry['treatment_ms']),
                           windows(entry['control_windows']), windows(entry['treatment_windows']),
                           entry.get('trigger_power'), int(entry.get('poll_ms', 5)),
-                          entry.get('label_suffix', 'aura_window'))
+                          entry.get('label_suffix', 'aura_window'),
+                          tuple(setup_cast(raw) for raw in entry.get('setup_casts', ())),
+                          entry.get('treatment_band_ms'))
+    if spec.treatment_band_ms is not None and not 0 < spec.treatment_band_ms < bonus_band(spec.treatment_ms):
+        raise ValueError(f'{spec.spell} aura_window treatment_band_ms narrows the G-19 band of the treatment')
     for (start_low, start_high), (end_low, end_high) in (spec.control_windows, spec.treatment_windows):
         if not 0 <= start_low < start_high < end_low < end_high:
             raise ValueError(f'{spec.spell} aura_window polls the start window, then the end window, after the cast')
@@ -53,7 +82,8 @@ def aura_window_scenario(class_file: dict, spec: AuraWindowSpec) -> tuple[dict, 
 
     def phase(name: str, windows) -> list[dict]:
         power = spec.trigger_power if spec.trigger_power is not None else facts.mana_cost
-        steps = [{'action': 'wait', 'label': f'{name} before the cast', 'ms': GCD_WAIT_MS},
+        steps = setup_steps(class_file, records, spec) if name == 'treatment' else []
+        steps += [{'action': 'wait', 'label': f'{name} before the cast', 'ms': GCD_WAIT_MS},
                  {'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': power},
                  {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell},
                  measurement(cast_period_label(spec, f'{name} cast'), CASTER, 'game_time_ms'),
@@ -74,7 +104,8 @@ def aura_window_scenario(class_file: dict, spec: AuraWindowSpec) -> tuple[dict, 
         reads[name] = {'cast': cast_period_label(spec, f'{name} cast'), 'rows': rows}
         return steps + [{'action': 'wait', 'label': f'{name} settle', 'ms': 1500}]
 
-    steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}]
+    learned = dict.fromkeys([spec.trigger_spell, *(spell for spell, _, _ in spec.setup_casts)])
+    steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in learned]
              + phase('control', spec.control_windows) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
              + phase('treatment', spec.treatment_windows))
     scenario = {
@@ -83,12 +114,14 @@ def aura_window_scenario(class_file: dict, spec: AuraWindowSpec) -> tuple[dict, 
         'contract': (f'{spec.trigger_spell} cast at the dummy without {spec.spell} (control) and with it learned; '
                      f'aura {spec.aura} on the dummy and the game time are read every {spec.poll_ms} ms over a start and '
                      f'an end window of each cast; the aura\'s stamped duration must be {spec.control_ms} ms without '
-                     f'and {spec.treatment_ms} ms with it, each inside the G-19 band.'),
+                     f'and {spec.treatment_ms} ms with it, each inside the G-19 band.{setup_text(spec)}'),
         'players': [{**player_fixture(class_file), 'allow_regeneration': False}],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
     model = {'kind': 'aura_window', 'metric': 'aura', 'quote': entry.quote, 'reads': reads,
              'expected': {'control': spec.control_ms, 'treatment': spec.treatment_ms}}
+    if spec.treatment_band_ms is not None:
+        model['bands'] = {'treatment': spec.treatment_band_ms}
     expectation = Expectation(f'{spec.spell} {BEHAVIOUR_METRIC_DELTA} {spec.label_suffix}', BEHAVIOUR_METRIC_DELTA,
                               spec.spell, spec.aura, None, str(spec.treatment_ms), prose_rule(entry.quote, spec.spell),
                               model)
@@ -123,15 +156,25 @@ def aura_window_verdict(base, run, model: dict):
         if isinstance(bracket, str):
             return replace(base, status='unmeasured', explanation=f'{name}: {bracket}')
         expected = float(model['expected'][name])
-        band = bonus_band(expected)
+        band = float(model.get('bands', {}).get(name, bonus_band(expected)))
         inside = expected - band <= bracket[0] and bracket[1] <= expected + band
         ok = ok and inside
         parts.append(f'{name} lasted between {bracket[0]:g} and {bracket[1]:g} ms against {expected:g} +- {band:g}')
     low, high = aura_window_bracket(run, model['reads']['treatment'])
     expected = float(model['expected']['treatment'])
+    band = float(model.get('bands', {}).get('treatment', bonus_band(expected)))
     return replace(base, status='ok' if ok else 'alert', measured=(low + high) / 2, expected=expected,
-                   low=expected - bonus_band(expected), high=expected + bonus_band(expected),
+                   low=expected - band, high=expected + band,
                    explanation='; '.join(parts) + ' (stamped game time, first read with the aura to the first without)')
+
+
+def setup_text(spec: AuraWindowSpec) -> str:
+    if not spec.setup_casts:
+        return ''
+    casts = ', '.join(f'{spell} at {target} ({wait_ms} ms)' for spell, target, wait_ms in spec.setup_casts)
+    band = (f' The treatment is judged inside {spec.treatment_band_ms} ms, the band of the stated change.'
+            if spec.treatment_band_ms is not None else '')
+    return f' The treatment phase first makes the real casts {casts}, then the cast.{band}'
 
 
 def scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:

@@ -374,6 +374,11 @@ class EvidenceStatusTest(unittest.TestCase):
     def test_an_effectiveness_clause_without_a_named_subject_stays_data(self):
         self.assertEqual(self.effectiveness('increasing Agility by $s1', named=3), DATA)
 
+    def test_a_literal_number_of_an_extension_row_is_not_a_second_value(self):
+        self.assertEqual(self.effectiveness('increasing Agility by $s1', 'Lasts $d.',
+                                            '@ext:Can only have 1 Gift active on a target at a time.:ext@'),
+                         BEHAVIOUR)
+
     def test_duration_and_range_are_not_stated_values(self):
         for text, stated in (('for $d', False), ('for $803237d', False), ('within $a1 yds', False),
                              ('increasing Agility by $s1', True), ('by 20%', True), ('for ${$m1+1} sec', True),
@@ -610,6 +615,26 @@ class EvidenceStatusTest(unittest.TestCase):
         self.assertEqual(evidence_of([claim('Create $s1 Bone Reliquaries', label)], [read])[0], [BEHAVIOUR])
         self.assertEqual(evidence_of([claim('Shares a cooldown with similar effects.', label)], [read])[0], [DATA])
 
+    def test_an_item_count_is_promised_by_a_brew(self):
+        label = '1 behaviour_metric_delta items'
+        read = judged(label, BEHAVIOUR_METRIC_DELTA, 'item_count', contrast=LEARNED_CONTRAST)
+        self.assertEqual(evidence_of([claim('Brews $s1 Black Lotus Bisque', label)], [read])[0], [BEHAVIOUR])
+
+    def test_a_root_state_is_promised_by_a_root(self):
+        label = '1 behaviour_metric_delta root'
+        read = judged(label, BEHAVIOUR_METRIC_DELTA, 'rooted', contrast=LEARNED_CONTRAST)
+        self.assertEqual(METRIC_EVIDENCE['rooted'], STATE)
+        self.assertEqual(evidence_of([claim('Root yourself for 8 sec', label)], [read])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('Stuns the target for 8 sec', label)], [read])[0], [DATA])
+
+    def test_a_carried_aura_count_is_promised_by_an_empowerment(self):
+        label = '1 behaviour_metric_delta empowerment'
+        read = judged(label, BEHAVIOUR_METRIC_DELTA, 'carried_aura_count', contrast=LEARNED_CONTRAST)
+        self.assertEqual(METRIC_EVIDENCE['carried_aura_count'], STATE)
+        self.assertEqual(evidence_of([claim('now applies a random empowerment to the target ally.', label)],
+                                     [read])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('Heals the target ally.', label)], [read])[0], [DATA])
+
     def test_a_cast_state_is_a_state_read_where_the_clause_promises_a_cast(self):
         label = '1 behaviour_metric_delta instant'
         read = judged(label, BEHAVIOUR_METRIC_DELTA, 'casting', contrast=LEARNED_CONTRAST)
@@ -661,6 +686,8 @@ class EvidenceStatusTest(unittest.TestCase):
         label = '1 behaviour_metric_delta'
         read = judged(label, BEHAVIOUR_METRIC_DELTA, 'power', contrast=LEARNED_CONTRAST)
         self.assertEqual(evidence_of([claim('Reduces the cost of all Raises by 20%', label)], [read])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('reducing their resource costs by $s1%.', label)], [read])[0],
+                         [BEHAVIOUR])
         self.assertEqual(evidence_of([claim('Raise a Ghoul', label)], [read])[0], [DATA])
 
     def test_a_cast_count_proves_only_a_clause_that_states_a_cast(self):
@@ -823,7 +850,8 @@ class EvidenceTablesTest(unittest.TestCase):
 
     def test_cross_class_guard_a_metric_without_its_evidence_row_is_found(self):
         seeded = {metric: kind for metric, kind in metric_evidence().items() if metric != 'owned_creature_distance_2d'}
-        self.assertEqual(self.unclassed_metrics(seeded), {'necromancer.json': ['owned_creature_distance_2d']})
+        self.assertEqual(self.unclassed_metrics(seeded), {'necromancer.json': ['owned_creature_distance_2d'],
+                                                          'witch_doctor.json': ['owned_creature_distance_2d']})
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
     def test_cross_class_guard_every_metric_classed_expectation_of_the_class_files_carries_its_metric(self):
