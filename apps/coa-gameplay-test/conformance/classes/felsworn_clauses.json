@@ -984,7 +984,7 @@
       {
         "claim": "dealing $806095s1% Weapon Damage",
         "labels": [
-          "555738 effect_value 806095e0 #2"
+          "555738 behaviour_metric_delta hit_ap"
         ]
       },
       {
@@ -2888,7 +2888,8 @@
     "spell": 563268,
     "clause": "dealing Weapon Damage plus $s1.",
     "labels": [
-      "563268 effect_value e0 #1"
+      "563268 behaviour_metric_delta hit",
+      "563268 behaviour_metric_delta hit_ap"
     ],
     "kind": "claim"
   },
@@ -3281,7 +3282,8 @@
     "spell": 572804,
     "clause": "Unleash a devastating attack, dealing $s2% Weapon Damage to your target with both weapons.",
     "labels": [
-      "572804 effect_value e1 #0"
+      "572804 behaviour_metric_delta hit",
+      "572804 behaviour_metric_delta hit_ap"
     ],
     "kind": "claim"
   },
@@ -3309,7 +3311,8 @@
     "spell": 803475,
     "clause": "Strike an enemy for Weapon Damage plus ${$m1+0+$AP*.145} with both weapons, additionally scaling with your attack power.",
     "labels": [
-      "803475 effect_value e0 #0"
+      "803475 behaviour_metric_delta hit",
+      "803475 behaviour_metric_delta hit_ap"
     ],
     "kind": "claim"
   },
