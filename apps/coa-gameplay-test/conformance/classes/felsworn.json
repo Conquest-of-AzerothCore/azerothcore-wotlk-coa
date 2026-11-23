@@ -102,7 +102,27 @@
       "internal_cooldown_ms": 0
     }
   ],
-  "triggers": [],
+  "triggers": [
+    {
+      "aura": 300476,
+      "name": "Betrayer",
+      "tooltip": "Dodging attacks causes $804336s2% off-hand Weapon Damage to attackers and enrages your party and raid members within $520256a1 yds, increasing their critical strike chance by $520256s1% for $520256d.",
+      "trigger": {
+        "action": "avoided",
+        "striker_entry": 36,
+        "swing_ms": 2000
+      },
+      "trigger_text": "Dodging attacks",
+      "trial_metric": "melee_attacks_taken",
+      "trial_attempts_factor": 2.5,
+      "observe_spell": 804336,
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "causes off-hand Weapon Damage to attackers",
+      "observe_source": "EffectTriggerSpell[0] of 300476 (804336). AscensionFelswornEvents.cpp:42-47 passes an incoming dodge (not a landed or parried swing) when Chance(player, 300476) succeeds (300476 ProcChance 100, so every dodge) and :223-224 casts 804336 at the attacker and 520256 on the caster. An aggressive striker (creature 36) swings at the caster, who wears Evasion 26669 (+50% dodge) refreshed before every 2000 ms attempt as a precondition fixture (the trigger action avoided, ADR 0709); every dodged (victim_state 2) or parried (victim_state 3) swing is a trial and the spell_cast_count of 804336 must match it. Reference search 2026-11-23: coa-history spell 804336: 3 damage events in 2 logs (14 to 74); 520256: 42 aura applications and 42 removals in 2 logs; nothing decides a value.",
+      "trial_attempts_reason": "An attempt is one striker swing interval; only the dodged or parried swings are trials (Evasion gives +50% dodge, the rest hit or miss), so 2.5 times the swings are scheduled to reach the trigger trials."
+    }
+  ],
   "talent_modifiers": [],
   "rotation": [],
   "stack": [],
@@ -228,6 +248,1939 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "Attribution of the spell_crit_rating entry: the Spirit the 20% is taken of. Greatness 60235 Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 4, EffectBasePoints 299 + 1 = +300 (SPELL_ATTR2_ALLOW_LOW_LEVEL_BUFF, no level scaling); the class file reference stat 4 reads 50 without it, so 50 + 300 x 1.03 = 359 after a real cast on the caster, the 1.03 being the Human racial The Human Spirit 20598 (aura 137, MiscValue 4, EffectBasePoints 2 + 1; class file race 1)."
+    },
+    {
+      "spell": 500067,
+      "name": "Fel Monstrosity (Stamina)",
+      "kind": "metric_delta",
+      "variant": "stamina",
+      "label_suffix": "stamina",
+      "quote": "Increases your Stamina by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 500067,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 2
+      },
+      "before_expected": 79,
+      "expected": 94.8,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "expected_ratio": 1.2,
+      "observe_source": "500067 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue 2 (Stamina), BasePoints 19 + 1 = 20 ($s1). The caster's exact Stamina (Player::GetExactStatValue, unrounded) is read before and after a real learn of 500067 (the reading before is the control without it): reference stat 2 = 79 (class file) x 1.20 = 94.8, ratio judged within 0.002 so +19% (93.99) and +21% (95.6) are excluded. Bless 804247 is the harmless self cast in both phases. Reference search 2026-11-23: coa-history spell 500067: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state (it says Stamina 25%; the DBC tooltip says 20% and prevails); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 500067,
+      "name": "Fel Monstrosity (Agility)",
+      "kind": "metric_delta",
+      "variant": "agility",
+      "label_suffix": "agility",
+      "quote": "your Agility by $s3%",
+      "trigger_spell": 804247,
+      "gate_spell": 500067,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 1
+      },
+      "before_expected": 130,
+      "expected": 143.0,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "expected_ratio": 1.1,
+      "observe_source": "500067 Effect[2] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue 1 (Agility), BasePoints 9 + 1 = 10 ($s3). The caster's exact Agility is read before and after a real learn of 500067 (control: the reading before): reference stat 1 = 130 x 1.10 = 143.0, ratio judged within 0.002 so +9% (141.7) and +11% (144.3) are excluded. Reference search 2026-11-23: coa-history spell 500067: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state (it names no Agility part); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 574153,
+      "name": "Unbound (melee critical strike rating)",
+      "kind": "metric_delta",
+      "variant": "crit_melee",
+      "label_suffix": "crit_melee",
+      "quote": "Increases your dodge and critical strike rating by $s1% of your Agility",
+      "trigger_spell": 804247,
+      "gate_spell": 574153,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 8
+      },
+      "before_expected": 0,
+      "expected": 24.0,
+      "tolerance": 0.7,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          58451,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "574153 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 1 (Agility), 15% ($s1). Combat rating 8 (melee critical strike rating) is read with Agility 58451 (+30, DBC BasePoints 29 + 1; a precondition fixture by harness set_aura) set in both phases, so Agility is the reference 130 + 30 = 160, before and after a real learn of 574153 (the reading before is the control): 15% of 160 = 24.0, the engine adds the integer part, tolerance 0.7 excludes the 14% and 16% readings. Reference search 2026-11-23: coa-history spell 574153: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state (it names no critical strike rating part); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 574153,
+      "name": "Unbound (ranged critical strike rating)",
+      "kind": "metric_delta",
+      "variant": "crit_ranged",
+      "label_suffix": "crit_ranged",
+      "quote": "Increases your dodge and critical strike rating by $s1% of your Agility",
+      "trigger_spell": 804247,
+      "gate_spell": 574153,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 9
+      },
+      "before_expected": 0,
+      "expected": 24.0,
+      "tolerance": 0.7,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          58451,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "574153 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 1 (Agility), 15% ($s1). Combat rating 9 (ranged critical strike rating) is read with Agility 58451 (+30, DBC BasePoints 29 + 1; a precondition fixture by harness set_aura) set in both phases, so Agility is the reference 130 + 30 = 160, before and after a real learn of 574153 (the reading before is the control): 15% of 160 = 24.0, the engine adds the integer part, tolerance 0.7 excludes the 14% and 16% readings. Reference search 2026-11-23: coa-history spell 574153: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state (it names no critical strike rating part); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 574153,
+      "name": "Unbound (spell critical strike rating)",
+      "kind": "metric_delta",
+      "variant": "crit_spell",
+      "label_suffix": "crit_spell",
+      "quote": "Increases your dodge and critical strike rating by $s1% of your Agility",
+      "trigger_spell": 804247,
+      "gate_spell": 574153,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 10
+      },
+      "before_expected": 0,
+      "expected": 24.0,
+      "tolerance": 0.7,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          58451,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "574153 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 1 (Agility), 15% ($s1). Combat rating 10 (spell critical strike rating) is read with Agility 58451 (+30, DBC BasePoints 29 + 1; a precondition fixture by harness set_aura) set in both phases, so Agility is the reference 130 + 30 = 160, before and after a real learn of 574153 (the reading before is the control): 15% of 160 = 24.0, the engine adds the integer part, tolerance 0.7 excludes the 14% and 16% readings. Reference search 2026-11-23: coa-history spell 574153: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state (it names no critical strike rating part); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 574153,
+      "name": "Unbound (dodge rating)",
+      "kind": "metric_delta",
+      "variant": "dodge",
+      "label_suffix": "dodge",
+      "quote": "Increases your dodge and critical strike rating by $s1% of your Agility",
+      "trigger_spell": 804247,
+      "gate_spell": 574153,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 2
+      },
+      "before_expected": 0,
+      "expected": 24.0,
+      "tolerance": 0.7,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          58451,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "574153 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 1 (Agility), 15% ($s1). Combat rating 2 (dodge rating) is read with Agility 58451 (+30, DBC BasePoints 29 + 1; a precondition fixture by harness set_aura) set in both phases, so Agility is the reference 130 + 30 = 160, before and after a real learn of 574153 (the reading before is the control): 15% of 160 = 24.0, the engine adds the integer part, tolerance 0.7 excludes the 14% and 16% readings. Reference search 2026-11-23: coa-history spell 574153: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state (it names no critical strike rating part); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 574153,
+      "name": "Unbound (melee hit rating)",
+      "kind": "metric_delta",
+      "variant": "hit_melee",
+      "label_suffix": "hit_melee",
+      "quote": "and your hit rating by $s2% of your Agility",
+      "trigger_spell": 804247,
+      "gate_spell": 574153,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 5
+      },
+      "before_expected": 10000,
+      "expected": 10009.6,
+      "tolerance": 0.7,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          58451,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "574153 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 1 (Agility), 6% ($s2). Combat rating 5 (melee hit rating) is read with Agility 58451 (+30, DBC BasePoints 29 + 1; a precondition fixture by harness set_aura) set in both phases, so Agility is the reference 130 + 30 = 160, before and after a real learn of 574153 (the reading before is the control): 6% of 160 = 9.6, the engine adds the integer part, tolerance 0.7 excludes the 5% and 7% readings. Reference search 2026-11-23: coa-history spell 574153: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 574153,
+      "name": "Unbound (ranged hit rating)",
+      "kind": "metric_delta",
+      "variant": "hit_ranged",
+      "label_suffix": "hit_ranged",
+      "quote": "and your hit rating by $s2% of your Agility",
+      "trigger_spell": 804247,
+      "gate_spell": 574153,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 6
+      },
+      "before_expected": 0,
+      "expected": 9.6,
+      "tolerance": 0.7,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          58451,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "574153 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 1 (Agility), 6% ($s2). Combat rating 6 (ranged hit rating) is read with Agility 58451 (+30, DBC BasePoints 29 + 1; a precondition fixture by harness set_aura) set in both phases, so Agility is the reference 130 + 30 = 160, before and after a real learn of 574153 (the reading before is the control): 6% of 160 = 9.6, the engine adds the integer part, tolerance 0.7 excludes the 5% and 7% readings. Reference search 2026-11-23: coa-history spell 574153: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state; expected values come from the tooltip and the DBC only. The class file fixes spell and melee hit rating at 10000 and no ranged hit rating, so the ranged reading starts at 0."
+    },
+    {
+      "spell": 574153,
+      "name": "Unbound (spell hit rating)",
+      "kind": "metric_delta",
+      "variant": "hit_spell",
+      "label_suffix": "hit_spell",
+      "quote": "and your hit rating by $s2% of your Agility",
+      "trigger_spell": 804247,
+      "gate_spell": 574153,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 7
+      },
+      "before_expected": 10000,
+      "expected": 10009.6,
+      "tolerance": 0.7,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          58451,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "574153 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 1 (Agility), 6% ($s2). Combat rating 7 (spell hit rating) is read with Agility 58451 (+30, DBC BasePoints 29 + 1; a precondition fixture by harness set_aura) set in both phases, so Agility is the reference 130 + 30 = 160, before and after a real learn of 574153 (the reading before is the control): 6% of 160 = 9.6, the engine adds the integer part, tolerance 0.7 excludes the 5% and 7% readings. Reference search 2026-11-23: coa-history spell 574153: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 560836,
+      "name": "Felfire Adept (Sargeron Smite critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "crit_gain",
+      "label_suffix": "crit_gain",
+      "quote": "Increases the critical strike chance of Sargeron Smite by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 560836,
+      "target": "caster",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 802060,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "expected_gain": 10,
+      "observe_source": "560836 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9 + 1 = 10 ($s1), EffectSpellClassMask word 1 = 2048, the SpellFamilyFlags word 1 of Sargeron Smite 802060 (SpellFamilyName 20). The caster's critical strike chance of Sargeron Smite 802060 (Player::SpellDoneCritChance with spell mods) is read before (control) and after a real learn of 560836: gain 10 points. Reference search 2026-11-23: coa-history spell 560836: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot repeats the tooltip; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 560645,
+      "name": "Fel Instincts (Azzinoth's Assault damage)",
+      "kind": "hit_ratio",
+      "variant": "assault_damage",
+      "label_suffix": "assault_damage",
+      "quote": "Increases the damage of Azzinoth's Assault by $s2%",
+      "expected": 1.2,
+      "observe_spell": 520262,
+      "cast_wait_ms": 1600,
+      "control": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ],
+        "learn": [
+          560645
+        ]
+      },
+      "trials": 20,
+      "critical": false,
+      "expected_source": "560645 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 19 + 1 = 20 ($s2). The main-hand strike 520262 of Azzinoth's Assault 801904 (Effect[0] trigger 520262, Effect[1] trigger 572585) is cast by a real cast; its non-critical hits are averaged in a control arm without 560645 and a treatment arm with it learned: ratio 1.20 within the 2-point band. Non-critical hits only (the critical filter), so no crit fixture is needed. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and At Least 2 Felfury 803468 on the caster before each cast (Azzinoth's Assault 801904 needs 803468 and consumes 2 Felfury; AscensionFelsworn.cpp:219-228), in both arms and phases. Reference search 2026-11-23: coa-history spell 560645 and 560646: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says Assault damage +10% where the DBC tooltip and Effect[1] say 20% (an older state, the tooltip prevails, G-9) and repeats the 20% haste for 5 seconds.",
+      "cast_spell": 803475,
+      "cast_power": 100
+    },
+    {
+      "spell": 560645,
+      "name": "Fel Instincts (melee haste)",
+      "kind": "metric_delta",
+      "variant": "haste",
+      "label_suffix": "haste",
+      "quote": "causes it to increase your melee haste by $560646s1%",
+      "trigger_spell": 803475,
+      "gate_spell": 560645,
+      "target": "dummy",
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 2300,
+      "expected": 1916.6667,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "560645 Effect[0] aura 42 PROC_TRIGGER_SPELL 560646 (AscensionFelswornAbilities.cpp:278: cast with Azzinoth's Assault); 560646 Effect[0] aura 138 SPELL_AURA_MOD_MELEE_HASTE, BasePoints 19 + 1 = 20 ($560646s1). The main-hand attack time of the reference weapon (Slayer item 2027, 2300 ms, class file weapon_sets) is read 500 ms after a real Assault cast before (control: 560645 not learned) and after the learn: 2300 / 1.20 = 1916.667 ms. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and At Least 2 Felfury 803468 on the caster before each cast (Azzinoth's Assault 801904 needs 803468 and consumes 2 Felfury; AscensionFelsworn.cpp:219-228), in both arms and phases. Reference search 2026-11-23: coa-history spell 560645 and 560646: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says Assault damage +10% where the DBC tooltip and Effect[1] say 20% (an older state, the tooltip prevails, G-9) and repeats the 20% haste for 5 seconds."
+    },
+    {
+      "spell": 560645,
+      "name": "Fel Instincts (haste duration, present at 4600 ms, excludes 4500 ms)",
+      "kind": "metric_delta",
+      "variant": "haste_duration_present",
+      "label_suffix": "haste_duration_present",
+      "quote": "for $560646d",
+      "trigger_spell": 803475,
+      "gate_spell": 560645,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 560646
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 4600,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "560646 DurationIndex 28 = 5000 ms ($560646d). The presence of 560646 on the caster (metric aura) is read 4600 ms after a real Azzinoth's Assault 803475 cast, before (control: 560645 not learned, reads 0) and after the learn: present at 4600 ms, excludes 4500 ms. Together with the other duration entry (present at 4600 ms, absent at 5400 ms) the reads exclude a duration 10% off on both sides (4500 and 5500 ms). Fixtures: Felfury 800058 x6 and 803468 set by harness set_aura before each cast as named preconditions. Reference search 2026-11-23: coa-history spell 560646: 0 events in 186 logs (positive control 801904: 21 casts); the bindmysoul snapshot repeats 5 seconds."
+    },
+    {
+      "spell": 560645,
+      "name": "Fel Instincts (haste duration, absent at 5400 ms, excludes 5500 ms)",
+      "kind": "metric_delta",
+      "variant": "haste_duration_absent",
+      "label_suffix": "haste_duration_absent",
+      "quote": "for $560646d",
+      "trigger_spell": 803475,
+      "gate_spell": 560645,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 560646
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 5400,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "560646 DurationIndex 28 = 5000 ms ($560646d). The presence of 560646 on the caster (metric aura) is read 5400 ms after a real Azzinoth's Assault 803475 cast, before (control: 560645 not learned, reads 0) and after the learn: absent at 5400 ms, excludes 5500 ms. Together with the other duration entry (present at 4600 ms, absent at 5400 ms) the reads exclude a duration 10% off on both sides (4500 and 5500 ms). Fixtures: Felfury 800058 x6 and 803468 set by harness set_aura before each cast as named preconditions. Reference search 2026-11-23: coa-history spell 560646: 0 events in 186 logs (positive control 801904: 21 casts); the bindmysoul snapshot repeats 5 seconds."
+    },
+    {
+      "spell": 704607,
+      "name": "Elemental Bane (critical strike chance against an Elemental)",
+      "kind": "hit_ratio",
+      "variant": "crit_chance_elemental",
+      "label_suffix": "crit_chance_elemental",
+      "quote": "and additionally increases your critical strike chance by $s1% while fighting Elementals",
+      "observe_spell": 520262,
+      "cast_spell": 803475,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "control": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ],
+        "learn": [
+          704607
+        ]
+      },
+      "expected": 1.0,
+      "rate": "critical",
+      "expected_points": 15,
+      "trials": 80,
+      "parts": 140,
+      "target_entry": 2022,
+      "expected_source": "704607 Effect[0] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, MiscValue 20008 rewritten to ASCENSION_CREATURE_GLOBAL_CRIT (AscensionFelswornContracts.cpp:106), MiscValueB 8 (creature type Elemental, mask 1 << 3), BasePoints 14 + 1 = 15 ($s1). The critical share of Assault strikes on a Timberling 2022 (Elemental, the creature entry the Necromancer corpse check reads as Elemental) is compared between a control arm without 704607 and a treatment arm with it learned: a difference of 15 points inside the 2-point band, pooled over 140 parts of 80 casts per arm. Reference search 2026-11-23: coa-history spell 704607: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats the tooltip. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before each cast of Azzinoth's Assault 803475 (it needs 803468; AscensionFelsworn.cpp:219-228), in both arms. Assault is cast at the dummy by a real cast and the hits of its main-hand strike 520262 are counted."
+    },
+    {
+      "spell": 704607,
+      "name": "Elemental Bane (control: no gain against a non-Elemental)",
+      "kind": "hit_ratio",
+      "variant": "crit_chance_other_type",
+      "label_suffix": "crit_chance_other_type",
+      "quote": "while fighting Elementals",
+      "observe_spell": 520262,
+      "cast_spell": 803475,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "control": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ],
+        "learn": [
+          704607
+        ]
+      },
+      "expected": 1.0,
+      "rate": "critical",
+      "expected_points": 0,
+      "trials": 80,
+      "parts": 20,
+      "expected_source": "704607 Effect[0] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, MiscValue 20008 rewritten to ASCENSION_CREATURE_GLOBAL_CRIT (AscensionFelswornContracts.cpp:106), MiscValueB 8 (creature type Elemental, mask 1 << 3), BasePoints 14 + 1 = 15 ($s1). The same comparison against the stock dummy, which is not an Elemental: a difference of 0 points inside the 2-point band, the control that the 15 points need the creature type. Reference search 2026-11-23: coa-history spell 704607: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats the tooltip. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before each cast of Azzinoth's Assault 803475 (it needs 803468; AscensionFelsworn.cpp:219-228), in both arms. Assault is cast at the dummy by a real cast and the hits of its main-hand strike 520262 are counted."
+    },
+    {
+      "spell": 704607,
+      "name": "Elemental Bane (critical damage)",
+      "kind": "hit_ratio",
+      "variant": "crit_damage",
+      "label_suffix": "crit_damage",
+      "quote": "Increases your critical damage by $s2%",
+      "observe_spell": 520262,
+      "cast_spell": 803475,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "control": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ],
+        "learn": [
+          704607
+        ]
+      },
+      "expected": 1.1,
+      "critical": true,
+      "force_crit": "melee",
+      "trials": 40,
+      "expected_source": "704607 Effect[1] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, MiscValue 127 (all schools), BasePoints 9 + 1 = 10 ($s2). Unit::SpellCriticalDamageBonus applies AddPct(crit_bonus, 10) to the whole crit total (2x of a melee hit), so a critical hit does 2.2x instead of 2.0x: whole-hit ratio 1.10 (the Sun Cleric Gavel entry applies the same reading to op 15). Forced melee crits, critical hits only, control without 704607 and treatment with it learned. Reference search 2026-11-23: coa-history spell 704607: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats the tooltip. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before each cast of Azzinoth's Assault 803475 (it needs 803468; AscensionFelsworn.cpp:219-228), in both arms. Assault is cast at the dummy by a real cast and the hits of its main-hand strike 520262 are counted."
+    },
+    {
+      "spell": 300484,
+      "name": "Fel Blades (stacks cap at 5)",
+      "kind": "metric_delta",
+      "variant": "max_stacks",
+      "label_suffix": "max_stacks",
+      "quote": "stacking $300482u times",
+      "trigger_spell": 803475,
+      "gate_spell": 300484,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        803475,
+        803475
+      ],
+      "setup_wait_ms": 1100,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 300482
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "300484 Effect[0] aura 42 PROC_TRIGGER_SPELL 300482 (AscensionFelswornEvents.cpp:99,231-232: each landed hit of Azzinoth's Assault or its strikes 520262 and 572585 casts 300482 at the target); 300482 Effect[0] aura 101 SPELL_AURA_MOD_RESISTANCE_PCT, MiscValue 1 (armor), BasePoints -5 + 1 = -4 ($300482s1), StackAmount 5 ($300482u), DurationIndex 1 = 10000 ms ($300482d). Three real Assault casts at the dummy (two setup casts and the trigger, 1100 ms apart; at least 6 landed hits against a cap of 5) with 300484 learned between the phases: the dummy's 300482 stacks read 5 and not 6 or more (before the learn, the control phase, 0). Reference search 2026-11-23: coa-history spell 300484 and 300482: 0 events in 186 logs (a passive and its debuff leave no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says -4% for 10 seconds, stacking 5 times, the same as the tooltip. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before the casts (Azzinoth's Assault 803475, the level 60 rank, needs 803468 and consumes 2 Felfury per cast; 3 casts use the 6)."
+    },
+    {
+      "spell": 300484,
+      "name": "Fel Blades (armor reduction at the stack cap)",
+      "kind": "metric_delta",
+      "variant": "armor_at_cap",
+      "label_suffix": "armor_at_cap",
+      "quote": "reduces the enemy's armor by $300482s1%",
+      "trigger_spell": 803475,
+      "gate_spell": 300484,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        803475,
+        803475
+      ],
+      "setup_wait_ms": 1100,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 50,
+      "expected": 40,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "expected_ratio": 0.8,
+      "observe_source": "300484 Effect[0] aura 42 PROC_TRIGGER_SPELL 300482 (AscensionFelswornEvents.cpp:99,231-232: each landed hit of Azzinoth's Assault or its strikes 520262 and 572585 casts 300482 at the target); 300482 Effect[0] aura 101 SPELL_AURA_MOD_RESISTANCE_PCT, MiscValue 1 (armor), BasePoints -5 + 1 = -4 ($300482s1), StackAmount 5 ($300482u), DurationIndex 1 = 10000 ms ($300482d). The dummy's armor is read before and after the same three Assault casts (control: 300484 not learned, no change); at the cap of 5 stacks of -4% each the armor is 1 - 5 x 0.04 = 0.80 of the before reading, ratio judged within 0.01 so -3% and -5% per stack (0.85 and 0.75) are excluded. Reference search 2026-11-23: coa-history spell 300484 and 300482: 0 events in 186 logs (a passive and its debuff leave no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says -4% for 10 seconds, stacking 5 times, the same as the tooltip. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before the casts (Azzinoth's Assault 803475, the level 60 rank, needs 803468 and consumes 2 Felfury per cast; 3 casts use the 6)."
+    },
+    {
+      "spell": 300484,
+      "name": "Fel Blades (debuff lasts 10 s, present at 9600 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_present",
+      "label_suffix": "duration_present",
+      "quote": "for $300482d",
+      "trigger_spell": 803475,
+      "gate_spell": 300484,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        803475,
+        803475
+      ],
+      "setup_wait_ms": 1100,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 300482
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 9600,
+      "expire_ms": 500,
+      "observe_source": "300484 Effect[0] aura 42 PROC_TRIGGER_SPELL 300482 (AscensionFelswornEvents.cpp:99,231-232: each landed hit of Azzinoth's Assault or its strikes 520262 and 572585 casts 300482 at the target); 300482 Effect[0] aura 101 SPELL_AURA_MOD_RESISTANCE_PCT, MiscValue 1 (armor), BasePoints -5 + 1 = -4 ($300482s1), StackAmount 5 ($300482u), DurationIndex 1 = 10000 ms ($300482d). The presence of 300482 on the dummy is read 9600 ms after the last of three real Assault casts: present (control phase without 300484 reads 0), excluding a duration of 9000 ms (10% short). Reference search 2026-11-23: coa-history spell 300484 and 300482: 0 events in 186 logs (a passive and its debuff leave no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says -4% for 10 seconds, stacking 5 times, the same as the tooltip. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before the casts (Azzinoth's Assault 803475, the level 60 rank, needs 803468 and consumes 2 Felfury per cast; 3 casts use the 6)."
+    },
+    {
+      "spell": 300484,
+      "name": "Fel Blades (debuff lasts 10 s, absent at 10400 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_absent",
+      "label_suffix": "duration_absent",
+      "quote": "for $300482d",
+      "trigger_spell": 803475,
+      "gate_spell": 300484,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        803475,
+        803475
+      ],
+      "setup_wait_ms": 1100,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 300482
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 10400,
+      "expire_ms": 500,
+      "observe_source": "300484 Effect[0] aura 42 PROC_TRIGGER_SPELL 300482 (AscensionFelswornEvents.cpp:99,231-232: each landed hit of Azzinoth's Assault or its strikes 520262 and 572585 casts 300482 at the target); 300482 Effect[0] aura 101 SPELL_AURA_MOD_RESISTANCE_PCT, MiscValue 1 (armor), BasePoints -5 + 1 = -4 ($300482s1), StackAmount 5 ($300482u), DurationIndex 1 = 10000 ms ($300482d). The presence of 300482 on the dummy is read 10400 ms after the last of three real Assault casts: absent, excluding a duration of 11000 ms (10% long); together with the present entry the duration lies between 9600 and 10400 ms. Reference search 2026-11-23: coa-history spell 300484 and 300482: 0 events in 186 logs (a passive and its debuff leave no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says -4% for 10 seconds, stacking 5 times, the same as the tooltip. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before the casts (Azzinoth's Assault 803475, the level 60 rank, needs 803468 and consumes 2 Felfury per cast; 3 casts use the 6)."
+    },
+    {
+      "spell": 520592,
+      "name": "Illidan's Favor (Felbane Energy cost removed)",
+      "kind": "metric_delta",
+      "variant": "felbane_cost",
+      "label_suffix": "felbane_cost",
+      "quote": "Removes the Energy cost of your Felbane and Manaburn",
+      "trigger_spell": 525001,
+      "gate_spell": 520592,
+      "target": "dummy",
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 525001
+      },
+      "cast_power": 0,
+      "before_expected": 85,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "520592 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 14 (SPELLMOD_COST), BasePoints -101 + 1 = -100%. Felbane 525001 is cast at the dummy with the caster's Energy held at 0 (cast_power 0), before (control) and after a real learn of 520592: the control refuses it with SPELL_FAILED_NO_POWER (85) when it has a cost, the learn lets it through (0). Reference search 2026-11-23: coa-history spell 520592: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats the tooltip; Manaburn 805248 and Felbane 525001 not in the logs either (0 events)."
+    },
+    {
+      "spell": 520592,
+      "name": "Illidan's Favor (Manaburn strikes 4 additional enemies)",
+      "kind": "fixed_count",
+      "variant": "manaburn_targets",
+      "label_suffix": "manaburn_targets",
+      "quote": "your Manaburn now strikes 4 additional enemies near the primary target",
+      "expected": 4,
+      "radius": 8,
+      "far_dummy": true,
+      "metric": "spell_damage_count",
+      "radius_reason": "Manaburn 805248 Effect[0] target 6 (TARGET_UNIT_TARGET_ENEMY), no ChainTarget in the DBC; 520592 Effect[0] aura 107, MiscValue 17 (SPELLMOD_JUMP_TARGETS), BasePoints 4 + 1 = 5 added to a chain count of 0, so the chain search picks maxTargets - 1 = 4 further targets (Spell::SelectImplicitChainTargets, Spell.cpp:1919-1934); the engine's jump radius for a magic spell (DmgClass 1) is 10 yd (Spell::SearchChainTargets, Spell.cpp:2218-2221), so the additional dummies stand inside 8 yd of the primary and one beyond it",
+      "cast_spell": 805248,
+      "target_rank": 805248,
+      "repeats": 3,
+      "learn": [
+        520592
+      ],
+      "count_primary": false,
+      "observe_source": "520592 Effect[0] SPELLMOD_JUMP_TARGETS +5 on the class mask of Manaburn; the number of dummies struck by Manaburn 805248 (spell_damage_count per dummy) is read with 520592 learned: the primary and exactly 4 additional ones (the control entry manaburn_targets_control casts the same Manaburn with 520592 never learned and expects no additional dummy struck) (more candidates are offered inside the radius, so a fifth strike would show), on Scarlet Magi 1832 (a level 56-57 mana-using mage, unit_class 8: Manaburn damage equals the mana drained, so a creature with no mana would never be struck), with one dummy outside the jump radius never struck. Reference search 2026-11-23: coa-history spell 520592: 0 events in 186 logs (a passive); spell 805248: 25 casts and 22 damage events in 4 logs (positive control 801904: 21 casts); the bindmysoul snapshot repeats the tooltip.",
+      "dummy_entry": 1832
+    },
+    {
+      "spell": 520592,
+      "name": "Illidan's Favor (control: Manaburn without 520592 strikes no additional enemy)",
+      "kind": "fixed_count",
+      "variant": "manaburn_targets_control",
+      "label_suffix": "manaburn_targets_control",
+      "quote": "your Manaburn now strikes 4 additional enemies near the primary target",
+      "expected": 0,
+      "radius": 8,
+      "far_dummy": true,
+      "metric": "spell_damage_count",
+      "radius_reason": "Manaburn 805248 Effect[0] target 6 (TARGET_UNIT_TARGET_ENEMY), no ChainTarget in the DBC: without 520592 (never learned in this scenario) the cast strikes the primary only, so the dummy standing inside the jump radius of the primary (10 yd for a magic spell, Spell::SearchChainTargets, Spell.cpp:2218-2221) and the one beyond it are never struck",
+      "cast_spell": 805248,
+      "target_rank": 805248,
+      "repeats": 3,
+      "learn": [],
+      "count_primary": false,
+      "observe_source": "Control arm of manaburn_targets on the same build: Manaburn 805248 cast at the primary with 520592 not learned, on Scarlet Magi 1832 (mana-using, so a strike would land), counts the additional dummies struck: 0, so the 4 additional strikes of the treatment entry come from 520592 (Effect[0] SPELLMOD_JUMP_TARGETS) and not from the spell or a script. Reference search 2026-11-23: coa-history spell 520592: 0 events in 186 logs (a passive); spell 805248: 25 casts and 22 damage events in 4 logs; nothing else found.",
+      "dummy_entry": 1832
+    },
+    {
+      "spell": 520252,
+      "name": "Demon Hide (armor of leather items with Inner Demon)",
+      "kind": "metric_delta",
+      "variant": "armor_with_inner_demon",
+      "label_suffix": "armor_with_inner_demon",
+      "quote": "While Inner Demon is active, your Armor contribution from cloth and leather items is increased by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 520252,
+      "target": "caster",
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 92.4,
+      "expected_gain": 92.4,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "shield_after_learn": {
+        "item": 236,
+        "slot": 4,
+        "rejected_before": false
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "520252 Effect[0] aura 107 rewritten to SPELL_AURA_MOD_BASE_RESISTANCE_PCT (AscensionFelswornContracts.cpp:151-156) with MiscValue SPELL_SCHOOL_MASK_NORMAL and MiscValueB 6 (1 << cloth 1 | 1 << leather 2), BasePoints 119 + 1 = 120 ($s1); the amount is 0 unless Inner Demon 804216 is on the caster (AscensionFelswornContracts.cpp:352). Player::UpdateArmor scales the armor of cloth and leather items by it (StatSystem.cpp, GetItemArmorBySubclass). The caster's armor is read before (control: 520252 not learned) and after a real learn of 520252, with Inner Demon 804216 set on the caster in both phases (a precondition fixture by harness set_aura, named as such) and the 77-armor leather chest worn in both: gain 120% of 77 = 92.4, within 1 for the integer armor. Reference search 2026-11-23: coa-history spell 520252: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats 'While Inner Demon is active, your Armor contribution from cloth and leather items is increased by 120%'. The item is Cured Leather Armor 236 (acore_world.item_template of the repository's data/sql/base/db_world/item_template.sql: class 4, subclass 2 leather, InventoryType 5 chest, equip slot 4, RequiredLevel 17, armor 77, no stats), equipped by the shield_after_learn option in both phases (its slot read is the contrast of the option, named as a fixture)."
+    },
+    {
+      "spell": 520252,
+      "name": "Demon Hide (control: no gain without Inner Demon)",
+      "kind": "metric_delta",
+      "variant": "armor_without_inner_demon",
+      "label_suffix": "armor_without_inner_demon",
+      "quote": "While Inner Demon is active, your Armor contribution from cloth and leather items is increased by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 520252,
+      "target": "caster",
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "shield_after_learn": {
+        "item": 236,
+        "slot": 4,
+        "rejected_before": false
+      },
+      "observe_source": "520252 Effect[0] aura 107 rewritten to SPELL_AURA_MOD_BASE_RESISTANCE_PCT (AscensionFelswornContracts.cpp:151-156) with MiscValue SPELL_SCHOOL_MASK_NORMAL and MiscValueB 6 (1 << cloth 1 | 1 << leather 2), BasePoints 119 + 1 = 120 ($s1); the amount is 0 unless Inner Demon 804216 is on the caster (AscensionFelswornContracts.cpp:352). Player::UpdateArmor scales the armor of cloth and leather items by it (StatSystem.cpp, GetItemArmorBySubclass). The same reading without Inner Demon on the caster: the learn adds 0 armor, the control that the 120% is conditional on Inner Demon (the tooltip's 'While Inner Demon is active'). Reference search 2026-11-23: coa-history spell 520252: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats 'While Inner Demon is active, your Armor contribution from cloth and leather items is increased by 120%'. The item is Cured Leather Armor 236 (acore_world.item_template of the repository's data/sql/base/db_world/item_template.sql: class 4, subclass 2 leather, InventoryType 5 chest, equip slot 4, RequiredLevel 17, armor 77, no stats), equipped by the shield_after_learn option in both phases (its slot read is the contrast of the option, named as a fixture)."
+    },
+    {
+      "spell": 800209,
+      "name": "Demonic Will (generates 1 Felfury)",
+      "kind": "metric_delta",
+      "variant": "felfury",
+      "label_suffix": "felfury",
+      "quote": "Generates 1 Felfury",
+      "trigger_spell": 800209,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Tooltip 800209: 'Generates 1 Felfury'. Felfury 800058 is the caster aura whose stacks are read: 0 before the cast, then exactly 1 after one real cast of 800209 (the learned active, no set_aura). The before read is the control arm. Reference search 2026-11-23: coa-history spell 800209: 13 casts, 13 aura applied and 13 removed in 4 logs, no value in a log event; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 800209,
+      "name": "Demonic Will (aura held 9400 ms)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "for $d",
+      "trigger_spell": 800209,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 800209
+      },
+      "before_expected": 0,
+      "wait_ms": 9400,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          9350,
+          9500
+        ]
+      },
+      "observe_source": "800209 DurationIndex 1 = 10000 ms ($d). The aura is still on the caster 9400 ms after the cast (excludes a duration 10% short, 9000 ms); the before read, absent, is the control. Reference search 2026-11-23: coa-history spell 800209: 13 casts, 13 aura applied and 13 removed in 4 logs, no value in a log event; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 800209,
+      "name": "Demonic Will (aura gone 10600 ms)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "for $d",
+      "trigger_spell": 800209,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 800209
+      },
+      "before_expected": 0,
+      "wait_ms": 10600,
+      "expire_ms": 500,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          10550,
+          10700
+        ]
+      },
+      "observe_source": "800209 DurationIndex 1 = 10000 ms ($d). The aura is gone 10600 ms after the cast (excludes a duration 10% long, 11000 ms). Reference search 2026-11-23: coa-history spell 800209: 13 casts, 13 aura applied and 13 removed in 4 logs, no value in a log event; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 800209,
+      "name": "Demonic Will (Physical damage taken)",
+      "kind": "taken_hit",
+      "variant": "physical_taken",
+      "label_suffix": "physical_taken",
+      "judge": "damage_ratio",
+      "expected": 0.7,
+      "quote": "reducing Physical damage taken by $s3%",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 18,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            800209
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 800209,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            800209
+          ],
+          "opening_casts": [
+            [
+              800209,
+              "caster"
+            ]
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 800209,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "800209 Effect[2] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127, BasePoints -31 + 1 = -30 ($s3). Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) strikes the caster six times in each arm; the control arm has Demonic Will unlearned and absent, the treatment arm casts it for real (opening cast) and the aura reads present. Expected ratio 0.70. Reference search 2026-11-23: coa-history spell 800209: 13 casts, 13 aura applied and 13 removed in 4 logs, no value in a log event; nothing found beyond the tooltip and Spell.dbc.",
+      "strikes": 1,
+      "settle_ms": 50
+    },
+    {
+      "spell": 800209,
+      "name": "Demonic Will (Shadow damage taken)",
+      "kind": "taken_hit",
+      "variant": "shadow_taken",
+      "label_suffix": "shadow_taken",
+      "judge": "damage_ratio",
+      "expected": 1.0,
+      "quote": "reducing Physical damage taken by $s3%",
+      "strike_spell": 47632,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            800209
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 800209,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            800209
+          ],
+          "opening_casts": [
+            [
+              800209,
+              "caster"
+            ]
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 800209,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "800209 Effect[2] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127 (every school mask), BasePoints -31 + 1 = -30 ($s3). The tooltip words only Physical damage ('reducing Physical damage taken'), so the expected ratio for a Shadow hit is 1.0 (no reduction). Grave Coil 47632 (Shadow, DmgClass 1 magic, the Sun Cleric 680652 shadow_taken strike) strikes the caster in each arm; the control arm has Demonic Will unlearned and absent, the treatment arm casts it for real (opening cast) and the aura reads present. Reference search 2026-11-23: coa-history spell 800209: 13 casts, 13 aura applied and 13 removed in 4 logs, no value in a log event; nothing found beyond the tooltip and Spell.dbc.",
+      "strikes": 1,
+      "settle_ms": 50
+    },
+    {
+      "spell": 805239,
+      "name": "Burning Hatred (generates 6 Felfury)",
+      "kind": "metric_delta",
+      "variant": "felfury",
+      "label_suffix": "felfury",
+      "quote": "instantly generating 6 Felfury",
+      "trigger_spell": 805239,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "before_expected": 0,
+      "expected": 6,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Tooltip 805239: 'instantly generating 6 Felfury'. Felfury 800058 stacks read 0 before the cast and 6 after one real cast of 805239 (the stack cap is 6, StackAmount 6). The before read is the control arm. Reference search 2026-11-23: coa-history spells 805239 and 807347: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 805239,
+      "name": "Burning Hatred (aura held 14100 ms)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "for $d",
+      "trigger_spell": 805239,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 805239
+      },
+      "before_expected": 0,
+      "wait_ms": 14100,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          14050,
+          14200
+        ]
+      },
+      "observe_source": "805239 DurationIndex 8 = 15000 ms ($d). The aura is still on the caster 14100 ms after the cast (excludes a duration 10% short, 13500 ms). Reference search 2026-11-23: coa-history spells 805239 and 807347: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 805239,
+      "name": "Burning Hatred (aura gone 15900 ms)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "for $d",
+      "trigger_spell": 805239,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 805239
+      },
+      "before_expected": 0,
+      "wait_ms": 15900,
+      "expire_ms": 500,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          15850,
+          16000
+        ]
+      },
+      "observe_source": "805239 DurationIndex 8 = 15000 ms ($d). The aura is gone 15900 ms after the cast (excludes a duration 10% long, 16500 ms). Reference search 2026-11-23: coa-history spells 805239 and 807347: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 805240,
+      "name": "Tyrant's Gaze (usable only below 35% health)",
+      "kind": "cast_gate",
+      "variant": "health_gate",
+      "quote": "Only usable on enemies below 35% health.",
+      "observe_source": "805240 TargetAuraState 13 (AURA_STATE_HEALTHLESS_35_PERCENT). The gated spell is attempted at the dummy at full health (must refuse with SPELL_FAILED_TARGET_AURASTATE) and then with the dummy lowered below 35% (must go through). Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 805240,
+      "name": "Tyrant's Gaze (damage at the reference attack power)",
+      "kind": "metric_delta",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "dealing ${$m1+0+$AP*0.35} Shadowflame Damage to them",
+      "trigger_spell": 805240,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805240,
+        "target": "dummy",
+        "critical": false
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 453.0,
+      "after_at_least": 452,
+      "after_at_most": 454,
+      "observe_source": "805240 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, Shadowflame (SchoolMask 36), BasePoints 219 + 1 (DieSides 1 adds 1) = 220, RealPointsPerLevel 4.0 x (60 - BaseLevel 29) = 124, so m1 = 344 at level 60; the tooltip adds attack power x 0.35 ($AP*0.35); reference attack power 312 (class file reference_stats). Spell crit is removed by Reg's Test Aura 984954 (the class files' crit-removal fixture, ADR 0742 observation) and the dummy's monster linear resistance (docs/coa/monster-linear-resistance.md: 60 magic resistance at level 60, partial resists in 10% steps) is removed by the spell-penetration fixture 823764 (aura 123, MiscValue 126, -9999); the dummy is held below 35% health from the before phase (34% in the before phase, 30% in the after phase). Expected 344 + int(0.35 x 312 = 109.2) = 453. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc.",
+      "phase_target_health_pct": [
+        34,
+        30
+      ]
+    },
+    {
+      "spell": 805240,
+      "name": "Tyrant's Gaze (damage at +20000 attack power)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "dealing ${$m1+0+$AP*0.35} Shadowflame Damage to them",
+      "trigger_spell": 805240,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805240,
+        "target": "dummy",
+        "critical": false
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 7453.0,
+      "after_at_least": 7452,
+      "after_at_most": 7454,
+      "player_attack_power": 20000,
+      "observe_source": "805240 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, Shadowflame (SchoolMask 36), BasePoints 219 + 1 (DieSides 1 adds 1) = 220, RealPointsPerLevel 4.0 x (60 - BaseLevel 29) = 124, so m1 = 344 at level 60; the tooltip adds attack power x 0.35 ($AP*0.35); reference attack power 312 (class file reference_stats). Spell crit is removed by Reg's Test Aura 984954 (the class files' crit-removal fixture, ADR 0742 observation) and the dummy's monster linear resistance (docs/coa/monster-linear-resistance.md: 60 magic resistance at level 60, partial resists in 10% steps) is removed by the spell-penetration fixture 823764 (aura 123, MiscValue 126, -9999); the dummy is held below 35% health from the before phase (34% in the before phase, 30% in the after phase). Contrast arm of the attack power term: +20000 attack power (player_attack_power): 344 + int(0.35 x 20312 = 7109.2) = 7453 against 453. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc.",
+      "phase_target_health_pct": [
+        34,
+        30
+      ]
+    },
+    {
+      "spell": 805240,
+      "name": "Tyrant's Gaze (an enemy nearby above 35% health is struck)",
+      "kind": "metric_delta",
+      "variant": "nearby_hit",
+      "label_suffix": "nearby_hit",
+      "quote": "Set your fiery gaze upon an enemy and all enemies nearby",
+      "trigger_spell": 805240,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805240,
+        "target": "area1",
+        "critical": false
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 453.0,
+      "after_at_least": 452,
+      "after_at_most": 454,
+      "observe_source": "805240 Effect[0] TargetA 6 (TARGET_UNIT_TARGET_ENEMY), EffectChainTarget 25, EffectRadiusIndex 14 = 8 yd (SpellRadius.dbc): the spell chains from the primary to enemies within 8 yd. AscensionFelswornContracts.cpp:22-23 sets AscensionTargetAuraStateOnlyPrimary, so only the primary needs the 35% state (SpellInfo.cpp:2147). The primary dummy is held at 34% and area1, 4 yd from the caster and inside 8 yd of the primary, stays at full health: the tooltip says all enemies nearby, so area1 must take the same hit as the primary (expected 453, the tooltip value of the damage entry). Before the cast area1 has taken none (control). Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and SpellRadius.dbc. The server hits which targets is read from this arm; 'intimidating them' has no DBC effect on Effect[0] and is a question, not a label.",
+      "phase_target_health_pct": [
+        34,
+        30
+      ],
+      "area_dummies": [
+        4.0
+      ]
+    },
+    {
+      "spell": 805240,
+      "name": "Tyrant's Gaze (heal at the reference attack power)",
+      "kind": "metric_delta",
+      "variant": "heal",
+      "label_suffix": "heal",
+      "quote": "heals you for ${$805241m1+$AP*.5}",
+      "trigger_spell": 805240,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 805241,
+        "target": "caster",
+        "critical": false
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 302.0,
+      "after_at_least": 301,
+      "after_at_most": 303,
+      "observe_source": "805241 Effect[0] SPELL_EFFECT_HEAL, BasePoints 145 + 1 = 146 (the tooltip's $805241m1; the tooltip reads 302 = 146 + 0.5 x 312), plus attack power x 0.5 ($AP*.5); the heal lands on the caster, read as spell_heal_total of 805241 on the caster. Spell crit is removed by Reg's Test Aura 984954 (the class files' crit-removal fixture, ADR 0742 observation) and the dummy's monster linear resistance (docs/coa/monster-linear-resistance.md: 60 magic resistance at level 60, partial resists in 10% steps) is removed by the spell-penetration fixture 823764 (aura 123, MiscValue 126, -9999); the dummy is held below 35% health from the before phase. Expected 146 + int(0.5 x 312 = 156) = 302. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc.",
+      "phase_target_health_pct": [
+        34,
+        30
+      ]
+    },
+    {
+      "spell": 805240,
+      "name": "Tyrant's Gaze (heal at +20000 attack power)",
+      "kind": "metric_delta",
+      "variant": "heal_ap",
+      "label_suffix": "heal_ap",
+      "quote": "heals you for ${$805241m1+$AP*.5}",
+      "trigger_spell": 805240,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 805241,
+        "target": "caster",
+        "critical": false
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 10302.0,
+      "after_at_least": 10301,
+      "after_at_most": 10303,
+      "player_attack_power": 20000,
+      "observe_source": "805241 Effect[0] SPELL_EFFECT_HEAL, BasePoints 145 + 1 = 146 (the tooltip's $805241m1; the tooltip reads 302 = 146 + 0.5 x 312), plus attack power x 0.5 ($AP*.5); the heal lands on the caster, read as spell_heal_total of 805241 on the caster. Spell crit is removed by Reg's Test Aura 984954 (the class files' crit-removal fixture, ADR 0742 observation) and the dummy's monster linear resistance (docs/coa/monster-linear-resistance.md: 60 magic resistance at level 60, partial resists in 10% steps) is removed by the spell-penetration fixture 823764 (aura 123, MiscValue 126, -9999); the dummy is held below 35% health from the before phase. Contrast arm of the attack power term: +20000 attack power: 146 + int(0.5 x 20312 = 10156) = 10302 against 302. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc.",
+      "phase_target_health_pct": [
+        34,
+        30
+      ]
+    },
+    {
+      "spell": 805240,
+      "name": "Tyrant's Gaze (generates 1 Felfury)",
+      "kind": "metric_delta",
+      "variant": "felfury",
+      "label_suffix": "felfury",
+      "quote": "and generates 1 Felfury.",
+      "trigger_spell": 805240,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "805241 Effect[1] SPELL_EFFECT_TRIGGER_SPELL 800058 (Felfury, caster aura), cast by the gaze's heal. Felfury stacks read 0 before the cast and 1 after one real cast at the dummy held at 30% health. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc.",
+      "phase_target_health_pct": [
+        34,
+        30
+      ]
+    },
+    {
+      "spell": 560284,
+      "name": "Infernal (damage at 0 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "dealing ${$m2+0+$spfi*1.05} Fire damage to enemies in the radius",
+      "trigger_spell": 560284,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 560284,
+        "target": "dummy",
+        "critical": false
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 190.0,
+      "after_at_least": 189,
+      "after_at_most": 191,
+      "observe_source": "560284 Effect[1] SPELL_EFFECT_SCHOOL_DAMAGE, Fire (SchoolMask 4), BasePoints 101 + 1 (DieSides 1 adds 1) = 102, RealPointsPerLevel 2.85 x (60 - BaseLevel 29) = 88.35 truncated to 88, so m2 = 190 at level 60 (tooltip 190.35); the tooltip adds fire spell power x 1.05 ($spfi*1.05). The dummy's magic resistance is removed (823764), criticals are made impossible by 64481, the cast at the dummy lands the area at its position. Expected 190. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 560284,
+      "name": "Infernal (damage at +10000 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "dealing ${$m2+0+$spfi*1.05} Fire damage to enemies in the radius",
+      "trigger_spell": 560284,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 560284,
+        "target": "dummy",
+        "critical": false
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 10690.0,
+      "after_at_least": 10689,
+      "after_at_most": 10691,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "observe_source": "560284 Effect[1] SPELL_EFFECT_SCHOOL_DAMAGE, Fire (SchoolMask 4), BasePoints 101 + 1 (DieSides 1 adds 1) = 102, RealPointsPerLevel 2.85 x (60 - BaseLevel 29) = 88.35 truncated to 88, so m2 = 190 at level 60 (tooltip 190.35); the tooltip adds fire spell power x 1.05 ($spfi*1.05). The dummy's magic resistance is removed (823764), criticals are made impossible by 64481, the cast at the dummy lands the area at its position. Contrast arm of the spell power term: +10000 spell power: 190 + int(1.05 x 10000 = 10500) = 10690 against 190. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 560284,
+      "name": "Infernal (horror held 2800 ms)",
+      "kind": "metric_delta",
+      "variant": "stun_held",
+      "label_suffix": "stun_held",
+      "quote": "horrifying them for $d,",
+      "trigger_spell": 560284,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 560284,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 2800,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          2750,
+          2900
+        ]
+      },
+      "observe_source": "Creature 6 (Kobold Vermin) is the target because the stock dummy 36 never takes the horror aura (measured: aura absent 500 ms after the cast, while 560284 hits it). 560284 DurationIndex 27 = 3000 ms ($d); Effect[0] aura 12 SPELL_AURA_MOD_STUN (mechanic 24, horror) on TARGET_UNIT_DEST_AREA_ENEMY. The aura is still on the dummy 2800 ms after the cast (excludes a duration 10% short, 2700 ms); the before read, absent, is the control. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc.",
+      "target_entry": 6
+    },
+    {
+      "spell": 560284,
+      "name": "Infernal (horror gone 3200 ms)",
+      "kind": "metric_delta",
+      "variant": "stun_gone",
+      "label_suffix": "stun_gone",
+      "quote": "horrifying them for $d,",
+      "trigger_spell": 560284,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 560284,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 3200,
+      "expire_ms": 500,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          3150,
+          3250
+        ]
+      },
+      "observe_source": "Creature 6 (Kobold Vermin) is the target because the stock dummy 36 never takes the horror aura (measured: aura absent 500 ms after the cast, while 560284 hits it). 560284 DurationIndex 27 = 3000 ms ($d). The aura is gone from the dummy 3200 ms after the cast (excludes a duration 10% long, 3300 ms). Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc.",
+      "target_entry": 6
+    },
+    {
+      "spell": 560284,
+      "name": "Infernal (Infernal present 14100 ms)",
+      "kind": "metric_delta",
+      "variant": "life_held",
+      "label_suffix": "life_held",
+      "quote": "and spawning an Infernal to fight by your side for $572163d.",
+      "trigger_spell": 560284,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 51320
+      },
+      "before_expected": 0,
+      "wait_ms": 14100,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          14050,
+          14200
+        ]
+      },
+      "observe_source": "572183 summons creature 51320 (SummonProperties 61); AscensionFelswornSummons.cpp:22 times it 15000 ms (572163 DurationIndex 8 = 15000 ms, $572163d). The owned creature count of entry 51320 is read from the caster. The Infernal is still owned 14100 ms after the cast (excludes a duration 10% short, 13500 ms); the before read, 0, is the control. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 560284,
+      "name": "Infernal (Infernal gone 15900 ms)",
+      "kind": "metric_delta",
+      "variant": "life_gone",
+      "label_suffix": "life_gone",
+      "quote": "and spawning an Infernal to fight by your side for $572163d.",
+      "trigger_spell": 560284,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 51320
+      },
+      "before_expected": 0,
+      "wait_ms": 15900,
+      "expire_ms": 500,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          15850,
+          16000
+        ]
+      },
+      "observe_source": "572183 summons creature 51320 (SummonProperties 61); AscensionFelswornSummons.cpp:22 times it 15000 ms (572163 DurationIndex 8 = 15000 ms, $572163d). The owned creature count of entry 51320 is read from the caster. The Infernal is gone 15900 ms after the cast (excludes a duration 10% long, 16500 ms). Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 560284,
+      "name": "Infernal (Inner Demon: Infernal present 15900 ms)",
+      "kind": "metric_delta",
+      "variant": "inner_held",
+      "label_suffix": "inner_held",
+      "quote": "Inner Demon: Lasts $/1000;807421s3 additional sec.",
+      "trigger_spell": 560284,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 51320
+      },
+      "before_expected": 0,
+      "wait_ms": 15900,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          15850,
+          16000
+        ]
+      },
+      "learn": [
+        805239,
+        804216
+      ],
+      "setup_casts": [
+        805239,
+        804216
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "observe_source": "807421 Effect[2] aura 107 ADD_FLAT_MODIFIER BasePoints 999 + 1 = 1000 ms ($/1000;807421s3 = 1 s); AscensionFelswornSummons.cpp:22 adds 1000 ms when Inner Demon 804216 is on the caster. Inner Demon is a real precondition: Burning Hatred 805239 gives 6 Felfury, then Inner Demon 804216 (CasterAuraSpell 800058) is cast; the aura lasts 5000 ms per Felfury, so it covers the 16 s window. With Inner Demon the Infernal is still owned 15900 ms after the cast, where the same read without it (life_gone) is 0: the lifetime is above 15900 ms. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 560284,
+      "name": "Infernal (Inner Demon: Infernal gone 16100 ms)",
+      "kind": "metric_delta",
+      "variant": "inner_gone",
+      "label_suffix": "inner_gone",
+      "quote": "Inner Demon: Lasts $/1000;807421s3 additional sec.",
+      "trigger_spell": 560284,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 51320
+      },
+      "before_expected": 0,
+      "wait_ms": 16100,
+      "expire_ms": 500,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          16050,
+          16200
+        ]
+      },
+      "learn": [
+        805239,
+        804216
+      ],
+      "setup_casts": [
+        805239,
+        804216
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "observe_source": "807421 Effect[2] aura 107 ADD_FLAT_MODIFIER BasePoints 999 + 1 = 1000 ms ($/1000;807421s3 = 1 s); AscensionFelswornSummons.cpp:22 adds 1000 ms when Inner Demon 804216 is on the caster. Inner Demon is a real precondition: Burning Hatred 805239 gives 6 Felfury, then Inner Demon 804216 (CasterAuraSpell 800058) is cast; the aura lasts 5000 ms per Felfury, so it covers the 16 s window. With Inner Demon the Infernal is gone 16100 ms after the cast: the lifetime is below 16100 ms, so 16000 +- 100 ms with the read above. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (no damage before the end, 5100 ms)",
+      "kind": "metric_delta",
+      "variant": "damage_early",
+      "label_suffix": "damage_early",
+      "quote": "and dealing ${$cond($gt($spfi, $sps), $m2+0+$spfi*0.85, $m2+0+$sps*0.85)} Shadowflame Damage at the end of the duration.",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800355,
+        "target": "dummy"
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 100,
+      "expire_ms": 500,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          5050,
+          5200
+        ]
+      },
+      "observe_source": "800355 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude set to the duration by AscensionFelswornContracts.cpp:232 (one tick at the end), DurationIndex 571 = 5500 ms ($d); BasePoints 694 + 1 = 695 + int(RealPointsPerLevel 9.55 x (60 - 59)) = 9 -> 704 at level 60 (tooltip 704.55); the tooltip adds 0.85 x the greater of fire spell power and shadow spell power ($cond). No damage has landed 5100 ms after the cast (excludes an end 10% early, 4950 ms). Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. Energy is held at 100 every 500 ms after the cast (hold_power_during_wait): the stock ManaPerSecond 30 drain (SpellAuras.cpp:771-801) removes the channel when the pool is below 30, so a single power fixture ended it near 4000 ms (fw-r1d review alert a).",
+      "hold_power_during_wait": {
+        "power": 3,
+        "every_ms": 500,
+        "count": 10
+      }
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (damage at the end, 0 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "and dealing ${$cond($gt($spfi, $sps), $m2+0+$spfi*0.85, $m2+0+$sps*0.85)} Shadowflame Damage at the end of the duration.",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800355,
+        "target": "dummy"
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 400,
+      "expire_ms": 500,
+      "expected": 704.0,
+      "after_at_least": 703,
+      "after_at_most": 705,
+      "game_time": {
+        "after": [
+          5850,
+          6000
+        ]
+      },
+      "observe_source": "800355 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude set to the duration by AscensionFelswornContracts.cpp:232 (one tick at the end), DurationIndex 571 = 5500 ms ($d); BasePoints 694 + 1 = 695 + int(RealPointsPerLevel 9.55 x (60 - 59)) = 9 -> 704 at level 60 (tooltip 704.55); the tooltip adds 0.85 x the greater of fire spell power and shadow spell power ($cond). The damage has landed 5900 ms after the cast (excludes an end 10% late, 6050 ms): 704. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. The dummy's monster linear resistance (docs/coa/monster-linear-resistance.md, partial resists in 10% steps) is removed by the spell-penetration fixture 823764 (aura 123, MiscValue 126, -9999). Energy is held at 100 every 500 ms after the cast (hold_power_during_wait): the stock ManaPerSecond 30 drain (SpellAuras.cpp:771-801) removes the channel when the pool is below 30, so a single power fixture ended it near 4000 ms (fw-r1d review alert a).",
+      "hold_power_during_wait": {
+        "power": 3,
+        "every_ms": 500,
+        "count": 11
+      }
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (damage at +10000 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "and dealing ${$cond($gt($spfi, $sps), $m2+0+$spfi*0.85, $m2+0+$sps*0.85)} Shadowflame Damage at the end of the duration.",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800355,
+        "target": "dummy"
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 400,
+      "expire_ms": 500,
+      "expected": 9204.0,
+      "after_at_least": 9203,
+      "after_at_most": 9205,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "game_time": {
+        "after": [
+          5850,
+          6000
+        ]
+      },
+      "observe_source": "800355 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude set to the duration by AscensionFelswornContracts.cpp:232 (one tick at the end), DurationIndex 571 = 5500 ms ($d); BasePoints 694 + 1 = 695 + int(RealPointsPerLevel 9.55 x (60 - 59)) = 9 -> 704 at level 60 (tooltip 704.55); the tooltip adds 0.85 x the greater of fire spell power and shadow spell power ($cond). Contrast arm of the spell power term: +10000 spell power: 704 + int(0.85 x 10000) = 9204 against 704. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. The dummy's monster linear resistance (docs/coa/monster-linear-resistance.md, partial resists in 10% steps) is removed by the spell-penetration fixture 823764 (aura 123, MiscValue 126, -9999). Energy is held at 100 every 500 ms after the cast (hold_power_during_wait): the stock ManaPerSecond 30 drain (SpellAuras.cpp:771-801) removes the channel when the pool is below 30, so a single power fixture ended it near 4000 ms (fw-r1d review alert a).",
+      "hold_power_during_wait": {
+        "power": 3,
+        "every_ms": 500,
+        "count": 11
+      }
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (slow)",
+      "kind": "metric_delta",
+      "variant": "slow",
+      "label_suffix": "slow",
+      "quote": "slowing your target's movement speed by $800833s1%",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.5,
+      "expected": 0.2,
+      "expected_ratio": 0.4,
+      "tolerance": 0.001,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "800833 Effect[0] aura 33 SPELL_AURA_MOD_DECREASE_SPEED, BasePoints -61 + 1 = -60 ($800833s1 = 60), applied to the dummy by the channel's periodic trigger every 500 ms. The dummy's run speed rate is read before and 1000 ms into the channel: the ratio is 0.40. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (slow_held)",
+      "kind": "metric_delta",
+      "variant": "slow_held",
+      "label_suffix": "slow_held",
+      "quote": "slowing your target's movement speed by $800833s1% for $d",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [],
+      "metric": "aura",
+      "fields": {
+        "spell": 800833
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 100,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          5050,
+          5200
+        ]
+      },
+      "observe_source": "800355 DurationIndex 571 = 5500 ms ($d); the slow 800833 is applied by the channel's periodic trigger. The slow is still on the dummy 5100 ms after the cast (excludes a duration 10% short, 4950 ms). Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. Energy is held at 100 every 500 ms after the cast (hold_power_during_wait): the stock ManaPerSecond 30 drain (SpellAuras.cpp:771-801) removes the channel when the pool is below 30, so a single power fixture ended it near 4000 ms (fw-r1d review alert a).",
+      "measure_actor": "dummy",
+      "hold_power_during_wait": {
+        "power": 3,
+        "every_ms": 500,
+        "count": 10
+      }
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (slow_gone)",
+      "kind": "metric_delta",
+      "variant": "slow_gone",
+      "label_suffix": "slow_gone",
+      "quote": "slowing your target's movement speed by $800833s1% for $d",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [],
+      "metric": "aura",
+      "fields": {
+        "spell": 800833
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 300,
+      "expire_ms": 500,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          6250,
+          6400
+        ]
+      },
+      "observe_source": "800355 DurationIndex 571 = 5500 ms ($d); the slow 800833 lasts 600 ms after the last periodic trigger (mentor D-15). The slow is absent from the dummy 6300 ms after the cast: the channel end plus 600 ms plus a 200 ms margin; the bound is not widened. The reading before the cast (cast_in_before false) is the control arm without the channel: slow absent. 6300 ms also excludes a duration 10% long (6050 ms). Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. Energy is held at 100 every 500 ms after the cast (hold_power_during_wait): the stock ManaPerSecond 30 drain (SpellAuras.cpp:771-801) removes the channel when the pool is below 30, so a single power fixture ended it near 4000 ms (fw-r1d review alert a).",
+      "measure_actor": "dummy",
+      "hold_power_during_wait": {
+        "power": 3,
+        "every_ms": 500,
+        "count": 12
+      }
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (uncounted: channel aura at 3700 ms without the power hold)",
+      "kind": "metric_delta",
+      "variant": "free_3700",
+      "label_suffix": "free_3700",
+      "quote": "Channel a beam of fel magic upon an enemy",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [],
+      "metric": "aura",
+      "fields": {
+        "spell": 800355
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 3700,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          3650,
+          3800
+        ]
+      },
+      "observe_source": "Uncounted observation for the owner (mentor D-16): without hold_power_during_wait, from full Energy (cast_power 100) with ManaPerSecond 30 Energy, the aura 800355 on the dummy is read 3700 ms after the cast, to bracket how long the channel lasts. No ledger label.",
+      "measure_actor": "dummy"
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (uncounted: channel aura at 3900 ms without the power hold)",
+      "kind": "metric_delta",
+      "variant": "free_3900",
+      "label_suffix": "free_3900",
+      "quote": "Channel a beam of fel magic upon an enemy",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [],
+      "metric": "aura",
+      "fields": {
+        "spell": 800355
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 3900,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          3850,
+          4000
+        ]
+      },
+      "observe_source": "Uncounted observation for the owner (mentor D-16): without hold_power_during_wait, from full Energy (cast_power 100) with ManaPerSecond 30 Energy, the aura 800355 on the dummy is read 3900 ms after the cast, to bracket how long the channel lasts. No ledger label.",
+      "measure_actor": "dummy"
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (uncounted: channel aura at 4100 ms without the power hold)",
+      "kind": "metric_delta",
+      "variant": "free_4100",
+      "label_suffix": "free_4100",
+      "quote": "Channel a beam of fel magic upon an enemy",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [],
+      "metric": "aura",
+      "fields": {
+        "spell": 800355
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 4100,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          4050,
+          4200
+        ]
+      },
+      "observe_source": "Uncounted observation for the owner (mentor D-16): without hold_power_during_wait, from full Energy (cast_power 100) with ManaPerSecond 30 Energy, the aura 800355 on the dummy is read 4100 ms after the cast, to bracket how long the channel lasts. No ledger label.",
+      "measure_actor": "dummy"
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (uncounted: channel aura at 4300 ms without the power hold)",
+      "kind": "metric_delta",
+      "variant": "free_4300",
+      "label_suffix": "free_4300",
+      "quote": "Channel a beam of fel magic upon an enemy",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [],
+      "metric": "aura",
+      "fields": {
+        "spell": 800355
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 4300,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          4250,
+          4400
+        ]
+      },
+      "observe_source": "Uncounted observation for the owner (mentor D-16): without hold_power_during_wait, from full Energy (cast_power 100) with ManaPerSecond 30 Energy, the aura 800355 on the dummy is read 4300 ms after the cast, to bracket how long the channel lasts. No ledger label.",
+      "measure_actor": "dummy"
     },
     {
       "spell": 520240,

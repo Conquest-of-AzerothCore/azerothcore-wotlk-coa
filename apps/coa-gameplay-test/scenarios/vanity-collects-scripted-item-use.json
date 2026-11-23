@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "A Vanity item whose script answers the use is collected before the script spends it",
+  "contract": [
+    "Only a soulbound copy of a VanityCollection.dbc item is collected, and an item use collected it in",
+    "OnPlayerCanCastItemUseSpell. Feather of Ancients (item_ascension_feather_of_ancients) and the Ethereal Bazaar set",
+    "caches (item_ethereal_set_cache) answer the use in their own ItemScript, so that hook never ran and a bound copy",
+    "nothing had collected yet was destroyed without entering the Vanity collection.",
+    "Expected: using Feather of Ancients 977025 (spell 18282) or set cache 1001854 Aspiring Aspirant's Vestments",
+    "(spell 60034) adds it to the account's Vanity collection while the item is spent. forget_vanity removes the row",
+    "first, as for copies bound before anything collected them."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8824.3, "y": 626.4, "z": 94.4, "o": 0},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 2000},
+    {"action": "add_item", "label": "Carry Feather of Ancients", "actor": "hero", "item": 977025},
+    {"action": "assert", "label": "SETUP: the feather is soulbound", "actor": "hero", "metric": "item_soulbound",
+     "item": 977025, "equals": 1},
+    {"action": "assert", "label": "Control: storing the bound feather collects it", "actor": "hero",
+     "metric": "vanity_owned", "item": 977025, "equals": 1},
+    {"action": "forget_vanity", "label": "Forget the feather", "actor": "hero", "item": 977025},
+    {"action": "assert", "label": "SETUP: the feather is no longer collected", "actor": "hero",
+     "metric": "vanity_owned", "item": 977025, "equals": 0},
+    {"action": "use_item", "label": "Use the feather", "actor": "hero", "item": 977025, "spell": 18282},
+    {"action": "assert", "label": "The feather is spent on the flight paths", "actor": "hero", "metric": "item_count",
+     "item": 977025, "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "DISCRIMINATING: the used feather is in the Vanity collection", "actor": "hero",
+     "metric": "vanity_owned", "item": 977025, "equals": 1},
+    {"action": "add_item", "label": "Carry the Aspiring Aspirant's Vestments set cache", "actor": "hero",
+     "item": 1001854},
+    {"action": "assert", "label": "SETUP: the set cache is soulbound", "actor": "hero", "metric": "item_soulbound",
+     "item": 1001854, "equals": 1},
+    {"action": "forget_vanity", "label": "Forget the set cache", "actor": "hero", "item": 1001854},
+    {"action": "assert", "label": "SETUP: the set cache is not collected", "actor": "hero", "metric": "vanity_owned",
+     "item": 1001854, "equals": 0},
+    {"action": "use_item", "label": "Open the set cache", "actor": "hero", "item": 1001854, "spell": 60034},
+    {"action": "assert", "label": "The set cache is spent", "actor": "hero", "metric": "item_count", "item": 1001854,
+     "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "DISCRIMINATING: the opened set cache is in the Vanity collection", "actor": "hero",
+     "metric": "vanity_owned", "item": 1001854, "equals": 1}
+  ]
+}

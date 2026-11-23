@@ -6,6 +6,7 @@
 #include "Map.h"
 #include "MapMgr.h"
 #include "ObjectMgr.h"
+#include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellAuras.h"
 #include "Vehicle.h"
@@ -24,9 +25,14 @@ constexpr uint32 SPELL_REINS = 43785;
 constexpr uint32 NPC_CARAVAN_HARNESS = 9303000;
 constexpr int8 DRIVER_SEAT = 1;
 
+bool IsCaravanCartEntry(uint32 entry)
+{
+    return std::find(CaravanCartEntries.begin(), CaravanCartEntries.end(), entry) != CaravanCartEntries.end();
+}
+
 bool IsCaravanCart(CreatureData const& spawn)
 {
-    return std::find(CaravanCartEntries.begin(), CaravanCartEntries.end(), spawn.id) != CaravanCartEntries.end();
+    return IsCaravanCartEntry(spawn.id);
 }
 
 bool IsOnOpenWorldMap(CreatureData const& spawn)
@@ -122,10 +128,26 @@ public:
         LOG_INFO("server.loading", ">> Loaded {} grids for {} caravan cart spawns", grids.size(), carts);
     }
 };
+
+class CaravanCartPassengerSave : public PlayerScript
+{
+public:
+    CaravanCartPassengerSave() : PlayerScript("CoACaravanCartPassengerSave", { PLAYERHOOK_ON_SAVE }) { }
+
+    void OnPlayerSave(Player* player) override
+    {
+        Unit* cart = player->GetVehicleBase();
+        if (!cart || !cart->IsCreature() || !IsCaravanCartEntry(cart->GetEntry()))
+            return;
+
+        player->Relocate(cart->GetPositionX(), cart->GetPositionY(), cart->GetPositionZ(), player->GetOrientation());
+    }
+};
 }
 
 void AddSC_AscensionCaravanCarts()
 {
     new CaravanCartGrids();
+    new CaravanCartPassengerSave();
     RegisterCreatureAI(npc_coa_caravan_cart);
 }
