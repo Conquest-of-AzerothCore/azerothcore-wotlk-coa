@@ -160,6 +160,94 @@
       "internal_cooldown_ms": 0
     },
     {
+      "aura": 804822,
+      "name": "Vengeance Is Mine",
+      "tooltip": "Dodging or parrying an attack now gives you a $h% chance to make your next 10 instances of damage with |cffffffffTwin Slice|r deal $807163s1% increased damage and generate 1 |cff32cd32Felfury|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "avoided",
+        "striker_entry": 36,
+        "swing_ms": 500,
+        "dodge": 5,
+        "parry": 95,
+        "strikers": 10,
+        "striker_auras": [
+          42716,
+          62531,
+          2116852
+        ],
+        "learn": [
+          560576
+        ]
+      },
+      "residual_target": 0.001,
+      "min_detectable": 5,
+      "min_parts": 10,
+      "trigger_text": "Dodging or parrying an attack",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 807163,
+      "events_per_proc": 1,
+      "proc_spell_source": "EffectTriggerSpell[0] of 804822; the handler casts it on the caster (AscensionFelswornEvents.cpp:157-158).",
+      "handler": "aura_ascension_felsworn_event: Check (AscensionFelswornEvents.cpp:42-47) passes an incoming dodge or parry (id 804822 accepts both) and rolls Chance(player, 804822) (AscensionFelsworn.cpp:231-239, roll_chance_f of the DBC ProcChance 10, no cooldown) once per avoided attack; Proc casts 807163 on the caster. Trigger: procs avoided trigger (ADR 0900) with the learn list (ADR 1261, provisional): Nether Disciple 560576 (Effect[0] APPLY_AURA 47 SPELL_AURA_MOD_PARRY_PERCENT; HandleAuraModParryPercent calls SetCanParry(true), SpellAuraEffects.cpp:4870-4884) is learned before the engage in every part, so the caster can parry; ten aggressive stationary strikers (creature 36) with Self Root Forever 42716, Molten 62531 and Enrage 2116852, dodge 5 and parry 95 set before every 500 ms interval, so nearly every trial is a parry; the pooled proc judge needs dodged swings to open its trial count (compare.py, trials from the dodged label) and rates over dodged + parried swings, so a server that ignored parries would read about 5% of the chance. The first pair with dodge 0 read 8250 parried swings and 804 procs in part 2 but was unmeasured for want of a dodged swing. This is the parry leg of 'Dodging or parrying'; the dodge leg is the entry without a learn list. Nether Disciple is obtainable (CharacterAdvancement 6338 per ~/CoaServer/reference/coa-obtainable, cited in the ledger row). Sized like the dodge leg. Reference search 2026-11-24: coa-history spell 804822 and 807163: 0 events in 186 logs; nothing found that decides the expectation.",
+      "dbc": {
+        "804822": {
+          "ProcChance": 10,
+          "ProcFlags": 4,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 805245,
+      "name": "Demonic Fortitude",
+      "tooltip": "While Demonic Will or Hateforged Barrier are active, all damage taken or avoided now has a $h% chance to generate 1 |cff32cd32Felfury|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "avoided",
+        "striker_entry": 36,
+        "swing_ms": 500,
+        "dodge": 100,
+        "parry": 0,
+        "strikers": 3,
+        "striker_auras": [
+          42716,
+          62531,
+          2116852
+        ]
+      },
+      "residual_target": 0.001,
+      "min_detectable": 5,
+      "min_parts": 10,
+      "trigger_text": "all damage taken or avoided",
+      "event_metric": "aura_stacks",
+      "stack_aura": 800058,
+      "stack_set": 0,
+      "stack_per_cast": 0,
+      "stack_cap": 6,
+      "events_per_proc": 1,
+      "proc_spell": 800058,
+      "proc_spell_source": "Proc of 805245 calls Gain(player, 1) (AscensionFelswornEvents.cpp:173-175), which adds one stack of aura 800058 (AscensionFelsworn.cpp:219-229); no spell is cast.",
+      "attempt_auras": [
+        {
+          "spell": 800058,
+          "stacks": 0,
+          "source": "Felfury 800058 set to 0 before every swing interval: the stack read after it counts the Gain(player, 1) events (ADR 1254, avoided trigger ADR 1261)."
+        },
+        {
+          "spell": 800209,
+          "stacks": 1,
+          "source": "Demonic Will 800209 held before every swing interval: the clause's condition (AscensionFelswornEvents.cpp:44-45, HasAura(800209)), not its subject. A real cast would gain 1 Felfury itself (ResourceGainRules {14, 800209, 800209, 800058, 1, AuraStacks}, AscensionCustomResourceData.h:120) and mix that gain into the events, so the aura is set (controller go, 2026-11-23)."
+        }
+      ],
+      "handler": "aura_ascension_felsworn_event: Check (AscensionFelswornEvents.cpp:42-47) passes damage taken, a dodge or a parry on the caster (id 805245) while Demonic Will 800209 or Hateforged Barrier 705129 is held, and rolls Chance(player, 805245) (Spell.dbc ProcChance 20, no cooldown); Proc gains 1 Felfury 800058 (Gain(player, 1)). Trigger: procs avoided trigger (ADR 0900) with aura_stacks events (ADR 1254) and attempt_auras on the avoided trigger (ADR 1261, provisional): three aggressive stationary strikers (creature 36) with 42716, 62531 and 2116852, dodge 100 before every 500 ms interval, so every attempt is a dodge (the avoided leg; the damage-taken leg is not read here). Three strikers keep an interval's gains far under the 6-stack cap of 800058 (StackAmount 6); a read at the cap voids the part. The passive is learned (mentor D-67). Sized like the 804822 avoided entry. Reference search 2026-11-24: coa-history spell 805245: 0 events in 186 logs; nothing found that decides the expectation."
+    },
+    {
       "aura": 681376,
       "name": "Chaotic",
       "tooltip": "Dealing damage now has an $h% chance to increase your damage by $572782s1% for $572782d, stacking $572782u times.",
@@ -15766,6 +15854,124 @@
         ]
       ],
       "observe_source": "Below-six arm of energy_at_six (50 Energy at six Felfury). The caster builds a real count of 5 Felfury 800058 (StackAmount 6) before each Inner Demon 804216 cast: Burning Hatred 805239 at the caster ('instantly generating 6 Felfury'), Sargeron Smite 802060 at the dummy ('Consumes 2 Felfury'), Bane of Fire 707901 at the dummy (a Bane hit on an enemy gives Gain(player, 1), AscensionFelswornAbilities.cpp:329-333; Fel Torpedo was dropped because its dash carried the caster past the dummy and the next Sargeron Smite was refused with SPELL_FAILED_UNIT_NOT_INFRONT, pair fw-tg1 proveP1); the per-cast targets are the setup_cast_targets option (ADR 1256) and the count is read at exactly 5 after the last setup cast of each phase (after_setup_stacks, ADR 1257), a mismatch voids the run. Inner Demon's own aura from the before phase is removed at the start of the after phase (after_auras), so both arms cast it the same way. The handler casts 520258 only when the Felfury consumed is at least 6 (AscensionFelswornAbilities.cpp:265-266): the energize events of 520258 on the caster are 0 before the learn of 520257 and 0 after it at five, where a threshold of 5 would restore 50. Reference search: as energy_at_six (2026-11-23)."
+    },
+    {
+      "spell": 300476,
+      "kind": "avoided_swing_reads",
+      "name": "Betrayer (party radius)",
+      "variant": "party_radius",
+      "label_suffix": "party_radius",
+      "quote": "enrages your party and raid members within $520256a1 yds",
+      "read": "aura_edge",
+      "observe_spell": 520256,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852
+      ],
+      "swing_ms": 500,
+      "control_windows": 10,
+      "windows": 20,
+      "observe_source": "AscensionFelswornEvents.cpp:42-47 passes an incoming dodge when Chance(player, 300476) succeeds (ProcChance 100) and :223-224 casts 804336 at the attacker and 520256 on the caster; 520256 Effect[0] APPLY_AURA SPELL_AURA_MOD_CRIT_PCT, TargetA 22 SRC_CASTER, TargetB 30 UNIT_SRC_AREA_ALLY, RadiusIndex 9, DurationIndex 1 (server DBC). Spell.cpp:9449-9459 adds no combat reach for a player target of a player caster. Strikers: the 804822 proc shape, ten aggressive stationary creature 36 with 42716, 62531 and 2116852, dodge 100 before every 500 ms window. Reference search 2026-11-24: coa-history spell 300476: 0 events in 186 logs; 520256 Betrayer: 42 SPELL_AURA_APPLIED and 42 SPELL_AURA_REMOVED in 2 logs (2026-08-10, logs 103 and 104), player to player (party and raid members), about 10.0 s each; it supports the 10 s duration."
+    },
+    {
+      "spell": 300476,
+      "kind": "avoided_swing_reads",
+      "name": "Betrayer (party crit)",
+      "variant": "party_crit",
+      "label_suffix": "party_crit",
+      "quote": "increasing their critical strike chance by $520256s1%",
+      "read": "stat_delta",
+      "observe_spell": 520256,
+      "metric": "melee_crit_chance_refreshed",
+      "ally_yd": 10,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852
+      ],
+      "swing_ms": 500,
+      "control_windows": 10,
+      "windows": 20,
+      "observe_source": "AscensionFelswornEvents.cpp:42-47 passes an incoming dodge when Chance(player, 300476) succeeds (ProcChance 100) and :223-224 casts 804336 at the attacker and 520256 on the caster; 520256 Effect[0] APPLY_AURA SPELL_AURA_MOD_CRIT_PCT, TargetA 22 SRC_CASTER, TargetB 30 UNIT_SRC_AREA_ALLY, RadiusIndex 9, DurationIndex 1 (server DBC). Spell.cpp:9449-9459 adds no combat reach for a player target of a player caster. Strikers: the 804822 proc shape, ten aggressive stationary creature 36 with 42716, 62531 and 2116852, dodge 100 before every 500 ms window. The ally's crit is read with melee_crit_chance_refreshed (UpdateCritPercentage before the read): the first pair read the unrefreshed PLAYER_CRIT_PERCENTAGE field as 0 before the learn. Reference search 2026-11-24: coa-history spell 300476: 0 events in 186 logs; 520256 Betrayer: 42 SPELL_AURA_APPLIED and 42 SPELL_AURA_REMOVED in 2 logs (2026-08-10, logs 103 and 104), player to player (party and raid members), about 10.0 s each; it supports the 10 s duration."
+    },
+    {
+      "spell": 300476,
+      "kind": "avoided_swing_reads",
+      "name": "Betrayer (party crit duration)",
+      "variant": "party_crit_duration",
+      "label_suffix": "party_crit_duration",
+      "quote": "for $520256d.",
+      "read": "duration_max",
+      "observe_spell": 520256,
+      "ally_yd": 10,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852
+      ],
+      "swing_ms": 500,
+      "control_windows": 10,
+      "windows": 30,
+      "observe_source": "AscensionFelswornEvents.cpp:42-47 passes an incoming dodge when Chance(player, 300476) succeeds (ProcChance 100) and :223-224 casts 804336 at the attacker and 520256 on the caster; 520256 Effect[0] APPLY_AURA SPELL_AURA_MOD_CRIT_PCT, TargetA 22 SRC_CASTER, TargetB 30 UNIT_SRC_AREA_ALLY, RadiusIndex 9, DurationIndex 1 (server DBC). Spell.cpp:9449-9459 adds no combat reach for a player target of a player caster. Strikers: the 804822 proc shape, ten aggressive stationary creature 36 with 42716, 62531 and 2116852, dodge 100 before every 500 ms window. Reference search 2026-11-24: coa-history spell 300476: 0 events in 186 logs; 520256 Betrayer: 42 SPELL_AURA_APPLIED and 42 SPELL_AURA_REMOVED in 2 logs (2026-08-10, logs 103 and 104), player to player (party and raid members), about 10.0 s each; it supports the 10 s duration."
+    },
+    {
+      "spell": 805249,
+      "kind": "avoided_swing_reads",
+      "name": "Illidari Training (energy per dodge)",
+      "variant": "energy_per_dodge",
+      "label_suffix": "energy_per_dodge",
+      "quote": "Dodging an attack now generates $521210s1 Energy.",
+      "read": "per_event",
+      "observe_spell": 521210,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852
+      ],
+      "swing_ms": 500,
+      "control_windows": 10,
+      "windows": 60,
+      "observe_source": "AscensionFelswornEvents.cpp:42-47 passes an incoming dodge when Chance(player, 805249) succeeds (ProcChance 100) and :208-209 casts 521210 on the caster; 521210 Effect[0] ENERGIZE, MiscValue 3 Energy (server DBC). SpellEffects.cpp EffectEnergize passes the effect value to Unit::EnergizeBySpell, which logs it uncapped (Unit.cpp:9330-9348), so each energize log carries the full amount. Strikers: the 804822 proc shape, dodge 100 before every 500 ms window. Reference search 2026-11-24: coa-history spell 805249 and 521210: 0 events in 186 logs; nothing found that decides the amount."
+    },
+    {
+      "spell": 804822,
+      "kind": "avoided_proc_instances",
+      "name": "Vengeance Is Mine (Twin Slice instances)",
+      "variant": "twin_slice_instances",
+      "label_suffix": "twin_slice_instances",
+      "quote": "next 10 instances of damage with Twin Slice",
+      "gain_quote": "and generate 1 Felfury.",
+      "proc_aura": 807163,
+      "cast_spell": 801901,
+      "hit_spells": [
+        808303,
+        808304
+      ],
+      "stack_aura": 800058,
+      "instances": 10,
+      "power": 3,
+      "power_value": 45,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852
+      ],
+      "swing_ms": 500,
+      "proc_windows": 30,
+      "casts": 8,
+      "cast_gap_ms": 1100,
+      "observe_source": "Mentor D-67: 807163 is obtained by the real route: 804822 learned, dodged swings (dodge 100) until the Chance(player, 804822) roll procs (AscensionFelswornEvents.cpp:42-47, :157-158 casts 807163 on the caster). 807163's apply sets script value 807163 to 10 (AscensionFelswornAuras.cpp:84-85); every direct Twin Slice damage instance (Twin(info) && Direct(info)) while it is held gains 1 Felfury and decrements it, removing the aura at the last (AscensionFelswornAbilities.cpp:375-384). Twin Slice 801901 strikes with both weapons (EffectTriggerSpell 808303 and 808304) and gains 1 Felfury itself (EffectTriggerSpell[2] 800058), read as the control arm's own gain; ManaCost 45 Energy (PowerType 3), set before each cast; StartRecoveryTime 1000 ms, so casts 1100 ms apart. Felfury 800058 StackAmount 6, set to 0 before each cast (at most 3 gained per cast). Twin Fury 801892 is not learned, so a critical strike adds no Felfury. 807163 DurationIndex 1 (10 s): an expiry by duration voids the run. Reference search 2026-11-24: coa-history spell 804822 and 807163: 0 events in 186 logs; nothing found that decides the 10 instances or the Felfury gain."
     }
   ],
   "player_observations": [],

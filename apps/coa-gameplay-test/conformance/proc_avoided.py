@@ -9,7 +9,7 @@ TRIAL_STATES = {'dodged': DODGED, 'parried': PARRIED}
 GUARD_STATES = {'landed': LANDED, 'blocked': FULL_BLOCKED}
 TRIALS_PER_ATTEMPT = 'trials_per_attempt'
 TRIGGER_FIELDS = {'action', 'striker_entry', 'swing_ms', 'dodge', 'parry', 'strikers', 'striker_auras', 'count_misses',
-                  'miss_exclusion'}
+                  'miss_exclusion', 'learn'}
 READING_NAME = 'avoided swings (dodged + parried)'
 MISSES_READING_NAME = 'avoided swings (dodged + parried + missed)'
 MISSED = 'missed'
@@ -50,6 +50,11 @@ def checked_trigger(entry: dict) -> dict:
                                   or not 0 < exclusion['min_share'] < 0.5):
         raise ValueError(f'Proc {aura} avoided trigger miss_exclusion is {{"min_share": 0 to 0.5 exclusive}} and '
                          f'needs count_misses true')
+    learn = trigger.get('learn', [])
+    if not isinstance(learn, list) or len(set(learn)) != len(learn) or aura in learn or any(
+            isinstance(spell, bool) or not isinstance(spell, int) or spell <= 0 for spell in learn):
+        raise ValueError(f'Proc {aura} avoided trigger learn is a list of distinct positive spell ids other than the '
+                         f'passive')
     if entry.get('trial_readings') or entry.get(TRIALS_PER_ATTEMPT):
         raise ValueError(f'Proc {aura} avoided trigger sets its own trial reading and trials per attempt')
     return trigger
@@ -67,6 +72,10 @@ def miss_exclusion_share(entry: dict) -> float | None:
 def miss_exclusion_model(entry: dict, trials_label: str) -> dict | None:
     share = miss_exclusion_share(entry)
     return None if share is None else {'min_share': share, 'missed': trial_labels(trials_label, True)[MISSED]}
+
+
+def learned(entry: dict) -> list:
+    return entry['trigger'].get('learn', [])
 
 
 def striker_auras(entry: dict) -> list:
@@ -110,8 +119,9 @@ def guard_reads(entry: dict) -> dict[str, dict]:
 
 def engage_steps(entry: dict) -> list[dict]:
     from behaviours import AVOIDING_ENGAGE_MS
-    steps = [{'action': 'set_aura', 'actor': CASTER, 'target': striker, 'caster': striker, 'spell': aura, 'stacks': 1}
-             for striker in striker_ids(entry) for aura in striker_auras(entry)]
+    steps = [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in learned(entry)]
+    steps += [{'action': 'set_aura', 'actor': CASTER, 'target': striker, 'caster': striker, 'spell': aura,
+               'stacks': 1} for striker in striker_ids(entry) for aura in striker_auras(entry)]
     for striker in striker_ids(entry):
         steps += avoidance_steps(entry) + [{'action': 'attack', 'actor': CASTER, 'target': striker},
                   {'action': 'wait', 'label': f'engage {striker}', 'ms': AVOIDING_ENGAGE_MS},
@@ -126,8 +136,9 @@ def guard_steps(entry: dict) -> list[dict]:
 
 
 def avoidance_steps(entry: dict) -> list[dict]:
+    from procs import attempt_auras
     trigger = entry['trigger']
-    return [fixture_health_step(CASTER, 100),
+    return [fixture_health_step(CASTER, 100), *attempt_auras(entry),
             {'action': 'set_combat_avoidance', 'actor': CASTER, 'dodge': trigger['dodge'], 'parry': trigger['parry']}]
 
 
@@ -174,7 +185,13 @@ def trial_rule(entry: dict) -> str:
                f'parried and missed swings is void)' if counts_misses(entry) else '')
             + f'; before every swing interval the caster\'s health is set to full and '
             f'its dodge and parry to {trigger["dodge"]:g}% and {trigger["parry"]:g}% (set_combat_avoidance), so no '
-            f'swing lands; the caster engages each striker once, at the same set health and avoidance, before the '
+            f'swing lands'
+            + (f', and the caster\'s auras {[aura["spell"] for aura in entry["attempt_auras"]]} are set (harness '
+               f'set_aura, a precondition fixture)' if entry.get('attempt_auras') else '')
+            + f'; '
+            + (f'the caster learns {learned(entry)} before the engage (a precondition, in every part); '
+               if learned(entry) else '')
+            + f'the caster engages each striker once, at the same set health and avoidance, before the '
             f'passive is learned and stops attacking; '
             f'the dodged and parried swings and the events up to that point are a held baseline; after the window '
             f'the caster\'s own auto attacks and the landed or fully blocked swings since the engage must be 0, or '
@@ -204,8 +221,14 @@ def holds_swings(entry: dict, part: int) -> bool:
 def baseline_steps(entry: dict, plan, swings: bool) -> list[dict]:
     from hits import DRAIN_MS
     from procs import baseline_labels, event_steps
+    from proc_stacks import avoided_attempt_steps, counts_stacks, drain_steps
     labels = baseline_labels(entry['aura'])
     steps = engage_steps(entry)
+    if counts_stacks(entry):
+        if swings:
+            steps += avoided_attempt_steps(entry, baseline_swings(entry, plan), plan.attempt_ms, True)
+            steps += drain_steps(entry, {'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS}, True)
+        return steps + trial_steps(labels['trials'], misses=counts_misses(entry))
     if swings:
         steps += attempt_steps(entry, baseline_swings(entry, plan), plan.attempt_ms)
         steps.append({'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS})
@@ -218,8 +241,13 @@ def avoided_baseline_model(entry: dict, plan, part: int) -> dict:
     labels = baseline_labels(entry['aura'])
     misses = counts_misses(entry)
     own, held = trial_labels(proc_measurements(entry['aura'])['trials'], misses), trial_labels(labels['trials'], misses)
-    return {**labels, 'attempts': baseline_swings(entry, plan) if holds_swings(entry, part) else 0,
-            'added_trials': {own[outcome]: held[outcome] for outcome in own if outcome != 'dodged'}}
+    from proc_stacks import STACK_EVENTS, baseline_model, counts_stacks
+    attempts = baseline_swings(entry, plan) if holds_swings(entry, part) else 0
+    stacks = {STACK_EVENTS: baseline_model(entry, attempts, labels['trials'])} if counts_stacks(entry) else {}
+    if stacks and not attempts:
+        stacks[STACK_EVENTS]['reads'] = []
+    return {**labels, 'attempts': attempts,
+            'added_trials': {own[outcome]: held[outcome] for outcome in own if outcome != 'dodged'}, **stacks}
 
 
 def baseline_ms(entry: dict, plan, part: int) -> int:
