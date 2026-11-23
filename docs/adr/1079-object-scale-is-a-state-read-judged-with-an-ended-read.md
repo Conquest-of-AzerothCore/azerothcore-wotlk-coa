@@ -30,8 +30,10 @@ Option 2.
 - A `metric_delta` option `ended_read` (`{unlearn, wait_ms, duration_ms}`) adds a third reading after the after
   reading: it unlearns the listed spells, waits `wait_ms` (longer than the stated `duration_ms` of the triggered
   aura), reads the metric again and alerts unless the reading equals the before reading of the same scenario within
-  the entry's tolerance. The baseline is always that before reading, never an assumed 1.0, so a race or display
-  scale on the fixture cancels out.
+  the entry's tolerance. The baseline is always that before reading, never an assumed 1.0. The engine adds scale
+  points (`Unit::RecalculateObjectScale` adds the native scale and a percent of 1.0), so the ratio equals the tooltip
+  only at a baseline of 1.0, which this fixture reads; another scale aura on the fixture would give a ratio below
+  1.10 and alert.
 - The 500067 entry judges `expected_ratio` 1.10 within 0.001 (float32 rounding of 1.1 is about 2e-8; +9% and +11% are
   0.01 away), with the ended reading 12000 ms after the unlearn, past the 11000 ms of 500076.
 

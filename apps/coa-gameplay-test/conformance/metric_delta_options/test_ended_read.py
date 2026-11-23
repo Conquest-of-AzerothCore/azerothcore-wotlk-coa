@@ -57,8 +57,9 @@ class EndedReadTests(unittest.TestCase):
         self.assertIn('after unlearning', verdict.explanation)
 
     def test_the_baseline_is_the_before_read_of_the_same_scenario(self):
-        self.assertEqual(self.judged(before=1.05, after=1.155, ended=1.05).status, 'ok')
+        self.assertEqual(self.judged(before=1.05, after=1.15, ended=1.05).status, 'alert')
         self.assertEqual(self.judged(before=1.05, after=1.155, ended=1.0).status, 'alert')
+        self.assertEqual(self.judged(before=1.0, after=1.1, ended=1.0).status, 'ok')
 
     def test_mutants_alert(self):
         for reads in ({'after': 1.09}, {'after': 1.11}, {'after': 1.2}, {'after': 1.0}, {'ended': 1.1},
