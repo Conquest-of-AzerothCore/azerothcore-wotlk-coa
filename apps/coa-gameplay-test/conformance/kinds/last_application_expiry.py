@@ -15,6 +15,7 @@ ORDER = 22
 LAST_APPLICATION_STEP_OVERHEAD_MS = 9
 FEED_STAMP_MS = 100
 FEED_RESIDUAL = 0.0005
+FORCE_HIT_RATINGS = {'melee': 'melee_hit_rating', 'spell': 'spell_hit_rating', 'ranged': 'ranged_hit_rating'}
 ARMS = ('control', 'treatment')
 
 
@@ -203,8 +204,10 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
         forced_roll.fixtures(class_file, spec, forced_roll.ForcedRoll(spec.forced_roll), scenario)
     if spec.force_crit is not None:
         scenario['players'][0][FORCE_CRIT_RATINGS[spec.force_crit]] = FORCED_CRIT_RATING
-        scenario['contract'] += (f' The {FORCE_CRIT_RATINGS[spec.force_crit]} fixture is {FORCED_CRIT_RATING}, so '
-                                 f'every landed hit is critical, in both arms.')
+        scenario['players'][0][FORCE_HIT_RATINGS[spec.force_crit]] = FORCED_CRIT_RATING
+        scenario['contract'] += (f' The {FORCE_CRIT_RATINGS[spec.force_crit]} and {FORCE_HIT_RATINGS[spec.force_crit]} '
+                                 f'fixtures are {FORCED_CRIT_RATING}, so every cast lands and is critical, in both '
+                                 f'arms.')
     if spec.caster:
         scenario['contract'] += ' The aura is read on the caster, not the dummy.'
     if feeding:

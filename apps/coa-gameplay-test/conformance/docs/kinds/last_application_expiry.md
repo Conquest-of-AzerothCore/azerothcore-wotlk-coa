@@ -55,10 +55,11 @@ before. The grant is dated by the stop: the step checks the aura on every world 
 verdict is the unchanged bracket test of the kind, the explanation names the remaining duration read at the stop.
 `feed` excludes `repeat`, `forced_roll` and `no_refresh`.
 
-`force_crit` (`melee`, `spell` or `ranged`) sets the matching crit rating fixture for both arms. `quote_spell` takes the
+`force_crit` (`melee`, `spell` or `ranged`) sets the matching crit and hit rating fixtures for both arms, so every
+cast lands and is critical. `quote_spell` takes the
 quote from the tooltip of a spell the entry's own tooltip embeds (`@s:N:`), as the window variant of `aura_fed_effect`
 does.
 
-Felsworn: Legionfall 801899 (Annihilan Strike 801903 feeding 801902, 15000 ms); Malice of Gul'dan 800214 (Sargeron
-Smite 802060, spell crit forced, feeding Felstrike 802678 on the dummy, 6000 ms, and Fragment of Malice 800239 on the
-caster, 5000 ms).
+Felsworn: Legionfall 801899 (Annihilan Strike 801903 feeding 801902, 15000 ms); Malice of Gul'dan 800214 (Fel Fireball
+801312 every 2000 ms with spell crit and hit forced, feeding Felstrike 802678 on the dummy, 6000 ms, and Fragment of
+Malice 800239 on the caster, 5000 ms).

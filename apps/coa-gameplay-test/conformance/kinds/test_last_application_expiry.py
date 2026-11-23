@@ -214,7 +214,8 @@ class FeedTests(unittest.TestCase):
         scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
         run.validate(scenario)
         self.assertEqual({step['max_casts'] for step in scenario['steps'] if step['action'] == 'cast_until_aura'}, {9})
-        self.assertEqual(scenario['players'][0]['melee_crit_rating'], 100000)
+        self.assertEqual((scenario['players'][0]['melee_crit_rating'], scenario['players'][0]['melee_hit_rating']),
+                         (100000, 100000))
 
     def test_a_dummy_aura_stops_on_a_named_caster_aura(self):
         entry = {**FED, 'caster': False, 'feed': {'every_ms': 1700, 'stop_aura': 707010}}
@@ -257,4 +258,4 @@ class FeedTests(unittest.TestCase):
         scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), ENTRY)
         self.assertNotIn('feed', expectation.model)
         self.assertNotIn('cast_until_aura', [step['action'] for step in scenario['steps']])
-        self.assertNotIn('melee_crit_rating', scenario['players'][0])
+        self.assertFalse({'melee_crit_rating', 'melee_hit_rating'} & set(scenario['players'][0]))
