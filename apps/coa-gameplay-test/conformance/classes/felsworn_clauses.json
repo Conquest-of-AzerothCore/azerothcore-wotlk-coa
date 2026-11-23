@@ -132,13 +132,19 @@
         "claim": "creates a damage absorption shield on all nearby allies",
         "labels": [
           "300468 behaviour_metric_delta ally_shield"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "within $300469a yds",
-        "labels": []
+        "labels": [
+          "300468 behaviour_metric_delta ally_radius"
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 300468,
@@ -149,16 +155,20 @@
         "claim": "absorbing ${$STA*1+$300469m1+$300469ppl1+$SP*.2+$AP*.08} damage",
         "labels": [
           "300468 behaviour_taken_hit amount"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "for $300469d",
         "labels": [
           "300468 behaviour_metric_delta shield_held",
           "300468 behaviour_metric_delta shield_gone"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 300468,
@@ -902,7 +912,8 @@
         "labels": [
           "525001 behaviour_metric_delta curse_held",
           "525001 behaviour_metric_delta curse_gone"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "causing the next spell they cast ... to be reflected onto them",
@@ -1493,7 +1504,8 @@
         "labels": [
           "570158 behaviour_metric_delta scar_held",
           "570158 behaviour_metric_delta scar_gone"
-        ]
+        ],
+        "evidence": "behaviour"
       }
     ]
   },
@@ -2408,16 +2420,20 @@
         "labels": [
           "707513 behaviour_metric_delta regen_one_stack",
           "707513 behaviour_metric_delta regen_two_stacks"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "for $525042d",
         "labels": [
           "707513 behaviour_metric_delta regen_held",
           "707513 behaviour_metric_delta regen_gone"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 707513,
@@ -2428,7 +2444,7 @@
     ],
     "kind": "claim",
     "evidence": "behaviour",
-    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 707842,
@@ -3463,8 +3479,12 @@
   {
     "spell": 804613,
     "clause": "While at full health, your chance to resist the next Curse or Magic effect on you is increased by 100%.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "804613 behaviour_taken_hit resist_next"
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 804613,
@@ -3526,7 +3546,9 @@
     "labels": [
       "804823 behaviour_metric_delta taunt_held",
       "804823 behaviour_metric_delta taunt_gone"
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 804823,
@@ -3537,16 +3559,20 @@
         "claim": "and ignore $s3% of all damage taken",
         "labels": [
           "804823 behaviour_taken_hit half_damage"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "for $d",
         "labels": [
           "804823 behaviour_metric_delta effect_held",
           "804823 behaviour_metric_delta effect_gone"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 804823,

@@ -4539,6 +4539,78 @@
     },
     {
       "spell": 300468,
+      "name": "Illidari Barrier (ally inside 15 yd shielded, ally outside not)",
+      "kind": "metric_delta",
+      "variant": "ally_radius",
+      "label_suffix": "ally_radius",
+      "quote": "within $300469a yds",
+      "trigger_spell": 705129,
+      "gate_spell": 300468,
+      "target": "caster",
+      "measure_actor": "ally",
+      "ally_arm": {
+        "allies": 2,
+        "arms": [
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 300469,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally2 stands 16 yd from the caster, outside the 15 yd edge of 300469 (SpellRadius 18, TARGET_UNIT_SRC_AREA_ALLY, TargetB 30: no leeway, no reach for a player target); it would carry the shield if the edge reached it"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 14,
+            "expected": 14,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally 14 yd along x from the shared spawn, dz 0; the caster stays"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 16,
+            "expected": 16,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally2 16 yd along x from the shared spawn, dz 0; the caster stays"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 300469,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 300,
+      "expire_ms": 5500,
+      "void_on_cast_failure": true,
+      "observe_source": "$300469a = 15 yd: 300469 Effect[0] EffectRadiusIndex 18 = SpellRadius 15.0 (SpellRadius.dbc), TargetA 22 / TargetB 30 (area ally around the caster). Hateforged Barrier 705129 is cast with 300468 learned (524635 absent): the ally at 14 yd must carry 300469 cast by the caster, the ally2 at 16 yd must not (read on the same cast), the distances are read on both. The aura on the ally at 14 yd is the positive control of the one on ally2 at 16 yd. Reference search 2026-11-23: coa-history spell 300468 and 300469: 0 events in 186 logs; nothing else found. Precedent: Sun Cleric 807343 ally_radius.",
+      "ally_offsets": {
+        "ally": 14,
+        "ally2": 16
+      }
+    },
+    {
+      "spell": 300468,
       "name": "Illidari Barrier (shield amount)",
       "kind": "taken_hit",
       "variant": "amount",
@@ -12590,6 +12662,38 @@
         "hit_arm": true
       },
       "observe_source": "Spell.dbc 802678 (server set /srv/coa/server-data/dbc) Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 1000, DurationIndex 32 = 6000 ms (6 ticks), EffectBasePoints 8, EffectDieSides 1, EffectRealPointsPerLevel 0.5, BaseLevel 10, SpellLevel 10, MaxLevel 0. Expected per tick at level 60: 8 + 1 (DieSides 1 adds 1) + int(0.5 x (60 - 10)) = 34 (SpellInfo.cpp CalcValue), plus the tooltip term $SP*.05 = int(0.05 x spell power). The displayed ${($d*1000/$T1)*($m1+0+$SP*.05)} reads 54 = 6 x 9 on the client (ADR 0006: no SkillLineAbility row, base points only); owner ruling O-19: the server keeps 34 per tick and the displayed text is to be corrected in a client patch, so the value is counted on the server formula, not on the displayed 54. Behaviour read: the caster casts Felstrike 802678 on the dummy and the dummy's spell_damage_total of 802678 is read 1500 ms later, one tick (EffectAmplitude 1000, the second tick at 2000 ms); the unread arm before the cast reads 0 (control). Criticals are made impossible (64481) and the dummy's magic resistance is removed (823764), as the Immolation Aura tick entries do. Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and the Felstrike tick events of coa-history (spell 802678, gear and level differ, no figure decides). Contrast arm of the spell power term: +10000 spell power must move the tick by int(0.05 x 10000) = 500 to 534; a server that dropped the term or used another coefficient cannot pass both arms."
+    },
+    {
+      "spell": 804613,
+      "name": "Doomstride (the next Curse or Magic effect is resisted at full health)",
+      "kind": "taken_hit",
+      "variant": "resist_next",
+      "label_suffix": "resist_next",
+      "judge": "resist_rate",
+      "expected_points": 100,
+      "quote": "While at full health, your chance to resist the next Curse or Magic effect on you is increased by 100%.",
+      "strike_spell": 702,
+      "trials": 800,
+      "parts": 5,
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              804613,
+              1
+            ],
+            [
+              706818,
+              0
+            ]
+          ]
+        }
+      ],
+      "observe_source": "804613 tooltip: 'increased by 100%' read as 100 points added to the resist chance, the reading the Templar precedent Holy Constitution 706323 uses ('increases your chance to resist disease effects by 30%' judged as 30 points, ADR 0196). A level 60 striker (entry 36) casts Curse of Weakness 702 (Dispel 2 curse, DmgClass 1 magic, two SPELL_EFFECT_APPLY_AURA effects, SpellDuration.dbc index 4) at the caster; each trial reads whether 702 took hold on the caster 300 ms later and removes it. The control arm's resisted share is the same-level spell miss chance; the treatment arm sets the passive aura 804613 (the precondition fixture; the caster stays at full health, the fixture default) and removes the 706818 aura before every trial, so each trial is the first Curse after a rest (the 10 s rule belongs to clause 282, not measured here), and must resist it 100 points more often. 800 trials per arm in each of 5 pooled parts. Reference search 2026-11-23: coa-history spell 804613 and 706818: 0 events in 186 logs; bindmysoul talents snapshot (~/CoaServer/reference/snapshots/bindmysoul): spellId 804613 Doomstride reads 'Using Chaos Rush twice in a row now refreshes a charge of Chaos Rush.', a different text from the installed DBC tooltip; the installed DBC wins over a snapshot (general rules), so the expectation is the DBC tooltip; nothing else found."
     }
   ],
   "player_observations": [],
