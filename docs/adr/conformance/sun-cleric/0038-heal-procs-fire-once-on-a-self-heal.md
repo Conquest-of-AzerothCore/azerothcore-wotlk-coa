@@ -135,6 +135,6 @@ untouched, and no SQL row changes.
   `mod-spellbook` lists them in its spellbook data only.
 - Regression: the class file's d245_self/d245_ally (300943, 704928) and d255_self/d255_ally (300336, 300339, 704563,
   707077, 534267, 704936) metric_delta entries, the ally arm being the control, with `void_on_cast_failure`; for
-  704920 the four hasted pooled `heal_rate` entries (ADR 1065, D-275): self and ally must both read the
+  704920 the four hasted pooled `heal_rate` entries (ADR 1066, D-275): self and ally must both read the
   single rate inside the G-20 band (38-42%, 18-22%), the ally arm being the control.
 - Client text unchanged.

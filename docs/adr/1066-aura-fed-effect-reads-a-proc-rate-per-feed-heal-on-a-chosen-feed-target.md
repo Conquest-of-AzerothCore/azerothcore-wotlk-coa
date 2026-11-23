@@ -1,4 +1,4 @@
-# 1065. `aura_fed_effect` reads a proc rate per feed heal on a chosen feed target
+# 1066. `aura_fed_effect` reads a proc rate per feed heal on a chosen feed target
 
 - Status: proposed (provisional number, numbered at merge)
 - Date: 2026-11-23
