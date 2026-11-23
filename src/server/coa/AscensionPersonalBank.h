@@ -4,6 +4,7 @@
 
 #include "Define.h"
 #include "ObjectGuid.h"
+#include <vector>
 
 class Player;
 class WorldPacket;
@@ -33,6 +34,14 @@ namespace AscensionPersonalBank
     void RegisterAccessGuard(AccessGuard guard);
 
     [[nodiscard]] bool CanAccess(Player* player, uint8 kind);
+
+    struct StoredItem
+    {
+        uint32 Entry = 0;
+        bool SoulBound = false;
+    };
+
+    [[nodiscard]] std::vector<StoredItem> StoredItems(Player const* player);
 }
 
 #endif

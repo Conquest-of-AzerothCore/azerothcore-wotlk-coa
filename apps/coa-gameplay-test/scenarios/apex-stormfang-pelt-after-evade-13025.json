@@ -1,0 +1,178 @@
+{
+  "schema": 1,
+  "name": "The Three Apex Hunts: Stormfang drops his pelt after an earlier pull evaded (#13025)",
+  "contract": "#13025: Skinpeeler Stormfang (9916222) died with no loot. When he evades, the core sets his player-damage requirement to half of his current health, which is still the apex pool (4x his base at the pull, up to 40x after the probe). ApexScaling::RestoreHealth then returns him to his base health without resetting the requirement, so a later kill that removes his whole base pool falls short of it, Unit::Kill drops the loot recipient and the corpse has no Stormfang Pelt (1009302) and gives no XP. Here a bait player pulls an unowned Stormfang, his maximum health rises above the base, the bait dies and he evades and returns to the base once no living player is within 60 yd (the hunter waits 78 yd away). The hunter, on The Three Apex Hunts (17839), with the pelt that prepare_quest adds destroyed again, then kills him with one blow of his full base health and loots him. Expected: the corpse offers the pelt.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": 146.7,
+    "y": -4587.3,
+    "z": 121.0,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "bait",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "teleport",
+      "label": "the hunter waits 78 yd away, outside the 60 yd apex scan",
+      "actor": "hunter",
+      "map": 0,
+      "x": 147.15,
+      "y": -4509.15,
+      "z": 131.5
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hunter",
+      "quest": 17839,
+      "complete": false
+    },
+    {
+      "action": "destroy_item",
+      "actor": "hunter",
+      "item": 1009302
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "summon",
+      "actor": "bait",
+      "as": "sf",
+      "entry": 9916222,
+      "distance": 3,
+      "unowned": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "bait",
+      "metric": "nearby_creature_max_health",
+      "entry": 9916222,
+      "save_as": "base"
+    },
+    {
+      "action": "set_health",
+      "actor": "bait",
+      "value": 100000000,
+      "maximum": 100000000
+    },
+    {
+      "action": "attack",
+      "actor": "bait",
+      "target": "sf"
+    },
+    {
+      "action": "assert",
+      "actor": "sf",
+      "label": "CONTROL: Stormfang is in combat",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "bait",
+      "label": "CONTROL: the apex pool replaces his base health",
+      "metric": "nearby_creature_max_health",
+      "entry": 9916222,
+      "relative_to": "base",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "die",
+      "actor": "bait"
+    },
+    {
+      "action": "assert",
+      "actor": "sf",
+      "label": "CONTROL: Stormfang leaves combat after the bait dies",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 20000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "hunter",
+      "map": 0,
+      "x": 146.7,
+      "y": -4587.3,
+      "z": 121.0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "label": "CONTROL: Stormfang is back at his base health",
+      "metric": "nearby_creature_max_health",
+      "entry": 9916222,
+      "relative_to": "base",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "label": "CONTROL: the hunter still needs the pelt",
+      "metric": "item_count",
+      "item": 1009302,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hunter",
+      "entry": 9916222,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "sf",
+      "label": "CONTROL: Stormfang is dead",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "hunter",
+      "target": "sf"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "label": "DISCRIMINATING: the corpse offers the Stormfang Pelt",
+      "metric": "loot_offered_item_count",
+      "item": 1009302,
+      "equals": 1
+    }
+  ]
+}

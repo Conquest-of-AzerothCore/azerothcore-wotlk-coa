@@ -39,6 +39,8 @@ enum RogueSpells
     SPELL_ROGUE_KILLING_SPREE_TELEPORT          = 57840,
     SPELL_ROGUE_KILLING_SPREE_WEAPON_DMG        = 57841,
     SPELL_ROGUE_KILLING_SPREE_DMG_BUFF          = 61851,
+    SPELL_ROGUE_EDGE_OF_FURY_TALENT             = 276397,
+    SPELL_ROGUE_EDGE_OF_FURY_TOGGLE             = 985227,
     SPELL_ROGUE_PREY_ON_THE_WEAK                = 58670,
     SPELL_ROGUE_SHIV_TRIGGERED                  = 5940,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE             = 57934,
@@ -337,9 +339,18 @@ class spell_rog_killing_spree_aura : public AuraScript
 
                 GetTarget()->CastSpell(target, sSpellMgr->GetSpellTwinFor(SPELL_ROGUE_KILLING_SPREE_TELEPORT, GetId()), true);
 
+                // Ascension Edge of Fury (talent 276397, toggle 985227): "Killing Spree no longer teleports you"; the
+                // teleport spell still lands (its other effects stay), spell_dummyfix_rogue_edge_of_fury_teleport
+                // cancels the move itself, and the hits come from the rogue's current position
+                bool const keepPosition = GetTarget()->HasAura(SPELL_ROGUE_EDGE_OF_FURY_TALENT) ||
+                    GetTarget()->HasAura(SPELL_ROGUE_EDGE_OF_FURY_TOGGLE);
+
                 // xinef: ensure fast coordinates switch, dont wait for client to send opcode
-                WorldLocation const& dest = GetTarget()->ToPlayer()->GetTeleportDest();
-                GetTarget()->ToPlayer()->UpdatePosition(dest, true);
+                if (!keepPosition)
+                {
+                    WorldLocation const& dest = GetTarget()->ToPlayer()->GetTeleportDest();
+                    GetTarget()->ToPlayer()->UpdatePosition(dest, true);
+                }
 
                 GetTarget()->CastSpell(target, sSpellMgr->GetSpellTwinFor(SPELL_ROGUE_KILLING_SPREE_WEAPON_DMG, GetId()),
                     TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_DONT_REPORT_CAST_ERROR));

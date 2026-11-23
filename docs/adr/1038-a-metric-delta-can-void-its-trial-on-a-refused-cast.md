@@ -35,3 +35,13 @@ was refused with NO_POWER (85); `void_on_cast_failure` voided the trial instead 
 existing `set_power` step, through the `setup_cast_steps` point. The builder refuses it for a power metric or a quote
 about mana, cost or a resource (a refill would feed the measured thing), and the contract says it is used. Absent by
 default; the finished classes regenerate byte-identical.
+
+## Addendum 2026-11-23: power held during the wait (Felsworn Sargeras Embrace)
+
+Sargeras Embrace 800355 has ManaPerSecond 30 Energy (Spell.dbc). `Aura::Update` drains it every 1000 ms and removes the
+aura when the pool is below the amount (SpellAuras.cpp:771-801); the harness sets the pool once to 100, so the channel
+ended near 4000 ms and the 5500 ms end damage never landed. An opt-in `hold_power_during_wait`
+(`{"power": type, "every_ms": N, "count": N}`) sets the power to `cast_power` every `every_ms` after the trigger cast,
+with the existing `set_power` step, through the `after_trigger_steps` point. The builder refuses it for a power metric
+or a quote about mana, cost or a resource (a refill would feed the measured thing), and the contract says it is used.
+Absent by default; the finished classes regenerate byte-identical.

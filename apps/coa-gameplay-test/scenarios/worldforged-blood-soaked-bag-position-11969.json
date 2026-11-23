@@ -1,0 +1,113 @@
+{
+    "schema":  1,
+    "name":  "Worldforged Blood-soaked Bag hangs at its recorded spot (#11969)",
+    "contract":  "#11969 reported the Blood-soaked Bag pickup (entry 254496, guid 6940145, hanging-bag model with its origin 2.74 yd above the bottom) floating. Its height 116.802 was recorded at -11103.0, -2454.68, but the row stood 4.1 yd away at -11100.4, -2451.5. The recorded x/y is restored, where the bag hangs below a structure (2.39 yd of headroom). Expected: the bag is at that spot and opens.",
+    "timeout_ms":  60000,
+    "location":  {
+                     "map":  0,
+                     "x":  -11102,
+                     "y":  -2454.68,
+                     "z":  115,
+                     "o":  0
+                 },
+    "players":  [
+                    {
+                        "id":  "p",
+                        "race":  1,
+                        "class":  12,
+                        "level":  60
+                    }
+                ],
+    "steps":  [
+                  {
+                      "action":  "set_phase",
+                      "actor":  "p",
+                      "value":  1
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  3000
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "SETUP: the pickup is in the area",
+                      "metric":  "nearby_gameobject_count",
+                      "entry":  254496,
+                      "equals":  1
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "DISCRIMINATING: the bag hangs at the realm spot (-11103.0, -2454.68) whose recorded height is 116.802",
+                      "metric":  "spawn_distance",
+                      "x":  -11103,
+                      "y":  -2454.68,
+                      "z":  116.802,
+                      "max":  0.3,
+                      "guid":  6940145,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the hanging model (origin 2.74 yd above its bottom) keeps its recorded hanging height",
+                      "metric":  "spawn_ground_gap",
+                      "min":  4.8,
+                      "max":  5.5,
+                      "guid":  6940145,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is not under water",
+                      "metric":  "spawn_submerged",
+                      "equals":  0,
+                      "guid":  6940145,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the hanging bag sits under the structure it hangs from",
+                      "metric":  "spawn_headroom",
+                      "min":  1.5,
+                      "max":  3,
+                      "guid":  6940145,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "set_aura",
+                      "actor":  "p",
+                      "spell":  642,
+                      "stacks":  1
+                  },
+                  {
+                      "action":  "cast",
+                      "actor":  "p",
+                      "spell":  3365,
+                      "target_gameobject":  254496
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  5500
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is within reach and opens",
+                      "metric":  "cast_failure",
+                      "spell":  3365,
+                      "equals":  0
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "its loot is shown",
+                      "metric":  "loot_count",
+                      "min":  1,
+                      "within_ms":  3000
+                  }
+              ]
+}

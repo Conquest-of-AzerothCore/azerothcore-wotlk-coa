@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "name": "A Dark Threat Looms: Chief Engineer Hinderweir VII yells on turn-in (#12914)",
+  "contract": "#12914: turning in 'A Dark Threat Looms' (283) at Chief Engineer Hinderweir VII (1093, guid 8198) at the Stonewrought Dam gave no yell. Creature_text 1093 group 0 ('The Stonewrought Dam has been saved!  Three cheers for $n!', broadcast 546) existed but 1093 had no AI to say it. The player rewards the chain up to 280 as setup, prepares 283 and turns it in through the questgiver packet handlers. Expected: the quest is rewarded and one monster chat message reaches the player.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -4740.9,
+    "y": -3263.8,
+    "z": 310.8,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: Hinderweir is here",
+      "metric": "nearby_creature_count",
+      "entry": 1093,
+      "min": 1
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 250,
+      "complete": true
+    },
+    {
+      "action": "reward_quest",
+      "actor": "p",
+      "quest": 250
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 199,
+      "complete": true
+    },
+    {
+      "action": "reward_quest",
+      "actor": "p",
+      "quest": 199
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 161,
+      "complete": true
+    },
+    {
+      "action": "reward_quest",
+      "actor": "p",
+      "quest": 161
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 274,
+      "complete": true
+    },
+    {
+      "action": "reward_quest",
+      "actor": "p",
+      "quest": 274
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 278,
+      "complete": true
+    },
+    {
+      "action": "reward_quest",
+      "actor": "p",
+      "quest": 278
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 280,
+      "complete": true
+    },
+    {
+      "action": "reward_quest",
+      "actor": "p",
+      "quest": 280
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 283,
+      "complete": true
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "monster_chat_count",
+      "save_as": "chats"
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "turn in A Dark Threat Looms at Hinderweir",
+      "actor": "p",
+      "quest": 283,
+      "entry": 1093
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the quest is rewarded",
+      "metric": "quest_rewarded",
+      "quest": 283,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Hinderweir yells to the player",
+      "metric": "monster_chat_count",
+      "relative_to": "chats",
+      "min": 1,
+      "within_ms": 5000
+    }
+  ]
+}

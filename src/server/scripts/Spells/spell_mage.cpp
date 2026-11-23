@@ -613,8 +613,33 @@ class spell_mage_focus_magic : public AuraScript
         if (!procTarget)
             return;
 
+        // Focal Point (Ascension Mystic Enchant 979761): the mage's buff "now only increases your critical strike chance
+        // by 2% and lasts for 5 seconds, but stacks up to 3 times". The buff spell (3%, 10 sec, one stack) is shared
+        // with every other Focus Magic, so its value, duration and stacks are set on this application only.
+        if (procTarget->HasAura(FOCAL_POINT))
+        {
+            // cast for the triggering aura, the buff's caster is that aura's caster (the mage), not its target
+            uint32 const buffId = sSpellMgr->GetSpellTwinFor(SPELL_MAGE_FOCUS_MAGIC_PROC, GetId());
+            Aura const* previous = procTarget->GetAura(buffId, aurEff->GetCasterGUID());
+            uint8 const stacks = previous ? std::min<uint8>(previous->GetStackAmount() + 1, FOCAL_POINT_MAX_STACKS) : 1;
+            GetTarget()->CastCustomSpell(buffId, SPELLVALUE_BASE_POINT0, FOCAL_POINT_CRIT_PCT, procTarget, true, nullptr,
+                aurEff);
+            if (Aura* buff = procTarget->GetAura(buffId, aurEff->GetCasterGUID()))
+            {
+                buff->SetStackAmount(stacks);
+                buff->SetMaxDuration(FOCAL_POINT_DURATION_MS);
+                buff->SetDuration(FOCAL_POINT_DURATION_MS);
+            }
+            return;
+        }
+
         GetTarget()->CastSpell(procTarget, SPELL_MAGE_FOCUS_MAGIC_PROC, true, nullptr, aurEff);
     }
+
+    static constexpr uint32 FOCAL_POINT = 979761;
+    static constexpr int32 FOCAL_POINT_CRIT_PCT = 2;
+    static constexpr uint8 FOCAL_POINT_MAX_STACKS = 3;
+    static constexpr int32 FOCAL_POINT_DURATION_MS = 5000;
 
     void Register() override
     {
