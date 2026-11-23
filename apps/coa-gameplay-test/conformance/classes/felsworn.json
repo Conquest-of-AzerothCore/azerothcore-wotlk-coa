@@ -2561,12 +2561,12 @@
       "metric": "dodge_chance",
       "fields": {},
       "before_expected": 0,
-      "expected": 6,
+      "expected": 7.17304,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "$s2 = 6 (803840 EffectBasePoints[1] 5, EffectDieSides 1): Effect[1] aura 49 SPELL_AURA_MOD_DODGE_PERCENT. The caster's dodge chance (percent points, a live unit read) is read before and after a real learn of 803840 (the reading before is the control without it); Bless 804247 is the harmless self cast of both phases. Effect[0] of the same passive raises Agility by 15%, which the engine also turns into dodge (Player::UpdateStats calls UpdateDodgePercentage on an Agility change), so the gain is judged as +6 within a 1 point tolerance, the 2-point band of the guide, which admits that Agility term; the measured gain is in the verdict. Reference search 2026-11-23: coa-history spell 803840: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); expected values come from the tooltip and the DBC only.",
-      "expected_gain": 6,
-      "tolerance": 1
+      "observe_source": "$s2 = 6 (803840 EffectBasePoints[1] 5, EffectDieSides 1): Effect[1] aura 49 SPELL_AURA_MOD_DODGE_PERCENT. The caster's dodge chance (percent points, a live unit read) is read before and after a real learn of 803840 (the reading before is the control without it); Bless 804247 is the harmless self cast of both phases. Effect[0] of the same passive raises Agility by 15%, which the engine also turns into dodge (Player::UpdateStats calls UpdateDodgePercentage on an Agility change), so the expected gain is 6 + the Agility term. Agility term: dodge is the undiminished sum of base and agility parts plus auras (StatSystem.cpp UpdateDodgePercentage: nondiminishing += GetTotalAuraModifier(SPELL_AURA_MOD_DODGE_PERCENT), value = max(diminishing + nondiminishing, 0), PLAYER_DODGE_PERCENTAGE), so linear in Agility; Felsworn (class 14) uses the Rogue curve unchanged (ClassicPlusStats::Dodge returns the client curve for non-vanilla classes); PerPoint = gtChanceToMeleeCrit row 1359 0.000355 x crit_to_dodge[Rogue] 2.00/1.15 = 0.000617391, i.e. 0.0617391 dodge % per Agility (Player.cpp GetDodgeFromAgility); Agility 130 -> 149 (+19, the counted agility label) gives +1.17304; expected gain 6 + 1.17304 = 7.17304, tolerance 0.01 (float read size). Reference search 2026-11-23: coa-history spell 803840: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); expected values come from the tooltip and the DBC only.",
+      "expected_gain": 7.17304,
+      "tolerance": 0.01
     },
     {
       "spell": 520253,
@@ -2581,8 +2581,8 @@
       "metric": "armor",
       "fields": {},
       "before_expected": 0,
-      "expected": 184.8,
-      "expected_gain": 184.8,
+      "expected": 187,
+      "expected_gain": 187,
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 500,
@@ -2599,7 +2599,7 @@
           "caster"
         ]
       ],
-      "observe_source": "520253 Effect[0] aura 107 rewritten to SPELL_AURA_MOD_BASE_RESISTANCE_PCT (AscensionFelswornContracts.cpp:151-156) with MiscValue SPELL_SCHOOL_MASK_NORMAL and MiscValueB 6 (1 << cloth 1 | 1 << leather 2), BasePoints 239 + 1 = 240 ($s1); the amount is 0 unless Inner Demon 804216 is on the caster (AscensionFelswornContracts.cpp:352). Player::UpdateArmor scales the armor of cloth and leather items by it (StatSystem.cpp, GetItemArmorBySubclass). The caster's armor is read before (control: 520253 not learned) and after a real learn of 520253, with Inner Demon 804216 set on the caster in both phases (a precondition fixture by harness set_aura, named as such) and the 77-armor leather chest worn in both: gain 240% of 77 = 184.8, within 1 for the integer armor. Reference search 2026-11-23: coa-history spell 520253: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats 'While Inner Demon is active, your Armor contribution from cloth and leather items is increased by 240%'. The item is Cured Leather Armor 236 (acore_world.item_template of the repository's data/sql/base/db_world/item_template.sql: class 4, subclass 2 leather, InventoryType 5 chest, equip slot 4, RequiredLevel 17, armor 77, no stats), equipped by the shield_after_learn option in both phases (its slot read is the contrast of the option, named as a fixture)."
+      "observe_source": "520253 Effect[0] aura 107 rewritten to SPELL_AURA_MOD_BASE_RESISTANCE_PCT (AscensionFelswornContracts.cpp:151-156) with MiscValue SPELL_SCHOOL_MASK_NORMAL and MiscValueB 6 (1 << cloth 1 | 1 << leather 2), BasePoints 239 + 1 = 240 ($s1); the amount is 0 unless Inner Demon 804216 is on the caster (AscensionFelswornContracts.cpp:352). Player::UpdateArmor scales the armor of cloth and leather items by it (StatSystem.cpp, GetItemArmorBySubclass). The caster's armor is read before (control: 520253 not learned) and after a real learn of 520253, with Inner Demon 804216 set on the caster in both phases (a precondition fixture by harness set_aura, named as such) and the leather chest worn in both: worn armor is the ItemAddon reborn value, not the template column (Player.cpp WornArmorFor, AscensionNativeItemScaling.cpp WornArmor returns the reborn armor for every class but Hero): Cured Leather Armor 236 = 68, plus the starter leather Vile Kilt 2000007 = 6 and Vile Walkers 2000008 = 4 that stay worn (236 replaces only the chest slot); leather total 78; Player::UpdateArmor adds GetItemArmorBySubclass x (multiplier - 1) with multiplier 3.4, then the integer SetArmor: gain int(2.4 x 78) = int(187.2) = 187. Reference search 2026-11-23: coa-history spell 520253: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats 'While Inner Demon is active, your Armor contribution from cloth and leather items is increased by 240%'. The item is Cured Leather Armor 236 (acore_world.item_template of the repository's data/sql/base/db_world/item_template.sql: class 4, subclass 2 leather, InventoryType 5 chest, equip slot 4, RequiredLevel 17, template armor 77 (not the worn value), no stats), equipped by the shield_after_learn option in both phases (its slot read is the contrast of the option, named as a fixture)."
     },
     {
       "spell": 520253,
@@ -2624,7 +2624,7 @@
         "slot": 4,
         "rejected_before": false
       },
-      "observe_source": "520253 Effect[0] aura 107 rewritten to SPELL_AURA_MOD_BASE_RESISTANCE_PCT (AscensionFelswornContracts.cpp:151-156) with MiscValue SPELL_SCHOOL_MASK_NORMAL and MiscValueB 6 (1 << cloth 1 | 1 << leather 2), BasePoints 239 + 1 = 240 ($s1); the amount is 0 unless Inner Demon 804216 is on the caster (AscensionFelswornContracts.cpp:352). Player::UpdateArmor scales the armor of cloth and leather items by it (StatSystem.cpp, GetItemArmorBySubclass). The same reading without Inner Demon on the caster: the learn adds 0 armor, the control that the 120% is conditional on Inner Demon (the tooltip's 'While Inner Demon is active'). Reference search 2026-11-23: coa-history spell 520253: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats 'While Inner Demon is active, your Armor contribution from cloth and leather items is increased by 240%'. The item is Cured Leather Armor 236 (acore_world.item_template of the repository's data/sql/base/db_world/item_template.sql: class 4, subclass 2 leather, InventoryType 5 chest, equip slot 4, RequiredLevel 17, armor 77, no stats), equipped by the shield_after_learn option in both phases (its slot read is the contrast of the option, named as a fixture)."
+      "observe_source": "520253 Effect[0] aura 107 rewritten to SPELL_AURA_MOD_BASE_RESISTANCE_PCT (AscensionFelswornContracts.cpp:151-156) with MiscValue SPELL_SCHOOL_MASK_NORMAL and MiscValueB 6 (1 << cloth 1 | 1 << leather 2), BasePoints 239 + 1 = 240 ($s1); the amount is 0 unless Inner Demon 804216 is on the caster (AscensionFelswornContracts.cpp:352). Player::UpdateArmor scales the armor of cloth and leather items by it (StatSystem.cpp, GetItemArmorBySubclass). The same reading without Inner Demon on the caster: the learn adds 0 armor, the control that the 240% is conditional on Inner Demon (the tooltip's 'While Inner Demon is active'). Reference search 2026-11-23: coa-history spell 520253: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats 'While Inner Demon is active, your Armor contribution from cloth and leather items is increased by 240%'. The item is Cured Leather Armor 236 (acore_world.item_template of the repository's data/sql/base/db_world/item_template.sql: class 4, subclass 2 leather, InventoryType 5 chest, equip slot 4, RequiredLevel 17, template armor 77 (not the worn value; worn is the reborn 68), no stats), equipped by the shield_after_learn option in both phases (its slot read is the contrast of the option, named as a fixture)."
     },
     {
       "spell": 574143,
