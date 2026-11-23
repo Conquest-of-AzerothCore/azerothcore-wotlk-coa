@@ -105,6 +105,15 @@
       "guid": 48706
     },
     {
+      "action": "assert",
+      "label": "CONTROL: the leader left the entrance protection at the boss",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
       "action": "attack_nearby",
       "actor": "leader",
       "entry": 11520,
