@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "name": "Wildcard: Shield Finesse lets Shield Wall reset Shield Block (#13218)",
+  "contract": [
+    "Shield Finesse 285548: 'Shield Block resets the cooldown of Shield Slam, and Shield Wall resets the cooldown of",
+    "Shield Block.' Only the Shield Block half had a coa_mystic_enchant_proc rule. The Shield Wall rule now casts the",
+    "existing Shield Block CDR 285551 (-60000 ms on Shield Block 2565). Expected: Shield Block's 60 s cooldown is",
+    "cleared when Shield Wall is cast."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Harnessa" },
+    { "action": "learn", "label": "Shield proficiency", "actor": "hero", "spell": 9116 },
+    { "action": "learn", "label": "Shield Finesse", "actor": "hero", "spell": 285548 },
+    { "action": "learn", "label": "Shield Block", "actor": "hero", "spell": 2565 },
+    { "action": "learn", "label": "Shield Wall", "actor": "hero", "spell": 871 },
+    { "action": "add_item", "actor": "hero", "item": 2362 },
+    { "action": "equip", "actor": "hero", "item": 2362, "slot": 16 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "SETUP hero has Shield Finesse", "actor": "hero", "metric": "aura", "spell": 285548, "equals": 1 },
+    { "action": "set_power", "actor": "hero", "power": 1, "value": 1000 },
+    { "action": "cast_no_target", "actor": "hero", "spell": 2565 },
+    {
+      "action": "assert", "label": "SETUP Shield Block is on cooldown", "actor": "hero", "metric": "cooldown_ms",
+      "spell": 2565, "min": 50000, "within_ms": 3000
+    },
+    { "action": "wait", "ms": 1600 },
+    { "action": "cast_no_target", "actor": "hero", "spell": 871 },
+    {
+      "action": "assert", "label": "SETUP Shield Wall was cast", "actor": "hero", "metric": "cooldown_ms",
+      "spell": 871, "min": 250000, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT (#13218) Shield Wall reset Shield Block", "actor": "hero",
+      "metric": "cooldown_ms", "spell": 2565, "max": 0, "within_ms": 3000
+    }
+  ]
+}
