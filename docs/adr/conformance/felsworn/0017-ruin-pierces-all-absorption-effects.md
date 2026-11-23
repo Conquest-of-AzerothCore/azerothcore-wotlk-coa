@@ -1,4 +1,4 @@
-# 0015. Ruin pierces all absorption effects
+# 0017. Ruin pierces all absorption effects
 
 - Status: accepted (Felsworn mentor decision D-71, 2026-11-23)
 - Date: 2026-11-23
