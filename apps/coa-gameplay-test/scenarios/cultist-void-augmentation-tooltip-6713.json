@@ -5,9 +5,9 @@
     "Void Augmentation (680575) describes two extra targets for Twilight Shock, but its native jump modifier",
     "matches Eldritch Shock (808043). The live spell name and exact family mask establish the corrected name.",
     "The existing native modifiers remain unchanged: Dreadnought cooldown slot minus 3000 ms and jump targets 3.",
-    "The outgoing description must name Eldritch Shock and preserve the separate Twilight Shieldtoss clause.",
+    "The client's description must name Eldritch Shock and preserve the separate Twilight Shieldtoss clause.",
     "This covers native effect values and spell-text data, not rendered client text or target hit rolls.",
-    "The initial wait exceeds the native 5000 ms description-stream fallback delay."
+    "The initial wait lets the login settle."
   ],
   "timeout_ms": 30000,
   "players": [
@@ -21,7 +21,7 @@
   "steps": [
     {
       "action": "wait",
-      "label": "Allow the five-second client description stream to complete",
+      "label": "Let the login settle",
       "ms": 6000
     },
     {
@@ -71,27 +71,24 @@
       "action": "assert",
       "label": "Description names the spell selected by the modifier",
       "actor": "cultist",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 680575,
+      "metric": "client_spell_row_contains",
+      "spell": 680575,
       "text": "|cffffffffEldritch Shock|r",
       "equals": 1
     },
     {
       "action": "assert",
       "actor": "cultist",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 680575,
+      "metric": "client_spell_row_contains",
+      "spell": 680575,
       "text": "|cFFFFFFFFTwilight Shieldtoss|r",
       "equals": 1
     },
     {
       "action": "assert",
       "actor": "cultist",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 680575,
+      "metric": "client_spell_row_contains",
+      "spell": 680575,
       "text": "Twilight Shock",
       "equals": 0
     }

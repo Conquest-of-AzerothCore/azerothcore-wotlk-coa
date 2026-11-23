@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Maelith and Miralyn hold each other as their target while idle",
+  "contract": [
+    "In the Hall of Stories Maelith 164284 stands talking to Miralyn 164291, who sits facing him (wJ2j4NOgjRI 3:14:37).",
+    "Each must hold the other as its target so the client turns its head to the other. Scripts cannot set a creature's",
+    "target, so AscensionIdleGaze does it for an idle, living creature of either entry with the other within 15 yd.",
+    "Expected: a summoned Maelith targets Miralyn and Miralyn targets Maelith; an unrelated NPC has no target.",
+    "target_entry reads the server's target field only; the client's head turn is not tested."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "viewer",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "maelith",
+      "owner": "viewer",
+      "entry": 164284,
+      "level": 25,
+      "health": 100000,
+      "distance": 10
+    },
+    {
+      "id": "miralyn",
+      "owner": "viewer",
+      "entry": 164291,
+      "level": 25,
+      "health": 100000,
+      "distance": 12
+    },
+    {
+      "id": "bystander",
+      "owner": "viewer",
+      "entry": 164138,
+      "level": 25,
+      "health": 100000,
+      "distance": 14
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawns settle",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Maelith targets Miralyn",
+      "actor": "maelith",
+      "metric": "target_entry",
+      "equals": 164291,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Miralyn targets Maelith",
+      "actor": "miralyn",
+      "metric": "target_entry",
+      "equals": 164284,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: an unrelated NPC has no target",
+      "actor": "bystander",
+      "metric": "target_entry",
+      "equals": 0
+    }
+  ]
+}

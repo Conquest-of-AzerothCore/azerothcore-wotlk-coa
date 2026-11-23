@@ -50,6 +50,8 @@ unsigned HealingPower(Unit const* caster)
 
 Player const* AttackingPlayer(Unit const* attacker, SpellInfo const* spell)
 {
+    if (spell && spell->AscensionInheritsPowerScaling)
+        return nullptr;
     if (Player const* player = attacker->ToPlayer())
         return player;
     if (spell && spell->AscensionInheritsResolvedAmount)

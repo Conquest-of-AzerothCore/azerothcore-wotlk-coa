@@ -1,0 +1,144 @@
+# Conformance modules
+
+## Modules
+
+- `mitigation.py`: expected armor and partial-resist mitigation of a target.
+- `classes.py`: `class_spells(dbc_dir, class_id, progression_header, level=60)` lists a CoA class's spells as
+  `ClassSpell(spell_id, name, ranks, max_rank, required_level, passive)`; `class_skill_lines(dbc_dir, spells,
+  weapon_subclass)` lists the `SkillLineAbility` lines of their ranks and of the weapon's skill spell.
+- `tooltip.py`: `read_tooltip(dbc, spell_id, caster)` evaluates a spell's `Description[enUS]` with the caster's
+  measured `CasterStats` and returns `Readout(values, unreadable)`; its `Records.field` prefers a streamed text.
+- `streamed.py`: `streamed_texts()` replays the `coa_client_spell_description` rows of the world SQL updates and
+  `streamed_field(spell, name)` gives the `Description[enUS]` or non-empty `ToolTip[enUS]` the server streams
+  (ADR 0192).
+- `bonus_data.py`: `bonus_table()` replays `spell_bonus_data` as the world updater builds it: the world baseline
+  package (or the base dump), then every `updates_include` directory and module `data/sql/*world*` directory in the
+  updater's order, skipping files the package records as applied; a statement other than a keyed DELETE or an INSERT,
+  or a module file naming the table, makes it unreadable. `bonus_terms` gives the modelled AP/SP terms (ADR 0679);
+  `client_first_ranks` reads the `SpellRank.dbc` chains as `SpellMgr::LoadClientSpellRankChains` keeps them, and
+  `bonus_row` falls back to the first rank's row for a rank without its own (ADR 0688).
+- `profile.py`: the reference character of a class file and `base_steps(class_file)`, the steps every scenario starts
+  with; `spell_dbc_sha256(dbc_dir)` hashes a set's `Spell.dbc` and `server_dbc_dir(dbc_dir)` /
+  `require_server_sha(sha, source)` raise `DbcSetMismatch` for a set other than the server's (`load_class_file`
+  applies it to a class file's `dbc_dir`); `load_fixture_class_file` reads the frozen copies of `fixtures/classes/`
+  that the tool tests use (ADR 0580). Its name shadows the standard library `profile`: run the package from its own directory.
+- `kinds/`: one module per behaviour kind that is not built into `behaviours.py`, found at run time
+  (`kinds.kind_modules()`); see [Behaviour kind modules](behaviour-scenarios.md#behaviour-kind-modules) (ADR 0581).
+- `metric_delta_options/`: one module per `metric_delta` option that is not a `MetricDeltaSpec` field
+  (`metric_delta_options.option_modules()`); see
+  [Metric-delta option modules](behaviour-scenarios.md#metric-delta-option-modules) (ADR 0582).
+- `values.py`: `value_scenario(class_file, spell, rank_id)` returns the no-combat scenario of one rank, its
+  `Expectation` list, and the `periodic_totals` of any `OVER_TICKS` token deferred to a companion scenario (below).
+- `passives.py`: `passive_effects(class_file, spell)` classifies each effect of a passive into a family, its expected
+  token, its metric plans and, for a spell modifier, its targets (see [Passive effects](passive-effects.md#passive-effects));
+  `passive_scenario(class_file, spell)` returns its with/without scenario, or `None` when no effect is measured, and
+  its `Expectation` list (see [Passive scenario](passive-effects.md#passive-scenario)).
+- `hits.py`: `hit_parts(class_file, spell, casts)` returns the parts of the hit scenario of a spell's highest rank
+  (`hit_scenario` the only part of a hit that fits one scenario) and `melee_scenario(class_file, swings)` the
+  auto-attack scenario, with their `Expectation` lists; `expected_hit` and `casts_needed` give the expected mean, its
+  sigma and the number of casts. When the highest rank targets a friendly unit (`values.targets_ally`), the scenario
+  adds an `ally` player and casts at `target: 'ally'`, measuring the heal total/count without a `target` filter, so
+  both the ally's and the caster's own heal land in the same metric. If the rank's own effects also close the
+  distance to its target (`values.closes_distance`, a charge/leap effect such as Temple Guardian's), the scenario
+  additionally relocates the caster `values.CHARGE_OFFSET_YD` yd before every cast (keeping it inside the spell's
+  range of the stationary ally after the previous cast closed the distance, as `procs.py`'s own ally casts already
+  do); a stationary ally heal with no such effect leaves the caster in place instead, since nothing would ever
+  close a relocate's drift back.
+- `procs.py`: `proc_scenario(class_file, entry, part)` returns one part of the proc-rate scenario of a `procs` entry
+  and its `Expectation`; `delta_proc_scenario`/`delta_proc_plan` do the same for a `kind: "proc_rate_delta"` entry
+  (see [Nested proc rate](proc-rates.md#nested-proc-rate-round-6-blade-sermon)); `proc_plan` sizes the parts, `trials_needed(p)` gives the trials a chance `p` needs and
+  `wilson_interval(procs, trials)` the 99% Wilson interval of a rate.
+- `triggers.py`: `trigger_scenario(class_file, entry, part)` returns one part of the scenario of a `triggers` entry and
+  its `Expectation`; `trigger_plan` sizes the parts and `trigger_entries(class_file, auras)` selects the entries (see
+  [Trigger entries](trigger-entries.md#trigger-entries)).
+- `expiry.py`: `behaviour_expiry(class_file, entry)` and `trigger_expiry(class_file, entry)` return the expiry-pair
+  scenario of a duration entry and its `behaviour_expiry` expectation (or `None` for another kind); `margins_of`
+  places the readings and `expiry_readings` judges each arm from the recorded step timing (see
+  [Expiry pairs](behaviour-scenarios.md#expiry-pairs-behaviour_expiry)).
+- `compare.py`: `compare(manifest, results_dir, build=None)` judges a run against the manifest and returns
+  `Verdict(label, status, measured, expected, low, high, explanation, ..., server_commit, build, runs)`; `evaluate`
+  returns the `Comparison` with the judged `Build` and the runs refused as `other_build` (`BuildMismatch` when the
+  results hold several builds and none is named); `write_outputs` writes `alerts.tsv`, `report.md`, `verdicts.json`
+  and `questions.md`.
+- `prove.py`: `prove(spec, generate, rows, enrich, annotate, runner, compare, pilot)` runs the gameplay passes of a
+  generated selection at least twice through `coa-verify`, compares each run, reports flips and unjudged verdicts,
+  and writes `fragment.json` and `summary.json` (see [Prove runner](generate-and-compare.md#prove-runner));
+  `prove_ledger.py` supplies the ledger rows, their per-run evidence and the coverage per run; `pilot.py`
+  (`hit_ratio_pilot`) runs the hit-ratio entries at 20 trials first and sizes the judged runs from their verdicts.
+- `mutants.py`: `load_mutants(path)` reads `{label, spell, op, factor}` server mutants (factor 2 or 0), `mutate(manifest,
+  mutants)` adds the `spell_mod_mutant` step after the `settle` wait and an active-mutant assert at the end of every
+  scenario carrying a mutant label, and `contamination(baseline, mutant, mutated)` lists the unmutated verdicts whose
+  status class changed; `k3.py`: `k3_rows(probes, mutants, baseline, mutant, evidence)` judges K3 consumption probes
+  into `consumed`/`not_consumed` rows (`literal_modifier_sites` refuses a spell whose modifier channel CoA code feeds
+  with its own amount) and `merge_consumption(path, rows)` writes `classes/<class>_consumption.json` (see
+  [Server mutants and K3 consumption](generate-and-compare.md#server-mutants-and-k3-consumption)).
+- `sample.py`: `sample_document(clauses, seed, total, buckets, minimums, first_size)` draws a batch sample of whole
+  spells from a bucket file (`spell_order` by sha256 of `<seed>|<spell id>`, `bucket_quotas` proportional with
+  floors) and splits it into two chunks (`chunk_split`) (see
+  [Drawing a batch sample](generate-and-compare.md#drawing-a-batch-sample)).
+- `packets.py`: `write_packets(dbc_dir, class_file, sample, chunk, bucket_rows, out_dir, class_map)` writes one
+  Markdown packet per spell of a sample chunk (`packet`, `render_packet`) (see
+  [Per-spell packets](generate-and-compare.md#per-spell-packets)).
+- `audit.py`: `audit_document(class_id, ledger, results, base_results, manifest, hooked, build, consumption)` merges
+  compare outputs (a later one replaces earlier labels, `disagreements` lists labels whose status class differs) and
+  runs `coverage.clause_coverage` on the ledger; `buckets.py`: `bucket_document(coverage, manifest, class_file,
+  sources, source_name, family, records, settled, standing, inputs)` turns that audit into the bucket file of
+  `sample` and `packets`; `aura354.py`: `aura354_rows(class_map, class_id)` lists a class's aura-354 spells and flags
+  those without class code; `batch_commands.py` registers the three as `audit`, `buckets` and `aura354` (see
+  [Coverage audit and bucket file](generate-and-compare.md#coverage-audit-and-bucket-file)).
+- `ledger.py`: `ledger(class_file, dbc_dir, text_bases)` writes a class's first clause ledger from the tooltips of
+  its class spell set (`raw_clauses` cuts each tooltip, `clause_label_lists` maps its `$` tokens to the value
+  scenario's labels, `no_claim_reason` names the rows without a mechanic) and returns `Ledger(entries, unlabelled)`;
+  `write_ledger(entries, out)` never overwrites a file (see
+  [Writing a first ledger](clause-ledger.md#writing-a-first-ledger)).
+- `class_map.py`: the command line `--worktree W --out OUT [--dbc-dir DIR] [--log-events EVENTS.csv]` maps every
+  spell of the 21 CoA classes to the code that touches it (`risk`, `gap`, `custom_mechanics`, log counts) and writes
+  `class-map.json` and `class-map-table.md`, the input of `packets --class-map` (see [Class map](class-map.md)); it
+  flags spells and class-file spell ids shared between classes (`mark_shared_spells`, `shared_class_file_spells`,
+  ADR 0597).
+- `snapshots.py`: `check --class N` / `write --class N` for the finished classes (`FINISHED_CLASSES`): regenerates
+  each generation of `GENERATIONS` into a temporary directory and compares the SHA-256 of every file with
+  `snapshots/<class>.json`, naming the changed, added and removed files (ADR 0590).
+- `cycle.py`: `run_cycle(config, skip, runner, write_digests)` runs the steps of `STEPS` from a `CycleConfig`
+  (`load_config(cycle.json)`), each logged under the output directory, and writes the checkpoint;
+  `add_cycle_arguments` and `cycle_command` register `cycle` in `conformance.py` (see
+  [Cycle runner](generate-and-compare.md#cycle-runner)).
+- `tally.py`: `tally(TallyInputs)` gives each ledger claim its status from the pair's compare outputs and audits,
+  the record and the decisions file (`load_decisions`); `flips` applies the flip rule within the pair and against
+  the record (see [Cycle runner](generate-and-compare.md#cycle-runner)).
+- `cost.py`: `conformance.py cost --transcripts DIR --since ISO [--until ISO] --out cost.json` (the directory is
+  required, there is no default) reads local agent transcripts (`*.jsonl`, subagents as `agent-*.jsonl` with an optional
+  `.meta.json` description) and writes aggregates only: per role (`author`, `integrator`, `read-only`, `fix`, and
+  `main` for the controller sessions) the agent count, input (uncached + cache read + cache write), cache read, output
+  and agent-minutes (an agent counts from its first message to its last one, or to `--until`). One usage is kept per
+  message id, synthetic messages are skipped, and the role comes from the first prompt and description by `role_of`. No
+  prompt, path, session id or user name is written (ADR 0656).
+- `bonus.py`: the owner's band on a percent bonus (`bonus_band`, the larger of 5% of it and 2 points), the bonus of
+  two arms with its 99% Welch half-width (`per_event_sample`, `bonus_of`), the status with power and negative arm
+  (`bonus_status`), the trials a band needs (`sized_trials`) and the interval a verdict excludes (`excluded_text`)
+  (see [Hit-ratio scenarios](behaviour-scenarios.md#hit-ratio-scenarios-behaviour_hit_ratio-kind-hit_ratio)).
+- `questions.py`: `questions(verdicts, tooltips)` turns the verdicts that carry a question into one `Question(tooltip,
+  spells, kind, question, readings, measured, labels, conditions, observations)` per tooltip and kind, and
+  `write_questions(items, out_dir)`
+  writes `questions.md` (see [Open conformance checks](generate-and-compare.md#open-conformance-checks)).
+- `diff.py`: `diff(before, after, intended)` returns the `Change` of every verdict that moved between two compare
+  outputs, and `write_impact` writes `impact.md` (see [Impact report](generate-and-compare.md#impact-report)).
+- `stack.py`: `stack_scenarios(class_file, passes=5)` returns the passes of every cumulative talent configuration of
+  the class file with their `Expectation` lists; `levers(verdicts)` turns the stack verdicts into one `Lever(config,
+  dps_mean, dps_low, dps_high, delta_pct, sources, tooltip_delta_pct)` per configuration; `mean_interval`,
+  `ratio_interval` and `student_t_quantile` give the 99% intervals of the passes.
+- `coverage.py`: `coverage(header, verdicts)` counts the verdicts per status and the class spells, passives and actives
+  that a compare output judges (`Coverage`), and `write_coverage` writes `coverage.md` for two outputs (see
+  [Coverage comparison](generate-and-compare.md#coverage-comparison)); `clause_coverage(clauses, verdicts, build,
+  consumption)` returns the `ClauseCoverage` of a clause ledger with the behaviour-proven and data-conformant counts
+  from the closed `EVIDENCE` and `METRIC_EVIDENCE` tables, the `not_measured` labels and the readbacks a K3
+  consumption row of that build promotes or shows not consumed (`load_consumption`, `acting`); `require_build` refuses verdicts of
+  another build than the one judged; `clause_claims` and `require_claims` read and check an entry's declared claims
+  (a clause is closed only when every one is proven, `ClauseCoverage.claim_evidence`); `fragment_entries`,
+  `write_fragment` and `read_fragment` write and check ledger fragments that carry the computed evidence and the
+  `Spell.dbc` sha256, one row per claim for a clause not fully proven (see
+  [Two proof statuses](clause-ledger.md#two-proof-statuses) and [Stated claims](clause-ledger.md#stated-claims)).
+- `observations.py`: `player_observations(class_file)` reads and validates a class file's `player_observations`
+  array (see [Player observations](player-observations.md#player-observations)) and `observations_by_spell` groups them by spell id.
+- `conformance.py`: the command line, `generate`, `compare`, `diff` and `coverage`.
+- `classes/<name>.json`: one class file per class (`classes/templar.json`).

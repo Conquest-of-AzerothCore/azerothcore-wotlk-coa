@@ -22,6 +22,7 @@
 #include "UnitScript.h"
 #include "WorldScript.h"
 #include <algorithm>
+#include <array>
 #include <iterator>
 #include <limits>
 #include <unordered_set>
@@ -33,6 +34,8 @@ namespace
     constexpr uint32 DungeonSpoils = 2021814;
     constexpr uint32 DungeonSpoilsHeroic = 1202039;
     constexpr uint32 DungeonSpoilsMythic = 1027965;
+    constexpr std::array<uint32, 10> BattlegroundSpoils = { 1175636, 1175637, 1175638, 1175639, 1175640,
+        1675636, 1675637, 1675638, 1675639, 1675640 };
     constexpr uint32 SpoilsLevelWindow = 3;
 
     std::unordered_set<uint32> MarkBosses;
@@ -245,7 +248,7 @@ public:
         if (!container || !IsSpoilsBag(container->GetEntry()))
             return true;
 
-        bool const levelScaled = container->GetEntry() == DungeonSpoils;
+        bool const levelScaled = container->GetEntry() == DungeonSpoils || IsBattlegroundSpoils(container->GetEntry());
         std::vector<LootStoreItem*> spoils = SpoilsFor(player, entries, loot, levelScaled, true);
         if (spoils.empty())
             spoils = SpoilsFor(player, entries, loot, levelScaled, false);
@@ -257,7 +260,13 @@ public:
 private:
     static bool IsSpoilsBag(uint32 entry)
     {
-        return entry == DungeonSpoils || entry == DungeonSpoilsHeroic || entry == DungeonSpoilsMythic;
+        return entry == DungeonSpoils || entry == DungeonSpoilsHeroic || entry == DungeonSpoilsMythic ||
+            IsBattlegroundSpoils(entry);
+    }
+
+    static bool IsBattlegroundSpoils(uint32 entry)
+    {
+        return std::ranges::find(BattlegroundSpoils, entry) != BattlegroundSpoils.end();
     }
 };
 

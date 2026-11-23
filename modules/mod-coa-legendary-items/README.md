@@ -59,30 +59,26 @@ while removing their client rows and power spells. Keeping it built with `Enable
 while disabling drops and powers.
 The module validates its item and spell records at startup and disables drops and powers if they are incomplete.
 
-`AscensionCompat` already streams `item_dbc` through `SMSG_PATCH_ITEM` (`0x0932`, eight 32-bit fields).
-The enabled module explicitly registers its variants and power spells with the shared patch registries.
-SQL-only item rows require registration; core registers its Heartwood Key independently. Server-only SQL spells
-are streamed only for description overrides or explicit registrations. All variants use on-demand streaming
-and existing client appearances. Names, rare quality, the tooltip tag,
+The client MPQs carry the variants' `Item.dbc` rows and the power and tooltip spells' `Spell.dbc` rows; the
+server streams none of them. The enabled module registers its power spells with the shared spell patch registry.
+All variants use existing client appearances. Names, rare quality, the tooltip tag,
 requirements and stats come from native item query responses.
 
 Legendary powers use native equip-spell tooltip lines. Each level variant has a separate display-only
 spell with its exact bonus and condition; item flavor descriptions are empty. These spells have no effects
 and are skipped by the module's equip-spell hook, so the event-driven power auras remain the only source
-of gameplay bonuses. Tooltip spells are delivered only alongside owned, acquired or queried items, once per
-spell per session. The login stream omits unowned variants, and its item-table capacity placeholder does not
-request a tooltip spell. Tooltip rows precede native item responses, including bulk queries.
+of gameplay bonuses.
 
 The pending world migration upgrades existing module data and runs after the module's
 catalog migration on fresh installs. It adds nothing when the module's client item rows are absent.
 The enabled module advances the native client-cache version so previously cached item descriptions are fetched again.
 
-Keep `CoA.SendDisplayPatches=1` enabled. The spell streamer merges physical records, SQL `spell_dbc` overlays and
-registered ability-selector patches using `SMSG_PATCH_SPELL` (`0x092A`, 170 words and four sized strings).
-Existing description overrides take priority, and empty SQL strings preserve physical strings. Timed buff
-tooltips receive current effect amounts through the existing Ascension aura-amount packets. No physical client
-or server DBC file is modified. Server packet construction is covered by socketless gameplay scenarios; live
-client delivery, numeric tooltip rendering and buff icons require separate client acceptance.
+The server's client spell rows merge physical records, SQL `spell_dbc` overlays and registered
+ability-selector patches in the `SMSG_PATCH_SPELL` layout (`0x092A`, 170 words and four sized strings); the client
+MPQs carry the same rows. Existing description overrides take priority, and empty SQL strings preserve physical
+strings. Timed buff tooltips receive current effect amounts through the existing Ascension aura-amount packets.
+The client spell rows are covered by socketless gameplay scenarios; numeric tooltip rendering and buff icons
+require separate client acceptance.
 
 The authoritative designs are in `data/catalog.json`. Regenerate the C++ catalog, catalog
 and standalone HTML preview with `python3 -B modules/mod-coa-legendary-items/tools/generate_catalog.py`.

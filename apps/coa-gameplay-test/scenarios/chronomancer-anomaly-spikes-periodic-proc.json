@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Periodic damage launches Anomaly Spikes (#852)",
-  "contract": "Anomaly Spikes 503825 applies aura 42 (proc trigger spell) on Anomaly Spike 503826, but Spell.dbc gives it ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs generated nothing and Aura::GetProcEffectMask returned 0 for every tick. Its tooltip is \"Periodic damage dealt now has a $h% chance to launch an Anomaly Spike at your target\", with $h = the record's own ProcChance of 8. Anomaly Spike 503826 is direct damage whose effect 1 triggers 504725 Fatebreaker, an area hit (implicit targets 53/16, EffectRadiusIndex 8 = 5 yards) centred on the spike's target, so a spike launched at the primary dummy also damages a bystander 2 yards away. Nothing else in this scenario can touch the bystander: Unmake 804418 is single-target and creature health regeneration is off, so any health loss on it is permanent evidence that at least one spike was launched. Unmake's DoT is duration index 36 (1000 ms) with Amplitude 250, i.e. 4 ticks per cast; 21 casts give 84 independent trials and 0.92^84 = 0.00091, so a false failure is under 0.1% at the record's real 8% chance.",
+  "contract": "Anomaly Spikes 503825 applies aura 42 (proc trigger spell) on Anomaly Spike 503826, but Spell.dbc gives it ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs generated nothing and Aura::GetProcEffectMask returned 0 for every tick. Its tooltip is \"Periodic damage dealt now has a $h% chance to launch an Anomaly Spike at your target\", with $h = the record's own ProcChance of 8. Anomaly Spike 503826 is a direct damage hit on the proc target, so any 503826 damage on the primary dummy is evidence that at least one spike was launched (its Fatebreaker splash 504725 belongs to the Fatebreaker talent, #12252). Unmake's DoT is duration index 36 (1000 ms) with Amplitude 250, i.e. 4 ticks per cast; 21 casts give 84 independent trials and 0.92^84 = 0.00091, so a false failure is under 0.1% at the record's real 8% chance.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -19,13 +19,6 @@
       "entry": 36,
       "health": 1000000,
       "distance": 3
-    },
-    {
-      "id": "bystander",
-      "owner": "chronomancer",
-      "entry": 36,
-      "health": 1000000,
-      "distance": 5
     }
   ],
   "steps": [
@@ -43,13 +36,6 @@
       "action": "learn",
       "actor": "chronomancer",
       "spell": 804418
-    },
-    {
-      "action": "snapshot",
-      "label": "Bystander health before any periodic damage",
-      "actor": "bystander",
-      "metric": "health",
-      "save_as": "bystander_start"
     },
     {
       "action": "set_power",
@@ -415,11 +401,12 @@
     },
     {
       "action": "assert",
-      "label": "Anomaly Spike's splash reached the bystander, so the periodic proc fired",
-      "actor": "bystander",
-      "metric": "health",
-      "relative_to": "bystander_start",
-      "max": -1
+      "label": "An Anomaly Spike struck the primary dummy, so the periodic proc fired",
+      "actor": "chronomancer",
+      "metric": "spell_damage_count",
+      "spell": 503826,
+      "target": "primary",
+      "min": 1
     }
   ]
 }

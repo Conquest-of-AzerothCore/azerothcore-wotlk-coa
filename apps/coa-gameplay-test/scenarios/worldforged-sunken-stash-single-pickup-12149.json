@@ -1,0 +1,133 @@
+{
+    "schema":  1,
+    "name":  "Hexweave Gloves Sunken Stash has one pickup (#12149)",
+    "contract":  "#12149 reported two Sunken Stash pickups (entry 9900039) for the Hexweave Gloves. Guid 6970044 was a coarse duplicate pin 24 yd from the grounded pickup 6970045 and is removed. Expected: the kept pickup is grounded and opens, and nothing is left at the duplicate pin.",
+    "timeout_ms":  60000,
+    "location":  {
+                     "map":  1,
+                     "x":  -7852.01,
+                     "y":  -1481.11,
+                     "z":  -266.1,
+                     "o":  0
+                 },
+    "players":  [
+                    {
+                        "id":  "p",
+                        "race":  1,
+                        "class":  12,
+                        "level":  60
+                    }
+                ],
+    "steps":  [
+                  {
+                      "action":  "set_phase",
+                      "actor":  "p",
+                      "value":  1
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  3000
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "SETUP: the pickup is in the area",
+                      "metric":  "nearby_gameobject_count",
+                      "entry":  9900039,
+                      "equals":  1
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the kept pickup stays at its spot",
+                      "metric":  "spawn_distance",
+                      "x":  -7853.01,
+                      "y":  -1481.11,
+                      "z":  -266.512,
+                      "max":  0.3,
+                      "guid":  6970045,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the kept pickup rests on the ground",
+                      "metric":  "spawn_ground_gap",
+                      "min":  -0.3,
+                      "max":  0.3,
+                      "guid":  6970045,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is grounded within 0.8 yd",
+                      "metric":  "spawn_placement",
+                      "tolerance":  0.8,
+                      "equals":  0,
+                      "guid":  6970045,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is not under water",
+                      "metric":  "spawn_submerged",
+                      "equals":  0,
+                      "guid":  6970045,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "set_aura",
+                      "actor":  "p",
+                      "spell":  642,
+                      "stacks":  1
+                  },
+                  {
+                      "action":  "cast",
+                      "actor":  "p",
+                      "spell":  3365,
+                      "target_gameobject":  9900039
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  5500
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is within reach and opens",
+                      "metric":  "cast_failure",
+                      "spell":  3365,
+                      "equals":  0
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "its loot is shown",
+                      "metric":  "loot_count",
+                      "min":  1,
+                      "within_ms":  3000
+                  },
+                  {
+                      "action":  "teleport",
+                      "actor":  "p",
+                      "map":  1,
+                      "x":  -7865.6,
+                      "y":  -1501.45,
+                      "z":  -265
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  3000
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "DISCRIMINATING: no Sunken Stash is left at the removed duplicate pin",
+                      "metric":  "nearby_gameobject_count",
+                      "entry":  9900039,
+                      "equals":  0
+                  }
+              ]
+}

@@ -1315,7 +1315,8 @@ bool AuraEffect::CheckEffectProc(AuraApplication* aurApp, ProcEventInfo& eventIn
     {
         case SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT:
             if (GetId() == 277785 || GetId() == 280375 || GetId() == 277082 || GetId() == 280220 ||
-                GetId() == 280225 || GetId() == 280365 || GetId() == 281050 || GetId() == 289261)
+                GetId() == 280225 || GetId() == 280365 || GetId() == 281050 || GetId() == 289261 ||
+                GetId() == 707615)
             {
                 Unit* owner = aurApp->GetTarget();
                 Unit* actor = eventInfo.GetActor();
@@ -1331,7 +1332,7 @@ bool AuraEffect::CheckEffectProc(AuraApplication* aurApp, ProcEventInfo& eventIn
                     return actor && actor != owner && owner->isInFront(actor) &&
                         (eventInfo.GetTypeMask() & (PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK |
                             PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS));
-                if (GetId() == 280365)
+                if (GetId() == 280365 || GetId() == 707615)
                     return target != owner;
                 if (GetId() == 289261)
                     return target != owner && (damage->GetSchoolMask() & SPELL_SCHOOL_MASK_NORMAL);
@@ -1676,7 +1677,8 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
                     target->CastSpell(target, 24932, true, nullptr, this, target->GetGUID());
             }
             // Improved Barkskin - apply/remove armor bonus due to shapeshift
-            if (player->HasTalent(63410, player->GetActiveSpec()) || player->HasTalent(63411, player->GetActiveSpec()))
+            if (player->HasTalentOrTwin(63410, player->GetActiveSpec()) ||
+                player->HasTalentOrTwin(63411, player->GetActiveSpec()))
             {
                 target->RemoveAurasDueToSpell(66530);
                 if (GetMiscValue() == FORM_TRAVEL || GetMiscValue() == FORM_NONE) // "while in Travel Form or while not shapeshifted"
@@ -1773,7 +1775,8 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
         // Improved Barkskin - apply/remove armor bonus due to shapeshift
         if (player)
         {
-            if (player->HasTalent(63410, player->GetActiveSpec()) || player->HasTalent(63411, player->GetActiveSpec()))
+            if (player->HasTalentOrTwin(63410, player->GetActiveSpec()) ||
+                player->HasTalentOrTwin(63411, player->GetActiveSpec()))
             {
                 target->RemoveAurasDueToSpell(66530);
                 target->CastSpell(target, 66530, true);
@@ -6257,17 +6260,17 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                         caster->CastCustomSpell(53352, SPELLVALUE_BASE_POINT0, m_amount, target, true, nullptr, this);
                     break;
                 }
-                switch (GetSpellInfo()->Id)
+                switch (sSpellMgr->GetSpellTwinSource(GetSpellInfo()->Id))
                 {
                     // Feeding Frenzy Rank 1
                     case 53511:
                         if (target->GetVictim() && target->GetVictim()->HealthBelowPct(35))
-                            target->CastSpell(target, 60096, true, 0, this);
+                            target->CastSpell(target, sSpellMgr->GetSpellTwinFor(60096, GetId()), true, 0, this);
                         return;
                     // Feeding Frenzy Rank 2
                     case 53512:
                         if (target->GetVictim() && target->GetVictim()->HealthBelowPct(35))
-                            target->CastSpell(target, 60097, true, 0, this);
+                            target->CastSpell(target, sSpellMgr->GetSpellTwinFor(60097, GetId()), true, 0, this);
                         return;
                     default:
                         break;
@@ -6275,7 +6278,7 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                 break;
             }
         case SPELLFAMILY_DEATHKNIGHT:
-            switch (GetId())
+            switch (sSpellMgr->GetSpellTwinSource(GetId()))
             {
                 case 49016: // Hysteria
                     uint32 damage = uint32(target->CountPctFromMaxHealth(1));
@@ -6702,7 +6705,14 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     damage = std::max(0, dmg);
     cleanDamage.mitigated_damage = std::max(0, mitigatedDamage);
 
-    DamageInfo dmgInfo(caster, target, damage, GetSpellInfo(), GetSpellInfo()->GetSchoolMask(), DOT, cleanDamage.mitigated_damage);
+    // Umbral Wounds (Ascension talent 299000): "While in Shadowform, your Deep Wounds deal Shadowstrike damage" -- the
+    // tick is absorbed, resisted and dealt as Shadow + Physical
+    SpellSchoolMask schoolMask = GetSpellInfo()->GetSchoolMask();
+    if (caster && sSpellMgr->GetSpellTwinSource(GetId()) == 12721 /*Deep Wounds*/ &&
+        caster->GetShapeshiftForm() == FORM_SHADOW && caster->HasAura(299000))
+        schoolMask = SpellSchoolMask(SPELL_SCHOOL_MASK_NORMAL | SPELL_SCHOOL_MASK_SHADOW);
+
+    DamageInfo dmgInfo(caster, target, damage, GetSpellInfo(), schoolMask, DOT, cleanDamage.mitigated_damage);
     Unit::CalcAbsorbResist(dmgInfo);
 
     uint32 absorb = dmgInfo.GetAbsorb();
@@ -6732,7 +6742,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     SpellPeriodicAuraLogInfo pInfo(this, damage, overkill, absorb, resist, 0.0f, crit);
     target->SendPeriodicAuraLog(&pInfo);
 
-    uint32 damageDealt = Unit::DealDamage(caster, target, damage, &cleanDamage, DOT, GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), true);
+    uint32 damageDealt = Unit::DealDamage(caster, target, damage, &cleanDamage, DOT, schoolMask, GetSpellInfo(), true);
     sScriptMgr->OnPeriodicDamageResult(target, caster, damageDealt, GetSpellInfo());
 
     Unit::ProcSkillsAndAuras(caster, target, caster ? procAttacker : 0, procVictim, procEx, damage, BASE_ATTACK, GetSpellInfo(), nullptr, GetEffIndex(), nullptr, &dmgInfo);
@@ -7028,7 +7038,7 @@ void AuraEffect::HandlePeriodicManaLeechAuraTick(Unit* target, Unit* caster) con
 {
     Powers PowerType = Powers(GetMiscValue());
 
-    if (!caster || !caster->IsAlive() || !target->IsAlive() || !target->HasActivePowerType(PowerType))
+    if (!caster || !caster->IsAlive() || !target->IsAlive() || !target->CanLosePowerToSpell(PowerType))
         return;
 
     if (target->IsImmunedToAuraPeriodicTick(caster, GetSpellInfo()))
@@ -7187,7 +7197,7 @@ void AuraEffect::HandlePeriodicPowerBurnAuraTick(Unit* target, Unit* caster) con
 {
     Powers PowerType = Powers(GetMiscValue());
 
-    if (!caster || !target->IsAlive() || !target->HasActivePowerType(PowerType))
+    if (!caster || !target->IsAlive() || !target->CanLosePowerToSpell(PowerType))
         return;
 
     if (target->IsImmunedToDamage(caster, GetSpellInfo()))
@@ -7283,7 +7293,8 @@ void AuraEffect::HandleProcTriggerSpellWithValueAuraProc(AuraApplication* aurApp
 void AuraEffect::HandleAscensionPercentEventProc(AuraApplication* aurApp, ProcEventInfo& eventInfo)
 {
     if (GetId() != 277785 && GetId() != 280375 && GetId() != 277082 && GetId() != 280220 &&
-        GetId() != 280225 && GetId() != 280365 && GetId() != 281050 && GetId() != 289261)
+        GetId() != 280225 && GetId() != 280365 && GetId() != 281050 && GetId() != 289261 &&
+        GetId() != 707615)
         return;
     Unit* owner = aurApp->GetTarget();
     Unit* target = (GetId() == 280225 || GetId() == 280365 || GetId() == 289261) ? owner :
@@ -7375,7 +7386,8 @@ void AuraEffect::HandleRaidProcFromChargeWithValueAuraProc(AuraApplication* aurA
     enum
     {
         SPELL_PRAYER_OF_MENDING_HEAL   = 33110,
-        SPELL_PRAYER_OF_MENDING_VISUAL = 41637
+        SPELL_PRAYER_OF_MENDING_VISUAL = 41637,
+        SPELL_SAY_YOUR_PRAYERS         = 278530  // Ascension talent
     };
 
     Unit* target = aurApp->GetTarget();
@@ -7390,6 +7402,18 @@ void AuraEffect::HandleRaidProcFromChargeWithValueAuraProc(AuraApplication* aurA
     int32 value = GetAmount();
 
     int32 jumps = GetBase()->GetCharges();
+
+    // Say Your Prayers: "$s1% chance not to consume a charge when it jumps to a new target" and "The last charge of
+    // Prayer of Mending heals for $s2% more"
+    AuraEffect const* sayYourPrayersChance = nullptr;
+    int32 heal = value;
+    if (Unit* caster = GetCaster())
+    {
+        sayYourPrayersChance = caster->GetAuraEffect(SPELL_SAY_YOUR_PRAYERS, EFFECT_0);
+        if (jumps <= 0)
+            if (AuraEffect const* lastCharge = caster->GetAuraEffect(SPELL_SAY_YOUR_PRAYERS, EFFECT_1))
+                AddPct(heal, lastCharge->GetAmount());
+    }
 
     // current aura expire on proc finish
     GetBase()->SetCharges(0);
@@ -7412,12 +7436,13 @@ void AuraEffect::HandleRaidProcFromChargeWithValueAuraProc(AuraApplication* aurA
                 target->CastSpell(triggerTarget, SPELL_PRAYER_OF_MENDING_VISUAL, true);
                 target->CastCustomSpell(triggerTarget, GetId(), &value, nullptr, nullptr, true, nullptr, this, GetCasterGUID());
                 if (Aura* aura = triggerTarget->GetAura(GetId(), GetCasterGUID()))
-                    aura->SetCharges(jumps);
+                    aura->SetCharges(sayYourPrayersChance && roll_chance_i(sayYourPrayersChance->GetAmount()) ?
+                        jumps + 1 : jumps);
             }
         }
     }
 
-    target->CastCustomSpell(target, SPELL_PRAYER_OF_MENDING_HEAL, &value, nullptr, nullptr, true, nullptr, this, GetCasterGUID());
+    target->CastCustomSpell(target, SPELL_PRAYER_OF_MENDING_HEAL, &heal, nullptr, nullptr, true, nullptr, this, GetCasterGUID());
 }
 
 int32 AuraEffect::GetTotalTicks() const

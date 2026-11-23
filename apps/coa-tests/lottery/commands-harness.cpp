@@ -11,8 +11,8 @@
 #include <type_traits>
 #include <variant>
 #include <vector>
-#define LOG_INFO(...)
-#define LOG_ERROR(...)
+#define LOG_INFO(...) do { } while (false)
+#define LOG_ERROR(...) do { } while (false)
 namespace
 {
 using uint8 = uint8_t;

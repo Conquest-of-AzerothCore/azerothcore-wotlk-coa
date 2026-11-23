@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "name": "Dire Maul West: Magister Kalendris' Mind Flay and Mind Blast hit as hard as in the logs (#11470)",
+  "contract": "#11470: Magister Kalendris (11487) channels Mind Flay back to back (kit row 9001, every 2.8-3.3 s, as in Ascension's Mythic+ logs), but the Heroic rank 2100240 ticked for 525 and the Mythic rank 2100241 for 367, while the logs give 230 per tick on Mythic. Mind Blast likewise hit about 1982 (Heroic, 2100199) and 2015 (Mythic, 2100200) against 1159 in the logs. coa_dungeon_creature_damage now scales them for Kalendris: Mythic to the logs, Heroic to Mythic / 1.3 (Mind Flay 0.627 / 0.337, Mind Blast 0.575 / 0.45).",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 429,
+      "x": 101.3,
+      "y": 509.7,
+      "z": -4.4
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Dire Maul on Heroic",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "summon",
+      "actor": "heroic",
+      "entry": 11487,
+      "as": "kalendris1",
+      "distance": 20
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: his kit's Mind Flay is 2100240 on Heroic",
+      "actor": "heroic",
+      "metric": "spell_id_for_difficulty",
+      "target": "kalendris1",
+      "spell": 2100241,
+      "equals": 2100240
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: his Mind Flay ticks deal 33.7% on Heroic",
+      "actor": "heroic",
+      "metric": "script_periodic_damage_taken",
+      "target": "kalendris1",
+      "spell": 2100240,
+      "equals": 337
+    },
+    {
+      "action": "assert",
+      "label": "His Mind Blast deals 45.0% on Heroic",
+      "actor": "heroic",
+      "metric": "script_spell_damage_taken",
+      "target": "kalendris1",
+      "spell": 2100199,
+      "equals": 450
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 429,
+      "x": 101.3,
+      "y": 509.7,
+      "z": -4.4
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Dire Maul on Mythic",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 11487,
+      "as": "kalendris2",
+      "distance": 20
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: his kit's Mind Flay is 2100241 on Mythic",
+      "actor": "mythic",
+      "metric": "spell_id_for_difficulty",
+      "target": "kalendris2",
+      "spell": 2100241,
+      "equals": 2100241
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: his Mind Flay ticks deal 62.7% on Mythic",
+      "actor": "mythic",
+      "metric": "script_periodic_damage_taken",
+      "target": "kalendris2",
+      "spell": 2100241,
+      "equals": 627
+    },
+    {
+      "action": "assert",
+      "label": "His Mind Blast deals 57.5% on Mythic",
+      "actor": "mythic",
+      "metric": "script_spell_damage_taken",
+      "target": "kalendris2",
+      "spell": 2100200,
+      "equals": 575
+    }
+  ]
+}

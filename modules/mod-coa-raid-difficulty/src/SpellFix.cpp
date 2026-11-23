@@ -15,6 +15,7 @@
  * spell catalogues print it).
  */
 
+#include "DBCStores.h"
 #include "DatabaseEnv.h"
 #include "Field.h"
 #include "Log.h"
@@ -76,10 +77,48 @@ namespace
                     effect.Mechanic = MECHANIC_SLEEP;
         }
     };
+
+    class coa_spectral_bomb_interrupt : public GlobalScript
+    {
+    public:
+        coa_spectral_bomb_interrupt() : GlobalScript("coa_spectral_bomb_interrupt",
+            {GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR}) { }
+
+        void OnLoadSpellCustomAttr(SpellInfo* info) override
+        {
+            if (info->Id == 2119819)
+                info->InterruptFlags |= SPELL_INTERRUPT_FLAG_INTERRUPT;
+            else if (info->Id == 2119845 || info->Id == 2146711)
+            {
+                info->AttributesEx2 |= SPELL_ATTR2_IGNORE_LINE_OF_SIGHT;
+                info->DurationEntry = sSpellDurationStore.LookupEntry(21);
+            }
+            else if (info->Id == 2119810)
+                info->Effects[1].Effect = SpellEffects(0);
+        }
+    };
+
+    // Live, Mandokir's Decapitate landed 12 of 12 and his Mortal Strike hit
+    // about 123 of 123 with no dodge, parry or miss, while the same tanks
+    // dodged about 45% of his swings; the DBC flags neither as unavoidable.
+    class coa_mandokir_unavoidable_strikes : public GlobalScript
+    {
+    public:
+        coa_mandokir_unavoidable_strikes() : GlobalScript("coa_mandokir_unavoidable_strikes",
+            {GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR}) { }
+
+        void OnLoadSpellCustomAttr(SpellInfo* info) override
+        {
+            if (info->Id == 2118402 || info->Id == 2118410)
+                info->AttributesEx3 |= SPELL_ATTR3_ALWAYS_HIT;
+        }
+    };
 }
 
 void AddCoaSpellFixScripts()
 {
     new coa_spell_fix_loader();
     new coa_dragon_sleep_mechanic();
+    new coa_spectral_bomb_interrupt();
+    new coa_mandokir_unavoidable_strikes();
 }

@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Running Wild plays the Accursed Form blood burst when transforming",
+  "contract": [
+    "Running Wild 800175 has no SpellVisual in the installed client Spell.dbc, so the transform into worgen creature",
+    "56332 showed no effect. Accursed Form 562572 uses SpellVisual 15283, whose impact kit SpellVisualKit 14140 is",
+    "Spells\\BloodyExplosion.mdx on the chest with no animation. Its cast kit 14122 carries the blood hands with cast",
+    "animation 54, which the transform should not play, so only the impact kit is used (maintainer decision).",
+    "Expected: when the Running Wild aura is applied and the player transforms, the server sends",
+    "SMSG_PLAY_SPELL_VISUAL (0x1F3: unit guid, then kit id) with kit 14140, and ending Running Wild sends none.",
+    "Client rendering is not tested."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "b", "race": 1, "class": 20, "level": 35 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 4000 },
+    { "action": "learn", "actor": "b", "spell": 800175 },
+    { "action": "snapshot", "actor": "b", "metric": "server_packets", "opcode": 499, "save_as": "visuals_before_cast" },
+    { "action": "cast", "actor": "b", "spell": 800175, "label": "run wild outdoors" },
+    {
+      "action": "assert", "label": "Running Wild is active", "actor": "b",
+      "metric": "aura", "spell": 800175, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "the transform sent one spell visual", "actor": "b",
+      "metric": "server_packets", "opcode": 499, "relative_to": "visuals_before_cast", "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "the visual is the Accursed Form blood burst kit 14140", "actor": "b",
+      "metric": "server_packet_u32", "opcode": 499, "index": 2, "equals": 14140
+    },
+    { "action": "snapshot", "actor": "b", "metric": "server_packets", "opcode": 499, "save_as": "visuals_before_end" },
+    { "action": "cancel_aura", "actor": "b", "spell": 800175, "label": "stand up" },
+    {
+      "action": "assert", "label": "Running Wild ended", "actor": "b",
+      "metric": "aura", "spell": 800175, "equals": 0, "within_ms": 2000
+    },
+    { "action": "wait", "ms": 1000, "label": "give a late visual time to arrive" },
+    {
+      "action": "assert", "label": "ending Running Wild plays no visual", "actor": "b",
+      "metric": "server_packets", "opcode": 499, "relative_to": "visuals_before_end", "equals": 0
+    }
+  ]
+}

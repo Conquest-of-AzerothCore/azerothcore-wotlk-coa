@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "May We Be Reunited: a Knight of Xoroth in Demon's Blood gets the Arvis Addle credit (#12443)",
+  "contract": "#12443 (class 17, level 37) heard the reunion talk after turning in 'Addle's Stead' 254089 but never got the 254905 credit of 254091 'May We Be Reunited'. Julie Addle's talk and the caged Nightbane Worgen's gossip cast 'Arvis Reunion Credit' 355229, whose TargetCreatureType mask 211 (beast, dragonkin, giant, humanoid, critter) skips demons, and Unit::GetCreatureType makes a class-17 player with Demon's Blood 804345 a demon (creature type 3). rev_20261117_12443 gives the same credit through SmartAI: Julie's talk credits every player within 30 yards, and the worgen's gossip credits a speaker on 254091. Expected: a demon-typed hero who takes 254091 right after the turn-in gets the credit when the talk ends (about 51 s), and a second demon-typed player who takes 254091 afterwards gets it by talking to the worgen.",
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -10560.0, "y": -1150.0, "z": 28.0, "o": 0},
+  "players": [
+    {"id": "hero", "race": 1, "class": 17, "level": 37},
+    {"id": "talker", "race": 1, "class": 17, "level": 37}
+  ],
+  "creatures": [
+    {"id": "julie", "owner": "hero", "entry": 254906, "distance": 3, "faction": 12, "level": 20},
+    {"id": "worgen", "owner": "hero", "entry": 764561, "distance": 5, "faction": 35, "level": 24}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"label": "SETUP: the hero knows Demon's Blood", "action": "learn", "actor": "hero", "spell": 804345},
+    {"label": "SETUP: the talker knows Demon's Blood", "action": "learn", "actor": "talker", "spell": 804345},
+    {"label": "SETUP: Demon's Blood makes the hero a demon", "action": "assert", "actor": "hero",
+     "metric": "creature_type", "equals": 3, "within_ms": 3000},
+    {"label": "SETUP: Demon's Blood makes the talker a demon", "action": "assert", "actor": "talker",
+     "metric": "creature_type", "equals": 3, "within_ms": 3000},
+    {"label": "SETUP: the hero carries 254089 complete, with the book and the nectar", "action": "prepare_quest",
+     "actor": "hero", "quest": 254089},
+    {"label": "SETUP: 254089 is ready to turn in", "action": "assert", "actor": "hero", "metric": "quest_status",
+     "quest": 254089, "equals": 1},
+    {"label": "SETUP: the worgen stands within Julie's 20-yard reach", "action": "assert", "actor": "hero",
+     "metric": "distance", "target": "worgen", "max": 10},
+    {"label": "the hero turns in 254089 to Julie Addle", "action": "client_packet", "actor": "hero", "opcode": 398,
+     "consumed": false, "fields": [{"actor_guid": "julie"}, {"u32": 254089}, {"u32": 0}]},
+    {"label": "254089 is rewarded", "action": "assert", "actor": "hero", "metric": "quest_rewarded",
+     "quest": 254089, "equals": 1, "within_ms": 3000},
+    {"label": "SETUP: the hero takes 254091 from Julie", "action": "prepare_quest", "actor": "hero",
+     "quest": 254091, "complete": false},
+    {"label": "the hero has no 254905 credit while the talk plays", "action": "assert", "actor": "hero",
+     "metric": "quest_objective_count", "quest": 254091, "equals": 0},
+    {"label": "DISCRIMINATING: the demon hero gets the 254905 credit when Julie's talk ends", "action": "assert",
+     "actor": "hero", "metric": "quest_objective_count", "quest": 254091, "equals": 1, "within_ms": 70000},
+    {"label": "254091 is complete for the hero", "action": "assert", "actor": "hero", "metric": "quest_status",
+     "quest": 254091, "equals": 1, "within_ms": 3000},
+    {"label": "SETUP: the talker takes 254091 after the talk", "action": "prepare_quest", "actor": "talker",
+     "quest": 254091, "complete": false},
+    {"label": "SETUP: the talker has no 254905 credit yet", "action": "assert", "actor": "talker",
+     "metric": "quest_objective_count", "quest": 254091, "equals": 0},
+    {"label": "the talker opens the caged worgen's gossip", "action": "gossip_hello", "actor": "talker",
+     "target": "worgen"},
+    {"label": "DISCRIMINATING: the demon talker gets the 254905 credit from the worgen", "action": "assert",
+     "actor": "talker", "metric": "quest_objective_count", "quest": 254091, "equals": 1, "within_ms": 3000}
+  ]
+}

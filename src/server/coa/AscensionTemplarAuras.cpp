@@ -46,6 +46,13 @@ class aura_ascension_templar_lifecycle : public AuraScript
                 return false;
         return true;
     }
+    void SetMindControlImmunity(bool apply)
+    {
+        Unit* target = GetTarget();
+        target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_CHARM, apply);
+        target->ApplySpellImmune(GetId(), IMMUNITY_STATE, SPELL_AURA_MOD_CHARM, apply);
+        target->ApplySpellImmune(GetId(), IMMUNITY_STATE, SPELL_AURA_MOD_POSSESS, apply);
+    }
     void Calculate(AuraEffect const* effect, int32& amount, bool& recalculate)
     {
         Player* player = Owner(GetCaster());
@@ -64,10 +71,10 @@ class aura_ascension_templar_lifecycle : public AuraScript
         if (id == 801409 && index == 0)
             amount = player->HasAura(705287) ? int32(player->GetStat(STAT_AGILITY) + player->GetStat(STAT_STAMINA)) : 0;
         if (id == 705299 && index == 0)
-            amount -= int32(.1f * player->GetStat(STAT_STAMINA));
+            amount = int32(-10 - .1f * player->GetStat(STAT_STAMINA));
         if (id == 301369 && index == 0)
             if (AuraEffect const* source = player->GetAuraEffect(301310, EFFECT_2))
-                amount = int32(source->GetAmount() * player->GetStat(STAT_INTELLECT) / 100.f);
+                amount = -int32(source->GetAmount() * player->GetStat(STAT_INTELLECT) / 100.f);
         if (id == 803237)
             recalculate = false;
         if (id == 801205 && index == 1 && player->HasAura(807004))
@@ -111,6 +118,8 @@ class aura_ascension_templar_lifecycle : public AuraScript
             GetTarget()->RemoveAurasDueToSpell(527272);
             GetTarget()->UpdateSpeed(MOVE_RUN, true);
         }
+        if (id == 804228)
+            SetMindControlImmunity(true);
         if (GetTarget() != player)
             return;
         for (uint32 selected : {806354, 807004, 561156, 681136, 712378, 524766, 806523, 524617, 300514})
@@ -131,11 +140,8 @@ class aura_ascension_templar_lifecycle : public AuraScript
             uint64 duration = GetAura()->GetScriptValue(805390);
             if (duration)
                 GetAura()->SetDuration(std::min(GetAura()->GetDuration(), int32(duration)));
-            if (GetAura()->GetStackAmount() >= 6)
-            {
+            if (GetAura()->GetStackAmount() >= 6 && !player->HasAura(806517))
                 Cast(player, player, 806517);
-                GetAura()->Remove();
-            }
         }
         if (id == 801202)
         {
@@ -168,8 +174,11 @@ class aura_ascension_templar_lifecycle : public AuraScript
         {
             PreventDefaultAction();
             uint32 remaining = std::max(0, effect->GetAmount());
-            uint32 ticks = std::max(1, GetAura()->GetDuration() / 1000 + 1);
-            uint32 amount = (remaining + ticks - 1) / ticks;
+            if (!remaining)
+                return;
+            int32 later = GetAura()->GetDuration() - effect->GetPeriodicTimer();
+            uint32 ticks = later < 0 ? 1 : 2 + later / std::max(1, effect->GetAmplitude());
+            uint32 amount = remaining - (ticks - 1) * (remaining / ticks);
             const_cast<AuraEffect*>(effect)->ChangeAmount(remaining - amount);
             uint32 applied =
                 Unit::DealDamage(player, player, amount, nullptr, DOT, SPELL_SCHOOL_MASK_NORMAL, GetSpellInfo(), false);
@@ -184,7 +193,7 @@ class aura_ascension_templar_lifecycle : public AuraScript
                 GetAura()->Remove();
                 return;
             }
-            for (Unit* enemy : Nearby(GetTarget(), 5.0f))
+            for (Unit* enemy : Nearby(GetTarget(), Radius(527269, EFFECT_0, player)))
                 if (player->IsValidAttackTarget(enemy))
                 {
                     Cast(player, enemy, 527269);
@@ -197,6 +206,8 @@ class aura_ascension_templar_lifecycle : public AuraScript
         if (!First(effect))
             return;
         uint32 id = GetId();
+        if (id == 804228)
+            SetMindControlImmunity(false);
         if (id == 300513)
             GetTarget()->UpdateSpeed(MOVE_RUN, true);
         if (id == 527272)

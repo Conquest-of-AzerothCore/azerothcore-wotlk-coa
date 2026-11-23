@@ -9,10 +9,21 @@ cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/azeroth-server -DCMAKE_BUILD_TYPE=RelWithD
 make -j$(nproc) && make install
 ```
 
-C++20 required (`CMAKE_CXX_STANDARD 20`). Useful flags: `BUILD_TESTING=ON` (Google Test), `NOPCH=1` (disable precompiled headers). Full set in `conf/dist/config.cmake`. `compile_commands.json` is exported automatically.
+C++20 required (`CMAKE_CXX_STANDARD 20`). Useful flags:
 
-On macOS, `verify_all.py` configures with `-DCMAKE_C_FLAGS_RELWITHDEBINFO` and `-DCMAKE_CXX_FLAGS_RELWITHDEBINFO`
-set to `-O2 -g1 -DNDEBUG`; pass the same to a manual configure to get its object sizes and link times.
+- `BUILD_TESTING=ON`: Google Test.
+- `NOPCH=1`: disable precompiled headers.
+- `WITH_TEST_COVERAGE=ON`: coverage instrumentation for the unit tests and the `coverage` target (off by default).
+- `WITH_GAME_UNITY_BUILD=ON`: unity build of `game`.
+
+Full set in `conf/dist/config.cmake`. `compile_commands.json` is exported automatically.
+
+On macOS and Linux, `verify_all.py` configures with `-DCMAKE_C_FLAGS_RELWITHDEBINFO` and
+`-DCMAKE_CXX_FLAGS_RELWITHDEBINFO` set to `-O2 -g1 -DNDEBUG`. On Linux it also enables the `game` unity build and
+thin archives, and links with mold when it is installed. The full list is in
+[verification](../../docs/coa/verification.md#setup). Pass the same flags to a manual configure to get the same
+build times. An existing build directory keeps the flags it was configured with: use a new directory or delete its
+`CMakeCache.txt`. Measurements and rejected options: [build performance](../../docs/coa/build-performance.md).
 
 ## Verification
 

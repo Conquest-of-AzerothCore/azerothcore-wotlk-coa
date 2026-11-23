@@ -1,0 +1,153 @@
+{
+  "schema": 1,
+  "name": "Eternal Blessing raises the Templar's healing done, not the healing the Templar receives",
+  "contract": "Eternal Blessing 705300 says \"Increases your Holy damage and healing done by $s1%\" ($s1 = 15). The owner ruled that its healing part raises healing done and no longer healing received (ADR 0286). The Templar casts Eternal Blessing for real (rule 4 amendment point 6); Benediction 578276 from the Templar to an ally then reads x1.15; the same Benediction from the ally to the Templar reads x1.00 with the aura on the Templar. Absolute reads at level 60 (authoring run 20261112-075042): healing done 800 without and 920 with the aura, healing taken 1000 in both.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 19,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 578276
+    },
+    {
+      "action": "learn",
+      "actor": "ally",
+      "spell": 578276
+    },
+    {
+      "action": "assert",
+      "label": "The Templar starts without Eternal Blessing",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 705300,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Benediction from the Templar to the ally reads 800 of a 1000 base without the aura",
+      "actor": "templar",
+      "metric": "spell_healing_done",
+      "spell": 578276,
+      "effect": 1,
+      "target": "ally",
+      "equals": 800
+    },
+    {
+      "action": "snapshot",
+      "actor": "templar",
+      "metric": "spell_healing_done",
+      "spell": 578276,
+      "effect": 1,
+      "target": "ally",
+      "save_as": "done_without"
+    },
+    {
+      "action": "assert",
+      "label": "Benediction from the ally to the Templar reads 1000 of a 1000 base without the aura",
+      "actor": "templar",
+      "metric": "spell_healing_taken",
+      "spell": 578276,
+      "target": "ally",
+      "equals": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "templar",
+      "metric": "spell_healing_taken",
+      "spell": 578276,
+      "target": "ally",
+      "save_as": "taken_without"
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 705300
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 705300,
+      "target": "templar"
+    },
+    {
+      "action": "wait",
+      "label": "Eternal Blessing's cast and global cooldown",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The real cast put Eternal Blessing on the Templar",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 705300,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Benediction from the Templar to the ally heals 15% more",
+      "actor": "templar",
+      "metric": "spell_healing_done",
+      "spell": 578276,
+      "effect": 1,
+      "target": "ally",
+      "ratio_to": "done_without",
+      "min": 1.149,
+      "max": 1.151
+    },
+    {
+      "action": "assert",
+      "label": "Control: Benediction from the ally heals the Templar for the same amount",
+      "actor": "templar",
+      "metric": "spell_healing_taken",
+      "spell": 578276,
+      "target": "ally",
+      "ratio_to": "taken_without",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "label": "Benediction from the Templar to the ally reads 920 with the aura",
+      "actor": "templar",
+      "metric": "spell_healing_done",
+      "spell": 578276,
+      "effect": 1,
+      "target": "ally",
+      "equals": 920
+    },
+    {
+      "action": "assert",
+      "label": "Control: Benediction from the ally to the Templar still reads 1000 with the aura",
+      "actor": "templar",
+      "metric": "spell_healing_taken",
+      "spell": 578276,
+      "target": "ally",
+      "equals": 1000
+    }
+  ]
+}

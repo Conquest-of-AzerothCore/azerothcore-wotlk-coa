@@ -134,6 +134,10 @@ namespace
         if (!creature || !creature->GetMap() || !creature->GetMap()->IsRaid())
             return;
 
+        // Manastorm stages scale their own creatures for one to five players.
+        if (creature->GetMap()->IsScriptedPrivateInstance())
+            return;
+
         if (creature->GetEntry() == ENTRY_BASALTHANE_MOLTEN_BLOOD_OOZE)
             return;
 

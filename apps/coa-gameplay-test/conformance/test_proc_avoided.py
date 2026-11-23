@@ -1,0 +1,198 @@
+import copy
+from pathlib import Path
+import sys
+import unittest
+
+from procs import PROC_CHECK, entry_proc_label, proc_plan, proc_scenario, shares_aura
+from profile import DBC_DIR
+from test_compare import Workspace, assert_step, constant_reader
+from tooltip import Displayed
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+import run
+
+DAWN_KNIGHT = 680497
+VENGEFUL_INTENT = 705534
+
+
+def chance_reader(value: float, text: str):
+    return constant_reader(Displayed(text, value, None, 'chance_pct'))
+
+
+def class_file() -> dict:
+    from profile import load_class_file
+    return load_class_file(15)
+
+
+def avoided_entry(source: dict, aura: int) -> dict:
+    return copy.deepcopy(next(entry for entry in source['procs']
+                              if entry['aura'] == aura and entry['trigger']['action'] == 'avoided'))
+
+
+def index_of(steps: list[dict], test) -> int:
+    return next(position for position, step in enumerate(steps) if test(step))
+
+
+def last_index_of(steps: list[dict], test) -> int:
+    return max(position for position, step in enumerate(steps) if test(step))
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class AvoidedProcScenarioTest(unittest.TestCase):
+    def setUp(self):
+        from profile import for_entry
+        self.class_file = for_entry(class_file(), DAWN_KNIGHT)
+        self.entry = avoided_entry(self.class_file, DAWN_KNIGHT)
+
+    def test_the_strikers_engage_before_the_learn_and_the_guards_hold_before_the_reads(self):
+        scenario, [expectation] = proc_scenario(self.class_file, self.entry)
+        run.validate(scenario)
+        steps = scenario['steps']
+        strikers = [creature['id'] for creature in scenario['creatures']]
+        self.assertEqual(len(strikers), 10)
+        self.assertTrue(all(creature['reaction'] == 2 and creature['stationary'] for creature in scenario['creatures']))
+        rooted = {step['target'] for step in steps if step['action'] == 'set_aura' and step.get('spell') == 42716
+                  and step.get('caster') == step.get('target')}
+        self.assertEqual(rooted, set(strikers))
+        learn = index_of(steps, lambda step: step['action'] == 'learn' and step.get('spell') == DAWN_KNIGHT)
+        engages = [index_of(steps, lambda step, striker=striker: step['action'] == 'attack'
+                            and step.get('target') == striker) for striker in strikers]
+        last_stop = last_index_of(steps, lambda step: step['action'] == 'stop_attack')
+        snapshots = [position for position, step in enumerate(steps) if step['action'] == 'snapshot']
+        guards = [position for position, step in enumerate(steps) if 'relative_to' in step]
+        trials = index_of(steps, lambda step: step.get('label') == f'{DAWN_KNIGHT} proc trials')
+        self.assertLess(max(engages), last_stop)
+        self.assertLess(last_stop, min(snapshots))
+        self.assertLess(max(snapshots), learn)
+        self.assertEqual(len(guards), 3)
+        self.assertLess(learn, min(guards))
+        self.assertLess(max(guards), trials)
+        self.assertTrue(all(steps[position]['equals'] == 0 for position in guards))
+        self.assertEqual({steps[position]['metric'] for position in guards},
+                         {'melee_attacks_taken', 'melee_attack_count'})
+        self.assertFalse([step for step in steps[learn:] if step['action'] == 'attack'])
+        windows = [position for position, step in enumerate(steps) if step['action'] == 'wait' and 'label' not in step]
+        self.assertTrue(windows)
+        for position in windows:
+            self.assertEqual(steps[position - 1], {'action': 'set_combat_avoidance', 'actor': 'caster',
+                                                   'dodge': 50, 'parry': 50})
+
+    def test_the_reading_sums_dodged_and_parried_swings_and_the_baseline_holds_both(self):
+        _, [expectation] = proc_scenario(self.class_file, self.entry, 1)
+        model = expectation.model
+        self.assertEqual(expectation.label, f'{DAWN_KNIGHT} proc_rate avoided')
+        self.assertEqual(model['readings'], [{'name': 'avoided swings (dodged + parried)',
+                                              'labels': [f'{DAWN_KNIGHT} proc trials',
+                                                         f'{DAWN_KNIGHT} proc trials parried'],
+                                              'minus_events': False}])
+        self.assertEqual(model['baseline']['added_trials'],
+                         {f'{DAWN_KNIGHT} proc trials parried': f'{DAWN_KNIGHT} proc baseline trials parried'})
+        self.assertEqual(model['baseline']['attempts'], 0)
+
+    def test_the_d261_sizing_reaches_the_residual_trials(self):
+        plan = proc_plan(self.class_file, self.entry)
+        _, [expectation] = proc_scenario(self.class_file, self.entry)
+        residual = expectation.model['residual']
+        self.assertEqual(residual['trials'], 29078)
+        self.assertGreaterEqual(plan.parts * plan.per_part * 10, residual['attempts'])
+
+    def test_a_faulty_trigger_is_refused(self):
+        trigger = self.entry['trigger']
+        for change in ({'dodge': 50, 'parry': 40}, {'dodge': -10, 'parry': 110}, {'strikers': 0}, {'strikers': 11},
+                       {'strikers': True}, {'swing_ms': 0}, {'striker_entry': 0}, {'spell': 41394},
+                       {'striker_auras': [0]}, {'striker_auras': 42716}, {'striker_auras': [True]}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                proc_plan(self.class_file, {**self.entry, 'trigger': {**trigger, **change}})
+        for change in ({'trials_per_attempt': 2}, {'trial_readings': [{'name': 'own'}]}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                proc_plan(self.class_file, {**self.entry, **change})
+
+    def test_an_internal_cooldown_is_unmodelled(self):
+        from hits import Unmodelled
+        with self.assertRaises(Unmodelled):
+            proc_plan(self.class_file, {**self.entry, 'internal_cooldown_ms': 1000})
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class AvoidedProcLabelTest(unittest.TestCase):
+    def test_the_taken_hit_sibling_keeps_its_label_beside_the_avoided_entry(self):
+        source = class_file()
+        taken = next(entry for entry in source['procs']
+                     if entry['aura'] == VENGEFUL_INTENT and entry['trigger']['action'] == 'taken_hit')
+        avoided = avoided_entry(source, VENGEFUL_INTENT)
+        self.assertFalse(shares_aura(source, taken))
+        self.assertEqual(entry_proc_label(source, taken), f'{VENGEFUL_INTENT} proc_rate')
+        self.assertEqual(entry_proc_label(source, avoided), f'{VENGEFUL_INTENT} proc_rate avoided')
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class AvoidedProcJudgeTest(unittest.TestCase):
+    ENGAGE_DODGED, ENGAGE_PARRIED = 40, 35
+    FIXTURE_SIZING = ('residual_target', 'min_detectable', 'min_parts')
+
+    def setUp(self):
+        from profile import for_entry
+        self.workspace = Workspace()
+        self.class_file = copy.deepcopy(for_entry(class_file(), VENGEFUL_INTENT))
+        self.entry = next(entry for entry in self.class_file['procs']
+                          if entry['aura'] == VENGEFUL_INTENT and entry['trigger']['action'] == 'avoided')
+        for sizing in self.FIXTURE_SIZING:
+            self.entry.pop(sizing, None)
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def verdict(self, dodged: int, parried: int, procs_on_dodges: int, procs_on_parries: int):
+        from compare import compare
+        plan = proc_plan(self.class_file, self.entry)
+        dodged, parried = dodged // plan.parts, parried // plan.parts
+        procs_on_dodges, procs_on_parries = procs_on_dodges // plan.parts, procs_on_parries // plan.parts
+        for part in range(plan.parts):
+            _, [expectation] = proc_scenario(self.class_file, self.entry, part)
+            labels, baseline = expectation.model['measurements'], expectation.model['baseline']
+            steps = [assert_step(baseline['trials'], str(self.ENGAGE_DODGED)),
+                     assert_step(f'{baseline["trials"]} parried', str(self.ENGAGE_PARRIED)),
+                     assert_step(baseline['events'], '0'),
+                     assert_step(labels['aura'], '1'),
+                     assert_step(labels['trials'], str(self.ENGAGE_DODGED + dodged)),
+                     assert_step(f'{labels["trials"]} parried', str(self.ENGAGE_PARRIED + parried)),
+                     assert_step(labels['attempts'], str(self.ENGAGE_DODGED + self.ENGAGE_PARRIED + dodged + parried)),
+                     assert_step(labels['events'], str(procs_on_dodges + procs_on_parries))]
+            self.workspace.scenario(f'conformance-witch-hunter-proc-{VENGEFUL_INTENT}-avoided-part-{part + 1}',
+                                    'proc', [expectation], steps=steps, spell=VENGEFUL_INTENT, rank=VENGEFUL_INTENT)
+        manifest, results = self.workspace.manifest()
+        [verdict] = [verdict for verdict in compare(manifest, results, tooltips=chance_reader(10.0, '$h'))
+                     if verdict.check == PROC_CHECK]
+        return verdict
+
+    def test_procs_on_dodges_and_parries_at_the_stated_chance_pass(self):
+        verdict = self.verdict(4000, 4000, 400, 400)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 0.10)
+        self.assertIn('8000 trials', verdict.explanation)
+
+    def test_a_mutant_that_procs_on_dodges_only_alerts(self):
+        verdict = self.verdict(4000, 4000, 400, 0)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertAlmostEqual(verdict.measured, 0.05)
+
+    def test_an_engage_proc_before_the_learn_alerts(self):
+        from compare import compare
+        self.assertEqual(proc_plan(self.class_file, self.entry).parts, 1)
+        _, [expectation] = proc_scenario(self.class_file, self.entry, 0)
+        labels, baseline = expectation.model['measurements'], expectation.model['baseline']
+        steps = [assert_step(baseline['trials'], '40'), assert_step(f'{baseline["trials"]} parried', '35'),
+                 assert_step(baseline['events'], '7'), assert_step(labels['aura'], '1'),
+                 assert_step(labels['trials'], '4040'), assert_step(f'{labels["trials"]} parried', '4035'),
+                 assert_step(labels['attempts'], '8075'), assert_step(labels['events'], '807')]
+        self.workspace.scenario(f'conformance-witch-hunter-proc-{VENGEFUL_INTENT}-avoided-part-1', 'proc',
+                                [expectation], steps=steps, spell=VENGEFUL_INTENT, rank=VENGEFUL_INTENT)
+        manifest, results = self.workspace.manifest()
+        [verdict] = [verdict for verdict in compare(manifest, results, tooltips=chance_reader(10.0, '$h'))
+                     if verdict.check == PROC_CHECK]
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('baseline trials without the passive', verdict.explanation)
+
+
+if __name__ == '__main__':
+    unittest.main()

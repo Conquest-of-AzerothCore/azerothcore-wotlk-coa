@@ -117,7 +117,7 @@ int main()
         realm.rate = 25.0f;
         town.Resurrect(EFFECT_0);
         assert(reportedOnce(SPELL_RESURRECT_CLOSEST_TOWN));
-        assert(p.alive && p.resurrected == std::vector<float>{ 0.5f } && p.sickness == std::vector<bool>{ true });
+        assert(p.alive && p.resurrected == std::vector<float>{ 0.5f } && p.sickness == std::vector<bool>{ false });
         assert(p.durability == std::vector<double>{ 0.25 } && p.bones == 1 && p.teleports.size() == 1);
         assert(p.teleports[0].map == 1 && p.teleports[0].x == -2350.0f && p.teleports[0].y == -360.0f);
         assert(p.teleports[0].z == -9.0f && p.teleports[0].o == p.o && p.teleports[0].options == TELE_TO_SPELL);
@@ -188,7 +188,7 @@ int main()
         city.Resurrect(EFFECT_0);
         assert(p.alive && p.teleports.size() == 1 && p.bones == 1);
         assert(p.teleports[0].map == c.destMap && p.teleports[0].x == c.destX && p.teleports[0].options == TELE_TO_SPELL);
-        assert(p.resurrected == std::vector<float>{ 0.5f } && p.sickness == std::vector<bool>{ true });
+        assert(p.resurrected == std::vector<float>{ 0.5f } && p.sickness == std::vector<bool>{ false });
         assert(reportedOnce(SPELL_RESURRECT_CLOSEST_CITY));
     }
 

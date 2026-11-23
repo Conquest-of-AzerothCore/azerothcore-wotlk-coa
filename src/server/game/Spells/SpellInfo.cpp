@@ -402,6 +402,11 @@ uint32 SpellEffectInfo::GetItemArmorSubclassMask() const
         return EffectIndex == EFFECT_1 && IsAura(SPELL_AURA_MOD_BASE_RESISTANCE_PCT) &&
             MiscValue == SPELL_SCHOOL_MASK_NORMAL && MiscValueB == 64 ? 64 : 0;
 
+    if (_spellInfo && _spellInfo->SpellFamilyName == 25 &&
+        (_spellInfo->Id == 301311 || _spellInfo->Id == 301360)) // Blessed Padding
+        return EffectIndex == EFFECT_0 && IsAura(SPELL_AURA_MOD_BASE_RESISTANCE_PCT) &&
+            MiscValue == SPELL_SCHOOL_MASK_NORMAL && MiscValueB == 8 ? 8 : 0;
+
     if (!_spellInfo || _spellInfo->SpellFamilyName != 24 || MiscValue != SPELL_SCHOOL_MASK_NORMAL)
         return 0;
 
@@ -1532,6 +1537,15 @@ namespace
     }
 }
 
+bool AscensionReach::IsReachModifier(SpellModifier const* mod)
+{
+    if (mod->op != SPELLMOD_RANGE || mod->type != SPELLMOD_FLAT)
+        return false;
+
+    return std::find(DamagingSpells.begin(), DamagingSpells.end(), mod->spellId) != DamagingSpells.end() ||
+        std::find(CastTimeSpells.begin(), CastTimeSpells.end(), mod->spellId) != CastTimeSpells.end();
+}
+
 bool SpellInfo::IsAffectedBySpellMods() const
 {
     return !(AttributesEx3 & SPELL_ATTR3_IGNORE_CASTER_MODIFIERS);
@@ -1572,11 +1586,24 @@ bool SpellInfo::IsAffectedBySpellMod(SpellModifier const* mod) const
     if (mod->targetSpellId && mod->targetSpellId != Id)
         return false;
 
-    // Flame Throwing has no SpellAffect.dbc row and a zero class mask, so the generic lookup below
-    // would match nothing for its range modifier; its tooltip names every damaging spell of its
-    // owner, not one spell family. Its other (undocumented) modifier effect is left alone.
-    if ((mod->spellId == 11100 || mod->spellId == 12353) && mod->op == SPELLMOD_RANGE)
-        return DealsDamage(this);
+    // Reach talents name every damaging spell of their owner, not one spell family; the cast-time ones leave instant
+    // spells alone. A channel such as Arcane Missiles deals its damage through the spell its periodic trigger casts.
+    if (AscensionReach::IsReachModifier(mod))
+    {
+        if (std::find(AscensionReach::CastTimeSpells.begin(), AscensionReach::CastTimeSpells.end(), mod->spellId) ==
+            AscensionReach::CastTimeSpells.end())
+            return DealsDamage(this);
+        if (!IsChanneled() && !(CastTimeEntry && CastTimeEntry->CastTime > 0))
+            return false;
+        if (DealsDamage(this))
+            return true;
+        for (SpellEffectInfo const& effect : GetEffects())
+            if (effect.ApplyAuraName == SPELL_AURA_PERIODIC_TRIGGER_SPELL)
+                if (SpellInfo const* triggered = sSpellMgr->GetSpellInfo(effect.TriggerSpell))
+                    if (DealsDamage(triggered))
+                        return true;
+        return false;
+    }
 
     if (SpellFamilyName == 31 && affectSpell->SpellFamilyName == 31)
     {
@@ -2739,7 +2766,7 @@ void SpellInfo::_LoadImmunityInfo()
             }
             case SPELL_AURA_MECHANIC_IMMUNITY:
             {
-                switch (Id)
+                switch (sSpellMgr->GetSpellTwinSource(Id) == 19574 ? 19574 : Id)
                 {
                     case 34471: // The Beast Within
                     case 19574: // Bestial Wrath
@@ -2757,6 +2784,10 @@ void SpellInfo::_LoadImmunityInfo()
                         break;
                     case 54508: // Demonic Empowerment
                         mechanicImmunityMask |= (1ULL << MECHANIC_SNARE) | (1ULL << MECHANIC_ROOT) | (1ULL << MECHANIC_STUN);
+                        break;
+                    case 804652: // Vial of Moonwell Water
+                        mechanicImmunityMask |= IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK &
+                            ~((1ULL << MECHANIC_SNARE) | (1ULL << MECHANIC_DAZE));
                         break;
                     default:
                         if (miscVal < 1)
@@ -3097,7 +3128,13 @@ uint32 SpellInfo::CalcCastTime(Unit* caster, Spell* spell) const
         uint32 const firstRank = GetFirstRankSpell()->Id;
         tinkerShot = firstRank == 500549 || firstRank == 500235;
     }
-    if (HasAttribute(SPELL_ATTR0_USES_RANGED_SLOT) && !artificersWand && !tinkerShot &&
+    bool witchHunterShot = false;
+    if (SpellFamilyName == 21)
+    {
+        uint32 const firstRank = GetFirstRankSpell()->Id;
+        witchHunterShot = firstRank == 804179 || firstRank == 805754;
+    }
+    if (HasAttribute(SPELL_ATTR0_USES_RANGED_SLOT) && !artificersWand && !tinkerShot && !witchHunterShot &&
         (!IsAutoRepeatRangedSpell()) && (castTime || !IsChanneled()))
         castTime += 500;
 

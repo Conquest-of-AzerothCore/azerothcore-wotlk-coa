@@ -287,10 +287,13 @@ public:
             _scriptedPrivateMembers.insert(owner);
 
         // Private maps are ephemeral even if the first transfer never arrives.
-        m_unloadTimer = _scriptedPrivateUnloadDelay;
+        if (!HavePlayers())
+            m_unloadTimer = _scriptedPrivateUnloadDelay;
     }
     bool LoadsScriptedPrivateDatabaseSpawns() const { return _scriptedPrivateDatabaseSpawns; }
     bool IsScriptedPrivateMember(ObjectGuid guid) const { return _scriptedPrivateMembers.contains(guid); }
+    // A member of this private copy, or a game master observing exactly this copy through .appear.
+    bool CanEnterScriptedPrivate(Player const* player) const;
     void RequestScriptedPrivateUnload()
     {
         _scriptedPrivateUnloadDelay = MIN_UNLOAD_DELAY;

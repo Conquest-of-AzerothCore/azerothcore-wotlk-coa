@@ -1,0 +1,229 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: a Spider Egg is sealed until its Hatching and no crowd control holds it",
+  "contract": [
+    "Round-8 tester (2026-11-15): players could attack Spider Eggs (14915) before Mar'li (14510) made them hatch.",
+    "One egg stands 3 yards north of the hero and one 6 yards north. Before Hatch Eggs (2118115) at 17 s the hero",
+    "cannot attack the nearer egg; once it casts Hatching (2118119) the hero can. By the user's decision the egg is",
+    "immune to all crowd control: stun, fear, polymorph and silence probes are immune, Shadow Bolt is not. Mar'li",
+    "dies mid-cast, her eggs' Hatching breaks, and the out-of-combat egg is sealed again; on the old behaviour every",
+    "egg was attackable and could be crowd controlled. Round 10 (user, 2026-11-16): each egg has scale 1.5."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the hero settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub",
+      "actor": "tank",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "summon",
+      "label": "An egg stands 3 yards north of the hero",
+      "actor": "tank",
+      "entry": 14915,
+      "as": "egg_near",
+      "distance": 3,
+      "unowned": true
+    },
+    {
+      "action": "summon",
+      "label": "An egg stands 6 yards north of the hero",
+      "actor": "tank",
+      "entry": 14915,
+      "as": "egg_far",
+      "distance": 6,
+      "unowned": true
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 14510,
+      "as": "marli",
+      "distance": -4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: before its Hatching the egg is sealed to the hero",
+      "actor": "tank",
+      "metric": "nearby_creature_can_attack",
+      "entry": 14915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the egg is half as large again as its model (round-10 user decision)",
+      "actor": "tank",
+      "metric": "nearby_creature_scale",
+      "entry": 14915,
+      "min": 1.49,
+      "max": 1.51
+    },
+    {
+      "action": "attack",
+      "label": "Engage High Priestess Mar'li",
+      "actor": "tank",
+      "target": "marli"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li fights",
+      "actor": "marli",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "tank"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li casts Hatch Eggs at 17 s",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118115,
+      "min": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the near egg casts Hatching",
+      "actor": "egg_near",
+      "metric": "casting",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a Hatching egg is open to the hero",
+      "actor": "tank",
+      "metric": "nearby_creature_can_attack",
+      "entry": 14915,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a stun cannot hold the egg (Hammer of Justice, stun)",
+      "actor": "egg_near",
+      "metric": "spell_immune",
+      "spell": 10308,
+      "target": "tank",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a fear cannot hold the egg (Psychic Scream, fear)",
+      "actor": "egg_near",
+      "metric": "spell_immune",
+      "spell": 10890,
+      "target": "tank",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a polymorph cannot hold the egg (Polymorph, polymorph)",
+      "actor": "egg_near",
+      "metric": "spell_immune",
+      "spell": 12826,
+      "target": "tank",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a silence cannot hold the egg (Silence, silence)",
+      "actor": "egg_near",
+      "metric": "spell_immune",
+      "spell": 15487,
+      "target": "tank",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: damage without crowd control still lands (Shadow Bolt)",
+      "actor": "egg_near",
+      "metric": "spell_immune",
+      "spell": 11661,
+      "target": "tank",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the egg is out of combat, so no evade reseals it",
+      "actor": "egg_near",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Mar'li dies mid-Hatching, breaking her eggs' casts",
+      "actor": "tank",
+      "entry": 14510,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the near egg's Hatching is broken",
+      "actor": "egg_near",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the near egg lives",
+      "actor": "egg_near",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: an egg whose Hatching broke is sealed again",
+      "actor": "tank",
+      "metric": "nearby_creature_can_attack",
+      "entry": 14915,
+      "equals": 0
+    }
+  ]
+}

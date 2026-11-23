@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionVenomancer.h"
+#include "AscensionIncarnation.h"
 #include "AscensionVenomancerData.h"
 #include "CellImpl.h"
 #include "DynamicObject.h"
@@ -258,11 +259,12 @@ void Expose(Player* player, uint32 stacks, bool molt)
     else if (Aura* added = player->AddAura(Exposed, player))
         added->SetStackAmount(after);
     uint32 applied = Count(player, Exposed);
-    if (applied > current && player->HasAura(CharmOfWarding))
+    uint32 healedStacks = applied > current ? applied - current : (molt ? 0 : 1);
+    if (healedStacks && player->HasAura(CharmOfWarding))
     {
-        SpellInfo const* talent = sSpellMgr->GetSpellInfo(CharmOfWarding);
-        HealInfo heal(player, player, player->CountPctFromMaxHealth((applied - current) * Amount(CharmOfWarding)),
-            talent, talent->GetSchoolMask());
+        SpellInfo const* logged = sSpellMgr->GetSpellInfo(ExposedFleshHeal);
+        HealInfo heal(player, player, player->CountPctFromMaxHealth(healedStacks * Amount(CharmOfWarding)),
+            logged, logged->GetSchoolMask());
         player->HealBySpell(heal);
     }
     if (!molt)
@@ -352,7 +354,8 @@ void ApplyVenoms(Player* player, Unit* target, bool fromSpiderling)
 }
 void UpdateSpiderLordDisplay(Player* player)
 {
-    bool spiderLord = player->HasAura(Beetle) && player->HasAura(SpiderLord);
+    bool spiderLord = player->HasAura(Beetle) && player->HasAura(SpiderLord) &&
+        !AscensionIncarnation::HasActiveFormIncarnation(player);
     uint32 beetleDisplay = player->GetModelForForm(player->GetShapeshiftForm(), Beetle);
     if (spiderLord && beetleDisplay && player->GetDisplayId() == beetleDisplay)
     {

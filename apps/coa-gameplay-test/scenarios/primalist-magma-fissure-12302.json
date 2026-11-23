@@ -1,0 +1,219 @@
+{
+  "schema": 1,
+  "name": "Primalist Magma Fissure pierces absorbs and makes the next spell instant (#12302)",
+  "contract": [
+    "#12302 Magma Fissure: the tooltip of every rank (802793, 803826 to 803829) says it deals Fire damage 'piercing",
+    "absorption effects' and 'Your next spell within $803299d is instant cast.' Rank 5 803829 is an instant line",
+    "attack (TargetA 24) with a SCHOOL_DAMAGE effect, but nothing set SpellInfo::AscensionIgnoreAbsorb for it and",
+    "nothing applied 803299 Magma Fissure (Buff), a -100% casting time modifier (aura 108, MiscValue 10): the",
+    "passive 707314 that triggers it has no proc flags and is taught by nothing. Expected: a target holding",
+    "Hardened Skin 71586 (a 6400 point absorb of every school) takes Magma Fissure's damage with nothing absorbed,",
+    "the absorb keeps its full 6400, and the caster gains 803299 right after the cast. The tooltip's sideways",
+    "knockback (effect 1, SPELL_EFFECT_SCRIPT_EFFECT) is not covered here. 803299 has no proc charges in Spell.dbc,",
+    "so without a consumer it would make every affected spell for its 6 seconds instant; the tooltip says only the",
+    "next spell, so the next affected cast removes it. Geode Barrage rank 8 502775 (2.5 s cast, in 803299's class",
+    "mask) checks this: the first cast lands at once and removes the buff, the second one casts normally."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 60,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803829
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502775
+    },
+    {
+      "action": "cast",
+      "actor": "target",
+      "spell": 71586,
+      "label": "fixture: the target shields itself with Hardened Skin"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the target holds Hardened Skin",
+      "actor": "target",
+      "metric": "aura_amount",
+      "spell": 71586,
+      "effect": 0,
+      "equals": 6400,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no instant cast buff before Magma Fissure",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 803299,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_log_count",
+      "save_as": "logs",
+      "spell": 803829,
+      "caster": "primalist",
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_absorb_total",
+      "save_as": "absorbed",
+      "spell": 803829,
+      "caster": "primalist",
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "damage",
+      "spell": 803829,
+      "target": "target"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803829
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Magma Fissure hit the target once",
+      "actor": "primalist",
+      "metric": "spell_log_count",
+      "spell": 803829,
+      "caster": "primalist",
+      "target": "target",
+      "relative_to": "logs",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Magma Fissure dealt damage through the absorb",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 803829,
+      "target": "target",
+      "relative_to": "damage",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: nothing of Magma Fissure was absorbed",
+      "actor": "primalist",
+      "metric": "spell_absorb_total",
+      "spell": 803829,
+      "caster": "primalist",
+      "target": "target",
+      "relative_to": "absorbed",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Hardened Skin keeps its full 6400",
+      "actor": "target",
+      "metric": "aura_amount",
+      "spell": 71586,
+      "effect": 0,
+      "equals": 6400
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the next spell is made instant",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 803299,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "let the global cooldown end",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502775,
+      "target": "target",
+      "label": "Geode Barrage normally has a 2.5 s cast"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Geode Barrage lands at once",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 502775,
+      "equals": 1,
+      "within_ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the next spell used up the buff",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 803299,
+      "equals": 0,
+      "within_ms": 600
+    },
+    {
+      "action": "wait",
+      "label": "let the global cooldown end",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502775,
+      "target": "target",
+      "label": "a second Geode Barrage"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the spell after that has its normal cast time",
+      "actor": "primalist",
+      "metric": "casting",
+      "equals": 1,
+      "within_ms": 500
+    }
+  ]
+}

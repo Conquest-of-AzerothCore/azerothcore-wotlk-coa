@@ -130,6 +130,9 @@ struct Unit {
     uint32 SpellDamageBonusTaken(Unit*, SpellInfo const*, uint32 amount, int) const { return amount * 3; }
 };
 uint32 CalculatePct(uint32 value, int32 percent) { return value * percent / 100; }
+namespace LocalLevelScaling {
+uint32 PersonalDamageHealthFor(Unit const*, Unit const* target) { return target->GetMaxHealth(); }
+}
 struct Spell {
     int effectHandleMode = SPELL_EFFECT_HANDLE_LAUNCH_TARGET;
     Unit* unitTarget;

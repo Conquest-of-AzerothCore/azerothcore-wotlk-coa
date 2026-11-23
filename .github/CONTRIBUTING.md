@@ -3,7 +3,7 @@
 Keep the core and the CoA server component coherent. Include the applicable generator/policy and tests with a change.
 Do not upload client archives, private captures, credentials or live DB dumps.
 
-Read AGENTS.md and the relevant `.agents/docs` instructions. Preserve applied SQL bytes and existing player progress.
+Read AGENTS.md, the rules in `.agents/rules` and the relevant `.agents/docs` instructions. Preserve applied SQL bytes and existing player progress.
 Record source/native checks, linked builds, deployment and real gameplay tests separately. Do not infer gameplay acceptance
 from a compiler or an open server port. Builds/deployments are explicit operations, not part of every edit.
 

@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Shadow Puppets fly as shadow bolts and still hit and proc for the Witch Doctor",
+  "contract": [
+    "Shadow Puppets (500015) ticks every 750 ms for 3 s. Each tick cast Shadow Puppet 801797 from the Witch Doctor,",
+    "whose client SpellVisual 1924 is the VoodooDoll02 missile, so a little doll flew at the target. Live shows purple",
+    "shadow bolts: SpellVisual 2133 (cfx_warlock_shadowbolt_missile) of Shadow Puppet 802745, the aura's own second",
+    "trigger, a dummy with the same family flags, school, targets and dice. The server now treats 802745 as the",
+    "damage spell (school damage, magic class, SPELL_ATTR3_NOT_A_PROC, not binary, as 801797 is) and each tick casts",
+    "it for the tick's amount, so the bolt flies and the doll spell is never cast. The Witch Doctor must cast 802745",
+    "and never 801797, the target must take Shadow Puppet damage from 802745, and De Other Side (802092: 'Damage",
+    "dealt by Shadow Puppets now increases your damage', buff 570066, 20 s, stacking to 10, proc chance 100) must gain",
+    "a stack from those hits. Before the cast the Witch Doctor has no De Other Side buff, so the stacks come from the",
+    "Shadow Puppet hits."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wd", "race": 1, "class": 13, "level": 30, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "e", "owner": "wd", "entry": 36, "level": 30, "distance": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "wd", "spell": 500015 },
+    { "action": "learn", "actor": "wd", "spell": 802092 },
+    { "action": "assert", "label": "Control: no De Other Side buff before Shadow Puppets", "actor": "wd", "metric": "aura", "spell": 570066, "equals": 0 },
+    { "action": "cast", "label": "Shadow Puppets", "actor": "wd", "spell": 500015, "target": "e" },
+    { "action": "wait", "label": "Let the 3 s of puppets land", "ms": 4500 },
+    { "action": "assert", "label": "The Witch Doctor fired shadow bolt puppets", "actor": "wd", "metric": "spell_cast_count", "spell": 802745, "min": 3 },
+    { "action": "assert", "label": "The doll missile spell is never cast", "actor": "wd", "metric": "spell_cast_count", "spell": 801797, "equals": 0 },
+    { "action": "assert", "label": "The bolts deal the Shadow Puppet damage for the Witch Doctor", "actor": "wd", "metric": "spell_damage_count", "spell": 802745, "target": "e", "min": 3 },
+    { "action": "assert", "label": "De Other Side stacks from the Shadow Puppet hits", "actor": "wd", "metric": "aura_stacks", "spell": 570066, "min": 3 }
+  ]
+}

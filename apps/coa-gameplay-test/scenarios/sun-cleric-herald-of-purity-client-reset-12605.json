@@ -1,0 +1,3165 @@
+{
+  "schema": 1,
+  "name": "Herald of Purity's Justice reset reaches the client after the cast (#12605)",
+  "contract": [
+    "Herald of Purity 806058 reads 'Damage dealt by Justice now has an 8% chance to reset its own cooldown.' Justice",
+    "520359 deals no damage itself: its main-hand and off-hand strikes 524857 and 572040 are TRIGGER_SPELL effects,",
+    "which Spell::EffectTriggerSpell runs in the launch phase, after SMSG_SPELL_COOLDOWN and before Justice's",
+    "SMSG_SPELL_GO. The handler cleared the cooldown right away, so its SMSG_CLEAR_COOLDOWN reached the client before",
+    "the SMSG_SPELL_GO that starts the client's own cooldown: the server cooldown was reset (#9129 passes) but the",
+    "button kept its full 8 sec (#12605, 132 hits without one visible reset). The reset now runs on the player's next",
+    "update, after the cast. The cast loop of sun-cleric-herald-of-purity-justice-reset-9129 is kept at level 60: 270",
+    "attempts every 1650 ms with two strikes per cast at 8%, where 54 casts complete without a reset and all 54 miss",
+    "every reset with probability about 0.012%. A clear sent before a cast's SMSG_SPELL_GO is undone by that GO, so",
+    "under the old order every cast a reset allowed was pressed while the client still showed the 8 sec cooldown.",
+    "client_cooldown_blocked_casts reads readiness when each cast is submitted, before any packet of that cast,",
+    "so a cast's own early clear cannot hide it; it must stay 0 while more than 54 casts complete."
+  ],
+  "timeout_ms": 600000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "cleric",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 806058
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Herald of Purity is active",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 806058,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Valkyr's Grip lets the off-hand hold a two-handed polearm",
+      "actor": "cleric",
+      "spell": 707072
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 520359
+    },
+    {
+      "action": "add_item",
+      "actor": "cleric",
+      "item": 4901
+    },
+    {
+      "action": "equip",
+      "label": "Test Polearm in the main hand",
+      "actor": "cleric",
+      "item": 4901,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "cleric",
+      "item": 5545
+    },
+    {
+      "action": "equip",
+      "label": "Fast Test Polearm in the off hand",
+      "actor": "cleric",
+      "item": 5545,
+      "slot": 16
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Justice cast completed yet",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 520359,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 520359,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1650
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: every completed cast lands its off-hand strike too (two rolls per cast)",
+      "actor": "cleric",
+      "metric": "spell_damage_count",
+      "spell": 572040,
+      "target": "dummy",
+      "min": 54
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: every completed cast lands its main-hand strike",
+      "actor": "cleric",
+      "metric": "spell_damage_count",
+      "spell": 524857,
+      "target": "dummy",
+      "min": 54
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Herald of Purity resets let extra Justice casts complete on the server (54 without any reset)",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 520359,
+      "min": 55
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: each reset reaches the client after its cast, so no cast meets a cooling button",
+      "actor": "cleric",
+      "metric": "client_cooldown_blocked_casts",
+      "spell": 520359,
+      "equals": 0
+    }
+  ]
+}

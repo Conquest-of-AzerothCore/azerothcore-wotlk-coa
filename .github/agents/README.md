@@ -6,5 +6,5 @@ YAML frontmatter with a `description` to register.
 Copilot code review does not read this directory; its instructions are
 `.github/copilot-instructions.md`, `.github/instructions/**` and `AGENTS.md`.
 
-Conventions live in `AGENTS.md` and `.agents/docs/`. Profiles point at them and must not restate
+Conventions live in `AGENTS.md`, `.agents/rules/` and `.agents/docs/`. Profiles point at them and must not restate
 them, so there is one copy to keep current.

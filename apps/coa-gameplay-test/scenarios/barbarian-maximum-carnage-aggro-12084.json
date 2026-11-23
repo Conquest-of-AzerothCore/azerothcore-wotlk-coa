@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Barbarian: Maximum Carnage damage puts the creature it hits into combat (#12084)",
+  "contract": "Maximum Carnage (talent 561359) makes Unbridled Rage cast the 6 s aura 560933, which casts the damage spell 560932 every second on up to 5 enemies within 8 yd (SPELL_EFFECT_SCHOOL_DAMAGE, caster = the player). The DBC gives 560932 SPELL_ATTR1_NO_THREAT, so Spell::DoSpellHitOnUnit passed canInitialAggro = false and an idle creature took the damage without ever engaging the player: it stayed out of combat and, in the open world, regenerated (#12084). A damage spell's tooltip ('swinging your weapon around you dealing ... Physical damage to up to 5 nearby enemies') carries normal threat, as the fork already restores for Witch Hunter, Cultist and Sun Cleric damage spells. A passive hostile creature (faction 14, reaction 0) never starts combat by itself; it must be out of combat before the aura ticks and in combat after its health drops. 560933 is cast directly, as in barbarian-maximum-carnage-7603, because the defect is in the damage spell it fires.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "barb",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mob",
+      "owner": "barb",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "barb", "spell": 560933 },
+    { "action": "assert", "label": "SETUP: the creature is not in combat", "actor": "mob", "metric": "combat", "equals": 0 },
+    { "action": "assert", "label": "SETUP: the Barbarian is not in combat", "actor": "barb", "metric": "combat", "equals": 0 },
+    { "action": "snapshot", "label": "Baseline creature health", "actor": "mob", "metric": "health", "save_as": "h0" },
+    { "action": "cast", "actor": "barb", "label": "Cast Maximum Carnage", "spell": 560933 },
+    { "action": "assert", "label": "SETUP: the Maximum Carnage aura applied", "actor": "barb", "metric": "aura", "spell": 560933, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "SETUP: the damage spell hit the creature", "actor": "mob", "metric": "health", "relative_to": "h0", "max": -100, "within_ms": 4000 },
+    { "action": "assert", "label": "DISCRIMINATING: the creature hit by Maximum Carnage is in combat", "actor": "mob", "metric": "combat", "equals": 1, "within_ms": 2000 }
+  ]
+}

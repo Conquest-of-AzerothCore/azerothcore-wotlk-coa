@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Artificer class trainer re-sends its window after a purchase so held Unmake stays a used row (#12421)",
+  "contract": [
+    "Artificer 804478 (specialization 33) shows active Unmake rank 3 503785 to the client as wand 561284",
+    "(SMSG_SUPERCEDED_SPELL), so the client spellbook does not hold 503785. On the next spell learned the 3.3.5",
+    "client redraws trainer rows from its own spellbook and offers the held Unmake row again, which the server",
+    "refuses as known. The Chronomancer class trainer (trainer 900022, Soridormi 50282) lists 503785 (level 12),",
+    "802229 (level 14) and Roll Back 804490 (level 16) without prerequisites. A level-16 Artificer holding",
+    "Unmake up to 503785 opens the window: 503785 is known (2) and both others are available (0). Each purchase",
+    "must re-send the window with 503785 still known, so the player can buy 802229 and then 804490 in the same",
+    "window. Client rendering itself is outside this harness; the re-sent window is what replaces the redraw."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 22,
+      "level": 16
+    }
+  ],
+  "creatures": [
+    {
+      "id": "trainer",
+      "owner": "c",
+      "entry": 50282,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "money", "actor": "c", "copper": 100000, "label": "fixture: enough copper for two lessons" },
+    { "action": "specialization", "actor": "c", "id": 33 },
+    { "action": "learn", "actor": "c", "spell": 503784 },
+    { "action": "learn", "actor": "c", "spell": 503785 },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "temporary_spell_replacement",
+      "spell": 503785,
+      "equals": 561284,
+      "label": "the client holds Unmake rank 3 only as the wand"
+    },
+    { "action": "gossip_hello", "actor": "c", "target": "trainer", "label": "right-click the Chronomancer trainer" },
+    { "action": "gossip_select", "actor": "c", "option": 0, "label": "I seek training as a Chronomancer." },
+    { "action": "assert", "actor": "c", "metric": "trainer_list_packets", "equals": 1, "label": "one window was sent" },
+    { "action": "assert", "actor": "c", "metric": "trainer_window_state", "spell": 503785, "equals": 2, "label": "held Unmake is a used row" },
+    { "action": "assert", "actor": "c", "metric": "trainer_window_state", "spell": 802229, "equals": 0, "label": "802229 is available" },
+    { "action": "assert", "actor": "c", "metric": "trainer_window_state", "spell": 804490, "equals": 0, "label": "Roll Back is available" },
+
+    { "action": "trainer_buy", "actor": "c", "target": "trainer", "spell": 802229, "label": "buy the first lesson" },
+    { "action": "assert", "actor": "c", "metric": "spellbook_buy_succeeded", "spell": 802229, "equals": 1, "label": "802229 was granted" },
+    { "action": "assert", "actor": "c", "metric": "knows_spell", "spell": 802229, "equals": 1, "label": "802229 was learned" },
+    { "action": "assert", "actor": "c", "metric": "trainer_list_packets", "equals": 2, "label": "the purchase re-sent the window" },
+    { "action": "assert", "actor": "c", "metric": "trainer_window_state", "spell": 503785, "equals": 2, "label": "held Unmake stays a used row" },
+    { "action": "assert", "actor": "c", "metric": "trainer_window_state", "spell": 802229, "equals": 2, "label": "the bought lesson is a used row" },
+    { "action": "assert", "actor": "c", "metric": "trainer_window_state", "spell": 804490, "equals": 0, "label": "Roll Back is still available" },
+
+    { "action": "trainer_buy", "actor": "c", "target": "trainer", "spell": 804490, "label": "buy the next lesson in the same window" },
+    { "action": "assert", "actor": "c", "metric": "spellbook_buy_succeeded", "spell": 804490, "equals": 1, "label": "Roll Back was granted" },
+    { "action": "assert", "actor": "c", "metric": "knows_spell", "spell": 804490, "equals": 1, "label": "Roll Back was learned" },
+    { "action": "assert", "actor": "c", "metric": "trainer_list_packets", "equals": 3, "label": "the second purchase re-sent the window too" },
+    { "action": "assert", "actor": "c", "metric": "trainer_window_state", "spell": 503785, "equals": 2, "label": "held Unmake is still a used row" },
+    { "action": "assert", "actor": "c", "metric": "spellbook_buy_failed", "spell": 503785, "equals": 0, "label": "held Unmake was never offered for purchase" }
+  ]
+}

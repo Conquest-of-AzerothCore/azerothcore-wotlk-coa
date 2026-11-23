@@ -151,8 +151,6 @@ void Gain(Player* player, uint32 count)
     uint32 maxStacks = uint32(std::max(cap, 0));
     if (Aura* aura = player->AddAura(500906, player))
         aura->SetStackAmount(std::min(maxStacks, previous + count));
-    if (player->HasAura(524922))
-        player->EnergizeBySpell(player, 524922, 10, POWER_RAGE);
 }
 bool Chance(Player* player, uint32 id, uint32 cooldown, float bonus)
 {
@@ -211,10 +209,9 @@ void Refresh(Player* player)
     scale(302573, player->HasAura(804340) ? imps * Amount(302573) : 0);
     scale(302574, player->HasAura(804340) ? -int32(imps) * Amount(302574) : 0);
     scale(302592, imps);
-    scale(805965, -150 * int32(imps));
     if (AuraEffect* effect = player->GetAuraEffect(573066, EFFECT_0))
         effect->ChangeAmount(Amount(573066) + imps * Amount(805916, 2));
-    for (uint32 id : {704195, 704217, 707630})
+    for (uint32 id : {704195, 704217, 707630, 805965})
         player->RemoveAurasDueToSpell(id);
     if (AuraEffect* effect = player->GetAuraEffect(704186, EFFECT_0))
         effect->ChangeAmount(Amount(704186) + 10 * Count(player, 500906));

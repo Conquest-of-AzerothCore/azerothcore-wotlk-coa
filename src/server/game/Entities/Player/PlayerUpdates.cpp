@@ -1153,7 +1153,7 @@ void Player::UpdateCombatSkills(Unit* victim, WeaponAttackType attType, bool def
     }
 
     uint8 greylevel = Acore::XP::GetGrayLevel(playerLevel);
-    uint8 moblevel = defence ? victim->getLevelForTarget(this) : victim->GetLevel(); // if defense than victim == attacker
+    uint8 moblevel = defence ? victim->getRewardLevelForTarget(this) : victim->GetLevel(); // if defense than victim == attacker
     if (!defence)
         if (Creature const* creature = victim->ToCreature())
             if (uint8 const view = LocalLevelScaling::ViewLevelFor(this, creature))

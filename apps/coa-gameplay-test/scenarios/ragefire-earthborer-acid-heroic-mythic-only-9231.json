@@ -1,0 +1,212 @@
+{
+  "schema": 1,
+  "name": "Ragefire Chasm: Earthborers spit Earthborer Acid on Heroic and Mythic, not on Normal (#9231)",
+  "contract": "#9231: Earthborer Acid (18070, Heroic 160139, Mythic 387490) stacks five times and gains 1 damage per second per caster level, so on Normal a level 13-14 Earthborer put up to 75 Nature damage per second on level 13-16 players. It now runs on Heroic and Mythic only (tester decision); Normal Earthborers melee.",
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "normal",
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 389,
+      "x": -86.4,
+      "y": -30.8,
+      "z": -22.3
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "actor": "normal",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Ragefire Chasm on Normal",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "normal",
+      "entry": 11320,
+      "as": "worm0",
+      "distance": 3
+    },
+    {
+      "action": "attack",
+      "actor": "normal",
+      "target": "worm0"
+    },
+    {
+      "action": "wait",
+      "ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: on Normal the Earthborer spits no Earthborer Acid in 15 s",
+      "actor": "worm0",
+      "metric": "spell_cast_count",
+      "spell": 18070,
+      "equals": 0
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 389,
+      "x": -86.4,
+      "y": -30.8,
+      "z": -22.3
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "actor": "heroic",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Ragefire Chasm on Heroic",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "summon",
+      "actor": "heroic",
+      "entry": 11320,
+      "as": "worm1",
+      "distance": 3
+    },
+    {
+      "action": "attack",
+      "actor": "heroic",
+      "target": "worm1"
+    },
+    {
+      "action": "wait",
+      "ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "on Heroic it spits Earthborer Acid",
+      "actor": "worm1",
+      "metric": "spell_cast_count",
+      "spell": 160139,
+      "min": 1
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 389,
+      "x": -86.4,
+      "y": -30.8,
+      "z": -22.3
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "actor": "mythic",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Ragefire Chasm on Mythic",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 11320,
+      "as": "worm2",
+      "distance": 3
+    },
+    {
+      "action": "attack",
+      "actor": "mythic",
+      "target": "worm2"
+    },
+    {
+      "action": "wait",
+      "ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "on Mythic it spits Earthborer Acid",
+      "actor": "worm2",
+      "metric": "spell_cast_count",
+      "spell": 387490,
+      "min": 1
+    }
+  ]
+}

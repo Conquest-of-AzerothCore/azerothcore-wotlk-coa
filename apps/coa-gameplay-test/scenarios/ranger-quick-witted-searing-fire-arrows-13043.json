@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Quick-Witted's stab triggers Searing Quiver's Fire Arrows (#13043)",
+  "contract": [
+    "Quick-Witted 704311 (Ranger, Brigand) fires its stab 704314 when you avoid an attack. #13043 reports that",
+    "the stab did not apply the quiver's effects. Searing Quiver 500103 tooltips that ranged abilities deal $s1%",
+    "(15%) additional direct Fire damage as Fire Arrows 681109, computed from the damage the hit actually dealt;",
+    "the stab is DmgClass 3 (ranged) but triggered, which the Ranger quiver hit handler skipped. Expected: the",
+    "first stab is followed by exactly one Fire Arrows worth 15% of the stab's dealt damage. Melee, ranged and",
+    "spell crit rating fixtures make every Fire Arrows a critical hit (a damage class 3 spell outside the Hunter",
+    "family rolls on the main hand attack type) (twice the amount for a ranged damage class spell), so the",
+    "critical/non-critical ambiguity is removed. Resists are removed too: the test spell penetration aura 823764",
+    "(-9999 target resistance) cancels the linear monster resistance, and the setup checks that the mob meets the",
+    "ranger's Fire spells with no average resist (spell_resist_chance 0) and that the measured Fire Arrows had",
+    "nothing resisted or absorbed. The pair must then land between 20% and 30.5%: at most twice 15% (the critical",
+    "bonus can be trimmed by the target's crit damage reduction, so the floor sits well above the 15% of a",
+    "non-critical hit). A doubled percentage (about 60%), a missing critical (15%) and a second Fire Arrows per",
+    "stab all fail. Before the fix no Fire Arrows followed the stab at all. The mob has 1,000,000 health so",
+    "overkill never trims the stab, Evasion (5277, +50% dodge) makes avoided attacks frequent, the ranger never",
+    "attacks, so the Fire Arrows can only come from the stab, and hit rating fixtures keep it from missing."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {
+      "id": "ranger", "race": 1, "class": 21, "level": 80, "allow_regeneration": false, "ranged_hit_rating": 100000,
+      "spell_hit_rating": 100000, "ranged_crit_rating": 100000, "spell_crit_rating": 100000,
+      "melee_crit_rating": 100000
+    }
+  ],
+  "creatures": [
+    {"id": "mob", "owner": "ranger", "entry": 36, "level": 80, "health": 1000000, "distance": 3, "reaction": 2}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000},
+    {
+      "action": "set_health", "label": "Keep the ranger alive while the mob swings", "actor": "ranger",
+      "value": 1000000, "maximum": 1000000
+    },
+    {"action": "learn", "actor": "ranger", "spell": 704311},
+    {
+      "action": "set_aura", "label": "SETUP: Searing Quiver is the active quiver", "actor": "ranger", "spell": 500103,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura", "label": "SETUP: Evasion makes avoided attacks frequent", "actor": "ranger", "spell": 5277,
+      "stacks": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: Quick-Witted is active", "actor": "ranger", "metric": "aura",
+      "spell": 704311, "equals": 1
+    },
+    {
+      "action": "set_aura", "label": "SETUP: spell penetration removes the mob's level-based Fire resistance",
+      "actor": "ranger", "spell": 823764, "stacks": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the mob meets the ranger's Fire spells with no average resist",
+      "actor": "ranger", "metric": "spell_resist_chance", "school": 2, "target": "mob", "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: the mob is attacking the ranger", "actor": "ranger",
+      "metric": "melee_attacks_taken", "target": "mob", "min": 1, "within_ms": 15000
+    },
+    {
+      "action": "assert", "label": "SETUP: an avoided attack fires the first Quick-Witted stab", "actor": "ranger",
+      "metric": "spell_damage_count", "spell": 704314, "target": "mob", "min": 1, "within_ms": 40000
+    },
+    {
+      "action": "assert", "label": "SETUP: the check sees exactly one stab", "actor": "ranger",
+      "metric": "spell_damage_count", "spell": 704314, "target": "mob", "equals": 1
+    },
+    {
+      "action": "assert", "label": "#13043: the stab is followed by exactly one Fire Arrows", "actor": "ranger",
+      "metric": "spell_damage_count", "spell": 681109, "target": "mob", "equals": 1, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "SETUP: the crit rating fixture makes that Fire Arrows a critical hit",
+      "actor": "ranger", "metric": "spell_damage_count", "spell": 681109, "target": "mob", "critical": true,
+      "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: nothing of that Fire Arrows was resisted", "actor": "ranger",
+      "metric": "spell_resist_total", "spell": 681109, "target": "mob", "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: nothing of that Fire Arrows was absorbed", "actor": "ranger",
+      "metric": "spell_absorb_total", "spell": 681109, "target": "mob", "equals": 0
+    },
+    {
+      "action": "snapshot", "actor": "ranger", "metric": "spell_damage_total", "spell": 704314, "target": "mob",
+      "save_as": "stab_total"
+    },
+    {
+      "action": "assert", "label": "#13043: that critical Fire Arrows deals at most twice 15% of the stab",
+      "actor": "ranger", "metric": "spell_damage_total", "spell": 681109, "target": "mob", "ratio_to": "stab_total",
+      "min": 0.2, "max": 0.305
+    }
+  ]
+}

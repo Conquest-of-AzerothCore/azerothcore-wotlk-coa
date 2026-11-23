@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Path to Ascension: the Rank Up Your Spells pop-up opens its quest (#10862)",
+  "contract": [
+    "Tutorial 56 (Tutorial.dbc: achievement 87246, quest 1903520 'Path to Ascension: Rank Up Your Spells', level 8, every race and class) is a tracking quest view. The client (UIParent.lua PLAYER_LEVEL_UP) shows it as a 'Quest Discovered!' pop-up at level 11 (AUTO_QUEST_RANK_UP_SPELLS_LEVEL).",
+    "Clicking an auto-quest pop-up sends CMSG_QUESTGIVER_QUERY_QUEST (390) with an empty quest giver, as the Pale Reach pop-up does (pale-reach-discovery.json). No handler answered it for 1903520, so the click did nothing; Accept then sends CMSG_QUESTGIVER_ACCEPT_QUEST (393) with an empty giver, which Path to Ascension already starts.",
+    "Expected: an unclaimed, eligible character receives SMSG_QUESTGIVER_QUEST_DETAILS (392) for 1903520; viewing does not accept; Accept puts the quest in the log and tracks tutorial 56. A character that already collected tutorial 56 gets the 'already been collected' answer on SMSG_CLAIM_TUTORIAL_REWARD_RESULT (1711) instead of a details window.",
+    "The pop-up frame itself is client-side and remains an in-game check."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 297.695,
+    "y": -4733.76,
+    "z": 9.32983,
+    "o": 0.0
+  },
+  "players": [
+    { "id": "orc", "race": 2, "class": 1, "level": 11 },
+    { "id": "collector", "race": 2, "class": 1, "level": 11 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login rewards and the tutorial state settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: the quest is not in the log", "actor": "orc",
+      "metric": "quest_status", "quest": 1903520, "equals": 0
+    },
+    {
+      "action": "client_packet", "label": "Click the Quest Discovered pop-up", "actor": "orc",
+      "opcode": 390, "fields": [{"u64": 0}, {"u32": 1903520}, {"u8": 0}], "early": false, "consumed": true
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the details window names Rank Up Your Spells", "actor": "orc",
+      "metric": "server_packet_u32", "opcode": 392, "row": 0, "index": 4, "equals": 1903520, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Viewing the details does not accept the quest", "actor": "orc",
+      "metric": "quest_status", "quest": 1903520, "equals": 0
+    },
+    {
+      "action": "client_packet", "label": "Accept from the details window", "actor": "orc",
+      "opcode": 393, "fields": [{"u64": 0}, {"u32": 1903520}, {"u32": 0}]
+    },
+    {
+      "action": "assert", "label": "The quest is in the log", "actor": "orc",
+      "metric": "quest_status", "quest": 1903520, "equals": 3, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Tutorial 56 is tracked", "actor": "orc",
+      "metric": "player_setting", "source": "core.ascension.tutorial_tracking", "index": 56, "equals": 1
+    },
+    {
+      "action": "set_player_setting", "label": "SETUP: tutorial 56 is already collected", "actor": "collector",
+      "source": "core.ascension.tutorial_rewards", "index": 56, "value": 1
+    },
+    {
+      "action": "client_packet", "label": "Click the pop-up after collecting the reward", "actor": "collector",
+      "opcode": 390, "fields": [{"u64": 0}, {"u32": 1903520}, {"u8": 0}], "early": false, "consumed": true
+    },
+    {
+      "action": "assert", "label": "The click is answered as already collected", "actor": "collector",
+      "metric": "server_packet_contains", "opcode": 1711, "text": "already been collected", "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "No details window for a collected tutorial", "actor": "collector",
+      "metric": "server_packets", "opcode": 392, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The collected quest stays out of the log", "actor": "collector",
+      "metric": "quest_status", "quest": 1903520, "equals": 0
+    }
+  ]
+}

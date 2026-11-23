@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Righteous Fury grants the 6% melee crit reduction 991293 only while Protection is the Paladin's main talent tree",
+  "contract": "A Paladin holding Righteous Fury (25780, Reborn 1125780) gets spell 991293 (SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE -6, absolute daze immunity) only while Protection (TalentTab 383, tab page 1) holds the most talent points of the active spec, as Player::GetMostPointsTalentTree decides it. Without talents the main tree is Holy, so Righteous Fury alone grants nothing. Learning a Protection talent (2185 Divine Strength) grants it, a talent reset removes it, and Retribution (1407 Benediction) outweighing Protection keeps it away until Protection leads again. 991293 follows Righteous Fury through a relog. The attacker carries QA aura 25848 (+10 crit) so the 0 clamp cannot hide the -6.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "paladin", "race": 1, "class": 2, "level": 60, "allow_regeneration": false }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "paladin",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_aura", "actor": "paladin", "target": "dummy", "spell": 25848, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: the Paladin starts without Divine Strength", "actor": "paladin", "metric": "has_talent", "spell": 20262, "equals": 0 },
+    { "action": "snapshot", "actor": "paladin", "metric": "melee_crit_taken_chance", "target": "dummy", "save_as": "plain" },
+    { "action": "set_aura", "actor": "paladin", "spell": 25780, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: Righteous Fury is up", "actor": "paladin", "metric": "aura", "spell": 25780, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "Righteous Fury without talents grants no 991293", "actor": "paladin", "metric": "aura", "spell": 991293, "equals": 0, "within_ms": 1000 },
+    { "action": "talent", "actor": "paladin", "talent": 2185, "rank": 0 },
+    { "action": "assert", "label": "SETUP: Divine Strength is learned", "actor": "paladin", "metric": "has_talent", "spell": 20262, "equals": 1 },
+    { "action": "assert", "label": "A Protection talent makes Righteous Fury grant 991293", "actor": "paladin", "metric": "aura", "spell": 991293, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "Protection Righteous Fury lowers the melee crit chance taken by 6 points", "actor": "paladin", "metric": "melee_crit_taken_chance", "target": "dummy", "relative_to": "plain", "min": -6.01, "max": -5.99 },
+    { "action": "assert", "label": "Protection Righteous Fury makes the Paladin immune to daze", "actor": "paladin", "metric": "daze_taken_chance", "target": "dummy", "equals": 0 },
+    { "action": "set_aura", "actor": "paladin", "spell": 25780, "stacks": 0 },
+    { "action": "assert", "label": "Dropping Righteous Fury removes 991293", "actor": "paladin", "metric": "aura", "spell": 991293, "equals": 0, "within_ms": 1000 },
+    { "action": "set_aura", "actor": "paladin", "spell": 1125780, "stacks": 1 },
+    { "action": "assert", "label": "Reborn Righteous Fury grants 991293 to a Protection Paladin", "actor": "paladin", "metric": "aura", "spell": 991293, "equals": 1, "within_ms": 1000 },
+    { "action": "set_aura", "actor": "paladin", "spell": 1125780, "stacks": 0 },
+    { "action": "assert", "label": "Dropping Reborn Righteous Fury removes 991293", "actor": "paladin", "metric": "aura", "spell": 991293, "equals": 0, "within_ms": 1000 },
+    { "action": "set_aura", "actor": "paladin", "spell": 25780, "stacks": 1 },
+    { "action": "assert", "label": "Righteous Fury grants 991293 again", "actor": "paladin", "metric": "aura", "spell": 991293, "equals": 1, "within_ms": 1000 },
+    { "action": "relog", "actor": "paladin" },
+    { "action": "assert", "label": "SETUP: Righteous Fury survives the relog", "actor": "paladin", "metric": "aura", "spell": 25780, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "991293 follows Protection Righteous Fury through the relog", "actor": "paladin", "metric": "aura", "spell": 991293, "equals": 1, "within_ms": 3000 },
+    { "action": "reset_talents", "actor": "paladin" },
+    { "action": "assert", "label": "SETUP: the reset removed Divine Strength", "actor": "paladin", "metric": "has_talent", "spell": 20262, "equals": 0 },
+    { "action": "assert", "label": "SETUP: Righteous Fury stays through the talent reset", "actor": "paladin", "metric": "aura", "spell": 25780, "equals": 1 },
+    { "action": "assert", "label": "A talent reset removes 991293", "actor": "paladin", "metric": "aura", "spell": 991293, "equals": 0, "within_ms": 1000 },
+    { "action": "talent", "actor": "paladin", "talent": 1407, "rank": 0 },
+    { "action": "talent", "actor": "paladin", "talent": 1407, "rank": 1 },
+    { "action": "assert", "label": "SETUP: two Benediction ranks are learned", "actor": "paladin", "metric": "has_talent", "spell": 20102, "equals": 1 },
+    { "action": "assert", "label": "Retribution as the main tree grants no 991293", "actor": "paladin", "metric": "aura", "spell": 991293, "equals": 0, "within_ms": 1000 },
+    { "action": "talent", "actor": "paladin", "talent": 2185, "rank": 0 },
+    { "action": "assert", "label": "SETUP: one Divine Strength rank is learned", "actor": "paladin", "metric": "has_talent", "spell": 20262, "equals": 1 },
+    { "action": "assert", "label": "One Protection point under two Retribution points grants no 991293", "actor": "paladin", "metric": "aura", "spell": 991293, "equals": 0, "within_ms": 1000 },
+    { "action": "talent", "actor": "paladin", "talent": 2185, "rank": 1 },
+    { "action": "talent", "actor": "paladin", "talent": 2185, "rank": 2 },
+    { "action": "assert", "label": "SETUP: three Divine Strength ranks are learned", "actor": "paladin", "metric": "has_talent", "spell": 20264, "equals": 1 },
+    { "action": "assert", "label": "Protection leading Retribution makes Righteous Fury grant 991293", "actor": "paladin", "metric": "aura", "spell": 991293, "equals": 1, "within_ms": 1000 }
+  ]
+}

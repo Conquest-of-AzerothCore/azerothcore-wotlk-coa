@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Freedom to Ruul: Ruul Snowhoof can fight the Thistlefur once escorted (#8624)",
+  "contract": "Ruul Snowhoof (12818) sets REACT_AGGRESSIVE on accepting 6482 but kept faction 714, which FactionTemplate.dbc makes neutral to the Thistlefur faction 82 both ways, so IsValidAttackTarget rejected every furbolg and he walked through them. Accepting 6482 now switches him to escortee faction 232, hostile to monsters. Before the accept Ruul cannot attack a Thistlefur Ursa (3921); after it his faction is 232 and he can.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": 3347.35, "y": -694.701, "z": 159.926, "o": 0 },
+  "players": [
+    { "id": "hero", "race": 2, "class": 1, "level": 26, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "set_health", "actor": "hero", "value": 1000000, "maximum": 1000000 },
+    { "action": "summon", "label": "Spawn Ruul Snowhoof", "actor": "hero", "entry": 12818, "as": "ruul", "distance": 3 },
+    { "action": "summon", "label": "Spawn a Thistlefur Ursa", "actor": "hero", "entry": 3921, "as": "ursa", "distance": 8, "unowned": true },
+    { "action": "assert", "label": "CONTROL: Ruul starts with his template faction 714", "actor": "ruul", "metric": "faction", "equals": 714, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTROL: faction 714 cannot attack the Thistlefur before the escort", "actor": "ruul", "metric": "can_attack", "target": "ursa", "equals": 0 },
+    { "action": "quest_accept", "label": "Accept Freedom to Ruul (6482) from Ruul", "actor": "hero", "quest": 6482, "entry": 12818 },
+    { "action": "assert", "label": "6482 in log", "actor": "hero", "metric": "quest_status", "quest": 6482, "equals": 3, "within_ms": 5000 },
+    { "action": "assert", "label": "Ruul switches to escortee faction 232", "actor": "ruul", "metric": "faction", "equals": 232, "within_ms": 5000 },
+    { "action": "assert", "label": "DISCRIMINATING: the escorted Ruul can attack the Thistlefur", "actor": "ruul", "metric": "can_attack", "target": "ursa", "equals": 1, "within_ms": 3000 }
+  ]
+}

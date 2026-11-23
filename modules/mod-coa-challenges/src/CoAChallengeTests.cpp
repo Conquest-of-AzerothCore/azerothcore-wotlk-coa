@@ -1587,7 +1587,7 @@ namespace CoAChallenges
             Quest const* talk = sObjectMgr->GetQuestTemplate(RuleTestFirstQuest(
                 [](Quest const* q) { return IsQuestWithoutObjectives(q); }));
             Quest const* work = sObjectMgr->GetQuestTemplate(RuleTestFirstQuest(
-                [](Quest const* q) { return !IsFetchOrCollectionQuest(q); }));
+                [](Quest const* q) { return q->GetReqItemsCount() && !q->GetReqCreatureOrGOcount(); }));
             if (!talk || !work) return true;
             uint32 talkXp = 1000;
             sScriptMgr->OnPlayerQuestComputeXP(p, talk, talkXp);

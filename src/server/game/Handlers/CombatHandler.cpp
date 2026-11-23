@@ -62,6 +62,13 @@ void WorldSession::HandleAttackSwingOpcode(WorldPacket& recvData)
         }
     }
 
+    // Unit::Attack refuses mounted players; combat mounts such as the Tinker Mechsuit keep the player mounted
+    if (_player->IsMounted())
+    {
+        _player->SendMeleeAttackStop(pEnemy);
+        return;
+    }
+
     _player->Attack(pEnemy, true);
 }
 

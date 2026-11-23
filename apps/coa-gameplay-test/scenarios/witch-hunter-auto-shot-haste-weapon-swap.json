@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "name": "Witch Hunter: Auto Shot's +15% ranged attack speed follows every ranged weapon swap (O-21)",
+  "contract": "Auto Shot 75 reads 'Increases your ranged Attack Speed by 15%.' for a holder of 552011, which the live baseline grants to the Witch Hunter (owner ruling O-21, mentor D-127). Witch Hunter code applies it through Unit::ApplyAttackTimePercentMod(RANGED_ATTACK, 15, apply), the call an aura 140 of amount 15 makes, so the ranged base attack time (UNIT_FIELD_BASEATTACKTIME + 2) is the weapon delay x 100 / 115. A CustomData flag makes the sync idempotent on login, learn and forget. Every assert window is the expected value +-1 ms; it excludes the lost bonus (the weapon delay) and a doubled bonus (delay x (100 / 115)^2 = delay / 1.3225). Weapon delays: Old Blunderbuss 2508 2300 ms, Light Crossbow 15807 2500 ms, Heavy Crossbow 15809 2800 ms (item_template delay). Each swap writes the new delay through Unit::SetAttackTime, which multiplies it by the existing factor, so each weapon reads its delay x 100 / 115 and the bonus is neither lost nor applied twice.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "wh",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Guns skill",
+      "actor": "wh",
+      "spell": 266
+    },
+    {
+      "action": "learn",
+      "label": "Crossbows skill",
+      "actor": "wh",
+      "spell": 5011
+    },
+    {
+      "action": "add_item",
+      "actor": "wh",
+      "item": 2508
+    },
+    {
+      "action": "add_item",
+      "actor": "wh",
+      "item": 15809
+    },
+    {
+      "action": "add_item",
+      "actor": "wh",
+      "item": 15807
+    },
+    {
+      "action": "equip",
+      "actor": "wh",
+      "item": 2508,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "label": "Let the weapon swap cooldown expire",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Gun: 2300 x 100 / 115 = 2000.00 ms",
+      "actor": "wh",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 1999.0,
+      "max": 2001.0,
+      "within_ms": 3000
+    },
+    {
+      "action": "equip",
+      "label": "Swap to the Heavy Crossbow",
+      "actor": "wh",
+      "item": 15809,
+      "slot": 17
+    },
+    {
+      "action": "assert",
+      "label": "Heavy Crossbow: 2800 x 100 / 115 = 2434.78 ms",
+      "actor": "wh",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 2433.78,
+      "max": 2435.78,
+      "within_ms": 3000
+    },
+    {
+      "action": "equip",
+      "label": "Swap to the Light Crossbow",
+      "actor": "wh",
+      "item": 15807,
+      "slot": 17
+    },
+    {
+      "action": "assert",
+      "label": "Light Crossbow: 2500 x 100 / 115 = 2173.91 ms",
+      "actor": "wh",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 2172.91,
+      "max": 2174.91,
+      "within_ms": 3000
+    },
+    {
+      "action": "equip",
+      "label": "Swap back to the gun",
+      "actor": "wh",
+      "item": 2508,
+      "slot": 17
+    },
+    {
+      "action": "assert",
+      "label": "Gun again: 2300 x 100 / 115 = 2000.00 ms",
+      "actor": "wh",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 1999.0,
+      "max": 2001.0,
+      "within_ms": 3000
+    },
+    {
+      "action": "relog",
+      "label": "Relog with the gun",
+      "actor": "wh"
+    },
+    {
+      "action": "assert",
+      "label": "Gun after a relog: 2300 x 100 / 115 = 2000.00 ms",
+      "actor": "wh",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "min": 1999.0,
+      "max": 2001.0,
+      "within_ms": 3000
+    }
+  ]
+}

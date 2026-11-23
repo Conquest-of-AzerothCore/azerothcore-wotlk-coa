@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "name": "Command: Bonefreeze ends once several hits below its damage cap add up past it (#12435)",
+  "contract": [
+    "Command: Bonefreeze 504489 makes a Skeletal Mage 50075 cast Bonefreeze 504845 (8 yd area at the target, 40 s,",
+    "two MOD_ROOT effects). Since Necromancer ADR 0082 it breaks on the stock damage cap: each root effect gets",
+    "BaseHealth(level 60, class 1, expansion 2) / 4.75 = int32(4979 / 4.75) = 1048, the magic-negative taken proc",
+    "flag lets Lichfrost proc it, and HandleBreakableCCAuraProc subtracts every hit from the remaining amount and",
+    "removes the freeze at 0, so damage accumulates. A Necromancer raises one Skeletal Mage, Commands the freeze",
+    "on the primary dummy and sets Undead: Pacify 500983 right after the Command (precondition fixture: the Mage's",
+    "damage is blocked, so only Lichfrost erodes the cap; owned_creature_damage_count 50075 must stay 0). A control",
+    "dummy 4 yd from the primary is inside the freeze and never hit. Fixtures: Reg's Test Aura 984954 (no spell",
+    "crit), beeg spellpen 823764 (no partial resist), spell hit rating 10000 (no miss) and QA Test 10000% Increased",
+    "Frost Damage 13055 with its amount set to +20. Lichfrost 501978 rolls 569 to 597 (Effect[0] 568 + 1d29) at",
+    "Frost spell power 0, so one hit deals about 682 to 716: at least 332 below the cap, and two hits deal at least",
+    "1364: at least 316 above it. The bands asserted on the dummy's Lichfrost damage (670 to 730 for one hit,",
+    "1340 to 1460 for two) keep both margins above 290. After the first Lichfrost the primary is still frozen; after",
+    "the second, with each hit below the cap and their sum above it, the freeze is gone, while the control dummy",
+    "stays frozen, so the freeze ended on damage and not on its duration.",
+    "Both root effects are read as aura_amount: 1048 before any damage and 318 to 378 (the cap minus the 670 to 730",
+    "band) after the first hit, so a wrong initial cap or a wrong debit fails apart from the freeze reads."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 23,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "primary",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.0,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "control",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 7.0,
+      "stationary": true,
+      "min_level_armor": true
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "caster", "spell": 501978 },
+    { "action": "learn", "actor": "caster", "spell": 500331 },
+    { "action": "learn", "actor": "caster", "spell": 504489 },
+    { "action": "set_aura", "actor": "caster", "spell": 984954, "stacks": 1 },
+    { "action": "set_aura", "actor": "caster", "spell": 823764, "stacks": 1 },
+    { "action": "set_aura", "actor": "caster", "spell": 13055, "stacks": 1, "effect": 0, "amount": 20 },
+    { "action": "set_power", "actor": "caster", "power": 0, "value": 1373 },
+    { "action": "cast", "actor": "caster", "spell": 500331, "target": "caster" },
+    { "action": "wait", "label": "Raise the Skeletal Mage", "ms": 3600 },
+    { "action": "set_power", "actor": "caster", "power": 6, "value": 300 },
+    { "action": "select", "actor": "caster", "target": "primary" },
+    { "action": "cast", "actor": "caster", "spell": 504489, "target": "primary" },
+    {
+      "action": "set_aura", "label": "Undead: Pacify keeps the Mage's damage off",
+      "actor": "caster", "spell": 500983, "stacks": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the primary dummy is frozen",
+      "actor": "primary", "metric": "aura", "spell": 504845, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "SETUP: the control dummy is frozen",
+      "actor": "control", "metric": "aura", "spell": 504845, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Root effect 0 starts with the full 1048 damage cap",
+      "actor": "primary", "metric": "aura_amount", "spell": 504845, "effect": 0, "equals": 1048
+    },
+    {
+      "action": "assert", "label": "Root effect 1 starts with the full 1048 damage cap",
+      "actor": "primary", "metric": "aura_amount", "spell": 504845, "effect": 1, "equals": 1048
+    },
+    { "action": "set_power", "actor": "caster", "power": 0, "value": 1373 },
+    { "action": "cast", "actor": "caster", "spell": 501978, "target": "primary" },
+    { "action": "wait", "label": "First Lichfrost: 2.5 s cast and flight", "ms": 3200 },
+    {
+      "action": "assert", "label": "SETUP: one Lichfrost hit landed on the primary dummy",
+      "actor": "caster", "metric": "spell_damage_count", "spell": 501978, "target": "primary", "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the first hit stays well below the 1048 cap",
+      "actor": "caster", "metric": "spell_damage_total", "spell": 501978, "target": "primary", "min": 670, "max": 730
+    },
+    {
+      "action": "assert", "label": "One hit below the cap leaves the freeze on",
+      "actor": "primary", "metric": "aura", "spell": 504845, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Root effect 0 keeps the cap minus the first hit",
+      "actor": "primary", "metric": "aura_amount", "spell": 504845, "effect": 0, "min": 318, "max": 378
+    },
+    {
+      "action": "assert", "label": "Root effect 1 keeps the cap minus the first hit",
+      "actor": "primary", "metric": "aura_amount", "spell": 504845, "effect": 1, "min": 318, "max": 378
+    },
+    { "action": "set_power", "actor": "caster", "power": 0, "value": 1373 },
+    { "action": "cast", "actor": "caster", "spell": 501978, "target": "primary" },
+    { "action": "wait", "label": "Second Lichfrost: 2.5 s cast and flight", "ms": 3200 },
+    {
+      "action": "assert", "label": "SETUP: a second Lichfrost hit landed on the primary dummy",
+      "actor": "caster", "metric": "spell_damage_count", "spell": 501978, "target": "primary", "equals": 2
+    },
+    {
+      "action": "assert", "label": "SETUP: the two hits add up well above the 1048 cap",
+      "actor": "caster", "metric": "spell_damage_total", "spell": 501978, "target": "primary", "min": 1340, "max": 1460
+    },
+    {
+      "action": "assert", "label": "SETUP: the Skeletal Mage dealt no damage",
+      "actor": "caster", "metric": "owned_creature_damage_count", "entry": 50075, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Two hits below the cap whose sum passes it end the freeze",
+      "actor": "primary", "metric": "aura", "spell": 504845, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: the undamaged dummy is still frozen",
+      "actor": "control", "metric": "aura", "spell": 504845, "equals": 1
+    }
+  ]
+}

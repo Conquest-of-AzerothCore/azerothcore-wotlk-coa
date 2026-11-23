@@ -1,0 +1,406 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Jeklik calls six bats every 30 s in both forms, and Crazed Bat Riders on Mythic",
+  "contract": [
+    "On live Jeklik (14517) brings six Bloodseeker Bats (11368) every 30 s in her troll and her bat form, and in",
+    "her bat form on Mythic and Ascended a Crazed Bat Rider (14914) on a Frenzied Bloodseeker Bat (14965) every",
+    "30 s, the first 6 s in, in place of stock's two Gurubashi Bat Riders (14750) (round-5 tester and live logs).",
+    "Our Jeklik called bats only as a troll, once a minute, and on Mythic a lone frenzied bat without its rider.",
+    "The waves come 52 s into the fight and every 30 s after. The pair circles out of reach while the rider",
+    "throws Liquid Fire, until the bat dives 16-56 s after it came and the rider can be struck. A Mythic Jeklik",
+    "is wounded into her bat form after landing; a Normal Jeklik stays a troll for two waves, then is wounded",
+    "into her bat form for a third, and calls no Crazed Bat Rider. Bats fight the heroes, who do not strike back,",
+    "so every wave stays; liquid fire is read from the heroes' own combat log, and the dive from the bat's Frenzy.",
+    "Summoned beside a hero, Jeklik engages in the same tick as her Reset casts Green Channeling (13540). The",
+    "channel never expires and she does nothing while she casts, so her engage interrupts it; before, it lasted",
+    "until a damaging swing landed, and a hero who kept missing faced an idle Jeklik that called no wave. A",
+    "second rider comes 30 s after the first, so the dived rider is read once its bat has reached the hero and is",
+    "the nearest rider."
+  ],
+  "timeout_ms": 360000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "mythic",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "normal",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 309,
+      "x": -12273.9,
+      "y": -1407.77,
+      "z": 132.223,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 309,
+      "x": -12273.9,
+      "y": -1407.77,
+      "z": 132.223,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: mythic is in Zul'Gurub on Mythic",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: normal is in Zul'Gurub on Normal",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 14517,
+      "as": "jeklik_mythic",
+      "distance": 4
+    },
+    {
+      "action": "summon",
+      "actor": "normal",
+      "entry": 14517,
+      "as": "jeklik_normal",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Jeklik engages the hero beside her without a swing",
+      "actor": "jeklik_mythic",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: her engage ends Green Channeling before any swing",
+      "actor": "jeklik_mythic",
+      "metric": "aura",
+      "spell": 13540,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and she is no longer channeling",
+      "actor": "jeklik_mythic",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "mythic",
+      "target": "jeklik_mythic"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Jeklik fights",
+      "actor": "jeklik_mythic",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Jeklik engages and ends her Green Channeling before the hero stops",
+      "actor": "jeklik_mythic",
+      "metric": "aura",
+      "spell": 13540,
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mythic"
+    },
+    {
+      "action": "attack",
+      "actor": "normal",
+      "target": "jeklik_normal"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Jeklik fights",
+      "actor": "jeklik_normal",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Jeklik engages and ends her Green Channeling before the hero stops",
+      "actor": "jeklik_normal",
+      "metric": "aura",
+      "spell": 13540,
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "normal"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the mythic Jeklik lands from her intro flight",
+      "actor": "jeklik_mythic",
+      "metric": "aura",
+      "spell": 23966,
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the normal Jeklik lands from her intro flight",
+      "actor": "jeklik_normal",
+      "metric": "aura",
+      "spell": 23966,
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "normal",
+      "metric": "nearby_creature_count",
+      "entry": 11368,
+      "save_as": "bats_at_landing"
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound the mythic Jeklik below half health",
+      "actor": "mythic",
+      "target": "jeklik_mythic",
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the mythic Jeklik takes her bat form",
+      "actor": "jeklik_mythic",
+      "metric": "aura",
+      "spell": 2106122,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Mythic Jeklik calls a Crazed Bat Rider 6 s into her bat form",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 14914,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the rider rides a Frenzied Bloodseeker Bat",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 14965,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the rider is out of reach before the dive",
+      "actor": "mythic",
+      "metric": "nearby_creature_can_attack",
+      "entry": 14914,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the rider's Liquid Fire burns the hero",
+      "actor": "mythic",
+      "metric": "owned_creature_damage_count",
+      "entry": 14914,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the bat dives within 56 s, frenzied, at the hero",
+      "actor": "mythic",
+      "metric": "nearby_creature_aura_count",
+      "entry": 14965,
+      "spell": 2106160,
+      "min": 1,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: after the dive its rider, nearest once the bat reaches the hero, can be struck",
+      "actor": "mythic",
+      "metric": "nearby_creature_can_attack",
+      "entry": 14914,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: six Bloodseeker Bats come while the Normal Jeklik is a troll",
+      "actor": "normal",
+      "metric": "nearby_creature_count",
+      "entry": 11368,
+      "relative_to": "bats_at_landing",
+      "min": 6,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: six more come 30 s later",
+      "actor": "normal",
+      "metric": "nearby_creature_count",
+      "entry": 11368,
+      "relative_to": "bats_at_landing",
+      "min": 12,
+      "within_ms": 35000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Jeklik is still a troll",
+      "actor": "jeklik_normal",
+      "metric": "aura",
+      "spell": 2106122,
+      "equals": 0
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound the normal Jeklik below half health",
+      "actor": "normal",
+      "target": "jeklik_normal",
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the normal Jeklik takes her bat form",
+      "actor": "jeklik_normal",
+      "metric": "aura",
+      "spell": 2106122,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "snapshot",
+      "actor": "normal",
+      "metric": "nearby_creature_count",
+      "entry": 11368,
+      "save_as": "bats_at_bat_form"
+    },
+    {
+      "action": "wait",
+      "label": "Past the 30 s at which a Mythic Jeklik calls her frenzied bat",
+      "ms": 35000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Jeklik is still fighting",
+      "actor": "jeklik_normal",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: six Bloodseeker Bats come in her bat form",
+      "actor": "normal",
+      "metric": "nearby_creature_count",
+      "entry": 11368,
+      "relative_to": "bats_at_bat_form",
+      "min": 6
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Normal Jeklik never calls a frenzied bat",
+      "actor": "normal",
+      "metric": "nearby_creature_count",
+      "entry": 14965,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Normal Jeklik never calls a Crazed Bat Rider",
+      "actor": "normal",
+      "metric": "nearby_creature_count",
+      "entry": 14914,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Crazed Bat Rider's Liquid Fire reached the Normal hero",
+      "actor": "normal",
+      "metric": "owned_creature_damage_count",
+      "entry": 14914,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic hero survived",
+      "actor": "mythic",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal hero survived",
+      "actor": "normal",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

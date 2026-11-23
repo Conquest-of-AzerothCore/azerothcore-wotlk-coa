@@ -42,6 +42,10 @@ enum
     SPELL_SCHOOL_MASK_FROST = 0x10,
     SPELL_SCHOOL_MASK_ARCANE = 0x40
 };
+enum SpellAttr3 : uint32
+{
+    SPELL_ATTR3_ONLY_ON_PLAYER = 0x100
+};
 enum SpellCastResult
 {
     SPELL_CAST_OK,
@@ -96,6 +100,10 @@ struct SpellInfo
     int32 GetDuration() const
     {
         return duration;
+    }
+    bool HasAttribute(SpellAttr3 attribute) const
+    {
+        return (AttributesEx3 & attribute) != 0;
     }
     uint32 GetRank() const
     {
@@ -186,7 +194,7 @@ struct Unit
     }
     uint32 guid = 1;
     float x = 0;
-    bool alive = true, world = true, phase = true, los = true, friendly = true, accept = true;
+    bool alive = true, world = true, phase = true, los = true, friendly = true, accept = true, playerUnit = true;
     std::map<uint32, Aura> auras;
     std::vector<Cast> casts;
     uint32 GetGUID() const
@@ -196,6 +204,10 @@ struct Unit
     bool IsAlive() const
     {
         return alive;
+    }
+    bool IsPlayer() const
+    {
+        return playerUnit;
     }
     bool IsInWorld() const
     {

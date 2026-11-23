@@ -147,9 +147,8 @@
       "action": "assert",
       "label": "Spell description explains the caster requirement",
       "actor": "cleric",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 680639,
+      "metric": "client_spell_row_contains",
+      "spell": 680639,
       "text": "Requires |cffffffffDawn|r",
       "equals": 1
     }

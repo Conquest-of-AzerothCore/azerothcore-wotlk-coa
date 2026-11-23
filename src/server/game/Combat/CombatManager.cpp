@@ -31,6 +31,7 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "ThreatManager.h"
+#include "TrainingDummyDefines.h"
 #include "Unit.h"
 #include "UnitAI.h"
 
@@ -62,7 +63,18 @@
         return false;
     // ...not friendly, unless one side is hostile (asymmetric aggressor wins)
     if ((a->IsFriendlyTo(b) || b->IsFriendlyTo(a)) && !a->IsHostileTo(b) && !b->IsHostileTo(a))
-        return false;
+    {
+        auto isHealingPractice = [](Unit const* dummy, Unit const* participant)
+        {
+            Creature const* creature = dummy->ToCreature();
+            return creature && participant->GetCharmerOrOwnerPlayerOrPlayerItself()
+                && creature->GetEntry() == 666935
+                && creature->GetScriptName() == "npc_advanced_training_dummy" && creature->IsAIEnabled
+                && creature->AI()->GetData(DATA_HEALING_PRACTICE_ACTIVE);
+        };
+        if (!isHealingPractice(a, b) && !isHealingPractice(b, a))
+            return false;
+    }
     Player const* playerA = a->GetCharmerOrOwnerPlayerOrPlayerItself();
     Player const* playerB = b->GetCharmerOrOwnerPlayerOrPlayerItself();
     // ...neither of the two units must be (owned by) a player with .gm on

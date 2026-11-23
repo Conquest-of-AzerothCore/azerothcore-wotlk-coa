@@ -1,0 +1,336 @@
+{
+  "schema": 1,
+  "name": "The Carrion Road: the map marks the Carrion Path objective (#12955)",
+  "contract": "#12955: The Carrion Road (1660012) showed no map area for its second objective, 'Carrion Path traversed' (credit 161729 through areatrigger 6138 SmartAI). rev_20261009_30_coa_quest_poi_restore.sql drew areas only from kill and loot sources, and rev_20261018_40_coa_quest_objective_map_areas.sql skipped quests that already had an objective area. The fix adds POI id 2 for ObjectiveIndex 1: the 40 x 40 yd box rev_20261018_40 uses for a single spot, centred on areatrigger 6138 (10687.4, 597.43; client AreaTrigger.dbc) and containing the client's objective point SuperTrack 8666 (QuestSuperTrack 32529), on the turn-in row's WorldMapAreaId 41. This case sends the CMSG_QUEST_POI_QUERY a real client sends and reads SMSG_QUEST_POI_QUERY_RESPONSE; the existing turn-in pin and treant area must stay. A control query for 17003, which the character does not carry, must come back empty.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 1,
+    "x": 10694.8,
+    "y": 594.1,
+    "z": 1380.9,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 4,
+      "class": 1,
+      "level": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 1660012 'The Carrion Road' unfinished",
+      "actor": "c",
+      "quest": 1660012,
+      "complete": false
+    },
+    {
+      "action": "client_packet",
+      "label": "CONTROL: ask the map to mark 17003, a quest this character does not carry",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 17003
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the answer names 17003, so the packet being read is this query's own answer",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 17003,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a quest outside the log gets no POIs",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 1660012 'The Carrion Road', as the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 1660012
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 1660012's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 1660012,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 1660012 answers with 3 POIs: the turn-in pin, the treant area and the Carrion Path area",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 0 is the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 0 carries ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 0 has 1 point",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 1 follows the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 1 marks the Carrion Treants (ObjectiveIndex 0)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 1 keeps its 7-point treant area",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 7,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: POI id 2 follows the treant area",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 140,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: POI id 2 marks Carrion Path traversed (ObjectiveIndex 1)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 144,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 2 is on map 1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 148,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 2 is drawn on WorldMapAreaId 41",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 152,
+      "index": 0,
+      "equals": 41,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 2 is a 4-corner area",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 168,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 2 corner 1 x 10707",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 172,
+      "index": 0,
+      "equals": 10707,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 2 corner 1 y 617",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 176,
+      "index": 0,
+      "equals": 617,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 2 corner 2 x 10707",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 180,
+      "index": 0,
+      "equals": 10707,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 2 corner 2 y 577",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 184,
+      "index": 0,
+      "equals": 577,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 2 corner 3 x 10667",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 188,
+      "index": 0,
+      "equals": 10667,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 2 corner 3 y 577",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 192,
+      "index": 0,
+      "equals": 577,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 2 corner 4 x 10667",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 196,
+      "index": 0,
+      "equals": 10667,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 2 corner 4 y 617",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 200,
+      "index": 0,
+      "equals": 617,
+      "within_ms": 4000
+    }
+  ]
+}

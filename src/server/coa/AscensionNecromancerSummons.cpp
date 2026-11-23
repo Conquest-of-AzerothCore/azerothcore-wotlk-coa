@@ -22,6 +22,7 @@
 #include "WorldSession.h"
 #include <algorithm>
 #include <cmath>
+#include <optional>
 
 namespace AscensionNecromancer
 {
@@ -33,7 +34,7 @@ bool Stationary(uint32 entry)
 }
 bool Ranged(uint32 entry)
 {
-    return entry == 50076 || entry == 50075 || entry == 50323 || entry == 50177 || entry == 50067;
+    return entry == 50076 || entry == 50075 || entry == 50323 || entry == 50177;
 }
 bool InReach(Creature const* minion, Unit const* target)
 {
@@ -44,13 +45,17 @@ bool Follows(uint32 entry)
 {
     return !Stationary(entry) && entry != 523032 && entry != 542065;
 }
-bool PlayerInCloud(Creature* minion, uint32 spell)
+bool EmitsZombiePlague(uint32 entry)
 {
-    SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
-    for (Unit* unit : Nearby(minion, info->Effects[EFFECT_0].CalcRadius(minion)))
-        if (unit->GetCharmerOrOwnerPlayerOrPlayerItself() && minion->_IsValidAttackTarget(unit, info))
-            return true;
-    return false;
+    return entry == 503030 || entry == 503031 || entry == 503032;
+}
+Milliseconds ZombiePlaguePeriod()
+{
+    return Milliseconds(sSpellMgr->GetSpellInfo(504023)->Effects[EFFECT_0].Amplitude);
+}
+Milliseconds BonestormSpinAndRest()
+{
+    return Milliseconds(2 * sSpellMgr->GetSpellInfo(801412)->GetDuration());
 }
 bool Travelling(Player const* player)
 {
@@ -105,6 +110,8 @@ uint32 ChampionAura(uint32 entry)
         return 808017;
     case 500484:
         return 807812;
+    case 50115:
+        return 520376;
     default:
         return 0;
     }
@@ -118,7 +125,7 @@ uint32 AttackSpell(uint32 entry)
     case 500650:
         return 572211;
     case 50075:
-        return 801513;
+        return 805955;
     case 50076:
         return 800609;
     case 50323:
@@ -144,6 +151,10 @@ void Evict(Player* player, int32 needed)
             unit->DespawnOrUnsummon();
     }
 }
+}
+bool FollowsOwner(uint32 entry)
+{
+    return Follows(entry);
 }
 bool Responds(uint32 entry, uint32 command)
 {
@@ -522,7 +533,8 @@ class npc_ascension_necromancer : public ScriptedAI
         me->SetHealth(me->GetMaxHealth());
         me->SetPower(POWER_MANA, me->GetMaxPower(POWER_MANA));
         if (_cost && player->HasAura(504866))
-            player->CastCustomSpell(505224, SPELLVALUE_BASE_POINT0, int32(me->CountPctFromMaxHealth(40)), me, true);
+            player->CastCustomSpell(SummonShield, SPELLVALUE_BASE_POINT0, int32(me->CountPctFromMaxHealth(40)), me,
+                                    true);
         if (me->GetEntry() == 50073)
             player->AddAura(805290, me);
         if (uint32 occupancy = OccupancyAura(me->GetEntry()))
@@ -545,10 +557,16 @@ class npc_ascension_necromancer : public ScriptedAI
         }
         _events.ScheduleEvent(1, 1ms);
         _events.ScheduleEvent(2, 2s);
+        if (me->GetEntry() == 50385)
+            _events.ScheduleEvent(10, 1s);
         if (me->GetEntry() == 50133 || me->GetEntry() == 50303)
             _events.ScheduleEvent(3, Milliseconds(sSpellMgr->GetSpellInfo(807640)->Effects[1].Amplitude));
         if (me->GetEntry() == 542064)
             _events.ScheduleEvent(4, 2s);
+        if (EmitsZombiePlague(me->GetEntry()))
+            _events.ScheduleEvent(11, ZombiePlaguePeriod());
+        if (me->GetEntry() == 50309)
+            _events.ScheduleEvent(12, 1s);
         if (me->GetEntry() == 50177)
         {
             me->SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 3.0f);
@@ -580,6 +598,13 @@ class npc_ascension_necromancer : public ScriptedAI
     {
         if (key == 1)
             _target = guid;
+    }
+    void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType, SpellSchoolMask) override
+    {
+        Player* player = Owner(me);
+        if (me->GetEntry() == 50068 && damage && attacker && player && !Pacified(player) &&
+            !me->HasUnitState(UNIT_STATE_CONTROLLED) && player->IsValidAttackTarget(attacker))
+            Cast(me, me, 802353);
     }
     void JustDied(Unit*) override
     {
@@ -663,9 +688,7 @@ class npc_ascension_necromancer : public ScriptedAI
         }
         if (_command == 504489)
         {
-            for (Unit* unit : Nearby(target, 8.0f))
-                if (player->IsValidAttackTarget(unit))
-                    Cast(me, unit, 504845);
+            Cast(me, target, 504845);
             return;
         }
         if (_command == 504050)
@@ -683,6 +706,9 @@ class npc_ascension_necromancer : public ScriptedAI
         case 50073:
             Cast(me, target, 801514);
             break;
+        case 50075:
+            Cast(me, target, 801513);
+            break;
         case 50068:
             Copy(me, me, 504022, std::max(1, Amount(504022, 0, player) + Amount(505223, 1, player)));
             break;
@@ -696,7 +722,7 @@ class npc_ascension_necromancer : public ScriptedAI
         case 500650:
         {
             uint32 mana = std::min<uint32>(target->GetPower(POWER_MANA), std::min(target->GetMaxPower(POWER_MANA) / 10,
-                                                                                  me->GetMaxPower(POWER_MANA) / 5));
+                                                                                  player->GetMaxPower(POWER_MANA) / 5));
             target->ModifyPower(POWER_MANA, -int32(mana));
             if (_command != 504864)
                 Copy(me, target, 505225, mana);
@@ -817,8 +843,6 @@ class npc_ascension_necromancer : public ScriptedAI
             {
                 if (!Pacified(player) && !me->HasUnitState(UNIT_STATE_CONTROLLED))
                 {
-                    if (me->GetEntry() == 50068 && (me->IsInCombat() || PlayerInCloud(me, 802353)))
-                        Cast(me, me, 802353);
                     if (Unit* victim = me->GetVictim(); victim && InReach(me, victim))
                         if (uint32 ability = AttackSpell(me->GetEntry()))
                             if (!me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
@@ -846,8 +870,11 @@ class npc_ascension_necromancer : public ScriptedAI
             if (event == 6 && !Pacified(player) && !me->HasUnitState(UNIT_STATE_CONTROLLED))
                 if (Unit* victim = ObjectAccessor::GetUnit(*me, _target))
                     if (me->IsWithinMeleeRange(victim))
-                        for (uint8 hit = 0; hit < (victim->HealthBelowPct(35) ? 5 : 2); ++hit)
+                    {
+                        int32 const strikes = victim->HealthBelowPct(35) ? 5 : Amount(805938, 0, me);
+                        for (int32 hit = 0; hit < strikes; ++hit)
                             me->AttackerStateUpdate(victim, BASE_ATTACK, true);
+                    }
             if (event == 7)
             {
                 me->ToTempSummon()->SetTempSummonType(TEMPSUMMON_CORPSE_TIMED_DESPAWN);
@@ -871,6 +898,30 @@ class npc_ascension_necromancer : public ScriptedAI
                     for (Unit* blasted : Nearby(enemy, 10.0f))
                         if (player->IsValidAttackTarget(blasted))
                             Cast(me, blasted, 807339);
+            if (event == 10)
+            {
+                if (!Pacified(player) && !me->HasUnitState(UNIT_STATE_CONTROLLED))
+                    if (Unit* victim = me->GetVictim(); victim && player->IsValidAttackTarget(victim))
+                        Cast(me, victim, 704706);
+                _events.ScheduleEvent(10, 1s);
+            }
+            if (event == 11)
+            {
+                if (!Pacified(player) && !me->HasUnitState(UNIT_STATE_CONTROLLED) && me->GetVictim())
+                    Cast(me, me, 504022);
+                _events.ScheduleEvent(11, ZombiePlaguePeriod());
+            }
+            if (event == 12)
+            {
+                if (!Pacified(player) && !me->HasUnitState(UNIT_STATE_CONTROLLED) && me->GetVictim() &&
+                    !me->HasAura(801412))
+                {
+                    Cast(me, me, 801412);
+                    _events.ScheduleEvent(12, BonestormSpinAndRest());
+                }
+                else
+                    _events.ScheduleEvent(12, 1s);
+            }
         }
         if (me->GetEntry() == 523032 && !_exploded)
             for (Unit* nearby : Nearby(me, 2.5f))
@@ -963,6 +1014,109 @@ class spell_ascension_necromancer_warrior_strike : public SpellScript
     }
 };
 
+class spell_ascension_necromancer_command_area : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_necromancer_command_area);
+
+    static std::optional<Targets> EnemyArea(SpellEffectInfo const& effect)
+    {
+        for (Targets target : {effect.TargetA.GetTarget(), effect.TargetB.GetTarget()})
+            switch (target)
+            {
+                case TARGET_UNIT_SRC_AREA_ENEMY:
+                case TARGET_UNIT_CONE_ENEMY_24:
+                case TARGET_UNIT_CONE_ENEMY_54:
+                case TARGET_UNIT_CONE_ENEMY_104:
+                    return target;
+                default:
+                    break;
+            }
+        return std::nullopt;
+    }
+
+    static bool AvoidsArea(Creature const* creature)
+    {
+        if (creature->IsAvoidingAOE())
+            return true;
+        CreatureImmunities const* immunities =
+            sSpellMgr->GetCreatureImmunities(creature->GetCreatureTemplate()->CreatureImmunitiesId);
+        return immunities && immunities->ImmuneAoE;
+    }
+
+    static float Radians(float degrees)
+    {
+        return degrees * static_cast<float>(M_PI) / 180.0f;
+    }
+
+    float ConeAngle(Targets target)
+    {
+        if (SpellCone const* cone = sSpellMgr->GetSpellCone(GetSpellInfo()->Id))
+            return Radians(static_cast<float>(cone->cone_degrees));
+        switch (target)
+        {
+            case TARGET_UNIT_CONE_ENEMY_24:
+                return Radians(24.0f);
+            case TARGET_UNIT_CONE_ENEMY_54:
+                return Radians(54.0f);
+            case TARGET_UNIT_CONE_ENEMY_104:
+                return Radians(104.0f);
+            default:
+                return Radians(60.0f);
+        }
+    }
+
+    void Reach(std::list<WorldObject*>& targets, SpellEffIndex effIndex)
+    {
+        Unit* caster = GetCaster();
+        Player* player = Owner(caster);
+        if (!player || !IsMinion(player, caster))
+            return;
+        Creature* focus = ObjectAccessor::GetCreature(*caster, State(player).focus);
+        if (!focus || !focus->IsAlive() || !AvoidsArea(focus) ||
+            std::find(targets.begin(), targets.end(), focus) != targets.end())
+            return;
+        SpellEffectInfo const& effect = GetSpellInfo()->Effects[effIndex];
+        Targets target = *EnemyArea(effect);
+        float radius = effect.CalcRadius(caster) + caster->GetLeewayBonusRadius();
+        if (!caster->IsWithinDistInMap(focus, radius) || !caster->IsWithinLOSInMap(focus) ||
+            !caster->IsValidAttackTarget(focus, GetSpellInfo()))
+            return;
+        if (target != TARGET_UNIT_SRC_AREA_ENEMY && !caster->isInFront(focus, ConeAngle(target)))
+            return;
+        targets.push_back(focus);
+    }
+
+    void Reach0(std::list<WorldObject*>& targets) { Reach(targets, EFFECT_0); }
+    void Reach1(std::list<WorldObject*>& targets) { Reach(targets, EFFECT_1); }
+    void Reach2(std::list<WorldObject*>& targets) { Reach(targets, EFFECT_2); }
+
+    void Register() override
+    {
+        SpellInfo const* info = sSpellMgr->GetSpellInfo(m_scriptSpellId);
+        for (uint8 index = EFFECT_0; index < MAX_SPELL_EFFECTS; ++index)
+        {
+            std::optional<Targets> target = EnemyArea(info->Effects[index]);
+            if (!target)
+                continue;
+            switch (index)
+            {
+                case EFFECT_0:
+                    OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
+                        spell_ascension_necromancer_command_area::Reach0, EFFECT_0, *target);
+                    break;
+                case EFFECT_1:
+                    OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
+                        spell_ascension_necromancer_command_area::Reach1, EFFECT_1, *target);
+                    break;
+                default:
+                    OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
+                        spell_ascension_necromancer_command_area::Reach2, EFFECT_2, *target);
+                    break;
+            }
+        }
+    }
+};
+
 class npc_ascension_necromancer_script : public GenericCreatureScript<npc_ascension_necromancer>
 {
 public:
@@ -982,6 +1136,7 @@ void AddAscensionNecromancerSummonScripts()
 {
     new npc_ascension_necromancer_script();
     RegisterSpellScript(spell_ascension_necromancer_warrior_strike);
+    RegisterSpellScript(spell_ascension_necromancer_command_area);
     RegisterSpellScript(spell_ascension_necromancer_summon);
     new necromancer_minion_dismiss();
 }

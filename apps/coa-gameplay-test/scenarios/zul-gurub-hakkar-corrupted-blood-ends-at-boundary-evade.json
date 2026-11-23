@@ -1,0 +1,181 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Corrupted Blood leaves the players when Hakkar evades at his room boundary",
+  "contract": [
+    "Corrupted Blood (2118601-2118604) must leave the players when Hakkar (14834) evades as well as when he dies",
+    "(tester feedback round 6, 2026-11-13). His room check left through BossAI::EnterEvadeMode, past his own",
+    "evade handler, so a boundary evade kept the blood on the raid. In a fresh Normal instance every High Priest",
+    "is set DONE; Hakkar is summoned in front of the hero on the pyramid stairs, below the 52-yard floor of his",
+    "room, and puts his Normal Corrupted Blood on the hero; the hero pulls him, so his first update in combat",
+    "evades him through the room check."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -11834.6,
+      "y": -1671.6,
+      "z": 37.04,
+      "o": 0.0,
+      "ignore_access": true,
+      "label": "The hero stands on the pyramid stairs below Hakkar's altar"
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub on Normal",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "The raid has killed Jeklik",
+      "actor": "hero",
+      "command": ".instance setbossstate 0 3"
+    },
+    {
+      "action": "command",
+      "label": "Venoxis",
+      "actor": "hero",
+      "command": ".instance setbossstate 1 3"
+    },
+    {
+      "action": "command",
+      "label": "Mar'li",
+      "actor": "hero",
+      "command": ".instance setbossstate 2 3"
+    },
+    {
+      "action": "command",
+      "label": "Arlokk",
+      "actor": "hero",
+      "command": ".instance setbossstate 3 3"
+    },
+    {
+      "action": "command",
+      "label": "and Thekal",
+      "actor": "hero",
+      "command": ".instance setbossstate 4 3"
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14834,
+      "as": "hakkar",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar stands below his room's 52-yard floor",
+      "actor": "hakkar",
+      "metric": "position_z",
+      "max": 50.0
+    },
+    {
+      "action": "set_aura",
+      "label": "Hakkar's Normal Corrupted Blood is on the hero",
+      "actor": "hero",
+      "spell": 2118601,
+      "stacks": 1,
+      "caster": "hakkar"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero carries Corrupted Blood",
+      "actor": "hero",
+      "metric": "carried_aura_count",
+      "spells": [
+        2118601,
+        2118602,
+        2118603,
+        2118604
+      ],
+      "equals": 1
+    },
+    {
+      "action": "encounter_start",
+      "actor": "hero",
+      "boss_entry": 14834
+    },
+    {
+      "action": "attack",
+      "label": "Pull Hakkar out of his room",
+      "actor": "hero",
+      "target": "hakkar"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar engages the hero",
+      "actor": "hero",
+      "metric": "timeline_count",
+      "event": "enter_combat",
+      "source_entry": 14834,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar evades at the room boundary",
+      "actor": "hero",
+      "metric": "timeline_count",
+      "event": "evade",
+      "source_entry": 14834,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Corrupted Blood leaves the hero when he evades",
+      "actor": "hero",
+      "metric": "carried_aura_count",
+      "spells": [
+        2118601,
+        2118602,
+        2118603,
+        2118604
+      ],
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

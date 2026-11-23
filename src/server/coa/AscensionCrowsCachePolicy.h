@@ -6,6 +6,7 @@ namespace CrowsCache
 constexpr unsigned CacheItem = 1615010;
 constexpr unsigned Spite = 1005000;
 constexpr unsigned HighRisk = 1004019;
+constexpr unsigned Mercenary = 9930874;
 constexpr unsigned CrowEntry = 994310;
 constexpr unsigned ChestEntry = 994311;
 constexpr unsigned DropEntry = 994312;
@@ -73,9 +74,9 @@ enum class Phase : unsigned
     Dropped
 };
 
-constexpr bool Eligible(unsigned level, bool highRisk, bool alive)
+constexpr bool Eligible(unsigned level, bool highRisk, bool mercenary, bool alive)
 {
-    return level == 60 && highRisk && alive;
+    return level == 60 && highRisk && mercenary && alive;
 }
 
 constexpr bool CanClaim(Phase phase, bool completedCast)
@@ -101,6 +102,47 @@ constexpr bool CanOpen(bool tracked, bool eligible, unsigned area, bool combat)
 constexpr bool InterruptOpening(bool moved, unsigned damage)
 {
     return moved || damage > 0;
+}
+
+constexpr float DefaultWallRange = 100.0f;
+
+enum class DropReason : unsigned
+{
+    Death,
+    Immunity,
+    LeftMode,
+    Logout,
+    LeftMap
+};
+
+constexpr bool WallPhase(Phase phase)
+{
+    return phase == Phase::Available || phase == Phase::Carried || phase == Phase::Dropped;
+}
+
+constexpr bool Walled(bool firstMercenary, bool secondMercenary, bool eitherNearCache)
+{
+    return firstMercenary != secondMercenary && eitherNearCache;
+}
+
+constexpr bool RefuseMovement(bool carrying, bool movementEffect, bool castByAnother)
+{
+    return carrying && movementEffect && !castByAnother;
+}
+
+constexpr bool ImmunityDrops(bool carrying, bool immunityAura, bool selfCast)
+{
+    return carrying && immunityAura && selfCast;
+}
+
+constexpr bool ModeDrops(bool carrying, bool highRisk, bool mercenary)
+{
+    return carrying && !(highRisk && mercenary);
+}
+
+constexpr bool LeftCacheMap(unsigned cacheMap, unsigned currentMap, bool instanceable)
+{
+    return cacheMap != currentMap || instanceable;
 }
 }
 

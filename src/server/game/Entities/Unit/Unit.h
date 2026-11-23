@@ -1104,7 +1104,8 @@ public:
 
     // Unit level methods
     [[nodiscard]] uint8 GetLevel() const { return uint8(GetUInt32Value(UNIT_FIELD_LEVEL)); }
-    uint8 getLevelForTarget(WorldObject const* /*target*/) const override { return GetLevel(); }
+    uint8 getLevelForTarget(WorldObject const* target) const override;
+    [[nodiscard]] uint8 getRewardLevelForTarget(WorldObject const* target) const;
     void SetLevel(uint8 lvl, bool showLevelChange = true);
 
     // Health methods
@@ -1134,6 +1135,8 @@ public:
     [[nodiscard]] Powers getPowerType() const { return Powers(GetByteValue(UNIT_FIELD_BYTES_0, 3)); }
     [[nodiscard]] virtual bool HasActivePowerType(Powers power) { return getPowerType() == power; }
     [[nodiscard]] bool CanReceivePowerFromSpell(Powers power);
+    [[nodiscard]] bool CanLosePowerToSpell(Powers power);
+    [[nodiscard]] bool HasNecromancerManaPool(Powers power) const;
     [[nodiscard]] Powers GetPowerTypeByAuraGroup(UnitMods unitMod) const;
 
     [[nodiscard]] uint32 GetPower(Powers power) const { return GetUInt32Value(static_cast<uint16>(UNIT_FIELD_POWER1) + power); }
@@ -1167,6 +1170,7 @@ public:
 
     [[nodiscard]] float GetUnitMissChance(WeaponAttackType attType) const;
     float GetUnitCriticalChance(WeaponAttackType attackType, Unit const* victim) const;
+    [[nodiscard]] float GetMeleeDazeChance(Unit const* victim) const;
     bool HasAscensionConditionalCombatState(int32 state) const;
     int32 GetAscensionConditionalCombatModifier(Unit const* victim, SpellInfo const* spellInfo,
         AscensionConditionalCombatModifier modifier) const;
@@ -1266,6 +1270,9 @@ public:
     float SpellPctDamageModsDone(Unit* victim, SpellInfo const* spellProto, DamageEffectType damagetype);
     float GetSpellAttackPowerCoefficientMultiplier(SpellInfo const* spellInfo, bool periodic) const;
     float GetSpellAttackPowerCoefficientFlatBonus(SpellInfo const* spellInfo) const;
+    // Ascension's server-side coefficient and damage-by-victim spell modifiers (SPELLMOD_AP_COEFFICIENT and on)
+    float ApplyAscensionCoefficientMods(SpellInfo const* spellInfo, bool periodic, bool attackPower, float coeff) const;
+    void ApplyAscensionVictimDamageMods(SpellInfo const* spellInfo, Unit const* victim, float& damage) const;
     float GetSpellPowerCoefficientFlatBonus(SpellInfo const* spellInfo) const;
     uint32 SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint8 effIndex, float TotalMod = 0.0f, uint32 stack = 1);
     uint32 SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack = 1);

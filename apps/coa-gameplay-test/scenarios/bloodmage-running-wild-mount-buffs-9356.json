@@ -1,0 +1,188 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: mount speed buffs apply to Running Wild, and plain run speed buffs do not (#9356)",
+  "contract": [
+    "#9356 decision: Running Wild 800175 acts like a mount, so mount speed buffs apply to it. While Running Wild",
+    "is active and the player is not mounted, Unit::UpdateSpeed uses the mounted run rules: the higher of Running",
+    "Wild's amount and aura 32 MOD_INCREASE_MOUNTED_SPEED, the aura 130 MOD_MOUNTED_SPEED_ALWAYS multiplier and",
+    "aura 172 MOD_MOUNTED_SPEED_NOT_STACK; Unit::UpdateSpeed takes the larger of the last two. Mithril Spurs",
+    "59916 is aura 130 +4%; Crusader Aura 32223 is aura 172 +20%; Sprint 2983 is aura 31 +50%, a plain run speed",
+    "buff that a mounted player does not get either. The buffs are placed with set_aura as fixtures. With",
+    "Journeyman Riding Running Wild gives 100%: alone 2.0, with Mithril Spurs 2.0 * 1.04 = 2.08, with Crusader",
+    "Aura 2.0 * 1.2 = 2.4, and Sprint changes nothing. After Running Wild ends, Sprint gives its own 1.5."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 35
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 34091,
+      "label": "fixture: forget riding rank 34091",
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 34090,
+      "label": "fixture: forget riding rank 34090",
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 33391,
+      "label": "fixture: forget riding rank 33391",
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 33388,
+      "label": "fixture: forget riding rank 33388",
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "skill_value",
+      "skill": 762,
+      "equals": 0,
+      "label": "SETUP: no riding skill is left"
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 33391,
+      "label": "learn Journeyman Riding"
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 800175,
+      "label": "learn Running Wild"
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 800175,
+      "label": "run wild outdoors"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 800175,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "Running Wild is active"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "run_speed_rate",
+      "min": 1.999,
+      "max": 2.001,
+      "label": "Running Wild with Journeyman Riding doubles the run speed rate"
+    },
+    {
+      "action": "set_aura",
+      "actor": "b",
+      "spell": 59916,
+      "stacks": 1,
+      "label": "fixture: Mithril Spurs"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "run_speed_rate",
+      "min": 2.079,
+      "max": 2.081,
+      "label": "Mithril Spurs adds 4% to Running Wild",
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "b",
+      "spell": 32223,
+      "stacks": 1,
+      "label": "fixture: Crusader Aura"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "run_speed_rate",
+      "min": 2.399,
+      "max": 2.401,
+      "label": "Crusader Aura's 20% mounted speed replaces the smaller Mithril Spurs bonus",
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "b",
+      "spell": 2983,
+      "stacks": 1,
+      "label": "fixture: Sprint"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 2983,
+      "equals": 1,
+      "label": "Sprint is active"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "run_speed_rate",
+      "min": 2.399,
+      "max": 2.401,
+      "label": "Sprint does not add to Running Wild",
+      "within_ms": 2000
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "b",
+      "spell": 800175,
+      "label": "stand up"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 800175,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "Running Wild ended"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "run_speed_rate",
+      "min": 1.499,
+      "max": 1.501,
+      "label": "without Running Wild, Sprint gives its own 50%",
+      "within_ms": 2000
+    }
+  ]
+}

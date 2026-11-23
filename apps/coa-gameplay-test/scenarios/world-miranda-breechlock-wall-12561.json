@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Light's Hope Chapel: Quartermaster Miranda Breechlock stands outside the house wall (#12561)",
+  "contract": "#12561 reported Quartermaster Miranda Breechlock (creature guid 68499, entry 11536) inside a wall at Light's Hope Chapel. patch-WB1 places DUSKWOOD_HUMANTWOSTORY.WMO (uid 1157624, origin 2244.4 -5346.89 87.63) over her vanilla spot (2251.3, -5344.98, 87.0119): wall faces lie 0.03 yd and 0.5 yd from her on both sides and the house roof is about 7.6 yd above. She moves 2.6 yd north-east, out of the wall, to (2253.05, -5343.0, 86.803) on the terrain, orientation unchanged, where the client geometry leaves 1.73 yd to the nearest wall or crate and open sky above.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": 2252.86,
+    "y": -5341.08,
+    "z": 86.66,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 58
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Miranda Breechlock stands at the spot outside the house wall",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": 2253.05,
+      "y": -5343.0,
+      "z": 86.803,
+      "max": 0.3,
+      "guid": 68499,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "Miranda Breechlock stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.3,
+      "max": 0.3,
+      "guid": 68499,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Miranda Breechlock keeps 1.5 yd from the house walls (was about 0.03 yd, inside the wall)",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "min": 1.5,
+      "guid": 68499,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no house roof within 8 yd above Miranda Breechlock (was about 7.6 yd)",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "min": 8,
+      "guid": 68499,
+      "spawn_type": "creature"
+    }
+  ]
+}

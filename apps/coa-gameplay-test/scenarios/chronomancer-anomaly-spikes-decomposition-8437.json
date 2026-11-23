@@ -1,0 +1,401 @@
+{
+  "schema": 1,
+  "name": "Decomposition ticks launch Anomaly Spikes (#8437)",
+  "contract": "Anomaly Spikes rank 2 504886 reads \"Periodic damage dealt now has a $h% chance to launch an Anomaly Spike at your target\", $h = ProcChance 15. Its spell_proc row (rev_20261004_04_class_mechanics_rank_procs.sql) gives ProcFlags 262144 PROC_FLAG_DONE_PERIODIC, SpellTypeMask 1 (damage), SpellPhaseMask 2 (hit), Chance 15, no family filter. Decomposition 800856 is SPELL_AURA_PERIODIC_DAMAGE with Amplitude 4000 and DurationIndex 86 (21000 ms), so 5 ticks per cast, and carries neither SPELL_ATTR3_NOT_A_PROC nor a suppress-procs attribute, so each tick is an ordinary periodic-damage proc event for the aura. Unlearned spike 503826 can only come from that proc here. Ten Decompositions on ten dummies give at least 50 independent ticks inside the window, so a false failure is 0.85^50 < 0.03% at the authored 15%. Regression guard for behaviour that already works; the report was a sample-size effect (a single 5-tick Decomposition misses every proc 44% of the time).",
+  "timeout_ms": 75000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "a",
+      "owner": "chronomancer",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "b",
+      "owner": "chronomancer",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5
+    },
+    {
+      "id": "c",
+      "owner": "chronomancer",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 7
+    },
+    {
+      "id": "d",
+      "owner": "chronomancer",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 9
+    },
+    {
+      "id": "e",
+      "owner": "chronomancer",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 11
+    },
+    {
+      "id": "f",
+      "owner": "chronomancer",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 13
+    },
+    {
+      "id": "g",
+      "owner": "chronomancer",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 15
+    },
+    {
+      "id": "h",
+      "owner": "chronomancer",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 17
+    },
+    {
+      "id": "i",
+      "owner": "chronomancer",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 19
+    },
+    {
+      "id": "j",
+      "owner": "chronomancer",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 21
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 504886
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 800856
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Anomaly Spike has been launched yet",
+      "actor": "chronomancer",
+      "metric": "spell_damage_count",
+      "spell": 503826,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition 1 of 10",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "a"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Decomposition 1 is ticking on its dummy",
+      "actor": "a",
+      "metric": "aura",
+      "spell": 800856,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition 2 of 10",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "b"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Decomposition 2 is ticking on its dummy",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 800856,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition 3 of 10",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "c"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Decomposition 3 is ticking on its dummy",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 800856,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition 4 of 10",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Decomposition 4 is ticking on its dummy",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 800856,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition 5 of 10",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Decomposition 5 is ticking on its dummy",
+      "actor": "e",
+      "metric": "aura",
+      "spell": 800856,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition 6 of 10",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "f"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Decomposition 6 is ticking on its dummy",
+      "actor": "f",
+      "metric": "aura",
+      "spell": 800856,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition 7 of 10",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "g"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Decomposition 7 is ticking on its dummy",
+      "actor": "g",
+      "metric": "aura",
+      "spell": 800856,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition 8 of 10",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "h"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Decomposition 8 is ticking on its dummy",
+      "actor": "h",
+      "metric": "aura",
+      "spell": 800856,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition 9 of 10",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "i"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Decomposition 9 is ticking on its dummy",
+      "actor": "i",
+      "metric": "aura",
+      "spell": 800856,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition 10 of 10",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "j"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Decomposition 10 is ticking on its dummy",
+      "actor": "j",
+      "metric": "aura",
+      "spell": 800856,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "A Decomposition tick launched an Anomaly Spike",
+      "actor": "chronomancer",
+      "metric": "spell_damage_count",
+      "spell": 503826,
+      "min": 1,
+      "within_ms": 24000
+    }
+  ]
+}

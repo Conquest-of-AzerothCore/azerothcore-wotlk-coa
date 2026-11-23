@@ -1,4 +1,3 @@
-#include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -13,9 +12,6 @@ using uint8 = std::uint8_t;
 using uint16 = std::uint16_t;
 using uint32 = std::uint32_t;
 
-constexpr uint16 SMSG_COA_CHALLENGE_ACTIVE_LIST = 0x596;
-constexpr uint16 SMSG_COA_CHALLENGE_CRITERIA_UPDATED = 0x59A;
-constexpr uint16 SMSG_COA_CHALLENGE_REQUIREMENT = 0x5B6;
 constexpr uint16 SMSG_COA_PATCH_CHALLENGE_REQUIREMENT_TYPE = 0x5BC;
 
 struct WorldPacket
@@ -62,13 +58,13 @@ struct Player
     WorldSession* session = nullptr;
 };
 
+#define LOG_DEBUG(...) ((void)0)
+
 // ACTUAL_CLIENT_LUA
 
 namespace
 {
     int failures = 0;
-    int deferrals = 0;
-    int syncs = 0;
 
     void Check(bool condition, std::string const& message)
     {
@@ -108,38 +104,62 @@ namespace
         return session.sent;
     }
 
-    bool IsFormatterRoute(std::vector<WorldPacket> const& sent)
+    bool OnlyHotPatches(std::vector<WorldPacket> const& sent)
     {
-        return sent.size() == 5 && sent[0].opcode == SMSG_COA_PATCH_CHALLENGE_REQUIREMENT_TYPE &&
-            sent[1].opcode == SMSG_COA_CHALLENGE_REQUIREMENT && sent[2].opcode == SMSG_COA_CHALLENGE_ACTIVE_LIST &&
-            sent[3].opcode == SMSG_COA_CHALLENGE_CRITERIA_UPDATED && sent[4].opcode == SMSG_COA_CHALLENGE_CRITERIA_UPDATED;
+        for (WorldPacket const& packet : sent)
+            if (packet.opcode != AscensionClientLuaHotPatchOpcode)
+                return false;
+        return true;
     }
+}
+
+std::string PayloadLua(WorldPacket const& packet)
+{
+    std::size_t offset = 0;
+    Sized(packet.bytes, offset);
+    Sized(packet.bytes, offset);
+    return Sized(packet.bytes, offset);
 }
 
 int main()
 {
-    using namespace std::chrono_literals;
-    RegisterAscensionChallengeStateSync([](Player*) { ++syncs; });
-    RegisterAscensionClientLuaDeferral([](Player*, AscensionClientLuaChunk const&) { ++deferrals; });
-    auto const start = AscensionClientLuaClock::now();
+    Check(GetAscensionClientLuaRoute(7) == AscensionClientLuaRoute::Unsupported,
+        "an account that never logged in through the script has no hot-patch channel");
+    Check(Run(Chunk()).empty(), "without a channel nothing is sent, and never the 0x5BC formatter sequence");
 
-    Check(GetAscensionClientLuaRoute(7, start) == AscensionClientLuaRoute::Formatter,
-        "an account that never logged in through the script uses the formatter route");
-    Check(IsFormatterRoute(Run(Chunk())) && syncs == 1, "the formatter route sends its five packets and restores the list");
-
-    ResetAscensionClientLuaCapability(7, start);
-    Check(GetAscensionClientLuaRoute(7, start + 1s) == AscensionClientLuaRoute::Wait,
-        "right after login the route waits for the client's capability packet");
-    Check(GetAscensionClientLuaRoute(7, start + 31s) == AscensionClientLuaRoute::Formatter,
-        "a client that says nothing for 30 seconds gets the formatter route");
-    Check(Run(Chunk()).empty() && deferrals == 1, "while waiting the chunk is handed to the deferral, nothing is sent");
-
-    SetAscensionClientLuaCapability(7, 1, 1);
-    Check(GetAscensionClientLuaRoute(7, start + 1s) == AscensionClientLuaRoute::HotPatch,
-        "a protocol 1 client gets the hot-patch route");
+    BeginAscensionClientLuaSession(7);
+    Check(GetAscensionClientLuaRoute(7) == AscensionClientLuaRoute::Queue,
+        "right after login chunks wait for the client's capability packet");
+    {
+        AscensionClientLuaChunk full = Chunk();
+        full.Lua = "State = {}";
+        Check(Run(full).empty(), "a chunk sent before the capability packet is queued, nothing is sent");
+        AscensionClientLuaChunk refresh = Chunk();
+        refresh.Lua = "State.now = 1";
+        Run(refresh);
+        AscensionClientLuaChunk other = Chunk();
+        other.Token = "FEL_COMMUTATION_WINDOW";
+        Run(other);
+    }
+    {
+        WorldSession session;
+        Check(SetAscensionClientLuaCapability(&session, 1, 1) == 3, "the capability packet sends every queued chunk");
+        Check(session.sent.size() == 3 && OnlyHotPatches(session.sent), "queued chunks go out as 0x8F0 packets");
+        if (session.sent.size() == 3)
+        {
+            Check(PayloadLua(session.sent[0]) == "State = {}" && PayloadLua(session.sent[1]) == "State.now = 1",
+                "two chunks for one token both arrive, the full state before the refresh that needs it");
+            std::size_t offset = 0;
+            Check(Sized(session.sent[2].bytes, offset) == "FEL_COMMUTATION_WINDOW", "queued chunks keep their order");
+        }
+        WorldSession again;
+        Check(SetAscensionClientLuaCapability(&again, 1, 1) == 0 && again.sent.empty(),
+            "a repeated capability packet (after /reload) resends nothing");
+    }
+    Check(GetAscensionClientLuaRoute(7) == AscensionClientLuaRoute::HotPatch, "a protocol 1 client gets the hot-patch route");
     {
         std::vector<WorldPacket> const sent = Run(Chunk("Ascension_Manastorm"));
-        Check(sent.size() == 1 && sent[0].opcode == AscensionClientLuaHotPatchOpcode, "the hot-patch route sends one 0x8F0 packet");
+        Check(sent.size() == 1 && OnlyHotPatches(sent), "the hot-patch route sends one 0x8F0 packet and nothing else");
         if (sent.size() == 1)
         {
             std::size_t offset = 0;
@@ -148,7 +168,6 @@ int main()
             Check(Sized(sent[0].bytes, offset) == "Sample = true", "then the Lua exactly as built, with no formatter wrapper");
             Check(offset == sent[0].bytes.size(), "0x8F0 has no trailing bytes");
         }
-        Check(syncs == 1, "the hot-patch route leaves the challenge list alone");
     }
     {
         std::vector<WorldPacket> const sent = Run(Chunk());
@@ -158,12 +177,52 @@ int main()
             "an empty target is sent as a zero length without a zero-sized append");
     }
 
-    SetAscensionClientLuaCapability(7, 0, 2);
-    Check(GetAscensionClientLuaRoute(7, start) == AscensionClientLuaRoute::Formatter,
-        "a client announcing protocol 0 gets the formatter route");
+    ForgetAscensionClientLuaCapability(7);
+    BeginAscensionClientLuaSession(7);
+    {
+        AscensionClientLuaChunk big = Chunk();
+        big.Lua.assign(AscensionClientLuaQueueLimit / 2 - 64, 'x');
+        Run(big);
+        Run(big);
+        Run(big);
+        WorldSession session;
+        Check(SetAscensionClientLuaCapability(&session, 1, 2) == 2,
+            "the queue holds at most AscensionClientLuaQueueLimit bytes and refuses chunks beyond it");
+    }
 
     ForgetAscensionClientLuaCapability(7);
-    Check(GetAscensionClientLuaRoute(7, start) == AscensionClientLuaRoute::Formatter, "logout forgets the capability");
+    BeginAscensionClientLuaSession(7);
+    Run(Chunk());
+    {
+        WorldSession session;
+        Check(SetAscensionClientLuaCapability(&session, 0, 2) == 0 && session.sent.empty(),
+            "a protocol 0 client drops what was queued");
+    }
+    Check(GetAscensionClientLuaRoute(7) == AscensionClientLuaRoute::Unsupported, "a protocol 0 client has no channel");
+    Check(Run(Chunk()).empty(), "a protocol 0 client is sent nothing");
+
+    ForgetAscensionClientLuaCapability(7);
+    BeginAscensionClientLuaSession(7);
+    Run(Chunk());
+    ForgetAscensionClientLuaCapability(7);
+    Check(GetAscensionClientLuaRoute(7) == AscensionClientLuaRoute::Unsupported, "logout forgets the capability");
+    {
+        WorldSession session;
+        Check(SetAscensionClientLuaCapability(&session, 1, 2) == 0 && session.sent.empty(), "logout discards the queue");
+    }
+
+    ForgetAscensionClientLuaCapability(7);
+    {
+        WorldSession session;
+        SetAscensionClientLuaCapability(&session, 1, 2);
+    }
+    BeginAscensionClientLuaSession(7);
+    Check(GetAscensionClientLuaRoute(7) == AscensionClientLuaRoute::HotPatch,
+        "a capability that arrives on the network thread before the login hook survives the login hook");
+    {
+        std::vector<WorldPacket> const sent = Run(Chunk());
+        Check(sent.size() == 1 && OnlyHotPatches(sent), "so the login push goes out at once as 0x8F0");
+    }
 
     if (failures)
         return 1;

@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "Dungeon boss kit spells aimed at players need line of sight",
+  "contract": [
+    "Several Ascension kit spells carry SPELL_ATTR2_IGNORE_LINE_OF_SIGHT, so bosses hit players behind walls, as our tester",
+    "saw with Curse of Arugal. These six spells, all aimed at a player or in a cone in front of the boss, now need line of",
+    "sight through coa_dungeon_spell_reach. Room-wide mechanics and melee strikes keep the flag."
+  ],
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Death Speaker Jargba: Shadow Bolt Volley (2102781) needs line of sight",
+      "actor": "p",
+      "metric": "spell_ignores_los",
+      "spell": 2102781,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Landslide: Hurl Boulder (2100732) needs line of sight",
+      "actor": "p",
+      "metric": "spell_ignores_los",
+      "spell": 2100732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Amnennar the Coldbringer: Steal Warmth (2100709) needs line of sight",
+      "actor": "p",
+      "metric": "spell_ignores_los",
+      "spell": 2100709,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mother Smolderweb: Mother's Milk (2102215) needs line of sight",
+      "actor": "p",
+      "metric": "spell_ignores_los",
+      "spell": 2102215,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Stomper Kreeg: Booze Spit (2100189) needs line of sight",
+      "actor": "p",
+      "metric": "spell_ignores_los",
+      "spell": 2100189,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Tendris Warpwood: Entangle (22994) needs line of sight",
+      "actor": "p",
+      "metric": "spell_ignores_los",
+      "spell": 22994,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Zevrim's Sacrifice (2100215) still ignores line of sight",
+      "actor": "p",
+      "metric": "spell_ignores_los",
+      "spell": 2100215,
+      "equals": 1
+    }
+  ]
+}

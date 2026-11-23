@@ -34,6 +34,7 @@
 enum DeathKnightSpells
 {
     SPELL_DK_DEATH_AND_DECAY_TRIGGER            = 52212,
+    SPELL_DK_SKELETON_KING                      = 299140,  // Ascension talent
     SPELL_DK_GLYPH_OF_SCOURGE_STRIKE            = 58642,
     SPELL_DK_WANDERING_PLAGUE_TRIGGER           = 50526,
     SPELL_DK_GLYPH_OF_THE_GHOUL                 = 58686,
@@ -1633,7 +1634,9 @@ class spell_dk_death_pact : public SpellScript
         if (target)
         {
             // xinef: remove all auras preventing effect execution
-            target->RemoveAllAurasOnDeath();
+            // Ascension Skeleton King: Death Pact no longer sacrifices the minion, which then keeps its auras
+            if (!GetCaster()->HasAura(SPELL_DK_SKELETON_KING))
+                target->RemoveAllAurasOnDeath();
             targetList.push_back(target);
         }
     }
@@ -1944,8 +1947,8 @@ class spell_dk_pestilence : public SpellScript
         if (target != hitUnit)
         {
             // Blood Plague
-            if (target->GetAura(SPELL_DK_BLOOD_PLAGUE, caster->GetGUID()))
-                caster->CastSpell(hitUnit, SPELL_DK_BLOOD_PLAGUE, true);
+            if (Aura const* plague = target->GetAuraOfRankedSpell(SPELL_DK_BLOOD_PLAGUE, caster->GetGUID()))
+                caster->CastSpell(hitUnit, plague->GetId(), true);
 
             // Frost Fever
             if (target->GetAura(SPELL_DK_FROST_FEVER, caster->GetGUID()))
@@ -1955,7 +1958,7 @@ class spell_dk_pestilence : public SpellScript
         else if (caster->GetAuraOfRankedSpellOrTwin(SPELL_DK_GLYPH_OF_DISEASE))
         {
             // Blood Plague
-            if (Aura* disease = target->GetAura(SPELL_DK_BLOOD_PLAGUE, caster->GetGUID()))
+            if (Aura* disease = target->GetAuraOfRankedSpell(SPELL_DK_BLOOD_PLAGUE, caster->GetGUID()))
                 disease->RefreshDuration();
 
             // Frost Fever
@@ -2885,7 +2888,7 @@ class spell_dk_threat_of_thassarian : public AuraScript
         if (!target)
             return;
 
-        spellId = sSpellMgr->GetSpellWithRank(spellId, spellInfo->GetRank());
+        spellId = sSpellMgr->GetSpellWithRankFor(spellId, spellInfo->Id);
         caster->CastSpell(target, spellId, true, nullptr, aurEff);
     }
 

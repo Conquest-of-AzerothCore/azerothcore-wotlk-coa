@@ -530,8 +530,9 @@ class xoroth_casts : public AllSpellScript
                 Gain(player, fire);
             if (fire && !refunded)
             {
-                if (fire >= 4 && player->HasAura(805706) && target)
-                    if (Aura* apocalypse = target->GetAura(560817, player->GetGUID()))
+                Unit* apocalypseTarget = target && target != player ? target : player->GetSelectedUnit();
+                if (fire >= 4 && player->HasAura(805706) && apocalypseTarget)
+                    if (Aura* apocalypse = apocalypseTarget->GetAura(560817, player->GetGUID()))
                         apocalypse->SetDuration(apocalypse->GetMaxDuration());
                 if (player->HasAura(520008) && fire >= 4)
                     Gain(player, 1);

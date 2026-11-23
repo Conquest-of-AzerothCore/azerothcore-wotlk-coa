@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Final Prayer doubles the Testament of Faith healing a Templar receives",
+  "contract": "Final Prayer 705268 reads 'Doubles the healing done to you by Testament of Fortitude and Testament of Faith.' The server DBC gives e1 SPELL_AURA_MOD_HEALING_RECEIVED BasePoints 99 (+100%) on the Testament of Faith class mask, so a Testament of Faith 501606 that the talented Templar casts on itself must heal for twice the untalented amount. Two level 80 Templars with forced critical strikes and no regeneration drop to 1 health and cast Testament of Faith on themselves once. The native heal logs compare 2.0 (1.94-2.06, the heal's 68-point roll); a healing-received bonus that misses the real heal gives 1.0.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 19,
+      "level": 80,
+      "spell_crit_rating": 100000,
+      "melee_crit_rating": 100000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "prayer",
+      "race": 1,
+      "class": 19,
+      "level": 80,
+      "spell_crit_rating": 100000,
+      "melee_crit_rating": 100000,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "control", "spell": 501606 },
+    { "action": "learn", "actor": "prayer", "spell": 501606 },
+    { "action": "learn", "actor": "prayer", "spell": 705268 },
+    { "action": "assert", "label": "Final Prayer is applied", "actor": "prayer", "metric": "aura", "spell": 705268, "equals": 1 },
+    { "action": "set_power", "actor": "control", "power": 3, "value": 100 },
+    { "action": "set_power", "actor": "prayer", "power": 3, "value": 100 },
+    { "action": "set_health", "actor": "control", "value": 1 },
+    { "action": "set_health", "actor": "prayer", "value": 1 },
+    { "action": "cast", "actor": "control", "spell": 501606 },
+    { "action": "cast", "actor": "prayer", "spell": 501606 },
+    { "action": "wait", "label": "Let both heals land", "ms": 2000 },
+    { "action": "assert", "label": "The control Testament of Faith heals its caster once, critically", "actor": "control", "metric": "spell_heal_count", "spell": 501606, "target": "control", "critical": true, "equals": 1 },
+    { "action": "assert", "label": "The talented Testament of Faith heals its caster once, critically", "actor": "prayer", "metric": "spell_heal_count", "spell": 501606, "target": "prayer", "critical": true, "equals": 1 },
+    { "action": "assert", "label": "No Testament of Faith lands without a critical strike", "actor": "control", "metric": "spell_heal_count", "spell": 501606, "critical": false, "equals": 0 },
+    { "action": "assert", "label": "No talented Testament of Faith lands without a critical strike", "actor": "prayer", "metric": "spell_heal_count", "spell": 501606, "critical": false, "equals": 0 },
+    { "action": "snapshot", "actor": "control", "metric": "spell_heal_total", "spell": 501606, "target": "control", "save_as": "control_heal" },
+    { "action": "assert", "label": "Final Prayer doubles the Testament of Faith healing done to the Templar", "actor": "prayer", "metric": "spell_heal_total", "spell": 501606, "target": "prayer", "ratio_to": "control_heal", "min": 1.94, "max": 2.06 }
+  ]
+}

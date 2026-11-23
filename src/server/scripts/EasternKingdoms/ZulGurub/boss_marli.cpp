@@ -60,7 +60,8 @@ enum Spells
     // Spawn of Mar'li
     SPELL_GROWTH              = 2118117,
     SPELL_FULL_GROWN          = 24088,
-    SPELL_SPAWN_FIERCE_BLOW   = 975011
+    SPELL_SPAWN_FIERCE_BLOW   = 975011,
+    SPELL_EVOLVE              = 2118116
 };
 
 enum Phases
@@ -253,7 +254,9 @@ struct npc_spawn_of_marli : public ScriptedAI
         {
             if (context.GetRepeatCounter() < 5)
             {
-                DoCastSelf(SPELL_GROWTH);
+                // An evolved spawn never grows (live Mythic log of 2026-08-04: no Growth on it).
+                if (!me->HasAura(SPELL_EVOLVE))
+                    DoCastSelf(SPELL_GROWTH);
                 context.Repeat(4s);
             }
             else

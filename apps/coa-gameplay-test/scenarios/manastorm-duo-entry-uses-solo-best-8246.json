@@ -1,0 +1,238 @@
+{
+  "schema": 1,
+  "name": "Manastorm: a Duo enters at the checkpoint its members unlocked in Solo (#8246)",
+  "contract": [
+    "Player report (#8246): the Manastorm window offered a group the depths its members had reached alone, but the",
+    "server refused the entry because it kept a separate best depth per group size. The checkpoint gate now reads",
+    "each member's best completed depth across group sizes on the run's track. Both level-30 players (Normal track)",
+    "complete depth 5 alone: each force-starts Shadowfang Keep segment 19 at depth 5, kills its objective Rethilgore",
+    "(3914) and leaves. Neither has any Duo progress. The Duo leader then sends the native enter request (1617) for",
+    "depth 6, which needs a best completed depth of 5 for every member, and must receive ENTER_MANASTORM_OK and",
+    "enter the private instance."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "n1",
+      "race": 5,
+      "class": 23,
+      "level": 30,
+      "security": 2
+    },
+    {
+      "id": "n2",
+      "race": 5,
+      "class": 23,
+      "level": 30,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "n1",
+      "command": ".manastorm segment test 19 5"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: n1 entered the Solo depth 5 stage",
+      "actor": "n1",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the stage is Shadowfang Keep",
+      "actor": "n1",
+      "metric": "map_id",
+      "equals": 33
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room so the objective is visible to this lane",
+      "actor": "n1",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "n1 goes to Rethilgore, leaving the entrance protection",
+      "actor": "n1",
+      "guid": 16242
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: n1 left the entrance protection at Rethilgore",
+      "actor": "n1",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "label": "n1 kills the stage objective Rethilgore",
+      "actor": "n1",
+      "entry": 3914,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: n1 completed the Solo stage",
+      "actor": "n1",
+      "metric": "server_packets",
+      "opcode": 1630,
+      "within_ms": 5000,
+      "min": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "n1 leaves the Solo run",
+      "actor": "n1",
+      "opcode": 1637,
+      "early": false
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: n1 left the private instance",
+      "actor": "n1",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "actor": "n2",
+      "command": ".manastorm segment test 19 5"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: n2 entered the Solo depth 5 stage",
+      "actor": "n2",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room so the objective is visible to this lane",
+      "actor": "n2",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "n2 goes to Rethilgore, leaving the entrance protection",
+      "actor": "n2",
+      "guid": 16242
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: n2 left the entrance protection at Rethilgore",
+      "actor": "n2",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "label": "n2 kills the stage objective Rethilgore",
+      "actor": "n2",
+      "entry": 3914,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: n2 completed the Solo stage",
+      "actor": "n2",
+      "metric": "server_packets",
+      "opcode": 1630,
+      "within_ms": 5000,
+      "min": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "n2 leaves the Solo run",
+      "actor": "n2",
+      "opcode": 1637,
+      "early": false
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: n2 left the private instance",
+      "actor": "n2",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "label": "n2 joins n1's group, so the next entry is a Duo",
+      "actor": "n1",
+      "target": "n2"
+    },
+    {
+      "action": "client_packet",
+      "label": "n1 requests a Duo entry at depth 6",
+      "actor": "n1",
+      "opcode": 1617,
+      "early": false,
+      "fields": [
+        {
+          "u32": 6
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The Duo entry at depth 6 is accepted",
+      "actor": "n1",
+      "metric": "server_packet_contains",
+      "opcode": 1618,
+      "text": "ENTER_MANASTORM_OK",
+      "within_ms": 5000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Duo entry was not refused for too low a completed depth",
+      "actor": "n1",
+      "metric": "server_packet_contains",
+      "opcode": 1618,
+      "text": "ENTER_MANASTORM_TOO_LOW_COMPLETED_LEVEL",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "n1 entered the Duo run",
+      "actor": "n1",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "n2 entered the Duo run",
+      "actor": "n2",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    }
+  ]
+}

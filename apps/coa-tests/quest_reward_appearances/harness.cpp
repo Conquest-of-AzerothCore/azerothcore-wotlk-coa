@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <deque>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -79,7 +80,9 @@ struct Player
 struct Item
 {
     uint32 Entry;
+    bool Bound = true;
     uint32 GetEntry() const { return Entry; }
+    bool IsSoulBound() const { return Bound; }
 };
 
 enum class AscensionCompatConfig
@@ -106,9 +109,33 @@ struct DatabaseWrite
     std::vector<uint32> Values;
 };
 
+constexpr uint32 CHAR_INS_ACCOUNT_VANITY_COLLECTION = 1;
+
+struct CharacterDatabasePreparedStatement
+{
+    std::vector<uint32> Values;
+    void SetData(std::size_t index, uint32 value)
+    {
+        if (Values.size() <= index)
+            Values.resize(index + 1);
+        Values[index] = value;
+    }
+};
+
 struct Database
 {
     std::vector<DatabaseWrite> Writes;
+    std::deque<CharacterDatabasePreparedStatement> Statements;
+
+    CharacterDatabasePreparedStatement* GetPreparedStatement(uint32)
+    {
+        return &Statements.emplace_back();
+    }
+
+    void Execute(CharacterDatabasePreparedStatement* statement)
+    {
+        Writes.push_back({false, statement->Values});
+    }
 
     template<class... Args>
     void Execute(char const* query, Args... values)
@@ -149,6 +176,18 @@ struct ScriptMgr
 
 auto sScriptMgr = &scripts;
 
+struct VanityInfo
+{
+};
+
+namespace AscensionCollectibles
+{
+constexpr std::array<uint32, 0> SigilVanityItems{};
+}
+
+bool IsConsumableVanityItem(VanityInfo const&) { return false; }
+bool IsVanityItemForPlayer(Player*, VanityInfo const&) { return true; }
+
 #define CALL_ENABLED_HOOKS(Type, Hook, Call) \
     for (PlayerScript* script : Scripts) \
         if (script->Enabled(Hook)) \
@@ -162,7 +201,7 @@ class AscensionCollectionService
 public:
     std::unordered_map<uint32, AppearanceInfo> _appearances;
     std::unordered_map<uint32, uint32> _itemAppearances;
-    std::unordered_set<uint32> _vanityItems;
+    std::unordered_map<uint32, VanityInfo> _vanityItems;
     std::unordered_set<uint32> BankItems;
     std::unordered_map<uint32, std::shared_ptr<PlayerCollectionState>> _playerStates;
     std::mutex _stateMutex;
@@ -170,6 +209,13 @@ public:
     bool IsBankVanityItem(uint32 itemId) const { return BankItems.contains(itemId); }
     void LearnOwnedBankSpells(Player* player, PlayerCollectionState&, bool) { ++player->BankSpellCalls; }
     void SendOwnedVanityStoreRecords(Player* player, PlayerCollectionState&) { ++player->VanityStoreCalls; }
+
+    void SendVanityCollectionAdded(Player* player, uint32 itemId)
+    {
+        WorldPacket packet(SMSG_VANITY_COLLECTION_ADDED, sizeof(uint32));
+        packet << itemId;
+        player->GetSession()->SendPacket(&packet);
+    }
 
     // ACTUAL_INSTANCE
     // ACTUAL_GET_STATE
@@ -323,7 +369,7 @@ void VanityBoundaries(Player& player)
     Appearance(701, 501, 14);
     Appearance(702, 502, 0);
     Appearance(703, 503, 69);
-    service._vanityItems = {700, 701, 703};
+    service._vanityItems = {{700, {}}, {701, {}}, {703, {}}};
     service.BankItems = {702};
     Quest quest{{700, 701, 702, 703, 0, 0}, {1, 1, 1, 1, 0, 0}, {}, {}};
     scripts.OnPlayerCompleteQuest(&player, &quest);

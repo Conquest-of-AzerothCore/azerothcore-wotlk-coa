@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "PTR character copy: a two-word name over 12 letters is copied once",
+  "contract": "Character names may have a second word, up to MAX_PLAYER_NAME (25) letters. .ptr copy reads the whole name after the command, and coa_ptr_copy_request stores source and copy names of that length, so the request is queued under its full name, the copy (renamed with its GUID in hex because ptr_character_copy makes this realm both source and target) loads once, and the source realm reports it.",
+  "timeout_ms": 90000,
+  "ptr_character_copy": true,
+  "players": [
+    { "id": "a", "name": "Harness Longcopy", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "relog", "actor": "a" },
+    { "action": "assert", "label": "The source account starts with one character", "actor": "a",
+      "metric": "account_character_count", "equals": 1 },
+    { "action": "command", "label": "Copy the online character by its full two-word name", "actor": "a",
+      "command": ".ptr copy Harness Longcopy" },
+    { "action": "assert", "label": "DISCRIMINATING: the copy is queued under the full name", "actor": "a",
+      "metric": "system_message_contains", "text": "Harness Longcopy is on its way to", "equals": 1,
+      "within_ms": 5000 },
+    { "action": "assert", "label": "DISCRIMINATING: the queued copy loads as a second character", "actor": "a",
+      "metric": "account_character_count", "equals": 2, "within_ms": 15000 },
+    { "action": "assert", "label": "The request completes, so the source realm reports the copy", "actor": "a",
+      "metric": "system_message_contains", "text": "Harness Longcopy was copied to", "equals": 1,
+      "within_ms": 15000 },
+    { "action": "wait", "label": "Let the target realm poll the request table three more times", "ms": 16000 },
+    { "action": "assert", "label": "The completed request is not loaded again", "actor": "a",
+      "metric": "account_character_count", "equals": 2 }
+  ]
+}

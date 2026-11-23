@@ -1277,10 +1277,18 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Effects[EFFECT_0].TriggerSpell = 58374;
     });
 
-    // Sweeping Strikes stance change
-    ApplySpellFix({ 12328 }, [](SpellInfo* spellInfo)
+    // CoA tooltips read "This ability is usable while shapeshifted" (#11978): Sweeping Strikes, Bloodthirst,
+    // Hunger For Blood, Strength of Earth Totem, Titanic Bloodthirst, Fel Strike
+    ApplySpellFix({ 12328, 23881, 63848, 65991, 823881, 1568346 }, [](SpellInfo* spellInfo)
     {
-        spellInfo->Attributes |= SPELL_ATTR0_NOT_SHAPESHIFTED;
+        spellInfo->Attributes &= ~SPELL_ATTR0_NOT_SHAPESHIFTED;
+    });
+
+    // Mycelial Ring (#11933): its triggered ring spells share spell category 38 with the 45 sec Mycelial Ring 681056
+    // and carry a 2 min category cooldown, which they put on Mycelial Ring itself.
+    ApplySpellFix({ 681291, 681552, 681553, 681554, 681555, 681556 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->CategoryRecoveryTime = 0;
     });
 
     // Damage Shield
@@ -5501,6 +5509,13 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Attributes |= SPELL_ATTR0_ON_NEXT_SWING;
     });
 
+    // CoA: Sacrifice (Zevrim Thornhoof): the 2100215 tooltip drains 17% maximum health per second, but the
+    // periodic effect of 2100216 ticked every 2 seconds.
+    ApplySpellFix({ 2100216 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->Effects[EFFECT_1].Amplitude = 1000;
+    });
+
     // CoA: Summon Eye of Immol'thar puts the eyes anywhere up to 30 yards away; keep them close around him.
     ApplySpellFix({ 2100246 }, [](SpellInfo* spellInfo)
     {
@@ -5525,6 +5540,18 @@ void SpellMgr::LoadSpellInfoCorrections()
     {
         spellInfo->Effects[EFFECT_0].BasePoints = 353;
     });
+
+    // Ascension's cast-time Reach talents carry their range bonus on an unmasked EFFECT1 modifier with no
+    // SpellAffect.dbc row, which matches nothing; it is the range modifier SpellInfo::IsAffectedBySpellMod limits to
+    // damaging spells with a cast time or channel.
+    for (uint32 spellId : AscensionReach::CastTimeSpells)
+        ApplySpellFix({ spellId }, [](SpellInfo* spellInfo)
+        {
+            for (SpellEffectInfo& effect : spellInfo->Effects)
+                if (effect.ApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER && effect.MiscValue == SPELLMOD_EFFECT1 &&
+                    effect.SpellClassMask == flag96(0, 0, 0))
+                    effect.MiscValue = SPELLMOD_RANGE;
+        });
 
     for (uint32 i = 0; i < GetSpellInfoStoreSize(); ++i)
     {

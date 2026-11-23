@@ -19,12 +19,6 @@ constexpr uint32 PENANCE_HEAL_R1 = 47757;
 constexpr uint32 PRIEST_PRAYER_OF_MENDING = 0x20;
 constexpr std::array<uint32, 3> DIVINE_PROVIDENCE = { 1147562, 1147564, 1147565 };
 
-uint32 RebornRank(uint32 stockFirstRank, uint8 rank)
-{
-    uint32 const stock = sSpellMgr->GetSpellWithRank(stockFirstRank, rank, false);
-    return RebornSpell(stock, [](std::uint32_t spellId) { return sSpellMgr->GetSpellInfo(spellId) != nullptr; });
-}
-
 class spell_ascension_reborn_penance : public SpellScript
 {
     PrepareSpellScript(spell_ascension_reborn_penance);
@@ -56,8 +50,8 @@ class spell_ascension_reborn_penance : public SpellScript
         Unit* target = GetHitUnit();
         if (!target || !target->IsAlive())
             return;
-        uint8 const rank = GetSpellInfo()->GetRank();
-        uint32 const channel = RebornRank(caster->IsFriendlyTo(target) ? PENANCE_HEAL_R1 : PENANCE_DAMAGE_R1, rank);
+        uint32 const channel = sSpellMgr->GetSpellWithRankFor(caster->IsFriendlyTo(target) ? PENANCE_HEAL_R1 :
+            PENANCE_DAMAGE_R1, GetSpellInfo()->Id, true);
         if (channel)
             caster->CastSpell(target, channel, false);
     }

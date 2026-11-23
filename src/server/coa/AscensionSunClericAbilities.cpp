@@ -53,6 +53,8 @@ constexpr uint32 BurnTheHeretics = 560857;
 constexpr uint32 BurnTheHereticsMagicDamage = 560856;
 constexpr uint32 SunStride = 680700;
 constexpr uint32 SunStrideVisual = 681434;
+constexpr uint32 RadiantFlame = 806060;
+constexpr uint32 RadiantFlameTick = 807058;
 void Finish(Player* player, Spell* spell)
 {
     for (uint32 id : SunClericFinite)
@@ -70,6 +72,37 @@ void Finish(Player* player, Spell* spell)
                 if (id == ScorchMarks && player->HasAura(BurnTheHeretics))
                     Cast(player, player, BurnTheHereticsMagicDamage);
             }
+}
+void SpendDawn(Player* player, Spell* spell, SpellInfo const* info)
+{
+    Aura* dawn = player->GetAura(Dawn);
+    if (!dawn)
+        return;
+    spell->m_appliedMods.erase(dawn);
+    spell->SetScriptValue(DawnCast, 1);
+    if (!State(player).timers.HasTimeUntilEvent(Dawn))
+    {
+        spell->SetScriptValue(Dawn, 1);
+        State(player).timers.ScheduleEvent(Dawn, 1s);
+    }
+    if (AuraEffect* choice = dawn->GetEffect(EFFECT_0); choice && choice->GetAmount() &&
+        (player->HasSpell(92135) || player->HasAura(92135)))
+    {
+        uint32 school = info->SchoolMask & (SPELL_SCHOOL_MASK_HOLY | SPELL_SCHOOL_MASK_FIRE);
+        if (school)
+        {
+            choice->SetAmount(0);
+            bool fire = school == SPELL_SCHOOL_MASK_FIRE;
+            player->RemoveAurasDueToSpell(fire ? Sunrise : Sunset);
+            Cast(player, player, fire ? Sunset : Sunrise);
+            if (player->HasAura(300360))
+                Cast(player, player, 301265);
+        }
+    }
+    if (dawn->GetCharges() > 1)
+        dawn->SetCharges(dawn->GetCharges() - 1);
+    else
+        dawn->Remove();
 }
 class sun_cleric_spells : public AllSpellScript
 {
@@ -109,8 +142,16 @@ public:
                 spell->SetScriptValue(Dawn,State(player).landingFulfillment);
             }
             if (Spell* origin = Origin(player,spell); origin != spell)
+            {
+                if (info->Id == RadiantFlameTick && Named(origin->GetSpellInfo(), RadiantFlame))
+                {
+                    origin->SetScriptValue(Dawn, 0);
+                    origin->SetScriptValue(DawnCast, 0);
+                    SpendDawn(player, origin, origin->GetSpellInfo());
+                }
                 for (uint32 key : {Dawn,DawnCast,807523u})
                     spell->SetScriptValue(key,origin->GetScriptValue(key));
+            }
             return;
         }
         for (uint32 id : SunClericFinite)
@@ -123,35 +164,9 @@ public:
                     if (id == 807061 || id == 807077)
                         spell->SetScriptValue(id + 1, aura->GetStackAmount());
                 }
-        if (info->Id == DawnCast || !Useful(info))
+        if (info->Id == DawnCast || !Useful(info) || Named(info, RadiantFlame))
             return;
-        if (Aura* dawn = player->GetAura(Dawn))
-        {
-            spell->SetScriptValue(DawnCast, 1);
-            if (!State(player).timers.HasTimeUntilEvent(Dawn))
-            {
-                spell->SetScriptValue(Dawn, 1);
-                State(player).timers.ScheduleEvent(Dawn, 1s);
-            }
-            if (AuraEffect* choice = dawn->GetEffect(EFFECT_0); choice && choice->GetAmount() &&
-                (player->HasSpell(92135) || player->HasAura(92135)))
-            {
-                uint32 school = info->SchoolMask & (SPELL_SCHOOL_MASK_HOLY | SPELL_SCHOOL_MASK_FIRE);
-                if (school)
-                {
-                    choice->SetAmount(0);
-                    bool fire = school == SPELL_SCHOOL_MASK_FIRE;
-                    player->RemoveAurasDueToSpell(fire ? Sunrise : Sunset);
-                    Cast(player, player, fire ? Sunset : Sunrise);
-                    if (player->HasAura(300360))
-                        Cast(player, player, 301265);
-                }
-            }
-            if (dawn->GetCharges() > 1)
-                dawn->SetCharges(dawn->GetCharges() - 1);
-            else
-                dawn->Remove();
-        }
+        SpendDawn(player, spell, info);
     }
     void OnSpellCritChance(Spell* spell, Unit* target, float& chance) override
     {

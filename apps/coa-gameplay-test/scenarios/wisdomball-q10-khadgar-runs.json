@@ -1,0 +1,26 @@
+{
+ "schema": 1,
+ "name": "Wisdomball Q10 Hold the Anchors: escort Khadgar runs, about 10 % slower than a player (Pitho 2026-11-19)",
+ "contract": [
+  "Escort Khadgar 9417004 (guid 9417100) starts path 94171000 with forced run (SMART_ACTION_WP_START param 2) and",
+  "speed_run 0.9 = 6.3 yd/s (player run 7.0). The route's first 20 yd are nearly straight.",
+  "DISCRIMINATING: the player stands still; 2 s after the start Khadgar is 11-16.5 yd away. Walking (2.5 yd/s) would",
+  "leave him about 7.5 yd away, the old run speed (8 yd/s) about 19 yd."
+ ],
+ "timeout_ms": 120000,
+ "location": { "map": 0, "x": -8996.0, "y": 853.5, "z": 29.62, "o": 3.8 },
+ "players": [ { "id": "p", "race": 1, "class": 1, "level": 60 } ],
+ "steps": [
+  { "action": "set_phase", "label": "world phase 1 (the crater phases come from the questline's own script)", "actor": "p", "value": 1 },
+  { "action": "prepare_quest", "label": "SETUP: Hold the Anchors (Q10) in progress", "actor": "p", "quest": 9417110, "complete": false },
+  { "action": "assert", "label": "Q10 is in progress", "actor": "p", "metric": "quest_status", "quest": 9417110, "equals": 3, "within_ms": 3000 },
+  { "action": "teleport", "label": "to the crater camp next to escort Khadgar", "actor": "p", "map": 4418, "x": 321.0, "y": 266.0, "z": 53.3, "o": 4.7, "ignore_access": true },
+  { "action": "assert", "label": "on map 4418", "actor": "p", "metric": "map_id", "equals": 4418, "within_ms": 15000 },
+  { "action": "wait", "ms": 4000 },
+  { "action": "assert", "label": "escort Khadgar stands next to the player", "actor": "p", "metric": "nearest_creature_distance", "entry": 9417004, "min": 0, "max": 8, "within_ms": 5000 },
+  { "action": "gossip_hello", "label": "talk to escort Khadgar", "actor": "p", "entry": 9417004 },
+  { "action": "gossip_select", "label": "I am ready - lead the way.", "actor": "p", "option": 0 },
+  { "action": "wait", "ms": 2000 },
+  { "action": "assert", "label": "DISCRIMINATING: 2 s later he has run 11-16.5 yd (walking: ~7.5, old run speed: ~19)", "actor": "p", "metric": "nearest_creature_distance", "entry": 9417004, "min": 11, "max": 16.5 }
+ ]
+}

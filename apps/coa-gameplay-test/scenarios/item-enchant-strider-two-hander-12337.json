@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Enchant Strider is 35% stronger with a single two-handed weapon (#12337)",
+  "contract": [
+    "#12337: Enchant Weapon - Strider (20044) reads 'often increase Agility by ${$20046m1+$20046ppl1} for $20046d",
+    "... This is 35% stronger if you are wielding a single two handed weapon.' Its proc buff Strider (20046) is",
+    "aura 29 (SPELL_AURA_MOD_STAT, misc 1 Agility), BasePoints 39 + 1 die, 2.0 points per level from BaseLevel 30",
+    "to MaxLevel 60, so a level 60 player gets 40 + 60 = 100 Agility. Nothing applied the 35%. With a one-handed",
+    "Worn Shortsword (25) the buff must stay at 100; with Arcanite Reaper (12784, a two-handed axe) in the main hand",
+    "and an empty off hand it must be 135. The buff is cast directly, so only its amount is under test, not the",
+    "enchant's proc rate."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "w", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "w", "spell": 201 },
+    { "action": "learn", "actor": "w", "spell": 197 },
+    { "action": "learn", "actor": "w", "spell": 20046 },
+    { "action": "add_item", "actor": "w", "item": 25 },
+    { "action": "equip", "actor": "w", "item": 25, "slot": 15, "label": "a one-handed sword in the main hand" },
+    { "action": "cast", "actor": "w", "spell": 20046 },
+    { "action": "assert", "label": "SETUP: Strider is active", "actor": "w", "metric": "aura", "spell": 20046,
+      "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTROL: a one-hander gives the base 100 Agility", "actor": "w",
+      "metric": "aura_amount", "spell": 20046, "equals": 100 },
+    { "action": "cancel_aura", "actor": "w", "spell": 20046 },
+    { "action": "assert", "label": "SETUP: Strider ended", "actor": "w", "metric": "aura", "spell": 20046,
+      "equals": 0, "within_ms": 3000 },
+    { "action": "add_item", "actor": "w", "item": 12784 },
+    { "action": "equip", "actor": "w", "item": 12784, "slot": 15, "label": "a single two-handed axe" },
+    { "action": "wait", "label": "Global cooldown", "ms": 2000 },
+    { "action": "cast", "actor": "w", "spell": 20046 },
+    { "action": "assert", "label": "SETUP: Strider is active again", "actor": "w", "metric": "aura", "spell": 20046,
+      "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: a single two-hander makes Strider 35% stronger", "actor": "w",
+      "metric": "aura_amount", "spell": 20046, "equals": 135 }
+  ]
+}

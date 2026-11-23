@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Pale Reach: Roco Stonefist stands on the house floor (#12792)",
+  "contract": "#12792 reported Roco Stonefist (entry 164170, guid 9960476) stuck in a pillar. He stood at z 364.364, 2.38 yd above the house floor that Innkeeper Julie (guid 9960475) and the reporter stand on (z 361.985). He now stands at the reporter's point (-7480.76, -313.918, 361.985) on that floor, clear of the pillar.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -7480.76,
+    "y": -313.918,
+    "z": 362.985,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "guid": 9960476,
+      "spawn_type": "creature",
+      "label": "DISCRIMINATING: Roco Stonefist stands at the new point (was 2.6 yd away in the pillar)",
+      "metric": "spawn_distance",
+      "x": -7480.76,
+      "y": -313.918,
+      "z": 361.985,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "guid": 9960476,
+      "spawn_type": "creature",
+      "label": "Roco Stonefist stands on the ground",
+      "metric": "spawn_ground_gap",
+      "min": -0.3,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "guid": 9960476,
+      "spawn_type": "creature",
+      "label": "Roco Stonefist is grounded within 0.8 yd",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "guid": 9960476,
+      "spawn_type": "creature",
+      "label": "Roco Stonefist is not under water",
+      "metric": "spawn_submerged",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "guid": 9960476,
+      "spawn_type": "creature",
+      "label": "Roco Stonefist is clear of walls, pillars and props",
+      "metric": "spawn_clearance",
+      "min": 1
+    }
+  ]
+}

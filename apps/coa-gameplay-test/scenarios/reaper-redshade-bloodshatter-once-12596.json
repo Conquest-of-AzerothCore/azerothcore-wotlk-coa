@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "name": "Redshade's Bloodshatter is used once, then Reap returns (#12596)",
+  "contract": [
+    "Thresh 505170 reads 'Upon cast, this ability transforms into Bloodshatter for 10 sec.' Its effect 1",
+    "applies Bloodshatter (Dummy) 525299 and its effect 2 removes Thresh (Dummy) 525058 through 525303.",
+    "Bloodshatter 505326 has no such remover, so its step stayed for the full 10 sec and Reap stayed",
+    "Bloodshatter. Ascension footage of a level 60 Reaper with Redshade, reviewed by the user on",
+    "2026-11-18, shows Bloodshatter used once inside its 10 sec, after which the button is Reap again.",
+    "Expected: Reap forwarded to Bloodshatter lands, the 525299 step ends on that cast, Reap is no longer",
+    "replaced on the client, and a second Bloodshatter is refused for the missing caster aura (22).",
+    "Melee hit, expertise and a fixture stun keep the landed hit from depending on an avoidance roll.",
+    "Bloodshatter strikes a frontal cone, so the Reaper faces east (o 0) toward the dummy spawned east of it."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 60,
+      "melee_hit_rating": 100000,
+      "expertise_rating": 100000,
+      "spell_hit_rating": 100000,
+      "allow_regeneration": false
+    }
+  ],
+  "location": { "map": 530, "x": 10349.6, "y": -6357.29, "z": 33.4026, "o": 0 },
+  "creatures": [
+    { "id": "enemy", "owner": "reaper", "entry": 1601, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 6000 },
+    { "action": "learn", "actor": "reaper", "spell": 500357 },
+    { "action": "learn", "actor": "reaper", "spell": 524735 },
+    {
+      "action": "assert", "label": "SETUP: the talent owns Bloodshatter", "actor": "reaper",
+      "metric": "knows_spell", "spell": 505326, "equals": 1, "within_ms": 3000
+    },
+    { "action": "learn", "actor": "reaper", "spell": 23775 },
+    {
+      "action": "cast", "label": "Hold the target still and prevent independent blocks", "actor": "reaper",
+      "spell": 23775, "target": "enemy"
+    },
+    {
+      "action": "assert", "label": "SETUP: the target is stunned", "actor": "enemy",
+      "metric": "stunned", "equals": 1, "within_ms": 1000
+    },
+    { "action": "wait", "label": "Clear the fixture stun global cooldown", "ms": 1600 },
+    { "action": "set_aura", "label": "The Bloodshatter step", "actor": "reaper", "spell": 525299, "stacks": 1 },
+    {
+      "action": "assert", "label": "SETUP: Reap is replaced by Bloodshatter", "actor": "reaper",
+      "metric": "temporary_spell_replacement", "spell": 500357, "equals": 505326, "within_ms": 1000
+    },
+    {
+      "action": "snapshot", "actor": "reaper", "metric": "spell_damage_count", "spell": 505326,
+      "target": "enemy", "save_as": "bloodshatter_before"
+    },
+    { "action": "cast", "label": "Press the Reap button", "actor": "reaper", "spell": 500357, "target": "enemy" },
+    {
+      "action": "assert", "label": "SETUP: Reap forwarded to Bloodshatter", "actor": "reaper",
+      "metric": "spell_cast_count", "spell": 505326, "min": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "SETUP: the forwarded Bloodshatter lands", "actor": "reaper",
+      "metric": "spell_damage_count", "spell": 505326, "target": "enemy",
+      "relative_to": "bloodshatter_before", "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Bloodshatter step ends on its cast", "actor": "reaper",
+      "metric": "aura", "spell": 525299, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Reap is itself again", "actor": "reaper",
+      "metric": "temporary_spell_replacement", "spell": 500357, "equals": 500357, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The client lists Reap again", "actor": "reaper",
+      "metric": "client_knows_spell", "spell": 500357, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The client no longer lists Bloodshatter", "actor": "reaper",
+      "metric": "client_knows_spell", "spell": 505326, "equals": 0
+    },
+    { "action": "wait", "label": "Clear the Bloodshatter global cooldown", "ms": 1600 },
+    { "action": "cast", "actor": "reaper", "spell": 505326, "target": "enemy" },
+    {
+      "action": "assert", "label": "A second Bloodshatter is refused without its step", "actor": "reaper",
+      "metric": "cast_failure", "spell": 505326, "equals": 22
+    }
+  ]
+}

@@ -16,6 +16,7 @@
  */
 
 #include "DBCStores.h"
+#include "AscensionBattlegroundBrackets.h"
 #include "BattlegroundMgr.h"
 #include "DBCFileLoader.h"
 #include "DBCfmt.h"
@@ -889,6 +890,9 @@ MapDifficulty const* GetDownscaledMapDifficultyData(uint32 mapId, Difficulty& di
 
 PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 level)
 {
+    if (PvPDifficultyEntry const* widened = AscensionBattlegroundBrackets::FindByLevel(mapid, level))
+        return widened;
+
     PvPDifficultyEntry const* maxEntry = nullptr;              // used for level > max listed level case
 
     for (PvPDifficultyEntry const* entry : sPvPDifficultyStore)
@@ -911,6 +915,9 @@ PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 lev
 
 PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattlegroundBracketId id)
 {
+    if (PvPDifficultyEntry const* widened = nullptr; AscensionBattlegroundBrackets::FindById(mapid, id, widened))
+        return widened;
+
     for (PvPDifficultyEntry const* entry : sPvPDifficultyStore)
         if (entry->mapId == mapid && entry->GetBracketId() == id)
             return entry;

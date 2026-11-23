@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "The Sleeper Has Awakened: Kerlonian's Chest rests on the ground in Ashenvale (#12554)",
+  "contract": "Kerlonian's Chest (176634, spawn 48510) holds the Horn of Awakening for quest 5321. It was placed at z 50.71 on the stock terrain; patch-WB1's revamped Kalimdor_31_22 raised the ground under it to 51.18, so the chest sat about 0.47 yards below the surface and players could not see or open it. The chest now stands on the terrain, so a gap below -0.15 yards means it is buried again.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "p", "race": 4, "class": 1, "level": 20 } ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Kerlonian's Chest is not buried under the raised ground",
+      "actor": "p", "metric": "spawn_ground_gap", "guid": 48510, "spawn_type": "gameobject", "min": -0.15, "max": 0.35
+    }
+  ]
+}

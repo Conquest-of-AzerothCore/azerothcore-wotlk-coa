@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Chat log: party, raid, raid warning, guild, officer and channel chat are logged, refused ones are not",
+  "contract": [
+    "With CoA.ChatLog.Enable on, party chat before the sender is in a group writes no row; in a group it writes one party row with the group set.",
+    "After the group becomes a raid, raid chat and a raid warning from the leader write one row each with the group set.",
+    "In a guild the leader's guild and officer chat write one row each with the guild set.",
+    "A channel message to a channel the sender has not joined writes no row; after joining ChatLogTest the same message writes one channel row with the channel name."
+  ],
+  "timeout_ms": 60000,
+  "chat_log": true,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {"id": "lead", "name": "Chatloglead", "race": 1, "class": 1, "level": 20},
+    {"id": "mate", "name": "Chatlogmate", "race": 1, "class": 1, "level": 20},
+    {"id": "third", "name": "Chatlogthrd", "race": 1, "class": 1, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "client_packet", "label": "Party chat without a group", "actor": "lead", "opcode": 149, "consumed": false, "fields": [{"u32": 2}, {"u32": 7}, {"string": "anyone here"}]},
+    {"action": "assert", "label": "No party row without a group", "actor": "lead", "metric": "chat_log_rows", "chat_type": "party", "equals": 0},
+    {"action": "group", "actor": "lead", "target": "mate"},
+    {"action": "client_packet", "label": "Party chat", "actor": "lead", "opcode": 149, "consumed": false, "fields": [{"u32": 2}, {"u32": 7}, {"string": "party hello"}]},
+    {"action": "assert", "label": "One party row with the group", "actor": "lead", "metric": "chat_log_rows", "chat_type": "party", "chat_text": "party hello", "chat_has_group": true, "chat_has_position": false, "equals": 1},
+    {"action": "group", "label": "The group becomes a raid", "actor": "lead", "target": "third", "raid": true},
+    {"action": "client_packet", "label": "Raid chat", "actor": "lead", "opcode": 149, "consumed": false, "fields": [{"u32": 3}, {"u32": 7}, {"string": "raid hello"}]},
+    {"action": "assert", "label": "One raid row", "actor": "lead", "metric": "chat_log_rows", "chat_type": "raid", "chat_text": "raid hello", "chat_has_group": true, "equals": 1},
+    {"action": "client_packet", "label": "Raid warning", "actor": "lead", "opcode": 149, "consumed": false, "fields": [{"u32": 40}, {"u32": 7}, {"string": "pull in 5"}]},
+    {"action": "assert", "label": "One raid warning row", "actor": "lead", "metric": "chat_log_rows", "chat_type": "raid_warning", "chat_text": "pull in 5", "chat_has_group": true, "equals": 1},
+    {"action": "guild", "actor": "lead", "members": ["mate"], "name": "Chatlogguild"},
+    {"action": "client_packet", "label": "Guild chat", "actor": "lead", "opcode": 149, "consumed": false, "fields": [{"u32": 4}, {"u32": 7}, {"string": "guild hello"}]},
+    {"action": "assert", "label": "One guild row with the guild", "actor": "lead", "metric": "chat_log_rows", "chat_type": "guild", "chat_text": "guild hello", "chat_has_guild": true, "equals": 1},
+    {"action": "client_packet", "label": "Officer chat", "actor": "lead", "opcode": 149, "consumed": false, "fields": [{"u32": 5}, {"u32": 7}, {"string": "officer hello"}]},
+    {"action": "assert", "label": "One officer row", "actor": "lead", "metric": "chat_log_rows", "chat_type": "officer", "chat_text": "officer hello", "chat_has_guild": true, "equals": 1},
+    {"action": "client_packet", "label": "Channel message before joining", "actor": "lead", "opcode": 149, "consumed": false, "fields": [{"u32": 17}, {"u32": 7}, {"string": "ChatLogTest"}, {"string": "too early"}]},
+    {"action": "assert", "label": "No row for a channel the sender is not in", "actor": "lead", "metric": "chat_log_rows", "chat_type": "channel", "equals": 0},
+    {"action": "client_packet", "label": "Join ChatLogTest", "actor": "lead", "opcode": 151, "consumed": false, "fields": [{"u32": 0}, {"u8": 0}, {"u8": 0}, {"string": "ChatLogTest"}, {"string": ""}]},
+    {"action": "client_packet", "label": "Channel message", "actor": "lead", "opcode": 149, "consumed": false, "fields": [{"u32": 17}, {"u32": 7}, {"string": "ChatLogTest"}, {"string": "channel hello"}]},
+    {"action": "assert", "label": "One channel row with the channel name", "actor": "lead", "metric": "chat_log_rows", "chat_type": "channel", "chat_channel": "ChatLogTest", "chat_text": "channel hello", "equals": 1}
+  ]
+}

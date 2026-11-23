@@ -243,12 +243,11 @@ class spell_ascension_bloodmage_empowered : public SpellScript
     {
         BeforeCast += SpellCastFn(spell_ascension_bloodmage_empowered::SnapshotNightFeastRage);
         if (GetEmpowerment(m_scriptSpellId) == Heartbreak)
-            OnEffectLaunchTarget += SpellEffectFn(spell_ascension_bloodmage_empowered::HeartbreakPower,
+            OnEffectLaunch += SpellEffectFn(spell_ascension_bloodmage_empowered::HeartbreakPower,
                 EFFECT_1, SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE);
         OnHit += SpellHitFn(spell_ascension_bloodmage_empowered::ModifyHit);
     }
 };
-constexpr uint32 EmpoweredIndicator = 524899;
 
 void SyncEmpoweredIndicator(Unit* unit)
 {

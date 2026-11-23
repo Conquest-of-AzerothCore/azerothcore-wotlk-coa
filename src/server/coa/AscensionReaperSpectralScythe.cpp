@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellAuras.h"
@@ -25,6 +26,30 @@ class spell_ascension_reaper_spectral_scythe : public SpellScript
     {
         OnEffectHit += SpellEffectFn(spell_ascension_reaper_spectral_scythe::SummonOneScythePerReapedSoul,
             EFFECT_0, SPELL_EFFECT_SUMMON);
+    }
+};
+
+class spell_ascension_reaper_scythe_sweep : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_reaper_scythe_sweep);
+
+    void ScaleWithScytheLevel(SpellEffIndex)
+    {
+        Unit* caster = GetCaster();
+        SpellInfo const* info = GetSpellInfo();
+        if (!caster || !info->SpellLevel || caster->GetLevel() == info->SpellLevel)
+            return;
+
+        CreatureBaseStats const* scythe = sObjectMgr->GetCreatureBaseStats(caster->GetLevel(), caster->getClass());
+        CreatureBaseStats const* spell = sObjectMgr->GetCreatureBaseStats(info->SpellLevel, caster->getClass());
+        if (scythe && spell && spell->BaseDamage[0] > 0.0f)
+            SetEffectValue(int32(GetEffectValue() * scythe->BaseDamage[0] / spell->BaseDamage[0]));
+    }
+
+    void Register() override
+    {
+        OnEffectLaunchTarget += SpellEffectFn(spell_ascension_reaper_scythe_sweep::ScaleWithScytheLevel,
+            EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
     }
 };
 
@@ -68,5 +93,6 @@ private:
 void AddSC_AscensionReaperSpectralScythe()
 {
     RegisterSpellScript(spell_ascension_reaper_spectral_scythe);
+    RegisterSpellScript(spell_ascension_reaper_scythe_sweep);
     RegisterCreatureAI(npc_ascension_reaper_spectral_scythe);
 }

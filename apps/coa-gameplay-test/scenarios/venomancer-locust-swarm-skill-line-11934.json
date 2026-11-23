@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Locust Swarm is in the Fortitude tab, not Stalking (#11934)",
+  "contract": [
+    "Issue #11934. Locust Swarm (560247) is the Fortitude talent CharacterAdvancement 6119 in Tab 78, but",
+    "SkillLineAbility row 22250 filed it under SkillLine 104 (Stalking), so the Fortitude spellbook tab did not list it.",
+    "Every other active Fortitude talent, such as Molt (805102, row 89239), is in SkillLine 105. Row 22250 now carries",
+    "SkillLine 105 on the server and in the client data; the client row is not observed here."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "v", "race": 1, "class": 29, "level": 60}
+  ],
+  "steps": [
+    {"action": "assert", "actor": "v", "metric": "skill_line_for_spell", "spell": 805102, "equals": 105,
+     "label": "CONTROL: Molt is in the Fortitude line"},
+    {"action": "assert", "actor": "v", "metric": "skill_line_for_spell", "spell": 560247, "equals": 105,
+     "label": "Locust Swarm carries the Fortitude line"}
+  ]
+}

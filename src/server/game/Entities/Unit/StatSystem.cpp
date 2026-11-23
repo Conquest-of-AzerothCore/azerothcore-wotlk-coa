@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AscensionLevelDamageSummons.h"
 #include "ClassicPlusStats.h"
 #include "Config.h"
 #include "Creature.h"
@@ -245,6 +246,11 @@ bool Player::UpdateStats(Stats stat)
     }
 
     return true;
+}
+
+float Player::GetExactStatValue(Stats stat) const
+{
+    return GetTotalStatValue(stat, GetAscensionStatFromStatBonus(*this, stat));
 }
 
 void Player::ApplySpellPowerBonus(int32 amount, bool apply)
@@ -1498,6 +1504,8 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
         val = GetStat(STAT_STRENGTH) - 10.0f;
     else if (IsPetGhoul())                                         // DK's ghoul attack power
         val = 589 /*xinef: base ap!*/ + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY);
+    else if (IsAscensionLevelDamageSummon(GetEntry()))
+        val = GetFlatModifierValue(unitMod, BASE_VALUE);
     else
         val = 2 * GetStat(STAT_STRENGTH) - 20.0f;
 
@@ -1508,11 +1516,12 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
     float attPowerMod = GetFlatModifierValue(unitMod, TOTAL_VALUE);
     float attPowerMultiplier = GetPctModifierValue(unitMod, TOTAL_PCT) - 1.0f;
 
-    // Glyph of Felguard: the Felguard's total attack power +20%
+    // Glyph of Felguard: the Felguard's total attack power +20%. The bonus multiplies the total: added to a pet
+    // multiplier below 1 it grew attack power by more than the glyph says (1.44x with the Felguard's own modifier).
     if (GetStockPetEntry(GetEntry()) == NPC_FELGUARD)
         if (Unit* owner = GetOwner())
             if (AuraEffect const* glyph = owner->GetAuraEffectOfRankedSpellOrTwin(SPELL_GLYPH_OF_FELGUARD, EFFECT_0))
-                attPowerMultiplier += glyph->GetAmount() / 100.0f;
+                attPowerMultiplier = (attPowerMultiplier + 1.0f) * (1.0f + glyph->GetAmount() / 100.0f) - 1.0f;
 
     //UNIT_FIELD_(RANGED)_ATTACK_POWER field
     SetInt32Value(UNIT_FIELD_ATTACK_POWER, (int32)base_attPower);

@@ -9,7 +9,8 @@ class SpellInfo;
 // Vanilla 5-player dungeon bosses, on every difficulty, never use sleep, charm, possession, Zevrim Thornhoof's
 // Sacrifice, Darkmaster Gandling's Shadow Portal, Shade of Eranikus' Deep Slumber or Lady Illucia Barov's Fear on a
 // player whose specialization tanks or heals: they pick another player, and when nobody else qualifies they do not cast
-// at all. Hex of Jammal'an also needs a second player engaged with the boss, so a lone player is never hexed. Area
+// at all. Hex of Jammal'an also needs a second player engaged with the boss, so a lone player is never hexed. Archmage
+// Arugal's curses still take tanks and healers, but only while at least two players are engaged with him. Area
 // spells drop tanks and healers from their targets (except the splash of Doctor Theolen Krastinov's Ghoulish Potion),
 // and a boss does not start one aimed at itself unless another player qualifies.
 namespace BossControl

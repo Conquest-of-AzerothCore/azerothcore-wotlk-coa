@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Chat log: the text of a mail a player sends is logged, refused and server mails are not",
+  "contract": [
+    "With CoA.ChatLog.Enable on, a mail a player sends with a subject and a body writes one mail row for the sender: the receiver as target (a two-word name typed in lower case is written in full, as the server spells it), the subject, the body as the text and the new mail's id.",
+    "A mail the sender cannot pay for (100000 copper they do not have, result 3) writes no row, and a mail the server sends (the Postmaster returning an item) writes no row for anyone."
+  ],
+  "timeout_ms": 60000,
+  "chat_log": true,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {"id": "sender", "name": "Chatlogmail", "race": 1, "class": 1, "level": 20},
+    {"id": "alt", "name": "Chatlogmalt Secondnamexy", "race": 1, "class": 1, "level": 20, "account_of": "sender"}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "summon_gameobject", "actor": "sender", "entry": 142119},
+    {"action": "client_packet", "label": "Mail with a subject and a body", "actor": "sender", "opcode": 568, "consumed": false, "fields": [{"gameobject_guid": 142119}, {"string": "chatlogmalt secondnamexy"}, {"string": "About last night"}, {"string": "You were rude in /2. Stop."}, {"u32": 41}, {"u32": 0}, {"u8": 0}, {"u32": 0}, {"u32": 0}, {"u64": 0}, {"u8": 0}]},
+    {"action": "assert", "label": "The mail is sent", "actor": "sender", "metric": "server_packet_u32", "opcode": 569, "index": 2, "equals": 0},
+    {"action": "assert", "label": "One mail row with subject, body, the receiver by their whole two-word name and the mail id", "actor": "sender", "metric": "chat_log_rows", "chat_type": "mail", "chat_subject": "About last night", "chat_text": "You were rude in /2. Stop.", "chat_target": "alt", "chat_target_name": "Chatlogmalt Secondnamexy", "chat_has_mail_id": true, "equals": 1},
+    {"action": "client_packet", "label": "Try to mail more money than the sender has", "actor": "sender", "opcode": 568, "consumed": false, "fields": [{"gameobject_guid": 142119}, {"string": "Chatlogmalt Secondnamexy"}, {"string": "Too much"}, {"string": "money"}, {"u32": 41}, {"u32": 0}, {"u8": 0}, {"u32": 100000}, {"u32": 0}, {"u64": 0}, {"u8": 0}]},
+    {"action": "assert", "label": "That mail is refused", "actor": "sender", "metric": "server_packet_u32", "opcode": 569, "index": 2, "equals": 3},
+    {"action": "assert", "label": "No row for the refused mail", "actor": "sender", "metric": "chat_log_rows", "chat_type": "mail", "equals": 1},
+    {"action": "system_mail", "label": "The Postmaster mails the alt", "actor": "alt", "item": 765, "kind": "postmaster"},
+    {"action": "assert", "label": "No mail row for the server's mail", "actor": "alt", "metric": "chat_log_rows", "chat_type": "mail", "equals": 0}
+  ]
+}

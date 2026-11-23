@@ -159,8 +159,7 @@ Map* MapMgr::CreateScriptedPrivateWorldMap(
             !existing->IsScriptedPrivateInstance() ||
             existing->GetScriptedPrivateOwner() !=
                 player->GetScriptedPrivateOwner() ||
-            !existing->IsScriptedPrivateMember(
-                player->GetGUID()))
+            !existing->CanEnterScriptedPrivate(player))
         {
             return nullptr;
         }
@@ -509,7 +508,7 @@ void MapMgr::Update(uint32 diff)
                 ? i_timer[0].GetCurrent()
                 : 0);
 
-        if (map->CanUnload(mapDiff))
+        if (!map->HavePlayers() && map->CanUnload(mapDiff))
         {
             map->UnloadAll();
             delete map;

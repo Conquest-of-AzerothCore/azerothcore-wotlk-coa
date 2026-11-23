@@ -1,0 +1,605 @@
+{
+ "class_file": {
+  "value_links": []
+ },
+ "scenarios": [
+  {
+   "key": "conformance-necromancer-value-301303",
+   "sha256": "44ed72b9a77866186ba382486ae97385de2711d20eede6747bafd37a0987d71d",
+   "expectations": [
+    {
+     "label": "301303 effect_value e0 #0",
+     "check": "effect_value",
+     "spell_id": 301303,
+     "rank_id": 301303,
+     "effect_index": 0,
+     "displayed": "$s1",
+     "rule": "read percent",
+     "model": null
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-value-504316",
+   "sha256": "0f8c56afa9f975162d7ee4c6637ef7eeb3462dd85171b9a0e288b753ff60f81b",
+   "expectations": [
+    {
+     "label": "504316 spell_duration 800043 #0",
+     "check": "spell_duration",
+     "spell_id": 504316,
+     "rank_id": 504316,
+     "effect_index": null,
+     "displayed": "$800043d",
+     "rule": "read duration_ms",
+     "model": {
+      "effect_spell": 800043
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-value-560800",
+   "sha256": "a639c132cce78c5034b85066fd5f6a6a74b99bd8d8b9ff76720ebf8546675290",
+   "expectations": [
+    {
+     "label": "560800 effect_value 500585e0 #1",
+     "check": "effect_value",
+     "spell_id": 560800,
+     "rank_id": 560800,
+     "effect_index": null,
+     "displayed": "${$500585m1+$500585ppl1+$SP*0.335}",
+     "rule": "read flat",
+     "model": {
+      "effect_spell": 500585,
+      "effect": 0
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-560800-metric-delta-rotling",
+   "sha256": "189a37d0e6edf0ae7e1958b039bb0ada62e0c77a65516b45503750bd3555bb3a",
+   "expectations": [
+    {
+     "label": "560800 behaviour_metric_delta rotling",
+     "check": "behaviour_metric_delta",
+     "spell_id": 560800,
+     "rank_id": 501886,
+     "effect_index": null,
+     "displayed": "1",
+     "rule": "prose: \"Upon fully channeling Crypt Swarm, you summon a Rotling\" (560800)",
+     "model": {
+      "kind": "metric_delta",
+      "before_label": "560800 owned_creature_count before",
+      "after_label": "560800 owned_creature_count after",
+      "expected": 1,
+      "before_expected": 0,
+      "metric": "owned_creature_count",
+      "contrast": "learned",
+      "quote": "Upon fully channeling Crypt Swarm, you summon a Rotling"
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-560800-metric-delta-explode-before",
+   "sha256": "917f3fe32218d13a74eb3aef5cdc60ba97a2f76210f0c30f27a6a182e83f67e9",
+   "expectations": [
+    {
+     "label": "560800 behaviour_metric_delta explode_before",
+     "check": "behaviour_metric_delta",
+     "spell_id": 560800,
+     "rank_id": 501886,
+     "effect_index": null,
+     "displayed": "0",
+     "rule": "prose: \"and explode after $807640t2 sec\" (560800)",
+     "model": {
+      "kind": "metric_delta",
+      "before_label": "560800 spell_damage_count before",
+      "after_label": "560800 spell_damage_count after",
+      "expected": 0,
+      "before_expected": 0,
+      "metric": "spell_damage_count",
+      "contrast": "learned",
+      "quote": "and explode after $807640t2 sec",
+      "game_time": {
+       "cast_label": "560800 game_time cast",
+       "after_label": "560800 game_time after",
+       "after_window": [
+        7750,
+        8250
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-560800-metric-delta-explode-after",
+   "sha256": "f688beb8c360ff37472dba44c28c19a71627526f96ceea836f4ad0a76c2fd493",
+   "expectations": [
+    {
+     "label": "560800 behaviour_metric_delta explode_after",
+     "check": "behaviour_metric_delta",
+     "spell_id": 560800,
+     "rank_id": 501886,
+     "effect_index": null,
+     "displayed": "1",
+     "rule": "prose: \"and explode after $807640t2 sec\" (560800)",
+     "model": {
+      "kind": "metric_delta",
+      "before_label": "560800 spell_damage_count before",
+      "after_label": "560800 spell_damage_count after",
+      "expected": 1,
+      "before_expected": 0,
+      "metric": "spell_damage_count",
+      "contrast": "learned",
+      "quote": "and explode after $807640t2 sec",
+      "game_time": {
+       "cast_label": "560800 game_time cast",
+       "after_label": "560800 game_time after",
+       "after_window": [
+        7750,
+        8250
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-504316-metric-delta-halt",
+   "sha256": "171dd68327c08dffbfb99169da9cff5107c46ac5955879785f3e35d1e346991f",
+   "expectations": [
+    {
+     "label": "504316 behaviour_metric_delta halt",
+     "check": "behaviour_metric_delta",
+     "spell_id": 504316,
+     "rank_id": 504316,
+     "effect_index": null,
+     "displayed": "0.0228572",
+     "rule": "prose: \"slowing their movement speed to a halt for $800043d.\" (504316)",
+     "model": {
+      "kind": "metric_delta",
+      "before_label": "504316 run_speed_rate before",
+      "after_label": "504316 run_speed_rate after",
+      "expected": 0.0228572,
+      "before_expected": 1.14286,
+      "metric": "run_speed_rate",
+      "contrast": "condition",
+      "quote": "slowing their movement speed to a halt for $800043d.",
+      "tolerance": 0.0001
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-504316-chase-halt",
+   "sha256": "fad58c2a6e942b7cb872091a4637019428f2603fcdd56cff32c314cb1bee0547",
+   "expectations": [
+    {
+     "label": "504316 behaviour_metric_delta chase_halt",
+     "check": "behaviour_metric_delta",
+     "spell_id": 504316,
+     "rank_id": 504316,
+     "effect_index": null,
+     "displayed": "0.02",
+     "rule": "prose: \"slowing their movement speed to a halt\" (504316)",
+     "model": {
+      "kind": "chase_halt",
+      "metric": "chase_travel_ratio",
+      "quote": "slowing their movement speed to a halt",
+      "expected": 0.02,
+      "reads": {
+       "start": [
+        "504316 chase_halt start time",
+        "504316 chase_halt start hooked",
+        "504316 chase_halt start chaser"
+       ],
+       "end": [
+        "504316 chase_halt end time",
+        "504316 chase_halt end hooked",
+        "504316 chase_halt end chaser"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-504316-metric-delta-hook-pull",
+   "sha256": "395d14961c2fadcc5084efc58c4eb176f1ec9d886bf3579723918a15ead11254",
+   "expectations": [
+    {
+     "label": "504316 behaviour_metric_delta hook_pull",
+     "check": "behaviour_metric_delta",
+     "spell_id": 504316,
+     "rank_id": 504316,
+     "effect_index": null,
+     "displayed": "8",
+     "rule": "prose: \"Command your Abominations to hook an enemy to their location\" (504316)",
+     "model": {
+      "kind": "metric_delta",
+      "before_label": "504316 distance_2d before",
+      "after_label": "504316 distance_2d after",
+      "expected": 8,
+      "before_expected": 25,
+      "metric": "distance_2d",
+      "contrast": "condition",
+      "quote": "Command your Abominations to hook an enemy to their location",
+      "tolerance": 0.01,
+      "after_at_least": 0,
+      "after_at_most": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-504316-metric-delta-hook-to-abomination",
+   "sha256": "23188425bd2c8ef47b59ddb7a0e68b5048a3a4d3df417d960910f68ac8f308fe",
+   "expectations": [
+    {
+     "label": "504316 behaviour_metric_delta hook_to_abomination",
+     "check": "behaviour_metric_delta",
+     "spell_id": 504316,
+     "rank_id": 504316,
+     "effect_index": null,
+     "displayed": "0",
+     "rule": "prose: \"Command your Abominations to hook an enemy to their location\" (504316)",
+     "model": {
+      "kind": "metric_delta",
+      "before_label": "504316 owned_creature_distance_2d before",
+      "after_label": "504316 owned_creature_distance_2d after",
+      "expected": 0,
+      "before_expected": 25,
+      "metric": "owned_creature_distance_2d",
+      "contrast": "learned",
+      "quote": "Command your Abominations to hook an enemy to their location",
+      "tolerance": 8,
+      "after_at_least": 0,
+      "after_at_most": 1.25
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-504316-metric-delta-duration",
+   "sha256": "91cfa0a36b4100e3ee0fb691e05c3907bc524c97df70403e8b5be8e3a54924a6",
+   "expectations": [
+    {
+     "label": "504316 behaviour_metric_delta duration",
+     "check": "behaviour_metric_delta",
+     "spell_id": 504316,
+     "rank_id": 504316,
+     "effect_index": null,
+     "displayed": "1",
+     "rule": "prose: \"slowing their movement speed to a halt for $800043d.\" (504316)",
+     "model": {
+      "kind": "metric_delta",
+      "before_label": "504316 aura before",
+      "after_label": "504316 aura after",
+      "expected": 1,
+      "before_expected": 0,
+      "metric": "aura",
+      "contrast": "learned",
+      "quote": "slowing their movement speed to a halt for $800043d.",
+      "expired_label": "504316 aura expired",
+      "after_expiry_expected": 0
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-300748-metric-delta-summon-health",
+   "sha256": "5d0f3fcad2bad1375c8699d9c517e407dc1c5ee74de54b3d51fffdeabdc6694c",
+   "expectations": [
+    {
+     "label": "300748 behaviour_metric_delta summon_health",
+     "check": "behaviour_metric_delta",
+     "spell_id": 300748,
+     "rank_id": 500971,
+     "effect_index": null,
+     "displayed": "1449",
+     "rule": "prose: \"and the maximum health of your summons by\" (300748)",
+     "model": {
+      "kind": "metric_delta",
+      "before_label": "300748 owned_creature_max_health before",
+      "after_label": "300748 owned_creature_max_health after",
+      "expected": 1449,
+      "before_expected": 1380,
+      "metric": "owned_creature_max_health",
+      "contrast": "learned",
+      "quote": "and the maximum health of your summons by"
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-300748-metric-delta-own-health",
+   "sha256": "17d7b8d21f345c342d7602570a1221fdae88e66124d5d501a1fd73455b7c97a0",
+   "expectations": [
+    {
+     "label": "300748 behaviour_metric_delta own_health",
+     "check": "behaviour_metric_delta",
+     "spell_id": 300748,
+     "rank_id": 500971,
+     "effect_index": null,
+     "displayed": "2053",
+     "rule": "prose: \"Increases your maximum health\" (300748)",
+     "model": {
+      "kind": "metric_delta",
+      "before_label": "300748 max_health before",
+      "after_label": "300748 max_health after",
+      "expected": 2053,
+      "before_expected": 1956,
+      "metric": "max_health",
+      "contrast": "learned",
+      "quote": "Increases your maximum health"
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-92121-metric-delta-crypt-swarm",
+   "sha256": "92fb9b4d02f5955517dd405ccfe12f01c1737bb78838d0e2a9c621e969890116",
+   "expectations": [
+    {
+     "label": "92121 behaviour_metric_delta crypt_swarm",
+     "check": "behaviour_metric_delta",
+     "spell_id": 92121,
+     "rank_id": 501886,
+     "effect_index": null,
+     "displayed": "6",
+     "rule": "prose: \"Damage dealt by Crypt Swarm now applies 1 stack of Crypt Plague\" (92121)",
+     "model": {
+      "kind": "metric_delta",
+      "before_label": "92121 aura_stacks before",
+      "after_label": "92121 aura_stacks after",
+      "expected": 6,
+      "before_expected": 0,
+      "metric": "aura_stacks",
+      "contrast": "learned",
+      "quote": "Damage dealt by Crypt Swarm now applies 1 stack of Crypt Plague"
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-301207-metric-delta-armor",
+   "sha256": "fd42660f2fd9b78956ddaef471ec6f646de14bbd2ab9bbd234fff4880304401a",
+   "expectations": [
+    {
+     "label": "301207 behaviour_metric_delta armor",
+     "check": "behaviour_metric_delta",
+     "spell_id": 301207,
+     "rank_id": 500335,
+     "effect_index": null,
+     "displayed": "1.3",
+     "rule": "prose: \"Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%\" (301207)",
+     "model": {
+      "kind": "metric_delta",
+      "before_label": "301207 armor before",
+      "after_label": "301207 armor after",
+      "expected": 1.3,
+      "before_expected": 1,
+      "metric": "armor",
+      "contrast": "learned",
+      "quote": "Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%",
+      "tolerance": 0.005,
+      "expected_ratio": 1.3
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-301207-metric-delta-resistance",
+   "sha256": "7584a09562587bef2bcd3d6860d1230eb91695478fb1719841e4ca9e28bcebbc",
+   "expectations": [
+    {
+     "label": "301207 behaviour_metric_delta resistance",
+     "check": "behaviour_metric_delta",
+     "spell_id": 301207,
+     "rank_id": 500335,
+     "effect_index": null,
+     "displayed": "116",
+     "rule": "prose: \"Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%\" (301207)",
+     "model": {
+      "kind": "metric_delta",
+      "before_label": "301207 resistance before",
+      "after_label": "301207 resistance after",
+      "expected": 116,
+      "before_expected": 90,
+      "metric": "resistance",
+      "contrast": "learned",
+      "quote": "Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%"
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-301207-metric-delta-armor-none",
+   "sha256": "ee9e6a7a03ecabe8a305b1c8c63db88a5d9d2503e40b501fd4ac5c58a343f4b6",
+   "expectations": [
+    {
+     "label": "301207 behaviour_metric_delta armor_none",
+     "check": "behaviour_metric_delta",
+     "spell_id": 301207,
+     "rank_id": 500981,
+     "effect_index": null,
+     "displayed": "1",
+     "rule": "prose: \"Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%\" (301207)",
+     "model": {
+      "kind": "metric_delta",
+      "before_label": "301207 armor before",
+      "after_label": "301207 armor after",
+      "expected": 1,
+      "before_expected": 1,
+      "metric": "armor",
+      "contrast": "learned",
+      "quote": "Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%",
+      "tolerance": 0.0001,
+      "expected_ratio": 1
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-301207-metric-delta-armor-colossus",
+   "sha256": "552fa6030d8589852b95560210b3aabcc0c27ceabc93095e2fdc40fdb366aff1",
+   "expectations": [
+    {
+     "label": "301207 behaviour_metric_delta armor_colossus",
+     "check": "behaviour_metric_delta",
+     "spell_id": 301207,
+     "rank_id": 500989,
+     "effect_index": null,
+     "displayed": "1.3",
+     "rule": "prose: \"Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%\" (301207)",
+     "model": {
+      "kind": "metric_delta",
+      "before_label": "301207 armor before",
+      "after_label": "301207 armor after",
+      "expected": 1.3,
+      "before_expected": 1,
+      "metric": "armor",
+      "contrast": "learned",
+      "quote": "Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%",
+      "tolerance": 0.005,
+      "expected_ratio": 1.3
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-301207-metric-delta-capacity-fixture",
+   "sha256": "eb8a1e3503a30d0dca14c272ca06df4ef6ff13c7d67c98f8eeedfe3234d4f674",
+   "expectations": [
+    {
+     "label": "301207 behaviour_metric_delta capacity_fixture",
+     "check": "behaviour_metric_delta",
+     "spell_id": 301207,
+     "rank_id": 500981,
+     "effect_index": null,
+     "displayed": "6",
+     "rule": "prose: \"Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%\" (301207)",
+     "model": {
+      "kind": "metric_delta",
+      "before_label": "301207 aura_stacks before",
+      "after_label": "301207 aura_stacks after",
+      "expected": 6,
+      "before_expected": 3,
+      "metric": "aura_stacks",
+      "contrast": "learned",
+      "quote": "Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%"
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-301207-metric-delta-armor-each",
+   "sha256": "138afb2748be73eebe9dcb90c211e89713e2864346b7d8ab32451dbd5b470917",
+   "expectations": [
+    {
+     "label": "301207 behaviour_metric_delta armor_each",
+     "check": "behaviour_metric_delta",
+     "spell_id": 301207,
+     "rank_id": 500335,
+     "effect_index": null,
+     "displayed": "1.6",
+     "rule": "prose: \"Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%\" (301207)",
+     "model": {
+      "kind": "metric_delta",
+      "before_label": "301207 armor before",
+      "after_label": "301207 armor after",
+      "expected": 1.6,
+      "before_expected": 1,
+      "metric": "armor",
+      "contrast": "learned",
+      "quote": "Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%",
+      "tolerance": 0.005,
+      "expected_ratio": 1.6
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-503740-metric-delta-frenzied-snare-immune",
+   "sha256": "576c3323c999ca8a67b0ebf6a2651d1f1fafa6cce7d8e7c711034febdfc723ff",
+   "expectations": [
+    {
+     "label": "503740 behaviour_metric_delta frenzied_snare_immune",
+     "check": "behaviour_metric_delta",
+     "spell_id": 503740,
+     "rank_id": 504868,
+     "effect_index": null,
+     "displayed": "1.14286",
+     "rule": "prose: \"chance to transform them into a Frenzied Ghoul.\" (503740)",
+     "model": {
+      "kind": "metric_delta",
+      "before_label": "503740 owned_creature_run_speed_rate before",
+      "after_label": "503740 owned_creature_run_speed_rate after",
+      "expected": 1.14286,
+      "before_expected": 1.14286,
+      "metric": "owned_creature_run_speed_rate",
+      "contrast": "learned",
+      "quote": "chance to transform them into a Frenzied Ghoul.",
+      "tolerance": 0.0001,
+      "forced_chance": {
+       "talent": 503740,
+       "aura": 707014,
+       "entry": 50073,
+       "absent_label": "503740 forced_chance 707014 absent",
+       "present_label": "503740 forced_chance 707014 present",
+       "count_label": "503740 forced_chance 50073 count",
+       "released_label": "503740 forced_chance released"
+      },
+      "strike_landed": {
+       "spell": 1715,
+       "log_label": "503740 strike_landed 1715 damage logs"
+      },
+      "before_aura_absent": {
+       "aura": 1604,
+       "entry": 50073,
+       "read_label": "503740 before_aura_absent 1604 on 50073"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "key": "conformance-necromancer-behaviour-503740-metric-delta-snare-control",
+   "sha256": "bbdc1c5856c2baa69f6f60db2267bacc7e451b3b2db0408955ea27be35716d0d",
+   "expectations": [
+    {
+     "label": "503740 behaviour_metric_delta snare_control",
+     "check": "behaviour_metric_delta",
+     "spell_id": 503740,
+     "rank_id": 504868,
+     "effect_index": null,
+     "displayed": "0.57143",
+     "rule": "prose: \"chance to transform them into a Frenzied Ghoul.\" (503740)",
+     "model": {
+      "kind": "metric_delta",
+      "before_label": "503740 owned_creature_run_speed_rate before",
+      "after_label": "503740 owned_creature_run_speed_rate after",
+      "expected": 0.57143,
+      "before_expected": 1.14286,
+      "metric": "owned_creature_run_speed_rate",
+      "contrast": "learned",
+      "quote": "chance to transform them into a Frenzied Ghoul.",
+      "tolerance": 0.0001,
+      "strike_landed": {
+       "spell": 1715,
+       "log_label": "503740 strike_landed 1715 damage logs"
+      },
+      "before_aura_absent": {
+       "aura": 1604,
+       "entry": 50073,
+       "read_label": "503740 before_aura_absent 1604 on 50073"
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,997 @@
+{
+  "schema": 1,
+  "name": "Grave Coil, Death Strike, Scourge Strike and Corpse Explosion ranks that only SpellRank.dbc lists run their first-rank scripts",
+  "contract": [
+    "These ranks exist only in the client's SpellRank.dbc. Under the stock spell_ranks chains they had no first rank, so the first-rank script that turns their dummy effect into the real one never ran and the cast did nothing.",
+    "Grave Coil 47551-47555 cast 47632; Death Strike 51027-51031 heal with 45470 per disease; Scourge Strike 55354-55355 add 70890 Shadow damage per disease; Corpse Explosion 49419-49422 blow up a corpse with 50444."
+  ],
+  "timeout_ms": 360000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "dk",
+      "name": "Rankknight",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "dk",
+      "entry": 28168,
+      "level": 60,
+      "health": 2000000,
+      "distance": 3
+    },
+    {
+      "id": "corpse0",
+      "owner": "dk",
+      "entry": 6,
+      "level": 1,
+      "health": 1,
+      "distance": 3
+    },
+    {
+      "id": "corpse1",
+      "owner": "dk",
+      "entry": 6,
+      "level": 1,
+      "health": 1,
+      "distance": 3
+    },
+    {
+      "id": "corpse2",
+      "owner": "dk",
+      "entry": 6,
+      "level": 1,
+      "health": 1,
+      "distance": 3
+    },
+    {
+      "id": "corpse3",
+      "owner": "dk",
+      "entry": 6,
+      "level": 1,
+      "health": 1,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and spawns settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Rankknight"
+    },
+    {
+      "action": "learn",
+      "actor": "dk",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "dk",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "dk",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "47551 is rank 2 of 47541",
+      "actor": "dk",
+      "metric": "spell_rank",
+      "spell": 47551,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "47551 belongs to the 47541 chain",
+      "actor": "dk",
+      "metric": "first_rank_spell",
+      "spell": 47551,
+      "equals": 47541
+    },
+    {
+      "action": "assert",
+      "label": "51027 is rank 2 of 49998",
+      "actor": "dk",
+      "metric": "spell_rank",
+      "spell": 51027,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "51027 belongs to the 49998 chain",
+      "actor": "dk",
+      "metric": "first_rank_spell",
+      "spell": 51027,
+      "equals": 49998
+    },
+    {
+      "action": "assert",
+      "label": "55354 is rank 2 of 55090",
+      "actor": "dk",
+      "metric": "spell_rank",
+      "spell": 55354,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "55354 belongs to the 55090 chain",
+      "actor": "dk",
+      "metric": "first_rank_spell",
+      "spell": 55354,
+      "equals": 55090
+    },
+    {
+      "action": "assert",
+      "label": "49419 is rank 2 of 49158",
+      "actor": "dk",
+      "metric": "spell_rank",
+      "spell": 49419,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "49419 belongs to the 49158 chain",
+      "actor": "dk",
+      "metric": "first_rank_spell",
+      "spell": 49419,
+      "equals": 49158
+    },
+    {
+      "action": "learn",
+      "actor": "dk",
+      "spell": 47551
+    },
+    {
+      "action": "set_power",
+      "actor": "dk",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 47632,
+      "target": "enemy",
+      "save_as": "d47551"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Grave Coil 47551",
+      "actor": "dk",
+      "spell": 47551,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Grave Coil 47551 produces 47632",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 47632,
+      "target": "enemy",
+      "relative_to": "d47551",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "dk",
+      "spell": 47552
+    },
+    {
+      "action": "set_power",
+      "actor": "dk",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 47632,
+      "target": "enemy",
+      "save_as": "d47552"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Grave Coil 47552",
+      "actor": "dk",
+      "spell": 47552,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Grave Coil 47552 produces 47632",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 47632,
+      "target": "enemy",
+      "relative_to": "d47552",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "dk",
+      "spell": 47553
+    },
+    {
+      "action": "set_power",
+      "actor": "dk",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 47632,
+      "target": "enemy",
+      "save_as": "d47553"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Grave Coil 47553",
+      "actor": "dk",
+      "spell": 47553,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Grave Coil 47553 produces 47632",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 47632,
+      "target": "enemy",
+      "relative_to": "d47553",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "dk",
+      "spell": 47554
+    },
+    {
+      "action": "set_power",
+      "actor": "dk",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 47632,
+      "target": "enemy",
+      "save_as": "d47554"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Grave Coil 47554",
+      "actor": "dk",
+      "spell": 47554,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Grave Coil 47554 produces 47632",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 47632,
+      "target": "enemy",
+      "relative_to": "d47554",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "dk",
+      "spell": 47555
+    },
+    {
+      "action": "set_power",
+      "actor": "dk",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 47632,
+      "target": "enemy",
+      "save_as": "d47555"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Grave Coil 47555",
+      "actor": "dk",
+      "spell": 47555,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Grave Coil 47555 produces 47632",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 47632,
+      "target": "enemy",
+      "relative_to": "d47555",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "dk",
+      "spell": 51027
+    },
+    {
+      "action": "set_aura",
+      "actor": "dk",
+      "target": "enemy",
+      "caster": "dk",
+      "spell": 55078,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "dk",
+      "target": "enemy",
+      "caster": "dk",
+      "spell": 55095,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "dk",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "spell_heal_count",
+      "spell": 45470,
+      "target": "dk",
+      "save_as": "h51027"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Death Strike 51027 on a diseased enemy",
+      "actor": "dk",
+      "spell": 51027,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Death Strike 51027 on a diseased enemy produces 45470",
+      "actor": "dk",
+      "metric": "spell_heal_count",
+      "spell": 45470,
+      "target": "dk",
+      "relative_to": "h51027",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "dk",
+      "spell": 51028
+    },
+    {
+      "action": "set_aura",
+      "actor": "dk",
+      "target": "enemy",
+      "caster": "dk",
+      "spell": 55078,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "dk",
+      "target": "enemy",
+      "caster": "dk",
+      "spell": 55095,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "dk",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "spell_heal_count",
+      "spell": 45470,
+      "target": "dk",
+      "save_as": "h51028"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Death Strike 51028 on a diseased enemy",
+      "actor": "dk",
+      "spell": 51028,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Death Strike 51028 on a diseased enemy produces 45470",
+      "actor": "dk",
+      "metric": "spell_heal_count",
+      "spell": 45470,
+      "target": "dk",
+      "relative_to": "h51028",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "dk",
+      "spell": 51029
+    },
+    {
+      "action": "wait",
+      "label": "Let the frost and unholy runes refresh",
+      "ms": 10500
+    },
+    {
+      "action": "set_aura",
+      "actor": "dk",
+      "target": "enemy",
+      "caster": "dk",
+      "spell": 55078,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "dk",
+      "target": "enemy",
+      "caster": "dk",
+      "spell": 55095,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "dk",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "spell_heal_count",
+      "spell": 45470,
+      "target": "dk",
+      "save_as": "h51029"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Death Strike 51029 on a diseased enemy",
+      "actor": "dk",
+      "spell": 51029,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Death Strike 51029 on a diseased enemy produces 45470",
+      "actor": "dk",
+      "metric": "spell_heal_count",
+      "spell": 45470,
+      "target": "dk",
+      "relative_to": "h51029",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "dk",
+      "spell": 51030
+    },
+    {
+      "action": "set_aura",
+      "actor": "dk",
+      "target": "enemy",
+      "caster": "dk",
+      "spell": 55078,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "dk",
+      "target": "enemy",
+      "caster": "dk",
+      "spell": 55095,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "dk",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "spell_heal_count",
+      "spell": 45470,
+      "target": "dk",
+      "save_as": "h51030"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Death Strike 51030 on a diseased enemy",
+      "actor": "dk",
+      "spell": 51030,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Death Strike 51030 on a diseased enemy produces 45470",
+      "actor": "dk",
+      "metric": "spell_heal_count",
+      "spell": 45470,
+      "target": "dk",
+      "relative_to": "h51030",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "dk",
+      "spell": 51031
+    },
+    {
+      "action": "wait",
+      "label": "Let the frost and unholy runes refresh",
+      "ms": 10500
+    },
+    {
+      "action": "set_aura",
+      "actor": "dk",
+      "target": "enemy",
+      "caster": "dk",
+      "spell": 55078,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "dk",
+      "target": "enemy",
+      "caster": "dk",
+      "spell": 55095,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "dk",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "spell_heal_count",
+      "spell": 45470,
+      "target": "dk",
+      "save_as": "h51031"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Death Strike 51031 on a diseased enemy",
+      "actor": "dk",
+      "spell": 51031,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Death Strike 51031 on a diseased enemy produces 45470",
+      "actor": "dk",
+      "metric": "spell_heal_count",
+      "spell": 45470,
+      "target": "dk",
+      "relative_to": "h51031",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "dk",
+      "spell": 55354
+    },
+    {
+      "action": "set_aura",
+      "actor": "dk",
+      "target": "enemy",
+      "caster": "dk",
+      "spell": 55078,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "dk",
+      "target": "enemy",
+      "caster": "dk",
+      "spell": 55095,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "dk",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 70890,
+      "target": "enemy",
+      "save_as": "d55354"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Scourge Strike 55354 on a diseased enemy",
+      "actor": "dk",
+      "spell": 55354,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Scourge Strike 55354 on a diseased enemy produces 70890",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 70890,
+      "target": "enemy",
+      "relative_to": "d55354",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "dk",
+      "spell": 55355
+    },
+    {
+      "action": "wait",
+      "label": "Let the frost and unholy runes refresh",
+      "ms": 10500
+    },
+    {
+      "action": "set_aura",
+      "actor": "dk",
+      "target": "enemy",
+      "caster": "dk",
+      "spell": 55078,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "dk",
+      "target": "enemy",
+      "caster": "dk",
+      "spell": 55095,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "dk",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 70890,
+      "target": "enemy",
+      "save_as": "d55355"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Scourge Strike 55355 on a diseased enemy",
+      "actor": "dk",
+      "spell": 55355,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Scourge Strike 55355 on a diseased enemy produces 70890",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 70890,
+      "target": "enemy",
+      "relative_to": "d55355",
+      "min": 1
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill a kobold for a corpse",
+      "actor": "dk",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill a kobold for a corpse",
+      "actor": "dk",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill a kobold for a corpse",
+      "actor": "dk",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill a kobold for a corpse",
+      "actor": "dk",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: corpse0 is a corpse",
+      "actor": "corpse0",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: corpse1 is a corpse",
+      "actor": "corpse1",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: corpse2 is a corpse",
+      "actor": "corpse2",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: corpse3 is a corpse",
+      "actor": "corpse3",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "dk",
+      "spell": 49419
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "dk",
+      "spell": 49419
+    },
+    {
+      "action": "set_power",
+      "actor": "dk",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 50444,
+      "target": "enemy",
+      "save_as": "d49419"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Corpse Explosion 49419 on corpse0",
+      "actor": "dk",
+      "spell": 49419,
+      "target": "corpse0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Corpse Explosion 49419 on corpse0 produces 50444",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 50444,
+      "target": "enemy",
+      "relative_to": "d49419",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "dk",
+      "spell": 49420
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "dk",
+      "spell": 49420
+    },
+    {
+      "action": "set_power",
+      "actor": "dk",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 50444,
+      "target": "enemy",
+      "save_as": "d49420"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Corpse Explosion 49420 on corpse1",
+      "actor": "dk",
+      "spell": 49420,
+      "target": "corpse1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Corpse Explosion 49420 on corpse1 produces 50444",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 50444,
+      "target": "enemy",
+      "relative_to": "d49420",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "dk",
+      "spell": 49421
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "dk",
+      "spell": 49421
+    },
+    {
+      "action": "set_power",
+      "actor": "dk",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 50444,
+      "target": "enemy",
+      "save_as": "d49421"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Corpse Explosion 49421 on corpse2",
+      "actor": "dk",
+      "spell": 49421,
+      "target": "corpse2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Corpse Explosion 49421 on corpse2 produces 50444",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 50444,
+      "target": "enemy",
+      "relative_to": "d49421",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "dk",
+      "spell": 49422
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "dk",
+      "spell": 49422
+    },
+    {
+      "action": "set_power",
+      "actor": "dk",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 50444,
+      "target": "enemy",
+      "save_as": "d49422"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Corpse Explosion 49422 on corpse3",
+      "actor": "dk",
+      "spell": 49422,
+      "target": "corpse3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Corpse Explosion 49422 on corpse3 produces 50444",
+      "actor": "dk",
+      "metric": "spell_damage_count",
+      "spell": 50444,
+      "target": "enemy",
+      "relative_to": "d49422",
+      "min": 1
+    }
+  ]
+}

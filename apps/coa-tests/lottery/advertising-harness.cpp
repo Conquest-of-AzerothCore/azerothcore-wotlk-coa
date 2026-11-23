@@ -84,7 +84,7 @@ struct Player
     uint32 zone = 1519;
     float distance = 20;
     bool gm = false, visible = true, inWorld = true;
-    Session session;
+    Session session{};
     uint32 received = 0;
     bool IsInWorld() const {return inWorld;}
     bool IsGameMaster() const {return gm;}

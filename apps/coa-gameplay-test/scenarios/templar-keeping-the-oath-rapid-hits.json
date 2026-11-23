@@ -1,0 +1,890 @@
+{
+  "schema": 1,
+  "name": "Keeping the Oath: hits every 0.5 s keep one payment per second and are repaid in full",
+  "contract": "Keeping the Oath 92109 delays 40% of a direct hit into Oathkeeper 803237, which pays it over 8 s (DurationIndex 31, amplitude 1000). A level 60 striker (entry 36) with the fixture's 100-point spell hit bonus, so that no strike misses, casts Light of the Naaru 41394 (1100 Holy, 440 delayed) at a level 60 Templar holding 92109. Each strike adds its 440 to the remaining debt, resets the debt to 8000 ms and resets its tick count but not its periodic timer (ADR 0157): payments keep their one-second cadence across strikes, 8 more follow the last strike, the last up to 1 s before the refreshed end, and the total repaid is 40% of every strike, with nothing paid after the debt ends. Each payment is the remaining debt divided by the ticks left, rounded down, and the first payment after a change also takes the integer leftover. Ten strikes 0.5 s apart from 0 to 4.5 s, one trial. A payment lands every second from 1 to 12 s (the count read at each half second rises by one per second, and no two payments are more than 1100 ms or less than 900 ms apart); 8 of them follow the last strike, the last 0.5 s before the refreshed end at 12.5 s; 4400 paid, nothing after.",
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "striker",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3.0,
+      "stationary": true,
+      "spell_hit_bonus": 100
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 92109,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 20000,
+      "maximum": 20000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "save_as": "paid_1",
+      "spell": 803237,
+      "target": "caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "save_as": "payments_1",
+      "spell": 803237,
+      "target": "caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "save_as": "absorbed_1_1",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "save_as": "logs_1_1",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "cast",
+      "actor": "striker",
+      "spell": 41394,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "strike 1 lands",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 1 lands, one damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "relative_to": "logs_1_1",
+      "min": 1,
+      "max": 1,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 1 delays 440",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "relative_to": "absorbed_1_1",
+      "min": 440,
+      "max": 440,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "to the next strike",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "label": "0 payments at 0.5 s, one per second while strikes arrive",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "relative_to": "payments_1",
+      "min": 0,
+      "max": 0,
+      "spell": 803237,
+      "target": "caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "save_as": "absorbed_1_2",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "save_as": "logs_1_2",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "cast",
+      "actor": "striker",
+      "spell": 41394,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "strike 2 lands",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 2 lands, one damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "relative_to": "logs_1_2",
+      "min": 1,
+      "max": 1,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 2 delays 440",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "relative_to": "absorbed_1_2",
+      "min": 440,
+      "max": 440,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "to the next strike",
+      "ms": 200
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "save_as": "absorbed_1_3",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "save_as": "logs_1_3",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "cast",
+      "actor": "striker",
+      "spell": 41394,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "strike 3 lands",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 3 lands, one damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "relative_to": "logs_1_3",
+      "min": 1,
+      "max": 1,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 3 delays 440",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "relative_to": "absorbed_1_3",
+      "min": 440,
+      "max": 440,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "to the next strike",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "label": "1 payments at 1.5 s, one per second while strikes arrive",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "relative_to": "payments_1",
+      "min": 1,
+      "max": 1,
+      "spell": 803237,
+      "target": "caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "save_as": "absorbed_1_4",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "save_as": "logs_1_4",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "cast",
+      "actor": "striker",
+      "spell": 41394,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "strike 4 lands",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 4 lands, one damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "relative_to": "logs_1_4",
+      "min": 1,
+      "max": 1,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 4 delays 440",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "relative_to": "absorbed_1_4",
+      "min": 440,
+      "max": 440,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "to the next strike",
+      "ms": 200
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "save_as": "absorbed_1_5",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "save_as": "logs_1_5",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "cast",
+      "actor": "striker",
+      "spell": 41394,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "strike 5 lands",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 5 lands, one damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "relative_to": "logs_1_5",
+      "min": 1,
+      "max": 1,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 5 delays 440",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "relative_to": "absorbed_1_5",
+      "min": 440,
+      "max": 440,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "to the next strike",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "label": "2 payments at 2.5 s, one per second while strikes arrive",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "relative_to": "payments_1",
+      "min": 2,
+      "max": 2,
+      "spell": 803237,
+      "target": "caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "save_as": "absorbed_1_6",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "save_as": "logs_1_6",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "cast",
+      "actor": "striker",
+      "spell": 41394,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "strike 6 lands",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 6 lands, one damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "relative_to": "logs_1_6",
+      "min": 1,
+      "max": 1,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 6 delays 440",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "relative_to": "absorbed_1_6",
+      "min": 440,
+      "max": 440,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "to the next strike",
+      "ms": 200
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "save_as": "absorbed_1_7",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "save_as": "logs_1_7",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "cast",
+      "actor": "striker",
+      "spell": 41394,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "strike 7 lands",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 7 lands, one damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "relative_to": "logs_1_7",
+      "min": 1,
+      "max": 1,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 7 delays 440",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "relative_to": "absorbed_1_7",
+      "min": 440,
+      "max": 440,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "to the next strike",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "label": "3 payments at 3.5 s, one per second while strikes arrive",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "relative_to": "payments_1",
+      "min": 3,
+      "max": 3,
+      "spell": 803237,
+      "target": "caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "save_as": "absorbed_1_8",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "save_as": "logs_1_8",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "cast",
+      "actor": "striker",
+      "spell": 41394,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "strike 8 lands",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 8 lands, one damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "relative_to": "logs_1_8",
+      "min": 1,
+      "max": 1,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 8 delays 440",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "relative_to": "absorbed_1_8",
+      "min": 440,
+      "max": 440,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "to the next strike",
+      "ms": 200
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "save_as": "absorbed_1_9",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "save_as": "logs_1_9",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "cast",
+      "actor": "striker",
+      "spell": 41394,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "strike 9 lands",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 9 lands, one damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "relative_to": "logs_1_9",
+      "min": 1,
+      "max": 1,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 9 delays 440",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "relative_to": "absorbed_1_9",
+      "min": 440,
+      "max": 440,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "to the next strike",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "label": "4 payments at 4.5 s, one per second while strikes arrive",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "relative_to": "payments_1",
+      "min": 4,
+      "max": 4,
+      "spell": 803237,
+      "target": "caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "save_as": "absorbed_1_10",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "save_as": "logs_1_10",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "cast",
+      "actor": "striker",
+      "spell": 41394,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "strike 10 lands",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 10 lands, one damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "relative_to": "logs_1_10",
+      "min": 1,
+      "max": 1,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: strike 10 delays 440",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "relative_to": "absorbed_1_10",
+      "min": 440,
+      "max": 440,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "to the next strike",
+      "ms": 200
+    },
+    {
+      "action": "wait",
+      "label": "to 5.5 s",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "5 payments at 5.5 s, one per second",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "relative_to": "payments_1",
+      "min": 5,
+      "max": 5,
+      "spell": 803237,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "to 6.5 s",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "6 payments at 6.5 s, one per second",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "relative_to": "payments_1",
+      "min": 6,
+      "max": 6,
+      "spell": 803237,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "to 7.5 s",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "7 payments at 7.5 s, one per second",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "relative_to": "payments_1",
+      "min": 7,
+      "max": 7,
+      "spell": 803237,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "to 8.5 s",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "8 payments at 8.5 s, one per second",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "relative_to": "payments_1",
+      "min": 8,
+      "max": 8,
+      "spell": 803237,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "to 9.5 s",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "9 payments at 9.5 s, one per second",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "relative_to": "payments_1",
+      "min": 9,
+      "max": 9,
+      "spell": 803237,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "to 10.5 s",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "10 payments at 10.5 s, one per second",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "relative_to": "payments_1",
+      "min": 10,
+      "max": 10,
+      "spell": 803237,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "to 11.5 s",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "11 payments at 11.5 s, one per second",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "relative_to": "payments_1",
+      "min": 11,
+      "max": 11,
+      "spell": 803237,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "to 13.0 s, 0.5 s after the refreshed end",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "12 payments 0.5 s after the refreshed end at 12.5 s",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "relative_to": "payments_1",
+      "min": 12,
+      "max": 12,
+      "spell": 803237,
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: 4400 paid, 40% of the ten strikes",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "relative_to": "paid_1",
+      "min": 4400,
+      "max": 4400,
+      "spell": 803237,
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: the debt ends 8 s after the last strike",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803237,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "save_as": "paid_after_1",
+      "spell": 803237,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "2 s after the debt's end",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: nothing is paid after the debt ends",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "relative_to": "paid_after_1",
+      "min": 0,
+      "max": 0,
+      "spell": 803237,
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "label": "Payments never come closer than 900 ms",
+      "actor": "caster",
+      "metric": "event_interval_min_ms",
+      "stream": "spell_damage",
+      "spell": 803237,
+      "target": "caster",
+      "min": 900
+    },
+    {
+      "action": "assert",
+      "label": "Payments never pause longer than 1100 ms while strikes arrive",
+      "actor": "caster",
+      "metric": "event_interval_max_ms",
+      "stream": "spell_damage",
+      "spell": 803237,
+      "target": "caster",
+      "max": 1100
+    }
+  ],
+  "timeout_ms": 40000
+}

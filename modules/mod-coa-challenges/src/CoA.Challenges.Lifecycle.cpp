@@ -3,6 +3,7 @@
 #include "CoA.Challenges.Review.h"
 #include "AscensionRulesets.h"
 #include "InstanceScript.h"
+#include "ObjectMgr.h"
 
 #include <atomic>
 #include <mutex>
@@ -258,6 +259,9 @@ namespace CoAChallenges
         CharacterDatabase.DirectExecute("DELETE FROM coa_character_objective WHERE guid = {}", guid);
         CharacterDatabase.DirectExecute("DELETE FROM coa_challenge_completion WHERE guid = {}", guid);
         CharacterDatabase.DirectExecute("DELETE FROM coa_challenge_failure WHERE guid = {}", guid);
+        auto* snapshots = CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_CHALLENGE_FAILURE_SNAPSHOTS);
+        snapshots->SetData(0, guid);
+        CharacterDatabase.DirectExecute(snapshots);
         CharacterDatabase.DirectExecute("DELETE FROM coa_character_condition WHERE guid = {}", guid);
         ResetConditionFlags(guid);
         CharacterDatabase.DirectExecute("DELETE FROM coa_character_gamemode WHERE guid = {}", guid);
@@ -570,6 +574,7 @@ namespace CoAChallenges
             "REPLACE INTO coa_character_challenge (guid, challengeId, level, deaths, hunger, thirst, startTime) "
             "VALUES ({}, {}, {}, 0, 0, 0, UNIX_TIMESTAMP())",
             guid, challengeID, level);
+        ForgetFailureSnapshot(guid, challengeID);
         ClearCharChallengeCache(guid);
         ApplyChallengeSpell(player, challengeID, level);
         TrackHunger(player, challengeID);
@@ -1473,14 +1478,6 @@ namespace CoAChallenges
             && quest->GetRewOrReqMoney() >= 0;
     }
 
-    bool IsFetchOrCollectionQuest(Quest const* quest)
-    {
-        return quest && !quest->GetReqCreatureOrGOcount() && !quest->GetPlayersSlain()
-            && !quest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_EXPLORATION_OR_EVENT)
-            && !quest->GetRepObjectiveFaction() && !quest->GetRepObjectiveFaction2()
-            && quest->GetRewOrReqMoney() >= 0;
-    }
-
     // NO_LEVEL_PAST_REQUIREMENTS: the lowest level ABOVE the player's current
     // one that still has an unmet tracked objective in an active challenge
     // carrying the rule, or 0 if none. XP must be capped one point short of it,
@@ -1563,6 +1560,7 @@ namespace CoAChallenges
         completion->Append(
             "DELETE FROM coa_character_challenge WHERE guid = {} AND challengeId = {}", guid, challengeID);
         CharacterDatabase.DirectCommitTransaction(completion);
+        ForgetFailureSnapshot(guid, challengeID);
         ClearCharChallengeCache(guid);
         RemoveChallengeSpell(player, challengeID);
         RemoveMeterAuras(player);
@@ -1786,6 +1784,7 @@ namespace CoAChallenges
         // so the failure announcement is attributed to the trial.
         std::string trialDisplayName, trialDisplayIcon;
         ActiveTrialDisplayFor(player, challengeID, trialDisplayName, trialDisplayIcon);
+        SaveFailureSnapshot(guid, challengeID, player->GetLevel());
         // INSERT IGNORE + synchronous: the PK (guid, challengeId) makes a repeat
         // fail a no-op, and a sync write means HasFailure/HasPermaDeathFailure
         // (read in the same tick) and the client re-push see the row immediately.
@@ -1869,6 +1868,8 @@ namespace CoAChallenges
     void FailChallengeOffline(uint32 guid, uint32 challengeID, uint32 level, uint32 deaths,
         ObjectGuid const& killerSource)
     {
+        SaveFailureSnapshot(guid, challengeID,
+            sCharacterCache->GetCharacterLevelByGuid(ObjectGuid::Create<HighGuid::Player>(guid)));
         CharacterDatabase.DirectExecute(
             "INSERT IGNORE INTO coa_challenge_failure (guid, challengeId, level, deaths, failTime) "
             "VALUES ({}, {}, {}, {}, UNIX_TIMESTAMP())",
@@ -2083,5 +2084,303 @@ namespace CoAChallenges
                     "Your {} challenge has failed.", GameModeNameForBit(bit));
             }
         }
+    }
+
+    // ---- GM tooling: objective listing/credit and failed-run restore -------
+    // (`.coa trial objectives|credit|restore`, see CoA.Challenges.Scripts.cpp)
+
+    // Tracked objectives in definition order. The 1-based position in this
+    // list is the objective number the GM commands show and accept.
+    std::vector<Objective> TrackedObjectives(uint32 challengeID)
+    {
+        std::vector<Objective> tracked;
+        for (Objective const& o : GetObjectives(challengeID))
+            if (IsTrackedObjective(o.type))
+                tracked.push_back(o);
+        return tracked;
+    }
+
+    std::string DescribeObjective(Objective const& o)
+    {
+        uint32 const target = CoAParse::ObjectiveTarget(o);
+        uint32 const gate = CoAParse::ObjectiveGateLevel(o);
+        std::string text;
+        if (o.type == "CHALLENGE_REQUIREMENT_TYPE_KILL_CREATURE_BEFORE_LEVEL")
+        {
+            CreatureTemplate const* creature = sObjectMgr->GetCreatureTemplate(target);
+            text = creature ? Acore::StringFormat("Kill {}", creature->Name)
+                : Acore::StringFormat("Kill creature {}", target);
+        }
+        else if (o.type == "CHALLENGE_REQUIREMENT_TYPE_LOOT_ITEM_BEFORE_LEVEL")
+        {
+            ItemTemplate const* item = sObjectMgr->GetItemTemplate(target);
+            text = item ? Acore::StringFormat("Loot {}", item->Name1)
+                : Acore::StringFormat("Loot item {}", target);
+        }
+        else if (o.type == "CHALLENGE_REQUIREMENT_TYPE_COMPLETE_QUEST_BEFORE_LEVEL")
+        {
+            Quest const* quest = sObjectMgr->GetQuestTemplate(target);
+            text = quest ? Acore::StringFormat("Complete quest \"{}\"", quest->GetTitle())
+                : Acore::StringFormat("Complete quest {}", target);
+        }
+        else if (o.type == "CHALLENGE_REQUIREMENT_TYPE_EARN_MONEY_BEFORE_LEVEL")
+            text = Acore::StringFormat("Carry {}g {}s {}c", target / 10000, (target / 100) % 100, target % 100);
+        else if (o.type == "CHALLENGE_REQUIREMENT_TYPE_DUO")
+            text = "Start in a party of two";
+        else if (o.type == "CHALLENGE_REQUIREMENT_TYPE_TRIO")
+            text = "Start in a party of three";
+        else
+            text = o.key;
+        if (gate)
+            text += Acore::StringFormat(" before level {}", gate);
+        return text;
+    }
+
+    // GM credit for one objective. Unlike MarkObjectives it ignores the
+    // objective's level gate; the banner and the completion check are the same.
+    bool CreditObjective(Player* player, uint32 challengeID, uint32 number, std::string& message)
+    {
+        uint32 const guid = player->GetGUID().GetCounter();
+        if (!ActiveChallenges(guid).count(challengeID))
+        {
+            message = Acore::StringFormat("Challenge {} is not active for {}.", challengeID, player->GetName());
+            return false;
+        }
+        std::vector<Objective> const tracked = TrackedObjectives(challengeID);
+        if (!number || number > tracked.size())
+        {
+            message = Acore::StringFormat(
+                "Challenge {} has no Objective ID {} (it has {}); see .coa trial objectives.",
+                challengeID, number, tracked.size());
+            return false;
+        }
+        Objective const& o = tracked[number - 1];
+        if (IsObjectiveDone(guid, challengeID, o.key))
+        {
+            message = Acore::StringFormat("Objective {} ({}) is already done for {}.",
+                number, DescribeObjective(o), player->GetName());
+            return false;
+        }
+
+        SetObjectiveDone(guid, challengeID, o.key);
+        LOG_INFO("module.coa_challenges", "{} was credited objective {} (challenge {}) by a GM",
+            player->GetName(), o.key, challengeID);
+        SendCriteriaUpdatedForObjective(player, challengeID, ActiveChallengeLevel(guid, challengeID), o, true);
+
+        uint32 const gate = CoAParse::ObjectiveGateLevel(o);
+        message = Acore::StringFormat("Credited objective {} ({}) on challenge {} for {}",
+            number, DescribeObjective(o), challengeID, player->GetName());
+        if (gate && player->GetLevel() >= gate)
+            message += Acore::StringFormat(" (past its level {} gate)", gate);
+        message += ".";
+
+        if (ObjectivesAllDone(guid, challengeID))
+        {
+            uint32 const cap = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
+            if (!IsTrialChallenge(challengeID) || player->GetLevel() >= cap)
+            {
+                CompleteChallenge(player, challengeID);
+                message += " All objectives done: challenge completed.";
+            }
+            else
+                message += Acore::StringFormat(" All objectives done; completes at level {}.", cap);
+        }
+        return true;
+    }
+
+    // Called at the top of a failure, while the active row still exists: keeps
+    // what the failure is about to discard (the run timer) for
+    // `.coa trial restore`, with the character's level so a restore can tell
+    // which objective gates the character has passed since.
+    // The statement copies the active row, so a repeat failure call, which
+    // finds none, writes nothing and leaves the snapshot alone.
+    void SaveFailureSnapshot(uint32 guid, uint32 challengeID, uint32 characterLevel)
+    {
+        auto* snapshot = CharacterDatabase.GetPreparedStatement(CHAR_REP_COA_CHALLENGE_FAILURE_SNAPSHOT);
+        snapshot->SetData(0, characterLevel);
+        snapshot->SetData(1, guid);
+        snapshot->SetData(2, challengeID);
+        CharacterDatabase.DirectExecute(snapshot);
+    }
+
+    // Synchronous, so a failure right after an activation cannot have its
+    // fresh snapshot removed by a delete still waiting in the async queue.
+    void ForgetFailureSnapshot(uint32 guid, uint32 challengeID)
+    {
+        auto* forget = CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_CHALLENGE_FAILURE_SNAPSHOT);
+        forget->SetData(0, guid);
+        forget->SetData(1, challengeID);
+        CharacterDatabase.DirectExecute(forget);
+    }
+
+    // GM restore of a failed run: drops the failure lock and puts the challenge
+    // back as active from the snapshot taken at the failure (or, for a failure
+    // older than the snapshot table, from the failure record alone). A custom
+    // trial the challenge belonged to is not restored.
+    bool RestoreFailedChallenge(Player* player, uint32 challengeID, std::string& message)
+    {
+        uint32 const guid = player->GetGUID().GetCounter();
+        auto* selectFailure = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_CHALLENGE_FAILURE);
+        selectFailure->SetData(0, guid);
+        selectFailure->SetData(1, challengeID);
+        PreparedQueryResult failure = CharacterDatabase.Query(selectFailure);
+        if (!failure)
+        {
+            message = Acore::StringFormat("{} has no failure lock on challenge {}.", player->GetName(), challengeID);
+            return false;
+        }
+        if (ActiveChallenges(guid).count(challengeID))
+        {
+            message = Acore::StringFormat("Challenge {} is already active for {}.", challengeID, player->GetName());
+            return false;
+        }
+
+        uint32 level = failure->Fetch()[0].Get<uint32>();
+        uint32 deaths = failure->Fetch()[1].Get<uint32>();
+        uint32 startTime = uint32(::time(nullptr));
+        uint32 levelAtFailure = 0;
+        auto* selectSnapshot = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_CHALLENGE_FAILURE_SNAPSHOT);
+        selectSnapshot->SetData(0, guid);
+        selectSnapshot->SetData(1, challengeID);
+        PreparedQueryResult snapshot = CharacterDatabase.Query(selectSnapshot);
+        bool const fromSnapshot = snapshot != nullptr;
+        if (fromSnapshot)
+        {
+            Field* f = snapshot->Fetch();
+            level = f[0].Get<uint32>();
+            deaths = f[1].Get<uint32>();
+            startTime = f[2].Get<uint32>();
+            levelAtFailure = f[3].Get<uint32>();
+        }
+
+        uint32 conflictId = 0;
+        if (ConflictingExclusiveChallenge(guid, challengeID, conflictId))
+        {
+            message = Acore::StringFormat(
+                "Cannot restore challenge {} for {}: it conflicts with active challenge {}.",
+                challengeID, player->GetName(), conflictId);
+            return false;
+        }
+
+        // Levels gained after the failure were earned without the challenge's
+        // rules (lives, bans on the auction house, mail and trade, level cap). A
+        // few are tolerated for a player who kept playing while waiting for a
+        // GM; more than the allowance refuses. A challenge without objective
+        // gates has no other check, so its failure needs the recorded level.
+        std::vector<Objective> const tracked = TrackedObjectives(challengeID);
+        uint32 const currentLevel = player->GetLevel();
+        uint32 const levelAllowance = sConfigMgr->GetOption<uint32>("CoAChallenges.Restore.MaxLevelsGained", 3);
+        if (levelAtFailure && currentLevel > levelAtFailure + levelAllowance)
+        {
+            message = Acore::StringFormat(
+                "Restore refused: {} was level {} when challenge {} failed and is now level {}, more than the {} "
+                "levels allowed since a failure (CoAChallenges.Restore.MaxLevelsGained).",
+                player->GetName(), levelAtFailure, challengeID, currentLevel, levelAllowance);
+            return false;
+        }
+        if (!levelAtFailure && std::none_of(tracked.begin(), tracked.end(),
+                [](Objective const& o) { return CoAParse::ObjectiveGateLevel(o) != 0; }))
+        {
+            message = Acore::StringFormat(
+                "Restore refused: challenge {} failed for {} before failures recorded the character's level, "
+                "and it has no objective gates to check the levels gained since against.",
+                challengeID, player->GetName());
+            return false;
+        }
+
+        // Within the allowance a character may still only be restored while
+        // every pending objective is within reach. An objective only counts
+        // below its gate level, so once the character has levelled past a
+        // pending gate the run can no longer be finished by playing. Without a
+        // snapshot the level at the failure is unknown (0), so any pending gate
+        // at or below the current level refuses.
+        for (std::size_t i = 0; i < tracked.size(); ++i)
+        {
+            uint32 const gate = CoAParse::ObjectiveGateLevel(tracked[i]);
+            if (!gate || gate <= levelAtFailure || gate > currentLevel
+                || IsObjectiveDone(guid, challengeID, tracked[i].key))
+                continue;
+            message = Acore::StringFormat(
+                "Restore refused: {} is level {}, past the level {} gate of pending objective {} ({}) on "
+                "challenge {}. That objective can no longer be earned.",
+                player->GetName(), currentLevel, gate, i + 1, DescribeObjective(tracked[i]), challengeID);
+            return false;
+        }
+
+        // The fatal death is taken back so the run is not left at zero lives.
+        uint32 const lives = LivesTotal(challengeID);
+        if (lives && deaths >= lives)
+            deaths = lives - 1;
+
+        // One transaction: the lock, the active row, the meters and the
+        // snapshot change together or not at all.
+        CharacterDatabaseTransaction restore = CharacterDatabase.BeginTransaction();
+        auto* deleteFailure = CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_CHALLENGE_FAILURE);
+        deleteFailure->SetData(0, guid);
+        deleteFailure->SetData(1, challengeID);
+        restore->Append(deleteFailure);
+        auto* activate = CharacterDatabase.GetPreparedStatement(CHAR_REP_COA_CHARACTER_CHALLENGE);
+        activate->SetData(0, guid);
+        activate->SetData(1, challengeID);
+        activate->SetData(2, level);
+        activate->SetData(3, deaths);
+        activate->SetData(4, startTime);
+        restore->Append(activate);
+        // The meters restart fresh, as on activation: a run that failed on a
+        // full hunger or thirst meter or an empty fatigue bar would otherwise
+        // die again at once. No fatigue row means a full bar.
+        auto* deleteFatigue = CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_CHARACTER_FATIGUE);
+        deleteFatigue->SetData(0, guid);
+        deleteFatigue->SetData(1, challengeID);
+        restore->Append(deleteFatigue);
+        bool const hungerReset = IsHungerChallenge(challengeID);
+        bool const fatigueReset = IsFatigueChallenge(challengeID);
+        if (hungerReset)
+        {
+            auto* resetSurvival = CharacterDatabase.GetPreparedStatement(CHAR_UPD_COA_CHARACTER_SURVIVAL_RESET);
+            resetSurvival->SetData(0, guid);
+            restore->Append(resetSurvival);
+        }
+        auto* deleteSnapshot = CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_CHALLENGE_FAILURE_SNAPSHOT);
+        deleteSnapshot->SetData(0, guid);
+        deleteSnapshot->SetData(1, challengeID);
+        restore->Append(deleteSnapshot);
+        CharacterDatabase.DirectCommitTransaction(restore);
+        ClearCharChallengeCache(guid);
+
+        bool const resurrected = !player->IsAlive();
+        if (resurrected)
+        {
+            player->ResurrectPlayer(1.0f);
+            player->SpawnCorpseBones();
+        }
+
+        // The login push rebuilds every tracker, aura and client list from the
+        // row just written; it is idempotent for an in-world character.
+        PreloadLoginChallengeRows(guid);
+        PushLoginState(player);
+
+        uint32 done = 0;
+        for (Objective const& o : tracked)
+            if (IsObjectiveDone(guid, challengeID, o.key))
+                ++done;
+        LOG_INFO("module.coa_challenges", "Challenge {} ({}) restored for {} by a GM (level {}, deaths {}, {})",
+            challengeID, ChallengeName(challengeID), player->GetName(), level, deaths,
+            fromSnapshot ? "from snapshot" : "no snapshot");
+        message = Acore::StringFormat(
+            "Restored challenge {} ({}) for {}: level {}, deaths {}, {} of {} objectives done.",
+            challengeID, ChallengeName(challengeID), player->GetName(), level, deaths, done, tracked.size());
+        if (resurrected)
+            message += " Resurrected.";
+        if (levelAtFailure && currentLevel > levelAtFailure)
+            message += Acore::StringFormat(" The character was level {} at the failure and is now level {}.",
+                levelAtFailure, currentLevel);
+        if (hungerReset)
+            message += " Hunger and thirst start from zero.";
+        if (fatigueReset)
+            message += " The fatigue bar is full.";
+        if (!fromSnapshot)
+            message += " No snapshot existed for this failure: the run timer restarted.";
+        return true;
     }
 } // namespace CoAChallenges

@@ -1,0 +1,164 @@
+{
+  "schema": 1,
+  "name": "Blackrock Depths: High Interrogator Gerstahn casts Mana Burn every 10 s (#11859)",
+  "contract": "#11859: On Heroic and Mythic Gerstahn (9018) cast Mana Burn (14033) about every 4 s: her C++ script casts it every 10 s and a coa_dungeon_boss_kit row marked 'manual' added a second Mana Burn every 4-4.5 s. Ascension's logs show Mana Burn every 10 s. The kit row is removed; the script's Mana Burn stays.",
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 8,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 8,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 230,
+      "x": 301.1,
+      "y": -145.7,
+      "z": -70.4
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "actor": "heroic",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Blackrock Depths on Heroic",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "summon",
+      "actor": "heroic",
+      "entry": 9018,
+      "as": "gerstahn1",
+      "distance": 3
+    },
+    {
+      "action": "attack",
+      "actor": "heroic",
+      "target": "gerstahn1"
+    },
+    {
+      "action": "wait",
+      "ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Gerstahn burns mana on Heroic",
+      "actor": "gerstahn1",
+      "metric": "spell_cast_count",
+      "spell": 14033,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: at most three Mana Burns in 30 s on Heroic (every 10 s, as in the logs)",
+      "actor": "gerstahn1",
+      "metric": "spell_cast_count",
+      "spell": 14033,
+      "max": 3
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 230,
+      "x": 301.1,
+      "y": -145.7,
+      "z": -70.4
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "actor": "mythic",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Blackrock Depths on Mythic",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 9018,
+      "as": "gerstahn2",
+      "distance": 3
+    },
+    {
+      "action": "attack",
+      "actor": "mythic",
+      "target": "gerstahn2"
+    },
+    {
+      "action": "wait",
+      "ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Gerstahn burns mana on Mythic",
+      "actor": "gerstahn2",
+      "metric": "spell_cast_count",
+      "spell": 14033,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: at most three Mana Burns in 30 s on Mythic (every 10 s, as in the logs)",
+      "actor": "gerstahn2",
+      "metric": "spell_cast_count",
+      "spell": 14033,
+      "max": 3
+    }
+  ]
+}

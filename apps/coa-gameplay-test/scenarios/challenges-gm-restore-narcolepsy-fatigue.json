@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Restoring a Narcolepsy run that fell asleep starts with a full fatigue bar",
+  "contract": [
+    "Hardcore - Narcolepsy (170) has one life and a fatigue bar that drains outside rest areas from 100 to 0, one point every 4.2 seconds; at 0 the character falls asleep and dies, which fails the run.",
+    "GM tooling with no live reference: .coa trial restore restarts the meters as a new activation does, because a run restored with the fatal value would die again at once.",
+    "Expected: outside a rest area a bar set to 3 kills the character within seconds, the restore reports a full bar and resurrects, the bar then reads 100 of 100 and the character is still alive after more than one drain interval."
+  ],
+  "timeout_ms": 150000,
+  "players": [
+    { "id": "gm", "race": 1, "class": 1, "level": 20, "security": 3 },
+    { "id": "sleeper", "name": "Dozeprobe Wendmoor", "race": 1, "class": 1, "level": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "start_challenge", "actor": "sleeper", "challenge": 170, "level": 1 },
+    {
+      "action": "assert", "label": "Narcolepsy activates through its native request",
+      "actor": "sleeper", "metric": "challenge_start_code", "equals": 0, "within_ms": 3000
+    },
+    {
+      "action": "teleport", "label": "Leave the starter rest area for open Elwynn Forest",
+      "actor": "sleeper", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053
+    },
+    { "action": "wait", "ms": 4000 },
+    {
+      "action": "command", "label": "Set the bar three points from empty",
+      "actor": "gm", "command": ".coa fatigue \"Dozeprobe Wendmoor\" 3"
+    },
+    {
+      "action": "assert", "label": "The bar is draining: the character is not in a rest area",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Fatigue[Dozeprobe Wendmoor] = 3/100 (resting=no)", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The character falls asleep when the bar empties",
+      "actor": "sleeper", "metric": "alive", "equals": 0, "within_ms": 40000
+    },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "command", "label": "Restore the run that fell asleep",
+      "actor": "gm", "command": ".coa trial restore 170 \"Dozeprobe Wendmoor\""
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the restore reports the meters restarted",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "objectives done. Resurrected. The fatigue bar is full.", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "Narcolepsy has no hunger or thirst, so the restore does not mention them",
+      "actor": "gm", "metric": "system_message_contains", "text": "Hunger and thirst", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The character is alive again",
+      "actor": "sleeper", "metric": "alive", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "command", "label": "Read the bar after the restore",
+      "actor": "gm", "command": ".coa fatigue \"Dozeprobe Wendmoor\""
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the bar is full, not the fatal value",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Fatigue[Dozeprobe Wendmoor] = 100/100", "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "ms": 9000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the restored character does not fall asleep again at once",
+      "actor": "sleeper", "metric": "alive", "equals": 1
+    }
+  ]
+}

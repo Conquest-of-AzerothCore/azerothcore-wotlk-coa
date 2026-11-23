@@ -1587,13 +1587,7 @@ class spell_warl_seed_of_corruption_dummy : public AuraScript
 
         GetUnitOwner()->CastSpell(GetUnitOwner(), SPELL_WARLOCK_SEED_OF_CORRUPTION_VISUAL, true, nullptr, aurEff);
 
-        uint32 spellId = sSpellMgr->GetSpellWithRank(SPELL_WARLOCK_SEED_OF_CORRUPTION_DAMAGE_R1, GetSpellInfo()->GetRank());
-        if (sSpellMgr->GetSpellTwinSource(GetId()) != GetId())
-        {
-            std::vector<uint32> const relatives = sSpellMgr->GetSpellAndRelatives(spellId);
-            if (relatives.size() > 1)
-                spellId = relatives[1];
-        }
+        uint32 const spellId = sSpellMgr->GetSpellWithRankFor(SPELL_WARLOCK_SEED_OF_CORRUPTION_DAMAGE_R1, GetId());
         caster->CastSpell(GetUnitOwner(), spellId, true, nullptr, aurEff);
     }
 
