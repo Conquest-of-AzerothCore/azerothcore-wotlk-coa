@@ -56,8 +56,11 @@ script value of 680646 is no longer used.
 
 - Each holder (allies and the Cleric itself) is healed on each fall below 35% while the Scroll is active; a holder
   still below 35% after the heal is not healed again until it has been at or above 35% before a hit.
-- A holder already below 35% when the Scroll is applied, and hit again while still below, is not healed: that hit is
-  not a fall. The ruling names crossings; this case was not read in-game.
+- Stated edge case 1: a holder already below 35% when the Scroll is cast has not fallen. Hit again while still below,
+  it is not healed; it is healed at its next fall, after it has been at or above 35% (tooltip "falls below 35%"). Not
+  read in-game.
+- Stated edge case 2: the Cleric is a party member and holds the area aura, so its own fall below 35% re-arms and
+  triggers its own heal like any ally's (the heal on the Cleric is the Cleric's own fall, never an ally's).
 - Readers of the changed lines: only 680646 and 681383, both Sun Cleric spells. 680646 is named elsewhere only in the
   script's aura list (`AscensionSunClericData.h`, `SunClericEvents`, read by `AscensionSunClericContracts.cpp`) and in
   `rev_20260909_13_sun_cleric_completion.sql`; 681383 only in the changed proc. No other class file, fixture or engine
