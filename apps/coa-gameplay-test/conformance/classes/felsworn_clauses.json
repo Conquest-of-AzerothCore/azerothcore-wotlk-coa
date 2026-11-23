@@ -449,10 +449,21 @@
   {
     "spell": 301287,
     "clause": "Each Felfury active now increases your haste by $s1%.",
-    "labels": [
-      "301287 behaviour_metric_delta haste"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your haste by $s1% (melee and ranged haste, Felfury effect 1)",
+        "labels": [
+          "301287 behaviour_metric_delta haste"
+        ]
+      },
+      {
+        "claim": "increases your haste by $s1% (spell haste, Felfury effect 0)",
+        "labels": [
+          "301287 behaviour_metric_delta spell_haste"
+        ]
+      }
+    ]
   },
   {
     "spell": 500067,
@@ -637,10 +648,23 @@
   {
     "spell": 520257,
     "clause": "Casting Inner Demon with at least 6 Felfury now restores $520258s1 Energy.",
-    "labels": [
-      "520257 behaviour_metric_delta energy_at_six"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting Inner Demon with at least 6 Felfury",
+        "labels": [
+          "520257 behaviour_metric_delta energy_at_six",
+          "520257 behaviour_metric_delta control_five_felfury",
+          "520257 behaviour_metric_delta fixture_six_felfury"
+        ]
+      },
+      {
+        "claim": "now restores $520258s1 Energy",
+        "labels": [
+          "520257 behaviour_metric_delta energy_at_six"
+        ]
+      }
+    ]
   },
   {
     "spell": 520592,
@@ -679,10 +703,27 @@
   {
     "spell": 520805,
     "clause": "and casting $?s520853[Fel Torpedo][Chaos Rush] now heals you for ${$520806m1+$520806ppl1+$STA*0.2+$AP*.33}.",
-    "labels": [
-      "520805 behaviour_metric_delta heal"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "$520806m1+$520806ppl1",
+        "labels": [
+          "520805 behaviour_metric_delta heal"
+        ]
+      },
+      {
+        "claim": "$STA*0.2",
+        "labels": [
+          "520805 behaviour_metric_delta heal_sta"
+        ]
+      },
+      {
+        "claim": "$AP*.33",
+        "labels": [
+          "520805 behaviour_metric_delta heal_ap"
+        ]
+      }
+    ]
   },
   {
     "spell": 520817,
@@ -713,24 +754,43 @@
     "spell": 520833,
     "clause": "In addition, Sargeron Smite now deals $s2% increased damage to enemies above 75% of their maximum health.",
     "kind": "claim",
-    "labels": [
-      "520833 behaviour_hit_ratio above_75",
-      "520833 behaviour_hit_ratio control_below_75"
+    "claims": [
+      {
+        "claim": "$s2% increased damage",
+        "labels": [
+          "520833 behaviour_hit_ratio above_76"
+        ]
+      },
+      {
+        "claim": "above 75% of their maximum health",
+        "labels": [
+          "520833 behaviour_hit_ratio above_76",
+          "520833 behaviour_hit_ratio control_below_74"
+        ]
+      }
     ]
   },
   {
     "spell": 520853,
     "clause": "Transforms your Chaos Rush into Fel Torpedo.",
-    "labels": [
-      "520853 behaviour_metric_delta replaced"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Chaos Rush is replaced only while specialization 9 is active (AscensionTalentReplacementData.h:29, SynchronizeTalentReplacements requires specializationId == SpecId); a metric_delta entry cannot set the active specialization, although the harness has a specialization step",
+      "attempts": [
+        {
+          "agent": "fw-b3g1b",
+          "report": ".agents/plans/fw-b3g1b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 520853,
     "clause": "Generates 1 Felfury",
     "labels": [
-      "520853 behaviour_metric_delta felfury"
+      "520853 behaviour_metric_delta felfury",
+      "520853 behaviour_metric_delta felfury_chaos_rush"
     ],
     "kind": "claim"
   },
@@ -780,11 +840,26 @@
   {
     "spell": 524947,
     "clause": "Using $?s520853[Fel Torpedo][Chaos Rush] increases the next instance of direct spell or ability damage within $525027d by $525027s1%.",
-    "labels": [
-      "524947 behaviour_metric_delta aura_held",
-      "524947 behaviour_metric_delta aura_gone"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "within $525027d",
+        "labels": [
+          "524947 behaviour_metric_delta aura_held",
+          "524947 behaviour_metric_delta aura_gone"
+        ]
+      },
+      {
+        "claim": "by $525027s1%",
+        "labels": [
+          "524947 behaviour_hit_ratio damage"
+        ]
+      },
+      {
+        "claim": "the next instance of direct spell or ability damage",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 524950,
@@ -2487,6 +2562,10 @@
         "labels": [
           "501298 behaviour_metric_delta damage_sp"
         ]
+      },
+      {
+        "claim": "piercing all absorption effects",
+        "labels": []
       }
     ]
   },

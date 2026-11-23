@@ -2430,7 +2430,7 @@
     },
     {
       "spell": 520254,
-      "name": "Quick Carving (Carve still channelled at 1400 ms)",
+      "name": "Quick Carving (Carve still channelled at 1425 ms)",
       "kind": "metric_delta",
       "variant": "channel_held",
       "label_suffix": "channel_held",
@@ -2446,9 +2446,9 @@
       "before_expected": 1,
       "expected": 1,
       "tolerance": 0,
-      "wait_ms": 1400,
+      "wait_ms": 1425,
       "expire_ms": 3500,
-      "observe_source": "520254 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints -1001 + 1 = -1000 ms (1 sec), EffectSpellClassMask word 2 = 2097152, the SpellFamilyFlags word 2 of Carve 800206 (a self channel, SPELL_ATTR1_IS_SELF_CHANNELED, DurationIndex 66 = 2500 ms; Effect[0] aura 23 on the caster). The channel aura 800206 on the caster is read 1400 ms after a real cast: before (control, 520254 not learned) the 2500 ms channel is still running (1); after a real learn it is still running (1) at 1400 ms, 100 ms short of its 1500 ms end. The held and gone reads together put the channel between 1400 and 1700 ms: 1000 ms less than stock, excluding durations 10% off on both sides. The weapon set is Tyrant (class ADR 0001: Carve needs a two-handed weapon) and the cast power is 100 so the 20 Energy cost cannot refuse the cast; Carve also consumes 2 Felfury (AscensionCustomResourceData.h:524, resource 800058, 2 fixed), so Felfury 800058 x6 is set before each cast as a precondition fixture by harness set_aura in both phases, named as such (the first two runs refused the cast with reason 85 NO_POWER). Reference search 2026-11-23: coa-history spell 520254: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Carve now channels 1 sec faster.'.",
+      "observe_source": "520254 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints -1001 + 1 = -1000 ms (1 sec), EffectSpellClassMask word 2 = 2097152, the SpellFamilyFlags word 2 of Carve 800206 (a self channel, SPELL_ATTR1_IS_SELF_CHANNELED, DurationIndex 66 = 2500 ms; Effect[0] aura 23 on the caster). The channel aura 800206 on the caster is read 1425 ms after a real cast: before (control, 520254 not learned) the 2500 ms channel is still running (1); after a real learn it is still running (1) at 1425 ms, 75 ms short of its 1500 ms end. The held read at 1425 ms and the gone read at 1575 ms put the channel between 1425 and 1575 ms, 5% either side of 1500 ms, so a channel 10% off (1350 or 1650 ms) and a cut 10% off the stated second (900 or 1100 ms, a channel of 1600 or 1400 ms) are excluded on both sides. The weapon set is Tyrant (class ADR 0001: Carve needs a two-handed weapon) and the cast power is 100 so the 20 Energy cost cannot refuse the cast; Carve also consumes 2 Felfury (AscensionCustomResourceData.h:524, resource 800058, 2 fixed), so Felfury 800058 x6 is set before each cast as a precondition fixture by harness set_aura in both phases, named as such (the first two runs refused the cast with reason 85 NO_POWER). Reference search 2026-11-23: coa-history spell 520254: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Carve now channels 1 sec faster.'.",
       "phase_auras": [
         [
           800058,
@@ -2460,7 +2460,7 @@
     },
     {
       "spell": 520254,
-      "name": "Quick Carving (Carve no longer channelled at 1700 ms)",
+      "name": "Quick Carving (Carve no longer channelled at 1575 ms)",
       "kind": "metric_delta",
       "variant": "channel_gone",
       "label_suffix": "channel_gone",
@@ -2476,9 +2476,9 @@
       "before_expected": 1,
       "expected": 0,
       "tolerance": 0,
-      "wait_ms": 1700,
+      "wait_ms": 1575,
       "expire_ms": 3500,
-      "observe_source": "520254 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints -1001 + 1 = -1000 ms (1 sec), EffectSpellClassMask word 2 = 2097152, the SpellFamilyFlags word 2 of Carve 800206 (a self channel, SPELL_ATTR1_IS_SELF_CHANNELED, DurationIndex 66 = 2500 ms; Effect[0] aura 23 on the caster). The channel aura 800206 on the caster is read 1700 ms after a real cast: before (control, 520254 not learned) the 2500 ms channel is still running (1); after a real learn it is over (0) at 1700 ms, 200 ms past its 1500 ms end. The held and gone reads together put the channel between 1400 and 1700 ms: 1000 ms less than stock, excluding durations 10% off on both sides. The weapon set is Tyrant (class ADR 0001: Carve needs a two-handed weapon) and the cast power is 100 so the 20 Energy cost cannot refuse the cast; Carve also consumes 2 Felfury (AscensionCustomResourceData.h:524, resource 800058, 2 fixed), so Felfury 800058 x6 is set before each cast as a precondition fixture by harness set_aura in both phases, named as such (the first two runs refused the cast with reason 85 NO_POWER). Reference search 2026-11-23: coa-history spell 520254: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Carve now channels 1 sec faster.'.",
+      "observe_source": "520254 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints -1001 + 1 = -1000 ms (1 sec), EffectSpellClassMask word 2 = 2097152, the SpellFamilyFlags word 2 of Carve 800206 (a self channel, SPELL_ATTR1_IS_SELF_CHANNELED, DurationIndex 66 = 2500 ms; Effect[0] aura 23 on the caster). The channel aura 800206 on the caster is read 1700 ms after a real cast: before (control, 520254 not learned) the 2500 ms channel is still running (1); after a real learn it is over (0) at 1575 ms, 75 ms past its 1500 ms end. The held read at 1425 ms and the gone read at 1575 ms put the channel between 1425 and 1575 ms, 5% either side of 1500 ms, so a channel 10% off (1350 or 1650 ms) and a cut 10% off the stated second (900 or 1100 ms, a channel of 1600 or 1400 ms) are excluded on both sides. The weapon set is Tyrant (class ADR 0001: Carve needs a two-handed weapon) and the cast power is 100 so the 20 Energy cost cannot refuse the cast; Carve also consumes 2 Felfury (AscensionCustomResourceData.h:524, resource 800058, 2 fixed), so Felfury 800058 x6 is set before each cast as a precondition fixture by harness set_aura in both phases, named as such (the first two runs refused the cast with reason 85 NO_POWER). Reference search 2026-11-23: coa-history spell 520254: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Carve now channels 1 sec faster.'.",
       "phase_auras": [
         [
           800058,
@@ -2518,6 +2518,35 @@
       "observe_source": "301287 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 0 + 1 = 1 ($s1), EffectSpellClassMask word 2 = 8, the SpellFamilyFlags word 2 of Felfury 800058 (StackAmount 6; Effect[0] aura 216 and Effect[1] aura 192, both haste auras with BasePoints -1 + 1 = 0 per stack, Spell.dbc). With six Felfury on the caster each stack of the haste auras carries 1%, so the melee haste is 6% and the main-hand attack time of the reference weapon (Slayer item 2027, 2300 ms, class file weapon_sets) is 2300 / 1.06 = 2169.81 ms; read 500 ms after the stacks are set, before (control: 301287 not learned, 2300 ms) and after a real learn. The Felfury stacks are a precondition fixture by harness set_aura in both phases, named as such. Reference search 2026-11-23: coa-history spell 301287: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Each Felfury active now increases your haste by 1%.'."
     },
     {
+      "spell": 301287,
+      "name": "Felheart (spell haste per Felfury)",
+      "kind": "metric_delta",
+      "variant": "spell_haste",
+      "label_suffix": "spell_haste",
+      "quote": "Each Felfury active now increases your haste by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 301287,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 801312
+      },
+      "before_expected": 1500,
+      "expected": 1415,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Spell haste half of 301287: Felfury 800058 Effect[0] aura 216 HASTE_SPELLS carries 0 + 1% per stack under 301287 (SPELLMOD_ALL_EFFECTS, BasePoints 0 + 1), 6% at six stacks. The cast time of Fel Fireball 801312 (CastingTimeIndex 16 = 1500 ms, SpellCastTimes.dbc; DmgClass 1, so Unit::ModSpellCastTime multiplies by UNIT_MOD_CAST_SPEED, Unit.cpp:13158-13160) is read for the caster 500 ms after the stacks are set: 1500 ms before (control: 301287 not learned) and int32(1500 / 1.06) = 1415 ms after a real learn, within 1 ms. The Felfury stacks are a precondition fixture by harness set_aura in both phases, named as such. Reference search 2026-11-23: bindmysoul snapshot says 'Each Felfury active now increases your haste by 1%.'; coa-history spell 301287: 0 events in 186 logs."
+    },
+    {
       "spell": 520257,
       "name": "Demonic Embrace (Inner Demon with six Felfury)",
       "kind": "metric_delta",
@@ -2543,8 +2572,74 @@
       "setup_wait_ms": 1600
     },
     {
+      "spell": 520257,
+      "name": "Demonic Embrace (Inner Demon with five Felfury)",
+      "kind": "metric_delta",
+      "variant": "control_five_felfury",
+      "label_suffix": "control_five_felfury",
+      "quote": "Casting Inner Demon with at least 6 Felfury now restores $520258s1 Energy",
+      "trigger_spell": 804216,
+      "gate_spell": 520257,
+      "target": "caster",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 520258
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "520257 Effect[0] aura 42 PROC_TRIGGER_SPELL 520258; 520258 Effect[0] SPELL_EFFECT_ENERGIZE (30), MiscValue 3 (Energy), BasePoints 49 + 1 = 50 ($520258s1). Inner Demon 804216 (CasterAuraSpell 800058) is cast once with five Felfury on the caster (a precondition fixture by harness set_aura in both phases, named as such); the energize events of 520258 on the caster are summed 500 ms after the cast, before (control: 520257 not learned, 0) and after a real learn: 0, the control that the restore needs at least 6 Felfury. Reference search 2026-11-23: coa-history spell 520257: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Casting Inner Demon with at least 6 Felfury now restores 50 Energy.'.",
+      "cast_auras": [
+        {
+          "spell": 804216,
+          "auras": [
+            {
+              "spell": 800058,
+              "stacks": 5
+            }
+          ],
+          "reason": "Felfury 800058 stacks set right before each Inner Demon cast (the harness otherwise resets it to 1 for the cast's caster-aura requirement)"
+        }
+      ]
+    },
+    {
+      "spell": 520257,
+      "name": "Demonic Embrace (Inner Demon with six Felfury set by the same fixture)",
+      "kind": "metric_delta",
+      "variant": "fixture_six_felfury",
+      "label_suffix": "fixture_six_felfury",
+      "quote": "Casting Inner Demon with at least 6 Felfury now restores $520258s1 Energy",
+      "trigger_spell": 804216,
+      "gate_spell": 520257,
+      "target": "caster",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 520258
+      },
+      "before_expected": 0,
+      "expected": 50,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "520257 Effect[0] aura 42 PROC_TRIGGER_SPELL 520258; 520258 Effect[0] SPELL_EFFECT_ENERGIZE (30), MiscValue 3 (Energy), BasePoints 49 + 1 = 50 ($520258s1). Inner Demon 804216 (CasterAuraSpell 800058) is cast once with six Felfury on the caster (a precondition fixture by harness set_aura in both phases, named as such); the energize events of 520258 on the caster are summed 500 ms after the cast, before (control: 520257 not learned, 0) and after a real learn: 50, the positive control of the five Felfury arm: the same set_aura fixture at six stacks restores the Energy, so the 0 of the five Felfury arm is the threshold and not a fixture that blocks the restore. Reference search 2026-11-23: coa-history spell 520257: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Casting Inner Demon with at least 6 Felfury now restores 50 Energy.'.",
+      "cast_auras": [
+        {
+          "spell": 804216,
+          "auras": [
+            {
+              "spell": 800058,
+              "stacks": 6
+            }
+          ],
+          "reason": "Felfury 800058 stacks set right before each Inner Demon cast (the harness otherwise resets it to 1 for the cast's caster-aura requirement)"
+        }
+      ]
+    },
+    {
       "spell": 560549,
-      "name": "Eye of the Tyrant (party melee haste, ally read, radius 100 yd)",
+      "name": "Eye of the Tyrant (party melee haste, ally read, radius 100 yd, allies at 95 and 105 yd)",
       "kind": "party_stat_ratio",
       "label_suffix": "melee_haste",
       "quote": "Grant $s1% increased melee and ranged haste to party and raid members within $a1 yds",
@@ -2554,12 +2649,14 @@
         "hand": 0
       },
       "radius": 100,
-      "radius_reason": "560549 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 9 + 1 = 10 ($s1), EffectRadiusIndex 287 = SpellRadius.dbc 100 yd ($a1 = 100, Spell.dbc read with apps/coa-dbc/inspect_dbc.py). AuraEffect::HandleModMeleeRangedSpeedPct applies the one percent to the base, off-hand and ranged attack times alike. A grouped ally near the caster is read before and after the caster learns the spell (a real learn); a second ally beyond 100 yd must show no change. Reference search 2026-11-23: coa-history spell 560549: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Grant 10% increased melee and ranged haste to party and raid members within 100 yds. Does not stack with similar effects. In addition, your attack power is increased by 5%.'.",
-      "variant": "melee_haste"
+      "radius_reason": "560549 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 9 + 1 = 10 ($s1), EffectRadiusIndex 287 = SpellRadius.dbc 100 yd ($a1 = 100, Spell.dbc read with apps/coa-dbc/inspect_dbc.py). AuraEffect::HandleModMeleeRangedSpeedPct applies the one percent to the base, off-hand and ranged attack times alike. A grouped ally near the caster is read before and after the caster learns the spell (a real learn); a second ally at 105 yd must show no change. Reference search 2026-11-23: coa-history spell 560549: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Grant 10% increased melee and ranged haste to party and raid members within 100 yds. Does not stack with similar effects. In addition, your attack power is increased by 5%.'. Radius bracket: the near ally stands 95 yd from the caster and the far ally 105 yd (near_distance 95, far_margin 5), so a radius 10% off (90 or 110 yd) is excluded on both sides.",
+      "variant": "melee_haste",
+      "near_distance": 95,
+      "far_margin": 5
     },
     {
       "spell": 560549,
-      "name": "Eye of the Tyrant (party ranged haste, ally read)",
+      "name": "Eye of the Tyrant (party ranged haste, ally read, radius 100 yd, allies at 95 and 105 yd)",
       "kind": "party_stat_ratio",
       "label_suffix": "ranged_haste",
       "quote": "and ranged haste to party and raid members",
@@ -2568,8 +2665,11 @@
       "metric_fields": {
         "hand": 2
       },
-      "radius_reason": "560549 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 9 + 1 = 10 ($s1), EffectRadiusIndex 287 = SpellRadius.dbc 100 yd ($a1 = 100, Spell.dbc read with apps/coa-dbc/inspect_dbc.py). AuraEffect::HandleModMeleeRangedSpeedPct applies the one percent to the base, off-hand and ranged attack times alike. A grouped ally near the caster is read before and after the caster learns the spell (a real learn); a second ally beyond 100 yd must show no change. The ranged half is the ally's ranged attack time (hand 2), the same percent modifier as the melee half. Reference search 2026-11-23: coa-history spell 560549: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Grant 10% increased melee and ranged haste to party and raid members within 100 yds. Does not stack with similar effects. In addition, your attack power is increased by 5%.'.",
-      "variant": "ranged_haste"
+      "radius_reason": "560549 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 9 + 1 = 10 ($s1), EffectRadiusIndex 287 = SpellRadius.dbc 100 yd ($a1 = 100, Spell.dbc read with apps/coa-dbc/inspect_dbc.py). AuraEffect::HandleModMeleeRangedSpeedPct applies the one percent to the base, off-hand and ranged attack times alike. A grouped ally near the caster is read before and after the caster learns the spell (a real learn); a second ally at 105 yd must show no change. The ranged half is the ally's ranged attack time (hand 2), the same percent modifier as the melee half. Reference search 2026-11-23: coa-history spell 560549: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Grant 10% increased melee and ranged haste to party and raid members within 100 yds. Does not stack with similar effects. In addition, your attack power is increased by 5%.'. Radius bracket: the near ally stands 95 yd from the caster and the far ally 105 yd (near_distance 95, far_margin 5), so a radius 10% off (90 or 110 yd) is excluded on both sides. The ranged read shares the aura of the melee entry (one effect, aura 192), and measures the $a1 of the ranged clause.",
+      "variant": "ranged_haste",
+      "radius": 100,
+      "near_distance": 95,
+      "far_margin": 5
     },
     {
       "spell": 560549,
@@ -2594,7 +2694,7 @@
     },
     {
       "spell": 560542,
-      "name": "Felguard (party melee haste, ally read, radius 100 yd)",
+      "name": "Felguard (party melee haste, ally read, radius 100 yd, allies at 95 and 105 yd)",
       "kind": "party_stat_ratio",
       "label_suffix": "melee_haste",
       "quote": "Emanate a powerful aura, granting $s1% increased melee and ranged haste to party and raid members within $a1 yds",
@@ -2604,12 +2704,14 @@
         "hand": 0
       },
       "radius": 100,
-      "radius_reason": "560542 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 9 + 1 = 10 ($s1), EffectRadiusIndex 287 = SpellRadius.dbc 100 yd ($a1 = 100, Spell.dbc read with apps/coa-dbc/inspect_dbc.py). AuraEffect::HandleModMeleeRangedSpeedPct applies the one percent to the base, off-hand and ranged attack times alike. A grouped ally near the caster is read before and after the caster learns the spell (a real learn); a second ally beyond 100 yd must show no change. Reference search 2026-11-23: coa-history spell 560542: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Emanate a powerful aura, granting 10% increased melee and ranged haste to party and raid members within 100 yds. Does not stack with similar effects.'.",
-      "variant": "melee_haste"
+      "radius_reason": "560542 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 9 + 1 = 10 ($s1), EffectRadiusIndex 287 = SpellRadius.dbc 100 yd ($a1 = 100, Spell.dbc read with apps/coa-dbc/inspect_dbc.py). AuraEffect::HandleModMeleeRangedSpeedPct applies the one percent to the base, off-hand and ranged attack times alike. A grouped ally near the caster is read before and after the caster learns the spell (a real learn); a second ally at 105 yd must show no change. Reference search 2026-11-23: coa-history spell 560542: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Emanate a powerful aura, granting 10% increased melee and ranged haste to party and raid members within 100 yds. Does not stack with similar effects.'. Radius bracket: the near ally stands 95 yd from the caster and the far ally 105 yd (near_distance 95, far_margin 5), so a radius 10% off (90 or 110 yd) is excluded on both sides.",
+      "variant": "melee_haste",
+      "near_distance": 95,
+      "far_margin": 5
     },
     {
       "spell": 560542,
-      "name": "Felguard (party ranged haste, ally read)",
+      "name": "Felguard (party ranged haste, ally read, radius 100 yd, allies at 95 and 105 yd)",
       "kind": "party_stat_ratio",
       "label_suffix": "ranged_haste",
       "quote": "and ranged haste to party and raid members",
@@ -2618,8 +2720,11 @@
       "metric_fields": {
         "hand": 2
       },
-      "radius_reason": "560542 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 9 + 1 = 10 ($s1), EffectRadiusIndex 287 = SpellRadius.dbc 100 yd ($a1 = 100, Spell.dbc read with apps/coa-dbc/inspect_dbc.py). AuraEffect::HandleModMeleeRangedSpeedPct applies the one percent to the base, off-hand and ranged attack times alike. A grouped ally near the caster is read before and after the caster learns the spell (a real learn); a second ally beyond 100 yd must show no change. The ranged half is the ally's ranged attack time (hand 2), the same percent modifier as the melee half. Reference search 2026-11-23: coa-history spell 560542: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Emanate a powerful aura, granting 10% increased melee and ranged haste to party and raid members within 100 yds. Does not stack with similar effects.'.",
-      "variant": "ranged_haste"
+      "radius_reason": "560542 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 9 + 1 = 10 ($s1), EffectRadiusIndex 287 = SpellRadius.dbc 100 yd ($a1 = 100, Spell.dbc read with apps/coa-dbc/inspect_dbc.py). AuraEffect::HandleModMeleeRangedSpeedPct applies the one percent to the base, off-hand and ranged attack times alike. A grouped ally near the caster is read before and after the caster learns the spell (a real learn); a second ally at 105 yd must show no change. The ranged half is the ally's ranged attack time (hand 2), the same percent modifier as the melee half. Reference search 2026-11-23: coa-history spell 560542: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Emanate a powerful aura, granting 10% increased melee and ranged haste to party and raid members within 100 yds. Does not stack with similar effects.'. Radius bracket: the near ally stands 95 yd from the caster and the far ally 105 yd (near_distance 95, far_margin 5), so a radius 10% off (90 or 110 yd) is excluded on both sides. The ranged read shares the aura of the melee entry (one effect, aura 192), and measures the $a1 of the ranged clause.",
+      "variant": "ranged_haste",
+      "radius": 100,
+      "near_distance": 95,
+      "far_margin": 5
     },
     {
       "spell": 560542,
@@ -2686,7 +2791,7 @@
     },
     {
       "spell": 560533,
-      "name": "Fel Infusion (party critical strike chance, ally read, radius 100 yd)",
+      "name": "Fel Infusion (party critical strike chance, ally read, radius 100 yd, allies at 95 and 105 yd)",
       "kind": "party_stat_ratio",
       "label_suffix": "party_crit",
       "quote": "Increases critical strike chance of all party and raid members within $a1 by $s1%",
@@ -2694,8 +2799,10 @@
       "relation": "additive",
       "metric": "melee_crit_chance_refreshed",
       "radius": 100,
-      "radius_reason": "560533 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 2 + 1 = 3 ($s1), EffectRadiusIndex 287 = SpellRadius.dbc 100 yd ($a1 = 100). The grouped ally's melee critical strike chance (melee_crit_chance_refreshed) is read before and after the caster learns 560533 and must rise by 3 points; a second ally beyond 100 yd must show no change. Reference search 2026-11-23: coa-history spell 560533: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Increases critical strike chance of all party and raid members within 100 by 3%. Does not stack with similar effects. In addition, increases your critical strike chance by 3%.'.",
-      "variant": "party_crit"
+      "radius_reason": "560533 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 2 + 1 = 3 ($s1), EffectRadiusIndex 287 = SpellRadius.dbc 100 yd ($a1 = 100). The grouped ally's melee critical strike chance (melee_crit_chance_refreshed) is read before and after the caster learns 560533 and must rise by 3 points; a second ally at 105 yd must show no change. Reference search 2026-11-23: coa-history spell 560533: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Increases critical strike chance of all party and raid members within 100 by 3%. Does not stack with similar effects. In addition, increases your critical strike chance by 3%.'. Radius bracket: the near ally stands 95 yd from the caster and the far ally 105 yd (near_distance 95, far_margin 5), so a radius 10% off (90 or 110 yd) is excluded on both sides.",
+      "variant": "party_crit",
+      "near_distance": 95,
+      "far_margin": 5
     },
     {
       "spell": 560533,
@@ -2755,7 +2862,15 @@
       "wait_ms": 2500,
       "expire_ms": 500,
       "force_crit": "spell",
-      "observe_source": "520246 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 800058 (Felfury); Fel Fireball 801312 (CastingTimeIndex 16 = 1500 ms). The Felfury aura 800058 (StackAmount 6) stacks on the caster are read 2500 ms after one real cast of Fel Fireball 801312 at the dummy, before (control: 520246 not learned) and after a real learn: after a real learn one more Felfury than before (the gain is judged, the read before is the control without the passive). The caster's spell critical strike rating is forced (force_crit spell), so the cast critically strikes. Reference search 2026-11-23: coa-history spell 520246: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Critical strikes with Fel Fireball now generate 1 Felfury.'. Fel Fireball's own cast grants 1 Felfury (Effect[1] TRIGGER_SPELL 800058), so the read before the learn is 1."
+      "observe_source": "520246 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 800058 (Felfury); Fel Fireball 801312 (CastingTimeIndex 16 = 1500 ms). The Felfury aura 800058 (StackAmount 6) stacks on the caster are read 2500 ms after one real cast of Fel Fireball 801312 at the dummy, before (control: 520246 not learned) and after a real learn: after a real learn one more Felfury than before (the gain is judged, the read before is the control without the passive). The caster's spell critical strike rating is forced (force_crit spell), so the cast critically strikes. Reference search 2026-11-23: coa-history spell 520246: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Critical strikes with Fel Fireball now generate 1 Felfury.'. Fel Fireball's own cast grants 1 Felfury (Effect[1] TRIGGER_SPELL 800058), so the read before the learn is 1. The Felfury of the first phase is removed at the start of the second (after_auras, 800058 at 0 stacks, a named precondition fixture), so the second phase counts only its own cast: 1 from the cast and 1 more from a critical strike (the first design carried the stack over and read 1 to 2 and 1 to 3).",
+      "after_auras": [
+        [
+          800058,
+          0,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 520246,
@@ -2778,7 +2893,15 @@
       "tolerance": 0,
       "wait_ms": 2500,
       "expire_ms": 500,
-      "observe_source": "520246 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 800058 (Felfury); Fel Fireball 801312 (CastingTimeIndex 16 = 1500 ms). The Felfury aura 800058 (StackAmount 6) stacks on the caster are read 2500 ms after one real cast of Fel Fireball 801312 at the dummy, before (control: 520246 not learned) and after a real learn: without a forced critical strike the learn adds no Felfury (gain 0), the control that only a critical strike counts. No critical rating is forced, the reference character's critical strike chance for the spell is 0 (read as 0 in the Felfire Adept 560836 entry). Reference search 2026-11-23: coa-history spell 520246: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Critical strikes with Fel Fireball now generate 1 Felfury.'. Fel Fireball's own cast grants 1 Felfury (Effect[1] TRIGGER_SPELL 800058), so the read before the learn is 1."
+      "observe_source": "520246 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 800058 (Felfury); Fel Fireball 801312 (CastingTimeIndex 16 = 1500 ms). The Felfury aura 800058 (StackAmount 6) stacks on the caster are read 2500 ms after one real cast of Fel Fireball 801312 at the dummy, before (control: 520246 not learned) and after a real learn: without a forced critical strike the learn adds no Felfury (gain 0), the control that only a critical strike counts. No critical rating is forced, the reference character's critical strike chance for the spell is 0 (read as 0 in the Felfire Adept 560836 entry). Reference search 2026-11-23: coa-history spell 520246: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Critical strikes with Fel Fireball now generate 1 Felfury.'. Fel Fireball's own cast grants 1 Felfury (Effect[1] TRIGGER_SPELL 800058), so the read before the learn is 1. The Felfury of the first phase is removed at the start of the second (after_auras, 800058 at 0 stacks, a named precondition fixture), so the second phase counts only its own cast: 1 from the cast and 1 more from a critical strike (the first design carried the stack over and read 1 to 2 and 1 to 3).",
+      "after_auras": [
+        [
+          800058,
+          0,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 520833,
@@ -2795,18 +2918,18 @@
       "fields": {
         "spell": 800058
       },
-      "before_expected": 4,
-      "expected": 5,
+      "before_expected": 2,
+      "expected": 3,
       "expected_gain": 1,
       "tolerance": 0,
       "wait_ms": 1500,
       "expire_ms": 500,
       "force_crit": "spell",
-      "observe_source": "520833 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 525617 and Effect[1] aura 112 (MiscValue 20007, BasePoints 24 + 1 = 25 = $s2); Sargeron Smite 802060 (SpellFamilyFlags word 1 2048, instant). The Felfury aura 800058 (StackAmount 6) stacks on the caster are read 1500 ms after one real cast of Sargeron Smite 802060 at the dummy, before (control: 520833 not learned) and after a real learn: after a real learn one more Felfury than before (the gain is judged, the read before is the control without the passive). The caster's spell critical strike rating is forced (force_crit spell), so the cast critically strikes. Reference search 2026-11-23: coa-history spell 520833: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Critical strikes with Sargeron Smite now refund 1 Felfury. In addition, Sargeron Smite now deals 25% increased damage to enemies above 75% of their maximum health.'. Smite consumes 2 Felfury (AscensionCustomResourceData.h:524-ff), so Felfury 800058 x6 and 803468 are set before each cast as precondition fixtures by harness set_aura in both phases: 4 remain after the cast, 5 with a refund (the first run's casts were refused, reason 85, with one Felfury).",
+      "observe_source": "520833 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 525617 and Effect[1] aura 112 (MiscValue 20007, BasePoints 24 + 1 = 25 = $s2); Sargeron Smite 802060 (SpellFamilyFlags word 1 2048, instant). The Felfury aura 800058 (StackAmount 6) stacks on the caster are read 1500 ms after one real cast of Sargeron Smite 802060 at the dummy, before (control: 520833 not learned) and after a real learn: after a real learn one more Felfury than before (the gain is judged, the read before is the control without the passive). The caster's spell critical strike rating is forced (force_crit spell), so the cast critically strikes. Reference search 2026-11-23: coa-history spell 520833: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Critical strikes with Sargeron Smite now refund 1 Felfury. In addition, Sargeron Smite now deals 25% increased damage to enemies above 75% of their maximum health.'. Smite consumes 2 Felfury (AscensionCustomResourceData.h:524-ff), so Felfury 800058 x4 (below the stack cap 6, so a refund is not lost to the cap; the first design set 6 and the refund was capped, 4 read 4) and 803468 are set before each cast as precondition fixtures by harness set_aura in both phases: 2 remain after the cast, 3 with a refund (the first run's casts were refused, reason 85, with one Felfury).",
       "phase_auras": [
         [
           800058,
-          6,
+          4,
           "caster",
           "caster"
         ],
@@ -2833,17 +2956,17 @@
       "fields": {
         "spell": 800058
       },
-      "before_expected": 4,
-      "expected": 4,
+      "before_expected": 2,
+      "expected": 2,
       "expected_gain": 0,
       "tolerance": 0,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "520833 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 525617 and Effect[1] aura 112 (MiscValue 20007, BasePoints 24 + 1 = 25 = $s2); Sargeron Smite 802060 (SpellFamilyFlags word 1 2048, instant). The Felfury aura 800058 (StackAmount 6) stacks on the caster are read 1500 ms after one real cast of Sargeron Smite 802060 at the dummy, before (control: 520833 not learned) and after a real learn: without a forced critical strike the learn adds no Felfury (gain 0), the control that only a critical strike counts. No critical rating is forced, the reference character's critical strike chance for the spell is 0 (read as 0 in the Felfire Adept 560836 entry). Reference search 2026-11-23: coa-history spell 520833: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Critical strikes with Sargeron Smite now refund 1 Felfury. In addition, Sargeron Smite now deals 25% increased damage to enemies above 75% of their maximum health.'. Smite consumes 2 Felfury (AscensionCustomResourceData.h:524-ff), so Felfury 800058 x6 and 803468 are set before each cast as precondition fixtures by harness set_aura in both phases: 4 remain after the cast, 5 with a refund (the first run's casts were refused, reason 85, with one Felfury).",
+      "observe_source": "520833 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 525617 and Effect[1] aura 112 (MiscValue 20007, BasePoints 24 + 1 = 25 = $s2); Sargeron Smite 802060 (SpellFamilyFlags word 1 2048, instant). The Felfury aura 800058 (StackAmount 6) stacks on the caster are read 1500 ms after one real cast of Sargeron Smite 802060 at the dummy, before (control: 520833 not learned) and after a real learn: without a forced critical strike the learn adds no Felfury (gain 0), the control that only a critical strike counts. No critical rating is forced, the reference character's critical strike chance for the spell is 0 (read as 0 in the Felfire Adept 560836 entry). Reference search 2026-11-23: coa-history spell 520833: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Critical strikes with Sargeron Smite now refund 1 Felfury. In addition, Sargeron Smite now deals 25% increased damage to enemies above 75% of their maximum health.'. Smite consumes 2 Felfury (AscensionCustomResourceData.h:524-ff), so Felfury 800058 x4 (below the stack cap 6, so a refund is not lost to the cap; the first design set 6 and the refund was capped, 4 read 4) and 803468 are set before each cast as precondition fixtures by harness set_aura in both phases: 2 remain after the cast, 3 with a refund (the first run's casts were refused, reason 85, with one Felfury).",
       "phase_auras": [
         [
           800058,
-          6,
+          4,
           "caster",
           "caster"
         ],
@@ -2853,15 +2976,14 @@
           "caster",
           "caster"
         ]
-      ],
-      "force_crit": "spell"
+      ]
     },
     {
       "spell": 520833,
-      "name": "Doomsayer (damage above 75% of their maximum health (100%))",
+      "name": "Doomsayer (damage at 76% of their maximum health, above the 75% edge)",
       "kind": "hit_ratio",
-      "variant": "above_75",
-      "label_suffix": "above_75",
+      "variant": "above_76",
+      "label_suffix": "above_76",
       "quote": "Sargeron Smite now deals $s2% increased damage to enemies above 75% of their maximum health",
       "expected": 1.25,
       "observe_spell": 802060,
@@ -2902,17 +3024,17 @@
           ]
         ]
       },
-      "target_health_pct": 99,
+      "target_health_pct": 76,
       "critical": false,
       "trials": 30,
-      "expected_source": "520833 Effect[1] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, MiscValue 20007, EffectSpellClassMask word 1 = 2048 (Sargeron Smite 802060), BasePoints 24 + 1 = 25 ($s2). Sargeron Smite is cast at the dummy trials times in a control arm without 520833 and a treatment arm with it learned (a real learn), the dummy held at 100% of its health, non-critical hits only: ratio 1.25 within the band of 2 points (above 75% of their maximum health (100%): +25%). Reference search 2026-11-23: coa-history spell 520833: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Sargeron Smite now deals 25% increased damage to enemies above 75% of their maximum health.'."
+      "expected_source": "520833 Effect[1] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, MiscValue 20007, EffectSpellClassMask word 1 = 2048 (Sargeron Smite 802060), BasePoints 24 + 1 = 25 ($s2). Sargeron Smite is cast at the dummy trials times in a control arm without 520833 and a treatment arm with it learned (a real learn), the dummy held at 76% of its health, one point above the 75% edge, non-critical hits only: ratio 1.25 within the band of 2 points (above 75% of their maximum health, read at 76%: +25%). Reference search 2026-11-23: coa-history spell 520833: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Sargeron Smite now deals 25% increased damage to enemies above 75% of their maximum health.'."
     },
     {
       "spell": 520833,
-      "name": "Doomsayer (damage at 50% of their maximum health, below the 75% condition)",
+      "name": "Doomsayer (damage at 74% of their maximum health, below the 75% edge)",
       "kind": "hit_ratio",
-      "variant": "control_below_75",
-      "label_suffix": "control_below_75",
+      "variant": "control_below_74",
+      "label_suffix": "control_below_74",
       "quote": "Sargeron Smite now deals $s2% increased damage to enemies above 75% of their maximum health",
       "expected": 1.0,
       "observe_spell": 802060,
@@ -2953,10 +3075,10 @@
           ]
         ]
       },
-      "target_health_pct": 50,
+      "target_health_pct": 74,
       "critical": false,
       "trials": 30,
-      "expected_source": "520833 Effect[1] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, MiscValue 20007, EffectSpellClassMask word 1 = 2048 (Sargeron Smite 802060), BasePoints 24 + 1 = 25 ($s2). Sargeron Smite is cast at the dummy trials times in a control arm without 520833 and a treatment arm with it learned (a real learn), the dummy held at 50% of its health, non-critical hits only: ratio 1.0 within the band of 2 points (at 50% of their maximum health, below the 75% condition: no change). Reference search 2026-11-23: coa-history spell 520833: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Sargeron Smite now deals 25% increased damage to enemies above 75% of their maximum health.'."
+      "expected_source": "520833 Effect[1] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, MiscValue 20007, EffectSpellClassMask word 1 = 2048 (Sargeron Smite 802060), BasePoints 24 + 1 = 25 ($s2). Sargeron Smite is cast at the dummy trials times in a control arm without 520833 and a treatment arm with it learned (a real learn), the dummy held at 74% of its health, one point below the 75% edge, non-critical hits only: ratio 1.0 within the band of 2 points (at 74%, below the 75% condition: no change; with the 76% arm this brackets the edge). Reference search 2026-11-23: coa-history spell 520833: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Sargeron Smite now deals 25% increased damage to enemies above 75% of their maximum health.'."
     },
     {
       "spell": 525079,
@@ -3340,14 +3462,14 @@
       "gated_spell": 555738,
       "resource": "cooldown",
       "reduction": 1000,
-      "margin_ms": 250,
+      "margin_ms": 90,
       "after_casts": [
         [
           800598,
           "dummy"
         ]
       ],
-      "observe_source": "520244 Effect[0] aura 42 PROC_TRIGGER_SPELL 520816 (Effect[0] SPELL_EFFECT_MODIFY_COOLDOWN-type 165, BasePoints -1001 + 1 = -1000 ms = $/1000;520816S1 = 1 s, MiscValue 555738); the handler (AscensionFelswornEvents.cpp:36-37, 154-155) fires on a damaging hit of Dancing Blades 800598. Fury Unleashed 555738 has RecoveryTime 180000 ms. Arms, each timed from a priming cast of Fury Unleashed: a cast of Dancing Blades 800598 at the dummy, then an attempt of Fury Unleashed 179250 ms after the priming cast (180000 - 1000 + 250) without the talent (refused), with it (goes through) and 250 ms before the reduced end with it (refused): the reduction lies between 750 and 1250 ms, i.e. 1 s to within the 250 ms margin. Reference search 2026-11-23: coa-history spell 520244: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Dealing damage with Dancing Blades reduces the cooldown of Fury Unleashed by -1 sec.'.",
+      "observe_source": "520244 Effect[0] aura 42 PROC_TRIGGER_SPELL 520816 (Effect[0] SPELL_EFFECT_MODIFY_COOLDOWN-type 165, BasePoints -1001 + 1 = -1000 ms = $/1000;520816S1 = 1 s, MiscValue 555738); the handler (AscensionFelswornEvents.cpp:36-37, 154-155) fires on a damaging hit of Dancing Blades 800598. Fury Unleashed 555738 has RecoveryTime 180000 ms. Arms, each timed from a priming cast of Fury Unleashed: a cast of Dancing Blades 800598 at the dummy, then an attempt of Fury Unleashed 179090 ms after the priming cast (180000 - 1000 + 90) without the talent (refused), with it (goes through) and 90 ms before the reduced end with it (refused): the reduction lies between 910 and 1090 ms, so a reduction 10% off the stated second (900 or 1100 ms) is excluded on both sides. Reference search 2026-11-23: coa-history spell 520244: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Dealing damage with Dancing Blades reduces the cooldown of Fury Unleashed by -1 sec.'.",
       "quote": "Dealing damage with Dancing Blades reduces the cooldown of Fury Unleashed by $/1000;520816S1 sec"
     },
     {
@@ -3380,7 +3502,60 @@
       "tolerance": 1.5,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "520805 Effect[0] aura 42 PROC_TRIGGER_SPELL 520806 (Effect[0] SPELL_EFFECT_HEAL 10, BasePoints 49 + 1 = 50, EffectRealPointsPerLevel 1.0); the tooltip token resolved with the reference stats (Stamina 79, attack power 312, level 60) is 199.76 (packet of the spell, tokens table). The heal events of 520806 on the caster are summed 1500 ms after a real cast of Chaos Rush 500028 at the dummy: 0 before the learn (control) and 199.76 within 1.5 after. Reference search 2026-11-23: coa-history spell 520805: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'casting Chaos Rush now heals you for 81 + 20% Stamina + 33% AP'."
+      "observe_source": "520805 Effect[0] aura 42 PROC_TRIGGER_SPELL 520806 (Effect[0] SPELL_EFFECT_HEAL 10, BasePoints 49 + 1 = 50, EffectRealPointsPerLevel 1.0); the tooltip token resolved with the reference stats (Stamina 79, attack power 312, level 60) is 199.76 (packet of the spell, tokens table). The heal events of 520806 on the caster are summed 1500 ms after a real cast of Chaos Rush 500028 at the dummy: 0 before the learn (control) and 199.76 within 1.5 after. The value part $520806m1+$520806ppl1 (50 + 31 at level 60) rests on EffectRealPointsPerLevel 1.0 and is PENDING RENDER (O-5): not counted. The attack power and Stamina terms are judged by the two contrast arms heal_ap and heal_sta of the same pair. Reference search 2026-11-23: coa-history spell 520805: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'casting Chaos Rush now heals you for 81 + 20% Stamina + 33% AP'."
+    },
+    {
+      "spell": 520805,
+      "name": "Scars of the Past (Chaos Rush heal at +3000 attack power)",
+      "kind": "metric_delta",
+      "variant": "heal_ap",
+      "label_suffix": "heal_ap",
+      "quote": "now heals you for",
+      "trigger_spell": 500028,
+      "gate_spell": 520805,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 520806
+      },
+      "before_expected": 0,
+      "expected": 1189.76,
+      "tolerance": 1.5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Contrast arm of heal: the caster holds 3000 more attack power (harness fixture player_attack_power), so the $AP*.33 term of 520806 is 0.33 x (312 + 3000) = 1092.96 and the heal reads 81 + 0.2 x 79 + 1092.96 = 1189.76 within 1.5, against 199.76 at the reference 312; the base and Stamina terms cannot compensate the attack power term. The base 81 rests on $m1 + ppl1 and is PENDING RENDER (O-5): the label is not counted for it. Reference search 2026-11-23: bindmysoul snapshot says 'casting Chaos Rush now heals you for 81 + 20% Stamina + 33% AP'; coa-history spell 520805: 0 events in 186 logs.",
+      "player_attack_power": 3000
+    },
+    {
+      "spell": 520805,
+      "name": "Scars of the Past (Chaos Rush heal at +55 Stamina)",
+      "kind": "metric_delta",
+      "variant": "heal_sta",
+      "label_suffix": "heal_sta",
+      "quote": "now heals you for",
+      "trigger_spell": 500028,
+      "gate_spell": 520805,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 520806
+      },
+      "before_expected": 0,
+      "expected": 210.76,
+      "tolerance": 1.5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Contrast arm of heal: Power Word: Fortitude 25389 (Effect[0] aura 29 MOD_STAT, MiscValue 2 Stamina, BasePoints 54 + DieSides 1 = 55, Spell.dbc) is set on the caster in both phases as a named precondition fixture (harness set_aura), so the $STA*0.2 term of 520806 is 0.2 x (79 + 55) = 26.8 and the heal reads 81 + 26.8 + 102.96 = 210.76 within 1.5, against 199.76 without the aura; the base and attack power terms cannot compensate the Stamina term. The base 81 is PENDING RENDER (O-5): the label is not counted for it. Reference search 2026-11-23: bindmysoul snapshot says 'casting Chaos Rush now heals you for 81 + 20% Stamina + 33% AP'; coa-history spell 520805: 0 events in 186 logs.",
+      "phase_auras": [
+        [
+          25389,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 524947,
@@ -3425,6 +3600,57 @@
       "wait_ms": 5400,
       "expire_ms": 500,
       "observe_source": "524947 triggers 525027 (DurationIndex 28 = 5000 ms) on a Chaos Rush cast. The aura 525027 on the caster is read 5400 ms after a real Chaos Rush cast at the dummy: absent before the learn (control) and gone after it; with the 4600 / 5400 pair the duration lies between them, excluding 10% off on both sides (4500 and 5500). Reference search 2026-11-23: coa-history spell 524947: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Using Chaos Rush increases the next instance of direct spell or ability damage within 5 seconds by 25%.'."
+    },
+    {
+      "spell": 524947,
+      "name": "Mark of Chaos (next direct damage +25%, aura 525027 granted as the fixture)",
+      "kind": "hit_ratio",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "increases the next instance of direct spell or ability damage within $525027d by $525027s1%",
+      "expected": 1.25,
+      "observe_spell": 802060,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "control": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ],
+          [
+            823764,
+            1
+          ],
+          [
+            525027,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 30,
+      "expected_source": "524947 Effect[0] aura 42 PROC_TRIGGER_SPELL 525027; 525027 Effect[0] aura 108 ADD_PCT_MODIFIER, BasePoints 24 + 1 = 25 ($525027s1), DurationIndex 28 = 5000 ms, a mask over the direct damage spells (Spell.dbc). The first design cast Chaos Rush 500028 before each observed Sargeron Smite 802060 and read no hit at all in either arm: the harness reported cast_failures reason 134 (SPELL_FAILED_UNIT_NOT_INFRONT, SharedDefines.h:1184) on every Smite, because the dash leaves the caster facing away from the dummy (pair C, run 20261123-164430). The grant of 525027 by a real Chaos Rush cast is proven by the aura_held and aura_gone labels of this spell, so here 525027 is set on the caster before every treatment trial as a named precondition fixture (harness set_aura, the control arm without it), and the cumulative non-critical Smite damage is read per trial: the mean non-critical hit of the treatment arm is 1.25 times the control's within the band of 2 points. The consumption of the buff by the first instance is not read. Reference search 2026-11-23: coa-history spell 524947: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Using Chaos Rush increases the next instance of direct spell or ability damage within 5 seconds by 25%.'."
     },
     {
       "spell": 555738,
@@ -3645,30 +3871,6 @@
     },
     {
       "spell": 520853,
-      "name": "Fel Torpedo (Chaos Rush replaced)",
-      "kind": "metric_delta",
-      "variant": "replaced",
-      "label_suffix": "replaced",
-      "quote": "Transforms your Chaos Rush into Fel Torpedo",
-      "trigger_spell": 804247,
-      "gate_spell": 520853,
-      "target": "caster",
-      "learn": [
-        500028
-      ],
-      "metric": "temporary_spell_replacement",
-      "fields": {
-        "spell": 500028
-      },
-      "before_expected": 500028,
-      "expected": 500610,
-      "tolerance": 0,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "AscensionTalentReplacementData.h:29 {class 14, 520853, Chaos Rush 500028 -> Fel Torpedo 500610}. The spell the caster's Chaos Rush 500028 resolves to is read before (control: 520853 not learned: 500028) and after a real learn: 500610. Reference search 2026-11-23: coa-history spell 520853: 0 events in 186 logs (a passive-like replacement leaves no event); the bindmysoul snapshot says 'Transforms your Chaos Rush into Fel Torpedo.'."
-    },
-    {
-      "spell": 520853,
       "name": "Fel Torpedo (generates 1 Felfury)",
       "kind": "metric_delta",
       "variant": "felfury",
@@ -3685,12 +3887,53 @@
       "fields": {
         "spell": 800058
       },
-      "before_expected": 0,
+      "before_expected": 1,
       "expected": 1,
       "tolerance": 0,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "Fel Torpedo 500610 cast with the talent 520853 learned gives Gain(player, 1) (AscensionFelswornAbilities.cpp:272-273); the Felfury 800058 stacks on the caster are read 1500 ms after a real cast of 500610 at the dummy: 0 before the learn of 520853 (control) and 1 after. Fel Torpedo's Effect[1] TRIGGER_SPELL 802028 is the spell's own effect, shared with Chaos Rush 500028. Reference search 2026-11-23: coa-history spell 520853: 0 events in 186 logs; the bindmysoul snapshot says 'Generates 1 Felfury'."
+      "observe_source": "Fel Torpedo 500610 gives Gain(player, 1) on any cast (AscensionFelswornAbilities.cpp:272-273, no check of 520853). The Felfury 800058 stacks on the caster are read 1500 ms after a real cast of 500610 at the dummy; the first phase reads 1 (a cast of Fel Torpedo alone), the stacks are removed at the start of the second phase (after_auras, a named precondition fixture) and the second reads 1 again: one Felfury per cast, not carried over. Chaos Rush 500028, whose tooltip has no Felfury sentence, is the contrast in the felfury_chaos_rush entry. Reference search 2026-11-23: coa-history spell 520853: 0 events in 186 logs; the bindmysoul snapshot says 'Generates 1 Felfury'.",
+      "after_auras": [
+        [
+          800058,
+          0,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 520853,
+      "name": "Fel Torpedo (contrast: Chaos Rush generates no Felfury)",
+      "kind": "metric_delta",
+      "variant": "felfury_chaos_rush",
+      "label_suffix": "felfury_chaos_rush",
+      "quote": "Transforms your Chaos Rush into Fel Torpedo",
+      "trigger_spell": 500028,
+      "gate_spell": 520853,
+      "target": "dummy",
+      "cast_power": 100,
+      "learn": [
+        500028
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Contrast of felfury: the same read after a real cast of Chaos Rush 500028 (learned for the scenario), whose tooltip has no Felfury sentence and whose cast gives no Felfury (no Gain in AscensionFelswornAbilities.cpp for 500028): 0 in both phases, so the 1 of the felfury entry belongs to Fel Torpedo. Reference search 2026-11-23: bindmysoul snapshot says Chaos Rush has no Felfury generation.",
+      "after_auras": [
+        [
+          800058,
+          0,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 524950,
