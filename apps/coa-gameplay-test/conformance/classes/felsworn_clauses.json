@@ -154,7 +154,8 @@
       {
         "claim": "for $300469d",
         "labels": [
-          "300468 behaviour_metric_delta shield_expiry"
+          "300468 behaviour_metric_delta shield_held",
+          "300468 behaviour_metric_delta shield_gone"
         ]
       }
     ]
@@ -899,7 +900,8 @@
       {
         "claim": "Curse an enemy ... within $d",
         "labels": [
-          "525001 behaviour_metric_delta curse_expiry"
+          "525001 behaviour_metric_delta curse_held",
+          "525001 behaviour_metric_delta curse_gone"
         ]
       },
       {
@@ -1488,7 +1490,10 @@
       },
       {
         "claim": "for $570159d",
-        "labels": []
+        "labels": [
+          "570158 behaviour_metric_delta scar_held",
+          "570158 behaviour_metric_delta scar_gone"
+        ]
       }
     ]
   },
@@ -2408,7 +2413,8 @@
       {
         "claim": "for $525042d",
         "labels": [
-          "707513 behaviour_metric_delta regen_expiry"
+          "707513 behaviour_metric_delta regen_held",
+          "707513 behaviour_metric_delta regen_gone"
         ]
       }
     ]
@@ -3518,7 +3524,8 @@
     "clause": "Taunt nearby enemies for $704233d",
     "kind": "claim",
     "labels": [
-      "804823 behaviour_metric_delta taunt_expiry"
+      "804823 behaviour_metric_delta taunt_held",
+      "804823 behaviour_metric_delta taunt_gone"
     ]
   },
   {
@@ -3535,7 +3542,8 @@
       {
         "claim": "for $d",
         "labels": [
-          "804823 behaviour_metric_delta effect_expiry"
+          "804823 behaviour_metric_delta effect_held",
+          "804823 behaviour_metric_delta effect_gone"
         ]
       }
     ]
