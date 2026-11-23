@@ -513,7 +513,8 @@
     "spell": 520693,
     "clause": "Blast an enemy and all enemies near them with fel magic, dealing ${$m1+0+$SP*0.4} Shadowflame Damage.",
     "labels": [
-      "520693 effect_value e0 #0"
+      "520693 behaviour_metric_delta damage",
+      "520693 behaviour_metric_delta damage_sp"
     ],
     "kind": "claim"
   },
@@ -525,7 +526,8 @@
       {
         "claim": "an additional ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage",
         "labels": [
-          "520693 effect_value 520832e0 #1"
+          "520693 behaviour_metric_delta inner_tick",
+          "520693 behaviour_metric_delta inner_tick_sp"
         ]
       },
       {
@@ -1229,7 +1231,7 @@
       {
         "claim": "Increases the damage dealt",
         "labels": [
-          "560578 effect_value e0 #0"
+          "560578 behaviour_hit_ratio damage"
         ]
       },
       {
@@ -1610,8 +1612,9 @@
     "spell": 572889,
     "clause": "Critically striking now increases your damage dealt by $705148s1% for $705148d,",
     "labels": [
-      "572889 effect_value 705148e0 #0",
-      "572889 spell_duration 705148 #1"
+      "572889 behaviour_hit_ratio stack_damage",
+      "572889 behaviour_metric_delta duration_held",
+      "572889 behaviour_metric_delta duration_gone"
     ],
     "kind": "claim"
   },
@@ -1699,7 +1702,7 @@
     "spell": 574145,
     "clause": "In addition, your critical auto attacks now deal $s2% additional damage as Chaos damage.",
     "labels": [
-      "574145 effect_value e1 #0"
+      "574145 behaviour_metric_delta chaos_copy"
     ],
     "kind": "claim"
   },
@@ -1777,7 +1780,7 @@
       {
         "claim": "increase your damage by $572782s1%",
         "labels": [
-          "681376 effect_value 572782e0 #1"
+          "681376 behaviour_hit_ratio stack_damage"
         ]
       },
       {

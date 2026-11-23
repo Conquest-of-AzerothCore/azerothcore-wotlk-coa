@@ -15641,6 +15641,455 @@
         ]
       ],
       "observe_source": "Below-six arm of energy_at_six (50 Energy at six Felfury). The caster builds a real count of 5 Felfury 800058 (StackAmount 6) before each Inner Demon 804216 cast: Burning Hatred 805239 at the caster ('instantly generating 6 Felfury'), Sargeron Smite 802060 at the dummy ('Consumes 2 Felfury'), Bane of Fire 707901 at the dummy (a Bane hit on an enemy gives Gain(player, 1), AscensionFelswornAbilities.cpp:329-333; Fel Torpedo was dropped because its dash carried the caster past the dummy and the next Sargeron Smite was refused with SPELL_FAILED_UNIT_NOT_INFRONT, pair fw-tg1 proveP1); the per-cast targets are the setup_cast_targets option (ADR 1256) and the count is read at exactly 5 after the last setup cast of each phase (after_setup_stacks, ADR 1257), a mismatch voids the run. Inner Demon's own aura from the before phase is removed at the start of the after phase (after_auras), so both arms cast it the same way. The handler casts 520258 only when the Felfury consumed is at least 6 (AscensionFelswornAbilities.cpp:265-266): the energize events of 520258 on the caster are 0 before the learn of 520257 and 0 after it at five, where a threshold of 5 would restore 50. Reference search: as energy_at_six (2026-11-23)."
+    },
+    {
+      "kind": "metric_delta",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "before_expected": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "spell": 520693,
+      "name": "Felwrath (damage at the reference spell power)",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "dealing ${$m1+0+$SP*0.4} Shadowflame Damage.",
+      "fields": {
+        "spell": 520693,
+        "target": "dummy",
+        "critical": false
+      },
+      "expected": 1291.0,
+      "after_at_least": 1231,
+      "after_at_most": 1351,
+      "observe_source": "520693 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE (2), Shadowflame (SchoolMask 36), BasePoints 1230, DieSides 121 so the roll is 1231 to 1351, RealPointsPerLevel 5.37 x (60 - BaseLevel 60) = 0, so $m1 reads 1231 to 1351 at level 60; the tooltip adds spell power x 0.4 ($SP*0.4); reference spell power 0 (class file reference_stats). Spell crit is removed by Reg's Test Aura 984954 and the dummy's magic resistance by the spell-penetration fixture 823764, both preconditions by harness set_aura, with Felfury 800058 x6 and At Least 2 Felfury 803468 (Felwrath consumes 2 Felfury and needs 803468). Expected range 1231 to 1351 (the tooltip's $m1 to $M1), mean 1291; one real cast at the dummy, the damage event of spell 520693 read 3000 ms after the cast starts (cast time 2000 ms); the control is the same read before any cast (0). Reference search 2026-11-24: coa-history spell 520693: 1993 SPELL_DAMAGE events in 6 logs (min 16, max 13826, mean 2686, 1268 crits), 365 casts; gear, spell power and resistances of the loggers are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "kind": "metric_delta",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "before_expected": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "spell": 520693,
+      "name": "Felwrath (damage at +10000 spell power)",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "dealing ${$m1+0+$SP*0.4} Shadowflame Damage.",
+      "fields": {
+        "spell": 520693,
+        "target": "dummy",
+        "critical": false
+      },
+      "expected": 5291.0,
+      "after_at_least": 5231,
+      "after_at_most": 5351,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "observe_source": "520693 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE (2), Shadowflame (SchoolMask 36), BasePoints 1230, DieSides 121 so the roll is 1231 to 1351, RealPointsPerLevel 5.37 x (60 - BaseLevel 60) = 0, so $m1 reads 1231 to 1351 at level 60; the tooltip adds spell power x 0.4 ($SP*0.4); reference spell power 0 (class file reference_stats). Spell crit is removed by Reg's Test Aura 984954 and the dummy's magic resistance by the spell-penetration fixture 823764, both preconditions by harness set_aura, with Felfury 800058 x6 and At Least 2 Felfury 803468 (Felwrath consumes 2 Felfury and needs 803468). Contrast arm of the spell power term: +10000 spell power (player_spell_power on the hit arm): 1231..1351 + 0.4 x 10000 = 5231..5351 against 1231..1351 at the reference. Reference search 2026-11-24: coa-history spell 520693: 1993 SPELL_DAMAGE events in 6 logs (min 16, max 13826, mean 2686, 1268 crits), 365 casts; gear, spell power and resistances of the loggers are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 520693,
+      "name": "Felwrath (Inner Demon DoT damage per tick)",
+      "variant": "inner_tick",
+      "label_suffix": "inner_tick",
+      "quote": "an additional ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d,",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 520832,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 118.8,
+      "after_at_least": 118,
+      "after_at_most": 119,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "520832 (Inner Demon rank of Felwrath) Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 1000, BasePoints 7 + DieSides 1 = 8, RealPointsPerLevel 2.0 x (60 - BaseLevel 10) = 100, so one Effect[0] tick is 108 at level 60 and the reference spell power 0, times the +10% of the Inner Demon fixture 804216 (Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127, BasePoints 9 + 1 = 10, tooltip 'increasing your damage dealt by $s2%'): 118.8, read as 118 or 119; the tooltip's SP term is $SP*.1, so +10000 spell power adds 1000 per tick (the 802678 Felstrike reading of the same token shape, owner O-19). Effect[1] (EffectAmplitude 2000) ticks later, so the read is taken 1500 ms after the DoT lands. Setup as the inner_five entry: 4 extra dummies at 4 to 7 yd (five enemies struck), Inner Demon 804216 by harness set_aura as the clause's own condition, spell crit and resist removed. Reference search 2026-11-24: coa-history spell 520832: 11712 SPELL_PERIODIC_DAMAGE events in 10 logs (min 4, max 3295, mean 524), no crit; the loggers' spell power, level and stacks are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 520693,
+      "name": "Felwrath (Inner Demon DoT damage per tick at +10000 spell power)",
+      "variant": "inner_tick_sp",
+      "label_suffix": "inner_tick_sp",
+      "quote": "an additional ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d,",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 520832,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1218.8,
+      "after_at_least": 1218,
+      "after_at_most": 1219,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "520832 (Inner Demon rank of Felwrath) Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 1000, BasePoints 7 + DieSides 1 = 8, RealPointsPerLevel 2.0 x (60 - BaseLevel 10) = 100, so one Effect[0] tick is 108 at level 60 and the reference spell power 0, times the +10% of the Inner Demon fixture 804216 (Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127, BasePoints 9 + 1 = 10, tooltip 'increasing your damage dealt by $s2%'): (108 + 1000) x 1.1 = 1218.8, read as 1218 or 1219; the tooltip's SP term is $SP*.1, so +10000 spell power adds 1000 per tick (the 802678 Felstrike reading of the same token shape, owner O-19). Effect[1] (EffectAmplitude 2000) ticks later, so the read is taken 1500 ms after the DoT lands. Setup as the inner_five entry: 4 extra dummies at 4 to 7 yd (five enemies struck), Inner Demon 804216 by harness set_aura as the clause's own condition, spell crit and resist removed. Contrast arm: +10000 spell power. Reference search 2026-11-24: coa-history spell 520832: 11712 SPELL_PERIODIC_DAMAGE events in 10 logs (min 4, max 3295, mean 524), no crit; the loggers' spell power, level and stacks are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc.",
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      }
+    },
+    {
+      "kind": "hit_ratio",
+      "spell": 560578,
+      "name": "Glaiving (Fury Unleashed damage)",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "Increases the damage dealt and reduces the Energy cost of",
+      "expected": 1.5,
+      "observe_spell": 555739,
+      "cast_spell": 555738,
+      "cast_wait_ms": 5500,
+      "cast_power": 100,
+      "learn": [
+        555738
+      ],
+      "control": {},
+      "treatment": {
+        "learn": [
+          560578
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "560578 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 (SPELLMOD_DAMAGE), BasePoints 49 + DieSides 1 = 50 ($s1), EffectSpellClassMask[0..2] = 0/0/0x400000 of family 20 (the Fury Unleashed hit flag). The weapon hits 555739 (Effect[0] aura 23 trigger spell of 555738, EffectAmplitude 1000, 5000 ms) of a real Fury Unleashed 555738 cast are averaged non-critical in a control arm without 560578 and a treatment arm with it learned: ratio 1.50 within the band (5% of 50 = 2.5 points). Energy cost is the cost_gate claim of the same clause. Reference search 2026-11-24: coa-history spell 560578: 0 events in 186 logs (a passive leaves no event; 555738 Fury Unleashed: 2 casts); the hit 806095 has no logged event either; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 574145,
+      "name": "Felcaked Blades (Chaos copy is 75% of the critical swing damage)",
+      "variant": "chaos_copy",
+      "label_suffix": "chaos_copy",
+      "quote": "your critical auto attacks now deal $s2% additional damage as Chaos damage.",
+      "trigger_spell": 574145,
+      "gate_spell": 574145,
+      "target": "dummy",
+      "attack_swings": 5,
+      "force_crit": "melee",
+      "measure_actor": "caster",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 574166,
+        "target": "dummy"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {},
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.75,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "574145 Effect[1] aura 354, BasePoints 74 + 1 = 75 ($s2). The Chaos damage of 574166 (Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, school mask 127) on the dummy over the caster's own swing damage (melee_damage_total, increase over the phase), as the Burning Hatred 805239 leech_damage entry reads its Chaos copy. Every swing is a forced critical (force_crit melee, ADR 0692) in both phases, so the control is the before phase: the same forced-critical swings without 574145 learned read 0 (no copy), and the after phase with it learned reads 0.75; misses, dodges and parries add nothing to either side. Expected 0.75 from $s2; tolerance 0.02 (0.73 to 0.77) excludes 70%, 80%, a full copy and no copy, and holds the integer division. Reference search 2026-11-24: coa-history spells 574145, 574150 and 574166: 0 events in 186 logs (a passive leaves no event, 574166 never logged); nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "kind": "hit_ratio",
+      "spell": 681376,
+      "name": "Chaotic (damage per stack at 3 stacks)",
+      "variant": "stack_damage",
+      "label_suffix": "stack_damage",
+      "quote": "increase your damage by $572782s1% for $572782d,",
+      "expected": 1.09,
+      "observe_spell": 805240,
+      "learn": [
+        805240
+      ],
+      "control": {},
+      "treatment": {
+        "auras": [
+          [
+            572782,
+            3
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "cast_wait_ms": 1500,
+      "observe_source": "572782 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127 (all schools), BasePoints 2 + DieSides 1 = 3 ($572782s1), StackAmount 3, DurationIndex 31 = 8000 ms. Tyrant's Gaze 805240 (Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, Shadowflame, BasePoints 219 + DieSides 1 = a fixed 220, so its hit has no dice: 344 + 0.35 x attack power at level 60, TargetAuraState 13 so the dummy is held at 30% health) is cast at the dummy in a control arm without the aura and a treatment arm with 3 stacks of 572782 on the caster before every cast: its non-critical hits must rise by 3 x 3 = 9% (ratio 1.09, band 7 to 11), which excludes a single stack (1.03) and no effect (1.0). 572782 is set by harness set_aura as a named precondition fixture: the clause's proc chance and duration are other parts, and what this entry judges is the damage the live aura changes; attack power +20000 fixture in both arms (the hit is the same size in both arms before the aura), the dummy's partial resists removed by the spell-penetration fixture 823764 on the caster before every cast (cast_unit_auras, both arms). Reference search 2026-11-24: coa-history spell 572782 (Chaotic): 541 SPELL_AURA_APPLIED, 766 SPELL_AURA_APPLIED_DOSE, 2055 SPELL_AURA_REFRESH events by players in 6 logs (the buff exists in play; the logs carry no damage figure per stack, so no value decides); spell 681376: 0 events (a passive leaves no event); nothing else found beyond the tooltip and Spell.dbc.",
+      "target_health_pct": 30,
+      "cast_power": 100,
+      "cast_unit_auras": [
+        [
+          823764,
+          1
+        ]
+      ]
+    },
+    {
+      "kind": "hit_ratio",
+      "spell": 572889,
+      "name": "Oblivion (damage at 10 stacks)",
+      "variant": "stack_damage",
+      "label_suffix": "stack_damage",
+      "quote": "increases your damage dealt by $705148s1%",
+      "expected": 1.1,
+      "observe_spell": 805240,
+      "learn": [
+        805240
+      ],
+      "control": {},
+      "treatment": {
+        "auras": [
+          [
+            705148,
+            10
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "cast_wait_ms": 1500,
+      "observe_source": "705148 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127, BasePoints 0 + DieSides 1 = 1 ($705148s1), StackAmount 10, DurationIndex 31 = 8000 ms. Tyrant's Gaze 805240 (a fixed hit, no dice, TargetAuraState 13 so the dummy is held at 30% health) is cast at the dummy in a control arm without the aura and a treatment arm with 10 stacks of 705148 on the caster before every cast: its non-critical hits must rise by 10 x 1 = 10% (ratio 1.10, band 8 to 12), which excludes a single stack (1.01) and no effect. 705148 is set by harness set_aura as a named precondition fixture (the stack grant by a real critical hit is the stack_cap entry of 572889 and the held/gone entries below, which apply 705148 for real); attack power +20000 fixture in both arms. Reference search 2026-11-24: coa-history spells 572889 and 705148 (Oblivion): 0 events in 186 logs (a passive and its buff leave no event); nothing else found beyond the tooltip and Spell.dbc.",
+      "target_health_pct": 30,
+      "cast_power": 100,
+      "cast_unit_auras": [
+        [
+          823764,
+          1
+        ]
+      ]
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 572889,
+      "name": "Oblivion (aura present at 7400 ms)",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "for $705148d,",
+      "trigger_spell": 803475,
+      "gate_spell": 572889,
+      "target": "dummy",
+      "cast_power": 100,
+      "force_crit": "melee",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 705148,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 7400,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "cast_in_before": false,
+      "observe_source": "705148 DurationIndex 31 = 8000 ms ($705148d, SpellDuration.dbc). Oblivion applies 705148 on the caster for every outgoing critical damage event that is not Derived (AscensionFelswornEvents.cpp:48, :217-218). One instant Azzinoth's Assault 803475 cast at the dummy (forced melee crit, Felfury 800058 x6 and At Least 2 Felfury 803468 by harness set_aura as preconditions, in both phases) crits and applies the aura: read 7400 ms after the cast, absent before the learn (control, 0). The pair 7400 / 8640 ms excludes a duration 10% short (7200) and 10% long (8800). Reference search 2026-11-24: coa-history spells 572889 and 705148 (Oblivion): 0 events in 186 logs (a passive and its buff leave no event); nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 572889,
+      "name": "Oblivion (aura gone at 8640 ms)",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "quote": "for $705148d,",
+      "trigger_spell": 803475,
+      "gate_spell": 572889,
+      "target": "dummy",
+      "cast_power": 100,
+      "force_crit": "melee",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 705148,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 8640,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "cast_in_before": false,
+      "observe_source": "705148 DurationIndex 31 = 8000 ms ($705148d, SpellDuration.dbc). Oblivion applies 705148 on the caster for every outgoing critical damage event that is not Derived (AscensionFelswornEvents.cpp:48, :217-218). One instant Azzinoth's Assault 803475 cast at the dummy (forced melee crit, Felfury 800058 x6 and At Least 2 Felfury 803468 by harness set_aura as preconditions, in both phases) crits and applies the aura: read 8640 ms after the cast, absent before the learn (control, 0). The pair 7400 / 8640 ms excludes a duration 10% short (7200) and 10% long (8800). Reference search 2026-11-24: coa-history spells 572889 and 705148 (Oblivion): 0 events in 186 logs (a passive and its buff leave no event); nothing else found beyond the tooltip and Spell.dbc."
     }
   ],
   "player_observations": [],
