@@ -73,4 +73,5 @@ power row, so only the melee aura is read. The engine is untouched.
 - Regressions, class file entries keyed to 570158: `scar_ap_gaze` (Tyrant's Gaze observed, hit_ratio, expected
   1.01325, control arm without the scar); `scar_ap_gaze_pin` (metric_delta, the scarred Gaze hit 459 within 1, which
   excludes no term, 453, and a doubled term, 466); `scar_ap_offhand` (metric_delta, the off-hand strike against a
-  scar fixture of 200100: gain 14507 + 68 to 74, excluding the main-hand share 29014).
+  scar fixture of 200100: gain 68 to 74 + the stock flat 34302 + the off-hand share 14507, excluding the main-hand
+  share 29014).
