@@ -554,7 +554,8 @@
     "spell": 520253,
     "clause": "While Inner Demon is active, your Armor contribution from cloth and leather items is increased by $s1%.",
     "labels": [
-      "520253 effect_value e0 #0"
+      "520253 behaviour_metric_delta armor_with_inner_demon",
+      "520253 behaviour_metric_delta armor_without_inner_demon"
     ],
     "kind": "claim"
   },
@@ -1202,7 +1203,9 @@
     "spell": 574143,
     "clause": "While Inner Demon is active, direct melee ability critical strikes now refund $592521s1 Energy.",
     "labels": [
-      "574143 effect_value 592521e0 #0"
+      "574143 behaviour_metric_delta refund_crit",
+      "574143 behaviour_metric_delta refund_noncrit",
+      "574143 behaviour_metric_delta refund_no_inner"
     ],
     "kind": "claim"
   },
@@ -2477,7 +2480,7 @@
     "spell": 803840,
     "clause": "and dodge chance by $s2%.",
     "labels": [
-      "803840 effect_value e1 #1"
+      "803840 behaviour_metric_delta dodge"
     ],
     "kind": "claim"
   },

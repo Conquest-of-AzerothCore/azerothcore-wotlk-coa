@@ -2548,6 +2548,180 @@
           2
         ]
       ]
+    },
+    {
+      "spell": 803840,
+      "name": "Spite (dodge chance)",
+      "kind": "metric_delta",
+      "variant": "dodge",
+      "label_suffix": "dodge",
+      "quote": "and dodge chance by $s2%.",
+      "trigger_spell": 60235,
+      "target": "caster",
+      "metric": "dodge_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 6,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s2 = 6 (803840 EffectBasePoints[1] 5, EffectDieSides 1): Effect[1] aura 49 SPELL_AURA_MOD_DODGE_PERCENT. The caster's dodge chance (percent points, a live unit read) is read before and after a real learn of 803840 (the reading before is the control without it); Bless 804247 is the harmless self cast of both phases. Effect[0] of the same passive raises Agility by 15%, which the engine also turns into dodge (Player::UpdateStats calls UpdateDodgePercentage on an Agility change), so the gain is judged as +6 within a 1 point tolerance, the 2-point band of the guide, which admits that Agility term; the measured gain is in the verdict. Reference search 2026-11-23: coa-history spell 803840: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); expected values come from the tooltip and the DBC only.",
+      "expected_gain": 6,
+      "tolerance": 1
+    },
+    {
+      "spell": 520253,
+      "name": "Demon Hide (rank 2) (armor of leather items with Inner Demon)",
+      "kind": "metric_delta",
+      "variant": "armor_with_inner_demon",
+      "label_suffix": "armor_with_inner_demon",
+      "quote": "While Inner Demon is active, your Armor contribution from cloth and leather items is increased by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 520253,
+      "target": "caster",
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 184.8,
+      "expected_gain": 184.8,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "shield_after_learn": {
+        "item": 236,
+        "slot": 4,
+        "rejected_before": false
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "520253 Effect[0] aura 107 rewritten to SPELL_AURA_MOD_BASE_RESISTANCE_PCT (AscensionFelswornContracts.cpp:151-156) with MiscValue SPELL_SCHOOL_MASK_NORMAL and MiscValueB 6 (1 << cloth 1 | 1 << leather 2), BasePoints 239 + 1 = 240 ($s1); the amount is 0 unless Inner Demon 804216 is on the caster (AscensionFelswornContracts.cpp:352). Player::UpdateArmor scales the armor of cloth and leather items by it (StatSystem.cpp, GetItemArmorBySubclass). The caster's armor is read before (control: 520253 not learned) and after a real learn of 520253, with Inner Demon 804216 set on the caster in both phases (a precondition fixture by harness set_aura, named as such) and the 77-armor leather chest worn in both: gain 240% of 77 = 184.8, within 1 for the integer armor. Reference search 2026-11-23: coa-history spell 520253: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats 'While Inner Demon is active, your Armor contribution from cloth and leather items is increased by 240%'. The item is Cured Leather Armor 236 (acore_world.item_template of the repository's data/sql/base/db_world/item_template.sql: class 4, subclass 2 leather, InventoryType 5 chest, equip slot 4, RequiredLevel 17, armor 77, no stats), equipped by the shield_after_learn option in both phases (its slot read is the contrast of the option, named as a fixture)."
+    },
+    {
+      "spell": 520253,
+      "name": "Demon Hide (rank 2) (control: no gain without Inner Demon)",
+      "kind": "metric_delta",
+      "variant": "armor_without_inner_demon",
+      "label_suffix": "armor_without_inner_demon",
+      "quote": "While Inner Demon is active, your Armor contribution from cloth and leather items is increased by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 520253,
+      "target": "caster",
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "shield_after_learn": {
+        "item": 236,
+        "slot": 4,
+        "rejected_before": false
+      },
+      "observe_source": "520253 Effect[0] aura 107 rewritten to SPELL_AURA_MOD_BASE_RESISTANCE_PCT (AscensionFelswornContracts.cpp:151-156) with MiscValue SPELL_SCHOOL_MASK_NORMAL and MiscValueB 6 (1 << cloth 1 | 1 << leather 2), BasePoints 239 + 1 = 240 ($s1); the amount is 0 unless Inner Demon 804216 is on the caster (AscensionFelswornContracts.cpp:352). Player::UpdateArmor scales the armor of cloth and leather items by it (StatSystem.cpp, GetItemArmorBySubclass). The same reading without Inner Demon on the caster: the learn adds 0 armor, the control that the 120% is conditional on Inner Demon (the tooltip's 'While Inner Demon is active'). Reference search 2026-11-23: coa-history spell 520253: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats 'While Inner Demon is active, your Armor contribution from cloth and leather items is increased by 240%'. The item is Cured Leather Armor 236 (acore_world.item_template of the repository's data/sql/base/db_world/item_template.sql: class 4, subclass 2 leather, InventoryType 5 chest, equip slot 4, RequiredLevel 17, armor 77, no stats), equipped by the shield_after_learn option in both phases (its slot read is the contrast of the option, named as a fixture)."
+    },
+    {
+      "spell": 574143,
+      "name": "Chaotic (critical Carve with Inner Demon refunds Energy)",
+      "kind": "metric_delta",
+      "variant": "refund_crit",
+      "label_suffix": "refund_crit",
+      "quote": "While Inner Demon is active, direct melee ability critical strikes now refund $592521s1 Energy.",
+      "trigger_spell": 803715,
+      "gate_spell": 574143,
+      "target": "dummy",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 592521
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "expected_gain": 2,
+      "tolerance": 0.0001,
+      "cast_power": 100,
+      "disable_regeneration": true,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "574143 Effect[0] aura 42 PROC_TRIGGER_SPELL triggering 592521 (Effect[0] SPELL_EFFECT_ENERGIZE, MiscValue 3 Energy, EffectBasePoints 1 + 1 = 2, the $592521s1 of the tooltip); AscensionFelswornEvents.cpp:74 grants it on an outgoing direct critical melee hit of a spell while Inner Demon 804216 is on the caster. Carve 803715 (a direct melee ability) is cast at the dummy once per phase; the refund is read as the energize total of 592521 after the learn (the before phase is the control without 574143). Forced melee critical rating (force_crit) and Inner Demon 804216 set on the caster in both phases (a precondition fixture). Reference search 2026-11-23: coa-history spell 574143: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 574143,
+      "name": "Chaotic (control: non-critical Carve, no refund)",
+      "kind": "metric_delta",
+      "variant": "refund_noncrit",
+      "label_suffix": "refund_noncrit",
+      "quote": "While Inner Demon is active, direct melee ability critical strikes now refund $592521s1 Energy.",
+      "trigger_spell": 803715,
+      "gate_spell": 574143,
+      "target": "dummy",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 592521
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.0001,
+      "cast_power": 100,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "574143 Effect[0] aura 42 PROC_TRIGGER_SPELL triggering 592521 (Effect[0] SPELL_EFFECT_ENERGIZE, MiscValue 3 Energy, EffectBasePoints 1 + 1 = 2, the $592521s1 of the tooltip); AscensionFelswornEvents.cpp:74 grants it on an outgoing direct critical melee hit of a spell while Inner Demon 804216 is on the caster. Carve 803715 (a direct melee ability) is cast at the dummy once per phase; the refund is read as the energize total of 592521 after the learn (the before phase is the control without 574143). Control: no critical strike (Reduce Critical Strike Chance -100% 64481 set on the caster, so the one cast cannot critically strike by chance), Inner Demon on the caster: no refund. Reference search 2026-11-23: coa-history spell 574143: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 574143,
+      "name": "Chaotic (control: critical Carve without Inner Demon, no refund)",
+      "kind": "metric_delta",
+      "variant": "refund_no_inner",
+      "label_suffix": "refund_no_inner",
+      "quote": "While Inner Demon is active, direct melee ability critical strikes now refund $592521s1 Energy.",
+      "trigger_spell": 803715,
+      "gate_spell": 574143,
+      "target": "dummy",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 592521
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.0001,
+      "cast_power": 100,
+      "disable_regeneration": true,
+      "force_crit": "melee",
+      "phase_auras": [],
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "574143 Effect[0] aura 42 PROC_TRIGGER_SPELL triggering 592521 (Effect[0] SPELL_EFFECT_ENERGIZE, MiscValue 3 Energy, EffectBasePoints 1 + 1 = 2, the $592521s1 of the tooltip); AscensionFelswornEvents.cpp:74 grants it on an outgoing direct critical melee hit of a spell while Inner Demon 804216 is on the caster. Carve 803715 (a direct melee ability) is cast at the dummy once per phase; the refund is read as the energize total of 592521 after the learn (the before phase is the control without 574143). Control: forced melee critical, no Inner Demon on the caster: no refund. Reference search 2026-11-23: coa-history spell 574143: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],
