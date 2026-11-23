@@ -340,25 +340,30 @@ character encounter-receipt table.
 
 The default world rule grants 25 tokens for the first completion of a depth in each character's
 personal window, and 10 for repeats. First clears are separate for Solo/Duo/Trio/Group and
-normal/endgame tracks. All of them share `Manastorm.CoALootMode.TokenCap` (default 1000).
-Rewards are guaranteed on eligible completion, independent of regular-cache chance, weekly cache
-allowance, group multipliers and segment multipliers. The final award is reduced to the remaining
-token allowance. Optional completion-reward rows for the Bazaar Token item are superseded by this
+normal/endgame tracks. Every Manastorm Bazaar Token award (stage completions, bonus caches converted
+to tokens and Greedy Demon loot) counts toward the account's `CoA.BazaarTokens.HourlyCap.Amount`
+allowance in `coa.conf`, shared with every other capped token source; Manastorm has no separate
+per-character cap. Rewards are guaranteed on eligible completion, independent of regular-cache
+chance, weekly cache allowance, group multipliers and segment multipliers. The final award is
+reduced to the account's remaining allowance; members who are offline at completion are limited
+by their own account. A completion whose transaction fails returns the claimed allowance.
+Optional completion-reward rows for the Bazaar Token item are superseded by this
 policy while it is active.
 
 The first completion starts a personal window of `Manastorm.CoALootMode.WindowHours` (default 24).
+It only decides when first clears renew and does not limit tokens.
 Further completions retain its saved expiry. After expiry the next completion starts a new window.
 `FirstClear.ResetWithWindow = 1` renews first clears with that window; setting it to 0 uses lifetime
 token first clears. Permanent Manastorm unlocks and other first-clear rewards use their original
-progression. The first-clear and repeat reward switches, cap and window length are reloadable.
+progression. The first-clear and repeat reward switches and window length are reloadable.
 New window lengths apply when opening the next window.
 
 Tune `manastorm_coa_token_rewards` and reload module data. Mode 0 matches every difficulty, 1..4
 select Solo/Duo/Trio/Group. Track 0 matches both tracks, 1 is normal and 2 is endgame. A maximum
 depth of 0 is unlimited. The first matching enabled row ordered by priority descending and ID
 ascending wins. Use a higher priority for depth-specific overrides. `milestone_every` and
-`milestone_tokens` add an optional bonus on first clears of divisible depths. The cap includes
-these bonuses. Migration reruns preserve edited or disabled default rows.
+`milestone_tokens` add an optional bonus on first clears of divisible depths. The account
+allowance includes these bonuses. Migration reruns preserve edited or disabled default rows.
 
 Token windows, clear records and token item delivery share the durable stage-completion
 transaction. Revision checks reject competing stale allowance updates, and the stage receipt
@@ -367,5 +372,6 @@ rejects replayed completions. Inventory overflow retains the existing mail deliv
 The native I-panel receives a Bazaar Token reward icon, first/repeat amount, allowance and countdown
 through the existing client Lua transport. The cache icon is reserved for an earned bonus cache.
 Reconstructed-mode state appends `COA_TOKENS|item|quantity|earned|cap|start|end|available` after the
-existing state fields for addons that consume the extension. Client rendering requires in-game
+existing state fields; `earned`, `cap`, `start` and `end` describe the account allowance (`cap` 0 when
+the account cap is off), for addons that consume the extension. Client rendering requires in-game
 acceptance with the installed addon/runtime.

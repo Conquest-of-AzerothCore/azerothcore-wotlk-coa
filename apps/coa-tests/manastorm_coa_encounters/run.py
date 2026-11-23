@@ -23,8 +23,8 @@ class EncounterTests(unittest.TestCase):
     def tearDown(self):
         self.db.close()
 
-    def claim(self, receipt, guid=1, requested=100, earned=0, revision=0):
-        quantity = min(requested, max(0, 1000 - earned))
+    def claim(self, receipt, guid=1, granted=100, earned=0, revision=0):
+        quantity = granted
         with self.db:
             self.db.execute(self.receipt, (receipt, guid))
             self.db.execute(self.save, (guid, 1000, 87400, earned + quantity, revision))
@@ -36,11 +36,11 @@ class EncounterTests(unittest.TestCase):
             self.claim('one-object', guid=2)
         self.assertEqual(self.db.execute('SELECT COUNT(*) FROM reward_delivery').fetchone()[0], 1)
 
-    def test_shared_partial_cap_and_gold_at_cap(self):
+    def test_partial_account_allowance_and_gold_when_none_is_left(self):
         self.db.execute(self.save, (1, 1000, 87400, 995, 0))
         self.db.commit()
-        self.claim('first', earned=995, revision=1)
-        self.claim('second', earned=1000, revision=2)
+        self.claim('first', granted=5, earned=995, revision=1)
+        self.claim('second', granted=0, earned=1000, revision=2)
         self.assertEqual(self.db.execute('SELECT * FROM reward_delivery').fetchall(), [(5, 930000), (0, 930000)])
 
     def test_stale_allowance_rolls_back_receipt_and_delivery(self):
@@ -70,6 +70,16 @@ class EncounterTests(unittest.TestCase):
         self.assertLess(greedy.index('SaveGoldToDB(transaction)'), greedy.index('AsyncCommitTransaction'))
         self.assertLess(greedy.index('AsyncCommitTransaction'), greedy.index('PublishCommitted(publications)'))
         self.assertIn('player->SetMoney(previousGold)', greedy)
+        self.assertIn('ManastormCoATokenClaims claims;', greedy)
+        self.assertLess(greedy.index('AsyncCommitTransaction'), greedy.index('claims.Keep()'))
+        self.assertLess(greedy.index('claims.Keep()'), greedy.index('PublishCommitted(publications)'))
+        self.assertIn('quantity = claims.Claim(guid, requested);', source)
+        self.assertIn('AscensionBazaarTokenCap::Refund(accountId, count);', source)
+        self.assertNotIn('CoATokenCap', source)
+        progression = (MODULE / 'ManastormProgression.cpp').read_text()
+        claims = progression.index('ManastormCoATokenClaims coaTokenClaims;')
+        self.assertLess(progression.index('AsyncCommitTransaction(transaction)', claims),
+            progression.index('coaTokenClaims.Keep();'))
         self.assertIn('entry == 1478051', source)
         self.assertIn('"item_manastorm_material_cache"', source)
         self.assertIn('if (!IsCoAMaterialCache(cacheItemEntry))', source)

@@ -11,10 +11,24 @@ namespace AscensionBazaarTokenCap
 {
 constexpr uint32 TOKEN_ITEM = 975001;
 
+struct Allowance
+{
+    uint32 cap = 0;
+    uint32 earned = 0;
+    uint32 start = 0;
+    uint32 end = 0;
+};
+
 uint32 GetCap();
 void WarmAccount(Player* player);
 
 uint32 Claim(Player* player, uint32 count);
+
+uint32 ClaimForAccount(uint32 accountId, Player* player, uint32 count);
+
+void Refund(uint32 accountId, uint32 count);
+
+Allowance GetAllowance(uint32 accountId);
 
 uint32 LimitReward(Player* player, uint32 itemId, uint32 count);
 
