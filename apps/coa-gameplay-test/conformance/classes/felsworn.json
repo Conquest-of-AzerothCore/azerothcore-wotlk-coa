@@ -228,6 +228,90 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "Attribution of the spell_crit_rating entry: the Spirit the 20% is taken of. Greatness 60235 Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 4, EffectBasePoints 299 + 1 = +300 (SPELL_ATTR2_ALLOW_LOW_LEVEL_BUFF, no level scaling); the class file reference stat 4 reads 50 without it, so 50 + 300 x 1.03 = 359 after a real cast on the caster, the 1.03 being the Human racial The Human Spirit 20598 (aura 137, MiscValue 4, EffectBasePoints 2 + 1; class file race 1)."
+    },
+    {
+      "spell": 803903,
+      "name": "Fel Haze (armor ignored while Blood of Mannoroth is active)",
+      "kind": "metric_delta",
+      "variant": "armor_ignore",
+      "label_suffix": "armor_ignore",
+      "quote": "While active, Blood of Mannoroth now also causes you to ignore all enemy Armor.",
+      "trigger_spell": 802075,
+      "gate_spell": 803903,
+      "target": "dummy",
+      "wait_ms": 500,
+      "expire_ms": 20500,
+      "metric": "armor_reduced_damage",
+      "fields": {
+        "spell": 803715,
+        "target": "dummy"
+      },
+      "before_expected": 913,
+      "expected": 1000,
+      "tolerance": 1,
+      "void_on_cast_failure": true,
+      "observe_source": "Blood of Mannoroth 802075 Effect[0] aura 280 SPELL_AURA_MOD_ARMOR_PENETRATION_PCT, EffectBasePoints -1 (0%), DurationIndex 18 = 20000 ms (SpellDuration.dbc); its description reads 'causes you to ignore all enemy armor' only with 803903. 803903 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), EffectBasePoints 99 (+100), class mask 0x200000 of family 20 = Blood of Mannoroth (SpellFamilyFlags[0] 2097152), so the armor penetration reads 100%. Blood of Mannoroth is a real cast on the caster in both phases (control phase: 803903 not learned, the first read); the passive is learned between them, and expire_ms lets the first 20 s aura end before the second cast, so the second aura is applied under the modifier. The read is the engine's own Unit::CalcArmorReducedDamage of Carve's strike 803715 (physical, family 20) against the harness dummy, as the Sun Cleric Vindicator armor_ignore entry reads Glorious Execution: damage kept of 1000 = K / (armor + K), K = 85 x 60 + 400 = 5500 at level 60 (Unit.cpp ClassicPlusCombat::ArmorConstant), dummy armor 528 (Harvest Golem 36 pinned reference armor), so 5500/6028 -> 913 before; with all armor ignored nothing is mitigated and 1000 of 1000 is kept. A 50% penetration would read 5500/5764 -> 954, outside the tolerance of 1. Reference search 2026-11-23: coa-history spell 803903: 0 events in 186 logs (passive, never logged); spell 802075 Blood of Mannoroth: SPELL_CAST_SUCCESS 33 events in 10 logs (a positive control that the active is logged; no armor figure); bindmysoul talents snapshot (fetched 2026-07-22): Fel Haze 803903 'While active, Blood of Mannoroth now also causes you to ignore all enemy Armor.', same wording as the tooltip; nothing else found."
+    },
+    {
+      "spell": 803905,
+      "name": "Shadow Magi (Annihilation cooldown)",
+      "kind": "metric_delta",
+      "variant": "annihilation_cooldown",
+      "label_suffix": "annihilation_cooldown",
+      "quote": "Reduces the cooldown of Annihilation by $/1000;s1 sec",
+      "trigger_spell": 803904,
+      "target": "caster",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 803904
+      },
+      "before_expected": 59900,
+      "expected": 44900,
+      "tolerance": 300,
+      "wait_ms": 100,
+      "expire_ms": 500,
+      "observe_source": "$/1000;s1 = 15 sec: 803905 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 11 (SPELLMOD_COOLDOWN), EffectBasePoints -15001 (-15000 ms), class mask 0x20000000 of family 20 = Annihilation 803904 (SpellFamilyFlags[0] 536870912, RecoveryTime and CategoryRecoveryTime 60000, Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Annihilation is a real cast on the caster before (control: 803905 not learned, 60000 ms less the 100 ms wait) and after a real learn (45000 less 100); the tolerance 300 excludes a reduction 10% off (13500 or 16500 would read 46400 or 43400). Reference search 2026-11-23: coa-history spell 803905: 0 events in 186 logs (passive); spell 803904 Annihilation: see the 803904 events of the log index, no cooldown figure; bindmysoul talents snapshot (fetched 2026-07-22): Shadow Magi 803905 'Reduces the cooldown of Annihilation by -15 sec and Sunder by -4 sec.'; nothing else found."
+    },
+    {
+      "spell": 803905,
+      "name": "Shadow Magi (Sunder cooldown)",
+      "kind": "metric_delta",
+      "variant": "sunder_cooldown",
+      "label_suffix": "sunder_cooldown",
+      "quote": "and Sunder by $/1000;s2 sec.",
+      "trigger_spell": 705121,
+      "target": "dummy",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 705121
+      },
+      "before_expected": 7900,
+      "expected": 3900,
+      "tolerance": 200,
+      "wait_ms": 100,
+      "expire_ms": 8500,
+      "void_on_cast_failure": true,
+      "observe_source": "$/1000;s2 = 4 sec: 803905 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 11 (SPELLMOD_COOLDOWN), EffectBasePoints -4001 (-4000 ms), class mask word 0 0x80000 of family 20 = Sunder 705121 (SpellFamilyFlags[0] 524288, RecoveryTime 8000). Sunder is a real cast at the dummy before (control: 803905 not learned, 8000 ms less the 100 ms wait) and after a real learn (4000 less 100); the tolerance 200 excludes a reduction 10% off (3600 or 4400 would read 4300 or 3500 after). void_on_cast_failure: a refused cast voids the trial. Reference search 2026-11-23: coa-history spell 803905: 0 events in 186 logs (passive); bindmysoul talents snapshot (fetched 2026-07-22): Shadow Magi 803905 'Reduces the cooldown of Annihilation by -15 sec and Sunder by -4 sec.'; nothing else found."
+    },
+    {
+      "spell": 804609,
+      "name": "Gul'dan's Gift (Skull of Gul'dan cooldown)",
+      "kind": "metric_delta",
+      "variant": "skull_cooldown",
+      "label_suffix": "skull_cooldown",
+      "quote": "but its cooldown is increased by $/1000;s2 sec.",
+      "trigger_spell": 800225,
+      "target": "caster",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 800225
+      },
+      "before_expected": 89900,
+      "expected": 119900,
+      "tolerance": 1500,
+      "wait_ms": 100,
+      "expire_ms": 500,
+      "observe_source": "$/1000;s2 = 30 sec: 804609 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 11 (SPELLMOD_COOLDOWN), EffectBasePoints 29999 (+30000 ms), class mask word 2 0x40 of family 20 = Skull of Gul'dan 800225 (SpellFamilyFlags[2] 64, RecoveryTime 90000). Skull is a real cast on the caster before (control: 804609 not learned, 90000 less the 100 ms wait) and after a real learn (120000 less 100); the tolerance 1500 is the 10% of the stated 30000 ms halved, so a +27 s or +33 s increase (119900 -/+ 3000) is outside it. Reference search 2026-11-23: coa-history spell 804609: 0 events in 186 logs (passive); spell 800225 Skull of Gul'dan: SPELL_AURA_APPLIED 16 events in 4 logs (no cooldown figure); bindmysoul talents snapshot (fetched 2026-07-22): Gul'dan's Gift 804609 'Increases the effectiveness of your Skull of Gul'dan by 50%, but its cooldown is increased by 30 sec.'; nothing else found."
     }
   ],
   "player_observations": [],
