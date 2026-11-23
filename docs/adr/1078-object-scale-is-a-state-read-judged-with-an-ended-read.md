@@ -1,4 +1,4 @@
-# 1079. Object scale is a state read, judged with an ended read
+# 1078. Object scale is a state read, judged with an ended read
 
 - Status: proposed (provisional number, numbered at merge)
 - Date: 2026-11-23
