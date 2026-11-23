@@ -1,4 +1,4 @@
-# 0039. Scroll of Hope heals each ally that falls below 35%, once per fall
+# 0040. Scroll of Hope heals each ally that falls below 35%, once per fall
 
 - Status: accepted (owner ruling O-29, confirmed defect under the tooltip and the ruling, 2026-11-23)
 - Date: 2026-11-23
