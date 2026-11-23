@@ -65,7 +65,7 @@ class ScriptHitRelocateTests(unittest.TestCase):
             casts = [index for index in range(start, end) if steps[index]['action'] in ('cast', 'set_aura')]
             self.assertTrue(all(index > start + 4 for index in casts))
         self.assertIn('teleports it back', scenario['contract'])
-        self.assertNotIn('trial_position', expectation.record)
+        self.assertNotIn('trial_position', expectation.model)
 
     def test_a_caster_left_where_its_dash_ends_fails_the_position_assert(self):
         scenario, _ = self.generated(self.relocated())
