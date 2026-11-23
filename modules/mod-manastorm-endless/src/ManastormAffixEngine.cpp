@@ -41,11 +41,18 @@ constexpr uint32 SPELL_BONESTORM_AURA = 93369;
 constexpr float BONESTORM_RUN_SPEED_RATE = 0.85f;
 constexpr uint32 SPELL_OVERWHELMING_COSMETIC_AURA = 93414;
 
+bool IsHostileToPlayerSummoner(Creature const* creature)
+{
+    TempSummon const* summon = creature->ToTempSummon();
+    Unit const* summoner = summon ? summon->GetSummonerUnit() : nullptr;
+    return summoner && creature->IsHostileTo(summoner);
+}
+
 bool IsPlayerControlledCreature(Creature const* creature)
 {
     return creature &&
         (creature->IsControlledByPlayer() ||
-         creature->IsCreatedByPlayer() ||
+         (creature->IsCreatedByPlayer() && !IsHostileToPlayerSummoner(creature)) ||
          creature->IsCharmedOwnedByPlayerOrPlayer());
 }
 

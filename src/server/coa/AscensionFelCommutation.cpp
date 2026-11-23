@@ -40,6 +40,7 @@ std::atomic<bool> clickToggle{false};
 std::atomic<float> altarRange{20.0f};
 std::atomic<double> feeMultiplier{DefaultFeeMultiplier};
 std::atomic<uint32> maxSlots{DefaultMaxSlots};
+std::atomic<bool> insureAllByDefault{true};
 
 std::mutex windowMutex;
 std::unordered_set<ObjectGuid::LowType> windowShown;
@@ -53,8 +54,12 @@ void ForgetWindow(Player const* player)
 }
 
 constexpr char AddonPrefix[] = "FELCOMM";
+constexpr uint32 ActiveIndex = 0;
 constexpr uint32 InsuredSlotsIndex = 1;
+constexpr uint32 DefaultAppliedIndex = 2;
 constexpr std::size_t AddonChunkLength = 200;
+constexpr char DefaultAppliedText[] =
+    "Fel Commutation now protects all your equipment slots. Use a Fel Commutation Portal to remove slots.";
 
 uint32 InsuredSlots(Player const* player)
 {
@@ -65,6 +70,36 @@ uint32 InsuredSlots(Player const* player)
 bool SlotInsured(uint32 mask, unsigned key)
 {
     return Insurable(key) && (mask & (1u << key)) != 0;
+}
+
+void SendState(Player* player);
+
+void SyncDefault(Player* player)
+{
+    if (player->GetSession()->IsBot())
+        return;
+
+    PlayerSettingVector const* settings = player->FindPlayerSettings(Setting);
+    bool const applied = settings && settings->size() > DefaultAppliedIndex &&
+        (*settings)[DefaultAppliedIndex].value != 0;
+    switch (DecideDefaultSync(enabled, insureAllByDefault, applied))
+    {
+        case DefaultSync::Apply:
+            player->UpdatePlayerSetting(Setting, ActiveIndex, 1);
+            player->UpdatePlayerSetting(Setting, InsuredSlotsIndex, AllSlotsMask);
+            player->UpdatePlayerSetting(Setting, DefaultAppliedIndex, 1);
+            ChatHandler(player->GetSession()).SendSysMessage(DefaultAppliedText);
+            SendState(player);
+            break;
+        case DefaultSync::Clear:
+            player->UpdatePlayerSetting(Setting, ActiveIndex, 0);
+            player->UpdatePlayerSetting(Setting, InsuredSlotsIndex, 0);
+            player->UpdatePlayerSetting(Setting, DefaultAppliedIndex, 0);
+            SendState(player);
+            break;
+        case DefaultSync::None:
+            break;
+    }
 }
 
 void SendAddon(Player* player, std::string const& message)
@@ -113,6 +148,7 @@ void SendSlots(Player* player)
 
 void HandleWindowMessage(Player* player, std::string const& body)
 {
+    SyncDefault(player);
     std::size_t const space = body.find(' ');
     std::string const action = body.substr(0, space);
     unsigned key = 0;
@@ -506,7 +542,7 @@ end
 
 std::string WindowBootstrapLua()
 {
-    return std::string("local showToggle = ") + (clickToggle ? "true" : "false") + WindowLua;
+    return std::string("local showToggle = ") + (clickToggle && !insureAllByDefault ? "true" : "false") + WindowLua;
 }
 
 void RunWindowLua(Player* player)
@@ -581,6 +617,17 @@ void ApplyToggle(Player* player, bool want, bool nearAltar)
         return;
     }
 
+    if (insureAllByDefault)
+    {
+        SendState(player);
+        if (want)
+        {
+            SendResult(player, ToggleResult::Ok);
+            player->KilledMonsterCredit(CreditEntry);
+        }
+        return;
+    }
+
     ToggleResult const result = DecideToggle(Active(player), want, nearAltar, toggleAnywhere);
     if (result == ToggleResult::Ok)
     {
@@ -611,6 +658,7 @@ bool HandleToggle(WorldSession* session, WorldPacket const& received)
         return true;
     }
 
+    SyncDefault(player);
     ApplyToggle(player, want != 0, NearAltar(player));
     return true;
 }
@@ -636,6 +684,7 @@ public:
         feeMultiplier = std::max(0.0, double(sConfigMgr->GetOption<float>("HighRisk.FelCommutation.FeeMultiplier",
             float(DefaultFeeMultiplier))));
         maxSlots = sConfigMgr->GetOption<uint32>("HighRisk.FelCommutation.MaxSlots", DefaultMaxSlots);
+        insureAllByDefault = sConfigMgr->GetOption<bool>("HighRisk.FelCommutation.InsureAllSlotsByDefault", true);
     }
 };
 
@@ -756,6 +805,7 @@ public:
     void OnPlayerLogin(Player* player) override
     {
         ForgetWindow(player);
+        SyncDefault(player);
         if (player->GetSession()->IsBot())
             return;
 
@@ -827,6 +877,7 @@ bool Active(Player const* player)
 
 uint32 Shield(Player* player, std::vector<Item*> const& insurable, std::vector<Item*>& losses)
 {
+    SyncDefault(player);
     if (!enabled || insurable.empty() || !Active(player))
         return 0;
 

@@ -939,6 +939,27 @@ class FixedTargetCountScenarioTests(unittest.TestCase):
         self.assertEqual(spec.cast_spell, 1)
         self.assertEqual(spec.target_rank, 2)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_dummy_distance_stands_the_primary_away_and_keeps_the_others_beyond_it(self):
+        entry = holy_cleave_entry()
+        plain, _ = behaviour_scenario(CLASS_FILE, entry)
+        distant, _ = behaviour_scenario(CLASS_FILE, {**entry, 'dummy_distance': 15})
+        run.validate(distant)
+        near = [creature['distance'] for creature in plain['creatures']]
+        far = [creature['distance'] for creature in distant['creatures']]
+        self.assertEqual(far[0], 15.0)
+        self.assertEqual([round(distance - 12.0, 6) for distance in far], [round(distance, 6) for distance in near])
+        self.assertIn('The primary dummy stands 15 yd from the caster', distant['contract'])
+        self.assertNotIn('The primary dummy stands', plain['contract'])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_dummy_distance_conflicting_with_the_layout_is_refused(self):
+        entry = holy_cleave_entry()
+        for change in ({'cast_target': 'caster'}, {'layout': 'caster'}, {'behind_yd': 2.0}, {'dummy_distance': 0},
+                       {'dummy_distance': 1000}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                behaviour_scenario(CLASS_FILE, {**entry, 'dummy_distance': 15, **change})
+
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class PartyStatRatioScenarioTests(unittest.TestCase):
@@ -3851,6 +3872,144 @@ class HitRatioTargetAuraAmountTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, {**self.armored_entry(treatment=[[self.ARMOR_AURA, 0, 5000]]),
                                             'target': 'caster'})
+
+
+MARIONETTE = 704497
+MALEFIC_WRATH = 807037
+SPIRIT_ECLIPSE = 811117
+ECLIPSE_HIT = 802717
+SPIRIT = 561136
+SOUL_FEEDER = 705894
+
+
+def marionette_lead_entry(kind: str = 'hit_ratio') -> dict:
+    entry = {'spell': MARIONETTE, 'kind': kind, 'name': 'Soul Marionette (lead)', 'label_suffix': 'lead',
+             'quote': 'applying a stack of', 'observe_spell': MALEFIC_WRATH, 'cast_power': 1000,
+             'control': {'auras': [[823764, 1]]},
+             'treatment': {'auras': [[823764, 1]], 'casts': [MARIONETTE], 'casts_wait_ms': 7400}}
+    if kind == 'crit_rate':
+        return {**entry, 'expected': 100, 'treatment_share': 100, 'trials': 10}
+    return {**entry, 'expected': 1.3, 'force_crit': 'spell', 'critical': True, 'trials': 4,
+            'fixture': {'spell_power': 20000}, 'cast_wait_ms': 2500}
+
+
+def eclipse_after_required_entry() -> dict:
+    arm = {'auras': [[823764, 1]], 'auras_after_required': [[SPIRIT, 5]]}
+    return {'spell': SOUL_FEEDER, 'kind': 'hit_ratio', 'name': 'Soul Feeder (Eclipse)', 'label_suffix': 'eclipse',
+            'quote': 'Increases the damage dealt by Malefic Arrow and Spirit Eclipse by $s2% for each active Spirit '
+                     'on you.',
+            'expected': 1.25, 'observe_spell': ECLIPSE_HIT, 'cast_spell': SPIRIT_ECLIPSE, 'critical': False,
+            'trials': 3, 'fixture': {'ranged_attack_power': 20000}, 'cast_power': 1000, 'cast_wait_ms': 500,
+            'control': arm, 'treatment': {**arm, 'learn': [SOUL_FEEDER]}}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HitRatioArmLeadTests(unittest.TestCase):
+    def test_the_lead_wait_follows_the_arm_casts_of_every_treatment_trial(self):
+        entry = marionette_lead_entry()
+        scenario, (expectation,) = behaviour_scenario(CLASS_FILE, entry)
+        steps = run.validate(scenario)['steps']
+        leads = [index for index, step in enumerate(steps) if step['action'] == 'wait'
+                 and str(step.get('label', '')).endswith(' lead')]
+        self.assertEqual([steps[index]['label'] for index in leads],
+                         [f'treatment trial {trial} lead' for trial in range(1, entry['trials'] + 1)])
+        self.assertTrue(all(steps[index]['ms'] == 7400 for index in leads))
+        for index in leads:
+            before = max(at for at in range(index) if steps[at]['action'] == 'cast')
+            after = min(at for at in range(index + 1, len(steps)) if steps[at]['action'] == 'cast')
+            self.assertEqual(steps[before]['spell'], MARIONETTE)
+            self.assertEqual(steps[after]['spell'], MALEFIC_WRATH)
+        self.assertIn('the treatment arm waits 7400 ms after its casts [704497]', scenario['contract'])
+        plain = {**entry, 'treatment': {key: value for key, value in entry['treatment'].items()
+                                        if key != 'casts_wait_ms'}}
+        _, (without,) = behaviour_scenario(CLASS_FILE, plain)
+        self.assertLess(expectation.model['trial_limit'], without.model['trial_limit'])
+
+    def test_the_lead_wait_precedes_every_treatment_cast_of_a_crit_rate(self):
+        entry = marionette_lead_entry('crit_rate')
+        scenario, _ = behaviour_scenario(CLASS_FILE, entry)
+        steps = run.validate(scenario, clock='simulated')['steps']
+        leads = [index for index, step in enumerate(steps) if step.get('label') == 'treatment lead']
+        self.assertEqual(len(leads), entry['trials'])
+        self.assertTrue(all(steps[index + 1:][0]['action'] != 'cast' for index in leads))
+        self.assertFalse([step for step in steps if step.get('label') == 'control lead'])
+        self.assertIn('the treatment arm waits 7400 ms', scenario['contract'])
+
+    def test_auras_after_required_follow_the_required_aura_step_of_the_observed_cast(self):
+        entry = eclipse_after_required_entry()
+        scenario, _ = behaviour_scenario(CLASS_FILE, entry)
+        steps = run.validate(scenario)['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast'
+                 and step['spell'] == SPIRIT_ECLIPSE]
+        self.assertEqual(len(casts), 2 * entry['trials'])
+        for index in casts:
+            self.assertEqual([(steps[at]['spell'], steps[at]['stacks']) for at in (index - 2, index - 1)],
+                             [(SPIRIT, 1), (SPIRIT, 5)])
+        self.assertIn('sets the auras [[561136, 5]] after the required-aura step of [811117]', scenario['contract'])
+
+    def test_an_entry_without_leads_keeps_its_steps_and_contract(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, pious_sweep_hit_ratio_entry())
+        self.assertFalse([step for step in scenario['steps'] if str(step.get('label', '')).endswith(' lead')])
+        self.assertNotIn('required-aura step', scenario['contract'])
+
+    def test_bad_leads_are_refused(self):
+        entry = marionette_lead_entry()
+        for treatment in ({'casts_wait_ms': 500}, {'casts': [MARIONETTE], 'casts_wait_ms': -1},
+                          {'casts': [MARIONETTE], 'casts_wait_ms': 30001},
+                          {'casts': [MARIONETTE], 'casts_wait_ms': 1.5},
+                          {'casts': [MARIONETTE], 'auras_after_required': [[SPIRIT, 5]]},
+                          {'casts': [MARIONETTE], 'auras_after_required': [[SPIRIT, 5], [SPIRIT, 1]]}):
+            with self.subTest(treatment=treatment), self.assertRaises(ValueError):
+                behaviour_scenario(CLASS_FILE, {**entry, 'treatment': treatment})
+
+    def test_leads_before_a_swing_are_refused(self):
+        entry = next(entry for entry in CLASS_FILE['behaviours'] if entry['kind'] == 'hit_ratio'
+                     and entry.get('swing_hand') is not None)
+        treatment = {**entry.get('treatment', {}), 'casts': [MARIONETTE], 'casts_wait_ms': 500}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, {**entry, 'treatment': treatment})
+
+
+def jinx_rate_entry(**changes) -> dict:
+    return {'spell': 300663, 'kind': 'hit_ratio', 'name': 'Will of the Serpent (streams)', 'label_suffix': 'jinx',
+            'quote': 'now increases your critical strike chance against the target by $s1%', 'expected': 1.0,
+            'observe_spell': 573026, 'control': {'casts': [802065]},
+            'treatment': {'casts': [802065], 'learn': [300663]}, 'rate': 'critical', 'expected_points': 10,
+            'trials': 10, 'parts': 4, 'cast_power': 1400, **changes}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HitRatioStreamTests(unittest.TestCase):
+    ISOLATION = {'reach_yd': 0, 'source': 'seeded: single-target casts at the own dummy'}
+
+    def test_streams_split_the_trials_and_every_read_carries_its_stream(self):
+        scenario, (expectation,) = behaviour_scenario(CLASS_FILE, jinx_rate_entry(streams=4, isolation=self.ISOLATION))
+        run.validate(scenario)
+        model = expectation.model
+        self.assertEqual([player['id'] for player in scenario['players']], ['caster', 'caster1', 'caster2', 'caster3'])
+        self.assertEqual(model['trials'], 12)
+        self.assertEqual(model['stream_suffixes'], [' s0', ' s1', ' s2', ' s3'])
+        labels = {step['label'] for step in scenario['steps'] if step['action'] == 'assert'}
+        for arm in model['reads'].values():
+            for pair in arm:
+                for label in pair:
+                    self.assertNotIn(label, labels)
+                    self.assertTrue(all(f'{label}{suffix}' in labels for suffix in model['stream_suffixes']))
+        casts = [step['actor'] for step in scenario['steps'] if step['action'] == 'cast' and step['spell'] == 573026]
+        self.assertEqual(sorted(set(casts)), ['caster', 'caster1', 'caster2', 'caster3'])
+        self.assertEqual(len(casts), 2 * 3 * 4)
+        self.assertTrue([item for item in model['isolation'] if item['status'] == 'alert'])
+
+    def test_a_single_stream_rate_entry_is_unchanged(self):
+        plain, _ = behaviour_scenario(CLASS_FILE, jinx_rate_entry())
+        self.assertEqual([player['id'] for player in plain['players']], ['caster'])
+        self.assertNotIn('location', plain)
+
+    def test_streams_need_a_rate_and_an_isolation(self):
+        for entry in (jinx_rate_entry(streams=4), jinx_rate_entry(streams=4, isolation=self.ISOLATION, rate='',
+                                                                  expected_points=None, expected=1.1)):
+            with self.assertRaises(ValueError):
+                behaviour_scenario(CLASS_FILE, entry)
 
 
 class HitRatioScenarioTests(unittest.TestCase):

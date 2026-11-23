@@ -148,7 +148,10 @@ def main():
     selection = affixes[start:end].replace('ManastormAffixEngine::InitializeStage', 'InitializeAutomaticAffixes')
     code = code.replace('// ACTUAL_SELECTION', selection + '    ++run.selections;\n}')
     distance = re.search(r'constexpr float HEART_PICKUP_DISTANCE = [^;]+;', source)[0]
-    code = code.replace('// ACTUAL_DISTANCE', distance)
+    depth = re.search(r'constexpr float HEART_LANDING_DEPTH = [^;]+;', source)[0]
+    code = code.replace('// ACTUAL_DISTANCE', distance + '\n' + depth)
+    launch = re.sub(r'\s+', '', method(source, 'bool ManastormMgr::SpawnHeartProjectile('))
+    assert 'destination.GetPositionZ()-HEART_LANDING_DEPTH,SPELL_MANASTORM_HEART_PROJECTILE' in launch
     compiler = shutil.which(os.environ.get('CXX', 'cl' if os.name == 'nt' else 'c++'))
     assert compiler, 'Enable the C++20 compiler environment.'
     with tempfile.TemporaryDirectory(prefix='manastorm-floor-safety-') as directory:

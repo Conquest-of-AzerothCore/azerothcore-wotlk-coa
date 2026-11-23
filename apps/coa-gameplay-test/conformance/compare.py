@@ -1,4 +1,5 @@
 from collections import Counter
+import copy
 from dataclasses import asdict, dataclass, field, replace
 from fractions import Fraction
 from functools import lru_cache
@@ -1353,11 +1354,44 @@ def own_summons_judgement(base: Verdict, model: dict, own_summons: int, baseline
     return None
 
 
+def stream_summed(run: Run, model: dict) -> Run:
+    suffixes = model.get('stream_suffixes')
+    if not suffixes or run is None:
+        return run
+    values = dict(run.values)
+    for label in model['summed_labels']:
+        found = [run.values.get(f'{label}{suffix}') for suffix in suffixes]
+        if any(value is None for value in found):
+            values.pop(label, None)
+        else:
+            values[label] = sum(found)
+    summed = copy.copy(run)
+    object.__setattr__(summed, 'values', values)
+    return summed
+
+
+def stream_isolation(parts: list[ProcPart], base: Verdict) -> Verdict | None:
+    from kinds.stack_chance_rate import isolation_reading
+    for _, run, part in parts:
+        bounds = (part.model or {}).get('isolation')
+        if bounds and run is not None:
+            reading = isolation_reading([run], bounds)
+            if reading:
+                return replace(base, status=reading[0], explanation=reading[1])
+    return None
+
+
 def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -> Verdict:
     first_entry, first_run, expectation = parts[0]
     model = expectation.model
     base = Verdict(expectation.label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
                    expectation.rank_id, expectation.check)
+    if model.get('stream_suffixes'):
+        isolated = stream_isolation(parts, base)
+        if isolated is not None:
+            return isolated
+        parts = [(entry, stream_summed(run, part.model), part) for entry, run, part in parts]
+        first_run = parts[0][1]
     if model.get(PER_TRIGGER):
         return judge_proc_per_trigger(manifest, parts, tooltips, base)
     labels = model['measurements']
@@ -4561,6 +4595,12 @@ def engine_amount_band_reading(bonus: Bonus, stated: dict) -> EngineStepReading:
 
 def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict) -> Verdict:
     runs = run if isinstance(run, list) else [run]
+    if model.get('stream_suffixes'):
+        from kinds.stack_chance_rate import isolation_reading
+        isolated = isolation_reading(runs, model.get('isolation', []))
+        if isolated:
+            return replace(base, status=isolated[0], explanation=isolated[1])
+        runs = [stream_summed(part, model) for part in runs]
     run = runs[0]
     scale = 100.0 if model.get('rate') else 1.0
     between_parts = len(runs) >= MINIMUM_BETWEEN_PARTS and bool(model.get('rate'))

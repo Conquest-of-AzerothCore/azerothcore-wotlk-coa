@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Chat log: LootCollector addon traffic in channels is not logged, other channel chat is",
+  "contract": [
+    "The LootCollector addon shares its finds as ordinary channel chat. With the default CoA.ChatLog.IgnoreChannels (BBLC25C KLCE25C) nothing said in those channels writes a coa_chat_log row, whatever the text.",
+    "With the default CoA.ChatLog.IgnoreChannelMessagesStartingWith (LC1: LCPOI1: LCR1 LCRD1 LCS3;) a channel message starting with one of them writes no row in any channel; in the shared channel CoASync another addon's line (PFQ6:) and plain text still write one channel row each.",
+    "The prefixes only apply to channels: the same LC1: text as a say still writes a say row."
+  ],
+  "timeout_ms": 60000,
+  "chat_log": true,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {"id": "sharer", "name": "Chatlogaddon", "race": 1, "class": 1, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "client_packet", "label": "Join BBLC25C", "actor": "sharer", "opcode": 151, "consumed": false, "fields": [{"u32": 0}, {"u8": 0}, {"u8": 0}, {"string": "BBLC25C"}, {"string": ""}]},
+    {"action": "client_packet", "label": "LootCollector confirmation in BBLC25C", "actor": "sharer", "opcode": 149, "consumed": false, "fields": [{"u32": 17}, {"u32": 7}, {"string": "BBLC25C"}, {"string": "LC1:CONF:1938ef80:DWyWkimmqq0VidztAAtpkcEmEy88arBkuqrLgkw)6DBpTdZ82hf"}]},
+    {"action": "client_packet", "label": "Plain text in BBLC25C", "actor": "sharer", "opcode": 149, "consumed": false, "fields": [{"u32": 17}, {"u32": 7}, {"string": "BBLC25C"}, {"string": "is this the loot channel"}]},
+    {"action": "assert", "label": "Nothing from BBLC25C is logged", "actor": "sharer", "metric": "chat_log_rows", "chat_type": "channel", "chat_channel": "BBLC25C", "equals": 0},
+    {"action": "client_packet", "label": "Join KLCE25C", "actor": "sharer", "opcode": 151, "consumed": false, "fields": [{"u32": 0}, {"u8": 0}, {"u8": 0}, {"string": "KLCE25C"}, {"string": ""}]},
+    {"action": "client_packet", "label": "KamiLabs LootCollector discovery in KLCE25C", "actor": "sharer", "opcode": 149, "consumed": false, "fields": [{"u32": 17}, {"u32": 7}, {"string": "KLCE25C"}, {"string": "LC1:DISC:18bbe650:abcDEF()"}]},
+    {"action": "assert", "label": "Nothing from KLCE25C is logged", "actor": "sharer", "metric": "chat_log_rows", "chat_type": "channel", "chat_channel": "KLCE25C", "equals": 0},
+    {"action": "client_packet", "label": "Join CoASync", "actor": "sharer", "opcode": 151, "consumed": false, "fields": [{"u32": 0}, {"u8": 0}, {"u8": 0}, {"string": "CoASync"}, {"string": ""}]},
+    {"action": "client_packet", "label": "LootCollector sync hello in CoASync", "actor": "sharer", "opcode": 149, "consumed": false, "fields": [{"u32": 17}, {"u32": 7}, {"string": "CoASync"}, {"string": "LCS3;HELLO;3"}]},
+    {"action": "client_packet", "label": "LootCollector pin in CoASync", "actor": "sharer", "opcode": 149, "consumed": false, "fields": [{"u32": 17}, {"u32": 7}, {"string": "CoASync"}, {"string": "LCPOI1:17950:x"}]},
+    {"action": "client_packet", "label": "LootCollector rare in CoASync", "actor": "sharer", "opcode": 149, "consumed": false, "fields": [{"u32": 17}, {"u32": 7}, {"string": "CoASync"}, {"string": "LCR1 rare 75"}]},
+    {"action": "client_packet", "label": "pfQuest line in CoASync", "actor": "sharer", "opcode": 149, "consumed": false, "fields": [{"u32": 17}, {"u32": 7}, {"string": "CoASync"}, {"string": "PFQ6:H:1:quest"}]},
+    {"action": "client_packet", "label": "Plain text in CoASync", "actor": "sharer", "opcode": 149, "consumed": false, "fields": [{"u32": 17}, {"u32": 7}, {"string": "CoASync"}, {"string": "hello sync"}]},
+    {"action": "assert", "label": "Only the pfQuest line and the plain text from CoASync are logged", "actor": "sharer", "metric": "chat_log_rows", "chat_type": "channel", "chat_channel": "CoASync", "equals": 2},
+    {"action": "assert", "label": "The pfQuest line is one of them", "actor": "sharer", "metric": "chat_log_rows", "chat_type": "channel", "chat_channel": "CoASync", "chat_text": "PFQ6:H:1:quest", "equals": 1},
+    {"action": "client_packet", "label": "The same LC1: text as a say", "actor": "sharer", "opcode": 149, "consumed": false, "fields": [{"u32": 1}, {"u32": 7}, {"string": "LC1:CONF:not a channel"}]},
+    {"action": "assert", "label": "A say is never skipped by the prefixes", "actor": "sharer", "metric": "chat_log_rows", "chat_type": "say", "chat_text": "LC1:CONF:not a channel", "equals": 1}
+  ]
+}

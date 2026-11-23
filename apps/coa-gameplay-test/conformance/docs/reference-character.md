@@ -71,7 +71,8 @@ models when its tooltip states a direct hit and a periodic total that both own t
 refuses the rank as several hit models; ADR [0920](../../../../docs/adr/0920-a-rank-can-split-its-direct-hit-from-its-periodic-total.md)).
 `hits.rank_hit` then reads only the named effect's tooltip values and refuses an effect whose model is not the label's
 (a periodic model for `periodic_total`, any other for `hit_mean`); the hit scenario's damage reads carry `periodic`
-false or true, so each label judges only its own events. Ranks without an entry are unchanged. Witch Hunter: 501349
+false or true, so each label judges only its own events, and the comparison models each label with its own role
+(`hits.measured_hit_model`, ADR 1141). Ranks without an entry are unchanged. Witch Hunter: 501349
 (direct Effect[2], periodic Effect[0]).
 
 `base_steps` waits 5 s, adds and equips the weapon, sets each line of `skill_lines` to 5 × level with `set_skill`

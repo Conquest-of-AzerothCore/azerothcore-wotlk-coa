@@ -37,6 +37,7 @@ MISSILE_WAIT_LABEL = 'missile travel'
 MISSILE_MIN_DISTANCE_YD = 5.0
 UNREADABLE = 'unreadable: '
 UNMEASURABLE = 'unmeasurable: '
+REMOVED_RADIUS = 'radius of an effect a class contract removes (removed_own_effects)'
 CALC_AMOUNT_HOOKS_METRIC = 'spell_calc_amount_hooks'
 CALC_AMOUNT_HOOKS_SUFFIX = ' calc_amount_hooks'
 GENERIC = 'generic: '
@@ -297,8 +298,9 @@ def fixture_health_step(actor: str, pct: int) -> dict:
     return {'action': 'set_health', 'actor': actor, 'value': value, 'maximum': FIXTURE_MAX_HEALTH}
 
 
-def first_aura_effect(facts: RankFacts) -> int | None:
-    return next((effect for effect in EFFECTS if facts.effects[effect] and facts.aura_names[effect]), None)
+def first_aura_effect(facts: RankFacts, removed: frozenset[int] = frozenset()) -> int | None:
+    return next((effect for effect in EFFECTS
+                 if facts.effects[effect] and facts.aura_names[effect] and effect not in removed), None)
 
 
 def foreign_aura_grants(class_file: dict) -> frozenset[tuple[int, int]]:
@@ -517,6 +519,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
     cast_wanted = False
     needs_ally_target = False
     removed = {(entry['spell'], entry['effect']) for entry in class_file.get('removed_own_effects', [])}
+    removed_effects = frozenset(effect for spell_id, effect in removed if spell_id == rank_id)
     first_effect = next((effect for effect in EFFECTS if facts.effects[effect] and (rank_id, effect) not in removed),
                         None)
     rolled: dict[str, int] = {}
@@ -596,6 +599,10 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             if shown.effect_index is not None:
                 radius_effect = shown.effect_index
                 label = f'{rank_id} effect_radius e{radius_effect} #{ordinal}'
+                if (rank_id, radius_effect) in removed:
+                    expect(label, 'effect_radius', radius_effect, shown.text,
+                           note_rule(UNMEASURABLE + REMOVED_RADIUS, note))
+                    return
                 measured.append(measurement(label, CASTER, 'spell_effect_radius', spell=rank_id,
                                             effect=radius_effect))
                 expect(label, 'effect_radius', radius_effect, shown.text, note_rule(f'read {shown.kind}', note))
@@ -677,7 +684,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
                    note_rule(UNMEASURABLE + unmeasurable, note))
             return
         own_duration = OWN_DURATION.fullmatch(shown.text)
-        aura_effect = first_aura_effect(facts)
+        aura_effect = first_aura_effect(facts, removed_effects)
         if shown.kind == 'duration_ms' and own_duration and own_duration.group(1) in ('', str(rank_id)):
             label = f'{rank_id} aura_duration_ms #{ordinal}'
             if facts.passive or aura_effect is None:

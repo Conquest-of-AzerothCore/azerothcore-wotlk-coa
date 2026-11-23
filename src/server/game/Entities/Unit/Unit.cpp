@@ -3969,6 +3969,9 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spellInfo
         return SPELL_MISS_NONE;
     }
 
+    if (victim->HasAura(806295))
+        return SPELL_MISS_MISS;
+
     SpellSchoolMask schoolMask = spellInfo->GetSchoolMask();
     int32 thisLevel = getLevelForTarget(victim);
     if (IsCreature() && ToCreature()->IsTrigger())
@@ -13039,6 +13042,7 @@ int32 Unit::ModSpellDuration(SpellInfo const* spellProto, Unit const* target, in
         int32 durationMod;
         int32 durationMod_always = 0;
         int32 durationMod_not_stack = 0;
+        int32 durationMod_raised = 0;
 
         for (uint8 i = 1; i <= MECHANIC_ENRAGED; ++i)
         {
@@ -13048,6 +13052,13 @@ int32 Unit::ModSpellDuration(SpellInfo const* spellProto, Unit const* target, in
             // Xinef: spells affecting movement imparing effects should not reduce duration if disoriented mechanic is present
             if (i == MECHANIC_SNARE && (mechanic & (1ULL << MECHANIC_DISORIENTED)))
                 continue;
+
+            // CoA: Witch Doctor fields (Graven Effigy 504767) raise crowd control durations, which the negative-only
+            // selection below would drop.
+            for (AuraEffect const* effect : target->GetAuraEffectsByType(SPELL_AURA_MECHANIC_DURATION_MOD))
+                if (effect->GetMiscValue() == int32(i) && effect->GetAmount() > 0 &&
+                    effect->GetSpellInfo()->SpellFamilyName == 19)
+                    durationMod_raised = std::max(durationMod_raised, effect->GetAmount());
 
             // Find total mod value (negative bonus)
             int32 new_durationMod_always = target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD, i);
@@ -13068,6 +13079,8 @@ int32 Unit::ModSpellDuration(SpellInfo const* spellProto, Unit const* target, in
 
         if (durationMod != 0)
             AddPct(duration, durationMod);
+        if (durationMod_raised != 0)
+            AddPct(duration, durationMod_raised);
 
         // there are only negative mods currently
         durationMod_always = target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL, spellProto->Dispel);
@@ -13392,6 +13405,8 @@ void Unit::SetAnimTier(AnimTier animTier)
 
 uint32 Unit::GetCreatureType() const
 {
+    if (HasAura(500952))
+        return CREATURE_TYPE_BEAST;
     if (IsPlayer())
     {
         if (getClass() == 17 && HasAura(804345))
@@ -16936,6 +16951,9 @@ float Unit::MeleeSpellMissChance(Unit const* victim, WeaponAttackType attType, i
     {
         return 0.0f;
     }
+
+    if (attType == RANGED_ATTACK && victim->HasAura(806295))
+        return 100.0f;
 
     //calculate miss chance
     float missChance = victim->GetUnitMissChance(attType);

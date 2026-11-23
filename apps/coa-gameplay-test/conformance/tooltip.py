@@ -51,6 +51,7 @@ DEFAULT_PERIOD_MS = 5000
 
 COLOR_CODE = re.compile(r'\|[cC][0-9a-fA-F]{8}|\|[rR]')
 EXTENSION_MARKUP = re.compile(r'@+[^@]*@?')
+EXTENSION_BLOCK = re.compile(r'@ext:(?P<body>(?:(?!:ext@).)*):ext@', re.DOTALL)
 SPELL_MARKUP = re.compile(r'@s:(?P<spell>\d+):(?P<flags>-?\d+)@')
 TOKEN_SPELL = re.compile(r'\$(\d+)')
 SPELL_TOKEN = re.compile(r'(?P<spell>\d*)(?P<letter>[A-Za-z])(?P<digit>[1-9]?)')
@@ -563,6 +564,13 @@ class Tooltip:
                     unreadable += expanded.unreadable
                     position = markup.end()
                     continue
+                block = EXTENSION_BLOCK.match(description, position)
+                if block and SPELL_MARKUP.search(block.group('body')):
+                    expanded = self.extension_block(block)
+                    values += expanded.values
+                    unreadable += expanded.unreadable
+                    position = block.end()
+                    continue
                 end = EXTENSION_MARKUP.match(description, position).end()
                 unreadable.append(description[position:end])
                 position = end
@@ -578,6 +586,17 @@ class Tooltip:
         nested = Tooltip(self.records, spell_id, self.caster, self.expanding)
         readout = nested.read(self.records.field('Spell', spell_id, 'Description[enUS]'))
         return Readout([referenced(value, spell_id) for value in readout.values], readout.unreadable)
+
+    def extension_block(self, block: re.Match) -> Readout:
+        values, unreadable = [], []
+        for markup in SPELL_MARKUP.finditer(block.group('body')):
+            expanded = self.expansion(markup)
+            values += expanded.values
+            unreadable += expanded.unreadable
+        rest = SPELL_MARKUP.sub('', block.group('body'))
+        if rest.strip():
+            unreadable.append(f'@ext:{rest}:ext@')
+        return Readout(values, unreadable)
 
     def token(self, text: str, start: int) -> tuple[int, Displayed | Unreadable | None]:
         position = start + 1
