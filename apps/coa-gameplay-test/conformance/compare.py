@@ -104,6 +104,9 @@ READ_RULE = 'read '
 ORDINAL = re.compile(r'#(\d+)$')
 BASE_ROLL_ONLY = 'base_roll_only'
 POWER_TERM_LABEL = 'power_term_label'
+TRIGGER_WITH_VALUE = 'trigger_with_value'
+TRIGGER_WITH_VALUE_CHECKS = ('effect_value', 'aura_amount')
+PERIODIC_TRIGGER_SPELL_WITH_VALUE = 227
 CONTRAST_LABEL = 'contrast_label'
 BASE_ROLL_READ_STATUS = 'read_status'
 BASE_ROLL_REFUSED = f'; {BASE_ROLL_ONLY} not accepted: '
@@ -933,6 +936,9 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
         if die_sides not in FIXED_DIE_SIDES:
             return judge_roll(base, expectation, run, measured, tokens, tooltips, index,
                               roll_range(base_points, die_sides))
+        carried = judge_trigger_with_value(base, expectation, measured, tokens, tooltips, index, effect)
+        if carried is not None:
+            return carried
     expected = undivided(token)
     plain = PLAIN_TOKEN.fullmatch(token.text)
     if plain:
@@ -960,6 +966,32 @@ def base_roll_entry(tooltips: TooltipSource, spell_id: int, effect: int) -> dict
 
 def unpowered(caster: CasterStats) -> CasterStats:
     return replace(caster, ap=0.0, rap=0.0, sp_by_school={school: 0.0 for school in caster.sp_by_school})
+
+
+def judge_trigger_with_value(base: Verdict, expectation: Expectation, measured: float, tokens: Tokens,
+                             tooltips: TooltipSource, index: int, effect: tuple[int, int]) -> Verdict | None:
+    spell_id, effect_index = effect
+    if (expectation.check not in TRIGGER_WITH_VALUE_CHECKS
+            or tooltips.spell_field(spell_id, f'EffectApplyAuraName[{effect_index}]')
+            != PERIODIC_TRIGGER_SPELL_WITH_VALUE):
+        return None
+    token = tokens.readout.values[index]
+    unpowered_value = tooltips.read(expectation.rank_id, unpowered(tokens.caster)).values[index]
+    if unpowered_value.text != token.text:
+        return replace(base, status='alert', measured=measured,
+                       explanation=f'{TRIGGER_WITH_VALUE}: token #{index} reads {unpowered_value.text} without '
+                                   f'power, {token.text} with the measured stats')
+    full, judged = undivided(token), undivided(unpowered_value)
+    term = full - judged
+    if term == 0:
+        return None
+    why = (f'{token.text} on an aura {PERIODIC_TRIGGER_SPELL_WITH_VALUE} carrier: full value {full:g} at the '
+           f'measured stats minus the power term {term:g} (attack, ranged attack and spell power read as 0) = '
+           f'judged amount {judged:g}; the amount is the BASE_POINT0 that spell {spell_id} effect {effect_index} '
+           f'hands its triggered spell (SpellAuraEffects.cpp:6566), whose hit labels carry the power term (D-292)')
+    verdict = deterministic(base, measured, measured, judged, why)
+    return replace(verdict, detail={**(verdict.detail or {}), TRIGGER_WITH_VALUE: {
+        'full_value': full, 'power_term': term, 'judged_amount': judged}})
 
 
 def judge_base_roll(base: Verdict, expectation: Expectation, measured: float, tokens: Tokens,

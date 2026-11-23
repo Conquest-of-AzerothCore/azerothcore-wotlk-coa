@@ -719,6 +719,49 @@ class CompareTest(unittest.TestCase):
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('names no power_term_label and no contrast_label', verdict.explanation)
 
+    CARRIER_TEXT = '${$m1+0+$AP*0.159426}'
+
+    def carrier_verdicts(self, measured='28', aura=227, term=0.159426):
+        def tokens(caster, forced):
+            return [Displayed(self.CARRIER_TEXT, 28 + caster.ap * term, 0, 'flat')]
+
+        labels = {'effect_value': '1001 effect_value e0 #0', 'aura_amount': '1001 aura_amount e0 #0'}
+        items = [expectation(label, check, self.CARRIER_TEXT, 'read flat', 0) for check, label in labels.items()]
+        reader = FakeTooltips(tokens, fields={(RANK, 'EffectApplyAuraName[0]'): aura})
+        steps = [assert_step(label, measured) for label in labels.values()]
+        verdicts = self.value_run(items, [self.CARRIER_TEXT], steps, reader)
+        return [verdicts[label] for label in labels.values()]
+
+    def test_an_aura_227_carrier_amount_is_judged_on_its_token_without_power(self):
+        for verdict in self.carrier_verdicts():
+            self.assertEqual(verdict.status, 'ok')
+            self.assertAlmostEqual(verdict.expected, 28)
+            detail = verdict.detail['trigger_with_value']
+            self.assertAlmostEqual(detail['full_value'], 28 + 313 * 0.159426)
+            self.assertAlmostEqual(detail['power_term'], 313 * 0.159426)
+            self.assertIn('SpellAuraEffects.cpp:6566', verdict.explanation)
+
+    def test_an_aura_227_carrier_amount_holding_the_power_term_is_an_alert(self):
+        for verdict in self.carrier_verdicts(measured=str(round(28 + 313 * 0.159426, 2))):
+            self.assertEqual(verdict.status, 'alert')
+
+    def test_mutant_an_aura_227_carrier_judged_on_its_full_token_alerts(self):
+        with mock.patch('compare.judge_trigger_with_value', return_value=None):
+            for verdict in self.carrier_verdicts():
+                self.assertEqual(verdict.status, 'alert')
+                self.assertAlmostEqual(verdict.expected, 28 + 313 * 0.159426)
+
+    def test_another_aura_keeps_its_full_token(self):
+        for verdict in self.carrier_verdicts(aura=226):
+            self.assertEqual(verdict.status, 'alert')
+            self.assertNotIn('trigger_with_value', verdict.detail or {})
+
+    def test_an_aura_227_carrier_without_a_power_term_keeps_its_plain_judgement(self):
+        for verdict in self.carrier_verdicts(term=0.0):
+            self.assertEqual(verdict.status, 'ok')
+            self.assertNotIn('trigger_with_value', verdict.detail or {})
+            self.assertIn('read with the measured stats', verdict.explanation)
+
     def test_a_base_roll_only_token_whose_hit_labels_are_not_in_the_comparison_is_an_alert(self):
         verdict = self.base_roll_verdict()
         self.assertEqual(verdict.status, 'alert')
