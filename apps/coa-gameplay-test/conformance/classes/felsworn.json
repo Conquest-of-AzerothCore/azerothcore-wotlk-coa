@@ -100,6 +100,105 @@
         }
       },
       "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 804822,
+      "name": "Vengeance Is Mine",
+      "tooltip": "Dodging or parrying an attack now gives you a $h% chance to make your next 10 instances of damage with |cffffffffTwin Slice|r deal $807163s1% increased damage and generate 1 |cff32cd32Felfury|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "avoided",
+        "striker_entry": 36,
+        "swing_ms": 500,
+        "dodge": 100,
+        "parry": 0,
+        "strikers": 10,
+        "striker_auras": [
+          42716,
+          62531,
+          2116852
+        ]
+      },
+      "residual_target": 0.001,
+      "min_detectable": 5,
+      "min_parts": 10,
+      "trigger_text": "Dodging or parrying an attack",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 807163,
+      "events_per_proc": 1,
+      "proc_spell_source": "EffectTriggerSpell[0] of 804822; the handler casts it on the caster (AscensionFelswornEvents.cpp:157-158).",
+      "handler": "aura_ascension_felsworn_event: Check (AscensionFelswornEvents.cpp:42-47) passes an incoming dodge or parry (id 804822 accepts both) and rolls Chance(player, 804822) (AscensionFelsworn.cpp:231-239, roll_chance_f of the DBC ProcChance 10, no cooldown) once per avoided attack; Proc casts 807163 on the caster. Trigger: procs avoided trigger (ADR 0900): ten aggressive stationary strikers (creature 36) with Self Root Forever 42716, Molten 62531 and Enrage 2116852, dodge 100 and parry 0 set before every 500 ms interval, so no swing lands and every attempt is a dodge (the trial); the parry leg is not entered: the class-map spell list of class 14 has Dodge 81 and no Parry, so the reference character cannot parry (a parry set on it lets the swing land, guard landed failed in the first pair 20261123, prove2 attempt). Sized like the Sun Cleric 92137 entry: residual_target 0.001 per pair, min_detectable 5 points (band 2 points on 10%). Reference search 2026-11-23: coa-history spell 804822 and 807163 and ~/CoaServer/reference snapshots: nothing found that decides the chance or the 10 instances; the tooltip and Spell.dbc ProcChance 10 are the expectation. The Twin Slice instances and the Felfury generation of the tooltip are not read here (tool gaps).",
+      "dbc": {
+        "804822": {
+          "ProcChance": 10,
+          "ProcFlags": 4,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 681376,
+      "name": "Chaotic",
+      "tooltip": "Dealing damage now has an $h% chance to increase your damage by $572782s1% for $572782d, stacking $572782u times.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 801312
+      },
+      "residual_target": 0.001,
+      "min_detectable": 5,
+      "min_parts": 10,
+      "trigger_text": "Dealing damage",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 572782,
+      "events_per_proc": 1,
+      "proc_spell_source": "EffectTriggerSpell[0] of 681376; the handler casts it on the caster (AscensionFelswornEvents.cpp:148-149).",
+      "handler": "aura_ascension_felsworn_event: Check case 681376 (AscensionFelswornEvents.cpp:56-57) rolls Chance(player, 681376) once per outgoing damage event of a non-derived spell (periodic included); Proc casts 572782 on the caster. Trigger: a cast of Fel Fireball 801312 (Effect[0] SCHOOL_DAMAGE, one landed hit per cast); a trial is the landed hit. Reference search 2026-11-23: coa-history spell 681376 and 572782 and ~/CoaServer/reference snapshots: nothing found that decides the chance. Only the chance is entered here; the stack cap is owned by a tool group.",
+      "dbc": {
+        "681376": {
+          "ProcChance": 8,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 300490,
+      "name": "Felforged",
+      "tooltip": "Periodic damage dealt now has a $h% chance to grant you |cffffffffFelforged|r for $806104d.@s:806104:0@",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 704368
+      },
+      "residual_target": 0.001,
+      "min_detectable": 6,
+      "min_parts": 10,
+      "trigger_text": "Periodic damage dealt",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 806104,
+      "events_per_proc": 1,
+      "proc_spell_source": "EffectTriggerSpell[0] of 300490; the handler casts it on the caster (AscensionFelswornEvents.cpp:205-207).",
+      "handler": "aura_ascension_felsworn_event: Check case 300490 (AscensionFelswornEvents.cpp:86-88) returns periodic && Chance(player, 300490), one roll per periodic damage event; Proc casts 806104 on the caster. Trigger: a cast of Bane of Chaos 704368, whose Effect[0] is aura 3 periodic damage every 3000 ms; a trial is a damage tick (spell_damage_count of 704368 on the dummy, recasts spaced two ticks apart by the generator). Reference search 2026-11-23: coa-history spell 300490 and 806104 and ~/CoaServer/reference snapshots: nothing found that decides the chance.",
+      "dbc": {
+        "300490": {
+          "ProcChance": 15,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
     }
   ],
   "triggers": [
@@ -120,6 +219,25 @@
       "per_trigger": 1,
       "per_trigger_text": "causes off-hand Weapon Damage to attackers",
       "observe_source": "EffectTriggerSpell[0] of 300476 (804336). AscensionFelswornEvents.cpp:42-47 passes an incoming dodge (not a landed or parried swing) when Chance(player, 300476) succeeds (300476 ProcChance 100, so every dodge) and :223-224 casts 804336 at the attacker and 520256 on the caster. An aggressive striker (creature 36) swings at the caster, who wears Evasion 26669 (+50% dodge) refreshed before every 2000 ms attempt as a precondition fixture (the trigger action avoided, ADR 0709); every dodged (victim_state 2) or parried (victim_state 3) swing is a trial and the spell_cast_count of 804336 must match it. Reference search 2026-11-23: coa-history spell 804336: 3 damage events in 2 logs (14 to 74); 520256: 42 aura applications and 42 removals in 2 logs; nothing decides a value.",
+      "trial_attempts_reason": "An attempt is one striker swing interval; only the dodged or parried swings are trials (Evasion gives +50% dodge, the rest hit or miss), so 2.5 times the swings are scheduled to reach the trigger trials."
+    },
+    {
+      "aura": 805249,
+      "name": "Illidari Training",
+      "tooltip": "Dodging an attack now generates $521210s1 Energy.",
+      "trigger": {
+        "action": "avoided",
+        "striker_entry": 36,
+        "swing_ms": 2000
+      },
+      "trigger_text": "Dodging an attack",
+      "trial_metric": "melee_attacks_taken",
+      "trial_attempts_factor": 2.5,
+      "observe_spell": 521210,
+      "observe_metric": "spell_energize_count",
+      "per_trigger": 1,
+      "per_trigger_text": "Dodging an attack now generates Energy",
+      "observe_source": "EffectTriggerSpell[0] of 805249 (521210, Effect[0] ENERGIZE). AscensionFelswornEvents.cpp:42-47 passes an incoming dodge (id 805249 accepts dodge only, not parry) when Chance(player, 805249) succeeds (ProcChance 100, so every dodge) and :208-209 casts 521210 on the caster. An aggressive striker (creature 36) swings at the caster, who wears Evasion 26669 refreshed before every 2000 ms attempt as a precondition fixture (trigger action avoided, ADR 0709); every dodged or parried swing is a trial and the energize events of 521210 must match them. Reference search 2026-11-23: coa-history spell 805249 and 521210, ~/CoaServer/reference snapshots: nothing found that decides a value; the Energy amount is not read here (tool gap).",
       "trial_attempts_reason": "An attempt is one striker swing interval; only the dodged or parried swings are trials (Evasion gives +50% dodge, the rest hit or miss), so 2.5 times the swings are scheduled to reach the trigger trials."
     }
   ],
