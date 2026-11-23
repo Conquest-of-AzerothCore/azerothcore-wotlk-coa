@@ -3626,14 +3626,14 @@
         801312
       ],
       "setup_wait_ms": 2000,
-      "after_auras": [
-        [
-          802058,
-          1,
-          "caster",
-          "caster"
-        ]
+      "after_gate_cast": true,
+      "after_start_reads": [
+        {
+          "spell": 802058,
+          "expected": 1
+        }
       ],
+      "void_on_cast_failure": true,
       "metric": "aura_stacks",
       "fields": {
         "spell": 524632
@@ -3643,7 +3643,7 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "524632 StackAmount 4 ($524632u), DurationIndex 8 = 15000 ms. The Felsworn cast hook (AscensionFelswornAbilities.cpp:330-333) casts 524632 on the caster for every damaging Fel Fireball 801312 while the caster has the Reckoning aura 802058 (DurationIndex 1 = 10000 ms). Five Fel Fireball casts at the dummy 2000 ms apart (a 1500 ms cast without Reckoning, the class file's spell hit rating): before (control) no Reckoning aura and 0 stacks; after, the Reckoning aura set on the caster by harness set_aura as the phase's precondition (after_auras), so the five hits within its 10000 ms give 5 applications against a cap of 4: the stacks read 4 and not 5."
+      "observe_source": "524632 StackAmount 4 ($524632u), DurationIndex 8 = 15000 ms. The Felsworn cast hook (AscensionFelswornAbilities.cpp:330-333) casts 524632 on the caster for every damaging Fel Fireball 801312 while the caster has the Reckoning aura 802058 (DurationIndex 1 = 10000 ms). Five Fel Fireball casts at the dummy 2000 ms apart (a 1500 ms cast without Reckoning, the class file's spell hit rating): before (control) no Reckoning aura and 0 stacks; after, a real cast of Reckoning 802058 at the caster at the start of the phase (after_gate_cast; CastingTimeIndex 1 and StartRecoveryTime 0, so the Fel Fireballs that follow meet no global cooldown, and under Reckoning they are instant), its aura read present right after the cast (after_start_reads, else unmeasured) and any refused cast unmeasured (void_on_cast_failure); the learn of 802058 alone applies nothing. The five hits within its 10000 ms give 5 applications against a cap of 4: the stacks read 4 and not 5."
     }
   ],
   "player_observations": [],
