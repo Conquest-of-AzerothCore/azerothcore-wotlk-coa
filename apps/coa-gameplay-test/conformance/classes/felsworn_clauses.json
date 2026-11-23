@@ -2550,7 +2550,9 @@
   {
     "spell": 707444,
     "clause": "up to a maximum of 10 enemies, dealing less damage with each target struck.",
-    "labels": [],
+    "labels": [
+      "707444 behaviour_metric_delta extras_cap"
+    ],
     "kind": "claim",
     "tool_gap": {
       "reason": "The cap of 10 needs eleven candidates around the primary after a full channel and the 'less damage with each target' direction needs a per-target damage order. The fixed_count cap arm (Norgannon's Wrath 524739 cap) was tried (cap and cap_control entries, one real Carve as a setup cast): fixed_count sets the setup cast with no Felfury (the Carve is refused for lack of power) and waits 1600 ms after it, shorter than the 2500 ms channel, so no Fel Fireball follows a finished channel; the harness admits nine area dummies in metric_delta, one short of the eleven the cap needs. A fixed_count setup fixture (setup auras and setup wait) is a tool change. The nearest kind is fixed_count cap.",

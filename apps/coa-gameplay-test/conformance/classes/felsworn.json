@@ -15874,6 +15874,69 @@
           "caster"
         ]
       ]
+    },
+    {
+      "spell": 707444,
+      "name": "Hellfire Carver (a full Carve channel: Fel Fireball strikes 10 additional enemies of 11 offered)",
+      "kind": "metric_delta",
+      "variant": "extras_cap",
+      "label_suffix": "extras_cap",
+      "quote": "up to a maximum of 10 enemies",
+      "trigger_spell": 801312,
+      "gate_spell": 707444,
+      "target": "dummy",
+      "cast_power": 100,
+      "setup_casts": [
+        800206
+      ],
+      "setup_wait_ms": 3000,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 801312,
+        "target": "dummy"
+      },
+      "area_dummies": [
+        3.2,
+        3.4,
+        3.6,
+        3.8,
+        4.0,
+        4.2,
+        4.4,
+        4.6,
+        4.8,
+        5.0,
+        5.2
+      ],
+      "area_sum": true,
+      "before_expected": 1,
+      "expected": 12,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Hellfire Carver 707444 Description (server DBC set): 'Casting Carve now makes your next Fel Fireball instant cast and causes it to strike 1 additional enemy near the primary target based on how long you channeled, up to a maximum of 10 enemies, dealing less damage with each target struck.' Reading of 'up to a maximum of 10 enemies': 10 ADDITIONAL enemies, the count that grows by 1 per channel tick (controller ruling of 2026-11-23), from two sources: the aura 807424 the channel leaves has StackAmount 10 in the DBC, and the server sets the extra targets to the channel's ticks, clamped to 10 at the channel's end (AscensionFelswornAuras.cpp:224-228, AscensionFelswornAbilities.cpp:136-147: every valid enemy within 10 yd of the primary while extra > 0). Carve 800206 is a 2500 ms channel (DurationIndex 66, ten 250 ms ticks). A real Carve is cast first (a setup cast, kept in both phases) and its channel ends after 3000 ms; then one real Fel Fireball at the primary dummy at 3 yd, with eleven more dummies at 3.2 to 5.2 yd from the caster (all within 2.2 yd of the primary, inside the 10 yd search), one more than the cap. The hits of Fel Fireball on the primary and the eleven area dummies are summed, cumulative over the scenario: before (control: Hellfire Carver not learned) 1, the primary only; after the learn 12, that 1 plus 11 in the second cast (the primary and 10 additional enemies; one offered dummy stays unhit), a gain of 11, which excludes a missing cap (12 in the cast, 13 summed). The 'less damage with each target struck' part is not judged here. Reference search 2026-11-23: coa-history spell 807424 (the Carve aura): SPELL_AURA_APPLIED 171 and SPELL_AURA_APPLIED_DOSE 1516 events in 4 logs, about 9 doses per application; spells 707444 and 801312: 0 events under those ids; bindmysoul snapshot has no value beyond the tooltip; nothing else found.",
+      "expected_gain": 11
     }
   ],
   "player_observations": [],
