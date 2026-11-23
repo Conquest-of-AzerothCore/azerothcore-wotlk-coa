@@ -258,12 +258,9 @@
           "spell": 705121,
           "auras": [
             803468,
-            {
-              "spell": 800058,
-              "stacks": 2
-            }
+            800058
           ],
-          "reason": "Sunder 705121 needs the caster aura 803468 (At Least 2 Felfury, CasterAuraSpell in Spell.dbc) and consumes two stacks of the Felfury resource 800058 (AscensionCustomResourceData.h:535, Fixed 2); both are precondition fixtures set before every attempt, the claim is the Energy cost."
+          "reason": "Sunder 705121 needs the caster aura 803468 (At Least 2 Felfury, CasterAuraSpell in Spell.dbc) and consumes the Felfury resource 800058 (AscensionCustomResourceData.h:535, Fixed 2); both auras are precondition fixtures set before every attempt, the claim is the Energy cost."
         }
       ],
       "observe_source": "$s1 = 10 (520885 Effect[0] aura 107 SPELLMOD_COST, flat -10, class mask word 0 0x80000 = SpellFamilyFlags[0] of Sunder 705121). Sunder 705121 ManaCost 30, PowerType 3, RecoveryTime 8000: 20 allowed, 19 beyond (the cooldown is cleared before each attempt). Arms: 20 Energy without the passive (refused), 20 with it (through), 19 with it (refused). Reference search 2026-11-23: coa-history spell 520885: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
