@@ -805,7 +805,11 @@
     "labels": [
       "520853 effect_value 500761e0 #0",
       "500610 script_hit 500761 torpedo_hit",
-      "500610 script_hit 500761 torpedo_hit_ap"
+      "500610 script_hit 500761 torpedo_hit_ap",
+      "500610 behaviour_metric_delta torpedo_once caster",
+      "500610 behaviour_metric_delta torpedo_once_far caster",
+      "500610 behaviour_metric_delta torpedo_two_casters caster",
+      "500610 behaviour_metric_delta torpedo_two_casters caster2"
     ],
     "kind": "claim"
   },
