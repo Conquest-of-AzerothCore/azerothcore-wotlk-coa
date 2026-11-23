@@ -7,7 +7,8 @@
     "magic hit and nothing granted Ascended (273269). The card now procs only on Holy Fire ticks; aura_proc_rate",
     "replays the native decision 40000 times: about 15% for a Holy Fire tick, 0 for its direct hit and for a",
     "Fireball. Live, a Smite without Surge of Light grants no Ascended; with Surge of Light (33151) the Smite",
-    "consumes it and grants Ascended."
+    "consumes it and grants Ascended. Removing Surge of Light while a fixture Smite is still casting must grant no",
+    "Ascended; the fixture weakens the Surge of Light cast-time modifier so the Smite has a cast bar."
   ],
   "timeout_ms": 60000,
   "players": [
@@ -59,6 +60,23 @@
     },
     { "action": "wait", "ms": 500 },
     { "action": "assert", "label": "CONTROL a Smite without Surge of Light grants no Ascended", "actor": "h", "metric": "aura", "spell": 273269, "equals": 0 },
+    { "action": "set_aura", "actor": "h", "spell": 33151, "stacks": 1, "effect": 1, "amount": -50 },
+    { "action": "set_power", "actor": "h", "power": 0, "value": 1000 },
+    { "action": "cast", "actor": "h", "spell": 585, "target": "d" },
+    {
+      "action": "assert", "label": "SETUP Smite is still casting with Surge of Light", "actor": "h",
+      "metric": "cast_remaining_ms", "spell": 585, "min": 1
+    },
+    { "action": "set_aura", "actor": "h", "spell": 33151, "stacks": 0 },
+    {
+      "action": "assert", "label": "SETUP Smite completed after Surge of Light was removed", "actor": "h",
+      "metric": "spell_cast_count", "spell": 585, "equals": 2, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "CONTROL losing Surge of Light before Smite completes grants no Ascended",
+      "actor": "h", "metric": "spell_cast_count", "spell": 273269, "equals": 0
+    },
+    { "action": "wait", "ms": 1600 },
     { "action": "set_aura", "label": "h fixture: Surge of Light", "actor": "h", "spell": 33151, "stacks": 1 },
     { "action": "assert", "label": "SETUP Surge of Light is active", "actor": "h", "metric": "aura", "spell": 33151, "equals": 1 },
     { "action": "set_power", "actor": "h", "power": 0, "value": 1000 },

@@ -878,7 +878,7 @@ public:
     wildcard_card_spell_events() : AllSpellScript("wildcard_card_spell_events",
         {ALLSPELLHOOK_ON_CRIT_CHANCE, ALLSPELLHOOK_ON_CAST, ALLSPELLHOOK_ON_SPELL_CHECK_CAST,
             ALLSPELLHOOK_ON_PREPARE, ALLSPELLHOOK_ON_CAST_CANCEL, ALLSPELLHOOK_ON_CALC_MAX_DURATION,
-            ALLSPELLHOOK_ON_GLOBAL_COOLDOWN}) { }
+            ALLSPELLHOOK_ON_GLOBAL_COOLDOWN, ALLSPELLHOOK_ON_BEFORE_EFFECTS}) { }
 
     void OnSpellGlobalCooldown(Spell* spell, int32& duration) override
     {
@@ -927,6 +927,15 @@ public:
             spell->SetScriptValue(273252, 1);
     }
 
+    void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const*) override
+    {
+        if (!spell->GetScriptValue(273252))
+            return;
+        Aura* const surge = caster ? caster->GetAura(33151) : nullptr;
+        if (!surge || !spell->m_appliedMods.contains(surge))
+            spell->SetScriptValue(273252, 0);
+    }
+
     void OnSpellCritChance(Spell* spell, Unit*, float& chance) override
     {
         Unit* caster = spell->GetCaster();
@@ -954,7 +963,11 @@ public:
         if (caster && caster->IsPlayer() && caster->HasAura(281687) && spell->GetScriptValue(281687))
             caster->CastSpell(caster, 281690, true);
         if (caster && caster->IsPlayer() && spell->GetScriptValue(273252))
-            caster->CastSpell(caster, 273269, true);
+        {
+            spell->SetScriptValue(273252, 0);
+            if (!caster->HasAura(33151))
+                caster->CastSpell(caster, 273269, true);
+        }
         if (!caster || !caster->IsPlayer() || !caster->HasAura(281542) || spell->IsTriggered() ||
             spell->GetCastTime() <= 0)
             return;
