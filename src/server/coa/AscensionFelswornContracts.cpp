@@ -26,6 +26,9 @@ void ApplyContracts(SpellInfo* info)
     uint32 id = info->Id;
     if (id == MannorothFelfury)
         info->Effects[EFFECT_0].MiscValue = 6;
+    if (id == BloodOfMannoroth &&
+        info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_MOD_ARMOR_PENETRATION_PCT)
+        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT;
     if (id == 300466)
     {
         info->Effects[EFFECT_0].SpellClassMask = flag96(128, 0, 2097152);
@@ -130,6 +133,8 @@ void ApplyContracts(SpellInfo* info)
         dummy(0);
     if (id == 800203)
         info->Effects[2].Effect = 0;
+    if (id == 800209)
+        info->Effects[EFFECT_2].MiscValue = SPELL_SCHOOL_MASK_NORMAL;
     if (id == BurningCommander)
     {
         periodic(1, 3000);
