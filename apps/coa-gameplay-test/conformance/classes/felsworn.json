@@ -160,6 +160,48 @@
       "internal_cooldown_ms": 0
     },
     {
+      "aura": 804822,
+      "name": "Vengeance Is Mine",
+      "tooltip": "Dodging or parrying an attack now gives you a $h% chance to make your next 10 instances of damage with |cffffffffTwin Slice|r deal $807163s1% increased damage and generate 1 |cff32cd32Felfury|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "avoided",
+        "striker_entry": 36,
+        "swing_ms": 500,
+        "dodge": 0,
+        "parry": 100,
+        "strikers": 10,
+        "striker_auras": [
+          42716,
+          62531,
+          2116852
+        ],
+        "learn": [
+          560576
+        ]
+      },
+      "residual_target": 0.001,
+      "min_detectable": 5,
+      "min_parts": 10,
+      "trigger_text": "Dodging or parrying an attack",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 807163,
+      "events_per_proc": 1,
+      "proc_spell_source": "EffectTriggerSpell[0] of 804822; the handler casts it on the caster (AscensionFelswornEvents.cpp:157-158).",
+      "handler": "aura_ascension_felsworn_event: Check (AscensionFelswornEvents.cpp:42-47) passes an incoming dodge or parry (id 804822 accepts both) and rolls Chance(player, 804822) (AscensionFelsworn.cpp:231-239, roll_chance_f of the DBC ProcChance 10, no cooldown) once per avoided attack; Proc casts 807163 on the caster. Trigger: procs avoided trigger (ADR 0900) with the learn list (ADR 1261, provisional): Nether Disciple 560576 (Effect[0] APPLY_AURA 47 SPELL_AURA_MOD_PARRY_PERCENT; HandleAuraModParryPercent calls SetCanParry(true), SpellAuraEffects.cpp:4870-4884) is learned before the engage in every part, so the caster can parry; ten aggressive stationary strikers (creature 36) with Self Root Forever 42716, Molten 62531 and Enrage 2116852, dodge 0 and parry 100 set before every 500 ms interval, so every attempt is a parry (the trial). This is the parry leg of 'Dodging or parrying'; the dodge leg is the entry without a learn list. Nether Disciple is obtainable (CharacterAdvancement 6338 per ~/CoaServer/reference/coa-obtainable, cited in the ledger row). Sized like the dodge leg.",
+      "dbc": {
+        "804822": {
+          "ProcChance": 10,
+          "ProcFlags": 4,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
+    },
+    {
       "aura": 681376,
       "name": "Chaotic",
       "tooltip": "Dealing damage now has an $h% chance to increase your damage by $572782s1% for $572782d, stacking $572782u times.",
@@ -14902,6 +14944,7 @@
       "spell": 300476,
       "kind": "avoided_swing_reads",
       "name": "Betrayer (party radius)",
+      "variant": "party_radius",
       "label_suffix": "party_radius",
       "quote": "enrages your party and raid members within $520256a1 yds",
       "read": "aura_edge",
@@ -14922,6 +14965,7 @@
       "spell": 300476,
       "kind": "avoided_swing_reads",
       "name": "Betrayer (party crit)",
+      "variant": "party_crit",
       "label_suffix": "party_crit",
       "quote": "increasing their critical strike chance by $520256s1%",
       "read": "stat_delta",
@@ -14944,6 +14988,7 @@
       "spell": 300476,
       "kind": "avoided_swing_reads",
       "name": "Betrayer (party crit duration)",
+      "variant": "party_crit_duration",
       "label_suffix": "party_crit_duration",
       "quote": "for $520256d.",
       "read": "duration_max",
@@ -14965,6 +15010,7 @@
       "spell": 805249,
       "kind": "avoided_swing_reads",
       "name": "Illidari Training (energy per dodge)",
+      "variant": "energy_per_dodge",
       "label_suffix": "energy_per_dodge",
       "quote": "Dodging an attack now generates $521210s1 Energy.",
       "read": "per_event",
