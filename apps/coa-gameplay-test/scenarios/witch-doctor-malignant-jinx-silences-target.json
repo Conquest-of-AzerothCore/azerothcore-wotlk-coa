@@ -1,0 +1,218 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Malignant Jinx silences the Jinxed enemy, not the Witch Doctor",
+  "contract": [
+    "Malignant Jinx 803678: 'causing their next spell cast to silence them for 5 sec.' The silence 803732 names",
+    "TARGET_UNIT_CASTER, and the class hook cast it as doctor->CastSpell(jinxed, 803732), so the target resolved",
+    "to the Witch Doctor: in both final05 runs the doctor carried 803732 and the Jinxed enemy did not (cycle 8",
+    "R2 F1). The fix has the Jinxed unit cast 803732 on itself with the Witch Doctor as original caster.",
+    "The Jinxed unit is an enemy player (harness creature casts are triggered and the hook skips triggered",
+    "casts) that casts a real Renew 25222 (instant, GCD 1500) at itself. Expected: the Renew after the Jinx puts",
+    "the Witch Doctor's 803732 on the enemy, its next Renew is refused, and the Witch Doctor carries no 803732",
+    "and still casts."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "enemy",
+      "race": 2,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "The enemy knows Renew",
+      "actor": "enemy",
+      "spell": 25222
+    },
+    {
+      "action": "learn",
+      "label": "The Witch Doctor knows Renew",
+      "actor": "doctor",
+      "spell": 25222
+    },
+    {
+      "action": "pvp",
+      "actor": "doctor",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "wait",
+      "label": "PvP flags settle",
+      "ms": 500
+    },
+    {
+      "action": "learn",
+      "label": "Malignant Jinx",
+      "actor": "doctor",
+      "spell": 803678
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: the enemy casts Renew without a Jinx",
+      "actor": "enemy",
+      "spell": 25222,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without a Jinx the Renew completes",
+      "actor": "enemy",
+      "metric": "spell_cast_count",
+      "spell": 25222,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without a Jinx the enemy is not silenced",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 803732,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 803678
+    },
+    {
+      "action": "cast",
+      "label": "The Witch Doctor Jinxes the enemy",
+      "actor": "doctor",
+      "spell": 803678,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the enemy carries the Witch Doctor's Malignant Jinx",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 803678,
+      "caster": "doctor",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "The Jinxed enemy casts its next spell",
+      "actor": "enemy",
+      "spell": 25222,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: that cast spends the Jinx",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 803678,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the Jinxed enemy carries the Witch Doctor's silence",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 803732,
+      "caster": "doctor",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the Witch Doctor is not silenced",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 803732,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Past the enemy's global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "The silenced enemy tries Renew again",
+      "actor": "enemy",
+      "spell": 25222,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the silenced enemy's Renew is refused (2 completed, not 3)",
+      "actor": "enemy",
+      "metric": "spell_cast_count",
+      "spell": 25222,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the enemy is still silenced inside the 5 s",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 803732,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "The Witch Doctor casts Renew while the enemy is silenced",
+      "actor": "doctor",
+      "spell": 25222,
+      "target": "doctor"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the Witch Doctor's own cast completes",
+      "actor": "doctor",
+      "metric": "spell_cast_count",
+      "spell": 25222,
+      "equals": 1
+    }
+  ]
+}

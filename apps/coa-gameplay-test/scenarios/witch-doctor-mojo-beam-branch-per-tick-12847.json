@@ -1,0 +1,884 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Mojo Beam grows one branch per tick with no cap of 8 (#12847)",
+  "contract": [
+    "Mojo Beam 501117: 'Each time Mojo Beam heals a target it will grow a new branch. Each new branch immediately",
+    "heals and continues healing.' Live (combat log 2026-08-31, one raid Witch Doctor, 32 beams, aggregates) the",
+    "healed targets grew by about one per 500 ms tick (median 2, 3, 4, 5, 6, 7 at 0.5 to 3 s, 15 at 8 s, up to",
+    "17), with no cap of 8. The tick script let every branch grow one, doubling to a cap of 8. Contributor",
+    "decision 2026-11-23 (class ADR witch-doctor/0034): one new branch per tick, no cap. Seven grouped Warlocks",
+    "(a raid) and their Imps stand within 15 yd of each other and 19 to 28 yd from the Witch Doctor, who is out of",
+    "their 15 yd reach: 14 units a branch can take. The mana is refilled every 250 ms (a precondition fixture, the",
+    "drain is judged by 501117 beam_drain). Expected: 2, 3, 4 and 5 heals on ticks 1 to 4 (9 at 1750 ms and 14 at",
+    "2250 ms; doubling reads 14 at 1750 ms), the channel still running at 2250 ms (the per-branch drain of 8",
+    "branches, 1643 on tick 4, is more than the 1497 refill and interrupts it), every Warlock and Imp healed and 146",
+    "heals over the 16 ticks (doubling heals 8 units)."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    },
+    {
+      "id": "m1",
+      "race": 1,
+      "class": 9,
+      "level": 60
+    },
+    {
+      "id": "m2",
+      "race": 1,
+      "class": 9,
+      "level": 60
+    },
+    {
+      "id": "m3",
+      "race": 1,
+      "class": 9,
+      "level": 60
+    },
+    {
+      "id": "m4",
+      "race": 1,
+      "class": 9,
+      "level": 60
+    },
+    {
+      "id": "m5",
+      "race": 1,
+      "class": 9,
+      "level": 60
+    },
+    {
+      "id": "m6",
+      "race": 1,
+      "class": 9,
+      "level": 60
+    },
+    {
+      "id": "m7",
+      "race": 1,
+      "class": 9,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login, spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "relocate",
+      "actor": "m1",
+      "dx": 11.0,
+      "dy": 0.0
+    },
+    {
+      "action": "relocate",
+      "actor": "m1",
+      "dx": 11.0,
+      "dy": 0.0
+    },
+    {
+      "action": "group",
+      "actor": "doctor",
+      "target": "m1"
+    },
+    {
+      "action": "learn",
+      "actor": "m1",
+      "spell": 688
+    },
+    {
+      "action": "cast",
+      "label": "m1 summons an Imp",
+      "actor": "m1",
+      "spell": 688
+    },
+    {
+      "action": "relocate",
+      "actor": "m2",
+      "dx": 9.5,
+      "dy": -1.5
+    },
+    {
+      "action": "relocate",
+      "actor": "m2",
+      "dx": 9.5,
+      "dy": -1.5
+    },
+    {
+      "action": "group",
+      "actor": "doctor",
+      "target": "m2"
+    },
+    {
+      "action": "learn",
+      "actor": "m2",
+      "spell": 688
+    },
+    {
+      "action": "cast",
+      "label": "m2 summons an Imp",
+      "actor": "m2",
+      "spell": 688
+    },
+    {
+      "action": "relocate",
+      "actor": "m3",
+      "dx": 12.5,
+      "dy": -1.5
+    },
+    {
+      "action": "relocate",
+      "actor": "m3",
+      "dx": 12.5,
+      "dy": -1.5
+    },
+    {
+      "action": "group",
+      "actor": "doctor",
+      "target": "m3"
+    },
+    {
+      "action": "learn",
+      "actor": "m3",
+      "spell": 688
+    },
+    {
+      "action": "cast",
+      "label": "m3 summons an Imp",
+      "actor": "m3",
+      "spell": 688
+    },
+    {
+      "action": "relocate",
+      "actor": "m4",
+      "dx": 9.5,
+      "dy": -3.5
+    },
+    {
+      "action": "relocate",
+      "actor": "m4",
+      "dx": 9.5,
+      "dy": -3.5
+    },
+    {
+      "action": "group",
+      "actor": "doctor",
+      "target": "m4"
+    },
+    {
+      "action": "learn",
+      "actor": "m4",
+      "spell": 688
+    },
+    {
+      "action": "cast",
+      "label": "m4 summons an Imp",
+      "actor": "m4",
+      "spell": 688
+    },
+    {
+      "action": "relocate",
+      "actor": "m5",
+      "dx": 12.5,
+      "dy": -3.5
+    },
+    {
+      "action": "relocate",
+      "actor": "m5",
+      "dx": 12.5,
+      "dy": -3.5
+    },
+    {
+      "action": "group",
+      "actor": "doctor",
+      "target": "m5"
+    },
+    {
+      "action": "learn",
+      "actor": "m5",
+      "spell": 688
+    },
+    {
+      "action": "cast",
+      "label": "m5 summons an Imp",
+      "actor": "m5",
+      "spell": 688
+    },
+    {
+      "action": "relocate",
+      "actor": "m6",
+      "dx": 11.0,
+      "dy": -5.0
+    },
+    {
+      "action": "relocate",
+      "actor": "m6",
+      "dx": 11.0,
+      "dy": -5.0
+    },
+    {
+      "action": "group",
+      "actor": "doctor",
+      "target": "m6"
+    },
+    {
+      "action": "learn",
+      "actor": "m6",
+      "spell": 688
+    },
+    {
+      "action": "cast",
+      "label": "m6 summons an Imp",
+      "actor": "m6",
+      "spell": 688
+    },
+    {
+      "action": "relocate",
+      "actor": "m7",
+      "dx": 11.0,
+      "dy": -2.0
+    },
+    {
+      "action": "relocate",
+      "actor": "m7",
+      "dx": 11.0,
+      "dy": -2.0
+    },
+    {
+      "action": "group",
+      "actor": "doctor",
+      "target": "m7"
+    },
+    {
+      "action": "learn",
+      "actor": "m7",
+      "spell": 688
+    },
+    {
+      "action": "cast",
+      "label": "m7 summons an Imp",
+      "actor": "m7",
+      "spell": 688
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: m1 has its Imp",
+      "actor": "m1",
+      "metric": "pet_entry",
+      "equals": 416,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: m2 has its Imp",
+      "actor": "m2",
+      "metric": "pet_entry",
+      "equals": 416,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: m3 has its Imp",
+      "actor": "m3",
+      "metric": "pet_entry",
+      "equals": 416,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: m4 has its Imp",
+      "actor": "m4",
+      "metric": "pet_entry",
+      "equals": 416,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: m5 has its Imp",
+      "actor": "m5",
+      "metric": "pet_entry",
+      "equals": 416,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: m6 has its Imp",
+      "actor": "m6",
+      "metric": "pet_entry",
+      "equals": 416,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: m7 has its Imp",
+      "actor": "m7",
+      "metric": "pet_entry",
+      "equals": 416,
+      "within_ms": 20000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Imps settle beside their owners",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "doctor",
+      "spell": 501117
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Mojo Beam heal before the cast",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 501117,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 501117
+    },
+    {
+      "action": "cast",
+      "label": "Mojo Beam at the first ally",
+      "actor": "doctor",
+      "spell": 501117,
+      "target": "m1"
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: 9 heals over three ticks (2, 3, 4; doubling reads 2, 4, 8 = 14)",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 501117,
+      "equals": 9
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: 14 heals over four ticks (one new branch per tick: 2, 3, 4, 5)",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 501117,
+      "equals": 14
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the beam still channels after four ticks (refilled mana pays them)",
+      "actor": "doctor",
+      "metric": "casting",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1497
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "doctor",
+      "metric": "casting",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: m1 is healed",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 501117,
+      "target": "m1",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: m1's Imp is healed (no cap of 8 branches)",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 501117,
+      "target": "m1",
+      "target_pet": true,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: m2 is healed",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 501117,
+      "target": "m2",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: m2's Imp is healed (no cap of 8 branches)",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 501117,
+      "target": "m2",
+      "target_pet": true,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: m3 is healed",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 501117,
+      "target": "m3",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: m3's Imp is healed (no cap of 8 branches)",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 501117,
+      "target": "m3",
+      "target_pet": true,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: m4 is healed",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 501117,
+      "target": "m4",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: m4's Imp is healed (no cap of 8 branches)",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 501117,
+      "target": "m4",
+      "target_pet": true,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: m5 is healed",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 501117,
+      "target": "m5",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: m5's Imp is healed (no cap of 8 branches)",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 501117,
+      "target": "m5",
+      "target_pet": true,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: m6 is healed",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 501117,
+      "target": "m6",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: m6's Imp is healed (no cap of 8 branches)",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 501117,
+      "target": "m6",
+      "target_pet": true,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: m7 is healed",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 501117,
+      "target": "m7",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: m7's Imp is healed (no cap of 8 branches)",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 501117,
+      "target": "m7",
+      "target_pet": true,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: 146 heals over the 16 ticks (14 branches from tick 13)",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 501117,
+      "equals": 146
+    }
+  ]
+}

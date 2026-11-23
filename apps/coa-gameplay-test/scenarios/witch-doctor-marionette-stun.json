@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Soul Marionette explosions leave the enemy stunned",
+  "contract": [
+    "Soul Marionette 704497: the five clones explode at the 20th stack, 'stunning enemies within $706553a1 yds'.",
+    "All five explosions 706553 (Effect[1] MOD_STUN, 4000 ms, 5 yd) hit the same enemy in the same instant;",
+    "each later stun climbed the stun diminishing returns (DRTYPE_ALL) and the zero-duration result removed the",
+    "aura, so in both final05 runs the dummy was not stunned (cycle 8 R5, M-51). The fix (Necromancer ADR 0050",
+    "precedent) strips the stun effect from an explosion on an enemy that already holds 706553: one explosion",
+    "stuns, the others deal damage only. The clones tick every 2000 ms, so the 20th stack and the explosions",
+    "come about 8000 ms after the cast. Expected: the dummy 3 yd away holds 706553 and is stunned, still 1.5 s",
+    "later; a dummy 12 yd away, beyond the clone ring plus 5 yd, is not."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "far",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 12,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login, spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Soul Marionette",
+      "actor": "doctor",
+      "spell": 704497
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the dummy is not stunned before the cast",
+      "actor": "dummy",
+      "metric": "stunned",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 704497
+    },
+    {
+      "action": "cast",
+      "label": "Soul Marionette",
+      "actor": "doctor",
+      "spell": 704497,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Three clone ticks",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the 20th stack transforms the Witch Doctor and explodes the clones",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 807044,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "The explosions resolve",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the dummy holds the Soul Marionette stun",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 706553,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the dummy is stunned",
+      "actor": "dummy",
+      "metric": "stunned",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the stun still holds 2 s after the explosions",
+      "actor": "dummy",
+      "metric": "stunned",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the stun runs its own duration, not a diminished one",
+      "actor": "dummy",
+      "metric": "aura_duration_ms",
+      "spell": 706553,
+      "min": 1000,
+      "max": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the dummy 12 yd away, beyond the explosions, is not stunned",
+      "actor": "far",
+      "metric": "aura",
+      "spell": 706553,
+      "equals": 0
+    }
+  ]
+}

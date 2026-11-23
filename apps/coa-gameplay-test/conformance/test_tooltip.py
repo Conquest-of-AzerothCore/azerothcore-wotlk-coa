@@ -481,6 +481,9 @@ FIXTURE_SPELLS = {
                               '${$cond($gt($SP, $AP), $m1+$AP*2, $m1+$SP*3)}.', 'EffectBasePoints[0]': 9,
          'EffectDieSides[0]': 1},
     79: {'Description[enUS]': 'Broken ${$cond($gt($AP), 1, 2)} and ${$cond(1, 2)} and ${$gt(1, 2, 3)}.'},
+    80: {'Description[enUS]': 'Picks one.\r\n@ext:@s:81:0@:ext@\r\n@ext:Note @s:82:0@ here:ext@'},
+    81: {'Description[enUS]': 'Raises haste by $s1%.', 'EffectBasePoints[0]': 2, 'EffectDieSides[0]': 1},
+    82: {'Description[enUS]': 'Lasts $d.', 'DurationIndex': 1},
 }
 FIXTURE_VARIABLES = {
     1: '$bonus=${$m1*2+$PL}\r\n',
@@ -577,6 +580,12 @@ class FixtureTooltipTest(unittest.TestCase):
         self.assertEqual(readout.values, [Displayed('$10s2', 25, None, 'percent', 10),
                                           Displayed('$10m1', 100, None, 'flat', 10)])
         self.assertEqual(readout.unreadable, ['$99d'])
+
+    def test_spell_markup_inside_an_extension_block_expands(self):
+        readout = read_tooltip(self.dbc, 80, FIXTURE_CASTER)
+        self.assertEqual(readout.values, [Displayed('$s1', 3, None, 'percent', 81),
+                                          Displayed('$d', 6000, None, 'duration_ms', 82)])
+        self.assertEqual(readout.unreadable, ['@ext:Note  here:ext@'])
 
     def test_negative_flags_stay_unreadable(self):
         readout = read_tooltip(self.dbc, 14, FIXTURE_CASTER)

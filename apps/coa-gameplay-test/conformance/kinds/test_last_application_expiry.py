@@ -103,6 +103,18 @@ class NoRefreshTests(unittest.TestCase):
         self.assertTrue(all(step['actor'] == 'dummy' for step in scenario['steps']
                             if step.get('metric') == 'aura' and step.get('spell') == 707010))
 
+    def test_a_trigger_target_of_the_caster_is_cast_at_the_caster(self):
+        entry = {**ENTRY, 'trigger_target': 'caster'}
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        targets = {step['target'] for step in scenario['steps']
+                   if step['action'] == 'cast' and step['spell'] == 707007}
+        self.assertEqual(targets, {'caster'})
+        default, _ = behaviour_scenario(load_fixture_class_file(23), ENTRY)
+        self.assertEqual({step['target'] for step in default['steps']
+                          if step['action'] == 'cast' and step['spell'] == 707007}, {'dummy'})
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**ENTRY, 'trigger_target': 'ally'})
+
     def test_one_application_with_rising_stacks_timed_from_it_passes(self):
         self.assertEqual(self.judged(3000.0).status, 'ok')
 
@@ -169,3 +181,46 @@ class ForcedRollTests(unittest.TestCase):
         entry = {key: value for key, value in FORCED.items() if key != 'repeat'}
         with self.assertRaises(ValueError):
             behaviour_scenario(load_fixture_class_file(23), entry)
+
+
+PRE_POLL = {**ENTRY, 'label_suffix': 'pre_poll', 'caster': True, 'trigger_target': 'caster', 'poll_before_cast': True}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class PollBeforeCastTests(unittest.TestCase):
+    def judged(self, entry: dict, lasts_ms: float) -> Verdict:
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
+        values = {}
+        for arm, rows in expectation.model['reads'].items():
+            for index, (time, applied, aura) in enumerate(rows):
+                now = index * 34.0
+                values[time] = 1000.0 + now
+                on = arm == 'treatment' and (index > 0 if entry.get('poll_before_cast') else True)
+                values[applied] = 1.0 if on else 0.0
+                values[aura] = 1.0 if on and now < lasts_ms + 34.0 else 0.0
+        base = Verdict(expectation.label, 'alert', None, None, None, None, '', 'fake', expectation.spell_id,
+                       expectation.rank_id, expectation.check)
+        return judge_behaviour(base, FakeRun(values), expectation)
+
+    def test_one_poll_precedes_the_cast_in_both_arms(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), PRE_POLL)
+        run.validate(scenario)
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        for arm, cast in zip(('control', 'treatment'), casts):
+            first_read = next(index for index, step in enumerate(steps)
+                              if step.get('label') == expectation.model['reads'][arm][0][1])
+            self.assertLess(first_read, cast)
+        self.assertIn('One poll precedes the cast', scenario['contract'])
+
+    def test_an_application_at_the_cast_is_timed_from_the_read_before_it(self):
+        self.assertEqual(self.judged(PRE_POLL, 3000.0).status, 'ok')
+        self.assertEqual(self.judged(PRE_POLL, 3600.0).status, 'alert')
+
+    def test_without_the_poll_an_application_at_the_cast_is_unmeasured(self):
+        entry = {key: value for key, value in PRE_POLL.items() if key != 'poll_before_cast'}
+        self.assertEqual(self.judged(entry, 3000.0).status, 'unmeasured')
+
+    def test_the_option_is_a_boolean(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**PRE_POLL, 'poll_before_cast': 'yes'})

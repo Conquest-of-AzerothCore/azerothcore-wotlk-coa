@@ -76,6 +76,31 @@ class EffectivenessDeltaTests(unittest.TestCase):
                 self.assertEqual(judged(29.6024, 37.1024).status, 'alert')
                 self.assertTrue(promised_state(judged(29.6024, 36.6024), 'and increases its effectiveness by 25%.'))
 
+    def test_a_slow_on_the_dummy_is_judged_as_its_effectiveness_state(self):
+        from coverage import STATE, metric_evidence, promised_state
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), {
+            'spell': 301361, 'name': 'Shadow Enchantments (Lethargy Jinx slow)', 'kind': 'effectiveness_delta',
+            'label_suffix': 'jinx_effect', 'quote': 'and effectiveness of your Jinxes by $s1%',
+            'trigger_spell': 802065, 'gate_spell': 301361, 'target': 'dummy', 'measure_actor': 'dummy',
+            'metric': 'run_speed_rate', 'fields': {}, 'before_expected': 0.57143, 'expected': 0.285715,
+            'tolerance': 0.0001, 'wait_ms': 1500, 'expire_ms': 10500})
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        model = expectation.model
+        reads = [step for step in scenario['steps'] if step.get('label') in (model['before_label'],
+                                                                              model['after_label'])]
+        self.assertEqual([(step['metric'], step['actor']) for step in reads],
+                         [('run_speed_rate', 'dummy'), ('run_speed_rate', 'dummy')])
+        self.assertEqual(metric_evidence()['effectiveness_run_speed_rate'], STATE)
+
+        def judged(before: float, after: float):
+            return judge_behaviour(base_verdict(expectation),
+                                   FakeRun({model['before_label']: before, model['after_label']: after}),
+                                   expectation)
+
+        self.assertEqual(judged(0.57143, 0.285715).status, 'ok')
+        self.assertEqual(judged(0.57143, 0.57143).status, 'alert')
+        self.assertTrue(promised_state(judged(0.57143, 0.285715), 'and effectiveness of your Jinxes by 50%'))
+
     def test_an_entry_without_a_modifier_or_without_the_control_cast_is_refused(self):
         for changes in ({'gate_spell': None}, {'cast_in_before': False}, {'metric': 'aura'},
                         {'gate_timing': 'start'}):

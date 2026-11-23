@@ -16,7 +16,7 @@ from profile import (CASTER, DBC_DIR, OFF_HAND, RANGED_DAMAGE_CLASS, SETTLE_MS, 
                      spec_weapon_set, unfit_reason, weapon_set_unfit_reason)
 from streamed import streamed_texts
 from tooltip import (MIXED_PERIOD, OVER_TICKS, CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip,
-                     Unreadable, mixed_period_reason, period_reading, read_tooltip)
+                     UnscaledForcedPoints, Unreadable, mixed_period_reason, period_reading, read_tooltip)
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, EFFECT_TOKEN,
                     EFFECTS, GAP_CLOSER_DISTANCE, MEAN_HALF_WIDTH, READ_STEP_MS, TARGET, UNREADABLE,
                     Z_99, Expectation, RankFacts, Unmodelled, armed_for, cast_aura_steps, cast_distance,
@@ -49,6 +49,9 @@ WEAPON_KINDS = frozenset({'weapon', TRIGGERED_WEAPON})
 TICKING_KINDS = frozenset(PERIODIC_KINDS.values()) | {TRIGGERED_WEAPON}
 HEAL_KINDS = frozenset({'heal', 'periodic_heal'})
 MODIFIER_AURAS = {341: 'damage', 136: 'heal', 79: 'damage', 118: 'heal'}
+MOD_DAMAGE_FROM_CASTER = 271
+DAMAGE_TAKEN = 'damage_taken'
+CLASS_MASK_WORDS = 3
 MAGIC_SCHOOLS = range(1, 7)
 NO_MITIGATION = MitigationModel(mean=1.0, variance=0.0)
 UNRESISTED_RANK_HITS = 'unresisted_rank_hits'
@@ -362,19 +365,22 @@ def effect_hit(readout: Readout, indexes: list[int], rolls: Mapping[int, Sequenc
 
 def rolled_values(records: Records, rank_id: int, caster: CasterStats, readout: Readout,
                   indexes: Sequence[int], tooltip_spell: int | None = None,
-                  value_source: tuple[int, int] | None = None) -> dict[int, tuple[float, ...]]:
+                  value_source: tuple[int, int] | None = None,
+                  level_points: bool = False) -> dict[int, tuple[float, ...]]:
     described = rank_id if tooltip_spell is None else tooltip_spell
     rolls = {}
     for effect in indexes:
         spell, rolled = value_source or (rank_id, effect)
         sides = records.field('Spell', spell, f'EffectDieSides[{rolled}]')
         shown = [value for value in readout.values if value.effect_index == effect]
-        if sides <= 1 or len(shown) != 1:
+        if len(shown) != 1 or sides < 1 or (sides == 1 and not level_points):
             continue
         base = records.field('Spell', spell, f'EffectBasePoints[{rolled}]')
+        term = calc_value_term(records, spell, rolled, caster.level) if level_points else 0.0
         values = []
         for roll in range(1, sides + 1):
-            forced = ForcedPoints(records.dbc, spell, rolled, base + roll)
+            forced = (UnscaledForcedPoints(records.dbc, spell, rolled, base + roll + term) if level_points
+                      else ForcedPoints(records.dbc, spell, rolled, base + roll))
             reread = Tooltip(forced, described, caster).read(records.field('Spell', described, 'Description[enUS]'))
             same = [value for value in reread.values if value.text == shown[0].text]
             if len(same) != 1:
@@ -391,6 +397,12 @@ def ordered(readout: Readout, texts: list[str]) -> list[str]:
 def applicable(modifiers: Sequence[Modifier], kind: str) -> tuple[Modifier, ...]:
     wanted = 'heal' if kind in HEAL_KINDS else 'damage'
     return tuple(modifier for modifier in modifiers if modifier.applies_to == wanted)
+
+
+def taken_by(modifiers: Sequence[Modifier], kind: str) -> tuple[Modifier, ...]:
+    if kind in HEAL_KINDS:
+        return ()
+    return tuple(modifier for modifier in modifiers if modifier.applies_to == DAMAGE_TAKEN)
 
 
 def done(distribution: Distribution, modifiers: Sequence[Modifier]) -> Distribution:
@@ -417,7 +429,8 @@ def expected_hit(readout: Readout, spell_effects: Sequence[int], caster: CasterS
                  ticks: int = 1, rolls: Mapping[int, Sequence[float]] | None = None,
                  triggered: Mapping[int, Triggered] | None = None, records: Records | None = None,
                  rank_id: int = 0, percent_before_flat: bool = False,
-                 weapon_part: tuple[Distribution, float, list[str]] | None = None) -> HitModel:
+                 weapon_part: tuple[Distribution, float, list[str]] | None = None,
+                 taken: Sequence[Modifier] = ()) -> HitModel:
     names = tuple(aura_names) or (0,) * len(spell_effects)
     kind, indexes = hit_kind(spell_effects, names, triggered, readout)
     events = 1
@@ -440,9 +453,12 @@ def expected_hit(readout: Readout, spell_effects: Sequence[int], caster: CasterS
         dealt = summed(dealt, done(weapon_distribution, used))
         tooltip_mean += weapon_mean
         texts = texts + weapon_texts
+    received = taken_by(taken, kind)
+    if received:
+        dealt = done(dealt, received)
     mean, sigma = moments(mitigated(dealt, mitigation))
     return HitModel(kind=kind, mean=mean, sigma=sigma, tooltip_mean=tooltip_mean,
-                    hits_per_cast=ticks if kind in TICKING_KINDS else events, modifiers=used,
+                    hits_per_cast=ticks if kind in TICKING_KINDS else events, modifiers=used + received,
                     displayed=tuple(texts))
 
 
@@ -511,6 +527,35 @@ def aura_modifiers(records: Records, aura_ids: Sequence[int], level: int) -> tup
                 modifiers.append(Modifier(spell_id=spell_id, effect_index=effect, aura=aura, percent=percent,
                                           applies_to=MODIFIER_AURAS[aura],
                                           school_mask=records.field('Spell', spell_id, f'EffectMiscValue[{effect}]')))
+    return tuple(modifiers)
+
+
+def taken_modifiers(records: Records, aura_ids: Sequence[int], level: int, hit_spell: int) -> tuple[Modifier, ...]:
+    def spell(spell_id: int, name: str) -> int:
+        return int(records.field('Spell', spell_id, name) or 0)
+
+    family = spell(hit_spell, 'SpellFamilyName')
+    flags = [spell(hit_spell, f'SpellFamilyFlags[{word}]') for word in range(CLASS_MASK_WORDS)]
+    school = spell(hit_spell, 'SchoolMask')
+    modifiers = []
+    for spell_id in aura_ids:
+        aura_family = spell(spell_id, 'SpellFamilyName')
+        for effect in EFFECTS:
+            if (spell(spell_id, f'Effect[{effect}]') != APPLY_AURA
+                    or spell(spell_id, f'EffectApplyAuraName[{effect}]') != MOD_DAMAGE_FROM_CASTER):
+                continue
+            mask = [spell(spell_id, f'EffectSpellClassMask[{effect * CLASS_MASK_WORDS + word}]')
+                    for word in range(CLASS_MASK_WORDS)]
+            schools = spell(spell_id, f'EffectMiscValue[{effect}]')
+            if schools and not schools & school:
+                continue
+            if aura_family and (aura_family != family or (any(mask) and not any(
+                    word & flag for word, flag in zip(mask, flags)))):
+                continue
+            percent = effect_points(records, spell_id, effect, level)
+            if percent:
+                modifiers.append(Modifier(spell_id=spell_id, effect_index=effect, aura=MOD_DAMAGE_FROM_CASTER,
+                                          percent=percent, applies_to=DAMAGE_TAKEN, school_mask=schools))
     return tuple(modifiers)
 
 
@@ -720,7 +765,7 @@ SCRIPT_HIT_KINDS = frozenset({'school', 'heal'})
 PER_LEVEL_ENGINE_RULE = 'known engine rounding, per-level term truncated before the sum (SpellInfo.cpp:497)'
 
 
-def per_level_fraction(records: Records, spell_id: int, effect: int, level: int) -> float:
+def calc_value_term(records: Records, spell_id: int, effect: int, level: int) -> float:
     rate = float32(float(records.field('Spell', spell_id, f'EffectRealPointsPerLevel[{effect}]') or 0))
     if not rate:
         return 0.0
@@ -730,7 +775,11 @@ def per_level_fraction(records: Records, spell_id: int, effect: int, level: int)
         level = max_level
     elif level < base_level:
         level = base_level
-    term = float32((level - max(base_level, spell_level)) * rate)
+    return float32((level - max(base_level, spell_level)) * rate)
+
+
+def per_level_fraction(records: Records, spell_id: int, effect: int, level: int) -> float:
+    term = calc_value_term(records, spell_id, effect, level)
     return term - math.trunc(term)
 
 
@@ -915,12 +964,15 @@ def script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: int, caste
                      value_effect: int = 0, unresisted: bool = False, hit_effect: int | None = None,
                      weapon_only: bool = False, normalized_value: bool = False,
                      effective_school: bool = False, normalized_percent: bool = False,
-                     value_rolls: bool = False) -> HitModel:
+                     value_rolls: bool = False, taken_auras: Sequence[int] = (),
+                     level_points: bool = False) -> HitModel:
     records = records_of(class_file)
     facts = facts_of(records, hit_spell)
     readout = triggered_readout(read_tooltip(records.dbc, tooltip_spell, caster), value_spell or hit_spell)
     if hit_effect is not None:
         readout = replace(readout, values=[value for value in readout.values if value.effect_index == hit_effect])
+    if level_points and (normalized_percent or normalized_value or weapon_only or value_spell is not None):
+        raise Unmodelled(f'level_points of {hit_spell} reads the points of its own school or heal effect only')
     if normalized_percent:
         if not weapon_only or normalized_value or effective_school or value_spell is not None or unresisted:
             raise Unmodelled(f'a normalized percent hit of {hit_spell} is weapon-only with no value spell, no '
@@ -951,17 +1003,24 @@ def script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: int, caste
                                                                                           indexes[0], kind, target,
                                                                                           caster.level)
     modifiers = for_school(aura_modifiers(records, auras, class_file['level']), school_mask)
+    taken = taken_modifiers(records, taken_auras, class_file['level'], hit_spell)
+    if level_points and weapon_part is not None:
+        raise Unmodelled(f'level_points of {hit_spell} reads the points of its own school or heal effect only')
     rolls = rolled_values(records, hit_spell, caster, readout, indexes, tooltip_spell=tooltip_spell,
-                          value_source=(value_spell, value_effect) if value_rolls else None)
+                          value_source=(value_spell, value_effect) if value_rolls else None,
+                          level_points=level_points)
+    if level_points and any(index not in rolls for index in indexes):
+        raise Unmodelled(f'level_points of {hit_spell} needs one shown token for each effect it reads')
     model = expected_hit(readout, facts.effects, caster, None, mitigation, aura_names=facts.aura_names,
-                         modifiers=modifiers, rolls=rolls, records=records, rank_id=hit_spell, weapon_part=weapon_part)
+                         modifiers=modifiers, rolls=rolls, records=records, rank_id=hit_spell, weapon_part=weapon_part,
+                         taken=taken)
     losses = {index: loss for index in indexes
               if (loss := per_level_fraction(records, hit_spell, index, caster.level))}
     if not losses:
         return model
     engine = expected_hit(readout, facts.effects, caster, None, mitigation, aura_names=facts.aura_names,
                           modifiers=modifiers, rolls=engine_rolls(readout, indexes, rolls, losses), records=records,
-                          rank_id=hit_spell, weapon_part=weapon_part)
+                          rank_id=hit_spell, weapon_part=weapon_part, taken=taken)
     terms = ', '.join(f'effect {index} loses {loss:.6g}' for index, loss in losses.items())
     return replace(model, engine=replace(engine, displayed=model.displayed),
                    engine_rule=f'{PER_LEVEL_ENGINE_RULE}: {terms}')
@@ -972,11 +1031,12 @@ def reference_script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: 
                                unresisted: bool = False, hit_effect: int | None = None,
                                weapon_only: bool = False, normalized_value: bool = False,
                                effective_school: bool = False, normalized_percent: bool = False,
-                               value_rolls: bool = False) -> HitModel:
+                               value_rolls: bool = False, level_points: bool = False,
+                               taken_auras: Sequence[int] = ()) -> HitModel:
     return script_hit_model(class_file, tooltip_spell, hit_spell, reference_caster(class_file), REFERENCE_TARGET,
                             [*class_file.get('known_auras', []), *model_auras], value_spell, value_effect, unresisted,
                             hit_effect, weapon_only, normalized_value, effective_school,
-                            normalized_percent, value_rolls)
+                            normalized_percent, value_rolls, taken_auras, level_points)
 
 
 def measured_hit_model(class_file: dict, expectation: Expectation, measured: Mapping[str, float]) -> HitModel:
@@ -1003,10 +1063,14 @@ def measured_hit_model(class_file: dict, expectation: Expectation, measured: Map
                                     expectation.model.get('normalized_value', False),
                                     expectation.model.get('effective_school', False),
                                     expectation.model.get('normalized_percent', False),
-                                    expectation.model.get('value_rolls', False))
+                                    expectation.model.get('value_rolls', False),
+                                    expectation.model.get('taken_auras', []),
+                                    expectation.model.get('level_points', False))
         factor = expectation.model.get('gate_multiplier', 1.0)
         return scripted if factor == 1.0 else replace(scripted, mean=scripted.mean * factor)
-    model = rank_hit(class_file, expectation.rank_id, caster, target, auras, expectation.model.get('learned')).model
+    role = expectation.check if expectation.check in HIT_ROLES else 'hit_mean'
+    model = rank_hit(class_file, expectation.rank_id, caster, target, auras, expectation.model.get('learned'),
+                     role).model
     performed = expectation.model.get('part_casts', 1)
     multiplier = self_stack_multiplier(class_file, expectation.rank_id, performed) \
         * expectation.model.get('gate_multiplier', 1.0)

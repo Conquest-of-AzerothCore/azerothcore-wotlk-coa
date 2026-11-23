@@ -79,7 +79,7 @@ class ManifestWriter:
             scenario = pinned_fixture_armor(scenario)
             text = json.dumps(run.validate(scenario, run.SIMULATED_CLOCK), indent=2) + '\n'
             file = f'{SCENARIO_DIR}/{key}.json'
-            (self.out / file).write_text(text, encoding='utf-8')
+            (self.out / file).write_text(text, encoding='utf-8', newline='\n')
             sha = hashlib.sha256(text.encode('utf-8')).hexdigest()
         self.entries.append({'key': key, 'file': file, 'sha256': sha, 'kind': kind,
                              'spell_id': spell.spell_id if spell else rank_id,
