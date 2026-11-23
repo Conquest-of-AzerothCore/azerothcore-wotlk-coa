@@ -31,6 +31,16 @@ namespace CoAPetBattles::Fixtures
         bool excluded = false;
     };
 
+    struct TraceKitTip
+    {
+        std::string side;
+        int32_t index = 0;
+        int32_t slot = 0;
+        int32_t option = 0;
+        std::string text;
+        bool excluded = false;
+    };
+
     struct TraceRound
     {
         std::string commandP;
@@ -46,6 +56,7 @@ namespace CoAPetBattles::Fixtures
         std::vector<Engine::RecordedRoll> rolls;
         std::vector<TracePet> pets;
         std::vector<TraceTip> tips;
+        std::vector<TraceKitTip> kitTips;
         std::vector<TraceRound> rounds;
     };
 

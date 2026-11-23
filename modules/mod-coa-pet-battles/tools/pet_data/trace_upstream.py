@@ -13,9 +13,13 @@ from tables import TABLES
 
 ROUND_LIMIT = 60
 TARGET_HITS = 8
+TARGET_BRANCH_HITS = 4
+TEAM_HANDLERS = ('FX03', 'FX15', 'FX20', 'FX22', 'FX39', 'FX145')
+TIP_POWER = 260
 MAX_TARGET_BATTLES = 40
 EXTRA_POOL = 40
-LIBRARY_ABILITIES = (277, 522, 325, 1344, 1073)
+LIBRARY_ABILITIES = (277, 522, 325, 1344, 1073, 795, 1104, 385)
+HARD_CODED_AURAS = (1124, 831)
 
 
 def prop_is(*props):
@@ -111,9 +115,9 @@ class Tracer:
             return f'S{self.commands.choice(bench)}'
         return f'A{self.commands.choice(ready)}' if ready else 'A1'
 
-    def battle(self, battle_id, team, target=None):
+    def battle(self, battle_id, team, target=None, tipped=frozenset()):
         self.rolls = []
-        lines, pets = [], {'P': [], 'E': []}
+        lines, pets, new_tips = [], {'P': [], 'E': []}, set()
         for side in ('P', 'E'):
             for index, member in enumerate(team[side], 1):
                 pet, quality = self.new_pet(member['entry'], member['level'], member.get('hp'), member.get('picks'))
@@ -126,6 +130,11 @@ class Tracer:
                 for tip in seq(self.M.tips(pet)):
                     tip = plain(self.lua_type, tip)
                     lines.append(['TIPX' if tip['fallback'] else 'TIP', side, index, int(tip['slot']), tip['text']])
+                if member['entry'] not in tipped and member['entry'] not in new_tips:
+                    new_tips.add(member['entry'])
+                    for tip in seq(plain(self.lua_type, self.M.kitTips(member['entry'], pet.power))):
+                        lines.append(['KITTIPX' if tip['fallback'] else 'KITTIP', side, index, int(tip['slot']),
+                                      int(tip['opt']), tip['text']])
         battle = self.C.NewBattle(self.lua.table_from(pets['P']), self.lua.table_from(pets['E']), self.roll)
         status = 'turn'
         for _ in range(ROUND_LIMIT):
@@ -146,11 +155,18 @@ class Tracer:
         body = header + rolls + lines + [['END']]
         species = [member['entry'] for side in ('P', 'E') for member in team[side]]
         return '\n'.join('\t'.join(cell if isinstance(cell, str) and cell.startswith('k=') else value_text(cell)
-                                   for cell in row) for row in body) + '\n', species
+                                   for cell in row) for row in body) + '\n', species, new_tips
 
     def report(self):
         counts = {str(key): int(value) for key, value in plain(self.lua_type, self.M.counts).items()}
-        return {'handlers': counts, 'kinds': dict(self.kinds), 'unknown': int(self.M.unknownTotal())}
+        branches = {str(key): int(value) for key, value in plain(self.lua_type, self.M.branches).items()}
+        return {'handlers': counts, 'kinds': dict(self.kinds), 'unknown': int(self.M.unknownTotal()),
+                'branches': branches}
+
+    def branch_candidates(self):
+        found = plain(self.lua_type, self.M.branchCandidates())
+        return {name: sorted({(int(row['entry']), int(row['slot']), int(row['opt'])) for row in seq(rows)})
+                for name, rows in found.items()}
 
 
 def handler_candidates(tracer, species):
@@ -184,9 +200,29 @@ def targeted_plans(tracer, species, rng):
             if name in NEEDS_FALLEN_ALLY:
                 fallen = [{'entry': rng.choice(species), 'level': 25, 'hp': 1} for _ in range(2)]
                 plans.append((name, {'P': fallen + [holder], 'E': enemy}, (3, slot)))
+            elif name in TEAM_HANDLERS:
+                plans.append((name, team_of(holder, species, rng), (1, slot)))
             else:
                 plans.append((name, {'P': [holder], 'E': enemy}, (1, slot)))
     return plans
+
+
+def team_of(holder, species, rng):
+    return {'P': [holder] + [{'entry': rng.choice(species), 'level': 25} for _ in range(2)],
+            'E': [{'entry': rng.choice(species), 'level': 25} for _ in range(3)]}
+
+
+def branch_plans(tracer, species, rng):
+    candidates = tracer.branch_candidates()
+    plans = []
+    for name in sorted(candidates, key=lambda branch: len(candidates[branch])):
+        found = list(candidates[name])
+        rng.shuffle(found)
+        for entry, slot, opt in (found * 4)[:MAX_TARGET_BATTLES]:
+            picks = [1, 1, 1]
+            picks[slot - 1] = opt
+            plans.append((name, team_of({'entry': entry, 'level': 25, 'picks': picks}, species, rng), (1, slot)))
+    return sorted(candidates), plans
 
 
 def random_plans(pool, rng, battles):
@@ -213,7 +249,7 @@ def data_rows(export_path, species_used):
     for row in tables['coa_pet_ability_effect']:
         effects_by_ability.setdefault(row[0], []).append(row)
     bases = {row[0]: row[5] for row in tables['coa_pet_ability']}
-    reach, pending = set(), [row[3] for row in kit_abilities] + list(LIBRARY_ABILITIES)
+    reach, pending = set(), [row[3] for row in kit_abilities] + list(LIBRARY_ABILITIES) + list(HARD_CODED_AURAS)
     while pending:
         ability = pending.pop()
         if ability in reach:
@@ -255,22 +291,27 @@ def main():
     tracer = Tracer(args.upstream, args.seed)
     rng = random.Random(args.seed + 2)
     species = tracer.species()
-    traces, used, size = [], set(), 0
-    report = {'handlers': {}, 'kinds': {}, 'unknown': 0}
+    traces, used, size, tipped = [], set(), 0, set()
+    report = {'handlers': {}, 'kinds': {}, 'unknown': 0, 'branches': {}}
 
     def run(team, target=None, wanted=None):
         nonlocal size
         before = tracer.report()
-        text, battle_species = tracer.battle(len(traces) + 1, team, target)
+        text, battle_species, new_tips = tracer.battle(len(traces) + 1, team, target, frozenset(tipped))
         after = tracer.report()
         gained = {key: after['handlers'].get(key, 0) - before['handlers'].get(key, 0) for key in after['handlers']}
-        if wanted and gained.get(wanted, 0) == 0:
+        gained_branches = {key: after['branches'].get(key, 0) - before['branches'].get(key, 0)
+                           for key in after['branches']}
+        if wanted and gained.get(wanted, 0) == 0 and gained_branches.get(wanted, 0) == 0:
             return False
-        if not wanted and size + len(text.encode('utf-8')) > args.max_bytes * 0.66:
+        if not wanted and size + len(text.encode('utf-8')) > args.max_bytes * 0.55:
             return None
         traces.append(text)
         size += len(text.encode('utf-8'))
         used.update(battle_species)
+        tipped.update(new_tips)
+        for key, value in gained_branches.items():
+            report['branches'][key] = report['branches'].get(key, 0) + value
         for key, value in gained.items():
             report['handlers'][key] = report['handlers'].get(key, 0) + value
         for key, value in after['kinds'].items():
@@ -280,6 +321,11 @@ def main():
 
     for name, team, target in targeted_plans(tracer, species, rng):
         if report['handlers'].get(name, 0) < TARGET_HITS:
+            run(team, target, name)
+    reachable, plans = branch_plans(tracer, species, rng)
+    report['reachable_branches'] = reachable
+    for name, team, target in plans:
+        if report['branches'].get(name, 0) < TARGET_BRANCH_HITS:
             run(team, target, name)
     pool = sorted(used) + rng.sample(species, EXTRA_POOL)
     for team in random_plans(pool, rng, args.battles):
@@ -294,7 +340,9 @@ def main():
     failures = fixture_format.coverage_failures(report)
     if total > args.max_bytes:
         failures.append(f'fixtures are {total} bytes, limit {args.max_bytes}')
-    print(json.dumps({'battles': len(traces), 'bytes': total, 'report': report, 'failures': failures}, indent=1))
+    census = plain(tracer.lua_type, tracer.M.fallbackCensus(TIP_POWER))
+    print(json.dumps({'battles': len(traces), 'bytes': total, 'report': report, 'tooltip_census': census,
+                      'failures': failures}, indent=1))
     sys.exit(1 if failures else 0)
 
 

@@ -79,6 +79,7 @@ TEST(CoAPetBattlesEngine, PetsBuildLikeUpstream)
 TEST(CoAPetBattlesEngine, DescribeMatchesUpstreamForEveryKitAbility)
 {
     size_t compared = 0;
+    size_t kitCompared = 0;
     size_t excluded = 0;
     for (Fixtures::TraceBattle const& battle : Battles())
     {
@@ -107,8 +108,33 @@ TEST(CoAPetBattlesEngine, DescribeMatchesUpstreamForEveryKitAbility)
                 << tip.slot;
             ++compared;
         }
+        for (Fixtures::TraceKitTip const& tip : battle.kitTips)
+        {
+            if (tip.excluded)
+            {
+                ++excluded;
+                continue;
+            }
+            size_t offset = 0;
+            for (size_t i = 0; i < battle.pets.size(); ++i)
+                if (battle.pets[i].side == tip.side && battle.pets[i].index == tip.index)
+                    offset = i;
+            bool found = false;
+            for (KitOption const& option : Engine::Kit(FixtureCatalog(), battle.pets[offset].species))
+                if (option.slot == tip.slot && option.option == tip.option)
+                {
+                    found = true;
+                    EXPECT_EQ(Describe(FixtureCatalog(), { option.ability.text, &option.ability.turns,
+                        option.ability.family, std::nullopt }, pets[offset].power), tip.text)
+                        << "battle " << battle.id << " species " << battle.pets[offset].species << " slot "
+                        << tip.slot << " option " << tip.option;
+                }
+            EXPECT_TRUE(found) << "battle " << battle.id << " slot " << tip.slot << " option " << tip.option;
+            ++kitCompared;
+        }
     }
     EXPECT_GT(compared, 0u);
+    EXPECT_GT(kitCompared, compared);
     EXPECT_EQ(excluded, 0u);
 }
 

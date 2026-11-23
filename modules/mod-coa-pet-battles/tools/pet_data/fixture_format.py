@@ -4,6 +4,10 @@ REQUIRED_HANDLERS = [name for name in HANDLERS if name not in LIBRARY_ONLY and n
 EVENT_KINDS = ('act', 'buff', 'debuff', 'dmg', 'dodge', 'dot', 'end', 'faint', 'heal', 'spawn', 'stunned', 'swap',
                'trap', 'turn', 'weather')
 MINIMUM_HITS = 5
+BRANCHES = ('reflect204', 'reflect179', 'webbing', 'plagued', 'rebirth', 'revive', 'detonate', 'portal', 'meteor',
+            'chew', 'leech', 'siphon', 'teamaura', 'photosynthesis', 'spore', 'lockout', 'charges', 'wall',
+            'split_bench', 'castate_bench', 'ally_heal', 'team_heal', 'swap145', 'swap39')
+MINIMUM_BRANCH_HITS = 3
 ESCAPES = {'\\': '\\\\', '\t': '\\t', '\n': '\\n'}
 UNESCAPES = {'\\': '\\', 't': '\t', 'n': '\n'}
 
@@ -61,4 +65,7 @@ def coverage_failures(report):
     failures += [f'event kind {kind} never appears' for kind in EVENT_KINDS if not report['kinds'].get(kind)]
     if report['unknown']:
         failures.append(f'unknown effect handler fired {report["unknown"]} times')
+    failures += [f'branch {name}: {report["branches"].get(name, 0)} hits, need {MINIMUM_BRANCH_HITS}'
+                 for name in BRANCHES if name in report['reachable_branches'] and
+                 report['branches'].get(name, 0) < MINIMUM_BRANCH_HITS]
     return failures

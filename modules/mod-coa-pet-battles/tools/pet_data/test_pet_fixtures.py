@@ -13,6 +13,8 @@ def full_report():
         'handlers': {name: 5 for name in fixture_format.REQUIRED_HANDLERS},
         'kinds': {kind: 1 for kind in fixture_format.EVENT_KINDS},
         'unknown': 0,
+        'branches': {name: 3 for name in fixture_format.BRANCHES},
+        'reachable_branches': list(fixture_format.BRANCHES),
     }
 
 
@@ -56,6 +58,16 @@ class FixtureFormatTest(unittest.TestCase):
         report = full_report()
         del report['kinds']['trap']
         self.assertTrue(any('trap' in failure for failure in fixture_format.coverage_failures(report)))
+
+    def test_branch_gate_counts_only_reachable_branches(self):
+        report = full_report()
+        report['branches']['reflect204'] = 2
+        self.assertTrue(any('reflect204' in failure for failure in fixture_format.coverage_failures(report)))
+        report['reachable_branches'].remove('reflect204')
+        self.assertEqual(fixture_format.coverage_failures(report), [])
+        report = full_report()
+        report['branches'].pop('swap39')
+        self.assertTrue(any('swap39' in failure for failure in fixture_format.coverage_failures(report)))
 
 
 if __name__ == '__main__':

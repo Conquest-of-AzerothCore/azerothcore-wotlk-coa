@@ -356,6 +356,73 @@ TEST(CoAPetBattlesMechanics, NevermoreLocksTheNextAbility)
     EXPECT_EQ(battle.Current(Side::E).cd[0], lockout - 1);
 }
 
+TEST(CoAPetBattlesMechanics, DarkRebirthRevivesAtFullHealth)
+{
+    ConstantRng rng(100);
+    Pet reborn = Stunned(MakePet(Strike, "Beast", 1));
+    reborn.auras.push_back(AuraOf(795, 99));
+    Battle battle(MechanicCatalog(), { reborn }, { MakePet(Strike, "Critter") }, rng);
+    RoundResult const result = Round(battle, "A1", "A1");
+    bool revived = false;
+    for (Event const& event : result.events)
+        if (event.kind == "heal" && event.Flag("revive"))
+        {
+            revived = true;
+            EXPECT_EQ(event.Number("amt"), 1000);
+            EXPECT_EQ(event.Text("side"), "P");
+        }
+    EXPECT_TRUE(revived);
+    EXPECT_EQ(First(result.events, "faint"), nullptr);
+    EXPECT_GT(battle.Current(Side::P).hp, 0);
+    EXPECT_FALSE(HasAura(battle.Current(Side::P), 795));
+    EXPECT_TRUE(HasAura(battle.Current(Side::P), 796));
+}
+
+TEST(CoAPetBattlesMechanics, ReflectiveShieldReturnsHalfTheHit)
+{
+    ConstantRng rng(100);
+    Pet shielded = Stunned(MakePet(Strike, "Critter"));
+    shielded.auras.push_back(AuraOf(1104, 3));
+    Battle battle(MechanicCatalog(), { MakePet(Strike, "Beast") }, { shielded }, rng);
+    RoundResult const result = Round(battle, "A1", "A1");
+    double const hit = Damage(20, 100, "Beast", "Critter", 0, 0);
+    double const reflected = std::floor(hit * 50 / 100);
+    bool found = false;
+    for (Event const& event : result.events)
+        if (event.kind == "dmg" && event.Flag("reflect"))
+        {
+            found = true;
+            EXPECT_EQ(event.Number("dmg"), reflected);
+            EXPECT_EQ(event.Text("tside"), "P");
+        }
+    EXPECT_TRUE(found);
+    EXPECT_EQ(battle.Current(Side::P).hp, 1000 - reflected);
+    EXPECT_EQ(battle.Current(Side::E).hp, 1000 - hit);
+}
+
+TEST(CoAPetBattlesMechanics, BombDetonatesOnTheNextPet)
+{
+    ConstantRng rng(100);
+    Battle battle(MechanicCatalog(), { MakePet(Strike, "Beast") },
+        { Stunned(MakePet(Strike, "Critter", 1)), MakePet(Strike, "Critter") }, rng);
+    Pet& layer = battle.At(Side::P, 1);
+    battle.bomb[static_cast<size_t>(Side::E)] = Bomb { 385, 3, &layer, layer.power };
+    RoundResult const result = Round(battle, "A1", "A1");
+    double const blast = std::floor(std::floor(30 * (1 + layer.power / 20) + 0.5) * Matchup("Mechanical", "Critter"));
+    Event const* spawn = First(result.events, "spawn");
+    ASSERT_NE(spawn, nullptr);
+    bool found = false;
+    for (Event const& event : result.events)
+        if (event.kind == "dmg" && event.Flag("reflect") && event.Text("tside") == "E" && event.Number("tidx") == 2)
+        {
+            found = true;
+            EXPECT_EQ(event.Number("dmg"), blast);
+        }
+    EXPECT_TRUE(found);
+    EXPECT_EQ(battle.At(Side::E, 2).hp, 1000 - blast);
+    EXPECT_FALSE(battle.bomb[static_cast<size_t>(Side::E)].has_value());
+}
+
 TEST(CoAPetBattlesMechanics, UnknownPropertyIsCounted)
 {
     ConstantRng rng(100);

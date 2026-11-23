@@ -20,11 +20,22 @@ with each pet's own numbers, round resolution with all 42 retail effect handlers
 passives, forced swaps, the trap and the enemy AI. It uses only the standard library and the loaded data, and draws
 every random number through one interface in upstream's order.
 
-It is proven against upstream by replay. `tools/pet_data/trace_upstream.py` ran 182 seeded battles (1v1 and 3v3,
-levels 1–25, 1,681 rounds) through upstream's own Lua and recorded every roll, command, event and pet state in
+It is proven against upstream by replay. `tools/pet_data/trace_upstream.py` ran 107 seeded battles (1v1 and 3v3,
+levels 1–25, 1,169 rounds) through upstream's own Lua and recorded every roll, command, event and pet state in
 `tests/fixtures/`. The unit tests replay each battle through the C++ engine and require identical events, statuses,
-pet state and rolls; every reachable effect handler occurs at least 9 times and the five handlers only unreferenced
-library abilities carry have their own tests.
+pet state and rolls. What the recorded battles cover, measured inside upstream's Lua:
+
+- every effect handler a species can reach is dispatched at least 8 times, and the unknown-effect handler never;
+- 17 engine branches that production kits can reach happen at least 4 times each — reflects (179), webbing,
+  Plagued Blood, Undead/Mechanical revives, Portal/Fade swaps, the meteor, Chew, leech, siphon, spore releases,
+  block charges, damage split over the bench, bench damage, ally and team heals, and forced swaps (145, 107/139);
+- the tooltip of every kit option of every recorded species matches, and across all 20,568 kit tooltips of the
+  3,428 species none reaches upstream's order-dependent fallback.
+
+Effects only the unreferenced retail library can reach are not in the recordings and have their own tests on the
+real abilities: Life Exchange, Nevermore and its ability lockout, Beaver Dam's wall, Refuge, Spiny Carapace, Dark
+Rebirth, Reflective Shield and the XE-321 Boombot bomb. Two such branches have no test: team-wide damage auras and
+Photosynthesis's weather bonus.
 
 ## Trying it: `.petbattle sim`
 

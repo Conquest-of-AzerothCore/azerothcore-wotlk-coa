@@ -141,7 +141,9 @@ namespace CoAPetBattles::Fixtures
             }
             std::vector<std::string> const f = SplitLine(line);
             if (tag == "BATTLE")
-                battles.push_back({ I(f[1]), {}, {}, {}, {} });
+                battles.push_back({ I(f[1]), {}, {}, {}, {}, {} });
+            else if (tag == "KITTIP" || tag == "KITTIPX")
+                battles.back().kitTips.push_back({ f[1], I(f[2]), I(f[3]), I(f[4]), f[5], tag == "KITTIPX" });
             else if (tag == "ROLL")
                 battles.back().rolls.push_back({ I(f[1]), I(f[2]), I(f[3]) });
             else if (tag == "PET")
