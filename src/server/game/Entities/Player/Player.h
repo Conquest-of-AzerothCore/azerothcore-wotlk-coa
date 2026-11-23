@@ -1811,6 +1811,7 @@ public:
     // Transient action replacements; never written to character spell ownership.
     void SetTemporarySpellReplacement(uint32 original, uint32 replacement, bool redirect = true);
     [[nodiscard]] uint32 GetTemporarySpellReplacement(uint32 original) const;
+    [[nodiscard]] uint32 GetClientShownSupersededSpell(uint32 superseded) const;
     // Replacement the server casts in place of a client request. Aliases published with `redirect = false`
     // keep the client-side swap but leave a request for the original spell alone (#6972).
     [[nodiscard]] uint32 GetCastReplacement(uint32 original) const;

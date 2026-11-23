@@ -36,7 +36,9 @@
 #include "AscensionClientSpellRows.h"
 #include "DBCStores.h"
 #include "DatabaseEnv.h"
+#include "CellImpl.h"
 #include "DynamicObject.h"
+#include "GridNotifiersImpl.h"
 #include "GameEventMgr.h"
 #include "GameObject.h"
 #include "GameTime.h"
@@ -3813,6 +3815,14 @@ private:
             Require(item != nullptr, "LFG Need metric needs a known item");
             return player->CanRollForItemInLFG(item, player) == EQUIP_ERR_OK ? 1 : 0;
         }
+        if (metric == "item_usable")
+        {
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "Item usability metric needs a player");
+            ItemTemplate const* item = sObjectMgr->GetItemTemplate(step.get<uint32>("item"));
+            Require(item != nullptr, "Item usability metric needs a known item");
+            return player->CanUseItem(item) == EQUIP_ERR_OK ? 1 : 0;
+        }
         if (metric == "battleground_status")
         {
             Player* player = unit->ToPlayer();
@@ -5793,6 +5803,21 @@ private:
                 return objects.front()->GetObjectScale();
             time_t expiry = objects.front()->GetRespawnTime();
             return expiry ? std::max<time_t>(0, expiry - GameTime::GetGameTime().count()) * IN_MILLISECONDS : -1;
+        }
+        if (metric == "dynamic_object_count")
+        {
+            Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown ground-effect spell");
+            std::list<WorldObject*> objects;
+            auto check = [player, spell](WorldObject* object)
+            {
+                DynamicObject const* ground = object->ToDynObject();
+                return ground && ground->IsInWorld() && ground->GetSpellId() == spell &&
+                    ground->GetCasterGUID() == player->GetGUID();
+            };
+            Acore::WorldObjectListSearcher<decltype(check)> search(player, objects, check,
+                GRID_MAP_TYPE_MASK_DYNAMICOBJECT);
+            Cell::VisitObjects(player, search, SIZE_OF_GRIDS);
+            return double(objects.size());
         }
         if (metric == "dynamic_object" || metric == "dynamic_object_duration_ms" ||
             metric == "dynamic_object_height" || metric == "dynamic_object_radius" ||

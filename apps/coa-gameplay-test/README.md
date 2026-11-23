@@ -629,7 +629,7 @@ Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`,
 `cooldown_ms`, `spell_cooldown_packet_ms`, `item_loot_releases`, `item_count`, `carried_item_count`, `bank_bag_slots`, `guild_bank_tabs`, `aura`, `aura_stacks`, `aura_charges`,
 `aura_duration_ms`, `aura_amount`, `pet_entry`, `pet_aura_stacks`, `owned_creature_count`, `owned_creature_spacing`,
 `owned_creature_remaining_ms`, `charm_entry`, `charm_distance`, `charm_aura_stacks`, `owned_creature_sent_faction`,
-`controls_self`, `charmed`, `private_instance`, `dynamic_object`,
+`controls_self`, `charmed`, `private_instance`, `dynamic_object`, `dynamic_object_count`,
 `dynamic_object_duration_ms`, `dynamic_object_height`, `dynamic_object_radius`, `dynamic_object_size`, `distance`,
 `spell_proc_count`, `spell_proc_chance`,
 `aura_proc_rate`, `spell_cast_count`, `temporary_spell_replacement`,
@@ -1069,6 +1069,8 @@ resource type, recipient and current pets. The total is the logged nominal gain 
 charmer holds the player (`Unit::IsCharmed`), else 0.
 `private_instance` checks membership in a scripted private map such as Manastorm.
 `dynamic_object` checks for the player's ground effect with the specified `spell`.
+`dynamic_object_count` counts the player's live ground effects with that `spell`, so overlapping casts can be
+told apart.
 `dynamic_object_duration_ms` measures its remaining duration, or zero when absent.
 `dynamic_object_height` reads how far, in yards, the player's oldest ground effect with that `spell` sits above
 the map's top terrain/collision height at its X/Y; it fails when no such ground effect exists.
@@ -1238,6 +1240,8 @@ selection holds it, otherwise 0.
 `lfg_need_allowed` takes a player `actor` and an `item` entry and returns 1 when the native Dungeon Finder
 loot rule lets the actor roll Need on that item at the actor's position, otherwise 0. Outside a Dungeon Finder
 group or its dungeon every item returns 1.
+`item_usable` takes a player `actor` and an `item` entry and returns 1 when the native `Player::CanUseItem` check
+on the item template (class, race, level, skill, spell and reputation requirements) accepts the actor, otherwise 0.
 `in_arena` takes a player `actor` and returns 1 while that player is inside an arena match.
 `arena_points` takes a player `actor` and returns the arena points the player holds.
 `battleground_status` takes a player `actor` and returns the native status of the player's battleground

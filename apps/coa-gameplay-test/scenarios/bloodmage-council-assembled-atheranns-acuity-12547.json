@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "name": "The Council Assembled stacks Atherann's Acuity on Taldaram's Torment ticks (#12547)",
+  "contract": [
+    "The Council Assembled 504103: 'Taldaram's Torment now increases the damage of your next Valanar's Vengeance or Keleseth's",
+    "Calamity by $504105s1% per tick for $504105d, stacking $504105u times.' Atherann's Acuity 504105 is a self aura",
+    "(SPELL_AURA_ADD_PCT_MODIFIER +3% on Valanar's Vengeance/Keleseth's Calamity, StackAmount 5), but no effect of 504103",
+    "casts it and nothing else did, so the stacking damage bonus never appeared (#12547). Each Torment tick must add one",
+    "stack: two ticks give two stacks with the talent, and none without it. The stacks modify the damage of",
+    "Valanar's Vengeance 572795 (family 26, flags 262144, inside the aura's class mask) by 2 x 3% = 6%."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "talented", "race": 1, "class": 20, "level": 80, "spell_hit_rating": 10000 },
+    { "id": "plain", "race": 1, "class": 20, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "talented", "entry": 36, "level": 80, "health": 1000000, "distance": 3 },
+    { "id": "enemy2", "owner": "plain", "entry": 36, "level": 80, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talented", "spell": 504103 },
+    { "action": "learn", "actor": "talented", "spell": 802580 },
+    { "action": "learn", "actor": "plain", "spell": 802580 },
+    { "action": "cast", "actor": "talented", "spell": 802580, "target": "enemy" },
+    { "action": "cast", "actor": "plain", "spell": 802580, "target": "enemy2" },
+    {
+      "action": "assert", "label": "SETUP: Taldaram's Torment lands from the talented Bloodmage", "actor": "enemy",
+      "metric": "aura", "spell": 802580, "caster": "talented", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: Taldaram's Torment lands from the untalented Bloodmage", "actor": "enemy2",
+      "metric": "aura", "spell": 802580, "caster": "plain", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "No Atherann's Acuity before the first tick", "actor": "talented", "metric": "aura",
+      "spell": 504105, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: Valanar's Vengeance damage is unmodified before the first tick",
+      "actor": "talented", "metric": "spell_modifier", "spell": 572795, "op": 0, "base": 1000, "equals": 1000
+    },
+    { "action": "wait", "label": "Two periodic ticks", "ms": 6600 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: two ticks give two Atherann's Acuity stacks", "actor": "talented",
+      "metric": "aura_stacks", "spell": 504105, "equals": 2
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: two stacks raise Valanar's Vengeance damage by 2 x 3%",
+      "actor": "talented", "metric": "spell_modifier", "spell": 572795, "op": 0, "base": 1000, "min": 1059,
+      "max": 1061
+    },
+    {
+      "action": "assert", "label": "CONTROL: the untalented Bloodmage's Valanar's Vengeance stays unmodified",
+      "actor": "plain", "metric": "spell_modifier", "spell": 572795, "op": 0, "base": 1000, "equals": 1000
+    },
+    {
+      "action": "assert", "label": "Without The Council Assembled no Atherann's Acuity appears", "actor": "plain",
+      "metric": "aura", "spell": 504105, "equals": 0
+    }
+  ]
+}

@@ -75,7 +75,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'melee_damage_count', 'melee_damage_total',
     'pet_power', 'pet_max_power', 'spell_energize_count', 'spell_energize_total',
     'xp', 'next_level_xp', 'skill_value', 'skill_maximum', 'lfg_dungeon_disabled', 'lfg_lock_status', 'lfg_state',
-    'lfg_selected_dungeon_count', 'lfg_selected_dungeon', 'lfg_need_allowed',
+    'lfg_selected_dungeon_count', 'lfg_selected_dungeon', 'lfg_need_allowed', 'item_usable',
     'map_id', 'instance_id', 'battleground_queued', 'battleground_invited_max_level',
     'in_arena', 'arena_points', 'arena_team_members', 'arena_team_season_games', 'arena_team_season_wins',
     'battleground_team', 'battleground_status', 'team', 'name_query_race',
@@ -138,8 +138,8 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_sent_faction', 'owned_creature_victim',
     'owned_creature_distance_2d',
     'charm_entry', 'charm_distance', 'charm_aura_stacks', 'controls_self', 'charmed', 'viewpoint_entry', 'seer_entry', 'private_instance',
-    'dynamic_object', 'dynamic_object_duration_ms', 'dynamic_object_height', 'dynamic_object_radius',
-    'dynamic_object_size', 'gossip_options', 'gossip_option_text',
+    'dynamic_object', 'dynamic_object_count', 'dynamic_object_duration_ms', 'dynamic_object_height',
+    'dynamic_object_radius', 'dynamic_object_size', 'gossip_options', 'gossip_option_text',
     'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale', 'at_homebind', 'summon_pending',
     'spellbook_rows', 'spellbook_offers_spell', 'spellbook_covers_spell', 'spellbook_learned_alerts',
     'spellbook_buy_succeeded', 'spellbook_buy_failed',
@@ -1286,6 +1286,9 @@ def validate(scenario, clock=REAL_CLOCK):
             if metric == 'lfg_need_allowed':
                 require(step['actor'] in player_ids, f'{where}: LFG Need metric needs a player')
                 number(step.get('item'), f'{where}.item', 1, 2**32 - 1, True)
+            if metric == 'item_usable':
+                require(step['actor'] in player_ids, f'{where}: item usability metric needs a player')
+                number(step.get('item'), f'{where}.item', 1, 2**32 - 1, True)
             if metric == 'lfg_lock_status':
                 require(step['actor'] in player_ids, f'{where}: LFG lock metric needs a player')
                 number(step.get('dungeon'), f'{where}.dungeon', 1, 2**24 - 1, True)
@@ -1316,7 +1319,7 @@ def validate(scenario, clock=REAL_CLOCK):
                     'pet_knows_spell', 'client_knows_spell', 'client_spellbook_copies', 'learned_spell_at',
                     'client_cooldown_ready', 'client_cooldown_clears', 'client_cooldown_blocked_casts',
                     'pet_aura_stacks', 'pet_aura_duration_ms', 'charm_aura_stacks', 'spell_active',
-                    'dynamic_object', 'dynamic_object_duration_ms', 'dynamic_object_height',
+                    'dynamic_object', 'dynamic_object_count', 'dynamic_object_duration_ms', 'dynamic_object_height',
                     'dynamic_object_radius', 'dynamic_object_size', 'spell_power_cost',
                     'skill_line_for_spell',
                     'spell_damage_done', 'spell_damage_taken', 'spell_healing_taken', 'spell_hit_bonus_taken',
@@ -1684,8 +1687,8 @@ def validate(scenario, clock=REAL_CLOCK):
                           'pet_knows_spell', 'pet_distance', 'pet_bearing', 'pet_casting', 'pet_loading',
                           'owned_creature_count', 'owned_creature_spacing', 'charm_entry', 'charm_distance',
                           'charm_aura_stacks', 'controls_self', 'charmed', 'private_instance',
-                          'dynamic_object', 'dynamic_object_duration_ms', 'dynamic_object_height',
-                          'dynamic_object_radius', 'dynamic_object_size',
+                          'dynamic_object', 'dynamic_object_count', 'dynamic_object_duration_ms',
+                          'dynamic_object_height', 'dynamic_object_radius', 'dynamic_object_size',
                           'gossip_options', 'gossip_option_text',
                           'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale',
                           'nearby_gameobject_display', 'nearby_gameobject_orientation', 'at_homebind', 'summon_pending',

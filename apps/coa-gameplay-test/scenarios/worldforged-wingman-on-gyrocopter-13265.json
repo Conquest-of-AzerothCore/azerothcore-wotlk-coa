@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "Worldforged The Wingman rests on the Tanaris gyrocopter wing (#13265)",
+  "contract": "The Wingman pickup (entry 515801, guid 6942306) sat at z 2.6922, 0.7 yd under the wing of the Tanaris gyrocopter doodad, so the rifle model was buried in the wing. rev_20261122_71 raises it to the realm height 3.485, inside the wing slab. The headroom ray, cast upward from 0.3 yd above the pickup, hit the wing underside at about 0.4 yd before the fix and now clears the wing up to the gyrocopter body. A fresh level 50 player then opens it.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -10080.5,
+    "y": -4166.5,
+    "z": 3.6,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 50
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no wing surface sits just above the pickup",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "guid": 6942306,
+      "spawn_type": "gameobject",
+      "min": 1.0
+    },
+    {
+      "action": "assert",
+      "label": "the pickup rests on the wing",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6942306,
+      "spawn_type": "gameobject",
+      "min": -0.3,
+      "max": 0.3
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 515801
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "it is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

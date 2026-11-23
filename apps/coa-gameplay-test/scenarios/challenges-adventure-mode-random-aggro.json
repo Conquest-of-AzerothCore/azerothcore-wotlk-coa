@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Adventure Mode's random aggro pulse waits out its 2-minute recovery",
-  "contract": "Issue #9031. Each Adventure Mode physical difficulty aura carries SPELL_AURA_PERIODIC_TRIGGER_SPELL for Adventurer Mode Random Aggro (888071): at tier 100 (302883) every 15 seconds. 888071 is a threat effect on every enemy within 25 yards with a 120000 ms RecoveryTime in Spell.dbc, and players on live described the pulse as rare. A periodic trigger casts with the spell and category cooldowns ignored, so the recovery is enforced by the spell's own script: after one pulse pulls a passive wolf 12 yards away into combat, the caster's 888071 cooldown runs for 2 minutes, a passive bat summoned 12 yards away on the other side stays out of combat through the five or more periods that tick inside it, and the first period after the recovery pulls the bat in. The pulser's health is raised so the wolf it pulled cannot kill it during the wait.",
+  "contract": "Issue #9031. Each Adventure Mode physical difficulty aura carries SPELL_AURA_PERIODIC_TRIGGER_SPELL for Adventurer Mode Random Aggro (888071): at tier 100 (302883) every 15 seconds. 888071 is a threat effect on every enemy within 25 yards with a 120000 ms RecoveryTime in Spell.dbc, and players on live described the pulse as rare. A periodic trigger casts with the spell and category cooldowns ignored, so the recovery is enforced by the spell's own script: after one pulse pulls a passive wolf 12 yards away into combat, the caster's 888071 cooldown runs for 2 minutes, a passive bat summoned 12 yards away on the other side stays out of combat through the five or more periods that tick inside it, and the first period after the recovery pulls the bat in. The pulser's health is raised so the wolf it pulled cannot kill it during the wait. Both creatures are the pulser's summons but hostile to it, so, as #7884 set for creatures that enter the world later, starting the challenge must not copy the pulser's auras onto the wolf; before that, the wolf carried 302883, pulsed itself and took the recovery the scenario reads from the pulser.",
   "timeout_ms": 300000,
   "location": {
     "map": 0,
@@ -25,6 +25,8 @@
     { "action": "assert", "label": "tier 100 starts", "actor": "pulser", "metric": "challenge_start_code", "equals": 0 },
     { "action": "assert", "label": "tier 100 physical difficulty aura", "actor": "pulser", "metric": "aura",
       "spell": 302883, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the hostile wolf the pulser summoned does not get the pulser's aura",
+      "actor": "first_wolf", "metric": "aura", "spell": 302883, "equals": 0 },
     { "action": "set_health", "actor": "pulser", "value": 100000, "maximum": 100000 },
 
     { "action": "assert", "label": "the first pulse pulls the wolf 12 yards away into combat", "actor": "first_wolf",

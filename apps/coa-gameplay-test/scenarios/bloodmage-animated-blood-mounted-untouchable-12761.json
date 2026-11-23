@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "name": "Animated Blood worms stay summoned but untouchable by NPCs while the owner rides (#12761)",
+  "contract": [
+    "Animated Blood 573299 summons two Blood Worms 325301 as guardians with the owner's faction, so a hostile NPC",
+    "near a mounted Bloodmage attacks the worms and their combat pulls the owner in (#12761). Necromancer minions",
+    "solve the same report (#7457) by keeping the minions summoned and immune to NPCs while the owner is mounted",
+    "or in flight. Expected: before mounting a hostile NPC can attack a worm; while mounted it cannot, both worms",
+    "stay summoned, no worm engages the NPC and the owner stays out of combat; after dismounting the worm is",
+    "attackable again. The aggressive NPC starts out of range and moves in after mounting. Invisibility on the",
+    "owner isolates aggro on the worms from direct aggro on the rider."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "bm", "race": 1, "class": 20, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "bm", "entry": 36, "level": 60, "health": 1000000, "distance": 60, "reaction": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "bm", "spell": 573299 },
+    { "action": "cast", "actor": "bm", "spell": 573299 },
+    {
+      "action": "assert",
+      "label": "Two Blood Worms are summoned",
+      "actor": "bm",
+      "metric": "owned_creature_count",
+      "entry": 325301,
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Baseline: a hostile NPC can attack the unmounted owner's worm",
+      "actor": "bm",
+      "metric": "owned_creature_attackable",
+      "entry": 325301,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    { "action": "set_aura", "actor": "bm", "spell": 458, "stacks": 1 },
+    { "action": "assert", "label": "The owner is mounted", "actor": "bm", "metric": "mount_display_id", "min": 1 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: mounted, the hostile NPC can no longer attack the worm",
+      "actor": "bm",
+      "metric": "owned_creature_attackable",
+      "entry": 325301,
+      "target": "enemy",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Mounted: both worms stay summoned",
+      "actor": "bm",
+      "metric": "owned_creature_count",
+      "entry": 325301,
+      "equals": 2
+    },
+    { "action": "set_aura", "label": "Hide the rider from direct aggro", "actor": "bm", "spell": 32612, "stacks": 1 },
+    { "action": "move_point", "label": "Bring the aggressive NPC into range", "actor": "enemy", "dx": -57 },
+    {
+      "action": "assert",
+      "label": "The NPC has reached the mounted owner's worms",
+      "actor": "bm",
+      "metric": "owned_creature_distance_2d",
+      "entry": 325301,
+      "target": "enemy",
+      "max": 10,
+      "within_ms": 12000
+    },
+    { "action": "wait", "label": "Give the hostile NPC time to engage", "ms": 3000 },
+    { "action": "assert", "label": "Still mounted", "actor": "bm", "metric": "mount_display_id", "min": 1 },
+    { "action": "assert", "label": "Still invisible", "actor": "bm", "metric": "aura", "spell": 32612, "equals": 1 },
+    {
+      "action": "assert",
+      "label": "Mounted: no worm has engaged the NPC",
+      "actor": "bm",
+      "metric": "owned_creature_victim",
+      "entry": 325301,
+      "target": "enemy",
+      "equals": 0
+    },
+    { "action": "assert", "label": "Mounted: the owner has not been pulled into combat", "actor": "bm", "metric": "combat", "equals": 0 },
+    { "action": "cancel_mount", "actor": "bm" },
+    { "action": "assert", "label": "The owner is dismounted", "actor": "bm", "metric": "mount_display_id", "equals": 0, "within_ms": 2000 },
+    {
+      "action": "assert",
+      "label": "Dismounted: the worm is attackable again",
+      "actor": "bm",
+      "metric": "owned_creature_attackable",
+      "entry": 325301,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

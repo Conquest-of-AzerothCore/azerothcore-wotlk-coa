@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Xoroth: Drag Through Hell summons a party member on another map (#11884, #12278)",
+  "contract": [
+    "Drag Through Hell 804773 says it summons a party member from anywhere in the world. Its only effect is",
+    "SPELL_EFFECT_SUMMON_PLAYER, whose target is the caster's selection, found globally by",
+    "Spell::SelectEffectTypeImplicitTargets. AddUnitTarget then runs Spell::CheckEffectTarget, whose default case",
+    "requires IsWithinLOSInMap, and that is false for any player on another map (or out of sight on the same one).",
+    "The effect mask was emptied, so the cast completed and spent its cost but no summon was offered (#11884,",
+    "#12278). Ritual of Summoning 7720, the stock spell with the same effect, carries SPELL_ATTR2_IGNORE_LINE_OF_SIGHT.",
+    "A grouped knight in Elwynn selects an ally in Orgrimmar and casts 804773 with no explicit target: the ally",
+    "must get a pending summon."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "caster", "race": 2, "class": 17, "level": 60 },
+    { "id": "ally", "race": 2, "class": 12, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    { "action": "teleport", "actor": "caster", "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+    { "action": "teleport", "actor": "ally", "map": 1, "x": 1563.45, "y": -4410.4, "z": 7.48746, "o": 0 },
+    { "action": "wait", "label": "Let the ally finish the far teleport", "ms": 3000 },
+    { "action": "group", "actor": "caster", "target": "ally" },
+    { "action": "learn", "actor": "caster", "spell": 804773 },
+    { "action": "add_item", "label": "Carry the Infernal Stone 804773's Totem[0] requires", "actor": "caster", "item": 5565 },
+    {
+      "action": "client_packet", "label": "Select the ally: the summon effect resolves the caster's selection",
+      "actor": "caster", "opcode": 317, "consumed": false, "fields": [ { "actor_guid": "ally" } ]
+    },
+    { "action": "assert", "actor": "ally", "metric": "summon_pending", "equals": 0, "label": "SETUP: no summon is pending yet" },
+    { "action": "cast", "actor": "caster", "spell": 804773 },
+    {
+      "action": "assert", "label": "The 5000 ms cast completed",
+      "actor": "caster", "metric": "spell_cast_count", "spell": 804773, "min": 1, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the ally on another map was offered the summon",
+      "actor": "ally", "metric": "summon_pending", "equals": 1, "within_ms": 8000
+    }
+  ]
+}
