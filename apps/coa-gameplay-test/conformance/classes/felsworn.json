@@ -4456,6 +4456,316 @@
       "wait_ms": 500,
       "expire_ms": 2000,
       "observe_source": "524632 StackAmount 4 ($524632u), DurationIndex 8 = 15000 ms. The Felsworn cast hook (AscensionFelswornAbilities.cpp:330-333) casts 524632 on the caster for every damaging Fel Fireball 801312 while the caster has the Reckoning aura 802058 (DurationIndex 1 = 10000 ms). Five Fel Fireball casts at the dummy 2000 ms apart (a 1500 ms cast without Reckoning, the class file's spell hit rating): before (control) no Reckoning aura and 0 stacks; after, a real cast of Reckoning 802058 at the caster at the start of the phase (after_gate_cast; CastingTimeIndex 1 and StartRecoveryTime 0, so the Fel Fireballs that follow meet no global cooldown, and under Reckoning they are instant), its aura read present right after the cast (after_start_reads, else unmeasured) and any refused cast unmeasured (void_on_cast_failure); the learn of 802058 alone applies nothing. The phases are 2000 ms apart (expire_ms) so the before phase's last 1500 ms Fel Fireball has finished: at 500 ms the pair fw-tgs2 prove refused the Reckoning cast and the next Fel Fireball with SPELL_FAILED_SPELL_IN_PROGRESS (105), unmeasured in both runs. The five hits within its 10000 ms give 5 applications against a cap of 4: the stacks read 4 and not 5."
+    },
+    {
+      "spell": 806111,
+      "kind": "metric_delta",
+      "trigger_spell": 802060,
+      "gate_spell": 806111,
+      "target": "dummy",
+      "void_on_cast_failure": true,
+      "name": "Demonic Machinations (bleed of 50% of the critical damage)",
+      "variant": "bleed_ratio",
+      "label_suffix": "bleed_ratio",
+      "force_crit": "spell",
+      "phase_auras": [
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "quote": "cause the target to bleed for an additional 50% of the damage dealt",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806112,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0.5,
+      "wait_ms": 6000,
+      "expire_ms": 500,
+      "player_spell_power": 20000,
+      "same_arm_ratio": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 802060,
+          "target": "dummy",
+          "critical": true
+        },
+        "ratio": 0.5,
+        "tolerance": 0.025,
+        "least": 1,
+        "source": "tooltip of 806111: an additional 50% of the damage dealt"
+      },
+      "observe_source": "Tooltip 806111: critical strikes with Sargeron Smite cause the target to bleed for an additional 50% of the damage dealt over $806112d. 806111 Effect[0] is aura 354 with EffectTriggerSpell 806112 (periodic damage, 1000 ms, 5000 ms), EffectBasePoints 9 does not state the 50%. The critical Smite is forced (spell crit rating 100000); the bleed total of 806112 on the dummy is read after the cast before and after a real learn of 806111 (the before phase is the control: 0), and the same window's gain of the critical Smite damage is read at the same moment: ratio of the two gains 0.5 within 0.025 (5% of 0.5), so 0.45 and 0.55 are excluded. Sargeron Smite 802060 (Spell.dbc: DmgClass magic, SchoolMask 36) needs the caster aura 803468 and consumes 2 Felfury 800058 (AscensionFelswornAbilities.cpp:234-237; refused without them), both set on the caster before every cast as precondition fixtures (harness set_aura, phase_auras), in both phases. Code: AscensionFelswornEvents.cpp:106-107 passes a non-periodic critical hit of Sargeron Smite 802060 and :246-247 casts the bleed 806112 on the target with 50% of the damage over its 5 ticks (CopyDot, AscensionFelsworn.cpp:164-169). Reference search 2026-11-23: coa-history spell 806111: 0 events in 186 logs (a passive leaves no event; 806112: 0 events; positive control 807554: 2923 events); ~/CoaServer/reference snapshots and the bindmysoul talent snapshot repeat the tooltip or name the talent only; nothing found that states a different value; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806111,
+      "kind": "metric_delta",
+      "trigger_spell": 802060,
+      "gate_spell": 806111,
+      "target": "dummy",
+      "void_on_cast_failure": true,
+      "name": "Demonic Machinations (bleed still on the target at 4600 ms)",
+      "variant": "bleed_held",
+      "label_suffix": "bleed_held",
+      "force_crit": "spell",
+      "phase_auras": [
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "quote": "bleed for an additional 50% of the damage dealt over $806112d",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 806112,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 4600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4550,
+          4750
+        ]
+      },
+      "observe_source": "806112 DurationIndex 28 = 5000 ms ($806112d). The bleed aura is read on the dummy 4600 ms after a critical Smite (game time 4550 to 4750 ms): still present, which excludes a duration 10% short (4500); the before phase (no 806111) reads it absent, the control. Sargeron Smite 802060 (Spell.dbc: DmgClass magic, SchoolMask 36) needs the caster aura 803468 and consumes 2 Felfury 800058 (AscensionFelswornAbilities.cpp:234-237; refused without them), both set on the caster before every cast as precondition fixtures (harness set_aura, phase_auras), in both phases. Code: AscensionFelswornEvents.cpp:106-107 passes a non-periodic critical hit of Sargeron Smite 802060 and :246-247 casts the bleed 806112 on the target with 50% of the damage over its 5 ticks (CopyDot, AscensionFelsworn.cpp:164-169). Reference search 2026-11-23: coa-history spell 806111: 0 events in 186 logs (a passive leaves no event; 806112: 0 events; positive control 807554: 2923 events); ~/CoaServer/reference snapshots and the bindmysoul talent snapshot repeat the tooltip or name the talent only; nothing found that states a different value; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806111,
+      "kind": "metric_delta",
+      "trigger_spell": 802060,
+      "gate_spell": 806111,
+      "target": "dummy",
+      "void_on_cast_failure": true,
+      "name": "Demonic Machinations (bleed gone at 5400 ms)",
+      "variant": "bleed_gone",
+      "label_suffix": "bleed_gone",
+      "force_crit": "spell",
+      "phase_auras": [
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "quote": "bleed for an additional 50% of the damage dealt over $806112d",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 806112,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 5400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5350,
+          5500
+        ]
+      },
+      "observe_source": "806112 DurationIndex 28 = 5000 ms ($806112d). The bleed aura is read on the dummy 5400 ms after a critical Smite (game time 5350 to 5500 ms): gone, which excludes a duration 10% long (5500); paired with the 4600 ms read of bleed_held. Sargeron Smite 802060 (Spell.dbc: DmgClass magic, SchoolMask 36) needs the caster aura 803468 and consumes 2 Felfury 800058 (AscensionFelswornAbilities.cpp:234-237; refused without them), both set on the caster before every cast as precondition fixtures (harness set_aura, phase_auras), in both phases. Code: AscensionFelswornEvents.cpp:106-107 passes a non-periodic critical hit of Sargeron Smite 802060 and :246-247 casts the bleed 806112 on the target with 50% of the damage over its 5 ticks (CopyDot, AscensionFelsworn.cpp:164-169). Reference search 2026-11-23: coa-history spell 806111: 0 events in 186 logs (a passive leaves no event; 806112: 0 events; positive control 807554: 2923 events); ~/CoaServer/reference snapshots and the bindmysoul talent snapshot repeat the tooltip or name the talent only; nothing found that states a different value; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806111,
+      "kind": "metric_delta",
+      "trigger_spell": 802060,
+      "gate_spell": 806111,
+      "target": "dummy",
+      "void_on_cast_failure": true,
+      "name": "Demonic Machinations (a non-critical Smite causes no bleed)",
+      "variant": "bleed_noncrit",
+      "label_suffix": "bleed_noncrit",
+      "phase_auras": [
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "quote": "Critical strikes with Sargeron Smite now cause the target to bleed",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806112,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 6000,
+      "expire_ms": 500,
+      "observe_source": "Control arm of bleed_ratio on the same build: 806111 learned, crits made impossible on the caster (64481, harness set_aura), so Sargeron Smite lands a non-critical hit (a refused cast voids the trial) and the bleed total of 806112 stays 0: the bleed comes from the critical strike, not from the passive alone. Sargeron Smite 802060 (Spell.dbc: DmgClass magic, SchoolMask 36) needs the caster aura 803468 and consumes 2 Felfury 800058 (AscensionFelswornAbilities.cpp:234-237; refused without them), both set on the caster before every cast as precondition fixtures (harness set_aura, phase_auras), in both phases. Code: AscensionFelswornEvents.cpp:106-107 passes a non-periodic critical hit of Sargeron Smite 802060 and :246-247 casts the bleed 806112 on the target with 50% of the damage over its 5 ticks (CopyDot, AscensionFelsworn.cpp:164-169). Reference search 2026-11-23: coa-history spell 806111: 0 events in 186 logs (a passive leaves no event; 806112: 0 events; positive control 807554: 2923 events); ~/CoaServer/reference snapshots and the bindmysoul talent snapshot repeat the tooltip or name the talent only; nothing found that states a different value; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 807461,
+      "kind": "metric_delta",
+      "name": "Herald of the Legion (strikes up to 8 nearby enemies)",
+      "variant": "nearby_count",
+      "label_suffix": "nearby_count",
+      "trigger_spell": 704368,
+      "gate_spell": 807461,
+      "target": "dummy",
+      "cast_in_before": false,
+      "area_dummies": [
+        2.5,
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5,
+        6.0,
+        6.5,
+        7.0
+      ],
+      "area_sum": true,
+      "quote": "to up to $807554i nearby enemies",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 807554,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 8,
+      "after_at_least": 8,
+      "after_at_most": 8,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "807554 MaxAffectedTargets 8 ($807554i); the handler searches Nearby(target, 8.0f) and stops at 8 enemies other than the target (AscensionFelswornEvents.cpp:249-257). Bane of Chaos 704368 (Effect[0] aura 3, first tick at 3000 ms) is cast at the dummy with 807461 learned; the 807554 hits (spell_damage_count) on the dummy and on nine further dummies 2.5 to 7 yd from the caster are summed at 3500 ms: exactly 8 (one tick, the primary never struck, nine candidates offered): one dummy more or fewer alerts. The before read (no cast) is 0; the entry nearby_count_control casts the same Bane without 807461. Reference search 2026-11-23: coa-history spell 807461 and 807554: 0 events in 186 logs for 807461 (a passive leaves no event); 807554: 2923 damage events in 4 logs (min 44, max 3364, mean 311, 0 crits, consistent with SPELL_ATTR2_CANT_CRIT on 807554); nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 807461,
+      "kind": "metric_delta",
+      "name": "Herald of the Legion (control: Bane of Chaos strikes no nearby enemy without 807461)",
+      "variant": "nearby_count_control",
+      "label_suffix": "nearby_count_control",
+      "trigger_spell": 704368,
+      "gate_spell": 804247,
+      "target": "dummy",
+      "cast_in_before": false,
+      "area_dummies": [
+        2.5,
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5,
+        6.0,
+        6.5,
+        7.0
+      ],
+      "area_sum": true,
+      "quote": "to up to $807554i nearby enemies",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 807554,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "after_at_least": 0,
+      "after_at_most": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Control arm of nearby_count on the same build: the same Bane of Chaos cast and sum, with 807461 never learned (the gate is the harmless Bless 804247): 0 strikes of 807554 on the ten dummies, so the 8 strikes of the treatment entry come from 807461 and not from the spell. Reference search 2026-11-23: coa-history spell 807461 and 807554: 0 events in 186 logs for 807461 (a passive leaves no event); 807554: 2923 damage events in 4 logs (min 44, max 3364, mean 311, 0 crits, consistent with SPELL_ATTR2_CANT_CRIT on 807554)."
+    },
+    {
+      "spell": 807461,
+      "kind": "metric_delta",
+      "name": "Herald of the Legion (50% of the damage to a nearby enemy)",
+      "variant": "nearby_ratio",
+      "label_suffix": "nearby_ratio",
+      "trigger_spell": 704368,
+      "gate_spell": 807461,
+      "target": "dummy",
+      "area_dummies": [
+        4.0
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "quote": "dealing $s1% of the damage dealt",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807554,
+        "target": "area1"
+      },
+      "before_expected": 0,
+      "expected": 0.5,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "same_arm_ratio": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 704368,
+          "target": "dummy"
+        },
+        "ratio": 0.5,
+        "tolerance": 0.025,
+        "least": 1,
+        "source": "tooltip of 807461: $s1 = 50 (Spell.dbc 807461 EffectBasePoints[0] 49 + 1)% of the damage dealt"
+      },
+      "observe_source": "$s1 = 50 (807461 EffectBasePoints[0] 49 + EffectDieSides 1). Bane of Chaos 704368 is cast at the dummy; one first tick at 3000 ms (read at 3500 ms); 807554 on a second dummy 4 yd from the caster (inside 8 yd of the first) is read before and after a real learn of 807461 (the before phase is the control) against the gain of the Bane damage on the first dummy in the same window: ratio 0.5 within 0.025, so 0.45 and 0.55 are excluded. 823764 on the caster removes partial resists in both phases (precondition fixture). Code: AscensionFelswornEvents.cpp:249-257 (damage / 2 per enemy). Reference search 2026-11-23: coa-history spell 807461 and 807554: 0 events in 186 logs for 807461 (a passive leaves no event); 807554: 2923 damage events in 4 logs (min 44, max 3364, mean 311, 0 crits, consistent with SPELL_ATTR2_CANT_CRIT on 807554); nothing found beyond the tooltip."
     }
   ],
   "player_observations": [],

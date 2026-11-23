@@ -3217,10 +3217,23 @@
   {
     "spell": 806111,
     "clause": "Critical strikes with Sargeron Smite now cause the target to bleed for an additional 50% of the damage dealt over $806112d.",
-    "labels": [
-      "806111 spell_duration 806112 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Critical strikes with Sargeron Smite now cause the target to bleed for an additional 50% of the damage dealt",
+        "labels": [
+          "806111 behaviour_metric_delta bleed_ratio",
+          "806111 behaviour_metric_delta bleed_noncrit"
+        ]
+      },
+      {
+        "claim": "over $806112d",
+        "labels": [
+          "806111 behaviour_metric_delta bleed_held",
+          "806111 behaviour_metric_delta bleed_gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 806235,
@@ -3276,15 +3289,16 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "dealing $s1% of the damage dealt",
+        "claim": "Damage dealt by Bane of Chaos now radiates fel energy around the enemy, dealing $s1% of the damage dealt",
         "labels": [
-          "807461 effect_value e0 #0"
+          "807461 behaviour_metric_delta nearby_ratio"
         ]
       },
       {
         "claim": "to up to $807554i nearby enemies",
         "labels": [
-          "807461 effect_value #1"
+          "807461 behaviour_metric_delta nearby_count",
+          "807461 behaviour_metric_delta nearby_count_control"
         ]
       }
     ]
