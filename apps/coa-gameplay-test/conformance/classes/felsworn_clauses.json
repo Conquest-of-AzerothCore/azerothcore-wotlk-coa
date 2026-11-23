@@ -78,10 +78,22 @@
   {
     "spell": 300466,
     "clause": "Increases the damage and threat generated from Carve by $s1%.",
-    "labels": [
-      "300466 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the damage",
+        "labels": [
+          "300466 behaviour_hit_ratio damage"
+        ]
+      },
+      {
+        "claim": "and threat generated from Carve by $s1%",
+        "labels": [
+          "300466 behaviour_threat_slope 803715 threat",
+          "300466 behaviour_threat_slope 803715 control"
+        ]
+      }
+    ]
   },
   {
     "spell": 300467,
@@ -220,7 +232,8 @@
     "spell": 300477,
     "clause": "Increases your spell critical strike rating by $s1% of your Spirit.",
     "labels": [
-      "300477 effect_value e0 #0"
+      "300477 behaviour_metric_delta spell_crit_rating",
+      "300477 behaviour_metric_delta spirit_read"
     ],
     "kind": "claim"
   },
@@ -2658,7 +2671,7 @@
     "spell": 807430,
     "clause": "Increases the duration of Skull of Gul'dan by $/1000;S1 sec.",
     "labels": [
-      "807430 effect_value e0 #0"
+      "807430 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },

@@ -63,7 +63,118 @@
   "talent_modifiers": [],
   "rotation": [],
   "stack": [],
-  "behaviours": [],
+  "behaviours": [
+    {
+      "spell": 300466,
+      "name": "Unholy Endurance (Carve damage)",
+      "kind": "hit_ratio",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "Increases the damage and threat generated from Carve by $s1%.",
+      "expected": 1.15,
+      "observe_spell": 803715,
+      "learn": [
+        803715
+      ],
+      "control": {},
+      "treatment": {
+        "learn": [
+          300466
+        ]
+      },
+      "critical": false,
+      "trials": 150,
+      "observe_source": "$s1 = 15 (300466 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectBasePoints 14 + EffectDieSides 1, MiscValue 0 = SPELLMOD_DAMAGE; Spell.dbc read with apps/coa-dbc/inspect_dbc.py), class mask 0x80 of family 20 widened by AscensionFelswornContracts.cpp:29-33 to 0x80/0/0x200000. Carve's strike 803715 (SpellFamilyFlags[0] 0x80, weapon percent damage) is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits only; mean damage per hit must rise by 15 percent (band 13..17, G-19). The control arm is the same cast without 300466. Reference search 2026-11-23: coa-history spell 300466: 0 events in 186 logs (passive, never logged); coa-history spell 803715 (Carve hit): SPELL_DAMAGE 1086 events in 5 logs, 188 crits, min 37 max 1630 mean 307 (gear and channel length differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Unholy Endurance 300466, Tyrant specialization, 'Increases the damage and threat generated from Carve by 15%.', same figure as the tooltip; nothing else found.",
+      "parts": 5
+    },
+    {
+      "spell": 300466,
+      "name": "Unholy Endurance (Carve threat, control without the passive)",
+      "kind": "threat_slope",
+      "variant": "control",
+      "label_suffix": "control",
+      "quote": "Increases the damage and threat generated from Carve by $s1%.",
+      "hit_spell": 803715,
+      "expected_slope": 1,
+      "flat": 11,
+      "observe_source": "Control of the threat entry: Carve's strike 803715 without 300466 must give threat = damage plus the initial threat of its SpellLevel 11 (Spell.dbc SpellLevel 11, no SPELL_EFFECT_THREAT, Spell.cpp:5731-5737 adds SpellLevel when the spell has no spell_threat row and no SPELL_ATTR0_CU_NO_INITIAL_THREAT), so (threat - 11) / damage = 1. Reference search 2026-11-23: coa-history spell 300466: 0 events in 186 logs (passive, never logged); coa-history spell 803715 (Carve hit): SPELL_DAMAGE 1086 events in 5 logs, 188 crits, min 37 max 1630 mean 307 (gear and channel length differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Unholy Endurance 300466, Tyrant specialization, 'Increases the damage and threat generated from Carve by 15%.', same figure as the tooltip; nothing else found."
+    },
+    {
+      "spell": 300466,
+      "name": "Unholy Endurance (Carve threat)",
+      "kind": "threat_slope",
+      "variant": "threat",
+      "label_suffix": "threat",
+      "quote": "Increases the damage and threat generated from Carve by $s1%.",
+      "hit_spell": 803715,
+      "expected_slope": 1.15,
+      "flat": 11,
+      "learn": [
+        300466
+      ],
+      "observe_source": "$s2 = 15 (300466 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectBasePoints 14 + 1, MiscValue 2 = SPELLMOD_THREAT), mask widened as for Effect[0]. ThreatManager::CalculateModifiedThreat (ThreatManager.cpp:703-714) applies ApplySpellMod(SPELLMOD_THREAT) to the damage threat; the flat initial threat of SpellLevel 11 is added with ignoreModifiers (Spell.cpp:5757-5762) and stays 11, so with 300466 learned (a real learn after the hit spell) (threat - 11) / damage = 1.15. The control arm is the control entry (slope 1 without the passive). Reference search 2026-11-23: coa-history spell 300466: 0 events in 186 logs (passive, never logged); coa-history spell 803715 (Carve hit): SPELL_DAMAGE 1086 events in 5 logs, 188 crits, min 37 max 1630 mean 307 (gear and channel length differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Unholy Endurance 300466, Tyrant specialization, 'Increases the damage and threat generated from Carve by 15%.', same figure as the tooltip; nothing else found."
+    },
+    {
+      "spell": 300477,
+      "name": "Nether Spirit (spell critical strike rating)",
+      "kind": "metric_delta",
+      "variant": "spell_crit_rating",
+      "label_suffix": "spell_crit_rating",
+      "quote": "Increases your spell critical strike rating by $s1% of your Spirit.",
+      "trigger_spell": 60235,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 10
+      },
+      "before_expected": 0,
+      "expected": 71,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "observe_source": "300477 Effect[0] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, EffectMiscValue 1024 (CR_CRIT_SPELL 10), EffectMiscValueB 4 (Spirit), $s1 = 20 (EffectBasePoints 19 + 1). Greatness 60235 (Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 4, EffectBasePoints 299 + 1 = +300 Spirit, SPELL_ATTR2_ALLOW_LOW_LEVEL_BUFF so it is not level-scaled) is a real cast on the caster in both phases: Spirit = class file reference stat 4 (50) + 300 x 1.03 = 359, the +3% being the Human racial The Human Spirit 20598 (Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue 4, EffectBasePoints 2 + 1; the class file race is 1, Human); 20% of 359 = 71.8, truncated to 71 as PlayerUpdates.cpp:662-670 does (int32(CalculatePct(stat, pct))). A first run read Spirit 359 and rating 71 against an expected 350 and 70 written without the racial: the expectation was corrected from the DBC racial, not from the reading. Combat rating 10 is read before (300477 not learned, control: 0) and after a real learn; the spirit_read entry reads the Spirit itself. First attempt with Divine Spirit 48073 (BasePoints 79, BaseLevel 80) read Spirit 101 (+51, not +80) and rating 20 = 20% of 101: a fixture scaling, not a defect of 300477. Reference search 2026-11-23: coa-history spell 300477: 0 events in 186 logs (passive); bindmysoul talents snapshot (fetched 2026-07-22) words the passive 'spell critical strike chance by 20% of your Spirit' (Infernal specialization), an older and different text; the tooltip and the DBC effect (rating from stat) govern; nothing else found."
+    },
+    {
+      "spell": 807430,
+      "name": "Suffering (Skull of Gul'dan duration)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Increases the duration of Skull of Gul'dan by $/1000;S1 sec.",
+      "trigger_spell": 800225,
+      "target": "caster",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 800225
+      },
+      "before_expected": 9900,
+      "expected": 14900,
+      "expected_gain": 5000,
+      "tolerance": 300,
+      "wait_ms": 100,
+      "expire_ms": 10500,
+      "observe_source": "$/1000;S1 = 5 sec: 807430 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), EffectBasePoints 4999 + 1 = 5000 ms, class mask word 2 0x40 matching Skull of Gul'dan 800225 (SpellFamilyFlags[2] 0x40, DurationIndex 1 = 10000 ms, SpellDuration.dbc). Skull is cast on the caster before (control: 807430 not learned, 10000 ms less the 100 ms wait) and after a real learn (15000 less 100); the tolerance 300 excludes a gain 10% off (4500 or 5500). Effect[2] of 807430 is SPELL_EFFECT_DUMMY, not an aura, so its pct modifier is inert (observation, not changed). Reference search 2026-11-23: coa-history spell 807430: 0 events in 186 logs (passive); spell 800225: SPELL_AURA_APPLIED 16 events in 4 logs (no duration figure for the passive); bindmysoul talents snapshot (fetched 2026-07-22) 'Increases the duration of Skull of Gul'dan by 5 sec.'; nothing else found."
+    },
+    {
+      "spell": 300477,
+      "name": "Nether Spirit (Spirit read under the fixture buff)",
+      "kind": "metric_delta",
+      "variant": "spirit_read",
+      "label_suffix": "spirit_read",
+      "quote": "Increases your spell critical strike rating by $s1% of your Spirit.",
+      "trigger_spell": 60235,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "stat",
+      "fields": {
+        "stat": 4
+      },
+      "before_expected": 50,
+      "expected": 359,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Attribution of the spell_crit_rating entry: the Spirit the 20% is taken of. Greatness 60235 Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 4, EffectBasePoints 299 + 1 = +300 (SPELL_ATTR2_ALLOW_LOW_LEVEL_BUFF, no level scaling); the class file reference stat 4 reads 50 without it, so 50 + 300 x 1.03 = 359 after a real cast on the caster, the 1.03 being the Human racial The Human Spirit 20598 (aura 137, MiscValue 4, EffectBasePoints 2 + 1; class file race 1)."
+    }
+  ],
   "player_observations": [],
   "player_tooltip_readings": [],
   "hit_notes": [],
