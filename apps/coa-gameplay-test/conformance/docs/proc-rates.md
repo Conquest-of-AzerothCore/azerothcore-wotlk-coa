@@ -32,6 +32,11 @@ A `procs` entry of the class file describes one proc aura:
 | | alerts, and a baseline arm without a landed hit is not judged. The text must cite the code line (`File.cpp:N`) |
 | | where the handler rolls once per landed hit of the added spell; a handler that rolls per cast or per aura |
 | | application must not use it (ADR 1015) |
+| `critical_trials` | `{"rating", "source"}` (rating `melee` or `spell`) for a `cast` trigger whose proc rolls only on a critical |
+| | hit: the trials count the critical landed hits only (`critical: true`), the rating fixture forces crits, and a |
+| | control arm in part 1, with the passive learned, casts the trigger under 34640 (crit chance effects 0 and 1 set |
+| | to -100000) until a crit-blind roll would show with under 0.05% probability: no critical hit and enough |
+| | non-critical hits (else `unmeasured`), no event (else `alert`). `source` cites the crit condition (ADR 1079) |
 | `readings_question` | the log evidence that tells the readings apart without counting, for `questions.md` |
 | `handler` | the code that rolls a proc without a `spell_proc` or `spell_script_names` row |
 | `dbc` | `ProcChance`, `ProcFlags`, `ProcCharges` of the aura and of the spell of the chance token |

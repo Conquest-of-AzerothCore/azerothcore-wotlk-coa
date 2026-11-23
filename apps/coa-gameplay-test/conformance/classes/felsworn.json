@@ -100,6 +100,45 @@
         }
       },
       "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 800214,
+      "name": "Malice of Gul'dan",
+      "tooltip": "Direct critical strikes now have a $h% chance to trigger a |cffffffffFelstrike|r and generate a |cffffffffFragment of Malice|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 801312
+      },
+      "trigger_text": "Direct critical strikes",
+      "critical_trials": {
+        "rating": "spell",
+        "source": "AscensionFelswornEvents.cpp:97-98: case 800214: return crit && !periodic && Chance(player, id); a non-critical direct hit never rolls"
+      },
+      "event_metric": "spell_cast_count",
+      "proc_spell": 800239,
+      "proc_spell_source": "Effect[0] of 800214 is aura 42 on 800239; the handler casts Fragment of Malice 800239 on the caster with Felstrike 802678 on the target (AscensionFelswornEvents.cpp:227-229)",
+      "events_per_proc": 1,
+      "handler": "aura_ascension_felsworn_event (spell_script_names row of 800214, rev_20260909_05_felsworn_completion.sql:193-194): Check case 800214 (AscensionFelswornEvents.cpp:97-98) passes an outgoing direct critical damage event that is not Derived and rolls Chance(player, 800214) on the raw ProcChance 60 (AscensionFelsworn.cpp:231-239); spell_proc Chance 100 (rev_20261003_10_coa_script_rolled_proc_chance.sql:7-11) so the script's roll is the only probability; Proc (AscensionFelswornEvents.cpp:227-229) casts 802678 on the target and 800239 on the caster.",
+      "dbc": {
+        "800214": {
+          "ProcChance": 60,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {
+        "800214": {
+          "ProcFlags": 1048575,
+          "Chance": 100,
+          "ProcsPerMinute": 0,
+          "Cooldown": 0,
+          "Charges": 0
+        }
+      },
+      "internal_cooldown_ms": 0
     }
   ],
   "triggers": [

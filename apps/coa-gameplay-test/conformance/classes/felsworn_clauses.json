@@ -2026,7 +2026,8 @@
     "spell": 800214,
     "clause": "Direct critical strikes now have a $h% chance to trigger a Felstrike and generate a Fragment of Malice.",
     "labels": [
-      "800214 effect_value #0"
+      "800214 effect_value #0",
+      "800214 proc_rate"
     ],
     "kind": "claim"
   },
