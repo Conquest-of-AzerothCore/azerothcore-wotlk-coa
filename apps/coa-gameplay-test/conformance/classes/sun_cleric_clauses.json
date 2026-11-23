@@ -3368,7 +3368,7 @@
         ]
       }
     ],
-    "reason": "counted pair 20261122-081128 / 20261122-081202, same build-dev and server commit f7c27d317a43 as the previous pair (no C++ change), no flip, 19 scenarios per run, all ok. Gavels: the stack is granted by a forced-critical Gavel of Wrath 802561 (stack_one), Gavel of Light 800611 (stack_light) and Gavel of Grace 800614 (stack_grace), the three roots of the script list Gavel() (AscensionSunCleric.cpp:171-174, G-23), and by a forced-critical Dawnbreak 800654 (stack_dawnbreak): 0 stacks before the learn, 1 after. Non-critical arms: a Gavel of Wrath and a Dawnbreak that cannot crit (fixture 984954 with its Effect[0] amount set to -1000, a precondition, never the subject) read 0 stacks with the passive learned. Increase of the next Illumination: the hit ratio illumination_heal (15.002 / 15.002 against 15, expected from 680642 BasePoints 14 + 1); the not_measured effect_value label is no longer cited. Reference search 2026-11-22: coa-history spell 680641 and 680642: 0 events in 186 logs; bindmysoul snapshot carries the tooltip without a figure; nothing found beyond the tooltip and the DBC. Landing arms (b8a re-review N-1): stack_noncrit_landed and stack_dawnbreak_noncrit_landed read spell_damage_count of 802561 / 800654 on the dummy with critical false, 1 before and 2 after (cumulative), so the 0 stacks are judged on a landed non-critical hit; misses are removed by the shared 10000 hit and expertise ratings."
+    "reason": "Mentor D-283: already works. No critical healing Gavel or Dawnbreak exists: Gavels 800611, 800614, 800617 and Dawnbreak 800654 target enemies only (TARGET_UNIT_TARGET_ENEMY, TARGET_UNIT_CONE_ENEMY_24), Dawnbreak has one damage effect, Gavel of Grace restores mana, and the only Gavel heal 707522 carries SPELL_ATTR2_CANT_CRIT (critical heals 0 and 0 with the strike critical, entry gavel_heal_crit_strike); AscensionSunClericEvents.cpp:126 needs damage and critical, so a heal never passes. Negative arms counting: stack_noncrit and stack_dawnbreak_noncrit (fixture 984954 removes the crit, 0 stacks) with stack_noncrit_landed and stack_dawnbreak_noncrit_landed reading the strike landed non-critical (spell_damage_count critical false 1 then 2); positive arms stack_one, stack_light, stack_grace, stack_dawnbreak read 1 stack. Pair 20261123-004222 / 20261123-004339, build af07b7fcc8, worldserver 91ec5905ef, 9 of 9 ok in both runs, no flip. Reference search: nothing found beyond the tooltip and the DBC."
   },
   {
     "spell": 680641,
@@ -5552,8 +5552,15 @@
         ]
       },
       {
-        "claim": "Doubles the effectiveness of your Holy Form: the threat reduction (Effect[2], -50%) and the mana sacrifice of the Blessed ally (Effect[1])",
+        "claim": "Doubles the effectiveness of your Holy Form: the threat reduction (Effect[2], -50%)",
         "labels": []
+      },
+      {
+        "claim": "Doubles the effectiveness of your Holy Form: the mana sacrifice of the Blessed ally (Effect[1]): the extra heal is taken at twice the mana fraction",
+        "labels": [
+          "800602 behaviour_metric_delta holy_form_bless_mana_doubled",
+          "800602 behaviour_metric_delta holy_form_bless_mana_control"
+        ]
       },
       {
         "claim": "and reduces the tick rate of Ancient Rites by $/1000;s2 sec",
@@ -5567,7 +5574,7 @@
         ]
       }
     ],
-    "reason": "Open: the Holy Form doubling is measured on its healing effect only (Effect[0]; Holy Form is cast for real in both arms); no label covers the threat (Effect[2]) and the Bless mana sacrifice (Effect[1]) parts, so the clause is not status 1. The Ancient Rites tick-rate part has its own labels."
+    "reason": "Open: the Holy Form doubling is measured on its healing effect only (Effect[0]; Holy Form is cast for real in both arms); no label covers the threat (Effect[2]) and the Bless mana sacrifice (Effect[1]) parts, so the clause is not status 1. The Ancient Rites tick-rate part has its own labels. Bless mana part (row 300, round C2): ratio of the extra heal 807994 to the Daybreak heal at 872 of 2868 mana, pair 20261123-003305 / 20261123-003821, build af07b7fcc8, no flip: with 800602 learned 0.3038 and 0.3031 (expected 0.3040, ok); control without 800602 0.3039 in run A and 0.3035 in run B, expected 0.1520 from Holy Form Effect[1] 49 + 1 = 50: alert, the baseline already gives 100%. Lead for the mentor, no server change."
   },
   {
     "spell": 800612,
