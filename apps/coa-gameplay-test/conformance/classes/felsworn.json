@@ -7816,6 +7816,82 @@
       "observe_source": "803904 duration $d = 12000 ms (Spell.dbc DurationIndex). The aura is gone 12100 ms after the cast (excludes a duration 10% long, 13200 ms). Reference search 2026-11-23: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS, 281 SPELL_AURA_APPLIED and 280 SPELL_AURA_REMOVED by players in 15 of 186 logs. Applied-to-removed intervals of the 280 pairs: longest 12.07 to 12.44 s (the $d = 12000 ms expiry), the others 1.37 s and up (the aura also ends after $n attacks, so a shorter interval is not an expiry); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
     },
     {
+      "spell": 802076,
+      "name": "Pit Lord's Strength 802076 (Annihilation attacks)",
+      "kind": "metric_delta",
+      "variant": "charges",
+      "label_suffix": "charges",
+      "quote": "Your Annihilation now affects $s1 additional attack",
+      "trigger_spell": 803904,
+      "gate_spell": 802076,
+      "target": "caster",
+      "metric": "aura_script_value",
+      "fields": {
+        "spell": 803904,
+        "key": 803904
+      },
+      "before_expected": 5,
+      "expected": 6,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "802076 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 0 + 1 = 1 ($s1), on Annihilation 803904 (ProcCharges 5). The charges of Annihilation on the caster are read 500 ms after a real cast, before a learn of 802076 (the control, 5) and after it: 6. Reference search 2026-11-23: coa-history spell 802076: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only. Read through the script_count opt-in (tool ADR 1258, provisional): the count is the aura's script value, the tooltip's own number of attacks, driven by real casts only, against a before arm whose cast runs without the talent.",
+      "script_count": {
+        "noun": "attack"
+      }
+    },
+    {
+      "spell": 802110,
+      "name": "Pit Lord's Strength 802110 (Annihilation attacks)",
+      "kind": "metric_delta",
+      "variant": "charges",
+      "label_suffix": "charges",
+      "quote": "Your Annihilation now affects $s1 additional attack",
+      "trigger_spell": 803904,
+      "gate_spell": 802110,
+      "target": "caster",
+      "metric": "aura_script_value",
+      "fields": {
+        "spell": 803904,
+        "key": 803904
+      },
+      "before_expected": 5,
+      "expected": 7,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "802110 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 1 + 1 = 2 ($s1), on Annihilation 803904 (ProcCharges 5). The charges of Annihilation on the caster are read 500 ms after a real cast, before a learn of 802110 (the control, 5) and after it: 7. Reference search 2026-11-23: coa-history spell 802110: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only. Read through the script_count opt-in (tool ADR 1258, provisional): the count is the aura's script value, the tooltip's own number of attacks, driven by real casts only, against a before arm whose cast runs without the talent.",
+      "script_count": {
+        "noun": "attack"
+      }
+    },
+    {
+      "spell": 803904,
+      "name": "Annihilation (attacks)",
+      "kind": "metric_delta",
+      "variant": "charges",
+      "label_suffix": "charges",
+      "quote": "Lasts for $n attacks or $d.",
+      "trigger_spell": 803904,
+      "gate_spell": 803904,
+      "target": "caster",
+      "metric": "aura_script_value",
+      "fields": {
+        "spell": 803904,
+        "key": 803904
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "803904 ProcCharges 5 (Spell.dbc; $n attacks). The charges of the aura on the caster (script value 803904, set to 5 plus the SPELLMOD_CHARGES mods, AscensionFelswornAuras.cpp:68-72) are read 500 ms after a real cast: 0 before the cast (control) and 5 after. Reference search 2026-11-23: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS, 281 SPELL_AURA_APPLIED and 280 SPELL_AURA_REMOVED by players in 15 of 186 logs. Applied-to-removed intervals of the 280 pairs: longest 12.07 to 12.44 s (the $d = 12000 ms expiry), the others 1.37 s and up (the aura also ends after $n attacks, so a shorter interval is not an expiry); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only. Read through the script_count opt-in (tool ADR 1258, provisional): the count is the aura's script value, the tooltip's own number of attacks, driven by real casts only, against a before arm without the driving cast.",
+      "script_count": {
+        "noun": "attack"
+      }
+    },
+    {
       "spell": 806109,
       "name": "Illidan's Guile (aura held 7900 ms)",
       "kind": "metric_delta",

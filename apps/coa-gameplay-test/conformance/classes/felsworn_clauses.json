@@ -3319,7 +3319,8 @@
     "spell": 802076,
     "clause": "Your Annihilation now affects $s1 additional attack",
     "labels": [
-      "802076 effect_value e0 #0"
+      "802076 effect_value e0 #0",
+      "802076 behaviour_metric_delta charges"
     ],
     "kind": "claim",
     "tool_gap": {
@@ -3367,7 +3368,8 @@
     "spell": 802110,
     "clause": "Your Annihilation now affects $s1 additional attack",
     "labels": [
-      "802110 effect_value e0 #0"
+      "802110 effect_value e0 #0",
+      "802110 behaviour_metric_delta charges"
     ],
     "kind": "claim",
     "tool_gap": {
@@ -3487,7 +3489,8 @@
     "labels": [
       "803904 behaviour_metric_delta held",
       "803904 behaviour_metric_delta gone",
-      "803904 effect_value #1"
+      "803904 effect_value #1",
+      "803904 behaviour_metric_delta charges"
     ],
     "kind": "claim",
     "tool_gap": {
