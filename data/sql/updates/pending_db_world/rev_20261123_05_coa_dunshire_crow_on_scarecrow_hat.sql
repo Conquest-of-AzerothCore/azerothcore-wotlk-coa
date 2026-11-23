@@ -8,7 +8,7 @@ UPDATE `creature` SET `position_x` = -7786.923, `position_y` = 568.814, `positio
 DELETE FROM `creature_movement_override` WHERE `SpawnId` = 9920417;
 INSERT INTO `creature_movement_override` (`SpawnId`, `Flight`) VALUES (9920417, 1);
 
-DELETE FROM `smart_scripts` WHERE `entryorguid` = -9920417 AND `source_type` = 0;
+DELETE FROM `smart_scripts` WHERE `entryorguid` = -9920417 AND `source_type` = 0 AND `id` IN (0, 1, 2);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`,
     `event_chance`, `event_flags`, `event_param1`, `event_param2`, `action_type`, `action_param1`, `action_param2`,
     `target_type`, `target_x`, `target_y`, `target_z`, `comment`)
