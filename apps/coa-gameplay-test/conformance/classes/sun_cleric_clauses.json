@@ -1953,35 +1953,93 @@
   },
   {
     "spell": 572848,
-    "clause": "Spin and strike with both weapons dealing $524857s1% Weapon Damage plus ${$524857m2+$spfi*0.2} to up to $i enemies within $a1 yds.",
-    "reason": "Open, not written: the value labels need a per-hand weapon hit with an absolute expected from the weapon and the off-hand rule. Observation: the tooltip token $524857m2 reads 6 while 572850 and 572045 effect 1 BasePoints are 156 and 104 (+1).",
-    "labels": [
-      "572848 effect_value 524857e0 #0",
-      "572848 effect_value 524857e1 #1",
-      "572848 effect_value #2",
-      "572848 effect_radius e0 #3"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572848,
-    "clause": "Your main-hand strike will deal Physical damage and your off-hand strike will deal Fire damage.",
+    "clause": "Spin and strike with both weapons dealing $524857s1% Weapon Damage to up to $i enemies within $a1 yds.",
+    "labels": [],
+    "kind": "claim",
+    "dbc_clause": "Spin and strike with both weapons dealing $524857s1% Weapon Damage plus ${$524857m2+$spfi*0.2} to up to $i enemies within $a1 yds. Your main-hand strike will deal Physical damage and your off-hand strike will deal Fire damage.",
+    "text_source": {
+      "basis": "owner_ruling",
+      "spell": 572848,
+      "ruling": "O-33 / O-38 (2026-11-23): the client text states each hand as an additional flat plus 20% spell power amount, ${$572850m2+$spfi*0.2} Physical for the main hand and ${$572045m2+$spfi*0.2} Fire for the off hand, in place of the DBC single figure $524857m2 = 6 (served 157 and 105); neither 572850 nor 572045 effect 1 carries points per level (EffectRealPointsPerLevel 0.0, O-37)."
+    },
     "claims": [
       {
-        "claim": "the main-hand strike 572850 deals Physical damage (SchoolMask 1)",
+        "claim": "$524857s1% Weapon Damage",
         "labels": [
-          "572848 behaviour_metric_delta school_main"
+          "572848 behaviour_metric_delta hand_main",
+          "572848 behaviour_metric_delta hand_off"
         ]
       },
       {
-        "claim": "the off-hand strike 572045 deals Fire damage (SchoolMask 4)",
+        "claim": "up to $i enemies",
+        "labels": [
+          "572848 effect_value #1"
+        ]
+      },
+      {
+        "claim": "within $a1 yds",
+        "labels": [
+          "572848 effect_radius e0 #2"
+        ]
+      }
+    ],
+    "reason": "Owner ruling O-33 / O-38 (2026-11-23): the streamed Description (coa_client_spell_description 572848, rev_20261123_300_sun_cleric_justice_tooltip_per_hand.sql) keeps the DBC start of the sentence and states each hand separately; neither 572850 nor 572045 effect 1 carries points per level (EffectRealPointsPerLevel 0.0, O-37), so the tooltip figures are the served 157 and 105. Counted pair 20261123-081314 / 20261123-081348, build bf866755c470 (server commit 06c926cb875e plus this change), no flip, 6 of 6 verdicts ok and 0 alerts in both runs, control arm of each entry: no cast before the strike reads 0 damage. Weapon Damage claim: the 50% is judged inside the hit intervals of hand_main [183, 198] and hand_off [126, 164] (a 100% weapon part would read about 223 to 250 on the main hand); measured main hand 191 and 187, off hand 161 and 152. The target count ($i = 5, MaxAffectedTargets) and the radius ($a1) keep their data labels and are not counted by this pair. Reference search 2026-11-23: coa-history 572850 600 damage events (mean 1276) and 572045 594 (mean 469) in 5 logs, 330 casts of 572848; live gear and talents unknown, so the live off-hand to main-hand ratio 0.37 (about 0.77 here) is a lead and no value is taken from it; nothing else found beyond the tooltip and the DBC. Client rendering not checked (no lab client run: not cheap here)."
+  },
+  {
+    "spell": 572848,
+    "clause": "Your main-hand strike deals an additional ${$572850m2+$spfi*0.2} Physical damage",
+    "labels": [],
+    "kind": "claim",
+    "dbc_clause": "Spin and strike with both weapons dealing $524857s1% Weapon Damage plus ${$524857m2+$spfi*0.2} to up to $i enemies within $a1 yds. Your main-hand strike will deal Physical damage and your off-hand strike will deal Fire damage.",
+    "text_source": {
+      "basis": "owner_ruling",
+      "spell": 572848,
+      "ruling": "O-33 / O-38 (2026-11-23): the client text states each hand as an additional flat plus 20% spell power amount, ${$572850m2+$spfi*0.2} Physical for the main hand and ${$572045m2+$spfi*0.2} Fire for the off hand, in place of the DBC single figure $524857m2 = 6 (served 157 and 105); neither 572850 nor 572045 effect 1 carries points per level (EffectRealPointsPerLevel 0.0, O-37)."
+    },
+    "claims": [
+      {
+        "claim": "deals an additional ${$572850m2+$spfi*0.2}",
+        "labels": [
+          "572848 behaviour_metric_delta hand_main",
+          "572848 behaviour_metric_delta hand_main_sp"
+        ]
+      },
+      {
+        "claim": "Physical damage",
+        "labels": [
+          "572848 behaviour_metric_delta school_main"
+        ]
+      }
+    ],
+    "reason": "Owner ruling O-33 / O-38 (2026-11-23): the streamed Description (coa_client_spell_description 572848, rev_20261123_300_sun_cleric_justice_tooltip_per_hand.sql) keeps the DBC start of the sentence and states each hand separately; neither 572850 nor 572045 effect 1 carries points per level (EffectRealPointsPerLevel 0.0, O-37), so the tooltip figures are the served 157 and 105. Counted pair 20261123-081314 / 20261123-081348, build bf866755c470 (server commit 06c926cb875e plus this change), no flip, 6 of 6 verdicts ok and 0 alerts in both runs, control arm of each entry: no cast before the strike reads 0 damage. Per-hand value judged against 157: hand_main reads 191 and 187 inside [183, 198] (50% of the weapon roll plus attack power part plus 157, times the dummy armor factor 0.913; the old single figure 6 would give 50 to 65); school_main reads one Physical (mask 1) event and 0 at the Fire mask. Spell power term: hand_main_sp at 20000 spell power reads 3845 and 3840 inside [3835, 3849] (0.2 x 20000 = 4000 added before armor), which excludes a 10% and a 30% coefficient by about 1826; the spell power is set by a plain integer fixture, because hit_arm needs a magic school and 572848 has none, so the spell power the hit ran at is not recorded on the verdict (tool limit, not extended). Reference search 2026-11-23: coa-history 572850 600 damage events (mean 1276) and 572045 594 (mean 469) in 5 logs, 330 casts of 572848; live gear and talents unknown, so the live off-hand to main-hand ratio 0.37 (about 0.77 here) is a lead and no value is taken from it; nothing else found beyond the tooltip and the DBC. Client rendering not checked (no lab client run: not cheap here)."
+  },
+  {
+    "spell": 572848,
+    "clause": "and your off-hand strike deals an additional ${$572045m2+$spfi*0.2} Fire damage.",
+    "labels": [],
+    "kind": "claim",
+    "dbc_clause": "Spin and strike with both weapons dealing $524857s1% Weapon Damage plus ${$524857m2+$spfi*0.2} to up to $i enemies within $a1 yds. Your main-hand strike will deal Physical damage and your off-hand strike will deal Fire damage.",
+    "text_source": {
+      "basis": "owner_ruling",
+      "spell": 572848,
+      "ruling": "O-33 / O-38 (2026-11-23): the client text states each hand as an additional flat plus 20% spell power amount, ${$572850m2+$spfi*0.2} Physical for the main hand and ${$572045m2+$spfi*0.2} Fire for the off hand, in place of the DBC single figure $524857m2 = 6 (served 157 and 105); neither 572850 nor 572045 effect 1 carries points per level (EffectRealPointsPerLevel 0.0, O-37)."
+    },
+    "claims": [
+      {
+        "claim": "deals an additional ${$572045m2+$spfi*0.2}",
+        "labels": [
+          "572848 behaviour_metric_delta hand_off",
+          "572848 behaviour_metric_delta hand_off_sp"
+        ]
+      },
+      {
+        "claim": "Fire damage",
         "labels": [
           "572848 behaviour_metric_delta school_off"
         ]
       }
     ],
-    "reason": "Measured: the damage event of each strike is read with its packet school mask (spell_damage_count with school_mask, an event read). Expected values come from the DBC: 572850 SchoolMask 1 (Physical), 572045 SchoolMask 4 (Fire). Pair 20261123-025253 / 20261123-025517, build 96e7e2292b2a (server b286767ee568), no flip, cast_failures none: main hand reads 1 event at mask 1, off hand 1 event at mask 4. Control arms in the same pair: the other school mask reads 0 for each hand and the unfiltered count reads 1, so the 0 is not a missed hit. An immunity or resistance fixture is not needed (#6786 not tested). Reference search: nothing found beyond the tooltip and the DBC.",
-    "kind": "claim"
+    "reason": "Owner ruling O-33 / O-38 (2026-11-23): the streamed Description (coa_client_spell_description 572848, rev_20261123_300_sun_cleric_justice_tooltip_per_hand.sql) keeps the DBC start of the sentence and states each hand separately; neither 572850 nor 572045 effect 1 carries points per level (EffectRealPointsPerLevel 0.0, O-37), so the tooltip figures are the served 157 and 105. Counted pair 20261123-081314 / 20261123-081348, build bf866755c470 (server commit 06c926cb875e plus this change), no flip, 6 of 6 verdicts ok and 0 alerts in both runs, control arm of each entry: no cast before the strike reads 0 damage. Per-hand value judged against 105: hand_off reads 161 and 152 inside [126, 164] (50% of the weapon roll plus attack power part plus 105; the old figure 6 would give 28 to 65); school_off reads one Fire (mask 4) event and 0 at the Physical mask. Spell power term: hand_off_sp at 20000 spell power reads 4153 and 4163 inside [4126, 4164] (0.2 x 20000 = 4000), excluding a 10% and a 30% coefficient by about 2000; same plain integer fixture as the main hand. Reference search 2026-11-23: coa-history 572850 600 damage events (mean 1276) and 572045 594 (mean 469) in 5 logs, 330 casts of 572848; live gear and talents unknown, so the live off-hand to main-hand ratio 0.37 (about 0.77 here) is a lead and no value is taken from it; nothing else found beyond the tooltip and the DBC. Client rendering not checked (no lab client run: not cheap here)."
   },
   {
     "spell": 520639,
