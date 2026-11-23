@@ -2053,7 +2053,8 @@
     "spell": 800214,
     "clause": "stacking $u times.",
     "labels": [
-      "800214 max_stacks 802678 #3"
+      "800214 max_stacks 802678 #3",
+      "802678 behaviour_metric_delta felstrike_stack_cap"
     ],
     "kind": "claim"
   },

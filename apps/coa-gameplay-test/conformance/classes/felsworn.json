@@ -2161,6 +2161,63 @@
       },
       "observe_source": "Uncounted observation for the owner (mentor D-16): without hold_power_during_wait, from full Energy (cast_power 100) with ManaPerSecond 30 Energy, the aura 800355 on the dummy is read 4300 ms after the cast, to bracket how long the channel lasts. No ledger label.",
       "measure_actor": "dummy"
+    },
+    {
+      "spell": 802678,
+      "name": "Malice of Gul'dan (Felstrike stacks cap at 3)",
+      "kind": "metric_delta",
+      "variant": "felstrike_stack_cap",
+      "label_suffix": "felstrike_stack_cap",
+      "quote": "stacking $u times.",
+      "trigger_spell": 803475,
+      "gate_spell": 800214,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        803475,
+        803475,
+        803475,
+        803475
+      ],
+      "setup_wait_ms": 1100,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 802678
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "stack_feed": {
+        "aura": 802678,
+        "cap": 3,
+        "window_ms": 6000,
+        "trials": 4,
+        "refeed_auras": [
+          [
+            800058,
+            6
+          ]
+        ],
+        "source": "802678 StackAmount 3, DurationIndex 32 = 6000 ms"
+      },
+      "observe_source": "Felstrike 802678 StackAmount 3 ($u of the Felstrike description that Malice of Gul'dan 800214 includes through @s:802678:0@), DurationIndex 32 = 6000 ms (SpellDuration.dbc row 32). The Malice handler (AscensionFelswornEvents.cpp:97-98, :227-229) casts 802678 on the target after an outgoing direct (not periodic) critical damage event that passes Chance() on the raw ProcChance 60 (AscensionFelsworn.cpp:231-239), which no spell modifier forces; a stack or refresh of the same caster's 802678 goes through ModStackAmount then OnAuraApply (Unit.cpp:5465-5466). Feed: Azzinoth's Assault 803475 (the level 60 rank, GCD 1000 ms, needs 803468 and 2 Felfury per cast) at the dummy every 1100 ms; its two strikes 520262 and 572585 (melee, not Derived, AscensionFelsworn.cpp:61-69) are direct hits, made critical by the melee crit rating fixture; the class file's hit and expertise ratings remove misses, dodges and parries. Fixtures named as preconditions: Felfury 800058 x6 and 803468 set before the casts and Felfury set to 6 again after every feed cast (refeed). Control: the same five casts before 800214 is learned read 0 stacks. Treatment: 4 trials of five casts each (stack_feed), each valid with at least 4 counted applications whose poll spans stay under 6000 ms; a valid trial passes at exactly 3 stacks, never 4. Design arithmetic only (not the residual): 10 strikes at 60% leave fewer than 4 applications in 5.5% of trials if every strike crits and lands; the residual v^N is stated from the measured void rate of the counted pair. Reference search 2026-11-23 (fw-b1b): coa-history 802678 16516 periodic damage events, nothing for the stack count."
     }
   ],
   "player_observations": [],
