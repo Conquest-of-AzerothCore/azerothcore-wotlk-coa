@@ -1,8 +1,8 @@
 UPDATE `worldforged_upgrade` `w`
 JOIN `item_template` `t` ON `t`.`entry` = `w`.`target_item`
 JOIN (VALUES
-ROW('1H', 60, 8800), ROW('2H', 60, 17600), ROW('Main', 60, 16000), ROW('Ranged', 60, 12000),
-ROW('Off', 60, 12000), ROW('Ring', 60, 14650), ROW('Neck', 60, 14650), ROW('Trinket', 60, 21000)
+ROW('1H', 60, 5850), ROW('2H', 60, 11700), ROW('Main', 60, 10650), ROW('Ranged', 60, 8000),
+ROW('Off', 60, 8000), ROW('Ring', 60, 9800), ROW('Neck', 60, 9800), ROW('Trinket', 60, 14000)
 ) AS `p` (`price_group`, `item_level`, `cost`)
     ON `p`.`item_level` = `t`.`ItemLevel`
     AND `p`.`price_group` = CASE
