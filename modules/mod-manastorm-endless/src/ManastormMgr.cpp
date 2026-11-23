@@ -3078,6 +3078,7 @@ namespace
             saved.Stacks = aura->GetStackAmount();
             saved.Charges = aura->GetCharges();
             saved.MaxDuration = aura->GetMaxDuration();
+            saved.Duration = aura->GetDuration();
             for (uint8 index = 0; index < MAX_SPELL_EFFECTS; ++index)
                 if (AuraEffect const* effect = aura->GetEffect(index))
                 {
@@ -3118,17 +3119,11 @@ namespace
             if (Aura* aura = Aura::TryCreate(info, saved.EffectMask, player, nullptr,
                 saved.BaseAmounts.data(), nullptr, saved.Caster, saved.CastItem))
             {
-                aura->SetLoadedState(saved.MaxDuration, saved.MaxDuration, saved.Charges, saved.Stacks,
+                aura->SetLoadedState(saved.MaxDuration, saved.Duration, saved.Charges, saved.Stacks,
                     saved.RecalculateMask, saved.Amounts.data());
                 aura->ApplyForTargets();
             }
         }
-        for (auto const& [spellId, application] : player->GetAppliedAuras())
-            if (IsRecoverableStageBuff(application, player))
-            {
-                Aura* aura = application->GetBase();
-                aura->SetDuration(aura->GetMaxDuration());
-            }
         player->SetFullHealth();
         player->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
     }

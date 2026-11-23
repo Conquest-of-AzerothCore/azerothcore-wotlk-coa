@@ -51,6 +51,7 @@ public:
         uint8 Charges = 0;
         uint8 RecalculateMask = 0;
         int32 MaxDuration = 0;
+        int32 Duration = 0;
         std::array<int32, 3> Amounts{};
         std::array<int32, 3> BaseAmounts{};
     };

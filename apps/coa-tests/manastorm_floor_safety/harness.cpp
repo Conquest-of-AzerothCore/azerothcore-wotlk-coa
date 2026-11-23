@@ -64,6 +64,7 @@ struct Aura
     void SetMaxDuration(int32 value) { maximum = value; }
     void SetDuration(int32 value) { duration = value; }
     int32 GetMaxDuration() const { return maximum; }
+    int32 GetDuration() const { return duration; }
     uint32 GetId() const { return spell; }
     Unit* GetOwner() const { return owner; }
     ObjectGuid GetCasterGUID() const { return caster; }
@@ -445,8 +446,8 @@ void CheckStageRecovery()
     Aura* restored = player.GetAura(1001, {1}, {77});
     assert(restored && restored->stacks == 2 && restored->charges == 3);
     assert(restored->effects[0].amount == 42 && restored->effects[0].base == 21);
-    assert(restored->duration == 30000 && foreign->duration == 30000);
-    assert(player.applications.at(1006)->aura->duration == 30000);
+    assert(restored->maximum == 30000 && restored->duration == 3000 && foreign->duration == 3000);
+    assert(player.applications.at(1006)->aura->duration == 3000);
     assert(!player.applications.count(2002));
     assert(player.health == 100 && player.mana == 100 && run.StageRecoveries.empty());
 
