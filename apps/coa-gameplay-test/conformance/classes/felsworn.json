@@ -2208,6 +2208,398 @@
       },
       "observe_source": "Uncounted observation for the owner (mentor D-16): without hold_power_during_wait, from full Energy (cast_power 100) with ManaPerSecond 30 Energy, the aura 800355 on the dummy is read 4300 ms after the cast, to bracket how long the channel lasts. No ledger label.",
       "measure_actor": "dummy"
+    },
+    {
+      "spell": 524950,
+      "name": "Black Magic (Ruin damage)",
+      "kind": "hit_ratio",
+      "variant": "ruin",
+      "label_suffix": "ruin",
+      "quote": "Increases the damage of your Bane of Chaos and Ruin by $s1%.",
+      "expected": 1.1,
+      "observe_spell": 801895,
+      "learn": [
+        801895
+      ],
+      "control": {
+        "auras": [
+          [
+            800058,
+            2
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            2
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          524950
+        ]
+      },
+      "critical": false,
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "observe_source": "$s1 = 10 (524950 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectBasePoints 9 + EffectDieSides 1, MiscValue 0 = SPELLMOD_DAMAGE, class mask word 1 = 2; Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Ruin 801895 (SpellFamilyFlags[1] 2, Effect[0] SCHOOL_DAMAGE, 30 Energy, 21 die sides) is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits only; spell power +20000 is a named precondition fixture, the same in both arms, so integer truncation is far inside the band; mean damage per hit must rise by 10 percent (band 8..12, G-19). Reference search 2026-11-23: coa-history spell 524950: 0 events in 186 logs (passive, never logged); ~/CoaServer/reference snapshots (ascension-data advancement.tsv, bindmysoul talents) list Black Magic 524950 without a value beyond the tooltip; nothing found for the value. Ruin costs 30 Energy and needs 2 Felfury (cast refused with SPELL_FAILED_NO_POWER without them, first pair 20261123-153036): both arms set 2 stacks of Felfury 800058 before every trial, a named precondition. Both arms set the aura 823764 (SPELL_AURA_MOD_TARGET_RESISTANCE -9999 on the magic schools, the harness spell-penetration fixture): the first two pairs (20261123-153036, bm2) read hits spread by partial resists (Ruin 21228 / 23893 / 26539 per hit) so the interval could not close inside one scenario."
+    },
+    {
+      "spell": 524950,
+      "name": "Black Magic (Bane of Chaos damage)",
+      "kind": "hit_ratio",
+      "variant": "bane",
+      "label_suffix": "bane",
+      "quote": "Increases the damage of your Bane of Chaos and Ruin by $s1%.",
+      "expected": 1.1,
+      "observe_spell": 706420,
+      "learn": [
+        706420
+      ],
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          524950
+        ]
+      },
+      "critical": false,
+      "trials": 24,
+      "cast_wait_ms": 3500,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "observe_source": "$s1 = 10 (524950 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectBasePoints 9 + EffectDieSides 1, MiscValue 22 = SPELLMOD_DOT, class mask word 0 = 32; Spell.dbc). Bane of Chaos 706420 (the level 60 rank: Effect[0] aura 3 periodic damage every 3000 ms, EffectBasePoints 325 + 1) (SpellFamilyFlags[0] 32, Effect[0] aura 3 periodic damage every 3000 ms) is cast at the dummy; about 326 points a tick, so integer truncation stays under 0.4 percent; one tick is read per trial, without the passive (control) and with it learned (treatment), non-critical ticks only; spell power +20000 is a named precondition fixture in both arms; mean tick damage must rise by 10 percent (band 8..12). Reference search 2026-11-23: coa-history spell 524950: 0 events in 186 logs; snapshots list Black Magic without a value beyond the tooltip; nothing found for the value. The first pair on rank 704368 (ticks of about 32) read +6.9 percent, which is the truncation of a small tick, not a defect proof (pair 20261123-153036). Both arms set the aura 823764 (SPELL_AURA_MOD_TARGET_RESISTANCE -9999 on the magic schools, the harness spell-penetration fixture): the first two pairs (20261123-153036, bm2) read hits spread by partial resists (Ruin 21228 / 23893 / 26539 per hit) so the interval could not close inside one scenario."
+    },
+    {
+      "spell": 704602,
+      "name": "Whirling Vengeance (strike when Fury Unleashed ends)",
+      "kind": "script_hit",
+      "variant": "strike",
+      "label_suffix": "strike",
+      "quote": "When Fury Unleashed ends, you strike all nearby enemies for ${$806096m1+$806096ppl1+$AP*0.5614286} Shadowflame Damage",
+      "hit_spell": 806096,
+      "hit_effect": 0,
+      "trials": 6,
+      "minimum_hits": 4,
+      "casts": [
+        [
+          555738,
+          "caster"
+        ]
+      ],
+      "caster_auras": [
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 6500,
+      "observe_source": "AscensionFelswornAuras.cpp:208-209: when 555738 ends with 704602 known the caster casts 806096; 806096 Effect[0] SCHOOL_DAMAGE EffectBasePoints 749 + 1, TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, radius index 14 (8 yd). Fury Unleashed lasts 5000 ms (SpellDuration 28). Each trial casts Fury Unleashed and waits settle_ms 6500 for its end; the tooltip formula of 806096 effect 0 read with the measured attack power gives the amount. The control arm makes the same cast without 704602 learned and must count no 806096 hit. Reference search 2026-11-23: coa-history spell 806096: 0 events in 186 logs; nothing found for the value."
+    },
+    {
+      "spell": 704602,
+      "name": "Whirling Vengeance (strike, AP contrast arm)",
+      "kind": "script_hit",
+      "variant": "strike_ap",
+      "label_suffix": "strike_ap",
+      "quote": "When Fury Unleashed ends, you strike all nearby enemies for ${$806096m1+$806096ppl1+$AP*0.5614286} Shadowflame Damage",
+      "hit_spell": 806096,
+      "hit_effect": 0,
+      "trials": 6,
+      "minimum_hits": 4,
+      "casts": [
+        [
+          555738,
+          "caster"
+        ]
+      ],
+      "caster_auras": [
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 6500,
+      "observe_source": "AscensionFelswornAuras.cpp:208-209: when 555738 ends with 704602 known the caster casts 806096; 806096 Effect[0] SCHOOL_DAMAGE EffectBasePoints 749 + 1, TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, radius index 14 (8 yd). Fury Unleashed lasts 5000 ms (SpellDuration 28). Each trial casts Fury Unleashed and waits settle_ms 6500 for its end; the tooltip formula of 806096 effect 0 read with the measured attack power gives the amount. The control arm makes the same cast without 704602 learned and must count no 806096 hit. Reference search 2026-11-23: coa-history spell 806096: 0 events in 186 logs; nothing found for the value. AP contrast arm (review fw-r2b I-1): the same entry with stat_auras 10031 (the attack-power fixture the Sun Cleric _ap entries use) set before the stats are measured, so the mean is read at a second attack power; a server that dropped the 0.5614286 x AP term or used another coefficient with the same product at the first AP cannot pass both.",
+      "stat_auras": [
+        [
+          10031,
+          1
+        ]
+      ]
+    },
+    {
+      "spell": 801892,
+      "name": "Twin Fury (Twin Slice critical strikes)",
+      "kind": "metric_delta",
+      "variant": "twin_slice",
+      "label_suffix": "twin_slice",
+      "quote": "Critically striking with Twin Slice or Annihilan Strike now generates an additional 1 Felfury.",
+      "trigger_spell": 801901,
+      "gate_spell": 801892,
+      "target": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "phase_auras": [
+        [
+          800058,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "melee",
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "before_expected": 1,
+      "expected": 3,
+      "observe_source": "The tooltip gives 'an additional 1 Felfury' per critical strike; Twin Slice 801901 states 'Generates 1 Felfury' and strikes with both weapons (808303 per hand, Effect[0] and Effect[1] TRIGGER_SPELL), so with every strike forced to crit (melee crit rating forced by the harness) the expected stacks of Felfury 800058 are 1 (own generation, the first phase, passive unknown = control arm) and 1 + 2 critical strikes x 1 = 3 with 801892 learned. The per-strike reading is the tooltip's own words; a per-cast reading would give 2: when the measured value is 2 the claim goes to status 5 as a question. Felfury is cleared before each phase (phase_auras stacks 0). The code path AscensionFelswornAbilities.cpp:358-361 gains 1 per critical Twin and Direct strike with 801892 known. Reference search 2026-11-23: coa-history spell 801892: 0 events in 186 logs (passive); spell 800058 (Felfury) logged; snapshots list Twin Fury 801892 without a value beyond the tooltip; nothing found for the value."
+    },
+    {
+      "spell": 801892,
+      "name": "Twin Fury (Annihilan Strike critical strikes)",
+      "kind": "metric_delta",
+      "variant": "annihilan",
+      "label_suffix": "annihilan",
+      "quote": "Critically striking with Twin Slice or Annihilan Strike now generates an additional 1 Felfury.",
+      "trigger_spell": 801903,
+      "gate_spell": 801892,
+      "target": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "phase_auras": [
+        [
+          800058,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "melee",
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "before_expected": 2,
+      "expected": 4,
+      "observe_source": "Annihilan Strike 801903 states 'Generates 2 Felfury' and strikes with both weapons (801913 main hand, 801914 off hand, Effect[0] and Effect[1] TRIGGER_SPELL_WITH_VALUE); with every strike forced to crit the expected Felfury 800058 stacks are 2 (control, passive unknown) and 2 + 2 critical strikes x 1 = 4 with 801892 learned; a per-cast reading would give 3 (see the Twin Slice entry). Reference search 2026-11-23: as the Twin Slice entry: nothing found for the value."
+    },
+    {
+      "spell": 300474,
+      "name": "Expose (applied by a Fire or Shadow direct hit)",
+      "kind": "metric_delta",
+      "variant": "applies",
+      "label_suffix": "applies",
+      "quote": "Direct Fire and Shadow spell damage dealt now applies Expose to enemies.",
+      "trigger_spell": 802060,
+      "gate_spell": 300474,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 300475,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "300474 Effect[0] aura 42 PROC_TRIGGER_SPELL of 300475, 300475 Effect[0] aura 271 MOD_DAMAGE_FROM_CASTER and Effect[1] aura 197 MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE on the enemy target (Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Sargeron Smite 802060 (Effect[0] SCHOOL_DAMAGE, SchoolMask 36 Fire and Shadow, SPELL_DAMAGE_CLASS_MAGIC, instant, Consumes 2 Felfury: 2 stacks of Felfury 800058 set before each phase as a named precondition) is cast at the dummy without 300474 (the first phase is the control arm: the Expose aura 300475 must be absent) and with it learned (the aura must be present on the dummy, cast by the caster). The class code applies it on a non-periodic Fire or Shadow magic damage event (AscensionFelswornEvents.cpp:60-62). Reference search 2026-11-23: coa-history spell 300474: 0 events in 186 logs, spell 300475: logged; snapshots list Expose 300474 without a value beyond the tooltip; nothing found for the value."
+    },
+    {
+      "spell": 300474,
+      "name": "Expose (damage taken from the Felsworn)",
+      "kind": "hit_ratio",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "Direct Fire and Shadow spell damage dealt now applies Expose to enemies.",
+      "expected": 1.1,
+      "observe_spell": 802060,
+      "learn": [
+        802060,
+        801895
+      ],
+      "control": {
+        "auras": [
+          [
+            800058,
+            4
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          801895
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            4
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          801895
+        ],
+        "learn": [
+          300474
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "observe_source": "$s1 = 10 (300475 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER, EffectBasePoints 9 + EffectDieSides 1, MiscValue 127 all schools, on the enemy target for 8000 ms). Each trial casts Ruin 801895 (a Fire and Shadow direct hit that applies Expose when 300474 is learned) at the dummy, then the observed Sargeron Smite 802060; the mean damage of the non-critical Smite hits must rise by 10 percent with 300474 learned against the same trials without it (control arm; band 8..12, G-19). Felfury 800058 x4 (Ruin and Smite each consume 2) and the spell penetration aura 823764 are named precondition fixtures; spell power +20000 is a fixture in both arms. Expose is the 8 s aura of the Ruin cast just before the Smite. Reference search 2026-11-23: as the applies entry: nothing found for the value."
+    },
+    {
+      "spell": 520240,
+      "name": "Nether Strength (Burning Hatred cooldown after Sargeron Smite, behaviour)",
+      "kind": "cost_gate",
+      "quote": "Casting Felfury spenders now reduces the cooldown of Burning Hatred, Hateforged Barrier, and Demonic Will by $/1000;520830S1 sec.",
+      "gated_spell": 805239,
+      "resource": "cooldown",
+      "reduction": 500,
+      "target": "caster",
+      "after_casts": [
+        [
+          802060,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 2000,
+      "margin_ms": 40,
+      "label_suffix": "cd_805239",
+      "cast_auras": [
+        {
+          "spell": 802060,
+          "auras": [
+            800058
+          ],
+          "stacks": 2,
+          "reason": "Sargeron Smite 802060 consumes 2 Felfury (AscensionFelswornAbilities.cpp:234-237 reduces the cooldowns on a spender cast) and is refused SPELL_FAILED_NO_POWER without them (prove_p2 refused Ruin): 800058 at 2 stacks is set on the caster before each Smite cast, a named precondition fixture; the claim measured is the cooldown cut."
+        }
+      ],
+      "observe_source": "520240 Effect[0] aura 42 PROC_TRIGGER_SPELL of 520830; 520830 effects 0-2 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -501 + EffectDieSides 1 = -500 ms (500 ms = $/1000;520830S1 sec 0.5), MiscValue 705129 / 800209 / 805239 (Spell.dbc). The class code reduces the cooldown by 500 ms of each of the three when a Felfury spender (Sargeron Smite 802060 here: instant, Consumes 2 Felfury; Ruin has a 2500 ms cast time that ends after the 1000 ms read) is cast (AscensionFelswornAbilities.cpp:234-237). Behaviour route (review fw-r2b I-2: cooldown_ms is a readback): the gated spell 805239 (Burning Hatred) is primed, Sargeron Smite is cast 2000 ms later, and the gated spell is attempted at its cooldown less 500 ms plus/minus 40 ms. A cut of 450 or 550 ms (10% off) falls inside the 40 ms margins on the wrong side, so the through and refused arms exclude both; the control arm is the talent unknown (refused at the same wait). Reference search 2026-11-23: coa-history spells 520240 and 520830: 0 events in 186 logs; nothing found for the value.",
+      "variant": "cd_805239"
+    },
+    {
+      "spell": 520240,
+      "name": "Nether Strength (Hateforged Barrier cooldown after Sargeron Smite, behaviour)",
+      "kind": "cost_gate",
+      "quote": "Casting Felfury spenders now reduces the cooldown of Burning Hatred, Hateforged Barrier, and Demonic Will by $/1000;520830S1 sec.",
+      "gated_spell": 705129,
+      "resource": "cooldown",
+      "reduction": 500,
+      "target": "caster",
+      "after_casts": [
+        [
+          802060,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 2000,
+      "margin_ms": 40,
+      "label_suffix": "cd_705129",
+      "cast_auras": [
+        {
+          "spell": 802060,
+          "auras": [
+            800058
+          ],
+          "stacks": 2,
+          "reason": "Sargeron Smite 802060 consumes 2 Felfury (AscensionFelswornAbilities.cpp:234-237 reduces the cooldowns on a spender cast) and is refused SPELL_FAILED_NO_POWER without them (prove_p2 refused Ruin): 800058 at 2 stacks is set on the caster before each Smite cast, a named precondition fixture; the claim measured is the cooldown cut."
+        }
+      ],
+      "observe_source": "520240 Effect[0] aura 42 PROC_TRIGGER_SPELL of 520830; 520830 effects 0-2 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -501 + EffectDieSides 1 = -500 ms (500 ms = $/1000;520830S1 sec 0.5), MiscValue 705129 / 800209 / 805239 (Spell.dbc). The class code reduces the cooldown by 500 ms of each of the three when a Felfury spender (Sargeron Smite 802060 here: instant, Consumes 2 Felfury; Ruin has a 2500 ms cast time that ends after the 1000 ms read) is cast (AscensionFelswornAbilities.cpp:234-237). Behaviour route (review fw-r2b I-2: cooldown_ms is a readback): the gated spell 705129 (Hateforged Barrier) is primed, Sargeron Smite is cast 2000 ms later, and the gated spell is attempted at its cooldown less 500 ms plus/minus 40 ms. A cut of 450 or 550 ms (10% off) falls inside the 40 ms margins on the wrong side, so the through and refused arms exclude both; the control arm is the talent unknown (refused at the same wait). Reference search 2026-11-23: coa-history spells 520240 and 520830: 0 events in 186 logs; nothing found for the value.",
+      "variant": "cd_705129"
+    },
+    {
+      "spell": 520240,
+      "name": "Nether Strength (Demonic Will cooldown after Sargeron Smite, behaviour)",
+      "kind": "cost_gate",
+      "quote": "Casting Felfury spenders now reduces the cooldown of Burning Hatred, Hateforged Barrier, and Demonic Will by $/1000;520830S1 sec.",
+      "gated_spell": 800209,
+      "resource": "cooldown",
+      "reduction": 500,
+      "target": "caster",
+      "after_casts": [
+        [
+          802060,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 2000,
+      "margin_ms": 40,
+      "label_suffix": "cd_800209",
+      "cast_auras": [
+        {
+          "spell": 802060,
+          "auras": [
+            800058
+          ],
+          "stacks": 2,
+          "reason": "Sargeron Smite 802060 consumes 2 Felfury (AscensionFelswornAbilities.cpp:234-237 reduces the cooldowns on a spender cast) and is refused SPELL_FAILED_NO_POWER without them (prove_p2 refused Ruin): 800058 at 2 stacks is set on the caster before each Smite cast, a named precondition fixture; the claim measured is the cooldown cut."
+        }
+      ],
+      "observe_source": "520240 Effect[0] aura 42 PROC_TRIGGER_SPELL of 520830; 520830 effects 0-2 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -501 + EffectDieSides 1 = -500 ms (500 ms = $/1000;520830S1 sec 0.5), MiscValue 705129 / 800209 / 805239 (Spell.dbc). The class code reduces the cooldown by 500 ms of each of the three when a Felfury spender (Sargeron Smite 802060 here: instant, Consumes 2 Felfury; Ruin has a 2500 ms cast time that ends after the 1000 ms read) is cast (AscensionFelswornAbilities.cpp:234-237). Behaviour route (review fw-r2b I-2: cooldown_ms is a readback): the gated spell 800209 (Demonic Will) is primed, Sargeron Smite is cast 2000 ms later, and the gated spell is attempted at its cooldown less 500 ms plus/minus 40 ms. A cut of 450 or 550 ms (10% off) falls inside the 40 ms margins on the wrong side, so the through and refused arms exclude both; the control arm is the talent unknown (refused at the same wait). Reference search 2026-11-23: coa-history spells 520240 and 520830: 0 events in 186 logs; nothing found for the value.",
+      "variant": "cd_800209"
+    },
+    {
+      "spell": 704602,
+      "name": "Whirling Vengeance (Fury Unleashed cooldown, behaviour)",
+      "kind": "cost_gate",
+      "quote": "Reduces the cooldown of Fury Unleashed by $/1000;S1 sec.",
+      "gated_spell": 555738,
+      "resource": "cooldown",
+      "reduction": 60000,
+      "target": "caster",
+      "label_suffix": "cd",
+      "observe_source": "704602 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -60001 + 1 die side = -60000 ms ($/1000;S1 = 60 sec). Fury Unleashed 555738 RecoveryTime 180000 ms, so the reduced cooldown is 120000 ms. Arms timed from a priming cast: an attempt 120500 ms later without the talent (refused), with it (goes through), and 119500 ms later with it (refused). A cut 10% off (54000 or 66000 ms) moves the end by 6000 ms, far outside the 500 ms margin. Reference search 2026-11-23: nothing found for the value beyond the tooltip.",
+      "variant": "cd"
     }
   ],
   "player_observations": [],
