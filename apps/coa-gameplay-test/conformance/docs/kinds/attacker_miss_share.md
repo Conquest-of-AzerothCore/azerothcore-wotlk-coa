@@ -15,6 +15,10 @@ melee the caster after one engaging swing each. Two arms of `arm_ms`, in whole c
   `pre_cast` (ADR 1033, opt-in) lists spells cast at the first attacker before `cast_spell` in every treatment cycle,
   each with its power set, its cooldown reset (the same named fixture) and its cast time waited out; `settle_ms` and
   `cycle_ms` must cover the whole sequence.
+  `relocate_dx` (ADR 1065, opt-in, a nonzero number of yards under the attackers' 3 yd) moves the caster once along x
+  after the engage wait, before the first control read, so both arms are counted from the same position; the player
+  cast needs the first attacker inside the 180 degree front arc (the caster faces +x) and the attackers settle on a
+  3 yd circle around the caster, so a small step back keeps all of them in front while they still swing.
 
 The aura is never set by the harness. Expected: the miss share rises by minus the amount of `aura` effect
 `aura_effect`, which must be `SPELL_AURA_MOD_HIT_CHANCE` (54); `expected` must equal it. The judge sums swings and

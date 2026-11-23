@@ -82,14 +82,14 @@ class AttackerMissShareTests(unittest.TestCase):
         self.assertEqual(expectation.model['expected'], 3.0)
         self.assertEqual(len(scenario['creatures']), 8)
 
-    def test_relocate_onto_the_attackers_moves_the_caster_once_before_the_first_read(self):
+    def test_relocate_dx_moves_the_caster_once_before_the_first_read(self):
         plain, _ = self.built()
-        moved, expectation = self.built({**ENTRY, 'relocate_onto_attackers': True})
+        moved, expectation = self.built({**ENTRY, 'relocate_dx': -1.0})
         run.validate(moved, run.SIMULATED_CLOCK)
         relocations = [index for index, step in enumerate(moved['steps']) if step['action'] == 'relocate']
         self.assertEqual(len(relocations), 1)
         step = moved['steps'][relocations[0]]
-        self.assertEqual((step['actor'], step['dx']), ('caster', share.STRIKER_DISTANCE))
+        self.assertEqual((step['actor'], step['dx']), ('caster', -1.0))
         labels = [step.get('label') for step in moved['steps']]
         self.assertLess(relocations[0], labels.index(expectation.model['reads']['control']['start swings']))
         self.assertGreater(relocations[0], labels.index('engage'))
@@ -97,12 +97,10 @@ class AttackerMissShareTests(unittest.TestCase):
                          plain['steps'])
         self.assertNotIn('relocate', [step['action'] for step in plain['steps']])
 
-    def test_relocate_onto_the_attackers_is_true_or_absent(self):
-        scenario, _ = self.built({**ENTRY, 'relocate_onto_attackers': False})
-        self.assertNotIn('relocate', [step['action'] for step in scenario['steps']])
-        for raw in (1, 'true', None):
+    def test_relocate_dx_is_a_nonzero_distance_under_the_attackers_distance(self):
+        for raw in (0, 3.0, -3.0, 40, float('nan'), 'x'):
             with self.assertRaises(ValueError):
-                self.built({**ENTRY, 'relocate_onto_attackers': raw})
+                self.built({**ENTRY, 'relocate_dx': raw})
 
     def test_no_cast_lies_inside_the_control_arm(self):
         scenario, expectation = self.built()

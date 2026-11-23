@@ -2141,7 +2141,7 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 
 - [`attacker_miss_share`](kinds/attacker_miss_share.md): the share of attackers' swings that miss the caster
   without and with a hit-chance aura from a real cast, pooled over parts (ADR 1019, provisional)
-  `relocate_onto_attackers` moves the caster onto the attackers once (ADR 1065, provisional)
+  `relocate_dx` moves the caster along x once before counting (ADR 1065, provisional)
 - [`aura_expiry`](kinds/aura_expiry.md): how long a forced, rolled minion aura lasts, in game time (ADR 0485)
 - [`aura_fed_effect`](kinds/aura_fed_effect.md): a proc-granted aura's effect with the aura earned by a real
   `cast_until_aura` feed and read before each judged cast (ADR 1025, provisional)

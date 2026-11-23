@@ -44,7 +44,7 @@ class AttackerMissShareSpec:
     label_suffix: str = 'attacker_miss'
     quote_spell: int | None = None
     pre_cast: tuple[int, ...] = ()
-    relocate_onto_attackers: bool = False
+    relocate_dx: float | None = None
 
 
 def attacker_miss_share_spec(entry: dict) -> AttackerMissShareSpec:
@@ -57,10 +57,11 @@ def attacker_miss_share_spec(entry: dict) -> AttackerMissShareSpec:
                                  entry.get('label_suffix', 'attacker_miss'),
                                  int(entry['quote_spell']) if 'quote_spell' in entry else None,
                                  tuple(int(spell) for spell in entry.get('pre_cast', [])),
-                                 entry.get('relocate_onto_attackers', False))
-    if spec.relocate_onto_attackers is not False and spec.relocate_onto_attackers is not True:
-        raise ValueError(f'{spec.spell} attacker_miss_share relocate_onto_attackers is true or absent, not '
-                         f'{spec.relocate_onto_attackers!r}')
+                                 float(entry['relocate_dx']) if 'relocate_dx' in entry else None)
+    if spec.relocate_dx is not None and (not math.isfinite(spec.relocate_dx) or spec.relocate_dx == 0
+                                         or abs(spec.relocate_dx) >= STRIKER_DISTANCE):
+        raise ValueError(f'{spec.spell} attacker_miss_share relocate_dx is nonzero and under {STRIKER_DISTANCE:g} yd, '
+                         f'the distance of the attackers, not {spec.relocate_dx!r}')
     if not 1 <= spec.attackers <= TAKEN_OUTCOME_ATTACKERS:
         raise ValueError(f'{spec.spell} attacker_miss_share needs 1 to {TAKEN_OUTCOME_ATTACKERS} attackers')
     if spec.cycle_ms <= 0 or spec.arm_ms < spec.cycle_ms or spec.arm_ms % spec.cycle_ms:
@@ -163,8 +164,8 @@ def attacker_miss_share_scenario(class_file: dict, spec: AttackerMissShareSpec) 
                   {'action': 'wait', 'label': f'engage {attacker}', 'ms': swing_ms}, health]
     steps += [{'action': 'stop_attack', 'actor': CASTER},
               {'action': 'wait', 'label': 'engage', 'ms': TAKEN_OUTCOME_ENGAGE_MS}]
-    if spec.relocate_onto_attackers:
-        steps.append({'action': 'relocate', 'actor': CASTER, 'dx': STRIKER_DISTANCE})
+    if spec.relocate_dx is not None:
+        steps.append({'action': 'relocate', 'actor': CASTER, 'dx': spec.relocate_dx})
     cycles = spec.arm_ms // spec.cycle_ms
     steps += count_reads(spec, 'control', 'start')
     for cycle in range(1, cycles + 1):
@@ -209,11 +210,11 @@ def attacker_miss_share_scenario(class_file: dict, spec: AttackerMissShareSpec) 
                      f'taken-outcome 99% interval; a lapsed treatment aura, a control aura or a control share '
                      f'within {abs(expected):g} points of the {MELEE_MISS_CLAMP[0]:g} to {MELEE_MISS_CLAMP[1]:g}% '
                      f'miss clamp is unmeasured.'
-                     + (f' Before the first read the caster is moved {STRIKER_DISTANCE:g} yd along x onto the '
-                        f'attackers (the harness relocate step), so the cast is not refused UNIT_NOT_INFRONT '
-                        f'(Spell.cpp:7351-7352 waives the facing check inside the target boundary radius, '
-                        f'Unit.cpp:954-962); a refused cast leaves the ready read at 0 and the part unmeasured.'
-                        if spec.relocate_onto_attackers else '')),
+                     + (f' Before the first read the caster is moved {spec.relocate_dx:+g} yd along x (the harness '
+                        f'relocate step) so that every attacker, which settles on a {STRIKER_DISTANCE:g} yd circle around '
+                        f'the caster, stays inside the 180 degree front arc of the caster, which faces +x, that the '
+                        f'player cast needs (Spell.cpp:7351-7352); a refused cast leaves the ready read at 0 and the '
+                        f'part unmeasured.' if spec.relocate_dx is not None else '')),
         'players': [player_fixture(class_file)],
         'creatures': creatures,
         'steps': steps}
