@@ -125,6 +125,13 @@ Event Describe(Unit* owner, ProcEventInfo& event, uint32 talent)
     return result;
 }
 
+void ExtendDuration(Aura* aura, int32 extension)
+{
+    if (aura && aura->GetDuration() >= 0 && extension > 0)
+        aura->SetDuration(int32(std::min<int64>(int64(aura->GetDuration()) + extension,
+            std::numeric_limits<int32>::max())));
+}
+
 void Cast(Unit* caster, Unit* target, uint32 spell, AuraEffect const* effect)
 {
     if (target && target->IsInWorld())
@@ -323,6 +330,10 @@ class aura_wildcard_skillcard_proc : public AuraScript
             case 283949:
                 if (target)
                     owner->AddAura(283951, target);
+                break;
+            case 281571:
+                ExtendDuration(NamedAura(target, "Holy Fire", owner->GetGUID()),
+                    sSpellMgr->AssertSpellInfo(helper)->Effects[EFFECT_0].CalcValue(owner));
                 break;
             default:
                 Cast(owner, owner, helper, effect);
@@ -840,13 +851,34 @@ public:
     }
 };
 
+class aura_wildcard_righteous_radiance : public AuraScript
+{
+    PrepareAuraScript(aura_wildcard_righteous_radiance);
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({270308});
+    }
+
+    void GrantRadiance(AuraEffect const* effect, ProcEventInfo&)
+    {
+        GetTarget()->CastSpell(GetTarget(), 270308, true, nullptr, effect);
+    }
+
+    void Register() override
+    {
+        AfterEffectProc += AuraEffectProcFn(aura_wildcard_righteous_radiance::GrantRadiance, EFFECT_0,
+            SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
+
 class wildcard_card_spell_events : public AllSpellScript
 {
 public:
     wildcard_card_spell_events() : AllSpellScript("wildcard_card_spell_events",
         {ALLSPELLHOOK_ON_CRIT_CHANCE, ALLSPELLHOOK_ON_CAST, ALLSPELLHOOK_ON_SPELL_CHECK_CAST,
             ALLSPELLHOOK_ON_PREPARE, ALLSPELLHOOK_ON_CAST_CANCEL, ALLSPELLHOOK_ON_CALC_MAX_DURATION,
-            ALLSPELLHOOK_ON_GLOBAL_COOLDOWN}) { }
+            ALLSPELLHOOK_ON_GLOBAL_COOLDOWN, ALLSPELLHOOK_ON_BEFORE_EFFECTS}) { }
 
     void OnSpellGlobalCooldown(Spell* spell, int32& duration) override
     {
@@ -890,6 +922,18 @@ public:
             caster->HasStealthAura() && info->SpellFamilyName == SPELLFAMILY_ROGUE &&
             (name == "Garrote" || name == "Cheap Shot" || name == "Ambush"))
             spell->SetScriptValue(281687, 1);
+        if (strict && caster && caster->IsPlayer() && !spell->IsTriggered() && name == "Smite" &&
+            caster->HasAura(273252) && caster->HasAura(33151))
+            spell->SetScriptValue(273252, 1);
+    }
+
+    void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const*) override
+    {
+        if (!spell->GetScriptValue(273252))
+            return;
+        Aura* const surge = caster ? caster->GetAura(33151) : nullptr;
+        if (!surge || !spell->m_appliedMods.contains(surge))
+            spell->SetScriptValue(273252, 0);
     }
 
     void OnSpellCritChance(Spell* spell, Unit*, float& chance) override
@@ -918,6 +962,12 @@ public:
             caster->RemoveAurasDueToSpell(283318);
         if (caster && caster->IsPlayer() && caster->HasAura(281687) && spell->GetScriptValue(281687))
             caster->CastSpell(caster, 281690, true);
+        if (caster && caster->IsPlayer() && spell->GetScriptValue(273252))
+        {
+            spell->SetScriptValue(273252, 0);
+            if (!caster->HasAura(33151))
+                caster->CastSpell(caster, 273269, true);
+        }
         if (!caster || !caster->IsPlayer() || !caster->HasAura(281542) || spell->IsTriggered() ||
             spell->GetCastTime() <= 0)
             return;
@@ -930,14 +980,9 @@ public:
         if (!damaging)
             return;
         Unit* target = spell->m_targets.GetUnitTarget();
-        Aura* moonfire = NamedAura(target, "Moonfire", caster->GetGUID());
-        SpellInfo const* helper = sSpellMgr->GetSpellInfo(281546);
-        if (!moonfire || moonfire->GetDuration() < 0 || !helper)
-            return;
-        int32 const extension = helper->Effects[EFFECT_0].CalcValue(caster);
-        if (extension > 0)
-            moonfire->SetDuration(int32(std::min<int64>(int64(moonfire->GetDuration()) + extension,
-                std::numeric_limits<int32>::max())));
+        if (SpellInfo const* helper = sSpellMgr->GetSpellInfo(281546))
+            ExtendDuration(NamedAura(target, "Moonfire", caster->GetGUID()),
+                helper->Effects[EFFECT_0].CalcValue(caster));
     }
 };
 
@@ -1108,6 +1153,7 @@ void AddSC_AscensionWildcardSkillcards()
     RegisterSpellScript(aura_wildcard_three_hammers);
     RegisterSpellScript(aura_wildcard_supercharged);
     RegisterSpellScript(aura_wildcard_waking_nightmare);
+    RegisterSpellScript(aura_wildcard_righteous_radiance);
     new wildcard_aura_lifecycle();
     new wildcard_card_spell_events();
     new skillcard_pet_healing();

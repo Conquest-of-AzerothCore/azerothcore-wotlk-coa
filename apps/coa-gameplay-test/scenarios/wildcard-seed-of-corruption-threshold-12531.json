@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "Wildcard: Seed of Corruption rank 1 detonates once its target takes the threshold damage (#12531)",
+  "contract": [
+    "Seed of Corruption reads 'When the target takes $s2 total damage or dies, the seed will inflict Shadow damage to",
+    "all enemies within 15 yards'. Ranks 1-5 (27243 ... 47835) carry DBC ProcFlags 0 and the stock spell_proc row",
+    "-27243 defers to them, so the damage-taken proc was never registered and the seed detonated only on death. The",
+    "row now carries rank 6's taken-damage flags (664232). The server threshold for rank 1 is 515 plus spell power;",
+    "four rank 7 Fire Blasts (10199) deal far more, while the 1,000,000 health dummy cannot die and the 18 s DoT",
+    "cannot expire, so an explosion cast (27285) within the window can only be the threshold detonation."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "hero", "spell": 27243 },
+    { "action": "learn", "actor": "hero", "spell": 10199 },
+    { "action": "set_power", "actor": "hero", "power": 0, "value": 1000 },
+    { "action": "cast", "actor": "hero", "spell": 27243, "target": "dummy", "label": "Seed of Corruption rank 1" },
+    {
+      "action": "assert", "label": "SETUP: the seed is on the dummy",
+      "actor": "dummy", "metric": "aura", "spell": 27243, "caster": "hero", "equals": 1, "within_ms": 5000
+    },
+    { "action": "set_power", "actor": "hero", "power": 0, "value": 1000 },
+    { "action": "reset_cooldown", "actor": "hero", "spell": 10199 },
+    { "action": "cast", "actor": "hero", "spell": 10199, "target": "dummy" },
+    { "action": "wait", "ms": 1600 },
+    { "action": "set_power", "actor": "hero", "power": 0, "value": 1000 },
+    { "action": "reset_cooldown", "actor": "hero", "spell": 10199 },
+    { "action": "cast", "actor": "hero", "spell": 10199, "target": "dummy" },
+    { "action": "wait", "ms": 1600 },
+    { "action": "set_power", "actor": "hero", "power": 0, "value": 1000 },
+    { "action": "reset_cooldown", "actor": "hero", "spell": 10199 },
+    { "action": "cast", "actor": "hero", "spell": 10199, "target": "dummy" },
+    { "action": "wait", "ms": 1600 },
+    { "action": "set_power", "actor": "hero", "power": 0, "value": 1000 },
+    { "action": "reset_cooldown", "actor": "hero", "spell": 10199 },
+    { "action": "cast", "actor": "hero", "spell": 10199, "target": "dummy" },
+    {
+      "action": "assert", "label": "SETUP: the Fire Blasts hit the dummy",
+      "actor": "hero", "metric": "spell_damage_count", "spell": 10199, "target": "dummy", "min": 3, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT (#12531): the seed detonated on damage taken",
+      "actor": "hero", "metric": "spell_cast_count", "spell": 27285, "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT (#12531): the detonation consumed the seed",
+      "actor": "dummy", "metric": "aura", "spell": 27243, "caster": "hero", "equals": 0
+    }
+  ]
+}
