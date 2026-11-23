@@ -1537,6 +1537,15 @@ namespace
     }
 }
 
+bool AscensionReach::IsReachModifier(SpellModifier const* mod)
+{
+    if (mod->op != SPELLMOD_RANGE || mod->type != SPELLMOD_FLAT)
+        return false;
+
+    return std::find(DamagingSpells.begin(), DamagingSpells.end(), mod->spellId) != DamagingSpells.end() ||
+        std::find(CastTimeSpells.begin(), CastTimeSpells.end(), mod->spellId) != CastTimeSpells.end();
+}
+
 bool SpellInfo::IsAffectedBySpellMods() const
 {
     return !(AttributesEx3 & SPELL_ATTR3_IGNORE_CASTER_MODIFIERS);
@@ -1577,11 +1586,24 @@ bool SpellInfo::IsAffectedBySpellMod(SpellModifier const* mod) const
     if (mod->targetSpellId && mod->targetSpellId != Id)
         return false;
 
-    // Flame Throwing has no SpellAffect.dbc row and a zero class mask, so the generic lookup below
-    // would match nothing for its range modifier; its tooltip names every damaging spell of its
-    // owner, not one spell family. Its other (undocumented) modifier effect is left alone.
-    if ((mod->spellId == 11100 || mod->spellId == 12353) && mod->op == SPELLMOD_RANGE)
-        return DealsDamage(this);
+    // Reach talents name every damaging spell of their owner, not one spell family; the cast-time ones leave instant
+    // spells alone. A channel such as Arcane Missiles deals its damage through the spell its periodic trigger casts.
+    if (AscensionReach::IsReachModifier(mod))
+    {
+        if (std::find(AscensionReach::CastTimeSpells.begin(), AscensionReach::CastTimeSpells.end(), mod->spellId) ==
+            AscensionReach::CastTimeSpells.end())
+            return DealsDamage(this);
+        if (!IsChanneled() && !(CastTimeEntry && CastTimeEntry->CastTime > 0))
+            return false;
+        if (DealsDamage(this))
+            return true;
+        for (SpellEffectInfo const& effect : GetEffects())
+            if (effect.ApplyAuraName == SPELL_AURA_PERIODIC_TRIGGER_SPELL)
+                if (SpellInfo const* triggered = sSpellMgr->GetSpellInfo(effect.TriggerSpell))
+                    if (DealsDamage(triggered))
+                        return true;
+        return false;
+    }
 
     if (SpellFamilyName == 31 && affectSpell->SpellFamilyName == 31)
     {

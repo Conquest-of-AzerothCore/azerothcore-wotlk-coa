@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Mountain Silversage node 200884 rests on the ground (#12188)",
+  "contract": "#12188 reported the Mountain Silversage herb node (entry 176586, guid 200884) misplaced: it floated 24.97 yd above the ground the server measures and is lowered to it. Expected: it is at that spot and grounded. The spawn is checked through its data, so the pool does not need to pick it.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": 1508.19,
+    "y": -5424.58,
+    "z": 86.472,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the node stays at its spot",
+      "metric": "spawn_distance",
+      "x": 1507.19,
+      "y": -5424.58,
+      "z": 85.972,
+      "max": 0.3,
+      "guid": 200884,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the node rests on the ground instead of floating above it",
+      "metric": "spawn_ground_gap",
+      "min": -0.35,
+      "max": 0.35,
+      "guid": 200884,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the node is grounded within 0.8 yd",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 200884,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the node is not under water",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 200884,
+      "spawn_type": "gameobject"
+    }
+  ]
+}

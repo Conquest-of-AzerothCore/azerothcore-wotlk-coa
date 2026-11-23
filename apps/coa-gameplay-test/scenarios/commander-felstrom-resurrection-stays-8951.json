@@ -1,0 +1,158 @@
+{
+    "schema":  1,
+    "name":  "Commander Felstrom stays and can be killed after Felstrom Resurrection (#8951)",
+    "contract":  "#8951: Commander Felstrom (771) casts Felstrom Resurrection (3488) below 10% health. On CoA the spell is HEAL_MAX_HEALTH on the caster with no summon, but the stock SmartAI rows 1-2 set him unlootable and force-despawned him 2 s after the spell hit, so the rare vanished without loot or XP. With those rows removed he heals to full once and stays in the fight until he is killed; the killer gains XP and can loot his guaranteed money (50-155 copper at the default money drop rate).",
+    "timeout_ms":  300000,
+    "location":  {
+                     "map":  0,
+                     "x":  -8914.0,
+                     "y":  -133.0,
+                     "z":  80.6,
+                     "o":  0
+                 },
+    "players":  [
+                    {
+                        "id":  "p",
+                        "race":  1,
+                        "class":  1,
+                        "level":  32,
+                        "melee_hit_rating":  10000,
+                        "expertise_rating":  10000
+                    }
+                ],
+    "steps":  [
+                  {
+                      "action":  "wait",
+                      "ms":  2000
+                  },
+                  {
+                      "action":  "set_health",
+                      "actor":  "p",
+                      "maximum":  1000000,
+                      "value":  1000000
+                  },
+                  {
+                      "action":  "summon",
+                      "actor":  "p",
+                      "as":  "felstrom",
+                      "entry":  771,
+                      "distance":  3
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  1000
+                  },
+                  {
+                      "action":  "attack_nearby",
+                      "actor":  "p",
+                      "entry":  771
+                  },
+                  {
+                      "action":  "set_health_pct",
+                      "actor":  "p",
+                      "target":  "felstrom",
+                      "pct":  15
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "SETUP: auto-attacks bring Felstrom into his 0-10% health window",
+                      "actor":  "felstrom",
+                      "metric":  "health_pct",
+                      "max":  10,
+                      "within_ms":  120000
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "Felstrom Resurrection heals him to full",
+                      "actor":  "felstrom",
+                      "metric":  "health_pct",
+                      "min":  90,
+                      "within_ms":  10000
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  6000
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "DISCRIMINATING: Felstrom is still there 4 s after the spell (he was despawned 2 s after it)",
+                      "actor":  "p",
+                      "metric":  "nearby_creature_count",
+                      "entry":  771,
+                      "equals":  1
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "Felstrom is alive",
+                      "actor":  "felstrom",
+                      "metric":  "alive",
+                      "equals":  1
+                  },
+                  {
+                      "action":  "snapshot",
+                      "actor":  "p",
+                      "metric":  "xp",
+                      "save_as":  "xp_before_kill"
+                  },
+                  {
+                      "action":  "attack_nearby",
+                      "actor":  "p",
+                      "entry":  771,
+                      "kill":  true
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "he can be killed",
+                      "actor":  "felstrom",
+                      "metric":  "alive",
+                      "equals":  0,
+                      "within_ms":  3000
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "the killer gains experience",
+                      "actor":  "p",
+                      "metric":  "xp",
+                      "relative_to":  "xp_before_kill",
+                      "min":  1,
+                      "within_ms":  3000
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "the killer remains at level 32 for the XP comparison",
+                      "actor":  "p",
+                      "metric":  "level",
+                      "equals":  32
+                  },
+                  {
+                      "action":  "snapshot",
+                      "actor":  "p",
+                      "metric":  "carried_money",
+                      "save_as":  "money_before_loot"
+                  },
+                  {
+                      "action":  "loot_creature",
+                      "actor":  "p",
+                      "target":  "felstrom"
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "the killer can open Felstrom's corpse",
+                      "actor":  "p",
+                      "metric":  "loot_gold",
+                      "min":  1
+                  },
+                  {
+                      "action":  "loot_money",
+                      "actor":  "p"
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "the killer receives Felstrom's money",
+                      "actor":  "p",
+                      "metric":  "carried_money",
+                      "relative_to":  "money_before_loot",
+                      "min":  1
+                  }
+              ]
+}

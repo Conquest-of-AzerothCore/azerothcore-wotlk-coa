@@ -550,6 +550,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `personal_bank_swap` | `actor`, vault `entry`, `direction` `deposit` or `withdraw`, optional bank `slot` (default 0) and split `count` (0 moves the stack); `deposit` needs `item`, the first carried item of that entry. Withdrawals optionally take backpack `inventory_slot` (23-38), otherwise use automatic storage. Sends native `CMSG_GUILD_BANK_SWAP_ITEMS` into or out of the open Personal Bank. |
 | `binder_activate` | `actor`, innkeeper `target` (or `owner` + `entry` for a creature that actor has out): native "make this inn your home" confirmation (`CMSG_BINDER_ACTIVATE`), walking up to the innkeeper first. |
 | `destroy_item` | `actor`, `item`: native `CMSG_DESTROYITEM` of the first carried item of that entry, as the player deleting it. |
+| `forget_vanity` | Player `actor`, `item`: fixture removes that item from the account's Vanity collection (memory and `account_vanity_collection`) while every copy stays where it is, as on accounts whose copies were bound before anything collected them. While the item is collected it first waits until its `account_vanity_collection` row has reached the database, so an insert still running from an earlier store cannot bring the row back, and then deletes it synchronously. |
 | `system_mail` | `actor`, `item`, `kind` `postmaster` (a mail from the Postmaster creature, as `Player::SendItemRetrievalMail` sends), `reward` (a Recruit-A-Friend reward mail: no sender, GM stationery and the reward subject) or `server` (the same sender-less GM-stationery mail with another subject, as boss loot and item recovery mail): post one such mail carrying one `item` to the actor. |
 | `area_trigger` | `actor`, `id`: native area-trigger packet, as the client sends on walking into one; inn triggers are what set the rested flag. |
 | `gossip_select` | `actor`, zero-based `option`: select from the current menu through the session handler. |
@@ -645,7 +646,8 @@ effect that picks one of several auras at random),
 `free_inventory_slots` `equals: 0` is how a scenario states "the bags are full". `mail_count` is the
 number of mails the player holds and `mail_item_count` the items inside them, which is how a reward
 that the bags could not take proves it was posted rather than lost; `mail_has_item` takes `item` and
-returns whether any mail carries it, and `mail_pool_item_count` takes `cache` (optional `table`) and
+returns whether any mail carries it. `vanity_owned` takes `item` and returns whether the account's Vanity collection
+lists it for this character, as a Vanity tab delivery checks. `mail_pool_item_count` takes `cache` (optional `table`) and
 counts only the mail items that are in that cache's own pool. `account_character_count` counts the stored
 characters on the player's account, and `account_other_item_count` takes `item` and counts that item on the
 account's other characters, which is how a character copy proves it carried the inventory.

@@ -1,0 +1,81 @@
+{
+    "schema":  1,
+    "name":  "Plagueland Tree stands on the ground (#11955)",
+    "contract":  "#11955 reported the Plagueland Tree (entry 244626, guid 8000520) floating. It stood 6.58 yd above the ground the server measures. It now stands on the measured ground at z 53.349. Expected: the object is grounded.",
+    "timeout_ms":  60000,
+    "location":  {
+                     "map":  0,
+                     "x":  1072.86,
+                     "y":  -384.121,
+                     "z":  53.8,
+                     "o":  0
+                 },
+    "players":  [
+                    {
+                        "id":  "p",
+                        "race":  1,
+                        "class":  12,
+                        "level":  60
+                    }
+                ],
+    "steps":  [
+                  {
+                      "action":  "set_phase",
+                      "actor":  "p",
+                      "value":  1
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  3000
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "SETUP: the pickup is in the area",
+                      "metric":  "nearby_gameobject_count",
+                      "entry":  244626,
+                      "equals":  1
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the tree stays at its spot, lowered to the ground",
+                      "metric":  "spawn_distance",
+                      "x":  1071.86,
+                      "y":  -384.121,
+                      "z":  53.349,
+                      "max":  0.3,
+                      "guid":  8000520,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "DISCRIMINATING: the tree stands on the ground instead of 6.58 yd above it",
+                      "metric":  "spawn_ground_gap",
+                      "min":  -0.3,
+                      "max":  0.3,
+                      "guid":  8000520,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is grounded within 0.8 yd",
+                      "metric":  "spawn_placement",
+                      "tolerance":  0.8,
+                      "equals":  0,
+                      "guid":  8000520,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is not under water",
+                      "metric":  "spawn_submerged",
+                      "equals":  0,
+                      "guid":  8000520,
+                      "spawn_type":  "gameobject"
+                  }
+              ]
+}

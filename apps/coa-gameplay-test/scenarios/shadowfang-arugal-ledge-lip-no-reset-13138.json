@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "name": "Archmage Arugal keeps fighting a player on the ledge lip at his Shadow Port spot (#13138)",
+  "contract": [
+    "#13138: Arugal (4275) resets when his target leaves his lair polygon, on every difficulty. At 50% health and through Shadow Port 7587 he stands on the south ledge (-103.5, 2122.1), only 0.2 yd inside the old south edge, while the ledge floor reaches 1.25 yd past it, so players fighting him there reset him.",
+    "p stands on the ledge lip at (-103.68, 2121.45), 0.5 yd outside the old edge and 2.75 yd inside the new one, with ledge floor under it. A summoned Arugal 3 yd east runs the same SmartAI and leash as his spawn.",
+    "Expected: Arugal stays in combat and visible for 5 s while p stays on the lip. shadowfang-arugal-resets-when-target-leaves-lair still covers the reset outside the lair."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 33,
+      "x": -76.0,
+      "y": 2152.0,
+      "z": 155.8,
+      "o": 3.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "CONTROL: p is in a Normal Shadowfang Keep",
+      "metric": "map_difficulty",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where Shadowfang Keep is spawned",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "teleport",
+      "label": "p steps onto the ledge lip",
+      "actor": "p",
+      "map": 33,
+      "x": -103.68,
+      "y": 2121.45,
+      "z": 155.9,
+      "o": 0.0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "CONTROL: ledge floor is under the lip spot",
+      "metric": "point_ground_gap",
+      "map": 33,
+      "x": -103.68,
+      "y": 2121.45,
+      "z": 156.5,
+      "min": 0,
+      "max": 2
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "CONTROL: p stands on the lip",
+      "metric": "point_distance_2d",
+      "x": -103.68,
+      "y": 2121.45,
+      "max": 0.5
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "as": "arugal",
+      "entry": 4275,
+      "distance": 3
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "arugal"
+    },
+    {
+      "action": "assert",
+      "actor": "arugal",
+      "label": "CONTROL: Arugal is in combat",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "CONTROL: p is still on the lip",
+      "metric": "point_distance_2d",
+      "x": -103.68,
+      "y": 2121.45,
+      "max": 1.0
+    },
+    {
+      "action": "assert",
+      "actor": "arugal",
+      "label": "DISCRIMINATING: Arugal is still in combat with p on the lip",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Arugal did not reset and vanish",
+      "metric": "nearby_creature_at_client",
+      "entry": 4275,
+      "equals": 1
+    }
+  ]
+}

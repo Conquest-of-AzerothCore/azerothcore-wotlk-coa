@@ -614,4 +614,19 @@ public:
     SpellEffectInfo& _GetEffect(SpellEffIndex index) { ASSERT(index < Effects.size()); return Effects[index]; }
 };
 
+// Ascension's Reach talents: a range bonus for every damaging spell of the owner, with no class mask or SpellAffect.dbc
+// row, that "does not stack with other similar effects"
+namespace AscensionReach
+{
+    // "Increases the range of your damaging spells by $s1 yards": an unmasked range modifier
+    inline constexpr std::array<uint32, 7> DamagingSpells = { 11100, 12353, 812352, 28999, 29000, 829000, 816758 };
+    // "Increases the range of your damaging spells with a channeling or cast time by $s1 yards": an unmasked EFFECT1
+    // modifier, carried as a range modifier (SpellInfoCorrections; Arcane Subtlety rank 3's is a dummy, converted by
+    // AscensionDummyFixMage)
+    inline constexpr std::array<uint32, 20> CastTimeSpells = { 11211, 812592, 12219, 12220, 12221, 16819, 16820, 816819,
+        17322, 17323, 817323, 17917, 17918, 817918, 18218, 18219, 818219, 27789, 27790, 827790 };
+
+    AC_GAME_API bool IsReachModifier(SpellModifier const* mod);
+}
+
 #endif // _SPELLINFO_H
