@@ -375,6 +375,7 @@ void AddSC_AscensionRangerTalents();
 void AddSC_AscensionRangerFlowers();
 void AddSC_AscensionDeadminesBosses();
 void AddSC_AscensionRangerPetalkeeper();
+void AddSC_AscensionPetItemAuras();
 void AddSC_AscensionRangerFalconstrike();
 void AddSC_AscensionRangerArchery();
 void AddSC_AscensionChronomancerTalents();
@@ -685,6 +686,7 @@ void AddCoAScripts()
     AddSC_AscensionRangerFlowers();
     AddSC_AscensionDeadminesBosses();
     AddSC_AscensionRangerPetalkeeper();
+    AddSC_AscensionPetItemAuras();
     AddSC_AscensionRangerFalconstrike();
     AddSC_AscensionRangerArchery();
     AddSC_AscensionChronomancerTalents();
