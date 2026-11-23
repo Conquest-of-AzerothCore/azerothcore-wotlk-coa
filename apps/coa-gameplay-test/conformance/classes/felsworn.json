@@ -8375,20 +8375,22 @@
         ]
       ],
       "control": {
-        "auras": []
+        "auras": [],
+        "target_health_pct": 50
       },
       "treatment": {
         "auras": [],
         "learn": [
           804610
-        ]
+        ],
+        "target_health_pct": 50
       },
-      "trials": 80,
+      "trials": 72,
       "parts": 8,
       "critical": false,
       "cast_spell": 801903,
       "cast_power": 100,
-      "expected_source": "804610 Effect[0] aura 112, BasePoints 14 + 1 = 15 ($s1), against slowed enemies. The non-critical hits of the 801913 main-hand strike of Annihilan Strike 801903 (Effect[0] TRIGGER_SPELL_WITH_VALUE, ManaCost 40 energy) are averaged in a control arm without 804610 and a treatment arm with it learned, on a dummy slowed by Daze 38767 (aura 33 SPELL_AURA_MOD_DECREASE_SPEED, set on the dummy before every cast as a precondition fixture): ratio 1.15, within the 2-point band. Reference search 2026-11-23: coa-history spell 804610: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+      "expected_source": "804610 Effect[0] aura 112, BasePoints 14 + 1 = 15 ($s1), against slowed enemies. The non-critical hits of the 801913 main-hand strike of Annihilan Strike 801903 (Effect[0] TRIGGER_SPELL_WITH_VALUE, ManaCost 40 energy) are averaged in a control arm without 804610 and a treatment arm with it learned, on a dummy slowed by Daze 38767 (aura 33 SPELL_AURA_MOD_DECREASE_SPEED, set on the dummy before every cast as a precondition fixture): ratio 1.15, within the 2-point band. Reference search 2026-11-23: coa-history spell 804610: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only. Since Felsworn ADR 0018 every 801913 strike above 75% health is a critical strike, so both arms set the dummy to 50% health before each cast (target_health_pct), where the normal roll keeps non-critical hits."
     },
     {
       "spell": 804610,
@@ -8401,20 +8403,22 @@
       "observe_spell": 801913,
       "cast_wait_ms": 1600,
       "control": {
-        "auras": []
+        "auras": [],
+        "target_health_pct": 50
       },
       "treatment": {
         "auras": [],
         "learn": [
           804610
-        ]
+        ],
+        "target_health_pct": 50
       },
-      "trials": 80,
+      "trials": 72,
       "parts": 6,
       "critical": false,
       "cast_spell": 801903,
       "cast_power": 100,
-      "expected_source": "804610 Effect[0] aura 112, BasePoints 14 + 1 = 15 ($s1), against slowed enemies. The non-critical hits of the 801913 main-hand strike of Annihilan Strike 801903 (Effect[0] TRIGGER_SPELL_WITH_VALUE, ManaCost 40 energy) are averaged in a control arm without 804610 and a treatment arm with it learned, on a dummy with no slow (the control claim: the passive adds nothing against an unslowed enemy): ratio 1.00, within the 2-point band, which excludes 1.15. Reference search 2026-11-23: coa-history spell 804610: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+      "expected_source": "804610 Effect[0] aura 112, BasePoints 14 + 1 = 15 ($s1), against slowed enemies. The non-critical hits of the 801913 main-hand strike of Annihilan Strike 801903 (Effect[0] TRIGGER_SPELL_WITH_VALUE, ManaCost 40 energy) are averaged in a control arm without 804610 and a treatment arm with it learned, on a dummy with no slow (the control claim: the passive adds nothing against an unslowed enemy): ratio 1.00, within the 2-point band, which excludes 1.15. Reference search 2026-11-23: coa-history spell 804610: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only. Since Felsworn ADR 0018 every 801913 strike above 75% health is a critical strike, so both arms set the dummy to 50% health before each cast (target_health_pct), where the normal roll keeps non-critical hits."
     },
     {
       "spell": 804610,
@@ -10532,6 +10536,206 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "observe_source": "572804 Annihilan Strike: Effect[0] and Effect[1] TRIGGER_SPELL_WITH_VALUE (801913 main hand, 801914 off hand, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE), BasePoints 259 + 1 = 260 ($s2). The tooltip's 'Generates 2 Felfury' is read as the Felfury gain of one cast. Felfury stacks read 0 before and 2 after one real cast at the dummy. Reference search 2026-11-23: coa-history spell 572804: 0 events; spell 801913 Annihilan Strike: SPELL_DAMAGE 70 events in 4 logs (34 crits, min 98 max 394; gear differs so no figure decides); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 572804,
+      "name": "Annihilan Strike (critical share: 76% health guaranteed, 74% health normal)",
+      "variant": "crit_guarantee_76_74",
+      "label_suffix": "crit_guarantee_76_74",
+      "kind": "hit_ratio",
+      "quote": "This ability is guaranteed to critically strike against enemies above 75% health.",
+      "observe_spell": 801913,
+      "cast_spell": 572804,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "expected": 1.0,
+      "rate": "critical",
+      "control": {
+        "auras": [
+          [
+            705109,
+            1
+          ]
+        ],
+        "target_health_pct": 74,
+        "aura_amounts": [
+          [
+            705109,
+            0,
+            -100
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            705109,
+            1
+          ]
+        ],
+        "target_health_pct": 76,
+        "aura_amounts": [
+          [
+            705109,
+            0,
+            -100
+          ]
+        ]
+      },
+      "expected_points": 100,
+      "trials": 40,
+      "parts": 2,
+      "expected_source": "Annihilan Strike 572804 (Effect[0] and [1] TRIGGER_SPELL_WITH_VALUE, main hand 801913, off hand 801914, both SPELL_EFFECT_WEAPON_PERCENT_DAMAGE; every rank 560759-560762, 572803, 572804 and 801903 triggers the same two strikes, whose own Spell.dbc description carries the sentence) states 'guaranteed to critically strike against enemies above 75% health'. The dummy health is set before each cast to pct x 50000000 / 100; 75% is exactly 37500000 = 75% of the maximum, so it is not above 75%. Felsworn ADR 0018 (mentor D-72). Both arms set Cruelty 705109 (Felsworn, Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT) on the caster with its amount set to -100 as a fixture, so the normal roll reads 0 whatever the reference character's own critical chance: every 801913 strike at 76% is a critical strike (100%), at 74% the strike keeps the normal roll (0): a difference of 100 points. Reference search 2026-11-24: coa-history spell 572804: 0 events in 186 logs; 801913 Annihilan Strike: SPELL_DAMAGE 70 events in 4 logs (34 crits); 801914 Annihilan Strike (Offhand): SPELL_DAMAGE 69 events in 4 logs (31 crits); target health is not logged and gear differs, so no figure decides; expected values come from the tooltip and the DBC only. Residual false alert per pair: none from a roll; the -100 Cruelty fixture reads 0 and the guarantee 100 on every counted strike, so no random draw decides the reading."
+    },
+    {
+      "spell": 572804,
+      "name": "Annihilan Strike (off-hand critical share: 76% health guaranteed, 74% health normal)",
+      "variant": "crit_guarantee_offhand_76_74",
+      "label_suffix": "crit_guarantee_offhand_76_74",
+      "kind": "hit_ratio",
+      "quote": "This ability is guaranteed to critically strike against enemies above 75% health.",
+      "observe_spell": 801914,
+      "cast_spell": 572804,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "expected": 1.0,
+      "rate": "critical",
+      "control": {
+        "auras": [
+          [
+            705109,
+            1
+          ]
+        ],
+        "target_health_pct": 74,
+        "aura_amounts": [
+          [
+            705109,
+            0,
+            -100
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            705109,
+            1
+          ]
+        ],
+        "target_health_pct": 76,
+        "aura_amounts": [
+          [
+            705109,
+            0,
+            -100
+          ]
+        ]
+      },
+      "expected_points": 100,
+      "trials": 40,
+      "parts": 2,
+      "expected_source": "Annihilan Strike 572804 (Effect[0] and [1] TRIGGER_SPELL_WITH_VALUE, main hand 801913, off hand 801914, both SPELL_EFFECT_WEAPON_PERCENT_DAMAGE; every rank 560759-560762, 572803, 572804 and 801903 triggers the same two strikes, whose own Spell.dbc description carries the sentence) states 'guaranteed to critically strike against enemies above 75% health'. The dummy health is set before each cast to pct x 50000000 / 100; 75% is exactly 37500000 = 75% of the maximum, so it is not above 75%. Felsworn ADR 0018 (mentor D-72). Both arms set Cruelty 705109 (Felsworn, Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT) on the caster with its amount set to -100 as a fixture, so the normal roll reads 0 whatever the reference character's own critical chance: every 801914 off-hand strike at 76% is a critical strike (100%), at 74% the strike keeps the normal roll (0): a difference of 100 points. The reference character dual-wields (Dual Wield 674, item 2027 in slots 15 and 16), so 801914 lands; it resolves after the 801913 damage, whose hit cannot take the 50000000 dummy from 76% (38000000) under 75% (37500000), so the off-hand strike still reads a target above 75%. Reference search 2026-11-24: coa-history spell 572804: 0 events in 186 logs; 801913 Annihilan Strike: SPELL_DAMAGE 70 events in 4 logs (34 crits); 801914 Annihilan Strike (Offhand): SPELL_DAMAGE 69 events in 4 logs (31 crits); target health is not logged and gear differs, so no figure decides; expected values come from the tooltip and the DBC only. Residual false alert per pair: none from a roll; the -100 Cruelty fixture reads 0 and the guarantee 100 on every counted strike, so no random draw decides the reading."
+    },
+    {
+      "spell": 572804,
+      "name": "Annihilan Strike (critical share: strictly above 75%, exactly 75% keeps the normal roll)",
+      "variant": "crit_strict_76_75",
+      "label_suffix": "crit_strict_76_75",
+      "kind": "hit_ratio",
+      "quote": "This ability is guaranteed to critically strike against enemies above 75% health.",
+      "observe_spell": 801913,
+      "cast_spell": 572804,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "expected": 1.0,
+      "rate": "critical",
+      "control": {
+        "auras": [
+          [
+            705109,
+            1
+          ]
+        ],
+        "target_health_pct": 75,
+        "aura_amounts": [
+          [
+            705109,
+            0,
+            -100
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            705109,
+            1
+          ]
+        ],
+        "target_health_pct": 76,
+        "aura_amounts": [
+          [
+            705109,
+            0,
+            -100
+          ]
+        ]
+      },
+      "expected_points": 100,
+      "trials": 40,
+      "parts": 2,
+      "expected_source": "Annihilan Strike 572804 (Effect[0] and [1] TRIGGER_SPELL_WITH_VALUE, main hand 801913, off hand 801914, both SPELL_EFFECT_WEAPON_PERCENT_DAMAGE; every rank 560759-560762, 572803, 572804 and 801903 triggers the same two strikes, whose own Spell.dbc description carries the sentence) states 'guaranteed to critically strike against enemies above 75% health'. The dummy health is set before each cast to pct x 50000000 / 100; 75% is exactly 37500000 = 75% of the maximum, so it is not above 75%. Felsworn ADR 0018 (mentor D-72). Both arms set Cruelty 705109 (Felsworn, Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT) on the caster with its amount set to -100 as a fixture, so the normal roll reads 0 whatever the reference character's own critical chance: at exactly 75% the strike is not above 75% and keeps the normal roll (0), at 76% every strike is critical: a difference of 100 points. Reference search 2026-11-24: coa-history spell 572804: 0 events in 186 logs; 801913 Annihilan Strike: SPELL_DAMAGE 70 events in 4 logs (34 crits); 801914 Annihilan Strike (Offhand): SPELL_DAMAGE 69 events in 4 logs (31 crits); target health is not logged and gear differs, so no figure decides; expected values come from the tooltip and the DBC only. Residual false alert per pair: none from a roll; the -100 Cruelty fixture reads 0 and the guarantee 100 on every counted strike, so no random draw decides the reading."
+    },
+    {
+      "spell": 572804,
+      "name": "Annihilan Strike (below 75% the normal critical roll applies: neither 0 nor 100)",
+      "variant": "crit_normal_74",
+      "label_suffix": "crit_normal_74",
+      "kind": "hit_ratio",
+      "quote": "This ability is guaranteed to critically strike against enemies above 75% health.",
+      "observe_spell": 801913,
+      "cast_spell": 572804,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "expected": 1.0,
+      "rate": "critical",
+      "control": {
+        "auras": [
+          [
+            705109,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            705109,
+            0,
+            0
+          ]
+        ],
+        "target_health_pct": 74
+      },
+      "treatment": {
+        "auras": [
+          [
+            705109,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            705109,
+            0,
+            90
+          ]
+        ],
+        "target_health_pct": 74
+      },
+      "expected_points": 90,
+      "trials": 72,
+      "parts": 30,
+      "expected_source": "Annihilan Strike 572804 (Effect[0] and [1] TRIGGER_SPELL_WITH_VALUE, main hand 801913, off hand 801914, both SPELL_EFFECT_WEAPON_PERCENT_DAMAGE; every rank 560759-560762, 572803, 572804 and 801903 triggers the same two strikes, whose own Spell.dbc description carries the sentence) states 'guaranteed to critically strike against enemies above 75% health'. The dummy health is set before each cast to pct x 50000000 / 100; 75% is exactly 37500000 = 75% of the maximum, so it is not above 75%. Felsworn ADR 0018 (mentor D-72). Both arms at 74% health set Cruelty 705109 (Felsworn, Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT) on the caster as a fixture, its amount set to 0 in the control arm and to 90 in the treatment arm, so both arms recompute the caster's critical chance and differ by 90 points of it: the normal roll gives a difference of 90 points. A forced critical strike below 75% would read 100 in both arms (difference 0), no critical strike at all 0 in both: both are excluded. Reference search 2026-11-24: coa-history spell 572804: 0 events in 186 logs; 801913 Annihilan Strike: SPELL_DAMAGE 70 events in 4 logs (34 crits); 801914 Annihilan Strike (Offhand): SPELL_DAMAGE 69 events in 4 logs (31 crits); target health is not logged and gear differs, so no figure decides; expected values come from the tooltip and the DBC only. Residual false alert per pair: at most 3e-6 (normal approximation: binomial standard error at most 0.73 point with both arms at a 6% spread over 2160 hits per arm, a true difference within 1 point of 90 as pair 3 read +89.31 and +90.14, against the +-4.5 band), under the 0.1% cap."
     },
     {
       "spell": 705108,
@@ -12734,85 +12938,6 @@
         "hit_arm": true
       },
       "observe_source": "Spell.dbc 802678 (server set /srv/coa/server-data/dbc) Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 1000, DurationIndex 32 = 6000 ms (6 ticks), EffectBasePoints 8, EffectDieSides 1, EffectRealPointsPerLevel 0.5, BaseLevel 10, SpellLevel 10, MaxLevel 0. Expected per tick at level 60: 8 + 1 (DieSides 1 adds 1) + int(0.5 x (60 - 10)) = 34 (SpellInfo.cpp CalcValue), plus the tooltip term $SP*.05 = int(0.05 x spell power). The displayed ${($d*1000/$T1)*($m1+0+$SP*.05)} reads 54 = 6 x 9 on the client (ADR 0006: no SkillLineAbility row, base points only); owner ruling O-19: the server keeps 34 per tick and the displayed text is to be corrected in a client patch, so the value is counted on the server formula, not on the displayed 54. Behaviour read: the caster casts Felstrike 802678 on the dummy and the dummy's spell_damage_total of 802678 is read 1500 ms later, one tick (EffectAmplitude 1000, the second tick at 2000 ms); the unread arm before the cast reads 0 (control). Criticals are made impossible (64481) and the dummy's magic resistance is removed (823764), as the Immolation Aura tick entries do. Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and the Felstrike tick events of coa-history (spell 802678, gear and level differ, no figure decides). Contrast arm of the spell power term: +10000 spell power must move the tick by int(0.05 x 10000) = 500 to 534; a server that dropped the term or used another coefficient cannot pass both arms."
-    },
-    {
-      "spell": 572804,
-      "name": "Annihilan Strike (critical share above 75% health)",
-      "kind": "hit_ratio",
-      "variant": "crit_above_75",
-      "label_suffix": "crit_above_75",
-      "quote": "This ability is guaranteed to critically strike against enemies above 75% health.",
-      "observe_spell": 801913,
-      "cast_spell": 572804,
-      "cast_wait_ms": 1600,
-      "cast_power": 100,
-      "control": {
-        "auras": [],
-        "target_health_pct": 50
-      },
-      "treatment": {
-        "auras": [],
-        "target_health_pct": 90
-      },
-      "expected": 1.0,
-      "rate": "critical",
-      "expected_points": 100,
-      "trials": 40,
-      "parts": 4,
-      "expected_source": "Annihilan Strike 572804 (Effect[0] and [1] TRIGGER_SPELL_WITH_VALUE, main hand 801913, off hand 801914; Energy cost 40, cast_power 100 before each cast) states 'guaranteed to critically strike against enemies above 75% health' (Spell.dbc description of 572804 and 801913). The critical share of the main-hand strike 801913 on the dummy is compared between a control arm with the dummy held at 50% health and a treatment arm at 90% (above and below the 75% threshold). Both arms use the same spell, the same weapons and the same real cast, so the only difference is the target's health. The critical share rises by 100 points (every strike above 75% is critical, none below). The reference character's melee critical strike chance is expected to be 0 (the Witch Hunter Stake 681328 entries rely on the same reading; not read for this class, so a control arm whose share is not 0 alerts the claim 'no gain below 75%' rather than hiding it). Reference search 2026-11-23: coa-history spell 572804: 0 events; spell 801913 Annihilan Strike: SPELL_DAMAGE 70 events in 4 logs (34 crits, min 98 max 394: real play shows crits at all healths, gear differs so no figure decides); expected values come from the tooltip and the DBC only."
-    },
-    {
-      "spell": 572804,
-      "name": "Annihilan Strike (control: no gain between two healths below 75%)",
-      "kind": "hit_ratio",
-      "variant": "crit_below_75",
-      "label_suffix": "crit_below_75",
-      "quote": "This ability is guaranteed to critically strike against enemies above 75% health.",
-      "observe_spell": 801913,
-      "cast_spell": 572804,
-      "cast_wait_ms": 1600,
-      "cast_power": 100,
-      "control": {
-        "auras": [],
-        "target_health_pct": 50
-      },
-      "treatment": {
-        "auras": [],
-        "target_health_pct": 60
-      },
-      "expected": 1.0,
-      "rate": "critical",
-      "expected_points": 0,
-      "trials": 40,
-      "parts": 4,
-      "expected_source": "Annihilan Strike 572804 (Effect[0] and [1] TRIGGER_SPELL_WITH_VALUE, main hand 801913, off hand 801914; Energy cost 40, cast_power 100 before each cast) states 'guaranteed to critically strike against enemies above 75% health' (Spell.dbc description of 572804 and 801913). The critical share of the main-hand strike 801913 on the dummy is compared between a control arm with the dummy held at 50% health and a treatment arm at 60% (both below the 75% threshold). Both arms use the same spell, the same weapons and the same real cast, so the only difference is the target's health. The critical share does not change (0 points): below 75% the strike is not guaranteed to critically strike, at either health. The reference character's melee critical strike chance is expected to be 0 (the Witch Hunter Stake 681328 entries rely on the same reading; not read for this class, so a control arm whose share is not 0 alerts the claim 'no gain below 75%' rather than hiding it). Reference search 2026-11-23: coa-history spell 572804: 0 events; spell 801913 Annihilan Strike: SPELL_DAMAGE 70 events in 4 logs (34 crits, min 98 max 394: real play shows crits at all healths, gear differs so no figure decides); expected values come from the tooltip and the DBC only."
-    },
-    {
-      "spell": 572804,
-      "name": "Annihilan Strike (positive arm: a forced critical chance reads critical 801913 strikes)",
-      "kind": "hit_ratio",
-      "variant": "crit_positive",
-      "label_suffix": "crit_positive",
-      "quote": "This ability is guaranteed to critically strike against enemies above 75% health.",
-      "observe_spell": 801913,
-      "cast_spell": 572804,
-      "cast_wait_ms": 1600,
-      "cast_power": 100,
-      "control": {
-        "auras": [],
-        "target_health_pct": 50
-      },
-      "treatment": {
-        "auras": [],
-        "target_health_pct": 60
-      },
-      "expected": 1.0,
-      "rate": "critical",
-      "expected_points": 0,
-      "trials": 40,
-      "parts": 4,
-      "expected_source": "Positive arm of crit_above_75 and crit_below_75 (same cast 572804, same observed strike 801913, same two healths below 75%): the player's melee critical strike rating is forced to 100% chance, so every 801913 strike is a critical strike by the engine's own roll and the critical share read of this entry must reach 100% in both arms (the per-arm counts are in the verdict detail); the arms differ by no health threshold, so the difference between them is 0 points. It shows that a critical strike of 801913 on the dummy is counted by the read the two entries above use, so 0 critical strikes in their trials is not an artefact of the design. Tooltip: 'This ability is guaranteed to critically strike against enemies above 75% health.' Reference search 2026-11-23: nothing found beyond the two entries above; expected values come from the tooltip and the DBC only.",
-      "force_crit": "melee"
     },
     {
       "spell": 803904,

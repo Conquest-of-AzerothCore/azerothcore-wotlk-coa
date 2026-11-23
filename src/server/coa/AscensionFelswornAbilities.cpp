@@ -202,6 +202,9 @@ class felsworn_casts : public AllSpellScript
                     if (charges == 1)
                         aura->Remove();
                 }
+        if ((info->Id == 801913 || info->Id == 801914) && target->HealthAbovePct(75) && info->IsCritCapable() &&
+            !info->HasAttribute(SPELL_ATTR2_CANT_CRIT))
+            hit.crit = true;
         float factor = 1;
         if (info->Id == 803715 && player->HasAura(805236) && spell->GetScriptValue(804216) && hit.crit)
             factor *= 1.0f + Amount(807427) / 100.0f * std::min<uint64>(10, spell->GetScriptValue(800206));
