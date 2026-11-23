@@ -232,7 +232,7 @@
       {
         "claim": "critical strike chance of all allies against this target is increased by $s2%",
         "labels": [
-          "300474 effect_value 300475e1 #1"
+          "300474 behaviour_metric_delta crit_ally"
         ]
       },
       {
@@ -364,8 +364,8 @@
     "spell": 300483,
     "clause": "and grants you $300481s1% increased spell critical damage for $300481d,",
     "labels": [
-      "300483 effect_value 300481e0 #1",
-      "300483 spell_duration 300481 #2"
+      "300483 behaviour_metric_delta crit_damage",
+      "300483 behaviour_metric_delta crit_damage_duration"
     ],
     "kind": "claim"
   },
@@ -417,7 +417,7 @@
     "spell": 300489,
     "clause": "Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.",
     "labels": [
-      "300489 effect_value e1 #0"
+      "300489 behaviour_hit_ratio crit_energy"
     ],
     "kind": "claim"
   },
@@ -1156,7 +1156,9 @@
     "spell": 560542,
     "clause": "In addition, while Inner Demon is active, you now heal for $s2% of all melee damage dealt.",
     "labels": [
-      "560542 effect_value e1 #2"
+      "560542 behaviour_metric_delta inner_heal",
+      "560542 behaviour_metric_delta no_inner_heal",
+      "560542 behaviour_metric_delta no_felguard_heal"
     ],
     "kind": "claim"
   },
@@ -1889,8 +1891,11 @@
     "spell": 706420,
     "clause": "Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.",
     "labels": [
-      "706420 effect_value 802676e0 #1",
-      "706420 aura_amplitude_ms #2"
+      "706420 behaviour_metric_delta inner_damage",
+      "706420 behaviour_metric_delta inner_damage_sp",
+      "706420 behaviour_metric_delta inner_interval_a",
+      "706420 behaviour_metric_delta inner_interval_b",
+      "706420 behaviour_metric_delta inner_none"
     ],
     "kind": "claim"
   },
@@ -2007,8 +2012,10 @@
     "spell": 704602,
     "clause": "and increase their damage taken from Sunder by $806096s2% for $806096d.",
     "labels": [
-      "704602 effect_value 806096e1 #2",
-      "704602 spell_duration 806096 #3"
+      "704602 behaviour_metric_delta sunder_taken",
+      "704602 behaviour_metric_delta sunder_taken_control",
+      "704602 behaviour_metric_delta sunder_held",
+      "704602 behaviour_metric_delta sunder_gone"
     ],
     "kind": "claim"
   },
@@ -2089,7 +2096,8 @@
     "spell": 704612,
     "clause": "Increases the effectiveness of your Pacts by $s1%.",
     "labels": [
-      "704612 effect_value e0 #0"
+      "704612 behaviour_metric_delta pact_resist",
+      "704612 behaviour_metric_delta pact_resist_hunter"
     ],
     "kind": "claim"
   },
@@ -3379,7 +3387,7 @@
       {
         "claim": "damage dealt by your Fel Fireball increases your damage dealt by $524632s2%",
         "labels": [
-          "802058 behaviour_metric_delta stack_amount"
+          "802058 behaviour_hit_ratio stack_damage"
         ]
       },
       {
