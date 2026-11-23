@@ -210,6 +210,57 @@
       "settle_ms": 50
     },
     {
+      "spell": 800209,
+      "name": "Demonic Will (Shadow damage taken)",
+      "kind": "taken_hit",
+      "variant": "shadow_taken",
+      "label_suffix": "shadow_taken",
+      "judge": "damage_ratio",
+      "expected": 1.0,
+      "quote": "reducing Physical damage taken by $s3%",
+      "strike_spell": 47632,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            800209
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 800209,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            800209
+          ],
+          "opening_casts": [
+            [
+              800209,
+              "caster"
+            ]
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 800209,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "800209 Effect[2] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127 (every school mask), BasePoints -31 + 1 = -30 ($s3). The tooltip words only Physical damage ('reducing Physical damage taken'), so the expected ratio for a Shadow hit is 1.0 (no reduction). Grave Coil 47632 (Shadow, DmgClass 1 magic, the Sun Cleric 680652 shadow_taken strike) strikes the caster in each arm; the control arm has Demonic Will unlearned and absent, the treatment arm casts it for real (opening cast) and the aura reads present. Reference search 2026-11-23: coa-history spell 800209: 13 casts, 13 aura applied and 13 removed in 4 logs, no value in a log event; nothing found beyond the tooltip and Spell.dbc.",
+      "strikes": 1,
+      "settle_ms": 50
+    },
+    {
       "spell": 805239,
       "name": "Burning Hatred (generates 6 Felfury)",
       "kind": "metric_delta",
@@ -300,11 +351,16 @@
       "quote": "dealing ${$m1+0+$AP*0.35} Shadowflame Damage to them",
       "trigger_spell": 805240,
       "target": "dummy",
-      "target_health_pct": 30,
       "cast_power": 100,
       "phase_auras": [
         [
-          64481,
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
           1,
           "caster",
           "caster"
@@ -323,7 +379,11 @@
       "expected": 453.0,
       "after_at_least": 452,
       "after_at_most": 454,
-      "observe_source": "805240 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, Shadowflame (SchoolMask 36), BasePoints 219 + 1 (DieSides 1 adds 1) = 220, RealPointsPerLevel 4.0 x (60 - BaseLevel 29) = 124, so m1 = 344 at level 60; the tooltip adds attack power x 0.35 ($AP*0.35); reference attack power 312 (class file reference_stats). Critical hits are made impossible by 64481; no resistance aura is set (823764 zeroes this Shadowflame hit, measured), the dummy's Fire and Shadow resistance reads 0 in the scenario, and the dummy is held at 30% health (below 35%). Expected 344 + int(0.35 x 312 = 109.2) = 453. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+      "observe_source": "805240 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, Shadowflame (SchoolMask 36), BasePoints 219 + 1 (DieSides 1 adds 1) = 220, RealPointsPerLevel 4.0 x (60 - BaseLevel 29) = 124, so m1 = 344 at level 60; the tooltip adds attack power x 0.35 ($AP*0.35); reference attack power 312 (class file reference_stats). Spell crit is removed by Reg's Test Aura 984954 (the class files' crit-removal fixture, ADR 0742 observation) and the dummy's monster linear resistance (docs/coa/monster-linear-resistance.md: 60 magic resistance at level 60, partial resists in 10% steps) is removed by the spell-penetration fixture 823764 (aura 123, MiscValue 126, -9999); the dummy is held below 35% health from the before phase (34% in the before phase, 30% in the after phase). Expected 344 + int(0.35 x 312 = 109.2) = 453. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc.",
+      "phase_target_health_pct": [
+        34,
+        30
+      ]
     },
     {
       "spell": 805240,
@@ -334,11 +394,16 @@
       "quote": "dealing ${$m1+0+$AP*0.35} Shadowflame Damage to them",
       "trigger_spell": 805240,
       "target": "dummy",
-      "target_health_pct": 30,
       "cast_power": 100,
       "phase_auras": [
         [
-          64481,
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
           1,
           "caster",
           "caster"
@@ -358,7 +423,11 @@
       "after_at_least": 7452,
       "after_at_most": 7454,
       "player_attack_power": 20000,
-      "observe_source": "805240 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, Shadowflame (SchoolMask 36), BasePoints 219 + 1 (DieSides 1 adds 1) = 220, RealPointsPerLevel 4.0 x (60 - BaseLevel 29) = 124, so m1 = 344 at level 60; the tooltip adds attack power x 0.35 ($AP*0.35); reference attack power 312 (class file reference_stats). Critical hits are made impossible by 64481; no resistance aura is set (823764 zeroes this Shadowflame hit, measured), the dummy's Fire and Shadow resistance reads 0 in the scenario, and the dummy is held at 30% health (below 35%). Contrast arm of the attack power term: +20000 attack power (player_attack_power): 344 + int(0.35 x 20312 = 7109.2) = 7453 against 453. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+      "observe_source": "805240 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, Shadowflame (SchoolMask 36), BasePoints 219 + 1 (DieSides 1 adds 1) = 220, RealPointsPerLevel 4.0 x (60 - BaseLevel 29) = 124, so m1 = 344 at level 60; the tooltip adds attack power x 0.35 ($AP*0.35); reference attack power 312 (class file reference_stats). Spell crit is removed by Reg's Test Aura 984954 (the class files' crit-removal fixture, ADR 0742 observation) and the dummy's monster linear resistance (docs/coa/monster-linear-resistance.md: 60 magic resistance at level 60, partial resists in 10% steps) is removed by the spell-penetration fixture 823764 (aura 123, MiscValue 126, -9999); the dummy is held below 35% health from the before phase (34% in the before phase, 30% in the after phase). Contrast arm of the attack power term: +20000 attack power (player_attack_power): 344 + int(0.35 x 20312 = 7109.2) = 7453 against 453. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc.",
+      "phase_target_health_pct": [
+        34,
+        30
+      ]
     },
     {
       "spell": 805240,
@@ -369,11 +438,16 @@
       "quote": "heals you for ${$805241m1+$AP*.5}",
       "trigger_spell": 805240,
       "target": "dummy",
-      "target_health_pct": 30,
       "cast_power": 100,
       "phase_auras": [
         [
-          64481,
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
           1,
           "caster",
           "caster"
@@ -392,7 +466,11 @@
       "expected": 302.0,
       "after_at_least": 301,
       "after_at_most": 303,
-      "observe_source": "805241 Effect[0] SPELL_EFFECT_HEAL, BasePoints 145 + 1 = 146 (the tooltip's $805241m1; the tooltip reads 302 = 146 + 0.5 x 312), plus attack power x 0.5 ($AP*.5); the heal lands on the caster, read as spell_heal_total of 805241 on the caster. The dummy is held at 30% health, criticals are made impossible by 64481. Expected 146 + int(0.5 x 312 = 156) = 302. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+      "observe_source": "805241 Effect[0] SPELL_EFFECT_HEAL, BasePoints 145 + 1 = 146 (the tooltip's $805241m1; the tooltip reads 302 = 146 + 0.5 x 312), plus attack power x 0.5 ($AP*.5); the heal lands on the caster, read as spell_heal_total of 805241 on the caster. Spell crit is removed by Reg's Test Aura 984954 (the class files' crit-removal fixture, ADR 0742 observation) and the dummy's monster linear resistance (docs/coa/monster-linear-resistance.md: 60 magic resistance at level 60, partial resists in 10% steps) is removed by the spell-penetration fixture 823764 (aura 123, MiscValue 126, -9999); the dummy is held below 35% health from the before phase. Expected 146 + int(0.5 x 312 = 156) = 302. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc.",
+      "phase_target_health_pct": [
+        34,
+        30
+      ]
     },
     {
       "spell": 805240,
@@ -403,11 +481,16 @@
       "quote": "heals you for ${$805241m1+$AP*.5}",
       "trigger_spell": 805240,
       "target": "dummy",
-      "target_health_pct": 30,
       "cast_power": 100,
       "phase_auras": [
         [
-          64481,
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
           1,
           "caster",
           "caster"
@@ -427,7 +510,11 @@
       "after_at_least": 10301,
       "after_at_most": 10303,
       "player_attack_power": 20000,
-      "observe_source": "805241 Effect[0] SPELL_EFFECT_HEAL, BasePoints 145 + 1 = 146 (the tooltip's $805241m1; the tooltip reads 302 = 146 + 0.5 x 312), plus attack power x 0.5 ($AP*.5); the heal lands on the caster, read as spell_heal_total of 805241 on the caster. The dummy is held at 30% health, criticals are made impossible by 64481. Contrast arm of the attack power term: +20000 attack power: 146 + int(0.5 x 20312 = 10156) = 10302 against 302. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+      "observe_source": "805241 Effect[0] SPELL_EFFECT_HEAL, BasePoints 145 + 1 = 146 (the tooltip's $805241m1; the tooltip reads 302 = 146 + 0.5 x 312), plus attack power x 0.5 ($AP*.5); the heal lands on the caster, read as spell_heal_total of 805241 on the caster. Spell crit is removed by Reg's Test Aura 984954 (the class files' crit-removal fixture, ADR 0742 observation) and the dummy's monster linear resistance (docs/coa/monster-linear-resistance.md: 60 magic resistance at level 60, partial resists in 10% steps) is removed by the spell-penetration fixture 823764 (aura 123, MiscValue 126, -9999); the dummy is held below 35% health from the before phase. Contrast arm of the attack power term: +20000 attack power: 146 + int(0.5 x 20312 = 10156) = 10302 against 302. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc.",
+      "phase_target_health_pct": [
+        34,
+        30
+      ]
     },
     {
       "spell": 805240,
@@ -438,7 +525,6 @@
       "quote": "and generates 1 Felfury.",
       "trigger_spell": 805240,
       "target": "dummy",
-      "target_health_pct": 30,
       "cast_power": 100,
       "metric": "aura_stacks",
       "fields": {
@@ -449,7 +535,11 @@
       "expected": 1,
       "wait_ms": 1000,
       "expire_ms": 500,
-      "observe_source": "805241 Effect[1] SPELL_EFFECT_TRIGGER_SPELL 800058 (Felfury, caster aura), cast by the gaze's heal. Felfury stacks read 0 before the cast and 1 after one real cast at the dummy held at 30% health. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+      "observe_source": "805241 Effect[1] SPELL_EFFECT_TRIGGER_SPELL 800058 (Felfury, caster aura), cast by the gaze's heal. Felfury stacks read 0 before the cast and 1 after one real cast at the dummy held at 30% health. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc.",
+      "phase_target_health_pct": [
+        34,
+        30
+      ]
     },
     {
       "spell": 560284,
@@ -731,7 +821,7 @@
       },
       "cast_in_before": false,
       "before_expected": 0,
-      "wait_ms": 5100,
+      "wait_ms": 100,
       "expire_ms": 500,
       "expected": 0,
       "game_time": {
@@ -740,7 +830,12 @@
           5200
         ]
       },
-      "observe_source": "800355 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude set to the duration by AscensionFelswornContracts.cpp:232 (one tick at the end), DurationIndex 571 = 5500 ms ($d); BasePoints 694 + 1 = 695 + int(RealPointsPerLevel 9.55 x (60 - 59)) = 9 -> 704 at level 60 (tooltip 704.55); the tooltip adds 0.85 x the greater of fire spell power and shadow spell power ($cond). No damage has landed 5100 ms after the cast (excludes an end 10% early, 4950 ms). Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. No resistance aura is set (823764 zeroes a Shadowflame hit on this dummy, measured on Tyrant's Gaze)."
+      "observe_source": "800355 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude set to the duration by AscensionFelswornContracts.cpp:232 (one tick at the end), DurationIndex 571 = 5500 ms ($d); BasePoints 694 + 1 = 695 + int(RealPointsPerLevel 9.55 x (60 - 59)) = 9 -> 704 at level 60 (tooltip 704.55); the tooltip adds 0.85 x the greater of fire spell power and shadow spell power ($cond). No damage has landed 5100 ms after the cast (excludes an end 10% early, 4950 ms). Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. Energy is held at 100 every 500 ms after the cast (hold_power_during_wait): the stock ManaPerSecond 30 drain (SpellAuras.cpp:771-801) removes the channel when the pool is below 30, so a single power fixture ended it near 4000 ms (fw-r1d review alert a).",
+      "hold_power_during_wait": {
+        "power": 3,
+        "every_ms": 500,
+        "count": 10
+      }
     },
     {
       "spell": 800355,
@@ -752,7 +847,14 @@
       "trigger_spell": 800355,
       "target": "dummy",
       "cast_power": 100,
-      "phase_auras": [],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
       "metric": "spell_damage_total",
       "fields": {
         "spell": 800355,
@@ -760,7 +862,7 @@
       },
       "cast_in_before": false,
       "before_expected": 0,
-      "wait_ms": 5900,
+      "wait_ms": 400,
       "expire_ms": 500,
       "expected": 704.0,
       "after_at_least": 703,
@@ -771,7 +873,12 @@
           6000
         ]
       },
-      "observe_source": "800355 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude set to the duration by AscensionFelswornContracts.cpp:232 (one tick at the end), DurationIndex 571 = 5500 ms ($d); BasePoints 694 + 1 = 695 + int(RealPointsPerLevel 9.55 x (60 - 59)) = 9 -> 704 at level 60 (tooltip 704.55); the tooltip adds 0.85 x the greater of fire spell power and shadow spell power ($cond). The damage has landed 5900 ms after the cast (excludes an end 10% late, 6050 ms): 704. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. No resistance aura is set (823764 zeroes a Shadowflame hit on this dummy, measured on Tyrant's Gaze)."
+      "observe_source": "800355 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude set to the duration by AscensionFelswornContracts.cpp:232 (one tick at the end), DurationIndex 571 = 5500 ms ($d); BasePoints 694 + 1 = 695 + int(RealPointsPerLevel 9.55 x (60 - 59)) = 9 -> 704 at level 60 (tooltip 704.55); the tooltip adds 0.85 x the greater of fire spell power and shadow spell power ($cond). The damage has landed 5900 ms after the cast (excludes an end 10% late, 6050 ms): 704. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. The dummy's monster linear resistance (docs/coa/monster-linear-resistance.md, partial resists in 10% steps) is removed by the spell-penetration fixture 823764 (aura 123, MiscValue 126, -9999). Energy is held at 100 every 500 ms after the cast (hold_power_during_wait): the stock ManaPerSecond 30 drain (SpellAuras.cpp:771-801) removes the channel when the pool is below 30, so a single power fixture ended it near 4000 ms (fw-r1d review alert a).",
+      "hold_power_during_wait": {
+        "power": 3,
+        "every_ms": 500,
+        "count": 11
+      }
     },
     {
       "spell": 800355,
@@ -783,7 +890,14 @@
       "trigger_spell": 800355,
       "target": "dummy",
       "cast_power": 100,
-      "phase_auras": [],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
       "metric": "spell_damage_total",
       "fields": {
         "spell": 800355,
@@ -791,7 +905,7 @@
       },
       "cast_in_before": false,
       "before_expected": 0,
-      "wait_ms": 5900,
+      "wait_ms": 400,
       "expire_ms": 500,
       "expected": 9204.0,
       "after_at_least": 9203,
@@ -806,7 +920,12 @@
           6000
         ]
       },
-      "observe_source": "800355 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude set to the duration by AscensionFelswornContracts.cpp:232 (one tick at the end), DurationIndex 571 = 5500 ms ($d); BasePoints 694 + 1 = 695 + int(RealPointsPerLevel 9.55 x (60 - 59)) = 9 -> 704 at level 60 (tooltip 704.55); the tooltip adds 0.85 x the greater of fire spell power and shadow spell power ($cond). Contrast arm of the spell power term: +10000 spell power: 704 + int(0.85 x 10000) = 9204 against 704. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. No resistance aura is set (823764 zeroes a Shadowflame hit on this dummy, measured on Tyrant's Gaze)."
+      "observe_source": "800355 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude set to the duration by AscensionFelswornContracts.cpp:232 (one tick at the end), DurationIndex 571 = 5500 ms ($d); BasePoints 694 + 1 = 695 + int(RealPointsPerLevel 9.55 x (60 - 59)) = 9 -> 704 at level 60 (tooltip 704.55); the tooltip adds 0.85 x the greater of fire spell power and shadow spell power ($cond). Contrast arm of the spell power term: +10000 spell power: 704 + int(0.85 x 10000) = 9204 against 704. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. The dummy's monster linear resistance (docs/coa/monster-linear-resistance.md, partial resists in 10% steps) is removed by the spell-penetration fixture 823764 (aura 123, MiscValue 126, -9999). Energy is held at 100 every 500 ms after the cast (hold_power_during_wait): the stock ManaPerSecond 30 drain (SpellAuras.cpp:771-801) removes the channel when the pool is below 30, so a single power fixture ended it near 4000 ms (fw-r1d review alert a).",
+      "hold_power_during_wait": {
+        "power": 3,
+        "every_ms": 500,
+        "count": 11
+      }
     },
     {
       "spell": 800355,
@@ -847,7 +966,7 @@
       },
       "cast_in_before": false,
       "before_expected": 0,
-      "wait_ms": 5100,
+      "wait_ms": 100,
       "expire_ms": 500,
       "expected": 1,
       "game_time": {
@@ -856,8 +975,13 @@
           5200
         ]
       },
-      "observe_source": "800355 DurationIndex 571 = 5500 ms ($d); the slow 800833 is applied by the channel's periodic trigger. The slow is still on the dummy 5100 ms after the cast (excludes a duration 10% short, 4950 ms). Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc.",
-      "measure_actor": "dummy"
+      "observe_source": "800355 DurationIndex 571 = 5500 ms ($d); the slow 800833 is applied by the channel's periodic trigger. The slow is still on the dummy 5100 ms after the cast (excludes a duration 10% short, 4950 ms). Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. Energy is held at 100 every 500 ms after the cast (hold_power_during_wait): the stock ManaPerSecond 30 drain (SpellAuras.cpp:771-801) removes the channel when the pool is below 30, so a single power fixture ended it near 4000 ms (fw-r1d review alert a).",
+      "measure_actor": "dummy",
+      "hold_power_during_wait": {
+        "power": 3,
+        "every_ms": 500,
+        "count": 10
+      }
     },
     {
       "spell": 800355,
@@ -876,7 +1000,7 @@
       },
       "cast_in_before": false,
       "before_expected": 0,
-      "wait_ms": 5900,
+      "wait_ms": 400,
       "expire_ms": 500,
       "expected": 0,
       "game_time": {
@@ -885,8 +1009,13 @@
           6000
         ]
       },
-      "observe_source": "800355 DurationIndex 571 = 5500 ms ($d). The slow is gone from the dummy 5900 ms after the cast (excludes a duration 10% long, 6050 ms). Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc.",
-      "measure_actor": "dummy"
+      "observe_source": "800355 DurationIndex 571 = 5500 ms ($d). The slow is gone from the dummy 5900 ms after the cast (excludes a duration 10% long, 6050 ms). Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. Energy is held at 100 every 500 ms after the cast (hold_power_during_wait): the stock ManaPerSecond 30 drain (SpellAuras.cpp:771-801) removes the channel when the pool is below 30, so a single power fixture ended it near 4000 ms (fw-r1d review alert a).",
+      "measure_actor": "dummy",
+      "hold_power_during_wait": {
+        "power": 3,
+        "every_ms": 500,
+        "count": 11
+      }
     }
   ],
   "player_observations": [],

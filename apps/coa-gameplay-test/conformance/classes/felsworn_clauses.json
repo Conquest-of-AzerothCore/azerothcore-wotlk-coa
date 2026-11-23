@@ -1896,7 +1896,8 @@
       {
         "claim": "reducing Physical damage taken by $s3% (30%)",
         "labels": [
-          "800209 behaviour_hit_ratio physical_taken"
+          "800209 behaviour_hit_ratio physical_taken",
+          "800209 behaviour_hit_ratio shadow_taken"
         ]
       },
       {
@@ -2063,11 +2064,15 @@
     "clause": "For the duration, you may instant cast Fel Fireball and Ruin while channeling and they refund their cost.",
     "labels": [],
     "tool_gap": {
-      "reason": "Instant cast and cost refund of two named spells while the channel runs: AscensionFelswornAbilities.cpp:165 and :232-233 (OnSpellCast energizes the paid cost back, CanCastDuringChannel). The channel itself ends near 4000 ms in this build (see the 800355 damage alert), so the window is not the tooltip's. No kind reads the cast time of a spell cast during another spell's channel; cast_period and shot_ramp read cast-to-cast spacing of one spell, energize_range reads an energize of one cast. The nearest is cast_period.",
+      "reason": "Instant cast and cost refund of two named spells while the channel runs: AscensionFelswornAbilities.cpp:165 and :232-233 (OnSpellCast energizes the paid cost back, CanCastDuringChannel). The channel costs ManaPerSecond 30 Energy (Spell.dbc 800355), drained every 1000 ms by Aura::Update, which removes the aura when the pool is below 30 (SpellAuras.cpp:771-801); the earlier counted pair set Energy once to 100, so the channel ended near 4000 ms: an incorrect test, not a property of the build. With Energy held at 100 by hold_power_during_wait the channel runs its 5500 ms (slow_held and damage ok in both runs of pair q2). No kind reads the cast time of a spell cast during another spell's channel; cast_period and shot_ramp read cast-to-cast spacing of one spell, energize_range reads an energize of one cast. The nearest is cast_period. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc.",
       "attempts": [
         {
           "agent": "fw-b1d",
           "report": ".agents/plans/fw-b1d/report.md"
+        },
+        {
+          "agent": "fw-b1d2",
+          "report": ".agents/plans/fw-b1d2/report.md"
         }
       ]
     },
@@ -2576,16 +2581,7 @@
       "805240 behaviour_metric_delta damage",
       "805240 behaviour_metric_delta damage_ap"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "metric_delta sets the dummy's health with set_health_pct and casts at once, with no wait for the health aura state the gate reads: Tyrant's Gaze 805240 (TargetAuraState 13) is refused at random (damage, heal and Felfury read 0 in the counted pair; the same cast landed once in an earlier run). The generated hit scenario waits 1000 ms after set_health_pct and its hit_mean is ok in two runs (828 and 831 usable hits, model mean 399, run stamps 20261123-144319 and -144350), but it carries no attack power contrast arm. No existing option waits between target_health_pct and the cast; the nearest is setup_wait_ms.",
-      "attempts": [
-        {
-          "agent": "fw-b1d",
-          "report": ".agents/plans/fw-b1d/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 805240,
@@ -2594,16 +2590,7 @@
       "805240 behaviour_metric_delta heal",
       "805240 behaviour_metric_delta heal_ap"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "metric_delta sets the dummy's health with set_health_pct and casts at once, with no wait for the health aura state the gate reads: Tyrant's Gaze 805240 (TargetAuraState 13) is refused at random (damage, heal and Felfury read 0 in the counted pair; the same cast landed once in an earlier run). The generated hit scenario waits 1000 ms after set_health_pct and its hit_mean is ok in two runs (828 and 831 usable hits, model mean 399, run stamps 20261123-144319 and -144350), but it carries no attack power contrast arm. No existing option waits between target_health_pct and the cast; the nearest is setup_wait_ms.",
-      "attempts": [
-        {
-          "agent": "fw-b1d",
-          "report": ".agents/plans/fw-b1d/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 805240,
@@ -2611,16 +2598,7 @@
     "labels": [
       "805240 behaviour_metric_delta felfury"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "metric_delta sets the dummy's health with set_health_pct and casts at once, with no wait for the health aura state the gate reads: Tyrant's Gaze 805240 (TargetAuraState 13) is refused at random (damage, heal and Felfury read 0 in the counted pair; the same cast landed once in an earlier run). The generated hit scenario waits 1000 ms after set_health_pct and its hit_mean is ok in two runs (828 and 831 usable hits, model mean 399, run stamps 20261123-144319 and -144350), but it carries no attack power contrast arm. No existing option waits between target_health_pct and the cast; the nearest is setup_wait_ms.",
-      "attempts": [
-        {
-          "agent": "fw-b1d",
-          "report": ".agents/plans/fw-b1d/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 805240,
