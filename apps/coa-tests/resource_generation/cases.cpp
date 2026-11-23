@@ -3,7 +3,6 @@ int main()
     struct Case { uint8 cls; uint32 first, last, resource; int32 amount; bool cast, each; };
     std::vector<Case> cases = {
         {14, 524706, 524706, 800058, 1, false, false},
-        {14, 805240, 805240, 800058, 1, false, true},
         {16, 501421, 501432, 803102, 20, false, false},
         {16, 801844, 801844, 803102, 20, false, false},
         {16, 807105, 807111, 803102, 25, false, false},
