@@ -2108,7 +2108,8 @@
       {
         "claim": "over $d",
         "labels": [
-          "800214 spell_duration 802678 #2"
+          "800214 spell_duration 802678 #2",
+          "800214 behaviour_metric_delta felstrike_duration"
         ]
       }
     ]
@@ -2132,11 +2133,22 @@
   {
     "spell": 800214,
     "clause": "and increases your critical strike chance by $s1% for $d.",
-    "labels": [
-      "800214 effect_value 800239e0 #5",
-      "800214 spell_duration 800239 #6"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your critical strike chance by $s1%",
+        "labels": [
+          "800214 effect_value 800239e0 #5"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "800214 spell_duration 800239 #6",
+          "800214 behaviour_metric_delta fragment_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 800220,
@@ -2314,7 +2326,8 @@
       {
         "claim": "within $801902d",
         "labels": [
-          "801899 spell_duration 801902 #1"
+          "801899 spell_duration 801902 #1",
+          "801899 behaviour_metric_delta legionfall_duration"
         ]
       }
     ]
