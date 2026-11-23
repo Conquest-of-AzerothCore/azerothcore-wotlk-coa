@@ -16448,6 +16448,52 @@
         "spell_power": 20000
       },
       "observe_source": "Reckoning 802058 Description: 'For the duration, your falling speed is slowed and damage dealt by your Fel Fireball increases your damage dealt by $524632s2% for $524632d, ...'. Effect[1] amount of 524632 = 4 ($s2, read by the sibling stack_amount value entry). Behaviour read (hit_ratio): each trial first cleans 524632, casts Reckoning 802058 on the caster and, in the treatment arm only, a real Fel Fireball 801312 at the dummy (its hit gives one stack of 524632), then casts the observed Sargeron Smite 802060 at the dummy; the mean damage of the non-critical Smite hits must rise by 4% (one stack) over the control arm, which makes the same casts without the Fel Fireball (control band 2 points, G-19). Felfury 800058 x4 (Smite consumes 2), spell penetration 823764 and spell power +20000 (so the damage die is negligible) are named precondition fixtures in both arms. Reference search 2026-11-23: coa-history spells 802058 and 524632: 78 and 588 aura events in 6 logs, no damage figures; nothing found beyond the tooltip and Spell.dbc. "
+    },
+    {
+      "spell": 300489,
+      "name": "Archimonde's Wrath (Ruin critical strike share rises by 10 points at 100 Energy)",
+      "kind": "hit_ratio",
+      "variant": "crit_energy",
+      "label_suffix": "crit_energy",
+      "quote": "Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.",
+      "expected": 1.1,
+      "observe_spell": 801895,
+      "learn": [
+        801895
+      ],
+      "control": {
+        "auras": [
+          [
+            800058,
+            2
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            2
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          300489
+        ]
+      },
+      "rate": "critical",
+      "expected_points": 10,
+      "trials": 60,
+      "parts": 140,
+      "cast_power": 100,
+      "observe_source": "Archimonde's Wrath 300489 Description: 'Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.' Effect[1] BasePoints 0 + 1 = 1 ($s2 = 1). With 100 Energy at the time of casting the stated bonus is 10 x 1 = 10 critical strike points on Ruin 801895, a Felfury spender (it consumes 2 Felfury). Behaviour read: critical over all hits of the observed Ruin, control arm (300489 not learned) against treatment arm (300489 learned), the difference of the two rates judged in percent points inside the G-19 band of the stated 10 (2 points), pooled over parts of 300 casts per arm (ADR 0195); Energy is set to 100 before every cast; Felfury x2 and spell penetration 823764 are named precondition fixtures. Reference search 2026-11-23: coa-history spell 300489: 0 events in 186 logs (a passive leaves no event); nothing found beyond the tooltip and Spell.dbc. "
     }
   ],
   "player_observations": [],
