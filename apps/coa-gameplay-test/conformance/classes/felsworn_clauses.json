@@ -1170,7 +1170,8 @@
       {
         "claim": "within $d",
         "labels": [
-          "560838 behaviour_last_application_expiry duration"
+          "560838 behaviour_metric_delta held",
+          "560838 behaviour_metric_delta gone"
         ]
       }
     ]

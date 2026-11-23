@@ -4640,7 +4640,7 @@
         ],
         [
           800058,
-          2,
+          6,
           "caster",
           "caster"
         ],
@@ -4728,7 +4728,7 @@
         ],
         [
           800058,
-          2,
+          6,
           "caster",
           "caster"
         ],
@@ -4766,7 +4766,7 @@
       "phase_auras": [
         [
           800058,
-          2,
+          6,
           "caster",
           "caster"
         ],
@@ -4942,23 +4942,6 @@
       ]
     },
     {
-      "spell": 560838,
-      "name": "The True Blessing (Sculptor of Doom lasts $d, stamped)",
-      "kind": "last_application_expiry",
-      "variant": "duration",
-      "label_suffix": "duration",
-      "quote": "Casting Annihilation now grants you Sculptor of Doom.",
-      "trigger_spell": 803904,
-      "gate_spell": 560838,
-      "aura": 555277,
-      "expected_ms": 8000,
-      "control_window_ms": 500,
-      "window_ms": 10000,
-      "poll_ms": 50,
-      "caster": true,
-      "observe_source": "560838 Effect[0] aura 42 PROC_TRIGGER_SPELL; AscensionFelswornAbilities.cpp:261-262 casts Sculptor of Doom 555277 on the caster after an Annihilation 803904 cast when 560838 is known. 555277 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -101, DurationIndex 31 = 8000 ms ($555277d); Ruin 801895 has CastingTimeIndex 19 = 2500 ms (SpellCastTimes.dbc). The 8000 ms duration is timed by polling 555277 on the caster with game-time stamps after a real Annihilation cast (the control cast before the learn applies none). Reference search 2026-11-23: coa-history spell 560838: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22): The True Blessing 560838 'Casting Annihilation now grants you Sculptor of Doom. Your next Ruin within 8 seconds is instant cast.', same figures; expected values come from the tooltip and the DBC only."
-    },
-    {
       "spell": 560840,
       "name": "Infernal Ruin (the 3rd Ruin spawns an Infernal)",
       "kind": "metric_delta",
@@ -4987,7 +4970,7 @@
       "phase_auras": [
         [
           800058,
-          2,
+          6,
           "caster",
           "caster"
         ],
@@ -5027,7 +5010,7 @@
       "phase_auras": [
         [
           800058,
-          2,
+          6,
           "caster",
           "caster"
         ],
@@ -5068,7 +5051,7 @@
       "phase_auras": [
         [
           800058,
-          2,
+          6,
           "caster",
           "caster"
         ],
@@ -5702,6 +5685,66 @@
       "poll_ms": 100,
       "caster": true,
       "observe_source": "560822 Effect[0] aura 4 dummy; AscensionFelswornAuras.cpp:206-207 casts Anti-Magic 561203 on the caster when a Hateforged Barrier 705129 aura is removed while the caster is alive and 560822 is known. 561203 Effect[0] aura 87 MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (all magic schools), BasePoints -16 + 1 = -15 ($561203s), DurationIndex 31 = 8000 ms ($561203d). Hateforged Barrier 705129 lasts 30000 ms (DurationIndex 9) unless its absorb is spent, so a real removal is the expiry after a real cast. Timed by polling 561203 on the caster with game-time stamps after a real Barrier cast; the aura is applied when the Barrier ends at 30000 ms. Reference search 2026-11-23: coa-history spell 560822: 0 events in 186 logs (a passive leaves no event); spell 561203 Anti-Magic: SPELL_AURA_APPLIED 1 event in 1 log (the logged result of the proc, no figure); bindmysoul talents snapshot (fetched 2026-07-22): Anti-Magic 560822 'reduce -10% of all Magic damage taken for 8 seconds', an older state (our Spell.dbc 561203 says 15%); the tooltip and the DBC prevail (G-9); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 560838,
+      "name": "The True Blessing (Sculptor of Doom present 7600 ms after the cast)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "Casting Annihilation now grants you Sculptor of Doom.",
+      "trigger_spell": 803904,
+      "gate_spell": 560838,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "aura",
+      "fields": {
+        "spell": 555277,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "560838 Effect[0] aura 42 PROC_TRIGGER_SPELL; AscensionFelswornAbilities.cpp:261-262 casts Sculptor of Doom 555277 on the caster after an Annihilation 803904 cast when 560838 is known. 555277 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -101, DurationIndex 31 = 8000 ms ($555277d); Ruin 801895 has CastingTimeIndex 19 = 2500 ms (SpellCastTimes.dbc). The aura 555277 cast by the caster is read on the caster before (control, 560838 not learned: 0) and after a real Annihilation cast with 560838 learned (1). Reference search 2026-11-23: coa-history spell 560838: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22): The True Blessing 560838 'Casting Annihilation now grants you Sculptor of Doom. Your next Ruin within 8 seconds is instant cast.', same figures; expected values come from the tooltip and the DBC only.",
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          7550,
+          7800
+        ]
+      }
+    },
+    {
+      "spell": 560838,
+      "name": "The True Blessing (Sculptor of Doom gone 8400 ms after the cast)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "Casting Annihilation now grants you Sculptor of Doom.",
+      "trigger_spell": 803904,
+      "gate_spell": 560838,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "aura",
+      "fields": {
+        "spell": 555277,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 8400,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "560838 Effect[0] aura 42 PROC_TRIGGER_SPELL; AscensionFelswornAbilities.cpp:261-262 casts Sculptor of Doom 555277 on the caster after an Annihilation 803904 cast when 560838 is known. 555277 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -101, DurationIndex 31 = 8000 ms ($555277d); Ruin 801895 has CastingTimeIndex 19 = 2500 ms (SpellCastTimes.dbc). The aura 555277 cast by the caster is read on the caster before (control, 560838 not learned: 0) and after a real Annihilation cast with 560838 learned (1). Reference search 2026-11-23: coa-history spell 560838: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22): The True Blessing 560838 'Casting Annihilation now grants you Sculptor of Doom. Your next Ruin within 8 seconds is instant cast.', same figures; expected values come from the tooltip and the DBC only.",
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          8350,
+          8600
+        ]
+      }
     }
   ],
   "player_observations": [],
