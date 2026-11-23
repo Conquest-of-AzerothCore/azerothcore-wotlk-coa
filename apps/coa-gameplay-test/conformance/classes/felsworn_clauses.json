@@ -1055,7 +1055,9 @@
       "560637 behaviour_metric_delta sunder",
       "560637 behaviour_metric_delta felwrath",
       "560637 behaviour_metric_delta ruin_no_inner"
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 560639,
@@ -1332,7 +1334,9 @@
     "kind": "claim",
     "labels": [
       "570077 behaviour_metric_delta stack_cap"
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 570158,
@@ -1551,21 +1555,13 @@
     "spell": 704360,
     "clause": "Your $?s520853[Fel Torpedo][Chaos Rush] now reduces all damage taken by $524633s1% for $524633d,",
     "kind": "claim",
-    "claims": [
-      {
-        "claim": "now reduces all damage taken by $524633s1%",
-        "labels": [
-          "704360 behaviour_taken_hit damage_taken"
-        ]
-      },
-      {
-        "claim": "for $524633d",
-        "labels": [
-          "704360 behaviour_metric_delta held",
-          "704360 behaviour_metric_delta gone"
-        ]
-      }
-    ]
+    "claim": "for $524633d",
+    "labels": [
+      "704360 behaviour_metric_delta held",
+      "704360 behaviour_metric_delta gone"
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 704360,
@@ -1778,7 +1774,9 @@
     "kind": "claim",
     "labels": [
       "704611 behaviour_metric_delta mid"
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 704611,
@@ -1786,7 +1784,9 @@
     "kind": "claim",
     "labels": [
       "704611 behaviour_metric_delta cap"
-    ]
+    ],
+    "evidence": "data",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 704612,
