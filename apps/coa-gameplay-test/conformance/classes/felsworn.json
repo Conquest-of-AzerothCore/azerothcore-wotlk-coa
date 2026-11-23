@@ -63,7 +63,207 @@
   "talent_modifiers": [],
   "rotation": [],
   "stack": [],
-  "behaviours": [],
+  "behaviours": [
+    {
+      "spell": 800209,
+      "name": "Demonic Will (generates 1 Felfury)",
+      "kind": "metric_delta",
+      "variant": "felfury",
+      "label_suffix": "felfury",
+      "quote": "Generates 1 Felfury",
+      "trigger_spell": 800209,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Tooltip 800209: 'Generates 1 Felfury'. Felfury 800058 is the caster aura whose stacks are read: 0 before the cast, then exactly 1 after one real cast of 800209 (the learned active, no set_aura). The before read is the control arm. Reference search 2026-11-23: coa-history spell 800209: 13 casts, 13 aura applied and 13 removed in 4 logs, no value in a log event; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 800209,
+      "name": "Demonic Will (aura held 9400 ms)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "for $d",
+      "trigger_spell": 800209,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 800209
+      },
+      "before_expected": 0,
+      "wait_ms": 9400,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          9350,
+          9500
+        ]
+      },
+      "observe_source": "800209 DurationIndex 1 = 10000 ms ($d). The aura is still on the caster 9400 ms after the cast (excludes a duration 10% short, 9000 ms); the before read, absent, is the control. Reference search 2026-11-23: coa-history spell 800209: 13 casts, 13 aura applied and 13 removed in 4 logs, no value in a log event; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 800209,
+      "name": "Demonic Will (aura gone 10600 ms)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "for $d",
+      "trigger_spell": 800209,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 800209
+      },
+      "before_expected": 0,
+      "wait_ms": 10600,
+      "expire_ms": 500,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          10550,
+          10700
+        ]
+      },
+      "observe_source": "800209 DurationIndex 1 = 10000 ms ($d). The aura is gone 10600 ms after the cast (excludes a duration 10% long, 11000 ms). Reference search 2026-11-23: coa-history spell 800209: 13 casts, 13 aura applied and 13 removed in 4 logs, no value in a log event; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 800209,
+      "name": "Demonic Will (Physical damage taken)",
+      "kind": "taken_hit",
+      "variant": "physical_taken",
+      "label_suffix": "physical_taken",
+      "judge": "damage_ratio",
+      "expected": 0.7,
+      "quote": "reducing Physical damage taken by $s3%",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 6,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            800209
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 800209,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            800209
+          ],
+          "opening_casts": [
+            [
+              800209,
+              "caster"
+            ]
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 800209,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "800209 Effect[2] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127, BasePoints -31 + 1 = -30 ($s3). Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) strikes the caster six times in each arm; the control arm has Demonic Will unlearned and absent, the treatment arm casts it for real (opening cast) and the aura reads present. Expected ratio 0.70. Reference search 2026-11-23: coa-history spell 800209: 13 casts, 13 aura applied and 13 removed in 4 logs, no value in a log event; nothing found beyond the tooltip and Spell.dbc.",
+      "strikes": 3,
+      "settle_ms": 100
+    },
+    {
+      "spell": 805239,
+      "name": "Burning Hatred (generates 6 Felfury)",
+      "kind": "metric_delta",
+      "variant": "felfury",
+      "label_suffix": "felfury",
+      "quote": "instantly generating 6 Felfury",
+      "trigger_spell": 805239,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "before_expected": 0,
+      "expected": 6,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Tooltip 805239: 'instantly generating 6 Felfury'. Felfury 800058 stacks read 0 before the cast and 6 after one real cast of 805239 (the stack cap is 6, StackAmount 6). The before read is the control arm. Reference search 2026-11-23: coa-history spells 805239 and 807347: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 805239,
+      "name": "Burning Hatred (aura held 14100 ms)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "for $d",
+      "trigger_spell": 805239,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 805239
+      },
+      "before_expected": 0,
+      "wait_ms": 14100,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          14050,
+          14200
+        ]
+      },
+      "observe_source": "805239 DurationIndex 8 = 15000 ms ($d). The aura is still on the caster 14100 ms after the cast (excludes a duration 10% short, 13500 ms). Reference search 2026-11-23: coa-history spells 805239 and 807347: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 805239,
+      "name": "Burning Hatred (aura gone 15900 ms)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "for $d",
+      "trigger_spell": 805239,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 805239
+      },
+      "before_expected": 0,
+      "wait_ms": 15900,
+      "expire_ms": 500,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          15850,
+          16000
+        ]
+      },
+      "observe_source": "805239 DurationIndex 8 = 15000 ms ($d). The aura is gone 15900 ms after the cast (excludes a duration 10% long, 16500 ms). Reference search 2026-11-23: coa-history spells 805239 and 807347: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    }
+  ],
   "player_observations": [],
   "player_tooltip_readings": [],
   "hit_notes": [],
