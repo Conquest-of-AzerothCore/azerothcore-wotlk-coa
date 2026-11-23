@@ -13380,8 +13380,10 @@
       "kind": "duration_ratio",
       "quote": "and reduces the duration of movement slowing effects by $s1%.",
       "expected_ratio": 0.8,
-      "vehicle_spell": 1715,
-      "striker_entry": 36
+      "vehicle_spell": 58617,
+      "striker_entry": 36,
+      "attempts": 1,
+      "observe_source": "680670 Effect[0] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 11 (MECHANIC_SNARE), EffectBasePoints -21 + 1 = -20 ($s1 = 20): snare durations on the caster x0.8. Vehicle Glyph of Heart Strike 58617 (D-277: replaces Hamstring 1715, DmgClass 2 melee, which can miss, so a missed last attempt moved the read by the 500 ms retry wait): DmgClass 0, SpellFamilyName 0, its only effect Effect[0] 6 APPLY_AURA with aura 33 SPELL_AURA_MOD_DECREASE_SPEED and EffectMechanic[0] 11 on EffectImplicitTargetA 6, Speed 0, DurationIndex 1 = 10000 ms (SpellDuration.dbc, DurationPerLevel 0, MaxDuration 10000), no Attributes, no spell script or proc row. Unit::SpellHitResult (Unit.cpp:4231-4245) returns SPELL_MISS_NONE for a DmgClass 0 spell with a non-damage effect, so the one attempt (attempts 1) never misses; a cast that does not apply leaves no aura and reads 0, which is unmeasured before and an alert after, never a silent pass. Expected after duration 10000 x 0.8 = 8000 ms, delta -2000 ms within the 500 ms settle margin plus the run's tick overshoot. Control: the before phase without 680670. Expected from the installed DBC and the tooltip; nothing from a run."
     },
     {
       "spell": 300331,
@@ -31953,7 +31955,7 @@
         ]
       ],
       "strike": {
-        "spell": 11976,
+        "spell": 28308,
         "health": 100000,
         "max_health": 100000,
         "count": 4,
@@ -31977,7 +31979,7 @@
           4250
         ]
       },
-      "observe_source": "300355 Stalwart Effect[0] aura 42 (proc trigger of 301342); 301342 Stalwart has DurationIndex 35 = 4000 ms ($301342d, SpellDuration.dbc) and Effect[0] aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, EffectBasePoints -1001 + 1 = -1000%, the immunity. The server grants it on a received melee critical hit with damage (AscensionSunClericEvents.cpp:102-103, :276). The critical melee hit is real: the striker's Strike 11976 (DmgClass 2, melee, Effect 58 weapon damage) hits the caster, and Vulnerable 213 (Effect[1] aura 197, EffectBasePoints 9999 + 1 = +10000% to be critically struck, the fixture of Witch Hunter Alertness 681152) set by harness set_aura makes it critical; Vulnerable is a precondition fixture, not the subject. 300355 is learned between the phases, so the before phase is the control (the same crit, no talent, aura 301342 absent). The aura is read on the caster at a game time measured from the trigger cast Angelic Presence 800722 (an instant self cast, only the clock): a calibration run (aura_duration_ms, run 20261122-200519, readback used to place the reads, not as proof) put the strike's landing 112 ms before that clock, so the read at about 4.24 s after the critical hit finds it gone, so 4 s is not 10% longer (4.4 s). Reference search 2026-11-22: coa-history spell 300355 and 301342: see the Stalwart passive, no logged event; nothing found beyond the tooltip and the server DBC. Four Strikes are cast 20 ms apart (strike count 4) with the caster's dodge and parry set to 0 (caster_avoidance): a first pair run read this entry once ok and once alert (aura absent), a strike that missed. What remains is the melee spell miss chance, 5.00% base (Unit::GetUnitMissChance, Unit.cpp:4350) plus the defence term of Unit::MeleeSpellMissChance (Unit.cpp:16928-16929), not measured here. Vulnerable makes every landing critical, so the aura starts at the first landing within 60 ms of the first Strike, and a run fails only if all four miss: with a miss chance p the pair fails with probability about 2 p^4, which is at most 0.1% for p up to 0.149 (at the 5% base, 1.3e-5).",
+      "observe_source": "300355 Stalwart Effect[0] aura 42 (proc trigger of 301342); 301342 Stalwart has DurationIndex 35 = 4000 ms ($301342d, SpellDuration.dbc) and Effect[0] aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, EffectBasePoints -1001 + 1 = -1000%, the immunity. The server grants it on a received melee critical hit with damage (AscensionSunClericEvents.cpp:102-103, :276). The critical melee hit is real: the striker's Hateful Strike 28308 (D-277: replaces Strike 11976, which can miss, so an all-miss run read the expected 0: DmgClass 2, melee, Effect[0] 31 WEAPON_PERCENT_DAMAGE, EffectBasePoints 99 + 1 = 100% weapon damage on EffectImplicitTargetA 6, SpellFamilyName 0, AttributesEx3 SPELL_ATTR3_ALWAYS_HIT, no spell script or proc row) hits the caster, and Vulnerable 213 (Effect[1] aura 197, EffectBasePoints 9999 + 1 = +10000% to be critically struck, the fixture of Witch Hunter Alertness 681152) set by harness set_aura makes it critical; Vulnerable is a precondition fixture, not the subject. 300355 is learned between the phases, so the before phase is the control (the same crit, no talent, aura 301342 absent). The aura is read on the caster at a game time measured from the trigger cast Angelic Presence 800722 (an instant self cast, only the clock): a calibration run (aura_duration_ms, run 20261122-200519, readback used to place the reads, not as proof) put the strike's landing 112 ms before that clock, so the read at about 4.24 s after the critical hit finds it gone, so 4 s is not 10% longer (4.4 s). Reference search 2026-11-22: coa-history spell 300355 and 301342: see the Stalwart passive, no logged event; nothing found beyond the tooltip and the server DBC. Four Strikes are cast 20 ms apart (strike count 4) with the caster's dodge and parry set to 0 (caster_avoidance): with Strike 11976 a first pair run read this entry once ok and once alert (aura absent), a strike that missed. Unit::MeleeSpellHitResult returns SPELL_MISS_NONE for SPELL_ATTR3_ALWAYS_HIT (Unit.cpp:3752-3753) and Unit::isSpellBlocked returns false for it (Unit.cpp:3686-3687), so every Strike lands: it cannot miss, be dodged, parried or blocked, and an all-miss trial cannot occur; the critical roll is made on the damage calculation, apart from the hit result (Unit.cpp:16901). Vulnerable makes every landing critical, so the aura starts at the first landing and each of the four landings within 60 ms re-grants it; the read is past the last landing's end.",
       "caster_avoidance": {
         "dodge": 0,
         "parry": 0
@@ -31999,7 +32001,7 @@
         ]
       ],
       "strike": {
-        "spell": 11976,
+        "spell": 28308,
         "health": 100000,
         "max_health": 100000,
         "count": 8,
@@ -32023,7 +32025,7 @@
           1480
         ]
       },
-      "observe_source": "300355 Stalwart Effect[0] aura 42 proc-triggers 301342 (DurationIndex 35 = 4000 ms), whose Effect[0] aura 197 has EffectBasePoints -1001 (Spell.dbc). Eight Strikes 11976 500 ms apart hit the caster, so the last lands at 3.5 s, inside the 4 s window; the aura is read about 5.4 s after the first Strike. Fixture Vulnerable 425 (Effect[1] aura 197, EffectBasePoints 99 = +100% to be critically struck, harness set_aura, not the subject) makes the first Strike critical (base chance plus 100%) and, summed with 301342, leaves -901%, so no later Strike is critical and 301342 is not re-granted: it ends 4 s after the first landed Strike, before the read. A re-granted aura would last until at least 7.5 s.",
+      "observe_source": "300355 Stalwart Effect[0] aura 42 proc-triggers 301342 (DurationIndex 35 = 4000 ms), whose Effect[0] aura 197 has EffectBasePoints -1001 (Spell.dbc). Eight Strikes Hateful Strike 28308 (D-277: replaces Strike 11976, which can miss, so an all-miss run read the expected 0: DmgClass 2, melee, Effect[0] 31 WEAPON_PERCENT_DAMAGE, EffectBasePoints 99 + 1 = 100% weapon damage on EffectImplicitTargetA 6, SpellFamilyName 0, AttributesEx3 SPELL_ATTR3_ALWAYS_HIT, no spell script or proc row) 500 ms apart hit the caster, so the last lands at 3.5 s, inside the 4 s window; the aura is read about 5.4 s after the first Strike. Fixture Vulnerable 425 (Effect[1] aura 197, EffectBasePoints 99 = +100% to be critically struck, harness set_aura, not the subject) makes the first Strike critical (base chance plus 100%) and, summed with 301342, leaves -901%, so no later Strike is critical and 301342 is not re-granted: it ends 4 s after the first landed Strike, before the read. A re-granted aura would last until at least 7.5 s. Unit::MeleeSpellHitResult returns SPELL_MISS_NONE for SPELL_ATTR3_ALWAYS_HIT (Unit.cpp:3752-3753) and Unit::isSpellBlocked returns false for it (Unit.cpp:3686-3687), so every Strike lands: it cannot miss, be dodged, parried or blocked, and an all-miss trial cannot occur; the critical roll is made on the damage calculation, apart from the hit result (Unit.cpp:16901). The first Strike therefore lands at 0 s and is critical (base chance plus 100%), so the grant is certain and the read at 5.4 s finds it ended.",
       "caster_avoidance": {
         "dodge": 0,
         "parry": 0
