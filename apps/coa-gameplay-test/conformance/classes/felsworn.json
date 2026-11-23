@@ -12431,23 +12431,6 @@
       "observe_source": "561216 Effect[2] aura 263 in Spell.dbc; the immunity mask is set by AscensionFelswornContracts.cpp:189-195 (read as a hint, not an expectation). The tooltip says 'immune to crowd control effects', read as: stun, fear, root, snare (and sleep). The aura lasts 3000 ms (6 assaults x 500 ms, the tooltip's own count and period), so one fixture per entry fits the window (3 casts x 500 ms). Fixtures, each landed by a real creature cast at the caster inside the window: Net 47021 (Mechanic 7 root, aura 26). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): 'While active you are immune to crowd control effects.' (same wording); expected values come from the tooltip and the DBC only."
     },
     {
-      "spell": 561216,
-      "name": "Fury of the Illidari (immune, snare)",
-      "kind": "immunity",
-      "variant": "snare",
-      "quote": "While active you are immune to crowd control effects.",
-      "caster_auras": [
-        804216
-      ],
-      "effects": [
-        {
-          "spell": 38767,
-          "words": "crowd control"
-        }
-      ],
-      "observe_source": "561216 Effect[2] aura 263 in Spell.dbc; the immunity mask is set by AscensionFelswornContracts.cpp:189-195 (read as a hint, not an expectation). The tooltip says 'immune to crowd control effects', read as: stun, fear, root, snare (and sleep). The aura lasts 3000 ms (6 assaults x 500 ms, the tooltip's own count and period), so one fixture per entry fits the window (3 casts x 500 ms). Fixtures, each landed by a real creature cast at the caster inside the window: Daze 38767 (Mechanic 11 snare, aura 33). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): 'While active you are immune to crowd control effects.' (same wording); expected values come from the tooltip and the DBC only."
-    },
-    {
       "spell": 806109,
       "name": "Illidan's Guile (no melee swings under the aura)",
       "kind": "metric_delta",
@@ -12495,6 +12478,272 @@
       "wait_ms": 600,
       "expire_ms": 8600,
       "observe_source": "806109 DurationIndex 31 = 8000 ms. The tooltip says that during the aura 'you cannot ... cast spells'. Control phase: Bane of Fire 707901 (40 Energy, Energy set to 100) is cast at the dummy and completes (spell_cast_count 1). Treatment phase, after 8600 ms: 806109 is cast at the caster, 1600 ms later (past the global cooldown) the same Bane cast is attempted while the aura is held: it must not complete, so the count stays 1. Expected 'no completed cast' comes from the tooltip's 'cannot cast spells'. Reference search 2026-11-23: coa-history spell 806109 finds 6 SPELL_CAST_SUCCESS, 6 SPELL_AURA_APPLIED and 6 SPELL_AURA_REMOVED by a player in 1 of 186 logs, none reaches $d (left early); bindmysoul talents snapshot: 'becoming immune to all physical attacks and spells for 8 seconds, but during that time you cannot attack, move or cast spells' (same wording); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806109,
+      "name": "Illidan's Guile (aura is on the caster during the no-swing phase)",
+      "kind": "metric_delta",
+      "variant": "no_attack_applied",
+      "label_suffix": "no_attack_applied",
+      "quote": "you cannot attack",
+      "trigger_spell": 806109,
+      "gate_spell": 806109,
+      "gate_cast": true,
+      "target": "dummy",
+      "attack_swings": 2,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 806109
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Equivalence arm of no_attack (mentor D-67 spirit: the aura must really be on the caster when the swings are judged): the same flow as the no_attack entry (806109 cast at the caster between the phases, 2 swing intervals of attacks at the dummy, readings 500 ms after), reading aura_stacks of 806109 on the caster: absent in the control phase (0), present at the end of the treatment phase (1; 8000 ms DurationIndex 31, the readings come 500 + 4600 + 500 ms after the cast). Reference search 2026-11-23: coa-history spell 806109 finds 6 SPELL_CAST_SUCCESS in 1 of 186 logs (aura left early); bindmysoul talents snapshot (older state): same sentence; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "trigger_spell": 561216,
+      "gate_spell": 561216,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "void_on_cast_failure": true,
+      "expire_ms": 3500,
+      "spell": 561216,
+      "name": "Fury of the Illidari (1 Felfury per strike)",
+      "kind": "metric_delta",
+      "variant": "felfury",
+      "label_suffix": "felfury",
+      "quote": "generating 1 Felfury with each strike.",
+      "cast_in_before": false,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 1250,
+      "same_arm_ratio": {
+        "metric": "spell_cast_count",
+        "fields": {
+          "spell": 808303
+        },
+        "ratio": 1.0,
+        "tolerance": 0.01,
+        "least": 2,
+        "source": "the tooltip: 'attacking them every $t1 sec ... generating 1 Felfury with each strike': one Felfury per strike, so the Felfury gain equals the number of strikes made in the same window"
+      },
+      "observe_source": "561216 Effect[0] aura 226 SPELL_AURA_PERIODIC_DUMMY every 500 ms (the tooltip's $t1 = 0.5 sec), 6 assaults. The Felfury 800058 (StackAmount 6, DBC) stacks on the caster are read 1250 ms after a real cast, before the 6-strike total can reach the stack cap (a read at the cap could not tell 1 per strike from more); the judged value is the Felfury gain divided by the gain of spell_cast_count of the strike Twin Slice 808303 read in the same window: 1 per strike. The control phase makes no cast (0 Felfury, 0 casts). Inner Demon 804216 (CasterAuraSpell of 561216) is set by harness set_aura as a precondition fixture, the claim's subject being the strikes. 808303 is the strike spell the cast produces (its Effect[0] is SPELL_EFFECT_NORMALIZED_WEAPON_DMG 121), read as a measurement target, never as an expected value. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): same sentences; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "trigger_spell": 561216,
+      "gate_spell": 561216,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "void_on_cast_failure": true,
+      "expire_ms": 3500,
+      "spell": 561216,
+      "name": "Fury of the Illidari (hits the same target more than once)",
+      "kind": "metric_delta",
+      "variant": "same_target",
+      "label_suffix": "same_target",
+      "quote": "Can hit the same target multiple times.",
+      "cast_in_before": false,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808303,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "after_at_least": 2,
+      "wait_ms": 3500,
+      "observe_source": "The tooltip says one assault is made on each strike for 6 assaults and that the same target can be hit more than once: with ONE enemy near the caster (the stock dummy, no other creature in the scenario) the strike spell Twin Slice 808303 must land on it at least twice (at least 2 damage events on the dummy, an arbitrary floor above 1 that excludes a single hit). The control phase makes no cast (0 events). Inner Demon 804216 is a precondition fixture (harness set_aura). Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): same sentences; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "trigger_spell": 561216,
+      "gate_spell": 561216,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "expire_ms": 3500,
+      "spell": 561216,
+      "name": "Fury of the Illidari (does not hit a stealth target)",
+      "kind": "metric_delta",
+      "variant": "no_hit_stealth",
+      "label_suffix": "no_hit_stealth",
+      "quote": "Cannot hit invisible or stealthed targets.",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808303,
+        "target": "dummy"
+      },
+      "before_expected": 2,
+      "expected": 2,
+      "expected_gain": 0,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "after_auras": [
+        [
+          1784,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "observe_source": "Control phase: Fury of the Illidari is cast with the dummy plain and Twin Slice 808303 lands on it (at least 2 events, the entry's floor). Treatment phase, after 3500 ms: the dummy carries Stealth 1784 (aura 16 MOD_STEALTH) (harness set_aura on the dummy, a precondition fixture: the claim's subject is the strikes, not the aura) and the same cast must add no strike event on it (gain 0). The caster stays out of the dummy's reach of detection (the dummy is a passive creature). Inner Demon 804216 is a precondition fixture (harness set_aura) in both phases; 2 charges allow the two casts. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): same sentences; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "trigger_spell": 561216,
+      "gate_spell": 561216,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "expire_ms": 3500,
+      "spell": 561216,
+      "name": "Fury of the Illidari (does not hit a invisible target)",
+      "kind": "metric_delta",
+      "variant": "no_hit_invisible",
+      "label_suffix": "no_hit_invisible",
+      "quote": "Cannot hit invisible or stealthed targets.",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808303,
+        "target": "dummy"
+      },
+      "before_expected": 2,
+      "expected": 2,
+      "expected_gain": 0,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "after_auras": [
+        [
+          32612,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "observe_source": "Control phase: Fury of the Illidari is cast with the dummy plain and Twin Slice 808303 lands on it (at least 2 events, the entry's floor). Treatment phase, after 3500 ms: the dummy carries Invisibility 32612 (aura 18 MOD_INVISIBILITY) (harness set_aura on the dummy, a precondition fixture: the claim's subject is the strikes, not the aura) and the same cast must add no strike event on it (gain 0). The caster stays out of the dummy's reach of detection (the dummy is a passive creature). Inner Demon 804216 is a precondition fixture (harness set_aura) in both phases; 2 charges allow the two casts. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): same sentences; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon extension on a Ruin critical strike)",
+      "kind": "metric_delta",
+      "variant": "duration_ruin",
+      "label_suffix": "duration_ruin",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 501298,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "spell",
+      "cast_power": 100,
+      "before_expected": 1000,
+      "expected": 2000,
+      "expected_gain": 1000,
+      "tolerance": 90,
+      "wait_ms": 2600,
+      "expire_ms": 10500,
+      "observe_source": "The tooltip names Ruin and Azzinoth's Assault among the Felfury spenders (the spells whose own tooltip says 'Consumes 2 Felfury': Ruin 501298, Spell.dbc Description). Ruin has a direct Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE (a 2500 ms cast time, Spell.dbc), so with its hit forced critical (spell crit rating forced by the harness) one direct critical strike must extend Inner Demon 804216 by $806236s1 = 1000 ms (806236 BasePoints 999 + 1, same figure as the Sargeron Smite entry of this spell); the remaining duration of 804216 2600 ms after the cast is read before the learn (control: 806235 not learned) and after: gain 1000, tolerance 90 excludes 10% on the gain. Inner Demon 804216, Felfury 800058 x2 (the cost of the spender) and At Least 2 Felfury 803468 (the spender's CasterAuraSpell) are set by harness set_aura on the caster in both phases as precondition fixtures. Reference search 2026-11-23: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec and cause enemies struck to have a 3% increased chance to be hit by spells for 12 seconds.' (same figures); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon extension on a Felwrath critical strike)",
+      "kind": "metric_delta",
+      "variant": "duration_felwrath",
+      "label_suffix": "duration_felwrath",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 520693,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "spell",
+      "cast_power": 100,
+      "before_expected": 1000,
+      "expected": 2000,
+      "expected_gain": 1000,
+      "tolerance": 90,
+      "wait_ms": 2100,
+      "expire_ms": 10500,
+      "observe_source": "The tooltip names Ruin and Azzinoth's Assault among the Felfury spenders (the spells whose own tooltip says 'Consumes 2 Felfury': Felwrath 520693, Spell.dbc Description). Felwrath has a direct Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE (a 2000 ms cast time, Spell.dbc), so with its hit forced critical (spell crit rating forced by the harness) one direct critical strike must extend Inner Demon 804216 by $806236s1 = 1000 ms (806236 BasePoints 999 + 1, same figure as the Sargeron Smite entry of this spell); the remaining duration of 804216 2100 ms after the cast is read before the learn (control: 806235 not learned) and after: gain 1000, tolerance 90 excludes 10% on the gain. Inner Demon 804216, Felfury 800058 x2 (the cost of the spender) and At Least 2 Felfury 803468 (the spender's CasterAuraSpell) are set by harness set_aura on the caster in both phases as precondition fixtures. Reference search 2026-11-23: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec and cause enemies struck to have a 3% increased chance to be hit by spells for 12 seconds.' (same figures); expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],
