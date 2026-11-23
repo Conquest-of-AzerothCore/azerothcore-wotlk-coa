@@ -2,7 +2,7 @@
 -- (Redthedeer VOD 2026-07-13, wJ2j4NOgjRI 01:27:52, 'Hookweed' tooltip on the shore plant, then 1/6). The capture has
 -- no spawn positions; the plants stand on dry, gentle ground within 2 yd of the water inside the quest area, scattered
 -- at least 38 to 50 yd apart.
-DELETE FROM `gameobject` WHERE `guid` BETWEEN 9935000 AND 9935026 AND `id` = 2300636;
+DELETE FROM `gameobject` WHERE `guid` BETWEEN 9935000 AND 9935006 AND `id` = 2300636;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`,
     `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`,
     `state`, `ScriptName`) VALUES
