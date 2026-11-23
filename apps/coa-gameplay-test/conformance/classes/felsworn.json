@@ -336,25 +336,6 @@
       "per_trigger_text": "Dodging an attack now generates Energy",
       "observe_source": "EffectTriggerSpell[0] of 805249 (521210, Effect[0] ENERGIZE). AscensionFelswornEvents.cpp:42-47 passes an incoming dodge (id 805249 accepts dodge only, not parry) when Chance(player, 805249) succeeds (ProcChance 100, so every dodge) and :208-209 casts 521210 on the caster. An aggressive striker (creature 36) swings at the caster, who wears Evasion 26669 refreshed before every 2000 ms attempt as a precondition fixture (trigger action avoided, ADR 0709); every dodged or parried swing is a trial and the energize events of 521210 must match them. Reference search 2026-11-23: coa-history spell 805249 and 521210, ~/CoaServer/reference snapshots: nothing found that decides a value; the Energy amount is not read here (tool gap).",
       "trial_attempts_reason": "An attempt is one striker swing interval; only the dodged or parried swings are trials (Evasion gives +50% dodge, the rest hit or miss), so 2.5 times the swings are scheduled to reach the trigger trials."
-    },
-    {
-      "aura": 805249,
-      "name": "Illidari Training",
-      "tooltip": "Dodging an attack now generates $521210s1 Energy.",
-      "trigger": {
-        "action": "avoided",
-        "striker_entry": 36,
-        "swing_ms": 2000
-      },
-      "trigger_text": "Dodging an attack",
-      "trial_metric": "melee_attacks_taken",
-      "trial_attempts_factor": 2.5,
-      "observe_spell": 521210,
-      "observe_metric": "spell_energize_count",
-      "per_trigger": 1,
-      "per_trigger_text": "now generates Energy",
-      "observe_source": "805249 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell[0] 521210 (Effect[0] 30 SPELL_EFFECT_ENERGIZE, BasePoints 2 + 1 = 3, MiscValue 3 Energy), ProcChance 100. An aggressive striker (creature 36) swings at the caster, who wears Evasion 26669 (+50% dodge) refreshed before every 2000 ms attempt as a precondition fixture (the trigger action avoided, ADR 0709); every dodged (victim_state 2) or parried (victim_state 3) swing is a trial and the spell_energize_count of 521210 must match it; the baseline part without the passive learned must read 0. The Energy amount is not read by this count. Reference search 2026-11-23: coa-history spell 805249: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only.",
-      "trial_attempts_reason": "An attempt is one striker swing interval; only the dodged or parried swings are trials (Evasion gives +50% dodge, the rest hit or miss), so 2.5 times the swings are scheduled to reach the trigger trials."
     }
   ],
   "talent_modifiers": [],
