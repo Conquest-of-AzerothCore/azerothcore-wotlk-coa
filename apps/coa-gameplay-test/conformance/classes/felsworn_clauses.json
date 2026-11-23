@@ -3123,7 +3123,12 @@
   {
     "spell": 800355,
     "clause": "For the duration, you may instant cast Fel Fireball and Ruin while channeling and they refund their cost.",
-    "labels": [],
+    "labels": [
+      "800355 behaviour_metric_delta instant_fel_fireball",
+      "800355 behaviour_metric_delta instant_ruin",
+      "800355 behaviour_metric_delta refund_fel_fireball",
+      "800355 behaviour_metric_delta refund_ruin"
+    ],
     "tool_gap": {
       "reason": "Instant cast and cost refund of two named spells while the channel runs: AscensionFelswornAbilities.cpp:165 and :232-233 (OnSpellCast energizes the paid cost back, CanCastDuringChannel). The channel costs ManaPerSecond 30 Energy (Spell.dbc 800355), drained every 1000 ms by Aura::Update, which removes the aura when the pool is below 30 (SpellAuras.cpp:771-801); the earlier counted pair set Energy once to 100, so the channel ended near 4000 ms: an incorrect test, not a property of the build. With Energy held at 100 by hold_power_during_wait the channel runs its 5500 ms (slow_held and damage ok in both runs of pair q2). No kind reads the cast time of a spell cast during another spell's channel; cast_period and shot_ramp read cast-to-cast spacing of one spell, energize_range reads an energize of one cast. The nearest is cast_period. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc.",
       "attempts": [
