@@ -5796,6 +5796,68 @@
           5550
         ]
       }
+    },
+    {
+      "spell": 563268,
+      "name": "Felrend (generates 1 Felfury)",
+      "kind": "metric_delta",
+      "variant": "felfury",
+      "label_suffix": "felfury",
+      "quote": "Generates 1 Felfury",
+      "trigger_spell": 563268,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "563268 Felrend: Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG and Effect[1] TRIGGER_SPELL_WITH_VALUE (803476, the logged damage spell), TargetA 22 SRC_CASTER / TargetB 15 SRC_AREA_ENEMY, EffectRadiusIndex 193 = 6 yd ($a1), 40 Energy, BasePoints 49 + 1 = 50 ($s1). Felfury stacks read 0 before the cast and 1 after one real Felrend cast at the dummy. Reference search 2026-11-23: coa-history spell 563268: 0 events; spell 803476 Felrend (the logged damage id): SPELL_DAMAGE 1580 events in 5 logs (positive control, min 25 max 492 mean 141, gear differs so no figure decides); nothing else found; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 563268,
+      "name": "Felrend (strikes enemies within 6 yd)",
+      "kind": "radius_edge",
+      "label_suffix": "radius_edge",
+      "quote": "Erupt in a whirlwind of felfury, striking all enemies within $a1 yds with both weapons,",
+      "gate_spell": 563268,
+      "cast_spell": 563268,
+      "cast_at": "caster",
+      "hit_spell": 803476,
+      "power": 100,
+      "radius": 6,
+      "dummy_reach": 1.275,
+      "primary_yd": 0.1,
+      "repeats": 1,
+      "settle_ms": 2000,
+      "leeway": true,
+      "reach_source": "the dummy entry 36 combat reach 1.275 yd (creature_model_info CombatReach of display 367, world DB; read 1.275 in the Templar 1161 aggro_redirect edge run 20261112-053731), added for a player-controlled caster against a non-player target (Spell.cpp:9434-9442); the caster's own size is not a term; the judge reads each reach again and refuses a layout that does not bracket the edge",
+      "observe_source": "563268 Felrend: Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG and Effect[1] TRIGGER_SPELL_WITH_VALUE (803476, the logged damage spell), TargetA 22 SRC_CASTER / TargetB 15 SRC_AREA_ENEMY, EffectRadiusIndex 193 = 6 yd ($a1), 40 Energy, BasePoints 49 + 1 = 50 ($s1). The damage hits of 803476 per dummy are read after Felrend is cast at the caster, before (control) and after it is learned; the inside dummy is struck, the one beyond 6 yd plus reach is not. Reference search 2026-11-23: coa-history spell 563268: 0 events; spell 803476 Felrend (the logged damage id): SPELL_DAMAGE 1580 events in 5 logs (positive control, min 25 max 492 mean 141, gear differs so no figure decides); nothing else found; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 572804,
+      "name": "Annihilan Strike (generates 2 Felfury)",
+      "kind": "metric_delta",
+      "variant": "felfury",
+      "label_suffix": "felfury",
+      "quote": "Generates 2 Felfury",
+      "trigger_spell": 572804,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "572804 Annihilan Strike: Effect[0] and Effect[1] TRIGGER_SPELL_WITH_VALUE (801913 main hand, 801914 off hand, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE), BasePoints 259 + 1 = 260 ($s2). The tooltip's 'Generates 2 Felfury' is read as the Felfury gain of one cast. Felfury stacks read 0 before and 2 after one real cast at the dummy. Reference search 2026-11-23: coa-history spell 572804: 0 events; spell 801913 Annihilan Strike: SPELL_DAMAGE 70 events in 4 logs (34 crits, min 98 max 394; gear differs so no figure decides); expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],

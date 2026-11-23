@@ -2340,16 +2340,18 @@
   {
     "spell": 563268,
     "clause": "Generates 1 Felfury",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "563268 behaviour_metric_delta felfury"
+    ]
   },
   {
     "spell": 563268,
     "clause": "Erupt in a whirlwind of felfury, striking all enemies within $a1 yds with both weapons,",
+    "kind": "claim",
     "labels": [
-      "563268 effect_radius e0 #0"
-    ],
-    "kind": "claim"
+      "563268 behaviour_metric_delta radius_edge"
+    ]
   },
   {
     "spell": 563268,
@@ -2641,8 +2643,10 @@
   {
     "spell": 572804,
     "clause": "Generates 2 Felfury",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "572804 behaviour_metric_delta felfury"
+    ]
   },
   {
     "spell": 572804,
