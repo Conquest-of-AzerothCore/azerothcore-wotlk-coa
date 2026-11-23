@@ -180,6 +180,11 @@ void ApplyContracts(SpellInfo* info)
     }
     if (id == 805241)
         info->Effects[0].RealPointsPerLevel = 0;
+    if (id == 570159)
+    {
+        info->Effects[0].BasePoints = -1;
+        info->Effects[0].RealPointsPerLevel = 0;
+    }
     if (id == 800598)
     {
         info->AttributesEx3 |= SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON;

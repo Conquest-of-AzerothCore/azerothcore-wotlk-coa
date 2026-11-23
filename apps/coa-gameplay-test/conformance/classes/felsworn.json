@@ -3184,6 +3184,45 @@
       ]
     },
     {
+      "spell": 570158,
+      "name": "Scars of Suffering (scar amount, Agility contrast arm)",
+      "kind": "metric_delta",
+      "variant": "scar_amount_agility",
+      "label_suffix": "scar_amount_agility",
+      "quote": "increasing your allies' attack power against them by ${$m1+0+$AGI*0.15}",
+      "trigger_spell": 801904,
+      "gate_spell": 570158,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 570159,
+        "effect": 0,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 24.0,
+      "tolerance": 1,
+      "wait_ms": 300,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "observe_source": "Agility contrast arm of the scar_amount entry (Felsworn ADR 0010, owner O-20): the talent text ${$m1+0+$AGI*0.15} reads $m1 from 570158 Effect[0] (EffectBasePoints -1, EffectDieSides 1: 0), so the scar 570159 Effect[0] aura 165 SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS carries 0.15 x the caster's Agility and nothing else. Agility 58451 (aura 29 SPELL_AURA_MOD_STAT, MiscValue 1, EffectBasePoints 29, EffectDieSides 1: +30) is set on the caster in both phases with Felfury 800058 at 6 stacks, so the reference Agility 130 (class file stat 1) becomes 160: 0.15 x 160 = 24, judged to 1. The control arm is the read before the learn (0: no scar without the talent). The aura amount is the attack power every attacker gains against the scarred target: Unit::GetTotalAttackPowerValue adds victim->GetTotalAuraModifier(SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS) (Unit.cpp:13786). The pair with scar_amount separates the Agility slope (0.15 x 30 = 4.5) from a flat base: the stock 570159 base and per-level points (4 + 1 + int32(43 x 0.5) = 26 at level 60) would read 45 and 50.",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          58451,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
       "spell": 803903,
       "name": "Fel Haze (all enemy armor ignored under Blood of Mannoroth)",
       "kind": "hit_ratio",

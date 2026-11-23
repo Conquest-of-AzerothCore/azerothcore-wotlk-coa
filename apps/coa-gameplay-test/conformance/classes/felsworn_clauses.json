@@ -1261,7 +1261,8 @@
       {
         "claim": "increasing your allies' attack power against them by ${$m1+0+$AGI*0.15}",
         "labels": [
-          "570158 behaviour_metric_delta scar_amount"
+          "570158 behaviour_metric_delta scar_amount",
+          "570158 behaviour_metric_delta scar_amount_agility"
         ]
       },
       {
