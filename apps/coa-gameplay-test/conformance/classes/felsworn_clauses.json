@@ -573,7 +573,7 @@
     "spell": 520249,
     "clause": "Increases your critical strike chance by $s1%",
     "labels": [
-      "520249 effect_value e0 #0"
+      "520249 behaviour_metric_delta crit_all"
     ],
     "kind": "claim"
   },
@@ -581,7 +581,8 @@
     "spell": 520249,
     "clause": "and an additional $s2% against Demons.",
     "labels": [
-      "520249 effect_value e1 #1"
+      "520249 behaviour_metric_delta crit_demon",
+      "520249 behaviour_metric_delta crit_other_type"
     ],
     "kind": "claim"
   },
@@ -1695,7 +1696,8 @@
     "spell": 705109,
     "clause": "and an additional $s2% against Demons.",
     "labels": [
-      "705109 effect_value e1 #1"
+      "705109 behaviour_metric_delta crit_demon",
+      "705109 behaviour_metric_delta crit_other_type"
     ],
     "kind": "claim"
   },

@@ -99,7 +99,6 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[1].ApplyAuraName = SPELL_AURA_OVERRIDE_CLASS_SCRIPTS;
         info->Effects[1].MiscValue = ASCENSION_CREATURE_GLOBAL_CRIT;
         info->Effects[1].MiscValueB = 4;
-        info->Effects[1].BasePoints = id == 705109 ? 2 : 4;
     }
     if (id == 92087)
         info->Effects[1].MiscValue = ASCENSION_STATE_MASKED_GUARANTEED_CRIT;
