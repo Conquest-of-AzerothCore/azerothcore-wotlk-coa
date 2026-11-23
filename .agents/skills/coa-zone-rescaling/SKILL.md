@@ -64,6 +64,13 @@ its elites, bosses and documented special-purpose exceptions keep separate budge
 templates, not random per-spawn rolls; obtain a separate policy before introducing random health. Derive it from level-60 stat tables and actual comparables. Preserve meaningful elite/boss
 roles, armor/resistance, attack speed and mechanics; evaluate mana and resource pools as levels change.
 
+When the owner supplies a common-enemy kill-time target, calculate its effective HP from reference DPS and
+target seconds. Recalculate the new zone's ordinary-enemy templates at their target levels, carry forward
+the previous zone's ordinary-enemy budget multiplier, and apply the new zone's order factor once. Weight the
+median by spawn count and report the implied kill time. If it misses the target materially, show both results
+and obtain approval for a zone-specific baseline before implementing it. The
+[Zangarmarsh rescale](../../../docs/coa/zangarmarsh-rescale.md) is a worked example.
+
 Keep zone order data, shared step settings and intentional exceptions separate. Define supported bounds and
 rounding before implementation. Derive effective results from a pinned unscaled baseline, never multiply already
 scaled live rows. Reload, restart, respawn and migration reapplication must not compound the result.
@@ -93,7 +100,11 @@ Audit hostile quest actors and friendly escorts separately rather than scaling e
    Avoid double-scaling spell damage through both caster stats and a final damage modifier. Review percentage
    damage, shared HP, damage reflection, healing and lethal mechanics separately; retain explicit exceptions.
 3. Show representative before/after effective stats for a common melee mob, caster, rare, elite, outdoor boss,
-   quest wave and escort. Compare kill time and player survival using the selected gear and roster, not HP alone.
+   quest wave and escort. Calculate melee swing ranges and swing timers at existing and proposed levels with
+   the applicable world and zone factors. State whether values are before mitigation and distinguish
+   formula estimates from observed damage. Report ranged attacks, caster abilities and periodic damage
+   separately, and mark any per-cast or per-tick values still awaiting verification. Compare kill time and
+   player survival using the selected gear and roster, not HP alone.
 4. Audit quest minimum/display/maximum levels, prerequisites, objective actors, starter items and completion
    scripts. Remove over-60 character requirements only within the agreed range; preserve valid lower gates,
    faction, reputation and class intent. Check offered, accepted, completed and rewarded states, not just UI.
