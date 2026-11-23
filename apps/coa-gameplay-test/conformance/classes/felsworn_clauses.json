@@ -562,7 +562,8 @@
           "520240 cost_gate 805239 cd_805239 without",
           "520240 cost_gate 805239 cd_805239 with",
           "520240 cost_gate 805239 cd_805239 beyond"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "Hateforged Barrier cooldown reduced by $/1000;520830S1 sec",
@@ -570,7 +571,8 @@
           "520240 cost_gate 705129 cd_705129 without",
           "520240 cost_gate 705129 cd_705129 with",
           "520240 cost_gate 705129 cd_705129 beyond"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "Demonic Will cooldown reduced by $/1000;520830S1 sec",
@@ -578,12 +580,14 @@
           "520240 cost_gate 800209 cd_800209 without",
           "520240 cost_gate 800209 cd_800209 with",
           "520240 cost_gate 800209 cd_800209 beyond"
-        ]
+        ],
+        "evidence": "behaviour"
       }
     ],
     "kind": "claim",
-    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068",
-    "reason": "Behaviour route (review fw-r2b I-2: cooldown_ms is a readback): the gated spell is primed, Sargeron Smite 802060 is cast 2000 ms later, and the gated spell is attempted at its cooldown less 500 ms with a 40 ms margin on each side: refused without the talent (control), through with it, refused 40 ms earlier. A cut of 450 or 550 ms (10% off) lands on the wrong side of the 40 ms margins. Pair prove_m1, runs 20261123-162432 / 20261123-162739, build cc3e6ebbb4eb, server commit 250cee3eb11f, no flip."
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "reason": "Pair 20261123-220940 / 20261123-221022 (prove3), build c934c0777690, server commit 9e1ffa1b799e, no flip. Behaviour route on the cooldown cut: the gated spell is attempted at its cooldown less 500 ms with a 25 ms margin on each side (refused without the talent as control, through with it, refused 25 ms earlier); a cut of 450 or 550 ms moves the opening by 50 ms and lands on the wrong side of both margins.",
+    "evidence": "behaviour"
   },
   {
     "spell": 520244,
@@ -602,7 +606,10 @@
       "520246 behaviour_metric_delta crit_gain",
       "520246 behaviour_metric_delta control_no_crit"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "reason": "Pair 20261123-220940 / 20261123-221022 (prove3), build c934c0777690, server commit 9e1ffa1b799e, no flip. crit_gain: forced critical Fel Fireball gains 1 Felfury with the passive (1 -> 2); control_no_crit: Reg's Test Aura 984954 on the caster removes spell critical strikes in both phases, so the same cast gains none (1 -> 1). The first design assumed a crit chance of 0 and read a critical strike in one run (fw-b3g1c)."
   },
   {
     "spell": 520249,
@@ -684,7 +691,8 @@
         "claim": "Removes the Energy cost of your Felbane",
         "labels": [
           "520592 behaviour_metric_delta felbane_cost"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "and Manaburn",
@@ -695,9 +703,11 @@
         "labels": [
           "520592 manaburn_targets behaviour_fixed_count",
           "520592 manaburn_targets_control behaviour_fixed_count"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 520805,
@@ -1261,9 +1271,7 @@
     "claims": [
       {
         "claim": "unable to critically strike",
-        "labels": [
-          "560641 behaviour_metric_delta no_crit"
-        ]
+        "labels": []
       },
       {
         "claim": "for $704397d",
@@ -1271,7 +1279,16 @@
           "560641 behaviour_metric_delta duration"
         ]
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "'unable to critically strike' needs an enemy attacker whose critical hits are counted with and without Crippling Pain 704397 on it. taken_hit damage_ratio reads only critical or only non-critical strikes of a striker and leaves a trial out when no log lands, so the debuffed arm has nothing to judge; crit_rate and hit_ratio count the caster's own hits; metric_delta has no enemy melee attacker with a critical filter. Nearest kind: taken_hit with striker_force_crit (Resilient Constitution 552011) and a Cripple 704371 cast on the striker, judged as a critical share per arm. Needs tool group B: critical-share judge for taken_hit strikes.",
+      "attempts": [
+        {
+          "agent": "fw-ea3",
+          "report": ".agents/plans/fw-ea3/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 560645,
@@ -1901,16 +1918,21 @@
       {
         "claim": "damage is increased on the target by $707511s1%",
         "labels": [
-          "704370 behaviour_metric_delta stack_value"
-        ]
+          "704370 behaviour_metric_delta stack_value",
+          "704370 behaviour_metric_delta stack_count"
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "for $707511d",
         "labels": [
           "704370 behaviour_metric_delta duration"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 704370,
@@ -2095,7 +2117,8 @@
     "labels": [
       "705105 behaviour_metric_delta max_energy"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Data reading, not a separation of the tooltip's flat 30 from 30%: the DBC aura of 705105 is MOD_INCREASE_ENERGY_PERCENT (132, 29 + 1) and AscensionFelswornContracts.cpp:98-99 already rewrites it to the flat aura 35, so the read of +30 on 100 Energy cannot tell the two apart. No class source gives a flat or a percent Energy term that does: the only other maximum Energy source of the class, 800225 Skull of Gul'dan (+25%), multiplies a flat 30 and a 30% alike (StatSystem.cpp:456-459, (100 + 30) x 1.25 = 100 x 1.30 x 1.25). Items and racial sources not found in the class kit; no item fixture separating them was identified. Reference search 2026-11-23: nothing found."
   },
   {
     "spell": 705108,
@@ -2129,7 +2152,10 @@
       "705122 behaviour_hit_ratio physical_taken",
       "705122 behaviour_metric_delta aura_amount"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "reason": "Pair 20261123-220940 / 20261123-221022 (prove3), build c934c0777690, server commit 9e1ffa1b799e, no flip. hit_ratio redesigned: Inner Demon is recast before every one of the 60 trials, so the 5 s aura never lapses inside the arm (the first pair let it expire after 4 strikes); damage ratio 0.95 within the band, with the aura amount read as the diagnostic."
   },
   {
     "spell": 705123,
@@ -2174,7 +2200,8 @@
           "705125 cost_gate 805248 manaburn_cd without",
           "705125 cost_gate 805248 manaburn_cd with",
           "705125 cost_gate 805248 manaburn_cd beyond"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "and Illidan's Guile by $s1%.",
@@ -2182,9 +2209,13 @@
           "705125 cost_gate 806109 illidans_guile_cd without",
           "705125 cost_gate 806109 illidans_guile_cd with",
           "705125 cost_gate 806109 illidans_guile_cd beyond"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "reason": "Pair 20261123-220940 / 20261123-221022 (prove3), build c934c0777690, server commit 9e1ffa1b799e, no flip. Cooldown cut of Mana Burn (20000 ms, -20%): attempted at 16000 ms plus and minus 300 ms (refused without, through with, refused 300 ms earlier); a cut of 3600 or 4400 ms falls outside the 300 ms margins on the wrong side (10% of 4000 is 400 ms, so the margin is below it)."
   },
   {
     "spell": 705127,
@@ -2969,7 +3000,9 @@
       "800220 cost_gate 805243 whipcrack_cd with",
       "800220 cost_gate 805243 whipcrack_cd beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 800220,
@@ -2984,9 +3017,11 @@
         "claim": "its radius is increased by $s2 yds.",
         "labels": [
           "800220 behaviour_metric_delta whipcrack_radius"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 800225,
@@ -3250,7 +3285,11 @@
   {
     "spell": 572804,
     "clause": "This ability is guaranteed to critically strike against enemies above 75% health.",
-    "labels": [],
+    "labels": [
+      "572804 behaviour_hit_ratio crit_above_75",
+      "572804 behaviour_hit_ratio crit_below_75",
+      "572804 behaviour_hit_ratio crit_positive"
+    ],
     "kind": "claim"
   },
   {
@@ -3259,7 +3298,9 @@
     "labels": [
       "803475 behaviour_metric_delta consumes"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 803475,
@@ -3272,8 +3313,23 @@
   {
     "spell": 803475,
     "clause": "$?s804216[\r\n\r\nInner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Cast part only: the extension spell 803089 is cast once per Assault with Inner Demon (extend_casts 0 -> 1) and not without it (extend_absent); this proves the cast, not that the duration grows. The value part, 'by $/1000;803089s1 sec' (3 s, 803089 Effect[0] 2999 + 1), is not measured: the duration read of Inner Demon after Assault gained 28009 ms against 3000 in all four runs of the pairs 20261123-220340/-220424 and -220711/-220741 (4991 -> 33000), an alert lead with no isolated cause (33000 = 6 x 5000 + 3000 is a lead: Felfury 803465 adds +5000 ms duration per stack and the fixture holds 6). Reference search 2026-11-23: nothing found for the value.",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "claims": [
+      {
+        "claim": "Extends the duration of Inner Demon",
+        "labels": [
+          "803475 behaviour_metric_delta extend_casts",
+          "803475 behaviour_metric_delta extend_absent"
+        ],
+        "evidence": "behaviour"
+      },
+      {
+        "claim": "by $/1000;803089s1 sec",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 802058,
@@ -3453,7 +3509,16 @@
     "spell": 803478,
     "clause": "Your Hateforged Barrier now also scales with your maximum health.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "'also scales with your maximum health': Hateforged Barrier 705129 absorb (Effect[0] 176 + 1..32, plus STA x 1) gains 10% of maximum health with 803478 (AscensionFelswornContracts.cpp:356-357), a term no tooltip number states, so only the direction can be judged. power_term_direction is built on attack power (aura 99) and has no maximum-health variant; 805256 Infernal Constitution (+10% maximum health) gives the contrast arm. Needs tool group B: a max-health analogue of power_term_direction with arms control low/high and learned low/high.",
+      "attempts": [
+        {
+          "agent": "fw-ea3",
+          "report": ".agents/plans/fw-ea3/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 803478,
@@ -3518,8 +3583,25 @@
   {
     "spell": 803904,
     "clause": "Gorge on fel energy, guaranteeing your next direct instance of damage to critically strike, but causing it to consume 5% of your maximum health.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "guaranteeing your next direct instance of damage to critically strike",
+        "labels": [
+          "803904 behaviour_metric_delta next_crit"
+        ],
+        "evidence": "behaviour"
+      },
+      {
+        "claim": "but causing it to consume 5% of your maximum health.",
+        "labels": [
+          "803904 behaviour_metric_delta health_cost"
+        ],
+        "evidence": "behaviour"
+      }
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 803904,
