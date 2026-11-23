@@ -625,10 +625,15 @@
   {
     "spell": 520251,
     "clause": "Increases the effectiveness of your Intuitions by $s2%.",
-    "labels": [
-      "520251 behaviour_metric_delta intuition"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the effectiveness of your Intuitions by $s2% (Illidari Intuition Agility)",
+        "labels": [
+          "520251 behaviour_metric_delta intuition"
+        ]
+      }
+    ]
   },
   {
     "spell": 520252,
@@ -1124,7 +1129,7 @@
   },
   {
     "spell": 560542,
-    "clause": "Emanate a powerful aura, granting $s1% increased melee",
+    "clause": "Emanate a powerful aura, granting $s1% increased melee and ranged haste to party and raid members within $a1 yds.",
     "labels": [
       "560542 behaviour_party_stat_ratio melee_haste"
     ],
@@ -1156,7 +1161,7 @@
   },
   {
     "spell": 560549,
-    "clause": "Grant $s1% increased melee",
+    "clause": "Grant $s1% increased melee and ranged haste to party and raid members within $a1 yds.",
     "labels": [
       "560549 behaviour_party_stat_ratio melee_haste"
     ],
@@ -2091,7 +2096,8 @@
     "spell": 704613,
     "clause": "Increases the amount of beneficial magic effects stolen by your Consume Magic by $s1.",
     "labels": [
-      "704613 behaviour_metric_delta stolen"
+      "704613 behaviour_metric_delta stolen",
+      "704613 behaviour_metric_delta stolen_effects"
     ],
     "kind": "claim"
   },
@@ -2367,7 +2373,8 @@
       {
         "claim": "by $705146s1%",
         "labels": [
-          "705145 behaviour_metric_delta stack_amount"
+          "705145 behaviour_metric_delta stack_amount",
+          "705145 behaviour_hit_ratio stack_damage"
         ]
       },
       {
@@ -3716,7 +3723,7 @@
     "spell": 804611,
     "clause": "Increases your Armor penetration by $s1%",
     "labels": [
-      "804611 effect_value e0 #0"
+      "804611 behaviour_hit_ratio armor_penetration"
     ],
     "kind": "claim"
   },
@@ -4300,11 +4307,22 @@
   {
     "spell": 806235,
     "clause": "and cause enemies struck to have a $572792s1% increased chance to be hit by spells for $572792d.",
-    "labels": [
-      "806235 effect_value 572792e0 #1",
-      "806235 spell_duration 572792 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and cause enemies struck to have a $572792s1% increased chance to be hit by spells",
+        "labels": [
+          "806235 effect_value 572792e0 #1"
+        ]
+      },
+      {
+        "claim": "for $572792d.",
+        "labels": [
+          "806235 behaviour_metric_delta mark_held",
+          "806235 behaviour_metric_delta mark_gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 807430,
@@ -4384,7 +4402,7 @@
     "spell": 807901,
     "clause": "Increases your Armor penetration by $s1%",
     "labels": [
-      "807901 effect_value e0 #0"
+      "807901 behaviour_hit_ratio armor_penetration"
     ],
     "kind": "claim"
   },
@@ -4416,7 +4434,7 @@
     "spell": 807914,
     "clause": "Increases your Armor penetration by $s1%",
     "labels": [
-      "807914 effect_value e0 #0"
+      "807914 behaviour_hit_ratio armor_penetration"
     ],
     "kind": "claim"
   },
