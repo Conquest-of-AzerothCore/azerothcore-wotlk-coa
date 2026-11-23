@@ -42,8 +42,11 @@ attack target, and the caster ended within 3 yd of the charge destination, 57003
 - Unchanged: the 20 yd cast range, the fall without damage when at the end of the flight the victim is gone, dead,
   not a valid attack target or farther than 50 yd plus both sizes, nothing when the caster is dead or on another map,
   and no damage when the caster ends more than 3 yd from the charge destination.
-- A victim that dies or becomes invalid during the charge itself (after the flight) gives no damage, as at the end of
-  the flight; before, the landing then used whatever enemy was selected.
+- Changed, owner ruling O-39: a victim that dies or becomes invalid during the charge itself (after the flight) gives
+  no damage, as at the end of the flight. Before, the landing then used whatever enemy was selected, so another
+  selected enemy took the 8 yd area; that fallback is dropped. Unchanged for the cases with no selection or a
+  friendly one (refused before, no cast now). No arm reads this case: `metric_delta` has no option that kills the
+  victim during the flight with a second enemy selected, and building one is a tool addition awaiting approval.
 - Readers: 570034 is read by id only in Sun Cleric code (`AscensionSunClericSummons.cpp`, the Dawn script values in
   `AscensionSunClericAbilities.cpp`, the coefficient row in `AscensionSunClericData.h`) and the Sun Cleric SQL;
   520024 and 520025 as in [Sun Cleric ADR 0010](0010-valkyrs-calling-landing-follows-the-flight-aura.md). No other
