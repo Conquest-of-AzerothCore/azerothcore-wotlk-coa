@@ -12,6 +12,8 @@ KIND = 'move_under_aura'
 ORDER = 50
 
 MOVED_METRIC = 'move_under_aura_moved'
+BLOCKED_METRIC = 'move_under_aura_blocked'
+EXPECTS = ('moved', 'blocked')
 MSG_MOVE_START_FORWARD = 0x0B5
 MSG_MOVE_STOP = 0x0B7
 MOVEMENTFLAG_FORWARD = 0x1
@@ -33,11 +35,15 @@ class MoveUnderAuraSpec:
     aura: int
     step_yd: float = 2.0
     label_suffix: str = 'move'
+    expect: str = 'moved'
 
 
 def move_under_aura_spec(entry: dict) -> MoveUnderAuraSpec:
     spec = MoveUnderAuraSpec(int(entry['spell']), entry['name'], entry['quote'], int(entry.get('aura', entry['spell'])),
-                             float(entry.get('step_yd', 2.0)), entry.get('label_suffix', 'move'))
+                             float(entry.get('step_yd', 2.0)), entry.get('label_suffix', 'move'),
+                             entry.get('expect', 'moved'))
+    if spec.expect not in EXPECTS:
+        raise ValueError(f'{spec.spell} move_under_aura expects one of {EXPECTS}, not {spec.expect!r}')
     if not 0.5 <= spec.step_yd <= 10:
         raise ValueError(f'{spec.spell} move_under_aura steps 0.5 to 10 yd, not {spec.step_yd:g}')
     return spec
@@ -86,24 +92,31 @@ def move_under_aura_scenario(class_file: dict, spec: MoveUnderAuraSpec) -> tuple
                                                                                          CASTER)
     steps.append({'action': 'wait', 'label': 'aura settle', 'ms': AURA_SETTLE_MS})
     steps += phase_steps(spec, 'aura', x + spec.step_yd)
+    blocked = spec.expect == 'blocked'
+    outcome = (f'the position must stay where it was (the attempt is refused) while {spec.aura} is held at the '
+               f'start, after the move and after the stop' if blocked else
+               f'the position must move by the step and {spec.aura} must stay through the move and the stop')
     scenario = {
         'schema': 1,
-        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour move under aura',
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour move under aura'
+                + (' blocked' if blocked else ''),
         'contract': (f'The caster is teleported to map {MOVE_MAP} {MOVE_ORIGIN}. Control: without {spec.aura}, a '
                      f'MSG_MOVE_START_FORWARD packet {spec.step_yd:g} yd along x, then MSG_MOVE_STOP, go to the '
                      f'session\'s movement handler (client_packet, consumed false); the position must move by the '
                      f'step, which proves the packet moves the player. Then {spec.spell} is cast and the same move '
-                     f'is sent while {spec.aura} is held: the position must move by the step and {spec.aura} must '
-                     f'stay through the move and the stop. Positions within {POSITION_TOLERANCE_YD:g} yd.'),
+                     f'is sent while {spec.aura} is held: {outcome}. Positions within {POSITION_TOLERANCE_YD:g} yd.'),
         'players': [player_fixture(class_file)],
         'creatures': [],
         'steps': steps}
-    model = {'kind': KIND, 'metric': MOVED_METRIC, 'quote': entry.quote, 'step_yd': spec.step_yd,
+    model = {'kind': KIND, 'metric': BLOCKED_METRIC if blocked else MOVED_METRIC, 'quote': entry.quote,
+             'step_yd': spec.step_yd,
              'reads': {phase: {moment: [move_label(spec, phase, moment, read) for read in ('x', 'aura')]
                                for moment in ('start', 'moved', 'stopped')} for phase in PHASES}}
+    if blocked:
+        model['expect'] = 'blocked'
     expectation = Expectation(f'{spec.spell} {BEHAVIOUR_METRIC_DELTA} {spec.label_suffix}', BEHAVIOUR_METRIC_DELTA,
-                              spec.spell, spec.spell, None, f'{spec.step_yd:g}', prose_rule(entry.quote, spec.spell),
-                              model)
+                              spec.spell, spec.spell, None, '0' if blocked else f'{spec.step_yd:g}',
+                              prose_rule(entry.quote, spec.spell), model)
     return timed(scenario, waited_ms(steps)), [expectation]
 
 
@@ -126,13 +139,18 @@ def move_under_aura_verdict(base, run, model: dict):
     aura_states = [read['aura'][moment][1] for moment in ('start', 'moved', 'stopped')]
     text = (f'control moved {control_moved:g} yd without the aura, auras {[a for _, a in read["control"].values()]}; '
             f'under the aura moved {aura_moved:g} yd against {step:g}, aura {aura_states} at start, moved, stopped')
-    common = dict(measured=aura_moved, expected=step, low=step - POSITION_TOLERANCE_YD,
-                  high=step + POSITION_TOLERANCE_YD)
+    blocked = model.get('expect') == 'blocked'
+    expected = 0.0 if blocked else step
+    if blocked:
+        text = (f'attempt: own forward movement (MSG_MOVE_START_FORWARD then MSG_MOVE_STOP to the movement '
+                f'handler); {text}; expected no movement under the aura')
+    common = dict(measured=aura_moved, expected=expected, low=expected - POSITION_TOLERANCE_YD,
+                  high=expected + POSITION_TOLERANCE_YD)
     if not control_held or not aura_states[0]:
         return replace(base, status='unmeasured', **common,
                        explanation=f'{text}; the control did not move the player by the step, or the aura was not '
                                    f'held before the move, so the arm does not discriminate')
-    ok = abs(aura_moved - step) <= POSITION_TOLERANCE_YD and all(aura_states)
+    ok = abs(aura_moved - expected) <= POSITION_TOLERANCE_YD and all(aura_states)
     return replace(base, status='ok' if ok else 'alert', **common, explanation=text)
 
 
