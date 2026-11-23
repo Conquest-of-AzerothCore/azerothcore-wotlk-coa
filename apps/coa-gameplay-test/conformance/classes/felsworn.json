@@ -434,9 +434,7 @@
       "quote": "Increases the damage of Azzinoth's Assault by $s2%",
       "expected": 1.2,
       "observe_spell": 520262,
-      "cast_spell": 801904,
       "cast_wait_ms": 1600,
-      "cast_power": 1000,
       "control": {
         "auras": [
           [
@@ -445,10 +443,6 @@
           ],
           [
             803468,
-            1
-          ],
-          [
-            984954,
             1
           ]
         ]
@@ -462,10 +456,6 @@
           [
             803468,
             1
-          ],
-          [
-            984954,
-            1
           ]
         ],
         "learn": [
@@ -474,7 +464,9 @@
       },
       "trials": 20,
       "critical": false,
-      "expected_source": "560645 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 19 + 1 = 20 ($s2). The main-hand strike 520262 of Azzinoth's Assault 801904 (Effect[0] trigger 520262, Effect[1] trigger 572585) is cast by a real cast; its non-critical hits are averaged in a control arm without 560645 and a treatment arm with it learned: ratio 1.20 within the 2-point band. No-crit 984954 is a harness precondition fixture as in the Necromancer entries. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and At Least 2 Felfury 803468 on the caster before each cast (Azzinoth's Assault 801904 needs 803468 and consumes 2 Felfury; AscensionFelsworn.cpp:219-228), in both arms and phases. Reference search 2026-11-23: coa-history spell 560645 and 560646: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says Assault damage +10% where the DBC tooltip and Effect[1] say 20% (an older state, the tooltip prevails, G-9) and repeats the 20% haste for 5 seconds."
+      "expected_source": "560645 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 19 + 1 = 20 ($s2). The main-hand strike 520262 of Azzinoth's Assault 801904 (Effect[0] trigger 520262, Effect[1] trigger 572585) is cast by a real cast; its non-critical hits are averaged in a control arm without 560645 and a treatment arm with it learned: ratio 1.20 within the 2-point band. Non-critical hits only (the critical filter), so no crit fixture is needed. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and At Least 2 Felfury 803468 on the caster before each cast (Azzinoth's Assault 801904 needs 803468 and consumes 2 Felfury; AscensionFelsworn.cpp:219-228), in both arms and phases. Reference search 2026-11-23: coa-history spell 560645 and 560646: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says Assault damage +10% where the DBC tooltip and Effect[1] say 20% (an older state, the tooltip prevails, G-9) and repeats the 20% haste for 5 seconds.",
+      "cast_spell": 803475,
+      "cast_power": 100
     },
     {
       "spell": 560645,
@@ -483,7 +475,7 @@
       "variant": "haste",
       "label_suffix": "haste",
       "quote": "causes it to increase your melee haste by $560646s1%",
-      "trigger_spell": 801904,
+      "trigger_spell": 803475,
       "gate_spell": 560645,
       "target": "dummy",
       "metric": "attack_time_ms",
@@ -495,7 +487,6 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 500,
-      "cast_power": 1000,
       "phase_auras": [
         [
           800058,
@@ -519,7 +510,7 @@
       "variant": "haste_duration",
       "label_suffix": "haste_duration",
       "quote": "for $560646d",
-      "trigger_spell": 801904,
+      "trigger_spell": 803475,
       "gate_spell": 560645,
       "target": "dummy",
       "metric": "aura_duration_ms",
@@ -531,7 +522,6 @@
       "tolerance": 250,
       "wait_ms": 500,
       "expire_ms": 500,
-      "cast_power": 1000,
       "phase_auras": [
         [
           800058,
