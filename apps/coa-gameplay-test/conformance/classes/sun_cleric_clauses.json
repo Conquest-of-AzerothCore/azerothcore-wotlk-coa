@@ -5265,7 +5265,7 @@
         ]
       }
     ],
-    "reason": "On block: 24 strikes at block 100% grant Hammer of Kings 804751 at least once after 707629 is learned and never before; unblocked hits grant it never: kind block_extension_trials mode grant (D-228), block 0% with the shield on, each trial removes the aura, reads it absent, strikes once and reads the damage log; a strike blocked anyway voids its trial (about 4%), at least 24 judged trials, 0.7^24 = 1.9e-4 per run. The 30% chance: 38 pooled parts of 950 trials at block 100% (36100, D-236: the 99% Wilson half-width is 0.62 points at p = 0.30, so each run's whole interval must lie inside 28.4..31.6%; the 5700 of D-228 gave 1.56 points and low ends 28.03 and 28.29), mentor band 28.4..31.6%, 24 control trials per part before the learn show no aura. Counted pair 2026-11-22 (d236, runs started 23:0x, same build-dev binary as D-228, no C++ change, no flip): run A 10776 grants in 36100 judged = 29.85%, Wilson 99% [29.23, 30.47]; run B 10854 in 36100 = 30.07%, [29.45, 30.69]; both intervals inside 28.4..31.6, control 0 grants in 912 judged trials per run. The expected 30% is the tooltip's $h (ProcChance 30 of 707629, DBC); no external reference was searched in this resize. The 4 sec duration stays data."
+    "reason": "On block: 24 strikes at block 100% grant Hammer of Kings 804751 at least once after 707629 is learned and never before; unblocked hits grant it never: kind block_extension_trials mode grant (D-228), block 0% with the shield on, each trial removes the aura, reads it absent, strikes once and reads the damage log; a strike blocked anyway voids its trial (about 4%), at least 24 judged trials, 0.7^24 = 1.9e-4 per run. The 30% chance: 38 pooled parts of 950 trials at block 100% (36100, D-236: the 99% Wilson half-width is 0.62 points at p = 0.30, so each run's whole interval must lie inside 28.4..31.6%; the 5700 of D-228 gave 1.56 points and low ends 28.03 and 28.29), mentor band 28.4..31.6%, 24 control trials per part before the learn show no aura. Counted pair 2026-11-22 (d236, runs started 23:0x, same build-dev binary as D-228, no C++ change, no flip): run A 10776 grants in 36100 judged = 29.85%, Wilson 99% [29.23, 30.47]; run B 10854 in 36100 = 30.07%, [29.45, 30.69]; both intervals inside 28.4..31.6, control 0 grants in 912 judged trials per run. The expected 30% is the tooltip's $h (ProcChance 30 of 707629, DBC); no external reference was searched in this resize. The 4 sec duration stays data. The 4 sec claim (lr3, ADR 1073, mentor D-295 on lr1 TN-3): 707629 behaviour_metric_delta block_grant_duration, block_extension_trials grant mode with the granted duration: 47 trials at block 100%, game time read around the strike and 804751 read 3720 and 4280 ms after it; a granted trial must read it on at an age in 3600..3860 ms and gone at 4140..4400 ms (712448 Effect[0] 4000 ms from the DBC, both reads inside +-10%); no grant voids the trial; at least 5 judged granted trials (7.9e-4 per pair at ProcChance 30). pair 20261123-034651 / 20261123-034809 (coa-verify --ram --stages gameplay --gameplay-db-workers 4, worldserver 2956bae6286f, branch feat/coa-sun-cleric-lr3), no flip: ok in both runs, 19 and 14 granted trials judged, 0 alert."
   },
   {
     "spell": 707629,
@@ -6392,7 +6392,7 @@
         ]
       }
     ],
-    "reason": "fed_instant: pair 20261122-132546 / 20261122-132659, build 7066298e412e (commit b99e76ea21f7), no flip, with the go-off read of each judged Dawnsear 554406 (spell_go_count 1 control, 2 after the fed cast; review t8 I1); the earlier pair 20261122-123610 / 20261122-123655 (build 770d0fc468d0) judged casting only. Spears of Glory 807299 is earned for real: Radiant Flame 806060 is cast every 4300 ms by cast_until_aura (owner ruling O-17) until the aura is on the caster, never set by the harness, and its presence is read right before the judged Dawnsear (control: cancelled, Dawnsear still casting after 300 ms; fed: casting 0). The held set_aura entries instant, instant_once and damage (review b7c C1) stay uncounted. Tool: kind aura_fed_effect, ADR 1025 (provisional). Reference search 2026-11-22: coa-history spells 804629 and 807299: 0 events in 186 logs (the aura is not logged); Dawnsear 554406 is found in 1 log with no event naming Spears of Glory; the coabuildhub and bindmysoul snapshots (fetched 2026-09-18) repeat the tooltip; nothing else found. Claim 'within $d' is open: only the data label 804629 spell_duration 807299 #1 exists; tool need: an aura_fed_effect cast-time variant with a consumed arm and reads around 9 s and 11 s if $d is 10 s (not checked)."
+    "reason": "fed_instant: pair 20261122-132546 / 20261122-132659, build 7066298e412e (commit b99e76ea21f7), no flip, with the go-off read of each judged Dawnsear 554406 (spell_go_count 1 control, 2 after the fed cast; review t8 I1); the earlier pair 20261122-123610 / 20261122-123655 (build 770d0fc468d0) judged casting only. Spears of Glory 807299 is earned for real: Radiant Flame 806060 is cast every 4300 ms by cast_until_aura (owner ruling O-17) until the aura is on the caster, never set by the harness, and its presence is read right before the judged Dawnsear (control: cancelled, Dawnsear still casting after 300 ms; fed: casting 0). The held set_aura entries instant, instant_once and damage (review b7c C1) stay uncounted. Tool: kind aura_fed_effect, ADR 1025 (provisional). Reference search 2026-11-22: coa-history spells 804629 and 807299: 0 events in 186 logs (the aura is not logged); Dawnsear 554406 is found in 1 log with no event naming Spears of Glory; the coabuildhub and bindmysoul snapshots (fetched 2026-09-18) repeat the tooltip; nothing else found. Evidence class (lr3, ADR 1072, mentor D-295 on lr1 TN-1): fed_instant opts into evidence_metric aura_fed_instant_casting with the contrast aura_fed (control casting 1 against fed casting 0 at the same 300 ms read, both judged), so the claim 'Your next Dawnsear is instant cast' counts as behaviour; pair 20261123-034651 / 20261123-034809 (coa-verify --ram --stages gameplay --gameplay-db-workers 4, worldserver 2956bae6286f, branch feat/coa-sun-cleric-lr3), no flip: fed_instant ok in both runs (control [1], fed [0], casts gone off [1] and [2])."
   },
   {
     "spell": 804629,
@@ -7231,7 +7231,8 @@
         "claim": "instantly healing you for $s1% of your maximum health",
         "labels": [
           "806479 behaviour_metric_delta heal_base",
-          "806479 behaviour_metric_delta heal_half_health"
+          "806479 behaviour_metric_delta heal_half_health",
+          "806479 hit_mean"
         ]
       },
       {
@@ -7240,7 +7241,8 @@
           "806479 behaviour_metric_delta heal_sp"
         ]
       }
-    ]
+    ],
+    "reason": "806479 hit_mean (lr3, ADR 1074, mentor D-295 on lr1 TN-4): the class file lists 806479 in heal_pct_terms, so the hit model adds Effect[0] SPELL_EFFECT_HEAL_PCT, 25% (BasePoints 24 + DieSides 1) of the caster's read maximum health, truncated, under the -20% healing modifier 887015, to Effect[1]; pair 20261123-034651 / 20261123-034809 (coa-verify --ram --stages gameplay --gameplay-db-workers 4, worldserver 2956bae6286f, branch feat/coa-sun-cleric-lr3), no flip: model 477 = measured 477 in both runs (deterministic, no dice)."
   },
   {
     "spell": 806479,
@@ -7275,7 +7277,8 @@
         "labels": [
           "806980 behaviour_metric_delta damage",
           "806980 behaviour_metric_delta damage_sp",
-          "806980 behaviour_metric_delta damage_ap"
+          "806980 behaviour_metric_delta damage_ap",
+          "806980 hit_mean wrath_taken stacks 0"
         ]
       },
       {
@@ -7291,7 +7294,7 @@
       "spell": 806980,
       "ruling": "O-16 (Q-sc-6, option a, 2026-11-22): the Templar \"High Threat\" = x2 ruling (ADR 0296) is standing for every class"
     },
-    "reason": "Owner ruling O-16 (Q-sc-6, option a, 2026-11-22), replacing the earlier hold: the five Templar rulings of open scope stand for every class; the rule applied here is High Threat = threat x2 on the damage (ADR 0296), set by spell_threat pctMod 2 (rev_20261026_20, PR #11008). The threat slope and threat_control labels are counted: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3) reads behaviour_threat_slope 806980 and threat_control ok in both runs, no flip. The hit_mean alert of 806980 is a separate lead, not a label of this claim. The cited label carries the entry label_suffix since 24eca3a958 (base pair 10 still emitted the bare one). Counted pair 20261122-205718 / 20261122-205955 (build 0b0842a72f38, server commit 4cc498eca10f+), no flip: label '806980 behaviour_threat_slope 806980 threat' slope 2.0 and label '806980 behaviour_metric_delta threat_control' ok in both runs, cast_failures empty in all results. High Threat = x2 on the damage is the owner ruling O-16, not a tooltip value; the slope 2.0 is measured against the ruling."
+    "reason": "Owner ruling O-16 (Q-sc-6, option a, 2026-11-22), replacing the earlier hold: the five Templar rulings of open scope stand for every class; the rule applied here is High Threat = threat x2 on the damage (ADR 0296), set by spell_threat pctMod 2 (rev_20261026_20, PR #11008). The threat slope and threat_control labels are counted: base pair 10 (20261122-113024 / 20261122-115522, build fd0671597bc3) reads behaviour_threat_slope 806980 and threat_control ok in both runs, no flip. The hit_mean alert of 806980 is a separate lead, not a label of this claim. The cited label carries the entry label_suffix since 24eca3a958 (base pair 10 still emitted the bare one). Counted pair 20261122-205718 / 20261122-205955 (build 0b0842a72f38, server commit 4cc498eca10f+), no flip: label '806980 behaviour_threat_slope 806980 threat' slope 2.0 and label '806980 behaviour_metric_delta threat_control' ok in both runs, cast_failures empty in all results. High Threat = x2 on the damage is the owner ruling O-16, not a tooltip value; the slope 2.0 is measured against the ruling. 806980 hit_mean wrath_taken stacks 0 (lr3, lr1 TN-5): the plain 806980 hit_mean reads +10% because every judged hit after the first lands on the 572067 debuff Justicar's Wrath applies (AscensionSunClericAbilities.cpp:341-342; 572067 aura 87, MiscValue 126, +10%, 15 s, cast every 2000 ms). This target gate arm sets 572067 at 0 stacks on the dummy before every cast: model 472.05, measured 473.27 and 473.58 (846 hits each), inside the 99% intervals; pair 20261123-034651 / 20261123-034809 (coa-verify --ram --stages gameplay --gameplay-db-workers 4, worldserver 2956bae6286f, branch feat/coa-sun-cleric-lr3), no flip. The model's 472.05 sits 12.1% under the tooltip mean 536.81 because the model applies the linear monster resistance of a level 60 creature (Unit::GetEffectiveResistChance, CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12% average resist); the tooltip mean carries no mitigation."
   },
   {
     "spell": 806980,
@@ -7302,7 +7305,8 @@
         "claim": "increasing the target's spell damage taken by $572067s1%",
         "labels": [
           "806980 behaviour_hit_ratio taken_fire",
-          "806980 behaviour_hit_ratio taken_holy"
+          "806980 behaviour_hit_ratio taken_holy",
+          "806980 hit_mean wrath_taken"
         ]
       },
       {
@@ -7312,7 +7316,8 @@
           "806980 behaviour_metric_delta gone"
         ]
       }
-    ]
+    ],
+    "reason": "806980 hit_mean wrath_taken (lr3, lr1 TN-5): the target gate arm sets 572067 at 1 stack on the dummy before every cast, expected the model mean x 1.10 ($572067s1 = BasePoints 9 + DieSides 1): model 519.25, measured 518.54 and 517.07 (846 hits each), inside the 99% intervals; pair 20261123-034651 / 20261123-034809 (coa-verify --ram --stages gameplay --gameplay-db-workers 4, worldserver 2956bae6286f, branch feat/coa-sun-cleric-lr3), no flip. The model's 472.05 sits 12.1% under the tooltip mean 536.81 because the model applies the linear monster resistance of a level 60 creature (Unit::GetEffectiveResistChance, CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12% average resist); the tooltip mean carries no mitigation."
   },
   {
     "spell": 807343,
