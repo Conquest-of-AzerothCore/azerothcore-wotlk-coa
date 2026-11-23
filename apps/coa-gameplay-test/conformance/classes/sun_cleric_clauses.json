@@ -1942,8 +1942,21 @@
   {
     "spell": 572848,
     "clause": "Your main-hand strike will deal Physical damage and your off-hand strike will deal Fire damage.",
-    "reason": "Open, tool need: no per-event school read exists (SpellDamageEvent in CoAGameplayTest.cpp carries no school field). The data side is DBC: 572850 SchoolMask 1 (Physical) and 572045 SchoolMask 4 (Fire).",
-    "labels": [],
+    "claims": [
+      {
+        "claim": "the main-hand strike 572850 deals Physical damage (SchoolMask 1)",
+        "labels": [
+          "572848 behaviour_metric_delta school_main"
+        ]
+      },
+      {
+        "claim": "the off-hand strike 572045 deals Fire damage (SchoolMask 4)",
+        "labels": [
+          "572848 behaviour_metric_delta school_off"
+        ]
+      }
+    ],
+    "reason": "Measured: the damage event of each strike is read with its packet school mask (spell_damage_count with school_mask, an event read). Expected values come from the DBC: 572850 SchoolMask 1 (Physical), 572045 SchoolMask 4 (Fire). Pair 20261123-025253 / 20261123-025517, build 96e7e2292b2a (server b286767ee568), no flip, cast_failures none: main hand reads 1 event at mask 1, off hand 1 event at mask 4. Control arms in the same pair: the other school mask reads 0 for each hand and the unfiltered count reads 1, so the 0 is not a missed hit. An immunity or resistance fixture is not needed (#6786 not tested). Reference search: nothing found beyond the tooltip and the DBC.",
     "kind": "claim"
   },
   {
