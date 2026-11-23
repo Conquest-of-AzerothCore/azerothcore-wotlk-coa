@@ -36968,7 +36968,7 @@
     {
       "spell": 572848,
       "kind": "metric_delta",
-      "quote": "Your main-hand strike will deal Physical damage and your off-hand strike will deal Fire damage.",
+      "quote": "Your main-hand strike deals an additional ${$572850m2+$spfi*0.2} Physical damage",
       "trigger_spell": 572848,
       "target": "dummy",
       "cast_in_before": false,
@@ -37026,7 +37026,7 @@
     {
       "spell": 572848,
       "kind": "metric_delta",
-      "quote": "Your main-hand strike will deal Physical damage and your off-hand strike will deal Fire damage.",
+      "quote": "and your off-hand strike deals an additional ${$572045m2+$spfi*0.2} Fire damage.",
       "trigger_spell": 572848,
       "target": "dummy",
       "cast_in_before": false,
@@ -37084,7 +37084,7 @@
     {
       "spell": 572848,
       "kind": "metric_delta",
-      "quote": "Spin and strike with both weapons dealing $524857s1% Weapon Damage plus ${$524857m2+$spfi*0.2} to up to $i enemies within $a1 yds.",
+      "quote": "Your main-hand strike deals an additional ${$572850m2+$spfi*0.2} Physical damage",
       "trigger_spell": 572848,
       "target": "dummy",
       "cast_in_before": false,
@@ -37110,7 +37110,7 @@
     {
       "spell": 572848,
       "kind": "metric_delta",
-      "quote": "Spin and strike with both weapons dealing $524857s1% Weapon Damage plus ${$524857m2+$spfi*0.2} to up to $i enemies within $a1 yds.",
+      "quote": "and your off-hand strike deals an additional ${$572045m2+$spfi*0.2} Fire damage.",
       "trigger_spell": 572848,
       "target": "dummy",
       "cast_in_before": false,
@@ -37140,6 +37140,68 @@
         ]
       ],
       "observe_source": "Justice 572848 Effect[0] TRIGGER_SPELL 572850 (main hand, Physical, SchoolMask 1) and Effect[1] TRIGGER_SPELL 572045 (off hand, Fire, SchoolMask 4); each strike has Effect[0] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE BasePoints 49 (50%, the $524857s1 of the tooltip) and Effect[1] SCHOOL_DAMAGE flat: 572850 BasePoints 156 (157), 572045 BasePoints 104 (105), EffectDieSides 1 (value = BasePoints + 1). The tooltip token $524857m2 reads 6 (524857 Effect[1] BasePoints 5, a tooltip-only spell), the served flats are 157 and 105: this entry reads the hit the server really deals per hand, and its bounds come from the served DBC values, not from the token. Valkyr weapon set (spell_weapon_sets 572848): 2529 in both hands, 73.62-103.34, 2800 ms; reference attack power 70, so the attack-power part of one hit is 70/14 x 2.8 = 14; spell power 0 so the $spfi*0.2 part is 0; melee and expertise rating 10000, non-critical hits only, Fire resistance of the dummy removed by 823764. Off hand, Fire: 50% of (die roll 73.62..103.34 + 14) + 105 = 148.8..163.7 without an off-hand penalty, 126.9..134.3 if the off-hand weapon part is halved: interval [126, 164]; Fire is not reduced by armor and 823764 removes the dummy's resistance. Control: no cast before, 0 damage. The 6-flat reading (tooltip token) would give 6 + 22..59 = 28..65, outside the interval. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 572848,
+      "kind": "metric_delta",
+      "quote": "Your main-hand strike deals an additional ${$572850m2+$spfi*0.2} Physical damage",
+      "trigger_spell": 572848,
+      "target": "dummy",
+      "cast_in_before": false,
+      "dummy_distance": 3,
+      "before_expected": 0,
+      "expire_ms": 500,
+      "wait_ms": 1500,
+      "metric": "spell_damage_total",
+      "void_on_cast_failure": true,
+      "name": "Justice (main-hand strike hit at 20000 spell power)",
+      "variant": "hand_main_sp",
+      "label_suffix": "hand_main_sp",
+      "fields": {
+        "spell": 572850,
+        "target": "dummy",
+        "critical": false
+      },
+      "expected": 3842,
+      "after_at_least": 3835,
+      "after_at_most": 3849,
+      "observe_source": "Justice 572848 Effect[0] TRIGGER_SPELL 572850 (main hand, Physical, SchoolMask 1) and Effect[1] TRIGGER_SPELL 572045 (off hand, Fire, SchoolMask 4); each strike has Effect[0] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE BasePoints 49 (50%, the $524857s1 of the tooltip) and Effect[1] SCHOOL_DAMAGE flat: 572850 BasePoints 156 (157), 572045 BasePoints 104 (105), EffectDieSides 1 (value = BasePoints + 1). The tooltip token $524857m2 reads 6 (524857 Effect[1] BasePoints 5, a tooltip-only spell), the served flats are 157 and 105: this entry reads the hit the server really deals per hand, and its bounds come from the served DBC values, not from the token. Valkyr weapon set (spell_weapon_sets 572848): 2529 in both hands, 73.62-103.34, 2800 ms; reference attack power 70, so the attack-power part of one hit is 70/14 x 2.8 = 14; spell power 0 so the $spfi*0.2 part is 0; melee and expertise rating 10000, non-critical hits only, Fire resistance of the dummy removed by 823764. Main hand, Physical: 50% of (die roll 73.62..103.34 + 14) + 157 = 200.8..215.7 before armor; the harness dummy's armor leaves 913 of 1000 (armor_reduced_damage read of the Vindicator armor_ignore entry, tolerance 1), so 183.1..197.1: interval [183, 198]. Control: no cast before, 0 damage. The 6-flat reading (tooltip token) would give 50% x (87.6..117.3) + 6 = 49.8..64.7 before armor, outside the interval. Spell power arm of the same pair as hand_main: the spell power term of the tooltip is 20% of the spell power ($spfi*0.2), 0.2 x 20000 = 4000, added to the flat 157 and the weapon part before armor, so (200.8..215.7 + 4000) x 0.913 = 3835.3..3848.8: interval [3835, 3849], which excludes a 10% coefficient (about 1826 less) and 30% (about 1826 more) and the arm without spell power (183..198). Reference search 2026-11-23: coa-history spell 572850 600 SPELL_DAMAGE events in 5 logs (mean 1276, 83 crits) and 572045 594 events (mean 469, 87 crits), 330 casts of 572848 in 6 logs; the live off-hand to main-hand mean ratio is 0.37, against 154/189 = 0.815 and 161/186 = 0.866 here (rb5 pair, main hand 189/186, off hand 154/161); those live logs (2026-08-01..08-11) predate the school swap (mentor D-312: main-hand Fire / off-hand Physical then, main-hand Physical / off-hand Fire since), so the ratios are not compared and no value is taken from it; nothing else found beyond the tooltip and the DBC.",
+      "player_spell_power": 20000
+    },
+    {
+      "spell": 572848,
+      "kind": "metric_delta",
+      "quote": "and your off-hand strike deals an additional ${$572045m2+$spfi*0.2} Fire damage.",
+      "trigger_spell": 572848,
+      "target": "dummy",
+      "cast_in_before": false,
+      "dummy_distance": 3,
+      "before_expected": 0,
+      "expire_ms": 500,
+      "wait_ms": 1500,
+      "metric": "spell_damage_total",
+      "void_on_cast_failure": true,
+      "name": "Justice (off-hand strike hit at 20000 spell power)",
+      "variant": "hand_off_sp",
+      "label_suffix": "hand_off_sp",
+      "fields": {
+        "spell": 572045,
+        "target": "dummy",
+        "critical": false
+      },
+      "expected": 4145,
+      "after_at_least": 4126,
+      "after_at_most": 4164,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Justice 572848 Effect[0] TRIGGER_SPELL 572850 (main hand, Physical, SchoolMask 1) and Effect[1] TRIGGER_SPELL 572045 (off hand, Fire, SchoolMask 4); each strike has Effect[0] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE BasePoints 49 (50%, the $524857s1 of the tooltip) and Effect[1] SCHOOL_DAMAGE flat: 572850 BasePoints 156 (157), 572045 BasePoints 104 (105), EffectDieSides 1 (value = BasePoints + 1). The tooltip token $524857m2 reads 6 (524857 Effect[1] BasePoints 5, a tooltip-only spell), the served flats are 157 and 105: this entry reads the hit the server really deals per hand, and its bounds come from the served DBC values, not from the token. Valkyr weapon set (spell_weapon_sets 572848): 2529 in both hands, 73.62-103.34, 2800 ms; reference attack power 70, so the attack-power part of one hit is 70/14 x 2.8 = 14; spell power 0 so the $spfi*0.2 part is 0; melee and expertise rating 10000, non-critical hits only, Fire resistance of the dummy removed by 823764. Off hand, Fire: 50% of (die roll 73.62..103.34 + 14) + 105 = 148.8..163.7 without an off-hand penalty, 126.9..134.3 if the off-hand weapon part is halved: interval [126, 164]; Fire is not reduced by armor and 823764 removes the dummy's resistance. Control: no cast before, 0 damage. The 6-flat reading (tooltip token) would give 6 + 22..59 = 28..65, outside the interval. Spell power arm of the same pair as hand_off: 0.2 x 20000 = 4000 added to the flat 105 and the weapon part, 148.8..163.7 + 4000 = 4148.8..4163.7 without an off-hand penalty and 126.9..134.3 + 4000 = 4126.9..4134.3 with the weapon part halved: interval [4126, 4164], which excludes a 10% coefficient (about 2000 less) and 30% (about 2000 more) and the arm without spell power (126..164). Reference search 2026-11-23: coa-history spell 572850 600 SPELL_DAMAGE events in 5 logs (mean 1276, 83 crits) and 572045 594 events (mean 469, 87 crits), 330 casts of 572848 in 6 logs; the live off-hand to main-hand mean ratio is 0.37, against 154/189 = 0.815 and 161/186 = 0.866 here (rb5 pair, main hand 189/186, off hand 154/161); those live logs (2026-08-01..08-11) predate the school swap (mentor D-312: main-hand Fire / off-hand Physical then, main-hand Physical / off-hand Fire since), so the ratios are not compared and no value is taken from it; nothing else found beyond the tooltip and the DBC.",
+      "player_spell_power": 20000
     },
     {
       "spell": 680622,
