@@ -707,7 +707,8 @@
         "evidence": "behaviour"
       }
     ],
-    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "reason": "Part 1 \"and Manaburn\" status 3 (G-24, D-76; fw-vb4 data check 2026-11-24 and the two recorded attempts): Spell.dbc 805248 Manaburn has PowerType 3 (Energy), ManaCost 0 and ManaCostPercentage 0 (no cost to remove); 520592 Effect[1] aura 108 SPELLMOD_COST (MiscValue 14), BasePoints -101 + 1 = -100%, SpellClassMask [0] 17301504 covers Manaburn (SpellFamilyFlags[0] 16777216) and mask [1] 8192 covers Felbane 525001 (SpellFamilyFlags[1] 8192, ManaCost 15 Energy): the data states the claim for both spells and the Felbane part is proven in game (felbane_cost). Attempt 1: the felbane_cost arm (fw-r1c), which reads the cast of Felbane only. Attempt 2: the Manaburn arms (fw-b1f, runs 20261123-155204 / -155657, build 1fc6a00e01d6, as recorded in counted.md): a cast of a spell whose cost is already 0 reads the same with and without 520592, so no control arm can differ. No behaviour route exists; the data check conforms. The part is \"data conformant, no behaviour route\", not \"client only\" (status 4 of D-20 is relabelled by D-76)."
   },
   {
     "spell": 520805,
@@ -2270,9 +2271,11 @@
     "spell": 707527,
     "clause": "While the barrier holds, you take $s2% reduced Physical Damage.",
     "labels": [
-      "707527 behaviour_metric_delta physical_taken"
+      "707527 effect_value e1 #2",
+      "707527 aura_amount e1 #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 3 (G-24, fw-vb4): data conformant only (Effect[1] aura 87, BasePoints -11 + 1 = -10, labels effect_value e1 #2 and aura_amount e1 #2). Two behaviour designs failed. Design 1: taken_hit damage_ratio, Void Zone 92559 x40 per trial (954 logged per hit without the barrier), barrier recast per trial: treatment per-hit mean 931.5 to 932.5 against 954 (-2.26% to -2.36%, pairs 20261123-234412 / -234445 and 233905 / 234132, read alert against -12.08%). The design is at fault, not necessarily the server: the one aura holds the absorb (Effect[0]) and the 10% (Effect[1]), so the first strike removes both when it breaks the barrier (with the reduction 0.9 x 954 - 831 = 27.6, without 954 - 831 = 123) and the 39 later strikes are full: the two cases differ by 0.26% of the mean, inside the spread. Design 2: the same entry on rank 1 705129 (Effect[1] MiscValue 1), the control of the ranks 2 to 6 MiscValue 0 hypothesis: -1.03% against an expected -10.98%, the same artefact, so the hypothesis is neither confirmed nor refuted. No existing option isolates a modifier carried by an absorb aura: damage_ratio judges the damage logged after the absorb, the absorb judge compares the absorbed amount with a formula of stats, and a one-strike design puts the armor-mitigated strike (954 of 1000, not a DBC value) in the expected ratio (0.9 - 831/954 = 0.029 against 0.129 without the reduction). Observation, not a change: Spell.dbc EffectMiscValue[1] is 0 on 707523 to 707527 and 1 on 705129, and a stock MOD_DAMAGE_PERCENT_TAKEN with school mask 0 never applies; the Felsworn contract sets it to 1 for 800209 only. The two entries were removed from the class file."
   },
   {
     "spell": 705131,
@@ -2414,7 +2417,8 @@
     "labels": [
       "706266 behaviour_metric_delta spell_hit_taken"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (fw-vb4, counted pair 20261123-233905 / -234132 (prove1, build 2f5c75a93d3b, server 6bab3cf100da, no flip)): attacker_miss_share spell_clamp on 4 stationary attackers x 826 casts: the reduction is exactly 2 points (clamp arm missless, edge arm missing; 1 and 3 points excluded for 2 = 2; control arm without the passive), in both runs."
   },
   {
     "spell": 706266,
@@ -2603,7 +2607,8 @@
     "labels": [
       "707844 behaviour_metric_delta spell_hit_taken"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (fw-vb4, counted pair 20261123-233905 / -234132 (prove1, build 2f5c75a93d3b, server 6bab3cf100da, no flip)): attacker_miss_share spell_clamp on 4 stationary attackers x 826 casts: the reduction is exactly 4 points (clamp arm missless, edge arm missing; 1 and 3 points excluded for 4 = 2; control arm without the passive), in both runs."
   },
   {
     "spell": 707844,
@@ -2703,7 +2708,8 @@
       "800188 behaviour_metric_delta dodge",
       "800188 behaviour_metric_delta agility_held"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (fw-vb4, counted pair 20261123-233905 / -234132 (prove1, build 2f5c75a93d3b, server 6bab3cf100da, no flip)): dodge_chance 40.1218 before and 43.1218 after a real learn of 800188, a gain of 3 within 0.01 in both runs (3 = Effect[1] aura 49, 2 + 1); the before read is the control; the Agility share is held out (Agility 8116 amount -9 in the learned phase only, agility_held reads 130 in both phases) and Stoicism 804802 lifts the sum off the floor, both named precondition fixtures."
   },
   {
     "spell": 800203,
@@ -2781,7 +2787,8 @@
       "800206 behaviour_metric_delta haste_held",
       "800206 behaviour_metric_delta haste_gone"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (fw-vb4, counted pair 20261123-234412 / -234445 (prove2, same build, no flip)): haste: the dummy attack time reads 2000 before and 2400 after a real Carve with Inner Demon, ratio 1.2 within 0.01 in both runs (stock engine convention, as Sacred Swing 572769: a haste of -20% multiplies the attack time by 1.2, a literal x1.25 is excluded); the 578317 aura is present 10000 ms after the cast and gone 11100 ms after it (7500 ms and 8600 ms after the 2500 ms channel, 0.94 and 1.075 of 8000, which excludes a duration 10% short or long); control: the before read without a cast. Felfury 800058 x6, 803468 and Inner Demon 804216 are set by harness set_aura as precondition fixtures."
   },
   {
     "spell": 800206,
@@ -2922,7 +2929,7 @@
         "evidence": "behaviour"
       }
     ],
-    "reason": "fw-tgs2 (review I3): the clause declares its claims. The label '800214 effect_value #0' is dropped: $h is a chance, not a value (guide 9.4, 'A $h chance cannot be measured as a value'; Necromancer 300235 C8 precedent), and it resolved to unmodelled. The chance is judged by two proc entries sharing the roll (AscensionFelswornEvents.cpp:97-98, one Proc branch casting Felstrike 802678 on the target and Fragment of Malice 800239 on the caster, :227-229): '800214 proc_rate 800239' counts the Fragment casts and '800214 proc_rate 802678' the Felstrike casts, each on critical Fel Fireball 801312 hits only with the critical_trials control (non-critical hits proc 0). The old label '800214 proc_rate' is renamed by the second entry (shares_aura).",
+    "reason": "fw-tgs2 (review I3): the clause declares its claims. The label '800214 effect_value #0' is dropped: $h is a chance, not a value (guide 9.4, 'A $h chance cannot be measured as a value'; Necromancer 300235 C8 precedent), and it resolved to unmodelled. The chance is judged by two proc entries sharing the roll (AscensionFelswornEvents.cpp:97-98, one Proc branch casting Felstrike 802678 on the target and Fragment of Malice 800239 on the caster, :227-229): '800214 proc_rate 800239' counts the Fragment casts and '800214 proc_rate 802678' the Felstrike casts, each on critical Fel Fireball 801312 hits only with the critical_trials control (non-critical hits proc 0). The old label '800214 proc_rate' is renamed by the second entry (shares_aura). D-76 data check (fw-vb4, 2026-11-24), claim 0 \"Direct critical strikes\": Spell.dbc 800214 ProcFlags 0, Effect[0] aura 42 PROC_TRIGGER_SPELL 800239, Effect[2] aura 42 PROC_TRIGGER_SPELL 802678; spell_proc (rev_20260909_05_felsworn_completion.sql:31) ProcFlags 1048575 (bits 0 to 19, including PROC_FLAG_DONE_PERIODIC 0x40000), SpellTypeMask 7, SpellPhaseMask 2, HitMask 63 then 9331 (rev_20260909_08), Chance 100 (rev_20261003_10). The proc flags do not exclude periodic damage: the exclusion is the script condition crit && !periodic (AscensionFelswornEvents.cpp:97-98), code and not data. The data check does not verify the claim, so status 3 does not apply; status 4 stays (D-35): a periodic critical strike needs aura 286 and class 14 has none, so the exclusion cannot be exercised in play.",
     "tool_gap": {
       "reason": "Claim 'Direct critical strikes': the critical part is in the critical_trials control of both proc_rate verdicts, the direct (non-periodic, the !periodic term of AscensionFelswornEvents.cpp:97-98) part needs a control in which a periodic critical tick procs 0, and class 14 has no periodic crit: CalcPeriodicCritChance grants one only through aura 286 or Rogue Rupture (SpellAuraEffects.cpp:1180-1206), so the control would need foreign-class spells; no Rogue fixtures (controller t5, 2026-11-23). Not observable in play; sent to the mentor as a possible status-4 candidate.",
       "attempts": [
@@ -2971,7 +2978,8 @@
     "labels": [
       "800239 behaviour_metric_delta fragment_energy"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (fw-vb4, counted pair 20261123-234412 / -234445 (prove2, same build, no flip)): spell_energize_total of 800239 on the caster is 0 before and 5 after one real cast of Fragment of Malice (the spell the handler casts, AscensionFelswornEvents.cpp:227-229), in both runs; control: no cast. coa-history spell 800239: SPELL_ENERGIZE min 5 max 5 in 4744 events."
   },
   {
     "spell": 800214,
@@ -2992,7 +3000,8 @@
           "800214 behaviour_metric_delta fragment_duration"
         ]
       }
-    ]
+    ],
+    "reason": "Claim 0 status 1 (fw-vb4, counted pair 20261123-234412 / -234445 (prove2, same build, no flip)): one real cast of 800239 raises spell_crit_chance (Shadow) 1.20828 -> 11.2083 and melee_crit_chance_refreshed 4.32 -> 14.32, +10 within 0.01 in both runs; control: no cast. The first pair read the unrefreshed melee field (0 -> 14.32, a stale field, G-21 point 5) and is not counted. Claim 1 keeps its duration entry."
   },
   {
     "spell": 800220,
@@ -3462,7 +3471,8 @@
       "802108 behaviour_metric_delta inner_spell_power",
       "802108 behaviour_metric_delta inner_crit_rating"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (fw-vb4, counted pair 20261123-233905 / -234132 (prove1, build 2f5c75a93d3b, server 6bab3cf100da, no flip)): with Inner Demon 804216 set on the caster (precondition fixture) a real learn of 802108 gains 22 Shadow spell power (22.6 expected within 1.0: 15% of Intellect 34 and 15% + 20% of Spirit 50) and 10 spell critical strike rating (20% of Spirit 50), in both runs; the unlearned phase reads 0 and the entry without Inner Demon (spell_power) gains 12.6, so the 10 extra points are Inner Demon's. The bindmysoul snapshot says 'critical strike chance' where the DBC says 'rating' (older state, G-9)."
   },
   {
     "spell": 802110,
@@ -3551,7 +3561,8 @@
     "labels": [
       "803645 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 3 (G-24, fw-vb4): data conformant (effect_value e0 #0: Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, MiscValue 124, BasePoints -21 + 1, RealPointsPerLevel -1.0, BaseLevel 20; the data label reads its value at level 60). Two designs analysed against the tool, not run. Design 1: metric_delta spell_resist_chance (Unit::GetEffectiveResistChance, the engine use-time function that adds the aura and clamps the victim resistance at 0) before and after a real learn: it needs a dummy with a positive Shadow resistance and an expected chance, which is an engine formula of that resistance, not a tooltip or DBC value; with the stock dummy at 0 resistance the read cannot move. Design 2: an equality of two reads, a MOD_RESISTANCE fixture aura on the dummy lowered by 60 in the control phase against the learned phase (before_auras, after_auras and phase_aura_amounts allow it): the expected gain is 0, which cannot be told from its control (Vampiric Tonic 802276, status 3 by ruling D-360) and no entry states a non-zero control gain without the engine formula. The nearest option is metric_delta with phase_aura_amounts; a ratio-or-equality judge between two arms is the extension. The scaling \"with your level\" is the data label."
   },
   {
     "spell": 803645,
@@ -3559,7 +3570,8 @@
     "labels": [
       "803645 effect_value e1 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 3 (G-24, fw-vb4): data conformant (effect_value e1 #1; RefreshUnphased sets the REDUCE_PUSHBACK amount to the full 50 while Inner Demon 804216 is on the caster and 0 otherwise, AscensionFelsworn.cpp:281-288). Two designs analysed against the tool, not run. Design 1: pushback_reduction (the unhit / hit / reduced casts of Dawnsear-like spells read in game time): its spec has no fixture for a condition on the caster, the reducer is learned or cast and Inner Demon 804216 cannot be held during the three casts, so the reduced arm would read the unconditional case (the talent is also not learned by the kind unless it is the reducer). Design 2: metric_delta cast_pushback_ms with after_trigger_strike and Inner Demon as a phase aura: the strike lands in the treatment phase only, so the control phase has no strike and the 50% would have to be judged against the engine base pushback of 500 ms, which no tooltip or DBC value states (the Necromancer 802988 finding). The nearest option is pushback_reduction with a caster-aura fixture, an extension."
   },
   {
     "spell": 803840,
