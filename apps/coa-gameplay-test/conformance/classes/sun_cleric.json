@@ -40854,6 +40854,19 @@
               "target": "ally"
             },
             "source": "the Daybreak 503624 heal the extra heal is taken from, effective healing on the Bless ally, one per phase"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 800602
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Empowered Holy Form 800602 is learned before both phases (learn [804247, 800602]); read present in both phases"
           }
         ],
         "ratios": [
@@ -40867,7 +40880,7 @@
           }
         ]
       },
-      "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY BasePoints 49 + 1 = 50 ($s2); 800602 Effect[0] aura 108 ADD_PCT_MODIFIER SPELLMOD_ALL_EFFECTS BasePoints 99 + 1 = +100% on the class mask of Holy Form (Spell.dbc), so the amount is 100 with 800602 learned. AscensionSunClericAbilities.cpp:390-405: a heal with Holy Form on at or above 30% of maximum mana casts 807994 on the Bless ally for extra = healing x mana / maximum mana x amount / 100, truncated, and pays (extra + 3) / 4; 807994 carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (Spell.dbc), so the heal takes no healing-done modifier of Holy Form or 800602. Same phases, setups and mana as ally_bless_mana: Bless 804247 at the ally and Holy Form 805301 on the caster 2000 ms apart, the caster's mana set to 2043 before the setup casts (Bless 272, Holy Form 545, Daybreak 354 taken from Spell.dbc ManaCostPercentage 20, 40, 26 of base mana 1363) so that 872 is the mana at the hook, against a maximum mana of 2868 (BaseMana 1363 + 20 + 15 x (Intellect 119 - 20), StatSystem.cpp:421-429); the before phase (2021, 850 at the hook, 29.6%) is below the gate and pays nothing, so the ratios read the after phase alone. The ally is set to 10000 of 100000 health so that no heal is capped by the missing health. Ratio of the 807994 heal total to the Daybreak 503624 heal total, both on the ally and read on the caster: Expected 872 / 2868 x 100 / 100 = 0.304042 (amount 50 doubled to 100 by 800602); truncation of one unit over the heal total is covered by floor_count, and the band 0.301 to 0.307 excludes the control's 0.152 and a 10% error either side (0.274, 0.334). void_on_cast_failure: a refused cast voids the trial (cast_failures are stated in the report). Reference search 2026-11-22/23: coa-history spell 800602: 0 events in 186 logs; bindmysoul snapshot \"Doubles the effectiveness of your Holy Form.\"; rb4 report row 300 (threat part of the same clause, doubled); nothing found that states an amount for the mana part.",
+      "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY BasePoints 49 + 1 = 50 ($s2); 800602 Effect[0] aura 108 ADD_PCT_MODIFIER SPELLMOD_ALL_EFFECTS BasePoints 99 + 1 = +100% on the class mask of Holy Form (Spell.dbc), so the amount is 100 with 800602 learned. AscensionSunClericAbilities.cpp:390-405: a heal with Holy Form on at or above 30% of maximum mana casts 807994 on the Bless ally for extra = healing x mana / maximum mana x amount / 100, truncated, and pays (extra + 3) / 4; 807994 carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (Spell.dbc), so the heal takes no healing-done modifier of Holy Form or 800602. Same phases, setups and mana as ally_bless_mana: Bless 804247 at the ally and Holy Form 805301 on the caster 2000 ms apart, the caster's mana set to 2043 before the setup casts (Bless 272, Holy Form 545, Daybreak 354 taken from Spell.dbc ManaCostPercentage 20, 40, 26 of base mana 1363) so that 872 is the mana at the hook, against a maximum mana of 2868 (BaseMana 1363 + 20 + 15 x (Intellect 119 - 20), StatSystem.cpp:421-429); the before phase (2021, 850 at the hook, 29.6%) is below the gate and pays nothing, so the ratios read the after phase alone. The ally is set to 10000 of 100000 health so that no heal is capped by the missing health. Ratio of the 807994 heal total to the Daybreak 503624 heal total, both on the ally and read on the caster: Expected 872 / 2868 x 100 / 100 = 0.304042 (amount 50 doubled to 100 by 800602); truncation of one unit over the heal total is covered by floor_count, and the band 0.301 to 0.307 excludes the control's 0.152 and a 10% error either side (0.274, 0.334). void_on_cast_failure: a refused cast voids the trial (cast_failures are stated in the report). Reference search 2026-11-22/23: coa-history spell 800602: 0 events in 186 logs; bindmysoul snapshot \"Doubles the effectiveness of your Holy Form.\"; rb4 report row 300 (threat part of the same clause, doubled); nothing found that states an amount for the mana part. Arm 3 reads 800602 present in both phases.",
       "tolerance": 0,
       "after_at_least": 0,
       "after_at_most": 871,
@@ -40957,6 +40970,45 @@
               "target": "ally"
             },
             "source": "the Daybreak 503624 heal the extra heal is taken from, effective healing on the Bless ally, one per phase"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 800602
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Empowered Holy Form 800602 is a passive this control never learns: the generated contrast learn goes to gate_spell 804247 (known already), not to 800602; read absent in both phases"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 681337
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Holy Giant 681337 (Spell.dbc: family 33, ADD_PCT_MODIFIER SPELLMOD_ALL_EFFECTS +100%, EffectSpellClassMask word 2 536870912, which holds the Holy Form 805301 SpellFamilyFlags[2] bit 1048576 together with 536870912): another +100% on Holy Form; read absent"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 300357
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Lead Me Not Astray 300357 (class ADR 0021, Bless heal and mana only); read absent"
           }
         ],
         "ratios": [
@@ -40970,7 +41022,7 @@
           }
         ]
       },
-      "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY BasePoints 49 + 1 = 50 ($s2); 800602 Effect[0] aura 108 ADD_PCT_MODIFIER SPELLMOD_ALL_EFFECTS BasePoints 99 + 1 = +100% on the class mask of Holy Form (Spell.dbc), so the amount is 100 with 800602 learned. AscensionSunClericAbilities.cpp:390-405: a heal with Holy Form on at or above 30% of maximum mana casts 807994 on the Bless ally for extra = healing x mana / maximum mana x amount / 100, truncated, and pays (extra + 3) / 4; 807994 carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (Spell.dbc), so the heal takes no healing-done modifier of Holy Form or 800602. Same phases, setups and mana as ally_bless_mana: Bless 804247 at the ally and Holy Form 805301 on the caster 2000 ms apart, the caster's mana set to 2043 before the setup casts (Bless 272, Holy Form 545, Daybreak 354 taken from Spell.dbc ManaCostPercentage 20, 40, 26 of base mana 1363) so that 872 is the mana at the hook, against a maximum mana of 2868 (BaseMana 1363 + 20 + 15 x (Intellect 119 - 20), StatSystem.cpp:421-429); the before phase (2021, 850 at the hook, 29.6%) is below the gate and pays nothing, so the ratios read the after phase alone. The ally is set to 10000 of 100000 health so that no heal is capped by the missing health. Ratio of the 807994 heal total to the Daybreak 503624 heal total, both on the ally and read on the caster: Control arm, 800602 never learned: 872 / 2868 x 50 / 100 = 0.152021 (Holy Form Effect[1] 49 + 1 = 50); the band 0.149 to 0.155 excludes the treatment's 0.304 and a 10% error either side (0.137, 0.167). void_on_cast_failure: a refused cast voids the trial (cast_failures are stated in the report). Reference search 2026-11-22/23: coa-history spell 800602: 0 events in 186 logs; bindmysoul snapshot \"Doubles the effectiveness of your Holy Form.\"; rb4 report row 300 (threat part of the same clause, doubled); nothing found that states an amount for the mana part.",
+      "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY BasePoints 49 + 1 = 50 ($s2); 800602 Effect[0] aura 108 ADD_PCT_MODIFIER SPELLMOD_ALL_EFFECTS BasePoints 99 + 1 = +100% on the class mask of Holy Form (Spell.dbc), so the amount is 100 with 800602 learned. AscensionSunClericAbilities.cpp:390-405: a heal with Holy Form on at or above 30% of maximum mana casts 807994 on the Bless ally for extra = healing x mana / maximum mana x amount / 100, truncated, and pays (extra + 3) / 4; 807994 carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (Spell.dbc), so the heal takes no healing-done modifier of Holy Form or 800602. Same phases, setups and mana as ally_bless_mana: Bless 804247 at the ally and Holy Form 805301 on the caster 2000 ms apart, the caster's mana set to 2043 before the setup casts (Bless 272, Holy Form 545, Daybreak 354 taken from Spell.dbc ManaCostPercentage 20, 40, 26 of base mana 1363) so that 872 is the mana at the hook, against a maximum mana of 2868 (BaseMana 1363 + 20 + 15 x (Intellect 119 - 20), StatSystem.cpp:421-429); the before phase (2021, 850 at the hook, 29.6%) is below the gate and pays nothing, so the ratios read the after phase alone. The ally is set to 10000 of 100000 health so that no heal is capped by the missing health. Ratio of the 807994 heal total to the Daybreak 503624 heal total, both on the ally and read on the caster: Control arm, 800602 never learned: 872 / 2868 x 50 / 100 = 0.152021 (Holy Form Effect[1] 49 + 1 = 50); the band 0.149 to 0.155 excludes the treatment's 0.304 and a 10% error either side (0.137, 0.167). void_on_cast_failure: a refused cast voids the trial (cast_failures are stated in the report). Reference search 2026-11-22/23: coa-history spell 800602: 0 events in 186 logs; bindmysoul snapshot \"Doubles the effectiveness of your Holy Form.\"; rb4 report row 300 (threat part of the same clause, doubled); nothing found that states an amount for the mana part. Corrected control (bless-diag 2026-11-23): the first control let the generated contrast learn 800602 between the phases (the entry spell), so its after phase had the passive and read 0.3039; the arms 3 to 5 now read 800602, Holy Giant 681337 and Lead Me Not Astray 300357 absent in both phases.",
       "tolerance": 0,
       "after_at_least": 0,
       "after_at_most": 871,
@@ -40984,7 +41036,8 @@
           "caster"
         ]
       ],
-      "expected": 871
+      "expected": 871,
+      "gate_spell": 804247
     },
     {
       "spell": 680641,
@@ -41070,6 +41123,32 @@
         ]
       },
       "observe_source": "MEASURE ONLY (mentor D-278), no verdict claimed on 680641's clause: AscensionSunClericEvents.cpp:126 accepts `damage && critical && (Gavel(info) || Named(info,800654))`, so a heal event never passes. The Gavels 800611, 800614, 800617 and Dawnbreak 800654 target enemies only (TARGET_UNIT_TARGET_ENEMY, TARGET_UNIT_CONE_ENEMY_24, Spell.dbc), Gavel of Grace restores mana (Effect[2] trigger with value), Dawnbreak has one SCHOOL_DAMAGE effect, so the only healing Gavel is Gavel of Light 800611, whose self heal 707522 is a Copy of the damage (SPELL_ATTR2_CANT_CRIT). Arm: Gavel of Light 800611 cast at the dummy with forced melee crits (harness crit rating fixture), 680641 learned between the phases: the strike is critical, the self heal 707522 lands and is never critical; stacks read after the heal landed (1500 ms after the cast; the heal is read in the same pair)."
+    },
+    {
+      "spell": 800602,
+      "name": "Empowered Holy Form (control read: Holy Form Effect[1] amount without 800602)",
+      "kind": "metric_delta",
+      "variant": "holy_form_amount_control",
+      "label_suffix": "holy_form_amount_control",
+      "quote": "Doubles the effectiveness of your Holy Form",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 805301,
+        "effect": 1
+      },
+      "before_expected": 0,
+      "expected": 50,
+      "tolerance": 0.5,
+      "wait_ms": 300,
+      "expire_ms": 500,
+      "trigger_only_after": true,
+      "observe_source": "DIAGNOSTIC. Holy Form 805301 Effect[1] aura 4 SPELL_AURA_DUMMY BasePoints 49 + 1 = 50 (Spell.dbc, $s2); no spell is learned, so with no modifier on its SpellFamilyFlags the aura amount reads 50 (the delta is the after reading, the aura is absent before the cast).",
+      "gate_spell": 804247,
+      "learn": [
+        804247
+      ]
     }
   ],
   "player_observations": [],
