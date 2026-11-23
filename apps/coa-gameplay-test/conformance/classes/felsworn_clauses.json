@@ -2519,7 +2519,9 @@
   {
     "spell": 803475,
     "clause": "Consumes 2 Felfury",
-    "labels": [],
+    "labels": [
+      "803475 behaviour_metric_delta consumes"
+    ],
     "kind": "claim"
   },
   {
@@ -2577,13 +2579,22 @@
     "labels": [
       "802076 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "metric aura_script_value (the server keeps Annihilation's attack charges in the aura script value 803904, AscensionFelswornAuras.cpp:68-72; Aura::GetCharges stays 0) has no evidence class in coverage.METRIC_EVIDENCE, so coverage stops with EvidenceError; the measured pair gave 5 / 6 / 7 charges, ok in both runs (fw-b3g4 prove B)",
+      "attempts": [
+        {
+          "agent": "fw-b3g4",
+          "report": ".agents/plans/fw-b3g4/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 802076,
     "clause": "and your Physical damage dealt is now increased by $s2%.",
     "labels": [
-      "802076 effect_value e1 #1"
+      "802076 behaviour_metric_delta physical_damage"
     ],
     "kind": "claim"
   },
@@ -2598,7 +2609,7 @@
     "spell": 802108,
     "clause": "Increases your spell damage by $s1% of your Intellect and Spirit.",
     "labels": [
-      "802108 effect_value e0 #0"
+      "802108 behaviour_metric_delta spell_power"
     ],
     "kind": "claim"
   },
@@ -2616,13 +2627,22 @@
     "labels": [
       "802110 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "metric aura_script_value (the server keeps Annihilation's attack charges in the aura script value 803904, AscensionFelswornAuras.cpp:68-72; Aura::GetCharges stays 0) has no evidence class in coverage.METRIC_EVIDENCE, so coverage stops with EvidenceError; the measured pair gave 5 / 6 / 7 charges, ok in both runs (fw-b3g4 prove B)",
+      "attempts": [
+        {
+          "agent": "fw-b3g4",
+          "report": ".agents/plans/fw-b3g4/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 802110,
     "clause": "and your Physical damage dealt is now increased by $s2%.",
     "labels": [
-      "802110 effect_value e1 #1"
+      "802110 behaviour_metric_delta physical_damage"
     ],
     "kind": "claim"
   },
@@ -2634,12 +2654,16 @@
       {
         "claim": "by $s1%",
         "labels": [
-          "802180 effect_value e0 #0"
+          "802180 behaviour_metric_delta fel_fireball_above",
+          "802180 behaviour_metric_delta ruin_above"
         ]
       },
       {
         "claim": "above 75% health",
-        "labels": []
+        "labels": [
+          "802180 behaviour_metric_delta fel_fireball_below",
+          "802180 behaviour_metric_delta ruin_below"
+        ]
       }
     ]
   },
@@ -2712,10 +2736,20 @@
     "spell": 803904,
     "clause": "Lasts for $n attacks or $d.",
     "labels": [
-      "803904 aura_duration_ms #0",
+      "803904 behaviour_metric_delta held",
+      "803904 behaviour_metric_delta gone",
       "803904 effect_value #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "metric aura_script_value (the server keeps Annihilation's attack charges in the aura script value 803904, AscensionFelswornAuras.cpp:68-72; Aura::GetCharges stays 0) has no evidence class in coverage.METRIC_EVIDENCE, so coverage stops with EvidenceError; the measured pair gave 5 / 6 / 7 charges, ok in both runs (fw-b3g4 prove B)",
+      "attempts": [
+        {
+          "agent": "fw-b3g4",
+          "report": ".agents/plans/fw-b3g4/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 803905,
@@ -2774,10 +2808,30 @@
   {
     "spell": 804610,
     "clause": "Increases the damage of Azzinoth's Assault, Annihilan Strike, and Twin Slice by $s1% against slowed enemies.",
-    "labels": [
-      "804610 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the damage of Azzinoth's Assault,",
+        "labels": [
+          "804610 behaviour_hit_ratio assault_slowed",
+          "804610 behaviour_hit_ratio assault_control"
+        ]
+      },
+      {
+        "claim": "Annihilan Strike,",
+        "labels": [
+          "804610 behaviour_hit_ratio annihilan_slowed",
+          "804610 behaviour_hit_ratio annihilan_control"
+        ]
+      },
+      {
+        "claim": "and Twin Slice by $s1% against slowed enemies.",
+        "labels": [
+          "804610 behaviour_hit_ratio twin_slice_slowed",
+          "804610 behaviour_hit_ratio twin_slice_control"
+        ]
+      }
+    ]
   },
   {
     "spell": 804611,
@@ -2791,7 +2845,7 @@
     "spell": 804611,
     "clause": "and your expertise by $s2.",
     "labels": [
-      "804611 effect_value e1 #1"
+      "804611 behaviour_metric_delta expertise"
     ],
     "kind": "claim"
   },
@@ -3037,20 +3091,36 @@
     "spell": 805243,
     "clause": "reducing their damage taken by $s1%",
     "labels": [
-      "805243 effect_value e0 #1",
-      "805243 aura_amount e0 #1"
+      "805243 behaviour_metric_delta amount_e0"
     ],
     "kind": "claim"
   },
   {
     "spell": 805243,
     "clause": "and increasing their haste by $s2% for $d.",
-    "labels": [
-      "805243 effect_value e1 #2",
-      "805243 aura_amount e1 #2",
-      "805243 aura_duration_ms #3"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and increasing their haste by $s2%",
+        "labels": [
+          "805243 behaviour_metric_delta amount_e1",
+          "805243 behaviour_metric_delta melee_haste"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "805243 behaviour_metric_delta held",
+          "805243 behaviour_metric_delta gone"
+        ]
+      },
+      {
+        "claim": "and increasing their haste by $s2% (effect 2, aura 216 spell haste)",
+        "labels": [
+          "805243 behaviour_metric_delta spell_haste"
+        ]
+      }
+    ]
   },
   {
     "spell": 805244,
@@ -3103,7 +3173,7 @@
     "spell": 805246,
     "clause": "Increases your attack power by $s1% of your Stamina",
     "labels": [
-      "805246 effect_value e0 #0"
+      "805246 behaviour_metric_delta attack_power"
     ],
     "kind": "claim"
   },
@@ -3111,7 +3181,8 @@
     "spell": 805246,
     "clause": "and your hit rating by $s2% of your Agility.",
     "labels": [
-      "805246 effect_value e1 #1"
+      "805246 behaviour_metric_delta hit_melee",
+      "805246 behaviour_metric_delta hit_spell"
     ],
     "kind": "claim"
   },
@@ -3159,7 +3230,7 @@
     "spell": 805255,
     "clause": "Reduces the cooldown of Burning Hatred by $/1000;s1 sec.",
     "labels": [
-      "805255 effect_value e0 #0"
+      "805255 behaviour_metric_delta cooldown"
     ],
     "kind": "claim"
   },
@@ -3167,7 +3238,7 @@
     "spell": 805256,
     "clause": "Increases your maximum health by $s1%",
     "labels": [
-      "805256 effect_value e0 #0"
+      "805256 behaviour_metric_delta max_health"
     ],
     "kind": "claim"
   },
@@ -3175,7 +3246,7 @@
     "spell": 805256,
     "clause": "and increases your off-hand weapon damage by $s2%.",
     "labels": [
-      "805256 effect_value e1 #1"
+      "805256 behaviour_metric_delta offhand_damage"
     ],
     "kind": "claim"
   },
@@ -3189,7 +3260,7 @@
     "spell": 806103,
     "clause": "Increases your Magic damage dealt by $s1%",
     "labels": [
-      "806103 effect_value e0 #0"
+      "806103 behaviour_metric_delta magic_damage"
     ],
     "kind": "claim"
   },
@@ -3197,17 +3268,54 @@
     "spell": 806103,
     "clause": "and your spell hit chance by $s2%.",
     "labels": [
-      "806103 effect_value e1 #1"
+      "806103 behaviour_metric_delta spell_hit"
     ],
     "kind": "claim"
   },
   {
     "spell": 806109,
     "clause": "Gorge on fel energy, becoming immune to all physical attacks and spells for $d, but during that time you cannot attack, move or cast spells.",
-    "labels": [
-      "806109 aura_duration_ms #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "for $d",
+        "labels": [
+          "806109 behaviour_metric_delta held",
+          "806109 behaviour_metric_delta gone"
+        ]
+      },
+      {
+        "claim": "becoming immune to all physical attacks",
+        "labels": [
+          "806109 immunity 38767 without",
+          "806109 immunity 38767 with",
+          "806109 immunity 38767 control",
+          "806109 immunity 806109 cast",
+          "806109 immunity 806109 applied",
+          "806109 immunity 806109 expired"
+        ]
+      },
+      {
+        "claim": "and spells",
+        "labels": [
+          "806109 immunity 35317 without",
+          "806109 immunity 35317 with",
+          "806109 immunity 35317 control"
+        ]
+      },
+      {
+        "claim": "you cannot attack",
+        "labels": []
+      },
+      {
+        "claim": "move",
+        "labels": []
+      },
+      {
+        "claim": "or cast spells",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 806109,
@@ -3228,10 +3336,19 @@
   {
     "spell": 806235,
     "clause": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
-    "labels": [
-      "806235 effect_value 806236e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec (Sargeron Smite)",
+        "labels": [
+          "806235 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "Direct critical strikes with the other Felfury spenders (Azzinoth's Assault, Ruin and the rest)",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 806235,
@@ -3253,11 +3370,28 @@
   {
     "spell": 807431,
     "clause": "Casting Felfury spenders now increases your Energy regeneration by $521234s1% for $521234d,",
-    "labels": [
-      "807431 effect_value 521234e0 #0",
-      "807431 spell_duration 521234 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting Felfury spenders now increases your Energy regeneration",
+        "labels": [
+          "807431 behaviour_metric_delta stack_one"
+        ]
+      },
+      {
+        "claim": "by $521234s1%",
+        "labels": [
+          "807431 behaviour_metric_delta regen_amount"
+        ]
+      },
+      {
+        "claim": "for $521234d,",
+        "labels": [
+          "807431 behaviour_metric_delta held",
+          "807431 behaviour_metric_delta gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 807431,
@@ -3270,7 +3404,9 @@
   {
     "spell": 807438,
     "clause": "Generating Felfury now extends the duration of Inner Demon by 0.5 sec.",
-    "labels": [],
+    "labels": [
+      "807438 behaviour_metric_delta duration"
+    ],
     "kind": "claim"
   },
   {
@@ -3304,7 +3440,7 @@
     "spell": 807901,
     "clause": "and your expertise by $s2.",
     "labels": [
-      "807901 effect_value e1 #1"
+      "807901 behaviour_metric_delta expertise"
     ],
     "kind": "claim"
   },
@@ -3336,7 +3472,7 @@
     "spell": 807914,
     "clause": "and your expertise by $s2.",
     "labels": [
-      "807914 effect_value e1 #1"
+      "807914 behaviour_metric_delta expertise"
     ],
     "kind": "claim"
   }
