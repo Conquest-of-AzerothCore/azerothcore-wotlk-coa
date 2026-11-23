@@ -581,7 +581,7 @@
       ],
       "proc_spell": 520262,
       "events_per_proc": 1,
-      "proc_spell_source": "Casts of 520262 beyond the completed Azzinoth's Assault casts: EffectTriggerSpell[0] of 704610; each Assault itself casts 520262 once (EffectTriggerSpell[0] of 801904), the handler casts the additional one (AscensionFelswornEvents.cpp:176-177). Reference search 2026-11-23: coa-history spell 704610: 0 events in 186 logs; the live logs show 520262 after 124 of 148 Assault casts (0.84 per cast, Wilson 0.77-0.89, never twice within 0.5 s, atc/report.md); nothing found that states the rate per hit.",
+      "proc_spell_source": "Casts of 520262 beyond the completed Azzinoth's Assault casts: EffectTriggerSpell[0] of 704610; each Assault itself casts 520262 once (EffectTriggerSpell[0] of 801904), the handler casts the additional one (AscensionFelswornEvents.cpp:176-177). Reference search 2026-11-24: coa-history spell 704610: 0 events in 186 logs. Live logs (atc/report.md:7-10, :36): 520262 follows 124 of 148 Assault casts (0.84 per cast) because it is the Assault's own main-hand strike (EffectTriggerSpell of 801904), not the talent's extra hit; no evidence of the 30% proc in the logs. Nothing found that states a rate per hit or per cast.",
       "handler": "aura_ascension_felsworn_event: Check case 704610 (AscensionFelswornEvents.cpp:69-71) passes a damage event of 801904, 520262 or 572585 and rolls Chance(player, 704610); Proc (AscensionFelswornEvents.cpp:176-177) casts 520262 at the target. Baseline arm: the same casts before 704610 is learned must read no extra hit. Reference search 2026-11-23: see trigger_spells_source.",
       "dbc": {
         "704610": {
@@ -600,8 +600,8 @@
         520262,
         572585
       ],
-      "trigger_lands_no_hit": "AscensionFelswornEvents.cpp:69-71: case 704610: return info && (Named(info, 801904) || info->Id == 520262 || info->Id == 572585) && !periodic && Chance(player, id): the handler rolls once per landed non-periodic damage event of the strikes 520262 (main hand) and 572585 (off hand), and of the extra 520262 hit it casts itself, never per cast of 801904",
-      "trigger_spells_source": "Azzinoth's Assault 801904 (Effect[0] and Effect[1] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE, EffectTriggerSpell 520262 main hand and 572585 off hand) has no damage of its own; the strikes are the landed hits, each rolls the chance, and the additional 520262 hit rolls it again. A trial is one landed hit of 520262 or 572585 on the dummy, additional hits included. Reference search 2026-11-23: coa-history spell 704610: 0 events in 186 logs; the live logs show 520262 after 124 of 148 Assault casts (0.84 per cast, Wilson 0.77-0.89, atc/report.md); nothing found that states the rate per hit."
+      "trigger_lands_no_hit": "AscensionFelswornEvents.cpp:69-71: case 704610: return info && (Named(info, 801904) || info->Id == 520262 || info->Id == 572585) && !periodic && Chance(player, id): the handler rolls once per landed non-periodic damage event of the strikes 520262 (main hand) and 572585 (off hand), never per cast of 801904. The extra 520262 hit it casts (:176-177) does not roll again: the Proc sets State(player).event (:126-127, reset at :278) and Check returns false while it is set (:40).",
+      "trigger_spells_source": "Azzinoth's Assault 801904 (Effect[0] and Effect[1] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE, EffectTriggerSpell 520262 main hand and 572585 off hand) has no damage of its own; the two strikes are the landed hits and each rolls the chance once; the additional 520262 hit does not roll (event guard, see trigger_lands_no_hit). A trial is one landed hit of 520262 or 572585 on the dummy, additional hits included, so the measured rate per landed hit is 0.3/1.3 = 0.231 for 0.3 per base strike. Reference search 2026-11-24: coa-history spell 704610: 0 events in 186 logs. Live logs (atc/report.md:7-10, :36): 520262 follows 124 of 148 Assault casts (0.84 per cast) because it is the Assault's own main-hand strike (EffectTriggerSpell of 801904), not the talent's extra hit; no evidence of the 30% proc in the logs."
     }
   ],
   "triggers": [
@@ -17550,6 +17550,176 @@
       "observe_source": "Dancing Blades 800598 Effect[0] 121 (normalized weapon damage), SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON, flat $m1 = 0 + 1 (DieSides 1). Off-hand weapon item 2027, 17.25-28.75, normalized speed 2.4; reference attack power 312 adds 312/14 x 2.4 = 53.49, so the roll is the integer 70..82; the off-hand factor 0.5 (hits.py OFF_HAND_DAMAGE_FACTOR, the engine's off-hand penalty) gives 35..41 and the flat 0 after the factor. Every melee hit is critical here (force_crit melee, the trigger needs a crit; 800598 is a melee ability), so x2: 70..82, then the dummy's armor (528, kept fraction 5500/6028 = 0.912409, ceil, as the Sun Cleric Justice entry derives it): 64..75 per hit; crit and armor in the other order give 64..76. Two hits (two forced-critical Twin Slice strikes, one dummy): 128..152. A main-hand hit (no 0.5) would read 256..304 and a hit without the attack power term 30..52. 0 before the learn (control). Reference search 2026-11-23: nothing found that decides a value; expected values come from the tooltip, the DBC and the class file.",
       "after_at_least": 128,
       "after_at_most": 152
+    },
+    {
+      "spell": 300465,
+      "name": "Cunning (root duration)",
+      "kind": "duration_ratio",
+      "variant": "root",
+      "label_suffix": "root",
+      "quote": "Reduces the duration of movement impairing effects on you by $s1%",
+      "expected_ratio": 0.8,
+      "vehicle_spell": 29991,
+      "striker_entry": 36,
+      "attempts": 1,
+      "margin_ms": 50,
+      "observe_source": "300465 Effect[0] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 7 (MECHANIC_ROOT), BasePoints -21 + 1 = -20 ($s1 = 20): root durations on the caster x0.8 (Effect[1] covers MECHANIC_SNARE 11, the snare entry). Vehicle 29991 (Spell.dbc: Mechanic 7, Effect[0] aura 26 SPELL_AURA_MOD_ROOT, DurationIndex 1 = 10000 ms) is a real root cast once per phase by the striker entry 36 at the caster, before (control: 300465 not learned) and after a real learn. The generated behaviour_expiry label reads the aura held and gone around the stated end of both arms (10000 ms without, 8000 ms with). Reference search 2026-11-24: coa-history spell 300465: 0 events in 186 logs (a passive leaves no event); nothing found that decides a value; expected values come from the tooltip and the DBC."
+    },
+    {
+      "spell": 92087,
+      "name": "Dancing Blades (control: no critical strike, no trigger)",
+      "kind": "metric_delta",
+      "variant": "noncrit",
+      "label_suffix": "noncrit",
+      "quote": "Critical strikes with melee abilities now trigger",
+      "gate_spell": 92087,
+      "trigger_spell": 801901,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 800598
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "after_at_least": 0,
+      "observe_source": "Dancing Blades 92087: the passive triggers on a critical melee ability only (AscensionFelswornEvents.cpp:52-53 case 92087 returns melee && crit && !periodic). Control of the condition: the same Twin Slice 801901 cast with 92087 learned in the after phase and Reduce Critical Strike Chance 64481 (Effect[0] MOD_WEAPON_CRIT_PERCENT -1000, a precondition fixture) on the caster in both phases, no forced critical: no strike is critical, so 800598 is cast 0 times; a server triggering on every melee hit reads 2. Without 92087 (before phase) it also reads 0. Reference search 2026-11-24: nothing found that decides a value.",
+      "after_at_most": 0,
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 560503,
+      "name": "Straight to the Nether (smite_heal)",
+      "kind": "metric_delta",
+      "variant": "smite_heal",
+      "label_suffix": "smite_heal",
+      "quote": "now leeches $s1% of the damage dealt from the initial strike as Shadowflame Damage.",
+      "gate_spell": 560503,
+      "trigger_spell": 802060,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 705124,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1.0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "same_arm_ratio": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 705124,
+          "target": "dummy"
+        },
+        "ratio": 1.0,
+        "tolerance": 0.02,
+        "least": 1,
+        "source": "705124 Effect[0] SPELL_EFFECT_HEALTH_LEECH, EffectValueMultiplier 1.0: the caster is healed by the damage the leech deals"
+      },
+      "observe_source": "Heal leg of 705124 (Spell.dbc Effect[0] SPELL_EFFECT_HEALTH_LEECH, EffectValueMultiplier 1.0): the caster's heal total of 705124 over the 705124 damage total of the same window (same_arm_ratio) is 1.0 within 0.02; 0 before the learn (control). The damage share of the same leech is the smite entry (0.20 of the strike). Reference search 2026-11-24: nothing found that decides a value; expected values come from the tooltip and the DBC.",
+      "player_attack_power": 20000
+    },
+    {
+      "spell": 560503,
+      "name": "Straight to the Nether (carve_heal)",
+      "kind": "metric_delta",
+      "variant": "carve_heal",
+      "label_suffix": "carve_heal",
+      "quote": "now leeches $s1% of the damage dealt from the initial strike as Shadowflame Damage.",
+      "gate_spell": 560503,
+      "trigger_spell": 803715,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 705124,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1.0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "same_arm_ratio": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 705124,
+          "target": "dummy"
+        },
+        "ratio": 1.0,
+        "tolerance": 0.02,
+        "least": 1,
+        "source": "705124 Effect[0] SPELL_EFFECT_HEALTH_LEECH, EffectValueMultiplier 1.0: the caster is healed by the damage the leech deals"
+      },
+      "observe_source": "Heal leg of 705124 (Spell.dbc Effect[0] SPELL_EFFECT_HEALTH_LEECH, EffectValueMultiplier 1.0): the caster's heal total of 705124 over the 705124 damage total of the same window (same_arm_ratio) is 1.0 within 0.02; 0 before the learn (control). The damage share of the same leech is the carve entry (0.20 of the strike). Reference search 2026-11-24: nothing found that decides a value; expected values come from the tooltip and the DBC.",
+      "player_attack_power": 20000
     }
   ],
   "player_observations": [],

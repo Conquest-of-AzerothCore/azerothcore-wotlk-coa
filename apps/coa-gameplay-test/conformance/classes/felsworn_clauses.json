@@ -15,7 +15,8 @@
       {
         "claim": "Critical strikes with melee abilities now trigger Dancing Blades",
         "labels": [
-          "92087 behaviour_metric_delta trigger"
+          "92087 behaviour_metric_delta trigger",
+          "92087 behaviour_metric_delta noncrit"
         ]
       },
       {
@@ -106,7 +107,10 @@
     "spell": 300465,
     "clause": "Reduces the duration of movement impairing effects on you by $s1%.",
     "labels": [
-      "300465 behaviour_duration_ratio snare"
+      "300465 behaviour_duration_ratio snare",
+      "300465 behaviour_expiry snare",
+      "300465 behaviour_duration_ratio root",
+      "300465 behaviour_expiry root"
     ],
     "kind": "claim"
   },
@@ -762,7 +766,8 @@
     "clause": "Your Twin Slice and Felrend now have a $h% chance to generate 1 additional Felfury.",
     "labels": [
       "520817 effect_value #0",
-      "520817 proc_rate"
+      "520817 proc_rate 800058 801901",
+      "520817 proc_rate 800058 563268"
     ],
     "kind": "claim"
   },
@@ -1106,14 +1111,16 @@
         "claim": "Sargeron Smite leeches $s1% of the strike as Shadowflame damage while Inner Demon is active",
         "labels": [
           "560503 behaviour_metric_delta smite",
-          "560503 behaviour_metric_delta smite_no_inner"
+          "560503 behaviour_metric_delta smite_no_inner",
+          "560503 behaviour_metric_delta smite_heal"
         ]
       },
       {
         "claim": "Carve leeches $s1% of the strike as Shadowflame damage while Inner Demon is active",
         "labels": [
           "560503 behaviour_metric_delta carve",
-          "560503 behaviour_metric_delta carve_no_inner"
+          "560503 behaviour_metric_delta carve_no_inner",
+          "560503 behaviour_metric_delta carve_heal"
         ]
       }
     ]
@@ -2087,7 +2094,7 @@
       "704610 proc_rate"
     ],
     "kind": "claim",
-    "reason": "AWAITING OWNER (status 5). Tooltip: \"Azzinoth's Assault now has a $h% chance to hit an additional time with your main-hand Weapon.\" ($h = 30, ProcChance of 704610). Measured (proc 704610, pairs prove-a5): 12513 procs in 54345 landed strikes (0.2303, Wilson 99.95% [0.2240, 0.2366]) and 12460 in 54292 (0.2295), one trial per landed hit of 520262 or 572585 including the additional hits; 0 events in 40 baseline trials. 0.2303 = 0.3/1.3: the additional 520262 hit does not roll again, so the server grants 0.3 per base strike, 0.6 additional hits per Assault. Live logs (atc/report.md): 520262 after 124 of 148 casts, 0.84 per cast, never twice. Options: (a) per cast 30%: one roll per Assault; (b) 30% per strike as served (0.6 per cast); (c) keep the served rule and correct the tooltip. Recommendation: (a) is the literal tooltip but live shows 0.84, so (b)/(c) decided by the owner; no server change made."
+    "reason": "AWAITING OWNER (status 5). Tooltip: \"Azzinoth's Assault now has a $h% chance to hit an additional time with your main-hand Weapon.\" ($h = 30, ProcChance of 704610). Measured (counted pair prove-final, proc 704610): 0.2297 (12474/54306) and 0.2317 (12613/54445) additional hits per landed hit of 520262 or 572585 (the extra hits are trials too); 0 events in 40 baseline trials. 0.23 = 0.3/1.3: the handler rolls 0.3 per base strike and the extra hit does not roll (event guard, AscensionFelswornEvents.cpp:40 and :126-127), so the server gives about 0.60 additional hits per Assault (two strikes x 0.3, derived, not read), against the tooltip's 0.30 per Assault. Live logs (atc/report.md:7-10, :36): 520262 follows 124 of 148 casts because it is the Assault's own main-hand strike, not the talent's extra hit; they give no evidence of the 30% proc and no rate for it. Options: (a) one 30% roll per Assault (tooltip, 0.30 per cast); (b) keep 30% per strike as served (0.60 per cast, tooltip corrected). No server change made."
   },
   {
     "spell": 704611,
@@ -4541,7 +4548,7 @@
     "clause": "30 Energy, plus 30 per sec",
     "labels": [],
     "kind": "claim",
-    "reason": "HELD (review fw-rf500610c I-1): the free_3900/free_4100 bracket admits an up-front cost 21-40 and a drain 28-33/s, so neither 10% error is excluded; needs direct Energy reads (up-front and per second). Cost line of the spell card, not the Description (lab render render2/answers/spell-800355.json: '30 Energy, plus 30 per sec'; Spell.dbc ManaCost 30, ManaPerSecond 30). Owner ruling O-24: the cost is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted (Felsworn ADR 0014). Counted on the measured drain: from 100 Energy with no power hold the channel aura is present at 3900 ms and gone at 4100 ms, the end of the fourth 30 Energy drain derived from the DBC and 10 Energy per second regeneration. No other ledger row represents a cost line (grep of every class ledger), so this row is new at the end of the ledger.",
+    "reason": "Cost line of the spell card, not the Description (lab render render2/answers/spell-800355.json: '30 Energy, plus 30 per sec'; Spell.dbc ManaCost 30, ManaPerSecond 30). Owner ruling O-24: the cost is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted (Felsworn ADR 0014). Counted on exact Energy reads with regeneration off (disable_regeneration) from a pool set to 100: 70 at 100 ms (up front), 40 at 1450-1900 ms (after one drain) and 10 after the second, each excluding a cost or drain of 27 or 33; the reading before the cast is the control (100). The drain claim reads the Energy the real channel spends over measured intervals. No other ledger row represents a cost line (grep of every class ledger), so this row is new at the end of the ledger.",
     "claims": [
       {
         "claim": "30 Energy",
@@ -4550,7 +4557,7 @@
         ]
       },
       {
-        "claim": "plus 30 per sec",
+        "claim": "plus 30 Energy per sec spent by the channel",
         "labels": [
           "800355 behaviour_metric_delta drain_1",
           "800355 behaviour_metric_delta drain_2"
