@@ -27,7 +27,7 @@ class AvoidedProcInstancesTests(unittest.TestCase):
         values = {model['start']['aura']: float(start_aura), model['start']['applies']: 7.0,
                   model['start']['remaining']: remaining, model['start']['time']: 1000.0,
                   model['start']['value']: float(instances), model['end_applies']: 8.0 if reproc else 7.0}
-        left = instances
+        left, hits_so_far = instances, {spell: 0.0 for spell in model['hit_spells']}
         for arm in ('control', 'treatment'):
             for cast, labels in enumerate(model['reads'][arm], start=1):
                 hits = 2
@@ -37,7 +37,9 @@ class AvoidedProcInstancesTests(unittest.TestCase):
                 values[labels['aura']] = float(arm == 'treatment' and left > 0 or (arm == 'control' and control_aura))
                 values[labels['time']] = 1000.0 + 1100 * cast
                 values[labels['value']] = float(left if arm == 'treatment' and left > 0 else 0)
-                values.update({labels[f'hits {spell}']: 1.0 for spell in model['hit_spells']})
+                for spell in model['hit_spells']:
+                    hits_so_far[spell] += 1.0
+                    values[labels[f'hits {spell}']] = hits_so_far[spell]
         return values
 
     def judge(self, expectation, values):

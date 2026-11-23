@@ -371,9 +371,9 @@ class AvoidedProcPreconditionTest(unittest.TestCase):
         avoidance = [index for index, step in enumerate(steps) if step['action'] == 'set_combat_avoidance']
         self.assertTrue(avoidance)
         for index in avoidance:
-            self.assertEqual(steps[index + 1]['action'], 'set_aura')
-            self.assertEqual(steps[index + 1]['spell'], self.CONDITION)
-            self.assertNotIn('target', steps[index + 1])
+            self.assertEqual(steps[index - 1]['action'], 'set_aura')
+            self.assertEqual(steps[index - 1]['spell'], self.CONDITION)
+            self.assertNotIn('target', steps[index - 1])
 
     def test_an_attempt_aura_on_another_trigger_than_a_cast_or_an_avoided_swing_is_refused(self):
         from procs import attempt_auras

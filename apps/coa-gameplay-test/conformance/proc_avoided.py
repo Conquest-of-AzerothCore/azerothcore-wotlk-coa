@@ -138,9 +138,8 @@ def guard_steps(entry: dict) -> list[dict]:
 def avoidance_steps(entry: dict) -> list[dict]:
     from procs import attempt_auras
     trigger = entry['trigger']
-    return [fixture_health_step(CASTER, 100),
-            {'action': 'set_combat_avoidance', 'actor': CASTER, 'dodge': trigger['dodge'], 'parry': trigger['parry']},
-            *attempt_auras(entry)]
+    return [fixture_health_step(CASTER, 100), *attempt_auras(entry),
+            {'action': 'set_combat_avoidance', 'actor': CASTER, 'dodge': trigger['dodge'], 'parry': trigger['parry']}]
 
 
 def attempt_steps(entry: dict, attempts: int, swing_ms: int) -> list[dict]:

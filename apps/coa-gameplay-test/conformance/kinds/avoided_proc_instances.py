@@ -165,10 +165,14 @@ def void(base: Verdict, why: str) -> Verdict:
     return replace(base, status='unmeasured', explanation=f'void: {why}')
 
 
-def cast_rows(model: dict, values: dict, arm: str) -> list[dict]:
-    return [{'stacks': values[labels['stacks']], 'aura': bool(values[labels['aura']]), 'time': values[labels['time']],
-             'hits': sum(values[labels[f'hits {spell}']] for spell in model['hit_spells'])}
-            for labels in model['reads'][arm]]
+def cast_rows(model: dict, values: dict, arm: str, hits_before: float = 0.0) -> list[dict]:
+    rows = []
+    for labels in model['reads'][arm]:
+        hits = sum(values[labels[f'hits {spell}']] for spell in model['hit_spells'])
+        rows.append({'stacks': values[labels['stacks']], 'aura': bool(values[labels['aura']]),
+                     'time': values[labels['time']], 'hits': hits - hits_before, 'total_hits': hits})
+        hits_before = hits
+    return rows
 
 
 def avoided_proc_instances_verdict(base: Verdict, run, model: dict) -> Verdict:
@@ -182,7 +186,8 @@ def avoided_proc_instances_verdict(base: Verdict, run, model: dict) -> Verdict:
     if refused:
         return void(base, f'refused casts {refused}')
     values, start = run.values, {name: run.values[label] for name, label in model['start'].items()}
-    control, treatment = cast_rows(model, values, 'control'), cast_rows(model, values, 'treatment')
+    control = cast_rows(model, values, 'control')
+    treatment = cast_rows(model, values, 'treatment', control[-1]['total_hits'] if control else 0.0)
     if any(row['aura'] for row in control):
         return replace(base, measured=1.0, expected=0.0, explanation='the proc aura is held before the passive is '
                                                                      'learned')

@@ -170,8 +170,8 @@
         "action": "avoided",
         "striker_entry": 36,
         "swing_ms": 500,
-        "dodge": 0,
-        "parry": 100,
+        "dodge": 5,
+        "parry": 95,
         "strikers": 10,
         "striker_auras": [
           42716,
@@ -190,7 +190,7 @@
       "proc_spell": 807163,
       "events_per_proc": 1,
       "proc_spell_source": "EffectTriggerSpell[0] of 804822; the handler casts it on the caster (AscensionFelswornEvents.cpp:157-158).",
-      "handler": "aura_ascension_felsworn_event: Check (AscensionFelswornEvents.cpp:42-47) passes an incoming dodge or parry (id 804822 accepts both) and rolls Chance(player, 804822) (AscensionFelsworn.cpp:231-239, roll_chance_f of the DBC ProcChance 10, no cooldown) once per avoided attack; Proc casts 807163 on the caster. Trigger: procs avoided trigger (ADR 0900) with the learn list (ADR 1261, provisional): Nether Disciple 560576 (Effect[0] APPLY_AURA 47 SPELL_AURA_MOD_PARRY_PERCENT; HandleAuraModParryPercent calls SetCanParry(true), SpellAuraEffects.cpp:4870-4884) is learned before the engage in every part, so the caster can parry; ten aggressive stationary strikers (creature 36) with Self Root Forever 42716, Molten 62531 and Enrage 2116852, dodge 0 and parry 100 set before every 500 ms interval, so every attempt is a parry (the trial). This is the parry leg of 'Dodging or parrying'; the dodge leg is the entry without a learn list. Nether Disciple is obtainable (CharacterAdvancement 6338 per ~/CoaServer/reference/coa-obtainable, cited in the ledger row). Sized like the dodge leg.",
+      "handler": "aura_ascension_felsworn_event: Check (AscensionFelswornEvents.cpp:42-47) passes an incoming dodge or parry (id 804822 accepts both) and rolls Chance(player, 804822) (AscensionFelsworn.cpp:231-239, roll_chance_f of the DBC ProcChance 10, no cooldown) once per avoided attack; Proc casts 807163 on the caster. Trigger: procs avoided trigger (ADR 0900) with the learn list (ADR 1261, provisional): Nether Disciple 560576 (Effect[0] APPLY_AURA 47 SPELL_AURA_MOD_PARRY_PERCENT; HandleAuraModParryPercent calls SetCanParry(true), SpellAuraEffects.cpp:4870-4884) is learned before the engage in every part, so the caster can parry; ten aggressive stationary strikers (creature 36) with Self Root Forever 42716, Molten 62531 and Enrage 2116852, dodge 5 and parry 95 set before every 500 ms interval, so nearly every trial is a parry; the pooled proc judge needs dodged swings to open its trial count (compare.py, trials from the dodged label) and rates over dodged + parried swings, so a server that ignored parries would read about 5% of the chance. The first pair with dodge 0 read 8250 parried swings and 804 procs in part 2 but was unmeasured for want of a dodged swing. This is the parry leg of 'Dodging or parrying'; the dodge leg is the entry without a learn list. Nether Disciple is obtainable (CharacterAdvancement 6338 per ~/CoaServer/reference/coa-obtainable, cited in the ledger row). Sized like the dodge leg.",
       "dbc": {
         "804822": {
           "ProcChance": 10,
@@ -15476,7 +15476,7 @@
       "quote": "increasing their critical strike chance by $520256s1%",
       "read": "stat_delta",
       "observe_spell": 520256,
-      "metric": "melee_crit_chance",
+      "metric": "melee_crit_chance_refreshed",
       "ally_yd": 10,
       "striker_entry": 36,
       "strikers": 10,
@@ -15488,7 +15488,7 @@
       "swing_ms": 500,
       "control_windows": 10,
       "windows": 20,
-      "observe_source": "AscensionFelswornEvents.cpp:42-47 passes an incoming dodge when Chance(player, 300476) succeeds (ProcChance 100) and :223-224 casts 804336 at the attacker and 520256 on the caster; 520256 Effect[0] APPLY_AURA SPELL_AURA_MOD_CRIT_PCT, TargetA 22 SRC_CASTER, TargetB 30 UNIT_SRC_AREA_ALLY, RadiusIndex 9, DurationIndex 1 (server DBC). Spell.cpp:9449-9459 adds no combat reach for a player target of a player caster. Strikers: the 804822 proc shape, ten aggressive stationary creature 36 with 42716, 62531 and 2116852, dodge 100 before every 500 ms window."
+      "observe_source": "AscensionFelswornEvents.cpp:42-47 passes an incoming dodge when Chance(player, 300476) succeeds (ProcChance 100) and :223-224 casts 804336 at the attacker and 520256 on the caster; 520256 Effect[0] APPLY_AURA SPELL_AURA_MOD_CRIT_PCT, TargetA 22 SRC_CASTER, TargetB 30 UNIT_SRC_AREA_ALLY, RadiusIndex 9, DurationIndex 1 (server DBC). Spell.cpp:9449-9459 adds no combat reach for a player target of a player caster. Strikers: the 804822 proc shape, ten aggressive stationary creature 36 with 42716, 62531 and 2116852, dodge 100 before every 500 ms window. The ally's crit is read with melee_crit_chance_refreshed (UpdateCritPercentage before the read): the first pair read the unrefreshed PLAYER_CRIT_PERCENTAGE field as 0 before the learn."
     },
     {
       "spell": 300476,
