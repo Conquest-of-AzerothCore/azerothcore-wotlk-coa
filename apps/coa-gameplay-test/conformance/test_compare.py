@@ -10,6 +10,7 @@ import tempfile
 import unittest
 from unittest import mock
 
+from block_value import BLOCK_VALUE_LABEL, BLOCK_VALUE_TERMS
 from compare import (ALERT_COLUMNS, CONFORMANT, DATA_ONLY, EFFECT_VALUE_SCOPE, ENGINE_ROUNDING, NOT_MEASURED,
                      PER_LEVEL_ROUNDING, PER_LEVEL_UNMODELLED, per_level_loss, per_level_unmodelled,
                      PERCENT_POINT_METRICS,
@@ -417,6 +418,42 @@ class CompareTest(unittest.TestCase):
         offset = fmean(values) * 0.5
         reads = [math.trunc(values[index % len(values)] + offset) for index in range(needed)]
         self.assertEqual(self.rolled_verdict(reads).status, 'alert')
+
+    def block_rolled_verdict(self, reads, block):
+        text = '${$m1+0+$AP*0.45}'
+        label = '1001 effect_value e0 #0'
+
+        def tokens(caster, forced):
+            roll = forced[2] if forced else 100
+            return [Displayed(text, roll + caster.ap * 0.45, 0, 'flat')]
+
+        reader = FakeTooltips(tokens, {(RANK, 0): (99, 10)})
+        reader.class_file = {BLOCK_VALUE_TERMS: [{'spell': SPELL, 'effect': 0, 'source': 'seeded code term'}]}
+        labels = sample_labels(label, len(reads))
+        item = expectation(label, 'effect_value', text, 'read flat', 0, {'samples': len(reads)})
+        steps = [assert_step(name, str(read)) for name, read in zip(labels, reads)]
+        if block is not None:
+            steps.append(assert_step(BLOCK_VALUE_LABEL, str(block)))
+        return self.value_run([item], [text], steps, reader)[label]
+
+    def test_a_listed_block_value_is_added_to_every_roll_before_the_truncation(self):
+        values, needed = rolled_reads_needed()
+        reads = [math.trunc(values[index % len(values)] + 11) for index in range(needed)]
+        verdict = self.block_rolled_verdict(reads, 11)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('plus the read block value 11 on effect 0 (seeded code term)', verdict.explanation)
+        self.assertAlmostEqual(verdict.expected, fmean(values) + 11)
+
+    def test_seeded_reads_without_the_listed_block_value_alert(self):
+        values, needed = rolled_reads_needed()
+        reads = [math.trunc(values[index % len(values)]) for index in range(needed)]
+        self.assertEqual(self.block_rolled_verdict(reads, 11).status, 'alert')
+
+    def test_a_listed_block_value_the_run_does_not_read_is_unmeasured(self):
+        values, needed = rolled_reads_needed()
+        verdict = self.block_rolled_verdict([math.trunc(value) for value in values][:needed], None)
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn("reads no 'block_value'", verdict.explanation)
 
     def narrow_roll_verdict(self, read, fraction):
         text = '${$803153m1+$803153ppl1+$AP*0.25+$sph*.25}'

@@ -6,6 +6,7 @@ import re
 import struct
 from typing import Mapping, Sequence
 
+from block_value import block_value_steps, block_value_terms
 from classes import ClassSpell
 from custom_attr import TABLE as CUSTOM_ATTR_TABLE, custom_attributes
 from mitigation import (PHYSICAL_SCHOOL_MASK, REFERENCE_TARGET, ArmorFacts, MitigationModel, TargetProfile,
@@ -620,7 +621,8 @@ def learned_weapon_part(readout: Readout, effects: Sequence[int], caster: Caster
 
 
 def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: TargetProfile,
-             auras: Sequence[int], learned: int | None = None, check: str = 'hit_mean') -> RankHit:
+             auras: Sequence[int], learned: int | None = None, check: str = 'hit_mean',
+             flat: Mapping[int, float] | None = None) -> RankHit:
     records = records_of(class_file)
     if learned is not None:
         caster = replace(caster, known_spells=caster.known_spells | {learned})
@@ -666,6 +668,10 @@ def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: Target
         shown = periodic_tick_readout(records, rank_id, caster, readout, indexes[0])
     modifiers = for_school(aura_modifiers(records, auras, class_file['level']), school_mask)
     rolls = {} if kind in WEAPON_KINDS else rolled_values(records, rank_id, caster, shown, indexes)
+    for index, amount in (flat or {}).items():
+        if index not in rolls:
+            raise Unmodelled(f'the block value term of {rank_id} effect {index} needs its rolled values')
+        rolls[index] = tuple(value + amount for value in rolls[index])
     percent_before_flat = rank_id in class_file.get('weapon_percent_before_flat', ())
     attacker = weapon_attacker(records, hit_spell, caster)
     weapon_part = composite if learned is None else learned_weapon_part(full_readout, facts.effects, attacker,
@@ -674,6 +680,20 @@ def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: Target
                          aura_names=facts.aura_names, modifiers=modifiers, ticks=ticks, rolls=rolls,
                          triggered=triggered, records=records, rank_id=rank_id,
                          percent_before_flat=percent_before_flat, weapon_part=weapon_part)
+    losses = {index: loss for index in indexes
+              if kind in SCRIPT_HIT_KINDS and (loss := per_level_fraction(records, rank_id, index, caster.level))}
+    if losses:
+        try:
+            engine = expected_hit(shown, facts.effects, attacker, weapon_profile(class_file), mitigation,
+                                  aura_names=facts.aura_names, modifiers=modifiers, ticks=ticks,
+                                  rolls=engine_rolls(shown, indexes, rolls, losses), triggered=triggered,
+                                  records=records, rank_id=rank_id, percent_before_flat=percent_before_flat,
+                                  weapon_part=weapon_part)
+        except Unmodelled:
+            return RankHit(model, readout, facts, school_mask, indexes, duration, hit_spell)
+        terms = ', '.join(f'effect {index} loses {loss:.6g}' for index, loss in losses.items())
+        model = replace(model, engine=replace(engine, displayed=model.displayed),
+                        engine_rule=f'{PER_LEVEL_ENGINE_RULE}: {terms}')
     return RankHit(model, readout, facts, school_mask, indexes, duration, hit_spell)
 
 
@@ -1007,7 +1027,9 @@ def measured_hit_model(class_file: dict, expectation: Expectation, measured: Map
                                     expectation.model.get('value_rolls', False))
         factor = expectation.model.get('gate_multiplier', 1.0)
         return scripted if factor == 1.0 else replace(scripted, mean=scripted.mean * factor)
-    model = rank_hit(class_file, expectation.rank_id, caster, target, auras, expectation.model.get('learned')).model
+    flat = block_value_terms(class_file, expectation.spell_id, measured)
+    model = rank_hit(class_file, expectation.rank_id, caster, target, auras, expectation.model.get('learned'),
+                     flat=flat).model
     performed = expectation.model.get('part_casts', 1)
     multiplier = self_stack_multiplier(class_file, expectation.rank_id, performed) \
         * expectation.model.get('gate_multiplier', 1.0)
@@ -1188,7 +1210,7 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
     label = f'{rank_id} hit_mean' if label is None else label
     name = f'Conformance hit {class_file["name"]} {spell.name} {rank_id}'
     contract = 'Mean non-critical hit of the highest rank against its tooltip, its known modifiers and mitigation.'
-    learn = [{'action': 'learn', 'actor': CASTER, 'spell': rank_id}]
+    learn = block_value_steps(class_file, spell.spell_id) + [{'action': 'learn', 'actor': CASTER, 'spell': rank_id}]
     if gate is not None:
         learn = learn + [{'action': 'learn', 'actor': CASTER, 'spell': gate[2]}]
     if learned is not None:
