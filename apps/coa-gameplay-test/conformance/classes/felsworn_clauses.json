@@ -4156,11 +4156,8 @@
   {
     "spell": 800355,
     "clause": "30 Energy, plus 30 per sec",
-    "labels": [
-      "800355 behaviour_metric_delta free_3900",
-      "800355 behaviour_metric_delta free_4100"
-    ],
+    "labels": [],
     "kind": "claim",
-    "reason": "Cost line of the spell card, not the Description (lab render render2/answers/spell-800355.json: '30 Energy, plus 30 per sec'; Spell.dbc ManaCost 30, ManaPerSecond 30). Owner ruling O-24: the cost is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted (Felsworn ADR 0014). Counted on the measured drain: from 100 Energy with no power hold the channel aura is present at 3900 ms and gone at 4100 ms, the end of the fourth 30 Energy drain derived from the DBC and 10 Energy per second regeneration. No other ledger row represents a cost line (grep of every class ledger), so this row is new at the end of the ledger."
+    "reason": "HELD (review fw-rf500610c I-1): the free_3900/free_4100 bracket admits an up-front cost 21-40 and a drain 28-33/s, so neither 10% error is excluded; needs direct Energy reads (up-front and per second). Cost line of the spell card, not the Description (lab render render2/answers/spell-800355.json: '30 Energy, plus 30 per sec'; Spell.dbc ManaCost 30, ManaPerSecond 30). Owner ruling O-24: the cost is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted (Felsworn ADR 0014). Counted on the measured drain: from 100 Energy with no power hold the channel aura is present at 3900 ms and gone at 4100 ms, the end of the fourth 30 Energy drain derived from the DBC and 10 Energy per second regeneration. No other ledger row represents a cost line (grep of every class ledger), so this row is new at the end of the ledger."
   }
 ]
