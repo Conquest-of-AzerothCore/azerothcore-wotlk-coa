@@ -2101,6 +2101,21 @@
       "observe_source": "807421 Effect[2] aura 107 ADD_FLAT_MODIFIER BasePoints 999 + 1 = 1000 ms ($/1000;807421s3 = 1 s); AscensionFelswornSummons.cpp:22 adds 1000 ms when Inner Demon 804216 is on the caster. Inner Demon is a real precondition: Burning Hatred 805239 gives 6 Felfury, then Inner Demon 804216 (CasterAuraSpell 800058) is cast; the aura lasts 5000 ms per Felfury, so it covers the 16 s window. With Inner Demon the Infernal is gone 16100 ms after the cast: the lifetime is below 16100 ms, so 16000 +- 100 ms with the read above. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
     },
     {
+      "spell": 300480,
+      "name": "Infernal Summoner (Infernal swing reset rate)",
+      "kind": "swing_reset_rate",
+      "quote": "Direct damage dealt now has a $h% chance to reset the cooldown of Infernal.",
+      "talent": 300480,
+      "reset_spell": 560284,
+      "chance_pct": 5,
+      "control_ms": 60000,
+      "attack_ms": 3400000,
+      "parts": 6,
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "observe_source": "300480 ProcChance 5 ($h, server DBC set). spell_proc 300480 has ProcFlags 1048575 and Chance 100 (rev_20260909_05_felsworn_completion.sql:9, restored to 100 by rev_20261003_10_coa_script_rolled_proc_chance.sql), so every outgoing non-periodic damaging hit reaches the event script: Check case 300480 is !periodic && Chance(player, 300480) (AscensionFelswornEvents.cpp:54-55, a 5% roll on the DBC ProcChance, AscensionFelsworn.cpp:231-239), and Proc case 300480 calls Reduce(player, 560284, INT32_MAX) (AscensionFelswornEvents.cpp:145-146), which calls Player::RemoveSpellCooldown(id, true) for every known Infernal rank (AscensionFelsworn.cpp:241-249) and so sends one SMSG_CLEAR_COOLDOWN of 560284 whether a cooldown ran or not (Player.cpp:3953-3959). Infernal 560284 is learned and read with server_packets opcode 0x1DE row 560284. A landed auto-attack hit is direct damage (white swings carry no spell, so Derived is false): trials are the landed damaging auto-attack hits of the 2027 main hand (2300 ms; the generated scenario lists that one weapon speed, a bound of 1478 swings per part). Control: 60 s of swings before 300480 is learned: no packet. Treatment: 300480 learned (mentor D-67), 6 pooled parts of 3400 s (8868 swings at most, for at least 5755 landed hits), judged with residual_target 0.001 per pair and min_detectable 4 points (5755 landed hits, the class's residual sizing). Reference search 2026-11-23: coa-history spell 300480: 0 events in 186 logs (the reset casts nothing); Infernal 560284: 156 SPELL_CAST_SUCCESS by players in 6 logs, not usable as a rate (the talent of each caster is unknown); nothing found beyond the tooltip and the DBC."
+    },
+    {
       "spell": 800355,
       "name": "Sargeras Embrace (no damage before the end, 5100 ms)",
       "kind": "metric_delta",

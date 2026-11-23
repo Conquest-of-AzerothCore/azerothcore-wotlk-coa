@@ -347,7 +347,8 @@
     "spell": 300480,
     "clause": "Direct damage dealt now has a $h% chance to reset the cooldown of Infernal.",
     "labels": [
-      "300480 effect_value #0"
+      "300480 effect_value #0",
+      "300480 behaviour_metric_delta swing_reset_rate"
     ],
     "kind": "claim",
     "tool_gap": {
