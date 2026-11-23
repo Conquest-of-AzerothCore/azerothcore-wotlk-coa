@@ -1006,7 +1006,27 @@
         520592
       ],
       "count_primary": false,
-      "observe_source": "520592 Effect[0] SPELLMOD_JUMP_TARGETS +5 on the class mask of Manaburn; the number of dummies struck by Manaburn 805248 (spell_damage_count per dummy) is read in a control arm without 520592 (the primary only) and a treatment arm with it learned: the primary and exactly 4 additional ones (more candidates are offered inside the radius, so a fifth strike would show), on Scarlet Magi 1832 (a level 56-57 mana-using mage, unit_class 8: Manaburn damage equals the mana drained, so a creature with no mana would never be struck), with one dummy outside the jump radius never struck. Reference search 2026-11-23: coa-history spell 520592 and 805248: 0 events in 186 logs (positive control 801904: 21 casts); the bindmysoul snapshot repeats the tooltip.",
+      "observe_source": "520592 Effect[0] SPELLMOD_JUMP_TARGETS +5 on the class mask of Manaburn; the number of dummies struck by Manaburn 805248 (spell_damage_count per dummy) is read with 520592 learned: the primary and exactly 4 additional ones (the control entry manaburn_targets_control casts the same Manaburn with 520592 never learned and expects no additional dummy struck) (more candidates are offered inside the radius, so a fifth strike would show), on Scarlet Magi 1832 (a level 56-57 mana-using mage, unit_class 8: Manaburn damage equals the mana drained, so a creature with no mana would never be struck), with one dummy outside the jump radius never struck. Reference search 2026-11-23: coa-history spell 520592 and 805248: 0 events in 186 logs (positive control 801904: 21 casts); the bindmysoul snapshot repeats the tooltip.",
+      "dummy_entry": 1832
+    },
+    {
+      "spell": 520592,
+      "name": "Illidan's Favor (control: Manaburn without 520592 strikes no additional enemy)",
+      "kind": "fixed_count",
+      "variant": "manaburn_targets_control",
+      "label_suffix": "manaburn_targets_control",
+      "quote": "your Manaburn now strikes 4 additional enemies near the primary target",
+      "expected": 0,
+      "radius": 8,
+      "far_dummy": true,
+      "metric": "spell_damage_count",
+      "radius_reason": "Manaburn 805248 Effect[0] target 6 (TARGET_UNIT_TARGET_ENEMY), no ChainTarget in the DBC: without 520592 (never learned in this scenario) the cast strikes the primary only, so the dummy standing inside the jump radius of the primary (10 yd for a magic spell, Spell::SearchChainTargets, Spell.cpp:2218-2221) and the one beyond it are never struck",
+      "cast_spell": 805248,
+      "target_rank": 805248,
+      "repeats": 3,
+      "learn": [],
+      "count_primary": false,
+      "observe_source": "Control arm of manaburn_targets on the same build: Manaburn 805248 cast at the primary with 520592 not learned, on Scarlet Magi 1832 (mana-using, so a strike would land), counts the additional dummies struck: 0, so the 4 additional strikes of the treatment entry come from 520592 (Effect[0] SPELLMOD_JUMP_TARGETS) and not from the spell or a script. Reference search 2026-11-23: coa-history spell 520592 and 805248: 0 events in 186 logs; nothing else found.",
       "dummy_entry": 1832
     },
     {

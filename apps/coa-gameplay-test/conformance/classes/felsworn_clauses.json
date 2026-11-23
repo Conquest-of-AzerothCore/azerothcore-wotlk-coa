@@ -575,7 +575,8 @@
       {
         "claim": "your Manaburn now strikes 4 additional enemies near the primary target",
         "labels": [
-          "520592 manaburn_targets behaviour_fixed_count"
+          "520592 manaburn_targets behaviour_fixed_count",
+          "520592 manaburn_targets_control behaviour_fixed_count"
         ]
       }
     ]
