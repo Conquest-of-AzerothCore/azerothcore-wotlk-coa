@@ -189,8 +189,8 @@ class felsworn_casts : public AllSpellScript
                         aura->Remove();
                 }
         float factor = 1;
-        if (info->Id == 803715 && player->HasAura(805236) && hit.crit)
-            factor *= 1.0f + .03f * std::min<uint64>(10, spell->GetScriptValue(800206));
+        if (info->Id == 803715 && player->HasAura(805236) && spell->GetScriptValue(804216) && hit.crit)
+            factor *= 1.0f + Amount(807427) / 100.0f * std::min<uint64>(10, spell->GetScriptValue(800206));
         if (Named(info, 801312))
         {
             uint32 index = 0;
