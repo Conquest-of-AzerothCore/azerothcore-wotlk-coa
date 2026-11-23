@@ -51,3 +51,17 @@ Python-only options in `metric_delta_options`, opt-in:
 - Seeded tests for each option; the C++ reads need the G-39 note in the PR.
 - A cast refused by design (Calm on a player refuses its Effect[0] trigger 807778, reason 27) cannot use
   `void_on_cast_failure`; `enemy_shooter` states it in `native_refusals` instead.
+
+## Addendum (2026-11-23): `enemy_shooter.attack_time_ms`
+
+Context: the Sun Cleric Calm entry `shooter_ranged` plans exactly 3 Auto Shots in its 6000 ms control window, a count
+that holds only for a ranged attack time of 2434.78 ms (2800 ms crossbow, Auto Shot 75's +15% ranged speed, owner
+ruling O-21). A different shooter (another haste, another weapon) would change the count and make the entry read an
+alert that is not a defect of the spell.
+
+Decision: `enemy_shooter` takes an optional `attack_time_ms` `{hand, value, tolerance}`. The scenario reads
+`attack_time_ms` of `hand` on the enemy before the control window; a read outside `value` +- `tolerance`, or no read,
+makes the trial `unmeasured`. It is a void guard only: no counted label, never `ok` or `alert`. An entry without the key
+generates the same scenario and model as before, so the finished classes regenerate byte-identical.
+
+Consequences: a seeded test and a mutant (a different attack time or no read gives `unmeasured`, never `ok`) cover it.
