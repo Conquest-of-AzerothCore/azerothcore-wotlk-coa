@@ -9,5 +9,5 @@ scenario is unchanged.
 Named points: `setup_cast_target(spec, value, index)` (new, read where the setup cast step is built), `fixtures`
 (contract sentence).
 
-Felsworn: Demonic Embrace 520257 `below_six` (Burning Hatred 805239 at the caster, Sargeron Smite 802060 and Fel Torpedo
-500610 at the dummy: five Felfury).
+Felsworn: Demonic Embrace 520257 `below_six` (Burning Hatred 805239 at the caster, Sargeron Smite 802060 and Bane of Fire
+707901 at the dummy: five Felfury).

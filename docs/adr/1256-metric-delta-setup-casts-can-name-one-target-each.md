@@ -9,7 +9,7 @@
 Demonic Embrace 520257 restores Energy when Inner Demon is cast "with at least 6 Felfury". The below-six arm needs a
 real Felfury count under six before the Inner Demon cast: the harness sets the Inner Demon caster-aura requirement
 800058 to one stack right before the setup casts, so an aura fixture cannot hold five stacks, and the count must be
-built by casts: Burning Hatred at the caster (six), Sargeron Smite at the dummy (minus two), Fel Torpedo at the dummy
+built by casts: Burning Hatred at the caster (six), Sargeron Smite at the dummy (minus two), Bane of Fire at the dummy
 (plus one). `setup_target` names one target for every setup cast.
 
 ## Options

@@ -13000,7 +13000,7 @@
       "setup_casts": [
         805239,
         802060,
-        500610
+        707901
       ],
       "setup_cast_targets": [
         "caster",
@@ -13023,7 +13023,7 @@
           "caster"
         ]
       ],
-      "observe_source": "Below-six arm of energy_at_six (50 Energy at six Felfury). The caster builds a real count of 5 Felfury 800058 (StackAmount 6) before each Inner Demon 804216 cast: Burning Hatred 805239 at the caster ('instantly generating 6 Felfury'), Sargeron Smite 802060 at the dummy ('Consumes 2 Felfury'), Fel Torpedo 500610 at the dummy ('Generates 1 Felfury', learned for the scenario); the per-cast targets are the setup_cast_targets option (ADR 1256) and the count is read at exactly 5 after the last setup cast of each phase (after_setup_stacks, ADR 1257), a mismatch voids the run. Inner Demon's own aura from the before phase is removed at the start of the after phase (after_auras), so both arms cast it the same way. The handler casts 520258 only when the Felfury consumed is at least 6 (AscensionFelswornAbilities.cpp:265-266): the energize events of 520258 on the caster are 0 before the learn of 520257 and 0 after it at five, where a threshold of 5 would restore 50. Reference search: as energy_at_six (2026-11-23)."
+      "observe_source": "Below-six arm of energy_at_six (50 Energy at six Felfury). The caster builds a real count of 5 Felfury 800058 (StackAmount 6) before each Inner Demon 804216 cast: Burning Hatred 805239 at the caster ('instantly generating 6 Felfury'), Sargeron Smite 802060 at the dummy ('Consumes 2 Felfury'), Bane of Fire 707901 at the dummy (a Bane hit on an enemy gives Gain(player, 1), AscensionFelswornAbilities.cpp:329-333; Fel Torpedo was dropped because its dash carried the caster past the dummy and the next Sargeron Smite was refused with SPELL_FAILED_UNIT_NOT_INFRONT, pair fw-tg1 proveP1); the per-cast targets are the setup_cast_targets option (ADR 1256) and the count is read at exactly 5 after the last setup cast of each phase (after_setup_stacks, ADR 1257), a mismatch voids the run. Inner Demon's own aura from the before phase is removed at the start of the after phase (after_auras), so both arms cast it the same way. The handler casts 520258 only when the Felfury consumed is at least 6 (AscensionFelswornAbilities.cpp:265-266): the energize events of 520258 on the caster are 0 before the learn of 520257 and 0 after it at five, where a threshold of 5 would restore 50. Reference search: as energy_at_six (2026-11-23)."
     }
   ],
   "player_observations": [],
