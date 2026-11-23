@@ -1,4 +1,4 @@
-# 0007. Fel Haze ignores all enemy armor
+# 0008. Fel Haze ignores all enemy armor
 
 - Status: accepted (owner ruling O-13, 2026-11-23)
 - Date: 2026-11-23
