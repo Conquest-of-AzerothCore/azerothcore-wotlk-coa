@@ -551,7 +551,8 @@
           "520240 cost_gate 805239 cd_805239 without",
           "520240 cost_gate 805239 cd_805239 with",
           "520240 cost_gate 805239 cd_805239 beyond"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "Hateforged Barrier cooldown reduced by $/1000;520830S1 sec",
@@ -559,7 +560,8 @@
           "520240 cost_gate 705129 cd_705129 without",
           "520240 cost_gate 705129 cd_705129 with",
           "520240 cost_gate 705129 cd_705129 beyond"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "Demonic Will cooldown reduced by $/1000;520830S1 sec",
@@ -567,12 +569,14 @@
           "520240 cost_gate 800209 cd_800209 without",
           "520240 cost_gate 800209 cd_800209 with",
           "520240 cost_gate 800209 cd_800209 beyond"
-        ]
+        ],
+        "evidence": "behaviour"
       }
     ],
     "kind": "claim",
-    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068",
-    "reason": "Behaviour route (review fw-r2b I-2: cooldown_ms is a readback): the gated spell is primed, Sargeron Smite 802060 is cast 2000 ms later, and the gated spell is attempted at its cooldown less 500 ms with a 40 ms margin on each side: refused without the talent (control), through with it, refused 40 ms earlier. A cut of 450 or 550 ms (10% off) lands on the wrong side of the 40 ms margins. Pair prove_m1, runs 20261123-162432 / 20261123-162739, build cc3e6ebbb4eb, server commit 250cee3eb11f, no flip."
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "reason": "Pair 20261123-220940 / 20261123-221022 (prove3), build c934c0777690, server commit 9e1ffa1b799e, no flip. Behaviour route on the cooldown cut: the gated spell is attempted at its cooldown less 500 ms with a 25 ms margin on each side (refused without the talent as control, through with it, refused 25 ms earlier); a cut of 450 or 550 ms moves the opening by 50 ms and lands on the wrong side of both margins.",
+    "evidence": "behaviour"
   },
   {
     "spell": 520244,
@@ -591,7 +595,10 @@
       "520246 behaviour_metric_delta crit_gain",
       "520246 behaviour_metric_delta control_no_crit"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "reason": "Pair 20261123-220940 / 20261123-221022 (prove3), build c934c0777690, server commit 9e1ffa1b799e, no flip. crit_gain: forced critical Fel Fireball gains 1 Felfury with the passive (1 -> 2); control_no_crit: Reg's Test Aura 984954 on the caster removes spell critical strikes in both phases, so the same cast gains none (1 -> 1). The first design assumed a crit chance of 0 and read a critical strike in one run (fw-b3g1c)."
   },
   {
     "spell": 520249,
@@ -680,7 +687,8 @@
         "claim": "Removes the Energy cost of your Felbane",
         "labels": [
           "520592 behaviour_metric_delta felbane_cost"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "and Manaburn",
@@ -691,9 +699,11 @@
         "labels": [
           "520592 manaburn_targets behaviour_fixed_count",
           "520592 manaburn_targets_control behaviour_fixed_count"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 520805,
@@ -2033,7 +2043,10 @@
       "705122 behaviour_hit_ratio physical_taken",
       "705122 behaviour_metric_delta aura_amount"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "reason": "Pair 20261123-220940 / 20261123-221022 (prove3), build c934c0777690, server commit 9e1ffa1b799e, no flip. hit_ratio redesigned: Inner Demon is recast before every one of the 60 trials, so the 5 s aura never lapses inside the arm (the first pair let it expire after 4 strikes); damage ratio 0.95 within the band, with the aura amount read as the diagnostic."
   },
   {
     "spell": 705123,
@@ -2078,7 +2091,8 @@
           "705125 cost_gate 805248 manaburn_cd without",
           "705125 cost_gate 805248 manaburn_cd with",
           "705125 cost_gate 805248 manaburn_cd beyond"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "and Illidan's Guile by $s1%.",
@@ -2086,9 +2100,13 @@
           "705125 cost_gate 806109 illidans_guile_cd without",
           "705125 cost_gate 806109 illidans_guile_cd with",
           "705125 cost_gate 806109 illidans_guile_cd beyond"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "reason": "Pair 20261123-220940 / 20261123-221022 (prove3), build c934c0777690, server commit 9e1ffa1b799e, no flip. Cooldown cut of Mana Burn (20000 ms, -20%): attempted at 16000 ms plus and minus 300 ms (refused without, through with, refused 300 ms earlier); a cut of 3600 or 4400 ms falls outside the 300 ms margins on the wrong side (10% of 4000 is 400 ms, so the margin is below it)."
   },
   {
     "spell": 705127,
@@ -2824,7 +2842,9 @@
       "800220 cost_gate 805243 whipcrack_cd with",
       "800220 cost_gate 805243 whipcrack_cd beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 800220,
@@ -2839,9 +2859,11 @@
         "claim": "its radius is increased by $s2 yds.",
         "labels": [
           "800220 behaviour_metric_delta whipcrack_radius"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 800225,
@@ -3100,7 +3122,9 @@
     "labels": [
       "803475 behaviour_metric_delta consumes"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 803475,
@@ -3118,7 +3142,9 @@
       "803475 behaviour_metric_delta extend_absent"
     ],
     "kind": "claim",
-    "reason": "One extension cast per Assault is proven (extend_casts: 803089 cast 0 -> 1) and none without Inner Demon (extend_absent); the 3000 ms of the extension is the DBC value of 803089 Effect[0] (2999 + 1). The duration read of Inner Demon after Assault gained 28009 ms in both runs of the pair 20261123-220340 / -220424 (4991 -> 33000), 25000 ms more than the extension: another source of Inner Demon duration acts in that cast (not isolated, no control spender run), so the 3 s itself is not counted as a duration; the figure is an alert lead in the report."
+    "reason": "One extension cast per Assault is proven (extend_casts: 803089 cast 0 -> 1) and none without Inner Demon (extend_absent); the 3000 ms of the extension is the DBC value of 803089 Effect[0] (2999 + 1). The duration read of Inner Demon after Assault gained 28009 ms in both runs of the pair 20261123-220340 / -220424 (4991 -> 33000), 25000 ms more than the extension: another source of Inner Demon duration acts in that cast (not isolated, no control spender run), so the 3 s itself is not counted as a duration; the figure is an alert lead in the report.",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 802058,
@@ -3364,15 +3390,19 @@
         "claim": "guaranteeing your next direct instance of damage to critically strike",
         "labels": [
           "803904 behaviour_metric_delta next_crit"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "but causing it to consume 5% of your maximum health.",
         "labels": [
           "803904 behaviour_metric_delta health_cost"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 803904,
