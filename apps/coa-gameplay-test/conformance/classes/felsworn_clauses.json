@@ -3034,7 +3034,16 @@
         "evidence": "behaviour"
       }
     ],
-    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "tool_gap": {
+      "reason": "'and it now affects all allies' needs more allies than Infernal Whipcrack 805243's 8-target cap (MaxAffectedTargets 8, $i). With 800220 the class script adds every friendly unit within the radius (AscensionFelswornAbilities.cpp:149-154), but 805243 carries SPELL_ATTR3_ONLY_ON_PLAYER (AttributesEx3 256, Spell.dbc), so friendly creatures are refused targets: a friendly-creature arm (fw-l2, ten creatures of entry 631, faction 35) read the aura on none of them in both runs of prove3 (20261123-230759 / -230830), an incorrect fixture and not a defect. The arm needs at least nine ally players beside the caster (scenario schema 2, run.py MAX_PLAYERS 25), while metric_delta ally_arm offers 1 to 7 allies on schema 1 (ally_arm.py ALLY_IDS); the read would sum the aura over the caster and the allies: 8 of 10 without 800220 (the stock cap) and 10 with it. That ally_arm extension is a tool change not built in this round.",
+      "attempts": [
+        {
+          "agent": "fw-l2",
+          "report": ".agents/plans/fw-l2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 800225,
