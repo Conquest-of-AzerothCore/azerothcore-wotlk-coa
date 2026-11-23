@@ -218,6 +218,84 @@
       },
       "spell_proc": {},
       "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 800214,
+      "name": "Malice of Gul'dan",
+      "tooltip": "Direct critical strikes now have a $h% chance to trigger a |cffffffffFelstrike|r and generate a |cffffffffFragment of Malice|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 801312
+      },
+      "trigger_text": "Direct critical strikes",
+      "critical_trials": {
+        "rating": "spell",
+        "source": "AscensionFelswornEvents.cpp:97-98: case 800214: return crit && !periodic && Chance(player, id); a non-critical direct hit never rolls"
+      },
+      "event_metric": "spell_cast_count",
+      "proc_spell": 800239,
+      "proc_spell_source": "Effect[0] of 800214 is aura 42 on 800239; the handler casts Fragment of Malice 800239 on the caster with Felstrike 802678 on the target (AscensionFelswornEvents.cpp:227-229)",
+      "events_per_proc": 1,
+      "handler": "aura_ascension_felsworn_event (spell_script_names row of 800214, rev_20260909_05_felsworn_completion.sql:193-194): Check case 800214 (AscensionFelswornEvents.cpp:97-98) passes an outgoing direct critical damage event that is not Derived and rolls Chance(player, 800214) on the raw ProcChance 60 (AscensionFelsworn.cpp:231-239); spell_proc Chance 100 (rev_20261003_10_coa_script_rolled_proc_chance.sql:7-11) so the script's roll is the only probability; Proc (AscensionFelswornEvents.cpp:227-229) casts 802678 on the target and 800239 on the caster.",
+      "dbc": {
+        "800214": {
+          "ProcChance": 60,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {
+        "800214": {
+          "ProcFlags": 1048575,
+          "Chance": 100,
+          "ProcsPerMinute": 0,
+          "Cooldown": 0,
+          "Charges": 0
+        }
+      },
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 800214,
+      "name": "Malice of Gul'dan",
+      "tooltip": "Direct critical strikes now have a $h% chance to trigger a |cffffffffFelstrike|r and generate a |cffffffffFragment of Malice|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 801312
+      },
+      "trigger_text": "Direct critical strikes",
+      "critical_trials": {
+        "rating": "spell",
+        "source": "AscensionFelswornEvents.cpp:97-98: case 800214: return crit && !periodic && Chance(player, id); a non-critical direct hit never rolls"
+      },
+      "event_metric": "spell_cast_count",
+      "proc_spell": 802678,
+      "proc_spell_source": "Effect[0] of 800214 is aura 42 on 800239; the same Proc branch casts Felstrike 802678 on the target with Fragment of Malice 800239 on the caster (AscensionFelswornEvents.cpp:227-229), so the Felstrike casts are counted as their own proc events",
+      "events_per_proc": 1,
+      "handler": "aura_ascension_felsworn_event (spell_script_names row of 800214, rev_20260909_05_felsworn_completion.sql:193-194): Check case 800214 (AscensionFelswornEvents.cpp:97-98) passes an outgoing direct critical damage event that is not Derived and rolls Chance(player, 800214) on the raw ProcChance 60 (AscensionFelsworn.cpp:231-239); spell_proc Chance 100 (rev_20261003_10_coa_script_rolled_proc_chance.sql:7-11) so the script's roll is the only probability; Proc (AscensionFelswornEvents.cpp:227-229) casts 802678 on the target and 800239 on the caster.",
+      "dbc": {
+        "800214": {
+          "ProcChance": 60,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {
+        "800214": {
+          "ProcFlags": 1048575,
+          "Chance": 100,
+          "ProcsPerMinute": 0,
+          "Cooldown": 0,
+          "Charges": 0
+        }
+      },
+      "internal_cooldown_ms": 0
     }
   ],
   "triggers": [
@@ -4219,6 +4297,165 @@
       "expire_ms": 500,
       "observe_source": "705109 Effect[0] aura 290 +2 ($s1) and Effect[1] aura 169 SPELL_AURA_MOD_CRIT_PERCENT_VERSUS (MiscValue 4, Demon), BasePoints 2 + 1 = 3 ($s2 = 3), which the stock engine reads as critical damage; the server moves it to aura 112 with the creature-type crit selector ASCENSION_CREATURE_GLOBAL_CRIT, MiscValueB 4 (Demon), and its own DBC base points (AscensionFelswornContracts.cpp:97-102, Felsworn ADR 0005). The caster's melee critical strike chance against the dummy (Unit::GetUnitCriticalChance, a computed chance, no roll) is read before (control: 705109 not learned) and after a real learn, against the stock dummy, which is not a Demon: 2 points, the control that the additional 3 points need the creature type. Reference search 2026-11-23: coa-history spell 705109: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot (fetched 2026-07-22) and the coabuildhub spells_master_index.json both render 'Increases your critical strike chance by 2% and an additional 3% against Demons.', equal to the DBC. The melee crit field is refreshed (Player::UpdateCritPercentage) in each phase before the reading (crit_field_refresh): the first run read 0 before the learn because the field was unset since login, not a floor.",
       "crit_field_refresh": true
+    },
+    {
+      "spell": 802678,
+      "name": "Malice of Gul'dan (Felstrike stacks cap at 3)",
+      "kind": "metric_delta",
+      "variant": "felstrike_stack_cap",
+      "label_suffix": "felstrike_stack_cap",
+      "quote": "stacking $u times.",
+      "trigger_spell": 803475,
+      "gate_spell": 800214,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        803475,
+        803475,
+        803475,
+        803475
+      ],
+      "setup_wait_ms": 1100,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 802678
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "stack_feed": {
+        "aura": 802678,
+        "cap": 3,
+        "window_ms": 6000,
+        "trials": 6,
+        "refeed_auras": [
+          [
+            800058,
+            6
+          ]
+        ],
+        "source": "802678 StackAmount 3, DurationIndex 32 = 6000 ms"
+      },
+      "observe_source": "Felstrike 802678 StackAmount 3 ($u of the Felstrike description that Malice of Gul'dan 800214 includes through @s:802678:0@), DurationIndex 32 = 6000 ms (SpellDuration.dbc row 32). The Malice handler (AscensionFelswornEvents.cpp:97-98, :227-229) casts 802678 on the target after an outgoing direct (not periodic) critical damage event that passes Chance() on the raw ProcChance 60 (AscensionFelsworn.cpp:231-239), which no spell modifier forces; a stack or refresh of the same caster's 802678 goes through ModStackAmount then OnAuraApply (Unit.cpp:5465-5466). Feed: Azzinoth's Assault 803475 (the level 60 rank, GCD 1000 ms, needs 803468 and 2 Felfury per cast) at the dummy every 1100 ms; its two strikes 520262 and 572585 (melee, not Derived, AscensionFelsworn.cpp:61-69) are direct hits, made critical by the melee crit rating fixture; the class file's hit and expertise ratings remove misses, dodges and parries. Fixtures named as preconditions: Felfury 800058 x6 and 803468 set before the casts and Felfury set to 6 again after every feed cast (refeed). Control: the same five casts before 800214 is learned read 0 stacks. Treatment: 6 trials of five casts each (stack_feed), each valid with at least 4 counted applications whose poll spans stay under 6000 ms; a valid trial passes at exactly 3 stacks, never 4. Design arithmetic only (not the residual): 10 strikes at 60% leave fewer than 4 applications in 5.5% of trials if every strike crits and lands; measured: pair prove1 (build 100257c26805, 2026-11-23) v = 0/4 in both runs; pair fw-tgs2 prove (server c3bd6628a143, 2026-11-23) v = 0/4 and 1/4, so the larger v = 1/4 sizes N = 6: (1/4)^6 = 0.024%, at most 0.05%; 1.40 and 1.00, then 1.15 and 1.33 applications per feed cast in the valid trials (per cast, not per hit: the scenario reads no hit count). Reference search 2026-11-23 (fw-b1b): coa-history 802678 16516 periodic damage events, nothing for the stack count."
+    },
+    {
+      "spell": 572889,
+      "name": "Oblivion (stacks cap at 10)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "quote": "stacking $705148u times.",
+      "trigger_spell": 572889,
+      "gate_spell": 572889,
+      "target": "dummy",
+      "attack_swings": 20,
+      "force_crit": "melee",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 705148
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "705148 StackAmount 10 ($705148u), DurationIndex 31 = 8000 ms (SpellDuration.dbc row 31). The Felsworn event handler (AscensionFelswornEvents.cpp:93-94, :217-218) casts 705148 on the caster for every outgoing critical damage event that is not Derived (AscensionFelswornEvents.cpp:48). The caster dual wields the Slayer pair (2027 in both hands, 2300 ms) and auto-attacks the dummy for 20 swing intervals with the melee crit rating fixture and the class file's hit and expertise ratings: without 572889 (control) 0 stacks; with it learned every landed critical swing adds a stack and refreshes the 8000 ms duration (a swing every 2300 ms or less), so the stacks read right after the last swing must be 10 and not 11 or more."
+    },
+    {
+      "spell": 705145,
+      "name": "Nether Champion (stacks cap at 5)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "quote": "stacking $705146u times.",
+      "trigger_spell": 803475,
+      "gate_spell": 705145,
+      "learn": [
+        92087
+      ],
+      "target": "dummy",
+      "setup_casts": [
+        803475,
+        803475
+      ],
+      "setup_wait_ms": 1100,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 705146
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "705146 StackAmount 5 ($705146u), DurationIndex 18 = 20000 ms. Dancing Blades 92087 (learned in both phases) passes every critical melee ability hit that is not periodic (AscensionFelswornEvents.cpp:51-52), and its Proc casts 705146 on the caster when 705145 is known (AscensionFelswornEvents.cpp:141-142). Three Azzinoth's Assault 803475 casts at the dummy 1100 ms apart (the level 60 rank, its strikes 520262 and 572585 are melee hits, at least 6 landed critical hits under the melee crit rating fixture and the class file's hit and expertise ratings) against a cap of 5: without 705145 (control) 0 stacks, with it learned 5 and not 6. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before the casts (803475 needs 803468 and consumes 2 Felfury per cast; 3 casts use the 6), as in the Fel Blades 300484 entry."
+    },
+    {
+      "spell": 802058,
+      "name": "Reckoning (stacks cap at 4)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "quote": "stacking $524632u times.",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "setup_casts": [
+        801312,
+        801312,
+        801312,
+        801312
+      ],
+      "setup_wait_ms": 2000,
+      "after_gate_cast": true,
+      "after_start_reads": [
+        {
+          "spell": 802058,
+          "expected": 1
+        }
+      ],
+      "void_on_cast_failure": true,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 524632
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "observe_source": "524632 StackAmount 4 ($524632u), DurationIndex 8 = 15000 ms. The Felsworn cast hook (AscensionFelswornAbilities.cpp:330-333) casts 524632 on the caster for every damaging Fel Fireball 801312 while the caster has the Reckoning aura 802058 (DurationIndex 1 = 10000 ms). Five Fel Fireball casts at the dummy 2000 ms apart (a 1500 ms cast without Reckoning, the class file's spell hit rating): before (control) no Reckoning aura and 0 stacks; after, a real cast of Reckoning 802058 at the caster at the start of the phase (after_gate_cast; CastingTimeIndex 1 and StartRecoveryTime 0, so the Fel Fireballs that follow meet no global cooldown, and under Reckoning they are instant), its aura read present right after the cast (after_start_reads, else unmeasured) and any refused cast unmeasured (void_on_cast_failure); the learn of 802058 alone applies nothing. The phases are 2000 ms apart (expire_ms) so the before phase's last 1500 ms Fel Fireball has finished: at 500 ms the pair fw-tgs2 prove refused the Reckoning cast and the next Fel Fireball with SPELL_FAILED_SPELL_IN_PROGRESS (105), unmeasured in both runs. The five hits within its 10000 ms give 5 applications against a cap of 4: the stacks read 4 and not 5."
     }
   ],
   "player_observations": [],

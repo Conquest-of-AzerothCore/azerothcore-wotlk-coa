@@ -1283,7 +1283,8 @@
     "spell": 572889,
     "clause": "stacking $705148u times.",
     "labels": [
-      "572889 max_stacks 705148 #2"
+      "572889 max_stacks 705148 #2",
+      "572889 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -1847,7 +1848,8 @@
     "spell": 705145,
     "clause": "stacking $705146u times.",
     "labels": [
-      "705145 max_stacks 705146 #2"
+      "705145 max_stacks 705146 #2",
+      "705145 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -2215,10 +2217,42 @@
   {
     "spell": 800214,
     "clause": "Direct critical strikes now have a $h% chance to trigger a Felstrike and generate a Fragment of Malice.",
-    "labels": [
-      "800214 effect_value #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Direct critical strikes",
+        "labels": []
+      },
+      {
+        "claim": "now have a $h% chance",
+        "labels": [
+          "800214 proc_rate 800239",
+          "800214 proc_rate 802678"
+        ]
+      },
+      {
+        "claim": "to trigger a Felstrike",
+        "labels": [
+          "800214 proc_rate 802678"
+        ]
+      },
+      {
+        "claim": "and generate a Fragment of Malice",
+        "labels": [
+          "800214 proc_rate 800239"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "fw-tgs2 (review I3): the clause declares its claims. The label '800214 effect_value #0' is dropped: $h is a chance, not a value (guide 9.4, 'A $h chance cannot be measured as a value'; Necromancer 300235 C8 precedent), and it resolved to unmodelled. The chance is judged by two proc entries sharing the roll (AscensionFelswornEvents.cpp:97-98, one Proc branch casting Felstrike 802678 on the target and Fragment of Malice 800239 on the caster, :227-229): '800214 proc_rate 800239' counts the Fragment casts and '800214 proc_rate 802678' the Felstrike casts, each on critical Fel Fireball 801312 hits only with the critical_trials control (non-critical hits proc 0). The old label '800214 proc_rate' is renamed by the second entry (shares_aura).",
+    "tool_gap": {
+      "reason": "Claim 'Direct critical strikes': the critical part is in the critical_trials control of both proc_rate verdicts, the direct (non-periodic, the !periodic term of AscensionFelswornEvents.cpp:97-98) part needs a control in which a periodic critical tick procs 0, and class 14 has no periodic crit: CalcPeriodicCritChance grants one only through aura 286 or Rogue Rupture (SpellAuraEffects.cpp:1180-1206), so the control would need foreign-class spells; no Rogue fixtures (controller t5, 2026-11-23). Not observable in play; sent to the mentor as a possible status-4 candidate.",
+      "attempts": [
+        {
+          "agent": "fw-tgs2",
+          "report": ".agents/plans/fw-tgs2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 800214,
@@ -2244,7 +2278,8 @@
     "spell": 800214,
     "clause": "stacking $u times.",
     "labels": [
-      "800214 max_stacks 802678 #3"
+      "800214 max_stacks 802678 #3",
+      "802678 behaviour_metric_delta felstrike_stack_cap"
     ],
     "kind": "claim"
   },
@@ -2528,7 +2563,8 @@
     "spell": 802058,
     "clause": "stacking $524632u times.",
     "labels": [
-      "802058 max_stacks 524632 #4"
+      "802058 max_stacks 524632 #4",
+      "802058 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },

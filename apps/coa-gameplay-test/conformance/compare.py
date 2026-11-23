@@ -52,6 +52,7 @@ from observations import player_observations
 from tooltip_readings import player_tooltip_readings, reading_band, reading_for
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE, cleaned_tooltip, family_spells, literal_token
 from proc_avoided import attack_imbalance
+from proc_critical import control_verdict as critical_control_verdict
 from procs import (AMBIGUOUS_TOOLTIP, CAST, CHANCE_KIND, DELTA_CHECK, DELTA_SANITY_FACTOR, PER_TRIGGER, PERCENT_KIND,
                    PROC_CHECK, PROC_ENERGIZE_CHECK, chance_of, rate_band, residual_note, wilson_interval)
 from profile import (DBC_DIR, WEAPON_REQUIREMENT_FIELDS, armed, caster_stats_from, known_aura_label, probe_aura_label,
@@ -6023,7 +6024,8 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
                        expectation.rank_id, expectation.check)
         verdicts[hit_slots[label]] = per_level_unmodelled(judge_hit(base, manifest['class_file'], parts, hit_model),
                                                           tooltips, hit_spell_of(parts[0][2]), manifest['level'])
-    verdicts += [server_question(manifest, parts[0][2], judge_proc(manifest, parts, tooltips), tooltips)
+    verdicts += [server_question(manifest, parts[0][2], critical_control_verdict(judge_proc(manifest, parts, tooltips),
+                                                                                parts), tooltips)
                  for parts in proc_parts.values()]
     verdicts += [server_question(manifest, parts[0][2], judge_proc_delta(manifest, parts, tooltips), tooltips)
                  for parts in delta_parts.values()]
