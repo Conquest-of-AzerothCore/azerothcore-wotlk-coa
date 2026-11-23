@@ -2026,5 +2026,112 @@ class CriticalControlVerdictTest(unittest.TestCase):
                 self.assertEqual(self.verdict(**reads).status, 'unmeasured')
 
 
+STACK_READS = [f'92111 proc stacks {attempt}' for attempt in range(1, 2001)] + ['92111 proc stacks after the drain']
+STACK_BASELINE = {**BASELINE_LABELS, 'attempts': 20, 'stack_events': {
+    'aura': 800058, 'set': 2, 'per_cast': -2, 'completed': '92111 proc baseline completed casts',
+    'reads': [f'92111 proc baseline stacks {attempt}' for attempt in range(1, 21)]
+    + ['92111 proc baseline stacks after the drain']}}
+
+
+class SizedAttemptsTest(unittest.TestCase):
+    def entry(self, **changes) -> dict:
+        return {**templar_proc(SCOURGEBANE), 'band': True, 'residual_target': 0.001, 'min_detectable': 4, **changes}
+
+    @unittest.skipUnless(Path(DBC_DIR).is_dir(), 'client DBC set not found')
+    def test_a_residual_beyond_the_band_sizing_is_refused_without_the_written_count(self):
+        with self.assertRaisesRegex(ValueError, 'needs 29079 attempts'):
+            proc_plan(CLASS_FILE, self.entry())
+
+    @unittest.skipUnless(Path(DBC_DIR).is_dir(), 'client DBC set not found')
+    def test_the_written_count_is_scheduled_in_parts_that_fit_the_budget(self):
+        plan = proc_plan(CLASS_FILE, self.entry(sized_attempts=29079))
+        self.assertEqual(plan.scheduled, 29079)
+        self.assertGreaterEqual(plan.parts * plan.per_part, 29079)
+        self.assertLessEqual(plan.per_part * plan.attempt_ms, PART_BUDGET_MS)
+
+    @unittest.skipUnless(Path(DBC_DIR).is_dir(), 'client DBC set not found')
+    def test_a_count_below_the_band_sizing_or_without_a_residual_is_refused(self):
+        with self.assertRaisesRegex(ValueError, 'sized_attempts'):
+            proc_plan(CLASS_FILE, self.entry(min_detectable=6, sized_attempts=100))
+        entry = {key: value for key, value in self.entry(sized_attempts=29079).items()
+                 if key not in ('residual_target', 'min_detectable')}
+        with self.assertRaisesRegex(ValueError, 'without the residual_target'):
+            proc_plan(CLASS_FILE, entry)
+
+    @unittest.skipUnless(Path(DBC_DIR).is_dir(), 'client DBC set not found')
+    def test_without_the_field_the_plan_is_unchanged(self):
+        self.assertEqual(proc_plan(CLASS_FILE, self.entry(min_detectable=6)).scheduled, 15927)
+
+
+class AuraStackEntryTest(unittest.TestCase):
+    def entry(self, **changes) -> dict:
+        entry = {'aura': 705137, 'trigger': {'action': 'cast', 'spell': 801904}, 'baseline': True,
+                 'trial_casts': True, 'event_metric': 'aura_stacks', 'stack_aura': 800058, 'stack_set': 2,
+                 'stack_per_cast': -2, 'events_per_proc': 2, 'proc_spell': 800058,
+                 'attempt_auras': [{'spell': 800058, 'stacks': 2, 'source': 'precondition fixture, not the subject'}]}
+        return {key: value for key, value in {**entry, **changes}.items() if value is not None}
+
+    def test_a_complete_entry_counts_stacks(self):
+        from proc_stacks import counts_stacks
+        self.assertTrue(counts_stacks(self.entry()))
+        self.assertFalse(counts_stacks(self.entry(event_metric='spell_cast_count')))
+
+    def test_an_entry_without_its_baseline_arm_fixture_or_cast_trigger_is_refused(self):
+        from proc_stacks import counts_stacks
+        for changes in ({'baseline': None}, {'attempt_auras': None}, {'stack_set': 1},
+                        {'trigger': {'action': 'attack', 'spell': 0}}, {'stack_per_cast': -3}, {'streams': 2},
+                        {'events_per_proc': 0}):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                counts_stacks(self.entry(**changes))
+
+
+class AuraStackCompareTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def verdict(self, preserved: int, baseline_preserved: int = 0, baseline: bool = True):
+        expectation = proc_expectation(events_per_proc=2)
+        model = {**expectation.model, 'part_attempts': 2000, 'event_labels': STACK_READS,
+                 'stack_events': {'aura': 800058, 'set': 2, 'per_cast': -2, 'completed': LABELS['attempts']}}
+        if baseline:
+            model['baseline'] = STACK_BASELINE
+        expectation = replace(expectation, model=model)
+        casts = 2020 if baseline else 2000
+        steps = [assert_step(LABELS['aura'], '1'), assert_step(LABELS['trials'], str(casts)),
+                 assert_step(LABELS['attempts'], str(casts))]
+        steps += [assert_step(label, '2' if index < preserved else '0') for index, label in enumerate(STACK_READS[:-1])]
+        steps.append(assert_step(STACK_READS[-1], '2'))
+        if baseline:
+            stack = STACK_BASELINE['stack_events']
+            steps += [assert_step(STACK_BASELINE['trials'], '20'), assert_step(stack['completed'], '20')]
+            steps += [assert_step(label, '2' if index < baseline_preserved else '0')
+                      for index, label in enumerate(stack['reads'][:-1])]
+            steps.append(assert_step(stack['reads'][-1], '2'))
+        self.workspace.scenario(PROC_KEY, 'proc', [expectation], steps=steps)
+        manifest, results = self.workspace.manifest()
+        from compare import compare
+        [verdict] = [verdict for verdict in compare(manifest, results, tooltips=chance_reader())
+                     if verdict.check == PROC_CHECK]
+        return verdict
+
+    def test_kept_stacks_after_a_completed_cast_are_the_events(self):
+        verdict = self.verdict(400)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 400 / 2000)
+
+    def test_a_kept_stack_in_the_baseline_arm_is_an_alert(self):
+        verdict = self.verdict(400, baseline_preserved=1)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('2 events in 20 baseline trials without the passive', verdict.explanation)
+
+    def test_without_the_baseline_arm_the_rate_is_not_judged(self):
+        verdict = self.verdict(400, baseline=False)
+        self.assertEqual(verdict.status, 'insufficient_trials')
+        self.assertIn('baseline arm of the aura stack events', verdict.explanation)
+
+
 if __name__ == '__main__':
     unittest.main()

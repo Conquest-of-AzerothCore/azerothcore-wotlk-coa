@@ -1249,18 +1249,10 @@
     "spell": 560639,
     "clause": "Your periodic damage now has a $h% chance to generate 1 Felfury.",
     "labels": [
-      "560639 effect_value #0"
+      "560639 effect_value #0",
+      "560639 proc_rate"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "The proc is Gain(player, 1) (AscensionFelswornEvents.cpp:172-176), a stack of aura 800058 that no procs event_metric reads. The trigger side is available (Bane of Chaos 704368 ticks, as the counted Felforged 300490 entry) so only the aura-stack event metric is missing. The nearest kind is procs cast with trigger_lands_no_hit and an aura-stack event metric.",
-      "attempts": [
-        {
-          "agent": "fw-chance",
-          "report": ".agents/plans/fw-chance/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 560641,
@@ -2290,16 +2282,9 @@
   {
     "spell": 705137,
     "clause": "Your Azzinoth's Assault now has a $h% chance to not consume Felfury.",
-    "labels": [],
-    "tool_gap": {
-      "reason": "The 30% chance is the engine roll of the DBC ProcChance of 705137 on an Azzinoth Assault 801904 cast. A proc entry with a cast trigger was built and run (p5, two runs): all 63 parts were unmeasured, every cast refused with SPELL_FAILED_NO_POWER (20936 refusals), because the cast trigger sets no Energy before an attempt (attempt_power_steps in procs.py handles only the base-mana percentage cost of base_mana_per_attempt) and 801904 costs 20 Energy and needs 2 Felfury. The nearest is a proc entry with a per-attempt power fixture.",
-      "attempts": [
-        {
-          "agent": "fw-b1d",
-          "report": ".agents/plans/fw-b1d/report.md"
-        }
-      ]
-    },
+    "labels": [
+      "705137 proc_rate"
+    ],
     "kind": "claim"
   },
   {
@@ -3717,7 +3702,7 @@
     "labels": [],
     "kind": "claim",
     "tool_gap": {
-      "reason": "The Felfury of this clause is not gained by the proc: the Proc of 804822 only casts 807163 (AscensionFelswornEvents.cpp:157-158). Each direct Twin Slice damage while 807163 is up calls Gain(player, 1) and counts the 10 charges down (AscensionFelswornAbilities.cpp:358-369; charges set at AscensionFelswornAuras.cpp:74-75). The gain is deterministic per Twin Slice hit and belongs with the 'next 10 instances' claim, not with a chance event. It is a ModStackAmount of aura 800058 that is not a cast, an energize or a first application, and no existing metric reads a stack gain per cast. The nearest kind is metric_delta aura_stacks 800058 around one Twin Slice cast with and without 807163 from a real proc.",
+      "reason": "The Felfury of this clause is not gained by the proc: the Proc of 804822 only casts 807163 (AscensionFelswornEvents.cpp:157-158). Each direct Twin Slice damage while 807163 is up calls Gain(player, 1) and counts the 10 charges down (AscensionFelswornAbilities.cpp:358-369; charges set at AscensionFelswornAuras.cpp:74-75). The gain is deterministic per Twin Slice hit and belongs with the 'next 10 instances' claim, not with a chance event. It is a ModStackAmount of aura 800058 that is not a cast, an energize or a first application, and no existing metric reads a stack gain per cast. The nearest kind is metric_delta aura_stacks 800058 around one Twin Slice cast with and without 807163 from a real proc. The procs aura_stacks event metric (tool ADR 1254) reads a stack gain per cast attempt, but this gain is deterministic per Twin Slice hit while 807163 is up, not a chance, so it stays with the 10-instance claim (B-7).",
       "attempts": [
         {
           "agent": "fw-chance2",
@@ -4010,7 +3995,7 @@
     ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "Two gaps. (1) The Felfury gain is Gain(player, 1), a stack of aura 800058 that no procs or triggers metric reads (same as 804822). (2) The handler needs Demonic Will 800209 or Hateforged Barrier 705129 active (AscensionFelswornEvents.cpp:44-45), and procs attempt_auras is refused for an avoided trigger (procs.py attempt_auras: cast trigger only), so the condition cannot be held while the strikers swing. Damage taken needs a taken_hit trigger, also without the fixture. The nearest kind is procs avoided with attempt_auras and an aura-stack event metric.",
+      "reason": "The Felfury gain is Gain(player, 1), a stack of aura 800058: procs now reads it with the aura_stacks event metric (tool ADR 1254), but only on a cast trigger. The handler needs Demonic Will 800209 or Hateforged Barrier 705129 active (AscensionFelswornEvents.cpp:44-45) while the strikers swing, and procs attempt_auras is refused for an avoided trigger, so the condition cannot be held (B-7); damage taken needs a taken_hit trigger, also without the fixture. The nearest kind is procs avoided with attempt_auras and the aura_stacks event metric.",
       "attempts": [
         {
           "agent": "fw-chance",

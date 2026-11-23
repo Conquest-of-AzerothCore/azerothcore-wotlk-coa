@@ -54,6 +54,7 @@ from tooltip_readings import player_tooltip_readings, reading_band, reading_for
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE, cleaned_tooltip, family_spells, literal_token
 from proc_avoided import attack_imbalance
 from proc_critical import control_verdict as critical_control_verdict
+from proc_stacks import STACK_EVENTS, baseline_held as stack_baseline_held, part_offset as stack_part_offset
 from procs import (AMBIGUOUS_TOOLTIP, CAST, CHANCE_KIND, DELTA_CHECK, DELTA_SANITY_FACTOR, PER_TRIGGER, PERCENT_KIND,
                    PROC_CHECK, PROC_ENERGIZE_CHECK, chance_of, rate_band, residual_note, wilson_interval)
 from profile import (DBC_DIR, WEAPON_REQUIREMENT_FIELDS, armed, caster_stats_from, known_aura_label, probe_aura_label,
@@ -1492,6 +1493,7 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
     readings = proc_readings(model)
     event_labels = model.get('event_labels') or [labels['events']]
     refunds = [model['charge_pool'], labels['attempts']] if model.get('charge_pool') else []
+    refunds += [labels['attempts']] if model.get(STACK_EVENTS) else []
     heal_guards = model.get('heal_guards', {})
     balance = model.get('attack_balance')
     wanted = [labels['aura']] + list(dict.fromkeys(
@@ -1516,6 +1518,8 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
         values = [run.values.get(label) for label in wanted]
         part_baseline = part.model.get('baseline')
         held = [run.values.get(part_baseline[name]) for name in ('trials', 'events')] if part_baseline else [0.0, 0.0]
+        if part_baseline and STACK_EVENTS in part_baseline:
+            held = stack_baseline_held(part_baseline, run.values)
         added_held = {label: run.values.get(held_label)
                       for label, held_label in (part_baseline or {}).get('added_trials', {}).items()}
         excluded = [run.values.get(label) for label in part.model.get('trial_exclusions', [])]
@@ -1543,7 +1547,8 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
                 control = part_baseline if part_baseline.get('control_weapon') else None
                 baseline_trials, baseline_events = held
                 part_totals[labels['trials']] -= baseline_trials
-                part_totals[event_labels[0]] -= baseline_events
+                if STACK_EVENTS not in part.model:
+                    part_totals[event_labels[0]] -= baseline_events
                 baseline_casts = baseline_player_casts(part.model, run, trigger)
                 baseline_events -= baseline_casts
                 for label, value in added_held.items():
@@ -1554,7 +1559,8 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
             part_totals[event_labels[0]] -= own_summons * part_totals[labels['trials']]
             for label, value in part_totals.items():
                 totals[label] += value
-            offset = refund_offset(model, run) - player_casts(model, run, trigger)
+            offset = refund_offset(model, run) - player_casts(model, run, trigger) \
+                + stack_part_offset(part.model, run.values)
             events += offset
             per_part.append((part_totals, offset))
     if imbalanced:
@@ -1588,6 +1594,10 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
                        explanation=f'{baseline_trials:g} control hits with the {control["control_weapon"]} one-handed '
                                    f'main hand {control["control_item"]}, fewer than the {control["minimum_trials"]} '
                                    f'the control arm needs')
+    if model.get(STACK_EVENTS) and not baseline_trials:
+        return replace(base, status='insufficient_trials', expected=0.0,
+                       explanation='the baseline arm of the aura stack events was not counted or read no trial, so '
+                                   'its required no-event control is not judged')
     if own_summons:
         unexplained = own_summons_judgement(base, model, own_summons, baseline_trials, baseline_events, per_part)
         if unexplained:

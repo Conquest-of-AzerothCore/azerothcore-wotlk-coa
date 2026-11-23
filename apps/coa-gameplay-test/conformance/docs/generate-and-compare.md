@@ -316,7 +316,8 @@ judged, and the judged runs must be on its build. The command passes `pilot.hit_
 entry is a `hit_ratio`: the pilot generates those entries at 20 trials (`generate(..., trials={label: n})`), each
 verdict's `detail.sized_trials` (the trials whose 99% half-width would be 0.8 of half the owner's band, ADR 0125)
 sizes the judged runs, never below the pilot's 20 and capped at what one scenario holds (`detail.trial_limit`;
-`capped` in the record); a label without a pilot verdict or interval keeps its class-file trials.
+`capped` in the record); an entry's `min_trials` floors the size (ADR 1255, `min_trials` in the record); a label
+without a pilot verdict or interval keeps its class-file trials.
 
 ### Server mutants and K3 consumption
 

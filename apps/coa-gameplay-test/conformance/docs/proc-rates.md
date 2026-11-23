@@ -390,6 +390,19 @@ approximation at the measured trials. Wilson coverage is nominal, not exact: the
 approximate (close at the thousands of trials these entries use). Shadow Rage 804192: 0.001 per pair, 5 points,
 110 parts.
 
+`sized_attempts` (ADR 1254) writes the attempts a `residual_target` needs when they exceed the band sizing; it is
+refused below that default or without `residual_target`. The parts come from the scenario budget as usual. Chaotic
+681376: 13377 attempts for `min_detectable` 4.
+
+### Aura stack events (ADR 1254)
+
+`event_metric: "aura_stacks"` on a cast trigger counts changes of a stack aura (`stack_aura`) that no spell cast marks.
+`attempt_auras` sets it to `stack_set` before each cast (a precondition fixture, named in its `source`);
+`stack_per_cast` is the signed change a completed cast makes without a proc, from the server's resource rules. The
+stacks are read after each cast and after the drain (reset before it); events = sum of the reads - `stack_set` x
+windows - `stack_per_cast` x completed casts, `events_per_proc` per proc. The `baseline` arm is required and must read
+no event. Azzinoth's Battery 705137 (2, -2, 2 per proc), Illidari Magi 560639 (1, +1, 1 per proc).
+
 ### Summon procs (ADR 0351)
 
 A proc whose event is a creature the code spawns directly (no spell event; Unrelenting Army 705747/707880, Muck
