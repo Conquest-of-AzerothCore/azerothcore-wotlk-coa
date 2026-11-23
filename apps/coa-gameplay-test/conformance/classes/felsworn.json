@@ -731,7 +731,11 @@
       "wait_ms": 15500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. The median interval between the damage events of the tick 800208 on the dummy (within 5 yd of the caster) since the last cast of 572617 (since_spell) is read 15500 ms after a real cast (hits at about 3, 6, 9, 12 and 15 s, four intervals), in both phases (the same cast twice; the no-hit control is the tick_count entry), within 150 ms (5%, the G-19 band) which excludes a period 10% off (2700 or 3300). Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found."
+      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. The median interval between the damage events of the tick 800208 on the dummy (within 5 yd of the caster) since the last cast of 572617 (since_spell) is read 15500 ms after a real cast (hits at 0, 3, 6, 9, 12 and 15 s, five intervals; 572617 has SPELL_ATTR5_EXTRA_INITIAL_PERIOD), in both phases (the same cast twice; the no-hit control is the tick_count entry), within 150 ms (5%, the G-19 band) which excludes a period 10% off (2700 or 3300). Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found.",
+      "caster_health": [
+        10000,
+        10000
+      ]
     },
     {
       "spell": 572617,
@@ -749,12 +753,16 @@
         "target": "dummy"
       },
       "before_expected": 0,
-      "expected": 5,
+      "expected": 6,
       "tolerance": 0.5,
-      "wait_ms": 15500,
+      "wait_ms": 16500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. Control: the tick 800208 has hit the dummy 0 times before the cast; 15500 ms after a real cast of 572617 it has hit 5 times (3, 6, 9, 12 and 15 s, EffectAmplitude 3000). Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found."
+      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. Control: the tick 800208 has hit the dummy 0 times before the cast; 16500 ms after a real cast of 572617 it has hit 6 times: 572617 has SPELL_ATTR5_EXTRA_INITIAL_PERIOD, so the ticks land at 0, 3, 6, 9, 12 and 15 s (EffectAmplitude 3000), the next at 18 s. The caster is held at 10000 health (caster_health) so the 50 health per second cost does not end the aura. Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found.",
+      "caster_health": [
+        10000,
+        10000
+      ]
     },
     {
       "spell": 572617,
@@ -768,7 +776,7 @@
       "cast_in_before": false,
       "phase_auras": [
         [
-          984954,
+          64481,
           1,
           "caster",
           "caster"
@@ -783,10 +791,14 @@
       "expected": 265.5,
       "after_at_least": 253,
       "after_at_most": 279,
-      "wait_ms": 3500,
+      "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. The first tick 800208 is read as the dummy's spell_damage_total over 3500 ms after a real cast (one tick: 3000 ms, the next at 6000 ms). 984954 (the test aura, Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000%) is set on the caster in both phases as a precondition fixture so the tick never critically strikes. Tick amount = base roll 181 + 1..26 (EffectBasePoints 181 + EffectDieSides 26: 182 to 207) + 0.30 x Fire spell power + 0.23 x attack power (the data row {572617, effect 0, ap 0.23, sp 0.3, school Fire}, AscensionFelswornData.h:55, AscensionFelswornContracts.cpp:326-333). At the reference attack power 312 and no spell power: 182 + 71.76 = 253.76 to 207 + 71.76 = 278.76, so a tick lies in [253, 279]. Control: 0 damage before the cast. Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found."
+      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. 572617 has SPELL_ATTR5_EXTRA_INITIAL_PERIOD, so the first tick 800208 lands at the apply, the next at 3000 ms. The dummy's spell_damage_total is read 1500 ms after a real cast: exactly one tick. The tick 800208 is DmgClass 2 (melee), whose crit chance is the caster's weapon crit (Unit.cpp:10335-10358, aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT); 64481 (Reduce Critical Strike Chance -100%, Effect[0] aura 52, EffectBasePoints -1000) is set on the caster in both phases as a precondition fixture so the tick never critically strikes (984954 is not used: its Effect[0] is aura 52 at +101%, which would force every tick to crit). The caster is held at 10000 health in both phases (caster_health), because 572617 costs 50 health per second (PowerType -2, ManaPerSecond 50) and the reference character's 2173 health runs out after about 42 s. Tick amount = base roll 181 + 1..26 (EffectBasePoints 181 + EffectDieSides 26: 182 to 207) + 0.30 x Fire spell power + 0.23 x attack power (the data row {572617, effect 0, ap 0.23, sp 0.3, school Fire}, AscensionFelswornData.h:55, AscensionFelswornContracts.cpp:326-333). At the reference attack power 312 and no spell power: 182 + 71.76 = 253.76 to 207 + 71.76 = 278.76, so a tick lies in [253, 279]. Control: 0 damage before the cast. Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found.",
+      "caster_health": [
+        10000,
+        10000
+      ]
     },
     {
       "spell": 572617,
@@ -800,7 +812,7 @@
       "cast_in_before": false,
       "phase_auras": [
         [
-          984954,
+          64481,
           1,
           "caster",
           "caster"
@@ -819,10 +831,14 @@
       "expected": 6265.5,
       "after_at_least": 6253,
       "after_at_most": 6279,
-      "wait_ms": 3500,
+      "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. The first tick 800208 is read as the dummy's spell_damage_total over 3500 ms after a real cast (one tick: 3000 ms, the next at 6000 ms). 984954 (the test aura, Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000%) is set on the caster in both phases as a precondition fixture so the tick never critically strikes. Tick amount = base roll 181 + 1..26 (EffectBasePoints 181 + EffectDieSides 26: 182 to 207) + 0.30 x Fire spell power + 0.23 x attack power (the data row {572617, effect 0, ap 0.23, sp 0.3, school Fire}, AscensionFelswornData.h:55, AscensionFelswornContracts.cpp:326-333). Spell power contrast: the caster holds +20000 spell power (the harness fixture), so the 0.30 coefficient adds 6000: a tick lies in [6253, 6279], 6000 above the tick_base range. Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found."
+      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. 572617 has SPELL_ATTR5_EXTRA_INITIAL_PERIOD, so the first tick 800208 lands at the apply, the next at 3000 ms. The dummy's spell_damage_total is read 1500 ms after a real cast: exactly one tick. The tick 800208 is DmgClass 2 (melee), whose crit chance is the caster's weapon crit (Unit.cpp:10335-10358, aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT); 64481 (Reduce Critical Strike Chance -100%, Effect[0] aura 52, EffectBasePoints -1000) is set on the caster in both phases as a precondition fixture so the tick never critically strikes (984954 is not used: its Effect[0] is aura 52 at +101%, which would force every tick to crit). The caster is held at 10000 health in both phases (caster_health), because 572617 costs 50 health per second (PowerType -2, ManaPerSecond 50) and the reference character's 2173 health runs out after about 42 s. Tick amount = base roll 181 + 1..26 (EffectBasePoints 181 + EffectDieSides 26: 182 to 207) + 0.30 x Fire spell power + 0.23 x attack power (the data row {572617, effect 0, ap 0.23, sp 0.3, school Fire}, AscensionFelswornData.h:55, AscensionFelswornContracts.cpp:326-333). Spell power contrast: the caster holds +20000 spell power (the harness fixture), so the 0.30 coefficient adds 6000: a tick lies in [6253, 6279], 6000 above the tick_base range. Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found.",
+      "caster_health": [
+        10000,
+        10000
+      ]
     },
     {
       "spell": 572617,
@@ -836,7 +852,7 @@
       "cast_in_before": false,
       "phase_auras": [
         [
-          984954,
+          64481,
           1,
           "caster",
           "caster"
@@ -852,10 +868,14 @@
       "expected": 4865.5,
       "after_at_least": 4853,
       "after_at_most": 4879,
-      "wait_ms": 3500,
+      "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. The first tick 800208 is read as the dummy's spell_damage_total over 3500 ms after a real cast (one tick: 3000 ms, the next at 6000 ms). 984954 (the test aura, Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000%) is set on the caster in both phases as a precondition fixture so the tick never critically strikes. Tick amount = base roll 181 + 1..26 (EffectBasePoints 181 + EffectDieSides 26: 182 to 207) + 0.30 x Fire spell power + 0.23 x attack power (the data row {572617, effect 0, ap 0.23, sp 0.3, school Fire}, AscensionFelswornData.h:55, AscensionFelswornContracts.cpp:326-333). Attack power contrast: the harness fixture adds 20000 to the reference 312, so the 0.23 coefficient gives 0.23 x 20312 = 4671.76: a tick lies in [4853, 4879], about 4600 above the tick_base range. Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found."
+      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. 572617 has SPELL_ATTR5_EXTRA_INITIAL_PERIOD, so the first tick 800208 lands at the apply, the next at 3000 ms. The dummy's spell_damage_total is read 1500 ms after a real cast: exactly one tick. The tick 800208 is DmgClass 2 (melee), whose crit chance is the caster's weapon crit (Unit.cpp:10335-10358, aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT); 64481 (Reduce Critical Strike Chance -100%, Effect[0] aura 52, EffectBasePoints -1000) is set on the caster in both phases as a precondition fixture so the tick never critically strikes (984954 is not used: its Effect[0] is aura 52 at +101%, which would force every tick to crit). The caster is held at 10000 health in both phases (caster_health), because 572617 costs 50 health per second (PowerType -2, ManaPerSecond 50) and the reference character's 2173 health runs out after about 42 s. Tick amount = base roll 181 + 1..26 (EffectBasePoints 181 + EffectDieSides 26: 182 to 207) + 0.30 x Fire spell power + 0.23 x attack power (the data row {572617, effect 0, ap 0.23, sp 0.3, school Fire}, AscensionFelswornData.h:55, AscensionFelswornContracts.cpp:326-333). Attack power contrast: the harness fixture adds 20000 to the reference 312, so the 0.23 coefficient gives 0.23 x 20312 = 4671.76: a tick lies in [4853, 4879], about 4600 above the tick_base range. Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found.",
+      "caster_health": [
+        10000,
+        10000
+      ]
     },
     {
       "spell": 707513,
@@ -957,10 +977,14 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. The aura 572617 on the caster is read absent before the cast (control: 0), present 57500 ms after a real cast and absent 4900 ms later (62400 ms), each reading stamped in game time inside its window (a duration 10% off, 54000 or 66000 ms, fails one of the two reads). The tooltip says 'up to': the aura may end earlier (the cost line of 572617 is a health cost per second); an end before 57400 ms is a finding, not a conformant duration. Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found.",
+      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. The aura 572617 on the caster is read absent before the cast (control: 0), present 57500 ms after a real cast and absent 4900 ms later (62400 ms), each reading stamped in game time inside its window (a duration 10% off, 54000 or 66000 ms, fails one of the two reads). The caster is held at 10000 health (caster_health): 572617 costs 50 health per second (PowerType -2, ManaPerSecond 50, SpellAuras.cpp:771-791 removes the aura once health is 50 or less), which 2173 health does not pay for 60 s. The tooltip says 'up to': the aura may end earlier (the cost line of 572617 is a health cost per second); an end before 57400 ms is a finding, not a conformant duration. Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found.",
       "gate_timing": "start",
       "trigger_only_after": true,
-      "measure_actor": "caster"
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ]
     }
   ],
   "player_observations": [],

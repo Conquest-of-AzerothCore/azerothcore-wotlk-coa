@@ -110,13 +110,19 @@
   {
     "spell": 300468,
     "clause": "Casting Hateforged Barrier now also creates a damage absorption shield on all nearby allies within $300469a yds,",
-    "claim": "creates a damage absorption shield on all nearby allies",
-    "labels": [
-      "300468 behaviour_metric_delta ally_shield"
-    ],
     "kind": "claim",
-    "evidence": "behaviour",
-    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
+    "claims": [
+      {
+        "claim": "creates a damage absorption shield on all nearby allies",
+        "labels": [
+          "300468 behaviour_metric_delta ally_shield"
+        ]
+      },
+      {
+        "claim": "within $300469a yds",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 300468,
@@ -2601,13 +2607,25 @@
   {
     "spell": 805244,
     "clause": "Increases the range of $?s520853[Fel Torpedo][Chaos Rush] by $s2 yds$?s520853[ and its critical strike chance by $s1%][].",
-    "claim": "Increases the range of Fel Torpedo by $s2 yds",
-    "labels": [
-      "805244 behaviour_metric_delta torpedo_range"
-    ],
     "kind": "claim",
-    "evidence": "behaviour",
-    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
+    "claims": [
+      {
+        "claim": "Increases the range of Fel Torpedo by $s2 yds",
+        "labels": [
+          "805244 behaviour_metric_delta torpedo_range"
+        ]
+      },
+      {
+        "claim": "Increases the range of Chaos Rush by $s2 yds",
+        "labels": [
+          "805244 behaviour_metric_delta chaos_range"
+        ]
+      },
+      {
+        "claim": "and its critical strike chance by $s1%",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 805245,
