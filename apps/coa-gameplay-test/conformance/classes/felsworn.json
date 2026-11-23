@@ -549,9 +549,9 @@
       "label_suffix": "magic_damage",
       "quote": "Increases your Magic damage dealt by $s1%",
       "expected": 1.06,
-      "observe_spell": 501321,
+      "observe_spell": 802060,
       "learn": [
-        501321
+        802060
       ],
       "control": {
         "auras": [
@@ -577,7 +577,7 @@
       "fixture": {
         "spell_power": 20000
       },
-      "expected_source": "$s1 = 6 (807902 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 126 (the six magic schools), EffectBasePoints 5 + 1, read from Spell.dbc). Sargeron Smite 501321 (level 60 rank, school mask 36 Fire and Shadow, AP 0.19 and SP 0.6 in AscensionFelswornData.h) non-critical hits at the dummy without the passive (control) and with it learned (treatment); 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; spell power fixture 20000 in both arms. Reference search 2026-11-23: coa-history spell 807902: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+      "expected_source": "$s1 = 6 (807902 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 126 (the six magic schools), EffectBasePoints 5 + 1, read from Spell.dbc). Sargeron Smite 802060 (level 1 rank, the Smite the class code scales, AscensionFelswornContracts.cpp:143-149, school mask 36 Fire and Shadow, AP 0.19 and SP 0.6 in AscensionFelswornData.h) non-critical hits at the dummy without the passive (control) and with it learned (treatment); 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; spell power fixture 20000 in both arms. Reference search 2026-11-23: coa-history spell 807902: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
     }
   ],
   "player_observations": [],
@@ -591,12 +591,12 @@
   "learned_hits": [],
   "cast_auras": [
     {
-      "spell": 501321,
+      "spell": 802060,
       "auras": [
         803468,
         800058
       ],
-      "reason": "Sargeron Smite 501321 needs the caster aura 803468 (At Least 2 Felfury, CasterAuraSpell in Spell.dbc); the hit scenario cast 0 landing hits without it. 803468 and the Felfury resource 800058 are precondition fixtures set before every cast (the same pair as the Sunder cost gate); the claim is the damage."
+      "reason": "Sargeron Smite 802060 needs the caster aura 803468 (At Least 2 Felfury, CasterAuraSpell in Spell.dbc); the hit scenario cast 0 landing hits without it. 803468 and the Felfury resource 800058 are precondition fixtures set before every cast (the same pair as the Sunder cost gate); the claim is the damage."
     }
   ],
   "hit_casts": [],
