@@ -863,9 +863,13 @@ def attempt_steps(class_file: dict, entry: dict, plan: ProcPlan, labels: dict[st
                 measurement(labels['attempts'], CASTER, 'melee_attack_count', **hand_fields(entry))]
     from proc_avoided import attempt_steps as avoided_attempts, counts_misses, guard_steps, is_avoided, trial_steps
     if is_avoided(entry):
-        return (avoided_attempts(entry, plan.per_part, plan.attempt_ms)
-                + [{'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}] + guard_steps(entry)
-                + trial_steps(labels['trials'], labels['attempts'], counts_misses(entry)))
+        drain = {'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}
+        if counts_stacks(entry):
+            from proc_stacks import avoided_attempt_steps
+            swings = avoided_attempt_steps(entry, plan.per_part, plan.attempt_ms) + stack_drain_steps(entry, drain)
+        else:
+            swings = avoided_attempts(entry, plan.per_part, plan.attempt_ms) + [drain]
+        return swings + guard_steps(entry) + trial_steps(labels['trials'], labels['attempts'], counts_misses(entry))
     if entry['trigger']['action'] == TAKEN_HIT:
         return (taken_hit_attempts(entry, plan, plan.per_part)
                 + [{'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}, taken_hit_trials(entry, labels['trials']),

@@ -405,6 +405,12 @@ stacks are read after each cast and after the drain (reset before it); events = 
 windows - `stack_per_cast` x completed casts, `events_per_proc` per proc. The `baseline` arm is required and must read
 no event. Azzinoth's Battery 705137 (2, -2, 2 per proc), Illidari Magi 560639 (1, +1, 1 per proc).
 
+On an `avoided` trigger (ADR 1261, provisional) `stack_per_cast` must be 0 and `stack_cap` names the aura's stack cap
+(its `StackAmount`): `attempt_auras` sets the aura before every swing interval, the stacks are read after every
+interval and after the drain, and the baseline swing intervals read the same way. A read at `stack_cap` makes the part
+`unmeasured` (a capped gain is not read); it never passes. Demonic Fortitude 805245 (0, 0, cap 6, 1 per proc, Demonic
+Will 800209 held as its condition).
+
 ### Summon procs (ADR 0351)
 
 A proc whose event is a creature the code spawns directly (no spell event; Unrelenting Army 705747/707880, Muck

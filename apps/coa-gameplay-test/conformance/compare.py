@@ -54,7 +54,8 @@ from tooltip_readings import player_tooltip_readings, reading_band, reading_for
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE, cleaned_tooltip, family_spells, literal_token
 from proc_avoided import attack_imbalance
 from proc_critical import control_verdict as critical_control_verdict
-from proc_stacks import STACK_EVENTS, baseline_held as stack_baseline_held, part_offset as stack_part_offset
+from proc_stacks import (STACK_EVENTS, baseline_held as stack_baseline_held, capped as stack_capped,
+                         part_offset as stack_part_offset)
 from procs import (AMBIGUOUS_TOOLTIP, CAST, CHANCE_KIND, DELTA_CHECK, DELTA_SANITY_FACTOR, PER_TRIGGER, PERCENT_KIND,
                    PROC_CHECK, PROC_ENERGIZE_CHECK, chance_of, rate_band, residual_note, wilson_interval)
 from profile import (DBC_DIR, WEAPON_REQUIREMENT_FIELDS, armed, caster_stats_from, known_aura_label, probe_aura_label,
@@ -1530,6 +1531,9 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
             unmeasured.append(f'{run.key} ({run.status}: {run.message})')
         elif any(read <= 0 for _, read in grant_reads):
             ungranted.append(f'{run.key} ({ungranted_text(grant_reads)})')
+        elif stack_capped(part.model, run.values):
+            unmeasured.append(f'{run.key} (stacks at the cap in {", ".join(stack_capped(part.model, run.values))}, '
+                              f'so a capped gain was not read)')
         elif heal_guards and heal_spoiled(heal_guards, run):
             spoiled.append(f'{run.key} ({heal_spoiled(heal_guards, run)})')
         elif balance and attack_imbalance(balance, run.values):

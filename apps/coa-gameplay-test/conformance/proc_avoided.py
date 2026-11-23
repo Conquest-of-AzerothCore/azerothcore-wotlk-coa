@@ -222,8 +222,14 @@ def holds_swings(entry: dict, part: int) -> bool:
 def baseline_steps(entry: dict, plan, swings: bool) -> list[dict]:
     from hits import DRAIN_MS
     from procs import baseline_labels, event_steps
+    from proc_stacks import avoided_attempt_steps, counts_stacks, drain_steps
     labels = baseline_labels(entry['aura'])
     steps = engage_steps(entry)
+    if counts_stacks(entry):
+        if swings:
+            steps += avoided_attempt_steps(entry, baseline_swings(entry, plan), plan.attempt_ms, True)
+            steps += drain_steps(entry, {'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS}, True)
+        return steps + trial_steps(labels['trials'], misses=counts_misses(entry))
     if swings:
         steps += attempt_steps(entry, baseline_swings(entry, plan), plan.attempt_ms)
         steps.append({'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS})
@@ -236,8 +242,13 @@ def avoided_baseline_model(entry: dict, plan, part: int) -> dict:
     labels = baseline_labels(entry['aura'])
     misses = counts_misses(entry)
     own, held = trial_labels(proc_measurements(entry['aura'])['trials'], misses), trial_labels(labels['trials'], misses)
-    return {**labels, 'attempts': baseline_swings(entry, plan) if holds_swings(entry, part) else 0,
-            'added_trials': {own[outcome]: held[outcome] for outcome in own if outcome != 'dodged'}}
+    from proc_stacks import STACK_EVENTS, baseline_model, counts_stacks
+    attempts = baseline_swings(entry, plan) if holds_swings(entry, part) else 0
+    stacks = {STACK_EVENTS: baseline_model(entry, attempts, labels['trials'])} if counts_stacks(entry) else {}
+    if stacks and not attempts:
+        stacks[STACK_EVENTS]['reads'] = []
+    return {**labels, 'attempts': attempts,
+            'added_trials': {own[outcome]: held[outcome] for outcome in own if outcome != 'dodged'}, **stacks}
 
 
 def baseline_ms(entry: dict, plan, part: int) -> int:

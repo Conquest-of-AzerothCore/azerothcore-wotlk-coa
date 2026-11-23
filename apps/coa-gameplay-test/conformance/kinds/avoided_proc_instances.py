@@ -114,9 +114,9 @@ def start_steps(spec: AvoidedProcInstancesSpec) -> list[dict]:
 
 
 def rule_text(spec: AvoidedProcInstancesSpec) -> str:
-    return (f'{spec.proc_aura} is obtained by the real route ({spec.spell} learned, dodged swings until it procs); then '
-            f'{spec.casts} casts of {spec.cast_spell} at a striker, with {spec.stack_aura} set to 0 and the swings no '
-            f'longer avoided before each cast. The control arm makes the same casts before the learn: its '
+    return (f'{spec.proc_aura} is obtained by the real route ({spec.spell} learned, dodged swings until it '
+            f'procs); then {spec.casts} casts of {spec.cast_spell} at a striker, with {spec.stack_aura} set to 0 and '
+            f'the swings no longer avoided before each cast. The control arm makes the same casts before the learn: its '
             f'{spec.stack_aura} stacks per cast are the own gain g and {spec.proc_aura} never appears. Treatment extra '
             f'per cast = stacks - g. Gain per instance = the extra over the {spec.hit_spells} hits of the casts after '
             f'which {spec.proc_aura} is still held (every hit of such a cast was a counted instance), expected 1. '

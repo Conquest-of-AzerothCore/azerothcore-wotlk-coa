@@ -202,6 +202,52 @@
       "internal_cooldown_ms": 0
     },
     {
+      "aura": 805245,
+      "name": "Demonic Fortitude",
+      "tooltip": "While Demonic Will or Hateforged Barrier are active, all damage taken or avoided now has a $h% chance to generate 1 |cff32cd32Felfury|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "avoided",
+        "striker_entry": 36,
+        "swing_ms": 500,
+        "dodge": 100,
+        "parry": 0,
+        "strikers": 3,
+        "striker_auras": [
+          42716,
+          62531,
+          2116852
+        ]
+      },
+      "residual_target": 0.001,
+      "min_detectable": 5,
+      "min_parts": 10,
+      "trigger_text": "all damage taken or avoided",
+      "event_metric": "aura_stacks",
+      "stack_aura": 800058,
+      "stack_set": 0,
+      "stack_per_cast": 0,
+      "stack_cap": 6,
+      "events_per_proc": 1,
+      "proc_spell": 800058,
+      "proc_spell_source": "Proc of 805245 calls Gain(player, 1) (AscensionFelswornEvents.cpp:173-175), which adds one stack of aura 800058 (AscensionFelsworn.cpp:219-229); no spell is cast.",
+      "attempt_auras": [
+        {
+          "spell": 800058,
+          "stacks": 0,
+          "source": "Felfury 800058 set to 0 before every swing interval: the stack read after it counts the Gain(player, 1) events (ADR 1254, avoided trigger ADR 1261)."
+        },
+        {
+          "spell": 800209,
+          "stacks": 1,
+          "source": "Demonic Will 800209 held before every swing interval: the clause's condition (AscensionFelswornEvents.cpp:44-45, HasAura(800209)), not its subject. A real cast would gain 1 Felfury itself (ResourceGainRules {14, 800209, 800209, 800058, 1, AuraStacks}, AscensionCustomResourceData.h:120) and mix that gain into the events, so the aura is set (controller go, 2026-11-23)."
+        }
+      ],
+      "handler": "aura_ascension_felsworn_event: Check (AscensionFelswornEvents.cpp:42-47) passes damage taken, a dodge or a parry on the caster (id 805245) while Demonic Will 800209 or Hateforged Barrier 705129 is held, and rolls Chance(player, 805245) (Spell.dbc ProcChance 20, no cooldown); Proc gains 1 Felfury 800058 (Gain(player, 1)). Trigger: procs avoided trigger (ADR 0900) with aura_stacks events (ADR 1254) and attempt_auras on the avoided trigger (ADR 1261, provisional): three aggressive stationary strikers (creature 36) with 42716, 62531 and 2116852, dodge 100 before every 500 ms interval, so every attempt is a dodge (the avoided leg; the damage-taken leg is not read here). Three strikers keep an interval's gains far under the 6-stack cap of 800058 (StackAmount 6); a read at the cap voids the part. The passive is learned (mentor D-67). Sized like the 804822 avoided entry."
+    },
+    {
       "aura": 681376,
       "name": "Chaotic",
       "tooltip": "Dealing damage now has an $h% chance to increase your damage by $572782s1% for $572782d, stacking $572782u times.",

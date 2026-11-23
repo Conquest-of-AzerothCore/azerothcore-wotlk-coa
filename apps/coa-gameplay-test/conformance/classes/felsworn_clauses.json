@@ -3981,11 +3981,12 @@
     "spell": 805245,
     "clause": "While Demonic Will or Hateforged Barrier are active, all damage taken or avoided now has a $h% chance to generate 1 Felfury.",
     "labels": [
-      "805245 effect_value #0"
+      "805245 effect_value #0",
+      "805245 proc_rate avoided"
     ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "The Felfury gain is Gain(player, 1), a stack of aura 800058: procs reads it with the aura_stacks event metric (tool ADR 1254), on a cast trigger only at the class head. The condition (Demonic Will 800209 or Hateforged Barrier 705129 active, AscensionFelswornEvents.cpp:44-45) can be held while strikers swing: procs attempt_auras is accepted for the avoided trigger and set before every swing interval (ADR 1261, provisional). Damage taken needs a taken_hit trigger, also without the fixture. The nearest kind is procs avoided with attempt_auras and the aura-stack event metric.",
+      "reason": "One leg left: damage taken. The avoided leg is the procs avoided entry 805245 proc_rate avoided: Felfury 800058 stack events (aura_stacks, tool ADR 1254, on the avoided trigger by ADR 1261, provisional) while Demonic Will 800209 is held by attempt_auras before every swing interval (the clause's condition, AscensionFelswornEvents.cpp:44-45). Damage taken needs a taken_hit trigger with the same condition and stack events, which procs does not combine (aura_stacks accepts a cast or an avoided trigger only). Hateforged Barrier 705129 as the condition is not read. The nearest kind is procs taken_hit with attempt_auras and aura_stacks events.",
       "attempts": [
         {
           "agent": "fw-chance",
