@@ -838,18 +838,28 @@
     "spell": 560645,
     "clause": "Increases the damage of Azzinoth's Assault by $s2%",
     "labels": [
-      "560645 effect_value e1 #0"
+      "560645 behaviour_hit_ratio assault_damage"
     ],
     "kind": "claim"
   },
   {
     "spell": 560645,
     "clause": "and causes it to increase your melee haste by $560646s1% for $560646d.",
-    "labels": [
-      "560645 effect_value 560646e0 #1",
-      "560645 spell_duration 560646 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increase your melee haste by $560646s1%",
+        "labels": [
+          "560645 behaviour_metric_delta haste"
+        ]
+      },
+      {
+        "claim": "for $560646d",
+        "labels": [
+          "560645 behaviour_metric_delta haste_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 560822,
@@ -864,7 +874,7 @@
     "spell": 560836,
     "clause": "Increases the critical strike chance of Sargeron Smite by $s1%.",
     "labels": [
-      "560836 effect_value e0 #0"
+      "560836 behaviour_metric_delta crit_gain"
     ],
     "kind": "claim"
   },
@@ -1325,17 +1335,29 @@
     "spell": 704607,
     "clause": "Increases your critical damage by $s2%",
     "labels": [
-      "704607 effect_value e1 #0"
+      "704607 behaviour_metric_delta crit_damage_spell",
+      "704607 behaviour_metric_delta crit_damage_melee"
     ],
     "kind": "claim"
   },
   {
     "spell": 704607,
     "clause": "and additionally increases your critical strike chance by $s1% while fighting Elementals.",
-    "labels": [
-      "704607 effect_value e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your critical strike chance by $s1%",
+        "labels": [
+          "704607 behaviour_metric_delta crit_chance_elemental"
+        ]
+      },
+      {
+        "claim": "while fighting Elementals",
+        "labels": [
+          "704607 behaviour_metric_delta crit_chance_other_type"
+        ]
+      }
+    ]
   },
   {
     "spell": 704610,

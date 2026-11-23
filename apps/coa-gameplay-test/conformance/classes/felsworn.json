@@ -310,6 +310,243 @@
         ]
       ],
       "observe_source": "574153 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 1 (Agility), 6% ($s2). Combat rating 7 (spell hit rating) is read with Agility 58451 (+30, DBC BasePoints 29 + 1; a precondition fixture by harness set_aura) set in both phases, so Agility is the reference 130 + 30 = 160, before and after a real learn of 574153 (the reading before is the control): 6% of 160 = 9.6, the engine adds the integer part, tolerance 0.7 excludes the 5% and 7% readings. Reference search 2026-11-23: coa-history spell 574153: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 560836,
+      "name": "Felfire Adept (Sargeron Smite critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "crit_gain",
+      "label_suffix": "crit_gain",
+      "quote": "Increases the critical strike chance of Sargeron Smite by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 560836,
+      "target": "caster",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 802060,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "expected_gain": 10,
+      "observe_source": "560836 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9 + 1 = 10 ($s1), EffectSpellClassMask word 1 = 2048, the SpellFamilyFlags word 1 of Sargeron Smite 802060 (SpellFamilyName 20). The caster's critical strike chance of Sargeron Smite 802060 (Player::SpellDoneCritChance with spell mods) is read before (control) and after a real learn of 560836: gain 10 points. Reference search 2026-11-23: coa-history spell 560836: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot repeats the tooltip; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 704607,
+      "name": "Elemental Bane (melee critical strike chance against an Elemental)",
+      "kind": "metric_delta",
+      "variant": "crit_chance_elemental",
+      "label_suffix": "crit_chance_elemental",
+      "quote": "and additionally increases your critical strike chance by $s1% while fighting Elementals",
+      "trigger_spell": 804432,
+      "gate_spell": 704607,
+      "target": "dummy",
+      "metric": "melee_crit_chance_against",
+      "fields": {
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 15,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "expected_gain": 15,
+      "target_entry": 2022,
+      "observe_source": "704607 Effect[0] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, MiscValue 20008 rewritten to ASCENSION_CREATURE_GLOBAL_CRIT (AscensionFelswornContracts.cpp:106), MiscValueB 8 (creature type Elemental, mask 1 << 3), BasePoints 14 + 1 = 15 ($s1). The caster's melee critical strike chance against a Timberling 2022 (Elemental, creature_template type 4, as the Necromancer corpse entry reads it) is read before (control) and after a real learn of 704607 with the harmless Guard Strike 804432 cast at it: gain 15 points. Reference search 2026-11-23: coa-history spell 704607: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot repeats the tooltip; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 704607,
+      "name": "Elemental Bane (control: melee critical strike chance against a non-Elemental)",
+      "kind": "metric_delta",
+      "variant": "crit_chance_other_type",
+      "label_suffix": "crit_chance_other_type",
+      "quote": "and additionally increases your critical strike chance by $s1% while fighting Elementals",
+      "trigger_spell": 804432,
+      "gate_spell": 704607,
+      "target": "dummy",
+      "metric": "melee_crit_chance_against",
+      "fields": {
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "expected_gain": 0,
+      "observe_source": "704607 Effect[0] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, MiscValue 20008 rewritten to ASCENSION_CREATURE_GLOBAL_CRIT (AscensionFelswornContracts.cpp:106), MiscValueB 8 (creature type Elemental, mask 1 << 3), BasePoints 14 + 1 = 15 ($s1). The same read against the stock dummy (not an Elemental) before and after the learn: gain 0, the control that the 15 points need the creature type. Reference search 2026-11-23: coa-history spell 704607: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot repeats the tooltip; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 704607,
+      "name": "Elemental Bane (spell critical damage)",
+      "kind": "metric_delta",
+      "variant": "crit_damage_spell",
+      "label_suffix": "crit_damage_spell",
+      "quote": "Increases your critical damage by $s2%",
+      "trigger_spell": 804432,
+      "gate_spell": 704607,
+      "target": "dummy",
+      "metric": "spell_critical_damage",
+      "fields": {
+        "spell": 802060,
+        "target": "dummy"
+      },
+      "before_expected": 1500,
+      "expected": 1650,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "expected_ratio": 1.1,
+      "observe_source": "704607 Effect[1] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, MiscValue 127 (all schools), BasePoints 9 + 1 = 10 ($s2). Unit::SpellCriticalDamageBonus on 1000 damage of Sargeron Smite 802060 (DmgClass 1, magic: crit 1000 + 500 = 1500) is read before (control) and after a real learn of 704607: AddPct 10% on the crit total gives 1650, ratio 1.10 within 0.002. Reference search 2026-11-23: coa-history spell 704607: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot repeats the tooltip; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 704607,
+      "name": "Elemental Bane (melee critical damage)",
+      "kind": "metric_delta",
+      "variant": "crit_damage_melee",
+      "label_suffix": "crit_damage_melee",
+      "quote": "Increases your critical damage by $s2%",
+      "trigger_spell": 804432,
+      "gate_spell": 704607,
+      "target": "dummy",
+      "metric": "spell_critical_damage",
+      "fields": {
+        "spell": 801904,
+        "target": "dummy"
+      },
+      "before_expected": 2000,
+      "expected": 2200,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "expected_ratio": 1.1,
+      "observe_source": "704607 Effect[1] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, MiscValue 127 (all schools), BasePoints 9 + 1 = 10 ($s2). Unit::SpellCriticalDamageBonus on 1000 damage of Azzinoth's Assault 801904 (DmgClass 2, melee: crit 1000 + 1000 = 2000) is read before (control) and after a real learn of 704607: AddPct 10% on the crit total gives 2200, ratio 1.10 within 0.002. Reference search 2026-11-23: coa-history spell 704607: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot repeats the tooltip; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 560645,
+      "name": "Fel Instincts (Azzinoth's Assault damage)",
+      "kind": "hit_ratio",
+      "variant": "assault_damage",
+      "label_suffix": "assault_damage",
+      "quote": "Increases the damage of Azzinoth's Assault by $s2%",
+      "expected": 1.2,
+      "observe_spell": 520262,
+      "cast_spell": 801904,
+      "cast_wait_ms": 1600,
+      "cast_power": 1000,
+      "control": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ],
+          [
+            984954,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ],
+          [
+            984954,
+            1
+          ]
+        ],
+        "learn": [
+          560645
+        ]
+      },
+      "trials": 20,
+      "critical": false,
+      "expected_source": "560645 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 19 + 1 = 20 ($s2). The main-hand strike 520262 of Azzinoth's Assault 801904 (Effect[0] trigger 520262, Effect[1] trigger 572585) is cast by a real cast; its non-critical hits are averaged in a control arm without 560645 and a treatment arm with it learned: ratio 1.20 within the 2-point band. No-crit 984954 is a harness precondition fixture as in the Necromancer entries. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and At Least 2 Felfury 803468 on the caster before each cast (Azzinoth's Assault 801904 needs 803468 and consumes 2 Felfury; AscensionFelsworn.cpp:219-228), in both arms and phases. Reference search 2026-11-23: coa-history spell 560645 and 560646: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says Assault damage +10% where the DBC tooltip and Effect[1] say 20% (an older state, the tooltip prevails, G-9) and repeats the 20% haste for 5 seconds."
+    },
+    {
+      "spell": 560645,
+      "name": "Fel Instincts (melee haste)",
+      "kind": "metric_delta",
+      "variant": "haste",
+      "label_suffix": "haste",
+      "quote": "causes it to increase your melee haste by $560646s1%",
+      "trigger_spell": 801904,
+      "gate_spell": 560645,
+      "target": "dummy",
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 2300,
+      "expected": 1916.6667,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "560645 Effect[0] aura 42 PROC_TRIGGER_SPELL 560646 (AscensionFelswornAbilities.cpp:278: cast with Azzinoth's Assault); 560646 Effect[0] aura 138 SPELL_AURA_MOD_MELEE_HASTE, BasePoints 19 + 1 = 20 ($560646s1). The main-hand attack time of the reference weapon (Slayer item 2027, 2300 ms, class file weapon_sets) is read 500 ms after a real Assault cast before (control: 560645 not learned) and after the learn: 2300 / 1.20 = 1916.667 ms. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and At Least 2 Felfury 803468 on the caster before each cast (Azzinoth's Assault 801904 needs 803468 and consumes 2 Felfury; AscensionFelsworn.cpp:219-228), in both arms and phases. Reference search 2026-11-23: coa-history spell 560645 and 560646: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says Assault damage +10% where the DBC tooltip and Effect[1] say 20% (an older state, the tooltip prevails, G-9) and repeats the 20% haste for 5 seconds."
+    },
+    {
+      "spell": 560645,
+      "name": "Fel Instincts (haste duration)",
+      "kind": "metric_delta",
+      "variant": "haste_duration",
+      "label_suffix": "haste_duration",
+      "quote": "for $560646d",
+      "trigger_spell": 801904,
+      "gate_spell": 560645,
+      "target": "dummy",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 560646
+      },
+      "before_expected": 0,
+      "expected": 4500,
+      "tolerance": 250,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "560646 DurationIndex 28 = 5000 ms ($560646d). The remaining duration of 560646 on the caster is read 500 ms after a real Assault cast: 5000 - 500 = 4500 ms, tolerance 250 so totals of 5500 or 4500 ms (10% off) read 5000 or 4000 and are excluded; the control phase (560645 not learned) reads 0. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and At Least 2 Felfury 803468 on the caster before each cast (Azzinoth's Assault 801904 needs 803468 and consumes 2 Felfury; AscensionFelsworn.cpp:219-228), in both arms and phases. Reference search 2026-11-23: coa-history spell 560645 and 560646: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says Assault damage +10% where the DBC tooltip and Effect[1] say 20% (an older state, the tooltip prevails, G-9) and repeats the 20% haste for 5 seconds."
     }
   ],
   "player_observations": [],
