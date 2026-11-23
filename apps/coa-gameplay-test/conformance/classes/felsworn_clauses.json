@@ -30,11 +30,21 @@
   {
     "spell": 92088,
     "clause": "Burn an enemy for ${($d*1000/$T1)*($m1+0+$SP*.05)} Shadowflame Damage over $d,",
-    "labels": [
-      "92088 effect_value 802678e0 #0",
-      "92088 spell_duration 802678 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "${($d*1000/$T1)*($m1+0+$SP*.05)} Shadowflame Damage",
+        "labels": [
+          "92088 effect_value 802678e0 #0"
+        ]
+      },
+      {
+        "claim": "over $d",
+        "labels": [
+          "92088 spell_duration 802678 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 92088,
@@ -92,11 +102,21 @@
   {
     "spell": 300468,
     "clause": "absorbing ${$STA*1+$300469m1+$300469ppl1+$SP*.2+$AP*.08} damage for $300469d.",
-    "labels": [
-      "300468 effect_value 300469e0 #0",
-      "300468 spell_duration 300469 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "absorbing ${$STA*1+$300469m1+$300469ppl1+$SP*.2+$AP*.08} damage",
+        "labels": [
+          "300468 effect_value 300469e0 #0"
+        ]
+      },
+      {
+        "claim": "for $300469d",
+        "labels": [
+          "300468 spell_duration 300469 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 300468,
@@ -145,11 +165,21 @@
   {
     "spell": 300474,
     "clause": "and the critical strike chance of all allies against this target is increased by $s2% for $d.",
-    "labels": [
-      "300474 effect_value 300475e1 #1",
-      "300474 spell_duration 300475 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "critical strike chance of all allies against this target is increased by $s2%",
+        "labels": [
+          "300474 effect_value 300475e1 #1"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "300474 spell_duration 300475 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 300476,
@@ -170,11 +200,21 @@
   {
     "spell": 300476,
     "clause": "increasing their critical strike chance by $520256s1% for $520256d.",
-    "labels": [
-      "300476 effect_value 520256e0 #2",
-      "300476 spell_duration 520256 #3"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing their critical strike chance by $520256s1%",
+        "labels": [
+          "300476 effect_value 520256e0 #2"
+        ]
+      },
+      {
+        "claim": "for $520256d",
+        "labels": [
+          "300476 spell_duration 520256 #3"
+        ]
+      }
+    ]
   },
   {
     "spell": 300477,
@@ -339,11 +379,25 @@
   {
     "spell": 520693,
     "clause": "Inner Demon: Striking at least 5 enemies with this spell causes it to deal an additional ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d,",
-    "labels": [
-      "520693 effect_value 520832e0 #1",
-      "520693 spell_duration 520832 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "an additional ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage",
+        "labels": [
+          "520693 effect_value 520832e0 #1"
+        ]
+      },
+      {
+        "claim": "over $520832d",
+        "labels": [
+          "520693 spell_duration 520832 #2"
+        ]
+      },
+      {
+        "claim": "at least 5 enemies",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 520693,
@@ -474,10 +528,19 @@
   {
     "spell": 520833,
     "clause": "In addition, Sargeron Smite now deals $s2% increased damage to enemies above 75% of their maximum health.",
-    "labels": [
-      "520833 effect_value e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "$s2% increased damage",
+        "labels": [
+          "520833 effect_value e1 #0"
+        ]
+      },
+      {
+        "claim": "above 75% of their maximum health",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 520853,
@@ -572,11 +635,21 @@
   {
     "spell": 555738,
     "clause": "and dealing $806095s1% Weapon Damage every $t1 sec with both weapons to all nearby enemies.",
-    "labels": [
-      "555738 effect_value 806095e0 #2",
-      "555738 aura_amplitude_ms #3"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing $806095s1% Weapon Damage",
+        "labels": [
+          "555738 effect_value 806095e0 #2"
+        ]
+      },
+      {
+        "claim": "every $t1 sec",
+        "labels": [
+          "555738 aura_amplitude_ms #3"
+        ]
+      }
+    ]
   },
   {
     "spell": 555738,
@@ -1042,12 +1115,27 @@
   {
     "spell": 681376,
     "clause": "Dealing damage now has an $h% chance to increase your damage by $572782s1% for $572782d,",
-    "labels": [
-      "681376 effect_value #0",
-      "681376 effect_value 572782e0 #1",
-      "681376 spell_duration 572782 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "$h% chance",
+        "labels": [
+          "681376 effect_value #0"
+        ]
+      },
+      {
+        "claim": "increase your damage by $572782s1%",
+        "labels": [
+          "681376 effect_value 572782e0 #1"
+        ]
+      },
+      {
+        "claim": "for $572782d",
+        "labels": [
+          "681376 spell_duration 572782 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 681376,
@@ -1347,10 +1435,19 @@
   {
     "spell": 705127,
     "clause": "Increases your critical damage by $s2% against enemies above 75% health.",
-    "labels": [
-      "705127 effect_value e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "critical damage by $s2%",
+        "labels": [
+          "705127 effect_value e1 #0"
+        ]
+      },
+      {
+        "claim": "above 75% health",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 707527,
@@ -1480,12 +1577,27 @@
   {
     "spell": 706267,
     "clause": "Generating Felfury now leeches ${$AP*0.1} health from $555742i nearby enemies within $555742a1 yds, scaling with your attack power.",
-    "labels": [
-      "706267 effect_value #0",
-      "706267 effect_value #1",
-      "706267 effect_radius 555742e0 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "leeches ${$AP*0.1} health",
+        "labels": [
+          "706267 effect_value #0"
+        ]
+      },
+      {
+        "claim": "from $555742i nearby enemies",
+        "labels": [
+          "706267 effect_value #1"
+        ]
+      },
+      {
+        "claim": "within $555742a1 yds",
+        "labels": [
+          "706267 effect_radius 555742e0 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 706425,
@@ -1702,12 +1814,22 @@
   {
     "spell": 572617,
     "clause": "dealing ${$m1+0+$spfi*.3+$AP*.23} Fire Damage to nearby enemies every $t1 sec.",
-    "labels": [
-      "572617 effect_value e0 #1",
-      "572617 aura_amount e0 #1",
-      "572617 aura_amplitude_ms #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$spfi*.3+$AP*.23} Fire Damage",
+        "labels": [
+          "572617 effect_value e0 #1",
+          "572617 aura_amount e0 #1"
+        ]
+      },
+      {
+        "claim": "every $t1 sec",
+        "labels": [
+          "572617 aura_amplitude_ms #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 800209,
@@ -1758,11 +1880,21 @@
   {
     "spell": 800214,
     "clause": "Burn an enemy for ${($d*1000/$T1)*($m1+0+$SP*.05)} Shadowflame Damage over $d,",
-    "labels": [
-      "800214 effect_value 802678e0 #1",
-      "800214 spell_duration 802678 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "${($d*1000/$T1)*($m1+0+$SP*.05)} Shadowflame Damage",
+        "labels": [
+          "800214 effect_value 802678e0 #1"
+        ]
+      },
+      {
+        "claim": "over $d",
+        "labels": [
+          "800214 spell_duration 802678 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 800214,
@@ -2038,10 +2170,19 @@
   {
     "spell": 802180,
     "clause": "Increases the critical strike chance of Fel Fireball and Ruin by $s1% on enemies above 75% health.",
-    "labels": [
-      "802180 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "by $s1%",
+        "labels": [
+          "802180 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "above 75% health",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 803478,
@@ -2194,11 +2335,25 @@
   {
     "spell": 804822,
     "clause": "Dodging or parrying an attack now gives you a $h% chance to make your next 10 instances of damage with Twin Slice deal $807163s1% increased damage",
-    "labels": [
-      "804822 effect_value #0",
-      "804822 effect_value 807163e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "$h% chance",
+        "labels": [
+          "804822 effect_value #0"
+        ]
+      },
+      {
+        "claim": "next 10 instances of damage with Twin Slice",
+        "labels": []
+      },
+      {
+        "claim": "deal $807163s1% increased damage",
+        "labels": [
+          "804822 effect_value 807163e0 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 804822,
@@ -2533,11 +2688,21 @@
   {
     "spell": 807461,
     "clause": "Damage dealt by Bane of Chaos now radiates fel energy around the enemy, dealing $s1% of the damage dealt to up to $807554i nearby enemies.",
-    "labels": [
-      "807461 effect_value e0 #0",
-      "807461 effect_value #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing $s1% of the damage dealt",
+        "labels": [
+          "807461 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "to up to $807554i nearby enemies",
+        "labels": [
+          "807461 effect_value #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 807901,
