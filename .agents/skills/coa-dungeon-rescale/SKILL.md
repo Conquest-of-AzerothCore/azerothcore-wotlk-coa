@@ -12,6 +12,10 @@ Follow the checkout's AGENTS.md and coa-development skill for repository procedu
 skill does not convert content or authorize live changes. For Hellfire's dungeon boundaries and existing scaling
 paths, read [the Hellfire reference](references/hellfire-peninsula.md) when converting that zone.
 
+When changing gear or item requirements, also read
+[fixed item rescaling](../../docs/systems/fixed-item-rescaling.md) for runtime ownership, existing-copy
+persistence, cache delivery and client-patch boundaries. Keep this skill's specific scope and effect policies.
+
 ## Inputs and settled defaults
 
 Required invocation inputs are **zone** and **target Normal item level**. Resolve the zone and all its five-player
@@ -63,6 +67,12 @@ not repeated multiplication of the preceding mode or additional factors over nat
 | Normal | I | 1.00 | 1.00 |
 | Heroic | I + 3 | 1.44 | 1.50 |
 | Mythic | I + 6 | 1.88 | 2.00 |
+
+An owner-approved retune may override damage factors for specific encounter roles or modes. Record the
+baseline, exact map/template set and every affected form/summon; preserve unrelated trash, health and other
+modes unless included. Validate the resulting effective damage ratios rather than assuming the default table
+still describes a retuned boss. Hellfire's current boss exception is in its linked reference; do not make it
+a default for future conversions.
 
 For each creature and damage path:
 
@@ -121,7 +131,9 @@ Use pinned original templates, effective DBC/SQL spells and original class-level
 from that baseline, not multiply already converted live values. Retain stable original-to-variant mappings and
 apply follow-up migrations instead of rewriting already applied migration files.
 
-- Rebudget primary stats, ratings, resistances and Power by installed quality/slot budgets at I/I+3/I+6.
+- Rebudget primary stats, ratings and resistances by installed quality/slot budgets at I/I+3/I+6.
+  Apply [Classic PvE Power by slot](../../docs/systems/fixed-item-rescaling.md#pve-power-by-slot)
+  across all three modes, and verify the equipped rating and tooltip.
   Derive armor, shield block and weapon DPS from matching slot/subclass and caster/physical comparables.
   Include wand damage and preserve weapon speed and damage spread.
 - Scale random properties and suffix factors, socket bonuses and appropriate enchant effects. Distinguish
@@ -163,7 +175,8 @@ eligibility for every converted mode, including effective DBC level gates. Confi
 and access-quest objectives/rewards are preserved, and outside access records are unchanged. Check ratios
 after all runtime scaling, not only database rows.
 
-Compare the same encounter across modes to prove 1/1.44/1.88 health and 1/1.5/2 damage without compounding.
+Compare the same encounter across modes to prove the approved health and damage ratios without compounding:
+by default 1/1.44/1.88 health and 1/1.5/2 damage; use recorded role/mode overrides where approved.
 Include death/respawn, encounter reset and restart persistence. Separate gameplay proof from schema/build
 checks and client tooltip acceptance. On this realm, a second real worldserver previously exhausted host
 resources; use another machine or stop the live process during an authorized test window.

@@ -11,6 +11,10 @@ description: >-
 Follow the checkout's AGENTS.md and coa-development skill. Creating or editing this skill does not rescale
 items, activate migrations, install a server or authorize live changes.
 
+When changing gear or item requirements, also read
+[fixed item rescaling](../../docs/systems/fixed-item-rescaling.md) for runtime ownership, existing-copy
+persistence, cache delivery and client-patch boundaries. Keep this skill's specific scope and effect policies.
+
 ## Inputs and policy decisions
 
 Required inputs are **profession**, **expansion** (`tbc` or `wotlk`) and **target item-level band** `[L, H]`.
@@ -80,6 +84,11 @@ editing. Store inputs, original expansion identity, source revision and transfor
 implementation's maintained data. Reuse that baseline for retunes; never treat already scaled live values as
 originals. Keep recipe-book item levels out of equipment budget anchors.
 
+For TBC Jewelcrafting, reuse the pinned cohort and regeneration instructions in
+`apps/coa-world-content/professions/README.md`. The installed run uses equipment 60–77, requirement-only
+non-equipment changes and preserved procs/on-use effects. These are that run's inputs, not defaults for every
+profession or expansion. The helper does not discover arbitrary new cohorts. Keep test gems excluded.
+
 ## Map equipment item levels
 
 For approved equipment outputs belonging to the requested expansion with **original ItemLevel > 60**, let
@@ -103,7 +112,9 @@ for the owner's endpoint rule; confirm a different requested interpolation befor
 ## Rebudget and preserve progression
 
 Use the installed quality/slot/role budgets at each mapped level to recalculate primary stats, ratings, armor,
-shield block, resistances, PvE/PvP Power and weapon DPS. Preserve quality, role, binding, unique restrictions,
+shield block, resistances and weapon DPS. Apply
+[Classic PvE Power by slot](../../docs/systems/fixed-item-rescaling.md#pve-power-by-slot) to converted
+equipment and verify its equipped rating and tooltip. Preserve quality, role, binding, unique restrictions,
 profession/specialization requirements, weapon speed and damage spread. Preserve socket count and colors,
 include their contributions in the total budget, and scale socket bonuses without counting
 inserted gem stats twice. Flag items whose sockets or utility alone exceed their target budget.

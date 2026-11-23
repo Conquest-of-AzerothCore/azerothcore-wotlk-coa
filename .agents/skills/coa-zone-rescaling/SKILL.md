@@ -11,6 +11,13 @@ Follow the target checkout's AGENTS.md and coa-development skill. For the initia
 inputs, read [Hellfire Peninsula](references/hellfire-peninsula.md). Use it as a worked design, not installed data
 or permission to convert the zone. Drafting or auditing the skill does not authorize gameplay changes.
 
+When changing gear or item requirements, also read
+[fixed item rescaling](../../docs/systems/fixed-item-rescaling.md) for runtime ownership, existing-copy
+persistence, cache delivery and client-patch boundaries. Keep this skill's specific scope and effect policies.
+For converted outdoor equipment, apply
+[Classic PvE Power by slot](../../docs/systems/fixed-item-rescaling.md#pve-power-by-slot) and verify
+the equipped rating and tooltip.
+
 ## Define the zone
 
 Collect only unresolved owner decisions; preserve choices already made. Derive IDs, affected records and current

@@ -24,13 +24,16 @@ zone: Hellfire Peninsula
 normal_item_level: 65
 normal_health_baseline_multiplier: 4
 normal_damage_baseline_multiplier: 1
+# Boss damage has the installed follow-up override described below.
 ```
 
 The owner approved these inputs and authorized installation on 2026-11-21.
 The owner chose original Normal creature stats recalculated at 60/63 as the combat baseline and requested
 optional baseline multipliers. Do not inherit the outdoor zone's 10x HP multiplier automatically.
 
-| Mode | Equipment ilvl | HP / converted Normal | Damage / converted Normal |
+Initial mode ratios; boss damage was subsequently retuned as described under Installed conversion.
+
+| Mode | Equipment ilvl | HP / converted Normal | Initial damage / converted Normal |
 |---|---:|---:|---:|
 | Normal | 65 | 1 | 1 |
 | Heroic | 68 | 1.44 | 1.5 |
@@ -82,11 +85,26 @@ Include dungeon quest turn-ins, end-of-run chests and completion rewards in the 
 ## Installed conversion
 
 Approved Normal/Heroic/Mythic item levels are 65/68/71. Original Normal health recalculated at 60/63 is
-multiplied by 4 before mode factors: final multipliers are 4/5.76/7.52. Normal damage retains the realm's
-existing dungeon rate, then uses 1/1.5/2 mode factors. Original Normal attack intervals are retained across
-modes so native Heroic template timing differences do not distort those ratios. Native Heroic spell-rank
+multiplied by 4 before mode factors: final multipliers are 4/5.76/7.52. Trash damage retains the realm's
+existing dungeon rate with 1/1.5/2 mode factors. Boss damage has the follow-up override below. Original
+Normal attack intervals are retained across modes so native Heroic template timing differences do not distort those ratios. Native Heroic spell-rank
 magnitudes are normalized to their Normal family before the mode factor. Existing generic Normal hit caps,
 Heroic/Mythic trash caps and per-player Dungeon Finder scaling defer to these fixed budgets for selected NPCs.
+
+The installed follow-up `rev_20261122_00_coa_hellfire_boss_damage.sql` updates 36 rows covering 12 boss/form
+map-template pairs in Normal/Heroic/Mythic. Relative to the original converted budgets it doubles Normal and
+Heroic boss melee/spell multipliers and triples Mythic. Boss effective damage factors relative to the
+converted Normal baseline before this retune are therefore 2/3/6; relative to the retuned Normal boss they
+are 1/1.5/3. These are encounter-role exceptions, not new global dungeon defaults. Health, attack intervals,
+trash and mechanics are unchanged. Do not infer these ratios directly from raw melee multiplier columns,
+which also compensate for native Heroic template damage. Preserve that compensation.
+
+The affected entries are 16807/16808/16809/20923 in map 540, 17377/17380/17381 in map 542, and
+17306/17307/17308/17536/17537 in map 543. Reinspect forms and summons if encounter scripts change.
+The follow-up stores absolute values and must be applied after migration 20 when reconstructing the current
+conversion. Its combined replay and unchanged-health/trash checks run in the `tbc_jewelcrafting_rescale`
+harness; the original eight-migration dungeon harness still tests the original conversion baseline. The
+owner accepted the follow-up in live testing.
 
 Eight `.sql` migrations numbered 20–27 cover combat, quests, equipment, affixes, effects,
 routing and level-60 access. The normal startup updater applied them to the live realm on 2026-11-21.

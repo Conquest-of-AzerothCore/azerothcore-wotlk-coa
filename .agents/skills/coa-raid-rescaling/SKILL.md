@@ -9,6 +9,10 @@ Use the target checkout's AGENTS.md and coa-development skill for repo procedure
 Karazhan, load [the worked example](references/karazhan.md); for Naxxramas, load
 [its conversion reference](references/naxxramas.md). Treat examples as per-raid inputs. Preserve decisions the owner already made.
 
+When changing gear or item requirements, also read
+[fixed item rescaling](../../docs/systems/fixed-item-rescaling.md) for runtime ownership, existing-copy
+persistence, cache delivery and client-patch boundaries. Keep this skill's specific scope and effect policies.
+
 ## Collect inputs
 
 - Source raid, placement in release order, character cap, and the adjacent gear benchmarks.
@@ -42,7 +46,9 @@ the scope the owner authorized.
 2. Inventory native encounters, NPC stats, spell effects, difficulty mappings, loot references,
    reputation, and quest and vendor rewards. Compare gear by slot, role, encounter position,
    and difficulty. Include weapon damage and speed, armor, stats, sockets and gems, procs,
-   and set bonuses. Trace shared item IDs across reward sources and existing copies. Rebalance
+   and set bonuses. Apply [Classic PvE Power by slot](../../docs/systems/fixed-item-rescaling.md#pve-power-by-slot)
+   across all raid gear variants in scope, and verify the equipped rating and tooltip.
+   Trace shared item IDs across reward sources and existing copies. Rebalance
    in place where authorized. Show the benchmarks supporting the proposed budgets.
 3. Use fixed encounter levels and tune HP, melee, spell effects, adds, and timers for the
    intended roster. Preserve each mechanic's purpose and trace the interaction between
@@ -61,6 +67,9 @@ the scope the owner authorized.
    and any cache, reputation, or reset interactions in scope. For Callboard, check progress-bar
    and generic cache paths separately. Apply the Callboard `PreviousStageOnly` cap to both
    when enabled. For Manastorm, check depth eligibility, item levels, and release-stage fallback.
+   Validate explicit set/tier ownership as well as item-level filters when populating token vendors. Similar
+   item levels alone do not establish tier membership. Check all difficulties and split pages for unintended
+   offers from another tier; preserve that tier's legitimate vendors, token prices and stock.
 5. Audit reputation rewards only for factions named in Launch Scope. Follow vendor and quest
    rewards through crafted outputs, Bloodforged copies, ammunition, and enchantments where
    present. Check character level, profession rank, materials, and separate spell or
