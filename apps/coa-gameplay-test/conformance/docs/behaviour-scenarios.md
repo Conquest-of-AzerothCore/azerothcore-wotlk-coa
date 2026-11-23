@@ -2153,6 +2153,7 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 
 - [`attacker_miss_share`](kinds/attacker_miss_share.md): the share of attackers' swings that miss the caster
   without and with a hit-chance aura from a real cast, pooled over parts (ADR 1019, provisional)
+  `relocate_dx` moves the caster along x once before counting (ADR 1065, provisional)
 - [`aura_expiry`](kinds/aura_expiry.md): how long a forced, rolled minion aura lasts, in game time (ADR 0485)
 - [`aura_fed_effect`](kinds/aura_fed_effect.md): a proc-granted aura's effect with the aura earned by a real
   `cast_until_aura` feed and read before each judged cast (ADR 1025, provisional)
@@ -2234,6 +2235,8 @@ Options with a module:
   a mismatch is `unmeasured` (ADR 1039)
 - [`after_setup_reads`](metric_delta_options/after_setup_reads.md): a caster aura read after the last setup cast of
   each phase, a mismatch is `unmeasured` (ADR 1058)
+- [`before_trigger_reads`](metric_delta_options/before_trigger_reads.md): a unit aura (caster or dummy) read before the
+  trigger cast of each phase that casts, a mismatch is `unmeasured` (ADR 1064, provisional)
 - [`corpse`](metric_delta_options/corpse.md): a creature corpse a real setup cast kills in the treatment phase (ADR
   0493)
 - [`player_spell_power`](metric_delta_options/player_spell_power.md): the caster's spell-power fixture (ADR 0364)
