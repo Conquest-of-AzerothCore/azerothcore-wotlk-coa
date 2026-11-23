@@ -3791,6 +3791,41 @@
       "wait_ms": 100,
       "expire_ms": 10500,
       "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a Felfury spender extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Sargeron Smite 802060 is a spender (AscensionFelsworn.cpp:56-60) with one direct hit (Effect[0] SCHOOL_DAMAGE), so with the strike forced to critical (spell crit rating forced by the harness) one critical strike extends by 1000 ms. Fixtures by harness set_aura, preconditions: Inner Demon 804216 and Felfury 800058 x2 (the cost of the spender, as the Expose entries use) on the caster in both phases. The remaining duration of 804216 100 ms after the cast is read before the learn (control: 806235 not learned) and after: gain 1000, tolerance 90 excludes 10% on the gain (900 and 1100), and the before reading must stay above the gain. Azzinoth's Assault 801904 was tried first (two strikes, a measured gain of 17000 ms against 2 x 1000 expected) and is recorded as a lead in the report, not counted. Reference search 2026-11-23: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 803475,
+      "name": "Azzinoth's Assault (consumes 2 Felfury)",
+      "kind": "metric_delta",
+      "variant": "consumes",
+      "label_suffix": "consumes",
+      "quote": "Consumes 2 Felfury",
+      "trigger_spell": 803475,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "before_expected": 6,
+      "expected": 4,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "The clause states 2 Felfury. Felfury 800058 x6 and At Least 2 Felfury 803468 are set on the caster by harness set_aura in both phases (preconditions: Azzinoth's Assault 801904 needs 803468, AscensionFelsworn.cpp:219-228); the stacks of 800058 on the caster are read before the real cast of 803475 at the dummy (6, the control: no cast) and 500 ms after it: 6 - 2 = 4, which excludes consuming 1 (5) and 3 (3). Reference search 2026-11-23: coa-history spell 803475: 0 events in 186 logs (positive control 801904 Azzinoth's Assault: 21 casts, the active that 803475 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],

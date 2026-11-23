@@ -2355,7 +2355,9 @@
   {
     "spell": 803475,
     "clause": "Consumes 2 Felfury",
-    "labels": [],
+    "labels": [
+      "803475 behaviour_metric_delta consumes"
+    ],
     "kind": "claim"
   },
   {
