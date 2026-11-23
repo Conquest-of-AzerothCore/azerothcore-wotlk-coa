@@ -510,8 +510,12 @@
   {
     "spell": 520693,
     "clause": "Consumes 2 Felfury",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "520693 behaviour_metric_delta consumes"
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 520693,
@@ -540,7 +544,11 @@
       },
       {
         "claim": "at least 5 enemies",
-        "labels": []
+        "labels": [
+          "520693 behaviour_metric_delta inner_five",
+          "520693 behaviour_metric_delta inner_four"
+        ],
+        "evidence": "behaviour"
       }
     ]
   },
@@ -828,7 +836,16 @@
     "spell": 520853,
     "clause": "Generates a large amount of threat.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Measured on Fel Torpedo's hit 500761 (SPELL_EFFECT_THREAT 225 flat in the DBC, SpellLevel 34): threat 1209.75 on 303 health lost, slope 3.14 against 1 with the DBC's flat 259 (counted pair 20261123-211541 / -211612, labels removed from the class file after the run). Spell::EffectThreat passes the flat amount through LocalLevelScaling::PoolThreatFor (SpellEffects.cpp:4787, Unit.cpp:194-200), a ratio of the dummy's real to viewed maximum health; that this explains the 872.75 left after damage 303 and initial threat 34 (3.879 times 225) is a hypothesis not verified by a run. A proof needs the dummy's pool factor as an input of the judge, which threat_slope lacks. The nearest kind is threat_slope.",
+      "attempts": [
+        {
+          "agent": "fw-ea5",
+          "report": ".agents/plans/fw-ea5/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 520853,
@@ -1593,7 +1610,16 @@
     "spell": 574145,
     "clause": "Twin Slice and Sargeron Smite now additionally scale with your Agility.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The tooltip states no coefficient, so the claim is a direction only (damage grows with Agility, and belongs to the passive): the same shape as power_term_direction (Sun Cleric Sun's Gift 680656, mentor D-106), which requires a power aura with SPELL_AURA_MOD_ATTACK_POWER (kinds/power_term_direction.py:23,83) and reads the caster's attack power. An Agility variant (an aura raising Agility, a read of Agility, Twin Slice 802060 as the cast spell) is a new option of that kind. hit_ratio needs a stated bonus and stat_gain judges a stat added by a cast, neither fits. The nearest kind is power_term_direction.",
+      "attempts": [
+        {
+          "agent": "fw-ea5",
+          "report": ".agents/plans/fw-ea5/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 574145,
@@ -1614,7 +1640,16 @@
     "spell": 574146,
     "clause": "Damage dealt by Fel Fireball, Sargeron Smite, and Twin Slice now additionally scales with your Agility.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Same as 129.0 with Fel Fireball 801312, Sargeron Smite and Twin Slice 802060 as cast spells: no coefficient in the tooltip, a direction-only claim, power_term_direction needs an Agility variant (an aura raising Agility, a read of Agility). The nearest kind is power_term_direction.",
+      "attempts": [
+        {
+          "agent": "fw-ea5",
+          "report": ".agents/plans/fw-ea5/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 574153,
@@ -2402,19 +2437,43 @@
     "claims": [
       {
         "claim": "Casting Carve now makes your next Fel Fireball instant cast",
-        "labels": []
+        "labels": [
+          "707444 behaviour_metric_delta instant",
+          "707444 behaviour_metric_delta consumed"
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "and causes it to strike 1 additional enemy near the primary target based on how long you channeled,",
-        "labels": []
+        "labels": [
+            "707444 behaviour_metric_delta extras_full"
+          ]
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "'strike 1 additional enemy ... based on how long you channeled' needs the channel ended at a set time, so that the extra targets of a short and of a full channel can be compared. No metric_delta option ends a channel: hold_power_during_wait and relocate_during_wait only keep or move the caster, Carve 800206 carries no movement channel interrupt (it can channel while moving), and the harness action cancel_aura is not wired into any metric_delta option (needs a new option, tool group). The full channel is read by extras_full (nine offered, all struck); the growth with the length is not. The nearest kind is metric_delta with area_dummies and area_sum.",
+      "attempts": [
+        {
+          "agent": "fw-ea5",
+          "report": ".agents/plans/fw-ea5/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 707444,
     "clause": "up to a maximum of 10 enemies, dealing less damage with each target struck.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The cap of 10 needs eleven candidates around the primary after a full channel and the 'less damage with each target' direction needs a per-target damage order. The fixed_count cap arm (Norgannon's Wrath 524739 cap) was tried (cap and cap_control entries, one real Carve as a setup cast): fixed_count sets the setup cast with no Felfury (the Carve is refused for lack of power) and waits 1600 ms after it, shorter than the 2500 ms channel, so no Fel Fireball follows a finished channel; the harness admits nine area dummies in metric_delta, one short of the eleven the cap needs. A fixed_count setup fixture (setup auras and setup wait) is a tool change. The nearest kind is fixed_count cap.",
+      "attempts": [
+        {
+          "agent": "fw-ea5",
+          "report": ".agents/plans/fw-ea5/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 707513,
@@ -2578,8 +2637,13 @@
   {
     "spell": 800203,
     "clause": "Usable while moving.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "800203 behaviour_metric_delta moving_cast",
+      "800203 behaviour_metric_delta moving_cast_control"
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 800204,
@@ -2600,8 +2664,12 @@
   {
     "spell": 800206,
     "clause": "Consumes 2 Felfury",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "800206 behaviour_metric_delta consumes"
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 800206,
@@ -2615,7 +2683,16 @@
     "spell": 800206,
     "clause": "Upon ending the channel, slash in front of you, dealing increased Weapon Damage with both weapons based on how long you channel, dealing less damage with each target struck.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The tooltip gives no figure for the end slash: it states a direction only (more Weapon Damage with a longer channel, less with each target struck). The check needs the damage of the end slash 803715 at two channel lengths (a channel ended at a set time, see the 707444 gap) and a direction judge across them; power_term_direction judges attack power only and no existing kind compares a spell's damage across channel lengths. The nearest is hit_ratio with a stated bonus, which the tooltip does not give.",
+      "attempts": [
+        {
+          "agent": "fw-ea5",
+          "report": ".agents/plans/fw-ea5/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 800206,
@@ -3025,7 +3102,9 @@
     "labels": [
       "501298 behaviour_metric_delta consumes"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 501298,
@@ -3046,7 +3125,11 @@
       },
       {
         "claim": "piercing all absorption effects",
-        "labels": []
+        "labels": [
+          "501298 behaviour_metric_delta pierce_shield",
+          "501298 behaviour_metric_delta pierce_damage",
+          "501298 behaviour_metric_delta pierce_shield_control"
+        ]
       }
     ]
   },
