@@ -24,7 +24,25 @@
     "melee_hit_rating": 10000,
     "expertise_rating": 10000
   },
-  "reference_stats": {},
+  "reference_stats": {
+    "attack_power": 312.0,
+    "ranged_attack_power": 180.0,
+    "spell_power 1": 0.0,
+    "spell_power 2": 0.0,
+    "spell_power 3": 0.0,
+    "spell_power 4": 0.0,
+    "spell_power 5": 0.0,
+    "spell_power 6": 0.0,
+    "stat 0": 82.0,
+    "stat 1": 130.0,
+    "stat 2": 79.0,
+    "stat 3": 34.0,
+    "stat 4": 50.0,
+    "skill 43": 300.0,
+    "skill 52": 300.0,
+    "skill 53": 300.0,
+    "skill 57": 300.0
+  },
   "log_queries": {},
   "alternate_weapons": [
     {
