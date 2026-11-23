@@ -6705,7 +6705,14 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     damage = std::max(0, dmg);
     cleanDamage.mitigated_damage = std::max(0, mitigatedDamage);
 
-    DamageInfo dmgInfo(caster, target, damage, GetSpellInfo(), GetSpellInfo()->GetSchoolMask(), DOT, cleanDamage.mitigated_damage);
+    // Umbral Wounds (Ascension talent 299000): "While in Shadowform, your Deep Wounds deal Shadowstrike damage" -- the
+    // tick is absorbed, resisted and dealt as Shadow + Physical
+    SpellSchoolMask schoolMask = GetSpellInfo()->GetSchoolMask();
+    if (caster && sSpellMgr->GetSpellTwinSource(GetId()) == 12721 /*Deep Wounds*/ &&
+        caster->GetShapeshiftForm() == FORM_SHADOW && caster->HasAura(299000))
+        schoolMask = SpellSchoolMask(SPELL_SCHOOL_MASK_NORMAL | SPELL_SCHOOL_MASK_SHADOW);
+
+    DamageInfo dmgInfo(caster, target, damage, GetSpellInfo(), schoolMask, DOT, cleanDamage.mitigated_damage);
     Unit::CalcAbsorbResist(dmgInfo);
 
     uint32 absorb = dmgInfo.GetAbsorb();
@@ -6735,7 +6742,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     SpellPeriodicAuraLogInfo pInfo(this, damage, overkill, absorb, resist, 0.0f, crit);
     target->SendPeriodicAuraLog(&pInfo);
 
-    uint32 damageDealt = Unit::DealDamage(caster, target, damage, &cleanDamage, DOT, GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), true);
+    uint32 damageDealt = Unit::DealDamage(caster, target, damage, &cleanDamage, DOT, schoolMask, GetSpellInfo(), true);
     sScriptMgr->OnPeriodicDamageResult(target, caster, damageDealt, GetSpellInfo());
 
     Unit::ProcSkillsAndAuras(caster, target, caster ? procAttacker : 0, procVictim, procEx, damage, BASE_ATTACK, GetSpellInfo(), nullptr, GetEffIndex(), nullptr, &dmgInfo);
@@ -7379,7 +7386,8 @@ void AuraEffect::HandleRaidProcFromChargeWithValueAuraProc(AuraApplication* aurA
     enum
     {
         SPELL_PRAYER_OF_MENDING_HEAL   = 33110,
-        SPELL_PRAYER_OF_MENDING_VISUAL = 41637
+        SPELL_PRAYER_OF_MENDING_VISUAL = 41637,
+        SPELL_SAY_YOUR_PRAYERS         = 278530  // Ascension talent
     };
 
     Unit* target = aurApp->GetTarget();
@@ -7394,6 +7402,18 @@ void AuraEffect::HandleRaidProcFromChargeWithValueAuraProc(AuraApplication* aurA
     int32 value = GetAmount();
 
     int32 jumps = GetBase()->GetCharges();
+
+    // Say Your Prayers: "$s1% chance not to consume a charge when it jumps to a new target" and "The last charge of
+    // Prayer of Mending heals for $s2% more"
+    AuraEffect const* sayYourPrayersChance = nullptr;
+    int32 heal = value;
+    if (Unit* caster = GetCaster())
+    {
+        sayYourPrayersChance = caster->GetAuraEffect(SPELL_SAY_YOUR_PRAYERS, EFFECT_0);
+        if (jumps <= 0)
+            if (AuraEffect const* lastCharge = caster->GetAuraEffect(SPELL_SAY_YOUR_PRAYERS, EFFECT_1))
+                AddPct(heal, lastCharge->GetAmount());
+    }
 
     // current aura expire on proc finish
     GetBase()->SetCharges(0);
@@ -7416,12 +7436,13 @@ void AuraEffect::HandleRaidProcFromChargeWithValueAuraProc(AuraApplication* aurA
                 target->CastSpell(triggerTarget, SPELL_PRAYER_OF_MENDING_VISUAL, true);
                 target->CastCustomSpell(triggerTarget, GetId(), &value, nullptr, nullptr, true, nullptr, this, GetCasterGUID());
                 if (Aura* aura = triggerTarget->GetAura(GetId(), GetCasterGUID()))
-                    aura->SetCharges(jumps);
+                    aura->SetCharges(sayYourPrayersChance && roll_chance_i(sayYourPrayersChance->GetAmount()) ?
+                        jumps + 1 : jumps);
             }
         }
     }
 
-    target->CastCustomSpell(target, SPELL_PRAYER_OF_MENDING_HEAL, &value, nullptr, nullptr, true, nullptr, this, GetCasterGUID());
+    target->CastCustomSpell(target, SPELL_PRAYER_OF_MENDING_HEAL, &heal, nullptr, nullptr, true, nullptr, this, GetCasterGUID());
 }
 
 int32 AuraEffect::GetTotalTicks() const

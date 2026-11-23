@@ -1,0 +1,113 @@
+{
+    "schema":  1,
+    "name":  "Worldforged Defense Crossbow rests on the ground (#11963)",
+    "contract":  "#11963 reported the Defense Crossbow pickup (entry 90498, guid 6941013) floating. Its height belonged to a point 3-5 yd away, so it stood 1.06 yd above the ground the server measures. It now rests on the measured ground at z 77.403. Expected: the pickup is grounded and opens.",
+    "timeout_ms":  60000,
+    "location":  {
+                     "map":  0,
+                     "x":  1670.7,
+                     "y":  -5156.3,
+                     "z":  77.8,
+                     "o":  0
+                 },
+    "players":  [
+                    {
+                        "id":  "p",
+                        "race":  1,
+                        "class":  12,
+                        "level":  60
+                    }
+                ],
+    "steps":  [
+                  {
+                      "action":  "set_phase",
+                      "actor":  "p",
+                      "value":  1
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  3000
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "SETUP: the pickup is in the area",
+                      "metric":  "nearby_gameobject_count",
+                      "entry":  90498,
+                      "equals":  1
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the crossbow stays at its spot, lowered to the ground",
+                      "metric":  "spawn_distance",
+                      "x":  1669.7,
+                      "y":  -5156.3,
+                      "z":  77.403,
+                      "max":  0.3,
+                      "guid":  6941013,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "DISCRIMINATING: the crossbow rests on the ground instead of 1.06 yd above it",
+                      "metric":  "spawn_ground_gap",
+                      "min":  -0.3,
+                      "max":  0.3,
+                      "guid":  6941013,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is grounded within 0.8 yd",
+                      "metric":  "spawn_placement",
+                      "tolerance":  0.8,
+                      "equals":  0,
+                      "guid":  6941013,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is not under water",
+                      "metric":  "spawn_submerged",
+                      "equals":  0,
+                      "guid":  6941013,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "set_aura",
+                      "actor":  "p",
+                      "spell":  642,
+                      "stacks":  1
+                  },
+                  {
+                      "action":  "cast",
+                      "actor":  "p",
+                      "spell":  3365,
+                      "target_gameobject":  90498
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  5500
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is within reach and opens",
+                      "metric":  "cast_failure",
+                      "spell":  3365,
+                      "equals":  0
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "its loot is shown",
+                      "metric":  "loot_count",
+                      "min":  1,
+                      "within_ms":  3000
+                  }
+              ]
+}

@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Worldforged Rotwood Sabre rests on the ground (#12284)",
+  "contract": "#12284 reported the Rotwood Sabre pickup (entry 517277, guid 6942104) misplaced: it floated 2.62 yd above the ground the server measures and is lowered to it. Expected: it is at that spot and grounded, and it opens.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 6571.3,
+    "y": -834.5,
+    "z": 475.332,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: the pickup is in the area",
+      "metric": "nearby_gameobject_count",
+      "entry": 517277,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup stays at its spot",
+      "metric": "spawn_distance",
+      "x": 6570.3,
+      "y": -834.5,
+      "z": 474.832,
+      "max": 0.3,
+      "guid": 6942104,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the pickup rests on the ground instead of floating above it",
+      "metric": "spawn_ground_gap",
+      "min": -0.35,
+      "max": 0.35,
+      "guid": 6942104,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is grounded within 0.8 yd",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 6942104,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is not under water",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6942104,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 517277
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is within reach and opens",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "its loot is shown",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

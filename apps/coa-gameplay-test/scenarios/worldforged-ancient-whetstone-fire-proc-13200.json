@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "name": "Ancient Whetstone's weapon enchant deals its Fire damage on melee hits (#13200)",
+  "contract": [
+    "#13200: Ancient Whetstone (410189) casts 201173 (cast directly here, as its use spell), which consumes a Heart of Fire (7077) and enchants a weapon with enchantment 1005. Its equip aura 201174 triggers 201175 (31-40 Fire) at the 10% chance Spell.dbc gives it, but the aura had no proc flags, so it never fired.",
+    "A warrior with a 0.5 s dagger and full hit and expertise swings at a dummy until 300 melee hits land. At 10% the chance of no proc is 0.9^300, about 2e-14; the upper bound of 80 rules out a proc on every hit with a residual chance below 1e-20."
+  ],
+  "timeout_ms": 300000,
+  "players": [
+    {
+      "id": "w",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "w",
+      "entry": 36,
+      "level": 60,
+      "health": 100000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "w",
+      "item": 5549
+    },
+    {
+      "action": "equip",
+      "actor": "w",
+      "item": 5549,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "w",
+      "item": 7077
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 201173
+    },
+    {
+      "action": "cast",
+      "actor": "w",
+      "spell": 201173,
+      "target_item": 5549
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "label": "CONTROL: the whetstone enchants the dagger",
+      "metric": "cast_failure",
+      "spell": 201173,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "label": "CONTROL: the Heart of Fire is consumed",
+      "metric": "item_count",
+      "item": 7077,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "label": "CONTROL: the enchantment (1005) is on the dagger and applies its equip aura",
+      "metric": "aura",
+      "spell": 201174,
+      "equals": 1
+    },
+    {
+      "action": "attack",
+      "actor": "w",
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "label": "CONTROL: 300 melee hits land",
+      "metric": "melee_damage_count",
+      "min": 300,
+      "within_ms": 240000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "w"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "label": "DISCRIMINATING: the enchant's Fire damage procs on some hits, not on every hit",
+      "metric": "spell_damage_count",
+      "spell": 201175,
+      "min": 1,
+      "max": 80
+    }
+  ]
+}

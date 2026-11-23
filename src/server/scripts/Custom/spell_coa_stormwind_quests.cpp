@@ -1,5 +1,6 @@
 #include "CreatureScript.h"
 #include "Item.h"
+#include "MoveSplineInit.h"
 #include "Player.h"
 #include "PlayerScript.h"
 #include "QuestDef.h"
@@ -21,6 +22,37 @@ namespace
     constexpr float CHAMBER_Y = 292.43518f;
     constexpr float CHAMBER_Z = 126.93212f;
     constexpr float CHAMBER_RADIUS = 25.0f;
+    constexpr uint32 NPC_FLASK_SKULL = 9935000;
+    constexpr uint32 SPELL_GHOST_VISUAL = 365039;
+    constexpr float COUNCIL_TABLE_X = -8320.0f;
+    constexpr float COUNCIL_TABLE_Y = 288.7f;
+    constexpr float SKULL_FLIGHT_Z = 132.0f;
+    constexpr float SKULL_LOOP_RADIUS = 9.0f;
+    constexpr uint32 SKULL_LOOPS = 2;
+    constexpr uint32 SKULL_POINTS_PER_LOOP = 12;
+    constexpr uint32 SKULL_LIFETIME_MS = 16000;
+
+    void ReleaseFlaskSkull(Player* player)
+    {
+        Creature* skull = player->SummonCreature(NPC_FLASK_SKULL, player->GetPositionX(), player->GetPositionY(),
+            player->GetPositionZ() + 2.5f, player->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, SKULL_LIFETIME_MS);
+        if (!skull)
+            return;
+        skull->SetDisableGravity(true);
+        skull->SetCanFly(true);
+        skull->CastSpell(skull, SPELL_GHOST_VISUAL, true);
+        float const start =
+            std::atan2(skull->GetPositionY() - COUNCIL_TABLE_Y, skull->GetPositionX() - COUNCIL_TABLE_X);
+        Movement::PointsArray path;
+        path.emplace_back(skull->GetPositionX(), skull->GetPositionY(), skull->GetPositionZ());
+        for (uint32 step = 0; step <= SKULL_LOOPS * SKULL_POINTS_PER_LOOP; ++step)
+        {
+            float const angle = start + 2.0f * float(M_PI) * float(step) / float(SKULL_POINTS_PER_LOOP);
+            path.emplace_back(COUNCIL_TABLE_X + SKULL_LOOP_RADIUS * std::cos(angle),
+                COUNCIL_TABLE_Y + SKULL_LOOP_RADIUS * std::sin(angle), SKULL_FLIGHT_Z);
+        }
+        skull->GetMotionMaster()->MoveSplinePath(&path);
+    }
 
     constexpr uint32 QUEST_VOICES_AT_THE_NORTH_GATE = 175198;
     constexpr uint32 NPC_FIRST_NORTH_GATE_CITIZEN = 164981;
@@ -96,6 +128,7 @@ class spell_coa_open_little_mickeys_flask : public SpellScript
         uint32 count = 1;
         player->DestroyItemCount(flask, count, true);
         player->KilledMonsterCredit(NPC_PETITIONERS_CHAMBER_CREDIT);
+        ReleaseFlaskSkull(player);
     }
 
     void Register() override

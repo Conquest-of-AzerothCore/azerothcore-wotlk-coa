@@ -1,0 +1,133 @@
+{
+    "schema":  1,
+    "name":  "Westfall Quarry Sledge has one pickup (#11908)",
+    "contract":  "#11908 reported two Quarry Sledge pickups (entry 95785). Guid 6940915 was a duplicate marker restore 43 yd from the pickup 6940916 at the cart and is removed. Expected: the kept pickup is grounded and opens, and nothing is left at the duplicate spot.",
+    "timeout_ms":  60000,
+    "location":  {
+                     "map":  0,
+                     "x":  -10428.3,
+                     "y":  1926.84,
+                     "z":  9.5,
+                     "o":  0
+                 },
+    "players":  [
+                    {
+                        "id":  "p",
+                        "race":  1,
+                        "class":  12,
+                        "level":  60
+                    }
+                ],
+    "steps":  [
+                  {
+                      "action":  "set_phase",
+                      "actor":  "p",
+                      "value":  1
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  3000
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "SETUP: the pickup is in the area",
+                      "metric":  "nearby_gameobject_count",
+                      "entry":  95785,
+                      "equals":  1
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the kept sledge stays at the cart",
+                      "metric":  "spawn_distance",
+                      "x":  -10429.3,
+                      "y":  1926.84,
+                      "z":  9.03996,
+                      "max":  0.3,
+                      "guid":  6940916,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the kept sledge rests on the ground",
+                      "metric":  "spawn_ground_gap",
+                      "min":  -0.5,
+                      "max":  0.5,
+                      "guid":  6940916,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is grounded within 0.8 yd",
+                      "metric":  "spawn_placement",
+                      "tolerance":  0.8,
+                      "equals":  0,
+                      "guid":  6940916,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is not under water",
+                      "metric":  "spawn_submerged",
+                      "equals":  0,
+                      "guid":  6940916,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "set_aura",
+                      "actor":  "p",
+                      "spell":  642,
+                      "stacks":  1
+                  },
+                  {
+                      "action":  "cast",
+                      "actor":  "p",
+                      "spell":  3365,
+                      "target_gameobject":  95785
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  5500
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is within reach and opens",
+                      "metric":  "cast_failure",
+                      "spell":  3365,
+                      "equals":  0
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "its loot is shown",
+                      "metric":  "loot_count",
+                      "min":  1,
+                      "within_ms":  3000
+                  },
+                  {
+                      "action":  "teleport",
+                      "actor":  "p",
+                      "map":  0,
+                      "x":  -10468.5,
+                      "y":  1944,
+                      "z":  12
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  3000
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "DISCRIMINATING: no Quarry Sledge is left at the removed duplicate spot",
+                      "metric":  "nearby_gameobject_count",
+                      "entry":  95785,
+                      "equals":  0
+                  }
+              ]
+}

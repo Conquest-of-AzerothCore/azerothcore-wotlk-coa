@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "The login scan collects Vanity items kept in the character bank and the Personal Bank",
+  "contract": [
+    "The login scan read only the equipped items and the bags, so a bound Vanity copy nothing had collected yet stayed",
+    "out of the Vanity collection for as long as it sat in the character bank, a bank bag or a Personal or Realm Bank",
+    "(on Rexxar, copies the downtime SQL bound in banks).",
+    "Expected: after the login hooks run again, Taeshalach 152094 in the character bank and Icy Ebon Warsword 141376 in",
+    "the Personal Bank are in the account's Vanity collection. forget_vanity removes both rows while they are banked."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -9465, "y": 64, "z": 56, "o": 0},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60}
+  ],
+  "creatures": [
+    {"id": "banker", "owner": "hero", "entry": 2455, "faction": 35, "distance": 2}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 2000},
+    {"action": "add_item", "label": "Acquire the Personal Bank", "actor": "hero", "item": 134985},
+    {"action": "use_item", "label": "Place the Personal Bank vault", "actor": "hero", "item": 134985, "spell": 100702},
+    {"action": "wait", "label": "Let the vault summon land in the world", "ms": 3000},
+    {"action": "personal_bank_open", "label": "Open the Personal Bank", "actor": "hero", "entry": 475001},
+    {"action": "add_item", "label": "Carry Icy Ebon Warsword", "actor": "hero", "item": 141376},
+    {"action": "assert", "label": "SETUP: the warsword is soulbound", "actor": "hero", "metric": "item_soulbound",
+     "item": 141376, "equals": 1},
+    {"action": "personal_bank_swap", "label": "Deposit the warsword", "actor": "hero", "entry": 475001,
+     "direction": "deposit", "item": 141376, "slot": 0},
+    {"action": "assert", "label": "The warsword leaves the bags", "actor": "hero", "metric": "item_count",
+     "item": 141376, "equals": 0, "within_ms": 2000},
+    {"action": "banker_activate", "label": "Open the character bank", "actor": "hero", "target": "banker"},
+    {"action": "add_item", "label": "Carry Taeshalach", "actor": "hero", "item": 152094},
+    {"action": "assert", "label": "SETUP: Taeshalach is soulbound", "actor": "hero", "metric": "item_soulbound",
+     "item": 152094, "equals": 1},
+    {"action": "client_packet", "label": "Move Taeshalach to the bank (CMSG_AUTOBANK_ITEM)", "actor": "hero",
+     "opcode": 643, "fields": [{"item_bag": 152094}, {"item_slot": 152094}], "consumed": false},
+    {"action": "assert", "label": "Taeshalach leaves the bags", "actor": "hero", "metric": "item_count",
+     "item": 152094, "equals": 0, "within_ms": 2000},
+    {"action": "forget_vanity", "label": "Forget the banked Taeshalach", "actor": "hero", "item": 152094},
+    {"action": "forget_vanity", "label": "Forget the warsword in the Personal Bank", "actor": "hero", "item": 141376},
+    {"action": "assert", "label": "SETUP: Taeshalach is not collected", "actor": "hero", "metric": "vanity_owned",
+     "item": 152094, "equals": 0},
+    {"action": "assert", "label": "SETUP: the warsword is not collected", "actor": "hero", "metric": "vanity_owned",
+     "item": 141376, "equals": 0},
+    {"action": "login_hooks", "label": "Replay the login hooks", "actor": "hero"},
+    {"action": "assert", "label": "DISCRIMINATING: the login scan collects Taeshalach from the character bank",
+     "actor": "hero", "metric": "vanity_owned", "item": 152094, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "DISCRIMINATING: the login scan collects the warsword from the Personal Bank",
+     "actor": "hero", "metric": "vanity_owned", "item": 141376, "equals": 1, "within_ms": 2000}
+  ]
+}
