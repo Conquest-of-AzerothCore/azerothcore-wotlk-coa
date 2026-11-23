@@ -467,12 +467,30 @@ class spell_ascension_sun_cleric_lights_of_absolution : public SpellScript
             CalculatePct(target->GetMaxHealth() - target->GetHealth(), GetEffectValue()), HEAL, index);
         SetHitHeal(int32(target->SpellHealingBonusTaken(caster, GetSpellInfo(), heal, HEAL)));
     }
+    void Restore(SpellEffIndex index)
+    {
+        PreventHitDefaultEffect(index);
+        Unit* caster = GetCaster();
+        Unit* target = GetHitUnit();
+        Powers power = Powers(GetSpellInfo()->Effects[index].MiscValue);
+        if (!caster || !target || power == POWER_MANA || !target->IsAlive() ||
+            target->HasUnitState(UNIT_STATE_ISOLATED) ||
+            (target->IsPlayer() && !target->CanReceivePowerFromSpell(power)))
+            return;
+        if (uint32 gain = CalculatePct(target->GetMaxPower(power) - target->GetPower(power), GetEffectValue()))
+            caster->EnergizeBySpell(target, GetSpellInfo()->Id, gain, power);
+    }
     void Register() override
     {
-        OnEffectLaunchTarget += SpellEffectFn(spell_ascension_sun_cleric_lights_of_absolution::Launch, EFFECT_0,
-            SPELL_EFFECT_HEAL_PCT);
-        OnEffectHitTarget += SpellEffectFn(spell_ascension_sun_cleric_lights_of_absolution::Heal, EFFECT_0,
-            SPELL_EFFECT_HEAL_PCT);
+        if (m_scriptSpellId == 807525)
+        {
+            OnEffectLaunchTarget += SpellEffectFn(spell_ascension_sun_cleric_lights_of_absolution::Launch, EFFECT_0,
+                SPELL_EFFECT_HEAL_PCT);
+            OnEffectHitTarget += SpellEffectFn(spell_ascension_sun_cleric_lights_of_absolution::Heal, EFFECT_0,
+                SPELL_EFFECT_HEAL_PCT);
+        }
+        OnEffectHitTarget += SpellEffectFn(spell_ascension_sun_cleric_lights_of_absolution::Restore, EFFECT_ALL,
+            SPELL_EFFECT_ENERGIZE_PCT);
     }
 };
 class spell_ascension_sun_cleric_ability : public SpellScript
