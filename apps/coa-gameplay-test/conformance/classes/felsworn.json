@@ -12532,6 +12532,73 @@
       "expire_ms": 10500,
       "void_on_cast_failure": true,
       "observe_source": "704370 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 707511 (Curse of Argus: Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER, BasePoints 0 + 1 = 1 ($707511s1) per stack, StackAmount 20); AscensionFelswornEvents.cpp:211-212 casts 707511 on the target of each damage event of Bane of Chaos 704368. Bane of Chaos 704368 has Effect[0] PERIODIC_DAMAGE with a 3000 ms period (Spell.dbc EffectAmplitude[0]), so the first damage event lands 3000 ms after the cast: the amount of effect 0 of 707511 (caster = the caster) on the dummy is read 3300 ms after one real cast, before the learn of 704370 (control: 0, no aura) and after it: 1, the amount of one stack (the engine multiplies the amount by the stack count, AuraEffect::CalculateAmount), and the aura's own stock handler 271 applies it to the damage the caster deals to that target. Not a damage ratio: 20 stacks need 60 s of Bane ticks per trial, past what the scenario cap holds for the sample a 2-point band needs, and the handler is the stock aura 271. Reference search 2026-11-23: coa-history spell 704370: 0 events in 186 logs (a passive leaves no event); spell 707511 Curse of Argus: SPELL_AURA_APPLIED_DOSE 690 events in 4 logs (it stacks in real play); nothing states another value; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 704370,
+      "name": "Curse of Argus (one stack after the first damage event)",
+      "kind": "metric_delta",
+      "variant": "stack_count",
+      "label_suffix": "stack_count",
+      "quote": "Each time Bane of Chaos deals damage its damage is increased on the target by $707511s1% for $707511d,",
+      "trigger_spell": 704368,
+      "gate_spell": 704370,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 707511,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3300,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "observe_source": "Diagnostic companion of stack_value on the same cast and read: the stacks of 707511 on the dummy 3300 ms after one real cast of Bane of Chaos 704368, one damage event (3000 ms period) having landed: 1 expected. The first pair read an amount of 4 for this one event (stack_value alert); this entry separates a per-stack amount other than 1 from a stack count other than 1. Reference search 2026-11-23: coa-history spell 707511: SPELL_AURA_APPLIED_DOSE 690 events in 4 logs; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 803475,
+      "kind": "metric_delta",
+      "quote": "$?s804216[ Inner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
+      "trigger_spell": 803475,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 803089
+      },
+      "cast_power": 100,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Azzinoth's Assault (one extension cast per Assault)",
+      "variant": "extend_casts",
+      "label_suffix": "extend_casts",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "observe_source": "Diagnostic companion of extend on the same cast: the casts of the extension spell 803089 (Double Trigger, Effect[0] ASCENSION_MODIFY_AURA_DURATION +3000 ms) by the caster, read 500 ms after one real Assault at the dummy with Inner Demon active (fixture as extend): 0 before (no cast) and 1 after, one 3 s extension per cast of Assault. The first pair read a duration gain of 28009 ms for the extend entry (alert); this entry counts the extensions. Reference search 2026-11-23: coa-history spell 803475: 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],

@@ -1797,7 +1797,8 @@
       {
         "claim": "damage is increased on the target by $707511s1%",
         "labels": [
-          "704370 behaviour_metric_delta stack_value"
+          "704370 behaviour_metric_delta stack_value",
+          "704370 behaviour_metric_delta stack_count"
         ]
       },
       {
@@ -3107,7 +3108,8 @@
     "clause": "$?s804216[\r\n\r\nInner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
     "labels": [
       "803475 behaviour_metric_delta extend",
-      "803475 behaviour_metric_delta extend_absent"
+      "803475 behaviour_metric_delta extend_absent",
+      "803475 behaviour_metric_delta extend_casts"
     ],
     "kind": "claim"
   },
