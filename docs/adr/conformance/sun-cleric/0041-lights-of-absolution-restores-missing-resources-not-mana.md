@@ -1,4 +1,4 @@
-# 0039. Lights of Absolution restores missing Energy, Focus, Runic Power and Rage, and no mana
+# 0041. Lights of Absolution restores missing Energy, Focus, Runic Power and Rage, and no mana
 
 - Status: accepted
 - Date: 2026-11-23
