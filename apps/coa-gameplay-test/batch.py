@@ -504,7 +504,7 @@ class Server:
         try:
             attempt.directory.mkdir(parents=True)
             scenario_path = attempt.directory / 'scenario.json'
-            scenario_path.write_text(json.dumps(case.scenario, indent=2) + '\n', encoding='utf-8')
+            scenario_path.write_text(json.dumps(case.scenario, indent=2) + '\n', encoding='utf-8', newline='\n')
             attempt.scenario_sha256 = run.sha256(scenario_path)
             write_json(self.case_directory / f'case-{attempt.sequence:06d}.json',
                        self.case_record(attempt, scenario_path))
@@ -1252,7 +1252,7 @@ def interrupt(signum, frame):
 
 
 def parser():
-    result = argparse.ArgumentParser(description=CLI_DESCRIPTION,
+    result = argparse.ArgumentParser(description=CLI_DESCRIPTION, fromfile_prefix_chars='@',
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     result.add_argument('--worldserver', type=Path, required=True)
     result.add_argument('--config', type=Path, required=True, help='Source worldserver config; never changed')

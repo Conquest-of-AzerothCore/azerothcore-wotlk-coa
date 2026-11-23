@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "name": "Wildcard: Spellblade restores base mana from melee attacks (#13092)",
+  "contract": [
+    "Spellblade rank 3 (812577) reads 'Your melee attacks have a 12% chance to restore 20% of your base mana.'",
+    "The talent is a PROC_TRIGGER_SPELL_WITH_VALUE aura onto 812574 with DBC ProcFlags 0, so without a spell_proc",
+    "row Aura::GetProcEffectMask returns 0 and the aura never procs. The spell_proc row gives it melee auto attack",
+    "and melee ability flags for every class family. Sixty unarmed 2000 ms swings at 12% leave about 0.05%",
+    "odds of never seeing an 812574 energize; before the fix it never fires regardless of sample size."
+  ],
+  "timeout_ms": 240000,
+  "players": [
+    {
+      "id": "h",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "h",
+      "entry": 36,
+      "level": 60,
+      "health": 2000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "learn", "label": "h fixture: Spellblade rank 3", "actor": "h", "spell": 812577 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "h has the Spellblade aura", "actor": "h", "metric": "aura", "spell": 812577, "equals": 1 },
+    {
+      "action": "assert", "label": "CONTRACT (#13092) an auto attack procs Spellblade at about 12%",
+      "actor": "h", "metric": "aura_proc_rate", "spell": 812577, "target": "d", "type_mask": 4, "min": 10.5, "max": 13.5
+    },
+    {
+      "action": "assert", "label": "CONTRACT (#13092) a melee ability from any family procs Spellblade at about 12%",
+      "actor": "h", "metric": "aura_proc_rate", "spell": 812577, "target": "d", "trigger_spell": 78, "type_mask": 16,
+      "min": 10.5, "max": 13.5
+    },
+    {
+      "action": "assert", "label": "CONTROL a spell hit is not a melee attack",
+      "actor": "h", "metric": "aura_proc_rate", "spell": 812577, "target": "d", "trigger_spell": 2136, "type_mask": 65536,
+      "equals": 0
+    },
+    { "action": "set_power", "actor": "h", "power": 0, "value": 0 },
+    { "action": "attack", "actor": "h", "target": "d" },
+    { "action": "wait", "ms": 20000 },
+    { "action": "wait", "ms": 20000 },
+    { "action": "wait", "ms": 20000 },
+    { "action": "wait", "ms": 20000 },
+    { "action": "wait", "ms": 20000 },
+    { "action": "wait", "ms": 20000 },
+    { "action": "stop_attack", "actor": "h" },
+    { "action": "wait", "ms": 2000 },
+    {
+      "action": "assert",
+      "label": "CONTRACT ordinary melee swings landed",
+      "actor": "h",
+      "metric": "melee_attack_count",
+      "min": 55
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT (#13092) Spellblade restored mana (812574) at least once",
+      "actor": "h",
+      "metric": "spell_energize_count",
+      "spell": 812574,
+      "power": 0,
+      "target": "h",
+      "min": 1
+    }
+  ]
+}

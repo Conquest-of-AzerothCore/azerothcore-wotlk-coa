@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Foreststalker's Wildroot Favor opens into its quiver and its arrow incarnation",
+  "contract": [
+    "Foreststalker's Favors (303595-303602) say they hold a quiver and an arrow incarnation, but their use spell 60034",
+    "\"Smoke\" has only dummy effects and no handler, so using one did nothing and the buyer never got either item.",
+    "Expected: using Foreststalker's Wildroot Favor 303601 spends it and stores Foreststalker's Wildroot Quiver 255966",
+    "and Incarnation: Foreststalker's Wildroot Arrow 282759, through the Ethereal Bazaar set cache script."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8824.3, "y": 626.4, "z": 94.4, "o": 0},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 2000},
+    {"action": "add_item", "label": "Carry Foreststalker's Wildroot Favor", "actor": "hero", "item": 303601},
+    {"action": "assert", "label": "SETUP: no quiver yet", "actor": "hero", "metric": "item_count", "item": 255966,
+     "equals": 0},
+    {"action": "use_item", "label": "Use the Favor", "actor": "hero", "item": 303601, "spell": 60034},
+    {"action": "assert", "label": "DISCRIMINATING: the Favor is spent", "actor": "hero", "metric": "item_count",
+     "item": 303601, "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "DISCRIMINATING: the quiver is stored", "actor": "hero", "metric": "item_count",
+     "item": 255966, "equals": 1},
+    {"action": "assert", "label": "DISCRIMINATING: the arrow incarnation is stored", "actor": "hero",
+     "metric": "item_count", "item": 282759, "equals": 1}
+  ]
+}

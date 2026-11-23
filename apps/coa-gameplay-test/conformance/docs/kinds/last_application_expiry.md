@@ -70,3 +70,19 @@ does.
 Felsworn: Legionfall 801899 (Annihilan Strike 801903 feeding 801902, 15000 ms); Malice of Gul'dan 800214 (Fel Fireball
 801312 every 2000 ms with spell crit and hit forced, feeding Felstrike 802678 on the dummy, 6000 ms, and Fragment of
 Malice 800239 on the caster, 5000 ms).
+
+## Trigger at the caster (opt-in, ADR 1132)
+
+`trigger_target: "caster"` casts the trigger at the caster instead of the dummy, for a self-cast or summon trigger
+whose aura is read on the caster (`caster: true`). Absent, the trigger is cast at the dummy as before.
+
+Witch Doctor: The True Spirit 802268 `true_lasts` (Serpent Ward 500960 at the caster, The True God 681233 on the
+caster, 10000 ms from its application).
+
+## Poll before the cast (opt-in, ADR 1152)
+
+`poll_before_cast: true` reads one poll right before the cast in each arm, so an aura applied at the cast itself (a
+summon that casts it inside an instant trigger) is seen as a rise from that read and timed from the cast. Absent, the
+first poll follows the cast as before (`no_refresh` always reads that poll).
+
+Witch Doctor: The True Spirit 802268 `true_lasts` (The True God 681233 from the Serpent Ward summon).

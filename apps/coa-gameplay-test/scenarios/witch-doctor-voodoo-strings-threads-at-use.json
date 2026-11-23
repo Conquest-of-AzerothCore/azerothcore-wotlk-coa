@@ -1,0 +1,253 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Voodoo Strings needs Puppeteer's Threads on the enemy when Bad Juju is used",
+  "contract": [
+    "Voodoo Strings 705910: 'When Bad Juju is used on enemies affected by Puppeteer's Threads, it strikes an",
+    "additional time every 1 sec for 30% of the damage dealt over 3 sec' (G-1, read literally: the enemy",
+    "carries the Threads when the Juju is used). Puppeteer's Threads 92084 lays 572836 on the enemy after any",
+    "non-periodic damage of the doctor (AscensionWitchDoctorEvents.cpp:77-79, 132-141), and that proc runs",
+    "inside the hit (Spell.cpp:2969) before OnSpellHitResult (Spell.cpp:3057), where the Strings check reads",
+    "target->HasAura(Threads) (AscensionWitchDoctorAbilities.cpp:251-252). So a first Bad Juju on an enemy",
+    "without Threads threads it with its own hit and strikes 3 times (cycle 9 sweep 20261121-051237). The",
+    "fix reads the Threads at the Juju's launch (OnSpellCalculatedTarget, Spell.cpp:8667, called from",
+    "HandleLaunchPhase at the cast) and marks that Threads aura; the hit strikes only through a marked aura.",
+    "Two dummies 20 yd apart, beyond any 10 yd chain or splash; Dark Effigy is not known, so each spell has",
+    "one target. Fresh (5 yd): a real Bad Juju 802087 with no Threads on it: 0 strikes after the fix, 3",
+    "before. Threaded (25 yd): a real Malefic Wrath 807037 (2000 ms, Speed 35) leaves the Threads, then a",
+    "real Bad Juju (2500 ms, Speed 20): 3 strikes in both builds. 706898 ticks every 1000 ms for 3000 ms;",
+    "each count is read at least 850 ms after the last tick (hit 2750 ms after the cast at 5 yd, 3750 ms at",
+    "25 yd). Counts only, no roll. Puppeteer 92084 is passive and its learn applies it; 705910 is learned as",
+    "in the class entries, whose generated scenarios read its strikes (final07 runs 1 and 2: 3)."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "fresh",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 5,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "threaded",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 25,
+      "stationary": true,
+      "min_level_armor": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login, spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Bad Juju",
+      "actor": "doctor",
+      "spell": 802087
+    },
+    {
+      "action": "learn",
+      "label": "Malefic Wrath",
+      "actor": "doctor",
+      "spell": 807037
+    },
+    {
+      "action": "learn",
+      "label": "Puppeteer's Threads (passive)",
+      "actor": "doctor",
+      "spell": 92084
+    },
+    {
+      "action": "learn",
+      "label": "Voodoo Strings",
+      "actor": "doctor",
+      "spell": 705910
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the fresh dummy stands 5 yd from the Witch Doctor",
+      "actor": "fresh",
+      "metric": "distance_2d",
+      "target": "doctor",
+      "min": 4.8,
+      "max": 5.2
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the threaded dummy stands 25 yd from the Witch Doctor",
+      "actor": "threaded",
+      "metric": "distance_2d",
+      "target": "doctor",
+      "min": 24.8,
+      "max": 25.2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the fresh dummy carries no Puppeteer's Threads 572836",
+      "actor": "fresh",
+      "metric": "aura",
+      "spell": 572836,
+      "caster": "doctor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the threaded dummy carries no Puppeteer's Threads 572836 yet",
+      "actor": "threaded",
+      "metric": "aura",
+      "spell": 572836,
+      "caster": "doctor",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 802087
+    },
+    {
+      "action": "cast",
+      "label": "Bad Juju at the fresh dummy, which carries no Threads",
+      "actor": "doctor",
+      "spell": 802087,
+      "target": "fresh"
+    },
+    {
+      "action": "wait",
+      "label": "2500 ms cast, 250 ms flight, three ticks over 3000 ms and 850 ms",
+      "ms": 6600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Juju hit the fresh dummy once",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 802087,
+      "target": "fresh",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Juju's own hit left Puppeteer's Threads on the fresh dummy",
+      "actor": "fresh",
+      "metric": "aura",
+      "spell": 572836,
+      "caster": "doctor",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: no Voodoo Strings strike on the enemy that had no Threads when the Juju was used",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 706898,
+      "target": "fresh",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 807037
+    },
+    {
+      "action": "cast",
+      "label": "Malefic Wrath at the threaded dummy",
+      "actor": "doctor",
+      "spell": 807037,
+      "target": "threaded"
+    },
+    {
+      "action": "wait",
+      "label": "2000 ms cast, 714 ms flight and 586 ms",
+      "ms": 3300
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Wrath left Puppeteer's Threads on the threaded dummy",
+      "actor": "threaded",
+      "metric": "aura",
+      "spell": 572836,
+      "caster": "doctor",
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 802087
+    },
+    {
+      "action": "cast",
+      "label": "Bad Juju at the threaded dummy",
+      "actor": "doctor",
+      "spell": 802087,
+      "target": "threaded"
+    },
+    {
+      "action": "wait",
+      "label": "2500 ms cast, 1250 ms flight, three ticks over 3000 ms and 850 ms",
+      "ms": 7600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Juju hit the threaded dummy once",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 802087,
+      "target": "threaded",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Voodoo Strings strikes the enemy that carried the Threads 3 times",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 706898,
+      "target": "threaded",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: still no strike on the fresh dummy",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 706898,
+      "target": "fresh",
+      "equals": 0
+    }
+  ]
+}

@@ -24,7 +24,10 @@
   {
     "spell": 92088,
     "clause": "While Inner Demon is active, your Fel Fireball will now unleash a Felstrike on your target.",
-    "labels": [],
+    "labels": [
+      "92088 behaviour_metric_delta applied",
+      "92088 behaviour_metric_delta no_inner_demon"
+    ],
     "kind": "claim"
   },
   {
@@ -35,7 +38,8 @@
       {
         "claim": "${($d*1000/$T1)*($m1+0+$SP*.05)} Shadowflame Damage",
         "labels": [
-          "92088 effect_value 802678e0 #0"
+          "802678 behaviour_metric_delta tick_value",
+          "802678 behaviour_metric_delta tick_spell_power"
         ]
       },
       {
@@ -44,13 +48,14 @@
           "92088 spell_duration 802678 #1"
         ]
       }
-    ]
+    ],
+    "reason": "Displayed text to be corrected in a client patch (O-19): the owner keeps the server value, 34 per tick at level 60 (Spell.dbc 802678 Effect[0] BasePoints 8 + DieSides 1, RealPointsPerLevel 0.5, BaseLevel 10, SpellLevel 10, MaxLevel 0; SpellEffectInfo::CalcValue = 8 + 1 + int(0.5 x (60 - 10)) = 34, the SP term 0 at the reference spell power), while the client shows 54 = 6 x 9 (base points only, ADR 0006). The value is counted on the server formula by the entry 802678 tick_value, not on the displayed 54; the corrected client text is prepared separately. Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and coa-history Felstrike ticks (gear and level differ)."
   },
   {
     "spell": 92088,
     "clause": "stacking $u times.",
     "labels": [
-      "92088 max_stacks 802678 #2"
+      "92088 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -82,7 +87,7 @@
     "spell": 300465,
     "clause": "Reduces the duration of movement impairing effects on you by $s1%.",
     "labels": [
-      "300465 effect_value e0 #0"
+      "300465 behaviour_duration_ratio snare"
     ],
     "kind": "claim"
   },
@@ -112,7 +117,9 @@
     "spell": 300467,
     "clause": "Reduces the cooldown of your Hateforged Barrier by $/1000;s1 sec.",
     "labels": [
-      "300467 effect_value e0 #0"
+      "300467 cost_gate 707527 without",
+      "300467 cost_gate 707527 with",
+      "300467 cost_gate 707527 beyond"
     ],
     "kind": "claim"
   },
@@ -125,13 +132,19 @@
         "claim": "creates a damage absorption shield on all nearby allies",
         "labels": [
           "300468 behaviour_metric_delta ally_shield"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "within $300469a yds",
-        "labels": []
+        "labels": [
+          "300468 behaviour_metric_delta ally_radius"
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 300468,
@@ -142,15 +155,20 @@
         "claim": "absorbing ${$STA*1+$300469m1+$300469ppl1+$SP*.2+$AP*.08} damage",
         "labels": [
           "300468 behaviour_taken_hit amount"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "for $300469d",
         "labels": [
-          "300468 behaviour_metric_delta shield_expiry"
-        ]
+          "300468 behaviour_metric_delta shield_held",
+          "300468 behaviour_metric_delta shield_gone"
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 300468,
@@ -311,15 +329,18 @@
     "spell": 300478,
     "clause": "Critically striking with Fel Fireball now increases the critical strike chance of your next Fel Fireball within $300486d by $300486s1%.",
     "labels": [
-      "300478 spell_duration 300486 #0",
-      "300478 effect_value 300486e0 #1"
+      "300478 behaviour_metric_delta crit_bonus",
+      "300478 behaviour_metric_delta aura_held",
+      "300478 behaviour_metric_delta aura_gone"
     ],
     "kind": "claim"
   },
   {
     "spell": 300478,
     "clause": "Can occur only once every 5 seconds.",
-    "labels": [],
+    "labels": [
+      "300478 behaviour_internal_cooldown_gate"
+    ],
     "kind": "claim"
   },
   {
@@ -396,7 +417,7 @@
     "spell": 300485,
     "clause": "Increases the tick rate of Immolation Aura by $s2%.",
     "labels": [
-      "300485 effect_value e1 #0"
+      "300485 behaviour_metric_delta tick_rate"
     ],
     "kind": "claim"
   },
@@ -439,10 +460,21 @@
   {
     "spell": 301287,
     "clause": "Each Felfury active now increases your haste by $s1%.",
-    "labels": [
-      "301287 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your haste by $s1% (melee and ranged haste, Felfury effect 1)",
+        "labels": [
+          "301287 behaviour_metric_delta haste"
+        ]
+      },
+      {
+        "claim": "increases your haste by $s1% (spell haste, Felfury effect 0)",
+        "labels": [
+          "301287 behaviour_metric_delta spell_haste"
+        ]
+      }
+    ]
   },
   {
     "spell": 500067,
@@ -478,8 +510,12 @@
   {
     "spell": 520693,
     "clause": "Consumes 2 Felfury",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "520693 behaviour_metric_delta consumes"
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 520693,
@@ -508,7 +544,11 @@
       },
       {
         "claim": "at least 5 enemies",
-        "labels": []
+        "labels": [
+          "520693 behaviour_metric_delta inner_five",
+          "520693 behaviour_metric_delta inner_four"
+        ],
+        "evidence": "behaviour"
       }
     ]
   },
@@ -557,14 +597,19 @@
     "spell": 520244,
     "clause": "Dealing damage with Dancing Blades reduces the cooldown of Fury Unleashed by $/1000;520816S1 sec.",
     "labels": [
-      "520244 effect_value 520816e0 #0"
+      "520244 cost_gate 555738 without",
+      "520244 cost_gate 555738 with",
+      "520244 cost_gate 555738 beyond"
     ],
     "kind": "claim"
   },
   {
     "spell": 520246,
     "clause": "Critical strikes with Fel Fireball now generate 1 Felfury.",
-    "labels": [],
+    "labels": [
+      "520246 behaviour_metric_delta crit_gain",
+      "520246 behaviour_metric_delta control_no_crit"
+    ],
     "kind": "claim"
   },
   {
@@ -588,7 +633,7 @@
     "spell": 520251,
     "clause": "Increases the effectiveness of your Intuitions by $s2%.",
     "labels": [
-      "520251 effect_value e1 #0"
+      "520251 behaviour_metric_delta intuition"
     ],
     "kind": "claim"
   },
@@ -613,16 +658,37 @@
   {
     "spell": 520254,
     "clause": "Carve now channels 1 sec faster.",
-    "labels": [],
+    "labels": [
+      "520254 behaviour_metric_delta channel_held",
+      "520254 behaviour_metric_delta channel_gone"
+    ],
     "kind": "claim"
   },
   {
     "spell": 520257,
     "clause": "Casting Inner Demon with at least 6 Felfury now restores $520258s1 Energy.",
-    "labels": [
-      "520257 effect_value 520258e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting Inner Demon with at least 6 Felfury",
+        "labels": []
+      },
+      {
+        "claim": "now restores $520258s1 Energy",
+        "labels": [
+          "520257 behaviour_metric_delta energy_at_six"
+        ]
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "the below-six control needs Inner Demon cast with a real Felfury count under six: set_aura at 5 or 6 right before the cast reads 0 even at six (pair P1), and a Burning Hatred then Smite setup needs two setup targets (setup_target is one for all setup casts)",
+      "attempts": [
+        {
+          "agent": "fw-b3g1b",
+          "report": ".agents/plans/fw-b3g1b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 520592,
@@ -652,17 +718,36 @@
     "spell": 520805,
     "clause": "Reduces the Energy cost of Chaos Rush by $s2",
     "labels": [
-      "520805 effect_value e1 #0"
+      "520805 cost_gate 500028 without",
+      "520805 cost_gate 500028 with",
+      "520805 cost_gate 500028 beyond"
     ],
     "kind": "claim"
   },
   {
     "spell": 520805,
     "clause": "and casting $?s520853[Fel Torpedo][Chaos Rush] now heals you for ${$520806m1+$520806ppl1+$STA*0.2+$AP*.33}.",
-    "labels": [
-      "520805 effect_value 520806e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "$520806m1+$520806ppl1",
+        "labels": [
+          "520805 behaviour_metric_delta heal"
+        ]
+      },
+      {
+        "claim": "$STA*0.2",
+        "labels": [
+          "520805 behaviour_metric_delta heal_sta"
+        ]
+      },
+      {
+        "claim": "$AP*.33",
+        "labels": [
+          "520805 behaviour_metric_delta heal_ap"
+        ]
+      }
+    ]
   },
   {
     "spell": 520817,
@@ -675,13 +760,18 @@
   {
     "spell": 520831,
     "clause": "Fully channeling Carve now refunds 1 Felfury.",
-    "labels": [],
+    "labels": [
+      "520831 behaviour_metric_delta refund"
+    ],
     "kind": "claim"
   },
   {
     "spell": 520833,
     "clause": "Critical strikes with Sargeron Smite now refund 1 Felfury.",
-    "labels": [],
+    "labels": [
+      "520833 behaviour_metric_delta crit_gain",
+      "520833 behaviour_metric_delta control_no_crit"
+    ],
     "kind": "claim"
   },
   {
@@ -692,12 +782,15 @@
       {
         "claim": "$s2% increased damage",
         "labels": [
-          "520833 effect_value e1 #0"
+          "520833 behaviour_hit_ratio above_76"
         ]
       },
       {
         "claim": "above 75% of their maximum health",
-        "labels": []
+        "labels": [
+          "520833 behaviour_hit_ratio above_76",
+          "520833 behaviour_hit_ratio control_below_74"
+        ]
       }
     ]
   },
@@ -705,12 +798,24 @@
     "spell": 520853,
     "clause": "Transforms your Chaos Rush into Fel Torpedo.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Chaos Rush is replaced only while specialization 9 is active (AscensionTalentReplacementData.h:29, SynchronizeTalentReplacements requires specializationId == SpecId); a metric_delta entry cannot set the active specialization, although the harness has a specialization step",
+      "attempts": [
+        {
+          "agent": "fw-b3g1b",
+          "report": ".agents/plans/fw-b3g1b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 520853,
     "clause": "Generates 1 Felfury",
-    "labels": [],
+    "labels": [
+      "520853 behaviour_metric_delta felfury",
+      "520853 behaviour_metric_delta felfury_chaos_rush"
+    ],
     "kind": "claim"
   },
   {
@@ -719,7 +824,11 @@
     "labels": [
       "520853 effect_value 500761e0 #0",
       "500610 script_hit 500761 torpedo_hit",
-      "500610 script_hit 500761 torpedo_hit_ap"
+      "500610 script_hit 500761 torpedo_hit_ap",
+      "500610 behaviour_metric_delta torpedo_once caster",
+      "500610 behaviour_metric_delta torpedo_once_far caster",
+      "500610 behaviour_metric_delta torpedo_two_casters caster",
+      "500610 behaviour_metric_delta torpedo_two_casters caster2"
     ],
     "kind": "claim"
   },
@@ -727,7 +836,16 @@
     "spell": 520853,
     "clause": "Generates a large amount of threat.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Measured on Fel Torpedo's hit 500761 (SPELL_EFFECT_THREAT 225 flat in the DBC, SpellLevel 34): threat 1209.75 on 303 health lost, slope 3.14 against 1 with the DBC's flat 259 (counted pair 20261123-211541 / -211612, labels removed from the class file after the run). Spell::EffectThreat passes the flat amount through LocalLevelScaling::PoolThreatFor (SpellEffects.cpp:4787, Unit.cpp:194-200), a ratio of the dummy's real to viewed maximum health; that this explains the 872.75 left after damage 303 and initial threat 34 (3.879 times 225) is a hypothesis not verified by a run. A proof needs the dummy's pool factor as an input of the judge, which threat_slope lacks. The nearest kind is threat_slope.",
+      "attempts": [
+        {
+          "agent": "fw-ea5",
+          "report": ".agents/plans/fw-ea5/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 520853,
@@ -761,11 +879,30 @@
   {
     "spell": 524947,
     "clause": "Using $?s520853[Fel Torpedo][Chaos Rush] increases the next instance of direct spell or ability damage within $525027d by $525027s1%.",
-    "labels": [
-      "524947 spell_duration 525027 #0",
-      "524947 effect_value 525027e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "within $525027d",
+        "labels": [
+          "524947 behaviour_metric_delta aura_held",
+          "524947 behaviour_metric_delta aura_gone"
+        ]
+      },
+      {
+        "claim": "by $525027s1%",
+        "labels": [
+          "524947 behaviour_hit_ratio damage",
+          "524947 behaviour_metric_delta grant_amount"
+        ]
+      },
+      {
+        "claim": "the next instance of direct spell or ability damage",
+        "labels": [
+          "524947 behaviour_metric_delta consumed",
+          "524947 behaviour_metric_delta kept"
+        ]
+      }
+    ]
   },
   {
     "spell": 524950,
@@ -798,8 +935,10 @@
       {
         "claim": "Curse an enemy ... within $d",
         "labels": [
-          "525001 behaviour_metric_delta curse_expiry"
-        ]
+          "525001 behaviour_metric_delta curse_held",
+          "525001 behaviour_metric_delta curse_gone"
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "causing the next spell they cast ... to be reflected onto them",
@@ -810,16 +949,28 @@
   {
     "spell": 525079,
     "clause": "Increases the damage of your Bane of Chaos and Ruin by $s1%.",
-    "labels": [
-      "525079 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Ruin damage +$s1% (20)",
+        "labels": [
+          "525079 behaviour_hit_ratio ruin"
+        ]
+      },
+      {
+        "claim": "Bane of Chaos damage +$s1% (20)",
+        "labels": [
+          "525079 behaviour_hit_ratio bane"
+        ]
+      }
+    ]
   },
   {
     "spell": 555738,
     "clause": "Spin your glaives for $d,",
     "labels": [
-      "555738 aura_duration_ms #0"
+      "555738 behaviour_metric_delta duration_held",
+      "555738 behaviour_metric_delta duration_gone"
     ],
     "kind": "claim"
   },
@@ -827,8 +978,7 @@
     "spell": 555738,
     "clause": "increasing movement speed by $s2%",
     "labels": [
-      "555738 effect_value e1 #1",
-      "555738 aura_amount e1 #1"
+      "555738 behaviour_metric_delta speed"
     ],
     "kind": "claim"
   },
@@ -854,16 +1004,52 @@
   {
     "spell": 555738,
     "clause": "You are immune to movement impairing and loss of control effects.",
-    "labels": [],
+    "labels": [
+      "555738 immunity loss_sleep 555738 applied",
+      "555738 immunity loss_sleep 555738 cast",
+      "555738 immunity loss_sleep 555738 expired",
+      "555738 immunity loss_sleep 9159 control",
+      "555738 immunity loss_sleep 9159 with",
+      "555738 immunity loss_sleep 9159 without",
+      "555738 immunity loss_stun_fear 12096 control",
+      "555738 immunity loss_stun_fear 12096 with",
+      "555738 immunity loss_stun_fear 12096 without",
+      "555738 immunity loss_stun_fear 555738 applied",
+      "555738 immunity loss_stun_fear 555738 cast",
+      "555738 immunity loss_stun_fear 555738 expired",
+      "555738 immunity loss_stun_fear 56 control",
+      "555738 immunity loss_stun_fear 56 with",
+      "555738 immunity loss_stun_fear 56 without",
+      "555738 immunity movement 38767 control",
+      "555738 immunity movement 38767 with",
+      "555738 immunity movement 38767 without",
+      "555738 immunity movement 47021 control",
+      "555738 immunity movement 47021 with",
+      "555738 immunity movement 47021 without",
+      "555738 immunity movement 555738 applied",
+      "555738 immunity movement 555738 cast",
+      "555738 immunity movement 555738 expired"
+    ],
     "kind": "claim"
   },
   {
     "spell": 560057,
     "clause": "Increases the critical strike chance of Azzinoth's Assault and Sargeron Smite by $s1%.",
-    "labels": [
-      "560057 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Azzinoth's Assault critical strike chance +$s1% (5)",
+        "labels": [
+          "560057 behaviour_metric_delta assault_crit"
+        ]
+      },
+      {
+        "claim": "Sargeron Smite critical strike chance +$s1% (5)",
+        "labels": [
+          "560057 behaviour_metric_delta smite_crit"
+        ]
+      }
+    ]
   },
   {
     "spell": 560284,
@@ -930,22 +1116,23 @@
     "spell": 560533,
     "clause": "Increases critical strike chance of all party and raid members within $a1 by $s1%.",
     "labels": [
-      "560533 effect_radius e0 #0",
-      "560533 effect_value e0 #1"
+      "560533 behaviour_party_stat_ratio party_crit"
     ],
     "kind": "claim"
   },
   {
     "spell": 560533,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "560533 behaviour_group_stack_cap"
+    ],
     "kind": "claim"
   },
   {
     "spell": 560533,
     "clause": "In addition, increases your critical strike chance by $s2%.",
     "labels": [
-      "560533 effect_value e1 #2"
+      "560533 behaviour_metric_delta personal_crit"
     ],
     "kind": "claim"
   },
@@ -953,7 +1140,7 @@
     "spell": 560542,
     "clause": "Emanate a powerful aura, granting $s1% increased melee",
     "labels": [
-      "560542 effect_value e0 #0"
+      "560542 behaviour_party_stat_ratio melee_haste"
     ],
     "kind": "claim"
   },
@@ -961,14 +1148,16 @@
     "spell": 560542,
     "clause": "and ranged haste to party and raid members within $a1 yds.",
     "labels": [
-      "560542 effect_radius e0 #1"
+      "560542 behaviour_party_stat_ratio ranged_haste"
     ],
     "kind": "claim"
   },
   {
     "spell": 560542,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "560542 behaviour_group_stack_cap"
+    ],
     "kind": "claim"
   },
   {
@@ -983,7 +1172,7 @@
     "spell": 560549,
     "clause": "Grant $s1% increased melee",
     "labels": [
-      "560549 effect_value e0 #0"
+      "560549 behaviour_party_stat_ratio melee_haste"
     ],
     "kind": "claim"
   },
@@ -991,23 +1180,36 @@
     "spell": 560549,
     "clause": "and ranged haste to party and raid members within $a1 yds.",
     "labels": [
-      "560549 effect_radius e0 #1"
+      "560549 behaviour_party_stat_ratio ranged_haste"
     ],
     "kind": "claim"
   },
   {
     "spell": 560549,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "560549 behaviour_group_stack_cap"
+    ],
     "kind": "claim"
   },
   {
     "spell": 560549,
     "clause": "In addition, your Stamina and attack power is increased by $s2%.",
-    "labels": [
-      "560549 effect_value e1 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Stamina +$s2% (4)",
+        "labels": [
+          "560549 behaviour_metric_delta stamina"
+        ]
+      },
+      {
+        "claim": "attack power +$s2% (4)",
+        "labels": [
+          "560549 behaviour_metric_delta attack_power"
+        ]
+      }
+    ]
   },
   {
     "spell": 560573,
@@ -1256,25 +1458,53 @@
   {
     "spell": 561216,
     "clause": "generating 1 Felfury with each strike.",
-    "labels": [],
+    "labels": [
+      "561216 behaviour_metric_delta felfury"
+    ],
     "kind": "claim"
   },
   {
     "spell": 561216,
     "clause": "While active you are immune to crowd control effects.",
-    "labels": [],
+    "labels": [
+      "561216 immunity fear 12096 control",
+      "561216 immunity fear 12096 with",
+      "561216 immunity fear 12096 without",
+      "561216 immunity fear 561216 applied",
+      "561216 immunity fear 561216 cast",
+      "561216 immunity fear 561216 expired",
+      "561216 immunity root 47021 control",
+      "561216 immunity root 47021 with",
+      "561216 immunity root 47021 without",
+      "561216 immunity root 561216 applied",
+      "561216 immunity root 561216 cast",
+      "561216 immunity root 561216 expired",
+      "561216 immunity stun 56 control",
+      "561216 immunity stun 56 with",
+      "561216 immunity stun 56 without",
+      "561216 immunity stun 561216 applied",
+      "561216 immunity stun 561216 cast",
+      "561216 immunity stun 561216 expired"
+    ],
     "kind": "claim"
   },
   {
     "spell": 561216,
     "clause": "Can hit the same target multiple times.",
-    "labels": [],
+    "labels": [
+      "561216 behaviour_metric_delta same_target"
+    ],
     "kind": "claim"
   },
   {
     "spell": 561216,
     "clause": "Cannot hit invisible or stealthed targets.",
-    "labels": [],
+    "labels": [
+      "561216 behaviour_metric_delta no_hit_invisible",
+      "561216 behaviour_metric_delta no_hit_stealth",
+      "561216 behaviour_metric_delta no_hit_invisible_visible",
+      "561216 behaviour_metric_delta no_hit_stealth_visible"
+    ],
     "kind": "claim"
   },
   {
@@ -1352,7 +1582,11 @@
       },
       {
         "claim": "for $570159d",
-        "labels": []
+        "labels": [
+          "570158 behaviour_metric_delta scar_held",
+          "570158 behaviour_metric_delta scar_gone"
+        ],
+        "evidence": "behaviour"
       }
     ]
   },
@@ -1434,7 +1668,16 @@
     "spell": 574145,
     "clause": "Twin Slice and Sargeron Smite now additionally scale with your Agility.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The tooltip states no coefficient, so the claim is a direction only (damage grows with Agility, and belongs to the passive): the same shape as power_term_direction (Sun Cleric Sun's Gift 680656, mentor D-106), which requires a power aura with SPELL_AURA_MOD_ATTACK_POWER (kinds/power_term_direction.py:23,83) and reads the caster's attack power. An Agility variant (an aura raising Agility, a read of Agility, Twin Slice 802060 as the cast spell) is a new option of that kind. hit_ratio needs a stated bonus and stat_gain judges a stat added by a cast, neither fits. The nearest kind is power_term_direction.",
+      "attempts": [
+        {
+          "agent": "fw-ea5",
+          "report": ".agents/plans/fw-ea5/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 574145,
@@ -1455,7 +1698,16 @@
     "spell": 574146,
     "clause": "Damage dealt by Fel Fireball, Sargeron Smite, and Twin Slice now additionally scales with your Agility.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Same as 129.0 with Fel Fireball 801312, Sargeron Smite and Twin Slice 802060 as cast spells: no coefficient in the tooltip, a direction-only claim, power_term_direction needs an Agility variant (an aura raising Agility, a read of Agility). The nearest kind is power_term_direction.",
+      "attempts": [
+        {
+          "agent": "fw-ea5",
+          "report": ".agents/plans/fw-ea5/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 574153,
@@ -2101,7 +2353,10 @@
     "claims": [
       {
         "claim": "Triggering Dancing Blades now increases the damage of next Sargeron Smite",
-        "labels": []
+        "labels": [
+          "705145 behaviour_metric_delta consumed",
+          "705145 behaviour_metric_delta kept"
+        ]
       },
       {
         "claim": "by $705146s1%",
@@ -2111,7 +2366,10 @@
       },
       {
         "claim": "for $705146d,",
-        "labels": []
+        "labels": [
+          "705145 behaviour_metric_delta duration_held",
+          "705145 behaviour_metric_delta duration_gone"
+        ]
       }
     ]
   },
@@ -2197,7 +2455,10 @@
     "claims": [
       {
         "claim": "your next Sargeron Smite",
-        "labels": []
+        "labels": [
+          "706425 behaviour_metric_delta consumed",
+          "706425 behaviour_metric_delta kept"
+        ]
       },
       {
         "claim": "within $706269d",
@@ -2243,19 +2504,43 @@
     "claims": [
       {
         "claim": "Casting Carve now makes your next Fel Fireball instant cast",
-        "labels": []
+        "labels": [
+          "707444 behaviour_metric_delta instant",
+          "707444 behaviour_metric_delta consumed"
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "and causes it to strike 1 additional enemy near the primary target based on how long you channeled,",
-        "labels": []
+        "labels": [
+            "707444 behaviour_metric_delta extras_full"
+          ]
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "'strike 1 additional enemy ... based on how long you channeled' needs the channel ended at a set time, so that the extra targets of a short and of a full channel can be compared. No metric_delta option ends a channel: hold_power_during_wait and relocate_during_wait only keep or move the caster, Carve 800206 carries no movement channel interrupt (it can channel while moving), and the harness action cancel_aura is not wired into any metric_delta option (needs a new option, tool group). The full channel is read by extras_full (nine offered, all struck); the growth with the length is not. The nearest kind is metric_delta with area_dummies and area_sum.",
+      "attempts": [
+        {
+          "agent": "fw-ea5",
+          "report": ".agents/plans/fw-ea5/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 707444,
     "clause": "up to a maximum of 10 enemies, dealing less damage with each target struck.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The cap of 10 needs eleven candidates around the primary after a full channel and the 'less damage with each target' direction needs a per-target damage order. The fixed_count cap arm (Norgannon's Wrath 524739 cap) was tried (cap and cap_control entries, one real Carve as a setup cast): fixed_count sets the setup cast with no Felfury (the Carve is refused for lack of power) and waits 1600 ms after it, shorter than the 2500 ms channel, so no Fel Fireball follows a finished channel; the harness admits nine area dummies in metric_delta, one short of the eleven the cap needs. A fixed_count setup fixture (setup auras and setup wait) is a tool change. The nearest kind is fixed_count cap.",
+      "attempts": [
+        {
+          "agent": "fw-ea5",
+          "report": ".agents/plans/fw-ea5/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 707513,
@@ -2267,15 +2552,20 @@
         "labels": [
           "707513 behaviour_metric_delta regen_one_stack",
           "707513 behaviour_metric_delta regen_two_stacks"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "for $525042d",
         "labels": [
-          "707513 behaviour_metric_delta regen_expiry"
-        ]
+          "707513 behaviour_metric_delta regen_held",
+          "707513 behaviour_metric_delta regen_gone"
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 707513,
@@ -2286,7 +2576,7 @@
     ],
     "kind": "claim",
     "evidence": "behaviour",
-    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 707842,
@@ -2414,8 +2704,13 @@
   {
     "spell": 800203,
     "clause": "Usable while moving.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "800203 behaviour_metric_delta moving_cast",
+      "800203 behaviour_metric_delta moving_cast_control"
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 800204,
@@ -2436,8 +2731,12 @@
   {
     "spell": 800206,
     "clause": "Consumes 2 Felfury",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "800206 behaviour_metric_delta consumes"
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 800206,
@@ -2451,7 +2750,16 @@
     "spell": 800206,
     "clause": "Upon ending the channel, slash in front of you, dealing increased Weapon Damage with both weapons based on how long you channel, dealing less damage with each target struck.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The tooltip gives no figure for the end slash: it states a direction only (more Weapon Damage with a longer channel, less with each target struck). The check needs the damage of the end slash 803715 at two channel lengths (a channel ended at a set time, see the 707444 gap) and a direction judge across them; power_term_direction judges attack power only and no existing kind compares a spell's damage across channel lengths. The nearest is hit_ratio with a stated bonus, which the tooltip does not give.",
+      "attempts": [
+        {
+          "agent": "fw-ea5",
+          "report": ".agents/plans/fw-ea5/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 800206,
@@ -2621,7 +2929,8 @@
       {
         "claim": "${($d*1000/$T1)*($m1+0+$SP*.05)} Shadowflame Damage",
         "labels": [
-          "800214 effect_value 802678e0 #1"
+          "802678 behaviour_metric_delta tick_value",
+          "802678 behaviour_metric_delta tick_spell_power"
         ]
       },
       {
@@ -2631,7 +2940,8 @@
           "800214 behaviour_metric_delta felstrike_duration"
         ]
       }
-    ]
+    ],
+    "reason": "Displayed text to be corrected in a client patch (O-19): the owner keeps the server value, 34 per tick at level 60 (Spell.dbc 802678 Effect[0] BasePoints 8 + DieSides 1, RealPointsPerLevel 0.5, BaseLevel 10, SpellLevel 10, MaxLevel 0; SpellEffectInfo::CalcValue = 8 + 1 + int(0.5 x (60 - 10)) = 34, the SP term 0 at the reference spell power), while the client shows 54 = 6 x 9 (base points only, ADR 0006). The value is counted on the server formula by the entry 802678 tick_value, not on the displayed 54; the corrected client text is prepared separately. Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and coa-history Felstrike ticks (gear and level differ)."
   },
   {
     "spell": 800214,
@@ -2730,7 +3040,10 @@
     "claims": [
       {
         "claim": "Increases the duration",
-        "labels": []
+        "labels": [
+          "800352 behaviour_metric_delta bane_held",
+          "800352 behaviour_metric_delta bane_gone"
+        ]
       },
       {
         "claim": "reduces the Energy cost of Banes by $s1%.",
@@ -2818,15 +3131,23 @@
     "claims": [
       {
         "claim": "Your next Ruin",
-        "labels": []
+        "labels": [
+          "555277 behaviour_metric_delta consumed",
+          "555277 behaviour_metric_delta kept"
+        ]
       },
       {
         "claim": "within $d",
-        "labels": []
+        "labels": [
+          "555277 behaviour_metric_delta held",
+          "555277 behaviour_metric_delta gone"
+        ]
       },
       {
         "claim": "is instant cast.",
-        "labels": []
+        "labels": [
+          "555277 behaviour_metric_delta instant"
+        ]
       }
     ]
   },
@@ -2856,16 +3177,39 @@
   {
     "spell": 501298,
     "clause": "Consumes 2 Felfury",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "501298 behaviour_metric_delta consumes"
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 501298,
     "clause": "Bring doom upon an enemy, dealing ${$cond($gt($spfi, $sps), $m1+0+$spfi*1, $m1+0+$sps*1.32)} Shadowflame Damage to an enemy, piercing all absorption effects.",
-    "labels": [
-      "501298 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${...} at 0 spell power (2163 to the roll's end)",
+        "labels": [
+          "501298 behaviour_metric_delta damage_0sp"
+        ]
+      },
+      {
+        "claim": "the 1.32 spell power coefficient",
+        "labels": [
+          "501298 behaviour_metric_delta damage_sp"
+        ]
+      },
+      {
+        "claim": "piercing all absorption effects",
+        "labels": [
+          "501298 behaviour_metric_delta pierce_shield",
+          "501298 behaviour_metric_delta pierce_damage",
+          "501298 behaviour_metric_delta pierce_shield_control"
+        ]
+      }
+    ]
   },
   {
     "spell": 501298,
@@ -2979,7 +3323,10 @@
       },
       {
         "claim": "and strikes up to $s2 targets.",
-        "labels": []
+        "labels": [
+          "802058 fireball_targets behaviour_fixed_count",
+          "802058 fireball_targets_control behaviour_fixed_count"
+        ]
       }
     ]
   },
@@ -3005,7 +3352,16 @@
           "802058 behaviour_metric_delta stack_duration_gone"
         ]
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "The claim 'your falling speed is slowed' is the effective Effect[2] SPELL_AURA_FEATHER_FALL of 802058 (AscensionFelswornContracts.cpp:228-235). No metric reads the feather-fall state or MOVEMENTFLAG_FALLING_SLOW, and the harness fall action refuses a feather-falling player ('Fall needs a living player that a landing can hurt'), so the fall_damage kind cannot compare the landing with the aura. Needs a read of the caster's feather-fall state (tool group, named B-8 here); nothing else reaches it.",
+      "attempts": [
+        {
+          "agent": "fw-ea4",
+          "report": ".agents/plans/fw-ea4/report.md (design 1: fall_damage kind, cast 802058 then land from 30 yd on the caster; prove2b runs ['20261123-205807', '20261123-205838']: the post-cast landing was refused with 'Fall needs a living player that a landing can hurt'; no second design exists with the current metrics)"
+        }
+      ]
+    }
   },
   {
     "spell": 802058,
@@ -3303,7 +3659,10 @@
     "spell": 804613,
     "clause": "While at full health, your chance to resist the next Curse or Magic effect on you is increased by 100%.",
     "labels": [],
-    "kind": "claim"
+    "reason": "HELD (review fw-rea1 I-1..I-3): resist_next (804613 behaviour_taken_hit) proves the Curse leg only; the Magic leg (AscensionFelsworn.cpp:78-80) and the full-health gate are not contrasted, and the treatment sets 804613 itself (mentor ruling pending).",
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 804613,
@@ -3363,8 +3722,11 @@
     "clause": "Taunt nearby enemies for $704233d",
     "kind": "claim",
     "labels": [
-      "804823 behaviour_metric_delta taunt_expiry"
-    ]
+      "804823 behaviour_metric_delta taunt_held",
+      "804823 behaviour_metric_delta taunt_gone"
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 804823,
@@ -3375,15 +3737,20 @@
         "claim": "and ignore $s3% of all damage taken",
         "labels": [
           "804823 behaviour_taken_hit half_damage"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "for $d",
         "labels": [
-          "804823 behaviour_metric_delta effect_expiry"
-        ]
+          "804823 behaviour_metric_delta effect_held",
+          "804823 behaviour_metric_delta effect_gone"
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 804823,
@@ -3462,14 +3829,18 @@
     "spell": 805236,
     "clause": "In addition, critical strikes with Carve deal $807427s1% increased damage,",
     "labels": [
-      "805236 effect_value 807427e0 #2"
+      "805236 effect_value 807427e0 #2",
+      "805236 behaviour_hit_ratio crit_inner",
+      "805236 behaviour_hit_ratio crit_no_inner"
     ],
     "kind": "claim"
   },
   {
     "spell": 805236,
     "clause": "increasing up to 60% with each strike based on how long you channel.",
-    "labels": [],
+    "labels": [
+      "805236 behaviour_hit_ratio crit_inner"
+    ],
     "kind": "claim"
   },
   {
@@ -3529,7 +3900,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Owner ruling O-16 (2026-11-23): \"intimidating them\" is flavour text, not a claim: the spell has no DBC effect for it and states no value (Sun Cleric precedent, sun_cleric_clauses.json, 'Flavour text with no stated mechanic'). The damage claim and the nearby-enemies claim of this row keep their labels."
   },
   {
     "spell": 805240,
@@ -3622,7 +3994,9 @@
       },
       {
         "claim": "and its critical strike chance by $s1%",
-        "labels": []
+        "labels": [
+          "805244 behaviour_metric_delta torpedo_crit"
+        ]
       }
     ]
   },
@@ -3744,7 +4118,9 @@
   {
     "spell": 805998,
     "clause": "Damage dealt by Sargeron Smite now spreads your Cripple to 2 nearby enemies.",
-    "labels": [],
+    "labels": [
+      "805998 behaviour_metric_delta cripple_spread"
+    ],
     "kind": "claim"
   },
   {
@@ -3796,7 +4172,10 @@
       },
       {
         "claim": "you cannot attack",
-        "labels": []
+        "labels": [
+          "806109 behaviour_metric_delta no_attack",
+          "806109 behaviour_metric_delta no_attack_applied"
+        ]
       },
       {
         "claim": "move",
@@ -3804,7 +4183,9 @@
       },
       {
         "claim": "or cast spells",
-        "labels": []
+        "labels": [
+          "806109 behaviour_metric_delta no_cast"
+        ]
       }
     ]
   },
@@ -3854,7 +4235,11 @@
       },
       {
         "claim": "Direct critical strikes with the other Felfury spenders (Azzinoth's Assault, Ruin and the rest)",
-        "labels": []
+        "labels": [
+          "806235 behaviour_metric_delta duration_azzinoth",
+          "806235 behaviour_metric_delta duration_felwrath",
+          "806235 behaviour_metric_delta duration_ruin"
+        ]
       }
     ]
   },
@@ -3988,5 +4373,12 @@
       "807914 behaviour_metric_delta expertise"
     ],
     "kind": "claim"
+  },
+  {
+    "spell": 800355,
+    "clause": "30 Energy, plus 30 per sec",
+    "labels": [],
+    "kind": "claim",
+    "reason": "HELD (review fw-rf500610c I-1): the free_3900/free_4100 bracket admits an up-front cost 21-40 and a drain 28-33/s, so neither 10% error is excluded; needs direct Energy reads (up-front and per second). Cost line of the spell card, not the Description (lab render render2/answers/spell-800355.json: '30 Energy, plus 30 per sec'; Spell.dbc ManaCost 30, ManaPerSecond 30). Owner ruling O-24: the cost is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted (Felsworn ADR 0014). Counted on the measured drain: from 100 Energy with no power hold the channel aura is present at 3900 ms and gone at 4100 ms, the end of the fourth 30 Energy drain derived from the DBC and 10 Energy per second regeneration. No other ledger row represents a cost line (grep of every class ledger), so this row is new at the end of the ledger."
   }
 ]

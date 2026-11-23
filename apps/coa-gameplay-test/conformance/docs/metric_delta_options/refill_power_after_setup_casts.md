@@ -1,4 +1,4 @@
-# Refill power after setup casts (`metric_delta` `refill_power_after_setup_casts`, ADR 1038 addendum, provisional)
+# Refill power after setup casts (`metric_delta` `refill_power_after_setup_casts`, ADR 1207 addendum, provisional)
 
 `refill_power_after_setup_casts` is `{"power": type}` or absent. After every setup cast (and its `setup_wait_ms`) the
 caster's power of that type is set to `cast_power` with the existing `set_power` step, through the named point

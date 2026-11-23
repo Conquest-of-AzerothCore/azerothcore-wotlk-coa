@@ -47,6 +47,15 @@ void StackInnerDemonRecast(Aura* aura, int32 remaining, int32 fury)
     aura->SetMaxDuration(std::max(aura->GetMaxDuration(), duration));
     aura->SetDuration(duration);
 }
+void Torpedo(std::vector<ObjectGuid>& struck, std::list<TargetInfo>& targets)
+{
+    targets.remove_if([&struck](TargetInfo const& target) {
+        return std::find(struck.begin(), struck.end(), target.targetGUID) != struck.end();
+    });
+    for (TargetInfo const& target : targets)
+        if (target.missCondition == SPELL_MISS_NONE)
+            struck.push_back(target.targetGUID);
+}
 class felsworn_casts : public AllSpellScript
 {
   public:
@@ -113,6 +122,10 @@ class felsworn_casts : public AllSpellScript
                     ResistDebuff(victim, info))
                     target.missCondition = SPELL_MISS_RESIST;
         Player* player = Owner(caster);
+        if (player && info->Id == 500610)
+            State(player).torpedoed.clear();
+        if (player && info->Id == 500761)
+            Torpedo(State(player).torpedoed, *spell->GetUniqueTargetInfo());
         if (!player || info->SpellFamilyName != 20)
             return;
         if (Inner(player))
@@ -190,8 +203,8 @@ class felsworn_casts : public AllSpellScript
                         aura->Remove();
                 }
         float factor = 1;
-        if (info->Id == 803715 && player->HasAura(805236) && hit.crit)
-            factor *= 1.0f + .03f * std::min<uint64>(10, spell->GetScriptValue(800206));
+        if (info->Id == 803715 && player->HasAura(805236) && spell->GetScriptValue(804216) && hit.crit)
+            factor *= 1.0f + Amount(807427) / 100.0f * std::min<uint64>(10, spell->GetScriptValue(800206));
         if (Named(info, 801312))
         {
             uint32 index = 0;

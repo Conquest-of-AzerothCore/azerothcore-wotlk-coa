@@ -6,7 +6,7 @@ optional `block`), for an entry with a `strike`. Right before every striker cast
 so a melee-class strike is dodged or parried as set. Without `block` it adds no check. Absent, the scenario is
 unchanged.
 
-`block` (0 or 100, ADR 1047, provisional, mentor D-176) adds the block chance to each `set_combat_avoidance` step
+`block` (0 or 100, ADR 1216, provisional, mentor D-176) adds the block chance to each `set_combat_avoidance` step
 (owner ruling O-20) for a strike at the caster. Right after the before and after readings the striker's
 `spell_damage_count` of the strike on the caster is read with `blocked: true` and `blocked: false`: at block 100
 every strike so far must be a blocked hit, at block 0 an unblocked hit, else the run is `unmeasured`. A match keeps

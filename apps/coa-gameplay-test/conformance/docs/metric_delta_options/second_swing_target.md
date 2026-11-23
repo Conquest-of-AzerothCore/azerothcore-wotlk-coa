@@ -1,4 +1,4 @@
-# Second swing target (`metric_delta` `second_swing_target`, ADR 1050, provisional)
+# Second swing target (`metric_delta` `second_swing_target`, ADR 1219, provisional)
 
 `second_swing_target` (an area dummy id, `area1` to `area9`) makes each attack phase of an `attack_swings` entry go on
 to a second target: after the swings at the dummy and the `stop_attack`, the caster attacks that area dummy for the

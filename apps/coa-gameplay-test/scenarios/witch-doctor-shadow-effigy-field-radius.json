@@ -1,0 +1,249 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Shadow Effigy slows every enemy within 30 yd",
+  "contract": [
+    "Shadow Effigy 505339 summons creature 50119; the tooltip says enemies within $504761a1 yds (504761",
+    "EffectRadiusIndex 10 = 30 yd) have their casting speed reduced by 20% and movement speed by 40%. The effigy",
+    "AI applies Shadow Effigy 504761 (casting speed) and 504909 (casting and movement speed) to every valid enemy",
+    "that Nearby() returns (AscensionWitchDoctorSummons.cpp:530-540). Two blocks (cycle 9 author D): the scan was",
+    "Nearby(me, 10.0f), and 504761 carries SPELL_ATTR5_LIMIT_N (AttributesEx5 1576 = 0x628), so a second enemy",
+    "given 504761 removed it from the first (Unit::_AddAura, single-cast auras of the doctor); a trial build with",
+    "the 30 yd scan alone left the dummy 29.78 yd out without 504761 (cycle 8, 20261121-020314). The fix scans",
+    "Radius(ShadowField) and clears LIMIT_N on 504761, whose own target is rewritten to one enemy per cast",
+    "(AscensionWitchDoctorCompletion.cpp:523-538). Layout along +x from the doctor; the effigy stands 1.5 yd",
+    "from the doctor at 1.6 rad from the facing (Summon, Summons.cpp:202-206), so its distances are read too.",
+    "Edges from the effigy with both object sizes (IsWithinDistInMap; effigy 1.0, dummy 1.275): 12.275 yd before",
+    "the fix, 32.275 yd after. Primary 5 yd (affected in both builds), inside 20 yd (affected only after the",
+    "fix), outside 45 yd (never). Reads at one instant 3100 ms after the instant cast: the effigy pulses at once",
+    "and every 1000 ms and renews each aura for 2200 ms, so three pulses have run."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "primary",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 5,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "inside",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 20,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "outside",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 45,
+      "stationary": true,
+      "min_level_armor": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login, spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Shadow Effigy",
+      "actor": "doctor",
+      "spell": 505339
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the primary dummy stands 5 yd from the Witch Doctor",
+      "actor": "primary",
+      "metric": "distance_2d",
+      "target": "doctor",
+      "min": 4.8,
+      "max": 5.2
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the inside dummy stands 20 yd from the Witch Doctor",
+      "actor": "inside",
+      "metric": "distance_2d",
+      "target": "doctor",
+      "min": 19.8,
+      "max": 20.2
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the outside dummy stands 45 yd from the Witch Doctor",
+      "actor": "outside",
+      "metric": "distance_2d",
+      "target": "doctor",
+      "min": 44.8,
+      "max": 45.2
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the dummy combat reach is 1.275 yd",
+      "actor": "inside",
+      "metric": "combat_reach",
+      "min": 1.27,
+      "max": 1.28
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no dummy carries Shadow Effigy 504761 before the cast",
+      "actor": "inside",
+      "metric": "aura",
+      "spell": 504761,
+      "caster": "doctor",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 505339
+    },
+    {
+      "action": "cast",
+      "label": "Shadow Effigy",
+      "actor": "doctor",
+      "spell": 505339,
+      "target": "doctor"
+    },
+    {
+      "action": "wait",
+      "label": "Three effigy pulses (at once, 1000 ms, 2000 ms) and 1100 ms more",
+      "ms": 3100
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one Shadow Effigy 50119 stands",
+      "actor": "doctor",
+      "metric": "owned_creature_count",
+      "entry": 50119,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the inside dummy is 18.5 to 21.5 yd from the effigy (edge 12.275 before, 32.275 after)",
+      "actor": "doctor",
+      "metric": "owned_creature_distance_2d",
+      "entry": 50119,
+      "target": "inside",
+      "min": 18.5,
+      "max": 21.5
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the outside dummy is 43.5 to 46.5 yd from the effigy",
+      "actor": "doctor",
+      "metric": "owned_creature_distance_2d",
+      "entry": 50119,
+      "target": "outside",
+      "min": 43.5,
+      "max": 46.5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the primary dummy, inside 10 yd, carries 504761",
+      "actor": "primary",
+      "metric": "aura",
+      "spell": 504761,
+      "caster": "doctor",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the primary dummy carries 504909",
+      "actor": "primary",
+      "metric": "aura",
+      "spell": 504909,
+      "caster": "doctor",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX (radius): the inside dummy carries 504909",
+      "actor": "inside",
+      "metric": "aura",
+      "spell": 504909,
+      "caster": "doctor",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX (radius and LIMIT_N): the inside dummy carries 504761 while the primary keeps it",
+      "actor": "inside",
+      "metric": "aura",
+      "spell": 504761,
+      "caster": "doctor",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX (LIMIT_N): the primary still carries 504761 at the same instant",
+      "actor": "primary",
+      "metric": "aura",
+      "spell": 504761,
+      "caster": "doctor",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the inside dummy runs 40% slower (1.14286 x 0.6)",
+      "actor": "inside",
+      "metric": "run_speed_rate",
+      "min": 0.68,
+      "max": 0.69
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the outside dummy, beyond 30 yd, carries no 504761",
+      "actor": "outside",
+      "metric": "aura",
+      "spell": 504761,
+      "caster": "doctor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the outside dummy carries no 504909",
+      "actor": "outside",
+      "metric": "aura",
+      "spell": 504909,
+      "caster": "doctor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the outside dummy runs at full speed",
+      "actor": "outside",
+      "metric": "run_speed_rate",
+      "min": 1.14,
+      "max": 1.15
+    }
+  ]
+}

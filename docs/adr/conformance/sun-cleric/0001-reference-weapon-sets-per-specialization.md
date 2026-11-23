@@ -79,7 +79,7 @@ Sources read on 2026-11-20:
 - The first base pair (20261120-201337 / -201547) could not equip the Valkyr set: the second 2529 was refused with
   `EQUIP_ERR_ITEM_CANT_BE_EQUIPPED` (`Item.h:67`) because the reference character does not know Valkyr's Grip 707072.
 - `weapon_set_spells` is `{"Valkyr": [707072]}`. The set learns the spell for real before its equip steps
-  ([ADR 1012](../../1012-a-weapon-set-can-learn-the-spells-it-needs-to-be-equipped.md)).
+  ([ADR 1182](../../1182-a-weapon-set-can-learn-the-spells-it-needs-to-be-equipped.md)).
 - 707072 leaves `spell_weapon_sets`: its own value and passive scenarios measure before and after learning it, so they
   wear the default set.
 - Effects of 707072 (Spell.dbc), and how each one is declared:

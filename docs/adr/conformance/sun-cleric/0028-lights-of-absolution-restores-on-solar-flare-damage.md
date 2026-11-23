@@ -56,6 +56,6 @@ The first option, in Sun Cleric code only (`AscensionSunClericAbilities.cpp`):
   3000 of 10000 health: ally at 39 yd healed 112, ally at 41 yd not; the distance arms and the 0-heal arm guard the
   offsets). Every before phase is the no-buff control.
 - The Energy, Focus, Runic Power and Rage part of the tooltip is not measured: its ledger claim stays open.
-- The 807524 edge is 40.0 yd: TargetB 30 takes no leeway and a player target adds no reach (ADR 1020 terms).
-- The `ally_radius` entry uses the new metric delta option `ally_offsets` (ADR 1026).
+- The 807524 edge is 40.0 yd: TargetB 30 takes no leeway and a player target adds no reach (ADR 1190 terms).
+- The `ally_radius` entry uses the new metric delta option `ally_offsets` (ADR 1196).
 - No other class reads 807523 to 807526; the class map lists 807343 for class 27 only.

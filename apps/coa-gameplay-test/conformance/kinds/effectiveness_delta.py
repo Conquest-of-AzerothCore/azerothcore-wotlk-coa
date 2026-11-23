@@ -7,7 +7,7 @@ from values import Expectation
 KIND = 'effectiveness_delta'
 ORDER = 27
 EFFECTIVENESS_PREFIX = 'effectiveness_'
-READ_METRICS = ('spell_power', 'stat', 'dodge_chance', 'parry_chance')
+READ_METRICS = ('spell_power', 'stat', 'dodge_chance', 'parry_chance', 'run_speed_rate')
 
 
 def checked_entry(entry: dict) -> dict:

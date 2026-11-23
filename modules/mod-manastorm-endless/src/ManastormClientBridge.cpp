@@ -410,12 +410,11 @@ void ManastormClientBridge::SendState(Player* player, ManastormRun const* run) c
         }
     }
 
-    if (ManastormRewards::Instance().IsCoALootMode(player->GetGUID().GetCounter()))
-    {
-        cacheChancePct = 0.0f;
-        if (!guaranteedCaches)
-            cacheItem = 0;
-    }
+    ManastormCoALoot::ClientCache const clientCache = ManastormCoALoot::ClientCacheState(
+        { cacheItem, cacheChancePct },
+        ManastormRewards::Instance().IsCoALootMode(player->GetGUID().GetCounter()));
+    cacheItem = clientCache.Item;
+    cacheChancePct = clientCache.ChancePct;
 
     WorldPacket packet(
         ManastormNativeOpcode::ActiveState,

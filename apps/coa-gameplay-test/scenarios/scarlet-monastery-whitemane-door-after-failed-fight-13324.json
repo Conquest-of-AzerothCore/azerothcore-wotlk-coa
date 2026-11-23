@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Scarlet Monastery: Whitemane's respawn keeps her door open after a failed fight with Mograine dead (#13324)",
+  "contract": [
+    "#13324: in the Scarlet Monastery Cathedral the High Inquisitor's Door (104600, spawn 11877) closed for good after the group pulled from the inquisitor's room and High Inquisitor Whitemane (3977) reset. Her evade sets the Mograine and Whitemane event (instance data 1) to FAIL; with Scarlet Commander Mograine (3976) already dead, instance_scarlet_monastery despawns her for a 20 s respawn and her SmartAI row 10 (On Respawn) then sets the door to closed. The door has faction 114 and cannot be used, and its only opener is Mograine's 1% action list, which a dead Mograine never runs, so she could no longer be reached.",
+    "A condition now lets row 10 close the door only while the event is not FAIL, so a reset with Mograine dead leaves the door open. A reset with both alive sets the event to NOT_STARTED and still closes the door until Mograine is beaten again.",
+    "The case kills Mograine in a normal Scarlet Monastery Cathedral, opens the door as his 1% event does (CONTROL: open), engages Whitemane and pulls her 20 yd from her spawn, then leaves combat with .combatstop so she has no target and evades. CONTROL: she despawns and respawns at her spawn, so row 10 ran. DISCRIMINATING: the door is still open after her respawn; before the fix it was closed."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"action": "teleport", "actor": "p", "map": 189, "x": 1165.0, "y": 1398.6, "z": 32.2, "o": 0.0},
+    {"action": "assert", "label": "CONTROL: p is in the Scarlet Monastery Cathedral", "actor": "p", "metric": "map_id", "equals": 189, "within_ms": 15000},
+    {"action": "set_phase", "label": "Join world phase 1, the phase of the cathedral's spawns (the case lane phase hides them)", "actor": "p", "value": 1},
+    {"action": "wait", "label": "Let the cathedral's grid activate", "ms": 2500},
+    {"action": "set_health", "actor": "p", "value": 100000000, "maximum": 100000000},
+    {"action": "attack_nearby", "label": "Mograine dies before Whitemane", "actor": "p", "entry": 3976, "radius": 40, "kill": true},
+    {"action": "assert", "label": "CONTROL: Mograine is dead", "actor": "p", "metric": "nearby_creature_count", "entry": 3976, "equals": 0, "within_ms": 3000},
+    {"action": "command", "label": "Open the door as Mograine's 1% event does", "actor": "p", "command": ".gobject activate 11877"},
+    {"action": "assert", "label": "CONTROL: the High Inquisitor's Door is open", "actor": "p", "metric": "nearby_gameobject_state", "entry": 104600, "equals": 0, "within_ms": 3000},
+    {"action": "teleport", "actor": "p", "map": 189, "x": 1199.6, "y": 1399.0, "z": 29.4, "o": 0.0},
+    {"action": "wait", "ms": 1500},
+    {"action": "attack_nearby", "actor": "p", "entry": 3977, "radius": 20},
+    {"action": "assert", "label": "CONTROL: p fights Whitemane", "actor": "p", "metric": "combat", "equals": 1, "within_ms": 5000},
+    {"action": "relocate", "label": "p pulls Whitemane toward her door", "actor": "p", "dx": -20},
+    {"action": "assert", "label": "CONTROL: Whitemane chased p more than 5 yd from her spawn", "actor": "p", "metric": "nearby_creature_count", "entry": 3977, "min_home_distance": 5, "equals": 1, "within_ms": 15000},
+    {"action": "command", "label": "p drops out of the fight, so Whitemane has no target left and evades", "actor": "p", "command": ".combatstop"},
+    {"action": "assert", "label": "CONTROL: Whitemane resets and despawns", "actor": "p", "metric": "nearby_creature_count", "entry": 3977, "equals": 0, "within_ms": 10000},
+    {"action": "assert", "label": "CONTROL: Whitemane respawns at her spawn", "actor": "p", "metric": "nearby_creature_count", "entry": 3977, "equals": 1, "within_ms": 30000},
+    {"action": "wait", "ms": 2000},
+    {"action": "assert", "label": "DISCRIMINATING: the High Inquisitor's Door stays open after her respawn", "actor": "p", "metric": "nearby_gameobject_state", "entry": 104600, "equals": 0}
+  ]
+}

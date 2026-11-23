@@ -1,4 +1,4 @@
-# Ally interact (`metric_delta` `ally_interact`, ADR 1051, provisional)
+# Ally interact (`metric_delta` `ally_interact`, ADR 1220, provisional)
 
 `ally_interact` makes the grouped `ally` (from `ally_arm`) interact with a creature the trigger leaves behind, through
 the harness `gossip_hello` with `entry`, 1500 ms after each trigger cast. The entry measures the ally

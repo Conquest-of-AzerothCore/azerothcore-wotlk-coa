@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Wildcard: Revengeful Sentinel from elemental Shield Slam shortens Shield Wall (#13222)",
+  "contract": [
+    "Revengeful Sentinel 299130: Shield Slam grants 299131, whose next Revenge deals 20% more damage and reduces the",
+    "cooldown of Shield Wall by 5 sec (299132). The 'cast' list named only the stock Shield Slam ranks, so the elemental",
+    "variants such as Blazing Shield Slam 910900 never granted the buff, and 299131 had DBC ProcFlags 0 without a",
+    "spell_proc row, so a Revenge never cast 299132. Revenge 6572 needs AURA_STATE_DEFENSE: an aggressive enemy swings",
+    "into Shield Block 2565, and the block sets the state. Shield Wall's 300 s cooldown only drains with time before",
+    "the fix; with it, the Revenge removes another 5 s, so the snapshot difference is at most -5000 ms."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 2,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Harnessa" },
+    { "action": "learn", "actor": "hero", "spell": 201 },
+    { "action": "learn", "label": "Shield proficiency", "actor": "hero", "spell": 9116 },
+    { "action": "learn", "label": "Defensive Stance", "actor": "hero", "spell": 71 },
+    { "action": "learn", "label": "Revengeful Sentinel", "actor": "hero", "spell": 299130 },
+    { "action": "learn", "label": "Blazing Shield Slam", "actor": "hero", "spell": 910900 },
+    { "action": "learn", "label": "Revenge", "actor": "hero", "spell": 6572 },
+    { "action": "learn", "label": "Shield Block", "actor": "hero", "spell": 2565 },
+    { "action": "learn", "label": "Shield Wall", "actor": "hero", "spell": 871 },
+    { "action": "add_item", "actor": "hero", "item": 25 },
+    { "action": "equip", "actor": "hero", "item": 25, "slot": 15 },
+    { "action": "add_item", "actor": "hero", "item": 2362 },
+    { "action": "equip", "actor": "hero", "item": 2362, "slot": 16 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "cast_no_target", "actor": "hero", "spell": 71 },
+    { "action": "assert", "label": "SETUP hero is in Defensive Stance", "actor": "hero", "metric": "aura", "spell": 71, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP hero has Revengeful Sentinel", "actor": "hero", "metric": "aura", "spell": 299130, "equals": 1 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "cast_no_target", "actor": "hero", "spell": 871 },
+    {
+      "action": "assert", "label": "SETUP Shield Wall is on cooldown", "actor": "hero", "metric": "cooldown_ms",
+      "spell": 871, "min": 250000, "within_ms": 3000
+    },
+    { "action": "wait", "ms": 1600 },
+    { "action": "set_power", "actor": "hero", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "hero", "spell": 910900, "target": "enemy" },
+    {
+      "action": "assert", "label": "CONTRACT (#13222) Blazing Shield Slam grants Revengeful Sentinel", "actor": "hero",
+      "metric": "aura", "spell": 299131, "equals": 1, "within_ms": 3000
+    },
+    { "action": "wait", "ms": 1600 },
+    { "action": "cast_no_target", "actor": "hero", "spell": 2565 },
+    {
+      "action": "assert", "label": "SETUP Shield Block is up", "actor": "hero", "metric": "aura", "spell": 2565,
+      "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP a blocked swing gives the hero the defense aura state", "actor": "hero",
+      "metric": "has_aura_state", "target": "hero", "aura_state": 1, "equals": 1, "within_ms": 6000
+    },
+    { "action": "wait", "ms": 1600 },
+    {
+      "action": "assert", "label": "SETUP the defense aura state is still up", "actor": "hero",
+      "metric": "has_aura_state", "target": "hero", "aura_state": 1, "equals": 1, "within_ms": 4000
+    },
+    { "action": "snapshot", "actor": "hero", "metric": "cooldown_ms", "spell": 871, "save_as": "shield_wall_before" },
+    { "action": "set_power", "actor": "hero", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "hero", "spell": 6572, "target": "enemy" },
+    {
+      "action": "assert", "label": "SETUP Revenge hit the enemy", "actor": "hero", "metric": "spell_damage_count",
+      "spell": 6572, "target": "enemy", "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT (#13222) the Revenge casts the Shield Wall reduction", "actor": "hero",
+      "metric": "spell_cast_count", "spell": 299132, "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT (#13222) the Revenge consumed Revengeful Sentinel", "actor": "hero",
+      "metric": "aura", "spell": 299131, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTRACT (#13222) Shield Wall lost 5 s on top of elapsed time", "actor": "hero",
+      "metric": "cooldown_ms", "spell": 871, "relative_to": "shield_wall_before", "min": -9000, "max": -5000
+    }
+  ]
+}

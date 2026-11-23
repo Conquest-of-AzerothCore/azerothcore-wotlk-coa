@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "Wildcard: opening a Case of Fortune hands out all twenty scrolls and uses up one case (#8033)",
+  "contract": [
+    "Case of Fortune 1278049 holds twenty guaranteed scrolls, Scroll of Fortune I-XX: Abilities 97913-97932, but the",
+    "3.3.5a loot window shows at most 18 slots (MAX_NR_LOOT_ITEMS). Scrolls XIX and XX could never be taken, so the",
+    "loot never finished: the case stayed in the bags, and the rest of a stack kept the half-looted loot (#8033, #9039).",
+    "Expected: each open of a stacked case stores all twenty scrolls, uses up exactly one case and sends one item loot",
+    "release, so a second open of the same stack works the same way."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "add_item", "label": "A bag for the scrolls", "actor": "hero", "item": 14156 },
+    { "action": "equip", "actor": "hero", "item": 14156, "slot": 19 },
+    { "action": "add_item", "label": "A second bag for the scrolls", "actor": "hero", "item": 14156 },
+    { "action": "equip", "actor": "hero", "item": 14156, "slot": 20 },
+    { "action": "add_item", "actor": "hero", "item": 1278049, "count": 2 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "SETUP the hero holds a stack of two cases", "actor": "hero", "metric": "item_count", "item": 1278049, "equals": 2 },
+    { "action": "assert", "label": "SETUP twenty slots are free", "actor": "hero", "metric": "free_inventory_slots", "min": 20 },
+    { "action": "assert", "label": "SETUP no item loot release has been sent yet", "actor": "hero", "metric": "item_loot_releases", "equals": 0 },
+    { "action": "open_item", "label": "Open the first case", "actor": "hero", "item": 1278049 },
+    {
+      "action": "assert", "label": "CONTRACT (#8033) one case of the stack is used up", "actor": "hero", "metric": "item_count",
+      "item": 1278049, "equals": 1, "within_ms": 3000
+    },
+    { "action": "assert", "label": "CONTRACT (#8033) Scroll of Fortune I is handed out", "actor": "hero", "metric": "item_count", "item": 97913, "equals": 1 },
+    { "action": "assert", "label": "CONTRACT (#8033) Scroll of Fortune XVIII is handed out", "actor": "hero", "metric": "item_count", "item": 97930, "equals": 1 },
+    { "action": "assert", "label": "CONTRACT (#8033) Scroll of Fortune XIX is handed out", "actor": "hero", "metric": "item_count", "item": 97931, "equals": 1 },
+    { "action": "assert", "label": "CONTRACT (#8033) Scroll of Fortune XX is handed out", "actor": "hero", "metric": "item_count", "item": 97932, "equals": 1 },
+    { "action": "assert", "label": "CONTRACT (#8033) the client was told to leave the looting state", "actor": "hero", "metric": "item_loot_releases", "equals": 1 },
+    { "action": "wait", "ms": 500 },
+    { "action": "open_item", "label": "Open the second case of the stack", "actor": "hero", "item": 1278049 },
+    {
+      "action": "assert", "label": "CONTRACT (#9039) the second case is used up", "actor": "hero", "metric": "item_count",
+      "item": 1278049, "equals": 0, "within_ms": 3000
+    },
+    { "action": "assert", "label": "CONTRACT (#9039) the second case hands out Scroll of Fortune I again", "actor": "hero", "metric": "item_count", "item": 97913, "equals": 2 },
+    { "action": "assert", "label": "CONTRACT (#9039) the second case hands out Scroll of Fortune XX again", "actor": "hero", "metric": "item_count", "item": 97932, "equals": 2 },
+    { "action": "assert", "label": "CONTRACT (#9039) each open sends one item loot release", "actor": "hero", "metric": "item_loot_releases", "equals": 2 }
+  ]
+}

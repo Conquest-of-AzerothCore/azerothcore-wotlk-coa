@@ -360,6 +360,10 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellInfo const
     if (spellproto->SpellFamilyName == 19 && spellproto->Id == 500952)
         return 8 * IN_MILLISECONDS;
 
+    // Hir'eek's Jinx's tooltip specifies eight seconds against players, before diminishing returns.
+    if (spellproto->SpellFamilyName == 19 && spellproto->Id == 803325)
+        return 8 * IN_MILLISECONDS;
+
     // Explicit diminishing duration
     switch (spellproto->SpellFamilyName)
     {

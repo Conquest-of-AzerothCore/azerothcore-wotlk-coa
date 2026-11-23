@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Runemaster Hurricane does not land through a wall (#13030)",
+  "contract": [
+    "#13030: Hurricane (645435) blinks the Runemaster to a point 1.5 yd around the target on every strike (StrikeHurricane in AscensionRunemasterHurricane.cpp). The point had no collision check, so a target standing at a wall sent the player through it: out of the Scarlet Monastery shell, or into the void where only the ADT terrain far below had a height.",
+    "StrikeHurricane now runs the landing through Map::CheckCollisionAndGetValidCoords from the target, the core helper behind MovePositionToFirstCollision: the navmesh raycast stops at the wall and the Z is the floor at that point. A strike with no valid landing is dealt from the current position.",
+    "Strike n lands at (facing + n * 72 degrees) around the target, and the player then faces the target, so the facings after strikes 0-3 are o+180, o+72, o+36 and o+72 and strike 4 lands at o+360 = o: the final landing lies in the player's initial facing from the dummy, the same ray as the first strike.",
+    "The scenario stands on the patch-WB1 Crossroads tower 0.5 yd past Darsok Swiftdagger's spawn (14415) along his facing toward the tower wall (orientation 5.74213, #11736), facing that wall with the dummy 0.5 yd away; from Darsok's own spot the final ring point still lies inside the tower. The final landing must move the player toward the wall along the positive X component of Darsok's facing, stay on the tower floor (position_z within 1% of the dummy's Z), and end closer to the dummy than the 1.5 yd ring. These checks show that the player blinked and the landing was clamped to the wall. Before the fix the ring point was used as is: 2D distance exactly 1.5 yd beyond the wall, where the floor search found nothing within 10 yd and fell back to the terrain below the tower."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 1, "x": -514.459, "y": -2597.648, "z": 129.469, "o": 5.74213},
+  "players": [
+    {"id": "rm", "race": 2, "class": 32, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 60, "health": 1000000, "distance": 0.5}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI, level scaling and the login patch stream settle", "ms": 7000},
+    {"action": "snapshot", "label": "tower floor height at the dummy", "actor": "dummy", "metric": "position_z", "save_as": "floor"},
+    {"action": "learn", "actor": "rm", "spell": 197},
+    {"action": "add_item", "actor": "rm", "item": 12784},
+    {"action": "equip", "label": "Hurricane requires a main-hand weapon", "actor": "rm", "item": 12784, "slot": 15},
+    {"action": "learn", "actor": "rm", "spell": 645435},
+    {"action": "snapshot", "actor": "rm", "metric": "position_x", "save_as": "start_x"},
+    {"action": "cast", "label": "Start the ability facing the tower wall", "actor": "rm", "spell": 645435, "target": "dummy"},
+    {"action": "assert", "label": "the ability is running", "actor": "rm", "metric": "aura", "spell": 645435, "equals": 1, "within_ms": 500},
+    {"action": "assert", "label": "the ability ends on its own", "actor": "rm", "metric": "aura", "spell": 645435, "equals": 0, "within_ms": 12000},
+    {"action": "assert", "label": "the ability still lands strikes", "actor": "rm", "metric": "spell_damage_count", "spell": 645437, "target": "dummy", "min": 1},
+    {"action": "assert", "label": "the Runemaster moved toward the wall", "actor": "rm",
+      "metric": "position_x", "relative_to": "start_x", "min": 0.1},
+    {"action": "assert", "label": "still on map 1", "actor": "rm", "metric": "map_id", "equals": 1},
+    {"action": "assert", "label": "the final landing is on the tower floor, not the terrain below", "actor": "rm", "metric": "position_z", "ratio_to": "floor", "min": 0.99, "max": 1.01},
+    {"action": "assert", "label": "DISCRIMINATING: the final landing stopped at the wall, short of the 1.5 yd ring", "actor": "rm", "metric": "distance", "target": "dummy", "max": 1.4}
+  ]
+}
