@@ -25,7 +25,7 @@ from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, DUMM
                     closes_distance, dataset,
                     equip_requirement, weapon_requirement,
                     facts_of, gap_closer_expectation, gap_closer_target, is_hostile, required_aura_steps,
-                    required_target_health_steps, targets_ally)
+                    pay_power_steps, required_target_health_steps, targets_ally)
 
 HIT_CHECKS = ('hit_mean', 'melee_mean', 'periodic_total', 'unmodelled', GAP_CLOSER_DISTANCE)
 UNMODELLED = 'unmodelled: '
@@ -1087,8 +1087,7 @@ def cast_steps(facts: RankFacts, rank_id: int, target: str | None, interval_ms: 
     steps = []
     for _ in range(casts):
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                          'value': facts.mana_cost})
+            steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
         steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': rank_id})
         steps += required_aura_steps(facts) + [dict(fixture) for fixture in fixtures]
         cast = {'action': 'cast', 'actor': CASTER, 'spell': rank_id}

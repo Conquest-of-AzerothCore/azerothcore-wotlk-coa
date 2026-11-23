@@ -16,7 +16,8 @@ from values import (ALLY, AURA_STATE_FROZEN, AURA_STATE_HEALTHLESS_20_PERCENT, A
                     CALC_AMOUNT_HOOKS_METRIC, CHECKS, FIXTURE_MAX_HEALTH, GCD_WAIT_MS, GENERIC, TARGET, UNMEASURABLE, UNREADABLE, Expectation, Unmodelled,
                     calc_amount_hooks_label, conditional_extra_values, effect_modifier_label,
                     disabled_foreign_effects, facts_of, fixture_health_step, foreign_aura_grants, foreign_effect,
-                    foreign_radius, periodic_reason, required_target_health_steps, sample_labels, value_scenario)
+                    foreign_radius, pay_power_steps, periodic_reason, required_target_health_steps, sample_labels,
+                    value_scenario, HEALTH_POWER)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -831,6 +832,61 @@ class FixtureHealthStepTest(unittest.TestCase):
 
     def test_the_actor_is_used_verbatim(self):
         self.assertEqual(fixture_health_step(CASTER, 100)['actor'], CASTER)
+
+
+IMMOLATION_AURA = 800207
+IMMOLATION_AURA_HEALTH_COST = 10
+
+
+def raw_power_steps(power_type, cost, actor=CASTER):
+    return [{'action': 'set_power', 'actor': actor, 'power': power_type, 'value': cost}]
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HealthPowerCostTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.records = Records(DataSet(DBC_DIR))
+        cls.class_file = load_fixture_class_file(TEMPLAR_CLASS_ID)
+        cls.spells = {spell.spell_id: spell for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER)}
+
+    def health_paid_scenario(self, pay=pay_power_steps):
+        def health_paid(records, rank_id):
+            facts = facts_of(records, rank_id)
+            return replace(facts, power_type=HEALTH_POWER) if rank_id == ARGENT_BLADE_RANK_2 else facts
+
+        with mock.patch('values.facts_of', health_paid), mock.patch('values.pay_power_steps', pay):
+            scenario, _, _ = value_scenario(self.class_file, self.spells[ARGENT_BLADE], ARGENT_BLADE_RANK_2)
+        return scenario
+
+    def test_immolation_aura_is_paid_from_health_after_a_health_check(self):
+        facts = facts_of(self.records, IMMOLATION_AURA)
+        self.assertEqual((facts.power_type, facts.mana_cost), (HEALTH_POWER, IMMOLATION_AURA_HEALTH_COST))
+        self.assertEqual(pay_power_steps(facts.power_type, facts.mana_cost),
+                         [{'action': 'assert', 'label': 'SETUP: caster health pays the 10 health cost',
+                           'actor': CASTER, 'metric': 'health', 'min': IMMOLATION_AURA_HEALTH_COST + 1}])
+
+    def test_other_power_types_keep_their_set_power_step(self):
+        self.assertEqual(pay_power_steps(ENERGY, ARGENT_BLADE_RANK_2_ENERGY_COST, 'ally'),
+                         raw_power_steps(ENERGY, ARGENT_BLADE_RANK_2_ENERGY_COST, 'ally'))
+        self.assertEqual(list(pay_power_steps(ENERGY, ARGENT_BLADE_RANK_2_ENERGY_COST)[0]),
+                         ['action', 'actor', 'power', 'value'])
+
+    def test_a_health_paid_value_scenario_checks_the_health_before_the_cast_and_passes_the_validator(self):
+        scenario = self.health_paid_scenario()
+        run.validate(scenario)
+        steps = scenario['steps']
+        self.assertEqual([step for step in steps if step['action'] == 'set_power'], [])
+        checks = [step for step in steps if step.get('metric') == 'health']
+        self.assertEqual([(step['action'], step['actor'], step['min']) for step in checks],
+                         [('assert', CASTER, ARGENT_BLADE_RANK_2_ENERGY_COST + 1)])
+        cast = next(index for index, step in enumerate(steps) if step['action'] == 'cast')
+        self.assertLess(steps.index(checks[0]), cast)
+
+    def test_mutant_writing_the_health_power_type_is_refused_by_the_validator(self):
+        scenario = self.health_paid_scenario(raw_power_steps)
+        with self.assertRaisesRegex(ValueError, 'value is too large'):
+            run.validate(scenario)
 
 
 DECIMATE = 804194

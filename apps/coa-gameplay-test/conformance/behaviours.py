@@ -23,7 +23,7 @@ from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, DUMM
                     FORCED_CRIT_RATING, GCD_WAIT_MS, TARGET_STATE_AURAS, Expectation, TARGET, armed_for,
                     cast_distance, closes_distance, dataset, facts_of,
                     FIXTURE_MAX_HEALTH, fixture_health_step, required_aura_steps,
-                    required_target_health_steps)
+                    pay_power_steps, required_target_health_steps)
 
 BEHAVIOUR_COUNT = 'behaviour_count'
 BEHAVIOUR_RATIO = 'behaviour_ratio'
@@ -222,8 +222,7 @@ def target_count_scenario(class_file: dict, spec: TargetCountSpec) -> tuple[dict
         steps = []
         for cast in range(1, spec.repeats + 1):
             if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-                steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                             'value': facts.mana_cost})
+                steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
             steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.target_rank})
             steps += required_aura_steps(facts)
             steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.target_rank, 'target': dummy_id(0)})
@@ -480,8 +479,7 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
         steps += distance_reads(BEFORE)
         for cast in range(1, spec.repeats + 1):
             if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-                steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                             'value': facts.mana_cost})
+                steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
             steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.cast_spell})
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': 0} for aura in spec.clear_auras]
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': stacks}
@@ -806,8 +804,7 @@ def ally_heal_breadth_scenario(class_file: dict, spec: AllyHealBreadthSpec) -> t
         steps = []
         for _ in range(spec.repeats):
             if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-                steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                             'value': facts.mana_cost})
+                steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
             steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell})
             steps += required_aura_steps(facts)
             steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': dummy_id(0)})
@@ -823,7 +820,7 @@ def ally_heal_breadth_scenario(class_file: dict, spec: AllyHealBreadthSpec) -> t
             return []
         steps = [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell}]
         if aura.mana_cost > 0 and not aura.mana_cost_percentage and not aura.mana_cost_per_level:
-            steps.append({'action': 'set_power', 'actor': CASTER, 'power': aura.power_type, 'value': aura.mana_cost})
+            steps.extend(pay_power_steps(aura.power_type, aura.mana_cost))
         return steps + required_aura_steps(aura) + [
             {'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': CASTER},
             {'action': 'wait', 'ms': aura.cast_time_ms + CAST_MARGIN_MS}]
@@ -907,8 +904,7 @@ def healing_ratio_scenario(class_file: dict, spec: HealingRatioSpec) -> tuple[di
                 continue
             facts = facts_of(records, target.spell)
             if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-                steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                             'value': facts.mana_cost})
+                steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
             steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': target.spell})
             steps += required_aura_steps(facts)
             steps.append({'action': 'cast', 'actor': CASTER, 'spell': target.spell, 'target': CASTER})
@@ -974,7 +970,7 @@ def leech_ratio_phase_steps(class_file: dict, facts, spec: LeechRatioSpec, phase
     dummy_id = leech_ratio_dummy_id(phase)
     steps = []
     if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-        steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost})
+        steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
     steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.target_rank})
     steps += required_aura_steps(facts)
     steps += required_target_health_steps(facts, dummy_id)
@@ -1087,8 +1083,7 @@ def cast_leech_ratio_scenario(class_file: dict, spec: CastLeechRatioSpec) -> tup
     def cast() -> list[dict]:
         steps = []
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                          'value': facts.mana_cost})
+            steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
         steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.cast_spell})
         steps += required_aura_steps(facts)
         steps += required_target_health_steps(facts, dummy['id'])
@@ -1190,7 +1185,7 @@ def cast_stat_ratio_scenario(class_file: dict, spec: CastStatRatioSpec) -> tuple
     amount_label = f'{spec.spell} {spec.effect} aura_amount cast_stat_ratio amount'
     steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
     if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-        steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost})
+        steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
     steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell})
     steps += required_aura_steps(facts)
     steps.append(measurement(stat_label, CASTER, spec.stat_metric))
@@ -1344,7 +1339,7 @@ def aura_spread_scenario(class_file: dict, spec: AuraSpreadSpec) -> tuple[dict, 
 
     def power_step(facts) -> list[dict]:
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-            return [{'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost}]
+            return pay_power_steps(facts.power_type, facts.mana_cost)
         return []
 
     def primary_hits(moment: str, edge: str) -> list[dict]:
@@ -1957,8 +1952,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             setup_facts = facts_of(records, setup_spell)
             if setup_facts.mana_cost > 0 and not setup_facts.mana_cost_percentage \
                     and not setup_facts.mana_cost_per_level:
-                steps.append({'action': 'set_power', 'actor': CASTER, 'power': setup_facts.power_type,
-                             'value': setup_facts.mana_cost})
+                steps.extend(pay_power_steps(setup_facts.power_type, setup_facts.mana_cost))
             steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': setup_spell})
             steps += required_aura_steps(setup_facts) + reagent_steps(records, setup_spell)
             steps.append({'action': 'cast', 'actor': CASTER, 'spell': setup_spell,
@@ -1967,8 +1961,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                 steps.append({'action': 'wait', 'ms': spec.setup_wait_ms})
             steps += option_setup_cast_steps(spec, index, after)
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                         'value': facts.mana_cost})
+            steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
         return steps
 
     def cast_steps(apply_setup_casts: bool = True, include_cast: bool = True, after: bool = True) -> list[dict]:
@@ -1987,8 +1980,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
                          'value': spec.cast_power})
         elif facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                         'value': facts.mana_cost})
+            steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
         if spec.phase_power is not None:
             power, before, after_value = spec.phase_power
             steps.append({'action': 'set_power', 'actor': CASTER, 'power': power,
@@ -2434,8 +2426,7 @@ def dispel_arms_scenario(class_file: dict, spec: DispelRemovalSpec, entry, facts
                   for unit in units for debuff in spec.debuffs]
         steps += dispel_arm_relocation(arm.away_yd)
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                          'value': facts.mana_cost})
+            steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
         steps += [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell}] + required_aura_steps(facts)
         steps += [{'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': arm.target},
                   {'action': 'wait', 'ms': spec.wait_ms},
@@ -2488,8 +2479,7 @@ def dispel_removal_scenario(class_file: dict, spec: DispelRemovalSpec) -> tuple[
                           for debuff in spec.debuffs]
     cast_steps = []
     if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-        cast_steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                           'value': facts.mana_cost})
+        cast_steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
     cast_steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell})
     cast_steps += required_aura_steps(facts)
     cast_steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': spec.target})
@@ -2658,8 +2648,7 @@ def aura_presence_scenario(class_file: dict, spec: AuraPresenceSpec) -> tuple[di
 
     cast_steps = []
     if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-        cast_steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                           'value': facts.mana_cost})
+        cast_steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
     cast_steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell})
     cast_steps += required_aura_steps(facts)
     cast_steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': 1} for aura in spec.caster_auras]
@@ -2745,8 +2734,7 @@ def heal_block_scenario(class_file: dict, spec: HealBlockSpec) -> tuple[dict, li
 
     cast_steps = []
     if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-        cast_steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                           'value': facts.mana_cost})
+        cast_steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
     cast_steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell})
     cast_steps += required_aura_steps(facts)
     cast_steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': TARGET})
@@ -2984,8 +2972,7 @@ def absorb_pierce_ratio_scenario(class_file: dict, spec: AbsorbPierceRatioSpec) 
     def cast_steps() -> list[dict]:
         steps = [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell}]
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                         'value': facts.mana_cost})
+            steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
         steps += required_aura_steps(facts)
         steps += [{'action': 'set_aura', 'actor': CASTER, 'target': TARGET, 'spell': aura, 'stacks': stacks}
                   for aura, stacks in spec.target_auras]
@@ -3340,8 +3327,7 @@ def amount_delta_phase_steps(spec: AmountDeltaSpec, facts_trigger, phase: str) -
         measurement(before_label, CASTER, 'aura_amount', spell=spec.target_aura, effect=0),
     ]
     if facts_trigger.mana_cost > 0 and not facts_trigger.mana_cost_percentage and not facts_trigger.mana_cost_per_level:
-        steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts_trigger.power_type,
-                     'value': facts_trigger.mana_cost})
+        steps.extend(pay_power_steps(facts_trigger.power_type, facts_trigger.mana_cost))
     steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell})
     steps += required_aura_steps(facts_trigger)
     steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': CASTER})
@@ -3501,7 +3487,7 @@ def aura_grant_scenario(class_file: dict, spec: AuraGrantSpec) -> tuple[dict, li
     oath_label = f'{spec.oath_aura} aura grant {spec.spell} after'
     steps = []
     if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-        steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost})
+        steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
     steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell})
     steps += required_aura_steps(facts)
     steps.append(measurement(before_label, CASTER, 'aura_stacks', spell=spec.chain_aura))
@@ -3581,8 +3567,7 @@ def oath_consumption_scenario(class_file: dict, spec: OathConsumptionSpec) -> tu
                  {'action': 'set_aura', 'actor': CASTER, 'spell': spec.oath_spell, 'stacks': 1},
                  measurement(other_label, CASTER, spec.metric, **read_fields)]
     if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-        steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                     'value': facts.mana_cost})
+        steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
     steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell})
     steps += required_aura_steps(facts)
     steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': spec.target})
@@ -3678,8 +3663,7 @@ def oath_consumption_removal_scenario(class_file: dict, spec: OathConsumptionRem
     remaining_ms = max(0, int(duration_ms) - spec.settle_ms) + spec.expire_margin_ms
     steps = []
     if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-        steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                     'value': facts.mana_cost})
+        steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
     steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell})
     steps += required_aura_steps(facts)
     for oath in spec.oath_spells:
@@ -3873,8 +3857,7 @@ def exclusivity_chain_scenario(class_file: dict, spec: ExclusivityChainSpec) -> 
         facts = facts_of(records, sid)
         steps = []
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                         'value': facts.mana_cost})
+            steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
         steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': sid})
         steps += required_aura_steps(facts)
         steps.append({'action': 'cast', 'actor': CASTER, 'spell': sid, 'target': CASTER})
@@ -4062,8 +4045,7 @@ def single_target_scenario(class_file: dict, spec: SingleTargetSpec) -> tuple[di
     def cast_steps(target: str) -> list[dict]:
         steps = []
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                         'value': facts.mana_cost})
+            steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
         steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell})
         steps += required_aura_steps(facts)
         steps += required_target_health_steps(facts, target)
@@ -4946,7 +4928,7 @@ def cast_gate_label(spell: int, moment: str) -> str:
 
 def cast_gate_power_step(facts) -> list[dict]:
     if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-        return [{'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost}]
+        return pay_power_steps(facts.power_type, facts.mana_cost)
     return []
 
 
@@ -6160,8 +6142,7 @@ def internal_cooldown_scenario(class_file: dict, spec: InternalCooldownSpec) -> 
                  {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell}]
         steps += required_aura_steps(facts)
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                         'value': facts.mana_cost})
+            steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
         steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': spec.target})
         return steps
 
@@ -6353,13 +6334,13 @@ def duration_refresh_phase_steps(spec: DurationRefreshSpec, facts_apply, facts_b
     after_label = duration_refresh_label(spec, phase, AFTER)
     return [
         {'action': 'set_aura', 'actor': CASTER, 'spell': spec.gating_aura, 'stacks': 1},
-        {'action': 'set_power', 'actor': CASTER, 'power': facts_apply.power_type, 'value': facts_apply.mana_cost},
+        *pay_power_steps(facts_apply.power_type, facts_apply.mana_cost),
         {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.apply_spell},
         {'action': 'cast', 'actor': CASTER, 'spell': spec.apply_spell, 'target': TARGET},
         {'action': 'wait', 'label': f'{phase} decay', 'ms': spec.decay_ms},
         measurement(before_label, TARGET, 'aura_duration_ms', spell=spec.target_aura, caster=CASTER),
         {'action': 'set_aura', 'actor': CASTER, 'spell': spec.gating_aura, 'stacks': spec.gating_stacks},
-        {'action': 'set_power', 'actor': CASTER, 'power': facts_breaker.power_type, 'value': facts_breaker.mana_cost},
+        *pay_power_steps(facts_breaker.power_type, facts_breaker.mana_cost),
         {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.breaker_spell},
         {'action': 'cast', 'actor': CASTER, 'spell': spec.breaker_spell, 'target': TARGET},
         measurement(after_label, TARGET, 'aura_duration_ms', spell=spec.target_aura, caster=CASTER),
@@ -6455,8 +6436,7 @@ def charge_recharge_scenario(class_file: dict, spec: ChargeRechargeSpec) -> tupl
         if returns and not first:
             steps.append({'action': 'relocate', 'actor': CASTER, 'dx': -placement})
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                         'value': facts.mana_cost})
+            steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
         steps += required_aura_steps(facts)
         cast = {'action': 'cast', 'actor': CASTER, 'spell': spec.spell}
         if spec.target != CASTER:
@@ -6728,7 +6708,7 @@ def hit_ratio_cast(records: Records, spell: int, actor: str = CASTER, target: st
     if power is not None:
         steps.append({'action': 'set_power', 'actor': actor, 'power': facts.power_type, 'value': power})
     elif facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-        steps.append({'action': 'set_power', 'actor': actor, 'power': facts.power_type, 'value': facts.mana_cost})
+        steps.extend(pay_power_steps(facts.power_type, facts.mana_cost, actor))
     steps.append({'action': 'reset_cooldown', 'actor': actor, 'spell': spell})
     steps += [{**step, 'actor': actor} for step in required_aura_steps(facts)]
     steps.append({'action': 'cast', 'actor': actor, 'spell': spell, 'target': target})

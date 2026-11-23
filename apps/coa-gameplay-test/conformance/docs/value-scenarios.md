@@ -50,7 +50,10 @@ is a resurrection (`SPELL_EFFECT_RESURRECT` 18 or `SPELL_EFFECT_RESURRECT_NEW` 1
 is killed with a `die` step right before the cast, since `TARGET_FLAG_CORPSE_ALLY` needs a dead friendly unit, not
 a living one (Templar: Spiritual Ascension 500688/500757/500758/500759/500760) — and the caster otherwise; an aura
 whose target is the caster is read on the caster. A cost in a power other than mana is set to its cost before the
-cast. A rank whose
+cast. A cost paid from health (PowerType -2, read as 4294967294) writes no `set_power`: a `SETUP:` assertion checks
+that the caster's health is above the cost instead, since the server refuses the cast at health equal to or below it
+(`Spell.cpp` `CheckPower`), and every generator that pays a cost goes through `values.pay_power_steps` (ADR 1077).
+A rank whose
 record names a `CasterAuraSpell` gets that aura as a one-stack fixture (`set_aura`) right before the cast: without it
 the server refuses the cast with `SPELL_FAILED_CASTER_AURASTATE` (22, `Spell.cpp:5930`). Templar: Oath Chain 704576
 for Righteous Upheaval, Blade of Faith, Righteous Tempest and Reckoning; Recently Parried or Dodged 681170, a dummy
