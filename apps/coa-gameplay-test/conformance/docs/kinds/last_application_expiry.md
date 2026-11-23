@@ -34,3 +34,31 @@ power before every recast so a costly trigger can be repeated. Absent, the scena
 
 Witch Hunter: Anguish 504742 `anguish_duration` (Dusk Blade 802258 cast 6 times 1600 ms apart on the dummy, Anguish
 500566 read on the caster, 15000 ms from the last application; claim 71.1).
+
+## Feed (opt-in, Felsworn ADR 0002, provisional)
+
+A grant that only a rolled proc earns, with no way to force the roll (Felsworn `Chance()` rolls the raw ProcChance,
+`AscensionFelsworn.cpp:231-239`), is earned for real: `feed: {"every_ms": ms, "stop_aura": spell}` replaces the single
+cast and `repeat` by the harness step `cast_until_aura` (owner-approved). `trigger_spell` is known in both arms and cast
+every `every_ms` (at least the 1600 ms global cooldown wait) with its power and cooldown reset before each cast, until
+`stop_aura` is on the caster (default `aura`, which then needs `caster: true`; name it when the judged aura sits on the
+dummy). `max_casts` is computed from the ProcChance of `gate_spell`, one roll per cast: `ceil(ln 0.0005 / ln(1 - p))`,
+47 at 15% and 9 at 60%, so a run without a grant is at most 0.05% likely. A loop that reaches its cap leaves the
+treatment arm unmeasured (never a fail, never a pass). The control arm runs the same loop with the gate unlearned and
+alerts on any application.
+
+Each arm reads the game time, the application count and the presence of `aura` once before the loop; the treatment arm
+cancels `stop_aura` on the caster first and is unmeasured when the aura is already on. After the loop it reads
+`stop_aura` on the caster and the remaining duration of `aura` (`aura_duration_ms`, supporting data), then polls as
+before. The grant is dated by the stop: the step checks the aura on every world update, so the first poll is at most
+100 ms after it, and that read replaces the pre-loop read as the earlier end of the last application's bracket. The
+verdict is the unchanged bracket test of the kind, the explanation names the remaining duration read at the stop.
+`feed` excludes `repeat`, `forced_roll` and `no_refresh`.
+
+`force_crit` (`melee`, `spell` or `ranged`) sets the matching crit rating fixture for both arms. `quote_spell` takes the
+quote from the tooltip of a spell the entry's own tooltip embeds (`@s:N:`), as the window variant of `aura_fed_effect`
+does.
+
+Felsworn: Legionfall 801899 (Annihilan Strike 801903 feeding 801902, 15000 ms); Malice of Gul'dan 800214 (Sargeron
+Smite 802060, spell crit forced, feeding Felstrike 802678 on the dummy, 6000 ms, and Fragment of Malice 800239 on the
+caster, 5000 ms).
