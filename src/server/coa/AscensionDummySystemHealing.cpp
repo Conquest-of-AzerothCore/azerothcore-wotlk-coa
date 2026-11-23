@@ -577,7 +577,12 @@ struct SpentFavor
     time_t Applied;
 };
 
-std::unordered_map<ObjectGuid, SpentFavor> SpentFavors;
+constexpr char SpentFavorKey[] = "AscensionDummySystemHealing.SpentFavor";
+
+struct SpentFavorData final : DataMap::Base
+{
+    SpentFavor Favor{};
+};
 
 class spell_dummysystem_healing_beacon_of_divinity : public AuraScript
 {
@@ -587,9 +592,9 @@ class spell_dummysystem_healing_beacon_of_divinity : public AuraScript
     {
         if (Aura const* favor = AuraNamed(caster, "Divine Favor", caster->GetGUID()))
             return favor->GetApplyTime();
-        auto const spent = SpentFavors.find(caster->GetGUID());
-        if (spent != SpentFavors.end() && GameTime::GetGameTimeMS().count() - spent->second.At <= FAVOR_SPENT_WINDOW_MS)
-            return spent->second.Applied;
+        SpentFavorData const* spent = caster->CustomData.Get<SpentFavorData>(SpentFavorKey);
+        if (spent && GameTime::GetGameTimeMS().count() - spent->Favor.At <= FAVOR_SPENT_WINDOW_MS)
+            return spent->Favor.Applied;
         return 0;
     }
 
@@ -658,7 +663,8 @@ class spell_dummysystem_healing_divine_favor_spent : public AuraScript
         if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE && GetAura()->GetMaxDuration() > 0 &&
             GetAura()->GetDuration() <= 0)
             return;
-        SpentFavors[GetTarget()->GetGUID()] = { uint32(GameTime::GetGameTimeMS().count()), GetAura()->GetApplyTime() };
+        GetTarget()->CustomData.GetDefault<SpentFavorData>(SpentFavorKey)->Favor =
+            { uint32(GameTime::GetGameTimeMS().count()), GetAura()->GetApplyTime() };
     }
 
     void Register() override
@@ -785,7 +791,7 @@ private:
         _radiating = false;
     }
 
-    static inline bool _radiating = false;
+    static inline thread_local bool _radiating = false;
 };
 
 constexpr std::array<uint32, 2> GUARDIANS_OF_THE_GROVE = { 81467, 270495 };

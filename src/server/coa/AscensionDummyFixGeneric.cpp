@@ -307,8 +307,10 @@ class spell_dummyfix_generic_shoulder_the_burden : public SpellScript
             float const moved = ref->GetThreat() * float(pct) / 100.0f;
             if (!owner || moved <= 0.0f)
                 continue;
-            ref->ScaleThreat(1.0f - float(pct) / 100.0f);
+            float const before = owner->GetThreatMgr().GetThreat(caster);
             owner->GetThreatMgr().AddThreat(caster, moved, nullptr, true, true);
+            if (owner->GetThreatMgr().GetThreat(caster) > before)
+                ref->ScaleThreat(1.0f - float(pct) / 100.0f);
         }
     }
 

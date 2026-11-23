@@ -228,12 +228,14 @@ constexpr uint32 SHAMAN_FIRE_NOVA_FLAG1 = 0x00040000;
 constexpr uint32 PURGE = 370;
 constexpr uint32 BY_FIRE_BE_PURGED_ICD = 281348;
 constexpr Milliseconds BY_FIRE_BE_PURGED_ENCHANT_ICD = 30s;
+constexpr Milliseconds BY_FIRE_BE_PURGED_BLAST_WINDOW = 1s;
 
 class spell_dummyfix_shaman_by_fire_be_purged : public AuraScript
 {
     PrepareAuraScript(spell_dummyfix_shaman_by_fire_be_purged);
 
     Spell const* _blast = nullptr;
+    TimePoint _blastAt = TimePoint::min();
     TimePoint _ready = TimePoint::min();
 
     bool Validate(SpellInfo const* ) override
@@ -249,12 +251,13 @@ class spell_dummyfix_shaman_by_fire_be_purged : public AuraScript
         if (!info || !spell || !target || !target->IsAlive() || info->SpellFamilyName != SPELLFAMILY_SHAMAN ||
             !(info->SpellFamilyFlags[1] & SHAMAN_FIRE_NOVA_FLAG1))
             return false;
-        if (spell == _blast)
-            return true;
         TimePoint const now = std::chrono::steady_clock::now();
+        if (spell == _blast && now - _blastAt < BY_FIRE_BE_PURGED_BLAST_WINDOW)
+            return true;
         if (now < _ready)
             return false;
         _blast = spell;
+        _blastAt = now;
         Milliseconds icd = BY_FIRE_BE_PURGED_ENCHANT_ICD;
         if (GetId() != 81100)
             if (SpellInfo const* icdInfo = sSpellMgr->GetSpellInfo(BY_FIRE_BE_PURGED_ICD))

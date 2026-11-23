@@ -714,7 +714,12 @@ constexpr uint32 MANAWELL = 954655;
 constexpr uint32 MANAWELL_BUFF = 954666;
 constexpr uint8 MANAWELL_LIGHTWELL_CHARGES = 5;
 
-std::unordered_map<ObjectGuid, uint8> ManawellHeals;
+constexpr char ManawellHealsKey[] = "AscensionDummySystemTime.ManawellHeals";
+
+struct ManawellHeals final : DataMap::Base
+{
+    uint8 Count = 0;
+};
 
 class spell_dummysystem_time_manawell : public SpellScript
 {
@@ -737,13 +742,8 @@ class spell_dummysystem_time_manawell : public SpellScript
         Creature* creature = well->ToCreature();
         if (!creature)
             return;
-        for (auto itr = ManawellHeals.begin(); itr != ManawellHeals.end();)
-            itr = ObjectAccessor::GetCreature(*creature, itr->first) ? std::next(itr) : ManawellHeals.erase(itr);
-        if (++ManawellHeals[creature->GetGUID()] >= MANAWELL_LIGHTWELL_CHARGES)
-        {
-            ManawellHeals.erase(creature->GetGUID());
+        if (++creature->CustomData.GetDefault<ManawellHeals>(ManawellHealsKey)->Count >= MANAWELL_LIGHTWELL_CHARGES)
             creature->DespawnOrUnsummon(Milliseconds(1));
-        }
     }
 
     void Register() override

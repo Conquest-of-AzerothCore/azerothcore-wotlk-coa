@@ -64,15 +64,15 @@ AuraCopy CopyAura(Aura const* aura)
     return copy;
 }
 
-void ApplyAuraCopy(Unit* caster, Unit* recipient, AuraCopy const& copy)
+bool ApplyAuraCopy(Unit* caster, Unit* recipient, AuraCopy const& copy)
 {
     SpellInfo const* info = sSpellMgr->GetSpellInfo(copy.SpellId);
     if (!info || !copy.EffectMask || !recipient->IsAlive() || recipient->IsImmunedToSpell(info, caster))
-        return;
+        return false;
     recipient->RemoveAurasDueToSpell(copy.SpellId, caster->GetGUID());
     Aura* aura = caster->AddAura(info, copy.EffectMask, recipient);
     if (!aura)
-        return;
+        return false;
     if (copy.Stacks > 1)
         aura->SetStackAmount(copy.Stacks);
     aura->SetMaxDuration(copy.MaxDuration);
@@ -88,6 +88,7 @@ void ApplyAuraCopy(Unit* caster, Unit* recipient, AuraCopy const& copy)
                 if (copy.Effects[i].Periodic)
                     effect->SetPeriodicTimer(copy.Effects[i].Timer);
             }
+    return true;
 }
 
 constexpr uint32 SOUL_SWAP = 954614;
@@ -188,9 +189,17 @@ class spell_dummysystem_caster_soul_swap_exhale : public SpellScript
         Aura* held = caster->GetAura(Reborn() ? SOUL_SWAP_HELD_REBORN : SOUL_SWAP_HELD, caster->GetGUID());
         if (!target || !held)
             return;
-        if (auto* script = held->GetScript<spell_dummysystem_caster_soul_swap_held>(SOUL_SWAP_HELD_SCRIPT))
+        std::vector<AuraCopy> failed;
+        auto* script = held->GetScript<spell_dummysystem_caster_soul_swap_held>(SOUL_SWAP_HELD_SCRIPT);
+        if (script)
             for (AuraCopy const& copy : script->Held())
-                ApplyAuraCopy(caster, target, copy);
+                if (!ApplyAuraCopy(caster, target, copy))
+                    failed.push_back(copy);
+        if (script && !failed.empty())
+        {
+            script->Hold(std::move(failed));
+            return;
+        }
         held->Remove();
     }
 

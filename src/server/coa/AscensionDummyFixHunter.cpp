@@ -15,10 +15,12 @@
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include "TemporarySummon.h"
 #include "UnitScript.h"
 #include <algorithm>
 #include <array>
 #include <functional>
+#include <list>
 #include <string_view>
 #include <vector>
 
@@ -615,7 +617,17 @@ class spell_dummyfix_hunter_binding_shot : public AuraScript
     {
         PreventDefaultAction();
         Unit* target = GetTarget();
-        Creature* arrow = target->FindNearestCreature(BINDING_SHOT_ARROW, 40.0f);
+        ObjectGuid const owner = GetCasterGUID();
+        std::list<Creature*> arrows;
+        target->GetCreatureListWithEntryInGrid(arrows, BINDING_SHOT_ARROW, 40.0f);
+        Creature* arrow = nullptr;
+        for (Creature* candidate : arrows)
+        {
+            TempSummon const* summon = candidate->ToTempSummon();
+            if ((candidate->GetOwnerGUID() == owner || (summon && summon->GetSummonerGUID() == owner)) &&
+                (!arrow || target->GetExactDist2d(candidate) < target->GetExactDist2d(arrow)))
+                arrow = candidate;
+        }
         if (!arrow || target->GetExactDist2d(arrow) <= BINDING_SHOT_TETHER)
             return;
         if (Unit* caster = GetCaster())

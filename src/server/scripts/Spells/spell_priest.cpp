@@ -1065,6 +1065,8 @@ static void HealFromVampiricEmbrace(Unit* priest, uint32 damage, int32 pct, Aura
         return;
 
     int32 heal = selfHeal + int32(priest->SpellBaseHealingBonusDone(healSpell->GetSchoolMask()) * VAMPIRISM_HEALING_POWER_COEFFICIENT);
+    if (heal > 0)
+        heal = int32(lowest->SpellHealingBonusTaken(priest, healSpell, uint32(heal), HEAL));
     heal = std::min<int32>(heal, priest->CountPctFromMaxHealth(VAMPIRISM_HEAL_CAP_PCT));
     if (heal <= 0)
         return;

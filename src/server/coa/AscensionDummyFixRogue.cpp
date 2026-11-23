@@ -644,10 +644,11 @@ class spell_dummyfix_rogue_spree_aura : public AuraScript
             }
             owner->CastSpell(target, KILLING_SPREE_TELEPORT, true);
             if (Player* player = owner->ToPlayer())
-            {
-                WorldLocation const& dest = player->GetTeleportDest();
-                player->UpdatePosition(dest, true);
-            }
+                if (player->IsBeingTeleportedNear())
+                {
+                    WorldLocation const& dest = player->GetTeleportDest();
+                    player->UpdatePosition(dest, true);
+                }
             owner->CastSpell(target, rule->Blitz, TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_DONT_REPORT_CAST_ERROR));
             break;
         }

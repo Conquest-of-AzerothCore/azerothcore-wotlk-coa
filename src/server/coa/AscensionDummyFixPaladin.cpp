@@ -177,8 +177,19 @@ class spell_dummyfix_paladin_beacon_of_virtue_aura : public AuraScript
     }
 };
 
+bool IsBeaconShare(SpellInfo const* info)
+{
+    for (BeaconRule const& rule : BEACONS)
+        if (SpellInfo const* share = sSpellMgr->GetSpellInfo(rule.Share))
+            if (uint32(share->Effects[EFFECT_0].MiscValue) == info->Id)
+                return true;
+    return false;
+}
+
 void ShareHealWithBeacons(Unit* healer, Unit* receiver, uint32 heal, SpellInfo const* info)
 {
+    if (IsBeaconShare(info))
+        return;
     std::vector<ObjectGuid> beacons;
     {
         std::lock_guard<std::mutex> lock(BeaconLock);
@@ -198,7 +209,7 @@ void ShareHealWithBeacons(Unit* healer, Unit* receiver, uint32 heal, SpellInfo c
                 continue;
             SpellInfo const* share = sSpellMgr->GetSpellInfo(rule.Share);
             SpellInfo const* beaconHeal = share ? sSpellMgr->GetSpellInfo(uint32(share->Effects[EFFECT_0].MiscValue)) : nullptr;
-            if (!beaconHeal || info->Id == beaconHeal->Id || !healer->IsWithinDistInMap(beacon, beaconHeal->GetMaxRange(true)))
+            if (!beaconHeal || !healer->IsWithinDistInMap(beacon, beaconHeal->GetMaxRange(true)))
                 continue;
             int32 amount = int32(CalculatePct(heal, share->Effects[EFFECT_0].CalcValue())) -
                 (beaconHeal->Effects[EFFECT_0].DieSides ? 1 : 0);
@@ -352,6 +363,7 @@ class spell_dummyfix_paladin_crimson_defender : public AuraScript
         uint32 const empowerment = _empowerment;
         ObjectGuid const targetGuid = _target;
         _empowerment = 0;
+        GetAura()->ModStackAmount(-int32(CRIMSON_CONSUMED_STACKS));
         caster->m_Events.AddEventAtOffset([caster, empowerment, targetGuid]()
         {
             Unit* target = ObjectAccessor::GetUnit(*caster, targetGuid);

@@ -225,8 +225,11 @@ constexpr uint32 ICE_BARRAGE_ICICLE = 830445;
 constexpr std::array<uint32, 3> RAY_OF_FROST = { 965680, 984513, 984514 };
 constexpr Milliseconds ICICLE_INTERVAL = 200ms;
 
-std::mutex IcicleLock;
-std::unordered_set<ObjectGuid> IciclesLaunching;
+constexpr char IciclesLaunchingKey[] = "AscensionDummyFixMage.IciclesLaunching";
+
+struct IciclesLaunching final : DataMap::Base
+{
+};
 
 bool IsIceBarrageGenerator(SpellInfo const* info)
 {
@@ -259,8 +262,7 @@ void LaunchIcicles(Unit* mage, ObjectGuid targetGuid, uint8 left)
             ICICLE_INTERVAL);
         return;
     }
-    std::lock_guard<std::mutex> lock(IcicleLock);
-    IciclesLaunching.erase(mage->GetGUID());
+    mage->CustomData.Erase(IciclesLaunchingKey);
 }
 
 class spell_dummyfix_mage_ice_barrage : public AuraScript
@@ -284,11 +286,8 @@ class spell_dummyfix_mage_ice_barrage : public AuraScript
     {
         PreventDefaultAction();
         Unit* mage = GetTarget();
-        {
-            std::lock_guard<std::mutex> lock(IcicleLock);
-            if (IciclesLaunching.count(mage->GetGUID()))
-                return;
-        }
+        if (mage->CustomData.Get<IciclesLaunching>(IciclesLaunchingKey))
+            return;
         if (IsIceLance(eventInfo.GetSpellInfo()))
         {
             Aura* icicles = mage->GetAura(ICE_BARRAGE_ICICLES, mage->GetGUID());
@@ -296,10 +295,7 @@ class spell_dummyfix_mage_ice_barrage : public AuraScript
                 return;
             uint8 const stored = icicles->GetStackAmount();
             icicles->Remove();
-            {
-                std::lock_guard<std::mutex> lock(IcicleLock);
-                IciclesLaunching.insert(mage->GetGUID());
-            }
+            mage->CustomData.GetDefault<IciclesLaunching>(IciclesLaunchingKey);
             LaunchIcicles(mage, eventInfo.GetActionTarget()->GetGUID(), stored);
             return;
         }

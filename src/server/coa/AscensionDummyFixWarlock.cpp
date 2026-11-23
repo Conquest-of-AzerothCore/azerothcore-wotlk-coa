@@ -915,6 +915,13 @@ constexpr uint32 HELLFIRE_PURSUIT_PULSE = 983067;
 constexpr uint32 BURNING_RUSH = 954806;
 constexpr int32 HELLISH_PURSUIT_CDR_MS = 20500;
 
+constexpr char HellishPursuitPulseKey[] = "AscensionDummyFixWarlock.HellishPursuitPulse";
+
+struct HellishPursuitPulse final : DataMap::Base
+{
+    uint32 Last = 0;
+};
+
 void HellishPursuit(Unit* attacker, SpellInfo const* info)
 {
     if (!attacker || !info || info->Id != HELLFIRE_PURSUIT_PULSE || !attacker->HasAura(HELLISH_PURSUIT))
@@ -922,9 +929,8 @@ void HellishPursuit(Unit* attacker, SpellInfo const* info)
     Player* player = attacker->ToPlayer();
     if (!player || !player->HasSpellCooldown(BURNING_RUSH))
         return;
-    static std::unordered_map<ObjectGuid, uint32> lastPulse;
     uint32 const now = uint32(GameTime::GetGameTimeMS().count());
-    uint32& last = lastPulse[player->GetGUID()];
+    uint32& last = player->CustomData.GetDefault<HellishPursuitPulse>(HellishPursuitPulseKey)->Last;
     if (last && now - last < 500)
         return;
     last = now;
