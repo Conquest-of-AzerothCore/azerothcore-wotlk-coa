@@ -1862,7 +1862,9 @@
     "spell": 572617,
     "clause": "Wreathe yourself in fire for up to $d,",
     "kind": "claim",
-    "labels": []
+    "labels": [
+      "572617 behaviour_metric_delta duration_up_to"
+    ]
   },
   {
     "spell": 572617,

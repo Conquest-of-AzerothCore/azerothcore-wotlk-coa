@@ -925,6 +925,42 @@
       "expire_ms": 1600,
       "void_on_cast_failure": true,
       "observe_source": "805244 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 6 (SPELLMOD_RADIUS), EffectBasePoints 2 (+3 yd, $s2), class mask word 2 0x2 of family 20. Chaos Rush 804521 (Effect[0] SPELL_EFFECT_CHARGE_DEST on TARGET_DEST_CASTER_FRONT, EffectRadiusIndex 15 = 3 yd in SpellRadius.dbc, SpellFamilyFlags[1] 0x80000, no SpellFamilyFlags[2]) does not carry that class mask (the Fel Torpedo jump 802028 does), so the data does not say the stated 3 yd more range reaches Chaos Rush itself. The entry asks the tooltip's default text (Chaos Rush, 520853 not learned): the caster's 2D displacement from right before each cast to 1500 ms after it, before (control, 805244 not learned) 3 yd by the data and 6 yd after a real learn by the tooltip, within 0.3 yd (a tenth of the stated 3 yd). A reading of 3 after the learn would be a lead, not a fix. Reference search 2026-11-23: coa-history spell 805244: 0 events in 186 logs (passive); spell 500610 Fel Torpedo: SPELL_CAST_SUCCESS 6 events in 1 log (positive control that the dash is logged; no distance in the log index); bindmysoul talents snapshot (fetched 2026-07-22): Legion March 805244 'Increases the range of Chaos Rush by 3 yds.' (an older, shorter text without the Fel Torpedo or crit parts; the figure 3 yd is the same as $s2); nothing else found."
+    },
+    {
+      "spell": 572617,
+      "name": "Immolation Aura (the aura lasts 60 seconds, held and gone)",
+      "kind": "metric_delta",
+      "variant": "duration_up_to",
+      "label_suffix": "duration_up_to",
+      "quote": "Wreathe yourself in fire for up to $d,",
+      "trigger_spell": 572617,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 572617,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 57500,
+      "expiry_wait_ms": 4900,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          57400,
+          57800
+        ],
+        "expired": [
+          62300,
+          62700
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. The aura 572617 on the caster is read absent before the cast (control: 0), present 57500 ms after a real cast and absent 4900 ms later (62400 ms), each reading stamped in game time inside its window (a duration 10% off, 54000 or 66000 ms, fails one of the two reads). The tooltip says 'up to': the aura may end earlier (the cost line of 572617 is a health cost per second); an end before 57400 ms is a finding, not a conformant duration. Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "measure_actor": "caster"
     }
   ],
   "player_observations": [],
