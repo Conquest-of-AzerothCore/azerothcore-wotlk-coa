@@ -17,7 +17,7 @@ extra casts, opt-in keys on existing kinds only, no C++.
 
 - The 4-line Necromancer pattern in `Chance()` (apply `SPELLMOD_CHANCE_OF_SUCCESS`) so the mutant forces it: C++,
   owner decision G-39, not built.
-- Unforced `repeat` casts: a fixed count of casts leaves 27% of runs without a grant at 15% (review I-1).
+- Unforced `repeat` casts: 4 casts of two strikes leave 27% of runs without a grant at 15% (review I-1).
 - `aura_fed_effect` `window`: judges an instant cast through a Sun Cleric channel; Legionfall's effect is a cost and
   Malice's auras sit on the dummy and the caster, so it would change what the variant judges.
 - An opt-in `feed` key on `last_application_expiry` driving the existing `cast_until_aura` step.
