@@ -2965,7 +2965,7 @@
           11950
         ]
       },
-      "observe_source": "803904 duration $d = 12000 ms (Spell.dbc DurationIndex). The aura is still on the caster 11900 ms after the cast (excludes a duration 10% short, 10800 ms). Reference search 2026-11-23: coa-history spell 803904: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+      "observe_source": "803904 duration $d = 12000 ms (Spell.dbc DurationIndex). The aura is still on the caster 11900 ms after the cast (excludes a duration 10% short, 10800 ms). Reference search 2026-11-23: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS, 281 SPELL_AURA_APPLIED and 280 SPELL_AURA_REMOVED by players in 15 of 186 logs. Applied-to-removed intervals of the 280 pairs: longest 12.07 to 12.44 s (the $d = 12000 ms expiry), the others 1.37 s and up (the aura also ends after $n attacks, so a shorter interval is not an expiry); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 803904,
@@ -2992,7 +2992,7 @@
           12150
         ]
       },
-      "observe_source": "803904 duration $d = 12000 ms (Spell.dbc DurationIndex). The aura is gone 12100 ms after the cast (excludes a duration 10% long, 13200 ms). Reference search 2026-11-23: coa-history spell 803904: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+      "observe_source": "803904 duration $d = 12000 ms (Spell.dbc DurationIndex). The aura is gone 12100 ms after the cast (excludes a duration 10% long, 13200 ms). Reference search 2026-11-23: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS, 281 SPELL_AURA_APPLIED and 280 SPELL_AURA_REMOVED by players in 15 of 186 logs. Applied-to-removed intervals of the 280 pairs: longest 12.07 to 12.44 s (the $d = 12000 ms expiry), the others 1.37 s and up (the aura also ends after $n attacks, so a shorter interval is not an expiry); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 806109,
@@ -3019,7 +3019,7 @@
           7950
         ]
       },
-      "observe_source": "806109 duration $d = 8000 ms (Spell.dbc DurationIndex). The aura is still on the caster 7900 ms after the cast (excludes a duration 10% short, 7200 ms). Reference search 2026-11-23: coa-history spell 806109: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+      "observe_source": "806109 duration $d = 8000 ms (Spell.dbc DurationIndex). The aura is still on the caster 7900 ms after the cast (excludes a duration 10% short, 7200 ms). Reference search 2026-11-23: coa-history spell 806109 finds 6 SPELL_CAST_SUCCESS, 6 SPELL_AURA_APPLIED and 6 SPELL_AURA_REMOVED by a player in 1 of 186 logs. Applied-to-removed intervals 1.59, 1.72, 1.74, 5.85, 6.09 and 6.09 s, none reaches $d = 8000 ms: the logged casts were left early (apps/coa-gameplay-test/scenarios/felsworn-illidans-guile-early-exit-9993.json), so the logs give no expiry read and are a lead, not a contradiction; advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 806109,
@@ -3046,7 +3046,7 @@
           8150
         ]
       },
-      "observe_source": "806109 duration $d = 8000 ms (Spell.dbc DurationIndex). The aura is gone 8100 ms after the cast (excludes a duration 10% long, 8800 ms). Reference search 2026-11-23: coa-history spell 806109: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+      "observe_source": "806109 duration $d = 8000 ms (Spell.dbc DurationIndex). The aura is gone 8100 ms after the cast (excludes a duration 10% long, 8800 ms). Reference search 2026-11-23: coa-history spell 806109 finds 6 SPELL_CAST_SUCCESS, 6 SPELL_AURA_APPLIED and 6 SPELL_AURA_REMOVED by a player in 1 of 186 logs. Applied-to-removed intervals 1.59, 1.72, 1.74, 5.85, 6.09 and 6.09 s, none reaches $d = 8000 ms: the logged casts were left early (apps/coa-gameplay-test/scenarios/felsworn-illidans-guile-early-exit-9993.json), so the logs give no expiry read and are a lead, not a contradiction; advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 805243,
@@ -3147,6 +3147,65 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "805243 Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 9 + 1 = 10 ($s2). The amount of effect 1 of the aura on the caster is read 500 ms after a real cast: 0 before the cast (control) and 10 after. Reference search 2026-11-23: coa-history spell 805243: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 805243,
+      "name": "Infernal Whipcrack (melee haste)",
+      "kind": "metric_delta",
+      "variant": "melee_haste",
+      "label_suffix": "melee_haste",
+      "quote": "and increasing their haste by $s2% for $d.",
+      "cast_in_before": false,
+      "trigger_spell": 805243,
+      "gate_spell": 805243,
+      "target": "caster",
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 2800,
+      "expected": 2545.4545,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "805243 Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 9 + 1 = 10 ($s2). The main-hand attack time of the reference weapon (Tyrant item 2529, 2800 ms, class file weapon_sets) is read 500 ms after a real Whipcrack cast, before (control: the same read before the cast) and after: 2800 / 1.10 = 2545.4545 ms, tolerance 1 ms; it excludes the neighbours 2800 / 1.05 = 2666.7 and 2800 / 1.15 = 2434.8. The ranged haste of the same effect has no ranged weapon in the set and stays unmeasured. Reference search 2026-11-23: coa-history spell 805243 finds 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 805243,
+      "name": "Infernal Whipcrack (spell haste)",
+      "kind": "metric_delta",
+      "variant": "spell_haste",
+      "label_suffix": "spell_haste",
+      "quote": "and increasing their haste by $s2% for $d.",
+      "cast_in_before": false,
+      "trigger_spell": 805243,
+      "gate_spell": 805243,
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0.909091,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "805243 Effect[2] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 9 + 1 = 10 ($s2). The caster's cast speed multiplier (UNIT_MOD_CAST_SPEED) is read 500 ms after a real Whipcrack cast, before (control: the same read before the cast) and after: 1 / 1.10 = 0.909091, tolerance 0.0001. Reference search 2026-11-23: coa-history spell 805243 finds 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806109,
+      "name": "Illidan's Guile (immunity to physical and spells)",
+      "kind": "immunity",
+      "quote": "becoming immune to all physical attacks and spells",
+      "effects": [
+        {
+          "spell": 38767,
+          "words": "physical"
+        },
+        {
+          "spell": 35317,
+          "words": "spells"
+        }
+      ],
+      "observe_source": "806109 Effect[1] aura 39 SPELL_AURA_SCHOOL_IMMUNITY, EffectMiscValue 127 (every school including Physical), DurationIndex 31 (8000 ms). Fixtures, each landed by a real creature cast at the caster inside the window: Daze 38767 (SchoolMask 1 Physical, one aura 33 effect, per witch_hunter.json 'Physical landing control') for 'physical attacks' and Chilled Blood 35317 (SchoolMask 16 Frost, DmgClass 1 magic, aura 33) for 'spells'. The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands. 'cannot attack, move or cast spells' has its own claims and no check here. Reference search 2026-11-23: coa-history spell 806109 finds 6 SPELL_CAST_SUCCESS, 6 SPELL_AURA_APPLIED and 6 SPELL_AURA_REMOVED by a player in 1 of 186 logs, intervals 1.59 to 6.09 s (left early, mechanic felsworn-illidans-guile-early-exit-9993); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],

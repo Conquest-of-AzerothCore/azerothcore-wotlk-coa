@@ -2863,12 +2863,29 @@
   {
     "spell": 805243,
     "clause": "and increasing their haste by $s2% for $d.",
-    "labels": [
-      "805243 behaviour_metric_delta amount_e1",
-      "805243 behaviour_metric_delta held",
-      "805243 behaviour_metric_delta gone"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and increasing their haste by $s2%",
+        "labels": [
+          "805243 behaviour_metric_delta amount_e1",
+          "805243 behaviour_metric_delta melee_haste"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "805243 behaviour_metric_delta held",
+          "805243 behaviour_metric_delta gone"
+        ]
+      },
+      {
+        "claim": "and increasing their haste by $s2% (effect 2, aura 216 spell haste)",
+        "labels": [
+          "805243 behaviour_metric_delta spell_haste"
+        ]
+      }
+    ]
   },
   {
     "spell": 805244,
@@ -2979,11 +2996,47 @@
   {
     "spell": 806109,
     "clause": "Gorge on fel energy, becoming immune to all physical attacks and spells for $d, but during that time you cannot attack, move or cast spells.",
-    "labels": [
-      "806109 behaviour_metric_delta held",
-      "806109 behaviour_metric_delta gone"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "for $d",
+        "labels": [
+          "806109 behaviour_metric_delta held",
+          "806109 behaviour_metric_delta gone"
+        ]
+      },
+      {
+        "claim": "becoming immune to all physical attacks",
+        "labels": [
+          "806109 immunity 38767 without",
+          "806109 immunity 38767 with",
+          "806109 immunity 38767 control",
+          "806109 immunity 806109 cast",
+          "806109 immunity 806109 applied",
+          "806109 immunity 806109 expired"
+        ]
+      },
+      {
+        "claim": "and spells",
+        "labels": [
+          "806109 immunity 35317 without",
+          "806109 immunity 35317 with",
+          "806109 immunity 35317 control"
+        ]
+      },
+      {
+        "claim": "you cannot attack",
+        "labels": []
+      },
+      {
+        "claim": "move",
+        "labels": []
+      },
+      {
+        "claim": "or cast spells",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 806109,
