@@ -2445,14 +2445,9 @@
       },
       {
         "claim": "and causes it to strike 1 additional enemy near the primary target based on how long you channeled,",
-        "labels": []
-      },
-      {
-        "claim": "strikes additional enemies near the primary target after a full channel (nine offered, all struck)",
         "labels": [
-          "707444 behaviour_metric_delta extras_full"
-        ],
-        "evidence": "behaviour"
+            "707444 behaviour_metric_delta extras_full"
+          ]
       }
     ],
     "tool_gap": {
