@@ -1275,7 +1275,8 @@
       {
         "claim": "unable to critically strike",
         "labels": [
-          "560641 behaviour_taken_hit no_crit"
+          "560641 behaviour_taken_hit no_crit",
+          "560641 behaviour_taken_hit no_crit_melee"
         ]
       },
       {
