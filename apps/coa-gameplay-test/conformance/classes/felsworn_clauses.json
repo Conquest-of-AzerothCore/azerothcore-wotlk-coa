@@ -1936,15 +1936,19 @@
         "labels": [
           "704370 behaviour_metric_delta stack_value",
           "704370 behaviour_metric_delta stack_count"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "for $707511d",
         "labels": [
           "704370 behaviour_metric_delta duration"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 704370,
@@ -2129,7 +2133,8 @@
     "labels": [
       "705105 behaviour_metric_delta max_energy"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Data reading, not a separation of the tooltip's flat 30 from 30%: the DBC aura of 705105 is MOD_INCREASE_ENERGY_PERCENT (132, 29 + 1) and AscensionFelswornContracts.cpp:98-99 already rewrites it to the flat aura 35, so the read of +30 on 100 Energy cannot tell the two apart. No class source gives a flat or a percent Energy term that does: the only other maximum Energy source of the class, 800225 Skull of Gul'dan (+25%), multiplies a flat 30 and a 30% alike (StatSystem.cpp:456-459, (100 + 30) x 1.25 = 100 x 1.30 x 1.25). Items and racial sources not found in the class kit; no item fixture separating them was identified. Reference search 2026-11-23: nothing found."
   },
   {
     "spell": 705108,
@@ -3305,7 +3310,8 @@
     "clause": "This ability is guaranteed to critically strike against enemies above 75% health.",
     "labels": [
       "572804 behaviour_hit_ratio crit_above_75",
-      "572804 behaviour_hit_ratio crit_below_75"
+      "572804 behaviour_hit_ratio crit_below_75",
+      "572804 behaviour_hit_ratio crit_positive"
     ],
     "kind": "claim"
   },
@@ -3330,14 +3336,23 @@
   {
     "spell": 803475,
     "clause": "$?s804216[\r\n\r\nInner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
-    "labels": [
-      "803475 behaviour_metric_delta extend_casts",
-      "803475 behaviour_metric_delta extend_absent"
-    ],
     "kind": "claim",
-    "reason": "One extension cast per Assault is proven (extend_casts: 803089 cast 0 -> 1) and none without Inner Demon (extend_absent); the 3000 ms of the extension is the DBC value of 803089 Effect[0] (2999 + 1). The duration read of Inner Demon after Assault gained 28009 ms in both runs of the pair 20261123-220340 / -220424 (4991 -> 33000), 25000 ms more than the extension: another source of Inner Demon duration acts in that cast (not isolated, no control spender run), so the 3 s itself is not counted as a duration; the figure is an alert lead in the report.",
-    "evidence": "behaviour",
-    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
+    "reason": "Cast part only: the extension spell 803089 is cast once per Assault with Inner Demon (extend_casts 0 -> 1) and not without it (extend_absent); this proves the cast, not that the duration grows. The value part, 'by $/1000;803089s1 sec' (3 s, 803089 Effect[0] 2999 + 1), is not measured: the duration read of Inner Demon after Assault gained 28009 ms against 3000 in all four runs of the pairs 20261123-220340/-220424 and -220711/-220741 (4991 -> 33000), an alert lead with no isolated cause (33000 = 6 x 5000 + 3000 is a lead: Felfury 803465 adds +5000 ms duration per stack and the fixture holds 6). Reference search 2026-11-23: nothing found for the value.",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "claims": [
+      {
+        "claim": "Extends the duration of Inner Demon",
+        "labels": [
+          "803475 behaviour_metric_delta extend_casts",
+          "803475 behaviour_metric_delta extend_absent"
+        ],
+        "evidence": "behaviour"
+      },
+      {
+        "claim": "by $/1000;803089s1 sec",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 802058,

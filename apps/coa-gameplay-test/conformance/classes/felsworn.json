@@ -12558,6 +12558,33 @@
       "expected_source": "Annihilan Strike 572804 (Effect[0] and [1] TRIGGER_SPELL_WITH_VALUE, main hand 801913, off hand 801914; Energy cost 40, cast_power 100 before each cast) states 'guaranteed to critically strike against enemies above 75% health' (Spell.dbc description of 572804 and 801913). The critical share of the main-hand strike 801913 on the dummy is compared between a control arm with the dummy held at 50% health and a treatment arm at 60% (both below the 75% threshold). Both arms use the same spell, the same weapons and the same real cast, so the only difference is the target's health. The critical share does not change (0 points): below 75% the strike is not guaranteed to critically strike, at either health. The reference character's melee critical strike chance is expected to be 0 (the Witch Hunter Stake 681328 entries rely on the same reading; not read for this class, so a control arm whose share is not 0 alerts the claim 'no gain below 75%' rather than hiding it). Reference search 2026-11-23: coa-history spell 572804: 0 events; spell 801913 Annihilan Strike: SPELL_DAMAGE 70 events in 4 logs (34 crits, min 98 max 394: real play shows crits at all healths, gear differs so no figure decides); expected values come from the tooltip and the DBC only."
     },
     {
+      "spell": 572804,
+      "name": "Annihilan Strike (positive arm: a forced critical chance reads critical 801913 strikes)",
+      "kind": "hit_ratio",
+      "variant": "crit_positive",
+      "label_suffix": "crit_positive",
+      "quote": "This ability is guaranteed to critically strike against enemies above 75% health.",
+      "observe_spell": 801913,
+      "cast_spell": 572804,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "control": {
+        "auras": [],
+        "target_health_pct": 50
+      },
+      "treatment": {
+        "auras": [],
+        "target_health_pct": 60
+      },
+      "expected": 1.0,
+      "rate": "critical",
+      "expected_points": 0,
+      "trials": 40,
+      "parts": 4,
+      "expected_source": "Positive arm of crit_above_75 and crit_below_75 (same cast 572804, same observed strike 801913, same two healths below 75%): the player's melee critical strike rating is forced to 100% chance, so every 801913 strike is a critical strike by the engine's own roll and the critical share read of this entry must reach 100% in both arms (the per-arm counts are in the verdict detail); the arms differ by no health threshold, so the difference between them is 0 points. It shows that a critical strike of 801913 on the dummy is counted by the read the two entries above use, so 0 critical strikes in their trials is not an artefact of the design. Tooltip: 'This ability is guaranteed to critically strike against enemies above 75% health.' Reference search 2026-11-23: nothing found beyond the two entries above; expected values come from the tooltip and the DBC only.",
+      "force_crit": "melee"
+    },
+    {
       "spell": 803904,
       "kind": "metric_delta",
       "quote": "Gorge on fel energy, guaranteeing your next direct instance of damage to critically strike, but causing it to consume 5% of your maximum health.",
@@ -12683,9 +12710,9 @@
       "expected": 1,
       "tolerance": 0.01,
       "wait_ms": 3300,
-      "expire_ms": 10500,
+      "expire_ms": 25000,
       "void_on_cast_failure": true,
-      "observe_source": "704370 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 707511 (Curse of Argus: Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER, BasePoints 0 + 1 = 1 ($707511s1) per stack, StackAmount 20); AscensionFelswornEvents.cpp:211-212 casts 707511 on the target of each damage event of Bane of Chaos 704368. Bane of Chaos 704368 has Effect[0] PERIODIC_DAMAGE with a 3000 ms period (Spell.dbc EffectAmplitude[0]), so the first damage event lands 3000 ms after the cast: the amount of effect 0 of 707511 (caster = the caster) on the dummy is read 3300 ms after one real cast, before the learn of 704370 (control: 0, no aura) and after it: 1, the amount of one stack (the engine multiplies the amount by the stack count, AuraEffect::CalculateAmount), and the aura's own stock handler 271 applies it to the damage the caster deals to that target. Not a damage ratio: 20 stacks need 60 s of Bane ticks per trial, past what the scenario cap holds for the sample a 2-point band needs, and the handler is the stock aura 271. Reference search 2026-11-23: coa-history spell 704370: 0 events in 186 logs (a passive leaves no event); spell 707511 Curse of Argus: SPELL_AURA_APPLIED_DOSE 690 events in 4 logs (it stacks in real play); nothing states another value; expected values come from the tooltip and the DBC only."
+      "observe_source": "704370 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 707511 (Curse of Argus: Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER, BasePoints 0 + 1 = 1 ($707511s1) per stack, StackAmount 20); AscensionFelswornEvents.cpp:211-212 casts 707511 on the target of each damage event of Bane of Chaos 704368. Bane of Chaos 704368 has Effect[0] PERIODIC_DAMAGE with a 3000 ms period (Spell.dbc EffectAmplitude[0]), so the first damage event lands 3000 ms after the cast: the amount of effect 0 of 707511 (caster = the caster) on the dummy is read 3300 ms after one real cast, before the learn of 704370 (control: 0, no aura) and after it: 1, the amount of one stack (the engine multiplies the amount by the stack count, AuraEffect::CalculateAmount), and the aura's own stock handler 271 applies it to the damage the caster deals to that target. Not a damage ratio: 20 stacks need 60 s of Bane ticks per trial, past what the scenario cap holds for the sample a 2-point band needs, and the handler is the stock aura 271. Reference search 2026-11-23: coa-history spell 704370: 0 events in 186 logs (a passive leaves no event); spell 707511 Curse of Argus: SPELL_AURA_APPLIED_DOSE 690 events in 4 logs (it stacks in real play); nothing states another value; expected values come from the tooltip and the DBC only. Phase gap 2026-11-23: the first Bane (21000 ms, 3000 ms ticks) keeps ticking after the learn and each tick refreshes 707511 (6000 ms), so the gap between the learn and the second cast is 25000 ms, past the last tick (21000 ms after the first cast) plus the 6000 ms of 707511, and the second cast reads the one stack of its own first tick."
     },
     {
       "spell": 704370,
@@ -12708,9 +12735,9 @@
       "expected": 1,
       "tolerance": 0,
       "wait_ms": 3300,
-      "expire_ms": 10500,
+      "expire_ms": 25000,
       "void_on_cast_failure": true,
-      "observe_source": "Diagnostic companion of stack_value on the same cast and read: the stacks of 707511 on the dummy 3300 ms after one real cast of Bane of Chaos 704368, one damage event (3000 ms period) having landed: 1 expected. The first pair read an amount of 4 for this one event (stack_value alert); this entry separates a per-stack amount other than 1 from a stack count other than 1. Reference search 2026-11-23: coa-history spell 707511: SPELL_AURA_APPLIED_DOSE 690 events in 4 logs; expected values come from the tooltip and the DBC only."
+      "observe_source": "Diagnostic companion of stack_value on the same cast and read: the stacks of 707511 on the dummy 3300 ms after one real cast of Bane of Chaos 704368, one damage event (3000 ms period) having landed: 1 expected. The first pair read an amount of 4 for this one event (stack_value alert); this entry separates a per-stack amount other than 1 from a stack count other than 1. Reference search 2026-11-23: coa-history spell 707511: SPELL_AURA_APPLIED_DOSE 690 events in 4 logs; expected values come from the tooltip and the DBC only. Phase gap 2026-11-23: the first Bane (21000 ms, 3000 ms ticks) keeps ticking after the learn and each tick refreshes 707511 (6000 ms), so the gap between the learn and the second cast is 25000 ms, past the last tick (21000 ms after the first cast) plus the 6000 ms of 707511, and the second cast reads the one stack of its own first tick."
     },
     {
       "spell": 803475,
