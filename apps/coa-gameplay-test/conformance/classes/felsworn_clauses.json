@@ -3014,7 +3014,7 @@
     "spell": 807902,
     "clause": "Increases your Magic damage dealt by $s1%",
     "labels": [
-      "807902 effect_value e0 #0"
+      "807902 behaviour_hit_ratio magic_damage"
     ],
     "kind": "claim"
   },
