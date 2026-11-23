@@ -1006,7 +1006,7 @@
         520592
       ],
       "count_primary": false,
-      "observe_source": "520592 Effect[0] SPELLMOD_JUMP_TARGETS +5 on the class mask of Manaburn; the number of dummies struck by Manaburn 805248 (spell_damage_count per dummy) is read with 520592 learned: the primary and exactly 4 additional ones (the control entry manaburn_targets_control casts the same Manaburn with 520592 never learned and expects no additional dummy struck) (more candidates are offered inside the radius, so a fifth strike would show), on Scarlet Magi 1832 (a level 56-57 mana-using mage, unit_class 8: Manaburn damage equals the mana drained, so a creature with no mana would never be struck), with one dummy outside the jump radius never struck. Reference search 2026-11-23: coa-history spell 520592 and 805248: 0 events in 186 logs (positive control 801904: 21 casts); the bindmysoul snapshot repeats the tooltip.",
+      "observe_source": "520592 Effect[0] SPELLMOD_JUMP_TARGETS +5 on the class mask of Manaburn; the number of dummies struck by Manaburn 805248 (spell_damage_count per dummy) is read with 520592 learned: the primary and exactly 4 additional ones (the control entry manaburn_targets_control casts the same Manaburn with 520592 never learned and expects no additional dummy struck) (more candidates are offered inside the radius, so a fifth strike would show), on Scarlet Magi 1832 (a level 56-57 mana-using mage, unit_class 8: Manaburn damage equals the mana drained, so a creature with no mana would never be struck), with one dummy outside the jump radius never struck. Reference search 2026-11-23: coa-history spell 520592: 0 events in 186 logs (a passive); spell 805248: 25 casts and 22 damage events in 4 logs (positive control 801904: 21 casts); the bindmysoul snapshot repeats the tooltip.",
       "dummy_entry": 1832
     },
     {
@@ -1026,7 +1026,7 @@
       "repeats": 3,
       "learn": [],
       "count_primary": false,
-      "observe_source": "Control arm of manaburn_targets on the same build: Manaburn 805248 cast at the primary with 520592 not learned, on Scarlet Magi 1832 (mana-using, so a strike would land), counts the additional dummies struck: 0, so the 4 additional strikes of the treatment entry come from 520592 (Effect[0] SPELLMOD_JUMP_TARGETS) and not from the spell or a script. Reference search 2026-11-23: coa-history spell 520592 and 805248: 0 events in 186 logs; nothing else found.",
+      "observe_source": "Control arm of manaburn_targets on the same build: Manaburn 805248 cast at the primary with 520592 not learned, on Scarlet Magi 1832 (mana-using, so a strike would land), counts the additional dummies struck: 0, so the 4 additional strikes of the treatment entry come from 520592 (Effect[0] SPELLMOD_JUMP_TARGETS) and not from the spell or a script. Reference search 2026-11-23: coa-history spell 520592: 0 events in 186 logs (a passive); spell 805248: 25 casts and 22 damage events in 4 logs; nothing else found.",
       "dummy_entry": 1832
     },
     {
