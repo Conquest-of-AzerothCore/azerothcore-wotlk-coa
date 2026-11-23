@@ -30,7 +30,8 @@ Two `metric_delta` fixture options follow the same rule (controller go of 2026-1
 distances instead of 9 (the dummy and 11 fill the 12 creatures `run.py` admits), for a cap of 10 additional targets
 that needs an eleventh candidate (Hellfire Carver 707444); and a new option `friendly_creatures` adds friendly
 creatures outside the party (faction 35, entry 631) and sums the judged `aura` reading over them, for "all allies"
-beyond a spell's party cap (Taskmaster's Army 800220 on Infernal Whipcrack 805243). Both are opt-in; no existing
+beyond a spell's party cap. Its first target, Infernal Whipcrack 805243 under Taskmaster's Army 800220, carries
+SPELL_ATTR3_ONLY_ON_PLAYER and refused the creatures, so no entry uses the option yet. Both are opt-in; no existing
 scenario changes and no evidence row is added.
 
 ## Consequences

@@ -10,5 +10,5 @@ creatures' readings. A missing part leaves the reading missing. Refused with `ar
 
 Named points: `check`, `fixtures`, `model`, `run_values`.
 
-Felsworn: Taskmaster's Army 800220 `all_allies` (Infernal Whipcrack 805243 reaches ten friendly creatures beyond its
-8-ally cap, entry 631 of the heal_sum fixture, ADR 1118).
+No class entry uses it yet. A spell with SPELL_ATTR3_ONLY_ON_PLAYER refuses creature targets, so the creatures read
+nothing: Infernal Whipcrack 805243 (Felsworn Taskmaster's Army 800220, "all allies") needs ally players instead.
