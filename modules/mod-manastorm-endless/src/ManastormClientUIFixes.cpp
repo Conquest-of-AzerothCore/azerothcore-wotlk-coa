@@ -54,8 +54,10 @@ if not queue.CoAOriginalUpdateRewards then
         end
         local elapsed = math.max(0, GetTime() - data.receivedAt)
         local expired = data.finish and data.finish > 0 and data.now + elapsed >= data.finish
+        local clearsExpired = data.clearFinish and data.clearFinish > 0 and data.now + elapsed >= data.clearFinish
         local earned = expired and 0 or (data.earned or 0)
-        local remaining = math.max(0, (data.cap or 0) - earned)
+        local capped = (data.cap or 0) > 0
+        local remaining = capped and math.max(0, data.cap - earned) or nil
         local types = { SOLO=1, DUO=2, TRIO=3, GROUP=4,
             SOLO_END_GAME=1, DUO_END_GAME=2, TRIO_END_GAME=3, GROUP_END_GAME=4 }
         local kind = ManastormUtil.GetManastormType()
@@ -64,7 +66,7 @@ if not queue.CoAOriginalUpdateRewards then
         if types[kind] then track = string.find(kind, "END_GAME", 1, true) and 2 or 1 end
         local depth = self.selectedLevel or 1
         local first = not (data.clears and data.clears[mode .. ":" .. track .. ":" .. depth])
-        if expired and data.perWindow then first = true end
+        if clearsExpired and data.perWindow then first = true end
         local quantity = 0
         for _, rule in ipairs(data.rules or {}) do
             if (rule[1] == 0 or rule[1] == mode) and (rule[2] == 0 or rule[2] == track)
@@ -78,7 +80,8 @@ if not queue.CoAOriginalUpdateRewards then
                 break
             end
         end
-        quantity = math.min(quantity + (data.bonusTokens or 0), remaining)
+        quantity = quantity + (data.bonusTokens or 0)
+        if capped then quantity = math.min(quantity, remaining) end
         if regular.itemID ~= 975001 or self.CoATokenQuantity ~= quantity then
             regular:SetItem(975001, quantity)
             self.CoATokenQuantity = quantity
@@ -86,7 +89,7 @@ if not queue.CoAOriginalUpdateRewards then
         self.CoAOriginalUpdateRewards(self)
         regular:SetShown(true)
         local seconds = math.max(0, (data.finish or 0) - (data.now or 0) - elapsed)
-        regular:SetLocked(data.unavailable or remaining == 0, seconds)
+        regular:SetLocked(data.unavailable or (capped and remaining == 0), seconds)
         if not self.CoABonusReward and (data.bonus or 0) > 0 then
             self.CoABonusReward = self.Rewards[4]
         end
@@ -108,9 +111,12 @@ if not queue.CoAOriginalUpdateRewards then
         local label = first and "First clear" or "Repeat clear"
         if data.unavailable then
             self.CoATokenProgress:SetText("Bazaar Token rewards temporarily unavailable")
+        elseif capped then
+            self.CoATokenProgress:SetText(string.format(
+                "%s: %d tokens  |  %d / %d Bazaar Tokens earned\n%d remaining  |  %s",
+                label, quantity, earned, data.cap, remaining, reset))
         else
-            self.CoATokenProgress:SetText(string.format("%s: %d tokens  |  %d / %d earned\n%d remaining  |  %s",
-                label, quantity, earned, data.cap or 0, remaining, reset))
+            self.CoATokenProgress:SetText(string.format("%s: %d tokens", label, quantity))
         end
         self.CoATokenProgress:Show()
         self.LoadoutTitle:ClearAllPoints()

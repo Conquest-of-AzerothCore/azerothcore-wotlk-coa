@@ -21,7 +21,6 @@ namespace ManastormModuleConfig
     bool CoAFirstClearEnabled();
     bool CoARepeatEnabled();
     bool CoAFirstClearResetsWithWindow();
-    uint32 CoATokenCap();
     uint32 CoATokenWindowSeconds();
     ManastormClientMode ClientMode();
     bool IsReconstructedClientMode();

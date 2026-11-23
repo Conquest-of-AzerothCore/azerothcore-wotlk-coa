@@ -3704,18 +3704,21 @@ void ManastormMgr::SendClientState(
     {
         ManastormCoATokenState tokens;
         bool const available = ManastormRewards::Instance().LoadCoATokenState(player->GetGUID().GetCounter(), tokens);
+        AscensionBazaarTokenCap::Allowance const allowance =
+            ManastormRewards::Instance().CoAAccountAllowance(player->GetGUID().GetCounter());
         uint32 quantity = 0;
         if (available && active)
         {
             bool const first = ManastormRewards::Instance().IsCoAFirstClear(
                 tokens, run->GetMode(), run->IsEndgame(), run->GetDepth());
-            uint32 const amount = ManastormRewards::Instance().CoATokenReward(
+            quantity = ManastormRewards::Instance().CoATokenReward(
                 run->GetMode(), run->IsEndgame(), run->GetDepth(), first);
-            quantity = ManastormCoALoot::Award(amount, tokens.Window.Earned, ManastormModuleConfig::CoATokenCap());
+            if (allowance.cap)
+                quantity = std::min(quantity, allowance.cap - allowance.earned);
         }
         message << "|COA_TOKENS|" << ManastormCoALoot::TokenItem << '|' << quantity << '|'
-            << tokens.Window.Earned << '|' << ManastormModuleConfig::CoATokenCap() << '|'
-            << tokens.Window.Start << '|' << tokens.Window.End << '|' << (available ? 1 : 0);
+            << allowance.earned << '|' << allowance.cap << '|'
+            << allowance.start << '|' << allowance.end << '|' << (available ? 1 : 0);
     }
 
     WorldPacket packet;

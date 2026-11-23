@@ -1,6 +1,7 @@
 #ifndef MANASTORM_REWARDS_H
 #define MANASTORM_REWARDS_H
 
+#include "AscensionBazaarTokenCap.h"
 #include "DatabaseEnv.h"
 #include "ManastormDefines.h"
 #include "ManastormReleaseStage.h"
@@ -61,6 +62,21 @@ struct ManastormCoATokenState
     std::vector<std::array<uint32, 3>> Clears;
 };
 
+class ManastormCoATokenClaims
+{
+public:
+    ManastormCoATokenClaims() = default;
+    ManastormCoATokenClaims(ManastormCoATokenClaims const&) = delete;
+    ManastormCoATokenClaims& operator=(ManastormCoATokenClaims const&) = delete;
+    ~ManastormCoATokenClaims();
+
+    uint32 Claim(ObjectGuid::LowType characterGuid, uint32 requested);
+    void Keep();
+
+private:
+    std::vector<std::pair<uint32, uint32>> _claims;
+};
+
 class ManastormRewards
 {
 public:
@@ -78,6 +94,7 @@ public:
     uint32 CoATokenReward(ManastormMode mode, bool endgame, uint32 depth, bool firstClear) const;
     std::string CoATokenClientState(ObjectGuid::LowType characterGuid, ManastormRun const* run,
         bool includeClock = true) const;
+    AscensionBazaarTokenCap::Allowance CoAAccountAllowance(ObjectGuid::LowType characterGuid) const;
 
     bool LoadState(
         ObjectGuid::LowType characterGuid,
@@ -89,6 +106,7 @@ public:
     bool PrepareStageCompletion(
         ManastormRun const& run,
         CharacterDatabaseTransaction const& transaction,
+        ManastormCoATokenClaims& claims,
         std::vector<std::shared_ptr<ManastormRewardPublication>>& publications,
         std::string& error) const;
 
@@ -234,9 +252,10 @@ private:
     bool LoadCacheBrackets();
     bool LoadCoATokenRules();
     void AppendCoAAllowance(ObjectGuid::LowType guid, uint32 requested,
-        CharacterDatabaseTransaction const& transaction, ManastormCoATokenState& state, uint32& quantity) const;
+        CharacterDatabaseTransaction const& transaction, ManastormCoATokenClaims& claims,
+        ManastormCoATokenState& state, uint32& quantity) const;
     bool PrepareCoATokenReward(ObjectGuid::LowType characterGuid, ManastormRun const& run,
-        CharacterDatabaseTransaction const& transaction, uint32& quantity,
+        CharacterDatabaseTransaction const& transaction, ManastormCoATokenClaims& claims, uint32& quantity,
         ManastormCoATokenState& state, std::string& error, uint32 extraTokens = 0) const;
     bool LoadCacheUnlockRequirements();
     void LoadReleasedItemLevelCaps();

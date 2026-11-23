@@ -130,11 +130,21 @@ void AscensionBazaarTokenCap::WarmAccount(Player* player)
 
 uint32 AscensionBazaarTokenCap::Claim(Player* player, uint32 count)
 {
-    uint32 const cap = GetCap();
-    if (!player || !player->GetSession() || !count || !cap)
+    if (!player || !player->GetSession())
         return count;
 
-    uint32 const accountId = player->GetSession()->GetAccountId();
+    return ClaimForAccount(player->GetSession()->GetAccountId(), player, count);
+}
+
+uint32 AscensionBazaarTokenCap::ClaimForAccount(uint32 accountId, Player* player, uint32 count)
+{
+    uint32 const cap = GetCap();
+    if (!accountId || !count || !cap)
+        return count;
+
+    if (player && !player->GetSession())
+        player = nullptr;
+
     uint32 const now = Now();
     uint32 allowed = 0;
     uint32 minutesLeft = 0;
@@ -152,7 +162,8 @@ uint32 AscensionBazaarTokenCap::Claim(Player* player, uint32 count)
             SaveIfNewer(accountId, window);
         }
 
-        if (window.earned >= cap && (allowed || now >= window.lastNotice + CAPPED_REMINDER_INTERVAL_SECONDS))
+        if (player && window.earned >= cap &&
+            (allowed || now >= window.lastNotice + CAPPED_REMINDER_INTERVAL_SECONDS))
         {
             window.lastNotice = now;
             minutesLeft = MinutesLeft(window, now);
@@ -165,10 +176,38 @@ uint32 AscensionBazaarTokenCap::Claim(Player* player, uint32 count)
             "You have reached the limit of {} Bazaar Tokens per hour. You can earn Bazaar Tokens again in {} min.",
             cap, std::max<uint32>(1, minutesLeft));
 
-    if (allowed || notify)
+    if (player && (allowed || notify))
         SendClientState(player);
 
     return allowed;
+}
+
+void AscensionBazaarTokenCap::Refund(uint32 accountId, uint32 count)
+{
+    if (!accountId || !count || !GetCap())
+        return;
+
+    std::unique_lock<std::mutex> guard(capLock);
+    Window& window = WindowRef(accountId, guard);
+    if (Expired(window, Now()))
+        return;
+
+    window.earned -= std::min(count, window.earned);
+    Overwrite(accountId, window);
+}
+
+AscensionBazaarTokenCap::Allowance AscensionBazaarTokenCap::GetAllowance(uint32 accountId)
+{
+    uint32 const cap = GetCap();
+    if (!cap)
+        return {};
+
+    std::unique_lock<std::mutex> guard(capLock);
+    Window const& window = WindowRef(accountId, guard);
+    if (Expired(window, Now()))
+        return { cap, 0, 0, 0 };
+
+    return { cap, std::min(window.earned, cap), window.start, window.start + WindowSeconds() };
 }
 
 uint32 AscensionBazaarTokenCap::LimitReward(Player* player, uint32 itemId, uint32 count)
