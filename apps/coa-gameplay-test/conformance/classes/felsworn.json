@@ -4766,6 +4766,195 @@
         "source": "tooltip of 807461: $s1 = 50 (Spell.dbc 807461 EffectBasePoints[0] 49 + 1)% of the damage dealt"
       },
       "observe_source": "$s1 = 50 (807461 EffectBasePoints[0] 49 + EffectDieSides 1). Bane of Chaos 704368 is cast at the dummy; one first tick at 3000 ms (read at 3500 ms); 807554 on a second dummy 4 yd from the caster (inside 8 yd of the first) is read before and after a real learn of 807461 (the before phase is the control) against the gain of the Bane damage on the first dummy in the same window: ratio 0.5 within 0.025, so 0.45 and 0.55 are excluded. 823764 on the caster removes partial resists in both phases (precondition fixture). Code: AscensionFelswornEvents.cpp:249-257 (damage / 2 per enemy). Reference search 2026-11-23: coa-history spell 807461 and 807554: 0 events in 186 logs for 807461 (a passive leaves no event); 807554: 2923 damage events in 4 logs (min 44, max 3364, mean 311, 0 crits, consistent with SPELL_ATTR2_CANT_CRIT on 807554); nothing found beyond the tooltip."
+    },
+    {
+      "spell": 805248,
+      "kind": "metric_delta",
+      "trigger_spell": 805248,
+      "target": "dummy",
+      "target_entry": 1832,
+      "void_on_cast_failure": true,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Manaburn (mana burnt: 200% of Stamina)",
+      "variant": "drain_base",
+      "label_suffix": "drain_base",
+      "quote": "Burn an enemy's mana equal to 200% of your Stamina",
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1000,
+      "expected": 842,
+      "expected_gain": -158,
+      "tolerance": 1.0,
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Tooltip 805248: mana equal to 200% of Stamina: 2 x 79 = 158. The target's mana is read before the cast and after it (the before read, no cast, is the control): a loss of 158 within 1 (integer mana). Code: AscensionFelswornContracts.cpp:340-341 sets Effect[0] of Manaburn to 2.0 x the caster's Stamina (Spell.dbc Effect[0] is SPELL_EFFECT_POWER_BURN with no base points). Scarlet Magi 1832 (a mana-using mage, so the burn lands) is the target; the caster's critical strikes are made impossible (64481) and partial resists removed (823764) by harness set_aura, precondition fixtures; reference stat 2 (Stamina) = 79.0 from the class file. Reference search 2026-11-23: coa-history spell 805248: 25 casts, 22 damage events (58 to 352, mean 193, 7 crits), 22 drains (58 to 591, mean 181), 2 misses in 4 logs (the players' Stamina is not recorded, so no figure decides); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
+    },
+    {
+      "spell": 805248,
+      "kind": "metric_delta",
+      "trigger_spell": 805248,
+      "target": "dummy",
+      "target_entry": 1832,
+      "void_on_cast_failure": true,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Manaburn (mana burnt follows Stamina)",
+      "variant": "drain_stamina",
+      "label_suffix": "drain_stamina",
+      "quote": "Burn an enemy's mana equal to 200% of your Stamina",
+      "cast_in_before": true,
+      "measure_actor": "dummy",
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1000,
+      "expected": 810.4,
+      "expected_gain": -189.60000000000002,
+      "tolerance": 1.5,
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Contrast arm of drain_base: after a real learn of 500067 the Stamina reads 94.8, so the second cast burns 2 x 94.8 = 189.6 (within 1.5, integer mana), against 158 in the first cast of the same scenario. Code: AscensionFelswornContracts.cpp:340-341 sets Effect[0] of Manaburn to 2.0 x the caster's Stamina (Spell.dbc Effect[0] is SPELL_EFFECT_POWER_BURN with no base points). Scarlet Magi 1832 (a mana-using mage, so the burn lands) is the target; the caster's critical strikes are made impossible (64481) and partial resists removed (823764) by harness set_aura, precondition fixtures; reference stat 2 (Stamina) = 79.0 from the class file. Reference search 2026-11-23: coa-history spell 805248: 25 casts, 22 damage events (58 to 352, mean 193, 7 crits), 22 drains (58 to 591, mean 181), 2 misses in 4 logs (the players' Stamina is not recorded, so no figure decides); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value.",
+      "gate_spell": 500067
+    },
+    {
+      "spell": 805248,
+      "kind": "metric_delta",
+      "trigger_spell": 805248,
+      "target": "dummy",
+      "target_entry": 1832,
+      "void_on_cast_failure": true,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Manaburn (damage equal to the mana burnt)",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Deals damage equal to the mana drained",
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805248,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 158,
+      "after_at_least": 157,
+      "after_at_most": 159,
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Tooltip 805248: damage equal to the mana drained, and the drained mana is 200% of Stamina (2 x 79 = 158): the damage of the cast at the target is read (before: none, the control) and must equal the 158 that drain_base reads as burnt mana, within 1. Code: AscensionFelswornContracts.cpp:340-341 sets Effect[0] of Manaburn to 2.0 x the caster's Stamina (Spell.dbc Effect[0] is SPELL_EFFECT_POWER_BURN with no base points). Scarlet Magi 1832 (a mana-using mage, so the burn lands) is the target; the caster's critical strikes are made impossible (64481) and partial resists removed (823764) by harness set_aura, precondition fixtures; reference stat 2 (Stamina) = 79.0 from the class file. Reference search 2026-11-23: coa-history spell 805248: 25 casts, 22 damage events (58 to 352, mean 193, 7 crits), 22 drains (58 to 591, mean 181), 2 misses in 4 logs (the players' Stamina is not recorded, so no figure decides); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
+    },
+    {
+      "spell": 805248,
+      "kind": "metric_delta",
+      "trigger_spell": 805248,
+      "target": "dummy",
+      "target_entry": 1832,
+      "void_on_cast_failure": true,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Manaburn (damage follows the mana burnt)",
+      "variant": "damage_stamina",
+      "label_suffix": "damage_stamina",
+      "quote": "Deals damage equal to the mana drained",
+      "cast_in_before": true,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805248,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 158,
+      "expected": 347.6,
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Contrast arm of damage_base: the damage total reads 158 after the first cast and, after a real learn of 500067 (Stamina 94.8), 189.6 more after the second: the damage follows the burnt mana 2 x Stamina, as drain_stamina reads. Code: AscensionFelswornContracts.cpp:340-341 sets Effect[0] of Manaburn to 2.0 x the caster's Stamina (Spell.dbc Effect[0] is SPELL_EFFECT_POWER_BURN with no base points). Scarlet Magi 1832 (a mana-using mage, so the burn lands) is the target; the caster's critical strikes are made impossible (64481) and partial resists removed (823764) by harness set_aura, precondition fixtures; reference stat 2 (Stamina) = 79.0 from the class file. Reference search 2026-11-23: coa-history spell 805248: 25 casts, 22 damage events (58 to 352, mean 193, 7 crits), 22 drains (58 to 591, mean 181), 2 misses in 4 logs (the players' Stamina is not recorded, so no figure decides); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value.",
+      "gate_spell": 500067,
+      "expected_gain": 189.60000000000002,
+      "tolerance": 1.5
+    },
+    {
+      "spell": 805236,
+      "kind": "metric_delta",
+      "name": "Grommash's Folly (melee haste while Inner Demon is active)",
+      "variant": "haste",
+      "label_suffix": "haste",
+      "trigger_spell": 804247,
+      "gate_spell": 805236,
+      "target": "caster",
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "quote": "While Inner Demon is active, your melee haste is now increased by $s2%",
+      "before_expected": 2300,
+      "expected": 2000.0,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s2 = 15 (805236 Effect[1], EffectBasePoints 14 + EffectDieSides 1); the aura 807426 the script applies while Inner Demon 804216 and 805236 are both on the caster carries aura 138 SPELL_AURA_MOD_MELEE_HASTE with BasePoints 14 + 1 = 15 (AscensionFelswornContracts.cpp:81-92, AscensionFelsworn.cpp:274). The main-hand attack time of the reference weapon (Slayer item 2027, 2300 ms) is read 500 ms after a harmless Bless 804247 before (control: 805236 not learned) and after a real learn: 2300 / 1.15 = 2000 ms within 1. Inner Demon 804216 is set on the caster in both phases by harness set_aura (a precondition fixture, named as such). Reference search 2026-11-23: coa-history spell 805236, 807426, 807427: 0 events in 186 logs (a passive leaves no event; positive control 807554: 2923 events); the bindmysoul snapshot repeats the tooltip; nothing found that states another value."
     }
   ],
   "player_observations": [],
