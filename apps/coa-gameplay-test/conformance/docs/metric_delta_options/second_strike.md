@@ -1,4 +1,4 @@
-# Second strike (`metric_delta` `second_strike`, ADR 1053)
+# Second strike (`metric_delta` `second_strike`, ADR 1222)
 
 `second_strike` is `{spell, present, wait_ms?}` on an entry with a `strike`, `spell` other than the strike's spell,
 `wait_ms` 300 by default. After each trigger cast:

@@ -1,4 +1,4 @@
-# Without item (`metric_delta` `without_item`, ADR 1056)
+# Without item (`metric_delta` `without_item`, ADR 1225)
 
 `without_item` is `{"item": item id, "source": text}` for an entry whose metric is `cast_failure` of its own
 `trigger_spell`, with `cast_in_before` true and the spell learned in both phases. The scenario must equip the item

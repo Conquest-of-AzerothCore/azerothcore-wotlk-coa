@@ -1,4 +1,4 @@
-# Move under aura (`behaviour_metric_delta`, `kind: "move_under_aura"`, ADR 1028)
+# Move under aura (`behaviour_metric_delta`, `kind: "move_under_aura"`, ADR 1198)
 
 "While under the effects of Sunstorm, you can move": a real movement step, read on the position. The caster is
 teleported to a fixed point (map 1, 2389.03 / -6608.37 / 125.192). In the control phase, without the aura, the

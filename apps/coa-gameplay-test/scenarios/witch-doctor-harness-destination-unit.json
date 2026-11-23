@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "name": "Harness casts a ground-targeted Witch Doctor spell at the position of a unit",
+  "contract": [
+    "ADR 1028 (provisional) adds destination_unit to cast: the cast sends that unit's current position as its",
+    "ground target. Splash Potion 802710 has Targets 64 (a destination) and Effect[0..2] TARGET_DEST_DEST (87) with",
+    "TARGET_UNIT_DEST_AREA_ALLY, healing up to $i allies within EffectRadiusIndex 13 of the destination; it needs a",
+    "brewed Ingredient (Bloodthistle 801664, Cauldron Brewer 92085, the marker 801702 set as a fixture). Cast with",
+    "the dummy 3 yd away as destination_unit, it completes and heals the wounded doctor inside its radius. The step",
+    "record carries the sent destination (destination_x, destination_y)."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Cauldron Brewer",
+      "actor": "doctor",
+      "spell": 92085
+    },
+    {
+      "action": "learn",
+      "label": "Ingredient: Bloodthistle",
+      "actor": "doctor",
+      "spell": 801664
+    },
+    {
+      "action": "learn",
+      "label": "Splash Potion",
+      "actor": "doctor",
+      "spell": 802710
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "cast",
+      "label": "Brew Bloodthistle",
+      "actor": "doctor",
+      "spell": 801664,
+      "target": "doctor"
+    },
+    {
+      "action": "wait",
+      "label": "Ingredient settle and global cooldown",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "doctor",
+      "value": 1000,
+      "maximum": 10000
+    },
+    {
+      "action": "set_aura",
+      "label": "Has Ingredient Marker",
+      "actor": "doctor",
+      "spell": 801702,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "Splash Potion at the dummy's position",
+      "actor": "doctor",
+      "spell": 802710,
+      "target": "doctor",
+      "destination_unit": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the Splash Potion is cast at the position",
+      "actor": "doctor",
+      "metric": "spell_cast_count",
+      "spell": 802710,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: its heal lands on the doctor beside that position",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 802710,
+      "target": "doctor",
+      "min": 1,
+      "within_ms": 1500
+    }
+  ]
+}

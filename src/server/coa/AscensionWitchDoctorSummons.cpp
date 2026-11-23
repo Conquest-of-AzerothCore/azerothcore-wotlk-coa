@@ -22,6 +22,7 @@
 #include "WorldSession.h"
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
 
 namespace AscensionWitchDoctor
 {
@@ -554,7 +555,9 @@ class npc_ascension_witch_doctor : public ScriptedAI
                         enemy->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
                     }
         if (entry == NpcShadow || entry == NpcGraven || entry == NpcCursed)
-            for (Unit* enemy : Nearby(me, 10.0f))
+            for (Unit* enemy : Nearby(me, entry == NpcCursed   ? Radius(CursedField)
+                                          : entry == NpcShadow ? Radius(ShadowField)
+                                                               : float(std::abs(Amount(ShadowField)))))
                 if (player->IsValidAttackTarget(enemy))
                 {
                     Field(enemy, entry == NpcShadow   ? ShadowField
@@ -577,7 +580,7 @@ class npc_ascension_witch_doctor : public ScriptedAI
         }
         if (entry == NpcCauldron)
         {
-            for (Unit* ally : Allies(player, me, 10.0f))
+            for (Unit* ally : Allies(player, me, Radius(VoodooCauldron, EFFECT_2)))
             {
                 Field(ally, CauldronBuff);
                 Copy(player, ally, LoaEchoHeal, Amount(VoodooCauldron, EFFECT_2, player));

@@ -1,0 +1,691 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Overflowing Juju raises the spell power scaling of Shadowflare, Bad Juju, Wrath and Arrow",
+  "contract": [
+    "Overflowing Juju 707405: 'Increases the spell power scaling of Malefic Wrath, Shadowflare, and Bad Juju by",
+    "$s1%.' ($s1 = 20). Effect[0] is aura 108 SPELLMOD_BONUS_MULTIPLIER, which the engine applies to the native",
+    "spell power coefficient; every Witch Doctor coefficient row has its native BonusMultiplier zeroed",
+    "(AscensionWitchDoctorCompletion.cpp:586-588) and is folded into the effect base value instead",
+    "(ModifySpellEffectBaseValue, AscensionWitchDoctorCompletion.cpp:646-660), so the talent scaled nothing:",
+    "+0.000% at 60000 spell power in all three cycle 9 sweep entries. The fix multiplies the folded spell power",
+    "coefficient by the talent's percent for the spells its corrected class mask (4 | 1024, 33792, 0) covers.",
+    "Malefic Arrow (IsArrow, SpellFamilyFlags[1] 0x80000000) shares the Malefic Wrath bit 32768 and stands in",
+    "for Malefic Wrath, so it is scaled too (contributor decision 2026-11-22, ADR 0031). Hexfire Wrath 807480",
+    "(word 1 32768) is scaled: its tooltip says it 'Scales with modifiers to Malefic Wrath'.",
+    "Each spell is cast once before the talent is learned (control arm) and once after; the second hit, read",
+    "as the cumulative total minus the first (relative_to) over the first (ratio_to), must be 1.18 to 1.22 at",
+    "60000 spell power, where the base, Spirit and attack power terms are at most about 1.2% of a hit and the",
+    "same in both casts (sweep: Shadowflare 21069, Bad Juju 60235, Malefic Wrath 37525 per hit; fixed ratios",
+    "about 1.199). Before the fix every ratio is 1.000. The Arrow ratio must be 1.16 to 1.22: its unscaled",
+    "ranged attack power and base terms are a larger share of a hit (about 1.19). Hexfire Wrath is read on its",
+    "direct hit (periodic false); a",
+    "real Hexfire with Hexfire Adept 704500 known gives the ready aura 503626 that turns Malefic Wrath into it.",
+    "823764 removes partial resists; 984954 removes spell critical strikes on the doctor; the archer's",
+    "ranged_crit_rating makes every Arrow a critical strike, so both Arrow hits carry the same multiplier.",
+    "Order: the archer's Arrows first, then the doctor's Shadowflare, Bad Juju and Malefic Wrath, then the",
+    "talent is unlearned for the Hexfire Wrath control cast, and the Serpent Ward (10000 ms) is waited out",
+    "before the talent is learned again for the second Hexfire Wrath."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "spell_power": 60000
+    },
+    {
+      "id": "archer",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "ranged_crit_rating": 100000,
+      "spell_power": 60000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 5,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "arrow_dummy",
+      "owner": "archer",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 20,
+      "stationary": true,
+      "min_level_armor": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "archer",
+      "item": 2000265
+    },
+    {
+      "action": "equip",
+      "actor": "archer",
+      "item": 2000265,
+      "slot": 17
+    },
+    {
+      "action": "set_skill",
+      "actor": "archer",
+      "skill": 45,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_aura",
+      "label": "No partial resists on the arrow dummy",
+      "actor": "archer",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "label": "Malefic Arrow",
+      "actor": "archer",
+      "spell": 801674
+    },
+    {
+      "action": "learn",
+      "label": "The Malefic Arrow talent (Abilities.cpp:87 refuses an Arrow without it)",
+      "actor": "archer",
+      "spell": 707854
+    },
+    {
+      "action": "set_power",
+      "actor": "archer",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "archer",
+      "spell": 801674
+    },
+    {
+      "action": "cast",
+      "label": "Malefic Arrow at the dummy 20 yd out without Overflowing Juju",
+      "actor": "archer",
+      "spell": 801674,
+      "target": "arrow_dummy"
+    },
+    {
+      "action": "wait",
+      "label": "The instant Arrow, its 0.5 s flight and the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one critical Malefic Arrow hit without Overflowing Juju",
+      "actor": "archer",
+      "metric": "spell_damage_count",
+      "spell": 801674,
+      "target": "arrow_dummy",
+      "critical": true,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Malefic Arrow hit without Overflowing Juju",
+      "save_as": "arrow_before",
+      "actor": "archer",
+      "metric": "spell_damage_total",
+      "spell": 801674,
+      "target": "arrow_dummy"
+    },
+    {
+      "action": "learn",
+      "label": "Overflowing Juju",
+      "actor": "archer",
+      "spell": 707405
+    },
+    {
+      "action": "set_power",
+      "actor": "archer",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "archer",
+      "spell": 801674
+    },
+    {
+      "action": "cast",
+      "label": "Malefic Arrow at the dummy with Overflowing Juju",
+      "actor": "archer",
+      "spell": 801674,
+      "target": "arrow_dummy"
+    },
+    {
+      "action": "wait",
+      "label": "The instant Arrow, its 0.5 s flight and the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a second critical Malefic Arrow hit, with Overflowing Juju",
+      "actor": "archer",
+      "metric": "spell_damage_count",
+      "spell": 801674,
+      "target": "arrow_dummy",
+      "critical": true,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Malefic Arrow, standing in for Malefic Wrath, is scaled by Overflowing Juju",
+      "actor": "archer",
+      "metric": "spell_damage_total",
+      "spell": 801674,
+      "target": "arrow_dummy",
+      "relative_to": "arrow_before",
+      "ratio_to": "arrow_before",
+      "min": 1.16,
+      "max": 1.22
+    },
+    {
+      "action": "set_aura",
+      "label": "No partial resists on the dummy",
+      "actor": "doctor",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "No spell critical strikes",
+      "actor": "doctor",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "label": "Shadowflare",
+      "actor": "doctor",
+      "spell": 801669
+    },
+    {
+      "action": "learn",
+      "label": "Bad Juju",
+      "actor": "doctor",
+      "spell": 802087
+    },
+    {
+      "action": "learn",
+      "label": "Malefic Wrath",
+      "actor": "doctor",
+      "spell": 807037
+    },
+    {
+      "action": "learn",
+      "label": "Hexfire",
+      "actor": "doctor",
+      "spell": 573026
+    },
+    {
+      "action": "learn",
+      "label": "Hexfire Adept (Hexfire turns the next Malefic Wrath into Hexfire Wrath)",
+      "actor": "doctor",
+      "spell": 704500
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 801669
+    },
+    {
+      "action": "cast",
+      "label": "Shadowflare at the dummy without Overflowing Juju",
+      "actor": "doctor",
+      "spell": 801669,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "The 2000 ms cast and the global cooldown",
+      "ms": 3600
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 802087
+    },
+    {
+      "action": "cast",
+      "label": "Bad Juju at the dummy without Overflowing Juju",
+      "actor": "doctor",
+      "spell": 802087,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "The 2500 ms cast and the bolt flight",
+      "ms": 3600
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 807037
+    },
+    {
+      "action": "cast",
+      "label": "Malefic Wrath at the dummy without Overflowing Juju",
+      "actor": "doctor",
+      "spell": 807037,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "The 2000 ms cast and the bolt flight",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one Shadowflare hit without Overflowing Juju",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 801669,
+      "target": "dummy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Shadowflare without the talent deals its spell power term once",
+      "actor": "doctor",
+      "metric": "spell_damage_total",
+      "spell": 801669,
+      "target": "dummy",
+      "critical": false,
+      "min": 21000,
+      "max": 21300
+    },
+    {
+      "action": "snapshot",
+      "label": "Shadowflare hit without Overflowing Juju",
+      "save_as": "sf_before",
+      "actor": "doctor",
+      "metric": "spell_damage_total",
+      "spell": 801669,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one Bad Juju hit without Overflowing Juju",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 802087,
+      "target": "dummy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Bad Juju without the talent deals its spell power term once",
+      "actor": "doctor",
+      "metric": "spell_damage_total",
+      "spell": 802087,
+      "target": "dummy",
+      "critical": false,
+      "min": 60000,
+      "max": 60500
+    },
+    {
+      "action": "snapshot",
+      "label": "Bad Juju hit without Overflowing Juju",
+      "save_as": "juju_before",
+      "actor": "doctor",
+      "metric": "spell_damage_total",
+      "spell": 802087,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one Malefic Wrath hit without Overflowing Juju",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 807037,
+      "target": "dummy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Malefic Wrath without the talent deals its spell power term once",
+      "actor": "doctor",
+      "metric": "spell_damage_total",
+      "spell": 807037,
+      "target": "dummy",
+      "critical": false,
+      "min": 37500,
+      "max": 37700
+    },
+    {
+      "action": "snapshot",
+      "label": "Malefic Wrath hit without Overflowing Juju",
+      "save_as": "wrath_before",
+      "actor": "doctor",
+      "metric": "spell_damage_total",
+      "spell": 807037,
+      "target": "dummy"
+    },
+    {
+      "action": "learn",
+      "label": "Overflowing Juju",
+      "actor": "doctor",
+      "spell": 707405
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 801669
+    },
+    {
+      "action": "cast",
+      "label": "Shadowflare at the dummy with Overflowing Juju",
+      "actor": "doctor",
+      "spell": 801669,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "The 2000 ms cast and the global cooldown",
+      "ms": 3600
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 802087
+    },
+    {
+      "action": "cast",
+      "label": "Bad Juju at the dummy with Overflowing Juju",
+      "actor": "doctor",
+      "spell": 802087,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "The 2500 ms cast and the bolt flight",
+      "ms": 3600
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 807037
+    },
+    {
+      "action": "cast",
+      "label": "Malefic Wrath at the dummy with Overflowing Juju",
+      "actor": "doctor",
+      "spell": 807037,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "The 2000 ms cast and the bolt flight",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a second Shadowflare hit, with Overflowing Juju",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 801669,
+      "target": "dummy",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the spell power term of Shadowflare is 20% larger with Overflowing Juju",
+      "actor": "doctor",
+      "metric": "spell_damage_total",
+      "spell": 801669,
+      "target": "dummy",
+      "relative_to": "sf_before",
+      "ratio_to": "sf_before",
+      "min": 1.18,
+      "max": 1.22
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a second Bad Juju hit, with Overflowing Juju",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 802087,
+      "target": "dummy",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the spell power term of Bad Juju is 20% larger with Overflowing Juju",
+      "actor": "doctor",
+      "metric": "spell_damage_total",
+      "spell": 802087,
+      "target": "dummy",
+      "relative_to": "juju_before",
+      "ratio_to": "juju_before",
+      "min": 1.18,
+      "max": 1.22
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a second Malefic Wrath hit, with Overflowing Juju",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 807037,
+      "target": "dummy",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the spell power term of Malefic Wrath is 20% larger with Overflowing Juju",
+      "actor": "doctor",
+      "metric": "spell_damage_total",
+      "spell": 807037,
+      "target": "dummy",
+      "relative_to": "wrath_before",
+      "ratio_to": "wrath_before",
+      "min": 1.18,
+      "max": 1.22
+    },
+    {
+      "action": "unlearn",
+      "label": "Overflowing Juju off for the Hexfire Wrath control cast",
+      "actor": "doctor",
+      "spell": 707405
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 573026
+    },
+    {
+      "action": "cast",
+      "label": "Hexfire at the dummy (ready aura 503626, 8000 ms) without Overflowing Juju",
+      "actor": "doctor",
+      "spell": 573026,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "The instant Hexfire and the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "cast",
+      "label": "Hexfire Wrath at the dummy without Overflowing Juju",
+      "actor": "doctor",
+      "spell": 807480,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "The 1500 ms cast and the bolt flight",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one direct Hexfire Wrath hit without Overflowing Juju",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 807480,
+      "target": "dummy",
+      "periodic": false,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Hexfire Wrath direct hit without Overflowing Juju",
+      "save_as": "hexwrath_before",
+      "actor": "doctor",
+      "metric": "spell_damage_total",
+      "spell": 807480,
+      "target": "dummy",
+      "periodic": false
+    },
+    {
+      "action": "wait",
+      "label": "The Serpent Ward of the first Hexfire Wrath despawns (10000 ms)",
+      "ms": 10500
+    },
+    {
+      "action": "learn",
+      "label": "Overflowing Juju",
+      "actor": "doctor",
+      "spell": 707405
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 573026
+    },
+    {
+      "action": "cast",
+      "label": "Hexfire at the dummy (ready aura 503626, 8000 ms) with Overflowing Juju",
+      "actor": "doctor",
+      "spell": 573026,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "The instant Hexfire and the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "cast",
+      "label": "Hexfire Wrath at the dummy with Overflowing Juju",
+      "actor": "doctor",
+      "spell": 807480,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "The 1500 ms cast and the bolt flight",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a second direct Hexfire Wrath hit, with Overflowing Juju",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 807480,
+      "target": "dummy",
+      "periodic": false,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Hexfire Wrath, which scales with modifiers to Malefic Wrath, is 20% larger",
+      "actor": "doctor",
+      "metric": "spell_damage_total",
+      "spell": 807480,
+      "target": "dummy",
+      "periodic": false,
+      "relative_to": "hexwrath_before",
+      "ratio_to": "hexwrath_before",
+      "min": 1.18,
+      "max": 1.22
+    }
+  ]
+}

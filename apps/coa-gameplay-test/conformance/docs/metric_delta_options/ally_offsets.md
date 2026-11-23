@@ -1,4 +1,4 @@
-# Ally offsets (`metric_delta` `ally_offsets`, ADR 1026)
+# Ally offsets (`metric_delta` `ally_offsets`, ADR 1196)
 
 `ally_offsets` is `{"<ally id>": yards}`: each named grouped ally of the entry's [`ally_arm`](ally_arm.md) is moved
 that far along x from the shared spawn, right after the `group` steps and before either phase, in harness `relocate`

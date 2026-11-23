@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Harness reads the percentage bonus of a combat rating of a Witch Doctor",
+  "contract": [
+    "ADR 1048 (provisional) adds combat_rating_bonus, Player::GetRatingBonusValue of one CombatRating. The fixture",
+    "gives 280 ranged critical strike rating (CR_CRIT_RANGED 9) and none of spell critical strike rating",
+    "(CR_CRIT_SPELL 10). At level 60 the DBC rating tables give 14.0 rating per point (gtCombatRatings row 959)",
+    "and a Witch Doctor scalar of 1.0 (gtOCTClassCombatRatingScalar row 394), so the ranged bonus is 20 points",
+    "and the spell bonus 0; combat_rating reads the raw 280."
+  ],
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "ranged_crit_rating": 280
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the fixture rating is applied",
+      "actor": "doctor",
+      "metric": "combat_rating",
+      "rating": 9,
+      "equals": 280
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: 280 ranged critical strike rating is 20 points",
+      "actor": "doctor",
+      "metric": "combat_rating_bonus",
+      "rating": 9,
+      "min": 19.99,
+      "max": 20.01
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no spell critical strike rating, no bonus",
+      "actor": "doctor",
+      "metric": "combat_rating_bonus",
+      "rating": 10,
+      "equals": 0
+    }
+  ]
+}

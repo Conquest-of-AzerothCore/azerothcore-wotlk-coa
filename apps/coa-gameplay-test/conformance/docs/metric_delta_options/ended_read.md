@@ -1,4 +1,4 @@
-# Ended read (`metric_delta` `ended_read`, ADR 1078)
+# Ended read (`metric_delta` `ended_read`, ADR 1247)
 
 `ended_read` is `{unlearn, wait_ms, duration_ms}`, with `wait_ms` longer than `duration_ms`, the DBC duration of the
 aura that carries the effect. After the after reading the scenario unlearns each spell of `unlearn`, waits `wait_ms`

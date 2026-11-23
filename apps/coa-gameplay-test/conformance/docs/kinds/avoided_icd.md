@@ -1,4 +1,4 @@
-# Avoided-swing internal cooldown (`behaviour_metric_delta`, `kind: "avoided_icd"`, ADR 1043, provisional)
+# Avoided-swing internal cooldown (`behaviour_metric_delta`, `kind: "avoided_icd"`, ADR 1212, provisional)
 
 A timer on a proc of avoided swings ("Can only occur once per sec.") that no cast can space. `strikers` aggressive,
 stationary strikers (`striker_entry`, `striker_auras` set from themselves) engage the caster as in the avoided proc

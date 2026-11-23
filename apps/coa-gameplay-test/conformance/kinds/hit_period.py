@@ -3,7 +3,7 @@ from pathlib import Path
 
 from behaviours import BEHAVIOUR_METRIC_DELTA, behaviour_entry, prose_rule, waited_ms
 from bonus import bonus_band
-from hits import creature_fixture, timed
+from hits import base_mana_steps, creature_fixture, timed
 from kinds.aura_window import AURA_WINDOW_STEP_OVERHEAD_MS
 from kinds.cast_period import cast_period_label
 from kinds.pulse_targets import PULSE_TARGETS_METRIC
@@ -27,6 +27,32 @@ class HitPeriodSpec:
     fixtures: tuple[tuple[int, str], ...] = ()
     poll_ms: int = 1
     label_suffix: str = 'hit_period'
+    setup_casts: tuple[tuple[str, int, str, int], ...] = ()
+    learn: tuple[int, ...] = ()
+
+
+SETUP_ACTORS = (CASTER, TARGET)
+
+
+def setup_cast(raw: dict) -> tuple[str, int, str, int]:
+    actor, target = raw.get('actor', CASTER), raw.get('target', CASTER)
+    if actor not in SETUP_ACTORS or target not in SETUP_ACTORS or int(raw['wait_ms']) < 0:
+        raise ValueError(f'hit_period setup cast {raw!r}: actor and target are {list(SETUP_ACTORS)}, wait_ms >= 0')
+    return actor, int(raw['spell']), target, int(raw['wait_ms'])
+
+
+def setup_steps(class_file: dict, records: Records, spec: 'HitPeriodSpec') -> list[dict]:
+    steps = []
+    for actor, spell, target, wait_ms in spec.setup_casts:
+        if actor == CASTER:
+            facts = facts_of(records, spell)
+            steps += base_mana_steps(class_file, facts) or (
+                [{'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost}]
+                if facts.mana_cost > 0 else [])
+            steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spell})
+        steps += [{'action': 'cast', 'actor': actor, 'spell': spell, 'target': target},
+                  {'action': 'wait', 'label': 'hit period setup', 'ms': wait_ms}]
+    return steps
 
 
 def hit_period_spec(entry: dict) -> HitPeriodSpec:
@@ -34,7 +60,9 @@ def hit_period_spec(entry: dict) -> HitPeriodSpec:
                          int(entry['hit_spell']), int(entry['expected_ms']),
                          tuple(int(value) for value in entry['window']),
                          tuple((int(spell), str(on)) for spell, on in entry.get('fixtures', ())),
-                         int(entry.get('poll_ms', 1)), entry.get('label_suffix', 'hit_period'))
+                         int(entry.get('poll_ms', 1)), entry.get('label_suffix', 'hit_period'),
+                         tuple(setup_cast(raw) for raw in entry.get('setup_casts', ())),
+                         tuple(int(spell) for spell in entry.get('learn', ())))
     low, high = spec.window
     if not 0 <= low < high or high - low < 2 * spec.expected_ms:
         raise ValueError(f'{spec.spell} hit_period polls a window of at least two periods after the cast')
@@ -49,9 +77,12 @@ def hit_period_scenario(class_file: dict, spec: HitPeriodSpec) -> tuple[dict, li
                  **({'target': on, 'caster': CASTER} if on != CASTER else {})} for spell, on in spec.fixtures]
     control = cast_period_label(spec, 'control')
     start = cast_period_label(spec, 'start')
-    steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] + fixtures
-             + [measurement(control, CASTER, PULSE_TARGETS_METRIC, spell=spec.hit_spell, target=TARGET),
-                {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell}]
+    learned = dict.fromkeys([spec.trigger_spell, *spec.learn,
+                             *(spell for actor, spell, _, _ in spec.setup_casts if actor == CASTER)])
+    steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in learned]
+             + fixtures + [measurement(control, CASTER, PULSE_TARGETS_METRIC, spell=spec.hit_spell, target=TARGET)]
+             + setup_steps(class_file, records, spec)
+             + [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell}]
              + ([{'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost}]
                 if facts.mana_cost > 0 else [])
              + [measurement(start, CASTER, 'game_time_ms'),
@@ -71,7 +102,8 @@ def hit_period_scenario(class_file: dict, spec: HitPeriodSpec) -> tuple[dict, li
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour hit period',
-        'contract': (f'{spec.trigger_spell} cast at the dummy (fixtures {list(spec.fixtures)}); the game time and the '
+        'contract': (f'{spec.trigger_spell} cast at the dummy (fixtures {list(spec.fixtures)}{setup_text(spec)}); '
+                     f'the game time and the '
                      f'{spec.hit_spell} hits on the dummy are read every {spec.poll_ms} ms of wait over {spec.window} '
                      f'ms of game time after the cast; (last stamped hit - first stamped hit) / (hits - 1) must lie '
                      f'inside {spec.expected_ms} ms +- the G-19 band; no hit before the cast.'),
@@ -85,6 +117,15 @@ def hit_period_scenario(class_file: dict, spec: HitPeriodSpec) -> tuple[dict, li
                               spec.spell, spec.hit_spell, None, str(spec.expected_ms),
                               prose_rule(entry.quote, spec.spell), model)
     return timed(scenario, waited_ms(steps)), [expectation]
+
+
+def setup_text(spec: HitPeriodSpec) -> str:
+    learned = f'; {list(spec.learn)} learned at the start' if spec.learn else ''
+    if not spec.setup_casts:
+        return learned
+    casts = ', '.join(f'{actor} casts {spell} at {target}, {wait_ms} ms' for actor, spell, target, wait_ms
+                      in spec.setup_casts)
+    return f'{learned}; real setup casts after the control read, before the cast: {casts}'
 
 
 def scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:

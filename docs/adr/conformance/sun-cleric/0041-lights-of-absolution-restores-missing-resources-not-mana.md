@@ -69,7 +69,7 @@ The first option, in Sun Cleric code only (`AscensionSunClericAbilities.cpp`):
 ## Addendum: the partial-pool arms
 
 - Date: 2026-11-23
-- Decided by: owner ruling O-30 (mentor D-303); the tool need above is met by `ally_arm` `ally_power` (ADR 1075)
+- Decided by: owner ruling O-30 (mentor D-303); the tool need above is met by `ally_arm` `ally_power` (ADR 1244)
 
 Five entries set the ally's pool ahead of the trigger in both phases and read it after landing with a judged `power`
 arm: `restore_rage_partial` and `restore_runic_partial` at 500 of 1000 log 10 (stock 20), `restore_energy_partial`

@@ -1,4 +1,4 @@
-# Hold power during the wait (`metric_delta` `hold_power_during_wait`, ADR 1038 addendum, provisional)
+# Hold power during the wait (`metric_delta` `hold_power_during_wait`, ADR 1207 addendum, provisional)
 
 `hold_power_during_wait` is `{"power": type, "every_ms": N, "count": N}`, `every_ms` at least 100. Right after each
 cast of the entry's `trigger_spell` (named point `after_trigger_steps`), the scenario makes `count` rounds of a wait of

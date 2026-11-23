@@ -1,0 +1,269 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Eye of Kimbul keeps the marked enemy from stealth and invisibility",
+  "contract": [
+    "Eye of Kimbul 503714 marks a critically struck enemy with 802707: 'While affected, enemies cannot stealth",
+    "or turn invisible.' 802707 has only auras 271 and 308, and no code stopped a marked unit from stealthing:",
+    "both final05 runs kept the stealth and invisibility auras on the marked dummy (cycle 8 R3 (b)). The fix",
+    "refuses a stealth or invisibility spell while the caster carries 802707 and strips both when the mark",
+    "lands. The enemy is a player, so a refused cast is a cast result and not a harness error. A forced spell",
+    "crit rating makes a real Hexfire 573026 critical in both arms; the arms differ only in the Eye talent.",
+    "Expected: unmarked, the enemy enters Stealth Dummy 2144558 (aura 16) and Head of the Horseman Invisible",
+    "44312 (aura 18); marked, both casts fail with SPELL_FAILED_CASTER_AURASTATE (22) and no aura lands."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 100000
+    },
+    {
+      "id": "enemy",
+      "race": 2,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Hexfire",
+      "actor": "doctor",
+      "spell": 573026
+    },
+    {
+      "action": "learn",
+      "label": "The enemy knows a stealth spell",
+      "actor": "enemy",
+      "spell": 2144558
+    },
+    {
+      "action": "learn",
+      "label": "The enemy knows an invisibility spell",
+      "actor": "enemy",
+      "spell": 44312
+    },
+    {
+      "action": "pvp",
+      "actor": "doctor",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "wait",
+      "label": "PvP flags settle",
+      "ms": 500
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 573026
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: a critical Hexfire without Eye of Kimbul",
+      "actor": "doctor",
+      "spell": 573026,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without the talent no Eye lands",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 802707,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: the unmarked enemy stealths",
+      "actor": "enemy",
+      "spell": 2144558,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the unmarked enemy enters stealth",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 2144558,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "doctor",
+      "target": "enemy",
+      "spell": 2144558,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: the unmarked enemy turns invisible",
+      "actor": "enemy",
+      "spell": 44312,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the unmarked enemy turns invisible",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 44312,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "doctor",
+      "target": "enemy",
+      "spell": 44312,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the enemy is out of stealth again",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 2144558,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the enemy is visible again",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 44312,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "learn",
+      "label": "Eye of Kimbul",
+      "actor": "doctor",
+      "spell": 503714
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 573026
+    },
+    {
+      "action": "cast",
+      "label": "A critical Hexfire with Eye of Kimbul",
+      "actor": "doctor",
+      "spell": 573026,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the critical hit marks the enemy with the Eye",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 802707,
+      "caster": "doctor",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "The marked enemy tries to stealth",
+      "actor": "enemy",
+      "spell": 2144558,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the marked enemy does not enter stealth",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 2144558,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the stealth cast is refused for the caster aura state",
+      "actor": "enemy",
+      "metric": "cast_failure",
+      "spell": 2144558,
+      "equals": 22
+    },
+    {
+      "action": "cast",
+      "label": "The marked enemy tries to turn invisible",
+      "actor": "enemy",
+      "spell": 44312,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the marked enemy does not turn invisible",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 44312,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the invisibility cast is refused for the caster aura state",
+      "actor": "enemy",
+      "metric": "cast_failure",
+      "spell": 44312,
+      "equals": 22
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the enemy is still marked",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 802707,
+      "equals": 1
+    }
+  ]
+}

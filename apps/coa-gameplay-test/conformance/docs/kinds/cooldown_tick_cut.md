@@ -1,4 +1,4 @@
-# Cooldown tick cut (`behaviour_metric_delta`, `kind: "cooldown_tick_cut"`, ADR 1027)
+# Cooldown tick cut (`behaviour_metric_delta`, `kind: "cooldown_tick_cut"`, ADR 1197)
 
 A periodic cut of a remaining cooldown ("the remaining cooldown of Horusath Blast is reduced by 10% every 1 sec"),
 read on the cooldown itself. `spell` (the periodic aura) and `cooled_spell` are learned with `phase_aura` set on the

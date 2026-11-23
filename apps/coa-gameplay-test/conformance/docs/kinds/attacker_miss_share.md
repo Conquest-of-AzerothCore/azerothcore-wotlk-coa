@@ -1,4 +1,4 @@
-# Attacker miss share (`behaviour_metric_delta`, `kind: "attacker_miss_share"`, ADR 1019)
+# Attacker miss share (`behaviour_metric_delta`, `kind: "attacker_miss_share"`, ADR 1189)
 
 A debuff that lowers an enemy's chance to hit ("reduces the target's chance to hit by 3%") is read on the swings the
 enemies aim at the caster, never on the aura's amount or the unit's hit modifier. `attackers` (1 to 8, default 8)
@@ -12,10 +12,10 @@ melee the caster after one engaging swing each. Two arms of `arm_ms`, in whole c
   of `cast_spell` is reset (a named precondition fixture, G-21 point 6, stated in the verdict) and `cast_spell` is
   cast at the first attacker. Counting starts `settle_ms` after the first cast, once `aura` from the caster is read on
   every attacker; the aura is read on every attacker again at each cycle end, where it must be held.
-  `pre_cast` (ADR 1033, opt-in) lists spells cast at the first attacker before `cast_spell` in every treatment cycle,
+  `pre_cast` (ADR 1202, opt-in) lists spells cast at the first attacker before `cast_spell` in every treatment cycle,
   each with its power set, its cooldown reset (the same named fixture) and its cast time waited out; `settle_ms` and
   `cycle_ms` must cover the whole sequence.
-  `relocate_dx` (ADR 1065, opt-in, a nonzero number of yards under the attackers' 3 yd) moves the caster once along x
+  `relocate_dx` (ADR 1234, opt-in, a nonzero number of yards under the attackers' 3 yd) moves the caster once along x
   after the engage wait, before the first control read, so both arms are counted from the same position; the player
   cast needs the first attacker inside the 180 degree front arc (the caster faces +x) and the attackers settle on a
   3 yd circle around the caster, so a small step back keeps all of them in front while they still swing.
@@ -40,7 +40,7 @@ The verdict stamps the metric `melee_attacks_taken`, already an event read in `c
 Sun Cleric: Sun Down 572752 (Solar Flare 807175 from the 572754 ground, claim "reduces the target's chance to hit by
 $s1%"), label `572752 behaviour_metric_delta attacker_miss`.
 
-## Spell clamp variant (`variant: "spell_clamp"`, ADR 1048, provisional)
+## Spell clamp variant (`variant: "spell_clamp"`, ADR 1217, provisional)
 
 For an aura 186 (`SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE`) on the caster: fields `spell` (the aura's spell, also
 the quoted tooltip), `quote`, `attacker_spell` (a magic damage spell of a school in the aura's MiscValue mask),

@@ -28,11 +28,12 @@ choices. These are explicit reconstruction decisions and require combat/balance 
 - Spirits cap at five. Successful Reclamation/Volley casts, eligible procs and Master of Puppets ticks
   generate the resource. Eclipse spends the captured amount and pulses every 250 ms once per Spirit;
   Frenzy lasts four seconds per Spirit and captures its initial strength before consumption.
-- Mojo Beam ticks every 500 ms, grows one branch from each existing branch per pulse, and stops at eight
-  distinct allies. Branches require a living, friendly raid member, range and line of sight. Mana cost
-  uses the extracted per-second value, current branch count, and an additional 10% of base per elapsed
-  pulse. Canceling the channel, losing the owner or insufficient mana stops it. Only Potion, Splash and
-  Spirit in a Bottle may be cast instantly during this channel; other channels retain their normal rules.
+- Mojo Beam ticks every 500 ms and grows one new branch per pulse, with no limit on distinct allies
+  (conformance ADR 0034). Branches require a living, friendly raid member, range and line of sight. Mana cost
+  uses the extracted per-second value and an additional 10% of base per elapsed pulse, whatever the
+  branch count (conformance ADR 0033). Canceling the channel, losing the owner or insufficient mana stops
+  it. Only Potion, Splash and Spirit in a Bottle may be cast instantly during this channel; other channels
+  retain their normal rules.
 - Glaive's incomplete Agility cast-time scaling uses `castTime / (1 + Agility / 1000)`.
   War Golem's absorb and health use eight times Intellect, with a 100-health floor for the summon.
   Ordinary stationary wards use at least five health, otherwise ten times owner level.
