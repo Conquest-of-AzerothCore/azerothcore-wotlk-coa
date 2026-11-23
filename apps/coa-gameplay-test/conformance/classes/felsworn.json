@@ -16255,6 +16255,56 @@
       "learn": [
         801895
       ]
+    },
+    {
+      "spell": 300483,
+      "name": "Chaotic Intuition (two stacks raise the spell critical damage by 2%)",
+      "kind": "metric_delta",
+      "variant": "crit_damage",
+      "label_suffix": "crit_damage",
+      "quote": "and grants you $300481s1% increased spell critical damage for $300481d,",
+      "trigger_spell": 802678,
+      "gate_spell": 300483,
+      "target": "dummy",
+      "setup_only_after": true,
+      "setup_casts": [
+        802678
+      ],
+      "setup_wait_ms": 1500,
+      "after_setup_stacks": [
+        {
+          "spell": 300481,
+          "actor": "caster",
+          "stacks": 2
+        }
+      ],
+      "metric": "spell_critical_damage",
+      "fields": {
+        "spell": 802060,
+        "target": "dummy"
+      },
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 1500,
+      "expected": 1530,
+      "expected_gain": 30,
+      "tolerance": 0.5,
+      "wait_ms": 300,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "x"
     }
   ],
   "player_observations": [],
