@@ -15641,6 +15641,118 @@
         ]
       ],
       "observe_source": "Below-six arm of energy_at_six (50 Energy at six Felfury). The caster builds a real count of 5 Felfury 800058 (StackAmount 6) before each Inner Demon 804216 cast: Burning Hatred 805239 at the caster ('instantly generating 6 Felfury'), Sargeron Smite 802060 at the dummy ('Consumes 2 Felfury'), Bane of Fire 707901 at the dummy (a Bane hit on an enemy gives Gain(player, 1), AscensionFelswornAbilities.cpp:329-333; Fel Torpedo was dropped because its dash carried the caster past the dummy and the next Sargeron Smite was refused with SPELL_FAILED_UNIT_NOT_INFRONT, pair fw-tg1 proveP1); the per-cast targets are the setup_cast_targets option (ADR 1256) and the count is read at exactly 5 after the last setup cast of each phase (after_setup_stacks, ADR 1257), a mismatch voids the run. Inner Demon's own aura from the before phase is removed at the start of the after phase (after_auras), so both arms cast it the same way. The handler casts 520258 only when the Felfury consumed is at least 6 (AscensionFelswornAbilities.cpp:265-266): the energize events of 520258 on the caster are 0 before the learn of 520257 and 0 after it at five, where a threshold of 5 would restore 50. Reference search: as energy_at_six (2026-11-23)."
+    },
+    {
+      "spell": 560542,
+      "name": "Felguard (Inner Demon: the heal is 15% of the swing damage)",
+      "kind": "metric_delta",
+      "variant": "inner_heal",
+      "label_suffix": "inner_heal",
+      "quote": "In addition, while Inner Demon is active, you now heal for $s2% of all melee damage dealt.",
+      "trigger_spell": 560542,
+      "gate_spell": 560542,
+      "target": "dummy",
+      "attack_swings": 4,
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 560627,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {},
+        "increments": true
+      },
+      "before_expected": 0.15,
+      "expected": 0.15,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560542 Effect[1] BasePoints 14 + 1 = 15 ($s2%). The event script (AscensionFelswornEvents.cpp: Check case 560542 returns an outgoing melee hit with damage while Inner Demon is on the caster and the spell is not derived; Proc case 560542 calls Copy(player, player, 560627, damage * 15 / 100)) casts Felguard 560627 (SPELL_EFFECT_HEAL) on the caster with that amount. Inner Demon 804216 is made by one real setup cast before the first phase (Inner Demon 804216 with 6 Felfury as its precondition fixture, 800058 required_aura_stacks: it lasts 6 x 5000 ms, $803465s1, over both four-swing phases) and is on the caster in both phases: the before arm (Felguard not learned) reads 0, the after arm (Felguard cast on the caster between the phases (gate_cast)) reads the heal of 560627 on the caster over the caster's own swing damage (melee_damage_total, both hands, increase over the after phase). Tolerance 0.02 (0.13 to 0.17, G-19: the larger of 5% and 2 points) excludes 10%, 20% and no heal. Reference search 2026-11-23: coa-history spells 560542 and 560627: 0 events in 186 logs (a passive leaves no event); nothing found beyond the tooltip and Spell.dbc.",
+      "gate_cast": true,
+      "learn": [
+        804216
+      ],
+      "setup_casts": [
+        804216
+      ],
+      "setup_wait_ms": 500,
+      "required_aura_stacks": {
+        "spell": 800058,
+        "stacks": 6
+      }
+    },
+    {
+      "spell": 560542,
+      "name": "Felguard (control: without Inner Demon the swings heal nothing)",
+      "kind": "metric_delta",
+      "variant": "no_inner_heal",
+      "label_suffix": "no_inner_heal",
+      "quote": "while Inner Demon is active, you now heal for $s2% of all melee damage dealt.",
+      "trigger_spell": 560542,
+      "gate_spell": 560542,
+      "target": "dummy",
+      "attack_swings": 4,
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 560627,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {},
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0.005,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Control arm of the Inner Demon clause: Felguard cast between the phases, no setup cast so Inner Demon 804216 is absent in both phases (Check case 560542 requires Inner(player)), the same six swings: the heal of 560627 reads 0 over the swing damage. Felguard's own swings of the previous entry heal 15%, so a heal here would show the clause ignoring Inner Demon. Reference search 2026-11-23: coa-history spells 560542 and 560627: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc.",
+      "gate_cast": true
+    },
+    {
+      "spell": 560542,
+      "name": "Felguard (control: without Felguard the swings under Inner Demon heal nothing)",
+      "kind": "metric_delta",
+      "variant": "no_felguard_heal",
+      "label_suffix": "no_felguard_heal",
+      "quote": "In addition, while Inner Demon is active, you now heal for $s2% of all melee damage dealt.",
+      "trigger_spell": 560542,
+      "gate_spell": 805239,
+      "target": "dummy",
+      "attack_swings": 4,
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 560627,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {},
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0.005,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Control arm of the Felguard clause: Inner Demon 804216 is on the caster (one real setup cast with 6 Felfury as precondition fixture, as the main entry) and the same four swings per phase are made, but Felguard 560542 is never learned or cast (the gate cast is Burning Hatred 805239, a spell with no heal): the heal of 560627 reads 0 over the swing damage. The main entry heals 15% of the same swings. Reference search 2026-11-23: coa-history spells 560542 and 560627: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc.",
+      "gate_cast": true,
+      "learn": [
+        804216
+      ],
+      "setup_casts": [
+        804216
+      ],
+      "setup_wait_ms": 500,
+      "required_aura_stacks": {
+        "spell": 800058,
+        "stacks": 6
+      }
     }
   ],
   "player_observations": [],
