@@ -2572,40 +2572,6 @@
       "setup_wait_ms": 1600
     },
     {
-      "spell": 520257,
-      "name": "Demonic Embrace (Inner Demon with four Felfury)",
-      "kind": "metric_delta",
-      "variant": "control_four_felfury",
-      "label_suffix": "control_four_felfury",
-      "quote": "Casting Inner Demon with at least 6 Felfury now restores $520258s1 Energy",
-      "trigger_spell": 804216,
-      "gate_spell": 520257,
-      "target": "caster",
-      "metric": "spell_energize_total",
-      "fields": {
-        "spell": 520258
-      },
-      "before_expected": 0,
-      "expected": 0,
-      "tolerance": 0,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "520257 Effect[0] aura 42 PROC_TRIGGER_SPELL 520258; 520258 Effect[0] SPELL_EFFECT_ENERGIZE (30), MiscValue 3 (Energy), BasePoints 49 + 1 = 50 ($520258s1). Inner Demon 804216 (CasterAuraSpell 800058) is cast once with six Felfury on the caster produced by a real cast of Burning Hatred 805239 (Felfury x6) before each Inner Demon cast in both phases (the harness's own set_aura of the caster-aura requirement would reset the stacks to 1, so no fixture can be used); the energize events of 520258 on the caster are summed 500 ms after the cast, before (control: 520257 not learned, 0) and after a real learn: 50 (one energize of 50). Control below the threshold: the setup is Burning Hatred 805239 (Felfury x6) then Sargeron Smite 802060 at the dummy, which consumes 2 Felfury (AscensionCustomResourceData.h:524), so Inner Demon is cast with four real Felfury and the energize of 520258 reads 0 after the learn. The earlier fixture design (set_aura of 5 and of 6 Felfury right before the cast) read 0 at six too (pair P1, run 1), so it proved nothing and is dropped. Reference search 2026-11-23: bindmysoul snapshot says 'Casting Inner Demon with at least 6 Felfury now restores 50 Energy.'; coa-history spell 520257: 0 events in 186 logs.",
-      "setup_casts": [
-        805239,
-        802060
-      ],
-      "setup_wait_ms": 1600,
-      "phase_auras": [
-        [
-          803468,
-          1,
-          "caster",
-          "caster"
-        ]
-      ]
-    },
-    {
       "spell": 560549,
       "name": "Eye of the Tyrant (party melee haste, ally read, radius 100 yd, allies at 95 and 105 yd)",
       "kind": "party_stat_ratio",

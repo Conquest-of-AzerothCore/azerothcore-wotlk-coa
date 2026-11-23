@@ -652,10 +652,7 @@
     "claims": [
       {
         "claim": "Casting Inner Demon with at least 6 Felfury",
-        "labels": [
-          "520257 behaviour_metric_delta energy_at_six",
-          "520257 behaviour_metric_delta control_four_felfury"
-        ]
+        "labels": []
       },
       {
         "claim": "now restores $520258s1 Energy",
@@ -663,7 +660,16 @@
           "520257 behaviour_metric_delta energy_at_six"
         ]
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "the below-six control needs Inner Demon cast with a real Felfury count under six: set_aura at 5 or 6 right before the cast reads 0 even at six (pair P1), and a Burning Hatred then Smite setup needs two setup targets (setup_target is one for all setup casts)",
+      "attempts": [
+        {
+          "agent": "fw-b3g1b",
+          "report": ".agents/plans/fw-b3g1b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 520592,
