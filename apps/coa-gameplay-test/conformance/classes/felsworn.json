@@ -15695,6 +15695,15 @@
       "observe_source": "Tooltip sentence of 806109 (server DBC set): 'Gorge on fel energy, becoming immune to all physical attacks and spells for $d, but during that time you cannot attack, move or cast spells.' The 'move' part is about the caster moving, so the attempt is the caster's own forward movement (MSG_MOVE_START_FORWARD then MSG_MOVE_STOP to the session's movement handler, mentor D-74 condition 2). Control: the same attempt without the aura moves 2 yd. Treatment: a real cast of 806109 at the caster (DurationIndex 31 = 8000 ms, the reads end well inside it), the aura held at the start, after the move and after the stop; the position must not change. Code reading only: 806109 carries HOVER, SCHOOL_IMMUNITY and DUMMY auras (Spell.dbc) and no root or stun; the movement handler refuses a moving packet only from a rooted mover (MovementHandler.cpp:602-604), and the class script (AscensionFelswornAuras.cpp:214-217) adds no movement lock, so a move may be accepted: the run decides. Reference search 2026-11-23: coa-history spell 806109 finds 6 SPELL_CAST_SUCCESS in 1 of 186 logs (combat logs carry no position); bindmysoul talents snapshot (older state): same sentence; expected values come from the tooltip only."
     },
     {
+      "spell": 35340,
+      "name": "Root Self (positive control of the Illidan's Guile move read)",
+      "kind": "move_under_aura",
+      "quote": "",
+      "expect": "blocked",
+      "label_suffix": "root_control",
+      "observe_source": "Positive control of 806109 move_blocked (review fw-rl2 M-2): the same own-movement attempt (MSG_MOVE_START_FORWARD then MSG_MOVE_STOP to the session's movement handler) under a stock root put on the caster by a real cast. Root Self 35340 (server DBC set): Effect[0] 6 APPLY_AURA, aura 26 SPELL_AURA_MOD_ROOT on TARGET_UNIT_CASTER, DurationIndex 8000 ms, no cost, instant, SpellFamilyName 0. The movement handler refuses a moving packet from a rooted mover (MovementHandler.cpp:601-604), so the position must not change. If this arm reads ok and 806109's reads a 2 yd move, the probe sees a block and the 806109 result is a defect lead; if this arm also moves, the probe bypasses locks and 806109's alert says nothing. No ledger label: a control for the evidence of row 318."
+    },
+    {
       "spell": 800203,
       "kind": "metric_delta",
       "quote": "Interrupt a spell from being cast, preventing the target from casting spells of that school for $d and draining mana from the target based on your Spirit.",
