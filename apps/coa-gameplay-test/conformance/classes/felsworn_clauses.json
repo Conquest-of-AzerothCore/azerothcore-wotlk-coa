@@ -2733,7 +2733,8 @@
     "clause": "While active, Blood of Mannoroth now also causes you to ignore all enemy Armor.",
     "kind": "claim",
     "labels": [
-      "803903 behaviour_hit_ratio ignores_armor"
+      "803903 behaviour_hit_ratio ignores_armor",
+      "803903 behaviour_hit_ratio ignores_armor_unarmored"
     ]
   },
   {
