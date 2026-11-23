@@ -4327,7 +4327,8 @@
           "806109 behaviour_metric_delta no_cast"
         ]
       }
-    ]
+    ],
+    "reason": "'move' (fw-l2b, review fw-rl2 M-2): the move_blocked arm alerts in both runs (2 yd under the aura), but its positive control alerts too: under a stock root put on the caster by a real cast of Root Self 35340 (aura 26 SPELL_AURA_MOD_ROOT, held at start, moved and stopped) the same own-movement attempt also moved 2 yd in both runs of fw-l2b prove1. Code reading: for a client-controlled player Unit::SendMoveRoot only sends SMSG_FORCE_MOVE_ROOT (Unit.cpp:16163-16170) and sets MOVEMENTFLAG_ROOT only through the client's acknowledgement, while Unit::IsRooted reads that flag (Unit.h:1759) for the movement handler's refusal (MovementHandler.cpp:601-604). The probe therefore cannot see any movement lock on a player, so the 806109 alert is not a defect proof; the claim stays unproven."
   },
   {
     "spell": 806109,
