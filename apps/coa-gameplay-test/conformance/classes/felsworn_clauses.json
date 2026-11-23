@@ -718,7 +718,9 @@
     "spell": 520853,
     "clause": "Torpedo forward in the direction you're running and deal ${$500761m1+$500761ppl1+$AP*.35} Shadowflame Damage to enemies in your path.",
     "labels": [
-      "520853 effect_value 500761e0 #0"
+      "520853 effect_value 500761e0 #0",
+      "500610 script_hit 500761 torpedo_hit",
+      "500610 script_hit 500761 torpedo_hit_ap"
     ],
     "kind": "claim"
   },
@@ -1050,8 +1052,15 @@
   {
     "spell": 560637,
     "clause": "While Inner Demon is active, casting Ruin, Sunder, or Felwrath now refunds 20 Energy.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "560637 behaviour_metric_delta ruin",
+      "560637 behaviour_metric_delta sunder",
+      "560637 behaviour_metric_delta felwrath",
+      "560637 behaviour_metric_delta ruin_no_inner"
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 560639,
@@ -1073,10 +1082,21 @@
   {
     "spell": 560641,
     "clause": "Cripple now causes the enemy target to be unable to critically strike for $704397d.",
-    "labels": [
-      "560641 spell_duration 704397 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "unable to critically strike",
+        "labels": [
+          "560641 behaviour_metric_delta no_crit"
+        ]
+      },
+      {
+        "claim": "for $704397d",
+        "labels": [
+          "560641 behaviour_metric_delta duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 560645,
@@ -1109,11 +1129,22 @@
   {
     "spell": 560822,
     "clause": "When Hateforged Barrier is removed from you, you now reduce $561203s% of all Magic damage taken for $561203d.",
-    "labels": [
-      "560822 spell_duration 561203 #0",
-      "560822 effect_value #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "When Hateforged Barrier is removed from you, you now reduce $561203s% of all Magic damage taken",
+        "labels": [
+          "560822 behaviour_metric_delta applies",
+          "560822 behaviour_hit_ratio damage_taken"
+        ]
+      },
+      {
+        "claim": "for $561203d",
+        "labels": [
+          "560822 behaviour_metric_delta duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 560836,
@@ -1126,24 +1157,58 @@
   {
     "spell": 560838,
     "clause": "Casting Annihilation now grants you Sculptor of Doom.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "560838 behaviour_metric_delta grant"
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 560838,
     "clause": "Your next Ruin within $d is instant cast.",
-    "labels": [
-      "560838 spell_duration 555277 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Your next Ruin is instant cast",
+        "labels": [
+          "560838 behaviour_metric_delta instant",
+          "560838 behaviour_metric_delta consumed"
+        ],
+        "evidence": "behaviour"
+      },
+      {
+        "claim": "within $d",
+        "labels": [
+          "560838 behaviour_metric_delta held",
+          "560838 behaviour_metric_delta gone"
+        ],
+        "evidence": "behaviour"
+      }
     ],
-    "kind": "claim"
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 560840,
     "clause": "Every 3rd Ruin or Felwrath now spawns an Infernal to fight by your side for $572163d.",
-    "labels": [
-      "560840 spell_duration 572163 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Every 3rd Ruin or Felwrath now spawns an Infernal",
+        "labels": [
+          "560840 behaviour_metric_delta third_ruin",
+          "560840 behaviour_metric_delta second_ruin",
+          "560840 behaviour_metric_delta third_mixed"
+        ]
+      },
+      {
+        "claim": "for $572163d (duration pending: a summon timed from its third cast, not entered)",
+        "labels": [
+          "560840 spell_duration 572163 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 561201,
@@ -1240,19 +1305,37 @@
   {
     "spell": 570077,
     "clause": "While Inner Demon is active your melee attacks reduce the target's healing received by $567578s1% for $567578d,",
-    "labels": [
-      "570077 effect_value 567578e0 #0",
-      "570077 spell_duration 567578 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reduce the target's healing received by $567578s1%",
+        "labels": [
+          "570077 behaviour_metric_delta healing",
+          "570077 behaviour_metric_delta no_inner"
+        ],
+        "evidence": "behaviour"
+      },
+      {
+        "claim": "for $567578d",
+        "labels": [
+          "570077 behaviour_metric_delta held",
+          "570077 behaviour_metric_delta gone"
+        ],
+        "evidence": "behaviour"
+      }
     ],
-    "kind": "claim"
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 570077,
     "clause": "stacking $567578u times.",
+    "kind": "claim",
     "labels": [
-      "570077 max_stacks 567578 #2"
+      "570077 behaviour_metric_delta stack_cap"
     ],
-    "kind": "claim"
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 570158,
@@ -1299,10 +1382,27 @@
   {
     "spell": 574140,
     "clause": "Your Inner Demon now grants $800707s1% increased dodge chance and critical damage dealt while active.",
-    "labels": [
-      "574140 effect_value 800707e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increased dodge chance",
+        "labels": [
+          "574140 behaviour_metric_delta dodge",
+          "574140 behaviour_metric_delta dodge_no_inner"
+        ],
+        "evidence": "behaviour"
+      },
+      {
+        "claim": "critical damage dealt while active",
+        "labels": [
+          "574140 behaviour_hit_ratio crit_damage",
+          "574140 behaviour_hit_ratio crit_damage_no_inner"
+        ],
+        "evidence": "behaviour"
+      }
     ],
-    "kind": "claim"
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 574143,
@@ -1453,19 +1553,32 @@
   {
     "spell": 704360,
     "clause": "Your $?s520853[Fel Torpedo][Chaos Rush] now reduces all damage taken by $524633s1% for $524633d,",
-    "labels": [
-      "704360 effect_value 524633e0 #0",
-      "704360 spell_duration 524633 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "now reduces all damage taken by $524633s1%",
+        "labels": [
+          "704360 behaviour_hit_ratio damage_taken"
+        ]
+      },
+      {
+        "claim": "for $524633d",
+        "labels": [
+          "704360 behaviour_metric_delta held",
+          "704360 behaviour_metric_delta gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 704360,
     "clause": "stacking $524633u times.",
+    "kind": "claim",
     "labels": [
-      "704360 max_stacks 524633 #2"
+      "704360 behaviour_metric_delta stack_cap"
     ],
-    "kind": "claim"
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 704361,
@@ -1541,11 +1654,21 @@
   {
     "spell": 704370,
     "clause": "Each time Bane of Chaos deals damage its damage is increased on the target by $707511s1% for $707511d,",
-    "labels": [
-      "704370 effect_value 707511e0 #0",
-      "704370 spell_duration 707511 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "damage is increased on the target by $707511s1%",
+        "labels": [
+          "704370 behaviour_metric_delta stack_value"
+        ]
+      },
+      {
+        "claim": "for $707511d",
+        "labels": [
+          "704370 behaviour_metric_delta duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 704370,
@@ -1558,10 +1681,28 @@
   {
     "spell": 704374,
     "clause": "Every 3rd Twin Slice or Fel Fireball within $707518d now generates 1 additional Felfury.",
-    "labels": [
-      "704374 spell_duration 707518 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Every 3rd Twin Slice or Fel Fireball now generates 1 additional Felfury",
+        "labels": [
+          "704374 behaviour_metric_delta third_cast",
+          "704374 behaviour_metric_delta second_cast",
+          "704374 behaviour_metric_delta mixed"
+        ],
+        "evidence": "behaviour"
+      },
+      {
+        "claim": "within $707518d",
+        "labels": [
+          "704374 behaviour_metric_delta gap_inside",
+          "704374 behaviour_metric_delta gap_outside"
+        ],
+        "evidence": "behaviour"
+      }
     ],
-    "kind": "claim"
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 704378,
@@ -1610,10 +1751,14 @@
   {
     "spell": 704606,
     "clause": "Direct magical critical strikes now generate $524898s1 Energy.",
+    "kind": "claim",
     "labels": [
-      "704606 effect_value 524898e0 #0"
+      "704606 behaviour_metric_delta crit_spell",
+      "704606 behaviour_metric_delta noncrit",
+      "704606 behaviour_metric_delta phys_crit"
     ],
-    "kind": "claim"
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 704607,
@@ -1653,16 +1798,28 @@
   {
     "spell": 704611,
     "clause": "While channeling Carve, your chance to dodge is now increased by $s1% based on how long you channel,",
+    "kind": "claim",
     "labels": [
-      "704611 effect_value e0 #0"
+      "704611 behaviour_metric_delta mid"
     ],
-    "kind": "claim"
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 704611,
     "clause": "up to a maximum of 10%.",
+    "kind": "claim",
     "labels": [],
-    "kind": "claim"
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "tool_gap": {
+      "reason": "The cap cannot be seen on this server. Carve 800206 ticks every 250 ms over 2500 ms, so a channel has at most 10 ticks, and both the tick count and the dodge amount are clamped to 10 (AscensionFelswornAuras.cpp:33-34, :114-118); a server without the clamp reads the same 9 at 2400 ms and 10 at the end. Haste scales period and duration together and cannot add ticks, and the only way to exceed 10 ticks is a SPELLMOD_DURATION modifier on Carve, which the harness generator does not offer for metric_delta entries (spell_mod_mutant is emitted for forced rolls only). The slope is judged by the mid label of the previous clause; the cap stays unproven until a duration mutant exists.",
+      "attempts": [
+        {
+          "agent": "fw-b3g2r3",
+          "report": ".agents/plans/fw-b3g2r3/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 704612,
@@ -1683,10 +1840,12 @@
   {
     "spell": 705102,
     "clause": "Increases your Energy regeneration by $s1%.",
+    "kind": "claim",
     "labels": [
-      "705102 effect_value e0 #0"
+      "705102 behaviour_metric_delta regen"
     ],
-    "kind": "claim"
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 705105,
@@ -2377,16 +2536,28 @@
   {
     "spell": 563268,
     "clause": "Generates 1 Felfury",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "563268 behaviour_metric_delta felfury"
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 563268,
     "clause": "Erupt in a whirlwind of felfury, striking all enemies within $a1 yds with both weapons,",
+    "kind": "claim",
+    "evidence": "behaviour",
     "labels": [
-      "563268 effect_radius e0 #0"
+      "563268 behaviour_metric_delta main_0_1",
+      "563268 behaviour_metric_delta main_5_5",
+      "563268 behaviour_metric_delta main_edge",
+      "563268 behaviour_metric_delta off_0_1",
+      "563268 behaviour_metric_delta off_5_5",
+      "563268 behaviour_metric_delta off_10_435"
     ],
-    "kind": "claim"
+    "reason": "Both weapons strike within 6 yd; neither beyond the engine edge. Counted pair pending (fw-b3g2r3 round 3). One cast of Felrend 563268 on the caster with dummies (entry 36, combat reach 1.275): the main hand 563268 is judged at 0.1 and 5.5 yd and by the edge entry (area_dummies edge: 6 + 2.66 leeway + 1.275 reach = 9.935 yd, area1 at 9.435 yd must be struck and area2 at 10.435 yd not, the reach and leeway read from the server, guide G-29), so only a radius from 5.5 to under 6.5 yd passes; the off hand 803476 is judged at 0.1, 5.5 and 10.435 yd, the last with the main hand's strike on the 0.1 yd dummy summed in as the positive read that the cast landed. Recorded, not judged: the main hand at 6.5 yd and the off hand at 6.5 and 9.435 yd (the triggered 803476 cast is refused by its melee range check, about 6.0 yd centre to centre). The live off hand strikes fewer targets than the main hand (54-67% of main-hand hits in 5 combat logs: 286/437, 315/467, 328/604, 277/498, 374/689), so the off-hand reach is not a defect (mentor D-57; note fix-563268/note.md, probe run 20261123-185743).",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 563268,
@@ -2735,8 +2906,12 @@
   {
     "spell": 572804,
     "clause": "Generates 2 Felfury",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "572804 behaviour_metric_delta felfury"
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 572804,
