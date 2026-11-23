@@ -12316,7 +12316,14 @@
       "expected": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "Bane of Fire 707901 (SpellFamilyFlags[0] 32, the Bane family mask of Bane of Chaos 706420) is cast at the dummy in both phases. The before phase casts no second Bane: Bane of Fire is on the dummy (the control, read 1). The after phase casts Bane of Chaos at the same dummy 1700 ms later: Bane of Fire is gone (read 0), so a second Bane replaces the first. Reference search 2026-11-23: coa-history spell 706420: 324 casts, 206 aura applied and 206 removed in 2 logs (113 refreshes), no figure for the exclusivity; nothing else found."
+      "observe_source": "Bane of Fire 707901 (SpellFamilyFlags[0] 32, the Bane family mask of Bane of Chaos 706420) is cast at the dummy in both phases. The before phase casts no second Bane: Bane of Fire is on the dummy (the control, read 1). The after phase casts Bane of Chaos at the same dummy 1700 ms later: Bane of Fire is gone (read 0), so a second Bane replaces the first. Reference search 2026-11-23: coa-history spell 706420: 324 casts, 206 aura applied and 206 removed in 2 logs (113 refreshes), no figure for the exclusivity; nothing else found. Precondition (after_setup_stacks, ADR 1257): Bane of Fire 707901 is read on the dummy at exactly 1 stack right after its setup cast in each phase, before the before reading and before the Bane of Chaos cast; a run where it did not land is void, not judged (the run-1 flip read 0 before the learn). No roll decides the judged reading: the removal is the aura apply handler AscensionFelswornAuras.cpp:48-58, which removes every other Bane of the same caster on the target when a Bane (AscensionFelsworn.cpp:114-117) applies, with no chance; the caster's spell hit rating 10000 (class file ratings) lifts HitChance to the 10000 clamp of Unit::MagicSpellHitResult (Unit.cpp:4039-4053), so the miss roll threshold is 0.",
+      "after_setup_stacks": [
+        {
+          "spell": 707901,
+          "actor": "dummy",
+          "stacks": 1
+        }
+      ]
     },
     {
       "spell": 706267,
@@ -14897,6 +14904,88 @@
         }
       ],
       "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK without snare and daze (SharedDefines.h:1469), the list of the CoA spell with the same tooltip wording, Vial of Moonwell Water 804652 'Immune to crowd control effects.' (SpellInfo.cpp:2788-2790, ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Piercing Howl 12323 (Mechanic 11 snare, aura 33), outside the list: snare and daze are not in the same-wording source, so the snare must land while the aura is on. Whether 'crowd control' covers snare is an open owner question; this entry reads the list as built, not that answer. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 520853,
+      "name": "Fel Torpedo (Chaos Rush is cast as Fel Torpedo once the talent is learned)",
+      "kind": "metric_delta",
+      "variant": "transform",
+      "label_suffix": "transform",
+      "quote": "Transforms your Chaos Rush into Fel Torpedo",
+      "trigger_spell": 500028,
+      "gate_spell": 520853,
+      "target": "dummy",
+      "cast_power": 100,
+      "specialization": 9,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "The replacement is TalentReplacements row { 14, 9, 520853, 500028, 500610 } (AscensionTalentReplacementData.h:29): with specialization 9 active and 520853 known, SynchronizeTalentReplacements (AscensionCompat.cpp:1133) sets Chaos Rush 500028 to be cast as Fel Torpedo 500610, and the cast opcode applies Player::GetCastReplacement (SpellHandler.cpp:411); the harness casts through HandleCastSpellOpcode. The caster switches to specialization 9 before the before phase (specialization option, ADR 1102, a precondition fixture) and casts Chaos Rush 500028 at the dummy in both phases. Fel Torpedo gives Gain(player, 1) on its cast (AscensionFelswornAbilities.cpp:286, '|cff32cd32Generates 1 Felfury' in its tooltip), Chaos Rush gives none (the felfury_chaos_rush contrast): the Felfury 800058 stacks read 1500 ms after the cast are 0 before the learn of 520853 (Chaos Rush cast) and 1 after it (the same Chaos Rush key casts Fel Torpedo). Reference search: coa-history spell 520853 0 events in 186 logs, recorded on the felfury entry (2026-11-23)."
+    },
+    {
+      "spell": 520805,
+      "name": "Scars of the Past (Fel Torpedo Energy cost: a Chaos Rush modifier carried by Fel Torpedo)",
+      "kind": "cost_gate",
+      "variant": "torpedo_cost",
+      "gated_spell": 500610,
+      "resource": "power",
+      "reduction": 5,
+      "quote": "Reduces the Energy cost of Chaos Rush by $s2",
+      "observe_source": "Claim of 520853 'Scales with modifiers to Chaos Rush'. 520805 Effect[1] aura 107 ADD_FLAT_MODIFIER, MiscValue 14 (SPELLMOD_COST), BasePoints -6 + 1 = -5, EffectSpellClassMask word 2 = 268435456: a modifier to Chaos Rush 500028 (SpellFamilyFlags 0, 524288, 268435456). Fel Torpedo 500610 carries the same words 1 and 2 (SpellFamilyFlags 33554432, 524288, 268435456; ManaCost 50 Energy), so the Chaos Rush modifier must apply to it. The caster's Energy is set to the reduced cost 45 before an attempt of Fel Torpedo: refused without 520805, through with it, refused at 44 with it. Reference search 2026-11-23: same sources as the 500028 cost_gate entry of 520805; nothing states the Fel Torpedo cost."
+    },
+    {
+      "spell": 520257,
+      "name": "Demonic Embrace (Inner Demon with five Felfury restores no Energy)",
+      "kind": "metric_delta",
+      "variant": "below_six",
+      "label_suffix": "below_six",
+      "quote": "Casting Inner Demon with at least 6 Felfury",
+      "trigger_spell": 804216,
+      "gate_spell": 520257,
+      "target": "caster",
+      "select_dummy": true,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 520258
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "setup_casts": [
+        805239,
+        802060,
+        707901
+      ],
+      "setup_cast_targets": [
+        "caster",
+        "dummy",
+        "dummy"
+      ],
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 800058,
+          "actor": "caster",
+          "stacks": 5
+        }
+      ],
+      "after_auras": [
+        [
+          804216,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Below-six arm of energy_at_six (50 Energy at six Felfury). The caster builds a real count of 5 Felfury 800058 (StackAmount 6) before each Inner Demon 804216 cast: Burning Hatred 805239 at the caster ('instantly generating 6 Felfury'), Sargeron Smite 802060 at the dummy ('Consumes 2 Felfury'), Bane of Fire 707901 at the dummy (a Bane hit on an enemy gives Gain(player, 1), AscensionFelswornAbilities.cpp:329-333; Fel Torpedo was dropped because its dash carried the caster past the dummy and the next Sargeron Smite was refused with SPELL_FAILED_UNIT_NOT_INFRONT, pair fw-tg1 proveP1); the per-cast targets are the setup_cast_targets option (ADR 1256) and the count is read at exactly 5 after the last setup cast of each phase (after_setup_stacks, ADR 1257), a mismatch voids the run. Inner Demon's own aura from the before phase is removed at the start of the after phase (after_auras), so both arms cast it the same way. The handler casts 520258 only when the Felfury consumed is at least 6 (AscensionFelswornAbilities.cpp:265-266): the energize events of 520258 on the caster are 0 before the learn of 520257 and 0 after it at five, where a threshold of 5 would restore 50. Reference search: as energy_at_six (2026-11-23)."
     }
   ],
   "player_observations": [],

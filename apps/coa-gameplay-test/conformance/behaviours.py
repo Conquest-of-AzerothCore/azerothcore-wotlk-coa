@@ -14,7 +14,8 @@ from hits import (ARMOR_LABEL, DAMAGE_TAKEN, DRAIN_MS, HEAL_KINDS, MAIN_HAND, MA
 from kinds import kind_module, kind_names
 from metric_delta_options import shield_after_learn
 from metric_delta_options import (checked_options, option_after_trigger_steps, option_fixtures, option_model,
-                                  option_phase_steps, option_setup_cast_steps, parsed_options)
+                                  option_phase_steps, option_setup_cast_steps,
+                                  option_setup_cast_target, parsed_options)
 from procs import cast_interval, swing_interval
 from profile import (CASTER, DBC_DIR, DISPEL_TYPE_NAMES, base_steps, measurement, off_hand_steps, off_hand_weapon,
                      one_hand_main, player_fixture)
@@ -1966,7 +1967,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': setup_spell})
             steps += required_aura_steps(setup_facts) + reagent_steps(records, setup_spell)
             steps.append({'action': 'cast', 'actor': CASTER, 'spell': setup_spell,
-                          'target': spec.setup_target or spec.target})
+                          'target': option_setup_cast_target(spec, index) or spec.setup_target or spec.target})
             if spec.setup_wait_ms:
                 steps.append({'action': 'wait', 'ms': spec.setup_wait_ms})
             steps += option_setup_cast_steps(spec, index, after)

@@ -2287,6 +2287,10 @@ Options with a module:
   a mismatch is `unmeasured` (ADR 1208)
 - [`after_setup_reads`](metric_delta_options/after_setup_reads.md): a caster aura read after the last setup cast of
   each phase, a mismatch is `unmeasured` (ADR 1227)
+- [`after_setup_stacks`](metric_delta_options/after_setup_stacks.md): an exact stack count on the caster or the dummy
+  after the last setup cast of each phase, a mismatch is `unmeasured` (ADR 1257)
+- [`setup_cast_targets`](metric_delta_options/setup_cast_targets.md): one target per setup cast, the named point
+  `setup_cast_target` (ADR 1256)
 - [`before_trigger_reads`](metric_delta_options/before_trigger_reads.md): a unit aura (caster or dummy) read before the
   trigger cast of each phase that casts, a mismatch is `unmeasured` (ADR 1233, provisional)
 - [`same_arm_ratio`](metric_delta_options/same_arm_ratio.md): a second metric read right after each reading, the
