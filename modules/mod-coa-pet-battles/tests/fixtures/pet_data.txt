@@ -1585,35 +1585,85 @@ coa_pet_kit_ability	1003394	2	20	5013579
 coa_pet_ability	110	Bite	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Bites at the enemy, dealing [StandardDamage(1,1)] [School()] damage.	0
 coa_pet_ability	111	Punch	0	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Bashes the enemy, dealing [StandardDamage(1,1)] [School()] damage.	0
 coa_pet_ability	112	Peck	2	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Pokes at the enemy with a sharp beak, dealing [StandardDamage(1,1)] [School()] damage.	0
+coa_pet_ability	113	Burn	6	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Blasts the enemy with fire, dealing [StandardDamage(1, 1)] [School()] damage.	0
+coa_pet_ability	114	Beam	5	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Blasts the enemy with a beam of arcane power, dealing [StandardDamage(1,1)] [petTypeName(abilityPetType())] damage.	0
+coa_pet_ability	115	Breath	1	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Overwhelms the enemy with draconic breath, dealing [StandardDamage(1, 1)] [School()] damage.	0
+coa_pet_ability	116	Zap	9	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Launches an electrical bolt at the target, dealing [StandardDamage(1,1)] [School()] damage.	0
+coa_pet_ability	117	Infected Claw	3	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Tears at the enemy with plagued claws, dealing [StandardDamage(1, 1)] [School()] damage.	0
 coa_pet_ability	118	Water Jet	8	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Blasts the enemy with a spray of water, dealing [StandardDamage(1,1)] [petTypeName(abilityPetType())] damage.	0
+coa_pet_ability	119	Scratch	4	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Scratches the enemy, dealing [StandardDamage(1,1)] [School()] damage.	0
+coa_pet_ability	120	Howling Blast	6	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage to the enemy.   Deals [StandardDamage(1,4)] additional damage to the enemy team if the target is |cFF0070DDChilled|r.	0
+coa_pet_ability	122	Tail Sweep	1	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,2)] [School()] damage, or [StandardDamage(1,1)] [School()] damage if the user strikes last.	0
+coa_pet_ability	123	Healing Wave	8	3	Restores [StandardDamage(1,1)] health to the user.	0
 coa_pet_ability	124	Rampage	7	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Goes on rampage, dealing [StandardDamage(1,1)] [School()] damage.  Rampage continues for [numTurns()] |4round:rounds.	0
+coa_pet_ability	152	Poison Fang	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Instantly deals [StandardDamage(1,1)] [School()] damage and |cFF1EFF00Poisons|r the target for [StandardDamage(1,1,379)] additional [School(379)] damage per round for [duration(1,2)] |4round:rounds.	0
 coa_pet_ability	153	Attack Reduction	-1	0	Damage dealt reduced by [abs(abilityStateMod( STATE_Mod_DamageDealtPercent, 153 ))]%.	0
 coa_pet_ability	154	Speed Reduction	-1	0	Speed reduced by [abs(abilityStateMod(25,154))]%.	0
+coa_pet_ability	158	Counterstrike	0	2	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.   Deals [StandardDamage(1,2)] additional [School()] damage if you were struck this round.	0
 coa_pet_ability	159	Burrow	7	4	[StandardAccuracy(2,1)] |cffffffffHit Chance|r  Burrow under the ground, becoming unattackable for one round.  On the next round, you attack, dealing [StandardDamage(2, 1)] [School()] damage.	0
+coa_pet_ability	160	Consume	3	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  The user is healed for [points(1,3)]% of the damage dealt.	0
 coa_pet_ability	161	Adrenaline	-1	0	Speed increased by [abs(abilityStateMod(25,161))]%.	0
+coa_pet_ability	162	Adrenaline Rush	4	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and increases your speed by [abs(abilityStateMod(25,161))]% for [duration(1,2)] |4round:rounds;.	0
 coa_pet_ability	164	Crouch	-1	0	Your damage taken has been reduced by [abs(abilityStateMod(24,164))]%.	0
+coa_pet_ability	165	Crouch	4	4	The user lowers its body close to the ground, reducing all damage taken by 50% for [duration(1,2)] |4round:rounds;.	0
+coa_pet_ability	169	Deep Breath	1	0	[StandardAccuracy(2,1)] |cffffffffHit Chance|r  Takes one round to breathe in deeply.  The next round the user unleashes a devastating breath attack, dealing [StandardDamage(2,1)] [School()] damage.	0
+coa_pet_ability	170	Lift-Off	2	4	[StandardAccuracy(2,1)] |cffffffffHit Chance|r  Fly up high, becoming unattackable for one round.  On the next round, you attack, dealing [StandardDamage(2, 1)] [School()] damage.	0
+coa_pet_ability	173	Cauterize	6	3	Restores [StandardDamage(1,1)] health plus half of the last hit taken by the user.	0
 coa_pet_ability	174	Stunned	-1	0	Unable to give this pet commands.	0
+coa_pet_ability	177	Immolate	6	0	Deals [StandardDamage(1,1)] Elemental damage every round.  |cFFFF2020Burning|r	0
+coa_pet_ability	178	Immolate	6	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage instantly. The enemy |cFFFF2020Burns|r for [StandardDamage(1,1,177)] additional [School()] damage per round for [duration(1,2)] |4round:rounds;.	0
+coa_pet_ability	179	Conflagrate	6	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  Deals [StandardDamage(1,3)] [School()] additional damage if the target is |cFFFF2020Burning|r.	0
 coa_pet_ability	185	Reckless Strike	-1	0	Your damage taken has been increased by [abs(abilityStateMod( 24, 185 ))]%.	0
+coa_pet_ability	186	Reckless Strike	2	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1, 1)] [School()] damage, but increases the damage you take for [duration(1,3)] round by [abs(abilityStateMod(24, 185 ))]%.	0
 coa_pet_ability	187	Accuracy	-1	0	Hit chance increased by [abs(abilityStateMod(41,187))]%.	0
+coa_pet_ability	193	Flank	4	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Flanks the enemy 1-2 times, dealing [StandardDamage(1,1)] [School()] damage per hit.  Hits an additional time if the user attacks first.	0
+coa_pet_ability	202	Thrash	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Wildly flails at the enemy 1-2 times, dealing [StandardDamage(1,1)] [School()] damage per hit.  Hits an additional time if the user attacks first.	0
+coa_pet_ability	205	Blizzard	6	0	Elemental abilities deal [abs(abilityStateMod(87,205))]% additional damage.  All pets are considered |cFF0070DDChilled|r.	0
+coa_pet_ability	206	Call Blizzard	6	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and causes a Blizzard for [duration(1,2)] rounds.  During a Blizzard, all pets are considered |cFF0070DDChilled|r and Elemental abilities deal [abs(abilityStateMod(87,205))]% additional damage.	0
 coa_pet_ability	207	Supercharged	-1	0	Damage increased by [abs(abilityStateMod( STATE_Mod_DamageDealtPercent, 207 ))]%.	0
+coa_pet_ability	208	Supercharge	9	3	Increases the damage of your next attack made within [duration(1,1)] |4round:rounds; by [abs(abilityStateMod( STATE_Mod_DamageDealtPercent, 207 ))]%.	0
+coa_pet_ability	209	Ion Cannon	9	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Instantly deals [StandardDamage(1,1)] Mechanical damage. The user must recharge for two |4round:rounds; afterwards.  While recharging, you cannot perform any other actions.	0
+coa_pet_ability	210	Shadow Slash	3	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Slashes at the target with dark energy, dealing [StandardDamage(1, 1)] [School()] damage.	0
+coa_pet_ability	211	Siphon Life	3	0	Deals [StandardDamage(1,1)] Undead damage every round. The caster of the aura is healed for [StandardHealing(1,2)].	0
+coa_pet_ability	212	Siphon Life	3	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1,211)] [School()] damage per round for [duration(1,1)] |4round:rounds and heals the user for [StandardHealing(1,2,211)].	0
 coa_pet_ability	215	Inner Vision	-1	0	Damage increased by [abs(abilityStateMod( STATE_Mod_DamageDealtPercent, 215 ))]%.	0
+coa_pet_ability	216	Inner Vision	5	1	Increases damage by [abs(abilityStateMod( STATE_Mod_DamageDealtPercent, 215 ))]% for 1 round.	0
+coa_pet_ability	219	Jab	0	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Jabs at the enemy, dealing [StandardDamage(1, 1)] [School()] damage.	0
 coa_pet_ability	221	Takedown	0	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Takes down an enemy, dealing [StandardDamage(1,1)] [School()] damage.  Deals double damage if the target is |cFF808080Stunned|r.	0
 coa_pet_ability	226	Fury of 1,000 Fists	0	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  Has a [accuracy(1,1)]% chance to stun the target for [duration(1,3)] |4round:rounds; if the target is |cff9933FFBlinded|r.	0
+coa_pet_ability	228	Tongue Lash	4	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Licks the enemy 1-2 times, dealing [StandardDamage(1,1)] [School()] damage per hit.  Hits an additional time if the user attacks first.	0
+coa_pet_ability	229	Cleansing Rain	8	0	Hostile damage over time effects last one less round.  Aquatic abilities deal 25% more damage.	0
+coa_pet_ability	230	Cleansing Rain	8	3	Restores [StandardHealing(1,1)] health to your team and calls down a cleansing rain for [duration(1,4)] rounds.   During a cleansing rain, the duration of hostile damage over time effects is reduced by 1 round and Aquatic abilities deal 25% more damage.	0
+coa_pet_ability	233	Frog Kiss	8	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and has a [accuracy(1,3)]% chance to transform the target into a frog for [duration(1,3)] |4round:rounds;.   Damage increases by [FormatDamage(10*AttackBonus())] each time it is used. Max [FormatDamage(30 *AttackBonus())] [School()] damage.	0
 coa_pet_ability	246	Hibernation	-1	0	Hibernating.  Restores increasing health every round.	0
+coa_pet_ability	247	Hibernate	7	5	Fall asleep, restoring [StandardHealing(1,1,246)] health on the first round, [StandardHealing(2,1,246)] health on the second, then [StandardHealing(3,1, 246)] health on the third.  While Hibernating you cannot swap pets.	0
 coa_pet_ability	248	Rooted	-1	0	This pet cannot be swapped.	0
+coa_pet_ability	249	Grasp	8	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Grabs the target, dealing [StandardDamage(1,1)] [School()] damage.  The target cannot swap for [duration(1,2)] |4round:rounds;.	0
 coa_pet_ability	250	Spiderling Swarm	7	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Swarms the enemy with spiderlings, dealing [FormatDamage(SimpleDamage(1,1)*2)] [School()] damage.   Deals double damage if the target is |cffffffffWebbed|r.	0
 coa_pet_ability	251	Uncanny Luck	-1	0	Hit chance increased by [abs(abilityStateMod(41,251))]%. Critical strike chance increased by [abs(abilityStateMod(40,251))]%.	0
+coa_pet_ability	252	Uncanny Luck	4	0	Increases your team's hit chance by [abs(abilityStateMod(41,251))]% and critical strike chance by [abs(abilityStateMod(40,251))]% for [duration(1,1)] |4round:rounds;.	0
+coa_pet_ability	253	Comeback	4	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.   Deals [StandardDamage(1,2)] additional damage if the user has lower health than the target.	0
 coa_pet_ability	254	Tranquility	4	0	Fills the area with peace, causing your active pet to restore [StandardHealing(1,1,255)] health every round.  Lasts [duration(1,1)] |4round:rounds;. Persists through pet swaps.	0
 coa_pet_ability	255	Tranquility	-1	0	Restores [StandardHealing(1,1)] health per round.	0
 coa_pet_ability	256	Call Darkness	0	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  A shadow falls across the battlefield, dealing [StandardDamage(1,1)] [School()] damage and turning the weather to Darkness for [duration(1,2)] rounds.  During Darkness, all pets are considered |cff9933FFBlinded|r and all healing received is reduced by [abs(abilityStateMod(66,257))]%.	0
 coa_pet_ability	257	Darkness	-1	0	Healing received reduced by [abs(abilityStateMod(66,257))]%. Accuracy reduced by [abs(abilityStateMod(41,257))]%.  |cff9933FFBlinded|r by the darkness.	0
+coa_pet_ability	258	Starfall	1	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage to all enemy pets, restores [SimpleDamage(1,4)] health to all allies and turns the weather into Moonlight for [duration(1,7)] |4round:rounds.  During Moonlight, all pets receive 25% additional healing and Magic abilities deal 10% additional damage.	258
 coa_pet_ability	270	Glowing Toxin	2	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [points(1,1,271)]% of the target's max health as damage every round.  Lasts [duration(1,1)] |4round:rounds.	270
 coa_pet_ability	271	Glowing Toxin	2	0	Deals [points(1,1)]% of maximum health as damage every round.	271
+coa_pet_ability	273	Wish	5	5	Next round, your active pet will be healed for 50% of its maximum health.	0
 coa_pet_ability	274	Wish	-1	0	Next round, your active pet will be healed for 50% of its maximum health.	0
 coa_pet_ability	276	Swallow You Whole	8	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  Deals double damage if the target is below 25% health.	0
+coa_pet_ability	278	Repair	9	5	Enters repair mode, performing no actions for two |4round:rounds;, then repairs [StandardHealing(3,1)] health.	0
+coa_pet_ability	282	Explode	9	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Instantly kills the caster, dealing damage equal to [FormatDamage(points(1,1))]% of the user's total health to the current enemy.  Using explode will prevent the caster from activating Failsafe mechanisms.	0
+coa_pet_ability	283	Survival	4	3	You endure, preventing your health from being reduced below 1 health until the end of the next round.  Pets affected by Survival will survive an Apocalypse.	0
 coa_pet_ability	284	Survive	-1	0	Unkillable.	0
 coa_pet_ability	296	Pumped Up	-1	0	Damage increased by 10%. Ready to unleash a torrent of water.	0
+coa_pet_ability	297	Pump	8	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  First use: Increases your damage dealt by 10%.  Second use: Blasts the target with a surge of water, dealing [StandardDamage(1,1)] [School()] damage.	0
+coa_pet_ability	298	Inspiring Song	6	3	Sings an inspiring song, which restores [StandardHealing(1,1)] health to all allies.	0
 coa_pet_ability	300	Locked On	-1	0	The enemy is preparing to launch a powerful attack against you.	0
+coa_pet_ability	301	Lock-On	9	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  First use: Locks onto the target.  Second use: Blasts the target, dealing [StandardDamage(1,1)] [School()] damage.	0
+coa_pet_ability	302	Planted	6	0	Unable to flee. Absorbing nutrients.  (Current: [unitState(state(1,1))])	0
+coa_pet_ability	303	Plant	6	0	Activate: Plant your roots into the ground, absorbing nutrients. While planted your pet cannot swap.  Deactivate: For every round spent planted, you gain [StandardHealing(1,1)] health.	0
 coa_pet_ability	305	Exposed Wounds	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Adds [abs(abilityStateMod(71,306))*AttackBonus()] damage to every attack against the target.   Lasts [duration(1,1)] |4round:rounds;.	0
 coa_pet_ability	306	Exposed Wounds	-1	0	Adds [abs(abilityStateMod(71,306))*AttackBonus()] damage to every attack against the target.	0
 coa_pet_ability	307	Kick	0	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and stuns the opponent if the user goes first.	0
@@ -1622,153 +1672,430 @@ coa_pet_ability	309	Shell Shield	-1	0	Reduces up to [abs(abilityStateMod(71,309)
 coa_pet_ability	310	Shell Shield	7	0	Reduces up to [abs(abilityStateMod(71,309))*AttackBonus()] damage from each attack against you.   Lasts [duration(1,1)] |4round:rounds;.	0
 coa_pet_ability	311	Dodge	-1	0	Increases your chance to dodge attacks by [abs(abilityStateMod( 73, 311 ))]%.	0
 coa_pet_ability	312	Dodge	0	4	Increases your chance to dodge an attack by [abs(abilityStateMod( 73, 311 ))]%.  Lasts [duration(1,1)] |4round:rounds;.	0
+coa_pet_ability	319	Magma Wave	6	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage to the enemy's pets.  Destroys objects created by both teams.	0
 coa_pet_ability	338	Webbed	-1	0	This pet cannot be swapped.  |cffffffffWebbed.|r	0
 coa_pet_ability	339	Sticky Web	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Flings a sticky |cffffffffWeb|r at the target, dealing [StandardDamage(1,1)] [School()] damage and making it impossible to flee for [duration(1,2)] |4round:rounds;.	0
 coa_pet_ability	340	Underground	-1	0	Burrowed underground.  Unattackable.	0
 coa_pet_ability	341	Flying	-1	0	Flying up high.  Unattackable.	0
 coa_pet_ability	345	Maul	7	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Savagely mauls the enemy, dealing [StandardDamage(1,1)] [School()] damage.   Deals [StandardDamage(1,3)] additional damage if the target is |cFF970000Bleeding|r.	0
 coa_pet_ability	347	Roar	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  A fierce roar deals [StandardDamage (1,1)] [School()] damage and enrages the user, increasing the damage they deal by [abs(abilityStateMod( STATE_Mod_DamageDealtPercent, 485 ))]% for [duration(1,2)] |4round:rounds.	0
+coa_pet_ability	348	Bash	7	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Stun the target for [duration(1,1)] |4round:rounds;.	0
+coa_pet_ability	349	Smash	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Smash the enemy, dealing [StandardDamage(1, 1)] [School()] damage.	0
+coa_pet_ability	350	Clobber	0	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Stun the target for [duration(1,1)] |4round:rounds;.	0
 coa_pet_ability	353	Barrel Ready	-1	0	A barrel is ready to throw.	0
+coa_pet_ability	354	Barrel Toss	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  First use: Fills a barrel.   Second use: Throws the barrel, dealing [StandardDamage(1,1)] [School()] damage.	0
 coa_pet_ability	355	Triple Snap	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Wildly flails at the enemy 1-3 times, dealing [StandardDamage(1,1)] [School()] damage per hit.	0
+coa_pet_ability	356	Snap	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Snaps at the enemy, dealing [StandardDamage(1,1)] [School()] damage.	0
 coa_pet_ability	357	Screech	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Frightens the target, dealing [StandardDamage(1,1)] [School()] damage and reducing their speed by [abs(abilityStateMod(25,154))]% for [duration(1,2)] |4round:rounds;.	0
+coa_pet_ability	358	Sting	7	0	Deals [StandardDamage(1,1)] [School()] damage every round.  |cFF1EFF00Poisoned.|r	0
+coa_pet_ability	359	Sting	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  |cFF1EFF00Poisons|r the target for [StandardDamage(1,1,358)] [School()] damage every round for [duration(1,1)] |4round:rounds;.	0
+coa_pet_ability	360	Flurry	4	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Rapidly strikes at the enemy 1-2 times, dealing [StandardDamage(1,1)] [School()] damage per hit.  Hits an additional time if the user attacks first.	0
 coa_pet_ability	362	Howl	7	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  A distant howl frightens the target, increasing the damage they take on the next attack by 100%, lasts [duration(1,1)] rounds.	0
+coa_pet_ability	364	Leap	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Instantly deals [StandardDamage(1,1)] [School()] damage and increases your speed by [abs(abilityStateMod( 25, 544 ))]% for [duration(1,2)] round.	0
 coa_pet_ability	365	Dazzling Dance	-1	0	Team speed increased by [abs(abilityStateMod(25,365))]%.	0
+coa_pet_ability	366	Dazzling Dance	4	0	Increases your team's speed by [abs(abilityStateMod(25,365))]% for [duration(1,1)] |4round:rounds;.	0
+coa_pet_ability	367	Chomp	4	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Chomps on the enemy, dealing [StandardDamage(1, 1)] [School()] damage.	0
 coa_pet_ability	370	Sticky Goo	-1	0	This pet cannot be swapped.	0
 coa_pet_ability	376	Headbutt	7	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and has a 25% chance to stun the target.	0
 coa_pet_ability	377	Trample	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Tramples the target, dealing [StandardDamage(1,1)] [School()] damage plus an additional [points(1,2)]% of the target's health.	0
+coa_pet_ability	378	Strike	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Strikes at the enemy, dealing [StandardDamage(1,1)] [petTypeName(abilityPetType())] damage.	0
 coa_pet_ability	379	Poisoned	6	0	Deals [StandardDamage(1,1)] [School()] damage every round.  |cFF1EFF00Poisoned.|r	0
+coa_pet_ability	380	Poison Spit	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Instantly deals [StandardDamage(1,1)] [School()] damage and |cFF1EFF00Poisons|r the target for [StandardDamage(1,1,379)] additional [School(379)] damage per round for [duration(1,2)] |4round:rounds.	0
+coa_pet_ability	381	Brittle Webbing	7	0	Takes [StandardDamage(1,1)] [School()] damage each time they attack.  |cffffffffWebbed.|r	0
+coa_pet_ability	382	Brittle Webbing	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and coats the target in brittle |cffffffffWebbing|r, causing them to take [StandardDamage(1,1,381)] [School()] damage each time they attack. Lasts [duration(1,2)] |4round:rounds;.	0
+coa_pet_ability	383	Leech Life	3	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  The user restores [StandardHealing(getProcIndex(PROC_ON_DAMAGE_DEALT),2)] health. Double if the target is |cffffffffWebbed.|r	0
+coa_pet_ability	384	Metal Fist	9	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Punches the target, dealing [StandardDamage(1,1)] [School()] damage.	0
 coa_pet_ability	389	Overtune	9	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Overtunes the user's central power core, dealing [StandardDamage(1,1) ] [School()] damage and increasing the user's speed by [abs(abilityStateMod( 25, 544 ))]% for [duration(1,2)] |4round:rounds;.	0
+coa_pet_ability	390	Demolish	9	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Rams the target, dealing [StandardDamage(1,1)] [School()] damage.	0
 coa_pet_ability	391	Extra Plating	-1	0	Your damage taken has been reduced by [abs(abilityStateMod(24,391))]%.	0
 coa_pet_ability	392	Extra Plating	9	4	The user equips additional plating, reducing all damage taken by 50% for [duration(1,2)] |4round:rounds;.	0
+coa_pet_ability	398	Poison Lash	6	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Instantly deals [StandardDamage(1,1)] [School()] damage and |cFF1EFF00Poisons|r the target for [StandardDamage(1,1,379)] additional [School(379)] damage per round for [duration(1,2)] |4round:rounds;.	0
+coa_pet_ability	399	Entangling Roots	6	0	When this effect expires, your current pet will take [StandardDamage(2,1)] [School()] damage and be unable to flee for [duration(2,2)] rounds.  [StandardAccuracy(2,1)] |cffffffffHit Chance|r	0
+coa_pet_ability	400	Entangling Roots	6	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Causes a thick nest of vines to begin growing around the enemy team.   Next round, the opponent's pet will take [StandardDamage(2,1,399)] [School()] damage and be rooted for [duration(2,2,399)] rounds.	0
+coa_pet_ability	401	Stun Seed	6	0	Detonates after [numTurns()-1] |4round:rounds, dealing [StandardDamage(3,1)] Elemental damage to the current enemy pet and stunning the target for 1 round.  [StandardAccuracy(3,1)] |cffffffffHit Chance|r	0
+coa_pet_ability	402	Stun Seed	6	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Plants a seed in the enemy.   After 2 |4round:rounds;, the seed blooms, causing the current enemy pet to take [StandardDamage(3,1,401)] [School()] damage and be stunned for [duration(3,2,401)] |4round:rounds;.	0
+coa_pet_ability	403	Sunny Day	6	0	Increases the maximum health of all pets by [abs(abilityStateMod(99,403))]%.  Increases healing done by [abs(abilityStateMod(65,403))]%.	0
+coa_pet_ability	404	Sunlight	6	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  A Solar Beam strikes all enemies, dealing [StandardDamage(1,1)] [School()] damage and transforms the weather into a sunny day for [duration(1,4)] rounds.  During a sunny day, the maximum health of all pets is increased by [abs(abilityStateMod(99,403))]%. and healing done is increased by [abs(abilityStateMod(65,403))]%.	0
+coa_pet_ability	405	Early Advantage	6	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [petTypeName(abilityPetType())] damage.  Deals double damage if the user has lower health.	0
+coa_pet_ability	406	Crush	0	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Crush the enemy, dealing [StandardDamage(1, 1)] [School()] damage.	0
 coa_pet_ability	411	Woodchipper	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Instantly deals [StandardDamage(1,1)] [School()] damage and causes the target to |cFF970000Bleed|r for [StandardDamage(1,1,491)] additional [School(491)] damage per round for [duration(1,2)] |4round:rounds.	0
+coa_pet_ability	412	Gnaw	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage plus [StandardDamage(1,3)] additional damage if the user attacks first.	0
 coa_pet_ability	413	Ice Lance	6	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Splashes the enemy with freezing damage, dealing [StandardDamage(1,1)] [School()] damage.   Deals [StandardDamage(1,2)] additional damage if the target is |cFF0070DDChilled|r.	0
+coa_pet_ability	414	Frost Nova	6	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and prevents the target from fleeing for [duration(1,2)] |4round:rounds.  While rooted the target is |cFF0070DDChilled|r.	0
 coa_pet_ability	415	Frost Shock	-1	0	Speed reduced by [abs(abilityStateMod(25,415))]%.  |cFF0070DDChilled|r	0
+coa_pet_ability	416	Frost Shock	6	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  |cFF0070DDChills|r the target, dealing [StandardDamage(1,1)] [School()] damage and reducing their speed by [abs(abilityStateMod(25,154))]% for [duration(1,2)] |4round:rounds.	0
 coa_pet_ability	417	Geyser	6	0	Detonates after [numTurns()-1] |4round:rounds, dealing [StandardDamage(4,1,417)] [School(417)] damage to the current enemy pet and stunning the target for [duration(4,2)] |4round:rounds;.  [StandardAccuracy(4,1)] |cffffffffHit Chance|r	0
 coa_pet_ability	418	Geyser	6	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Causes a water geyser to form under the enemy team.   After [duration(1,1)] |4round:rounds;, the geyser erupts, causing the current enemy pet to take [StandardDamage(4,1,417)] [School(417)] damage and be stunned for [duration(4,2,417)] |4round:rounds;.	0
+coa_pet_ability	419	Tidal Wave	8	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage to the enemy's pets.  Destroys objects created by both teams.	0
+coa_pet_ability	420	Slicing Wind	2	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Attacks the enemy with 1-3 blades of wind, dealing [StandardDamage(1,1)] [School()] damage per attack.	0
+coa_pet_ability	421	Arcane Blast	5	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Blasts the enemy with a surge of arcane power, dealing [StandardDamage(1,1)] [School()] damage.   Damage increases by [FormatDamage(5*AttackBonus())] each time it is used. Max [FormatDamage(25 *AttackBonus())] [School()] damage.	0
+coa_pet_ability	422	Shadow Shock	3	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Shocks the target with dark energy, dealing [StandardDamage(1, 1)] [School()] damage.	0
+coa_pet_ability	423	Blood in the Water	8	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  Always hits if the target is |cFF970000Bleeding|r.	0
+coa_pet_ability	424	Tail Slap	8	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Slaps the enemy with its tail, dealing [StandardDamage(1, 1)] [School()] damage.	0
 coa_pet_ability	425	Focused	-1	0	Speed increased by [abs(abilityStateMod(25, 425))]%. Hit chance increased by [abs(abilityStateMod(41, 425))]%. Critical strike chance increased by [abs(abilityStateMod(40, 425))]%.	0
+coa_pet_ability	426	Focus	0	0	Focuses intensely, increasing your speed, hit, and critical strike chance by [abilityStateMod(41, 425)]% for [duration(1,1)] rounds.	0
 coa_pet_ability	429	Claw	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Claws at the enemy, dealing [StandardDamage(1, 1)] [petTypeName(abilityPetType())] damage.	0
+coa_pet_ability	432	Jade Claw	5	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Rakes the enemy with jade claws, dealing [StandardDamage(1, 1)] [School()] damage.	0
 coa_pet_ability	435	Stoneskin	-1	0	Reduces up to [abs(abilityStateMod(71,435))*AttackBonus()] damage from each attack against you.	0
+coa_pet_ability	436	Stoneskin	5	0	Reduces up to [abs(abilityStateMod(71,435))*AttackBonus()] damage from each attack against you.   Lasts [duration(1,1)] |4round:rounds;.	0
+coa_pet_ability	437	Onyx Bite	5	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Bites the enemy with Onyx teeth, dealing [StandardDamage(1, 1)] [School()] damage.	0
 coa_pet_ability	441	Rend	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Lashes the enemy 1-2 times, dealing [StandardDamage(1,1)] [School()] damage per lash.  Attacks an additional time if the user attacks first.	0
+coa_pet_ability	442	Spectral Strike	5	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Strikes at the enemy with the power of a spirit beast, causing [StandardDamage(1,1)] [School()] damage.   Always hits if the target is |cff9933FFBlinded|r.	0
+coa_pet_ability	445	Ooze Touch	5	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Oozes onto the enemy, dealing [StandardDamage(1,1)] [School()] damage.	0
+coa_pet_ability	446	Corrosion	5	0	Deals [StandardDamage(1,1)] [School()] damage each round. Damage taken increased by up to [abs(abilityStateMod(71,446))*AttackBonus()].	0
+coa_pet_ability	447	Corrosion	5	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Splashes the target with corrosive acid, causing [StandardDamage(1,1)] [School()] damage instantly and [StandardDamage(1,1,446)] [School()] damage each round and increases damage taken by up to [abs(abilityStateMod(71,446))*AttackBonus()] for [duration(1,2)] |4round:rounds;.	0
+coa_pet_ability	448	Creeping Ooze	8	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Covers the target in a |cFF1EFF00Poisonous|r ooze, which deals [StandardDamage(1,1)] [School()] damage plus [StandardDamage(1,1,781)] damage each round. Lasts [duration(1,2)] |4round:rounds.	0
+coa_pet_ability	449	Absorb	3	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  The user is healed for [points(1,2)]% of the damage dealt.	0
+coa_pet_ability	450	Expunge	5	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1, 1)] [School()] damage to the target.	0
+coa_pet_ability	453	Sandstorm	2	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and turns the weather into a sandstorm for [duration(1,2)] rounds.  During a sandstorm, all pets take [AttackBonus()*5] less damage and their accuracy is reduced by 10%.	0
+coa_pet_ability	454	Sandstorm	4	0	Reduces the damage taken by all pets by up to [AttackBonus()*5].  Accuracy reduced by 10%.	0
+coa_pet_ability	456	Clean-Up	5	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1, 1)] [School()] damage and removes any objects on the battlefield.	0
+coa_pet_ability	457	Sweep	5	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and forces the opponent's highest health pet to swap into battle.	0
+coa_pet_ability	458	Wind-Up	9	0	Damage increased by 10%. Ready to unleash a barrage of attacks.	0
+coa_pet_ability	459	Wind-Up	9	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  First use: Increases your damage dealt by 10%.  Second use: Unleashes a flurry of attacks, dealing [StandardDamage(1,1)] [School()] damage.	0
+coa_pet_ability	460	Illuminate	5	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and transforms the weather into a sunny day for [duration(1,2)] rounds.  During a sunny day, the maximum health of all pets is increased by [abs(abilityStateMod(99,403))]% and healing done is increased by [abs(abilityStateMod(65,403))]%.	0
 coa_pet_ability	462	Partially Blinded	-1	0	Your hit chance is reduced by [abs(abilityStateMod( 41 , 462 ))]%.  |cff9933FFBlinded.|r	0
+coa_pet_ability	466	Nether Gate	5	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and forces an opponent's pet to swap into battle.	0
 coa_pet_ability	470	Weakness	-1	0	Damage dealt reduced by [abs(abilityStateMod(23,470))]%. Speed reduced by [abs(abilityStateMod(25,470))]%.	0
+coa_pet_ability	471	Weakness	5	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and reduces the target's speed by [abs(abilityStateMod(25,470))]% and damage done by [abs(abilityStateMod(23,470))]% for [duration(1,2)] |4round:rounds;.	0
 coa_pet_ability	472	Blast of Hatred	5	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.   Deals [StandardDamage(1,2)] extra damage if you were struck first this round.	472
+coa_pet_ability	473	Focused Beams	5	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Blasts the enemy with a beam of arcane power, dealing [StandardDamage(1,1)] [School()] damage.  Damage increases by [FormatDamage(pointsincreaseperuse(1,1)*AttackBonus())] each time it is used. Max [FormatDamage(pointsmax(1,1)*AttackBonus())] [School()] damage.	0
 coa_pet_ability	475	Eyeblast	5	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and reduces the target's speed by [abs(abilityStateMod(25,154))]% for [duration(1,2)] |4round:rounds;.	0
+coa_pet_ability	476	Rot	3	3	[StandardAccuracy(1,2)] |cffffffffHit Chance|r  Rots the target's flesh, dealing [StandardDamage(1,2)] [School()] damage and transforming them into [School()] for [duration(1,3)] |4round:rounds;.	0
 coa_pet_ability	477	Snowball	6	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Hits the enemy with a ball of snow, dealing [StandardDamage(1,1)] [School()] damage.	0
+coa_pet_ability	478	Magic Hat	5	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Throws his hat at the enemy, dealing [StandardDamage(1,1)] [petTypeName(abilityPetType())] damage.	0
 coa_pet_ability	481	Deep Freeze	6	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1, 1)] [School()] damage and has a [accuracy(1,3)]% chance to stun the target for [duration(1,3)] |4round:rounds;.  The chance to stun becomes 100% if the target is |cFF0070DDChilled|r.	0
+coa_pet_ability	484	Feedback	5	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Launches a surge of mana at the enemy, dealing [StandardDamage(1,1)] [School()] damage.	0
 coa_pet_ability	485	Attack Boost	-1	0	Your damage has been increased by [abs(abilityStateMod( STATE_Mod_DamageDealtPercent, 485 ))]%.	0
+coa_pet_ability	486	Drain Power	5	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage, reduces the target's damage by [abs(abilityStateMod( STATE_Mod_DamageDealtPercent, 153 ))]% for [duration(1,2)] |4round:rounds; and increases the user's damage by [abs(abilityStateMod( STATE_Mod_DamageDealtPercent, 485 ))]% for [duration(1,3)] |4round:rounds;.	0
 coa_pet_ability	489	Mana Surge	5	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1, 1)] [School()] damage. Deals [StandardDamage(1,3)] additional damage when the weather is Arcane Winds.  Mana Surge continues for [numTurns()] |4round:rounds;.	0
+coa_pet_ability	490	Deflection	0	3	Avoids enemy attacks made during the round it is used.  This ability always goes first.	0
 coa_pet_ability	491	Bleeding	7	0	Deals [StandardDamage(1,1)] [School()] damage every round.  |cFF970000Bleeding|r	0
+coa_pet_ability	492	Rake	7	2	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and reduces the target's next attack by 50%.	0
+coa_pet_ability	493	Hoof	4	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Stomps the enemy, dealing [StandardDamage(1, 1)] [School()] damage.	0
 coa_pet_ability	494	Attack Reduction	-1	0	Damage dealt decreased by [abs(abilityStateMod( STATE_Mod_DamageDealtPercent, 494 ))]%.	0
 coa_pet_ability	496	Drowsy	-1	0	Feeling sleepy... will fall asleep next round unless hurt.	0
+coa_pet_ability	497	Soothe	4	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Sings to the target, causing them to become drowsy.   Drowsy targets will fall asleep at the end of next round unless hit.	0
 coa_pet_ability	498	Asleep	-1	0	Unable to give this pet commands.  Breaks on damage.	0
+coa_pet_ability	499	Diseased Bite	3	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Infects the enemy, dealing [StandardDamage(1, 1)] [School()] damage.	0
+coa_pet_ability	500	Flame Breath	1	0	Deals [StandardDamage(1,1)] [School()] damage every round.  |cFFFF2020Burning|r	0
+coa_pet_ability	501	Flame Breath	1	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [petTypeName(abilityPetType())] damage instantly. The enemy continues to  |cFFFF2020Burn|r for [StandardDamage(1,1,500)] additional [petTypeName(abilityPetType())] damage per round for [duration(1,2)] |4round:rounds.	0
+coa_pet_ability	502	Flamethrower	6	0	Deals [StandardDamage(1,1)] [School()] damage to the current pet every round.   |cFFFF2020Burning|r.	0
+coa_pet_ability	503	Flamethrower	6	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Turns the battlefield into a raging inferno, dealing [StandardDamage(1,1)] [School()] damage.   Fire continues to |cFFFF2020Burn|r the enemy, dealing [StandardDamage(1,1, 502)] [School()] damage each round for [duration(1,2)] |4round:rounds;.	0
 coa_pet_ability	505	Silk Cocoon	-1	0	You will block the next attack that strikes you. Speed reduced by [abs(abilityStateMod(25,505))]%.	0
+coa_pet_ability	506	Cocoon Strike	2	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and increases your chance to block an attack by 100%.  Lasts [duration(1,2)] |4round:rounds;.	0
+coa_pet_ability	509	Surge	8	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Rushes to the enemy on a stream of water, dealing [StandardDamage(1,1)] [School()] damage.   This move always goes first.	0
 coa_pet_ability	510	Renewing Mists	-1	0	Restores [StandardHealing(1,1,510)] health every round.	0
 coa_pet_ability	511	Renewing Mists	8	0	Fills the area with a healing mist, causing your front pet to restore [StandardHealing(1,1,510)] health every round.  Lasts [duration(1,1)] |4round:rounds;. Persists through pet swaps.	0
+coa_pet_ability	514	Wild Winds	2	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  A sharp wind gust deals [StandardDamage(1,1)] [School()] damage instantly and [StandardDamage(1,1,677)] [School()] damage every round for [duration(1,2)] |4round:rounds;. Persists through pet swaps.	0
+coa_pet_ability	515	Flyby	2	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and increases the target's damage taken by [abs(abilityStateMod( 24,516))]% for [duration(1,2)] |4round:rounds;.	0
 coa_pet_ability	516	Weakened Defenses	-1	0	Your damage taken has been increased by [abs(abilityStateMod( 24,516))]%.	0
+coa_pet_ability	517	Nocturnal Strike	2	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.   Always hits if the target is |cff9933FFBlinded|r.	0
+coa_pet_ability	518	Predatory Strike	2	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  Deals double damage if the target is below 25% health.	0
 coa_pet_ability	520	Hawk Eye	-1	0	Your critical strike chance has been increased by [abs(abilityStateMod(40,520))]%.	0
+coa_pet_ability	521	Hawk Eye	2	0	Increases your critical strike chance by [abs(abilityStateMod(40,520))]% for [duration(1,1)] |4round:rounds;.	0
+coa_pet_ability	524	Squawk	2	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Lets out a loud squawk, dealing [StandardDamage(1,1)] [School()] damage and reducing the damage the target deals by 25% for [duration(1,2)] rounds.	0
+coa_pet_ability	532	Body Slam	0	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Slams into the enemy, dealing [StandardDamage(1,1)] [School()] damage and dealing [SimpleDamage(1,3)] [School()] damage to themselves.	0
+coa_pet_ability	533	Rebuild	9	3	Rebuilds broken pets, restoring [StandardDamage(1,1)] health to itself, and half that amount to other mechanical allies.	0
+coa_pet_ability	535	Pounce	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Pounces the enemy, dealing [StandardDamage(1,1)] [School()] damage plus [StandardDamage(1,3)] [School()] damage if the user strikes first.	0
 coa_pet_ability	536	Prowl	7	5	Reduces your speed by 30% and increases the damage of your next attack made within [duration(1,1)] |4round:rounds; by 150%.	0
 coa_pet_ability	537	Attack Reduction	-1	0	Damage dealt has been reduced by [abs(abilityStateMod( 23, 537 ))]% for the next attack.	0
 coa_pet_ability	538	Devour	7	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  If the user kills an enemy with Devour, they restore [StandardHealing(1,2)] health.  Devour continues for [numTurns()] |4round:rounds;.	0
+coa_pet_ability	539	Bleat	4	4	Sings an inspiring song, which restores [StandardHealing(1,1)] health to all allies.	0
 coa_pet_ability	540	Chew	4	0	Chewing on grass. Will deal [StandardDamage(2,2)] [School()] damage when done.	0
 coa_pet_ability	541	Chew	4	1	Patiently chew some grass. On the next round, you will deal [StandardDamage(2,2,540)] [School()] damage in addition to your next attack.  Chew can deal damage from the back row.	0
 coa_pet_ability	542	Shattered Defenses	-1	0	Increases your damage taken by [abs(abilityStateMod( 24, 542 ))]%.	0
 coa_pet_ability	543	Prowl	-1	0	Speed reduced by 30%. Damage increased by 150%.	0
 coa_pet_ability	544	Speed Boost	-1	0	Speed increased by [abs(abilityStateMod( 25, 544 ))]%.	0
+coa_pet_ability	563	Quick Attack	4	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.   This ability always goes first.	0
+coa_pet_ability	564	Dive	8	4	[StandardAccuracy(2,1)] |cffffffffHit Chance|r  Submerges, becoming unattackable for one round.   On the next round, you attack, dealing [StandardDamage(2, 1)] [School()] damage.	0
+coa_pet_ability	566	Powerball	4	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Roll at the enemy, dealing [StandardDamage(1,1)] [School()] damage and increasing your speed by [statechange(1,2)]%.   Your speed continues to increase each time you use Powerball.	0
+coa_pet_ability	567	Rush	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Rushes the enemy, dealing [StandardDamage(1,1)] [School()] damage and causes the user to go first next round.	0
 coa_pet_ability	571	Horn Attack	7	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  If the user is faster than the target, they have a [accuracy(1,3)]% chance to be trampled and lose their turn.	0
 coa_pet_ability	572	Mudslide	4	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Calls down a mudslide, dealing [StandardDamage(1,1)] [School()] damage and causing muddy weather for [duration(1,2)] rounds.   Muddy weather prevents any pet that enters the battlefield from swapping out for 3 rounds, and increases all critical damage dealt by [abs(abilityStateMod(314,718))]%.	0
+coa_pet_ability	573	Nature's Touch	4	3	Restores [StandardDamage(1,1)] health to the user.	573
 coa_pet_ability	575	Slippery Ice	6	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Shoots a jet of rapidly chilling ice, dealing [StandardDamage(1,1)] [School()] damage and coats the ground near the enemy with ice.  Frozen ground causes enemies to be |cFF0070DDChilled|r and reduces hit chance by 20%. Lasts [duration(1,2)] |4round:rounds;. Persists through pet swaps.	0
 coa_pet_ability	576	Perk Up	4	3	Restores [StandardHealing(1,5)] health and increases the maximum health of your active pet by [points(1,1,577)] per level for [duration(1,1)] rounds.	0
 coa_pet_ability	577	Healthy	-1	0	Increases your maximum health by 5 points per level.	0
+coa_pet_ability	578	Buried Treasure	4	3	Digs up a bone, healing up to [percentage(1,1)]% of your health.	0
+coa_pet_ability	580	Food Coma	4	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Puts the target to sleep for [duration(1,1)] |4round:rounds;.	0
+coa_pet_ability	581	Flock	2	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Flocks the target, causing [FormatDamage(SimpleDamage(1,1)+SimpleDamage(1,2)+SimpleDamage(1,3))] [School()] damage on the first round, [FormatDamage(SimpleDamage(2,1)+SimpleDamage(2,2)+SimpleDamage(2,3))] [School()] on the second round, and [FormatDamage(SimpleDamage(3,1)+SimpleDamage(3,2)+SimpleDamage(3,3))] [School()] on the third round. Lasts [numTurns()] |4round:rounds;.  Opponents struck by the flock take [abs(abilityStateMod( 24, 542 ))]% increased damage for [duration(1,4)] |4round:rounds;.	0
+coa_pet_ability	586	Gift of Winter Veil	5	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage to the enemy.	0
+coa_pet_ability	588	Devastate	1	4	Fly up high, becoming unattackable for one turn.   On the next turn, you attack, dealing [StandardDamage(2,1)] [School()] damage.	0
 coa_pet_ability	589	Arcane Storm	5	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage split between all enemies and warps the weather into Arcane Winds for [duration(1,2)] rounds. Does additional damage if Arcane Winds is already active.  During Arcane Winds, pets cannot be stunned or rooted.	0
 coa_pet_ability	590	Arcane Winds	-1	0	Pets cannot be stunned or rooted.	0
+coa_pet_ability	594	Sleeping Gas	1	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and has a [accuracy(1,3)]% chance to put the target to sleep for [duration(1,3)] |4round:rounds;.  Damage increases by [FormatDamage(10*AttackBonus())] each time it is used. Max [FormatDamage(30 *AttackBonus())] [School()] damage.	0
+coa_pet_ability	595	Moonfire	5	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and turns the weather into Moonlight for [duration(1,2)] rounds.  During Moonlight, all pets receive 25% additional healing and Magic abilities deal 10% additional damage.	0
+coa_pet_ability	596	Moonlight	5	0	Increases healing received by 25%.  Magic abilities deal 10% additional damage.	0
+coa_pet_ability	600	Time Stop	5	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Stun the target for [duration(1,1)] |4round:rounds;.	600
+coa_pet_ability	608	Nether Blast	5	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Blasts the enemy with a surge of arcane power, dealing [StandardDamage(1,1)] [School()] damage.  Damage increases by [FormatDamage(pointsincreaseperuse(1,1)*AttackBonus())] each time it is used. Max [FormatDamage(pointsmax(1,1)*AttackBonus())] [School()] damage.	0
 coa_pet_ability	610	Ancient Blessing	-1	0	Increases your maximum health by [abs(abilityStateMod(2,610))/100] points per level.	0
+coa_pet_ability	611	Ancient Blessing	1	3	Heals the user for [StandardHealing(1,5)] health and increases the maximum health of your active pet by [points(1,1,610)] per level for [duration(1,1)] rounds.	0
+coa_pet_ability	616	Blinkstrike	5	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Blink to the enemy, dealing [StandardDamage(1,1)] [School()] damage.   This move always goes first.	0
+coa_pet_ability	625	Ice Spike	6	0	Impales the target, dealing [StandardDamage(1,1)] [School()] damage.  This ability has a high chance to miss.	0
 coa_pet_ability	631	Super Sticky Goo	6	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Flings a sticky goo at the target, dealing [StandardDamage(1,1)] [School()] damage and making it impossible to flee for [duration(1,2)] |4round:rounds;.	0
+coa_pet_ability	639	Toxic Smoke	9	0	Deals [StandardDamage(1,1)] [School()] damage every round.	0
+coa_pet_ability	640	Toxic Smoke	9	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Covers the enemy team in toxic smoke, dealing [StandardDamage(1,1)] [School()] damage instantly and [StandardDamage(1,1,639)] [School()] damage every round for [duration(1,2)] |4round:rounds. Persists through pet swaps.	0
 coa_pet_ability	641	Egg Barrage	-1	0	Deals [StandardDamage(1,1)] Critter damage to the current pet every round.	0
+coa_pet_ability	642	Egg Barrage	4	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Hurls eggs at the enemy, dealing [FormatDamage(SimpleDamage(1,1)+SimpleDamage(1,2)+SimpleDamage(1,3)+SimpleDamage(1,4))] [School()] damage.   Eggs continue to fall on the enemy's current pet, dealing [StandardDamage(1,1, 641)] [School()] damage each round for 3 |4round:rounds;.	0
+coa_pet_ability	646	Shock and Awe	9	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and has a [accuracy(1,3)]% chance to stun the target for [duration(1,3)] round.	646
+coa_pet_ability	648	Bone Bite	3	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Bites at the enemy, dealing [StandardDamage(1,1)] [School()] damage.	0
+coa_pet_ability	654	Ghostly Bite	3	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and stuns the user for [duration(1,2)] round.	0
 coa_pet_ability	657	Plagued Blood	3	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and plagues the target for [duration(1,2)] |4round:rounds.   While plagued, enemies who strike the target are healed.	0
 coa_pet_ability	658	Plagued Blood	3	0	When damaged, the attacker is healed.	0
+coa_pet_ability	663	Corpse Explosion	3	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Instantly kills the user, causing [points(1,1)]% of their health as [School()] damage to the enemy and infects the target.  Infected targets receive [points(1,1,664)]% of their maximum health as [School()] damage every round for [duration(1,2)] |4round:rounds.	0
+coa_pet_ability	664	Corpse Explosion	3	0	Deals [points(1,1)]% of the target's health as [School()] damage every round.  |cFFAAFFAAPoisoned|r	0
 coa_pet_ability	665	Consume Corpse	3	3	[StandardAccuracy(1,2)] |cffffffffHit Chance|r  Consumes an allied corpse to restore [points(1,2)]% of total health.  Corpses can only be used once.	0
+coa_pet_ability	666	Rabid Strike	3	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and turns the target rabid for [duration(1,2)] rounds.  While rabid, the target deals 25% additional damage and receives 50% additional damage.	0
+coa_pet_ability	667	Aged Yolk	0	2	Removes all buffs and debuffs from the user.	0
+coa_pet_ability	668	Dreadful Breath	0	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Channels a dreadful toxic breath which deals [StandardDamage(1,1)] [School()] damage split across the enemy team. Deals additional damage if the weather is Cleansing Rain.  Your pet continues performing this attack for [numTurns()] |4round:rounds;.	0
+coa_pet_ability	669	Backflip	0	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Performs a flip, dealing [StandardDamage(1,1)] [School()] damage.   Interrupts the opponent's round if the user goes first.	0
+coa_pet_ability	677	Wild Winds	2	0	The current pet takes [StandardDamage(1,1)] [School()] damage every round.	0
+coa_pet_ability	706	Swarm	4	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Starts a swarm, causing [FormatDamage(SimpleDamage(1,1)+SimpleDamage(1,2)+SimpleDamage(1,3))] [School()] damage on the first round, [FormatDamage(SimpleDamage(2,1)+SimpleDamage(2,2)+SimpleDamage(2,3))] [School()] on the second round, and [FormatDamage(SimpleDamage(3,1)+SimpleDamage(3,2)+SimpleDamage(3,3))] [School()] on the third round.   Opponents struck by the swarm take [abs(abilityStateMod( 24, 542 ))]% increased damage for [duration(1,4)] |4round:rounds;.  Swarm continues for [numTurns()] |4round:rounds;.	0
+coa_pet_ability	713	Blitz	0	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Pummels the enemy 1-2 times, dealing [StandardDamage(1,1)] [School()] damage per hit.  Hits an additional time if the user attacks first.	0
 coa_pet_ability	718	Mudslide	4	0	All pets who enter battle are rooted for [duration(1,1)] |4round:rounds, and all critical damage dealt is increased by [abs(abilityStateMod(314,718))]%.  Rooted enemies are unable to swap out.	0
 coa_pet_ability	721	Slippery Ice	6	0	Accuracy reduced by 20%.  All pets are considered |cFF0070DDChilled|r.	0
 coa_pet_ability	739	Frenzy	-1	0	Damage dealt increased by [abs(abilityStateMod( STATE_Mod_DamageDealtPercent, 739 ))]%.	0
+coa_pet_ability	744	Leech Seed	6	0	Deals [StandardDamage(1,1)] [School()] damage every round. The caster of the aura is healed for [points(1,2)]% of the damage dealt.	0
+coa_pet_ability	745	Leech Seed	6	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Plants a seed in the target, instantly dealing [StandardDamage(1,1)] [School()] damage and restoring [StandardHealing(1,2)] health to the user. The seed lasts for [duration(1,3)] round.  Each round, the seed deals [StandardDamage(1,1,744)] [School(744)] damage and restores that damage as health to the user.	0
+coa_pet_ability	752	Soulrush	5	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and has a 25% chance to stun the target.	0
+coa_pet_ability	753	Solar Beam	6	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Instantly deals [StandardDamage(1,1)] [School()] damage, plus [StandardDamage(1,3)] damage if the weather is Sunlight. The user must recharge for two |4round:rounds; afterwards.  While recharging, you cannot perform any other actions.	0
+coa_pet_ability	754	Screeching Gears	9	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and has a [accuracy(1,3)]% chance to stun the target for [duration(1,3)] |4round:rounds;.	0
+coa_pet_ability	755	Acid Touch	8	0	Deals [StandardDamage(1,1)] [School()] damage each round.	0
+coa_pet_ability	756	Acid Touch	8	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Acid eats away at the target, dealing [StandardDamage(1,1)] [School()] damage and causing [StandardDamage(1,1,755)] [School()] damage each round for [duration(1,2)] |4round:rounds.	0
+coa_pet_ability	761	Heroic Leap	0	4	[StandardAccuracy(2,1)] |cffffffffHit Chance|r  Leap up high, becoming unattackable for one round.   On the next round, you attack, dealing [StandardDamage(2, 1)] [School()] damage.	0
 coa_pet_ability	762	Haymaker	0	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Unleashes a vicious swing which deals [StandardDamage(1,1)] [School()] damage.  If the ability misses, the user is stunned for [duration(1,4)] |4round:rounds;.	0
+coa_pet_ability	763	Sear Magic	5	2	Removes all buffs and debuffs from the user.	0
+coa_pet_ability	770	Restoration	0	3	Restores [percentage(1,1)]% of the caster's health. This ability always goes first.	0
+coa_pet_ability	776	Love Potion	0	3	Restores [percentage(1,1)]% of the caster's health. This ability always goes first.	0
 coa_pet_ability	778	Charge	0	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Rushes to the enemy, dealing [StandardDamage(1,1)] [School()] damage.   This move always goes first.	0
+coa_pet_ability	779	Thunderbolt	6	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage split evenly across the enemy team.	779
 coa_pet_ability	780	Death Grip	3	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and forces the opponent's lowest health pet to swap into battle.	0
+coa_pet_ability	781	Creeping Ooze	8	0	Deals [StandardDamage(1,1)] [School()] damage each round.  |cFF1EFF00Poisoned.|r	0
+coa_pet_ability	782	Frost Breath	1	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Freezes the target, dealing [StandardDamage(1,1)] [School()] damage.	782
+coa_pet_ability	784	Shriek	1	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Lets out a loud shriek, dealing [StandardDamage(1,1)] [School()] damage and reducing the damage the target deals by [abs(abilityStateMod( STATE_Mod_DamageDealtPercent, 494 ))]% for [duration(1,2)] |4round:rounds.	0
+coa_pet_ability	792	Darkflame	6	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Engulfs the enemy in dark flame, dealing [StandardDamage(1,1)] [School()] damage and causing the target to receive [abs(abilityStateMod(66,793))]% less healing for [duration(1,2)] |4round:rounds.	0
 coa_pet_ability	793	Healing Reduction	-1	0	Healing received reduced by [abs(abilityStateMod(66,793))]%.	0
+coa_pet_ability	800	Impale	7	2	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.   Deals double damage if the target is below 25% health.	0
+coa_pet_ability	801	Stone Shot	6	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Hurls a stone, dealing [StandardDamage(1,1)] [School()] damage.	0
 coa_pet_ability	802	Ravage	7	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  If the user kills an enemy with Ravage, they restore [StandardHealing(1,2)] health.  Ravage continues for [numTurns()] |4round:rounds;.	0
+coa_pet_ability	803	Rip	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and causes the target to |cFF970000Bleed|r for [StandardDamage(1,1,491)] [School(491)] damage per round for [duration(1,2)] |4round:rounds.	0
+coa_pet_ability	807	Rabies	3	0	Deals [abs(abilityStateMod( 23, 807 ))]% additional damage. Takes [abs(abilityStateMod( 24, 807 ))]% additional damage.	0
+coa_pet_ability	812	Sulfuras Smash	6	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Devastates the enemy with a swing of Sulfuras, dealing [StandardDamage(1, 1)] [School()] damage.	812
+coa_pet_ability	814	Rupture	6	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Stone spikes erupt from the ground, dealing [StandardDamage(1,1)] [School()] damage and has a 25% chance to stun the target.	0
+coa_pet_ability	822	Polymorphed	8	0	Turned into a frog. Unable to use attacks.	0
+coa_pet_ability	826	Weakening Blow	0	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Unleashes a restrained attack, dealing [StandardDamage(1,1)] [School()] damage.  This attack cannot reduce the opponent's health below 1.	0
 coa_pet_ability	830	Underwater	-1	0	Dove underwater.  Unattackable.	0
 coa_pet_ability	831	Speed Boost	-1	0	Speed increased.	0
+coa_pet_ability	833	Repairing	9	0	Enters repair mode, performing no actions for 2 rounds, then repairs [StandardHealing(3,1,278)] health.	0
 coa_pet_ability	837	Centrifugal Hooks	-1	0	Speed has been increased by [abs(abilityStateMod( 25, 837 ))]%.	837
+coa_pet_ability	838	Centrifugal Hooks	5	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Instantly deals [StandardDamage(1,1)] [School()] damage and increases your speed by [abs(abilityStateMod( 25, 837 ))]% for [duration(1,2)] |4round:rounds;.	838
 coa_pet_ability	839	Leaping	-1	0	Leaping up high.  Unattackable.	0
 coa_pet_ability	848	Frost Nova	-1	0	This pet cannot be swapped.  |cFF0070DDChilled|r.	0
+coa_pet_ability	849	Huge, Sharp Teeth!	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and causes the target to |cFF970000Bleed|r for [StandardDamage(1,1,491)] [School(491)] damage per round for [duration(1,2)] |4round:rounds.	0
 coa_pet_ability	853	SpeedPriority - Server Only	8	0		0
+coa_pet_ability	870	Murder	2	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  A murder of crows swoops in, causing [FormatDamage(SimpleDamage(1,1)+SimpleDamage(1,2)+SimpleDamage(1,3))] [School()] damage on the first round, [FormatDamage(SimpleDamage(2,1)+SimpleDamage(2,2)+SimpleDamage(2,3))] [School()] on the second round, and [FormatDamage(SimpleDamage(3,1)+SimpleDamage(3,2)+SimpleDamage(3,3))] [School()] on the third round.   Opponents struck by the murder take [abs(abilityStateMod( 24, 542 ))]% increased damage for [duration(1,4)] |4round:rounds;.  Swarm continues for [numTurns()] |4round:rounds;.	0
 coa_pet_ability	900	Fel Immolate	6	0	Deals [StandardDamage(1,1)] Elemental damage every round.  |cFFFF2020Burning|r	0
 coa_pet_ability	901	Fel Immolate	6	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage instantly. The enemy |cFFFF2020Burns|r for [StandardDamage(1,1,900)] additional [School()] damage per round for [duration(1,2)] |4round:rounds.	0
 coa_pet_ability	903	Deflection	-1	0	Increases your chance to avoid attacks by [abs(abilityStateMod( 73, 311 ))]%.	0
 coa_pet_ability	904	Cute Face	-1	0	Increases your chance to dodge attacks by [abs(abilityStateMod( 73, 904 ))]%.	0
+coa_pet_ability	905	Cute Face	7	0	Increases your chance to dodge an attack by [abs(abilityStateMod( 73, 904 ))]%.  Lasts [duration(1,1)] |4round:rounds;.	0
 coa_pet_ability	916	Haywire	9	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Goes haywire, dealing [StandardDamage(1,1)] [School()] damage.  Haywire continues for [numTurns()] |4round:rounds;.	0
+coa_pet_ability	917	Bloodfang	7	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  If the user kills an enemy with Bloodfang, they restore [StandardHealing(1,3)] health.	0
 coa_pet_ability	920	Primal Cry	7	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Frightens the enemy team, dealing [StandardDamage(1,1)] [School()] damage to all enemy pets and reducing their speed by [abs(abilityStateMod(25,154))]% for [duration(1,2)] |4round:rounds;.	0
 coa_pet_ability	924	Resilient	-1	0	Immune to stun, sleep, and polymorph.	0
 coa_pet_ability	926	Asleep	-1	0	Unable to give this pet commands.  Breaks on damage.	0
 coa_pet_ability	927	Stunned	-1	0	Unable to give this pet commands.	0
+coa_pet_ability	930	Huge Fang	7	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage. Damage increases by [FormatDamage (pointsincreaseperuse(1,1)*AttackBonus())] each time it hits. Max [FormatDamage (pointsmax(1,1)*AttackBonus())] [School()] damage.	930
 coa_pet_ability	935	Caw	-1	0	Your critical strike chance has been increased by [abs(abilityStateMod(40,935))]%.	935
+coa_pet_ability	936	Caw	2	0	Increases your critical strike chance by [abs(abilityStateMod(40,935))]% for [duration(1,1)] |4round:rounds;.	936
+coa_pet_ability	937	Siphon Anima	9	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  The user is healed for [points(1,3)]% of the damage dealt.	0
+coa_pet_ability	938	Interrupting Jolt	9	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  Interrupts the opponent's round if the user goes first.	0
+coa_pet_ability	943	Chop	9	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and causes the target to |cFF970000Bleed|r for [StandardDamage(1,1,491)] [School(491)] damage per round for [duration(1,2)] |4round:rounds;.	0
+coa_pet_ability	957	Evolution	5	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Evolve, dealing [StandardDamage (1,1)] [School()] damage and mutating the user, increasing the damage they deal by [abs(abilityStateMod( STATE_Mod_DamageDealtPercent, 485 ))]% for [duration(1,2)] |4round:rounds.	957
 coa_pet_ability	958	Trihorn Charge	7	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Rushes to the enemy, dealing [StandardDamage(1,1)] [School()] damage.   This move always goes first.	958
 coa_pet_ability	959	Trihorn Shield	-1	0	Reduces up to [abs(abilityStateMod(71,959))*AttackBonus()] damage from every attack against the target.	959
+coa_pet_ability	960	Trihorn Shield	7	5	Reduces up to [abs(abilityStateMod(71,959))*AttackBonus()] damage from each attack against you.   Lasts [duration(1,1)] |4round:rounds;.	960
 coa_pet_ability	968	Undead Mark	-1	0	Wearer takes damage as if they were an Undead pet.	0
+coa_pet_ability	974	Spirit Claws	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Rakes the enemy with ghostly claws, dealing [StandardDamage(1,1)] [petTypeName(abilityPetType())] damage.  Always hits when the weather is Moonlight.	0
+coa_pet_ability	975	Logic	0	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Assault the enemy with infallible logic, dealing [StandardDamage(1,1)] [petTypeName(abilityPetType())] damage.	975
+coa_pet_ability	978	Moon Fang	5	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Bites the enemy with arcane power, dealing [StandardDamage(1, 1)] [School()] damage.	978
+coa_pet_ability	979	Moon Tears	5	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage to all enemy pets, restores [SimpleDamage(1,4)] health to all allies and turns the weather into Moonlight for [duration(1,7)] |4round:rounds;.  During Moonlight, all pets receive 25% additional healing and Magic abilities deal 10% additional damage.	0
+coa_pet_ability	985	Make it Rain	9	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Casually tosses gold coins at the enemy, dealing [FormatDamage(SimpleDamage(1,1)+SimpleDamage(1,2)+SimpleDamage(1,3))] [School()] damage.   Gold continues to fall on the enemy's current pet, dealing [StandardDamage(1,1, 166)] [School()] damage each round for [duration(1,4)] |4round:rounds;.	985
+coa_pet_ability	986	Make it Rain	9	0	Deals [StandardDamage(1,1)] [School()] damage to the current pet every round.	986
+coa_pet_ability	996	Lullaby	4	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Sings the target to sleep for [duration(1,1)] |4round:rounds;.	996
 coa_pet_ability	997	Vengeance	7	2	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  A vengeful attack that deals [petTypeName(abilityPetType())] damage equal to the last hit taken by the user.	0
+coa_pet_ability	998	Ethereal	5	3	Enter an ethereal state, avoiding all attacks the round it is used.  This ability always goes first.	0
 coa_pet_ability	999	Ethereal	-1	0	Increases your chance to avoid attacks by [abs(abilityStateMod( 73, 311 ))]%.	0
+coa_pet_ability	1012	Giant's Blood	0	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Howls with primitive fury, restoring [StandardDamage (1,1)] health and increasing damage dealt by [abs(abilityStateMod( STATE_Mod_DamageDealtPercent, 485 ))]% for [duration(1,2)] |4round:rounds.	1012
+coa_pet_ability	1013	Call of Winter	6	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage to enemy team and causes a Blizzard for [duration(1,7)] rounds. Deals additional damage against targets already |cFF0070DDChilled|r.  During a Blizzard, all pets are considered |cFF0070DDChilled|r.	0
 coa_pet_ability	1016	Feed	7	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  The user is healed for [points(1,3)]% of the damage dealt.	0
+coa_pet_ability	1020	Lens Flare	5	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  A brilliant flash deals [StandardDamage(1,1)] [School()] damage and |cff9933FFBlinds|r the target, reducing their hit chance by [abs(abilityStateMod( 41 , 462 ))]% for [duration(1,2)] |4round:rounds;.	1020
+coa_pet_ability	1023	Rebooting	9	0	Enters reboot mode, performing no actions for 2 rounds, then recovers [StandardHealing(3,1,1024)] health.	1023
+coa_pet_ability	1024	Reboot	9	5	Reboots the operating system, performing no actions for two |4round:rounds;, then recovers [StandardHealing(3,1)] health.	1024
+coa_pet_ability	1026	Amber Prison	0	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Encase the target in amber and stuns them for [duration(1,1)] |4round:rounds;.	1026
 coa_pet_ability	1030	Stunned	-1	0	Unable to give this pet commands.	1030
+coa_pet_ability	1032	Celestial Blessing	5	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Sanctifies the ground for [duration(1,1)] |4round:rounds;, blessing the next friendly pet to swap into battle with [abs(abilityStateMod(24 ,1034))]% reduced damage for [duration(1,2,1033)] |4round:rounds;.	1032
+coa_pet_ability	1033	Sanctified Ground	5	0	The next pet on this team to enter the battlefield receives a Celestial Blessing, reducing damage by 50% for 3 turns.	1033
 coa_pet_ability	1034	Celestial Blessing	-1	0	Your damage taken has been reduced by [abs(abilityStateMod( 24 , 1034 ))]%.	1034
 coa_pet_ability	1043	Drain Blood	3	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Drains the enemy of [points(1,1)]% of their maximum health.  The user is healed for [points(1,3)]% of the health drained.	1043
 coa_pet_ability	1044	Barkskin	-1	0	Reduces up to [abs(abilityStateMod(71,1044))*AttackBonus()] damage from every attack against the target.	0
+coa_pet_ability	1045	Barkskin	6	0	Reduces up to [abs(abilityStateMod(71,1044))*AttackBonus()] damage from each attack against you.   Lasts [duration(1,1)] |4round:rounds;.	0
+coa_pet_ability	1050	Puncture Wound	7	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Bites deeply into the enemy, dealing [StandardDamage(1,1)] [School()] damage.   Deals double damage if the target is |cFF1EFF00Poisoned.|r	0
+coa_pet_ability	1051	Acid Rain	8	3	Poisons the clouds with acid, dealing [StandardDamage(1,1)] [School()] damage to all enemies. The acid quickly disperses and calls down a cleansing rain for [duration(1,4)] rounds.  During a cleansing rain, the duration of hostile damage over time effects is reduced by 1 round and Aquatic abilities deal 25% more damage.	1051
+coa_pet_ability	1052	Tornado Punch	0	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and has a 25% chance to stun the target.	0
 coa_pet_ability	1053	Bonkers!	-1	0	Chance to critically strike increased by [abs(abilityStateMod( 40, 1053 ))]%.	0
+coa_pet_ability	1054	Going Bonkers!	7	3	Releases a primal scream, increasing the user's critical strike chance by [abs(abilityStateMod(40,1053))]% for [duration(1,1)] rounds.	0
+coa_pet_ability	1055	Breath of Sorrow	6	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Breathes sorrow onto the enemy, dealing [StandardDamage(1,1)] [School()] damage and causing the target to receive [abs(abilityStateMod(66,793))]% less healing for [duration(1,2)] |4round:rounds.	0
+coa_pet_ability	1056	Seethe	6	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Projects seething anger at the target, dealing [StandardDamage(1, 1)] [School()] damage.	0
 coa_pet_ability	1059	Healing Reduction	-1	0	Healing received reduced by [abs(abilityStateMod(66,793))]%.	0
+coa_pet_ability	1060	Steam Vent	8	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Blasts the target with steam, dealing [StandardDamage(1, 1)] [School()] damage.	1060
 coa_pet_ability	1061	Rain Dance	-1	0	Hit chance increased by [abs(abilityStateMod(41,1061))]%. Critical strike chance increased by [abs(abilityStateMod(40,1061))]%.	0
 coa_pet_ability	1062	Rain Dance	8	4	Heals you for [StandardHealing(1,1)] and increases your team's hit and critical strike chance by [abs(abilityStateMod(41,1061))]% for [duration(1,2)] |4round:rounds;.	0
+coa_pet_ability	1078	Bandage	0	3	Restores [StandardDamage(1,1)] health plus half of the last hit taken by the user.	0
 coa_pet_ability	1086	Toxic Skin	8	0	Deals damage equal to [points(1,1)]% of the attacker's max health each time they deal damage.	0
 coa_pet_ability	1087	Toxic Skin	8	0	Excretes toxin from the user's pores for [duration(1,1)] |4round:rounds, dealing 5% of the target's max health as damage when they attack you.	0
+coa_pet_ability	1091	Bone Barrage	3	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Hurls bones at the enemy, dealing [FormatDamage(SimpleDamage(1,1)+SimpleDamage(1,2)+SimpleDamage(1,3))] [School()] damage.  Bones continue to fall on the enemy's current pet, dealing [StandardDamage(1,1, 166)] [School()] damage each round for [duration(1,4)] |4round:rounds;	0
+coa_pet_ability	1092	Bone Barrage	3	0	Deals [StandardDamage(1,1)] [School()] damage to the current pet every round.	0
 coa_pet_ability	1093	Dead Man's Party	3	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Summons a dead man's party, causing [FormatDamage(SimpleDamage(1,1)+SimpleDamage(1,2)+SimpleDamage(1,3))] [School()] damage on the first round, [FormatDamage(SimpleDamage(2,1)+SimpleDamage(2,2)+SimpleDamage(2,3))] [School()] on the second round, and [FormatDamage(SimpleDamage(3,1)+SimpleDamage(3,2)+SimpleDamage(3,3))] [School()] on the third round.  Opponents struck by the party take [abs(abilityStateMod( 24, 542 ))]% increased damage for [duration(1,4)] |4round:rounds;.  The party continues for [numTurns()] |4round:rounds;.	0
+coa_pet_ability	1095	Horn Gore	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Gores the enemy, dealing [StandardDamage(1, 1)] [School()] damage.	0
+coa_pet_ability	1099	Punish	0	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Lashes the enemy with a flail, dealing [StandardDamage(1, 1)] [School()] damage.	0
 coa_pet_ability	1108	Bark	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and reduces the target's next attack by [abs(abilityStateMod( 23, 1120 ))]%. Lasts [duration(1, 2)] |4round:rounds;.	0
+coa_pet_ability	1109	The Good Stuff	7	4	Heal other friendly pets, restoring [StandardHealing(1,2)] health to each.	0
+coa_pet_ability	1110	Avalanche	6	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Calls down an Avalanche on your enemies, dealing [StandardDamage(1,1)] [School()] damage, split evenly amongst them.	0
 coa_pet_ability	1111	Tough n' Cuddly	-1	0	Your damage taken has been reduced by [abs(abilityStateMod(24,391))]%.	0
 coa_pet_ability	1112	Tough n' Cuddly	7	4	The user becomes surprisingly resilient, reducing all damage taken by 50% for [duration(1,2)] |4round:rounds;.	0
 coa_pet_ability	1116	Call the Pack	7	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Calls for canine backup, dealing [FormatDamage(SimpleDamage(1,2)*3)] [School()] damage and increasing damage taken by [abs(abilityStateMod( 24, 542 ))]% for [duration(1, 4)] |4round:rounds;.	0
 coa_pet_ability	1120	Attack Reduction	-1	0	Damage dealt has been reduced by [abs(abilityStateMod( 23, 1120 ))]% for the next attack.	0
 coa_pet_ability	1223	Vicious Slice	0	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Slices the enemy, dealing [StandardDamage(1,1)] [School()] damage.	1223
+coa_pet_ability	1231	Consume Magic	5	4	Restores [StandardHealing(1,5)] health and removes all buffs and debuffs from the user.	0
+coa_pet_ability	1232	Anzu's Blessing	2	0	Calls upon Anzu's power, increasing damage and accuracy of your active pet by [abs(abilityStateMod( STATE_Mod_DamageDealtPercent, 485))]% for [duration(1,1)] |4round:rounds.	1232
+coa_pet_ability	1238	Shadow Talon	5	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Slashes at the target with cruel talons, dealing [StandardDamage(1, 1)] [School()] damage.	1238
+coa_pet_ability	1273	Cleave	3	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Recklessly attack your enemies, dealing [StandardDamage(1,1)] [School()] damage, split evenly amongst them.	0
+coa_pet_ability	1301	Pig Out	7	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  The user is healed for [points(1,3)]% of the damage dealt.	0
 coa_pet_ability	1346	Cute As A Button	-1	0	Increases your chance to dodge attacks by [abs(abilityStateMod(73, 1346))]%.	0
+coa_pet_ability	1347	Cute As A Button	4	3	Look cute.  Increases your chance to dodge an attack by [abs(abilityStateMod( 73, 1346))]%.  Lasts [duration(1,1)] |4round:rounds;.	0
+coa_pet_ability	1357	Superbark	7	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Barks with incredible power, dealing [StandardDamage(1,1)] [School()] damage.  This attack cannot reduce the opponent's health below 1.	0
+coa_pet_ability	1360	Slow and Steady	4	4	[StandardAccuracy(2,1)] |cffffffffHit Chance|r  Builds up power during the first round.  The next round the user charges the enemy with unstoppable force, dealing [StandardDamage(2,1)] [School()] damage.	1360
+coa_pet_ability	1369	Barbed Stinger	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Instantly deals [StandardDamage(1,1)] [School()] damage and has a 20% chance to |cFF1EFF00Poison|r the target for [StandardDamage(1,1,379)] additional [School(379)] damage per round for [duration(1,2)] |4round:rounds;.	0
+coa_pet_ability	1371	Sneak Attack	4	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  Deals additional damage if the target is |cff9933FFBlinded|r.	0
+coa_pet_ability	1372	Deep Bite	8	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Bites deeply into the enemy, dealing [StandardDamage(1,1)] [School()] damage.   Damage increases by [FormatDamage(5*AttackBonus())] each time it is used. Max [FormatDamage(30*AttackBonus())] [School()] damage.	1372
 coa_pet_ability	1379	Shell Armor	-1	0	Reduces up to [abs(abilityStateMod(71,1379))*AttackBonus()] damage from every attack against the target.	0
+coa_pet_ability	1380	Shell Armor	7	5	Reduces up to [abs(abilityStateMod(71,1379))*AttackBonus()] damage from each attack against you.   Lasts [duration(1,1)] |4round:rounds;.	0
 coa_pet_ability	1391	Enraged	7	0	Increases damage dealt by [abilityStateMod(23, 1391)]% and damage taken by [abilityStateMod(24, 1391)]%.	0
 coa_pet_ability	1392	Enrage	7	0	Increases your damage dealt by [abilityStateMod(23, 1391)]% and damage taken by [abilityStateMod(24, 1391)]%.	0
+coa_pet_ability	1398	Feathered Frenzy	2	3	Attacks wildly, dealing [SimpleDamage(1,2)*0.7] to [SimpleDamage(1,2)*1.3] [School()] damage and entering a frenzy for [duration(1,4)] |4round:rounds;.  While frenzied, damage dealt is increased by [abs(abilityStateMod(23, 1399))]% and the user takes damage as if they were a [School()] pet.	1398
+coa_pet_ability	1399	Feathered Frenzy	2	0	Increases damage dealt by [abs(abilityStateMod(23, 1399))]%.	1399
+coa_pet_ability	1407	Deep Burn	6	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  Deals double damage if the target is |cFFFF2020Burning|r.	0
+coa_pet_ability	1408	Reforge	6	5	Slumber, rebuild, and reforge, restoring [StandardHealing(1,1,1409)] health on the first round, [StandardHealing(2,1,1409)] health on the second, then [StandardHealing(3,1,1409)] health on the third.  While Reforging you cannot swap pets.	1408
 coa_pet_ability	1409	Reforging	-1	0	Reforging. Restores health every round.	1409
+coa_pet_ability	1418	Rot	3	0	Periodically transforms this pet to take damage as if they were Undead.	0
+coa_pet_ability	1420	Flying Mark	2	0	Wearer takes damage as if they were a [School()] pet.	1420
 coa_pet_ability	1438	Mighty Charge	0	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Charges at the enemy, dealing [StandardDamage(1,1)] [School()] damage.	0
+coa_pet_ability	1483	Skull Toss	3	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Hits the enemy with a skull, dealing [StandardDamage(1,1)] [School()] damage.	0
+coa_pet_ability	1533	Eye Beam	0	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Blasts the enemy with eye beams, dealing [StandardDamage(1,1)] [School()] damage.  Eye Beam continues for [numTurns()] |4round:rounds.	1533
+coa_pet_ability	1536	Arcane Dash	5	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and has a 25% chance to stun the target.	0
+coa_pet_ability	1545	Preen	2	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Restores [StandardDamage(1,1)] health and increases your damage dealt by [abs(abilityStateMod( STATE_Mod_DamageDealtPercent, 613 ))]% for [duration(1,2)] |4round:rounds;.	0
 coa_pet_ability	1546	Preen	-1	0	Damage increased by [abs(abilityStateMod( STATE_Mod_DamageDealtPercent, 613 ))]%.	0
+coa_pet_ability	1555	Worst Fear	5	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Channels the enemy's worst fear, causing [StandardDamage(1,1)] [School()] damage.   Always hits if the target is |cff0099FFSleeping|r or |cFF808080Stunned|r.	1555
+coa_pet_ability	1559	Paralyzing Venom	7	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  Interrupts the opponent's round if the user goes first.	1559
+coa_pet_ability	1560	Lumbering Charge	7	4	[StandardAccuracy(2,1)] |cffffffffHit Chance|r  Builds up power during the first round.  The next round the user charges the enemy with unstoppable force, dealing [StandardDamage(2,1)] [School()] damage.	0
 coa_pet_ability	1561	Lumbering Charge	-1	0	The enemy is preparing to launch a powerful attack against you.	0
+coa_pet_ability	1625	Tesla Cannon	9	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Zaps an enemy, dealing [StandardDamage(1,1)] [School()] damage.	1625
 coa_pet_ability	1626	Primal Rage	0	0	Increases your damage dealt by [abilityStateMod(23, 1629)]% and damage taken by [abilityStateMod(24, 1629)]% for [duration(1,1)] |4round:rounds;.	1626
+coa_pet_ability	1627	Barrier Projector	0	4	Reduces up to [abs(abilityStateMod(71,1628))*AttackBonus()] damage from each attack against your active pet.  Lasts [duration(1,1)] |4round:rounds;.	1627
 coa_pet_ability	1628	Barrier Projector	-1	0	Reduces up to [abs(abilityStateMod(71,1628))*AttackBonus()] damage from every attack against the target.	1628
 coa_pet_ability	1629	Primal Rage	0	0	Increases damage dealt by [abilityStateMod(23, 1629)]% and damage taken by [abilityStateMod(24, 1629)]%.	1629
+coa_pet_ability	1679	Smoke Bomb	0	5	Avoids enemy attacks made against your team during the round it is used.  This ability always goes first.	1679
 coa_pet_ability	1680	Hidden	-1	0	Increases your chance to avoid attacks by [abs(abilityStateMod( 73, 311 ))]%.	1680
 coa_pet_ability	1725	Howl	-1	0	Increases your damage taken by [abs(abilityStateMod( 24, 1725 ))]%.	0
+coa_pet_ability	1731	Nightmare	5	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Call nightmares onto the enemy, dealing [StandardDamage(1,1)] [School()] damage and causing the target to receive [abs(abilityStateMod(66,793))]% less healing for [duration(1,2)] |4round:rounds.	0
 coa_pet_ability	1732	Healing Reduction	-1	0	Healing received reduced by [abs(abilityStateMod(66,793))]%.	0
+coa_pet_ability	1738	Chaos Nova	6	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage to the enemy's active pet and [StandardDamage(1,2)] [School()] damage to the enemy's backline pets.	0
+coa_pet_ability	1756	Wing Buffet	5	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and forces the opponent's lowest health pet to swap into battle.	1756
 coa_pet_ability	1757	Ironskin	-1	0	Reduces up to [abs(abilityStateMod(71,1757))*AttackBonus()] damage from each attack against you.	0
+coa_pet_ability	1758	Ironskin	5	4	Reduces up to [abs(abilityStateMod(71,1757))*AttackBonus()] damage from each attack against you.   Lasts [duration(1,1)] |4round:rounds;.	0
+coa_pet_ability	1764	Cosmic Smash	6	2	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage to the enemy's active pet and [StandardDamage(1,2)] [School()] damage to the enemy's backline pets.	1764
 coa_pet_ability	1771	Warning Squawk	-1	0	Your critical strike chance has been increased by [abs(abilityStateMod(40,1771))]%.	0
+coa_pet_ability	1772	Warning Squawk	2	5	Increases the critical strike chance of your active pet by [abs(abilityStateMod(40,1771))]%. Lasts for [duration(1,1)] |4round:rounds;.	0
+coa_pet_ability	1810	Temporal Anomaly	5	3	Reduce your opponents team's speed by [abs(abilityStateMod(25,154))]% for [duration(1,1)] |4round:rounds;.	0
+coa_pet_ability	1860	Cannon Shot	9	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  First use: Loads the cannon.  Second use: Fires the cannon, dealing [StandardDamage(1,1)] [School()] damage.	1860
 coa_pet_ability	1861	Cannon Shot Ready	-1	0	Cannon is ready to fire.	1861
+coa_pet_ability	1862	Flame Shot	6	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  First use: Loads the cannon.  Second use: Fires the cannon, dealing [StandardDamage(1,1)] [School()] damage.	1862
 coa_pet_ability	1863	Flame Shot Ready	-1	0	Cannon is ready to fire.	1863
+coa_pet_ability	1880	Plague Breath	1	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Breathes putrid smoke on to the enemy, dealing [StandardDamage(1,1)] [School()] damage.	1880
 coa_pet_ability	1895	Sniff Out	4	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1, 1)] [School()] damage and removes any objects on the battlefield.	0
 coa_pet_ability	1920	Clamp	9	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Clamps the target, dealing [StandardDamage(1,1)] [School()] damage.  The target cannot swap for [duration(1,2)] |4round:rounds;.	0
 coa_pet_ability	1921	Drill Charge	9	2	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Rushes to the enemy, dealing [StandardDamage(1,1)] [School()] damage.   This move always goes first.	0
+coa_pet_ability	1922	Storm Coil	9	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage split evenly across the enemy team.	0
+coa_pet_ability	1933	Rewind Time	5	3	Restores [StandardDamage(1,1)] health plus half of the last hit taken by the user.	1933
+coa_pet_ability	1934	Bronze Breath	1	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Overwhelms the enemy with draconic breath, dealing [StandardDamage(1, 1)] [School()] damage.	1934
+coa_pet_ability	1944	Retrieve	7	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and forces the opponent's highest health pet to swap into battle.	0
+coa_pet_ability	1945	Lick	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and reduces the target's speed by [abs(abilityStateMod(25,154))]% for [duration(1,2)] |4round:rounds;.	0
+coa_pet_ability	1955	Flash Freeze	6	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  |cFF0070DDChills|r the target, dealing [StandardDamage(1,1)] [School()] damage and reducing their speed by [abs(abilityStateMod(25,154))]% for [duration(1,2)] |4round:rounds.	0
+coa_pet_ability	1957	Reanimate	3	8	Reanimate, healing for [StandardHealing(3,1)] health every round for three |4round:rounds;.	0
+coa_pet_ability	1958	Empowering Strikes	3	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Slash at the enemy with shadowy blades, dealing [StandardDamage(1,1)] [School()] damage.   Damage increases by [FormatDamage(5*AttackBonus())] each time it is used. Max [FormatDamage(25 *AttackBonus())] [School()] damage.	0
+coa_pet_ability	1959	Great Cleave	3	2	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Cleave your enemies, dealing [StandardDamage(1,1)] [School()] damage, split evenly amongst them.	0
+coa_pet_ability	1963	Wind Buffet	2	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and forces the opponent's lowest health pet to swap into battle.	1963
+coa_pet_ability	1966	Great Sting	7	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  |cFF1EFF00Poisons|r the enemy team for [StandardDamage(1,1,358)] [School()] damage every round for [duration(1,1)] |4round:rounds;.	0
+coa_pet_ability	2009	Express Delivery	0	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.   This ability always goes first.	2009
+coa_pet_ability	2010	Snail Mail	4	4	[StandardAccuracy(2,1)] |cffffffffHit Chance|r  Builds up power during the first round.  The next round the user charges the enemy with unstoppable force, dealing [StandardDamage(2,1)] [School()] damage.	0
+coa_pet_ability	2011	Hate Mail	0	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Go into a frenzy, dealing [StandardDamage(1,1)] [School()] damage and increasing the damage you deal by [abs(abilityStateMod( STATE_Mod_DamageDealtPercent, 739 ))]% for [duration(1,2)] |4round:rounds.	2011
+coa_pet_ability	2012	Return to Sender	5	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and forces an opponent's pet to swap into battle.	2012
 coa_pet_ability	2013	Package Drop	0	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Throws a package at the enemy, dealing [StandardDamage(1,1)] [School()] damage.	0
+coa_pet_ability	2023	Junk Mail	0	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Starts an avalanche of mail, causing [FormatDamage(SimpleDamage(1,1)+SimpleDamage(1,2)+SimpleDamage(1,3))] [School()] damage on the first round, [FormatDamage(SimpleDamage(2,1)+SimpleDamage(2,2)+SimpleDamage(2,3))] [School()] on the second round, and [FormatDamage(SimpleDamage(3,1)+SimpleDamage(3,2)+SimpleDamage(3,3))] [School()] on the third round.  Opponents struck by the mail take [abs(abilityStateMod( 24, 542 ))]% increased damage for [duration(1,4)] |4round:rounds;.  Junk Mail continues for [numTurns()] |4round:rounds;.	2023
+coa_pet_ability	2064	Tea Party	3	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Attacks the enemy team twice in the blink of an eye, dealing [StandardDamage(1,1)] [School()] damage to all enemy pets on the first attack and [StandardDamage(1,4)] [School()] damage on the second attack.	2064
 coa_pet_ability	2065	Nap Time	7	5	Fall asleep, restoring [StandardHealing(1,1,2066)] health on the first round, [StandardHealing(2,1,2066)] health on the second, then [StandardHealing(3,1,2066)] health on the third.  While napping you cannot swap pets.	0
 coa_pet_ability	2066	Napping	-1	0	Napping. Restores increasing health every round.	0
+coa_pet_ability	2067	Pinch	8	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Pinch the target with your massive claw, dealing [StandardDamage(1,1)] [petTypeName(abilityPetType())] damage.  Damage increases by [FormatDamage(pointsincreaseperuse(1,1)*AttackBonus())] each time it is used. Max [FormatDamage(pointsmax(1,1)*AttackBonus())] [School()] damage.	0
+coa_pet_ability	2068	Face Bite	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Leap to the target's face, instantly dealing [StandardDamage(1,1)] [School()] damage and increases your speed by [abs(abilityStateMod( 25, 544 ))]% for [duration(1,2)] round.	0
+coa_pet_ability	2112	Toxic Wound	7	0	Harmful damage over time effects deal [abs(abilityStateMod(202,2112))*AttackBonus()] more damage each time they deal damage.	0
+coa_pet_ability	2113	Toxic Bite	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Instantly deals [StandardDamage(1,1)] [School()] damage and causes harmful damage over time effects to deal [abs(abilityStateMod(202,2112))*AttackBonus()] more damage each time they deal damage for [duration(1,2)] |4round:rounds.	0
+coa_pet_ability	2205	Howl	7	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  A distant howl frightens the target, increasing the damage they take on the next attack by 100%, lasts [duration(1,1)] rounds.	2205
+coa_pet_ability	2209	Burst	4	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Instantly kills the caster, dealing damage equal to [FormatDamage(points(1,1))]% of the user's total health to the current enemy.	2209
+coa_pet_ability	2214	Tail Smash	7	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and forces the opponent's lowest health pet to swap into battle.	0
+coa_pet_ability	2223	Murder the Innocent	5	3	Blast the target with unholy magic, dealing [points(1,1)]% of the target's health in damage.	2223
+coa_pet_ability	2228	Sonic Blast	9	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Release a blast of sonic energy at your target, dealing [StandardDamage(1,1)] [School()] damage.	2228
+coa_pet_ability	2241	Omni Pummel	9	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Pummel your enemy with both arms, dealing [StandardDamage(1,1)] [School()] damage 4 times.	2241
+coa_pet_ability	2290	Sludge	3	0	Deals [StandardDamage(1,1)] [School()] damage to the current pet every round.  |cFF1EFF00Poisoned|r.	0
+coa_pet_ability	2291	Sludge Belch	3	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Turns the battlefield into a stinky, slimy mess, dealing [StandardDamage(1,1)] [School()] damage.   Acid continues to |cFF1EFF00Poison|r the enemy, dealing [StandardDamage(1,1, 2290)] [School()] damage each round for [duration(1,2)] |4round:rounds;.	0
+coa_pet_ability	2297	Healing Wrap	8	2	Restores [StandardDamage(1,1)] health to the user.	0
+coa_pet_ability	2308	Slime Trail	4	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Leave a slime trail, dealing [StandardDamage(1,1)] [School()] damage and coating the target in sticky goo, making it impossible to flee for [duration(1,2)] |4round:rounds.	0
+coa_pet_ability	2338	Vault Drop	9	4	[StandardAccuracy(2,1)] |cffffffffHit Chance|r  Defy gravity, leaping high up in the air becoming unattackable for one round.   On the next round, crash into your target, dealing [StandardDamage(2, 1)] [School()] damage.	2338
 coa_pet_ability	2339	Leaping	-1	0	Leaping up high.  Unattackable.	2339
+coa_pet_ability	2340	Coin Toss	9	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Throw a bunch of coins at the enemy, dealing [StandardDamage(1, 1)] [School()] damage.	2340
+coa_pet_ability	2341	Money Meteor	9	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Teleport a giant ball of coins from the hidden vault on top of the enemy team, dealing [StandardDamage(1,1)] [School()] damage, split evenly amongst them.	2341
+coa_pet_ability	2342	Overcharge	9	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Overtunes the user's central power core, dealing [StandardDamage(1,1) ] [School()] damage to the enemy pet and increasing the user's critical damage by [abs(abilityStateMod(314, 2343))]% for [duration(1,2)] |4round:rounds;.	2342
 coa_pet_ability	2343	Dazzling Criticals	-1	0	Critical damage increased by [abs(abilityStateMod(314, 2343))]%.	2343
+coa_pet_ability	2349	Toxic Fumes	1	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and turns the weather into toxic gas for [duration(1,2)] rounds.  During toxic gas, the duration of all hostile damage over time effects is increased by 1 round, and all pets are considered |cFF1EFF00Poisoned.|r	0
+coa_pet_ability	2350	Toxic Gas	4	0	Hostile damage over time effects last one additional round.  All pets count as though they are |cFF1EFF00Poisoned.|r	0
+coa_pet_ability	2353	Contagion Strike	0	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage plus [StandardDamage(1,3)] additional damage if the target is |cFF1EFF00Poisoned.|r	2353
 coa_pet_ability	2359	Void Tremors	5	0	[StandardAccuracy(3,1)] |cffffffffHit Chance|r  When this effect expires, your current pet will take [StandardDamage(3,1)] [School()] damage and be unable to flee for [duration(3,2)] rounds.	0
 coa_pet_ability	2360	Void Tremors	5	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Causes a void tremor to form under the enemy pet.   In two |4round:rounds, the opponent's pet will take [StandardDamage(3,1,2359)] [School()] damage and be rooted for [duration(3,2,2359)] rounds.	2360
+coa_pet_ability	2364	Chain Lightning	9	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Discharge a massive amount of electricity at the enemy team, dealing dealing [StandardDamage(1,1)] [School()] damage to the active pet and [StandardDamage(1,2)] [School()] damage to the enemy's backline pets.	2364
+coa_pet_ability	2384	Hammer	9	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and forces an opponent's pet to swap into battle.	2384
+coa_pet_ability	2400	Furious Flapping	2	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Flap your wings furiously, dealing [StandardDamage(1,1)] [School()] damage.   Damage increases by [FormatDamage(10*AttackBonus())] each time it is used. Max [FormatDamage(30*AttackBonus())] [School()] damage.	2400
 coa_pet_ability	2401	Face Punch	0	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Punch the enemy directly in the face, dealing [StandardDamage(1,1)] [School()] damage.   Damage increases by [FormatDamage(10*AttackBonus())] each time it is used. Max [FormatDamage(30*AttackBonus())] [School()] damage.	0
+coa_pet_ability	2407	Glop	5	5	[StandardAccuracy(2,1)] |cffffffffHit Chance|r  Submerges into a puddle of ooze, becoming unattackable for one round.   On the next round, you attack, dealing [StandardDamage(2, 1)] [School()] damage.	2407
 coa_pet_ability	2408	Goo Puddle	-1	0	Puddle of goo.  Unattackable.	2408
+coa_pet_ability	2411	Deep Snap	8	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Bites deeply into the enemy, dealing [StandardDamage(1,1)] [School()] damage.   Damage increases by [FormatDamage(10*AttackBonus())] each time it is used. Max [FormatDamage(200*AttackBonus())] [School()] damage.	2411
+coa_pet_ability	2431	Feast	7	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.  Always hits if the target is |cFF970000Bleeding|r.	2431
 coa_pet_ability	2439	Light of Creation	5	0	The Light of Creation restores health in decreasing amounts over time.	2439
 coa_pet_ability	2440	Light of Creation	5	5	Ancient First Ones technology heals the active pet's wounds, restoring [StandardHealing(1,1,2439)] health on the first round, [StandardHealing(2,1,2439)] health on the second, then [StandardHealing(3,1,2439)] health on the third.	2440
+coa_pet_ability	2444	Wombo Combo	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Unleash a combo of blows, dealing [StandardDamage(1,1)], [StandardDamage(1,2)], and [StandardDamage(1,4)] [School()] damage.   The last hit will always critically strike.	0
+coa_pet_ability	2445	Critical Bonus	7	0	Chance to critically strike increased by [abs(abilityStateMod(40, 2445))]%.	0
+coa_pet_ability	2446	Faceroll	7	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Stun the target for [duration(1,1)] |4round:rounds;.	0
+coa_pet_ability	2452	Trenchant Claws	4	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Powerful claws rake the enemy, dealing [StandardDamage(1,1)] [School()] damage.   Damage increases by [FormatDamage(5*AttackBonus())] each time it is used. Max [FormatDamage(25 *AttackBonus())] [School()] damage.	2452
 coa_pet_ability	2454	Devour the Weak	7	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage, plus [StandardDamage(1,2)] additional damage if the target is |cFF1EFF00Poisoned,|r plus [StandardDamage(1,3)] additional damage if the target is |cffffffffWebbed.|r	2454
 coa_pet_ability	2470	Ursoc's Claws	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Ursoc's titansteel claws lay waste to the enemy, dealing [StandardDamage(1, 1)] [School()] damage.	2470
+coa_pet_ability	2471	Rend Flesh	7	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Razor sharp teeth and claws tear into the enemy, dealing [StandardDamage(1,1)] [School()] damage.	2471
+coa_pet_ability	2482	Sticky Surge	5	5	Destroys objects created by both teams.  Reduce your opponents team's speed by [abs(abilityStateMod(25,154))]% for [duration(1,1)] |4round:rounds;.	0
+coa_pet_ability	2504	Hatred Manifest	5	0	Adds [abs(abilityStateMod(71,2504))*AttackBonus()] damage to every attack against the target.	2504
+coa_pet_ability	2505	Hatred Manifest	5	5	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Immeasurable hatred overwhelms the target, adding [abs(abilityStateMod(71,2504))*AttackBonus()] damage to every attack against the target.   Lasts [duration(1,1)] |4round:rounds;.	2505
+coa_pet_ability	2518	Arcane Riposte	5	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage.   Deals [StandardDamage(1,2)] additional damage if the user has lower health than the target.	2518
+coa_pet_ability	2520	Dazzle	0	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Dazzle your enemies with a sparkling ball. Deals [StandardDamage(1,1)] [School()] damage and |cff9933FFBlinds|r the target, reducing their hit chance by [abs(abilityStateMod( 41 , 462 ))]% for [duration(1,2)] |4round:rounds;.	2520
 coa_pet_ability	2527	Surge of Darkness	0	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Blasts the opponent with a surge of dark energy, dealing [StandardDamage(1,1)] [School()] damage and has a [accuracy(1,3)]% chance to stun the target for [duration(1,3)] |4round:rounds;.  The chance to stun is increased to 100% if the weather is Sunlight.	0
+coa_pet_ability	2528	Void Burst	5	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Instantly deals [StandardDamage(1,1)] [School()] damage, plus [StandardDamage(1,3)] damage if the weather is Darkness. The user must recharge for two |4round:rounds; afterwards.  While recharging, you cannot perform any other actions.	0
 coa_pet_ability	5001100	Bite	0	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Bites at the enemy, dealing [StandardDamage(1,1)] [School()] damage.	110
 coa_pet_ability	5001102	Bite	2	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Bites at the enemy, dealing [StandardDamage(1,1)] [School()] damage.	110
 coa_pet_ability	5001103	Bite	3	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Bites at the enemy, dealing [StandardDamage(1,1)] [School()] damage.	110
@@ -2716,38 +3043,100 @@ coa_pet_ability	5025282	Void Burst	2	0	[StandardAccuracy(1,1)] |cffffffffHit Cha
 coa_pet_ability_turn	110	1	0	255
 coa_pet_ability_turn	111	1	0	255
 coa_pet_ability_turn	112	1	0	255
+coa_pet_ability_turn	113	1	0	255
+coa_pet_ability_turn	114	1	0	255
+coa_pet_ability_turn	115	1	0	255
+coa_pet_ability_turn	116	1	0	255
+coa_pet_ability_turn	117	1	0	255
 coa_pet_ability_turn	118	1	0	255
+coa_pet_ability_turn	119	1	0	255
+coa_pet_ability_turn	120	1	1	7
+coa_pet_ability_turn	120	2	0	255
+coa_pet_ability_turn	122	1	0	255
+coa_pet_ability_turn	123	1	0	255
 coa_pet_ability_turn	124	1	0	255
 coa_pet_ability_turn	124	2	0	255
 coa_pet_ability_turn	124	3	0	255
+coa_pet_ability_turn	152	1	0	255
 coa_pet_ability_turn	153	1	0	255
+coa_pet_ability_turn	158	1	1	6
+coa_pet_ability_turn	158	2	1	1
+coa_pet_ability_turn	158	3	0	255
 coa_pet_ability_turn	159	1	0	255
 coa_pet_ability_turn	159	2	0	255
+coa_pet_ability_turn	160	1	1	6
+coa_pet_ability_turn	160	2	0	255
 coa_pet_ability_turn	161	1	0	255
+coa_pet_ability_turn	162	1	0	255
 coa_pet_ability_turn	164	1	0	255
+coa_pet_ability_turn	165	1	0	255
+coa_pet_ability_turn	169	1	0	255
+coa_pet_ability_turn	169	2	0	255
+coa_pet_ability_turn	170	1	0	255
+coa_pet_ability_turn	170	2	0	255
+coa_pet_ability_turn	173	1	0	255
 coa_pet_ability_turn	174	1	0	255
+coa_pet_ability_turn	177	1	0	255
+coa_pet_ability_turn	178	1	0	255
+coa_pet_ability_turn	179	1	0	255
 coa_pet_ability_turn	185	1	0	255
+coa_pet_ability_turn	186	1	0	255
 coa_pet_ability_turn	187	1	0	255
+coa_pet_ability_turn	193	1	0	255
+coa_pet_ability_turn	202	1	0	255
+coa_pet_ability_turn	205	1	0	255
+coa_pet_ability_turn	206	1	0	255
 coa_pet_ability_turn	207	1	1	2
+coa_pet_ability_turn	208	1	0	255
+coa_pet_ability_turn	209	1	0	255
+coa_pet_ability_turn	209	2	0	255
+coa_pet_ability_turn	209	3	0	255
+coa_pet_ability_turn	210	1	0	255
+coa_pet_ability_turn	211	1	0	255
+coa_pet_ability_turn	212	1	0	255
 coa_pet_ability_turn	215	1	0	255
+coa_pet_ability_turn	216	1	0	255
+coa_pet_ability_turn	219	1	0	255
 coa_pet_ability_turn	221	1	0	255
 coa_pet_ability_turn	226	1	0	255
+coa_pet_ability_turn	228	1	0	255
+coa_pet_ability_turn	230	1	0	255
+coa_pet_ability_turn	233	1	0	255
 coa_pet_ability_turn	246	1	0	255
 coa_pet_ability_turn	246	2	0	255
 coa_pet_ability_turn	246	3	0	255
+coa_pet_ability_turn	247	1	0	255
+coa_pet_ability_turn	249	1	0	255
 coa_pet_ability_turn	250	1	0	255
 coa_pet_ability_turn	251	1	0	255
+coa_pet_ability_turn	252	1	0	255
+coa_pet_ability_turn	253	1	0	255
 coa_pet_ability_turn	254	1	0	255
 coa_pet_ability_turn	255	1	0	255
 coa_pet_ability_turn	256	1	0	255
+coa_pet_ability_turn	258	1	0	255
 coa_pet_ability_turn	270	1	0	255
 coa_pet_ability_turn	271	1	0	255
+coa_pet_ability_turn	273	1	0	255
 coa_pet_ability_turn	274	1	0	255
 coa_pet_ability_turn	274	2	0	255
 coa_pet_ability_turn	276	1	0	255
+coa_pet_ability_turn	278	1	0	255
+coa_pet_ability_turn	278	2	0	255
+coa_pet_ability_turn	278	3	0	255
+coa_pet_ability_turn	282	1	0	255
+coa_pet_ability_turn	283	1	0	255
 coa_pet_ability_turn	284	1	0	255
 coa_pet_ability_turn	296	1	0	255
+coa_pet_ability_turn	297	1	1	7
+coa_pet_ability_turn	297	2	0	255
+coa_pet_ability_turn	298	1	0	255
 coa_pet_ability_turn	300	1	0	255
+coa_pet_ability_turn	301	1	1	7
+coa_pet_ability_turn	301	2	0	255
+coa_pet_ability_turn	302	1	0	255
+coa_pet_ability_turn	303	1	1	5
+coa_pet_ability_turn	303	2	0	255
 coa_pet_ability_turn	305	1	0	255
 coa_pet_ability_turn	306	1	0	255
 coa_pet_ability_turn	307	1	0	255
@@ -2756,176 +3145,507 @@ coa_pet_ability_turn	309	1	0	255
 coa_pet_ability_turn	310	1	0	255
 coa_pet_ability_turn	311	1	0	255
 coa_pet_ability_turn	312	1	0	255
+coa_pet_ability_turn	319	1	0	255
 coa_pet_ability_turn	339	1	0	255
 coa_pet_ability_turn	340	1	0	255
 coa_pet_ability_turn	341	1	0	255
 coa_pet_ability_turn	345	1	0	255
 coa_pet_ability_turn	347	1	0	255
+coa_pet_ability_turn	348	1	0	255
+coa_pet_ability_turn	349	1	0	255
+coa_pet_ability_turn	350	1	0	255
 coa_pet_ability_turn	353	1	0	255
+coa_pet_ability_turn	354	1	1	7
+coa_pet_ability_turn	354	2	0	255
 coa_pet_ability_turn	355	1	0	255
+coa_pet_ability_turn	356	1	0	255
 coa_pet_ability_turn	357	1	0	255
+coa_pet_ability_turn	358	1	0	255
+coa_pet_ability_turn	359	1	0	255
+coa_pet_ability_turn	360	1	0	255
 coa_pet_ability_turn	362	1	0	255
+coa_pet_ability_turn	364	1	0	255
 coa_pet_ability_turn	365	1	0	255
+coa_pet_ability_turn	366	1	0	255
+coa_pet_ability_turn	367	1	0	255
 coa_pet_ability_turn	370	1	0	255
 coa_pet_ability_turn	376	1	0	255
 coa_pet_ability_turn	377	1	0	255
+coa_pet_ability_turn	378	1	0	255
 coa_pet_ability_turn	379	1	0	255
+coa_pet_ability_turn	380	1	0	255
+coa_pet_ability_turn	381	1	1	2
+coa_pet_ability_turn	381	2	0	255
+coa_pet_ability_turn	382	1	0	255
+coa_pet_ability_turn	383	1	1	2
+coa_pet_ability_turn	383	2	1	6
+coa_pet_ability_turn	383	3	0	255
+coa_pet_ability_turn	384	1	0	255
 coa_pet_ability_turn	389	1	0	255
+coa_pet_ability_turn	390	1	0	255
 coa_pet_ability_turn	391	1	0	255
 coa_pet_ability_turn	392	1	0	255
+coa_pet_ability_turn	398	1	0	255
+coa_pet_ability_turn	399	1	0	255
+coa_pet_ability_turn	399	2	0	255
+coa_pet_ability_turn	400	1	0	255
+coa_pet_ability_turn	401	1	0	255
+coa_pet_ability_turn	401	2	0	255
+coa_pet_ability_turn	401	3	0	255
+coa_pet_ability_turn	402	1	0	255
+coa_pet_ability_turn	403	1	1	0
+coa_pet_ability_turn	404	1	0	255
+coa_pet_ability_turn	405	1	0	255
+coa_pet_ability_turn	406	1	0	255
 coa_pet_ability_turn	411	1	0	255
+coa_pet_ability_turn	412	1	0	255
 coa_pet_ability_turn	413	1	0	255
+coa_pet_ability_turn	414	1	0	255
 coa_pet_ability_turn	415	1	0	255
+coa_pet_ability_turn	416	1	0	255
 coa_pet_ability_turn	417	1	0	255
 coa_pet_ability_turn	417	2	0	255
 coa_pet_ability_turn	417	3	0	255
 coa_pet_ability_turn	417	4	0	255
 coa_pet_ability_turn	418	1	0	255
+coa_pet_ability_turn	419	1	0	255
+coa_pet_ability_turn	420	1	0	255
+coa_pet_ability_turn	421	1	0	255
+coa_pet_ability_turn	422	1	0	255
+coa_pet_ability_turn	423	1	0	255
+coa_pet_ability_turn	424	1	0	255
 coa_pet_ability_turn	425	1	0	255
+coa_pet_ability_turn	426	1	0	255
 coa_pet_ability_turn	429	1	0	255
+coa_pet_ability_turn	432	1	0	255
 coa_pet_ability_turn	435	1	0	255
+coa_pet_ability_turn	436	1	0	255
+coa_pet_ability_turn	437	1	0	255
 coa_pet_ability_turn	441	1	0	255
+coa_pet_ability_turn	442	1	0	255
+coa_pet_ability_turn	445	1	0	255
+coa_pet_ability_turn	446	1	0	255
+coa_pet_ability_turn	447	1	0	255
+coa_pet_ability_turn	448	1	0	255
+coa_pet_ability_turn	449	1	1	6
+coa_pet_ability_turn	449	2	0	255
+coa_pet_ability_turn	450	1	0	255
+coa_pet_ability_turn	453	1	0	255
+coa_pet_ability_turn	456	1	0	255
+coa_pet_ability_turn	457	1	0	255
+coa_pet_ability_turn	458	1	0	255
+coa_pet_ability_turn	459	1	1	5
+coa_pet_ability_turn	459	2	0	255
+coa_pet_ability_turn	460	1	0	255
 coa_pet_ability_turn	462	1	0	255
+coa_pet_ability_turn	466	1	0	255
+coa_pet_ability_turn	471	1	0	255
 coa_pet_ability_turn	472	1	1	6
 coa_pet_ability_turn	472	2	1	1
 coa_pet_ability_turn	472	3	0	255
+coa_pet_ability_turn	473	1	0	255
 coa_pet_ability_turn	475	1	0	255
+coa_pet_ability_turn	476	1	0	255
 coa_pet_ability_turn	477	1	0	255
+coa_pet_ability_turn	478	1	0	255
 coa_pet_ability_turn	481	1	0	255
+coa_pet_ability_turn	484	1	0	255
 coa_pet_ability_turn	485	1	0	255
+coa_pet_ability_turn	486	1	0	255
 coa_pet_ability_turn	489	1	0	255
 coa_pet_ability_turn	489	2	0	255
 coa_pet_ability_turn	489	3	0	255
+coa_pet_ability_turn	490	1	1	7
+coa_pet_ability_turn	490	2	1	6
+coa_pet_ability_turn	490	3	0	255
 coa_pet_ability_turn	491	1	0	255
+coa_pet_ability_turn	492	1	0	255
+coa_pet_ability_turn	493	1	0	255
 coa_pet_ability_turn	494	1	0	255
 coa_pet_ability_turn	496	1	1	1
 coa_pet_ability_turn	496	2	0	255
 coa_pet_ability_turn	496	3	0	255
+coa_pet_ability_turn	497	1	0	255
 coa_pet_ability_turn	498	1	1	1
 coa_pet_ability_turn	498	2	1	5
+coa_pet_ability_turn	499	1	0	255
+coa_pet_ability_turn	500	1	0	255
+coa_pet_ability_turn	501	1	0	255
+coa_pet_ability_turn	502	1	0	255
+coa_pet_ability_turn	503	1	0	255
 coa_pet_ability_turn	505	1	0	255
+coa_pet_ability_turn	506	1	0	255
+coa_pet_ability_turn	509	1	1	6
+coa_pet_ability_turn	509	2	1	7
+coa_pet_ability_turn	509	3	0	255
 coa_pet_ability_turn	510	1	0	255
 coa_pet_ability_turn	511	1	0	255
+coa_pet_ability_turn	514	1	0	255
+coa_pet_ability_turn	515	1	0	255
 coa_pet_ability_turn	516	1	0	255
+coa_pet_ability_turn	517	1	0	255
+coa_pet_ability_turn	518	1	0	255
 coa_pet_ability_turn	520	1	0	255
+coa_pet_ability_turn	521	1	0	255
+coa_pet_ability_turn	524	1	0	255
+coa_pet_ability_turn	532	1	0	255
+coa_pet_ability_turn	533	1	0	255
+coa_pet_ability_turn	535	1	0	255
 coa_pet_ability_turn	536	1	0	255
 coa_pet_ability_turn	537	1	1	2
 coa_pet_ability_turn	538	1	0	255
 coa_pet_ability_turn	538	2	0	255
+coa_pet_ability_turn	539	1	0	255
 coa_pet_ability_turn	540	1	0	255
 coa_pet_ability_turn	540	2	0	255
 coa_pet_ability_turn	541	1	0	255
 coa_pet_ability_turn	543	1	1	2
 coa_pet_ability_turn	544	1	0	255
+coa_pet_ability_turn	563	1	1	6
+coa_pet_ability_turn	563	2	1	7
+coa_pet_ability_turn	563	3	0	255
+coa_pet_ability_turn	564	1	0	255
+coa_pet_ability_turn	564	2	0	255
+coa_pet_ability_turn	566	1	0	255
+coa_pet_ability_turn	567	1	0	255
 coa_pet_ability_turn	571	1	0	255
 coa_pet_ability_turn	572	1	0	255
+coa_pet_ability_turn	573	1	0	255
 coa_pet_ability_turn	575	1	0	255
 coa_pet_ability_turn	576	1	0	255
 coa_pet_ability_turn	577	1	0	255
+coa_pet_ability_turn	578	1	0	255
+coa_pet_ability_turn	580	1	0	255
+coa_pet_ability_turn	581	1	0	255
+coa_pet_ability_turn	581	2	0	255
+coa_pet_ability_turn	581	3	0	255
+coa_pet_ability_turn	586	1	0	255
+coa_pet_ability_turn	588	1	0	255
+coa_pet_ability_turn	588	2	0	255
 coa_pet_ability_turn	589	1	0	255
+coa_pet_ability_turn	594	1	0	255
+coa_pet_ability_turn	595	1	0	255
+coa_pet_ability_turn	600	1	0	255
+coa_pet_ability_turn	608	1	0	255
 coa_pet_ability_turn	610	1	0	255
+coa_pet_ability_turn	611	1	0	255
+coa_pet_ability_turn	616	1	1	6
+coa_pet_ability_turn	616	2	1	7
+coa_pet_ability_turn	616	3	0	255
+coa_pet_ability_turn	625	1	0	255
 coa_pet_ability_turn	631	1	0	255
+coa_pet_ability_turn	639	1	0	255
+coa_pet_ability_turn	640	1	0	255
 coa_pet_ability_turn	641	1	0	255
+coa_pet_ability_turn	642	1	0	255
+coa_pet_ability_turn	646	1	0	255
+coa_pet_ability_turn	648	1	0	255
+coa_pet_ability_turn	654	1	0	255
 coa_pet_ability_turn	657	1	0	255
 coa_pet_ability_turn	658	1	1	1
+coa_pet_ability_turn	663	1	0	255
+coa_pet_ability_turn	664	1	0	255
 coa_pet_ability_turn	665	1	0	255
+coa_pet_ability_turn	666	1	0	255
+coa_pet_ability_turn	667	1	0	255
+coa_pet_ability_turn	668	1	0	255
+coa_pet_ability_turn	668	2	0	255
+coa_pet_ability_turn	668	3	0	255
+coa_pet_ability_turn	669	1	0	255
+coa_pet_ability_turn	677	1	0	255
+coa_pet_ability_turn	706	1	0	255
+coa_pet_ability_turn	706	2	0	255
+coa_pet_ability_turn	706	3	0	255
+coa_pet_ability_turn	713	1	0	255
 coa_pet_ability_turn	718	1	1	10
 coa_pet_ability_turn	739	1	0	255
+coa_pet_ability_turn	744	1	0	255
+coa_pet_ability_turn	745	1	0	255
+coa_pet_ability_turn	752	1	0	255
+coa_pet_ability_turn	753	1	0	255
+coa_pet_ability_turn	753	2	0	255
+coa_pet_ability_turn	753	3	0	255
+coa_pet_ability_turn	754	1	0	255
+coa_pet_ability_turn	755	1	0	255
+coa_pet_ability_turn	756	1	0	255
+coa_pet_ability_turn	761	1	0	255
+coa_pet_ability_turn	761	2	0	255
 coa_pet_ability_turn	762	1	0	255
+coa_pet_ability_turn	763	1	0	255
+coa_pet_ability_turn	770	1	1	6
+coa_pet_ability_turn	770	2	1	7
+coa_pet_ability_turn	770	3	0	255
+coa_pet_ability_turn	776	1	1	6
+coa_pet_ability_turn	776	2	1	7
+coa_pet_ability_turn	776	3	0	255
 coa_pet_ability_turn	778	1	1	6
 coa_pet_ability_turn	778	2	1	7
 coa_pet_ability_turn	778	3	0	255
+coa_pet_ability_turn	779	1	0	255
 coa_pet_ability_turn	780	1	0	255
+coa_pet_ability_turn	781	1	0	255
+coa_pet_ability_turn	782	1	0	255
+coa_pet_ability_turn	784	1	0	255
+coa_pet_ability_turn	792	1	0	255
+coa_pet_ability_turn	800	1	0	255
+coa_pet_ability_turn	801	1	0	255
 coa_pet_ability_turn	802	1	0	255
 coa_pet_ability_turn	802	2	0	255
+coa_pet_ability_turn	803	1	0	255
+coa_pet_ability_turn	807	1	0	255
+coa_pet_ability_turn	812	1	0	255
+coa_pet_ability_turn	814	1	0	255
+coa_pet_ability_turn	822	1	1	5
+coa_pet_ability_turn	826	1	0	255
 coa_pet_ability_turn	830	1	0	255
 coa_pet_ability_turn	831	1	0	255
 coa_pet_ability_turn	837	1	0	255
+coa_pet_ability_turn	838	1	0	255
 coa_pet_ability_turn	839	1	0	255
 coa_pet_ability_turn	848	1	0	255
+coa_pet_ability_turn	849	1	0	255
 coa_pet_ability_turn	853	1	0	255
+coa_pet_ability_turn	870	1	0	255
+coa_pet_ability_turn	870	2	0	255
+coa_pet_ability_turn	870	3	0	255
 coa_pet_ability_turn	900	1	0	255
 coa_pet_ability_turn	901	1	0	255
 coa_pet_ability_turn	903	1	0	255
 coa_pet_ability_turn	904	1	0	255
+coa_pet_ability_turn	905	1	0	255
 coa_pet_ability_turn	916	1	0	255
 coa_pet_ability_turn	916	2	0	255
+coa_pet_ability_turn	917	1	0	255
 coa_pet_ability_turn	920	1	0	255
 coa_pet_ability_turn	926	1	1	1
 coa_pet_ability_turn	926	2	1	5
 coa_pet_ability_turn	927	1	1	5
 coa_pet_ability_turn	927	2	0	255
+coa_pet_ability_turn	930	1	0	255
 coa_pet_ability_turn	935	1	0	255
+coa_pet_ability_turn	936	1	0	255
+coa_pet_ability_turn	937	1	1	6
+coa_pet_ability_turn	937	2	0	255
+coa_pet_ability_turn	938	1	0	255
+coa_pet_ability_turn	943	1	0	255
+coa_pet_ability_turn	957	1	0	255
 coa_pet_ability_turn	958	1	1	6
 coa_pet_ability_turn	958	2	1	7
 coa_pet_ability_turn	958	3	0	255
 coa_pet_ability_turn	959	1	0	255
+coa_pet_ability_turn	960	1	0	255
+coa_pet_ability_turn	974	1	0	255
+coa_pet_ability_turn	975	1	0	255
+coa_pet_ability_turn	978	1	0	255
+coa_pet_ability_turn	979	1	0	255
+coa_pet_ability_turn	985	1	0	255
+coa_pet_ability_turn	986	1	0	255
+coa_pet_ability_turn	996	1	0	255
 coa_pet_ability_turn	997	1	0	255
+coa_pet_ability_turn	998	1	1	6
+coa_pet_ability_turn	998	2	1	7
+coa_pet_ability_turn	998	3	0	255
 coa_pet_ability_turn	999	1	0	255
+coa_pet_ability_turn	1012	1	0	255
+coa_pet_ability_turn	1013	1	0	255
 coa_pet_ability_turn	1016	1	1	6
 coa_pet_ability_turn	1016	2	0	255
+coa_pet_ability_turn	1020	1	0	255
+coa_pet_ability_turn	1024	1	0	255
+coa_pet_ability_turn	1024	2	0	255
+coa_pet_ability_turn	1024	3	0	255
+coa_pet_ability_turn	1026	1	0	255
 coa_pet_ability_turn	1030	1	1	5
 coa_pet_ability_turn	1030	2	0	255
+coa_pet_ability_turn	1032	1	0	255
+coa_pet_ability_turn	1033	1	1	10
 coa_pet_ability_turn	1034	1	0	255
 coa_pet_ability_turn	1043	1	1	6
 coa_pet_ability_turn	1043	2	0	255
 coa_pet_ability_turn	1044	1	0	255
+coa_pet_ability_turn	1045	1	0	255
+coa_pet_ability_turn	1050	1	0	255
+coa_pet_ability_turn	1051	1	0	255
+coa_pet_ability_turn	1052	1	0	255
 coa_pet_ability_turn	1053	1	0	255
+coa_pet_ability_turn	1054	1	0	255
+coa_pet_ability_turn	1055	1	0	255
+coa_pet_ability_turn	1056	1	0	255
+coa_pet_ability_turn	1060	1	0	255
 coa_pet_ability_turn	1061	1	0	255
 coa_pet_ability_turn	1062	1	0	255
+coa_pet_ability_turn	1078	1	0	255
 coa_pet_ability_turn	1086	1	1	1
 coa_pet_ability_turn	1087	1	0	255
+coa_pet_ability_turn	1091	1	0	255
+coa_pet_ability_turn	1092	1	0	255
 coa_pet_ability_turn	1093	1	0	255
 coa_pet_ability_turn	1093	2	0	255
 coa_pet_ability_turn	1093	3	0	255
+coa_pet_ability_turn	1095	1	0	255
+coa_pet_ability_turn	1099	1	0	255
 coa_pet_ability_turn	1108	1	0	255
+coa_pet_ability_turn	1109	1	0	255
+coa_pet_ability_turn	1110	1	0	255
 coa_pet_ability_turn	1111	1	0	255
 coa_pet_ability_turn	1112	1	0	255
 coa_pet_ability_turn	1116	1	0	255
 coa_pet_ability_turn	1120	1	1	2
 coa_pet_ability_turn	1223	1	0	255
+coa_pet_ability_turn	1231	1	0	255
+coa_pet_ability_turn	1232	1	0	255
+coa_pet_ability_turn	1238	1	0	255
+coa_pet_ability_turn	1273	1	0	255
+coa_pet_ability_turn	1301	1	0	255
 coa_pet_ability_turn	1346	1	0	255
+coa_pet_ability_turn	1347	1	0	255
+coa_pet_ability_turn	1357	1	0	255
+coa_pet_ability_turn	1360	1	0	255
+coa_pet_ability_turn	1360	2	0	255
+coa_pet_ability_turn	1369	1	0	255
+coa_pet_ability_turn	1371	1	0	255
+coa_pet_ability_turn	1372	1	0	255
 coa_pet_ability_turn	1379	1	0	255
+coa_pet_ability_turn	1380	1	0	255
 coa_pet_ability_turn	1392	1	0	255
+coa_pet_ability_turn	1398	1	0	255
+coa_pet_ability_turn	1399	1	0	255
+coa_pet_ability_turn	1407	1	0	255
+coa_pet_ability_turn	1408	1	0	255
 coa_pet_ability_turn	1409	1	0	255
 coa_pet_ability_turn	1409	2	0	255
 coa_pet_ability_turn	1409	3	0	255
+coa_pet_ability_turn	1418	1	1	5
+coa_pet_ability_turn	1418	2	1	6
+coa_pet_ability_turn	1418	3	0	255
 coa_pet_ability_turn	1438	1	0	255
+coa_pet_ability_turn	1483	1	0	255
+coa_pet_ability_turn	1533	1	0	255
+coa_pet_ability_turn	1533	2	0	255
+coa_pet_ability_turn	1533	3	0	255
+coa_pet_ability_turn	1536	1	0	255
+coa_pet_ability_turn	1545	1	0	255
 coa_pet_ability_turn	1546	1	0	255
+coa_pet_ability_turn	1555	1	0	255
+coa_pet_ability_turn	1559	1	0	255
+coa_pet_ability_turn	1560	1	0	255
+coa_pet_ability_turn	1560	2	0	255
 coa_pet_ability_turn	1561	1	0	255
+coa_pet_ability_turn	1625	1	0	255
 coa_pet_ability_turn	1626	1	0	255
+coa_pet_ability_turn	1627	1	0	255
 coa_pet_ability_turn	1628	1	0	255
+coa_pet_ability_turn	1679	1	1	6
+coa_pet_ability_turn	1679	2	1	7
+coa_pet_ability_turn	1679	3	0	255
 coa_pet_ability_turn	1680	1	0	255
 coa_pet_ability_turn	1725	1	1	1
+coa_pet_ability_turn	1731	1	0	255
+coa_pet_ability_turn	1738	1	0	255
+coa_pet_ability_turn	1756	1	0	255
 coa_pet_ability_turn	1757	1	0	255
+coa_pet_ability_turn	1758	1	0	255
+coa_pet_ability_turn	1764	1	0	255
 coa_pet_ability_turn	1771	1	0	255
+coa_pet_ability_turn	1772	1	0	255
+coa_pet_ability_turn	1810	1	0	255
+coa_pet_ability_turn	1860	1	1	7
+coa_pet_ability_turn	1860	2	0	255
 coa_pet_ability_turn	1861	1	0	255
+coa_pet_ability_turn	1862	1	1	7
+coa_pet_ability_turn	1862	2	0	255
 coa_pet_ability_turn	1863	1	0	255
+coa_pet_ability_turn	1880	1	0	255
 coa_pet_ability_turn	1895	1	0	255
 coa_pet_ability_turn	1920	1	0	255
 coa_pet_ability_turn	1921	1	1	6
 coa_pet_ability_turn	1921	2	1	7
 coa_pet_ability_turn	1921	3	0	255
+coa_pet_ability_turn	1922	1	0	255
+coa_pet_ability_turn	1933	1	0	255
+coa_pet_ability_turn	1934	1	0	255
+coa_pet_ability_turn	1944	1	0	255
+coa_pet_ability_turn	1945	1	0	255
+coa_pet_ability_turn	1955	1	0	255
+coa_pet_ability_turn	1957	1	0	255
+coa_pet_ability_turn	1957	2	0	255
+coa_pet_ability_turn	1957	3	0	255
+coa_pet_ability_turn	1958	1	0	255
+coa_pet_ability_turn	1959	1	0	255
+coa_pet_ability_turn	1963	1	0	255
+coa_pet_ability_turn	1966	1	0	255
+coa_pet_ability_turn	2009	1	1	6
+coa_pet_ability_turn	2009	2	1	7
+coa_pet_ability_turn	2009	3	0	255
+coa_pet_ability_turn	2010	1	0	255
+coa_pet_ability_turn	2010	2	0	255
+coa_pet_ability_turn	2011	1	0	255
+coa_pet_ability_turn	2012	1	0	255
 coa_pet_ability_turn	2013	1	0	255
+coa_pet_ability_turn	2023	1	0	255
+coa_pet_ability_turn	2023	2	0	255
+coa_pet_ability_turn	2023	3	0	255
+coa_pet_ability_turn	2064	1	0	255
 coa_pet_ability_turn	2065	1	0	255
 coa_pet_ability_turn	2066	1	0	255
 coa_pet_ability_turn	2066	2	0	255
 coa_pet_ability_turn	2066	3	0	255
+coa_pet_ability_turn	2067	1	0	255
+coa_pet_ability_turn	2068	1	0	255
+coa_pet_ability_turn	2112	1	0	255
+coa_pet_ability_turn	2113	1	0	255
+coa_pet_ability_turn	2205	1	0	255
+coa_pet_ability_turn	2209	1	0	255
+coa_pet_ability_turn	2214	1	0	255
+coa_pet_ability_turn	2223	1	0	255
+coa_pet_ability_turn	2228	1	0	255
+coa_pet_ability_turn	2241	1	0	255
+coa_pet_ability_turn	2290	1	0	255
+coa_pet_ability_turn	2291	1	0	255
+coa_pet_ability_turn	2297	1	0	255
+coa_pet_ability_turn	2308	1	0	255
+coa_pet_ability_turn	2338	1	0	255
+coa_pet_ability_turn	2338	2	0	255
 coa_pet_ability_turn	2339	1	0	255
+coa_pet_ability_turn	2340	1	0	255
+coa_pet_ability_turn	2341	1	0	255
+coa_pet_ability_turn	2342	1	0	255
 coa_pet_ability_turn	2343	1	0	255
+coa_pet_ability_turn	2349	1	0	255
+coa_pet_ability_turn	2353	1	0	255
 coa_pet_ability_turn	2359	1	0	255
 coa_pet_ability_turn	2359	2	0	255
 coa_pet_ability_turn	2359	3	0	255
 coa_pet_ability_turn	2360	1	0	255
+coa_pet_ability_turn	2364	1	0	255
+coa_pet_ability_turn	2384	1	0	255
+coa_pet_ability_turn	2400	1	0	255
 coa_pet_ability_turn	2401	1	0	255
+coa_pet_ability_turn	2407	1	0	255
+coa_pet_ability_turn	2407	2	0	255
 coa_pet_ability_turn	2408	1	0	255
+coa_pet_ability_turn	2411	1	0	255
+coa_pet_ability_turn	2431	1	0	255
 coa_pet_ability_turn	2439	1	0	255
 coa_pet_ability_turn	2439	2	0	255
 coa_pet_ability_turn	2439	3	0	255
 coa_pet_ability_turn	2440	1	0	255
+coa_pet_ability_turn	2444	1	0	255
+coa_pet_ability_turn	2445	1	0	255
+coa_pet_ability_turn	2446	1	0	255
+coa_pet_ability_turn	2452	1	0	255
 coa_pet_ability_turn	2454	1	0	255
 coa_pet_ability_turn	2470	1	0	255
+coa_pet_ability_turn	2471	1	0	255
+coa_pet_ability_turn	2482	1	0	255
+coa_pet_ability_turn	2504	1	0	255
+coa_pet_ability_turn	2505	1	0	255
+coa_pet_ability_turn	2518	1	0	255
+coa_pet_ability_turn	2520	1	0	255
 coa_pet_ability_turn	2527	1	0	255
+coa_pet_ability_turn	2528	1	0	255
+coa_pet_ability_turn	2528	2	0	255
+coa_pet_ability_turn	2528	3	0	255
 coa_pet_ability_turn	5001100	1	0	255
 coa_pet_ability_turn	5001102	1	0	255
 coa_pet_ability_turn	5001103	1	0	255
@@ -4040,36 +4760,146 @@ coa_pet_ability_turn	5025282	3	0	255
 coa_pet_ability_effect	110	1	1	24	0	20	100	0	0	0	0
 coa_pet_ability_effect	111	1	1	24	0	20	100	0	0	0	0
 coa_pet_ability_effect	112	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	113	1	1	222	0	21	100	40	0	0	0
+coa_pet_ability_effect	114	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	115	1	1	222	0	21	100	40	0	0	0
+coa_pet_ability_effect	116	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	117	1	1	222	0	22	100	60	0	0	0
 coa_pet_ability_effect	118	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	119	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	120	1	1	31	0	91	0	0	0	0	0
+coa_pet_ability_effect	120	2	1	24	0	25	100	0	0	0	0
+coa_pet_ability_effect	120	2	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	120	2	3	138	0	91	1	0	0	52	0
+coa_pet_ability_effect	120	2	4	29	0	5	100	91	0	0	0
+coa_pet_ability_effect	120	2	5	29	0	5	100	91	0	0	0
+coa_pet_ability_effect	120	2	6	29	0	5	100	91	0	0	0
+coa_pet_ability_effect	122	1	1	385	0	25	100	0	0	0	0
+coa_pet_ability_effect	122	1	2	384	0	18	100	0	0	0	0
+coa_pet_ability_effect	123	1	1	23	0	30	100	20	0	0	0
 coa_pet_ability_effect	124	1	1	24	0	25	100	0	0	0	0
 coa_pet_ability_effect	124	2	1	24	0	25	100	0	0	0	0
 coa_pet_ability_effect	124	3	1	24	0	25	100	0	0	0	0
+coa_pet_ability_effect	152	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	152	1	2	54	379	1	100	5	0	0	0
+coa_pet_ability_effect	158	1	1	31	0	28	0	0	0	0	0
+coa_pet_ability_effect	158	2	1	31	0	28	100	0	0	0	0
+coa_pet_ability_effect	158	3	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	158	3	2	29	0	10	100	28	0	0	0
 coa_pet_ability_effect	159	1	1	26	340	0	100	1	0	0	0
 coa_pet_ability_effect	159	2	1	222	0	30	100	40	0	0	0
 coa_pet_ability_effect	159	2	2	49	340	200	0	0	0	0	0
+coa_pet_ability_effect	160	1	1	31	0	32	0	0	0	0	0
+coa_pet_ability_effect	160	2	1	24	0	12	100	0	0	0	0
+coa_pet_ability_effect	160	2	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	160	2	3	32	0	100	100	0	0	0	0
+coa_pet_ability_effect	162	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	162	1	2	26	161	0	100	3	0	0	0
+coa_pet_ability_effect	165	1	1	85	0	161	0	0	0	0	0
+coa_pet_ability_effect	165	1	2	26	164	0	100	3	0	0	0
+coa_pet_ability_effect	169	1	1	31	0	113	1	0	0	0	0
+coa_pet_ability_effect	169	1	2	31	0	113	0	0	0	0	0
+coa_pet_ability_effect	169	2	1	24	0	50	100	0	0	0	0
+coa_pet_ability_effect	170	1	1	26	341	0	100	1	0	0	0
+coa_pet_ability_effect	170	2	1	222	0	30	100	40	0	0	0
+coa_pet_ability_effect	170	2	2	49	341	200	0	0	0	0	0
+coa_pet_ability_effect	173	1	1	23	0	20	100	20	0	0	0
+coa_pet_ability_effect	173	1	2	44	0	50	100	0	0	0	0
 coa_pet_ability_effect	174	1	1	22	0	0	100	0	0	0	0
+coa_pet_ability_effect	177	1	1	24	0	5	100	1	0	0	0
+coa_pet_ability_effect	178	1	1	24	0	12	100	0	0	0	0
+coa_pet_ability_effect	178	1	2	54	177	1	100	4	0	0	0
+coa_pet_ability_effect	179	1	1	24	0	30	100	0	0	0	0
+coa_pet_ability_effect	179	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	179	1	3	29	0	10	100	0	34	0	0
+coa_pet_ability_effect	186	1	1	222	0	25	100	40	0	0	0
+coa_pet_ability_effect	186	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	186	1	3	26	185	0	100	1	0	0	0
+coa_pet_ability_effect	193	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	193	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	193	1	3	24	0	10	50	0	0	0	0
+coa_pet_ability_effect	193	1	4	384	0	10	100	0	0	0	0
+coa_pet_ability_effect	202	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	202	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	202	1	3	24	0	10	50	0	0	0	0
+coa_pet_ability_effect	202	1	4	384	0	10	100	0	0	0	0
+coa_pet_ability_effect	206	1	1	24	0	27	100	0	0	0	0
+coa_pet_ability_effect	206	1	2	80	205	0	200	9	0	0	0
 coa_pet_ability_effect	207	1	1	49	207	200	0	0	0	0	0
+coa_pet_ability_effect	208	1	1	26	207	0	100	1	0	0	0
+coa_pet_ability_effect	209	1	1	24	0	50	100	0	0	0	0
+coa_pet_ability_effect	209	2	1	31	0	114	1	0	0	0	0
+coa_pet_ability_effect	209	2	2	31	0	114	0	0	0	0	0
+coa_pet_ability_effect	209	3	1	31	0	114	1	0	0	0	0
+coa_pet_ability_effect	209	3	2	31	0	114	0	0	0	0	0
+coa_pet_ability_effect	210	1	1	222	0	21	100	40	0	0	0
+coa_pet_ability_effect	211	1	1	24	0	4	100	1	0	0	0
+coa_pet_ability_effect	211	1	2	23	0	4	100	0	0	0	0
+coa_pet_ability_effect	212	1	1	54	211	0	100	3	0	0	0
+coa_pet_ability_effect	216	1	1	26	215	0	100	1	0	0	0
+coa_pet_ability_effect	219	1	1	222	0	21	100	40	0	0	0
 coa_pet_ability_effect	221	1	1	24	0	18	100	0	0	0	0
 coa_pet_ability_effect	221	1	2	29	0	18	100	0	22	0	0
 coa_pet_ability_effect	226	1	1	24	0	30	100	0	0	0	0
 coa_pet_ability_effect	226	1	2	177	0	149	0	0	0	0	0
 coa_pet_ability_effect	226	1	3	172	927	0	0	1	82	1	0
+coa_pet_ability_effect	228	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	228	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	228	1	3	24	0	10	50	0	0	0	0
+coa_pet_ability_effect	228	1	4	384	0	10	100	0	0	0	0
+coa_pet_ability_effect	230	1	1	23	0	9	100	0	0	0	0
+coa_pet_ability_effect	230	1	2	23	0	9	100	0	0	0	0
+coa_pet_ability_effect	230	1	3	23	0	9	100	0	0	0	0
+coa_pet_ability_effect	230	1	4	80	229	0	200	9	0	0	0
+coa_pet_ability_effect	233	1	1	27	0	10	100	10	30	0	0
+coa_pet_ability_effect	233	1	2	177	0	149	0	0	0	0	0
+coa_pet_ability_effect	233	1	3	52	822	1	25	1	0	0	0
 coa_pet_ability_effect	246	1	1	23	0	10	100	20	0	0	0
 coa_pet_ability_effect	246	2	1	23	0	20	100	20	0	0	0
 coa_pet_ability_effect	246	3	1	23	0	40	100	20	0	0	0
+coa_pet_ability_effect	247	1	1	26	246	0	100	2	0	0	0
+coa_pet_ability_effect	249	1	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	249	1	2	52	248	1	100	2	0	0	0
 coa_pet_ability_effect	250	1	1	24	0	10	100	0	1	0	0
 coa_pet_ability_effect	250	1	2	29	0	10	100	0	64	0	0
 coa_pet_ability_effect	250	1	3	24	0	10	100	0	1	0	0
 coa_pet_ability_effect	250	1	4	29	0	10	100	0	64	0	0
+coa_pet_ability_effect	252	1	1	26	251	0	200	4	0	0	0
+coa_pet_ability_effect	252	1	2	26	251	0	200	4	0	0	0
+coa_pet_ability_effect	252	1	3	26	251	0	200	4	0	0	0
+coa_pet_ability_effect	253	1	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	253	1	2	59	0	10	100	0	0	0	0
 coa_pet_ability_effect	254	1	1	63	255	0	100	2	0	0	0
 coa_pet_ability_effect	255	1	1	23	0	10	100	0	0	0	0
 coa_pet_ability_effect	256	1	1	24	0	45	100	0	0	0	0
 coa_pet_ability_effect	256	1	2	80	257	0	200	5	0	0	0
+coa_pet_ability_effect	258	1	1	24	0	6	100	0	0	0	0
+coa_pet_ability_effect	258	1	2	24	0	6	100	0	0	0	0
+coa_pet_ability_effect	258	1	3	24	0	6	100	0	0	0	0
+coa_pet_ability_effect	258	1	4	23	0	6	101	0	0	0	0
+coa_pet_ability_effect	258	1	5	23	0	6	101	0	0	0	0
+coa_pet_ability_effect	258	1	6	23	0	6	101	0	0	0	0
+coa_pet_ability_effect	258	1	7	80	596	0	200	9	0	0	0
 coa_pet_ability_effect	270	1	1	50	271	0	100	4	0	0	0
 coa_pet_ability_effect	271	1	1	62	0	6	100	0	0	0	0
+coa_pet_ability_effect	273	1	1	63	274	0	100	1	0	0	0
 coa_pet_ability_effect	274	1	1	22	0	0	100	0	0	0	0
 coa_pet_ability_effect	274	2	1	53	0	50	100	0	0	0	0
 coa_pet_ability_effect	276	1	1	66	0	20	100	100	0	0	0
+coa_pet_ability_effect	278	1	1	26	833	0	100	2	0	0	0
+coa_pet_ability_effect	278	2	1	22	0	0	100	0	0	0	0
+coa_pet_ability_effect	278	3	1	23	0	70	100	20	0	0	0
+coa_pet_ability_effect	278	3	2	49	833	100	0	0	0	0	0
+coa_pet_ability_effect	282	1	1	68	0	40	100	0	0	0	0
+coa_pet_ability_effect	282	1	2	135	0	100	100	0	0	0	0
+coa_pet_ability_effect	283	1	1	26	284	0	100	1	0	0	0
+coa_pet_ability_effect	297	2	1	76	296	45	100	0	0	0	0
+coa_pet_ability_effect	298	1	1	23	0	12	100	20	0	0	0
+coa_pet_ability_effect	298	1	2	23	0	12	100	20	0	0	0
+coa_pet_ability_effect	298	1	3	23	0	12	100	20	0	0	0
+coa_pet_ability_effect	301	2	1	77	300	45	100	1	0	0	0
+coa_pet_ability_effect	302	1	1	79	0	70	1	0	10	0	0
+coa_pet_ability_effect	303	2	1	78	302	12	70	10	70	0	0
 coa_pet_ability_effect	305	1	1	50	306	0	100	5	0	0	0
 coa_pet_ability_effect	307	1	1	24	0	15	100	0	0	0	0
 coa_pet_ability_effect	307	1	2	177	0	149	0	0	0	0	0
@@ -4079,6 +4909,11 @@ coa_pet_ability_effect	308	1	2	177	0	149	0	0	0	0	0
 coa_pet_ability_effect	308	1	3	131	927	0	100	0	0	0	0
 coa_pet_ability_effect	310	1	1	26	309	0	100	5	0	0	0
 coa_pet_ability_effect	312	1	1	26	311	0	100	1	0	0	0
+coa_pet_ability_effect	319	1	1	24	0	7	100	0	0	0	0
+coa_pet_ability_effect	319	1	2	24	0	7	100	0	0	0	0
+coa_pet_ability_effect	319	1	3	24	0	7	100	0	0	0	0
+coa_pet_ability_effect	319	1	4	85	0	69	100	0	0	0	0
+coa_pet_ability_effect	319	1	5	85	0	69	100	0	0	0	0
 coa_pet_ability_effect	339	1	1	24	0	15	100	0	0	0	0
 coa_pet_ability_effect	339	1	2	52	338	1	100	2	0	0	0
 coa_pet_ability_effect	345	1	1	24	0	30	100	0	0	0	0
@@ -4086,48 +4921,164 @@ coa_pet_ability_effect	345	1	2	158	0	0	0	0	0	0	0
 coa_pet_ability_effect	345	1	3	29	0	20	100	0	77	0	0
 coa_pet_ability_effect	347	1	1	24	0	10	100	0	0	0	0
 coa_pet_ability_effect	347	1	2	26	485	0	100	3	0	0	0
+coa_pet_ability_effect	348	1	1	178	927	1	100	1	149	0	1
+coa_pet_ability_effect	349	1	1	222	0	22	100	60	0	0	0
+coa_pet_ability_effect	350	1	1	178	927	1	100	1	149	0	1
+coa_pet_ability_effect	354	2	1	76	353	45	100	0	0	0	0
 coa_pet_ability_effect	355	1	1	24	0	10	100	0	0	0	0
 coa_pet_ability_effect	355	1	2	158	0	0	0	0	0	0	0
 coa_pet_ability_effect	355	1	3	24	0	10	66	0	0	0	0
 coa_pet_ability_effect	355	1	4	24	0	10	33	0	0	0	0
+coa_pet_ability_effect	356	1	1	24	0	20	100	0	0	0	0
 coa_pet_ability_effect	357	1	1	24	0	10	100	0	0	0	0
 coa_pet_ability_effect	357	1	2	50	154	1	100	4	0	0	0
+coa_pet_ability_effect	358	1	1	24	0	6	100	1	0	0	0
+coa_pet_ability_effect	359	1	1	54	358	0	100	6	0	0	0
+coa_pet_ability_effect	360	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	360	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	360	1	3	24	0	10	50	0	0	0	0
+coa_pet_ability_effect	360	1	4	384	0	10	100	0	0	0	0
 coa_pet_ability_effect	362	1	1	50	1725	0	100	2	0	0	0
+coa_pet_ability_effect	364	1	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	364	1	2	26	544	0	100	1	0	0	0
+coa_pet_ability_effect	366	1	1	26	365	0	100	9	0	0	0
+coa_pet_ability_effect	366	1	2	26	365	0	200	9	0	0	0
+coa_pet_ability_effect	366	1	3	26	365	0	200	9	0	0	0
+coa_pet_ability_effect	367	1	1	222	0	22	100	60	0	0	0
 coa_pet_ability_effect	376	1	1	24	0	30	100	0	0	0	0
 coa_pet_ability_effect	376	1	2	177	0	149	0	0	0	0	0
 coa_pet_ability_effect	376	1	3	52	927	1	25	1	0	0	0
 coa_pet_ability_effect	377	1	1	24	0	10	100	0	0	0	0
 coa_pet_ability_effect	377	1	2	62	0	10	100	0	0	0	0
+coa_pet_ability_effect	378	1	1	24	0	20	100	0	0	0	0
 coa_pet_ability_effect	379	1	1	24	0	5	100	1	0	0	0
+coa_pet_ability_effect	380	1	1	24	0	14	100	0	0	0	0
+coa_pet_ability_effect	380	1	2	54	379	1	100	3	0	0	0
+coa_pet_ability_effect	381	1	1	24	0	5	100	0	0	0	0
+coa_pet_ability_effect	381	2	1	22	0	5	0	0	0	0	0
+coa_pet_ability_effect	382	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	382	1	2	50	381	1	100	3	0	0	0
+coa_pet_ability_effect	383	1	1	157	0	91	1	0	0	0	0
+coa_pet_ability_effect	383	1	2	23	0	10	100	20	0	0	0
+coa_pet_ability_effect	383	1	3	104	0	10	100	0	64	20	0
+coa_pet_ability_effect	383	1	4	31	0	91	0	0	0	0	0
+coa_pet_ability_effect	383	2	1	31	0	91	1	0	0	0	0
+coa_pet_ability_effect	383	3	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	384	1	1	24	0	20	100	0	0	0	0
 coa_pet_ability_effect	389	1	1	24	0	10	100	0	0	0	0
 coa_pet_ability_effect	389	1	2	26	544	0	100	2	0	0	0
+coa_pet_ability_effect	390	1	1	24	0	40	50	0	0	0	0
 coa_pet_ability_effect	392	1	1	85	0	161	0	0	0	0	0
 coa_pet_ability_effect	392	1	2	26	391	0	100	3	0	0	0
+coa_pet_ability_effect	398	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	398	1	2	54	379	1	100	5	0	0	0
+coa_pet_ability_effect	399	2	1	24	0	30	100	0	0	0	0
+coa_pet_ability_effect	399	2	2	52	248	1	100	2	0	0	0
+coa_pet_ability_effect	400	1	1	50	399	0	100	1	0	0	0
+coa_pet_ability_effect	401	1	1	22	0	0	100	0	0	0	0
+coa_pet_ability_effect	401	2	1	22	0	0	100	0	0	0	0
+coa_pet_ability_effect	401	3	1	24	0	30	100	0	0	0	0
+coa_pet_ability_effect	401	3	2	178	927	1	100	1	149	1	0
+coa_pet_ability_effect	402	1	1	50	401	0	100	2	0	0	0
+coa_pet_ability_effect	403	1	1	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	403	1	2	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	403	1	3	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	403	1	4	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	403	1	5	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	403	1	6	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	404	1	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	404	1	2	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	404	1	3	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	404	1	4	80	403	0	200	9	0	0	0
+coa_pet_ability_effect	405	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	405	1	2	59	0	20	100	0	0	0	0
+coa_pet_ability_effect	406	1	1	222	0	22	100	60	0	0	0
 coa_pet_ability_effect	411	1	1	24	0	12	100	0	0	0	0
 coa_pet_ability_effect	411	1	2	54	491	1	100	4	0	0	0
+coa_pet_ability_effect	412	1	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	412	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	412	1	3	384	0	10	100	0	0	0	0
 coa_pet_ability_effect	413	1	1	24	0	15	100	0	0	0	0
 coa_pet_ability_effect	413	1	2	29	0	10	100	0	52	0	0
+coa_pet_ability_effect	414	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	414	1	2	52	848	1	100	2	0	0	0
+coa_pet_ability_effect	416	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	416	1	2	50	415	1	100	2	0	0	0
 coa_pet_ability_effect	417	1	1	22	0	0	100	0	0	0	0
 coa_pet_ability_effect	417	2	1	22	0	0	100	0	0	0	0
 coa_pet_ability_effect	417	3	1	22	0	0	100	0	0	0	0
 coa_pet_ability_effect	417	4	1	24	0	35	100	0	0	0	0
 coa_pet_ability_effect	417	4	2	178	927	1	100	1	149	1	1
 coa_pet_ability_effect	418	1	1	50	417	0	100	3	0	0	0
+coa_pet_ability_effect	419	1	1	24	0	7	100	0	0	0	0
+coa_pet_ability_effect	419	1	2	24	0	7	100	0	0	0	0
+coa_pet_ability_effect	419	1	3	24	0	7	100	0	0	0	0
+coa_pet_ability_effect	419	1	4	85	0	69	100	0	0	0	0
+coa_pet_ability_effect	419	1	5	85	0	69	100	0	0	0	0
+coa_pet_ability_effect	420	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	420	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	420	1	3	24	0	10	66	0	0	0	0
+coa_pet_ability_effect	420	1	4	24	0	10	33	0	0	0	0
+coa_pet_ability_effect	421	1	1	27	0	15	100	5	25	0	0
+coa_pet_ability_effect	422	1	1	222	0	22	100	60	0	0	0
+coa_pet_ability_effect	423	1	1	96	0	40	50	0	77	0	0
+coa_pet_ability_effect	424	1	1	222	0	22	100	60	0	0	0
+coa_pet_ability_effect	426	1	1	26	425	0	100	5	0	0	0
 coa_pet_ability_effect	429	1	1	222	0	21	100	40	0	0	0
+coa_pet_ability_effect	432	1	1	222	0	21	100	40	0	0	0
+coa_pet_ability_effect	436	1	1	26	435	0	100	5	0	0	0
+coa_pet_ability_effect	437	1	1	222	0	22	100	60	0	0	0
 coa_pet_ability_effect	441	1	1	24	0	10	100	0	0	0	0
 coa_pet_ability_effect	441	1	2	158	0	0	0	0	0	0	0
 coa_pet_ability_effect	441	1	3	24	0	10	50	0	0	0	0
 coa_pet_ability_effect	441	1	4	384	0	10	100	0	0	0	0
+coa_pet_ability_effect	442	1	1	96	0	40	50	0	82	0	0
+coa_pet_ability_effect	445	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	446	1	1	24	0	5	100	1	0	0	0
+coa_pet_ability_effect	447	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	447	1	2	54	446	1	100	2	0	0	0
+coa_pet_ability_effect	448	1	1	24	0	14	100	0	0	0	0
+coa_pet_ability_effect	448	1	2	54	781	1	100	3	0	0	0
+coa_pet_ability_effect	449	1	1	31	0	32	0	0	0	0	0
+coa_pet_ability_effect	449	2	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	449	2	2	32	0	100	100	0	0	0	0
+coa_pet_ability_effect	450	1	1	222	0	32	100	60	0	0	0
+coa_pet_ability_effect	453	1	1	24	0	45	100	0	0	0	0
+coa_pet_ability_effect	453	1	2	80	454	0	200	5	0	0	0
+coa_pet_ability_effect	456	1	1	222	0	25	100	40	0	0	0
+coa_pet_ability_effect	456	1	2	85	0	69	100	0	0	0	0
+coa_pet_ability_effect	456	1	3	85	0	69	100	0	0	0	0
+coa_pet_ability_effect	457	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	457	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	457	1	3	145	0	100	0	0	0	0	0
+coa_pet_ability_effect	459	2	1	76	458	45	100	0	0	0	0
+coa_pet_ability_effect	460	1	1	24	0	45	100	0	0	0	0
+coa_pet_ability_effect	460	1	2	80	403	0	200	9	0	0	0
+coa_pet_ability_effect	466	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	466	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	466	1	3	107	0	100	0	0	0	0	0
+coa_pet_ability_effect	471	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	471	1	2	50	470	1	100	1	0	0	0
 coa_pet_ability_effect	472	1	1	31	0	28	0	0	0	0	0
 coa_pet_ability_effect	472	2	1	31	0	28	1	0	0	0	0
 coa_pet_ability_effect	472	3	1	24	0	15	100	0	0	0	0
 coa_pet_ability_effect	472	3	2	29	0	10	100	28	0	0	0
+coa_pet_ability_effect	473	1	1	27	0	15	100	5	25	0	0
 coa_pet_ability_effect	475	1	1	24	0	20	100	0	0	0	0
 coa_pet_ability_effect	475	1	2	50	154	1	100	4	0	0	0
+coa_pet_ability_effect	476	1	1	85	0	124	0	0	0	0	0
+coa_pet_ability_effect	476	1	2	24	0	25	100	0	0	0	0
+coa_pet_ability_effect	476	1	3	50	1418	1	100	5	0	0	0
+coa_pet_ability_effect	476	1	4	229	968	0	100	1	1	0	124
 coa_pet_ability_effect	477	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	478	1	1	24	0	20	100	0	0	0	0
 coa_pet_ability_effect	481	1	1	222	0	25	100	40	0	0	0
 coa_pet_ability_effect	481	1	2	177	0	149	0	0	0	0	0
 coa_pet_ability_effect	481	1	3	172	927	0	0	1	52	1	25
+coa_pet_ability_effect	484	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	486	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	486	1	2	50	153	1	100	2	0	0	0
+coa_pet_ability_effect	486	1	3	26	485	0	100	2	0	0	0
 coa_pet_ability_effect	489	1	1	222	0	25	100	40	0	0	0
 coa_pet_ability_effect	489	1	2	158	0	0	0	0	0	0	0
 coa_pet_ability_effect	489	1	3	170	0	10	100	54	54	0	0
@@ -4137,29 +5088,88 @@ coa_pet_ability_effect	489	2	3	170	0	10	100	54	54	0	0
 coa_pet_ability_effect	489	3	1	222	0	25	100	40	0	0	0
 coa_pet_ability_effect	489	3	2	158	0	0	0	0	0	0	0
 coa_pet_ability_effect	489	3	3	170	0	10	100	54	54	0	0
+coa_pet_ability_effect	490	1	1	49	853	100	0	0	0	0	0
+coa_pet_ability_effect	490	1	2	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	490	1	3	49	903	100	0	0	0	0	0
+coa_pet_ability_effect	490	2	1	28	853	0	100	0	0	0	0
+coa_pet_ability_effect	490	2	2	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	490	3	1	26	903	0	100	0	0	0	0
 coa_pet_ability_effect	491	1	1	24	0	5	100	1	0	0	0
+coa_pet_ability_effect	492	1	1	24	491	15	100	0	0	0	0
+coa_pet_ability_effect	492	1	2	50	537	1	100	-1	1	0	0
+coa_pet_ability_effect	493	1	1	222	0	21	100	40	0	0	0
 coa_pet_ability_effect	496	1	1	49	496	100	0	0	0	0	0
 coa_pet_ability_effect	496	3	1	178	926	1	100	2	149	0	1
+coa_pet_ability_effect	497	1	1	50	496	0	100	1	0	0	0
 coa_pet_ability_effect	498	1	1	49	498	100	0	0	0	0	0
 coa_pet_ability_effect	498	2	1	26	924	0	200	2	0	0	0
+coa_pet_ability_effect	499	1	1	222	0	21	100	40	0	0	0
+coa_pet_ability_effect	500	1	1	24	0	4	100	1	0	0	0
+coa_pet_ability_effect	501	1	1	24	0	16	100	0	0	0	0
+coa_pet_ability_effect	501	1	2	54	500	1	100	4	0	0	0
+coa_pet_ability_effect	502	1	1	24	0	5	100	1	0	0	0
+coa_pet_ability_effect	503	1	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	503	1	2	54	502	1	100	2	0	0	0
+coa_pet_ability_effect	506	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	506	1	2	26	505	0	100	1	0	0	0
+coa_pet_ability_effect	509	1	1	28	853	0	100	0	0	0	0
+coa_pet_ability_effect	509	1	2	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	509	2	1	49	853	100	0	0	0	0	0
+coa_pet_ability_effect	509	2	2	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	509	3	1	24	0	15	100	0	0	0	0
 coa_pet_ability_effect	510	1	1	23	0	8	100	0	0	0	0
 coa_pet_ability_effect	511	1	1	63	510	0	100	3	0	0	0
+coa_pet_ability_effect	514	1	1	24	0	18	100	0	0	0	0
+coa_pet_ability_effect	514	1	2	54	677	0	100	2	1	0	0
+coa_pet_ability_effect	515	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	515	1	2	50	516	0	100	3	0	0	0
+coa_pet_ability_effect	517	1	1	96	0	40	50	0	82	0	0
+coa_pet_ability_effect	518	1	1	66	0	30	100	100	0	0	0
+coa_pet_ability_effect	521	1	1	26	520	0	100	3	0	0	0
+coa_pet_ability_effect	524	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	524	1	2	50	494	1	100	3	0	0	0
+coa_pet_ability_effect	532	1	1	24	0	30	100	0	0	0	0
+coa_pet_ability_effect	532	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	532	1	3	24	0	13	200	0	0	0	0
+coa_pet_ability_effect	533	1	1	23	0	24	100	20	0	0	0
+coa_pet_ability_effect	533	1	2	100	0	12	100	10	10	20	0
+coa_pet_ability_effect	533	1	3	100	0	12	100	10	10	20	0
+coa_pet_ability_effect	535	1	1	24	0	17	100	0	0	0	0
+coa_pet_ability_effect	535	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	535	1	3	384	0	10	100	0	0	0	0
 coa_pet_ability_effect	536	1	1	26	543	0	100	2	0	0	0
 coa_pet_ability_effect	537	1	1	49	537	100	0	0	0	0	0
 coa_pet_ability_effect	538	1	1	24	0	15	100	0	0	0	0
 coa_pet_ability_effect	538	1	2	104	0	30	100	0	1	20	0
 coa_pet_ability_effect	538	2	1	24	0	15	100	0	0	0	0
 coa_pet_ability_effect	538	2	2	104	0	30	100	0	1	20	0
+coa_pet_ability_effect	539	1	1	23	0	15	100	20	0	0	0
+coa_pet_ability_effect	539	1	2	23	0	15	100	20	0	0	0
+coa_pet_ability_effect	539	1	3	23	0	15	100	20	0	0	0
 coa_pet_ability_effect	540	1	1	22	0	0	100	0	0	0	0
 coa_pet_ability_effect	540	2	1	156	0	1	0	0	0	0	0
 coa_pet_ability_effect	540	2	2	24	0	25	100	0	0	0	0
 coa_pet_ability_effect	541	1	1	26	540	0	100	1	0	0	0
 coa_pet_ability_effect	543	1	1	49	543	100	0	0	0	0	0
+coa_pet_ability_effect	563	1	1	79	0	20	10000	0	0	0	0
+coa_pet_ability_effect	563	1	2	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	563	2	1	79	0	20	-10000	0	0	0	0
+coa_pet_ability_effect	563	2	2	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	563	3	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	564	1	1	26	830	0	100	1	0	0	0
+coa_pet_ability_effect	564	2	1	222	0	30	100	40	0	0	0
+coa_pet_ability_effect	564	2	2	49	830	100	0	0	0	0	0
+coa_pet_ability_effect	566	1	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	566	1	2	79	0	25	20	0	10000	0	0
+coa_pet_ability_effect	566	1	3	28	831	0	0	0	0	0	0
+coa_pet_ability_effect	567	1	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	567	1	2	26	544	0	100	1	0	0	0
 coa_pet_ability_effect	571	1	1	24	0	20	100	0	0	0	0
 coa_pet_ability_effect	571	1	2	156	0	149	0	0	0	0	0
 coa_pet_ability_effect	571	1	3	131	927	1	50	0	0	0	0
 coa_pet_ability_effect	572	1	1	24	0	36	100	0	0	0	0
 coa_pet_ability_effect	572	1	2	80	718	0	200	9	0	0	0
+coa_pet_ability_effect	573	1	1	23	0	30	100	20	0	0	0
 coa_pet_ability_effect	575	1	1	24	0	10	100	0	0	0	0
 coa_pet_ability_effect	575	1	2	50	721	0	100	4	0	0	0
 coa_pet_ability_effect	576	1	1	26	577	0	100	9	0	0	0
@@ -4168,40 +5178,198 @@ coa_pet_ability_effect	576	1	3	116	0	0	0	0	0	0	0
 coa_pet_ability_effect	576	1	4	116	0	0	0	0	0	0	0
 coa_pet_ability_effect	576	1	5	23	0	28	100	20	0	0	0
 coa_pet_ability_effect	577	1	1	22	0	5	0	0	0	0	0
+coa_pet_ability_effect	578	1	1	53	0	25	100	0	0	0	0
+coa_pet_ability_effect	580	1	1	178	926	1	100	2	149	0	1
+coa_pet_ability_effect	581	1	1	24	0	3	100	0	0	0	0
+coa_pet_ability_effect	581	1	2	24	0	3	100	0	0	0	0
+coa_pet_ability_effect	581	1	3	24	0	3	100	0	0	0	0
+coa_pet_ability_effect	581	1	4	50	542	0	100	2	0	0	0
+coa_pet_ability_effect	581	2	1	24	0	5	100	0	0	0	0
+coa_pet_ability_effect	581	2	2	24	0	5	100	0	0	0	0
+coa_pet_ability_effect	581	2	3	24	0	5	100	0	0	0	0
+coa_pet_ability_effect	581	2	4	50	542	0	100	2	0	0	0
+coa_pet_ability_effect	581	3	1	24	0	7	100	0	0	0	0
+coa_pet_ability_effect	581	3	2	24	0	7	100	0	0	0	0
+coa_pet_ability_effect	581	3	3	24	0	7	100	0	0	0	0
+coa_pet_ability_effect	581	3	4	50	542	0	100	2	0	0	0
+coa_pet_ability_effect	586	1	1	24	0	40	100	0	0	0	0
+coa_pet_ability_effect	588	1	1	26	341	0	100	1	0	0	0
+coa_pet_ability_effect	588	2	1	222	0	30	100	40	0	0	0
+coa_pet_ability_effect	588	2	2	49	341	100	100	0	0	0	0
 coa_pet_ability_effect	589	1	1	141	0	24	100	54	4	0	0
 coa_pet_ability_effect	589	1	2	80	590	0	200	9	0	0	0
+coa_pet_ability_effect	594	1	1	27	0	10	100	10	30	0	0
+coa_pet_ability_effect	594	1	2	177	0	149	0	0	0	0	0
+coa_pet_ability_effect	594	1	3	52	498	1	25	1	0	0	0
+coa_pet_ability_effect	595	1	1	24	0	27	100	0	0	0	0
+coa_pet_ability_effect	595	1	2	80	596	0	200	9	0	0	0
+coa_pet_ability_effect	600	1	1	52	927	0	100	1	0	0	0
+coa_pet_ability_effect	608	1	1	27	0	15	100	5	25	0	0
 coa_pet_ability_effect	610	1	1	22	0	5	0	0	0	0	0
+coa_pet_ability_effect	611	1	1	26	610	0	100	9	0	0	0
+coa_pet_ability_effect	611	1	2	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	611	1	3	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	611	1	4	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	611	1	5	23	0	28	100	20	0	0	0
+coa_pet_ability_effect	616	1	1	79	0	20	10000	0	0	0	0
+coa_pet_ability_effect	616	1	2	116	0	0	100	0	0	0	0
+coa_pet_ability_effect	616	2	1	79	0	20	-10000	0	0	0	0
+coa_pet_ability_effect	616	2	2	116	0	0	100	0	0	0	0
+coa_pet_ability_effect	616	3	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	625	1	1	24	0	40	50	0	0	0	0
 coa_pet_ability_effect	631	1	1	24	0	15	100	0	0	0	0
 coa_pet_ability_effect	631	1	2	52	370	1	100	2	0	0	0
+coa_pet_ability_effect	639	1	1	24	0	5	100	1	0	0	0
+coa_pet_ability_effect	640	1	1	24	0	16	100	0	0	0	0
+coa_pet_ability_effect	640	1	2	54	639	0	100	2	0	0	0
 coa_pet_ability_effect	641	1	1	24	0	4	100	0	0	0	0
+coa_pet_ability_effect	642	1	1	24	0	9	50	0	0	0	0
+coa_pet_ability_effect	642	1	2	24	0	8	50	0	1	0	0
+coa_pet_ability_effect	642	1	3	24	0	9	50	0	1	0	0
+coa_pet_ability_effect	642	1	4	24	0	8	50	0	1	0	0
+coa_pet_ability_effect	642	1	5	50	641	0	200	3	0	0	0
+coa_pet_ability_effect	646	1	1	24	0	30	100	0	0	0	0
+coa_pet_ability_effect	646	1	2	177	0	149	0	0	0	0	0
+coa_pet_ability_effect	646	1	3	52	927	1	25	1	0	0	0
+coa_pet_ability_effect	648	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	654	1	1	24	0	40	100	0	0	0	0
+coa_pet_ability_effect	654	1	2	52	174	1	100	1	0	0	0
 coa_pet_ability_effect	657	1	1	24	0	16	100	0	0	0	0
 coa_pet_ability_effect	657	1	2	50	658	1	100	5	0	0	0
 coa_pet_ability_effect	658	1	1	23	0	4	100	0	0	0	0
+coa_pet_ability_effect	663	1	1	68	0	15	100	0	0	0	0
+coa_pet_ability_effect	663	1	2	54	664	0	100	4	0	0	0
+coa_pet_ability_effect	663	1	3	135	0	100	100	0	0	0	0
+coa_pet_ability_effect	664	1	1	62	0	5	100	0	0	0	0
 coa_pet_ability_effect	665	1	1	144	0	0	0	0	0	0	0
 coa_pet_ability_effect	665	1	2	61	0	50	100	0	120	0	0
 coa_pet_ability_effect	665	1	3	31	0	120	0	0	0	0	0
+coa_pet_ability_effect	666	1	1	24	0	13	100	0	0	0	0
+coa_pet_ability_effect	666	1	2	50	807	1	100	3	0	0	0
+coa_pet_ability_effect	667	1	1	31	0	141	1	0	0	0	0
+coa_pet_ability_effect	667	1	2	136	0	1	0	0	0	0	0
+coa_pet_ability_effect	667	1	3	136	0	1	0	0	0	0	0
+coa_pet_ability_effect	667	1	4	31	0	141	0	0	0	0	0
+coa_pet_ability_effect	668	1	1	141	0	19	100	60	5	0	0
+coa_pet_ability_effect	668	2	1	141	0	19	100	60	5	0	0
+coa_pet_ability_effect	668	3	1	141	0	19	100	60	5	0	0
+coa_pet_ability_effect	669	1	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	669	1	2	177	0	149	0	0	0	0	0
+coa_pet_ability_effect	669	1	3	131	927	0	100	0	0	0	0
+coa_pet_ability_effect	677	1	1	24	0	4	100	1	0	0	0
+coa_pet_ability_effect	706	1	1	24	0	3	100	0	0	0	0
+coa_pet_ability_effect	706	1	2	24	0	3	100	0	1	0	0
+coa_pet_ability_effect	706	1	3	24	0	3	100	0	1	0	0
+coa_pet_ability_effect	706	1	4	50	542	0	100	2	1	0	0
+coa_pet_ability_effect	706	2	1	24	0	5	100	0	0	0	0
+coa_pet_ability_effect	706	2	2	24	0	5	100	0	1	0	0
+coa_pet_ability_effect	706	2	3	24	0	5	100	0	1	0	0
+coa_pet_ability_effect	706	2	4	50	542	0	100	2	1	0	0
+coa_pet_ability_effect	706	3	1	24	0	7	100	0	0	0	0
+coa_pet_ability_effect	706	3	2	24	0	7	100	0	1	0	0
+coa_pet_ability_effect	706	3	3	24	0	7	100	0	1	0	0
+coa_pet_ability_effect	706	3	4	50	542	0	100	2	1	0	0
+coa_pet_ability_effect	713	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	713	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	713	1	3	24	0	10	50	0	0	0	0
+coa_pet_ability_effect	713	1	4	384	0	10	100	0	0	0	0
 coa_pet_ability_effect	718	1	1	52	248	0	200	3	0	0	0
+coa_pet_ability_effect	744	1	1	24	0	5	100	1	0	0	0
+coa_pet_ability_effect	744	1	2	32	0	100	100	1	0	0	0
+coa_pet_ability_effect	745	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	745	1	2	23	0	10	100	0	0	0	0
+coa_pet_ability_effect	745	1	3	54	744	1	100	1	0	0	0
+coa_pet_ability_effect	752	1	1	24	0	30	100	0	0	0	0
+coa_pet_ability_effect	752	1	2	177	0	149	0	0	0	0	0
+coa_pet_ability_effect	752	1	3	52	927	1	25	1	0	0	0
+coa_pet_ability_effect	753	1	1	24	0	40	100	0	0	0	0
+coa_pet_ability_effect	753	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	753	1	3	170	0	20	100	61	0	0	0
+coa_pet_ability_effect	753	2	1	31	0	114	1	0	0	0	0
+coa_pet_ability_effect	753	2	2	31	0	114	0	0	0	0	0
+coa_pet_ability_effect	753	3	1	31	0	114	1	0	0	0	0
+coa_pet_ability_effect	753	3	2	31	0	114	0	0	0	0	0
+coa_pet_ability_effect	754	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	754	1	2	177	0	149	0	0	0	0	0
+coa_pet_ability_effect	754	1	3	52	927	1	25	1	0	0	0
+coa_pet_ability_effect	755	1	1	24	0	5	100	1	0	0	0
+coa_pet_ability_effect	756	1	1	24	0	12	100	0	0	0	0
+coa_pet_ability_effect	756	1	2	54	755	1	100	4	0	0	0
+coa_pet_ability_effect	761	1	1	26	839	0	100	1	0	0	0
+coa_pet_ability_effect	761	2	1	222	0	30	100	40	0	0	0
+coa_pet_ability_effect	761	2	2	49	839	100	0	0	0	0	0
 coa_pet_ability_effect	762	1	1	24	0	50	50	0	0	0	0
 coa_pet_ability_effect	762	1	2	194	0	0	0	0	0	0	0
 coa_pet_ability_effect	762	1	3	159	0	0	0	0	0	0	0
 coa_pet_ability_effect	762	1	4	52	174	0	100	1	0	0	0
+coa_pet_ability_effect	763	1	1	31	0	141	1	0	0	0	0
+coa_pet_ability_effect	763	1	2	136	0	1	0	0	0	0	0
+coa_pet_ability_effect	763	1	3	136	0	1	0	0	0	0	0
+coa_pet_ability_effect	763	1	4	31	0	141	0	0	0	0	0
+coa_pet_ability_effect	770	1	1	79	0	20	10000	0	0	0	0
+coa_pet_ability_effect	770	1	2	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	770	2	1	79	0	20	-10000	0	0	0	0
+coa_pet_ability_effect	770	2	2	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	770	3	1	53	0	25	100	0	0	0	0
+coa_pet_ability_effect	776	1	1	79	0	20	10000	0	0	0	0
+coa_pet_ability_effect	776	1	2	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	776	2	1	79	0	20	-10000	0	0	0	0
+coa_pet_ability_effect	776	2	2	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	776	3	1	53	0	25	100	0	0	0	0
 coa_pet_ability_effect	778	1	1	79	0	20	10000	0	10000	0	0
 coa_pet_ability_effect	778	1	2	116	0	0	100	0	0	0	0
 coa_pet_ability_effect	778	2	1	79	0	20	-10000	0	10000	0	0
 coa_pet_ability_effect	778	2	2	116	0	0	100	0	0	0	0
 coa_pet_ability_effect	778	3	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	779	1	1	141	0	36	100	0	0	0	0
 coa_pet_ability_effect	780	1	1	24	0	10	100	0	0	0	0
 coa_pet_ability_effect	780	1	2	158	0	0	0	0	0	0	0
 coa_pet_ability_effect	780	1	3	139	0	100	0	0	0	0	0
+coa_pet_ability_effect	781	1	1	24	0	5	100	1	0	0	0
+coa_pet_ability_effect	782	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	784	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	784	1	2	50	494	1	100	3	0	0	0
+coa_pet_ability_effect	792	1	1	24	0	25	100	0	0	0	0
+coa_pet_ability_effect	792	1	2	50	793	1	100	2	0	0	0
+coa_pet_ability_effect	800	1	1	66	0	25	100	100	0	0	0
+coa_pet_ability_effect	801	1	1	24	0	20	100	0	0	0	0
 coa_pet_ability_effect	802	1	1	24	0	20	100	0	0	0	0
 coa_pet_ability_effect	802	1	2	104	0	20	100	0	1	20	0
 coa_pet_ability_effect	802	2	1	24	0	20	100	0	0	0	0
 coa_pet_ability_effect	802	2	2	104	0	20	100	0	1	20	0
+coa_pet_ability_effect	803	1	1	24	491	10	100	0	0	0	0
+coa_pet_ability_effect	803	1	2	54	491	1	100	5	1	0	0
+coa_pet_ability_effect	812	1	1	222	0	22	100	60	0	0	0
+coa_pet_ability_effect	814	1	1	24	0	30	100	0	0	0	0
+coa_pet_ability_effect	814	1	2	177	0	149	0	0	0	0	0
+coa_pet_ability_effect	814	1	3	52	927	1	25	1	0	0	0
+coa_pet_ability_effect	822	1	1	26	924	0	200	2	0	0	0
+coa_pet_ability_effect	826	1	1	149	0	20	100	0	0	0	0
+coa_pet_ability_effect	838	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	838	1	2	26	837	0	100	2	0	0	0
+coa_pet_ability_effect	849	1	1	24	491	12	100	0	0	0	0
+coa_pet_ability_effect	849	1	2	54	491	1	100	4	1	0	0
+coa_pet_ability_effect	870	1	1	24	0	3	100	0	0	0	0
+coa_pet_ability_effect	870	1	2	24	0	3	100	0	1	0	0
+coa_pet_ability_effect	870	1	3	24	0	3	100	0	1	0	0
+coa_pet_ability_effect	870	1	4	50	542	0	100	2	1	0	0
+coa_pet_ability_effect	870	2	1	24	0	5	100	0	0	0	0
+coa_pet_ability_effect	870	2	2	24	0	5	100	0	1	0	0
+coa_pet_ability_effect	870	2	3	24	0	5	100	0	1	0	0
+coa_pet_ability_effect	870	2	4	50	542	0	100	2	1	0	0
+coa_pet_ability_effect	870	3	1	24	0	7	100	0	0	0	0
+coa_pet_ability_effect	870	3	2	24	0	7	100	0	1	0	0
+coa_pet_ability_effect	870	3	3	24	0	7	100	0	1	0	0
+coa_pet_ability_effect	870	3	4	50	542	0	100	2	1	0	0
 coa_pet_ability_effect	900	1	1	24	0	5	100	1	0	0	0
 coa_pet_ability_effect	901	1	1	24	0	12	100	0	0	0	0
 coa_pet_ability_effect	901	1	2	54	900	1	100	4	0	0	0
+coa_pet_ability_effect	905	1	1	26	904	0	100	4	0	0	0
 coa_pet_ability_effect	916	1	1	24	0	25	100	0	0	0	0
 coa_pet_ability_effect	916	2	1	24	0	25	100	0	0	0	0
+coa_pet_ability_effect	917	1	1	24	0	25	100	0	0	0	0
+coa_pet_ability_effect	917	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	917	1	3	104	0	25	100	0	1	20	0
 coa_pet_ability_effect	920	1	1	24	0	10	100	0	0	0	0
 coa_pet_ability_effect	920	1	2	50	154	1	100	4	0	0	0
 coa_pet_ability_effect	920	1	3	24	0	10	100	0	0	0	0
@@ -4212,26 +5380,104 @@ coa_pet_ability_effect	926	1	1	49	926	100	0	0	0	0	0
 coa_pet_ability_effect	926	2	1	26	924	0	200	3	0	0	0
 coa_pet_ability_effect	927	1	1	26	924	0	200	2	0	0	0
 coa_pet_ability_effect	927	2	1	22	0	0	100	0	0	0	0
+coa_pet_ability_effect	930	1	1	27	0	20	100	5	40	0	0
+coa_pet_ability_effect	936	1	1	26	935	0	100	3	0	0	0
+coa_pet_ability_effect	937	1	1	31	0	32	0	0	0	0	0
+coa_pet_ability_effect	937	2	1	24	0	18	100	0	0	0	0
+coa_pet_ability_effect	937	2	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	937	2	3	32	0	100	100	0	0	0	0
+coa_pet_ability_effect	938	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	938	1	2	177	0	149	0	0	0	0	0
+coa_pet_ability_effect	938	1	3	131	927	0	100	0	0	0	0
+coa_pet_ability_effect	943	1	1	24	491	10	100	0	0	0	0
+coa_pet_ability_effect	943	1	2	54	491	1	100	5	1	0	0
+coa_pet_ability_effect	957	1	1	24	0	30	100	0	0	0	0
+coa_pet_ability_effect	957	1	2	26	485	0	100	3	0	0	0
 coa_pet_ability_effect	958	1	1	79	0	20	10000	0	10000	0	0
 coa_pet_ability_effect	958	1	2	116	0	0	100	0	0	0	0
 coa_pet_ability_effect	958	2	1	79	0	20	-10000	0	10000	0	0
 coa_pet_ability_effect	958	2	2	116	0	0	100	0	0	0	0
 coa_pet_ability_effect	958	3	1	24	0	20	85	0	0	0	0
+coa_pet_ability_effect	960	1	1	26	959	0	100	3	0	0	0
+coa_pet_ability_effect	974	1	1	96	0	28	80	55	0	0	0
+coa_pet_ability_effect	975	1	1	24	0	25	100	0	0	0	0
+coa_pet_ability_effect	978	1	1	222	0	22	100	60	0	0	0
+coa_pet_ability_effect	979	1	1	24	0	6	100	0	0	0	0
+coa_pet_ability_effect	979	1	2	24	0	6	100	0	0	0	0
+coa_pet_ability_effect	979	1	3	24	0	6	100	0	0	0	0
+coa_pet_ability_effect	979	1	4	23	0	6	101	0	0	0	0
+coa_pet_ability_effect	979	1	5	23	0	6	101	0	0	0	0
+coa_pet_ability_effect	979	1	6	23	0	6	101	0	0	0	0
+coa_pet_ability_effect	979	1	7	80	596	0	200	9	0	0	0
+coa_pet_ability_effect	985	1	1	24	0	9	80	0	0	0	0
+coa_pet_ability_effect	985	1	2	24	0	9	80	0	1	0	0
+coa_pet_ability_effect	985	1	3	24	0	9	80	0	1	0	0
+coa_pet_ability_effect	985	1	4	50	986	0	200	4	0	0	0
+coa_pet_ability_effect	986	1	1	24	0	3	100	0	0	0	0
+coa_pet_ability_effect	996	1	1	178	926	1	100	2	149	0	1
 coa_pet_ability_effect	997	1	1	197	0	100	100	0	0	0	0
+coa_pet_ability_effect	998	1	1	28	853	0	100	0	0	0	0
+coa_pet_ability_effect	998	1	2	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	998	2	1	49	853	100	0	0	0	0	0
+coa_pet_ability_effect	998	2	2	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	998	2	3	49	999	100	0	0	0	0	0
+coa_pet_ability_effect	998	3	1	26	999	0	100	0	0	0	0
+coa_pet_ability_effect	1012	1	1	23	0	22	100	20	0	0	0
+coa_pet_ability_effect	1012	1	2	26	485	0	100	3	0	0	0
+coa_pet_ability_effect	1013	1	1	24	0	8	100	0	0	0	0
+coa_pet_ability_effect	1013	1	2	29	0	2	100	0	52	0	0
+coa_pet_ability_effect	1013	1	3	24	0	8	100	0	0	0	0
+coa_pet_ability_effect	1013	1	4	29	0	2	100	0	52	0	0
+coa_pet_ability_effect	1013	1	5	24	0	8	100	0	0	0	0
+coa_pet_ability_effect	1013	1	6	29	0	2	100	0	52	0	0
+coa_pet_ability_effect	1013	1	7	80	205	0	200	9	0	0	0
 coa_pet_ability_effect	1016	1	1	31	0	32	0	0	0	0	0
 coa_pet_ability_effect	1016	2	1	24	0	20	100	0	0	0	0
 coa_pet_ability_effect	1016	2	2	158	0	0	0	0	0	0	0
 coa_pet_ability_effect	1016	2	3	32	0	100	100	0	0	0	0
+coa_pet_ability_effect	1020	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	1020	1	2	50	462	1	100	2	0	0	0
+coa_pet_ability_effect	1024	1	1	26	1023	0	100	2	0	0	0
+coa_pet_ability_effect	1024	2	1	22	0	0	100	0	0	0	0
+coa_pet_ability_effect	1024	3	1	23	0	70	100	20	0	0	0
+coa_pet_ability_effect	1024	3	2	49	1023	100	0	0	0	0	0
+coa_pet_ability_effect	1026	1	1	178	1030	1	100	1	149	0	1
 coa_pet_ability_effect	1030	1	1	26	924	0	200	2	0	0	0
 coa_pet_ability_effect	1030	2	1	22	0	0	100	0	0	0	0
+coa_pet_ability_effect	1032	1	1	26	1033	0	100	5	0	0	0
+coa_pet_ability_effect	1033	1	1	85	0	161	0	0	0	0	0
+coa_pet_ability_effect	1033	1	2	26	1034	0	100	3	0	0	0
+coa_pet_ability_effect	1033	1	3	49	1033	200	0	0	0	0	0
 coa_pet_ability_effect	1043	1	1	31	0	32	0	0	0	0	0
 coa_pet_ability_effect	1043	2	1	62	0	10	100	0	0	0	0
 coa_pet_ability_effect	1043	2	2	158	0	0	0	0	0	0	0
 coa_pet_ability_effect	1043	2	3	32	0	300	100	0	0	0	0
+coa_pet_ability_effect	1045	1	1	26	1044	0	100	5	0	0	0
+coa_pet_ability_effect	1050	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	1050	1	2	29	0	20	100	0	21	0	0
+coa_pet_ability_effect	1051	1	1	24	0	9	100	0	0	0	0
+coa_pet_ability_effect	1051	1	2	24	0	9	100	0	0	0	0
+coa_pet_ability_effect	1051	1	3	24	0	9	100	0	0	0	0
+coa_pet_ability_effect	1051	1	4	80	229	0	200	9	0	0	0
+coa_pet_ability_effect	1052	1	1	24	0	30	100	0	0	0	0
+coa_pet_ability_effect	1052	1	2	177	0	149	0	0	0	0	0
+coa_pet_ability_effect	1052	1	3	52	927	1	25	1	0	0	0
+coa_pet_ability_effect	1054	1	1	26	1053	0	100	2	0	0	0
+coa_pet_ability_effect	1055	1	1	24	0	25	100	0	0	0	0
+coa_pet_ability_effect	1055	1	2	50	1059	1	100	2	0	0	0
+coa_pet_ability_effect	1056	1	1	222	0	22	100	60	0	0	0
+coa_pet_ability_effect	1060	1	1	222	0	22	100	60	0	0	0
 coa_pet_ability_effect	1062	1	1	23	0	20	100	20	0	0	0
 coa_pet_ability_effect	1062	1	2	26	1061	0	100	2	0	0	0
+coa_pet_ability_effect	1078	1	1	23	0	20	100	20	0	0	0
+coa_pet_ability_effect	1078	1	2	44	0	50	100	0	0	0	0
 coa_pet_ability_effect	1086	1	1	62	379	5	100	0	0	0	0
 coa_pet_ability_effect	1087	1	1	26	1086	0	200	5	0	0	0
+coa_pet_ability_effect	1091	1	1	24	0	9	80	0	0	0	0
+coa_pet_ability_effect	1091	1	2	24	0	9	80	0	0	0	0
+coa_pet_ability_effect	1091	1	3	24	0	9	80	0	0	0	0
+coa_pet_ability_effect	1091	1	4	50	1092	0	200	4	0	0	0
+coa_pet_ability_effect	1092	1	1	24	0	3	100	0	0	0	0
 coa_pet_ability_effect	1093	1	1	24	0	3	100	0	0	0	0
 coa_pet_ability_effect	1093	1	2	24	0	3	100	0	1	0	0
 coa_pet_ability_effect	1093	1	3	24	0	3	100	0	1	0	0
@@ -4244,8 +5490,14 @@ coa_pet_ability_effect	1093	3	1	24	0	7	100	0	1	0	0
 coa_pet_ability_effect	1093	3	2	24	0	7	100	0	1	0	0
 coa_pet_ability_effect	1093	3	3	24	0	7	100	0	1	0	0
 coa_pet_ability_effect	1093	3	4	50	542	0	100	2	0	0	0
+coa_pet_ability_effect	1095	1	1	222	0	21	100	40	0	0	0
+coa_pet_ability_effect	1099	1	1	222	0	21	100	40	0	0	0
 coa_pet_ability_effect	1108	1	1	24	491	15	100	0	0	0	0
 coa_pet_ability_effect	1108	1	2	50	1120	1	100	1	1	0	0
+coa_pet_ability_effect	1109	1	1	23	0	0	100	0	0	0	0
+coa_pet_ability_effect	1109	1	2	23	0	24	100	20	0	0	0
+coa_pet_ability_effect	1109	1	3	23	0	24	100	20	0	0	0
+coa_pet_ability_effect	1110	1	1	141	0	45	100	0	0	0	0
 coa_pet_ability_effect	1111	1	1	85	0	161	0	0	0	0	0
 coa_pet_ability_effect	1112	1	1	85	0	161	0	0	0	0	0
 coa_pet_ability_effect	1112	1	2	26	1111	0	100	3	0	0	0
@@ -4255,13 +5507,92 @@ coa_pet_ability_effect	1116	1	3	24	0	6	100	0	0	0	0
 coa_pet_ability_effect	1116	1	4	50	542	0	100	1	0	0	0
 coa_pet_ability_effect	1120	1	1	49	1120	100	0	0	0	0	0
 coa_pet_ability_effect	1223	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	1231	1	1	31	0	141	1	0	0	0	0
+coa_pet_ability_effect	1231	1	2	136	0	1	0	0	0	0	0
+coa_pet_ability_effect	1231	1	3	136	0	1	0	0	0	0	0
+coa_pet_ability_effect	1231	1	4	31	0	141	0	0	0	0	0
+coa_pet_ability_effect	1231	1	5	23	0	20	100	20	0	0	0
+coa_pet_ability_effect	1232	1	1	26	485	0	100	4	0	0	0
+coa_pet_ability_effect	1232	1	2	26	187	0	100	4	0	0	0
+coa_pet_ability_effect	1238	1	1	222	0	21	100	40	0	0	0
+coa_pet_ability_effect	1273	1	1	141	0	20	100	0	0	0	0
+coa_pet_ability_effect	1301	1	1	24	0	14	100	0	0	0	0
+coa_pet_ability_effect	1301	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	1301	1	3	32	0	100	100	0	0	0	0
+coa_pet_ability_effect	1347	1	1	26	1346	0	100	2	0	0	0
+coa_pet_ability_effect	1357	1	1	149	0	35	100	0	0	0	0
+coa_pet_ability_effect	1360	1	1	31	0	113	1	0	0	0	0
+coa_pet_ability_effect	1360	1	2	31	0	113	0	0	0	0	0
+coa_pet_ability_effect	1360	2	1	24	0	50	100	0	0	0	0
+coa_pet_ability_effect	1369	1	1	24	0	19	100	0	0	0	0
+coa_pet_ability_effect	1369	1	2	54	379	1	20	1	0	0	0
+coa_pet_ability_effect	1371	1	1	226	0	17	100	8	82	0	0
+coa_pet_ability_effect	1372	1	1	27	0	10	100	5	30	0	0
+coa_pet_ability_effect	1380	1	1	26	1379	0	100	2	0	0	0
 coa_pet_ability_effect	1392	1	1	26	1391	0	100	1	0	0	0
+coa_pet_ability_effect	1398	1	1	85	0	124	0	0	0	0	0
+coa_pet_ability_effect	1398	1	2	222	0	25	100	60	0	0	0
+coa_pet_ability_effect	1398	1	3	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	1398	1	4	26	1399	0	100	1	0	0	0
+coa_pet_ability_effect	1398	1	5	229	1420	0	100	1	0	0	124
+coa_pet_ability_effect	1407	1	1	226	0	13	100	13	34	0	0
+coa_pet_ability_effect	1408	1	1	26	1409	0	100	2	0	0	0
 coa_pet_ability_effect	1409	1	1	23	0	20	100	20	0	0	0
 coa_pet_ability_effect	1409	2	1	23	0	23	100	20	0	0	0
 coa_pet_ability_effect	1409	3	1	23	0	27	100	20	0	0	0
+coa_pet_ability_effect	1418	1	1	49	968	100	0	0	0	0	0
+coa_pet_ability_effect	1418	2	1	229	968	0	100	1	1	0	124
 coa_pet_ability_effect	1438	1	1	24	0	32	100	0	0	0	0
+coa_pet_ability_effect	1483	1	1	222	0	22	100	60	0	0	0
+coa_pet_ability_effect	1533	1	1	24	0	25	100	0	0	0	0
+coa_pet_ability_effect	1533	2	1	24	0	25	100	0	0	0	0
+coa_pet_ability_effect	1533	3	1	24	0	25	100	0	0	0	0
+coa_pet_ability_effect	1536	1	1	24	0	40	100	0	0	0	0
+coa_pet_ability_effect	1536	1	2	177	0	149	0	0	0	0	0
+coa_pet_ability_effect	1536	1	3	52	927	1	25	1	0	0	0
+coa_pet_ability_effect	1545	1	1	23	0	22	100	20	0	0	0
+coa_pet_ability_effect	1545	1	2	26	1546	0	100	2	0	0	0
+coa_pet_ability_effect	1555	1	1	96	0	40	50	0	35	0	0
+coa_pet_ability_effect	1559	1	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	1559	1	2	177	0	149	0	0	0	0	0
+coa_pet_ability_effect	1559	1	3	131	927	0	100	0	0	0	0
+coa_pet_ability_effect	1560	1	1	31	0	113	1	0	0	0	0
+coa_pet_ability_effect	1560	1	2	31	0	113	0	0	0	0	0
+coa_pet_ability_effect	1560	1	3	50	1561	0	100	1	0	0	0
+coa_pet_ability_effect	1560	2	1	24	0	50	100	0	0	0	0
+coa_pet_ability_effect	1625	1	1	222	0	22	100	60	0	0	0
 coa_pet_ability_effect	1626	1	1	26	1629	0	100	5	0	0	0
+coa_pet_ability_effect	1627	1	1	26	1628	0	100	2	0	0	0
+coa_pet_ability_effect	1679	1	1	28	853	0	100	0	0	0	0
+coa_pet_ability_effect	1679	1	2	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	1679	2	1	49	853	100	0	0	0	0	0
+coa_pet_ability_effect	1679	2	2	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	1679	2	3	49	1680	100	0	0	0	0	0
+coa_pet_ability_effect	1679	2	4	49	1680	100	0	0	0	0	0
+coa_pet_ability_effect	1679	2	5	49	1680	100	0	0	0	0	0
+coa_pet_ability_effect	1679	3	1	26	1680	0	100	0	0	0	0
+coa_pet_ability_effect	1679	3	2	26	1680	0	100	0	0	0	0
+coa_pet_ability_effect	1679	3	3	26	1680	0	100	0	0	0	0
 coa_pet_ability_effect	1725	1	1	49	1725	0	0	0	0	0	0
+coa_pet_ability_effect	1731	1	1	24	0	25	100	0	0	0	0
+coa_pet_ability_effect	1731	1	2	50	1732	1	100	2	0	0	0
+coa_pet_ability_effect	1738	1	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	1738	1	2	24	0	9	100	0	0	0	0
+coa_pet_ability_effect	1738	1	3	24	0	9	100	0	0	0	0
+coa_pet_ability_effect	1756	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	1756	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	1756	1	3	139	0	0	0	0	0	0	0
+coa_pet_ability_effect	1758	1	1	26	1757	15	100	2	0	0	0
+coa_pet_ability_effect	1764	1	1	24	0	11	100	0	0	0	0
+coa_pet_ability_effect	1764	1	2	24	0	8	100	0	0	0	0
+coa_pet_ability_effect	1764	1	3	24	0	8	100	0	0	0	0
+coa_pet_ability_effect	1772	1	1	26	1771	0	100	3	0	0	0
+coa_pet_ability_effect	1810	1	1	50	154	0	200	9	0	0	0
+coa_pet_ability_effect	1810	1	2	50	154	0	200	9	0	0	0
+coa_pet_ability_effect	1810	1	3	50	154	0	200	9	0	0	0
+coa_pet_ability_effect	1860	2	1	76	1861	45	100	0	0	0	0
+coa_pet_ability_effect	1862	2	1	76	1863	45	100	0	0	0	0
+coa_pet_ability_effect	1880	1	1	222	0	22	100	60	0	0	0
 coa_pet_ability_effect	1895	1	1	222	0	25	100	40	0	0	0
 coa_pet_ability_effect	1895	1	2	85	0	69	100	0	0	0	0
 coa_pet_ability_effect	1895	1	3	85	0	69	100	0	0	0	0
@@ -4272,26 +5603,151 @@ coa_pet_ability_effect	1921	1	2	116	0	0	100	0	0	0	0
 coa_pet_ability_effect	1921	2	1	79	0	20	-10000	0	10000	0	0
 coa_pet_ability_effect	1921	2	2	116	0	0	100	0	0	0	0
 coa_pet_ability_effect	1921	3	1	24	0	25	100	0	0	0	0
+coa_pet_ability_effect	1922	1	1	141	0	27	100	0	0	0	0
+coa_pet_ability_effect	1933	1	1	23	0	20	100	20	0	0	0
+coa_pet_ability_effect	1933	1	2	44	0	50	100	0	0	0	0
+coa_pet_ability_effect	1934	1	1	222	0	21	100	40	0	0	0
+coa_pet_ability_effect	1944	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	1944	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	1944	1	3	145	0	100	0	0	0	0	0
+coa_pet_ability_effect	1945	1	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	1945	1	2	50	154	1	100	4	0	0	0
+coa_pet_ability_effect	1955	1	1	24	0	30	100	0	0	0	0
+coa_pet_ability_effect	1955	1	2	50	415	1	100	5	0	0	0
+coa_pet_ability_effect	1957	1	1	23	833	25	100	20	0	0	0
+coa_pet_ability_effect	1957	2	1	23	833	25	100	20	0	0	0
+coa_pet_ability_effect	1957	3	1	23	833	25	100	20	0	0	0
+coa_pet_ability_effect	1958	1	1	27	0	15	100	5	25	0	0
+coa_pet_ability_effect	1959	1	1	141	0	23	100	0	0	0	0
+coa_pet_ability_effect	1963	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	1963	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	1963	1	3	139	0	100	0	0	0	0	0
+coa_pet_ability_effect	1966	1	1	54	358	0	100	2	0	0	0
+coa_pet_ability_effect	1966	1	2	54	358	0	100	2	0	0	0
+coa_pet_ability_effect	1966	1	3	54	358	0	100	2	0	0	0
+coa_pet_ability_effect	2009	1	1	79	0	20	10000	0	0	0	0
+coa_pet_ability_effect	2009	1	2	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	2009	2	1	79	0	20	-10000	0	0	0	0
+coa_pet_ability_effect	2009	2	2	116	0	0	0	0	0	0	0
+coa_pet_ability_effect	2009	3	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	2010	1	1	31	0	113	1	0	0	0	0
+coa_pet_ability_effect	2010	1	2	31	0	113	0	0	0	0	0
+coa_pet_ability_effect	2010	2	1	24	0	50	100	0	0	0	0
+coa_pet_ability_effect	2011	1	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	2011	1	2	26	739	0	100	3	0	0	0
+coa_pet_ability_effect	2012	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	2012	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	2012	1	3	107	0	100	0	0	0	0	0
 coa_pet_ability_effect	2013	1	1	24	0	18	200	0	0	0	0
+coa_pet_ability_effect	2023	1	1	24	0	3	100	0	0	0	0
+coa_pet_ability_effect	2023	1	2	24	0	3	100	0	1	0	0
+coa_pet_ability_effect	2023	1	3	24	0	3	100	0	1	0	0
+coa_pet_ability_effect	2023	1	4	50	542	0	100	2	0	0	0
+coa_pet_ability_effect	2023	2	1	24	0	5	100	0	1	0	0
+coa_pet_ability_effect	2023	2	2	24	0	5	100	0	1	0	0
+coa_pet_ability_effect	2023	2	3	24	0	5	100	0	1	0	0
+coa_pet_ability_effect	2023	2	4	50	542	0	100	2	0	0	0
+coa_pet_ability_effect	2023	3	1	24	0	7	100	0	1	0	0
+coa_pet_ability_effect	2023	3	2	24	0	7	100	0	1	0	0
+coa_pet_ability_effect	2023	3	3	24	0	7	100	0	1	0	0
+coa_pet_ability_effect	2023	3	4	50	542	0	100	2	0	0	0
+coa_pet_ability_effect	2064	1	1	24	0	4	100	0	0	0	0
+coa_pet_ability_effect	2064	1	2	24	0	4	100	0	0	0	0
+coa_pet_ability_effect	2064	1	3	24	0	4	100	0	0	0	0
+coa_pet_ability_effect	2064	1	4	24	0	3	100	0	1	0	0
+coa_pet_ability_effect	2064	1	5	24	0	3	100	0	0	0	0
+coa_pet_ability_effect	2064	1	6	24	0	3	100	0	0	0	0
+coa_pet_ability_effect	2064	1	7	22	0	7	0	0	0	0	0
 coa_pet_ability_effect	2065	1	1	26	2066	0	100	2	0	0	0
 coa_pet_ability_effect	2066	1	1	23	0	10	100	10	0	0	0
 coa_pet_ability_effect	2066	2	1	23	0	20	100	10	0	0	0
 coa_pet_ability_effect	2066	3	1	23	0	40	100	10	0	0	0
+coa_pet_ability_effect	2067	1	1	27	0	15	100	5	25	0	0
+coa_pet_ability_effect	2068	1	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	2068	1	2	26	544	0	100	1	0	0	0
+coa_pet_ability_effect	2113	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	2113	1	2	50	2112	0	100	5	1	0	0
+coa_pet_ability_effect	2205	1	1	50	1725	0	100	2	0	0	0
+coa_pet_ability_effect	2209	1	1	68	0	40	100	0	0	0	0
+coa_pet_ability_effect	2209	1	2	135	0	100	100	0	0	0	0
+coa_pet_ability_effect	2214	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	2214	1	2	139	0	100	0	0	0	0	0
+coa_pet_ability_effect	2223	1	1	62	0	30	100	0	0	0	0
+coa_pet_ability_effect	2228	1	1	24	0	20	100	0	0	0	0
+coa_pet_ability_effect	2241	1	1	24	0	6	100	0	0	0	0
+coa_pet_ability_effect	2241	1	2	24	0	6	100	0	0	0	0
+coa_pet_ability_effect	2241	1	3	24	0	6	100	0	0	0	0
+coa_pet_ability_effect	2241	1	4	24	0	6	100	0	0	0	0
+coa_pet_ability_effect	2290	1	1	24	0	5	100	1	0	0	0
+coa_pet_ability_effect	2291	1	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	2291	1	2	54	2290	1	100	2	0	0	0
+coa_pet_ability_effect	2297	1	1	23	0	25	100	20	0	0	0
+coa_pet_ability_effect	2308	1	1	24	0	18	100	0	0	0	0
+coa_pet_ability_effect	2308	1	2	52	370	1	100	1	0	0	0
+coa_pet_ability_effect	2338	1	1	26	2339	0	100	1	0	0	0
+coa_pet_ability_effect	2338	2	1	222	0	30	100	40	0	0	0
+coa_pet_ability_effect	2338	2	2	49	2339	100	0	0	0	0	0
+coa_pet_ability_effect	2340	1	1	222	0	22	100	60	0	0	0
+coa_pet_ability_effect	2341	1	1	141	0	45	100	0	0	0	0
+coa_pet_ability_effect	2342	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	2342	1	2	26	2343	0	100	2	0	0	0
+coa_pet_ability_effect	2349	1	1	24	0	27	100	0	0	0	0
+coa_pet_ability_effect	2349	1	2	80	2350	0	200	9	0	0	0
+coa_pet_ability_effect	2353	1	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	2353	1	2	157	0	21	1	0	0	0	0
+coa_pet_ability_effect	2353	1	3	29	0	10	100	0	21	0	0
 coa_pet_ability_effect	2359	3	1	24	0	30	100	0	0	0	0
 coa_pet_ability_effect	2359	3	2	52	248	0	100	2	0	0	0
 coa_pet_ability_effect	2360	1	1	50	2359	0	100	2	0	0	0
+coa_pet_ability_effect	2364	1	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	2364	1	2	24	0	9	100	0	0	0	0
+coa_pet_ability_effect	2364	1	3	24	0	9	100	0	0	0	0
+coa_pet_ability_effect	2384	1	1	24	0	10	100	0	0	0	0
+coa_pet_ability_effect	2384	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	2384	1	3	107	0	100	0	0	0	0	0
+coa_pet_ability_effect	2400	1	1	27	0	10	100	10	30	0	0
 coa_pet_ability_effect	2401	1	1	27	0	10	100	10	30	0	0
+coa_pet_ability_effect	2407	1	1	26	2408	0	100	1	0	0	0
+coa_pet_ability_effect	2407	2	1	222	0	40	100	40	0	0	0
+coa_pet_ability_effect	2407	2	2	49	2408	100	0	0	0	0	0
+coa_pet_ability_effect	2411	1	1	27	0	10	100	10	200	0	0
+coa_pet_ability_effect	2431	1	1	96	0	40	50	0	77	0	0
 coa_pet_ability_effect	2439	1	1	23	0	25	100	20	0	0	0
 coa_pet_ability_effect	2439	2	1	23	0	20	100	20	0	0	0
 coa_pet_ability_effect	2439	3	1	23	0	15	100	20	0	0	0
 coa_pet_ability_effect	2440	1	1	26	2439	0	100	2	0	0	0
+coa_pet_ability_effect	2444	1	1	24	0	4	100	0	0	0	0
+coa_pet_ability_effect	2444	1	2	24	0	6	100	0	0	0	0
+coa_pet_ability_effect	2444	1	3	26	2445	0	100	1	0	0	0
+coa_pet_ability_effect	2444	1	4	24	0	5	100	0	0	0	0
+coa_pet_ability_effect	2444	1	5	49	2445	100	0	0	0	0	0
+coa_pet_ability_effect	2446	1	1	178	927	1	100	1	149	0	1
+coa_pet_ability_effect	2452	1	1	27	0	15	100	5	25	0	0
 coa_pet_ability_effect	2454	1	1	24	0	15	100	0	0	0	0
 coa_pet_ability_effect	2454	1	2	29	0	15	100	0	64	0	0
 coa_pet_ability_effect	2454	1	3	29	0	15	100	0	21	0	0
 coa_pet_ability_effect	2470	1	1	222	0	22	100	60	0	0	0
+coa_pet_ability_effect	2471	1	1	24	0	40	100	0	0	0	0
+coa_pet_ability_effect	2482	1	1	50	154	0	200	9	0	0	0
+coa_pet_ability_effect	2482	1	2	50	154	0	200	9	0	0	0
+coa_pet_ability_effect	2482	1	3	50	154	0	200	9	0	0	0
+coa_pet_ability_effect	2482	1	4	85	0	69	0	0	0	0	0
+coa_pet_ability_effect	2482	1	5	85	0	69	0	0	0	0	0
+coa_pet_ability_effect	2505	1	1	50	2504	0	100	4	0	0	0
+coa_pet_ability_effect	2518	1	1	24	0	15	100	0	0	0	0
+coa_pet_ability_effect	2518	1	2	59	0	10	100	0	0	0	0
+coa_pet_ability_effect	2520	1	1	24	0	25	100	0	0	0	0
+coa_pet_ability_effect	2520	1	2	50	462	1	100	2	0	0	0
 coa_pet_ability_effect	2527	1	1	24	0	25	100	0	0	0	0
 coa_pet_ability_effect	2527	1	2	177	0	149	0	0	0	0	0
 coa_pet_ability_effect	2527	1	3	172	927	0	61	1	61	1	25
+coa_pet_ability_effect	2528	1	1	24	0	40	100	0	0	0	0
+coa_pet_ability_effect	2528	1	2	158	0	0	0	0	0	0	0
+coa_pet_ability_effect	2528	1	3	170	0	20	100	56	0	0	0
+coa_pet_ability_effect	2528	2	1	31	0	114	1	0	0	0	0
+coa_pet_ability_effect	2528	2	2	31	0	114	0	0	0	0	0
+coa_pet_ability_effect	2528	3	1	31	0	114	1	0	0	0	0
+coa_pet_ability_effect	2528	3	2	31	0	114	0	0	0	0	0
 coa_pet_ability_effect	5001100	1	1	24	0	20	100	0	0	0	0
 coa_pet_ability_effect	5001102	1	1	24	0	20	100	0	0	0	0
 coa_pet_ability_effect	5001103	1	1	24	0	20	100	0	0	0	0
@@ -6744,10 +8200,18 @@ coa_pet_aura_state	161	Mod_SpeedPercent	75
 coa_pet_aura_state	164	Mod_DamageTakenPercent	-50
 coa_pet_aura_state	174	Mechanic_IsStunned	1
 coa_pet_aura_state	174	turnLock	1
+coa_pet_aura_state	177	Mechanic_IsBurning	1
 coa_pet_aura_state	185	Mod_DamageTakenPercent	25
 coa_pet_aura_state	187	Stat_Accuracy	25
+coa_pet_aura_state	205	Mechanic_IsChilled	1
+coa_pet_aura_state	205	Mod_PetTypeDamageDealtPercent	25
+coa_pet_aura_state	205	Mod_PetType_ID	7
+coa_pet_aura_state	205	Weather_Blizzard	1
 coa_pet_aura_state	207	Mod_DamageDealtPercent	125
 coa_pet_aura_state	215	Mod_DamageDealtPercent	100
+coa_pet_aura_state	229	Mod_PetTypeDamageDealtPercent	25
+coa_pet_aura_state	229	Mod_PetType_ID	9
+coa_pet_aura_state	229	Weather_Rain	1
 coa_pet_aura_state	246	swapInLock	1
 coa_pet_aura_state	246	swapOutLock	1
 coa_pet_aura_state	246	turnLock	1
@@ -6761,6 +8225,7 @@ coa_pet_aura_state	257	Weather_Darkness	1
 coa_pet_aura_state	271	Mechanic_IsPoisoned	1
 coa_pet_aura_state	284	unkillable	1
 coa_pet_aura_state	296	Mod_DamageDealtPercent	10
+coa_pet_aura_state	302	swapOutLock	1
 coa_pet_aura_state	306	Add_FlatDamageTaken	5
 coa_pet_aura_state	309	Add_FlatDamageTaken	-5
 coa_pet_aura_state	311	Stat_Dodge	100
@@ -6770,16 +8235,26 @@ coa_pet_aura_state	340	Mechanic_IsUnderground	1
 coa_pet_aura_state	340	untargettable	1
 coa_pet_aura_state	341	Mechanic_IsFlying	1
 coa_pet_aura_state	341	untargettable	1
+coa_pet_aura_state	358	Mechanic_IsPoisoned	1
 coa_pet_aura_state	365	Mod_SpeedPercent	25
 coa_pet_aura_state	370	swapOutLock	1
 coa_pet_aura_state	379	Mechanic_IsPoisoned	1
+coa_pet_aura_state	381	Mechanic_IsWebbed	1
 coa_pet_aura_state	391	Mod_DamageTakenPercent	-50
+coa_pet_aura_state	403	Mod_HealingDealtPercent	25
+coa_pet_aura_state	403	Mod_MaxHealthPercent	50
+coa_pet_aura_state	403	Weather_Sunlight	1
 coa_pet_aura_state	415	Mechanic_IsChilled	1
 coa_pet_aura_state	415	Mod_SpeedPercent	-25
 coa_pet_aura_state	425	Mod_SpeedPercent	25
 coa_pet_aura_state	425	Stat_Accuracy	25
 coa_pet_aura_state	425	Stat_CritChance	25
 coa_pet_aura_state	435	Add_FlatDamageTaken	-5
+coa_pet_aura_state	446	Add_FlatDamageTaken	2
+coa_pet_aura_state	454	Add_FlatDamageTaken	-5
+coa_pet_aura_state	454	Stat_Accuracy	-10
+coa_pet_aura_state	454	Weather_Sandstorm	1
+coa_pet_aura_state	458	Mod_DamageDealtPercent	10
 coa_pet_aura_state	462	Mechanic_IsBlind	1
 coa_pet_aura_state	462	Stat_Accuracy	-50
 coa_pet_aura_state	470	Mod_DamageDealtPercent	-50
@@ -6789,6 +8264,8 @@ coa_pet_aura_state	491	Mechanic_IsBleeding	1
 coa_pet_aura_state	494	Mod_DamageDealtPercent	-25
 coa_pet_aura_state	498	Mechanic_IsStunned	1
 coa_pet_aura_state	498	turnLock	1
+coa_pet_aura_state	500	Mechanic_IsBurning	1
+coa_pet_aura_state	502	Mechanic_IsBurning	1
 coa_pet_aura_state	505	Mod_SpeedPercent	-100
 coa_pet_aura_state	505	Special_BlockedAttackCount	1
 coa_pet_aura_state	505	swapOutLock	1
@@ -6802,13 +8279,24 @@ coa_pet_aura_state	543	Mod_SpeedPercent	-30
 coa_pet_aura_state	544	Mod_SpeedPercent	100
 coa_pet_aura_state	577	maxHealthBonus	500
 coa_pet_aura_state	590	Weather_ArcaneStorm	1
+coa_pet_aura_state	596	Mod_HealingTakenPercent	25
+coa_pet_aura_state	596	Mod_PetTypeDamageDealtPercent	10
+coa_pet_aura_state	596	Mod_PetType_ID	6
+coa_pet_aura_state	596	Weather_Moonlight	1
 coa_pet_aura_state	610	maxHealthBonus	500
+coa_pet_aura_state	664	Mechanic_IsPoisoned	1
 coa_pet_aura_state	718	Critical_Damage_Bonus	25
 coa_pet_aura_state	718	Weather_Mud	1
 coa_pet_aura_state	721	Mechanic_IsChilled	1
 coa_pet_aura_state	721	Stat_Accuracy	-20
 coa_pet_aura_state	739	Mod_DamageDealtPercent	25
+coa_pet_aura_state	781	Mechanic_IsPoisoned	1
 coa_pet_aura_state	793	Mod_HealingTakenPercent	-50
+coa_pet_aura_state	807	Mod_DamageDealtPercent	25
+coa_pet_aura_state	807	Mod_DamageTakenPercent	50
+coa_pet_aura_state	822	Cosmetic_Stealthed	1
+coa_pet_aura_state	822	Mechanic_IsInvisible	1
+coa_pet_aura_state	822	turnLock	1
 coa_pet_aura_state	830	Mechanic_IsUnderground	1
 coa_pet_aura_state	830	untargettable	1
 coa_pet_aura_state	837	Mod_SpeedPercent	100
@@ -6842,9 +8330,11 @@ coa_pet_aura_state	1346	Stat_Dodge	33
 coa_pet_aura_state	1379	Add_FlatDamageTaken	-15
 coa_pet_aura_state	1391	Mod_DamageDealtPercent	100
 coa_pet_aura_state	1391	Mod_DamageTakenPercent	50
+coa_pet_aura_state	1399	Mod_DamageDealtPercent	50
 coa_pet_aura_state	1409	swapInLock	1
 coa_pet_aura_state	1409	swapOutLock	1
 coa_pet_aura_state	1409	turnLock	1
+coa_pet_aura_state	1420	Special_TypeOverride	3
 coa_pet_aura_state	1546	Mod_DamageDealtPercent	25
 coa_pet_aura_state	1628	Add_FlatDamageTaken	-15
 coa_pet_aura_state	1629	Mod_DamageDealtPercent	50
@@ -6857,11 +8347,17 @@ coa_pet_aura_state	1771	Stat_CritChance	75
 coa_pet_aura_state	2066	swapInLock	1
 coa_pet_aura_state	2066	swapOutLock	1
 coa_pet_aura_state	2066	turnLock	1
+coa_pet_aura_state	2112	Add_PeriodicDamageTaken	7
+coa_pet_aura_state	2290	Mechanic_IsPoisoned	1
 coa_pet_aura_state	2339	Mechanic_IsFlying	1
 coa_pet_aura_state	2339	untargettable	1
 coa_pet_aura_state	2343	Critical_Damage_Bonus	50
+coa_pet_aura_state	2350	Mechanic_IsPoisoned	1
+coa_pet_aura_state	2350	Weather_Toxic_Gas	1
 coa_pet_aura_state	2408	Mechanic_IsUnderground	1
 coa_pet_aura_state	2408	untargettable	1
+coa_pet_aura_state	2445	Stat_CritChance	100
+coa_pet_aura_state	2504	Add_FlatDamageTaken	7
 coa_pet_aura_state	5001771	Mechanic_IsBurning	1
 coa_pet_aura_state	5001777	Mechanic_IsBurning	1
 coa_pet_aura_state	5002050	Mechanic_IsChilled	1

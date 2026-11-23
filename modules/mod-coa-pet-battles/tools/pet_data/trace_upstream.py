@@ -211,14 +211,16 @@ def data_rows(export_path, species_used):
     effects_by_ability = {}
     for row in tables['coa_pet_ability_effect']:
         effects_by_ability.setdefault(row[0], []).append(row)
-    abilities_known = {row[0] for row in tables['coa_pet_ability']}
+    bases = {row[0]: row[5] for row in tables['coa_pet_ability']}
     reach, pending = set(), [row[3] for row in kit_abilities]
     while pending:
         ability = pending.pop()
         if ability in reach:
             continue
         reach.add(ability)
-        pending += [row[4] for row in effects_by_ability.get(ability, []) if row[4] and row[4] in abilities_known]
+        pending += [row[4] for row in effects_by_ability.get(ability, []) if row[4] and row[4] in bases]
+        if bases.get(ability):
+            pending.append(bases[ability])
     auras = reach | {row[4] for ability in reach for row in effects_by_ability.get(ability, []) if row[4]}
     rows = {
         'coa_pet_species': species,
@@ -263,7 +265,7 @@ def main():
         gained = {key: after['handlers'].get(key, 0) - before['handlers'].get(key, 0) for key in after['handlers']}
         if wanted and gained.get(wanted, 0) == 0:
             return False
-        if not wanted and size + len(text.encode('utf-8')) > args.max_bytes * 0.7:
+        if not wanted and size + len(text.encode('utf-8')) > args.max_bytes * 0.66:
             return None
         traces.append(text)
         size += len(text.encode('utf-8'))
