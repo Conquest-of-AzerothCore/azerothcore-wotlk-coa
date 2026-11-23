@@ -1,4 +1,4 @@
-# 0039. Solar Eclipse and Sunlight follow the displayed points, without the per-level term
+# 0044. Solar Eclipse and Sunlight follow the displayed points, without the per-level term
 
 - Status: accepted (owner ruling O-37, mentor D-305 option a: both halves applied, 2026-11-23)
 - Date: 2026-11-23

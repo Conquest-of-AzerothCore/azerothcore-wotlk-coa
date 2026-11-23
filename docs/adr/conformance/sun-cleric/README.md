@@ -42,4 +42,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0036](0036-knight-of-dawn-trials-are-the-player-casts.md) | Knight of Dawn's extra strike never rolls again: its trials are the player casts of Glorious Execution (incorrect test, row 371) |
 | [0037](0037-blessing-of-kings-cuts-once-per-critical-strike.md) | Blessing of Kings cuts Hammer of Kings and Solar Prayer once per critical strike, a self-heal included (mentor D-220) |
 | [0038](0038-heal-procs-fire-once-on-a-self-heal.md) | Nine heal and critical-strike procs fire once on a self-heal, from the actor-side event (mentor D-255/D-258/D-276) |
-| [0039](0039-solar-eclipse-and-sunlight-follow-the-displayed-points.md) | Solar Eclipse 704931 and Sunlight 704911 drop the per-level points the tooltip does not display (owner ruling O-37, mentor D-305) |
+| [0044](0044-solar-eclipse-and-sunlight-follow-the-displayed-points.md) | Solar Eclipse 704931 and Sunlight 704911 drop the per-level points the tooltip does not display (owner ruling O-37, mentor D-305) |
