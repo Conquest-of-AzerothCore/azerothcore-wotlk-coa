@@ -8919,6 +8919,29 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "707907 Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_COST, BasePoints -21 + 1 = -20 ($s1 percent), class mask word 2 = 2048 = SpellFamilyFlags[2] of Immolation Aura 800207. 800207 has PowerType -2 (Health), ManaCost 10, ManaCostPercentage 0 (Spell.dbc): 20% of 10 = 2, so the cast costs 10 health without the talent (the control) and 8 with it learned. Health is set to 50000 of 100000 with regeneration off before each cast and read 500 ms after it (before the first periodic tick of 1000 ms): 49990 without, 49992 with. A cut of 10% (1 health) would read 49991 or 49993 and falls outside the 0.5 tolerance. Reference search 2026-11-23: coa-history spell 707907: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); coa-history spell 800207: 29 SPELL_CAST_SUCCESS and 29 SPELL_AURA_APPLIED in 2 logs, no health amount in an event; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 802678,
+      "name": "Felstrike (damage per tick, server formula)",
+      "kind": "metric_delta",
+      "variant": "tick_value",
+      "label_suffix": "tick_value",
+      "quote": "Burn an enemy for ${($d*1000/$T1)*($m1+0+$SP*.05)} Shadowflame Damage over $d,",
+      "trigger_spell": 804247,
+      "gate_spell": 800214,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "spell_effect_value",
+      "fields": {
+        "spell": 802678,
+        "effect": 0
+      },
+      "before_expected": 34,
+      "expected": 34,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Spell.dbc 802678 (server set /srv/coa/server-data/dbc) Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 1000, DurationIndex 32 = 6000 ms (6 ticks), EffectBasePoints 8, EffectDieSides 1, EffectRealPointsPerLevel 0.5, BaseLevel 10, SpellLevel 10, MaxLevel 0. SpellEffectInfo::CalcValue (SpellInfo.cpp:479) at level 60: 8 + 1 (DieSides 1 adds 1) + int(0.5 x (60 - max(BaseLevel 10, SpellLevel 10))) = 9 + 25 = 34 per tick; the SP term of the tooltip ($SP*.05) is 0 at the reference spell power 0 (class file reference_stats). The displayed ${($d*1000/$T1)*($m1+0+$SP*.05)} reads 54 = 6 x 9 on the client (ADR 0006: no SkillLineAbility row, base points only); owner ruling O-19: the server keeps 34 per tick and the displayed text is to be corrected, so the value is counted on the server formula (6 x 34 = 204 over the six ticks), not on the displayed 54. The server's effect value is read with spell_effect_value, which applies CalcValue with the spell mods (the same read as Magic Fiend 704613 stolen); the same value before and after the learn of Malice of Gul'dan 800214 is the control (a learn changes no amount). Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and the Felstrike tick events of coa-history (spell 802678, gear and level differ, no figure decides)."
     }
   ],
   "player_observations": [],
