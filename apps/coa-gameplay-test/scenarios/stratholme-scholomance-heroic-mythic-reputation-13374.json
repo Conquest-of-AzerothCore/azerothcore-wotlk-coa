@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Heroic and Mythic Stratholme and Scholomance kills give Argent Dawn reputation (#13374)",
-  "contract": "#13374: Player::RewardReputation reads creature_onkill_reputation for the active difficulty template, and none of the Stratholme or Scholomance Heroic (difficulty_entry_1) or Mythic (difficulty_entry_2) templates had a row, so their kills gave no Argent Dawn reputation. rev_20261123_13374_strat_scholo_heroic_mythic_reputation.sql copies each Normal entry's row (faction 529, value and standing cap) to both difficulty templates, as Zul'Gurub's templates do. Three neutral-standing level 60 characters each kill an unowned Skeletal Guardian (10390, Heroic 110390) or Risen Guard (10489, Mythic 210489) in their own instance; the Normal kill is the control, and before the fix the Heroic and Mythic standings stayed at 0.",
+  "contract": "#13374: Player::RewardReputation reads creature_onkill_reputation for the active difficulty template, and none of the Stratholme or Scholomance Heroic (difficulty_entry_1) or Mythic (difficulty_entry_2) templates had a row, so their kills gave no Argent Dawn reputation. rev_20261123_13374_strat_scholo_heroic_mythic_reputation.sql copies each Normal entry's row (faction 529, value and standing cap) to both difficulty templates, as Zul'Gurub's templates do. Three neutral-standing level 60 characters each kill an unowned Skeletal Guardian (10390, Heroic 110390) or Risen Guard (10489, Mythic 210489) in their own instance; the Normal kill is the control. The vanilla reputation migration sets both Normal rewards to 5. Human Diplomacy can raise the gain to 5.5, which the server rounds to 5 or 6 from the zero baseline. The scenario expects that same final range for all three kills at default rates, and before the fix the Heroic and Mythic standings stayed at 0.",
   "timeout_ms": 60000,
   "location": {
     "map": 0,
@@ -93,7 +93,8 @@
       "actor": "normal",
       "metric": "reputation",
       "id": 529,
-      "min": 1
+      "min": 5,
+      "max": 6
     },
     {
       "action": "dungeon_difficulty_packet",
@@ -154,7 +155,8 @@
       "actor": "heroic",
       "metric": "reputation",
       "id": 529,
-      "min": 1
+      "min": 5,
+      "max": 6
     },
     {
       "action": "ascension_dungeon_difficulty_packet",
@@ -215,7 +217,8 @@
       "actor": "mythic",
       "metric": "reputation",
       "id": 529,
-      "min": 1
+      "min": 5,
+      "max": 6
     }
   ]
 }
