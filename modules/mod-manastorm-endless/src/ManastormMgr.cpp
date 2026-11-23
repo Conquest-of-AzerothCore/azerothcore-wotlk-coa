@@ -3284,11 +3284,18 @@ namespace
         return (uint64(mapId) << 32) | instanceId;
     }
 
+    bool IsHostileToPlayerSummoner(Creature const* creature)
+    {
+        TempSummon const* summon = creature->ToTempSummon();
+        Unit const* summoner = summon ? summon->GetSummonerUnit() : nullptr;
+        return summoner && creature->IsHostileTo(summoner);
+    }
+
     bool IsPlayerControlledCreature(Creature const* creature)
     {
         return creature &&
             (creature->IsControlledByPlayer() ||
-                creature->IsCreatedByPlayer() ||
+                (creature->IsCreatedByPlayer() && !IsHostileToPlayerSummoner(creature)) ||
                 creature->IsCharmedOwnedByPlayerOrPlayer());
     }
 
