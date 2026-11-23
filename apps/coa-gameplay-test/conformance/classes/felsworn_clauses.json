@@ -103,7 +103,9 @@
     "spell": 300467,
     "clause": "Reduces the cooldown of your Hateforged Barrier by $/1000;s1 sec.",
     "labels": [
-      "300467 effect_value e0 #0"
+      "300467 cost_gate 707527 without",
+      "300467 cost_gate 707527 with",
+      "300467 cost_gate 707527 beyond"
     ],
     "kind": "claim"
   },
@@ -359,7 +361,7 @@
     "spell": 300485,
     "clause": "Increases the tick rate of Immolation Aura by $s2%.",
     "labels": [
-      "300485 effect_value e1 #0"
+      "300485 behaviour_metric_delta tick_rate"
     ],
     "kind": "claim"
   },
@@ -546,7 +548,10 @@
   {
     "spell": 520254,
     "clause": "Carve now channels 1 sec faster.",
-    "labels": [],
+    "labels": [
+      "520254 behaviour_metric_delta channel_held",
+      "520254 behaviour_metric_delta channel_gone"
+    ],
     "kind": "claim"
   },
   {
@@ -752,10 +757,21 @@
   {
     "spell": 560057,
     "clause": "Increases the critical strike chance of Azzinoth's Assault and Sargeron Smite by $s1%.",
-    "labels": [
-      "560057 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Azzinoth's Assault critical strike chance +$s1% (5)",
+        "labels": [
+          "560057 behaviour_metric_delta assault_crit"
+        ]
+      },
+      {
+        "claim": "Sargeron Smite critical strike chance +$s1% (5)",
+        "labels": [
+          "560057 behaviour_metric_delta smite_crit"
+        ]
+      }
+    ]
   },
   {
     "spell": 560284,

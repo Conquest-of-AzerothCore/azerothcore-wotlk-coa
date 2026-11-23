@@ -2181,6 +2181,235 @@
       },
       "observe_source": "Uncounted observation for the owner (mentor D-16): without hold_power_during_wait, from full Energy (cast_power 100) with ManaPerSecond 30 Energy, the aura 800355 on the dummy is read 4300 ms after the cast, to bracket how long the channel lasts. No ledger label.",
       "measure_actor": "dummy"
+    },
+    {
+      "spell": 560057,
+      "name": "Chaos Soldier (Azzinoth's Assault critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "assault_crit",
+      "label_suffix": "assault_crit",
+      "quote": "Increases the critical strike chance of Azzinoth's Assault and Sargeron Smite by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 560057,
+      "target": "caster",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 520262,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "expected_gain": 5,
+      "observe_source": "560057 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask words 32768 / 2048 / 0 (SpellFamilyName 20): Azzinoth's Assault strike 520262 carries SpellFamilyFlags 32768 in word 0 (Spell.dbc, apps/coa-dbc/inspect_dbc.py; the strike 572585 of the off hand carries the same word 0). The caster's critical strike chance of that spell (Player::SpellDoneCritChance with spell mods) is read before (control: 560057 not learned) and after a real learn of 560057: gain 5 points. Reference search 2026-11-23: coa-history spell 560057: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Increases the critical strike chance of Azzinoth's Assault and Sargeron Smite by 5%.'. The same read of Sargeron Smite is the Felfire Adept 560836 entry's read."
+    },
+    {
+      "spell": 560057,
+      "name": "Chaos Soldier (Sargeron Smite critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "smite_crit",
+      "label_suffix": "smite_crit",
+      "quote": "Increases the critical strike chance of Azzinoth's Assault and Sargeron Smite by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 560057,
+      "target": "caster",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 802060,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "expected_gain": 5,
+      "observe_source": "560057 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 4 + 1 = 5 ($s1), EffectSpellClassMask words 32768 / 2048 / 0 (SpellFamilyName 20): Sargeron Smite 802060 carries SpellFamilyFlags 2048 in word 1 (Spell.dbc, apps/coa-dbc/inspect_dbc.py; the strike 572585 of the off hand carries the same word 0). The caster's critical strike chance of that spell (Player::SpellDoneCritChance with spell mods) is read before (control: 560057 not learned) and after a real learn of 560057: gain 5 points. Reference search 2026-11-23: coa-history spell 560057: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Increases the critical strike chance of Azzinoth's Assault and Sargeron Smite by 5%.'. The same read of Sargeron Smite is the Felfire Adept 560836 entry's read."
+    },
+    {
+      "spell": 301287,
+      "name": "Felheart (melee haste per Felfury)",
+      "kind": "metric_delta",
+      "variant": "haste",
+      "label_suffix": "haste",
+      "quote": "Each Felfury active now increases your haste by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 301287,
+      "target": "caster",
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 2300,
+      "expected": 2169.8113,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "301287 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 0 + 1 = 1 ($s1), EffectSpellClassMask word 2 = 8, the SpellFamilyFlags word 2 of Felfury 800058 (StackAmount 6; Effect[0] aura 216 and Effect[1] aura 192, both haste auras with BasePoints -1 + 1 = 0 per stack, Spell.dbc). With six Felfury on the caster each stack of the haste auras carries 1%, so the melee haste is 6% and the main-hand attack time of the reference weapon (Slayer item 2027, 2300 ms, class file weapon_sets) is 2300 / 1.06 = 2169.81 ms; read 500 ms after the stacks are set, before (control: 301287 not learned, 2300 ms) and after a real learn. The Felfury stacks are a precondition fixture by harness set_aura in both phases, named as such. Reference search 2026-11-23: coa-history spell 301287: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Each Felfury active now increases your haste by 1%.'."
+    },
+    {
+      "spell": 520257,
+      "name": "Demonic Embrace (Inner Demon with six Felfury)",
+      "kind": "metric_delta",
+      "variant": "energy_at_six",
+      "label_suffix": "energy_at_six",
+      "quote": "Casting Inner Demon with at least 6 Felfury now restores $520258s1 Energy",
+      "trigger_spell": 804216,
+      "gate_spell": 520257,
+      "target": "caster",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 520258
+      },
+      "before_expected": 0,
+      "expected": 50,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "520257 Effect[0] aura 42 PROC_TRIGGER_SPELL 520258; 520258 Effect[0] SPELL_EFFECT_ENERGIZE (30), MiscValue 3 (Energy), BasePoints 49 + 1 = 50 ($520258s1). Inner Demon 804216 (CasterAuraSpell 800058) is cast once with six Felfury on the caster (a precondition fixture by harness set_aura in both phases, named as such); the energize events of 520258 on the caster are summed 500 ms after the cast, before (control: 520257 not learned, 0) and after a real learn: 50 (one energize of 50). Reference search 2026-11-23: coa-history spell 520257: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Casting Inner Demon with at least 6 Felfury now restores 50 Energy.'."
+    },
+    {
+      "spell": 520257,
+      "name": "Demonic Embrace (Inner Demon with five Felfury)",
+      "kind": "metric_delta",
+      "variant": "control_five_felfury",
+      "label_suffix": "control_five_felfury",
+      "quote": "Casting Inner Demon with at least 6 Felfury now restores $520258s1 Energy",
+      "trigger_spell": 804216,
+      "gate_spell": 520257,
+      "target": "caster",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 520258
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          5,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "520257 Effect[0] aura 42 PROC_TRIGGER_SPELL 520258; 520258 Effect[0] SPELL_EFFECT_ENERGIZE (30), MiscValue 3 (Energy), BasePoints 49 + 1 = 50 ($520258s1). Inner Demon 804216 (CasterAuraSpell 800058) is cast once with five Felfury on the caster (a precondition fixture by harness set_aura in both phases, named as such); the energize events of 520258 on the caster are summed 500 ms after the cast, before (control: 520257 not learned, 0) and after a real learn: 0, the control that the restore needs at least 6 Felfury. Reference search 2026-11-23: coa-history spell 520257: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Casting Inner Demon with at least 6 Felfury now restores 50 Energy.'."
+    },
+    {
+      "spell": 300467,
+      "name": "Infernal Armor (Hateforged Barrier cooldown)",
+      "kind": "cost_gate",
+      "quote": "Reduces the cooldown of your Hateforged Barrier by $/1000;s1 sec",
+      "gated_spell": 707527,
+      "resource": "cooldown",
+      "reduction": 10000,
+      "margin_ms": 250,
+      "observe_source": "300467 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -10001 + 1 = -10000 ms ($/1000;s1 = 10 s), EffectSpellClassMask word 0 = 67108864, the SpellFamilyFlags word 0 of Hateforged Barrier 707527, whose CategoryRecoveryTime is 30000 ms (Spell.dbc), so the reduced cooldown is 20000 ms. Arms, each timed from a priming cast: an attempt 20250 ms later without the talent (refused, 30000 ms stock), with it (goes through), and 19750 ms later with it (refused): the cooldown lies between 19750 and 20250 ms, excluding 18000 and 22000 ms (10% off on both sides). Reference search 2026-11-23: coa-history spell 300467: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Reduces the cooldown of your Hateforged Barrier by -10 sec.'."
+    },
+    {
+      "spell": 300485,
+      "name": "Consumed By Fel (Immolation Aura tick interval)",
+      "kind": "metric_delta",
+      "variant": "tick_rate",
+      "label_suffix": "tick_rate",
+      "quote": "Increases the tick rate of Immolation Aura by $s2%",
+      "gate_spell": 300485,
+      "trigger_spell": 572617,
+      "target": "dummy",
+      "metric": "event_interval_median_ms",
+      "fields": {
+        "stream": "spell_damage",
+        "spell": 800208,
+        "target": "dummy",
+        "since_spell": 572617
+      },
+      "before_expected": 3000,
+      "expected": 2400,
+      "tolerance": 50,
+      "wait_ms": 20000,
+      "expire_ms": 61000,
+      "observe_source": "300485 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 19 (SPELLMOD_ACTIVATION_TIME), BasePoints -26 + 1 = -25 ($s2 shown unsigned), EffectSpellClassMask word 2 = 2048, the SpellFamilyFlags word 2 of Immolation Aura 572617 (Effect[0] aura 227 with EffectAmplitude 3000 and EffectTriggerSpell 800208, Spell.dbc). The tooltip says the tick RATE rises by 25%: owner ruling O-24 (2026-11-22, Sun Cleric ADR 0031, the Blightbreaker/Mercy entry) reads such a tooltip literally, a rate of 1.25 times the base, so the interval is 3000 x 100 / 125 = 2400 ms (the stock -25% period modifier gives 2250 ms, a rate of 1.33). The median interval between the damage events of the tick spell 800208 on the dummy since the cast is read 20000 ms after a real cast, before (control: 300485 not learned, 3000 ms) and after a real learn, within 50 ms: 2250 is excluded. Reference search 2026-11-23: coa-history spell 300485: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Increases the tick rate of Immolation Aura by -25%.'. Immolation Aura costs health (PowerType health, ManaCost 50) and its aura drains the caster, so the caster is held at 100% of the health fixture before each cast (caster_health_pct), a setup fixture.",
+      "caster_health_pct": 100
+    },
+    {
+      "spell": 520254,
+      "name": "Quick Carving (Carve still channelled at 1400 ms)",
+      "kind": "metric_delta",
+      "variant": "channel_held",
+      "label_suffix": "channel_held",
+      "quote": "Carve now channels 1 sec faster",
+      "gate_spell": 520254,
+      "trigger_spell": 800206,
+      "target": "caster",
+      "cast_power": 100,
+      "metric": "aura",
+      "fields": {
+        "spell": 800206
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 1400,
+      "expire_ms": 3500,
+      "observe_source": "520254 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints -1001 + 1 = -1000 ms (1 sec), EffectSpellClassMask word 2 = 2097152, the SpellFamilyFlags word 2 of Carve 800206 (a self channel, SPELL_ATTR1_IS_SELF_CHANNELED, DurationIndex 66 = 2500 ms; Effect[0] aura 23 on the caster). The channel aura 800206 on the caster is read 1400 ms after a real cast: before (control, 520254 not learned) the 2500 ms channel is still running (1); after a real learn it is still running (1) at 1400 ms, 100 ms short of its 1500 ms end. The held and gone reads together put the channel between 1400 and 1700 ms: 1000 ms less than stock, excluding durations 10% off on both sides. The weapon set is Tyrant (class ADR 0001: Carve needs a two-handed weapon) and the cast power is 100 so the 20 Energy cost cannot refuse the cast; Carve also consumes 2 Felfury (AscensionCustomResourceData.h:524, resource 800058, 2 fixed), so Felfury 800058 x6 is set before each cast as a precondition fixture by harness set_aura in both phases, named as such (the first two runs refused the cast with reason 85 NO_POWER). Reference search 2026-11-23: coa-history spell 520254: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Carve now channels 1 sec faster.'.",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 520254,
+      "name": "Quick Carving (Carve no longer channelled at 1700 ms)",
+      "kind": "metric_delta",
+      "variant": "channel_gone",
+      "label_suffix": "channel_gone",
+      "quote": "Carve now channels 1 sec faster",
+      "gate_spell": 520254,
+      "trigger_spell": 800206,
+      "target": "caster",
+      "cast_power": 100,
+      "metric": "aura",
+      "fields": {
+        "spell": 800206
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1700,
+      "expire_ms": 3500,
+      "observe_source": "520254 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints -1001 + 1 = -1000 ms (1 sec), EffectSpellClassMask word 2 = 2097152, the SpellFamilyFlags word 2 of Carve 800206 (a self channel, SPELL_ATTR1_IS_SELF_CHANNELED, DurationIndex 66 = 2500 ms; Effect[0] aura 23 on the caster). The channel aura 800206 on the caster is read 1700 ms after a real cast: before (control, 520254 not learned) the 2500 ms channel is still running (1); after a real learn it is over (0) at 1700 ms, 200 ms past its 1500 ms end. The held and gone reads together put the channel between 1400 and 1700 ms: 1000 ms less than stock, excluding durations 10% off on both sides. The weapon set is Tyrant (class ADR 0001: Carve needs a two-handed weapon) and the cast power is 100 so the 20 Energy cost cannot refuse the cast; Carve also consumes 2 Felfury (AscensionCustomResourceData.h:524, resource 800058, 2 fixed), so Felfury 800058 x6 is set before each cast as a precondition fixture by harness set_aura in both phases, named as such (the first two runs refused the cast with reason 85 NO_POWER). Reference search 2026-11-23: coa-history spell 520254: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Carve now channels 1 sec faster.'.",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ]
+      ]
     }
   ],
   "player_observations": [],
