@@ -589,7 +589,16 @@
   "dual_target_effects": [],
   "target_aura_gates": [],
   "learned_hits": [],
-  "cast_auras": [],
+  "cast_auras": [
+    {
+      "spell": 501321,
+      "auras": [
+        803468,
+        800058
+      ],
+      "reason": "Sargeron Smite 501321 needs the caster aura 803468 (At Least 2 Felfury, CasterAuraSpell in Spell.dbc); the hit scenario cast 0 landing hits without it. 803468 and the Felfury resource 800058 are precondition fixtures set before every cast (the same pair as the Sunder cost gate); the claim is the damage."
+    }
+  ],
   "hit_casts": [],
   "weapon_sets": {
     "Slayer": {
