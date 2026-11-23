@@ -306,6 +306,56 @@ TEST(CoAPetBattlesMechanics, Prop137Handler)
     EXPECT_TRUE(HasAura(battle.Current(Side::P), 1075));
 }
 
+TEST(CoAPetBattlesMechanics, MalformedCommandsAreHandledSafely)
+{
+    auto events = [](std::string const& command)
+    {
+        ConstantRng rng(100);
+        Battle battle(MechanicCatalog(), { MakePet(Strike, "Beast") }, { Stunned(MakePet(Strike, "Critter")) }, rng);
+        std::vector<std::string> canonical;
+        for (Event const& event : Round(battle, command, "A1").events)
+            canonical.push_back(event.Canonical());
+        return canonical;
+    };
+    EXPECT_EQ(events(""), events("A1"));
+    EXPECT_EQ(events("A"), events("A1"));
+    EXPECT_EQ(events("A1e10"), events("A1"));
+    EXPECT_EQ(events("A-99999999999"), events("A1"));
+
+    for (std::string const command : { "S0", "S9", "Sx", "S", "S1e12", "S2" })
+    {
+        ConstantRng rng(100);
+        Battle battle(MechanicCatalog(), { MakePet(Strike, "Beast") }, { MakePet(Strike, "Critter") }, rng);
+        RoundResult const result = Round(battle, command, "A1");
+        EXPECT_EQ(result.status, "invalid") << command;
+        EXPECT_TRUE(result.events.empty()) << command;
+        EXPECT_EQ(battle.round, 0) << command;
+        EXPECT_EQ(battle.Active(Side::P), 1) << command;
+    }
+}
+
+TEST(CoAPetBattlesMechanics, NevermoreLocksTheNextAbility)
+{
+    ConstantRng rng(100);
+    Pet enemy = MakePet(Strike, "Critter");
+    Battle battle(MechanicCatalog(), { MakePet(522, "Beast") }, { enemy }, rng);
+    RoundResult const first = Round(battle, "A1", "A1");
+    double lockout = 0;
+    for (Turn const& turn : MechanicCatalog().Ability(738)->turns)
+        for (Fx const& fx : turn.fx)
+            if (fx.prop == 129)
+                lockout = fx.p[0];
+    ASSERT_EQ(lockout, 5);
+    EXPECT_EQ(Count(first.events, "act"), 2u);
+    EXPECT_FALSE(HasAura(battle.Current(Side::E), 738));
+    EXPECT_EQ(battle.Current(Side::E).cd[0], lockout);
+    RoundResult const second = Round(battle, "A1", "A1");
+    Event const* pass = First(second.events, "stunned");
+    ASSERT_NE(pass, nullptr);
+    EXPECT_TRUE(pass->Flag("pass"));
+    EXPECT_EQ(battle.Current(Side::E).cd[0], lockout - 1);
+}
+
 TEST(CoAPetBattlesMechanics, UnknownPropertyIsCounted)
 {
     ConstantRng rng(100);

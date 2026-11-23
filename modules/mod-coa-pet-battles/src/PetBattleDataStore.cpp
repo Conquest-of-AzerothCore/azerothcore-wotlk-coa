@@ -176,7 +176,7 @@ namespace CoAPetBattles
         settings.xpStep = ReadDecimal("CoAPetBattles.XpStep", settings.xpStep);
         _settings = settings;
         if (_loaded)
-            _catalog = std::make_unique<Engine::Catalog>(_data, _settings);
+            _catalog = std::make_shared<Engine::Catalog const>(_data, _settings);
     }
 
     void PetBattleDataStore::Load()
@@ -207,7 +207,7 @@ namespace CoAPetBattles
             data.zoneSpecies.size(), data.presentations.size(), data.modelSizes.size(), data.displaySizes.size(),
             data.companions.size());
         _data = std::move(data);
-        _catalog = std::make_unique<Engine::Catalog>(_data, _settings);
+        _catalog = std::make_shared<Engine::Catalog const>(_data, _settings);
         _loaded = true;
     }
 

@@ -65,6 +65,30 @@ namespace CoAPetBattles::Engine
 
         void Detonate(Battle& b, std::vector<Event>& ev, Side s);
 
+        std::optional<double> CommandNumber(std::string const& command)
+        {
+            return LuaToNumber(command.size() > 1 ? command.substr(1) : std::string());
+        }
+
+        int32_t CommandSlot(std::string const& command)
+        {
+            std::optional<double> const number = CommandNumber(command);
+            if (!number)
+                return 1;
+            if (*number >= 1 && *number <= 3 && *number == std::floor(*number))
+                return static_cast<int32_t>(*number);
+            return 0;
+        }
+
+        std::optional<int32_t> TeamIndex(Battle const& b, Side side, std::string const& command)
+        {
+            std::optional<double> const number = CommandNumber(command);
+            if (!number || *number != std::floor(*number) || *number < 1 ||
+                *number > static_cast<double>(b.Team(side).size()))
+                return std::nullopt;
+            return static_cast<int32_t>(*number);
+        }
+
         void FixLastHp(std::vector<Event>& ev, Side s, int32_t idx, double hp)
         {
             if (ev.empty())
@@ -1289,10 +1313,7 @@ namespace CoAPetBattles::Engine
             }
             else
             {
-                std::string const command = cmd ? *cmd : "A1";
-                std::optional<double> parsed = LuaToNumber(command.substr(1));
-                slot = parsed && *parsed >= 1 && *parsed <= 3 && *parsed == std::floor(*parsed) ?
-                    static_cast<int32_t>(*parsed) : (parsed ? 0 : 1);
+                slot = CommandSlot(cmd ? *cmd : "A1");
                 if (!Ready(pet, slot))
                     slot = 1;
                 if (!Ready(pet, slot))
@@ -1771,8 +1792,7 @@ namespace CoAPetBattles::Engine
                 ab = pet.Ability(pet.channel->slot);
             else
             {
-                std::optional<double> slot = LuaToNumber(cmd->substr(1));
-                ab = pet.Ability(slot && *slot == std::floor(*slot) ? static_cast<int32_t>(*slot) : (slot ? 0 : 1));
+                ab = pet.Ability(CommandSlot(*cmd));
             }
             return ab && ab->priority && !pet.channel;
         }
@@ -1789,6 +1809,16 @@ namespace CoAPetBattles::Engine
             RoundResult result;
             std::vector<Event>& ev = result.events;
             std::map<Pet const*, int32_t> used;
+            std::optional<int32_t> swapTo;
+            if (!commandP.empty() && commandP[0] == 'S')
+            {
+                swapTo = TeamIndex(b, Side::P, commandP);
+                if (!swapTo)
+                {
+                    result.status = "invalid";
+                    return result;
+                }
+            }
             b.round = b.round + 1;
             b.acted = { false, false };
             std::optional<std::string> cmdP = commandP;
@@ -1796,7 +1826,7 @@ namespace CoAPetBattles::Engine
             bool const forcedSwap = b.Current(Side::P).hp <= 0;
             if (!commandP.empty() && commandP[0] == 'S')
             {
-                int32_t const to = static_cast<int32_t>(LuaToNumber(commandP.substr(1)).value_or(0));
+                int32_t const to = *swapTo;
                 int32_t const from = b.Active(Side::P);
                 b.At(Side::P, from).channel.reset();
                 b.Active(Side::P) = to;

@@ -29,7 +29,7 @@ namespace
         static bool HandleSim(ChatHandler* handler, uint32 speciesA, uint32 speciesB, Optional<uint32> level,
             Optional<uint32> seed)
         {
-            CoAPetBattles::Engine::Catalog const* catalog = sPetBattleData->Catalog();
+            std::shared_ptr<CoAPetBattles::Engine::Catalog const> const catalog = sPetBattleData->Catalog();
             if (!sPetBattleData->IsLoaded() || !catalog)
             {
                 handler->SendErrorMessage("pet battle data is not loaded", false);
