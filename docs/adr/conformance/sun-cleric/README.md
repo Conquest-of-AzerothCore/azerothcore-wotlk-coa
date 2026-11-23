@@ -44,3 +44,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0038](0038-heal-procs-fire-once-on-a-self-heal.md) | Nine heal and critical-strike procs fire once on a self-heal, from the actor-side event (mentor D-255/D-258/D-276) |
 | [0039](0039-calm-disarms-ranged-weapons.md) | Calm disarms ranged weapons through the class contract (owner O-28) |
 | [0040](0040-scroll-of-hope-heals-each-ally-once-per-fall.md) | Scroll of Hope heals each ally that falls below 35%, once per fall, not the Cleric (owner ruling O-29) |
+| [0041](0041-lights-of-absolution-restores-missing-resources-not-mana.md) | Lights of Absolution restores 2% of the missing Energy, Focus, Runic Power and Rage, and no mana (owner ruling O-30; supersedes the energize line of 0028) |

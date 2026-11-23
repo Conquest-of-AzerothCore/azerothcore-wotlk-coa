@@ -3,6 +3,8 @@
 - Status: accepted
 - Date: 2026-11-22
 - Ruling: owner O-13 (card Q-sc-2, option a), mentor decision log, 2026-11-22
+- Superseded by: [0041](0041-lights-of-absolution-restores-missing-resources-not-mana.md) (owner ruling O-30) for the
+  energize line of the Decision and the unmeasured resource part of the Consequences.
 
 ## Context
 

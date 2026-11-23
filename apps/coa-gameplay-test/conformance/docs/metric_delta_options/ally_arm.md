@@ -1,4 +1,4 @@
-# Ally arm (`metric_delta` `ally_arm`, ADR 1016, ADR 1029, ADR 1045, ADR 1046)
+# Ally arm (`metric_delta` `ally_arm`, ADR 1016, ADR 1029, ADR 1045, ADR 1046, ADR 1075)
 
 `ally_arm` is an object of these keys, at least one:
 
@@ -22,6 +22,11 @@
   lines and checks that the spell's whole target selection (DBC implicit targets and every script filter) reaches the
   raid, not only the party (mentor D-56).
 - `ally_health`: `[value, maximum]`, set on every ally in both phases, ahead of the trigger.
+- `ally_power` (ADR 1075, provisional): a non-empty list of `[power, value]`, a power index 0 to 6 once each and a
+  value of at least 0, needing at least one ally. Each phase sets every ally's listed power to its value with the
+  harness `set_power` step, right after `ally_health` and ahead of the trigger (the harness refuses a value above the
+  maximum). Read the pool with a judged `power` arm on the ally, not a precondition, so a pool that did not move
+  alerts.
 - `ally_casts`: spells the caster casts at `ally` in both phases ahead of the trigger, 2000 ms after each (global
   cooldown). Each spell must be in the entry's `learn` and must not be its trigger or a setup cast; a cast time above
   1500 ms (the settle less the 500 ms cast margin) and `attack_swings` are refused. Before each cast the option sets

@@ -58,6 +58,14 @@ def ally_entry(**option) -> dict:
     return steed_entry(ally_arm={'allies': 2, 'arms': [HEALTH_ARM, AURA_ARM], **option})
 
 
+POWER_ARM = {'actors': ['ally'], 'metric': 'power', 'fields': {'power': 1}, 'before_expected': 500,
+             'expected': 510, 'tolerance': 0, 'source': 'a seeded 2% of the 500 missing rage of 1000'}
+
+
+def power_entry(**option) -> dict:
+    return steed_entry(ally_arm={'allies': 1, 'ally_power': [[1, 500]], 'arms': [POWER_ARM], **option})
+
+
 def ratio_entry(**ratio) -> dict:
     return steed_entry(ally_arm={'allies': 2, 'arms': [COPY_ARM, PRIMARY_ARM], 'ratios': [{**RATIO, **ratio}]})
 
@@ -183,6 +191,42 @@ class AllyArmScenarioTests(unittest.TestCase):
         self.assertLess(before, ally_casts[1])
         self.assertLess(ally_casts[1], trigger)
         self.assertLess(max(healths), trigger)
+
+    def test_an_ally_power_is_set_on_every_ally_in_both_phases_after_its_health_ahead_of_the_trigger(self):
+        scenario, [expectation] = self.scenario(power_entry(allies=2, ally_health=[3000, 10000],
+                                                            ally_power=[[1, 500], [3, 40]]))
+        run.validate(scenario)
+        steps = scenario['steps']
+        powers = [index for index, step in enumerate(steps) if step['action'] == 'set_power'
+                  and step['actor'] in ('ally', 'ally2')]
+        self.assertEqual([(steps[index]['actor'], steps[index]['power'], steps[index]['value']) for index in powers],
+                         [('ally', 1, 500), ('ally2', 1, 500), ('ally', 3, 40), ('ally2', 3, 40)] * 2)
+        healths = [index for index, step in enumerate(steps) if step['action'] == 'set_health'
+                   and step['actor'] in ('ally', 'ally2')]
+        triggers = [index for index, step in enumerate(steps)
+                    if step['action'] == 'cast' and step.get('target') == 'caster' and step['spell'] == SPELL]
+        before = labels_of(scenario).index(expectation.model['before_label'])
+        self.assertLess(max(healths[:2]), min(powers[:4]))
+        self.assertLess(max(powers[:4]), before)
+        self.assertLess(before, min(powers[4:]))
+        self.assertLess(max(powers[4:]), triggers[-1])
+        self.assertEqual(expectation.model['ally_arm']['ally_power'], [[1, 500], [3, 40]])
+        self.assertIn("sets the allies' power 1 to 500 ahead of the trigger", scenario['contract'])
+
+    def test_without_an_ally_power_no_ally_power_step_or_model_key_is_written(self):
+        scenario, [expectation] = self.scenario(ally_entry())
+        self.assertFalse(any(step['action'] == 'set_power' and step['actor'] in ('ally', 'ally2')
+                             for step in scenario['steps']))
+        self.assertNotIn('ally_power', expectation.model['ally_arm'])
+        self.assertNotIn("the allies' power", scenario['contract'])
+
+    def test_a_malformed_ally_power_or_one_without_an_ally_is_refused(self):
+        for value in ([], [1, 500], [[7, 1]], [[-1, 1]], [[1, -1]], [[1, 500], [1, 400]], [[True, 1]],
+                      [[1, 500.0]], [[1]], 'rage'):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                parse({'allies': 1, 'ally_power': value})
+        with self.assertRaises(ValueError):
+            parse({'allies': 0, 'ally_power': [[1, 500]], 'arms': [{**POWER_ARM, 'actors': ['caster']}]})
 
     def test_a_malformed_option_or_an_arm_without_its_stated_expectation_is_refused(self):
         readback = next(metric for metric, kind in metric_evidence().items() if kind == READBACK)
@@ -486,6 +530,18 @@ class AllyArmVerdictTests(unittest.TestCase):
         values = {key: value for key, value in self.held().items() if key != (0, 'after')}
         self.assertEqual(self.judged(ally_entry(), values).status, 'unmeasured')
         self.assertEqual(self.judged(ally_entry(), values, main=(1.0, 1.0)).status, 'alert')
+
+    def test_a_partial_pool_restored_by_its_missing_share_holds(self):
+        verdict = self.judged(power_entry(), {(0, 'before'): 500, (0, 'after'): 510})
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_mutant_a_partial_pool_restored_nothing_or_by_the_maximum_alerts(self):
+        for after in (500, 520):
+            with self.subTest(after=after):
+                verdict = self.judged(power_entry(), {(0, 'before'): 500, (0, 'after'): after})
+                self.assertEqual(verdict.status, 'alert')
+                self.assertIn(f'ally arm 0 power: 500 before (expected 500) and {after} after (expected 510), '
+                              f'within 0: off', verdict.explanation)
 
     def ratio_values(self, copy_after=5750, primary_after=6000) -> dict:
         return {(0, 'before'): 5000, (0, 'after'): copy_after, (1, 'before'): 5000, (1, 'after'): primary_after}
