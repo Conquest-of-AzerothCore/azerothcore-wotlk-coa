@@ -1,4 +1,4 @@
-# Stack feed (`metric_delta` `stack_feed`, ADR 1078, provisional)
+# Stack feed (`metric_delta` `stack_feed`, ADR 1080, provisional)
 
 `stack_feed` is `{"aura": A, "cap": C, "window_ms": W, "trials": N, "source": text}`, plus an optional
 `"refeed_auras": [[aura, stacks], ...]`, on an entry whose metric is `aura_stacks` of `A`, with `expected` C,

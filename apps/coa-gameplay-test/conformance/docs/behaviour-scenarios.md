@@ -2244,7 +2244,7 @@ Options with a module:
 - [`apply_stamp`](metric_delta_options/apply_stamp.md): an encounter timeline stamps the aura apply and the trigger
   cast in one time base, and the after reading's bracket from the apply is judged against a window (ADR 1067)
 - [`stack_feed`](metric_delta_options/stack_feed.md): a stack cap fed by chance, judged over repeated trials polled
-  after every feed cast, a trial without cap + 1 applications inside the duration void (ADR 1078, provisional)
+  after every feed cast, a trial without cap + 1 applications inside the duration void (ADR 1080, provisional)
 - [`corpse`](metric_delta_options/corpse.md): a creature corpse a real setup cast kills in the treatment phase (ADR
   0493)
 - [`player_spell_power`](metric_delta_options/player_spell_power.md): the caster's spell-power fixture (ADR 0364)

@@ -1,4 +1,4 @@
-# 1079. A crit-gated proc is judged on critical trials with a non-critical control
+# 1081. A crit-gated proc is judged on critical trials with a non-critical control
 
 - Status: accepted (number provisional, assigned at merge)
 - Date: 2026-11-23

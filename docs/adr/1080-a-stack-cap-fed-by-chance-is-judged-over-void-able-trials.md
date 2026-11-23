@@ -1,4 +1,4 @@
-# 1078. A stack cap fed by chance is judged over trials that can be void
+# 1080. A stack cap fed by chance is judged over trials that can be void
 
 - Status: accepted (number provisional, assigned at merge)
 - Date: 2026-11-23
