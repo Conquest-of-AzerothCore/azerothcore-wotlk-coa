@@ -1335,7 +1335,7 @@
       "expected": 0.7,
       "quote": "reducing Physical damage taken by $s3%",
       "strike_spell": 92559,
-      "caster_health_pct": 99,
+      "caster_health_pct": 100,
       "caster_max_health": 100000,
       "trials": 18,
       "arms": [
@@ -1386,7 +1386,7 @@
       "expected": 1.0,
       "quote": "reducing Physical damage taken by $s3%",
       "strike_spell": 47632,
-      "caster_health_pct": 99,
+      "caster_health_pct": 100,
       "caster_max_health": 100000,
       "trials": 20,
       "arms": [
