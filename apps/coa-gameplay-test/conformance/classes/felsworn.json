@@ -5270,6 +5270,243 @@
       "poll_ms": 25,
       "caster": false,
       "observe_source": "560641 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704397 (Crippling Pain, Effect[0] aura 290 MOD_CRIT_PCT -100000, DurationIndex 35 = 4000 ms); AscensionFelswornAbilities.cpp:321-322 casts 704397 on the target of a landed Cripple 704371 when 560641 is known. The aura on the dummy is polled with game-time stamps after a real Cripple cast. The no-critical part is a data readback only: no harness route makes an enemy attack and critically strike (not entered, see the report). Reference search 2026-11-23: coa-history spell 560641: 0 events in 186 logs (a passive leaves no event); 704397: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Warlock Training 560641 'Cripple now causes the enemy target to be unable to critically strike for 4 seconds.', same figure; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 704611,
+      "name": "Battle Finesse (dodge after 1000 ms of channeling: 4 ticks of 1%)",
+      "kind": "metric_delta",
+      "variant": "mid",
+      "label_suffix": "mid",
+      "quote": "While channeling Carve, your chance to dodge is now increased by $s1% based on how long you channel,",
+      "trigger_spell": 800206,
+      "gate_spell": 704611,
+      "expected": 4,
+      "expected_gain": 4,
+      "tolerance": 1.0,
+      "wait_ms": 1000,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "dodge_chance",
+      "fields": {},
+      "before_expected": 0,
+      "disable_regeneration": true,
+      "expire_ms": 3000,
+      "void_on_cast_failure": true,
+      "observe_source": "704611 Effect[0] aura 107 ADD_FLAT_MODIFIER (the flag read by the script, $s1 = 1); Carve 800206 (DurationIndex 66 = 2500 ms) is rewritten to tick every 250 ms (AscensionFelswornContracts.cpp:156-162); each tick adds one to the aura's tick count and its Effect[1] MOD_DODGE_PERCENT amount is set to min(10, ticks) when 704611 is known (AscensionFelswornAuras.cpp:33-34, :112-118). The caster's live dodge chance is read during the channel, before (control: 704611 not learned) and after the learn. Read 1000 ms after the cast: 4 ticks of 250 ms, +4 points (tolerance 1 point for the tick phase). Reference search 2026-11-23: coa-history spell 704611: 0 events in 186 logs (a passive leaves no event); spell 800206 Carve: logged by other ids only, nothing found that decides the slope; bindmysoul talents snapshot (fetched 2026-07-22): Battle Finesse 704611 'While channeling Carve, your chance to dodge is now increased by 1% based on how long you channel, up to a maximum of 10%.', same figures; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 704611,
+      "name": "Battle Finesse (dodge near the end of the channel: capped at 10%)",
+      "kind": "metric_delta",
+      "variant": "cap",
+      "label_suffix": "cap",
+      "quote": "While channeling Carve, your chance to dodge is now increased by $s1% based on how long you channel,",
+      "trigger_spell": 800206,
+      "gate_spell": 704611,
+      "expected": 10,
+      "expected_gain": 10,
+      "tolerance": 1.0,
+      "wait_ms": 2400,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "dodge_chance",
+      "fields": {},
+      "before_expected": 0,
+      "disable_regeneration": true,
+      "expire_ms": 3000,
+      "void_on_cast_failure": true,
+      "observe_source": "704611 Effect[0] aura 107 ADD_FLAT_MODIFIER (the flag read by the script, $s1 = 1); Carve 800206 (DurationIndex 66 = 2500 ms) is rewritten to tick every 250 ms (AscensionFelswornContracts.cpp:156-162); each tick adds one to the aura's tick count and its Effect[1] MOD_DODGE_PERCENT amount is set to min(10, ticks) when 704611 is known (AscensionFelswornAuras.cpp:33-34, :112-118). The caster's live dodge chance is read during the channel, before (control: 704611 not learned) and after the learn. Read 2400 ms after the cast, inside the 2500 ms channel: at least 9 ticks, +9 to +10 points (tolerance 0.51 around 9.5 would not exclude 9; the read is judged as 10 within 1 so +9..+11 and a 20-point uncapped slope is excluded). Reference search 2026-11-23: coa-history spell 704611: 0 events in 186 logs (a passive leaves no event); spell 800206 Carve: logged by other ids only, nothing found that decides the slope; bindmysoul talents snapshot (fetched 2026-07-22): Battle Finesse 704611 'While channeling Carve, your chance to dodge is now increased by 1% based on how long you channel, up to a maximum of 10%.', same figures; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 570077,
+      "name": "Blighted Strikes (healing received reduced by 20%)",
+      "kind": "metric_delta",
+      "variant": "amount",
+      "label_suffix": "amount",
+      "quote": "While Inner Demon is active your melee attacks reduce the target's healing received by $567578s1% for $567578d,",
+      "trigger_spell": 803715,
+      "gate_spell": 570077,
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 567578,
+        "effect": 0,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": -20,
+      "tolerance": 0.01,
+      "wait_ms": 1000,
+      "target": "dummy",
+      "cast_power": 100,
+      "measure_actor": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 500,
+      "observe_source": "570077 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 567578 (Effect[0] aura 118 MOD_HEALING_PCT MiscValue 127, EffectBasePoints -21 + 1 = -20, DurationIndex 31 = 8000 ms, StackAmount 2); AscensionFelswornEvents.cpp:80-81, :189-190 casts 567578 on the target of every outgoing non-derived melee damage event while Inner Demon 804216 is on the caster (no chance roll: the DBC ProcChance 20 on 567578 is not rolled by the handler). Inner Demon is set on the caster by harness set_aura in both arms (a precondition fixture). Carve 803715 is the melee hit. The amount of Effect[0] of 567578 on the dummy is read before (control: 570077 not learned, aura absent) and after a Carve hit with it learned: -20. Reference search 2026-11-23: coa-history spell 570077: 0 events in 186 logs (a passive leaves no event; positive control 803715 Carve has 1086 events); spell 567578 Blighted Strike: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Blighted Strikes 570077 \"While Inner Demon is active your melee attacks reduce the target's healing received by -20% for 8 seconds, stacking 2 times.\", same figures; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 570077,
+      "name": "Blighted Strikes (control: no debuff without Inner Demon)",
+      "kind": "metric_delta",
+      "variant": "no_inner",
+      "label_suffix": "no_inner",
+      "quote": "While Inner Demon is active your melee attacks reduce the target's healing received by $567578s1% for $567578d,",
+      "trigger_spell": 803715,
+      "gate_spell": 570077,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 567578
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "target": "dummy",
+      "cast_power": 100,
+      "measure_actor": "dummy",
+      "phase_auras": [],
+      "void_on_cast_failure": true,
+      "expire_ms": 500,
+      "observe_source": "570077 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 567578 (Effect[0] aura 118 MOD_HEALING_PCT MiscValue 127, EffectBasePoints -21 + 1 = -20, DurationIndex 31 = 8000 ms, StackAmount 2); AscensionFelswornEvents.cpp:80-81, :189-190 casts 567578 on the target of every outgoing non-derived melee damage event while Inner Demon 804216 is on the caster (no chance roll: the DBC ProcChance 20 on 567578 is not rolled by the handler). Inner Demon is set on the caster by harness set_aura in both arms (a precondition fixture). Carve 803715 is the melee hit. Control: the same Carve hit with 570077 learned and no Inner Demon on the caster: no debuff (stacks 0). Reference search 2026-11-23: coa-history spell 570077: 0 events in 186 logs (a passive leaves no event; positive control 803715 Carve has 1086 events); spell 567578 Blighted Strike: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Blighted Strikes 570077 \"While Inner Demon is active your melee attacks reduce the target's healing received by -20% for 8 seconds, stacking 2 times.\", same figures; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 570077,
+      "name": "Blighted Strikes (debuff present 7600 ms after the hit)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "While Inner Demon is active your melee attacks reduce the target's healing received by $567578s1% for $567578d,",
+      "trigger_spell": 803715,
+      "gate_spell": 570077,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 567578
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 7600,
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          7550,
+          7800
+        ]
+      },
+      "target": "dummy",
+      "cast_power": 100,
+      "measure_actor": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 500,
+      "observe_source": "570077 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 567578 (Effect[0] aura 118 MOD_HEALING_PCT MiscValue 127, EffectBasePoints -21 + 1 = -20, DurationIndex 31 = 8000 ms, StackAmount 2); AscensionFelswornEvents.cpp:80-81, :189-190 casts 567578 on the target of every outgoing non-derived melee damage event while Inner Demon 804216 is on the caster (no chance roll: the DBC ProcChance 20 on 567578 is not rolled by the handler). Inner Demon is set on the caster by harness set_aura in both arms (a precondition fixture). Carve 803715 is the melee hit. One Carve hit: the debuff is on the dummy 7600 ms later (excludes a duration 5% short or less). Reference search 2026-11-23: coa-history spell 570077: 0 events in 186 logs (a passive leaves no event; positive control 803715 Carve has 1086 events); spell 567578 Blighted Strike: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Blighted Strikes 570077 \"While Inner Demon is active your melee attacks reduce the target's healing received by -20% for 8 seconds, stacking 2 times.\", same figures; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 570077,
+      "name": "Blighted Strikes (debuff gone 8400 ms after the hit)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "While Inner Demon is active your melee attacks reduce the target's healing received by $567578s1% for $567578d,",
+      "trigger_spell": 803715,
+      "gate_spell": 570077,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 567578
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 8400,
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          8350,
+          8600
+        ]
+      },
+      "target": "dummy",
+      "cast_power": 100,
+      "measure_actor": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 500,
+      "observe_source": "570077 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 567578 (Effect[0] aura 118 MOD_HEALING_PCT MiscValue 127, EffectBasePoints -21 + 1 = -20, DurationIndex 31 = 8000 ms, StackAmount 2); AscensionFelswornEvents.cpp:80-81, :189-190 casts 567578 on the target of every outgoing non-derived melee damage event while Inner Demon 804216 is on the caster (no chance roll: the DBC ProcChance 20 on 567578 is not rolled by the handler). Inner Demon is set on the caster by harness set_aura in both arms (a precondition fixture). Carve 803715 is the melee hit. One Carve hit: the debuff is gone 8400 ms later (excludes a duration 5% long or more). Reference search 2026-11-23: coa-history spell 570077: 0 events in 186 logs (a passive leaves no event; positive control 803715 Carve has 1086 events); spell 567578 Blighted Strike: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Blighted Strikes 570077 \"While Inner Demon is active your melee attacks reduce the target's healing received by -20% for 8 seconds, stacking 2 times.\", same figures; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 570077,
+      "name": "Blighted Strikes (stacking 2 times)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "quote": "stacking $567578u times.",
+      "trigger_spell": 803715,
+      "gate_spell": 570077,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 567578
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "target": "dummy",
+      "cast_power": 100,
+      "measure_actor": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 500,
+      "observe_source": "570077 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 567578 (Effect[0] aura 118 MOD_HEALING_PCT MiscValue 127, EffectBasePoints -21 + 1 = -20, DurationIndex 31 = 8000 ms, StackAmount 2); AscensionFelswornEvents.cpp:80-81, :189-190 casts 567578 on the target of every outgoing non-derived melee damage event while Inner Demon 804216 is on the caster (no chance roll: the DBC ProcChance 20 on 567578 is not rolled by the handler). Inner Demon is set on the caster by harness set_aura in both arms (a precondition fixture). Carve 803715 is the melee hit. Two setup Carve hits 1600 ms apart then the timed third: the debuff stacks read 2 and not 3 (the cap), 0 in the control phase. Reference search 2026-11-23: coa-history spell 570077: 0 events in 186 logs (a passive leaves no event; positive control 803715 Carve has 1086 events); spell 567578 Blighted Strike: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Blighted Strikes 570077 \"While Inner Demon is active your melee attacks reduce the target's healing received by -20% for 8 seconds, stacking 2 times.\", same figures; expected values come from the tooltip and the DBC only.",
+      "setup_casts": [
+        803715,
+        803715
+      ],
+      "setup_wait_ms": 1600
+    },
+    {
+      "spell": 704370,
+      "name": "Curse of Argus (the aura is held for its duration after the last application)",
+      "kind": "last_application_expiry",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Each time Bane of Chaos deals damage its damage is increased on the target by $707511s1% for $707511d,",
+      "trigger_spell": 704368,
+      "gate_spell": 704370,
+      "aura": 707511,
+      "expected_ms": 6000,
+      "control_window_ms": 500,
+      "window_ms": 40000,
+      "poll_ms": 50,
+      "caster": false,
+      "observe_source": "704370 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 707511 (Effect[0] aura 271 MOD_DAMAGE_FROM_CASTER, BasePoints 0 + 1 = 1 per stack, DurationIndex 8 = 15000 ms in the packet's Spell.dbc? read below, StackAmount 20); AscensionFelswornEvents.cpp:211-212 casts 707511 on the target of each damage event of Bane of Chaos 704368 or Chaos 802676. Timed by polling 707511 on the dummy with game-time stamps after a real Bane of Chaos cast; the last application ends the Bane's damage. Reference search 2026-11-23: coa-history spell 704370: 0 events in 186 logs (a passive leaves no event); spell 707511 Curse of Argus: SPELL_AURA_APPLIED_DOSE 690 events in 4 logs (positive control: it stacks in real play); nothing else found."
     }
   ],
   "player_observations": [],

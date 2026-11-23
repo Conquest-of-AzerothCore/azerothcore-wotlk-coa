@@ -1280,19 +1280,31 @@
   {
     "spell": 570077,
     "clause": "While Inner Demon is active your melee attacks reduce the target's healing received by $567578s1% for $567578d,",
-    "labels": [
-      "570077 effect_value 567578e0 #0",
-      "570077 spell_duration 567578 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reduce the target's healing received by $567578s1%",
+        "labels": [
+          "570077 behaviour_metric_delta amount",
+          "570077 behaviour_metric_delta no_inner"
+        ]
+      },
+      {
+        "claim": "for $567578d",
+        "labels": [
+          "570077 behaviour_metric_delta held",
+          "570077 behaviour_metric_delta gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 570077,
     "clause": "stacking $567578u times.",
+    "kind": "claim",
     "labels": [
-      "570077 max_stacks 567578 #2"
-    ],
-    "kind": "claim"
+      "570077 behaviour_metric_delta stack_cap"
+    ]
   },
   {
     "spell": 570158,
@@ -1589,11 +1601,19 @@
   {
     "spell": 704370,
     "clause": "Each time Bane of Chaos deals damage its damage is increased on the target by $707511s1% for $707511d,",
-    "labels": [
-      "704370 effect_value 707511e0 #0",
-      "704370 spell_duration 707511 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "damage is increased on the target by $707511s1%",
+        "labels": []
+      },
+      {
+        "claim": "for $707511d",
+        "labels": [
+          "704370 behaviour_last_application_expiry duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 704370,
@@ -1714,16 +1734,18 @@
   {
     "spell": 704611,
     "clause": "While channeling Carve, your chance to dodge is now increased by $s1% based on how long you channel,",
+    "kind": "claim",
     "labels": [
-      "704611 effect_value e0 #0"
-    ],
-    "kind": "claim"
+      "704611 behaviour_metric_delta mid"
+    ]
   },
   {
     "spell": 704611,
     "clause": "up to a maximum of 10%.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "704611 behaviour_metric_delta cap"
+    ]
   },
   {
     "spell": 704612,
