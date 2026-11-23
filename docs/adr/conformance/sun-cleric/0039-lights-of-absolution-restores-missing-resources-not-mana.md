@@ -65,3 +65,16 @@ The first option, in Sun Cleric code only (`AscensionSunClericAbilities.cpp`):
 - No other class reads 807523 to 807526: 807524 is the only spell that triggers 807525 and 807526 (DBC links), and no
   code under `src/server` outside the Sun Cleric files and no other class file or fixture names 807343 or 807523 to
   807526. `Spell::EffectEnergizePct` is unchanged.
+
+## Addendum: the partial-pool arms
+
+- Date: 2026-11-23
+- Decided by: owner ruling O-30 (mentor D-303); the tool need above is met by `ally_arm` `ally_power` (ADR 1075)
+
+Five entries set the ally's pool ahead of the trigger in both phases and read it after landing with a judged `power`
+arm: `restore_rage_partial` and `restore_runic_partial` at 500 of 1000 log 10 (stock 20), `restore_energy_partial`
+and `restore_focus_partial` at 50 of 100 log 1 (stock 2), `restore_mana_partial` at 1400 of 2868 logs 0 (stock 57).
+Pair 20261123-080621 / -080716, build 0361bbda8f2f, server commit 93da3b7e0ffa (src and data identical to
+b2a2ea1baa), no flip, 18/18 ok. No pre-fix run of these arms exists and the pre-fix tree is not rebuilt; the stock
+figures come from code reading (`Spell::EffectEnergizePct`, SpellEffects.cpp:3040-3044) and match the full-pool
+before pair.
