@@ -1049,8 +1049,13 @@
   {
     "spell": 560637,
     "clause": "While Inner Demon is active, casting Ruin, Sunder, or Felwrath now refunds 20 Energy.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "560637 behaviour_metric_delta ruin",
+      "560637 behaviour_metric_delta sunder",
+      "560637 behaviour_metric_delta felwrath",
+      "560637 behaviour_metric_delta ruin_no_inner"
+    ]
   },
   {
     "spell": 560639,
@@ -1072,10 +1077,19 @@
   {
     "spell": 560641,
     "clause": "Cripple now causes the enemy target to be unable to critically strike for $704397d.",
-    "labels": [
-      "560641 spell_duration 704397 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "unable to critically strike",
+        "labels": []
+      },
+      {
+        "claim": "for $704397d",
+        "labels": [
+          "560641 behaviour_last_application_expiry duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 560645,
@@ -1125,24 +1139,51 @@
   {
     "spell": 560838,
     "clause": "Casting Annihilation now grants you Sculptor of Doom.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "560838 behaviour_metric_delta grant"
+    ]
   },
   {
     "spell": 560838,
     "clause": "Your next Ruin within $d is instant cast.",
-    "labels": [
-      "560838 spell_duration 555277 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Your next Ruin is instant cast",
+        "labels": [
+          "560838 behaviour_metric_delta instant",
+          "560838 behaviour_metric_delta consumed"
+        ]
+      },
+      {
+        "claim": "within $d",
+        "labels": [
+          "560838 behaviour_last_application_expiry duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 560840,
     "clause": "Every 3rd Ruin or Felwrath now spawns an Infernal to fight by your side for $572163d.",
-    "labels": [
-      "560840 spell_duration 572163 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Every 3rd Ruin or Felwrath now spawns an Infernal",
+        "labels": [
+          "560840 behaviour_metric_delta third_ruin",
+          "560840 behaviour_metric_delta second_ruin",
+          "560840 behaviour_metric_delta third_mixed"
+        ]
+      },
+      {
+        "claim": "for $572163d (duration pending: a summon timed from its third cast, not entered)",
+        "labels": [
+          "560840 spell_duration 572163 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 561201,
@@ -1298,10 +1339,23 @@
   {
     "spell": 574140,
     "clause": "Your Inner Demon now grants $800707s1% increased dodge chance and critical damage dealt while active.",
-    "labels": [
-      "574140 effect_value 800707e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increased dodge chance",
+        "labels": [
+          "574140 behaviour_metric_delta dodge",
+          "574140 behaviour_metric_delta dodge_no_inner"
+        ]
+      },
+      {
+        "claim": "critical damage dealt while active",
+        "labels": [
+          "574140 behaviour_hit_ratio crit_damage",
+          "574140 behaviour_hit_ratio crit_damage_no_inner"
+        ]
+      }
+    ]
   },
   {
     "spell": 574143,
@@ -1452,19 +1506,29 @@
   {
     "spell": 704360,
     "clause": "Your $?s520853[Fel Torpedo][Chaos Rush] now reduces all damage taken by $524633s1% for $524633d,",
-    "labels": [
-      "704360 effect_value 524633e0 #0",
-      "704360 spell_duration 524633 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "now reduces all damage taken by $524633s1%",
+        "labels": [
+          "704360 behaviour_taken_hit damage_taken"
+        ]
+      },
+      {
+        "claim": "for $524633d",
+        "labels": [
+          "704360 behaviour_last_application_expiry duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 704360,
     "clause": "stacking $524633u times.",
+    "kind": "claim",
     "labels": [
-      "704360 max_stacks 524633 #2"
-    ],
-    "kind": "claim"
+      "704360 behaviour_metric_delta stack_cap"
+    ]
   },
   {
     "spell": 704361,
@@ -1542,10 +1606,24 @@
   {
     "spell": 704374,
     "clause": "Every 3rd Twin Slice or Fel Fireball within $707518d now generates 1 additional Felfury.",
-    "labels": [
-      "704374 spell_duration 707518 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Every 3rd Twin Slice or Fel Fireball now generates 1 additional Felfury",
+        "labels": [
+          "704374 behaviour_metric_delta third_cast",
+          "704374 behaviour_metric_delta second_cast",
+          "704374 behaviour_metric_delta mixed"
+        ]
+      },
+      {
+        "claim": "within $707518d",
+        "labels": [
+          "704374 behaviour_metric_delta gap_inside",
+          "704374 behaviour_metric_delta gap_outside"
+        ]
+      }
+    ]
   },
   {
     "spell": 704378,
@@ -1591,10 +1669,12 @@
   {
     "spell": 704606,
     "clause": "Direct magical critical strikes now generate $524898s1 Energy.",
+    "kind": "claim",
     "labels": [
-      "704606 effect_value 524898e0 #0"
-    ],
-    "kind": "claim"
+      "704606 behaviour_metric_delta crit_spell",
+      "704606 behaviour_metric_delta noncrit",
+      "704606 behaviour_metric_delta phys_crit"
+    ]
   },
   {
     "spell": 704607,
@@ -1664,10 +1744,10 @@
   {
     "spell": 705102,
     "clause": "Increases your Energy regeneration by $s1%.",
+    "kind": "claim",
     "labels": [
-      "705102 effect_value e0 #0"
-    ],
-    "kind": "claim"
+      "705102 behaviour_metric_delta regen"
+    ]
   },
   {
     "spell": 705105,
