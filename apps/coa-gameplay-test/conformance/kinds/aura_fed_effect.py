@@ -4,7 +4,7 @@ from pathlib import Path
 
 from behaviours import (BEHAVIOUR_METRIC_DELTA, SPELL_FAILED_NOT_READY, ally_group_steps, ally_players,
                         behaviour_entry, dummy_fixture, dummy_id, prose_rule, waited_ms)
-from aura_fed_rate import HEAL_RATE, is_rate, rate_scenario, rate_verdict
+from aura_fed_rate import HEAL_RATE, is_rate, pooled_rate_verdict, rate_scenario, rate_verdict
 from bonus import bonus_of, per_event_sample
 from compare import FLOAT_EPSILON, NO_CAST_FAILURE, Run, Verdict, describe_failures, missing_measurement
 from hits import MAX_ACCELERATED_SCENARIO_MS, MAX_SCENARIO_MS, timed
@@ -666,3 +666,12 @@ def label(entry: dict) -> list[str]:
 
 
 JUDGES = {BEHAVIOUR_METRIC_DELTA: aura_fed_verdict}
+
+
+def pooled_verdict(base: Verdict, runs: list[Run], model: dict) -> Verdict:
+    if model['variant'] != HEAL_RATE:
+        return replace(base, status='unmeasured', explanation=f'{KIND} pools only the {HEAL_RATE} variant')
+    return pooled_rate_verdict(base, runs, model)
+
+
+POOLED_JUDGE = pooled_verdict
