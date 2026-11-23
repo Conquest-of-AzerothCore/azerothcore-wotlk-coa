@@ -35,7 +35,8 @@
       {
         "claim": "${($d*1000/$T1)*($m1+0+$SP*.05)} Shadowflame Damage",
         "labels": [
-          "802678 behaviour_metric_delta tick_value"
+          "802678 behaviour_metric_delta tick_value",
+          "802678 behaviour_metric_delta tick_spell_power"
         ]
       },
       {
@@ -2619,7 +2620,8 @@
       {
         "claim": "${($d*1000/$T1)*($m1+0+$SP*.05)} Shadowflame Damage",
         "labels": [
-          "802678 behaviour_metric_delta tick_value"
+          "802678 behaviour_metric_delta tick_value",
+          "802678 behaviour_metric_delta tick_spell_power"
         ]
       },
       {
