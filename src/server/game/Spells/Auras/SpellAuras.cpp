@@ -1648,7 +1648,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             case SPELLFAMILY_WARLOCK:
                 if (!caster)
                     break;
-                if (GetSpellInfo()->SpellFamilyFlags[1] & 0x00000400)
+                // Improved Fear: the Nightmare follows the end of the Fear ("when the fear effect ends"), so a refresh of
+                // a Fear still on the target (SetStackAmount re-runs these mods with onReapply) does not apply it
+                if (!onReapply && GetSpellInfo()->SpellFamilyFlags[1] & 0x00000400)
                 {
                     if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 98, 0))
                     {
