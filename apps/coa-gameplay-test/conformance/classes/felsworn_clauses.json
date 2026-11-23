@@ -2487,12 +2487,16 @@
       {
         "claim": "by $s1%",
         "labels": [
-          "802180 effect_value e0 #0"
+          "802180 behaviour_metric_delta fel_fireball_above",
+          "802180 behaviour_metric_delta ruin_above"
         ]
       },
       {
         "claim": "above 75% health",
-        "labels": []
+        "labels": [
+          "802180 behaviour_metric_delta fel_fireball_below",
+          "802180 behaviour_metric_delta ruin_below"
+        ]
       }
     ]
   },

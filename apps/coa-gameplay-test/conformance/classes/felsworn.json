@@ -3456,6 +3456,118 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "802108 Effect[0] and Effect[1] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, MiscValue 126 (the six magic schools), MiscValueB 3 (Intellect) and 4 (Spirit), BasePoints 14 + 1 = 15 ($s1). The caster's Shadow spell power is read before (control) and after a real learn of 802108: 15% x Intellect 34 + 15% x Spirit 50 (class file reference_stats stat 3 and 4) = 5.1 + 7.5 = 12.6, tolerance 0.7 for the integer parts (12 or 13), so the 10% and 20% neighbours (8.4 and 16.8) are excluded. The second clause, Inner Demon's extra Spirit share, is not read here. Reference search 2026-11-23: coa-history spell 802108: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 802180,
+      "name": "Fel Cannon (Fel Fireball critical strike chance above 75% health)",
+      "kind": "metric_delta",
+      "variant": "fel_fireball_above",
+      "label_suffix": "fel_fireball_above",
+      "quote": "Increases the critical strike chance of Fel Fireball and Ruin by $s1% on enemies above 75% health.",
+      "trigger_spell": 804247,
+      "gate_spell": 802180,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "spell_taken_crit_chance",
+      "fields": {
+        "spell": 801312,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 20,
+      "expected_gain": 20,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_target_health_pct": [
+        99,
+        76
+      ],
+      "observe_source": "802180 Effect[0] aura 112 (SPELL_AURA_OVERRIDE_CLASS_SCRIPTS; AscensionFelswornContracts.cpp:110-114 sets ASCENSION_STATE_MASKED_CRIT with AURA_STATE_HEALTH_ABOVE_75_PERCENT), BasePoints 19 + 1 = 20 ($s1). The caster's critical strike chance of Fel Fireball 801312 (Player::SpellDoneCritChance then Unit::SpellTakenCritChance of the dummy, which adds the conditional modifier of Unit.cpp:10657, metric spell_taken_crit_chance) against the dummy is read before (control: 802180 unknown) and after a real learn of 802180, with the dummy at 99% in the control phase (no 802180) and at 76% in the treatment phase (just above 75%): gain 20 points. Reference search 2026-11-23: coa-history spell 802180: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 802180,
+      "name": "Fel Cannon (Fel Fireball critical strike chance control: at or below 75% health)",
+      "kind": "metric_delta",
+      "variant": "fel_fireball_below",
+      "label_suffix": "fel_fireball_below",
+      "quote": "Increases the critical strike chance of Fel Fireball and Ruin by $s1% on enemies above 75% health.",
+      "trigger_spell": 804247,
+      "gate_spell": 802180,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "spell_taken_crit_chance",
+      "fields": {
+        "spell": 801312,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_target_health_pct": [
+        99,
+        74
+      ],
+      "observe_source": "802180 Effect[0] aura 112 (SPELL_AURA_OVERRIDE_CLASS_SCRIPTS; AscensionFelswornContracts.cpp:110-114 sets ASCENSION_STATE_MASKED_CRIT with AURA_STATE_HEALTH_ABOVE_75_PERCENT), BasePoints 19 + 1 = 20 ($s1). The caster's critical strike chance of Fel Fireball 801312 (Player::SpellDoneCritChance then Unit::SpellTakenCritChance of the dummy, which adds the conditional modifier of Unit.cpp:10657, metric spell_taken_crit_chance) against the dummy is read before (control: 802180 unknown) and after a real learn of 802180, with the dummy at 99% in the control phase (no 802180) and at 74% in the treatment phase (just below 75%, the control claim): gain 0. Reference search 2026-11-23: coa-history spell 802180: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 802180,
+      "name": "Fel Cannon (Ruin critical strike chance above 75% health)",
+      "kind": "metric_delta",
+      "variant": "ruin_above",
+      "label_suffix": "ruin_above",
+      "quote": "Increases the critical strike chance of Fel Fireball and Ruin by $s1% on enemies above 75% health.",
+      "trigger_spell": 804247,
+      "gate_spell": 802180,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "spell_taken_crit_chance",
+      "fields": {
+        "spell": 801895,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 20,
+      "expected_gain": 20,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_target_health_pct": [
+        99,
+        76
+      ],
+      "observe_source": "802180 Effect[0] aura 112 (SPELL_AURA_OVERRIDE_CLASS_SCRIPTS; AscensionFelswornContracts.cpp:110-114 sets ASCENSION_STATE_MASKED_CRIT with AURA_STATE_HEALTH_ABOVE_75_PERCENT), BasePoints 19 + 1 = 20 ($s1). The caster's critical strike chance of Ruin 801895 (Player::SpellDoneCritChance then Unit::SpellTakenCritChance of the dummy, which adds the conditional modifier of Unit.cpp:10657, metric spell_taken_crit_chance) against the dummy is read before (control: 802180 unknown) and after a real learn of 802180, with the dummy at 99% in the control phase (no 802180) and at 76% in the treatment phase (just above 75%): gain 20 points. Reference search 2026-11-23: coa-history spell 802180: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 802180,
+      "name": "Fel Cannon (Ruin critical strike chance control: at or below 75% health)",
+      "kind": "metric_delta",
+      "variant": "ruin_below",
+      "label_suffix": "ruin_below",
+      "quote": "Increases the critical strike chance of Fel Fireball and Ruin by $s1% on enemies above 75% health.",
+      "trigger_spell": 804247,
+      "gate_spell": 802180,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "spell_taken_crit_chance",
+      "fields": {
+        "spell": 801895,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_target_health_pct": [
+        99,
+        74
+      ],
+      "observe_source": "802180 Effect[0] aura 112 (SPELL_AURA_OVERRIDE_CLASS_SCRIPTS; AscensionFelswornContracts.cpp:110-114 sets ASCENSION_STATE_MASKED_CRIT with AURA_STATE_HEALTH_ABOVE_75_PERCENT), BasePoints 19 + 1 = 20 ($s1). The caster's critical strike chance of Ruin 801895 (Player::SpellDoneCritChance then Unit::SpellTakenCritChance of the dummy, which adds the conditional modifier of Unit.cpp:10657, metric spell_taken_crit_chance) against the dummy is read before (control: 802180 unknown) and after a real learn of 802180, with the dummy at 99% in the control phase (no 802180) and at 74% in the treatment phase (just below 75%, the control claim): gain 0. Reference search 2026-11-23: coa-history spell 802180: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],
