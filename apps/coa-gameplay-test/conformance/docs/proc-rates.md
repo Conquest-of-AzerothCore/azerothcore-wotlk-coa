@@ -53,6 +53,8 @@ A `procs` entry of the class file describes one proc aura:
 | | roll out of the trials (Blade Sermon 572548: Oath Chain at its cap, so Vindication grants no Oath: Vindication) |
 | | or, with `"target": "dummy"`, a state the trigger needs on the dummy (Soulfreeze 572023: Ice Lock 22856, a |
 | | Frost stun without interrupt flags, keeps the dummy Frozen through the damage, ADR 0491) |
+| | or, for an `avoided` trigger (ADR 1261, provisional), set on the caster before every swing interval and every |
+| | engage, for a condition the handler needs while strikers swing (Demonic Fortitude 805245: Demonic Will 800209) |
 | `applied_by` | `{"spell", "source"}`: the aura is not learned but granted by a cast of `spell` (an Oath), so the |
 | | scenario sets it (`set_aura`, 1 stack) instead of learning it, and the chance is the aura's own `$<aura>s1` |
 | | percent token in the tooltip of `spell`, which `tooltip` then copies (ADR 0151) |
@@ -403,6 +405,12 @@ stacks are read after each cast and after the drain (reset before it); events = 
 windows - `stack_per_cast` x completed casts, `events_per_proc` per proc. The `baseline` arm is required and must read
 no event. Azzinoth's Battery 705137 (2, -2, 2 per proc), Illidari Magi 560639 (1, +1, 1 per proc).
 
+On an `avoided` trigger (ADR 1261, provisional) `stack_per_cast` must be 0 and `stack_cap` names the aura's stack cap
+(its `StackAmount`): `attempt_auras` sets the aura before every swing interval, the stacks are read after every
+interval and after the drain, and the baseline swing intervals read the same way. A read at `stack_cap` makes the part
+`unmeasured` (a capped gain is not read); it never passes. Demonic Fortitude 805245 (0, 0, cap 6, 1 per proc, Demonic
+Will 800209 held as its condition).
+
 ### Summon procs (ADR 0351)
 
 A proc whose event is a creature the code spawns directly (no spell event; Unrelenting Army 705747/707880, Muck
@@ -477,6 +485,8 @@ source fails the part instead of being judged. Trials per attempt are the strike
 `avoided`; an avoided entry does not rename a sibling entry of the same aura.
 
 `count_misses: true` in the trigger (ADR 1210, provisional; mentor D-175) adds the swings that missed the caster (`melee_missed_taken`, read beside the dodged and parried swings and held in the baseline) to the trials, for a handler that rolls on a miss as well. Each counted part must then read as many attacks taken (`melee_attacks_taken`) as dodged, parried and missed swings, the guards having ruled out landed and blocked ones; otherwise the rate is `unmeasured` (void). Absent, the trials are the dodged and parried swings only.
+
+`learn: [<spell>, ...]` in the trigger (ADR 1261, provisional) lists precondition spells the caster learns before the engage in every part, for an avoidance the reference character lacks (Vengeance Is Mine 804822: Nether Disciple 560576 lets the caster parry, so a parry 100 entry reads the parry leg). The spells must be distinct positive ids other than the passive. An entry with a learn list is its own roll: its label ends in `learn <spell>` (`804822 proc_rate avoided learn 560576`) and it does not rename the entry without one. Absent, nothing changes.
 
 `miss_exclusion: {"min_share": s}` (ADR 1229, provisional; mentor D-252, D-253) needs `count_misses`. It reads the miss share m of the counted parts: under `s` the rate is `unmeasured`, otherwise expected x (1 - m), the rate of a server that ignores misses, must lie below the Wilson interval or the verdict is `alert`. Absent, nothing changes.
 

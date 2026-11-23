@@ -44,9 +44,14 @@ class AreaDummiesTests(unittest.TestCase):
 
     def test_area_dummies_need_distances_and_the_dummy_as_setup_target(self):
         for change in ({'area_dummies': []}, {'area_dummies': [0]}, {'area_dummies': 4.0},
-                       {'area_dummies': [4.0] * 10}, {'setup_target': 'caster'}):
+                       {'area_dummies': [4.0] * 12}, {'setup_target': 'caster'}):
             with self.subTest(change=change), self.assertRaises(ValueError):
                 behaviour_scenario(load_fixture_class_file(23), area_entry(**change))
+
+    def test_eleven_area_dummies_fill_the_twelve_creatures_a_scenario_admits(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), area_entry(area_dummies=[4.0] * 11))
+        run.validate(scenario)
+        self.assertEqual(len(scenario['creatures']), 12)
 
     def test_an_unmarked_reading_passes_and_a_marked_reading_mutant_alerts(self):
         _, [expectation] = behaviour_scenario(load_fixture_class_file(23), area_entry())

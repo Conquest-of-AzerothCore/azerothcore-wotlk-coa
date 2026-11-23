@@ -160,6 +160,94 @@
       "internal_cooldown_ms": 0
     },
     {
+      "aura": 804822,
+      "name": "Vengeance Is Mine",
+      "tooltip": "Dodging or parrying an attack now gives you a $h% chance to make your next 10 instances of damage with |cffffffffTwin Slice|r deal $807163s1% increased damage and generate 1 |cff32cd32Felfury|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "avoided",
+        "striker_entry": 36,
+        "swing_ms": 500,
+        "dodge": 5,
+        "parry": 95,
+        "strikers": 10,
+        "striker_auras": [
+          42716,
+          62531,
+          2116852
+        ],
+        "learn": [
+          560576
+        ]
+      },
+      "residual_target": 0.001,
+      "min_detectable": 5,
+      "min_parts": 10,
+      "trigger_text": "Dodging or parrying an attack",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 807163,
+      "events_per_proc": 1,
+      "proc_spell_source": "EffectTriggerSpell[0] of 804822; the handler casts it on the caster (AscensionFelswornEvents.cpp:157-158).",
+      "handler": "aura_ascension_felsworn_event: Check (AscensionFelswornEvents.cpp:42-47) passes an incoming dodge or parry (id 804822 accepts both) and rolls Chance(player, 804822) (AscensionFelsworn.cpp:231-239, roll_chance_f of the DBC ProcChance 10, no cooldown) once per avoided attack; Proc casts 807163 on the caster. Trigger: procs avoided trigger (ADR 0900) with the learn list (ADR 1261, provisional): Nether Disciple 560576 (Effect[0] APPLY_AURA 47 SPELL_AURA_MOD_PARRY_PERCENT; HandleAuraModParryPercent calls SetCanParry(true), SpellAuraEffects.cpp:4870-4884) is learned before the engage in every part, so the caster can parry; ten aggressive stationary strikers (creature 36) with Self Root Forever 42716, Molten 62531 and Enrage 2116852, dodge 5 and parry 95 set before every 500 ms interval, so nearly every trial is a parry; the pooled proc judge needs dodged swings to open its trial count (compare.py, trials from the dodged label) and rates over dodged + parried swings, so a server that ignored parries would read about 5% of the chance. The first pair with dodge 0 read 8250 parried swings and 804 procs in part 2 but was unmeasured for want of a dodged swing. This is the parry leg of 'Dodging or parrying'; the dodge leg is the entry without a learn list. Nether Disciple is obtainable (CharacterAdvancement 6338 per ~/CoaServer/reference/coa-obtainable, cited in the ledger row). Sized like the dodge leg. Reference search 2026-11-24: coa-history spell 804822 and 807163: 0 events in 186 logs; nothing found that decides the expectation.",
+      "dbc": {
+        "804822": {
+          "ProcChance": 10,
+          "ProcFlags": 4,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 805245,
+      "name": "Demonic Fortitude",
+      "tooltip": "While Demonic Will or Hateforged Barrier are active, all damage taken or avoided now has a $h% chance to generate 1 |cff32cd32Felfury|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "avoided",
+        "striker_entry": 36,
+        "swing_ms": 500,
+        "dodge": 100,
+        "parry": 0,
+        "strikers": 3,
+        "striker_auras": [
+          42716,
+          62531,
+          2116852
+        ]
+      },
+      "residual_target": 0.001,
+      "min_detectable": 5,
+      "min_parts": 10,
+      "trigger_text": "all damage taken or avoided",
+      "event_metric": "aura_stacks",
+      "stack_aura": 800058,
+      "stack_set": 0,
+      "stack_per_cast": 0,
+      "stack_cap": 6,
+      "events_per_proc": 1,
+      "proc_spell": 800058,
+      "proc_spell_source": "Proc of 805245 calls Gain(player, 1) (AscensionFelswornEvents.cpp:173-175), which adds one stack of aura 800058 (AscensionFelsworn.cpp:219-229); no spell is cast.",
+      "attempt_auras": [
+        {
+          "spell": 800058,
+          "stacks": 0,
+          "source": "Felfury 800058 set to 0 before every swing interval: the stack read after it counts the Gain(player, 1) events (ADR 1254, avoided trigger ADR 1261)."
+        },
+        {
+          "spell": 800209,
+          "stacks": 1,
+          "source": "Demonic Will 800209 held before every swing interval: the clause's condition (AscensionFelswornEvents.cpp:44-45, HasAura(800209)), not its subject. A real cast would gain 1 Felfury itself (ResourceGainRules {14, 800209, 800209, 800058, 1, AuraStacks}, AscensionCustomResourceData.h:120) and mix that gain into the events, so the aura is set (controller go, 2026-11-23)."
+        }
+      ],
+      "handler": "aura_ascension_felsworn_event: Check (AscensionFelswornEvents.cpp:42-47) passes damage taken, a dodge or a parry on the caster (id 805245) while Demonic Will 800209 or Hateforged Barrier 705129 is held, and rolls Chance(player, 805245) (Spell.dbc ProcChance 20, no cooldown); Proc gains 1 Felfury 800058 (Gain(player, 1)). Trigger: procs avoided trigger (ADR 0900) with aura_stacks events (ADR 1254) and attempt_auras on the avoided trigger (ADR 1261, provisional): three aggressive stationary strikers (creature 36) with 42716, 62531 and 2116852, dodge 100 before every 500 ms interval, so every attempt is a dodge (the avoided leg; the damage-taken leg is not read here). Three strikers keep an interval's gains far under the 6-stack cap of 800058 (StackAmount 6); a read at the cap voids the part. The passive is learned (mentor D-67). Sized like the 804822 avoided entry. Reference search 2026-11-24: coa-history spell 805245: 0 events in 186 logs; nothing found that decides the expectation."
+    },
+    {
       "aura": 681376,
       "name": "Chaotic",
       "tooltip": "Dealing damage now has an $h% chance to increase your damage by $572782s1% for $572782d, stacking $572782u times.",
@@ -8503,20 +8591,22 @@
         ]
       ],
       "control": {
-        "auras": []
+        "auras": [],
+        "target_health_pct": 50
       },
       "treatment": {
         "auras": [],
         "learn": [
           804610
-        ]
+        ],
+        "target_health_pct": 50
       },
-      "trials": 80,
+      "trials": 72,
       "parts": 8,
       "critical": false,
       "cast_spell": 801903,
       "cast_power": 100,
-      "expected_source": "804610 Effect[0] aura 112, BasePoints 14 + 1 = 15 ($s1), against slowed enemies. The non-critical hits of the 801913 main-hand strike of Annihilan Strike 801903 (Effect[0] TRIGGER_SPELL_WITH_VALUE, ManaCost 40 energy) are averaged in a control arm without 804610 and a treatment arm with it learned, on a dummy slowed by Daze 38767 (aura 33 SPELL_AURA_MOD_DECREASE_SPEED, set on the dummy before every cast as a precondition fixture): ratio 1.15, within the 2-point band. Reference search 2026-11-23: coa-history spell 804610: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+      "expected_source": "804610 Effect[0] aura 112, BasePoints 14 + 1 = 15 ($s1), against slowed enemies. The non-critical hits of the 801913 main-hand strike of Annihilan Strike 801903 (Effect[0] TRIGGER_SPELL_WITH_VALUE, ManaCost 40 energy) are averaged in a control arm without 804610 and a treatment arm with it learned, on a dummy slowed by Daze 38767 (aura 33 SPELL_AURA_MOD_DECREASE_SPEED, set on the dummy before every cast as a precondition fixture): ratio 1.15, within the 2-point band. Reference search 2026-11-23: coa-history spell 804610: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only. Since Felsworn ADR 0018 every 801913 strike above 75% health is a critical strike, so both arms set the dummy to 50% health before each cast (target_health_pct), where the normal roll keeps non-critical hits."
     },
     {
       "spell": 804610,
@@ -8529,20 +8619,22 @@
       "observe_spell": 801913,
       "cast_wait_ms": 1600,
       "control": {
-        "auras": []
+        "auras": [],
+        "target_health_pct": 50
       },
       "treatment": {
         "auras": [],
         "learn": [
           804610
-        ]
+        ],
+        "target_health_pct": 50
       },
-      "trials": 80,
+      "trials": 72,
       "parts": 6,
       "critical": false,
       "cast_spell": 801903,
       "cast_power": 100,
-      "expected_source": "804610 Effect[0] aura 112, BasePoints 14 + 1 = 15 ($s1), against slowed enemies. The non-critical hits of the 801913 main-hand strike of Annihilan Strike 801903 (Effect[0] TRIGGER_SPELL_WITH_VALUE, ManaCost 40 energy) are averaged in a control arm without 804610 and a treatment arm with it learned, on a dummy with no slow (the control claim: the passive adds nothing against an unslowed enemy): ratio 1.00, within the 2-point band, which excludes 1.15. Reference search 2026-11-23: coa-history spell 804610: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+      "expected_source": "804610 Effect[0] aura 112, BasePoints 14 + 1 = 15 ($s1), against slowed enemies. The non-critical hits of the 801913 main-hand strike of Annihilan Strike 801903 (Effect[0] TRIGGER_SPELL_WITH_VALUE, ManaCost 40 energy) are averaged in a control arm without 804610 and a treatment arm with it learned, on a dummy with no slow (the control claim: the passive adds nothing against an unslowed enemy): ratio 1.00, within the 2-point band, which excludes 1.15. Reference search 2026-11-23: coa-history spell 804610: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only. Since Felsworn ADR 0018 every 801913 strike above 75% health is a critical strike, so both arms set the dummy to 50% health before each cast (target_health_pct), where the normal roll keeps non-critical hits."
     },
     {
       "spell": 804610,
@@ -9861,10 +9953,16 @@
       "aura": 704397,
       "expected_ms": 4000,
       "control_window_ms": 500,
-      "window_ms": 6000,
+      "window_ms": 8000,
       "poll_ms": 25,
       "caster": false,
-      "observe_source": "560641 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704397 (Crippling Pain, Effect[0] aura 290 MOD_CRIT_PCT -100000, DurationIndex 35 = 4000 ms); AscensionFelswornAbilities.cpp:321-322 casts 704397 on the target of a landed Cripple 704371 when 560641 is known. The aura on the dummy is polled with game-time stamps after a real Cripple cast. The no-critical part is a data readback only: no harness route makes an enemy attack and critically strike (not entered, see the report). Reference search 2026-11-23: coa-history spell 560641: 0 events in 186 logs (a passive leaves no event); 704397: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Warlock Training 560641 'Cripple now causes the enemy target to be unable to critically strike for 4 seconds.', same figure; expected values come from the tooltip and the DBC only."
+      "repeat": {
+        "count": 3,
+        "every_ms": 1300
+      },
+      "trigger_power": 90,
+      "poll_before_cast": true,
+      "observe_source": "560641 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704397 (Crippling Pain, Effect[0] aura 290 MOD_CRIT_PCT -100000, DurationIndex 35 = 4000 ms); AscensionFelswornAbilities.cpp:321-322 casts 704397 on the target of a landed Cripple 704371 when 560641 is known. The aura on the dummy is polled with game-time stamps after a real Cripple cast. The no-critical part is a data readback only: no harness route makes an enemy attack and critically strike (not entered, see the report). Reference search 2026-11-23: coa-history spell 560641: 0 events in 186 logs (a passive leaves no event); 704397: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Warlock Training 560641 'Cripple now causes the enemy target to be unable to critically strike for 4 seconds.', same figure; expected values come from the tooltip and the DBC only. Design 2 (2026-11-24; design 1, one Cripple per arm, was unmeasured in 3 of 15 recorded runs with 'no application is seen after the cast'): a probe read the caster's Shadow resist chance against the dummy at 12% (spell_resist_chance) and 4 of 30 Cripples left neither Cripple nor Crippling Pain on it, so a binary resist of Cripple is the cause, not a cast refusal (no cast_failures). The treatment arm now casts Cripple 3 times 1300 ms apart (energy 90 set once; the caster's maximum is 100 and regeneration is off, so a fourth cast cannot be paid) with a read before the first cast, and the aura is timed from its last application (a refresh is counted): all three resisted is 0.12^3 = 0.17% per run, an unmeasured outcome only."
     },
     {
       "spell": 704611,
@@ -10660,6 +10758,206 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "observe_source": "572804 Annihilan Strike: Effect[0] and Effect[1] TRIGGER_SPELL_WITH_VALUE (801913 main hand, 801914 off hand, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE), BasePoints 259 + 1 = 260 ($s2). The tooltip's 'Generates 2 Felfury' is read as the Felfury gain of one cast. Felfury stacks read 0 before and 2 after one real cast at the dummy. Reference search 2026-11-23: coa-history spell 572804: 0 events; spell 801913 Annihilan Strike: SPELL_DAMAGE 70 events in 4 logs (34 crits, min 98 max 394; gear differs so no figure decides); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 572804,
+      "name": "Annihilan Strike (critical share: 76% health guaranteed, 74% health normal)",
+      "variant": "crit_guarantee_76_74",
+      "label_suffix": "crit_guarantee_76_74",
+      "kind": "hit_ratio",
+      "quote": "This ability is guaranteed to critically strike against enemies above 75% health.",
+      "observe_spell": 801913,
+      "cast_spell": 572804,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "expected": 1.0,
+      "rate": "critical",
+      "control": {
+        "auras": [
+          [
+            705109,
+            1
+          ]
+        ],
+        "target_health_pct": 74,
+        "aura_amounts": [
+          [
+            705109,
+            0,
+            -100
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            705109,
+            1
+          ]
+        ],
+        "target_health_pct": 76,
+        "aura_amounts": [
+          [
+            705109,
+            0,
+            -100
+          ]
+        ]
+      },
+      "expected_points": 100,
+      "trials": 40,
+      "parts": 2,
+      "expected_source": "Annihilan Strike 572804 (Effect[0] and [1] TRIGGER_SPELL_WITH_VALUE, main hand 801913, off hand 801914, both SPELL_EFFECT_WEAPON_PERCENT_DAMAGE; every rank 560759-560762, 572803, 572804 and 801903 triggers the same two strikes, whose own Spell.dbc description carries the sentence) states 'guaranteed to critically strike against enemies above 75% health'. The dummy health is set before each cast to pct x 50000000 / 100; 75% is exactly 37500000 = 75% of the maximum, so it is not above 75%. Felsworn ADR 0018 (mentor D-72). Both arms set Cruelty 705109 (Felsworn, Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT) on the caster with its amount set to -100 as a fixture, so the normal roll reads 0 whatever the reference character's own critical chance: every 801913 strike at 76% is a critical strike (100%), at 74% the strike keeps the normal roll (0): a difference of 100 points. Reference search 2026-11-24: coa-history spell 572804: 0 events in 186 logs; 801913 Annihilan Strike: SPELL_DAMAGE 70 events in 4 logs (34 crits); 801914 Annihilan Strike (Offhand): SPELL_DAMAGE 69 events in 4 logs (31 crits); target health is not logged and gear differs, so no figure decides; expected values come from the tooltip and the DBC only. Residual false alert per pair: none from a roll; the -100 Cruelty fixture reads 0 and the guarantee 100 on every counted strike, so no random draw decides the reading."
+    },
+    {
+      "spell": 572804,
+      "name": "Annihilan Strike (off-hand critical share: 76% health guaranteed, 74% health normal)",
+      "variant": "crit_guarantee_offhand_76_74",
+      "label_suffix": "crit_guarantee_offhand_76_74",
+      "kind": "hit_ratio",
+      "quote": "This ability is guaranteed to critically strike against enemies above 75% health.",
+      "observe_spell": 801914,
+      "cast_spell": 572804,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "expected": 1.0,
+      "rate": "critical",
+      "control": {
+        "auras": [
+          [
+            705109,
+            1
+          ]
+        ],
+        "target_health_pct": 74,
+        "aura_amounts": [
+          [
+            705109,
+            0,
+            -100
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            705109,
+            1
+          ]
+        ],
+        "target_health_pct": 76,
+        "aura_amounts": [
+          [
+            705109,
+            0,
+            -100
+          ]
+        ]
+      },
+      "expected_points": 100,
+      "trials": 40,
+      "parts": 2,
+      "expected_source": "Annihilan Strike 572804 (Effect[0] and [1] TRIGGER_SPELL_WITH_VALUE, main hand 801913, off hand 801914, both SPELL_EFFECT_WEAPON_PERCENT_DAMAGE; every rank 560759-560762, 572803, 572804 and 801903 triggers the same two strikes, whose own Spell.dbc description carries the sentence) states 'guaranteed to critically strike against enemies above 75% health'. The dummy health is set before each cast to pct x 50000000 / 100; 75% is exactly 37500000 = 75% of the maximum, so it is not above 75%. Felsworn ADR 0018 (mentor D-72). Both arms set Cruelty 705109 (Felsworn, Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT) on the caster with its amount set to -100 as a fixture, so the normal roll reads 0 whatever the reference character's own critical chance: every 801914 off-hand strike at 76% is a critical strike (100%), at 74% the strike keeps the normal roll (0): a difference of 100 points. The reference character dual-wields (Dual Wield 674, item 2027 in slots 15 and 16), so 801914 lands; it resolves after the 801913 damage, whose hit cannot take the 50000000 dummy from 76% (38000000) under 75% (37500000), so the off-hand strike still reads a target above 75%. Reference search 2026-11-24: coa-history spell 572804: 0 events in 186 logs; 801913 Annihilan Strike: SPELL_DAMAGE 70 events in 4 logs (34 crits); 801914 Annihilan Strike (Offhand): SPELL_DAMAGE 69 events in 4 logs (31 crits); target health is not logged and gear differs, so no figure decides; expected values come from the tooltip and the DBC only. Residual false alert per pair: none from a roll; the -100 Cruelty fixture reads 0 and the guarantee 100 on every counted strike, so no random draw decides the reading."
+    },
+    {
+      "spell": 572804,
+      "name": "Annihilan Strike (critical share: strictly above 75%, exactly 75% keeps the normal roll)",
+      "variant": "crit_strict_76_75",
+      "label_suffix": "crit_strict_76_75",
+      "kind": "hit_ratio",
+      "quote": "This ability is guaranteed to critically strike against enemies above 75% health.",
+      "observe_spell": 801913,
+      "cast_spell": 572804,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "expected": 1.0,
+      "rate": "critical",
+      "control": {
+        "auras": [
+          [
+            705109,
+            1
+          ]
+        ],
+        "target_health_pct": 75,
+        "aura_amounts": [
+          [
+            705109,
+            0,
+            -100
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            705109,
+            1
+          ]
+        ],
+        "target_health_pct": 76,
+        "aura_amounts": [
+          [
+            705109,
+            0,
+            -100
+          ]
+        ]
+      },
+      "expected_points": 100,
+      "trials": 40,
+      "parts": 2,
+      "expected_source": "Annihilan Strike 572804 (Effect[0] and [1] TRIGGER_SPELL_WITH_VALUE, main hand 801913, off hand 801914, both SPELL_EFFECT_WEAPON_PERCENT_DAMAGE; every rank 560759-560762, 572803, 572804 and 801903 triggers the same two strikes, whose own Spell.dbc description carries the sentence) states 'guaranteed to critically strike against enemies above 75% health'. The dummy health is set before each cast to pct x 50000000 / 100; 75% is exactly 37500000 = 75% of the maximum, so it is not above 75%. Felsworn ADR 0018 (mentor D-72). Both arms set Cruelty 705109 (Felsworn, Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT) on the caster with its amount set to -100 as a fixture, so the normal roll reads 0 whatever the reference character's own critical chance: at exactly 75% the strike is not above 75% and keeps the normal roll (0), at 76% every strike is critical: a difference of 100 points. Reference search 2026-11-24: coa-history spell 572804: 0 events in 186 logs; 801913 Annihilan Strike: SPELL_DAMAGE 70 events in 4 logs (34 crits); 801914 Annihilan Strike (Offhand): SPELL_DAMAGE 69 events in 4 logs (31 crits); target health is not logged and gear differs, so no figure decides; expected values come from the tooltip and the DBC only. Residual false alert per pair: none from a roll; the -100 Cruelty fixture reads 0 and the guarantee 100 on every counted strike, so no random draw decides the reading."
+    },
+    {
+      "spell": 572804,
+      "name": "Annihilan Strike (below 75% the normal critical roll applies: neither 0 nor 100)",
+      "variant": "crit_normal_74",
+      "label_suffix": "crit_normal_74",
+      "kind": "hit_ratio",
+      "quote": "This ability is guaranteed to critically strike against enemies above 75% health.",
+      "observe_spell": 801913,
+      "cast_spell": 572804,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "expected": 1.0,
+      "rate": "critical",
+      "control": {
+        "auras": [
+          [
+            705109,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            705109,
+            0,
+            0
+          ]
+        ],
+        "target_health_pct": 74
+      },
+      "treatment": {
+        "auras": [
+          [
+            705109,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            705109,
+            0,
+            90
+          ]
+        ],
+        "target_health_pct": 74
+      },
+      "expected_points": 90,
+      "trials": 72,
+      "parts": 30,
+      "expected_source": "Annihilan Strike 572804 (Effect[0] and [1] TRIGGER_SPELL_WITH_VALUE, main hand 801913, off hand 801914, both SPELL_EFFECT_WEAPON_PERCENT_DAMAGE; every rank 560759-560762, 572803, 572804 and 801903 triggers the same two strikes, whose own Spell.dbc description carries the sentence) states 'guaranteed to critically strike against enemies above 75% health'. The dummy health is set before each cast to pct x 50000000 / 100; 75% is exactly 37500000 = 75% of the maximum, so it is not above 75%. Felsworn ADR 0018 (mentor D-72). Both arms at 74% health set Cruelty 705109 (Felsworn, Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT) on the caster as a fixture, its amount set to 0 in the control arm and to 90 in the treatment arm, so both arms recompute the caster's critical chance and differ by 90 points of it: the normal roll gives a difference of 90 points. A forced critical strike below 75% would read 100 in both arms (difference 0), no critical strike at all 0 in both: both are excluded. Reference search 2026-11-24: coa-history spell 572804: 0 events in 186 logs; 801913 Annihilan Strike: SPELL_DAMAGE 70 events in 4 logs (34 crits); 801914 Annihilan Strike (Offhand): SPELL_DAMAGE 69 events in 4 logs (31 crits); target health is not logged and gear differs, so no figure decides; expected values come from the tooltip and the DBC only. Residual false alert per pair: at most 3e-6 (normal approximation: binomial standard error at most 0.73 point with both arms at a 6% spread over 2160 hits per arm, a true difference within 1 point of 90 as pair 3 read +89.31 and +90.14, against the +-4.5 band), under the 0.1% cap."
     },
     {
       "spell": 705108,
@@ -12862,85 +13160,6 @@
         "hit_arm": true
       },
       "observe_source": "Spell.dbc 802678 (server set /srv/coa/server-data/dbc) Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 1000, DurationIndex 32 = 6000 ms (6 ticks), EffectBasePoints 8, EffectDieSides 1, EffectRealPointsPerLevel 0.5, BaseLevel 10, SpellLevel 10, MaxLevel 0. Expected per tick at level 60: 8 + 1 (DieSides 1 adds 1) + int(0.5 x (60 - 10)) = 34 (SpellInfo.cpp CalcValue), plus the tooltip term $SP*.05 = int(0.05 x spell power). The displayed ${($d*1000/$T1)*($m1+0+$SP*.05)} reads 54 = 6 x 9 on the client (ADR 0006: no SkillLineAbility row, base points only); owner ruling O-19: the server keeps 34 per tick and the displayed text is to be corrected in a client patch, so the value is counted on the server formula, not on the displayed 54. Behaviour read: the caster casts Felstrike 802678 on the dummy and the dummy's spell_damage_total of 802678 is read 1500 ms later, one tick (EffectAmplitude 1000, the second tick at 2000 ms); the unread arm before the cast reads 0 (control). Criticals are made impossible (64481) and the dummy's magic resistance is removed (823764), as the Immolation Aura tick entries do. Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and the Felstrike tick events of coa-history (spell 802678, gear and level differ, no figure decides). Contrast arm of the spell power term: +10000 spell power must move the tick by int(0.05 x 10000) = 500 to 534; a server that dropped the term or used another coefficient cannot pass both arms."
-    },
-    {
-      "spell": 572804,
-      "name": "Annihilan Strike (critical share above 75% health)",
-      "kind": "hit_ratio",
-      "variant": "crit_above_75",
-      "label_suffix": "crit_above_75",
-      "quote": "This ability is guaranteed to critically strike against enemies above 75% health.",
-      "observe_spell": 801913,
-      "cast_spell": 572804,
-      "cast_wait_ms": 1600,
-      "cast_power": 100,
-      "control": {
-        "auras": [],
-        "target_health_pct": 50
-      },
-      "treatment": {
-        "auras": [],
-        "target_health_pct": 90
-      },
-      "expected": 1.0,
-      "rate": "critical",
-      "expected_points": 100,
-      "trials": 40,
-      "parts": 4,
-      "expected_source": "Annihilan Strike 572804 (Effect[0] and [1] TRIGGER_SPELL_WITH_VALUE, main hand 801913, off hand 801914; Energy cost 40, cast_power 100 before each cast) states 'guaranteed to critically strike against enemies above 75% health' (Spell.dbc description of 572804 and 801913). The critical share of the main-hand strike 801913 on the dummy is compared between a control arm with the dummy held at 50% health and a treatment arm at 90% (above and below the 75% threshold). Both arms use the same spell, the same weapons and the same real cast, so the only difference is the target's health. The critical share rises by 100 points (every strike above 75% is critical, none below). The reference character's melee critical strike chance is expected to be 0 (the Witch Hunter Stake 681328 entries rely on the same reading; not read for this class, so a control arm whose share is not 0 alerts the claim 'no gain below 75%' rather than hiding it). Reference search 2026-11-23: coa-history spell 572804: 0 events; spell 801913 Annihilan Strike: SPELL_DAMAGE 70 events in 4 logs (34 crits, min 98 max 394: real play shows crits at all healths, gear differs so no figure decides); expected values come from the tooltip and the DBC only."
-    },
-    {
-      "spell": 572804,
-      "name": "Annihilan Strike (control: no gain between two healths below 75%)",
-      "kind": "hit_ratio",
-      "variant": "crit_below_75",
-      "label_suffix": "crit_below_75",
-      "quote": "This ability is guaranteed to critically strike against enemies above 75% health.",
-      "observe_spell": 801913,
-      "cast_spell": 572804,
-      "cast_wait_ms": 1600,
-      "cast_power": 100,
-      "control": {
-        "auras": [],
-        "target_health_pct": 50
-      },
-      "treatment": {
-        "auras": [],
-        "target_health_pct": 60
-      },
-      "expected": 1.0,
-      "rate": "critical",
-      "expected_points": 0,
-      "trials": 40,
-      "parts": 4,
-      "expected_source": "Annihilan Strike 572804 (Effect[0] and [1] TRIGGER_SPELL_WITH_VALUE, main hand 801913, off hand 801914; Energy cost 40, cast_power 100 before each cast) states 'guaranteed to critically strike against enemies above 75% health' (Spell.dbc description of 572804 and 801913). The critical share of the main-hand strike 801913 on the dummy is compared between a control arm with the dummy held at 50% health and a treatment arm at 60% (both below the 75% threshold). Both arms use the same spell, the same weapons and the same real cast, so the only difference is the target's health. The critical share does not change (0 points): below 75% the strike is not guaranteed to critically strike, at either health. The reference character's melee critical strike chance is expected to be 0 (the Witch Hunter Stake 681328 entries rely on the same reading; not read for this class, so a control arm whose share is not 0 alerts the claim 'no gain below 75%' rather than hiding it). Reference search 2026-11-23: coa-history spell 572804: 0 events; spell 801913 Annihilan Strike: SPELL_DAMAGE 70 events in 4 logs (34 crits, min 98 max 394: real play shows crits at all healths, gear differs so no figure decides); expected values come from the tooltip and the DBC only."
-    },
-    {
-      "spell": 572804,
-      "name": "Annihilan Strike (positive arm: a forced critical chance reads critical 801913 strikes)",
-      "kind": "hit_ratio",
-      "variant": "crit_positive",
-      "label_suffix": "crit_positive",
-      "quote": "This ability is guaranteed to critically strike against enemies above 75% health.",
-      "observe_spell": 801913,
-      "cast_spell": 572804,
-      "cast_wait_ms": 1600,
-      "cast_power": 100,
-      "control": {
-        "auras": [],
-        "target_health_pct": 50
-      },
-      "treatment": {
-        "auras": [],
-        "target_health_pct": 60
-      },
-      "expected": 1.0,
-      "rate": "critical",
-      "expected_points": 0,
-      "trials": 40,
-      "parts": 4,
-      "expected_source": "Positive arm of crit_above_75 and crit_below_75 (same cast 572804, same observed strike 801913, same two healths below 75%): the player's melee critical strike rating is forced to 100% chance, so every 801913 strike is a critical strike by the engine's own roll and the critical share read of this entry must reach 100% in both arms (the per-arm counts are in the verdict detail); the arms differ by no health threshold, so the difference between them is 0 points. It shows that a critical strike of 801913 on the dummy is counted by the read the two entries above use, so 0 critical strikes in their trials is not an artefact of the design. Tooltip: 'This ability is guaranteed to critically strike against enemies above 75% health.' Reference search 2026-11-23: nothing found beyond the two entries above; expected values come from the tooltip and the DBC only.",
-      "force_crit": "melee"
     },
     {
       "spell": 803904,
@@ -15769,6 +15988,952 @@
         ]
       ],
       "observe_source": "Below-six arm of energy_at_six (50 Energy at six Felfury). The caster builds a real count of 5 Felfury 800058 (StackAmount 6) before each Inner Demon 804216 cast: Burning Hatred 805239 at the caster ('instantly generating 6 Felfury'), Sargeron Smite 802060 at the dummy ('Consumes 2 Felfury'), Bane of Fire 707901 at the dummy (a Bane hit on an enemy gives Gain(player, 1), AscensionFelswornAbilities.cpp:329-333; Fel Torpedo was dropped because its dash carried the caster past the dummy and the next Sargeron Smite was refused with SPELL_FAILED_UNIT_NOT_INFRONT, pair fw-tg1 proveP1); the per-cast targets are the setup_cast_targets option (ADR 1256) and the count is read at exactly 5 after the last setup cast of each phase (after_setup_stacks, ADR 1257), a mismatch voids the run. Inner Demon's own aura from the before phase is removed at the start of the after phase (after_auras), so both arms cast it the same way. The handler casts 520258 only when the Felfury consumed is at least 6 (AscensionFelswornAbilities.cpp:265-266): the energize events of 520258 on the caster are 0 before the learn of 520257 and 0 after it at five, where a threshold of 5 would restore 50. Reference search: as energy_at_six (2026-11-23)."
+    },
+    {
+      "spell": 300476,
+      "kind": "avoided_swing_reads",
+      "name": "Betrayer (party radius)",
+      "variant": "party_radius",
+      "label_suffix": "party_radius",
+      "quote": "enrages your party and raid members within $520256a1 yds",
+      "read": "aura_edge",
+      "observe_spell": 520256,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852
+      ],
+      "swing_ms": 500,
+      "control_windows": 10,
+      "windows": 20,
+      "observe_source": "AscensionFelswornEvents.cpp:42-47 passes an incoming dodge when Chance(player, 300476) succeeds (ProcChance 100) and :223-224 casts 804336 at the attacker and 520256 on the caster; 520256 Effect[0] APPLY_AURA SPELL_AURA_MOD_CRIT_PCT, TargetA 22 SRC_CASTER, TargetB 30 UNIT_SRC_AREA_ALLY, RadiusIndex 9, DurationIndex 1 (server DBC). Spell.cpp:9449-9459 adds no combat reach for a player target of a player caster. Strikers: the 804822 proc shape, ten aggressive stationary creature 36 with 42716, 62531 and 2116852, dodge 100 before every 500 ms window. Reference search 2026-11-24: coa-history spell 300476: 0 events in 186 logs; 520256 Betrayer: 42 SPELL_AURA_APPLIED and 42 SPELL_AURA_REMOVED in 2 logs (2026-08-10, logs 103 and 104), player to player (party and raid members), about 10.0 s each; it supports the 10 s duration."
+    },
+    {
+      "spell": 300476,
+      "kind": "avoided_swing_reads",
+      "name": "Betrayer (party crit)",
+      "variant": "party_crit",
+      "label_suffix": "party_crit",
+      "quote": "increasing their critical strike chance by $520256s1%",
+      "read": "stat_delta",
+      "observe_spell": 520256,
+      "metric": "melee_crit_chance_refreshed",
+      "ally_yd": 10,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852
+      ],
+      "swing_ms": 500,
+      "control_windows": 10,
+      "windows": 20,
+      "observe_source": "AscensionFelswornEvents.cpp:42-47 passes an incoming dodge when Chance(player, 300476) succeeds (ProcChance 100) and :223-224 casts 804336 at the attacker and 520256 on the caster; 520256 Effect[0] APPLY_AURA SPELL_AURA_MOD_CRIT_PCT, TargetA 22 SRC_CASTER, TargetB 30 UNIT_SRC_AREA_ALLY, RadiusIndex 9, DurationIndex 1 (server DBC). Spell.cpp:9449-9459 adds no combat reach for a player target of a player caster. Strikers: the 804822 proc shape, ten aggressive stationary creature 36 with 42716, 62531 and 2116852, dodge 100 before every 500 ms window. The ally's crit is read with melee_crit_chance_refreshed (UpdateCritPercentage before the read): the first pair read the unrefreshed PLAYER_CRIT_PERCENTAGE field as 0 before the learn. Reference search 2026-11-24: coa-history spell 300476: 0 events in 186 logs; 520256 Betrayer: 42 SPELL_AURA_APPLIED and 42 SPELL_AURA_REMOVED in 2 logs (2026-08-10, logs 103 and 104), player to player (party and raid members), about 10.0 s each; it supports the 10 s duration."
+    },
+    {
+      "spell": 300476,
+      "kind": "avoided_swing_reads",
+      "name": "Betrayer (party crit duration)",
+      "variant": "party_crit_duration",
+      "label_suffix": "party_crit_duration",
+      "quote": "for $520256d.",
+      "read": "duration_max",
+      "observe_spell": 520256,
+      "ally_yd": 10,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852
+      ],
+      "swing_ms": 500,
+      "control_windows": 10,
+      "windows": 30,
+      "observe_source": "AscensionFelswornEvents.cpp:42-47 passes an incoming dodge when Chance(player, 300476) succeeds (ProcChance 100) and :223-224 casts 804336 at the attacker and 520256 on the caster; 520256 Effect[0] APPLY_AURA SPELL_AURA_MOD_CRIT_PCT, TargetA 22 SRC_CASTER, TargetB 30 UNIT_SRC_AREA_ALLY, RadiusIndex 9, DurationIndex 1 (server DBC). Spell.cpp:9449-9459 adds no combat reach for a player target of a player caster. Strikers: the 804822 proc shape, ten aggressive stationary creature 36 with 42716, 62531 and 2116852, dodge 100 before every 500 ms window. Reference search 2026-11-24: coa-history spell 300476: 0 events in 186 logs; 520256 Betrayer: 42 SPELL_AURA_APPLIED and 42 SPELL_AURA_REMOVED in 2 logs (2026-08-10, logs 103 and 104), player to player (party and raid members), about 10.0 s each; it supports the 10 s duration."
+    },
+    {
+      "spell": 805249,
+      "kind": "avoided_swing_reads",
+      "name": "Illidari Training (energy per dodge)",
+      "variant": "energy_per_dodge",
+      "label_suffix": "energy_per_dodge",
+      "quote": "Dodging an attack now generates $521210s1 Energy.",
+      "read": "per_event",
+      "observe_spell": 521210,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852
+      ],
+      "swing_ms": 500,
+      "control_windows": 10,
+      "windows": 60,
+      "observe_source": "AscensionFelswornEvents.cpp:42-47 passes an incoming dodge when Chance(player, 805249) succeeds (ProcChance 100) and :208-209 casts 521210 on the caster; 521210 Effect[0] ENERGIZE, MiscValue 3 Energy (server DBC). SpellEffects.cpp EffectEnergize passes the effect value to Unit::EnergizeBySpell, which logs it uncapped (Unit.cpp:9330-9348), so each energize log carries the full amount. Strikers: the 804822 proc shape, dodge 100 before every 500 ms window. Reference search 2026-11-24: coa-history spell 805249 and 521210: 0 events in 186 logs; nothing found that decides the amount."
+    },
+    {
+      "spell": 804822,
+      "kind": "avoided_proc_instances",
+      "name": "Vengeance Is Mine (Twin Slice instances)",
+      "variant": "twin_slice_instances",
+      "label_suffix": "twin_slice_instances",
+      "quote": "next 10 instances of damage with Twin Slice",
+      "gain_quote": "and generate 1 Felfury.",
+      "proc_aura": 807163,
+      "cast_spell": 801901,
+      "hit_spells": [
+        808303,
+        808304
+      ],
+      "stack_aura": 800058,
+      "instances": 10,
+      "power": 3,
+      "power_value": 45,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852
+      ],
+      "swing_ms": 500,
+      "proc_windows": 30,
+      "casts": 8,
+      "cast_gap_ms": 1100,
+      "observe_source": "Mentor D-67: 807163 is obtained by the real route: 804822 learned, dodged swings (dodge 100) until the Chance(player, 804822) roll procs (AscensionFelswornEvents.cpp:42-47, :157-158 casts 807163 on the caster). 807163's apply sets script value 807163 to 10 (AscensionFelswornAuras.cpp:84-85); every direct Twin Slice damage instance (Twin(info) && Direct(info)) while it is held gains 1 Felfury and decrements it, removing the aura at the last (AscensionFelswornAbilities.cpp:375-384). Twin Slice 801901 strikes with both weapons (EffectTriggerSpell 808303 and 808304) and gains 1 Felfury itself (EffectTriggerSpell[2] 800058), read as the control arm's own gain; ManaCost 45 Energy (PowerType 3), set before each cast; StartRecoveryTime 1000 ms, so casts 1100 ms apart. Felfury 800058 StackAmount 6, set to 0 before each cast (at most 3 gained per cast). Twin Fury 801892 is not learned, so a critical strike adds no Felfury. 807163 DurationIndex 1 (10 s): an expiry by duration voids the run. Reference search 2026-11-24: coa-history spell 804822 and 807163: 0 events in 186 logs; nothing found that decides the 10 instances or the Felfury gain."
+    },
+    {
+      "spell": 561216,
+      "name": "Fury of the Illidari (charges and recharge)",
+      "kind": "charge_recharge",
+      "quote": "2 Charges, 1.5 min recharge",
+      "max_charges": 2,
+      "recharge_ms": 90000,
+      "target": "dummy",
+      "observe_source": "SpellCharges.dbc row Spell=561216 points at SpellChargesCategory.dbc row 365 (MaxCharges 2, RecoveryTime 90000 ms; coa-dbc-viewer record --table SpellCharges --id 561216, --table SpellChargesCategory --id 365); Spell.dbc 561216 carries RecoveryTime 0. Inner Demon 804216 is 561216's CasterAuraSpell and is set before each cast as a precondition fixture (required_aura_steps); the claim's subject is the charge count and the recharge. The tooltip 'Requires a nearby enemy to cast' is met by the stock dummy. The pair brackets the recharge at 5% (85500 / 94500 ms), which excludes a recharge 10% off on both sides (81000 and 99000 ms). The scenario waits 99500 ms, past the run's 90000 ms default, so it carries its own timeout (waits + 60000 ms; the first attempt, runs 20261123-205143/-205258, timed out without it). Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): '2 Charges, 1.5 min recharge' (same figures); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 802058,
+      "name": "Reckoning (falling speed slowed)",
+      "kind": "metric_delta",
+      "variant": "feather_fall",
+      "label_suffix": "feather_fall",
+      "quote": "For the duration, your falling speed is slowed",
+      "trigger_spell": 802058,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "server_packets",
+      "fields": {
+        "opcode": 242
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "802058 Effect[2] is aura 42 in Spell.dbc; the class contract turns it into SPELL_AURA_FEATHER_FALL (AscensionFelswornContracts.cpp:234-241), whose handler calls Unit::SetFeatherFall: for a client-controlled player the server sends SMSG_MOVE_FEATHER_FALL (opcode 0x0F2 = 242, Opcodes.h:272) to the controlling client (Unit.cpp:18337-18348), which is what slows the fall; the server sets no movement flag itself until the client acknowledges. The harness records that opcode (server_packets). Control: before the cast, no feather-fall packet (0). After a real cast of 802058 on the caster: one packet (1), read 500 ms later, inside the 10000 ms aura (DurationIndex 1). Reference search 2026-11-23: coa-history spell 802058: 78 casts, 78 aura applied and 78 removed in 6 logs (combat logs carry no fall speed); expected values come from the tooltip, the DBC and the class contract only."
+    },
+    {
+      "spell": 802058,
+      "name": "Reckoning (no fall damage under the aura)",
+      "kind": "fall_damage",
+      "variant": "landing",
+      "label_suffix": "landing",
+      "quote": "For the duration, your falling speed is slowed",
+      "cast_spell": 802058,
+      "height": 30,
+      "receiver": "caster",
+      "observe_source": "802058 Effect[2] is aura 42 in Spell.dbc; the class contract turns it into SPELL_AURA_FEATHER_FALL (AscensionFelswornContracts.cpp:234-241). DurationIndex 1 = 10000 ms. Player::HandleFall (Player.cpp:15123-15160), the server's landing handler that MSG_MOVE_FALL_LAND reaches (MovementHandler.cpp:628-630), skips fall damage for a player with a feather-fall aura (!HasFeatherFallAura(), Player.cpp:15129-15131); the slower descent itself is rendered by the client. The caster lands from 30 yd at 10000 maximum health without the aura (the control: health lost above 0 proves the handler ran on this fall) and again about 2000 ms after a real cast of 802058 (aura read present 1500 ms after the cast, 500 ms before the landing, inside its 10000 ms): health lost 0 expected. The landing is harness-simulated (ADR 0237): the fall action feeds Player::HandleFall, not a relocate; its refusal of a feather-falling player was lifted for this read (mentor D-77, ADR 1265). The SMSG_MOVE_FEATHER_FALL packet read (feather_fall) stays as data. Reference search 2026-11-23: coa-history spell 802058: 78 casts, 78 aura applied and 78 removed in 6 logs, no value in a log event; expected values come from the tooltip, Spell.dbc and the server code only."
+    },
+    {
+      "spell": 800203,
+      "kind": "metric_delta",
+      "quote": "Interrupt a spell from being cast, preventing the target from casting spells of that school for $d and draining mana from the target based on your Spirit.",
+      "trigger_spell": 800203,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "void_on_cast_failure": true,
+      "target_casts_before": [
+        12051
+      ],
+      "expire_ms": 500,
+      "name": "Felbreak (interrupts the target's channel)",
+      "variant": "interrupt",
+      "label_suffix": "interrupt",
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "observe_source": "Felbreak 800203 (server DBC set): CastingTimeIndex 3 = 500 ms, Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 = 3000 ms ($d, SpellDuration.dbc), RangeIndex 3; the class contract clears Effect[2] (AscensionFelswornContracts.cpp:136-137) and the class script casts Spellbreak 804809 (SPELL_EFFECT_POWER_DRAIN) at the target on a successful interrupt (AscensionFelswornAbilities.cpp:396-400). Spell::EffectInterruptCast stops a channel whose ChannelInterruptFlags hold CHANNEL_INTERRUPT_FLAG_INTERRUPT and locks that spell's school for the duration (ProhibitSpellSchool, SpellEffects.cpp). The target channels Evocation 12051 (Arcane, SchoolMask 64, 8000 ms) on itself right before the trigger (target_casts_before), the same fixture as the counted moving_cast entry. The before phase casts nothing (the control). Control: the channel is running (1). After a real Felbreak cast (500 ms cast) at the channelling target, read 1500 ms after the cast starts: the target no longer casts (0). Reference search 2026-11-23: coa-history spell 800203: SPELL_CAST_START 8 events and SPELL_INTERRUPT 6 events by players in 1 log (no lockout or drain figure); the bindmysoul snapshot has no value beyond the tooltip; expected values come from the tooltip and the DBC only. Residual risk, code reading only: a missed Felbreak leaves the channel running and alerts; the counted moving_cast entry carries the same single landing."
+    },
+    {
+      "spell": 800203,
+      "kind": "metric_delta",
+      "quote": "Interrupt a spell from being cast, preventing the target from casting spells of that school for $d and draining mana from the target based on your Spirit.",
+      "trigger_spell": 800203,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "void_on_cast_failure": true,
+      "target_casts_before": [
+        12051
+      ],
+      "expire_ms": 500,
+      "name": "Felbreak (Arcane lockout still held 2850 ms after the interrupt)",
+      "variant": "lockout_held",
+      "label_suffix": "lockout_held",
+      "metric": "school_prohibited",
+      "fields": {
+        "school_mask": 64
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3350,
+      "observe_source": "Felbreak 800203 (server DBC set): CastingTimeIndex 3 = 500 ms, Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 = 3000 ms ($d, SpellDuration.dbc), RangeIndex 3; the class contract clears Effect[2] (AscensionFelswornContracts.cpp:136-137) and the class script casts Spellbreak 804809 (SPELL_EFFECT_POWER_DRAIN) at the target on a successful interrupt (AscensionFelswornAbilities.cpp:396-400). Spell::EffectInterruptCast stops a channel whose ChannelInterruptFlags hold CHANNEL_INTERRUPT_FLAG_INTERRUPT and locks that spell's school for the duration (ProhibitSpellSchool, SpellEffects.cpp). The target channels Evocation 12051 (Arcane, SchoolMask 64, 8000 ms) on itself right before the trigger (target_casts_before), the same fixture as the counted moving_cast entry. The before phase casts nothing (the control). The Arcane lockout of the target is read with school_prohibited: none in the control (0); 3350 ms after the cast starts, 2850 ms after the 500 ms cast lands, still held (1), which excludes a lockout 10% short (2700 ms). Reference search 2026-11-23: coa-history spell 800203: SPELL_CAST_START 8 events and SPELL_INTERRUPT 6 events by players in 1 log (no lockout or drain figure); the bindmysoul snapshot has no value beyond the tooltip; expected values come from the tooltip and the DBC only. Residual risk, code reading only: a missed Felbreak leaves the channel running and alerts; the counted moving_cast entry carries the same single landing."
+    },
+    {
+      "spell": 800203,
+      "kind": "metric_delta",
+      "quote": "Interrupt a spell from being cast, preventing the target from casting spells of that school for $d and draining mana from the target based on your Spirit.",
+      "trigger_spell": 800203,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "void_on_cast_failure": true,
+      "target_casts_before": [
+        12051
+      ],
+      "expire_ms": 500,
+      "name": "Felbreak (Arcane lockout gone 3150 ms after the interrupt)",
+      "variant": "lockout_free",
+      "label_suffix": "lockout_free",
+      "metric": "school_prohibited",
+      "fields": {
+        "school_mask": 64
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 3650,
+      "observe_source": "Felbreak 800203 (server DBC set): CastingTimeIndex 3 = 500 ms, Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 = 3000 ms ($d, SpellDuration.dbc), RangeIndex 3; the class contract clears Effect[2] (AscensionFelswornContracts.cpp:136-137) and the class script casts Spellbreak 804809 (SPELL_EFFECT_POWER_DRAIN) at the target on a successful interrupt (AscensionFelswornAbilities.cpp:396-400). Spell::EffectInterruptCast stops a channel whose ChannelInterruptFlags hold CHANNEL_INTERRUPT_FLAG_INTERRUPT and locks that spell's school for the duration (ProhibitSpellSchool, SpellEffects.cpp). The target channels Evocation 12051 (Arcane, SchoolMask 64, 8000 ms) on itself right before the trigger (target_casts_before), the same fixture as the counted moving_cast entry. The before phase casts nothing (the control). The Arcane lockout is read 3650 ms after the cast starts, 3150 ms after the 500 ms cast lands: gone (0), which excludes a lockout 10% long (3300 ms); the lockout_held arm shows it was applied. Reference search 2026-11-23: coa-history spell 800203: SPELL_CAST_START 8 events and SPELL_INTERRUPT 6 events by players in 1 log (no lockout or drain figure); the bindmysoul snapshot has no value beyond the tooltip; expected values come from the tooltip and the DBC only. Residual risk, code reading only: a missed Felbreak leaves the channel running and alerts; the counted moving_cast entry carries the same single landing."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (Fel Fireball is instant while channeling)",
+      "kind": "metric_delta",
+      "variant": "instant_fel_fireball",
+      "label_suffix": "instant_fel_fireball",
+      "quote": "For the duration, you may instant cast Fel Fireball and Ruin while channeling and they refund their cost.",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 801312
+      },
+      "before_expected": 1500,
+      "expected": 0,
+      "tolerance": 1,
+      "wait_ms": 700,
+      "expire_ms": 6000,
+      "observe_source": "Sargeras Embrace 800355 (server DBC set): a channel (AttributesEx SPELL_ATTR1_IS_CHANNELED), DurationIndex 571 (5500 ms), ManaCost 30 Energy plus ManaPerSecond 30, drained every 1000 ms (SpellAuras.cpp:771-801). While it is the caster's active channel, Unit::CanCastDuringChannel (Unit.cpp:5143-5159) admits a Felsworn spell of family 20 whose SpellFamilyFlags[1] has bit 1 or 2: Fel Fireball 801312 (flags[1] 1) and Ruin 501298 (flags[1] 2); Unit::ModSpellCastTime then sets their cast time to 0 (Unit.cpp:13146-13150), and the class script stores the paid cost of such a cast and energizes it back as spell 800355 (AscensionFelswornAbilities.cpp:177-178, :246-247). The cast time the server uses for Fel Fireball 801312 (CalcCastTime with the caster, which applies ModSpellCastTime) is read without the channel (the control: 1500 ms, SpellCastTimes.dbc) and 700 ms after a real cast of 800355 at the dummy from 100 Energy, inside the channel and before its first 1000 ms drain: 0. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (Ruin is instant while channeling)",
+      "kind": "metric_delta",
+      "variant": "instant_ruin",
+      "label_suffix": "instant_ruin",
+      "quote": "For the duration, you may instant cast Fel Fireball and Ruin while channeling and they refund their cost.",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 501298
+      },
+      "before_expected": 2500,
+      "expected": 0,
+      "tolerance": 1,
+      "wait_ms": 700,
+      "expire_ms": 6000,
+      "observe_source": "Sargeras Embrace 800355 (server DBC set): a channel (AttributesEx SPELL_ATTR1_IS_CHANNELED), DurationIndex 571 (5500 ms), ManaCost 30 Energy plus ManaPerSecond 30, drained every 1000 ms (SpellAuras.cpp:771-801). While it is the caster's active channel, Unit::CanCastDuringChannel (Unit.cpp:5143-5159) admits a Felsworn spell of family 20 whose SpellFamilyFlags[1] has bit 1 or 2: Fel Fireball 801312 (flags[1] 1) and Ruin 501298 (flags[1] 2); Unit::ModSpellCastTime then sets their cast time to 0 (Unit.cpp:13146-13150), and the class script stores the paid cost of such a cast and energizes it back as spell 800355 (AscensionFelswornAbilities.cpp:177-178, :246-247). The cast time the server uses for Ruin 501298 (CalcCastTime with the caster, which applies ModSpellCastTime) is read without the channel (the control: 2500 ms, SpellCastTimes.dbc) and 700 ms after a real cast of 800355 at the dummy from 100 Energy, inside the channel and before its first 1000 ms drain: 0. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (Fel Fireball cast while channeling refunds its cost)",
+      "kind": "metric_delta",
+      "variant": "refund_fel_fireball",
+      "label_suffix": "refund_fel_fireball",
+      "quote": "For the duration, you may instant cast Fel Fireball and Ruin while channeling and they refund their cost.",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "setup_casts": [
+        800355
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "cast_power": 100,
+      "measure_actor": "caster",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 800355
+      },
+      "before_expected": 0,
+      "expected": 35,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 6000,
+      "observe_source": "Sargeras Embrace 800355 (server DBC set): a channel (AttributesEx SPELL_ATTR1_IS_CHANNELED), DurationIndex 571 (5500 ms), ManaCost 30 Energy plus ManaPerSecond 30, drained every 1000 ms (SpellAuras.cpp:771-801). While it is the caster's active channel, Unit::CanCastDuringChannel (Unit.cpp:5143-5159) admits a Felsworn spell of family 20 whose SpellFamilyFlags[1] has bit 1 or 2: Fel Fireball 801312 (flags[1] 1) and Ruin 501298 (flags[1] 2); Unit::ModSpellCastTime then sets their cast time to 0 (Unit.cpp:13146-13150), and the class script stores the paid cost of such a cast and energizes it back as spell 800355 (AscensionFelswornAbilities.cpp:177-178, :246-247). Energy given back by spell 800355 is read with spell_energize_total. Control: Fel Fireball 801312 cast at the dummy with no channel: no 800355 energize (0). After: a real 800355 cast at the dummy, 300 ms later Fel Fireball is cast at the same dummy from 100 Energy while the channel runs: one energize of its paid cost, 35 Energy (ManaCost 35, Spell.dbc), read 500 ms after the cast. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (Ruin cast while channeling refunds its cost)",
+      "kind": "metric_delta",
+      "variant": "refund_ruin",
+      "label_suffix": "refund_ruin",
+      "quote": "For the duration, you may instant cast Fel Fireball and Ruin while channeling and they refund their cost.",
+      "trigger_spell": 501298,
+      "target": "dummy",
+      "setup_casts": [
+        800355
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "cast_power": 100,
+      "measure_actor": "caster",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 800355
+      },
+      "before_expected": 0,
+      "expected": 30,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 6000,
+      "observe_source": "Sargeras Embrace 800355 (server DBC set): a channel (AttributesEx SPELL_ATTR1_IS_CHANNELED), DurationIndex 571 (5500 ms), ManaCost 30 Energy plus ManaPerSecond 30, drained every 1000 ms (SpellAuras.cpp:771-801). While it is the caster's active channel, Unit::CanCastDuringChannel (Unit.cpp:5143-5159) admits a Felsworn spell of family 20 whose SpellFamilyFlags[1] has bit 1 or 2: Fel Fireball 801312 (flags[1] 1) and Ruin 501298 (flags[1] 2); Unit::ModSpellCastTime then sets their cast time to 0 (Unit.cpp:13146-13150), and the class script stores the paid cost of such a cast and energizes it back as spell 800355 (AscensionFelswornAbilities.cpp:177-178, :246-247). Energy given back by spell 800355 is read with spell_energize_total. Control: Ruin 501298 cast at the dummy with no channel: no 800355 energize (0). After: a real 800355 cast at the dummy, 300 ms later Ruin is cast at the same dummy from 100 Energy while the channel runs: one energize of its paid cost, 30 Energy (ManaCost 30, Spell.dbc), read 500 ms after the cast. Ruin is a Felfury spender: 6 Felfury 800058 and At Least 2 Felfury 803468 are set on the caster in both arms as named precondition fixtures, the same pair as the counted Ruin entries (moving_cast_control, consumes). Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc; expected values come from the tooltip and the DBC only.",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (the channel survives an instant Fel Fireball)",
+      "kind": "metric_delta",
+      "variant": "channel_held_fel_fireball",
+      "label_suffix": "channel_held_fel_fireball",
+      "quote": "For the duration, you may instant cast Fel Fireball and Ruin while channeling",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "setup_casts": [
+        800355
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "cast_power": 100,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 800355
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 6000,
+      "observe_source": "Sargeras Embrace 800355 (server DBC set): a channel, DurationIndex 571 (5500 ms). Casting Fel Fireball 801312 or Ruin 501298 while it is the caster's active channel keeps the channel only if every interrupt path admits them through Unit::CanCastDuringChannel (Unit.cpp:5143-5159): the cast-in-progress refusal (Spell.cpp:3604-3611), the generic-spell interrupt of the channel in SetCurrentCastedSpell (Unit.cpp:4832-4842) and the aura-interrupt path (Unit.cpp:6305-6315). The channel aura 800355 on the dummy is read; free_3900 / free_4100 show the read sees the channel end. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc; expected values come from the tooltip and the DBC only. Control: Fel Fireball cast at the dummy with no channel: no 800355 aura (0). After: a real 800355 cast at the dummy from 100 Energy, Fel Fireball cast 300 ms later, the channel aura read 500 ms after it, before the first 1000 ms drain: present (1). The positive control is channel_break_felbreak."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (the channel survives an instant Ruin)",
+      "kind": "metric_delta",
+      "variant": "channel_held_ruin",
+      "label_suffix": "channel_held_ruin",
+      "quote": "For the duration, you may instant cast Fel Fireball and Ruin while channeling",
+      "trigger_spell": 501298,
+      "target": "dummy",
+      "setup_casts": [
+        800355
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "cast_power": 100,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 800355
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 6000,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Sargeras Embrace 800355 (server DBC set): a channel, DurationIndex 571 (5500 ms). Casting Fel Fireball 801312 or Ruin 501298 while it is the caster's active channel keeps the channel only if every interrupt path admits them through Unit::CanCastDuringChannel (Unit.cpp:5143-5159): the cast-in-progress refusal (Spell.cpp:3604-3611), the generic-spell interrupt of the channel in SetCurrentCastedSpell (Unit.cpp:4832-4842) and the aura-interrupt path (Unit.cpp:6305-6315). The channel aura 800355 on the dummy is read; free_3900 / free_4100 show the read sees the channel end. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc; expected values come from the tooltip and the DBC only. Control: Ruin cast at the dummy with no channel: no 800355 aura (0). After: a real 800355 cast at the dummy from 100 Energy, Ruin cast 300 ms later, the channel aura read 500 ms after it: present (1). Ruin is a Felfury spender: 6 Felfury 800058 and At Least 2 Felfury 803468 are set on the caster in both arms as named precondition fixtures, the same pair as refund_ruin. The positive control is channel_break_felbreak."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (control: Felbreak, not admitted, ends the channel)",
+      "kind": "metric_delta",
+      "variant": "channel_break_felbreak",
+      "label_suffix": "channel_break_felbreak",
+      "quote": "For the duration, you may instant cast Fel Fireball and Ruin while channeling",
+      "trigger_spell": 800203,
+      "target": "dummy",
+      "setup_casts": [
+        800355
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "cast_power": 100,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 800355
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 800,
+      "expire_ms": 6000,
+      "observe_source": "Sargeras Embrace 800355 (server DBC set): a channel, DurationIndex 571 (5500 ms). Casting Fel Fireball 801312 or Ruin 501298 while it is the caster's active channel keeps the channel only if every interrupt path admits them through Unit::CanCastDuringChannel (Unit.cpp:5143-5159): the cast-in-progress refusal (Spell.cpp:3604-3611), the generic-spell interrupt of the channel in SetCurrentCastedSpell (Unit.cpp:4832-4842) and the aura-interrupt path (Unit.cpp:6305-6315). The channel aura 800355 on the dummy is read; free_3900 / free_4100 show the read sees the channel end. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc; expected values come from the tooltip and the DBC only. Positive control of channel_held_*: Felbreak 800203 (family 20, SpellFamilyFlags[1] 0, so CanCastDuringChannel refuses it; CastingTimeIndex 3 = 500 ms, a generic spell) cast at the dummy 300 ms after a real 800355 cast: the generic-spell interrupt ends the channel, so the 800355 aura is absent 800 ms after the Felbreak cast (0). A read that missed the end of a channel would read 1 here."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (end damage still lands after an instant Fel Fireball)",
+      "kind": "metric_delta",
+      "variant": "damage_after_fel_fireball",
+      "label_suffix": "damage_after_fel_fireball",
+      "quote": "For the duration, you may instant cast Fel Fireball and Ruin while channeling",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "setup_casts": [
+        800355
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800355,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 704.0,
+      "after_at_least": 703,
+      "after_at_most": 705,
+      "wait_ms": 100,
+      "expire_ms": 500,
+      "hold_power_during_wait": {
+        "power": 3,
+        "every_ms": 500,
+        "count": 11
+      },
+      "observe_source": "Sargeras Embrace 800355 (server DBC set): a channel, DurationIndex 571 (5500 ms). Casting Fel Fireball 801312 or Ruin 501298 while it is the caster's active channel keeps the channel only if every interrupt path admits them through Unit::CanCastDuringChannel (Unit.cpp:5143-5159): the cast-in-progress refusal (Spell.cpp:3604-3611), the generic-spell interrupt of the channel in SetCurrentCastedSpell (Unit.cpp:4832-4842) and the aura-interrupt path (Unit.cpp:6305-6315). The channel aura 800355 on the dummy is read; free_3900 / free_4100 show the read sees the channel end. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc; expected values come from the tooltip and the DBC only. The channel's end damage (one SPELL_AURA_PERIODIC_DAMAGE tick at the end, AscensionFelswornContracts.cpp:232; 704 at level 60 and 0 spell power, as the counted damage entry) still lands when Fel Fireball was cast 300 ms into the channel: read 5600 ms after the Fel Fireball cast (11 power holds of 500 ms, then 100 ms), about 5900 ms after the channel cast. Control: Fel Fireball alone, no 800355 damage (0). Energy is held at 100 every 500 ms after the Fel Fireball cast (hold_power_during_wait), as the damage entry. The dummy's resistance is removed by the spell-penetration fixture 823764 (aura 123, MiscValue 126, -9999)."
+    },
+    {
+      "spell": 707444,
+      "name": "Hellfire Carver (a full Carve channel: Fel Fireball strikes 10 additional enemies of 11 offered)",
+      "kind": "metric_delta",
+      "variant": "extras_cap",
+      "label_suffix": "extras_cap",
+      "quote": "up to a maximum of 10 enemies",
+      "trigger_spell": 801312,
+      "gate_spell": 707444,
+      "target": "dummy",
+      "cast_power": 100,
+      "setup_casts": [
+        800206
+      ],
+      "setup_wait_ms": 3000,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 801312,
+        "target": "dummy"
+      },
+      "area_dummies": [
+        3.2,
+        3.4,
+        3.6,
+        3.8,
+        4.0,
+        4.2,
+        4.4,
+        4.6,
+        4.8,
+        5.0,
+        5.2
+      ],
+      "area_sum": true,
+      "before_expected": 1,
+      "expected": 12,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Hellfire Carver 707444 Description (server DBC set): 'Casting Carve now makes your next Fel Fireball instant cast and causes it to strike 1 additional enemy near the primary target based on how long you channeled, up to a maximum of 10 enemies, dealing less damage with each target struck.' Reading of 'up to a maximum of 10 enemies': 10 ADDITIONAL enemies, the count that grows by 1 per channel tick (controller ruling of 2026-11-23), from two sources: the aura 807424 the channel leaves has StackAmount 10 in the DBC, and the server sets the extra targets to the channel's ticks, clamped to 10 at the channel's end (AscensionFelswornAuras.cpp:224-228, AscensionFelswornAbilities.cpp:136-147: every valid enemy within 10 yd of the primary while extra > 0). Carve 800206 is a 2500 ms channel (DurationIndex 66, ten 250 ms ticks). A real Carve is cast first (a setup cast, kept in both phases) and its channel ends after 3000 ms; then one real Fel Fireball at the primary dummy at 3 yd, with eleven more dummies at 3.2 to 5.2 yd from the caster (all within 2.2 yd of the primary, inside the 10 yd search), one more than the cap. The hits of Fel Fireball on the primary and the eleven area dummies are summed, cumulative over the scenario: before (control: Hellfire Carver not learned) 1, the primary only; after the learn 12, that 1 plus 11 in the second cast (the primary and 10 additional enemies; one offered dummy stays unhit), a gain of 11, which excludes a missing cap (12 in the cast, 13 summed). The 'less damage with each target struck' part is not judged here. Reference search 2026-11-23: coa-history spell 807424 (the Carve aura): SPELL_AURA_APPLIED 171 and SPELL_AURA_APPLIED_DOSE 1516 events in 4 logs, about 9 doses per application; spells 707444 and 801312: 0 events under those ids; bindmysoul snapshot has no value beyond the tooltip; nothing else found.",
+      "expected_gain": 11
+    },
+    {
+      "spell": 525001,
+      "name": "Felbane (the cursed enemy's next spell is reflected onto it)",
+      "kind": "taken_hit",
+      "variant": "reflect",
+      "label_suffix": "reflect",
+      "judge": "counts",
+      "quote": "Curse an enemy, causing the next spell they cast within $d to be reflected onto them.",
+      "strike_spell": 41394,
+      "trials": 6,
+      "caster_health_pct": 100,
+      "caster_max_health": 20000,
+      "striker_spell_hit": true,
+      "striker_untriggered": true,
+      "count_reads": {
+        "landed": {
+          "metric": "spell_damage_count",
+          "spell": 41394,
+          "caster": "striker",
+          "target": "caster"
+        },
+        "reflected": {
+          "metric": "spell_damage_count",
+          "spell": 41394,
+          "caster": "striker",
+          "target": "striker"
+        }
+      },
+      "count_total": [
+        "landed",
+        "reflected"
+      ],
+      "arms": [
+        {
+          "name": "control",
+          "strikes": 2,
+          "counts": {
+            "landed": 2,
+            "reflected": 0
+          }
+        },
+        {
+          "name": "treatment",
+          "casts": [
+            [
+              525001,
+              "striker"
+            ]
+          ],
+          "strikes": 2,
+          "counts": {
+            "landed": 1,
+            "reflected": 1
+          }
+        }
+      ],
+      "observe_source": "525001 Felbane (DBC: Effect[0] SPELL_AURA_DUMMY on TARGET_UNIT_TARGET_ENEMY, Dispel 2 curse, DurationIndex 35 = 4000 ms, DmgClass magic). The server reflects the first non-triggered harmful magic-class spell a unit holding the caster's 525001 casts at another unit (missCondition SPELL_MISS_REFLECT) and removes 525001 (AscensionFelswornAbilities.cpp:102-117, OnSpellBeforeEffects). A stationary creature striker (entry 36) casts Light of the Naaru 41394 (SPELL_EFFECT_SCHOOL_DAMAGE, Holy, 1100, DmgClass magic, instant, no cost) at the caster twice per trial, untriggered (the harness creature cast with triggered false, TRIGGERED_NONE, so the hook's triggered check passes) and with a spell hit bonus of 100 (no natural miss, Unit.cpp:4039-4051); the caster player fixture holds 10000 spell hit rating, so its Felbane, cast at the striker before each trial's strikes in the treatment arm, always lands. Both 41394 damage logs are read from the caster's combat log: striker to caster (landed) and striker to striker (reflected). Control: 2 landed, 0 reflected; treatment: the first strike reflected onto the striker and the second landing (only the next spell), 1 and 1. A trial is judged when landed + reflected reaches 2. Reference search 2026-11-23: coa-history spell 525001: 10 SPELL_CAST_SUCCESS events by players in 5 of 186 logs, no reflected event recorded; bindmysoul talents snapshot not consulted for this ability; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 560641,
+      "name": "Warlock Training (a Crippled enemy cannot critically strike)",
+      "kind": "taken_hit",
+      "variant": "no_crit",
+      "label_suffix": "no_crit",
+      "judge": "counts",
+      "quote": "Cripple now causes the enemy target to be unable to critically strike for $704397d.",
+      "strike_spell": 41394,
+      "striker_race": 2,
+      "striker_force_crit": "spell",
+      "trials": 10,
+      "caster_health_pct": 100,
+      "caster_max_health": 20000,
+      "count_reads": {
+        "hits": {
+          "metric": "spell_damage_count",
+          "spell": 41394,
+          "caster": "striker",
+          "target": "caster"
+        },
+        "crits": {
+          "metric": "spell_damage_count",
+          "spell": 41394,
+          "caster": "striker",
+          "target": "caster",
+          "critical": true
+        },
+        "cripple": {
+          "metric": "aura",
+          "actor": "striker",
+          "spell": 704371,
+          "caster": "caster",
+          "state": true
+        },
+        "pain": {
+          "metric": "aura",
+          "actor": "striker",
+          "spell": 704397,
+          "caster": "caster",
+          "state": true
+        }
+      },
+      "count_total": [
+        "hits"
+      ],
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            560641
+          ],
+          "casts": [
+            [
+              704371,
+              "striker"
+            ]
+          ],
+          "require": {
+            "cripple": 1
+          },
+          "counts": {
+            "crits": 1,
+            "pain": 0
+          }
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            560641
+          ],
+          "casts": [
+            [
+              704371,
+              "striker"
+            ]
+          ],
+          "require": {
+            "cripple": 1
+          },
+          "counts": {
+            "crits": 0,
+            "pain": 1
+          }
+        }
+      ],
+      "observe_source": "560641 Warlock Training: Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704397 (Crippling Pain, Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT -100000, DurationIndex 35 = 4000 ms, tooltip 'Unable to critically strike.'); AscensionFelswornAbilities.cpp:336-337 casts 704397 on the target of Cripple 704371 when 560641 is known; on a player 290 is read by Player::UpdateAllSpellCritChances (SpellAuraEffects.cpp HandleAuraModCritPct). A PvP-flagged player striker (race 2) holding 100000 spell crit rating (every strike crits, the Resilient Constitution 552011 pattern) casts Light of the Naaru 41394 at the caster once per trial; before each strike the caster (the player fixture's 10000 spell hit rating) casts Cripple at the striker. Control unlearns 560641, treatment learns it (D-67, a real learn). After each trial the Cripple and Crippling Pain auras of the caster on the striker are read as states: a trial without Cripple on the striker is void; a judged trial must read 1 critical strike and no Crippling Pain in control, 0 critical strikes with Crippling Pain in treatment. A trial is judged when its strike landed. Reference search 2026-11-23: coa-history spell 704397: 0 events in 186 logs; 560641 is a passive with no event; bindmysoul talents snapshot (fetched 2026-07-22): Warlock Training 560641 'Cripple now causes the enemy target to be unable to critically strike for 4 seconds.'; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 804613,
+      "name": "Doomstride (the resist occurs at most once every 10 sec)",
+      "kind": "taken_hit",
+      "variant": "resist_icd",
+      "label_suffix": "resist_icd",
+      "judge": "resist_rate",
+      "expected_points": 100,
+      "quote": "Can only occur once every 10 sec.",
+      "strike_spell": 702,
+      "trials": 6,
+      "learn": [
+        804613
+      ],
+      "striker_spell_hit": true,
+      "arms": [
+        {
+          "name": "control",
+          "auras": [
+            [
+              706818,
+              0
+            ]
+          ],
+          "prime_gap_ms": 9000
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              706818,
+              0
+            ]
+          ],
+          "prime_gap_ms": 11000
+        }
+      ],
+      "observe_source": "804613 Doomstride tooltip: 'While at full health, your chance to resist the next Curse or Magic effect on you is increased by 100%. Can only occur once every 10 sec.' The server resists a non-positive Curse or Magic all-aura spell at a full-health owner of 804613 without 706818, then casts 706818 on the owner (AscensionFelsworn.cpp:76-93, ResistDebuff); 706818 lasts SpellDuration index 1 = 10000 ms (forced in AscensionFelswornContracts.cpp:263-266). 804613 is learned for every arm (D-67, a real learn) and the caster stays at full health (Curse of Weakness 702 deals no damage). A stationary creature striker (entry 36) with a spell hit bonus of 100 (no natural miss, Unit.cpp:4039-4051) casts 702 (Dispel 2 curse, DmgClass magic, two APPLY_AURA effects) at the caster: each trial removes 706818, casts a priming 702, waits the arm's gap, removes any 702 and casts the judged 702, read 300 ms later. Control gap 9000 ms (inside the 10 s): the judged curse must land; treatment gap 11000 ms (past it): it must be resisted; treatment resists 100 points more often. Deterministic with no natural miss, so 6 trials per arm. Reference search 2026-11-23: coa-history spell 804613 and 706818: 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 804823,
+      "name": "Tyrannical Resolve (the ignored damage stops at 100% of maximum health)",
+      "kind": "taken_hit",
+      "variant": "capped",
+      "label_suffix": "capped",
+      "judge": "absorb",
+      "quote": "up to 100% of your maximum health.",
+      "strike_spell": 41394,
+      "trials": 6,
+      "caster_health_pct": 100,
+      "caster_max_health": 2000,
+      "arms": [
+        {
+          "name": "control",
+          "absorb": "none"
+        },
+        {
+          "name": "resolve",
+          "opening_casts": [
+            [
+              804823,
+              "caster"
+            ]
+          ],
+          "absorb": "capped_share",
+          "share_pct": 50,
+          "cap_pct": 100
+        }
+      ],
+      "observe_source": "804823 Tyrannical Resolve: Effect[1] SCHOOL_ABSORB whose amount the server sets to half of each damage taken, capped by the caster's maximum health less what was already absorbed during the effect (AscensionFelswornAuras.cpp:315-333, aura_ascension_felsworn_resolve::Absorb; script value 804824 holds the absorbed total, reset on apply at AscensionFelswornAuras.cpp:102-104). The caster is held at 2000 of 2000 maximum health before every trial; a passive striker casts Light of the Naaru 41394 (1100) at it once per trial, 6 trials inside the 30000 ms effect cast once at the arm's start. The resolve arm must absorb floor(50% of each strike) until its absorbed total reaches 2000 (100% of maximum health), then only what is left: 550, 550, 550, 350, 0, 0; the judge needs a trial below the cap and a trial held by it. Control absorbs nothing. Reference search 2026-11-23: coa-history spell 804823: 0 events in 186 logs (see the half_damage entry); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 804823,
+      "name": "Tyrannical Resolve (the closing Felfire Blast leeches more after more hits)",
+      "kind": "taken_hit",
+      "variant": "end_leech",
+      "label_suffix": "end_leech",
+      "judge": "counts",
+      "quote": "When this ends, you unleash a Felfire Blast that leeches health from nearby enemies based on how many times you took damage with the effect active.",
+      "strike_spell": 41394,
+      "trials": 3,
+      "caster_health_pct": 100,
+      "caster_max_health": 20000,
+      "settle_ms": 31000,
+      "count_reads": {
+        "hits": {
+          "metric": "spell_log_count",
+          "spell": 41394,
+          "caster": "striker",
+          "target": "caster"
+        },
+        "blast": {
+          "metric": "spell_damage_total",
+          "spell": 807347,
+          "caster": "caster",
+          "target": "striker"
+        },
+        "blasts": {
+          "metric": "spell_damage_count",
+          "spell": 807347,
+          "caster": "caster",
+          "target": "striker"
+        },
+        "leech": {
+          "metric": "spell_heal_total",
+          "spell": 807347,
+          "target": "caster"
+        },
+        "named_blasts": {
+          "metric": "spell_damage_count",
+          "spell": 804825,
+          "caster": "caster",
+          "target": "striker"
+        }
+      },
+      "count_total": [
+        "hits"
+      ],
+      "rising": [
+        "blast"
+      ],
+      "equal": [
+        [
+          "blast",
+          "leech"
+        ]
+      ],
+      "arms": [
+        {
+          "name": "one",
+          "casts": [
+            [
+              804823,
+              "caster"
+            ]
+          ],
+          "strikes": 1,
+          "counts": {
+            "blasts": 1,
+            "named_blasts": 1
+          }
+        },
+        {
+          "name": "three",
+          "casts": [
+            [
+              804823,
+              "caster"
+            ]
+          ],
+          "strikes": 3,
+          "counts": {
+            "blasts": 1,
+            "named_blasts": 1
+          }
+        }
+      ],
+      "observe_source": "804823 Tyrannical Resolve: on its removal while the caster lives (not by death) the server counts the strikes absorbed during the effect (script value 804823, one per absorbed damage event, AscensionFelswornAuras.cpp:333) and casts 807347 (Effect[0] SPELL_EFFECT_HEALTH_LEECH, EffectValueMultiplier[0] 1.0, so the caster heals by the damage dealt) with an amount that grows with that count on every valid enemy within 10 yd in line of sight (AscensionFelswornAuras.cpp:263-269). Each trial: the caster is set to 20000 of 20000 health, casts 804823, a passive striker 3 yd away casts Light of the Naaru 41394 (1100) at it 1 or 3 times, then the trial waits 31000 ms past the 30000 ms duration (DurationIndex 9) for the natural end. Judged: exactly one 807347 hit on the striker per trial; its damage rises strictly from 1 to 3 hits (the tooltip states 'based on how many times you took damage', not a figure, so no per-hit value is judged); the caster's 807347 heal equals that damage (multiplier 1.0). The tooltip names the blast Felfire Blast: server DBC 804825 'Felfire Blast' (Effect[0] SPELL_EFFECT_HEALTH_LEECH, SchoolMask 36, RadiusIndex 13, Description 'Deals $s1 Felfire Damage to nearby enemies.') while 807347 is 'Burning Hatred' (SchoolMask 127); no server code casts 804825 and no DBC record links to it, so the named read expects exactly one 804825 hit on the striker per trial and alerts when the server unleashes only 807347. Reference search 2026-11-24: coa-history spell 804823, 804825, 807347, 'Felfire Blast', 'Burning Hatred': 0 events in 186 logs each; ~/CoaServer/reference snapshots (sidekick data.js, bindmysoul talents.normalized.json, coabuildhub spells_missing.json and spells_master_index.json) carry only the 804823 tooltip text, no record of 804825 or 807347; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 560641,
+      "name": "Warlock Training (a Crippled enemy cannot critically strike with a melee attack)",
+      "kind": "taken_hit",
+      "variant": "no_crit_melee",
+      "label_suffix": "no_crit_melee",
+      "judge": "counts",
+      "quote": "Cripple now causes the enemy target to be unable to critically strike for $704397d.",
+      "strike_spell": 21140,
+      "striker_race": 2,
+      "striker_force_crit": "melee",
+      "trials": 10,
+      "caster_health_pct": 100,
+      "caster_max_health": 20000,
+      "count_reads": {
+        "hits": {
+          "metric": "spell_damage_count",
+          "spell": 21140,
+          "caster": "striker",
+          "target": "caster"
+        },
+        "crits": {
+          "metric": "spell_damage_count",
+          "spell": 21140,
+          "caster": "striker",
+          "target": "caster",
+          "critical": true
+        },
+        "cripple": {
+          "metric": "aura",
+          "actor": "striker",
+          "spell": 704371,
+          "caster": "caster",
+          "state": true
+        },
+        "pain": {
+          "metric": "aura",
+          "actor": "striker",
+          "spell": 704397,
+          "caster": "caster",
+          "state": true
+        }
+      },
+      "count_total": [
+        "hits"
+      ],
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            560641
+          ],
+          "casts": [
+            [
+              704371,
+              "striker"
+            ]
+          ],
+          "require": {
+            "cripple": 1
+          },
+          "counts": {
+            "crits": 1,
+            "pain": 0
+          }
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            560641
+          ],
+          "casts": [
+            [
+              704371,
+              "striker"
+            ]
+          ],
+          "require": {
+            "cripple": 1
+          },
+          "counts": {
+            "crits": 0,
+            "pain": 1
+          }
+        }
+      ],
+      "observe_source": "560641 Warlock Training: Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704397 (Crippling Pain, Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT -100000, DurationIndex 35 = 4000 ms, tooltip 'Unable to critically strike.'); AscensionFelswornAbilities.cpp:336-337 casts 704397 on the target of Cripple 704371 when 560641 is known. The melee leg of the no_crit entry: on a player 290 also lowers the melee crit percentage (SpellAuraEffects.cpp HandleAuraModCritPct, UpdateAllWeaponDependentCritAuras), which a melee-class spell reads for its crit (Unit::SpellDoneCritChance, SPELL_DAMAGE_CLASS_MELEE -> PLAYER_CRIT_PERCENTAGE; code reading). A PvP-flagged player striker (race 2) holding 100000 melee crit rating (every strike crits) casts Fatal Wound 21140 (server DBC: Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE 240, SchoolMask 1 Physical, DmgClass 2 melee, Attributes 0, no cost, no cooldown, no weapon requirement, no server script) at the caster once per trial (harness cast, triggered); before each strike the caster (the player fixture's 10000 spell hit rating) casts Cripple at the striker. Control unlearns 560641, treatment learns it (D-67, a real learn). After each trial the Cripple and Crippling Pain auras of the caster on the striker are read as states: a trial without Cripple on the striker is void; a judged trial must read 1 critical strike and no Crippling Pain in control, 0 critical strikes with Crippling Pain in treatment. A trial is judged when its strike landed (a dodged, parried or missed strike logs no damage and is left out). Not covered here: a creature striker's melee (Unit.cpp:4567-4571) and spell (m_baseSpellCritChance) crit paths, which have no forced-crit fixture. Reference search 2026-11-24: coa-history spell 704397 and 21140: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22): Warlock Training 560641 'Cripple now causes the enemy target to be unable to critically strike for 4 seconds.'; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 800355,
