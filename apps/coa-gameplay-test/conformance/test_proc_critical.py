@@ -9,9 +9,14 @@ from test_procs import PROC_KEY, chance_reader, proc_expectation, proc_steps, te
 
 VINDICATION_OATH = 805332
 CRITICAL = {'rating': 'melee', 'source': 'test: only a critical hit rolls'}
-CONTROL = {'events': ['92111 proc critical control events 0'],
-           'crits': ['92111 proc critical control crits 801832'],
-           'hits': ['92111 proc critical control hits 801832'], 'minimum_hits': 9, 'source': CRITICAL['source']}
+def control_reads(moment: str) -> dict:
+    return {'events': [f'92111 proc critical control {moment} events 0'],
+            'crits': [f'92111 proc critical control {moment} crits 801832'],
+            'hits': [f'92111 proc critical control {moment} hits 801832']}
+
+
+CONTROL = {'start': control_reads('start'), 'end': control_reads('end'), 'minimum_hits': 9,
+           'source': CRITICAL['source']}
 
 
 def critical_entry(**changes) -> dict:
@@ -26,13 +31,16 @@ class CriticalTrialsScenarioTest(unittest.TestCase):
         self.assertTrue(reads[f'{VINDICATION_OATH} proc trials']['critical'])
         self.assertEqual(scenario['players'][0]['melee_crit_rating'], 100000)
         control = expectation.model[KEY]
-        self.assertFalse(any(reads[label]['critical'] for label in control['hits']))
-        self.assertTrue(all(reads[label]['critical'] for label in control['crits']))
+        for moment in ('start', 'end'):
+            self.assertFalse(any(reads[label]['critical'] for label in control[moment]['hits']))
+            self.assertTrue(all(reads[label]['critical'] for label in control[moment]['crits']))
         suppressed = [step for step in scenario['steps'] if step['action'] == 'set_aura' and step['spell'] == SUPPRESSOR
                       and step.get('amount') is not None]
         self.assertEqual(len(suppressed), 2 * control_hits(expectation.model['chance_pct']))
         labels = [step.get('label') for step in scenario['steps']]
-        self.assertLess(labels.index(control['events'][0]), labels.index(f'{VINDICATION_OATH} proc trials'))
+        first_cast = next(index for index, step in enumerate(scenario['steps']) if step.get('spell') == SUPPRESSOR)
+        self.assertLess(labels.index(control['start']['events'][0]), first_cast)
+        self.assertLess(labels.index(control['end']['events'][0]), labels.index(f'{VINDICATION_OATH} proc trials'))
         self.assertIn(KEY, expectation.rule)
 
     def test_later_parts_have_no_control_arm(self):
@@ -70,7 +78,9 @@ class CriticalControlVerdictTest(unittest.TestCase):
     def verdict(self, events=0, crits=0, hits=9, drop=None):
         expectation = proc_expectation()
         expectation.model[KEY] = CONTROL
-        reads = {CONTROL['events'][0]: events, CONTROL['crits'][0]: crits, CONTROL['hits'][0]: hits}
+        start, end = CONTROL['start'], CONTROL['end']
+        reads = {start['events'][0]: 2, start['crits'][0]: 20, start['hits'][0]: 0, end['events'][0]: 2 + events,
+                 end['crits'][0]: 20 + crits, end['hits'][0]: hits}
         if drop:
             reads.pop(drop)
         steps = proc_steps(1699, 340) + [assert_step(label, str(value)) for label, value in reads.items()]
@@ -89,7 +99,7 @@ class CriticalControlVerdictTest(unittest.TestCase):
         self.assertEqual(self.verdict(events=1).status, 'alert')
 
     def test_a_control_that_crits_or_lacks_hits_is_unmeasured(self):
-        for reads in ({'crits': 1}, {'hits': 8}, {'drop': CONTROL['hits'][0]}):
+        for reads in ({'crits': 1}, {'hits': 8}, {'drop': CONTROL['end']['hits'][0]}):
             with self.subTest(reads=reads):
                 self.assertEqual(self.verdict(**reads).status, 'unmeasured')
 
