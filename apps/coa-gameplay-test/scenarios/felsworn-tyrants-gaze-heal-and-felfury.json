@@ -140,6 +140,11 @@
       "max": 34.9
     },
     {
+      "action": "wait",
+      "label": "Let the creature update refresh its health aura states",
+      "ms": 1000
+    },
+    {
       "action": "reset_cooldown",
       "actor": "p",
       "spell": 805240

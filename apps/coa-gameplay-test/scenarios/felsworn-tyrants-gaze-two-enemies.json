@@ -118,6 +118,11 @@
       "max": 34.9
     },
     {
+      "action": "wait",
+      "label": "Let the creature update refresh its health aura states",
+      "ms": 1000
+    },
+    {
       "action": "set_health",
       "actor": "second",
       "value": 300000
@@ -128,6 +133,11 @@
       "actor": "second",
       "metric": "health_pct",
       "max": 34.9
+    },
+    {
+      "action": "wait",
+      "label": "Let the creature update refresh its health aura states",
+      "ms": 1000
     },
     {
       "action": "reset_cooldown",
