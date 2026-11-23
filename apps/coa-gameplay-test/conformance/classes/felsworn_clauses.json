@@ -2649,7 +2649,11 @@
   {
     "spell": 803478,
     "clause": "Casting Sunder causes you to cast Fel Explosion twice over the next 4 sec.",
-    "labels": [],
+    "labels": [
+      "803478 behaviour_metric_delta cast_early",
+      "803478 behaviour_metric_delta cast_twice",
+      "803478 behaviour_metric_delta cast_only_twice"
+    ],
     "kind": "claim"
   },
   {

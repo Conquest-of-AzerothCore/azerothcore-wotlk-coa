@@ -5120,6 +5120,111 @@
         ]
       },
       "observe_source": "Control arm of broken: the same timing (3600 ms after the cast) with no damage on the target: the aura is still there, so its loss in broken comes from the damage. Code: AscensionFelswornContracts.cpp:292-293 adds AURA_INTERRUPT_FLAG_TAKE_DAMAGE to 805235 and 807590; Spell.dbc 805235 Effect[0] aura 7 SPELL_AURA_MOD_FEAR, Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED BasePoints -81 + 1 = -80 ($s3), DurationIndex 31 = 8000 ms ($d). Kobold Vermin 6 is the target (the stock dummy 36 takes no fear or horror aura, measured in the Infernal entries of this class); the Whispers cast at the dummy lands its area at the dummy's position (radius index 14). Reference search 2026-11-23: coa-history spell 805235: 3 casts, 8 aura applications and 8 removals in 2 logs, 2 SPELL_AURA_BROKEN_SPELL (the effect is broken by damage; no duration or amount is logged); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
+    },
+    {
+      "spell": 803478,
+      "kind": "metric_delta",
+      "trigger_spell": 705121,
+      "gate_spell": 803478,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 804600
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "quote": "Casting Sunder causes you to cast Fel Explosion twice over the next 4 sec.",
+      "name": "Pure Hatred (one Fel Explosion by 3500 ms)",
+      "variant": "cast_early",
+      "label_suffix": "cast_early",
+      "expected": 1,
+      "wait_ms": 3500,
+      "observe_source": "Casts of Fel Explosion 804600 counted 3500 ms after Sunder: one (the 2000 ms cast, not yet the 4000 ms one). Code: AscensionFelswornAbilities.cpp:446-455: after a Sunder 705121 hit with 803478 on the caster, 804600 (Fel Explosion) is cast on the caster at 2000 and at 4000 ms. Sunder 705121 needs the caster aura 803468 and consumes 2 Felfury 800058 (set on the caster before every cast in both phases: harness set_aura, precondition fixtures). The before phase (Sunder cast without 803478) is the control: 0 casts of Fel Explosion. Reference search 2026-11-23: coa-history spell 803478 and 804600: 0 events for 803478 in 186 logs (a passive leaves no event; positive control 807554: 2923 events); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
+    },
+    {
+      "spell": 803478,
+      "kind": "metric_delta",
+      "trigger_spell": 705121,
+      "gate_spell": 803478,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 804600
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "quote": "Casting Sunder causes you to cast Fel Explosion twice over the next 4 sec.",
+      "name": "Pure Hatred (two Fel Explosions by 4500 ms)",
+      "variant": "cast_twice",
+      "label_suffix": "cast_twice",
+      "expected": 2,
+      "wait_ms": 4500,
+      "observe_source": "Casts of Fel Explosion 804600 counted 4500 ms after Sunder: two, so both fall inside the 4 sec. Code: AscensionFelswornAbilities.cpp:446-455: after a Sunder 705121 hit with 803478 on the caster, 804600 (Fel Explosion) is cast on the caster at 2000 and at 4000 ms. Sunder 705121 needs the caster aura 803468 and consumes 2 Felfury 800058 (set on the caster before every cast in both phases: harness set_aura, precondition fixtures). The before phase (Sunder cast without 803478) is the control: 0 casts of Fel Explosion. Reference search 2026-11-23: coa-history spell 803478 and 804600: 0 events for 803478 in 186 logs (a passive leaves no event; positive control 807554: 2923 events); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
+    },
+    {
+      "spell": 803478,
+      "kind": "metric_delta",
+      "trigger_spell": 705121,
+      "gate_spell": 803478,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 804600
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "quote": "Casting Sunder causes you to cast Fel Explosion twice over the next 4 sec.",
+      "name": "Pure Hatred (still two Fel Explosions at 6500 ms)",
+      "variant": "cast_only_twice",
+      "label_suffix": "cast_only_twice",
+      "expected": 2,
+      "wait_ms": 6500,
+      "observe_source": "Casts of Fel Explosion 804600 counted 6500 ms after Sunder: still two, so no third cast. Code: AscensionFelswornAbilities.cpp:446-455: after a Sunder 705121 hit with 803478 on the caster, 804600 (Fel Explosion) is cast on the caster at 2000 and at 4000 ms. Sunder 705121 needs the caster aura 803468 and consumes 2 Felfury 800058 (set on the caster before every cast in both phases: harness set_aura, precondition fixtures). The before phase (Sunder cast without 803478) is the control: 0 casts of Fel Explosion. Reference search 2026-11-23: coa-history spell 803478 and 804600: 0 events for 803478 in 186 logs (a passive leaves no event; positive control 807554: 2923 events); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
     }
   ],
   "player_observations": [],
