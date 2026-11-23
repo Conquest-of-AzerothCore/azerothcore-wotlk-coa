@@ -66,7 +66,7 @@ void Valkyr(Player* player, Unit* target, bool dawn, bool fulfillment)
             Position destination = enemy->GetPosition();
             caster->GetMotionMaster()->MoveCharge(destination.GetPositionX(),destination.GetPositionY(),
                 destination.GetPositionZ(),50,ValkyrLanding);
-            State(caster).scheduler.Schedule(50ms,[owner,map,destination,dawn,fulfillment](TaskContext context)
+            State(caster).scheduler.Schedule(50ms,[owner,victim,map,destination,dawn,fulfillment](TaskContext context)
             {
                 Player* landed = ObjectAccessor::FindPlayer(owner);
                 if (!landed || !landed->IsAlive() || !landed->IsInWorld() || landed->GetMapId() != map)
@@ -77,13 +77,14 @@ void Valkyr(Player* player, Unit* target, bool dawn, bool fulfillment)
                         context.Repeat(50ms);
                     return;
                 }
-                if (landed->GetExactDist(&destination) <= 3)
+                Unit* landingVictim = ObjectAccessor::GetUnit(*landed,victim);
+                if (landingVictim && landed->IsValidAttackTarget(landingVictim) &&
+                    landed->GetExactDist(&destination) <= 3)
                 {
                     bool oldDawn = State(landed).landingDawn, oldFulfillment = State(landed).landingFulfillment;
                     State(landed).landingDawn = dawn;
                     State(landed).landingFulfillment = fulfillment;
-                    landed->CastSpell(destination.GetPositionX(),destination.GetPositionY(),
-                        destination.GetPositionZ(),570034,true);
+                    landed->CastSpell(landingVictim,570034,true);
                     State(landed).landingDawn = oldDawn;
                     State(landed).landingFulfillment = oldFulfillment;
                 }
