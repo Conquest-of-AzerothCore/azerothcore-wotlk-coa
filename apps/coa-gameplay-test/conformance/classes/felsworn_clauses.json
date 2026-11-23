@@ -1383,7 +1383,9 @@
   {
     "spell": 706420,
     "clause": "Generates 1 Felfury",
-    "labels": [],
+    "labels": [
+      "706420 behaviour_metric_delta felfury"
+    ],
     "kind": "claim"
   },
   {
@@ -1407,7 +1409,9 @@
   {
     "spell": 706420,
     "clause": "Can only have 1 Bane active on a target at a time.",
-    "labels": [],
+    "labels": [
+      "706420 behaviour_metric_delta one_bane"
+    ],
     "kind": "claim"
   },
   {
@@ -1577,7 +1581,7 @@
     "spell": 705108,
     "clause": "Increases your chance to dodge by $s1%.",
     "labels": [
-      "705108 effect_value e0 #0"
+      "705108 behaviour_metric_delta dodge"
     ],
     "kind": "claim"
   },
@@ -1585,7 +1589,7 @@
     "spell": 705109,
     "clause": "Increases your critical strike chance by $s1%",
     "labels": [
-      "705109 effect_value e0 #0"
+      "705109 behaviour_metric_delta melee_crit"
     ],
     "kind": "claim"
   },
@@ -1593,7 +1597,8 @@
     "spell": 705109,
     "clause": "and an additional $s2% against Demons.",
     "labels": [
-      "705109 effect_value e1 #1"
+      "705109 behaviour_metric_delta demon_crit",
+      "705109 behaviour_metric_delta humanoid_crit_control"
     ],
     "kind": "claim"
   },
@@ -1601,33 +1606,66 @@
     "spell": 705122,
     "clause": "Inner Demon now also reduces your damage taken by $500031s1%.",
     "labels": [
-      "705122 effect_value 500031e0 #0"
+      "705122 behaviour_hit_ratio physical_taken",
+      "705122 behaviour_metric_delta aura_amount",
+      "705122 behaviour_metric_delta damage_taken_readback"
     ],
     "kind": "claim"
   },
   {
     "spell": 705123,
     "clause": "Reduces the cost of your Felrend and Fel Fireball by $s1",
-    "labels": [
-      "705123 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the cost of your Felrend",
+        "labels": [
+          "705123 cost_gate 800210 felrend_cost without",
+          "705123 cost_gate 800210 felrend_cost with",
+          "705123 cost_gate 800210 felrend_cost beyond"
+        ]
+      },
+      {
+        "claim": "and Fel Fireball by $s1",
+        "labels": [
+          "705123 cost_gate 801312 fel_fireball_cost without",
+          "705123 cost_gate 801312 fel_fireball_cost with",
+          "705123 cost_gate 801312 fel_fireball_cost beyond"
+        ]
+      }
+    ]
   },
   {
     "spell": 705123,
     "clause": "and increases their damage dealt by $s2%.",
     "labels": [
-      "705123 effect_value e1 #1"
+      "705123 behaviour_hit_ratio felrend_damage",
+      "705123 behaviour_hit_ratio fel_fireball_damage"
     ],
     "kind": "claim"
   },
   {
     "spell": 705125,
     "clause": "Reduces the cooldown of Mana Burn and Illidan's Guile by $s1%.",
-    "labels": [
-      "705125 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the cooldown of Mana Burn",
+        "labels": [
+          "705125 cost_gate 805248 manaburn_cd without",
+          "705125 cost_gate 805248 manaburn_cd with",
+          "705125 cost_gate 805248 manaburn_cd beyond"
+        ]
+      },
+      {
+        "claim": "and Illidan's Guile by $s1%.",
+        "labels": [
+          "705125 cost_gate 806109 illidans_guile_cd without",
+          "705125 cost_gate 806109 illidans_guile_cd with",
+          "705125 cost_gate 806109 illidans_guile_cd beyond"
+        ]
+      }
+    ]
   },
   {
     "spell": 705127,
@@ -1637,12 +1675,15 @@
       {
         "claim": "critical damage by $s2%",
         "labels": [
-          "705127 effect_value e1 #0"
+          "705127 behaviour_hit_ratio crit_damage_high"
         ]
       },
       {
         "claim": "above 75% health",
-        "labels": []
+        "labels": [
+          "705127 behaviour_hit_ratio crit_damage_high",
+          "705127 behaviour_hit_ratio crit_damage_low"
+        ]
       }
     ]
   },
@@ -1650,8 +1691,8 @@
     "spell": 707527,
     "clause": "Manifest a barrier of pure hatred, absorbing ${$m1+0+$STA*1} damage,",
     "labels": [
-      "707527 effect_value e0 #0",
-      "707527 aura_amount e0 #0"
+      "707527 behaviour_metric_delta absorb",
+      "707527 behaviour_metric_delta absorb_stamina"
     ],
     "kind": "claim"
   },
@@ -1659,7 +1700,8 @@
     "spell": 707527,
     "clause": "scaling with your Stamina, for $d.",
     "labels": [
-      "707527 aura_duration_ms #1"
+      "707527 behaviour_metric_delta duration_held",
+      "707527 behaviour_metric_delta duration_gone"
     ],
     "kind": "claim"
   },
@@ -1676,18 +1718,28 @@
     "spell": 705131,
     "clause": "Increases the critical strike chance of Fel Fireball by $s1%",
     "labels": [
-      "705131 effect_value e0 #0"
+      "705131 behaviour_metric_delta crit_gain"
     ],
     "kind": "claim"
   },
   {
     "spell": 705131,
     "clause": "and it's damage dealt now reduces the enemy's chance to hit by $707360s1% for $707360d.",
-    "labels": [
-      "705131 effect_value 707360e0 #1",
-      "705131 spell_duration 707360 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and it's damage dealt now reduces the enemy's chance to hit by $707360s1%",
+        "labels": [
+          "705131 behaviour_metric_delta attacker_miss"
+        ]
+      },
+      {
+        "claim": "for $707360d.",
+        "labels": [
+          "705131 behaviour_metric_delta daze_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 705135,
@@ -1716,8 +1768,9 @@
     "spell": 705141,
     "clause": "Casting $?s520853[Fel Torpedo][Chaos Rush] now increases your Physical damage by $705142s1% for $705142d.",
     "labels": [
-      "705141 effect_value 705142e0 #0",
-      "705141 spell_duration 705142 #1"
+      "705141 behaviour_metric_delta rush_damage_amount",
+      "705141 behaviour_metric_delta rush_damage_held",
+      "705141 behaviour_metric_delta rush_damage_gone"
     ],
     "kind": "claim"
   },
@@ -1725,25 +1778,38 @@
     "spell": 705141,
     "clause": "Casting Felhoof Charge increases your critical strike chance by $705143s1% for $705143d.",
     "labels": [
-      "705141 effect_value 705143e0 #2",
-      "705141 spell_duration 705143 #3"
+      "705141 behaviour_metric_delta charge_crit_amount",
+      "705141 behaviour_metric_delta charge_crit_held",
+      "705141 behaviour_metric_delta charge_crit_gone"
     ],
     "kind": "claim"
   },
   {
     "spell": 705145,
     "clause": "Triggering Dancing Blades now increases the damage of next Sargeron Smite by $705146s1% for $705146d,",
-    "labels": [
-      "705145 effect_value 705146e0 #0",
-      "705145 spell_duration 705146 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Triggering Dancing Blades now increases the damage of next Sargeron Smite",
+        "labels": []
+      },
+      {
+        "claim": "by $705146s1%",
+        "labels": [
+          "705145 behaviour_metric_delta stack_amount"
+        ]
+      },
+      {
+        "claim": "for $705146d,",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 705145,
     "clause": "stacking $705146u times.",
     "labels": [
-      "705145 max_stacks 705146 #2"
+      "705145 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -1766,7 +1832,7 @@
     "spell": 706266,
     "clause": "Reduces your chance to be hit by spells by $s1%",
     "labels": [
-      "706266 effect_value e0 #0"
+      "706266 behaviour_metric_delta spell_hit_taken"
     ],
     "kind": "claim"
   },
@@ -1774,7 +1840,7 @@
     "spell": 706266,
     "clause": "and increases the absorption value of Hateforged Barrier by $s2%.",
     "labels": [
-      "706266 effect_value e1 #1"
+      "706266 behaviour_metric_delta barrier_absorb"
     ],
     "kind": "claim"
   },
@@ -1786,19 +1852,20 @@
       {
         "claim": "leeches ${$AP*0.1} health",
         "labels": [
-          "706267 effect_value #0"
+          "706267 behaviour_metric_delta leech_damage",
+          "706267 behaviour_metric_delta leech_damage_ap"
         ]
       },
       {
         "claim": "from $555742i nearby enemies",
         "labels": [
-          "706267 effect_value #1"
+          "706267 leech_targets behaviour_fixed_count"
         ]
       },
       {
         "claim": "within $555742a1 yds",
         "labels": [
-          "706267 effect_radius 555742e0 #2"
+          "706267 leech_radius behaviour_fixed_count"
         ]
       }
     ]
@@ -1806,23 +1873,48 @@
   {
     "spell": 706425,
     "clause": "After generating 10 Felfury,",
-    "labels": [],
+    "labels": [
+      "706425 behaviour_metric_delta ten_felfury",
+      "706425 behaviour_metric_delta nine_felfury_control"
+    ],
     "kind": "claim"
   },
   {
     "spell": 706425,
     "clause": "your next Sargeron Smite within $706269d gains $706269s1% increased critical strike chance and damage.",
-    "labels": [
-      "706425 spell_duration 706269 #0",
-      "706425 effect_value 706269e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "your next Sargeron Smite",
+        "labels": []
+      },
+      {
+        "claim": "within $706269d",
+        "labels": [
+          "706425 behaviour_metric_delta duration_held",
+          "706425 behaviour_metric_delta duration_gone"
+        ]
+      },
+      {
+        "claim": "gains $706269s1% increased critical strike chance",
+        "labels": [
+          "706425 behaviour_metric_delta crit_amount"
+        ]
+      },
+      {
+        "claim": "and damage.",
+        "labels": [
+          "706425 behaviour_metric_delta damage_amount"
+        ]
+      }
+    ]
   },
   {
     "spell": 707416,
     "clause": "Your Fel Fireballs used with Felforged active now deal $s1% increased damage.",
     "labels": [
-      "707416 effect_value e0 #0"
+      "707416 behaviour_hit_ratio felforged_damage",
+      "707416 behaviour_hit_ratio no_felforged_control"
     ],
     "kind": "claim"
   },
@@ -1836,8 +1928,19 @@
   {
     "spell": 707444,
     "clause": "Casting Carve now makes your next Fel Fireball instant cast and causes it to strike 1 additional enemy near the primary target based on how long you channeled,",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting Carve now makes your next Fel Fireball instant cast",
+        "labels": [
+          "707444 behaviour_metric_delta instant"
+        ]
+      },
+      {
+        "claim": "and causes it to strike 1 additional enemy near the primary target based on how long you channeled,",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 707444,
@@ -1866,7 +1969,7 @@
     "spell": 707842,
     "clause": "Increases your Energy regeneration by $s1%.",
     "labels": [
-      "707842 effect_value e0 #0"
+      "707842 behaviour_metric_delta energy_regen"
     ],
     "kind": "claim"
   },
@@ -1874,7 +1977,7 @@
     "spell": 707844,
     "clause": "Reduces your chance to be hit by spells by $s1%",
     "labels": [
-      "707844 effect_value e0 #0"
+      "707844 behaviour_metric_delta spell_hit_taken"
     ],
     "kind": "claim"
   },
@@ -1882,7 +1985,7 @@
     "spell": 707844,
     "clause": "and increases the absorption value of Hateforged Barrier by $s2%.",
     "labels": [
-      "707844 effect_value e1 #1"
+      "707844 behaviour_metric_delta barrier_absorb"
     ],
     "kind": "claim"
   },
@@ -1890,7 +1993,8 @@
     "spell": 707845,
     "clause": "Increases your off-hand weapon damage by $s1%",
     "labels": [
-      "707845 effect_value e0 #0"
+      "707845 behaviour_hit_ratio offhand_damage",
+      "707845 behaviour_hit_ratio mainhand_control"
     ],
     "kind": "claim"
   },
@@ -1898,39 +2002,72 @@
     "spell": 707845,
     "clause": "and reduces the Energy cost of Twin Slice by $s2.",
     "labels": [
-      "707845 effect_value e1 #1"
+      "707845 cost_gate 801901 twin_slice_cost without",
+      "707845 cost_gate 801901 twin_slice_cost with",
+      "707845 cost_gate 801901 twin_slice_cost beyond"
     ],
     "kind": "claim"
   },
   {
     "spell": 707846,
     "clause": "Reduces the cost of your Felrend and Fel Fireball by $s1",
-    "labels": [
-      "707846 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the cost of your Felrend",
+        "labels": [
+          "707846 cost_gate 800210 felrend_cost without",
+          "707846 cost_gate 800210 felrend_cost with",
+          "707846 cost_gate 800210 felrend_cost beyond"
+        ]
+      },
+      {
+        "claim": "and Fel Fireball by $s1",
+        "labels": [
+          "707846 cost_gate 801312 fel_fireball_cost without",
+          "707846 cost_gate 801312 fel_fireball_cost with",
+          "707846 cost_gate 801312 fel_fireball_cost beyond"
+        ]
+      }
+    ]
   },
   {
     "spell": 707846,
     "clause": "and increases their damage dealt by $s2%.",
     "labels": [
-      "707846 effect_value e1 #1"
+      "707846 behaviour_hit_ratio felrend_damage",
+      "707846 behaviour_hit_ratio fel_fireball_damage"
     ],
     "kind": "claim"
   },
   {
     "spell": 707907,
     "clause": "Increases the damage and reduces the cost of Sunder and Immolation Aura by $s1%.",
-    "labels": [
-      "707907 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the damage",
+        "labels": [
+          "707907 behaviour_hit_ratio sunder_explosion",
+          "707907 behaviour_hit_ratio sunder_dot",
+          "707907 behaviour_hit_ratio immolation_aura"
+        ]
+      },
+      {
+        "claim": "reduces the cost of Sunder and Immolation Aura by $s1%.",
+        "labels": [
+          "707907 cost_gate 705121 sunder_cost without",
+          "707907 cost_gate 705121 sunder_cost with",
+          "707907 cost_gate 705121 sunder_cost beyond"
+        ]
+      }
+    ]
   },
   {
     "spell": 800188,
     "clause": "Increases your Agility by $s1%",
     "labels": [
-      "800188 effect_value e0 #0"
+      "800188 behaviour_metric_delta agility"
     ],
     "kind": "claim"
   },
@@ -1959,14 +2096,16 @@
   {
     "spell": 800204,
     "clause": "Generates 1 Felfury",
-    "labels": [],
+    "labels": [
+      "800204 behaviour_metric_delta felfury"
+    ],
     "kind": "claim"
   },
   {
     "spell": 800204,
     "clause": "Charge an enemy, dealing ${$m2+0+$AP*0.285} Physical damage.",
     "labels": [
-      "800204 effect_value e1 #0"
+      "800204 behaviour_hit_ratio damage_ap"
     ],
     "kind": "claim"
   },
@@ -2154,35 +2293,76 @@
     "spell": 800220,
     "clause": "Reduces the cooldown of Infernal Whipcrack by $/1000;s3 sec",
     "labels": [
-      "800220 effect_value e2 #0"
+      "800220 cost_gate 805243 whipcrack_cd without",
+      "800220 cost_gate 805243 whipcrack_cd with",
+      "800220 cost_gate 805243 whipcrack_cd beyond"
     ],
     "kind": "claim"
   },
   {
     "spell": 800220,
     "clause": "and it now affects all allies and its radius is increased by $s2 yds.",
-    "labels": [
-      "800220 effect_value e1 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and it now affects all allies",
+        "labels": []
+      },
+      {
+        "claim": "its radius is increased by $s2 yds.",
+        "labels": [
+          "800220 behaviour_metric_delta whipcrack_radius"
+        ]
+      }
+    ]
   },
   {
     "spell": 800225,
     "clause": "Consume the essence of the skull of Gul'dan, increasing your maximum health and Energy by $s1% for $d.",
-    "labels": [
-      "800225 effect_value e0 #0",
-      "800225 aura_amount e0 #0",
-      "800225 aura_duration_ms #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing your maximum health",
+        "labels": [
+          "800225 behaviour_metric_delta max_health"
+        ]
+      },
+      {
+        "claim": "and Energy by $s1%",
+        "labels": [
+          "800225 behaviour_metric_delta max_energy"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "800225 behaviour_metric_delta held",
+          "800225 behaviour_metric_delta gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 800352,
     "clause": "Increases the duration and reduces the Energy cost of Banes by $s1%.",
-    "labels": [
-      "800352 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the duration",
+        "labels": [
+          "800352 behaviour_metric_delta bane_of_fire_expiry",
+          "800352 behaviour_metric_delta bane_of_chaos_expiry"
+        ]
+      },
+      {
+        "claim": "reduces the Energy cost of Banes by $s1%.",
+        "labels": [
+          "800352 cost_gate 707901 bane_of_fire_cost without",
+          "800352 cost_gate 707901 bane_of_fire_cost with",
+          "800352 cost_gate 707901 bane_of_fire_cost beyond"
+        ]
+      }
+    ]
   },
   {
     "spell": 800355,
@@ -2247,7 +2427,10 @@
   {
     "spell": 801235,
     "clause": "Landing 3 direct critical strikes now grants Sculptor of Doom.",
-    "labels": [],
+    "labels": [
+      "801235 behaviour_metric_delta three_crits",
+      "801235 behaviour_metric_delta two_crits_control"
+    ],
     "kind": "claim"
   },
   {
@@ -2376,33 +2559,65 @@
     "spell": 802058,
     "clause": "For $d,",
     "labels": [
-      "802058 aura_duration_ms #0"
+      "802058 behaviour_metric_delta held",
+      "802058 behaviour_metric_delta gone"
     ],
     "kind": "claim"
   },
   {
     "spell": 802058,
     "clause": "your Fel Fireball is free of cost, instant cast, and strikes up to $s2 targets.",
-    "labels": [
-      "802058 effect_value e1 #1",
-      "802058 aura_amount e1 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "your Fel Fireball is free of cost",
+        "labels": [
+          "802058 cost_gate 801312 free_cost without",
+          "802058 cost_gate 801312 free_cost with"
+        ]
+      },
+      {
+        "claim": "instant cast",
+        "labels": [
+          "802058 behaviour_metric_delta instant"
+        ]
+      },
+      {
+        "claim": "and strikes up to $s2 targets.",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 802058,
     "clause": "For the duration, your falling speed is slowed and damage dealt by your Fel Fireball increases your damage dealt by $524632s2% for $524632d,",
-    "labels": [
-      "802058 effect_value 524632e1 #2",
-      "802058 spell_duration 524632 #3"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "your falling speed is slowed",
+        "labels": []
+      },
+      {
+        "claim": "damage dealt by your Fel Fireball increases your damage dealt by $524632s2%",
+        "labels": [
+          "802058 behaviour_metric_delta stack_amount"
+        ]
+      },
+      {
+        "claim": "for $524632d,",
+        "labels": [
+          "802058 behaviour_metric_delta stack_duration_held",
+          "802058 behaviour_metric_delta stack_duration_gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 802058,
     "clause": "stacking $524632u times.",
     "labels": [
-      "802058 max_stacks 524632 #4"
+      "802058 behaviour_metric_delta stack_cap",
+      "802058 behaviour_metric_delta stack_three"
     ],
     "kind": "claim"
   },
