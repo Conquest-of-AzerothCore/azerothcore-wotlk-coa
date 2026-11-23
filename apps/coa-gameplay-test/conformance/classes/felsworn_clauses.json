@@ -889,7 +889,9 @@
     "spell": 560573,
     "clause": "Reduces the Energy cost of Cripple and Consume Magic by $s1.",
     "labels": [
-      "560573 effect_value e0 #0"
+      "560573 behaviour_metric_delta cripple_cost",
+      "560573 behaviour_metric_delta consume_cost",
+      "560573 behaviour_metric_delta cost_control"
     ],
     "kind": "claim"
   },
@@ -897,7 +899,7 @@
     "spell": 560576,
     "clause": "Increases your parry chance by $s1%.",
     "labels": [
-      "560576 effect_value e0 #0"
+      "560576 behaviour_metric_delta parry"
     ],
     "kind": "claim"
   },
@@ -1078,7 +1080,7 @@
     "spell": 561343,
     "clause": "Increases your parry chance by $s1%.",
     "labels": [
-      "561343 effect_value e0 #0"
+      "561343 behaviour_metric_delta parry"
     ],
     "kind": "claim"
   },
@@ -1086,7 +1088,7 @@
     "spell": 561345,
     "clause": "Increases the critical strike chance of Sargeron Smite by $s1%.",
     "labels": [
-      "561345 effect_value e0 #0"
+      "561345 behaviour_metric_delta crit_gain"
     ],
     "kind": "claim"
   },
@@ -1392,7 +1394,10 @@
     "spell": 704378,
     "clause": "Reduces Energy cost and cast time of Fel Fireball by $s3%.",
     "labels": [
-      "704378 effect_value e2 #0"
+      "704378 behaviour_metric_delta cast_time",
+      "704378 behaviour_metric_delta cast_time_control",
+      "704378 behaviour_metric_delta cost",
+      "704378 behaviour_metric_delta cost_control"
     ],
     "kind": "claim"
   },
@@ -1490,7 +1495,7 @@
     "spell": 704613,
     "clause": "Increases the amount of beneficial magic effects stolen by your Consume Magic by $s1.",
     "labels": [
-      "704613 effect_value e0 #0"
+      "704613 behaviour_metric_delta stolen"
     ],
     "kind": "claim"
   },
@@ -1506,7 +1511,7 @@
     "spell": 705105,
     "clause": "Increases your maximum Energy by $s1.",
     "labels": [
-      "705105 effect_value e0 #0"
+      "705105 behaviour_metric_delta max_energy"
     ],
     "kind": "claim"
   },

@@ -2181,6 +2181,306 @@
       },
       "observe_source": "Uncounted observation for the owner (mentor D-16): without hold_power_during_wait, from full Energy (cast_power 100) with ManaPerSecond 30 Energy, the aura 800355 on the dummy is read 4300 ms after the cast, to bracket how long the channel lasts. No ledger label.",
       "measure_actor": "dummy"
+    },
+    {
+      "spell": 560576,
+      "name": "Nether Disciple 560576 (parry chance)",
+      "kind": "metric_delta",
+      "variant": "parry",
+      "label_suffix": "parry",
+      "quote": "Increases your parry chance by $s1%.",
+      "trigger_spell": 804247,
+      "gate_spell": 560576,
+      "target": "caster",
+      "metric": "parry_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 4,
+      "expected_gain": 4,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560576 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT, BasePoints 3 + 1 = 4 ($s1), TARGET_UNIT_CASTER. The caster's live parry chance is read before (control) and after a real learn of 560576: gain 4 points; a reference character that cannot parry starts at 0 (docs/generate-and-compare.md). Reference search 2026-11-23: coa-history spell 560576: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); ~/CoaServer/reference snapshots and the bindmysoul snapshot add nothing beyond the tooltip; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 561343,
+      "name": "Nether Disciple 561343 (parry chance)",
+      "kind": "metric_delta",
+      "variant": "parry",
+      "label_suffix": "parry",
+      "quote": "Increases your parry chance by $s1%.",
+      "trigger_spell": 804247,
+      "gate_spell": 561343,
+      "target": "caster",
+      "metric": "parry_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 8,
+      "expected_gain": 8,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "561343 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT, BasePoints 7 + 1 = 8 ($s1), TARGET_UNIT_CASTER. The caster's live parry chance is read before (control) and after a real learn of 561343: gain 8 points. Reference search 2026-11-23: coa-history spell 561343: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); ~/CoaServer/reference snapshots and the bindmysoul snapshot add nothing beyond the tooltip; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 561345,
+      "name": "Felfire Adept 561345 (Sargeron Smite critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "crit_gain",
+      "label_suffix": "crit_gain",
+      "quote": "Increases the critical strike chance of Sargeron Smite by $s1%.",
+      "trigger_spell": 804247,
+      "gate_spell": 561345,
+      "target": "caster",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 802060,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 20,
+      "expected_gain": 20,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "561345 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 19 + 1 = 20 ($s1), EffectSpellClassMask word 1 = 2048, the SpellFamilyFlags word 1 of Sargeron Smite 802060 (SpellFamilyName 20). The caster's critical strike chance of 802060 (Player::SpellDoneCritChance with spell mods) is read before (control) and after a real learn of 561345: gain 20 points. Reference search 2026-11-23: coa-history spell 561345: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); ~/CoaServer/reference snapshots and the bindmysoul snapshot add nothing beyond the tooltip; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 705105,
+      "name": "Fel Communion 705105 (maximum Energy)",
+      "kind": "metric_delta",
+      "variant": "max_energy",
+      "label_suffix": "max_energy",
+      "quote": "Increases your maximum Energy by $s1.",
+      "trigger_spell": 804247,
+      "gate_spell": 705105,
+      "target": "caster",
+      "metric": "max_power",
+      "fields": {
+        "power": 3
+      },
+      "before_expected": 0,
+      "expected": 30,
+      "expected_gain": 30,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "705105 Effect[0] aura SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT 132 in the DBC, BasePoints 29 + 1 = 30 ($s1), MiscValue 3 (Energy); AscensionFelswornContracts.cpp:95 sets the aura to SPELL_AURA_MOD_INCREASE_ENERGY (flat) so the tooltip's flat 30 is the expectation. The caster's live maximum Energy is read before (control) and after a real learn of 705105; judged on the gain, +30 flat (a percent reading would also give +30 on 100 Energy, so the gain is read from the control arm). Reference search 2026-11-23: coa-history spell 705105: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); ~/CoaServer/reference snapshots and the bindmysoul snapshot add nothing beyond the tooltip; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 560573,
+      "name": "Felgorged 560573 (Cripple energy cost)",
+      "kind": "metric_delta",
+      "variant": "cripple_cost",
+      "label_suffix": "cripple_cost",
+      "quote": "Reduces the Energy cost of Cripple and Consume Magic by $s1.",
+      "trigger_spell": 804247,
+      "gate_spell": 560573,
+      "target": "caster",
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 704371
+      },
+      "before_expected": 30,
+      "expected": 20,
+      "expected_gain": -10,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560573 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 14 (SPELLMOD_COST), BasePoints -11 + 1 = -10 ($s1), EffectSpellClassMask word 0 = 16777218, word 2 = 8193; Cripple 704371 (SpellFamilyFlags[2] 1, PowerType 3 Energy, ManaCost 30) is in the mask. Energy cost 30 before the learn (control), 30 - 10 = 20 after. Reference search 2026-11-23: coa-history spell 560573: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); ~/CoaServer/reference snapshots and the bindmysoul snapshot add nothing beyond the tooltip; expected values come from the tooltip and the DBC only.",
+      "use_time_contrast": [
+        "cripple_cost",
+        "consume_cost",
+        "cost_control"
+      ],
+      "void_on_cast_failure": true
+    },
+    {
+      "spell": 560573,
+      "name": "Felgorged 560573 (Consume Magic energy cost)",
+      "kind": "metric_delta",
+      "variant": "consume_cost",
+      "label_suffix": "consume_cost",
+      "quote": "Reduces the Energy cost of Cripple and Consume Magic by $s1.",
+      "trigger_spell": 804247,
+      "gate_spell": 560573,
+      "target": "caster",
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 800353
+      },
+      "before_expected": 30,
+      "expected": 20,
+      "expected_gain": -10,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560573 SPELLMOD_COST -10 flat, mask word 2 = 8193 includes 8192: Consume Magic 800353 (SpellFamilyFlags[2] 8192, PowerType 3 Energy, ManaCost 30) is in the mask. Energy cost 30 before (control), 20 after. Reference search 2026-11-23: coa-history spell 560573: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); ~/CoaServer/reference snapshots and the bindmysoul snapshot add nothing beyond the tooltip; expected values come from the tooltip and the DBC only.",
+      "use_time_contrast": [
+        "cripple_cost",
+        "consume_cost",
+        "cost_control"
+      ],
+      "void_on_cast_failure": true
+    },
+    {
+      "spell": 560573,
+      "name": "Felgorged 560573 (Fel Fireball energy cost, outside the mask)",
+      "kind": "metric_delta",
+      "variant": "cost_control",
+      "label_suffix": "cost_control",
+      "quote": "Reduces the Energy cost of Cripple and Consume Magic by $s1.",
+      "trigger_spell": 804247,
+      "gate_spell": 560573,
+      "target": "caster",
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 801312
+      },
+      "before_expected": 35,
+      "expected": 35,
+      "expected_gain": 0,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Zero arm: Fel Fireball 801312 (SpellFamilyFlags [0] 0, [1] 1, [2] 0, PowerType 3, ManaCost 35) is outside 560573's mask (words 0 = 16777218, 2 = 8193), so its cost stays 35. Reference search 2026-11-23: coa-history spell 560573: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); ~/CoaServer/reference snapshots and the bindmysoul snapshot add nothing beyond the tooltip; expected values come from the tooltip and the DBC only.",
+      "use_time_contrast": [
+        "cripple_cost",
+        "consume_cost",
+        "cost_control"
+      ],
+      "void_on_cast_failure": true
+    },
+    {
+      "spell": 704378,
+      "name": "Gul'dan's Prodigy 704378 (Fel Fireball cast time)",
+      "kind": "metric_delta",
+      "variant": "cast_time",
+      "label_suffix": "cast_time",
+      "quote": "Reduces Energy cost and cast time of Fel Fireball by $s3%.",
+      "trigger_spell": 804247,
+      "gate_spell": 704378,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 801312
+      },
+      "before_expected": 1500,
+      "expected": 1275,
+      "expected_gain": -225,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "704378 Effect[1] and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints -16 + 1 = -15 ($s3 = 15 for Effect[2], MiscValue 10 SPELLMOD_CASTING_TIME; Effect[1] MiscValue 14 SPELLMOD_COST), EffectSpellClassMask words 4 and 7 = 1 (SpellFamilyFlags word 1 bit 0), which Fel Fireball 801312 (SpellFamilyFlags[1] 1) carries; Felbreak 800203 (SpellFamilyFlags[0] 1024) does not. Fel Fireball 801312 CastingTimeIndex 16 = 1500 ms (SpellCastTimes.dbc); 1500 x 0.85 = 1275 after the learn, 1500 before (control). Reference search 2026-11-23: coa-history spell 704378: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); ~/CoaServer/reference snapshots and the bindmysoul snapshot add nothing beyond the tooltip; expected values come from the tooltip and the DBC only.",
+      "use_time_contrast": [
+        "cast_time",
+        "cast_time_control"
+      ],
+      "void_on_cast_failure": true
+    },
+    {
+      "spell": 704378,
+      "name": "Gul'dan's Prodigy 704378 (Felbreak cast time, outside the mask)",
+      "kind": "metric_delta",
+      "variant": "cast_time_control",
+      "label_suffix": "cast_time_control",
+      "quote": "Reduces Energy cost and cast time of Fel Fireball by $s3%.",
+      "trigger_spell": 804247,
+      "gate_spell": 704378,
+      "target": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 800203
+      },
+      "before_expected": 500,
+      "expected": 500,
+      "expected_gain": 0,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "704378 Effect[1] and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints -16 + 1 = -15 ($s3 = 15 for Effect[2], MiscValue 10 SPELLMOD_CASTING_TIME; Effect[1] MiscValue 14 SPELLMOD_COST), EffectSpellClassMask words 4 and 7 = 1 (SpellFamilyFlags word 1 bit 0), which Fel Fireball 801312 (SpellFamilyFlags[1] 1) carries; Felbreak 800203 (SpellFamilyFlags[0] 1024) does not. Zero arm: Felbreak 800203 CastingTimeIndex 3 = 500 ms stays 500. Reference search 2026-11-23: coa-history spell 704378: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); ~/CoaServer/reference snapshots and the bindmysoul snapshot add nothing beyond the tooltip; expected values come from the tooltip and the DBC only.",
+      "use_time_contrast": [
+        "cast_time",
+        "cast_time_control"
+      ],
+      "void_on_cast_failure": true
+    },
+    {
+      "spell": 704378,
+      "name": "Gul'dan's Prodigy 704378 (Fel Fireball energy cost)",
+      "kind": "metric_delta",
+      "variant": "cost",
+      "label_suffix": "cost",
+      "quote": "Reduces Energy cost and cast time of Fel Fireball by $s3%.",
+      "trigger_spell": 804247,
+      "gate_spell": 704378,
+      "target": "caster",
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 801312
+      },
+      "before_expected": 35,
+      "expected": 29.75,
+      "expected_gain": -5.25,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "704378 Effect[1] and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints -16 + 1 = -15 ($s3 = 15 for Effect[2], MiscValue 10 SPELLMOD_CASTING_TIME; Effect[1] MiscValue 14 SPELLMOD_COST), EffectSpellClassMask words 4 and 7 = 1 (SpellFamilyFlags word 1 bit 0), which Fel Fireball 801312 (SpellFamilyFlags[1] 1) carries; Felbreak 800203 (SpellFamilyFlags[0] 1024) does not. Fel Fireball 801312 PowerType 3 ManaCost 35; 35 x 0.85 = 29.75, judged within 1 for the engine's integer rounding, which excludes the 0% and 30% readings. Reference search 2026-11-23: coa-history spell 704378: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); ~/CoaServer/reference snapshots and the bindmysoul snapshot add nothing beyond the tooltip; expected values come from the tooltip and the DBC only.",
+      "use_time_contrast": [
+        "cost",
+        "cost_control"
+      ],
+      "void_on_cast_failure": true
+    },
+    {
+      "spell": 704378,
+      "name": "Gul'dan's Prodigy 704378 (Felbreak energy cost, outside the mask)",
+      "kind": "metric_delta",
+      "variant": "cost_control",
+      "label_suffix": "cost_control",
+      "quote": "Reduces Energy cost and cast time of Fel Fireball by $s3%.",
+      "trigger_spell": 804247,
+      "gate_spell": 704378,
+      "target": "caster",
+      "metric": "spell_power_cost",
+      "fields": {
+        "spell": 800203
+      },
+      "before_expected": 10,
+      "expected": 10,
+      "expected_gain": 0,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "704378 Effect[1] and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints -16 + 1 = -15 ($s3 = 15 for Effect[2], MiscValue 10 SPELLMOD_CASTING_TIME; Effect[1] MiscValue 14 SPELLMOD_COST), EffectSpellClassMask words 4 and 7 = 1 (SpellFamilyFlags word 1 bit 0), which Fel Fireball 801312 (SpellFamilyFlags[1] 1) carries; Felbreak 800203 (SpellFamilyFlags[0] 1024) does not. Zero arm: Felbreak 800203 PowerType 3 ManaCost 10 stays 10. Reference search 2026-11-23: coa-history spell 704378: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); ~/CoaServer/reference snapshots and the bindmysoul snapshot add nothing beyond the tooltip; expected values come from the tooltip and the DBC only.",
+      "use_time_contrast": [
+        "cost",
+        "cost_control"
+      ],
+      "void_on_cast_failure": true
+    },
+    {
+      "spell": 704613,
+      "name": "Magic Fiend 704613 (Consume Magic stolen effects)",
+      "kind": "metric_delta",
+      "variant": "stolen",
+      "label_suffix": "stolen",
+      "quote": "Increases the amount of beneficial magic effects stolen by your Consume Magic by $s1.",
+      "trigger_spell": 804247,
+      "gate_spell": 704613,
+      "target": "caster",
+      "metric": "spell_effect_value",
+      "fields": {
+        "spell": 800353,
+        "effect": 0
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "expected_gain": 1,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "704613 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), no BasePoints + DieSides 1 = 1 ($s1), EffectSpellClassMask word 2 = 8192 = Consume Magic 800353 (SpellFamilyFlags[2] 8192). Consume Magic Effect[0] is 126 STEAL_BENEFICIAL_BUFF with BasePoints 0 + DieSides 1 = 1 stolen aura; the effect value read (SpellEffectInfo::CalcValue with spell mods) is 1 before the learn (control) and 2 after. Reference search 2026-11-23: coa-history spell 704613: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); ~/CoaServer/reference snapshots and the bindmysoul snapshot add nothing beyond the tooltip; expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],
