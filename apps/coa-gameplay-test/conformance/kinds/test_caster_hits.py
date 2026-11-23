@@ -14,7 +14,7 @@ QUOTE = ("Torpedo forward in the direction you're running and deal ${$500761m1+$
 def torpedo_entry(casters: int = 2, **changes) -> dict:
     entry = {'spell': 500610, 'name': 'Fel Torpedo', 'kind': 'caster_hits', 'label_suffix': 'torpedo',
              'quote': QUOTE, 'cast_spell': 500610, 'hit_spell': 500761, 'casters': casters, 'trials': 3,
-             'hits_per_cast': 1, 'dummy_distance': 2, 'cast_power': 100, 'settle_ms': 1500,
+             'hits_per_cast': 1, 'dummy_distance': 2, 'cast_power': 100, 'settle_ms': 1500, 'cast_target': 'self',
              'trial_position': {'map': 0, 'x': -9617.06, 'y': -288.949, 'z': 57.3053, 'o': 0}}
     if casters == 2:
         entry['gap_ms'] = 100
@@ -46,8 +46,10 @@ class CasterHitsTests(unittest.TestCase):
         steps = run.validate(scenario)['steps']
         casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
         self.assertEqual([steps[index]['actor'] for index in casts[:2]], [CASTER, SECOND_CASTER])
+        self.assertEqual([steps[index]['target'] for index in casts[:2]], [CASTER, SECOND_CASTER])
         self.assertEqual(steps[casts[0] + 1], {'action': 'wait', 'label': 'second caster gap 1', 'ms': 100})
         self.assertEqual([player['id'] for player in scenario['players']], [CASTER, SECOND_CASTER])
+        self.assertEqual(scenario['location'], {'map': 0, 'x': -9617.06, 'y': -288.949, 'z': 57.3053, 'o': 0.0})
         self.assertEqual(len(expectations), 6)
 
     def test_one_caster_has_no_second_player(self):
@@ -71,3 +73,5 @@ class CasterHitsTests(unittest.TestCase):
             caster_hits_spec(torpedo_entry(gap_ms=0))
         with self.assertRaises(ValueError):
             caster_hits_spec(torpedo_entry(casters=3))
+        with self.assertRaises(ValueError):
+            caster_hits_spec(torpedo_entry(cast_target='enemy'))

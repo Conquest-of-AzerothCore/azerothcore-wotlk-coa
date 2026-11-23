@@ -14,6 +14,8 @@ SECOND_CASTER = 'caster2'
 MAX_DUMMY_DISTANCE_YD = 10.0
 POSITION_TOLERANCE_YD = 0.5
 POSITION_WITHIN_MS = 2000
+SELF = 'self'
+CAST_TARGETS = frozenset({TARGET, SELF})
 
 
 @dataclass(frozen=True)
@@ -33,6 +35,7 @@ class CasterHitsSpec:
     settle_ms: int
     caster_auras: tuple[tuple[int, int], ...] = ()
     label_suffix: str = 'caster_hits'
+    cast_target: str = TARGET
 
 
 def caster_hits_spec(entry: dict) -> CasterHitsSpec:
@@ -44,7 +47,7 @@ def caster_hits_spec(entry: dict) -> CasterHitsSpec:
                            float(where.get('o', 0.0))),
                           int(entry['cast_power']), int(entry.get('gap_ms', 0)), int(entry['settle_ms']),
                           tuple((int(spell), int(stacks)) for spell, stacks in entry.get('caster_auras', ())),
-                          entry.get('label_suffix', 'caster_hits'))
+                          entry.get('label_suffix', 'caster_hits'), entry.get('cast_target', TARGET))
     if spec.casters not in (1, 2):
         raise ValueError(f'{spec.spell} caster_hits casts from one or two casters, not {spec.casters}')
     if spec.trials < 2 or spec.hits_per_cast < 1:
@@ -55,6 +58,8 @@ def caster_hits_spec(entry: dict) -> CasterHitsSpec:
     if spec.casters == 2 and not 0 < spec.gap_ms < spec.settle_ms:
         raise ValueError(f'{spec.spell} caster_hits casts the second caster a positive gap_ms after the first, '
                          f'inside settle_ms')
+    if spec.cast_target not in CAST_TARGETS:
+        raise ValueError(f'{spec.spell} caster_hits casts at {sorted(CAST_TARGETS)}, not {spec.cast_target!r}')
     if spec.cast_spell == spec.hit_spell:
         raise ValueError(f'{spec.spell} caster_hits counts a hit spell other than the cast spell')
     return spec
@@ -72,13 +77,19 @@ def expectation_label(spec: CasterHitsSpec, actor: str, trial: int) -> str:
     return f'{spec.spell} {BEHAVIOUR_METRIC_DELTA} {spec.label_suffix} {actor} #{trial}'
 
 
-def relocate(spec: CasterHitsSpec, actor: str, trial: int) -> list[dict]:
+def location(spec: CasterHitsSpec) -> dict:
     map_id, x, y, z, orientation = spec.trial_position
-    location = {'map': map_id, 'x': x, 'y': y, 'z': z, 'o': orientation}
-    return [{'action': 'teleport', 'actor': actor, **location}] + [
+    return {'map': map_id, 'x': x, 'y': y, 'z': z, 'o': orientation}
+
+
+def relocate(spec: CasterHitsSpec, actor: str, trial: int) -> list[dict]:
+    spot = location(spec)
+    return [{'action': 'teleport', 'actor': actor, **spot}] + [
         {'action': 'assert', 'label': f'{spec.spell} {spec.label_suffix} SETUP position {actor} {trial} {axis}',
-         'actor': actor, 'metric': f'position_{axis}', 'min': location[axis] - POSITION_TOLERANCE_YD,
-         'max': location[axis] + POSITION_TOLERANCE_YD, 'within_ms': POSITION_WITHIN_MS} for axis in ('x', 'y')]
+         'actor': actor, 'metric': f'position_{axis}', 'min': spot[axis] - POSITION_TOLERANCE_YD,
+         'max': spot[axis] + POSITION_TOLERANCE_YD, 'within_ms': POSITION_WITHIN_MS} for axis in ('x', 'y')] + [
+        measurement(f'{spec.spell} {spec.label_suffix} dummy position {actor} {trial} {axis}', TARGET,
+                    f'position_{axis}') for axis in ('x', 'y') if actor == CASTER]
 
 
 def reads(spec: CasterHitsSpec, trial: int, moment: str) -> list[dict]:
@@ -99,7 +110,8 @@ def trial_steps(records: Records, spec: CasterHitsSpec, trial: int) -> list[dict
     for index, actor in enumerate(actors(spec)):
         if index:
             steps.append({'action': 'wait', 'label': f'second caster gap {trial}', 'ms': spec.gap_ms})
-        steps.append({'action': 'cast', 'actor': actor, 'spell': spec.cast_spell, 'target': TARGET})
+        steps.append({'action': 'cast', 'actor': actor, 'spell': spec.cast_spell,
+                      'target': actor if spec.cast_target == SELF else TARGET})
     steps.append({'action': 'wait', 'label': f'settle {trial}', 'ms': spec.settle_ms})
     return steps + reads(spec, trial, 'after')
 
@@ -122,14 +134,16 @@ def caster_hits_scenario(class_file: dict, spec: CasterHitsSpec) -> tuple[dict, 
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour caster hits',
         'contract': (f'{spec.trials} trials; each trial teleports {who} to {list(spec.trial_position)}, with the '
-                     f'dummy {spec.dummy_distance:g} yd ahead, and casts {spec.cast_spell} at the dummy with '
+                     f'dummy {spec.dummy_distance:g} yd ahead, and casts {spec.cast_spell} at the '
+                     f'{"caster itself" if spec.cast_target == SELF else "dummy"} with '
                      f'{spec.cast_power} power (caster auras {list(spec.caster_auras)}); every caster\'s own '
                      f'{spec.hit_spell} hits on the dummy ({METRIC}) are read before the casts and {spec.settle_ms} '
                      f'ms after them, and each trial must add exactly {spec.hits_per_cast} per caster. No hit before '
                      f'the first cast.'),
         'players': players,
         'creatures': [creature_fixture(class_file, spec.dummy_distance)],
-        'steps': steps}
+        'steps': steps,
+        'location': location(spec)}
     expectations = []
     for actor in actors(spec):
         for trial in range(1, spec.trials + 1):

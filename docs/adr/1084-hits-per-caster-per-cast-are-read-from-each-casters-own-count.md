@@ -13,9 +13,11 @@ often one dummy is. No kind casts from two players of the class or reads hits pe
 ## Decision
 
 - Behaviour kind `caster_hits` (module `kinds/caster_hits.py`, ADR 0581 hooks; doc `docs/kinds/caster_hits.md`). One or
-  two players of the class (`caster`, `caster2`), restored to `trial_position` before every trial with a position
-  assertion; every caster's own `spell_damage_count` of `hit_spell` on the dummy is read before and after each trial's
-  casts, the second caster casting `gap_ms` after the first.
+  two players of the class (`caster`, `caster2`). `trial_position` is the scenario's `location`, so the dummy spawns
+  `dummy_distance` yd ahead of it; every caster is restored there before every trial with a position assertion, and
+  the dummy's position is read. `cast_spell` is cast at the dummy or, with `cast_target` "self", at the caster itself
+  (Fel Torpedo is a self cast). Every caster's own `spell_damage_count` of `hit_spell` on the dummy is read before and
+  after each trial's casts, the second caster casting `gap_ms` after the first.
 - Each caster and trial is one expectation `<spell> behaviour_metric_delta <suffix> <actor> #<trial>`, judged by the
   existing `metric_delta` judge: before = (trial - 1) x `hits_per_cast`, after = trial x `hits_per_cast`. The read
   before the first cast is the no-cast control (0).
