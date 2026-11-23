@@ -45,6 +45,11 @@ Every trial reads `aura` right before the judged cast: 0 in the control, 1 in th
   `expected` is 0.
   `evidence_metric: "cast_failure"` (opt-in, cooldown variant only) stamps the verdict with `cast_failure`, the
   recast reads, instead of the readback `cooldown_ms`; without it the stamp is unchanged.
+  `evidence_metric: "aura_fed_instant_casting"` (opt-in, instant variant only, ADR 1072, provisional) stamps the
+  verdict with that metric and the contrast `aura_fed`: casting 1 in the control arm (aura cancelled) against casting 0
+  in the fed arm, both read 300 ms after the cast and both judged. The kind's `METRIC_EVIDENCE` (state),
+  `CONTRAST_PROOF` and `STATE_PROMISES` (`instant`) rows make an ok verdict behaviour on a clause that says "instant"
+  and data otherwise; judging and the ok are unchanged, and without the option the stamp stays `casting`.
 - `variant: "cooldown_reset_recast"` (ADR 1037 addendum, opt-in): every trial resets the effect cooldown as a
   fixture, casts the effect for real (primer) and reads `cooldown_ms` after the global cooldown; treatment trials then
   feed until `aura`, control trials cast no feed. After the global cooldown the effect is cast again (R): R goes off

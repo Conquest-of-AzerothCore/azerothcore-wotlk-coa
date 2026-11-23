@@ -25150,6 +25150,7 @@
       "feed_power": 1000,
       "effect_power": 1363,
       "expected": 0,
+      "evidence_metric": "aura_fed_instant_casting",
       "caster_auras": [
         823764
       ],
