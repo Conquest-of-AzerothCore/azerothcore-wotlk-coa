@@ -58,36 +58,7 @@
   "literal_tokens": [],
   "effect_notes": [],
   "passive_targets": [],
-  "procs": [
-    {
-      "aura": 705137,
-      "name": "Azzinoth's Battery",
-      "tooltip": "Your |cffffffffAzzinoth's Assault|r now has a $h% chance to not consume |cff32cd32Felfury|r.",
-      "chance_token": "$h",
-      "band": true,
-      "baseline": true,
-      "trigger": {
-        "action": "cast",
-        "spell": 801904
-      },
-      "trial_casts": true,
-      "trigger_text": "Azzinoth's Assault",
-      "event_metric": "spell_cast_count",
-      "proc_spell": 801024,
-      "events_per_proc": 1,
-      "proc_spell_source": "EffectTriggerSpell[0] of 705137 (aura 42 PROC_TRIGGER_SPELL, ProcChance 30): 801024 Add 2 Felfury, Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS (175) on the caster, refunds the Felfury the cast consumed. Reference search 2026-11-23: coa-history spells 705137 and 801024: 801024 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc.",
-      "handler": "705137 is listed in FelswornCastDrivers (AscensionFelswornData.h:89) and has no scripted OnProc case in AscensionFelswornEvents.cpp; the engine rolls the DBC ProcChance 30 on the Azzinoth's Assault 801904 cast.",
-      "dbc": {
-        "705137": {
-          "ProcChance": 30,
-          "ProcFlags": 0,
-          "ProcCharges": 0
-        }
-      },
-      "spell_proc": {},
-      "internal_cooldown_ms": 0
-    }
-  ],
+  "procs": [],
   "triggers": [
     {
       "aura": 300476,
