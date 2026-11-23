@@ -5059,6 +5059,104 @@
       "expected_ratio": 1.0
     },
     {
+      "spell": 805236,
+      "kind": "hit_ratio",
+      "observe_spell": 803715,
+      "cast_spell": 800206,
+      "cast_wait_ms": 1700,
+      "learn": [
+        800206
+      ],
+      "critical": true,
+      "force_crit": "melee",
+      "trials": 20,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "name": "Grommash's Folly (Carve critical strikes at 10 channel steps with Inner Demon)",
+      "variant": "crit_inner",
+      "label_suffix": "crit_inner",
+      "quote": "In addition, critical strikes with Carve deal $807427s1% increased damage, increasing up to 60% with each strike based on how long you channel.",
+      "expected": 1.5,
+      "control": {
+        "auras": [
+          [
+            800058,
+            4
+          ],
+          [
+            804216,
+            0
+          ],
+          [
+            804216,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          805236
+        ],
+        "auras": [
+          [
+            800058,
+            4
+          ],
+          [
+            804216,
+            0
+          ],
+          [
+            804216,
+            1
+          ]
+        ]
+      },
+      "observe_source": "807427 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectBasePoints 4 + EffectDieSides 1 = 5 ($807427s1); Carve 800206 channels 2500 ms (DurationIndex 66) with Effect[0] made periodic every 250 ms by the Felsworn contract (AscensionFelswornContracts.cpp:161-163), so a full channel counts 10 steps (AscensionFelswornAuras.cpp:112-118, an expired channel is forced to 10 at :210-216) and releases one Carve strike 803715 per enemy in front. AscensionFelswornAbilities.cpp:192-193 multiplies a critical 803715 hit by 1 + $807427s1 / 100 x min(10, steps) when 805236 is known and Inner Demon 804216 was on the caster when the strike was cast (owner rulings O-21 and O-23, Felsworn ADR 0011: +5% of the whole critical hit per step, +50% at 10 steps; the tooltip's 60% is unreachable). Both arms channel Carve to its end at the one dummy with Felfury 800058 set to 4 and Inner Demon 804216 removed and set again before every trial (the harness set_aura keeps the running duration of an aura already present, and the contract gives Inner Demon 10 s: kept, it lapsed before every seventh release in the first pilot), melee crits forced and attack power +20000 (fixtures, the same in both arms), so the weapon dice (17.25-28.75 of about 3450 normalized points) move a hit under 0.2%; the treatment learns 805236 for real. The one-step arm (1.05) needs a channel cancelled after one step, which hit_ratio cannot schedule; the scenario felsworn-grommash-folly-carve-crit.json covers it. Reference search 2026-11-23: coa-history spell 807427: 3 logs, 3-4 stacks per channel that expire 0.5 s after the first step, crit/non-crit median ratio 1.94-1.98 against 1.94 without the talent (no measurable bonus on live); the bindmysoul and coabuildhub snapshots repeat the tooltip with 5%; nothing found that states another value. Expected 1 + 5 x 10 / 100 = 1.5; the previous factor 0.03 per step read 1.3."
+    },
+    {
+      "spell": 805236,
+      "kind": "hit_ratio",
+      "observe_spell": 803715,
+      "cast_spell": 800206,
+      "cast_wait_ms": 1700,
+      "learn": [
+        800206
+      ],
+      "critical": true,
+      "force_crit": "melee",
+      "trials": 20,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "name": "Grommash's Folly (control: no Carve critical bonus without Inner Demon)",
+      "variant": "crit_no_inner",
+      "label_suffix": "crit_no_inner",
+      "quote": "While Inner Demon is active, your melee haste is now increased by $s2% and you now heal equal to $807426s1% of all damage dealt by critical strikes with auto attacks. In addition, critical strikes with Carve deal $807427s1% increased damage,",
+      "expected": 1.0,
+      "control": {
+        "auras": [
+          [
+            800058,
+            4
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          805236
+        ],
+        "auras": [
+          [
+            800058,
+            4
+          ]
+        ]
+      },
+      "observe_source": "Contrast arm of crit_inner for the condition 'While Inner Demon is active' (owner ruling O-23: it covers the Carve sentence): the same arms with no Inner Demon 804216 on the caster, so the critical Carve strike at 10 steps is unchanged by 805236: 1.0. The previous code ignored Inner Demon and read 1.3. 807427 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectBasePoints 4 + EffectDieSides 1 = 5 ($807427s1); Carve 800206 channels 2500 ms (DurationIndex 66) with Effect[0] made periodic every 250 ms by the Felsworn contract (AscensionFelswornContracts.cpp:161-163), so a full channel counts 10 steps (AscensionFelswornAuras.cpp:112-118, an expired channel is forced to 10 at :210-216) and releases one Carve strike 803715 per enemy in front. AscensionFelswornAbilities.cpp:192-193 multiplies a critical 803715 hit by 1 + $807427s1 / 100 x min(10, steps) when 805236 is known and Inner Demon 804216 was on the caster when the strike was cast (owner rulings O-21 and O-23, Felsworn ADR 0011: +5% of the whole critical hit per step, +50% at 10 steps; the tooltip's 60% is unreachable). Both arms channel Carve to its end at the one dummy with Felfury 800058 set to 4 before every trial, melee crits forced and attack power +20000 (fixtures, the same in both arms), so the weapon dice (17.25-28.75 of about 3450 normalized points) move a hit under 0.2%; the treatment learns 805236 for real. The one-step arm (1.05) needs a channel cancelled after one step, which hit_ratio cannot schedule; the scenario felsworn-grommash-folly-carve-crit.json covers it. Reference search 2026-11-23: coa-history spell 807427: 3 logs, 3-4 stacks per channel that expire 0.5 s after the first step, crit/non-crit median ratio 1.94-1.98 against 1.94 without the talent (no measurable bonus on live); the bindmysoul and coabuildhub snapshots repeat the tooltip with 5%; nothing found that states another value."
+    },
+    {
       "spell": 805235,
       "kind": "metric_delta",
       "trigger_spell": 805235,

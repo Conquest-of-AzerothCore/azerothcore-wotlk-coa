@@ -3284,14 +3284,18 @@
     "spell": 805236,
     "clause": "In addition, critical strikes with Carve deal $807427s1% increased damage,",
     "labels": [
-      "805236 effect_value 807427e0 #2"
+      "805236 effect_value 807427e0 #2",
+      "805236 behaviour_hit_ratio crit_inner",
+      "805236 behaviour_hit_ratio crit_no_inner"
     ],
     "kind": "claim"
   },
   {
     "spell": 805236,
     "clause": "increasing up to 60% with each strike based on how long you channel.",
-    "labels": [],
+    "labels": [
+      "805236 behaviour_hit_ratio crit_inner"
+    ],
     "kind": "claim"
   },
   {
