@@ -4254,7 +4254,9 @@
       },
       {
         "claim": "move",
-        "labels": []
+        "labels": [
+          "806109 behaviour_metric_delta move_blocked"
+        ]
       },
       {
         "claim": "or cast spells",

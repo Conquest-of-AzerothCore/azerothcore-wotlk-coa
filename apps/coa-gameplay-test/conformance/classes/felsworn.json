@@ -15672,6 +15672,15 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "802058 Effect[2] is aura 42 in Spell.dbc; the class contract turns it into SPELL_AURA_FEATHER_FALL (AscensionFelswornContracts.cpp:234-241), whose handler calls Unit::SetFeatherFall: for a client-controlled player the server sends SMSG_MOVE_FEATHER_FALL (opcode 0x0F2 = 242, Opcodes.h:272) to the controlling client (Unit.cpp:18337-18348), which is what slows the fall; the server sets no movement flag itself until the client acknowledges. The harness records that opcode (server_packets). Control: before the cast, no feather-fall packet (0). After a real cast of 802058 on the caster: one packet (1), read 500 ms later, inside the 10000 ms aura (DurationIndex 1). Reference search 2026-11-23: coa-history spell 802058: 78 casts, 78 aura applied and 78 removed in 6 logs (combat logs carry no fall speed); expected values come from the tooltip, the DBC and the class contract only."
+    },
+    {
+      "spell": 806109,
+      "name": "Illidan's Guile (the caster cannot move under the aura)",
+      "kind": "move_under_aura",
+      "quote": "but during that time you cannot attack, move or cast spells.",
+      "expect": "blocked",
+      "label_suffix": "move_blocked",
+      "observe_source": "Tooltip sentence of 806109 (server DBC set): 'Gorge on fel energy, becoming immune to all physical attacks and spells for $d, but during that time you cannot attack, move or cast spells.' The 'move' part is about the caster moving, so the attempt is the caster's own forward movement (MSG_MOVE_START_FORWARD then MSG_MOVE_STOP to the session's movement handler, mentor D-74 condition 2). Control: the same attempt without the aura moves 2 yd. Treatment: a real cast of 806109 at the caster (DurationIndex 31 = 8000 ms, the reads end well inside it), the aura held at the start, after the move and after the stop; the position must not change. Code reading only: 806109 carries HOVER, SCHOOL_IMMUNITY and DUMMY auras (Spell.dbc) and no root or stun; the movement handler refuses a moving packet only from a rooted mover (MovementHandler.cpp:602-604), and the class script (AscensionFelswornAuras.cpp:214-217) adds no movement lock, so a move may be accepted: the run decides. Reference search 2026-11-23: coa-history spell 806109 finds 6 SPELL_CAST_SUCCESS in 1 of 186 logs (combat logs carry no position); bindmysoul talents snapshot (older state): same sentence; expected values come from the tooltip only."
     }
   ],
   "player_observations": [],
