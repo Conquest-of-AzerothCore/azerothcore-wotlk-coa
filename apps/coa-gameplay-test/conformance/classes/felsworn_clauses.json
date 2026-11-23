@@ -1252,7 +1252,7 @@
     "spell": 704361,
     "clause": "Increases your off-hand weapon damage by $s1%",
     "labels": [
-      "704361 effect_value e0 #0"
+      "704361 behaviour_hit_ratio offhand_swing"
     ],
     "kind": "claim"
   },
