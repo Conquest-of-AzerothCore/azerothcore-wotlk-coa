@@ -1607,8 +1607,7 @@
     "clause": "Inner Demon now also reduces your damage taken by $500031s1%.",
     "labels": [
       "705122 behaviour_hit_ratio physical_taken",
-      "705122 behaviour_metric_delta aura_amount",
-      "705122 behaviour_metric_delta damage_taken_readback"
+      "705122 behaviour_metric_delta aura_amount"
     ],
     "kind": "claim"
   },
@@ -1932,9 +1931,7 @@
     "claims": [
       {
         "claim": "Casting Carve now makes your next Fel Fireball instant cast",
-        "labels": [
-          "707444 behaviour_metric_delta instant"
-        ]
+        "labels": []
       },
       {
         "claim": "and causes it to strike 1 additional enemy near the primary target based on how long you channeled,",
@@ -2349,10 +2346,7 @@
     "claims": [
       {
         "claim": "Increases the duration",
-        "labels": [
-          "800352 behaviour_metric_delta bane_of_fire_expiry",
-          "800352 behaviour_metric_delta bane_of_chaos_expiry"
-        ]
+        "labels": []
       },
       {
         "claim": "reduces the Energy cost of Banes by $s1%.",
@@ -2436,10 +2430,21 @@
   {
     "spell": 801235,
     "clause": "Your next Ruin within $d is instant cast.",
-    "labels": [
-      "801235 spell_duration 555277 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Your next Ruin",
+        "labels": []
+      },
+      {
+        "claim": "within $d",
+        "labels": []
+      },
+      {
+        "claim": "is instant cast.",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 801892,

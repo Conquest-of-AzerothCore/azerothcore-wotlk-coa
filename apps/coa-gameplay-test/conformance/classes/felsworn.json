@@ -3664,55 +3664,6 @@
       "observe_source": "Same arms as crit_damage_high with the dummy held at 60% health (below 75%, so the bonus does not apply): the treatment arm must read the control size, ratio 1.0 within the 2-point band. Reference search 2026-11-23: coa-history spell 705127: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: nothing found; expected values come from the tooltip and the DBC only. Spell penetration 823764 (aura 123, MiscValue 126, -9999) is set in both arms as a named precondition fixture: it removes the partial resists of the dummy's magic resistance, the variance the first pairs showed (about 1,900 trials per arm needed without it)."
     },
     {
-      "spell": 801235,
-      "kind": "metric_delta",
-      "gate_spell": 801235,
-      "trigger_spell": 801312,
-      "target": "dummy",
-      "measure_actor": "caster",
-      "force_crit": "spell",
-      "wait_ms": 2500,
-      "expire_ms": 500,
-      "metric": "aura_stacks",
-      "fields": {
-        "spell": 555276
-      },
-      "before_expected": 0,
-      "setup_wait_ms": 1700,
-      "observe_source": "Diagnostic of the Sculptor of Doom count (not a claim label of its own): Fel Energy 555276 (StackAmount 3, DurationIndex 1 = 10000 ms) is cast on the caster by each direct critical hit of a Felsworn spell with 801235 known (AscensionFelswornAbilities.cpp:372-374). Forced spell crits of Fel Fireball 801312. ",
-      "name": "Sculptor of Doom (diagnostic: stacks after one crit)",
-      "variant": "stacks_one",
-      "label_suffix": "stacks_one",
-      "quote": "Landing 3 direct critical strikes now grants Sculptor of Doom.",
-      "expected": 1
-    },
-    {
-      "spell": 801235,
-      "kind": "metric_delta",
-      "gate_spell": 801235,
-      "trigger_spell": 801312,
-      "target": "dummy",
-      "measure_actor": "caster",
-      "force_crit": "spell",
-      "wait_ms": 2500,
-      "expire_ms": 500,
-      "metric": "aura_stacks",
-      "fields": {
-        "spell": 555276
-      },
-      "before_expected": 0,
-      "setup_wait_ms": 1700,
-      "observe_source": "Diagnostic of the Sculptor of Doom count (not a claim label of its own): Fel Energy 555276 (StackAmount 3, DurationIndex 1 = 10000 ms) is cast on the caster by each direct critical hit of a Felsworn spell with 801235 known (AscensionFelswornAbilities.cpp:372-374). Forced spell crits of Fel Fireball 801312. ",
-      "name": "Sculptor of Doom (diagnostic: stacks after two crits)",
-      "variant": "stacks_two",
-      "label_suffix": "stacks_two",
-      "quote": "Landing 3 direct critical strikes now grants Sculptor of Doom.",
-      "setup_casts": [
-        801312
-      ],
-      "expected": 2
-    },
-    {
       "spell": 706266,
       "name": "Armaments of the Legion (spell hit chance taken)",
       "kind": "attacker_miss_share",
@@ -4778,28 +4729,6 @@
       "observe_source": "Bane of Fire 707901 (SpellFamilyFlags[0] 32, the Bane family mask of Bane of Chaos 706420) is cast at the dummy in both phases. The before phase casts no second Bane: Bane of Fire is on the dummy (the control, read 1). The after phase casts Bane of Chaos at the same dummy 1700 ms later: Bane of Fire is gone (read 0), so a second Bane replaces the first. Reference search 2026-11-23: coa-history spell 706420: 324 casts, 206 aura applied and 206 removed in 2 logs (113 refreshes), no figure for the exclusivity; nothing else found."
     },
     {
-      "spell": 707444,
-      "name": "Hellfire Carver (Fel Fireball is instant after Carve)",
-      "kind": "metric_delta",
-      "variant": "instant",
-      "label_suffix": "instant",
-      "quote": "Casting Carve now makes your next Fel Fireball instant cast",
-      "trigger_spell": 800206,
-      "gate_spell": 707444,
-      "target": "dummy",
-      "cast_power": 100,
-      "metric": "spell_cast_time_ms",
-      "fields": {
-        "spell": 801312
-      },
-      "before_expected": 1500,
-      "expected": 0,
-      "tolerance": 1,
-      "wait_ms": 3200,
-      "expire_ms": 500,
-      "observe_source": "AscensionFelswornAuras.cpp:241-245: when a Carve channel 803716 ends with 707444 known, Hellfire Carver's aura 807424 is cast on the caster (807424 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -101 + 1 = -100%, DurationIndex 1 = 10000 ms). The cast time of Fel Fireball 801312 (CastingTimeIndex 16 = 1500 ms, SpellCastTimes.dbc) is read 3200 ms after a real cast of Carve 800206 (a channel of 2500 ms, DurationIndex 66): 1500 without the passive (the control: the same cast before the learn) and 0 with it. Reference search 2026-11-23: coa-history spell 707444: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: text 'Level 30 Passive ... instant cast and causes it to strike 1 additional enemy ... up to a maximum of 10 enemies' (same words); expected values come from the tooltip and the DBC only."
-    },
-    {
       "spell": 706267,
       "kind": "metric_delta",
       "gate_spell": 706267,
@@ -4865,63 +4794,6 @@
       "after_at_most": 2032,
       "player_attack_power": 20000,
       "observe_source": "706267 Effect[0] aura 4 DUMMY; AscensionFelsworn.cpp:210-216 casts Felspill 555742 (Effect[0] SPELL_EFFECT_HEALTH_LEECH, Shadowflame SchoolMask 36, SPELL_ATTR2_CANT_CRIT, AscensionFelswornContracts.cpp:289-290) once per Felfury generated while 706267 is known; the tooltip states health leeched of ${$AP*0.1} (reference attack power 312: 31.2). Demonic Will 800209 (generates 1 Felfury) is cast with 706267 known: the damage of the leech on the dummy is read 1500 ms later (0 before the learn, the control, in which the same cast generates the Felfury but leeches nothing). Spell penetration 823764 (aura 123, MiscValue 126, -9999) is a named precondition fixture that removes the dummy's partial resists. Contrast arm of the attack power term: +20000 attack power (player_attack_power): int(0.1 x 20312 = 2031.2) = 2031 against 31. Reference search 2026-11-23: coa-history spell 706267: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); Felspill 555742: 2106 damage events (3..75, mean 32) and 2115 heals in 4 logs; the players' attack power differs, no figure decides; bindmysoul talents snapshot: same text as above."
-    },
-    {
-      "spell": 800352,
-      "name": "Embracing Evil (Bane of Fire lasts 21600 ms)",
-      "kind": "last_application_expiry",
-      "variant": "bane_of_fire_expiry",
-      "label_suffix": "bane_of_fire_expiry",
-      "quote": "Increases the duration and reduces the Energy cost of Banes by $s1%.",
-      "gate_spell": 800352,
-      "trigger_spell": 707901,
-      "aura": 707901,
-      "expected_ms": 21600,
-      "control_window_ms": 500,
-      "window_ms": 26600,
-      "poll_ms": 50,
-      "caster": false,
-      "observe_source": "800352 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 19 + 1 = +20% ($s1), class mask matching the Bane family flags (Bane of Fire 707901: SpellFamilyFlags[0] 32, DurationIndex 85 = 18000 ms, SpellDuration.dbc): 18000 x 1.2 = 21600 ms. Bane of Fire is cast at the dummy before the learn (the control) and after it; the aura is polled every 50 ms and the bracket around its last application and its removal must lie inside the band around 21600 ms, which excludes 18000 (no gain) and 19800 / 23400 (10% off the gain). Banes tested: Bane of Fire and Bane of Chaos, one effect with one class mask covering them (G-23). Reference search 2026-11-23: coa-history spell 800352: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); bindmysoul talents snapshot: text 'by 20%' (same figure); expected values come from the tooltip and the DBC only."
-    },
-    {
-      "spell": 800352,
-      "name": "Embracing Evil (Bane of Chaos lasts 25200 ms)",
-      "kind": "last_application_expiry",
-      "variant": "bane_of_chaos_expiry",
-      "label_suffix": "bane_of_chaos_expiry",
-      "quote": "Increases the duration and reduces the Energy cost of Banes by $s1%.",
-      "gate_spell": 800352,
-      "trigger_spell": 706420,
-      "aura": 706420,
-      "expected_ms": 25200,
-      "control_window_ms": 500,
-      "window_ms": 30200,
-      "poll_ms": 50,
-      "caster": false,
-      "observe_source": "800352 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 19 + 1 = +20% ($s1), class mask matching the Bane family flags (Bane of Chaos 706420: SpellFamilyFlags[0] 32, DurationIndex 86 = 21000 ms, SpellDuration.dbc): 21000 x 1.2 = 25200 ms. Bane of Chaos is cast at the dummy before the learn (the control) and after it; the aura is polled every 50 ms and the bracket around its last application and its removal must lie inside the band around 25200 ms, which excludes 21000 (no gain) and 23100 / 27300 (10% off the gain). Banes tested: Bane of Fire and Bane of Chaos, one effect with one class mask covering them (G-23). Reference search 2026-11-23: coa-history spell 800352: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); bindmysoul talents snapshot: text 'by 20%' (same figure); expected values come from the tooltip and the DBC only."
-    },
-    {
-      "spell": 705122,
-      "name": "Bulwark of Azzinoth (damage taken readback at 1000)",
-      "kind": "metric_delta",
-      "variant": "damage_taken_readback",
-      "label_suffix": "damage_taken_readback",
-      "quote": "Inner Demon now also reduces your damage taken by $500031s1%.",
-      "trigger_spell": 804216,
-      "gate_spell": 705122,
-      "target": "caster",
-      "measure_actor": "caster",
-      "cast_in_before": false,
-      "metric": "melee_damage_taken",
-      "fields": {
-        "target": "caster"
-      },
-      "before_expected": 1000,
-      "expected": 950,
-      "tolerance": 0.5,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "Diagnostic of the damage path: the engine's own damage-taken calculation of a fixed 1000 Physical hit on the caster (a readback, no hit lands) is read before Inner Demon (the control, 1000) and 500 ms after a real cast of Inner Demon 804216 with 705122 learned: 500031 Effect[0] aura 87, MiscValue 127, -5 ($500031s1) gives 950. Reference search 2026-11-23: coa-history spell 500031: 0 events in 186 logs; bindmysoul snapshot says -10% where the DBC tooltip says 5% (an older state, G-9)."
     }
   ],
   "player_observations": [],
