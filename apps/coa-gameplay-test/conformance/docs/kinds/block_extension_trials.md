@@ -1,4 +1,4 @@
-# Block extension trials (`behaviour_metric_delta`, `kind: "block_extension_trials"`, ADR 1047, provisional)
+# Block extension trials (`behaviour_metric_delta`, `kind: "block_extension_trials"`, ADR 1216, provisional)
 
 Whether a block taken while an aura is on extends it by the stated time. `shield` is equipped with Block 107, `aura`
 and `spell` learned. Each of `trials` trials removes `aura`, casts it on the caster (power `cast_power`, cooldown
@@ -30,7 +30,7 @@ must expire in the base band; an extended expiry alerts, and fewer than 24 judge
 extension of every unblocked strike escapes 24 judged trials with probability 0.7^24 = 1.9e-4). Needs at least 24
 `trials`. Sun Cleric 284 uses 32.
 
-## `mode: "grant"` (ADR 1047 addendum, D-230)
+## `mode: "grant"` (ADR 1216 addendum, D-230)
 
 Whether a strike grants `aura` at all, and how often. No cast: per trial `aura` is removed and read absent, block is
 forced to `block` (0 or 100), a passive striker casts `strike_spell` once, the blocked and unblocked counts are
@@ -44,14 +44,14 @@ Without `chance_pct` (block 0): no judged trial may show the aura, fewer than 24
 `chance_pct` +- `half_width_points`, else alert (a finding). The 99% Wilson interval is reported. The residual of a
 conformant server leaving the range is erfc(z / sqrt 2) = 1.0% per run, about 1e-4 when both runs of a pair must agree.
 
-### Granted duration (`duration_spell`, ADR 1073, provisional)
+### Granted duration (`duration_spell`, ADR 1242, provisional)
 
 Opt-in on `mode: "grant"` at `block: 100`, without `chance_pct`, `control_trials` or `parts`: keys `duration_spell`,
 `duration_effect`, `min_granted` and `residual_target`. The expected duration is `duration_spell`
 Effect[`duration_effect`] from the DBC. Each trial reads `game_time_ms` right before and right after the strike and the
 aura with game-time stamps at 0.93 and 1.07 times the duration after the strike. A trial whose strike granted the aura
 is judged when the read ages (bounded by the two strike stamps) lie in 0.905..0.965 and 1.035..1.095 times the duration
-(ADR 1052's window shares, both inside +-10%); otherwise it is void, as is a trial with no grant or a strike not
+(ADR 1221's window shares, both inside +-10%); otherwise it is void, as is a trial with no grant or a strike not
 blocked once. A judged trial must show the aura on at the first read and gone at the second, else alert; fewer than
 `min_granted` judged trials is unmeasured. `trials` must reach the count at which fewer than `min_granted` grants come
 with probability at most `residual_target` per pair (two runs) at the talent's `ProcChance`.

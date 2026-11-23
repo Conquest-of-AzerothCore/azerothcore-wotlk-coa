@@ -1,0 +1,289 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Voodoo Unleashed cuts the Shadow Puppets cooldown by 3 sec",
+  "contract": [
+    "Voodoo Unleashed 705901: 'casting Bad Juju now reduces the cooldown of Shadow Puppets by $/1000;504607S1 sec.'",
+    "504607 Effect[0] is SPELL_EFFECT_ASCENSION_COOLDOWN 165 on misc 500015 with BasePoints -3001 + 1 = -3000, so",
+    "the tooltip reads 3 sec. AscensionWitchDoctorAbilities.cpp:367-368 cut Shadow Puppets by a hard-coded 5000 ms",
+    "on every Juju cast with 705901 known (cycle 9 sweep 20261121-051237: the cost_gate attempt 3500 ms before the",
+    "uncut end at 14500 ms went through). The fix reads the cut from 504607. Shadow Puppets 500015: instant, GCD",
+    "1500, RecoveryTime 18000, 15% base mana. Bad Juju 802087: CastingTimeIndex 19 = 2500 ms, 16% base mana,",
+    "CategoryRecoveryTime 15000, cast 2000 ms after the Puppets, so its cast completes about 4500 ms in. Both",
+    "players cast Puppets and then Bad Juju at the dummy at the same moments; only the doctor knows 705901 (the",
+    "plain player is the control). At 5000 ms after the Puppets cast the plain player's Puppets cooldown reads",
+    "18000 - 5000 = 13000 ms (judged 12700 to 13300) and the doctor's reads 10000 ms (9700 to 10300), which",
+    "excludes the 5000 ms cut (8000) and no cut (13000). The doctor's Puppets is then refused at 14000 ms (1000 ms",
+    "of cooldown left, more than the 400 ms spell queue; refused only if the cut is under 4 sec) and accepted at",
+    "15500 ms, while the plain player's is refused at 15500 ms (2500 ms left)."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true,
+      "min_level_armor": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Shadow Puppets",
+      "actor": "doctor",
+      "spell": 500015
+    },
+    {
+      "action": "learn",
+      "label": "Bad Juju",
+      "actor": "doctor",
+      "spell": 802087
+    },
+    {
+      "action": "learn",
+      "label": "Voodoo Unleashed",
+      "actor": "doctor",
+      "spell": 705901
+    },
+    {
+      "action": "learn",
+      "label": "Shadow Puppets",
+      "actor": "plain",
+      "spell": 500015
+    },
+    {
+      "action": "learn",
+      "label": "Bad Juju",
+      "actor": "plain",
+      "spell": 802087
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: only the doctor knows Voodoo Unleashed",
+      "actor": "plain",
+      "metric": "knows_spell",
+      "spell": 705901,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "set_power",
+      "actor": "plain",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 500015
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "plain",
+      "spell": 500015
+    },
+    {
+      "action": "cast",
+      "label": "Shadow Puppets",
+      "actor": "doctor",
+      "spell": 500015,
+      "target": "dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Shadow Puppets",
+      "actor": "plain",
+      "spell": 500015,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the doctor's Shadow Puppets cooldown starts at 18 sec",
+      "actor": "doctor",
+      "metric": "cooldown_ms",
+      "spell": 500015,
+      "min": 17500,
+      "max": 18000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the plain player's Shadow Puppets cooldown starts at 18 sec",
+      "actor": "plain",
+      "metric": "cooldown_ms",
+      "spell": 500015,
+      "min": 17500,
+      "max": 18000
+    },
+    {
+      "action": "wait",
+      "label": "Past the Shadow Puppets global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 802087
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "plain",
+      "spell": 802087
+    },
+    {
+      "action": "cast",
+      "label": "Bad Juju",
+      "actor": "doctor",
+      "spell": 802087,
+      "target": "dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Bad Juju",
+      "actor": "plain",
+      "spell": 802087,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Bad Juju completes 2500 ms after its submission",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the doctor's Bad Juju completed",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 802087,
+      "target": "dummy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Voodoo Unleashed Bad Juju leaves the Puppets cooldown at 13 sec",
+      "actor": "plain",
+      "metric": "cooldown_ms",
+      "spell": 500015,
+      "min": 12700,
+      "max": 13300
+    },
+    {
+      "action": "assert",
+      "label": "Voodoo Unleashed cut the Puppets cooldown by 3 sec, to 10 sec",
+      "actor": "doctor",
+      "metric": "cooldown_ms",
+      "spell": 500015,
+      "min": 9700,
+      "max": 10300
+    },
+    {
+      "action": "wait",
+      "label": "To 14000 ms after the Puppets cast",
+      "ms": 9000
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "cast",
+      "label": "Shadow Puppets 1 sec before the cut cooldown ends",
+      "actor": "doctor",
+      "spell": 500015,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "A cut of no more than 3 sec still refuses the Puppets at 14 sec",
+      "actor": "doctor",
+      "metric": "cast_failure",
+      "spell": 500015,
+      "equals": 67
+    },
+    {
+      "action": "wait",
+      "label": "To 15500 ms after the Puppets cast",
+      "ms": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "set_power",
+      "actor": "plain",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "cast",
+      "label": "Shadow Puppets 500 ms after the cut cooldown ends",
+      "actor": "doctor",
+      "spell": 500015,
+      "target": "dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Shadow Puppets with 2500 ms of the uncut cooldown left",
+      "actor": "plain",
+      "spell": 500015,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "The doctor's Puppets is accepted at 15.5 sec",
+      "actor": "doctor",
+      "metric": "cast_failure",
+      "spell": 500015,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the plain player's Puppets is refused at 15.5 sec",
+      "actor": "plain",
+      "metric": "cast_failure",
+      "spell": 500015,
+      "equals": 67
+    }
+  ]
+}

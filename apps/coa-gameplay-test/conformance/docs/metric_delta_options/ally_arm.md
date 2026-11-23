@@ -1,4 +1,4 @@
-# Ally arm (`metric_delta` `ally_arm`, ADR 1016, ADR 1029, ADR 1045, ADR 1046, ADR 1075)
+# Ally arm (`metric_delta` `ally_arm`, ADR 1186, ADR 1199, ADR 1214, ADR 1215, ADR 1244)
 
 `ally_arm` is an object of these keys, at least one:
 
@@ -10,7 +10,7 @@
   reading only), where a party-scoped spell (`TARGET_CHECK_PARTY`, `IsInPartyWith`, `GetPartyMembers`) reads 0.
   Seven allies and the caster fill the scenario schema 1 cap of 8 players (`run.py` `MAX_PLAYERS`), so a scenario
   that adds another player, such as an enemy player, is refused at validation.
-- `ally_class` (ADR 1040): a CoA class, 12 to 32, needing at least one ally. The allies are created with that class
+- `ally_class` (ADR 1209): a CoA class, 12 to 32, needing at least one ally. The allies are created with that class
   instead of the class under test (the scenario schema's per-player `class`, created by the existing character
   creation), for a spell that lands only on a power type the class under test lacks. The entry states the power type it
   needs with a precondition arm on the state metric `active_power` (`fields.power`), read on the ally, so a wrong class
@@ -22,7 +22,7 @@
   lines and checks that the spell's whole target selection (DBC implicit targets and every script filter) reaches the
   raid, not only the party (mentor D-56).
 - `ally_health`: `[value, maximum]`, set on every ally in both phases, ahead of the trigger.
-- `ally_power` (ADR 1075, provisional): a non-empty list of `[power, value]`, a power index 0 to 6 once each and a
+- `ally_power` (ADR 1244, provisional): a non-empty list of `[power, value]`, a power index 0 to 6 once each and a
   value of at least 0, needing at least one ally. Each phase sets every ally's listed power to its value with the
   harness `set_power` step, right after `ally_health` and ahead of the trigger (the harness refuses a value above the
   maximum). Read the pool with a judged `power` arm on the ally, not a precondition, so a pool that did not move
@@ -39,7 +39,7 @@
   count, still asserted with `equals`, so a count too high or too low fails the scenario as a cast that did not go
   off does. Every item of one spell states the same count and source. On each use, the reviewer opens the cited
   lines and checks that they say what `source` claims (mentor D-57).
-- `ally_attacks` (ADR 1045, provisional): a non-empty list of `{spell, power, source}`. `ally` learns each spell
+- `ally_attacks` (ADR 1214, provisional): a non-empty list of `{spell, power, source}`. `ally` learns each spell
   (right after the group steps) and casts it at the dummy after the trigger, after the option's other after-trigger
   steps; in an uncast before phase (`cast_in_before` false or `trigger_only_after`) at the end of the phase steps, so
   both phases carry the attacks. Before each cast the ally's mana (power 0) is set to `power` and the spell's cooldown
@@ -49,7 +49,7 @@
   read a caster-scoped metric (`spell_damage_total`, `spell_damage_count`, ...) on `ally` when its `fields.spell` is
   one of these attacks: the ally's own casts are the events meant. Every other caster-scoped read on an ally stays
   refused.
-- `ally_strikes` (ADR 1046, provisional): `true`, on an entry with a `strike` that has `after_trigger_ms`, no
+- `ally_strikes` (ADR 1215, provisional): `true`, on an entry with a `strike` that has `after_trigger_ms`, no
   `owned_entry` and no `dx`. After the trigger and the caster's strikes (at the start of the phase steps in an uncast
   before phase), each ally is set to the strike's `health` (or to N when written `ally_strikes: {"health": N}`, which
   changes the allies only, N at most `max_health`) of `max_health` and struck `count` times by the striker's
@@ -72,7 +72,7 @@
   arm. An optional `floor_count` names an arm that counts the events whose amounts are truncated to an integer one by
   one (a ratio-only arm gives its count, another arm its delta): the low end of the band widens by that count over the
   denominator, one unit per event, the high end does not move; `tolerance` must stay below 10% of `expected`, and a
-  widened low end at or below 90% of `expected` makes the ratio unmeasured, never ok (ADR 1028).
+  widened low end at or below 90% of `expected` makes the ratio unmeasured, never ok (ADR 1198).
 - `allies: 0` (from 0 to 7, default 1) adds no ally player and no group step, for arms on the caster or the dummy
   only; it needs arms and refuses `ally_health` and `ally_casts`.
 - `arms`: a list of `{actors, metric, fields?, before_expected, expected, tolerance, source, reach_source?,
@@ -88,10 +88,10 @@
   `expected` and `tolerance` together, for totals no data states (a heal or damage amount). It reads `count_metric`
   with the same fields beside `metric`, is judged only through the ratios that name it (an arm no ratio names is
   refused), and any ratio over it is unmeasured unless its count moved, or when its denominator did not move.
-- `precondition: true` on an arm (ADR 1029, mentor D-169): the arm states a premise of the trial, never behaviour.
+- `precondition: true` on an arm (ADR 1199, mentor D-169): the arm states a premise of the trial, never behaviour.
   Its metric must be a state metric; `combat_reach` (`METRIC_EVIDENCE` row `state` declared by this option, the
   harness `GetCombatReach()` read) is accepted only on such an arm. A precondition arm is never ratio-only, and no
-  ratio names it as numerator, in a denominator or list, or as `floor_count` (ADR 1028, ADR 1029). Any other value
+  ratio names it as numerator, in a denominator or list, or as `floor_count` (ADR 1198, ADR 1199). Any other value
   than `true` is refused; the key is written to the model and the contract only when set.
 
 Heal and energize totals (`spell_heal_count`, `spell_heal_total`, `spell_effective_heal_total`,

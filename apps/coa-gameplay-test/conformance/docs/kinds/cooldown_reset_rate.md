@@ -29,7 +29,7 @@ global cooldown trigger holds about 2200 casts per case.
 An optional `dummy_distance` (0 to 100 yd) places the dummy at that distance, for a ranged trigger with a minimum range
 (Witch Hunter: Expulsion of Evil 139778, Shadowblast 680269 at 17.5 yd; claim 8.0, 2 pooled parts).
 
-Options for a trigger with a cooldown and a percent cost (ADR 1022, provisional), all optional and absent by default:
+Options for a trigger with a cooldown and a percent cost (ADR 1192, provisional), all optional and absent by default:
 
 - `residual_target` and `min_detectable`: the residual sizing of proc entries (`procs.residual_sizing`, ADR 0781); the
   judge takes Wilson at that confidence, the minimum trials are the larger of the band's and the residual's, and the

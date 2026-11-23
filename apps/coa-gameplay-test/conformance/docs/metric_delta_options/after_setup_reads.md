@@ -1,4 +1,4 @@
-# After setup reads (`metric_delta` `after_setup_reads`, ADR 1058)
+# After setup reads (`metric_delta` `after_setup_reads`, ADR 1227)
 
 `after_setup_reads` is a non-empty list of `{"spell": id, "expected": 0 or 1}`. In every phase that makes the
 entry's `setup_casts`, right after the last setup cast (and its `setup_wait_ms`), before the triggering cast, the

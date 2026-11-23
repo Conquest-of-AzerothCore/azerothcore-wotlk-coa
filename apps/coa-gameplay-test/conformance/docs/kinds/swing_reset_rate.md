@@ -1,4 +1,4 @@
-# Swing reset rate (`behaviour_metric_delta`, `kind: "swing_reset_rate"`, ADR 1017)
+# Swing reset rate (`behaviour_metric_delta`, `kind: "swing_reset_rate"`, ADR 1187)
 
 A talent's chance to reset another spell's cooldown on each landed auto-attack hit: the swing twin of
 [`cooldown_reset_rate`](cooldown_reset_rate.md), whose clear-cooldown read and pooled judge it reuses unchanged.
@@ -21,7 +21,7 @@ The scenario proves the rate on auto attacks only: a melee ability never rolls i
 
 Sun Cleric: Odyn's Vanguard 806699, resetting Glorious Execution 800626 at 20% (Valkyr set, two 2800 ms weapons).
 
-Optional `residual_target` and `min_detectable` size and judge the rate as `cooldown_reset_rate` does (ADR 1022,
+Optional `residual_target` and `min_detectable` size and judge the rate as `cooldown_reset_rate` does (ADR 1192,
 provisional): Wilson at the residual confidence, the minimum landed hits the larger of the band's and the residual's,
 and the residual probabilities in the verdict. Odyn's Vanguard uses 0.001 per pair and 4 points (twice
 the 2-point band, so the false alert at the chance is also at most 0.1% per pair) over 14 parts.

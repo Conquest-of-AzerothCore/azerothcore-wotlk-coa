@@ -31,19 +31,19 @@ A `procs` entry of the class file describes one proc aura:
 | | ticks are another spell): the trials are the landed hits of the added spells, any landed hit of the trigger |
 | | alerts, and a baseline arm without a landed hit is not judged. The text must cite the code line (`File.cpp:N`) |
 | | where the handler rolls once per landed hit of the added spell; a handler that rolls per cast or per aura |
-| | application must not use it (ADR 1015) |
+| | application must not use it (ADR 1185) |
 | `critical_trials` | `{"rating", "source"}` (rating `melee` or `spell`) for a `cast` trigger whose proc rolls only on a critical |
 | | hit: the trials count the critical landed hits only (`critical: true`), the rating fixture forces crits, and a |
 | | control arm in part 1, with the passive learned, casts the trigger under 34640 (crit chance effects 0 and 1 set |
 | | to -100000) until a crit-blind roll would show with under 0.05% probability: no critical hit and enough |
-| | non-critical hits (else `unmeasured`), no event (else `alert`). `source` cites the crit condition (ADR 1081) |
+| | non-critical hits (else `unmeasured`), no event (else `alert`). `source` cites the crit condition (ADR 1250) |
 | `readings_question` | the log evidence that tells the readings apart without counting, for `questions.md` |
 | `handler` | the code that rolls a proc without a `spell_proc` or `spell_script_names` row |
 | `dbc` | `ProcChance`, `ProcFlags`, `ProcCharges` of the aura and of the spell of the chance token |
 | `spell_proc` | the `spell_proc` row of each spell, `{}` without one |
 | `internal_cooldown_ms` | the `spell_proc` `Cooldown`, the internal cooldown between procs |
 | `base_mana_per_attempt` | `true` sets the caster's mana to the class file's `base_mana` before every attempt of a `cast` trigger that costs a percentage of base mana (`hits.base_mana_steps`), the baseline casts included; refused for a trigger without such a cost (ADR 0700) |
-| `trial` | `"effective_heal"` for a `cast` trigger at the ally whose handler rolls on an effective heal: the trials are the trigger's heals on the ally (`spell_heal_count`, target ally), the ally set to 1 health of a 2000000000 maximum before every cast and the caster left at full health; an overheal on the ally or an effective heal of the caster by the trigger, read at the end of each part, makes the rate unmeasured; a chain heal trigger is accepted only with it (ADR 1022) |
+| `trial` | `"effective_heal"` for a `cast` trigger at the ally whose handler rolls on an effective heal: the trials are the trigger's heals on the ally (`spell_heal_count`, target ally), the ally set to 1 health of a 2000000000 maximum before every cast and the caster left at full health; an overheal on the ally or an effective heal of the caster by the trigger, read at the end of each part, makes the rate unmeasured; a chain heal trigger is accepted only with it (ADR 1192) |
 | `control_weapon` | the name of a class-file weapon set with a one-handed main hand, for an `attack` trigger whose own |
 | | set wields a two-handed one: part 1 first swings that main hand with the aura learned, then re-equips the own |
 | | weapon; any event in the control hits alerts, fewer landed hits than the baseline attempts are not judged (ADR 0751) |
@@ -435,7 +435,7 @@ handler must accept off-hand swings only. Absent or `0`, the main hand stays the
 Off The Dusk 681329 (10%) and 681488 (20%), each proc counted by its single Replenishment 1257670 cast (claims 214.0,
 228.0).
 
-### Both-hand trials of an attack proc (ADR 1027)
+### Both-hand trials of an attack proc (ADR 1197)
 
 `trial_hand: "both"` on an `attack` proc without `most_procs_per_trigger` counts the trials and attempts of both hands
 together (`melee_damage_count` and `melee_attack_count` with no hand, the harness's sum of both) and spaces the plan
@@ -463,6 +463,18 @@ source fails the part instead of being judged. Trials per attempt are the strike
 `trial_readings` and an internal cooldown are refused. The label is `<aura> proc_rate avoided` and the key ends in
 `avoided`; an avoided entry does not rename a sibling entry of the same aura.
 
-`count_misses: true` in the trigger (ADR 1041, provisional; mentor D-175) adds the swings that missed the caster (`melee_missed_taken`, read beside the dodged and parried swings and held in the baseline) to the trials, for a handler that rolls on a miss as well. Each counted part must then read as many attacks taken (`melee_attacks_taken`) as dodged, parried and missed swings, the guards having ruled out landed and blocked ones; otherwise the rate is `unmeasured` (void). Absent, the trials are the dodged and parried swings only.
+`count_misses: true` in the trigger (ADR 1210, provisional; mentor D-175) adds the swings that missed the caster (`melee_missed_taken`, read beside the dodged and parried swings and held in the baseline) to the trials, for a handler that rolls on a miss as well. Each counted part must then read as many attacks taken (`melee_attacks_taken`) as dodged, parried and missed swings, the guards having ruled out landed and blocked ones; otherwise the rate is `unmeasured` (void). Absent, the trials are the dodged and parried swings only.
 
-`miss_exclusion: {"min_share": s}` (ADR 1060, provisional; mentor D-252, D-253) needs `count_misses`. It reads the miss share m of the counted parts: under `s` the rate is `unmeasured`, otherwise expected x (1 - m), the rate of a server that ignores misses, must lie below the Wilson interval or the verdict is `alert`. Absent, nothing changes.
+`miss_exclusion: {"min_share": s}` (ADR 1229, provisional; mentor D-252, D-253) needs `count_misses`. It reads the miss share m of the counted parts: under `s` the rate is `unmeasured`, otherwise expected x (1 - m), the rate of a server that ignores misses, must lie below the Wilson interval or the verdict is `alert`. Absent, nothing changes.
+
+### Caster streams (ADR 1048, provisional)
+
+A cast-trigger entry at the dummy may set `streams` (default 1) with an `isolation` (`reach_yd`, `source`, optional
+`wards`), as the chance rate kinds do (`docs/kinds/flat_chance_rate.md`): stream k is `casterk` and `dummyk` on one
+flat 100 yd line at the Shimmering Flats, every step of the part copied per stream and every read suffixed with its
+stream (` s0` to ` sN-1`). The plan, its parts and `scheduled_attempts` are unchanged; each stream makes ceil(attempts
+per part / streams) attempts and ceil(baseline attempts / streams) baseline attempts, and the model's `part_attempts`
+and baseline `attempts` count all streams. The judge is unchanged: it first reads the isolation bounds (a cross-stream
+damage read alerts, a placement breach is `unmeasured`), then sums every listed read over the streams per part
+(`summed_labels`, `compare.stream_summed`). An entry with charges, extra dummies, minion events, excluded trial spells
+or another trigger is refused with streams.

@@ -35,6 +35,14 @@ namespace
     {
         return caster->GetEntry() == NPC_ARCHMAGE_ARUGAL;
     }
+
+    // Magister Kalendris' Dominate Mind would leave a lone player's fight with nobody to hold him, so he evades.
+    constexpr uint32 NPC_MAGISTER_KALENDRIS = 11487;
+
+    bool IsMagisterKalendris(Unit const* caster)
+    {
+        return caster->GetEntry() == NPC_MAGISTER_KALENDRIS;
+    }
 }
 
 bool BossControl::IsControlSpell(SpellInfo const* spellInfo)
@@ -122,6 +130,9 @@ bool BossControl::Forbids(Unit const* caster, Unit const* target, SpellInfo cons
     if (IsArchmageArugal(caster))
         return !HasSeveralEngagedPlayers(caster);
 
+    if (IsMagisterKalendris(caster) && !HasSeveralEngagedPlayers(caster))
+        return true;
+
     if (IsProtectedTarget(target))
         return true;
 
@@ -138,6 +149,9 @@ bool BossControl::ForbidsCast(Unit const* caster, Unit const* explicitTarget, Sp
 
     if (IsArchmageArugal(caster))
         return !HasSeveralEngagedPlayers(caster);
+
+    if (IsMagisterKalendris(caster) && !HasSeveralEngagedPlayers(caster))
+        return true;
 
     return !HasEngagedUnprotectedPlayer(caster);
 }

@@ -1,4 +1,4 @@
-# After gate cast (`metric_delta` `after_gate_cast`, ADR 1082, provisional)
+# After gate cast (`metric_delta` `after_gate_cast`, ADR 1251, provisional)
 
 `after_gate_cast: true` casts the gate spell (`gate_spell`, else `spell`) at the caster at the start of the after
 phase, after the gate learn and the `after_auras` and `phase_auras` steps and before the feed and trigger casts

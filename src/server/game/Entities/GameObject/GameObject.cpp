@@ -892,7 +892,7 @@ void GameObject::Update(uint32 diff)
                 m_respawnTime = GameTime::GetGameTime().count() + dynamicRespawnDelay;
 
                 // if option not set then object will be saved at grid unload
-                if (GetMap()->IsDungeon())
+                if (GetMap()->IsDungeon() || sWorld->getBoolConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY))
                     SaveRespawnTime();
 
                 DestroyForVisiblePlayers(); // xinef: old UpdateObjectVisibility();

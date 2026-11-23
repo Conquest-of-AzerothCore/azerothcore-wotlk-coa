@@ -1,4 +1,4 @@
-# Power term direction (`behaviour_metric_delta`, `kind: "power_term_direction"`, ADR 1022, provisional)
+# Power term direction (`behaviour_metric_delta`, `kind: "power_term_direction"`, ADR 1192, provisional)
 
 A passive whose tooltip says a spell's damage gains a term "scaling with your attack power" and states no figure. The
 judge proves the direction only: the gain exists, grows with attack power and belongs to the passive.

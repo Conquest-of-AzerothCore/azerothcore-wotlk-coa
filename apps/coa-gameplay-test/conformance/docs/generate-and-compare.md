@@ -44,7 +44,7 @@ Each run carries its build: the server commit parsed from `server_version` of `r
 otherwise `compare` stops with exit 5 and no verdict. Every verdict, alerts included, then carries `server_commit`,
 `build` (the worldserver sha256) and `runs` (the run ids it was judged from, empty for a verdict decided by rule), in
 `verdicts.json` and as the last three `alerts.tsv` columns (ADR 0118). `verdicts.json` also carries `selected` per
-verdict (a scenario behind the label ran, or the label is judged by rule alone; ADR 1032) and, on a linking verdict,
+verdict (a scenario behind the label ran, or the label is judged by rule alone; ADR 1201) and, on a linking verdict,
 `detail.linked_from` (its status before its links were resolved); a `base_roll_only` verdict carries its base-roll
 read status in `detail.base_roll_only.read_status`.
 
@@ -376,7 +376,7 @@ python3 -B conformance.py aura354 --class-map CLASS-MAP.json --class 23 [--out A
 
 `audit` merges the verdicts of `--base-results` and then of each `--results` directory in order (a later directory
 replaces the labels of the earlier ones, except with a verdict whose `selected` marker is false: a label its run did
-not select keeps the earlier verdict, ADR 1032). `compare` writes `selected` true when a scenario behind the label ran
+not select keeps the earlier verdict, ADR 1201). `compare` writes `selected` true when a scenario behind the label ran
 or every manifest expectation of the label is judged from its rule alone (`closed`, `unmodelled`, `unmeasurable`,
 `generic`, `unreadable` or `ambiguous_tooltip` rules and `unmodelled` checks, pooled checks excluded); a verdict
 written before the marker counts as selected when its `runs` list is absent or not empty. After the merge, a linking
@@ -582,7 +582,7 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   power set to 0; the carrier's amount is only the base point 0 handed to the triggered spell
   (`SpellAuraEffects.cpp:6566`), whose hit labels carry the power term. The verdict keeps `full_value`,
   `power_term` and `judged_amount` in `detail.trigger_with_value`; a token without a power term at the measured
-  stats is judged as before (ADR 1071, mentor D-292).
+  stats is judged as before (ADR 1240, mentor D-292).
 - Counts (`max_stacks`): `measured == expected`, no tolerance.
 - Sign: the client shows `$sN`, `$mN` and `$MN` (with or without `$/N;` or a spell id) unsigned, while the
   `Spell.dbc` record is signed. The expected value of such a token takes the sign of the points it shows
@@ -633,17 +633,17 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   when the read is the int32 truncation of the tooltip value or, under the same model checks, of that value less
   the lost fraction; otherwise an `alert`, labelled "not modelled" when a model check failed. A `hit_mean` of a
   `school` or `heal` hit (rank or script hit) on such a term carries an engine model, the same rolls less the lost
-  fraction (ADR 1069): outside the tooltip model it is `ok` only inside the engine model's 99% interval, else an
+  fraction (ADR 1238): outside the tooltip model it is `ok` only inside the engine model's 99% interval, else an
   alert naming the engine mean; an engine model that cannot be built (an effect read from a sibling token) leaves
-  the rank as before. A class-file `block_value_terms` entry (`{spell, effect, source}`, ADR 1070) adds the run's
+  the rank as before. A class-file `block_value_terms` entry (`{spell, effect, source}`, ADR 1239) adds the run's
   `block_value` read to each per-roll value of that effect, in `effect_value` and in the rank hit model, for a code
   term the tooltip names only in words (the Sun Cleric Dawnbreak chain); a missing read is `unmeasured`. A
-  class-file `heal_pct_terms` entry (`{spell, effect, source}` on the rank, ADR 1074) adds a `SPELL_EFFECT_HEAL_PCT`
+  class-file `heal_pct_terms` entry (`{spell, effect, source}` on the rank, ADR 1243) adds a `SPELL_EFFECT_HEAL_PCT`
   effect to a single-target heal model: the hit scenario reads the healed unit's `max_health`
   (`heal target max_health`), and the judge adds `floor(max_health x percent / 100)` (float, as
   `Unit::CountPctFromMaxHealth`) under the same healing modifiers, the percent from the DBC (BasePoints + DieSides,
   fixed values only); a missing read is reported as a missing measurement (the Sun Cleric Solar Prayer 806479). A
-  class-file `superseded_hits` entry (`{spell, reason, replaced_by}`, ADR 1074 addendum) closes a rank's generated
+  class-file `superseded_hits` entry (`{spell, reason, replaced_by}`, ADR 1243 addendum) closes a rank's generated
   plain hit: `add_hit` writes no scenario and a `closed: no check needed: <reason>` record whose model names the
   replacing labels (`replaced_by`, required, never the hit itself). `compare` keeps it `closed` only when every
   replacing label is in the same comparison and `ok`; a missing or non-ok replacement makes it an `alert`. Outside

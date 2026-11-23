@@ -1,4 +1,4 @@
-# Vehicle landed (`metric_delta` `vehicle_landed`, ADR 1062)
+# Vehicle landed (`metric_delta` `vehicle_landed`, ADR 1231)
 
 `vehicle_landed` is `true` or `{"max_step_ms": <positive ms>}`, on an entry whose `strike` hits the caster (no `owned_entry`). The scenario reads
 `aura_apply_count` of the strike spell on the caster three times: right after the settle wait, right after the before

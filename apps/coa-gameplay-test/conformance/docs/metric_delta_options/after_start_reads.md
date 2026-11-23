@@ -1,4 +1,4 @@
-# After start reads (`metric_delta` `after_start_reads`, ADR 1039)
+# After start reads (`metric_delta` `after_start_reads`, ADR 1208)
 
 `after_start_reads` is a non-empty list of `{"spell": id, "expected": 0 or 1}`. In the after phase only, right after
 the `after_auras` and `phase_auras` steps (so after a `set_aura` with 0 stacks removed the aura), the scenario reads
@@ -6,7 +6,7 @@ the `after_auras` and `phase_auras` steps (so after a `set_aura` with 0 stacks r
 missing read, makes the run `unmeasured`; a match leaves the plain verdict. The read is a diagnostic precondition
 check: it never makes a verdict `ok` or `alert` and adds no counted label.
 
-A read may name an `actor` (ADR 1059): a unit of the scenario, the caster or an ally of its `ally_arm`. The read is
+A read may name an `actor` (ADR 1228): a unit of the scenario, the caster or an ally of its `ally_arm`. The read is
 then `aura_stacks` on that unit and its label ends with ` <actor>`; without `actor` the read, label and model are the
 caster's as before.
 

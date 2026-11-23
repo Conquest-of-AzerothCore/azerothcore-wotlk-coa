@@ -1,4 +1,4 @@
-# Caster health entered from a percent (`metric_delta` `caster_health_from`, ADR 1027)
+# Caster health entered from a percent (`metric_delta` `caster_health_from`, ADR 1197)
 
 `caster_health_from` is a percent, 1-100, on an entry that sets `caster_health_pct` (a different percent) and
 `disable_regeneration`. At the start of each phase the caster is set to that percent of the health fixture and held

@@ -233,7 +233,7 @@ regression reads ~0.12 off, not ~1e-7).
 settle after each), for an interrupt that needs a target casting: Heartchill 801739 interrupts the dummy's Evocation
 12051 channel (`casting` reads 1 then 0, a state read its clause's cast words promise, ADR 0403) and slows it.
 The same channel's school lockout reads with `school_prohibited` (`fields.school_mask`), a state read its
-claim's interrupt, lockout or `for $d` duration words promise (ADR 1021): Luminary Mendicant 547214 reads Arcane locked 3000 ms and free
+claim's interrupt, lockout or `for $d` duration words promise (ADR 1191): Luminary Mendicant 547214 reads Arcane locked 3000 ms and free
 3475 ms after a Horusath Blast cast.
 
 `caster_health_pct` (ADR 0423) holds the caster at that percent of the 10000 health fixture before each trigger
@@ -422,8 +422,11 @@ non-class spell whose own effect mechanic matches the passive's `EffectMiscValue
 `MECHANIC_SNARE`) — directly at the caster, once before the passive is learned and once after, reading
 `aura_duration_ms` of `vehicle_spell`'s own applied aura `CAST_MARGIN_MS` (500 ms) after the last of up to
 `MECHANIC_LAND_ATTEMPTS` (3) casts, `MECHANIC_RETRY_WAIT_MS` (500 ms) apart, per phase. A `vehicle_spell` with
-`DmgClass SPELL_DAMAGE_CLASS_MELEE`, such as Hamstring 1715, rolls the separate dodge/parry leg of the melee
-combat table that `spell_hit_bonus` does not reach — only the miss roll does — so each phase opens with a
+`DmgClass SPELL_DAMAGE_CLASS_MELEE`, such as Hamstring 1715, rolls the melee combat table, which `spell_hit_bonus`
+(the magic hit modifier, read by `MagicSpellHitResult` only) does not reach: its miss roll subtracts the striker's
+melee hit modifier alone (`MeleeSpellMissChance`), so it misses the caster about 5% of the time unless the entry sets
+`striker_melee_hit_bonus: true` (the striker fixture's `melee_hit_bonus` 100, ADR 1049, provisional; both the
+readback and the `duration_ratio_expiry` striker take it), and it rolls a dodge/parry leg, so each phase opens with a
 `set_combat_avoidance` fixture step (`Player::SetRealDodgeParryForTest`, round10 ADR 0053, superseding round9's
 retry-only ADR 0050) that zeroes the caster's dodge and parry chance before the attempts, making the first
 attempt land deterministically; 712466's `behaviour_duration_ratio` flipped `unmeasured`/`alert` across round
@@ -457,12 +460,17 @@ vary slightly run to run); that per-read jitter is amplified by the ratio itself
 measured at up to ~100 ms for Courage's -20% rank — within `CAST_MARGIN_MS`, comfortably outside the shared
 delta-margin scale's usual 0.5%-of-expected floor.
 
-Two opt-in fields (ADR 1028) leave every other entry unchanged. `attempts` (1 to 3, default 3) lands the vehicle that
+Two opt-in fields (ADR 1198) leave every other entry unchanged. `attempts` (1 to 3, default 3) lands the vehicle that
 many times per phase; 1 reads a single landing, never a diminished re-application. `margin_ms` (absent by default)
 replaces `CAST_MARGIN_MS` in the judge's margin, `margin_ms + run.max_step_ms`, and the verdict is `unmeasured` when
 that margin is not below 10% of `|expected_delta|`, so a stated margin never passes a 10% deviation. With
 `margin_ms` the judge compares the landing-corrected durations (each read plus the game time elapsed since its
 landing) and reports their ratio as `measured`, on the scale of its own `low` and `high`.
+
+A `duration_ratio` entry may name a `variant` (ADR 1134, provisional): its labels then end in it
+(`<spell> behaviour_duration_ratio <variant>` and `<spell> behaviour_expiry <variant>`), so one passive can carry one
+entry per mechanic (Spice: Peacebloom 803700 `root` with Chains of Ice 29991 and `stun` with Stun 2880 beside its
+unnamed snare entry). An entry without a variant keeps its labels.
 
 ### Duration-refresh scenarios (`behaviour_duration_refresh`, `kind: "duration_refresh"`)
 
@@ -805,7 +813,7 @@ must read 1, the proof that the cast route lands at all (ADR 0134; the shape of 
 the immune window, not before it, because a landed creature fear raises the player's diminishing-returns level and
 would shorten later fears for a reason unrelated to the immunity. A named word without a fixture stays an unproven
 claim of the ledger entry. Judged exactly (`compare.behaviour_immunity_verdict`).
-An optional `cast_target: "dummy"` (ADR 1027, with `aura` and the caster as subject) casts `spell` at the dummy, an
+An optional `cast_target: "dummy"` (ADR 1197, with `aura` and the caster as subject) casts `spell` at the dummy, an
 enemy target, for a spell that puts its immunity `aura` on the caster (Valkyr's Calling 520024 -> 520025); the
 carrier is read with no extra settle, and an immune window (the cast read plus the dummy's casts) longer than the
 carrier's DBC duration is refused as not modelled.
@@ -820,6 +828,9 @@ that many yd from the caster, for a stealthed subject that a creature sees only 
 second entry of the same spell keeps its labels apart. An effect with `"lands": true` is a landing control: it is read
 present after the same casts under the immunity (no `words` match with the quote is needed), removed with `set_aura`,
 and has no post-expiry control arm. Both are absent by default and change no other entry.
+`expired_extra_ms` (ADR 1114, provisional) waits that much longer before the expired reading, for a carrier `aura`
+that outlives the spell's duration by a stated linger (Big Bad Voodoo 802719 `field`: the spirit's field 802718 carries
+a 2200 ms duration, 2500 ms); absent by default.
 
 ### Threat-slope scenarios (`behaviour_threat_slope`, `kind: "threat_slope"`)
 
@@ -834,7 +845,7 @@ A `threat_slope` entry may name `flat_spells`, spells the hit triggers on the du
 join the flat part, and the hit spell's `CasterAuraSpell` is set before its cast (ADR 0225). Sacred Swing 572769: the
 slow 301061 it triggers adds a flat 50.
 
-Opt-in fields (ADR 1034): `flat` adds a stated flat part (the SpellLevel initial threat of `Spell.cpp:5736-5737`),
+Opt-in fields (ADR 1203): `flat` adds a stated flat part (the SpellLevel initial threat of `Spell.cpp:5736-5737`),
 `learn` learns spells after `hit_spell` (the talent), `label_suffix` keeps a talent entry and its control apart,
 `settle_ms` lengthens the read wait for a delayed hit, and `unlanded` (needs `settle_ms`) reads
 `spell_damage_count` of each named spell on the dummy after the threat read; a count above 0 makes the trial
@@ -989,7 +1000,7 @@ observed spell whose hits are its own periodic ticks (Blade of Faith 803880, eve
 `ally_distance` (ADR 0207) groups the ally with the caster and moves it that far before the trials, for an aura that
 reaches party members within a radius; the ally must be the caster or the target (Fortified Body 300515: a self heal
 of the ally at 30 yd and at 45 yd).
-An arm `casts` item may be `{spell, target?, power?}` instead of a spell id (ADR 1057, provisional): the caster makes
+An arm `casts` item may be `{spell, target?, power?}` instead of a spell id (ADR 1226, provisional): the caster makes
 that cast at `target` (`caster`, `dummy`, or `ally` when the ally is the scenario's caster or target; default the
 dummy), with its power set to `power` right before it when stated, so a percentage cost does not drain the pool over
 the trials. Bare ids and items without `target` and `power` generate the same steps; `crit_rate` refuses targeted
@@ -1034,7 +1045,7 @@ the same cast refused without the group. Judged exactly (`compare.behaviour_cast
 a cast goes through. `cost_gate_scenario` attempts `gated_spell` at the reduced level: `resource: "power"` sets the
 caster's power to the reduced cost (rounded up; regeneration is off), `resource: "cooldown"` attempts it
 `reduction` less than its cooldown plus `margin_ms` (500) after a priming cast. An optional `caster_health_pct`
-(ADR 1027, 1-99, with `after_casts`) sets the caster to that percent of the health fixture before every arm's after
+(ADR 1197, 1-99, with `after_casts`) sets the caster to that percent of the health fixture before every arm's after
 casts, so a heal among them is effective (a proc on an effective heal, Hope 300349). Arms, each with its own
 `cast_failure` reading `<spell> cost_gate <gated>[ <label_suffix>] <arm>`. An optional `target_entry` (ADR 0737, dummy
 target only) replaces the dummy's creature entry, for a gated spell that only some creature types accept (Brand of
@@ -1105,7 +1116,7 @@ Interdict 560116). The arms are then `without` (through `margin_ms` after the ba
 (refused `margin_ms` before it). An increase not above twice `margin_ms` is `NotModelled`; next, duration and
 after-cast arms are refused.
 
-`area_dummies` (ADR 1049, provisional; a list of 1 to 9 distances in yd, cooldown gates whose `after_casts` all
+`area_dummies` (ADR 1218, provisional; a list of 1 to 9 distances in yd, cooldown gates whose `after_casts` all
 target the dummy, no `resets`) adds the copies of the dummy that the `metric_delta` option of the same name adds
 (`area1`, `area2`, ...), so an area after cast strikes several targets in the arms that make it. The entry states the
 whole cut in `reduction` (the DBC per-target amount times the targets struck). Solar Nova 681433 `cd_conquest_area`:
@@ -1117,7 +1128,7 @@ the gated spell `margin_ms` after the after casts, `without` refused (the contro
 `beyond` arm, since any later attempt goes through. Tome of Light 805422 resets Barrier of Light 805417
 (`AscensionTemplarAuras.cpp:122-128`): Barrier is primed, Tome is cast 2000 ms later, Barrier is attempted at 2500 ms.
 
-`refused_with: true` (only with `resets`, ADR 1034) states a reset that must not happen: the `with` arm expects the
+`refused_with: true` (only with `resets`, ADR 1203) states a reset that must not happen: the `with` arm expects the
 refusal code, as `without` does, and also reads `cast_failure` of the entry's spell just before the attempt (label
 `<spell> cost_gate <gated>[ <suffix>] with after_cast`, expected 0), so a refused after cast alerts instead of reading
 as a refused reset. Solar Concord 301266 under the other phase's aura uses it.
@@ -1184,7 +1195,7 @@ overcomes.
 `off_hand_item` (an item of the class file's `off_hand_weapons`) wields that off hand beside the class file's
 one-handed main hand: the main hand replaces the reference weapon and the off hand is equipped after the base steps,
 with no Dual Wield grant unless the `off_hand_weapons` entry states `grants` (spell ids learned right before the
-equip, ADR 1028; Sun Cleric 30754 with 707072). A spell carrying `SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON` then reads the off hand. A class
+equip, ADR 1198; Sun Cleric 30754 with 707072). A spell carrying `SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON` then reads the off hand. A class
 with `weapon_sets` (see [Weapon sets](reference-character.md#weapon-sets)) leaves `off_hand_item` out: the set of
 the cast spell equips its own off hand. With
 `swing_hand` (0 main hand, 1 off hand) and `metric: "melee_damage_total"` the arms observe auto attacks instead of a
@@ -1193,7 +1204,7 @@ plain (not critical unless `critical` says so, not glancing) hits of that hand. 
 swing from landing between the total and the count. An off-hand `swing_hand` needs `off_hand_item`; a swing entry
 takes no casts, warmup or target health, and has no `observe_spell` (ADR 0142).
 
-`void_on_cast_failure: true` (ADR 1054, provisional) voids the trial when the run's `cast_failures` lists a refused
+`void_on_cast_failure: true` (ADR 1223, provisional) voids the trial when the run's `cast_failures` lists a refused
 cast: the verdict is `unmeasured`, never ok or alert, and the contract says so. Absent by default; it changes no
 step, so a run without a refusal is judged as without the option.
 
@@ -1233,6 +1244,15 @@ trials of every part and needs all of them to have run. `rate: "critical"` (crit
 spell) or `rate: "proc"` (hits of `rate_spell` over them) with `expected_points` judges the arms' difference of rates in
 percent points inside the larger of 5% of it and 2 points. Scourge-Defense Training 520608's crit chance pools 76 parts
 of 166 Argent Blades per arm (`argent_blade_crit_rate`), the pooled proof after the 300-cast `crit_rate` step (ADR 0173).
+A rate entry (non-swing, the caster's own casts at its own dummy) may set `streams` with an `isolation`, as the chance
+rate kinds do (ADR 1048, provisional): each stream makes ceil(`trials` / `streams`) trials per arm and part, every read
+carries its stream suffix, and the judge reads the isolation bounds and then sums the reads of the streams per label
+(`summed_labels`), so the pooled per-part rates and their judge are unchanged.
+`rate: "landed"` (ADR 1116, provisional) counts the observed spell's damage hits over its `spell_go_count` (every
+cast packet, a miss included), the share of casts that land; the `fixture` may set `spell_hit_rating` (0 removes the
+reference character's rating, which hides every miss). Staff of the Coven 807905 `hit_landed`: 96% to 100% against a
+same-level dummy. `warmup_power` (ADR 1116) sets the power before every warmup cast (Eye of Kimbul 503714
+`eye_damage`: five Hexfires in each arm).
 
 `kind: "detection"` (ADR 0197) reads `can_detect` (`Unit::CanSeeOrDetect` of the caster for a dummy `distance` yd
 away) with the dummy shown, hidden by each of `hide_auras`, with `reveal_aura` set on it by the caster, and with it
@@ -1306,6 +1326,9 @@ is not fixed, so each reading is the sum of the fixtures' `aura` values (`sum_la
 cost, for a channel that also drains power per second (Testament of Fortitude: `ManaPerSecond` 15 on top of
 `ManaCost` 15; at exactly the cost the channel ended at its first tick).
 
+`label_tag` (ADR 1103) puts a tag after `periodic_dispel` in every label (`<spell> periodic_dispel <tag> <moment>`),
+for a second arm of the same spell: Cleansing Idol 504840 `dispel_poison` (tag `poison`) beside its disease arm.
+
 `party_pulse: {"radius_spell": id, "pulses": n}` (ADR 0930, `periodic_dispel_party.py`) judges a pulse that removes
 every effect of the dispelled mechanics from party members inside a radius (Witching Idol 804051). The debuffs go on a
 party member 3 yd away (`ally`) and one at the radius of `radius_spell`'s Effect[0] plus 15 yd (`ally_far`); labels
@@ -1335,7 +1358,7 @@ Disciplined Mind 680399 / 681483 (ADR 0158) uses Frost Fever 55095 and Blood Pla
 
 An arm may state `learns` (spells learned before the arm and unlearned after it, for a claim whose own aura must not
 be set with `set_aura`) and `cast: false` (the arm waits and reads the same way without casting, and expects no
-removal: a no-cast control). The control arm is an arm without auras or learns, or a no-cast arm (ADR 1028).
+removal: a no-cast control). The control arm is an arm without auras or learns, or a no-cast arm (ADR 1198).
 
 ### Threat-tick periods
 
@@ -1427,7 +1450,7 @@ the caster) casts `strike_spell` at the caster `strikes` times per trial
 (an arm may set its own `strikes`), `trials` trials per arm. `arms` lists named arms, the first the control; each
 sets its `auras` on the caster, makes its `casts` (`[spell, target]`) before the strikes and its `after_casts`
 after them, every trial. `caster_health_pct` with `caster_max_health` sets the caster's health, and maximum, at
-the arm start and before every trial. An optional `caster_health_from_pct` (ADR 1027, another percent) opens each arm
+the arm start and before every trial. An optional `caster_health_from_pct` (ADR 1197, another percent) opens each arm
 at that percent instead, waits 1000 ms, sets `caster_health_pct`, waits 1000 ms again and turns health regeneration
 off, so a health state kept with hysteresis is entered from above or below. After every trial the scenario reads the strike's `spell_damage_total` and
 `spell_damage_count` (caster `striker`, target the caster), its `spell_absorb_total` and its `spell_log_count`:
@@ -1499,6 +1522,9 @@ and reads the logs of `strike_spell` on the ally. `transfer_spell` with each arm
 absorbed amount of that spell the caster takes from the striker after each strike: one log adding up to
 floor(`transfer_pct`% of the strike's damage plus absorbed amount), none at 0. Gaze of the Black Knight 802138
 `gaze_transfer`: 25% of a party member's damage moved to the caster.
+`struck: "ally"` also takes the `damage_ratio` judge (ADR 1115, provisional; no caster health or `health_loss`): the
+non-critical strike logs on the ally are judged as a hit ratio (Big Bad Voodoo 802719 `ally_taken` 0.80, One Armed Waltz
+705909 `waltz_taken` 0.75, both under one real cast in the treatment arm while the caster is immune).
 
 ### Threat-redirect scenarios (`behaviour_threat_redirect`, `kind: "threat_redirect"`)
 
@@ -1510,17 +1536,17 @@ it, the ally gains none and the caster some: the whole of the ally's threat goes
 
 ### Script-cast hits (`hit_mean`, `kind: "script_hit"`)
 
-The class file key `tooltip_corrections` (`{"<spell>": {"text": ..., "ruling": ...}}`, ADR 1042, provisional) replaces the Description that a script hit reads its amount from, only for a spell with a recorded ruling and only when the text is the DBC Description with `+` operators inserted; anything else is refused. Sun Cleric: Protector of the Flame 560492 (D-166). No finished class uses it.
+The class file key `tooltip_corrections` (`{"<spell>": {"text": ..., "ruling": ...}}`, ADR 1211, provisional) replaces the Description that a script hit reads its amount from, only for a spell with a recorded ruling and only when the text is the DBC Description with `+` operators inserted; anything else is refused. Sun Cleric: Protector of the Flame 560492 (D-166). No finished class uses it.
 
 A tooltip may state the amount of a hit that a class script casts on an event, such as a pulse on a heal or a
 strike when a shield breaks (ADR 0160). `hit_spell` is the spell the script casts and `spell` the passive whose
 tooltip shows its amount. Every trial sets `caster_auras` on the caster, holds the caster at `caster_health_pct`
 of 10000 health, makes the `casts` (`[spell, target]`, after their power, cooldown and required-aura fixtures)
 and, with `strike_spell`, has a passive, stationary striker (creature `striker_entry`, default 36) cast it at the
-caster; with `caster_avoidance` (`{"dodge": percent, "parry": percent}`, ADR 1028) it instead sets the caster's
+caster; with `caster_avoidance` (`{"dodge": percent, "parry": percent}`, ADR 1198) it instead sets the caster's
 avoidance with `set_combat_avoidance` at the start of every trial while a hostile, stationary melee striker (creature
 `striker_entry`, `reaction` 2) swings at it, so an avoided swing can set off the script, and the striker can be the
-`receiver` (refused with `strike_spell`). The caster engages that striker once with its auto attack for 2800 ms before the control trials (ADR 1042, provisional, round B design 2: without it the striker never swings), and its own melee swings after the engage must be 0 at the end, or the run fails before its reads; it then waits `settle_ms` (default 500). `trials` trials run without
+`receiver` (refused with `strike_spell`). The caster engages that striker once with its auto attack for 2800 ms before the control trials (ADR 1211, provisional, round B design 2: without it the striker never swings), and its own melee swings after the engage must be 0 at the end, or the run fails before its reads; it then waits `settle_ms` (default 500). `trials` trials run without
 `spell` known (the control arm,
 whose `hit_spell` hits on the `receiver` must count 0) and `trials` with it. The `receiver` is the dummy or the
 striker; its armor, view level and resistances are read for the mitigation model. `weapon_only: true` (ADR 0742,
@@ -1545,6 +1571,11 @@ of that effect, to the school part (ADR 0208, the Scourgebane strike 801832 from
 527269 from `$527270m3`). `value_rolls: true` (ADR 0996, only with `value_spell`) rolls the die of `value_spell`'s
 `value_effect` instead of the hit spell's, one modelled value per roll (Shadow Rage 680275 `$m3`, 57..58, struck by
 567570); without it the hit spell's die is rolled, as before.
+`level_points: true` (ADR 1150) reads the hit effect's points with the `SpellEffectInfo::CalcValue` per-level term at
+the caster level (clamped to BaseLevel and MaxLevel), not at the client level of a helper `$m1` (ADR 0014): each roll
+is forced to base + roll + that term and read again through the tooltip, and the engine model truncates the term
+(Spirit Volley 503712 `volley_hit`: 389.0 with the 18 points of 504582 at level 60, 371.0 without; mentor ruling
+M-46). Weapon, normalized and value-spell hits refuse it.
 `strikes_per_cast` (ADR 1007, with a minion `caster_entry` and casts) reads that minion's casts of the hit spell before
 each treatment call and after its settle; the verdict alerts unless every call cast that many, and lists per run the
 casts, landed (any outcome), usable, critical and not-landed strikes (Houndmaster's Call 802273: two per call).
@@ -1557,7 +1588,7 @@ spell with a damage and a heal effect (Raise: Ghoul 500971: Command: Ghouls 8015
 the owner, effect 2).
 `cast_power` (ADR 0401) sets that power, in each cast's own power type, before every cast of a trial, for a cast whose
 cost is paid after a cast time while the power decays (Ice Barrage 501997, 1000 Runic Power).
-`trial_position` (`{"map": id, "x", "y", "z": yards, "o": radians}`, `o` default 0; ADR 1083, provisional)
+`trial_position` (`{"map": id, "x", "y", "z": yards, "o": radians}`, `o` default 0; ADR 1252, provisional)
 starts the scenario at that position (`location`, so the dummy stands `dummy_distance` yards along x from it) and
 begins every trial of both arms with the harness `teleport` of the caster back there, before the trial's auras and
 casts, for a cast that moves the caster (Fel Torpedo 500610 dashes it 10 yd through Chaos Rush Jump 802028). The
@@ -1787,7 +1818,7 @@ Four kinds can set auras around their casts. Without the fields every scenario i
   `after_auras` at the start of the after phase only, before the phase auras; a stack count of 0 removes the aura.
   Crusader's Brand 300513: Courage 707754 on the dummy before and after a brand cast (`speed_cap`), and a fear 12096
   set on the caster by the dummy in both phases with the brand set on it in the second (`flee`). `on` and `by` may
-  also be `striker` when the entry has a `strike` (ADR 1059; refused otherwise): Heaven's Appraisal 300353 sets QA
+  also be `striker` when the entry has a `strike` (ADR 1228; refused otherwise): Heaven's Appraisal 300353 sets QA
   Test 100% Parry 10019 on an aggressive striker that turns to the caster.
 - `fixed_count` `auras`: `[spell, stacks]` set on the caster before every cast. Libram of Consecration 803893 is held
   before each Chastise, so 804148 strikes the primary and 4 nearby enemies.
@@ -1922,7 +1953,7 @@ players are flagged for PvP after the base steps. The entry's `target` and `meas
 only then. Tranquil Circle 801205's Tranquil State 850010 lasts 8000 ms on an orc in the circle (read 9800 ms and
 10200 ms after the cast, its first tick at about 2000 ms) and 40000 ms on the dummy.
 
-### Two read-only harness reads (ADR 1040, provisional)
+### Two read-only harness reads (ADR 1209, provisional)
 
 - `school_mask` (1 to 127) in the `fields` of a `spell_damage_count` or `spell_damage_total` read keeps the damage events
   whose packet school mask equals it (`SMSG_SPELLNONMELEEDAMAGELOG` carries `log->schoolMask`; Physical 1, Holy 2, Fire 4,
@@ -1953,7 +1984,7 @@ the one 3 yd behind never.
   the one at 10 yd. Norgannon's Wrath 524739: `settle_ms` 2500 for the delayed strike.
 - `metric_delta` `evidence_metric` (ADR 0616) names the metric the verdict stamps in place of `metric` (a metric of
   `coverage.METRIC_EVIDENCE`, usually gated by `CONTRAST_PROOF`); the read itself is unchanged.
-- `metric_delta` on `spell_done_crit_chance_scripted` (ADR 1018) is `NotModelled` when the probed spell rolls its crit
+- `metric_delta` on `spell_done_crit_chance_scripted` (ADR 1188) is `NotModelled` when the probed spell rolls its crit
   on another attack than the probe's base attack (`DmgClass` 3, an auto-repeat wand spell, or a melee spell that
   requires the off hand), when the read is on another actor than the player, without `expected_gain` (each arm
   names its gain, which the coverage partner gate reads), and with an `evidence_metric` that differs from `metric` when
@@ -1998,7 +2029,10 @@ the one 3 yd behind never.
   `model_auras` names auras the treatment casts put on the caster, which the hit model then counts among its modifiers
   (they must be cast by the entry), and `unresisted: true` drops the resistance mitigation for a hit that ignores it.
   The hit model now reads SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79) and SPELL_AURA_MOD_HEALING_PCT (118) modifiers of
-  those auras (ADR 0219, ADR 0220). Libram of Grace 801463's Grace 804150 on the Templar under its own +20% healing
+  those auras (ADR 0219, ADR 0220), and, for the caster's own hit, their SPELL_AURA_MOD_DAMAGE_FROM_CASTER (271) on
+  the target as a taken modifier after the done truncation, kept to the school mask and to the family and class mask
+  `SpellInfo::IsAffected` checks (ADR 1151; the record names them in `taken_auras`: Veil of Darkness 802100
+  `veil_tick`, the pulse under the Veil's own +15%, 235). Libram of Grace 801463's Grace 804150 on the Templar under its own +20% healing
   received, Eternal Blessing 705300's 707111 under its own +15% Holy damage, Norgannon's Wrath's 524740 unresisted.
 
 ### fixed_count cap arms (ADR 0221)
@@ -2161,19 +2195,19 @@ Its tests are `kinds/test_<kind>.py`, run by `test_kinds.py` (one `conformance` 
 every module imports, names its kind and has a test file); its page is `docs/kinds/<kind>.md`. Kinds with a module:
 
 - [`attacker_miss_share`](kinds/attacker_miss_share.md): the share of attackers' swings that miss the caster
-  without and with a hit-chance aura from a real cast, pooled over parts (ADR 1019, provisional)
-  `relocate_dx` moves the caster along x once before counting (ADR 1065, provisional)
+  without and with a hit-chance aura from a real cast, pooled over parts (ADR 1189, provisional)
+  `relocate_dx` moves the caster along x once before counting (ADR 1234, provisional)
 - [`aura_expiry`](kinds/aura_expiry.md): how long a forced, rolled minion aura lasts, in game time (ADR 0485)
 - [`aura_fed_effect`](kinds/aura_fed_effect.md): a proc-granted aura's effect with the aura earned by a real
-  `cast_until_aura` feed and read before each judged cast (ADR 1025, provisional)
+  `cast_until_aura` feed and read before each judged cast (ADR 1195, provisional)
 - [`aura_keep_rate`](kinds/aura_keep_rate.md): the chance that a consumable aura survives the cast that consumes
   it, pooled over parts (ADR 0672, provisional)
 - [`aura_window`](kinds/aura_window.md): a cast's aura duration on the dummy without and with a talent, from stamped
   windows (ADR 0551)
 - [`block_charge_strikes`](kinds/block_charge_strikes.md): how many real blocks a block-charge aura lasts without and
-  with a talent, block forced by `set_combat_avoidance` (ADR 1025, provisional)
+  with a talent, block forced by `set_combat_avoidance` (ADR 1195, provisional)
 - [`block_extension_trials`](kinds/block_extension_trials.md): whether one blocked strike on a fresh aura extends
-  it by the stated time, every trial judged on game-time stamps (ADR 1047, provisional)
+  it by the stated time, every trial judged on game-time stamps (ADR 1216, provisional)
 - [`bounce_amounts`](kinds/bounce_amounts.md): the per-hit amount of each enemy a bouncing spell strikes, against
   its jump multiplier (ADR 0587)
 - [`cast_period`](kinds/cast_period.md): a minion's cast period from game-time stamped polls (ADR 0535)
@@ -2181,16 +2215,21 @@ every module imports, names its kind and has a test file); its page is `docs/kin
   forced ability crit earns it (ADR 0694, provisional)
 - [`chase_halt`](kinds/chase_halt.md): a hooked enemy's chase against an unhooked one; unmeasured until enemies can
   be moved (ADR 0596)
+- [`cooldown_cut_series`](kinds/cooldown_cut_series.md): a percent cut of a running cooldown per tick and its
+  period, from game-time stamped remaining-cooldown reads against a control series (ADR 1026, provisional)
 - [`cooldown_reset_rate`](kinds/cooldown_reset_rate.md): a talent's chance to reset a cooldown, from the
   clear-cooldown packets per trigger hit (ADR 0603)
 - [`corpse_per_raise`](kinds/corpse_per_raise.md): the corpses a periodic raise leaves, against the raises (ADR 0595)
 - [`disease_copy`](kinds/disease_copy.md): a disease copied by a snapshot ability, its amount and duration kept against
   a fresh cast after a spell power raise (ADR 0622)
 - [`effectiveness_delta`](kinds/effectiveness_delta.md): an effect cast without and with the modifier that raises its
-  effectiveness (ADR 0601)
+  effectiveness (ADR 0601; a slow read as the run speed rate, ADR 1160, provisional)
 - [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)
 - [`extra_strikes`](kinds/extra_strikes.md): the strikes an off-hand proc adds, counted per proc against a control
   without the talent (ADR 0693, provisional)
+- [`heal_sum`](kinds/heal_sum.md): one heal's counts summed over the caster, ally players and assistable friendly
+  creatures against a stated target cap, or one heal's amount paired with another unit's healing (ADR 1118,
+  provisional)
 - [`hit_period`](kinds/hit_period.md): a cast's hit period on the dummy, judged as a cast period (ADR 0552)
 - [`item_cooldown_gate`](kinds/item_cooldown_gate.md): an item's use cooldown through the item-use handler, shared and
   in combat (ADR 0492, ADR 0534)
@@ -2209,11 +2248,13 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 - [`parried_restore`](kinds/parried_restore.md): a restore of a percent of the missing health and Rage per
   parried swing, one swing per cycle at a set state (ADR 0801; judged window ADR 0850)
 - [`power_term_direction`](kinds/power_term_direction.md): the direction of a power term without a figure, from four
-  arms crossing the passive with two attack power levels (ADR 1022, provisional)
+  arms crossing the passive with two attack power levels (ADR 1192, provisional)
 - [`pulse_targets`](kinds/pulse_targets.md): the targets of each area pulse of one creature, against the stated cap (ADR
   0550)
 - [`pushback_reduction`](kinds/pushback_reduction.md): the share of spell pushback a talent removes, from game-time cast
   ends (ADR 0543, ADR 0546, ADR 0570)
+- [`pick_effect`](kinds/pick_effect.md): each aura of a random pick, read for its stated change in the trials of a
+  real cast that left it and for no change in the others (ADR 1163, provisional)
 - [`radius_edge`](kinds/radius_edge.md): an area radius bracketed by dummies 0.5 yd inside and beyond its edge (ADR
   0592)
 - [`shot_ramp`](kinds/shot_ramp.md): each shot of a chained channel against its first, by the stacks the earlier
@@ -2221,12 +2262,14 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 - [`spawn_fuse`](kinds/spawn_fuse.md): the time from a summoned creature's first spawn to its first fuse cast,
   read on an encounter timeline (ADR 0602)
 - [`strike_bursts`](kinds/strike_bursts.md): a minion's scripted strikes per Command at falling dummy health (ADR 0383)
+- [`summon_edge`](kinds/summon_edge.md): a summon-centred field or pulse bracketed by two players placed at its edge
+  from the summon itself, with the layout read back (ADR 1111, provisional)
 - [`summon_lifetime`](kinds/summon_lifetime.md): a proc-summoned creature's lifetime from bracketed polls, pooled over
   parts (ADR 0544, ADR 0546)
 - [`swing_reset_rate`](kinds/swing_reset_rate.md): a talent's chance to reset a cooldown, from the clear-cooldown
-  packets per landed auto-attack hit, pooled over parts (ADR 1017, provisional)
+  packets per landed auto-attack hit, pooled over parts (ADR 1187, provisional)
 - [`timer_spacing_arms`](kinds/timer_spacing_arms.md): an internal timer bracketed by two real hits cast
-  `ignore_gcd` on either side of it, judged on the measured spacing (ADR 1025, provisional)
+  `ignore_gcd` on either side of it, judged on the measured spacing (ADR 1195, provisional)
 
 ## Metric-delta option modules
 
@@ -2241,19 +2284,23 @@ player ratings, before the striker creature is added). An option that needs anot
 Options with a module:
 
 - [`after_start_reads`](metric_delta_options/after_start_reads.md): a caster aura read at the start of the after phase,
-  a mismatch is `unmeasured` (ADR 1039)
+  a mismatch is `unmeasured` (ADR 1208)
 - [`after_setup_reads`](metric_delta_options/after_setup_reads.md): a caster aura read after the last setup cast of
-  each phase, a mismatch is `unmeasured` (ADR 1058)
+  each phase, a mismatch is `unmeasured` (ADR 1227)
+- [`after_setup_stacks`](metric_delta_options/after_setup_stacks.md): an exact stack count on the caster or the dummy
+  after the last setup cast of each phase, a mismatch is `unmeasured` (ADR 1257)
+- [`setup_cast_targets`](metric_delta_options/setup_cast_targets.md): one target per setup cast, the named point
+  `setup_cast_target` (ADR 1256)
 - [`before_trigger_reads`](metric_delta_options/before_trigger_reads.md): a unit aura (caster or dummy) read before the
-  trigger cast of each phase that casts, a mismatch is `unmeasured` (ADR 1064, provisional)
+  trigger cast of each phase that casts, a mismatch is `unmeasured` (ADR 1233, provisional)
 - [`same_arm_ratio`](metric_delta_options/same_arm_ratio.md): a second metric read right after each reading, the
-  gain of the reading per gain of that metric over the after arm judged against a stated ratio (ADR 1068)
+  gain of the reading per gain of that metric over the after arm judged against a stated ratio (ADR 1237)
 - [`apply_stamp`](metric_delta_options/apply_stamp.md): an encounter timeline stamps the aura apply and the trigger
-  cast in one time base, and the after reading's bracket from the apply is judged against a window (ADR 1067)
+  cast in one time base, and the after reading's bracket from the apply is judged against a window (ADR 1236)
 - [`stack_feed`](metric_delta_options/stack_feed.md): a stack cap fed by chance, judged over repeated trials polled
-  after every feed cast, a trial without cap + 1 applications inside the duration void (ADR 1080, provisional)
+  after every feed cast, a trial without cap + 1 applications inside the duration void (ADR 1249, provisional)
 - [`after_gate_cast`](metric_delta_options/after_gate_cast.md): a real cast of the gate at the caster at the start of
-  the after phase instead of an aura fixture, its aura read after it (ADR 1082, provisional)
+  the after phase instead of an aura fixture, its aura read after it (ADR 1251, provisional)
 - [`corpse`](metric_delta_options/corpse.md): a creature corpse a real setup cast kills in the treatment phase (ADR
   0493)
 - [`player_spell_power`](metric_delta_options/player_spell_power.md): the caster's spell-power fixture (ADR 0364)
@@ -2274,7 +2321,7 @@ Options with a module:
 - [`strike_landed`](metric_delta_options/strike_landed.md): the strike's damage logs read after the after reading, no
   landed strike is unmeasured, the fifth named point `verdict` (ADR 0625)
 - [`vehicle_landed`](metric_delta_options/vehicle_landed.md): the strike spell's aura applications on the caster
-  counted outside every timed interval, a phase whose strikes did not all apply is unmeasured (ADR 1062)
+  counted outside every timed interval, a phase whose strikes did not all apply is unmeasured (ADR 1231)
 - [`before_aura_absent`](metric_delta_options/before_aura_absent.md): an aura the owned creature must not hold at
   the before reading, else unmeasured, through the named point `verdict` (ADR 0653)
 - [`trigger_reset_after_setup`](metric_delta_options/trigger_reset_after_setup.md): the trigger's cooldown cleared
@@ -2295,15 +2342,15 @@ Options with a module:
 - [`expiry_below_after`](metric_delta_options/expiry_below_after.md): the expired reading judged below the after
   reading and at or above its floor, for a decay without a stated rate (ADR 0738)
 - [`refill_power_after_setup_casts`](metric_delta_options/refill_power_after_setup_casts.md): the caster's power set to
-  `cast_power` after every setup cast, refused for a claim about a resource (ADR 1038)
+  `cast_power` after every setup cast, refused for a claim about a resource (ADR 1207)
 - [`second_strike`](metric_delta_options/second_strike.md): a second strike no table avoids after the treatment
-  cast, the state it meets read first, a missing state or strike is unmeasured (ADR 1053, provisional)
+  cast, the state it meets read first, a missing state or strike is unmeasured (ADR 1222, provisional)
 - [`without_item`](metric_delta_options/without_item.md): destroys the equipped item (and resets the trigger's
-  cooldown) before the second cast of a `cast_failure` entry (ADR 1056).
+  cooldown) before the second cast of a `cast_failure` entry (ADR 1225).
 - [`hold_power_during_wait`](metric_delta_options/hold_power_during_wait.md): the caster's power set to `cast_power`
-  every `every_ms` after the trigger, refused for a claim about a resource (ADR 1038)
+  every `every_ms` after the trigger, refused for a claim about a resource (ADR 1207)
 - [`void_on_cast_failure`](metric_delta_options/void_on_cast_failure.md): the verdict `unmeasured` when a setup, step
-  or trigger cast was refused (ADR 1038)
+  or trigger cast was refused (ADR 1207)
 - [`displacement`](metric_delta_options/displacement.md): the judged readings replaced by the caster's 2D
   displacement from right before each trigger cast (ADR 0739)
 - [`before_absent_recipient`](metric_delta_options/before_absent_recipient.md): a target-pet heal or energize total
@@ -2319,11 +2366,52 @@ Options with a module:
 - [`stop_shooting_after_ms`](metric_delta_options/stop_shooting_after_ms.md): the caster moved out of range a set
   time after an auto-repeat shot, its hits read so no shot fires after the move (ADR 1005)
 - [`ally_arm`](metric_delta_options/ally_arm.md): grouped ally players to read or target, their health and casts at
-  the ally in both phases, a timed no-cast control, and stated extra reads judged beside the main one (ADR 1016),
-  or held as preconditions that void the trial when off (ADR 1029)
+  the ally in both phases, a timed no-cast control, and stated extra reads judged beside the main one (ADR 1186),
+  or held as preconditions that void the trial when off (ADR 1199)
 - [`enemy_shooter`](metric_delta_options/enemy_shooter.md): the enemy player casts a shot or an ability at the caster in
-  an uncast control window and again under the trigger, its casts read, void trials stated (ADR 1040)
+  an uncast control window and again under the trigger, its casts read, void trials stated (ADR 1209)
 - [`use_time_contrast`](metric_delta_options/use_time_contrast.md): an opt-in learned contrast for a cast time or
-  power cost read, judged with the partner arms the entry names (ADR 1024)
+  power cost read, judged with the partner arms the entry names (ADR 1194)
 - [`ended_read`](metric_delta_options/ended_read.md): a third reading after unlearning the gate, past the triggered
-  aura's DBC duration, that must equal the before reading of the same scenario (ADR 1078)
+  aura's DBC duration, that must equal the before reading of the same scenario (ADR 1247)
+- [`ratio_to_metric`](metric_delta_options/ratio_to_metric.md): each judged reading divided by a second metric of the
+  same unit, for a stated share (ADR 1030, provisional)
+- [`skill_line`](metric_delta_options/skill_line.md): a skill line given to the caster at the start of the before
+  phase, for an aura that modifies a line (ADR 1030, provisional)
+- [`target_attack_window`](metric_delta_options/target_attack_window.md): the dummy melees the caster, its swings
+  counted over a window in each phase, for an enemy that a debuff stops attacking (ADR 1027, provisional)
+- [`refusable_target_casts`](metric_delta_options/refusable_target_casts.md): dummy casts after each trigger that may
+  be refused with one stated code, their results read (ADR 1027, provisional)
+- [`after_trigger_casts`](metric_delta_options/after_trigger_casts.md): real casts by the caster after the treatment
+  trigger, at a unit or at a unit's position (ADR 1028, provisional); per cast also in the control phase and with
+  its cooldown left running (ADR 1161, provisional)
+- [`ally_player`](metric_delta_options/ally_player.md): a grouped ally player of another class as the trigger target
+  and measured unit, its power emptied per phase (ADR 1162, provisional)
+- [`phase_since`](metric_delta_options/phase_since.md): each judged reading and its ratio base counted from right
+  before its own phase's trigger cast (ADR 1130, provisional)
+- [`after_target_health`](metric_delta_options/after_target_health.md): the dummy's health set in the treatment phase
+  only, for a kill by the cast (ADR 1131, provisional)
+- [`relog_before_read`](metric_delta_options/relog_before_read.md): a relog with a stated offline time before each
+  judged reading, read as a share of the pre-logout read (ADR 1133, provisional)
+- [`phase_caster_level`](metric_delta_options/phase_caster_level.md): the caster level set per phase (ADR 1136,
+  provisional)
+- [`engage_and_select`](metric_delta_options/engage_and_select.md): every dummy engaged and one selected per phase
+  (ADR 1137, provisional)
+- [`required_aura_stacks`](metric_delta_options/required_aura_stacks.md): a CasterAuraSpell precondition fixture set
+  to a stated stack count (ADR 1138, provisional)
+- [`use_gameobject_after`](metric_delta_options/use_gameobject_after.md): the caster uses the gameobject its
+  treatment cast created, with the gameobject reads' evidence rows (ADR 1139, provisional)
+- [`dummy_casts_at_caster`](metric_delta_options/dummy_casts_at_caster.md): the dummy casts a spell at the caster in
+  each phase as an ordinary, untriggered cast (ADR 1112, provisional)
+- [`before_reference`](metric_delta_options/before_reference.md): the before read of an absent summon replaced by a
+  reference read, the summon count 0 before and 1 at the after read (ADR 1172, provisional)
+- [`dummy_power_after_trigger`](metric_delta_options/dummy_power_after_trigger.md): the dummy's power set after each
+  trigger cast, for a regeneration read (ADR 1173, provisional)
+- [`grouped_ally`](metric_delta_options/grouped_ally.md): a second friendly player beside the caster, grouped or
+  not (ADR 1174, provisional)
+- [`enemy_casts_before`](metric_delta_options/enemy_casts_before.md): the enemy player casts spells at itself once,
+  before any trigger cast, for a form or lasting state the trigger needs (ADR 1113, provisional)
+- [`action_buttons`](metric_delta_options/action_buttons.md): spells put on the caster's action buttons in the
+  treatment phase only, for a spell that casts from the action bar (ADR 1113, provisional)
+- [`step_out`](metric_delta_options/step_out.md): the caster stepped to one side of a range edge for a hold after the
+  trigger, the layout read back, off its side unmeasured (ADR 1119, provisional)

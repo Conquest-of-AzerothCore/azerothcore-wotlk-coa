@@ -216,7 +216,7 @@ def attacker_miss_share_scenario(class_file: dict, spec: AttackerMissShareSpec) 
                         f'player cast needs (Spell.cpp:7351-7352): the arc then covers attackers up to '
                         f'{math.degrees(math.acos(max(-1.0, spec.relocate_dx / STRIKER_DISTANCE))):.1f} degrees from '
                         f'the facing. This is a margin, not a proof: the attackers can slide around the caster during an '
-                        f'arm (ADR 1065). A refused cast leaves the ready read at 0 and the part unmeasured, with the refusal '
+                        f'arm (ADR 1234). A refused cast leaves the ready read at 0 and the part unmeasured, with the refusal '
                         f'reason as invalid setup.' if spec.relocate_dx is not None else '')),
         'players': [player_fixture(class_file)],
         'creatures': creatures,

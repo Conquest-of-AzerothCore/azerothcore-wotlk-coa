@@ -8,12 +8,13 @@
 
 namespace AscensionSkillcard
 {
-inline constexpr std::array<std::uint32_t, 46> ImplementedSpells = {
+inline constexpr std::array<std::uint32_t, 48> ImplementedSpells = {
     299986, 285930, 282040, 282105, 285537, 285240, 282029, 283949, 283251, 276808,
     281471, 277185, 283175, 283700, 283634, 285749, 285865, 283238, 273595, 283465,
     293200, 270424, 285100, 283927, 285739, 274125, 277505, 270327, 283471, 273121,
     281712, 281710, 285780, 277143, 274268,
-    16580, 35102, 281352, 281543, 281782, 282279, 286217, 964993, 17933, 277588, 284041
+    16580, 35102, 281352, 281543, 281782, 282279, 286217, 964993, 17933, 277588, 284041,
+    281571, 273252
 };
 
 inline bool Implemented(std::uint32_t id)
@@ -112,6 +113,10 @@ inline bool Allows(std::uint32_t id, Event const& event)
         case 964993: return event.Kill;
         case 277588: return event.Damage && named("Hurricane");
         case 284041: return direct && named("Haunt");
+        case 281571:
+            return direct && (named("Crusader Strike") || named("Divine Storm") || named("Exorcism") ||
+                named("Hammer of Wrath") || named("Judgement") || event.Name.starts_with("Judgement of "));
+        case 273252: return event.Damage && event.Periodic && named("Holy Fire");
         default: return false;
     }
 }

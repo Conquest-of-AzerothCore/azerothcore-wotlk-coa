@@ -43,6 +43,8 @@ class LastApplicationSpec:
     feed_stop_aura: int | None = None
     force_crit: str | None = None
     quote_spell: int | None = None
+    trigger_target: str = TARGET
+    poll_before_cast: bool = False
 
 
 AURA_HOLDERS = {False: TARGET, True: CASTER}
@@ -59,9 +61,13 @@ def last_application_spec(entry: dict) -> LastApplicationSpec:
                                None if entry.get('forced_roll') is None else int(entry['forced_roll']),
                                *feed_of(entry),
                                entry.get('force_crit'),
-                               int(entry['quote_spell']) if 'quote_spell' in entry else None)
-    if not isinstance(spec.caster, bool) or not isinstance(spec.no_refresh, bool):
-        raise ValueError(f'{spec.spell} last_application_expiry caster and no_refresh are true or false')
+                               int(entry['quote_spell']) if 'quote_spell' in entry else None,
+                               entry.get('trigger_target', TARGET), entry.get('poll_before_cast', False))
+    if spec.trigger_target not in (TARGET, CASTER):
+        raise ValueError(f'{spec.spell} last_application_expiry casts its trigger at {TARGET} or {CASTER}')
+    if not all(isinstance(flag, bool) for flag in (spec.caster, spec.no_refresh, spec.poll_before_cast)):
+        raise ValueError(f'{spec.spell} last_application_expiry caster, no_refresh and poll_before_cast are true or '
+                         f'false')
     if spec.no_refresh and spec.repeat is None:
         raise ValueError(f'{spec.spell} last_application_expiry judges no refresh only over repeated trigger casts')
     if spec.forced_roll is not None and spec.repeat is None:
@@ -138,7 +144,7 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
 
     def arm(name: str, window_ms: int) -> list[dict]:
         power = spec.trigger_power if spec.trigger_power is not None else facts.mana_cost
-        cast = {'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': TARGET}
+        cast = {'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': spec.trigger_target}
         steps = [{'action': 'wait', 'label': f'{name} before the cast', 'ms': GCD_WAIT_MS},
                  {'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': power},
                  {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell},
@@ -161,7 +167,7 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
             start = last_application_label(spec, f'{name} timeline start')
             steps += [measurement(start, CASTER, 'game_time_ms'),
                       {'action': 'encounter_start', 'actor': CASTER, 'boss_entry': DUMMY_ENTRY}]
-        if spec.no_refresh or feeding:
+        if spec.no_refresh or feeding or spec.poll_before_cast:
             steps += poll()
         if feeding:
             stop = last_application_label(spec, f'{name} stop')
@@ -241,9 +247,14 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
             f'first apply stamp; above {FEED_STAMP_MS} ms, without a stamp, or with any count of stamped applies '
             f'but one (a refresh or a second apply leaves the last application unstamped), the arm is unmeasured. '
             f'The timeline is process global, so the scenario runs exclusive in a batch.')
+    if spec.trigger_target == CASTER:
+        scenario['contract'] += f' {spec.trigger_spell} is cast at the caster, not the dummy.'
     if spec.repeat is not None:
         scenario['contract'] += (f' {spec.trigger_spell} is cast up to {spec.repeat[0]} times per arm (inside its '
                                  f'poll window), {spec.repeat[1]} ms apart.')
+    if spec.poll_before_cast and not spec.no_refresh:
+        scenario['contract'] += (' One poll precedes the cast, so an application at the cast itself is seen as a '
+                                 'rise from that read.')
     if spec.no_refresh:
         scenario['contract'] += (' Its stack count is read at every poll, and one poll precedes the first cast: no '
                                  'refresh means one counted application while the stacks still rise, the duration '
