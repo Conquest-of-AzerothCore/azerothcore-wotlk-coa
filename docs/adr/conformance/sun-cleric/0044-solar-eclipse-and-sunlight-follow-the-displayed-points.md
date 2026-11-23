@@ -53,7 +53,7 @@ engine is untouched. 704931 Effect[0] is not touched, so Heat Death 704932 (`$70
   20000 more spell power. The x 0.8 is the general class heal tuning 887015 "CoA Aura - Sun Cleric Class"
   (`AscensionClassTuning.h:36`, `{ 887015, 27, 0 }`, Effect[2] aura 136 -20% at level 60), accepted for the class in
   [Sun Cleric ADR 0028](0028-lights-of-absolution-restores-on-solar-flare-damage.md) and
-  [ADR 1074](../../1074-a-listed-heal-pct-term-adds-the-read-percent-of-maximum-health.md), like the Templar twin
+  [ADR 1243](../../1243-a-listed-heal-pct-term-adds-the-read-percent-of-maximum-health.md), like the Templar twin
   887007. Whether the client applies aura 136 to the displayed Sunlight value is not verified: no client reading of
   Sunlight exists.
 - Class file entries updated to the rule: 704929 `damage`, `damage_ap`, `damage_sp`; 92136 `sunlight_heal`,

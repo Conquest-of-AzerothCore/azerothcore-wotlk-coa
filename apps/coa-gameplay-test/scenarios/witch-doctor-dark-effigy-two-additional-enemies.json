@@ -1,0 +1,383 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Dark Effigy makes Bad Juju and Hexfire strike exactly 2 additional enemies",
+  "contract": [
+    "Dark Effigy 707331: 'Your Bad Juju and Hexfire now strike 2 additional nearby enemies.' Its Effect[0] is",
+    "aura 107 SPELLMOD_JUMP_TARGETS +3 on Hexfire (mask word 1 262144) and Bad Juju (word 2 2), applied in",
+    "Spell::SelectImplicitChainTargets (Spell.cpp:1921-1925): Bad Juju (EffectChainTarget 0) chains to 0 + 3 =",
+    "3 targets, the tooltip's primary and 2 more. Before the fix the script (AscensionWitchDoctorAbilities.cpp:",
+    "133-144) added up to 2 more from Nearby(primary, 10), and Hexfire (EffectChainTarget 1) chained to 1 + 3 =",
+    "4 targets. The fix removes the script block and gives the Hexfire ranks EffectChainTarget 0 (one target",
+    "alone either way: a count of 1 is not above 1, Spell.cpp:1927).",
+    "Distances: a 10 yd check between two dummies passes up to 12.55 yd between centres (IsWithinDist adds",
+    "both combat reaches, 1.275 each for creature 36, model 367). Layout along +x from the doctor: near 1 yd,",
+    "primary 10, chain1 14, chain2 24.5, chain3 27.5. The chain takes the closest remaining dummy within",
+    "12.55 yd of the previous one (SearchChainTargets): primary, chain1 (4 yd; near is 9 yd), chain2 (10.5 yd",
+    "from chain1; near is 13), then chain3 (3 yd from chain2). The near dummy is 9 yd from the primary, inside",
+    "the script's Nearby(primary, 10); chain2 (14.5 yd), chain3 (17.5) are outside it. Before the fix the",
+    "script's picks are chain1 (already a target) and near, so near is struck by both spells on every run; with",
+    "only the script block removed Hexfire still chains to chain3. After the fix both spells strike the primary,",
+    "chain1 and chain2, and neither near nor chain3.",
+    "Control arm: the same casts before Dark Effigy is learned strike the primary only.",
+    "Live logs (2026-08-15) show Bad Juju striking at most 3 enemies per cast, as the tooltip states."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "near",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 1,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "primary",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 10,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "chain1",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 14,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "chain2",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 24.5,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "chain3",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 27.5,
+      "stationary": true,
+      "min_level_armor": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Bad Juju",
+      "actor": "doctor",
+      "spell": 802087
+    },
+    {
+      "action": "learn",
+      "label": "Hexfire",
+      "actor": "doctor",
+      "spell": 573026
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 802087
+    },
+    {
+      "action": "cast",
+      "label": "Bad Juju at the primary dummy without Dark Effigy",
+      "actor": "doctor",
+      "spell": 802087,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "The 2500 ms cast and the bolt flight",
+      "ms": 4500
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 573026
+    },
+    {
+      "action": "cast",
+      "label": "Hexfire at the primary dummy without Dark Effigy",
+      "actor": "doctor",
+      "spell": 573026,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "The instant Hexfire and its flight",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Dark Effigy Bad Juju strikes the primary dummy",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 802087,
+      "target": "primary",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Dark Effigy Bad Juju does not strike near",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 802087,
+      "target": "near",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Dark Effigy Bad Juju does not strike chain1",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 802087,
+      "target": "chain1",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Dark Effigy Bad Juju does not strike chain2",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 802087,
+      "target": "chain2",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Dark Effigy Bad Juju does not strike chain3",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 802087,
+      "target": "chain3",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Dark Effigy Hexfire strikes the primary dummy",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 573026,
+      "target": "primary",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Dark Effigy Hexfire does not strike near",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 573026,
+      "target": "near",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Dark Effigy Hexfire does not strike chain1",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 573026,
+      "target": "chain1",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Dark Effigy Hexfire does not strike chain2",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 573026,
+      "target": "chain2",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Dark Effigy Hexfire does not strike chain3",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 573026,
+      "target": "chain3",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "label": "Dark Effigy",
+      "actor": "doctor",
+      "spell": 707331
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 802087
+    },
+    {
+      "action": "cast",
+      "label": "Bad Juju at the primary dummy with Dark Effigy",
+      "actor": "doctor",
+      "spell": 802087,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "The 2500 ms cast and the flights to the chained dummies (Speed 20, up to 24.5 yd)",
+      "ms": 4500
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 573026
+    },
+    {
+      "action": "cast",
+      "label": "Hexfire at the primary dummy with Dark Effigy",
+      "actor": "doctor",
+      "spell": 573026,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "The instant Hexfire and its bouncing missiles",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Bad Juju with Dark Effigy strikes the primary dummy again",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 802087,
+      "target": "primary",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Bad Juju strikes the first additional enemy, 4 yd from the primary",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 802087,
+      "target": "chain1",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Bad Juju strikes the second additional enemy, 10.5 yd from chain1",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 802087,
+      "target": "chain2",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Bad Juju strikes no enemy beside its chain (the script's pick before the fix)",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 802087,
+      "target": "near",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Bad Juju strikes no third additional enemy, 3 yd from chain2",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 802087,
+      "target": "chain3",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Hexfire with Dark Effigy strikes the primary dummy again",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 573026,
+      "target": "primary",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Hexfire strikes the first additional enemy, 4 yd from the primary",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 573026,
+      "target": "chain1",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Hexfire strikes the second additional enemy, 10.5 yd from chain1",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 573026,
+      "target": "chain2",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Hexfire strikes no enemy beside its chain (the script's pick before the fix)",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 573026,
+      "target": "near",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Hexfire strikes no third additional enemy, 3 yd from chain2",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "spell": 573026,
+      "target": "chain3",
+      "equals": 0
+    }
+  ]
+}

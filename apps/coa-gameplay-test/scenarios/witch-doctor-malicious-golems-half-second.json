@@ -1,0 +1,185 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Malicious Golems cuts the War Golem cooldown by 0.5 s per event",
+  "contract": [
+    "Malicious Golems 705912: '...will reduce the cooldown of War Golem by $/1000;707333S1 sec.' Golem's Vigil",
+    "707333 Effect[0] 165 BasePoints -501 + DieSides 1 = -500 ms, so 0.5 sec. The proc called",
+    "Reduce(player, WarGolem, 1000): both final05 runs read a War Golem SMSG_MODIFY_COOLDOWN (opcode 1169)",
+    "change of -1000 ms (u32 4294966296) per Hex of Malice tick (cycle 8 R3 (a)). The fix reads the cut from",
+    "707333. A War Golem cast first starts its 180000 ms cooldown; a real Hex of Malice 801693 at the dummy ticks",
+    "first 3000 ms after the cast. Expected: without the talent the tick sends no War Golem change; with it the",
+    "change is -500 ms (u32 4294966796)."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login, spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Hex of Malice",
+      "actor": "doctor",
+      "spell": 801693
+    },
+    {
+      "action": "learn",
+      "label": "War Golem",
+      "actor": "doctor",
+      "spell": 800330
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 800330
+    },
+    {
+      "action": "cast",
+      "label": "War Golem starts its cooldown",
+      "actor": "doctor",
+      "spell": 800330,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: War Golem is on its 180 s cooldown",
+      "actor": "doctor",
+      "metric": "cooldown_ms",
+      "spell": 800330,
+      "min": 170000,
+      "max": 180000
+    },
+    {
+      "action": "wait",
+      "label": "Past the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 801693
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: Hex of Malice without Malicious Golems",
+      "actor": "doctor",
+      "spell": 801693,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "The first Hex tick lands",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without the talent the Hex tick sends no War Golem cooldown change",
+      "actor": "doctor",
+      "metric": "server_packet_u32",
+      "opcode": 1169,
+      "row": 800330,
+      "index": 3,
+      "equals": -1
+    },
+    {
+      "action": "learn",
+      "label": "Malicious Golems",
+      "actor": "doctor",
+      "spell": 705912
+    },
+    {
+      "action": "wait",
+      "label": "Let the first Hex of Malice end",
+      "ms": 24500
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 800330
+    },
+    {
+      "action": "cast",
+      "label": "War Golem again",
+      "actor": "doctor",
+      "spell": 800330,
+      "target": "doctor"
+    },
+    {
+      "action": "wait",
+      "label": "Past the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 801693
+    },
+    {
+      "action": "cast",
+      "label": "Hex of Malice with Malicious Golems",
+      "actor": "doctor",
+      "spell": 801693,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "The first Hex tick lands",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the Hex tick cuts War Golem by 500 ms (707333), not 1000",
+      "actor": "doctor",
+      "metric": "server_packet_u32",
+      "opcode": 1169,
+      "row": 800330,
+      "index": 3,
+      "equals": 4294966796
+    }
+  ]
+}

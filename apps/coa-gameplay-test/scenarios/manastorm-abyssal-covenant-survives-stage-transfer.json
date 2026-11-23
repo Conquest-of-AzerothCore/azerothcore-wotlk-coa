@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "name": "Manastorm: Abyssal Covenant on a party member survives a stage transfer with its remaining time (#12427)",
+  "contract": [
+    "Issue #12427. Abyssal Covenant 500751 is a single-target aura (DurationIndex 30 = 1800000 ms) that a Cultist",
+    "casts on an ally; its apply hook casts Abyssal Covenant Passive 300295 on the caster. A stage transfer",
+    "teleports members one by one, and Unit::RemoveFromWorld runs RemoveNotOwnSingleTargetAuras on whichever of",
+    "the caster or the target leaves first, so the covenant was gone on the next floor. The maintainer decided the",
+    "covenant must remain. PrepareStageMemberTransfer now records each single-target positive aura linking two run",
+    "members and RestoreStageLinks re-applies it once both members are on the new floor, keeping the remaining",
+    "time instead of refreshing it. The member must hold the leader's covenant on the next floor with less than",
+    "the full 1800000 ms left, and the leader must hold 300295 again."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "leader",
+      "race": 1,
+      "class": 25,
+      "level": 60,
+      "security": 2
+    },
+    {
+      "id": "member",
+      "race": 1,
+      "class": 25,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "label": "member joins the leader's group so both are run members",
+      "actor": "leader",
+      "target": "member"
+    },
+    {
+      "action": "command",
+      "label": "start segment 1",
+      "actor": "leader",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leader entered a private Manastorm instance",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the member was brought into the same run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "leader",
+      "spell": 500751
+    },
+    {
+      "action": "cast",
+      "label": "the Cultist leader binds the member with Abyssal Covenant",
+      "actor": "leader",
+      "spell": 500751,
+      "target": "member"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the member holds the leader's Abyssal Covenant",
+      "actor": "member",
+      "metric": "aura",
+      "spell": 500751,
+      "caster": "leader",
+      "within_ms": 5000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the covenant's apply hook gave the leader Abyssal Covenant Passive",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 300295,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "match the native phase 1 Manastorm room",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "only the leader goes to Taragaman",
+      "actor": "leader",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leader left the entrance protection at the boss",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "leader",
+      "entry": 11520,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the floor committed and the run advanced, restoring entrance protection",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 12000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the member moved with the run to the next floor",
+      "actor": "member",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 12000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the member still holds the leader's Abyssal Covenant on the next floor",
+      "actor": "member",
+      "metric": "aura",
+      "spell": 500751,
+      "caster": "leader",
+      "within_ms": 5000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the covenant kept its remaining time instead of refreshing to the full 1800000 ms",
+      "actor": "member",
+      "metric": "aura_duration_ms",
+      "spell": 500751,
+      "caster": "leader",
+      "min": 1,
+      "max": 1799000
+    },
+    {
+      "action": "assert",
+      "label": "the leader holds Abyssal Covenant Passive again on the next floor",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 300295,
+      "within_ms": 5000,
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "the leader leaves the run",
+      "actor": "leader",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "command",
+      "label": "the member ends the run",
+      "actor": "member",
+      "command": ".manastorm stop"
+    }
+  ]
+}

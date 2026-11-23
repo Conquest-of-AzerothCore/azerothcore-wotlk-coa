@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "name": "Manastorm: stepping back into the Safety Bubble on an active floor drops combat (#12482)",
+  "contract": [
+    "Issue #12482. The entrance Safety Bubble 93306 is a persistent ground effect the first arrival casts at the",
+    "segment's start teleport; its helper 93307 (all-school immunity and MOD_UNATTACKABLE) protects members while",
+    "the floor is preparing. Once the floor became active, the validation tick stripped every bubble aura from",
+    "every member each second and the ground effect expired with the preparation window, so re-entering the",
+    "bubble never dropped aggro as it does on live. Activation now makes the bubble permanent for the floor, and",
+    "the active tick ends the combat of a member who steps back within the 8-yard entrance radius while the",
+    "bubble stands, then keeps 93307 on them while inside and removes it once they leave again. The member pulls",
+    "a Searing Blade Cultist 11322 outside the bubble, is teleported back to the entrance teleport 2040, must be",
+    "out of combat with 93307, and loses 93307 after leaving."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "n",
+      "race": 1,
+      "class": 25,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "label": "start segment 1",
+      "actor": "n",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the player entered a private Manastorm instance",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the preparing floor protects the player",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the player cast the entrance Safety Bubble",
+      "actor": "n",
+      "metric": "dynamic_object",
+      "spell": 93306,
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "match the native phase 1 Manastorm room",
+      "actor": "n",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "leave the bubble for a Searing Blade Cultist 19 yards away",
+      "actor": "n",
+      "guid": 48689
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: leaving the entrance activated the floor and removed the protection",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the bubble stands for the whole active floor",
+      "actor": "n",
+      "metric": "dynamic_object_duration_ms",
+      "spell": 93306,
+      "within_ms": 2000,
+      "equals": -1
+    },
+    {
+      "action": "attack_nearby",
+      "label": "pull the cultist",
+      "actor": "n",
+      "entry": 11322,
+      "radius": 10,
+      "damage_pct": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the player is in combat outside the bubble",
+      "actor": "n",
+      "metric": "combat",
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "label": "step back into the bubble at the entrance teleport 2040",
+      "actor": "n",
+      "map": 389,
+      "x": -184.952,
+      "y": 77.4474,
+      "z": -22.3901,
+      "o": 2.41317
+    },
+    {
+      "action": "assert",
+      "label": "the bubble shelters the player again",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "re-entering the bubble dropped combat",
+      "actor": "n",
+      "metric": "combat",
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "leave the bubble again",
+      "actor": "n",
+      "guid": 48689
+    },
+    {
+      "action": "assert",
+      "label": "the shelter ends outside the bubble",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "end the run",
+      "actor": "n",
+      "command": ".manastorm stop"
+    }
+  ]
+}

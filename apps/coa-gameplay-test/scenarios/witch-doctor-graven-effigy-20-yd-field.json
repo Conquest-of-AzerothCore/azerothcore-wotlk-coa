@@ -1,0 +1,208 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Graven Effigy reaches enemies within 20 yd",
+  "contract": [
+    "Graven Effigy 506635 summons creature 50122; its tooltip says 'Enemies within $504761s1 yds have the",
+    "duration of crowd control effects on them increased by $504767s1%'. $504761s1 is Shadow Effigy 504761",
+    "Effect[0] BasePoints -21 + 1 = -20, shown as 20, so the tooltip states 20 yd (G-1, read literally; the",
+    "cycle 9 B13 fix round keeps Graven at its own 20 yd). The effigy AI scans Nearby(me, 10.0f) for",
+    "NpcGraven and casts the field 504767 on each valid enemy (AscensionWitchDoctorSummons.cpp:530-540); the",
+    "fix scans 20 yd. No data radius gives 10 yd: 504767 has EffectRadiusIndex 18 (15 yd) and 10 (30 yd).",
+    "Layout along +x from the doctor; the effigy stands 1.5 yd from the doctor at 1.6 rad from the facing",
+    "(Summon, Summons.cpp:202-206), read at 5.26, 20.10 and 26.09 yd from the dummies (the Shadow Effigy",
+    "catalog reads 20.10 and 45.07 for the same layout). Edges from the effigy add both combat reaches",
+    "(dummy 1.275, effigy model 25017 at most 2.5): 10 yd reaches at most 13.775 yd, 15 yd at most 18.775,",
+    "20 yd at least 21.275 and at most 23.775, 30 yd at least 31.275. Primary (5.26) is inside 10 yd in both",
+    "builds; inside (20.10) is reached only by 20 yd, neither by 10 nor by 15; outside (26.09) is beyond 20",
+    "yd and inside 30 yd, so a 30 yd scan fails too. Reads at one instant 3100 ms after the instant cast: the",
+    "effigy pulses at once and every 1000 ms and renews the field for 2200 ms, so three pulses have run.",
+    "Graven Effigy: instant, StartRecoveryTime 1000, no RecoveryTime, 20% of base mana (311 in final07)."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "primary",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 5,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "inside",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 20,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "outside",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 26,
+      "stationary": true,
+      "min_level_armor": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login, spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Graven Effigy",
+      "actor": "doctor",
+      "spell": 506635
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the primary dummy stands 5 yd from the Witch Doctor",
+      "actor": "primary",
+      "metric": "distance_2d",
+      "target": "doctor",
+      "min": 4.8,
+      "max": 5.2
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the inside dummy stands 20 yd from the Witch Doctor",
+      "actor": "inside",
+      "metric": "distance_2d",
+      "target": "doctor",
+      "min": 19.8,
+      "max": 20.2
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the outside dummy stands 26 yd from the Witch Doctor",
+      "actor": "outside",
+      "metric": "distance_2d",
+      "target": "doctor",
+      "min": 25.8,
+      "max": 26.2
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the dummy combat reach is 1.275 yd",
+      "actor": "inside",
+      "metric": "combat_reach",
+      "min": 1.27,
+      "max": 1.28
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the inside dummy carries no Graven Effigy 504767 before the cast",
+      "actor": "inside",
+      "metric": "aura",
+      "spell": 504767,
+      "caster": "doctor",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 506635
+    },
+    {
+      "action": "cast",
+      "label": "Graven Effigy",
+      "actor": "doctor",
+      "spell": 506635,
+      "target": "doctor"
+    },
+    {
+      "action": "wait",
+      "label": "Three effigy pulses (at once, 1000 ms, 2000 ms) and 1100 ms more",
+      "ms": 3100
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one Graven Effigy 50122 stands",
+      "actor": "doctor",
+      "metric": "owned_creature_count",
+      "entry": 50122,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the primary dummy is 4.8 to 5.8 yd from the effigy",
+      "actor": "doctor",
+      "metric": "owned_creature_distance_2d",
+      "entry": 50122,
+      "target": "primary",
+      "min": 4.8,
+      "max": 5.8
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the inside dummy is 19.6 to 20.6 yd from the effigy (edges 13.775, 18.775, 21.275)",
+      "actor": "doctor",
+      "metric": "owned_creature_distance_2d",
+      "entry": 50122,
+      "target": "inside",
+      "min": 19.6,
+      "max": 20.6
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the outside dummy is 25.6 to 26.6 yd from the effigy (edges 23.775, 31.275)",
+      "actor": "doctor",
+      "metric": "owned_creature_distance_2d",
+      "entry": 50122,
+      "target": "outside",
+      "min": 25.6,
+      "max": 26.6
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the primary dummy, inside 10 yd, carries 504767",
+      "actor": "primary",
+      "metric": "aura",
+      "spell": 504767,
+      "caster": "doctor",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the inside dummy, 20.1 yd from the effigy, carries 504767",
+      "actor": "inside",
+      "metric": "aura",
+      "spell": 504767,
+      "caster": "doctor",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the outside dummy, beyond 20 yd and inside 30 yd, carries no 504767",
+      "actor": "outside",
+      "metric": "aura",
+      "spell": 504767,
+      "caster": "doctor",
+      "equals": 0
+    }
+  ]
+}

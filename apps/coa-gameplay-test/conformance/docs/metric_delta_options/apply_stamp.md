@@ -1,4 +1,4 @@
-# Apply stamp (`metric_delta` `apply_stamp`, ADR 1067, provisional)
+# Apply stamp (`metric_delta` `apply_stamp`, ADR 1236, provisional)
 
 `apply_stamp` is `{"aura": A, "window": [LOW, HIGH], "source": text}` on an entry with `game_time` and a `strike`
 that lands before the trigger cast. The after phase opens an encounter timeline (`encounter_start` on the striker's

@@ -1,4 +1,4 @@
-# Caster hits (`behaviour_metric_delta`, `kind: "caster_hits"`, ADR 1084)
+# Caster hits (`behaviour_metric_delta`, `kind: "caster_hits"`, ADR 1253)
 
 Hits of one spell per caster per cast on one dummy. One or two players of the class (`casters`; the second is
 `caster2`) stand at `trial_position`, which is also the scenario's `location`, with the dummy `dummy_distance` yd

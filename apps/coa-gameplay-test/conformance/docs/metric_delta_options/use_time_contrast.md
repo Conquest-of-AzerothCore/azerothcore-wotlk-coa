@@ -1,4 +1,4 @@
-# Use-time contrast (`metric_delta` `use_time_contrast`, ADR 1024)
+# Use-time contrast (`metric_delta` `use_time_contrast`, ADR 1194)
 
 `use_time_contrast: ["<suffix>", ...]` is for a `spell_cast_time_ms` or `spell_power_cost` entry with the learned
 contrast (no `setup_only_after`). It lists the `label_suffix` of every arm, on the same spell, that together prove the

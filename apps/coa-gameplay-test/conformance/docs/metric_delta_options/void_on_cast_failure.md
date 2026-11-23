@@ -1,4 +1,4 @@
-# Void on cast failure (`metric_delta` `void_on_cast_failure`, ADR 1038, provisional)
+# Void on cast failure (`metric_delta` `void_on_cast_failure`, ADR 1207, provisional)
 
 `void_on_cast_failure: true` makes the verdict `unmeasured`, never `ok` or `alert`, when the run's `cast_failures`
 list any refused cast (a setup cast, a step cast or the trigger; the entry does not judge a cast). The readings keep

@@ -9,6 +9,8 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 
+#include <algorithm>
+
 namespace
 {
 enum HurricaneSpells : uint32
@@ -76,16 +78,16 @@ bool StrikeHurricane(Unit* player, Aura* aura)
     aura->SetScriptValue(SPELL_HURRICANE_HIT, strikes + 1);
     float const angle = player->GetOrientation() +
         float(strikes % HURRICANE_STRIKE_DIRECTIONS) * 2.0f * float(M_PI) / float(HURRICANE_STRIKE_DIRECTIONS);
-    float const x = target->GetPositionX() + std::cos(angle) * HURRICANE_STRIKE_DISTANCE;
-    float const y = target->GetPositionY() + std::sin(angle) * HURRICANE_STRIKE_DISTANCE;
+    float x = target->GetPositionX() + std::cos(angle) * HURRICANE_STRIKE_DISTANCE;
+    float y = target->GetPositionY() + std::sin(angle) * HURRICANE_STRIKE_DISTANCE;
     float z = target->GetPositionZ();
-    if (!player->IsUnderWater())
+    if (player->GetMap()->CheckCollisionAndGetValidCoords(player, target->GetPositionX(), target->GetPositionY(),
+            target->GetPositionZ(), x, y, z, false))
     {
-        float const ground = player->GetMap()->GetHeight(x, y, player->GetPositionZ() + 2.0f, true, 10.0f);
-        if (ground > INVALID_HEIGHT)
-            z = ground;
+        if (player->IsUnderWater())
+            z = std::max(z, target->GetPositionZ());
+        player->NearTeleportTo(x, y, z, player->GetOrientation());
     }
-    player->NearTeleportTo(x, y, z, player->GetOrientation());
     player->SetFacingToObject(target);
     player->CastSpell(target,
         aura->GetId() == SPELL_RUNIC_HURRICANE ? SPELL_RUNIC_HURRICANE_HIT : SPELL_HURRICANE_HIT, true);

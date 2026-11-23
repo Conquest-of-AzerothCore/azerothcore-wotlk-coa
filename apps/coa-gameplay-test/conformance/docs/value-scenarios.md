@@ -52,7 +52,7 @@ a living one (Templar: Spiritual Ascension 500688/500757/500758/500759/500760) â
 whose target is the caster is read on the caster. A cost in a power other than mana is set to its cost before the
 cast. A cost paid from health (PowerType -2, read as 4294967294) writes no `set_power`: a `SETUP:` assertion checks
 that the caster's health is above the cost instead, since the server refuses the cast at health equal to or below it
-(`Spell.cpp` `CheckPower`), and every generator that pays a cost goes through `values.pay_power_steps` (ADR 1077).
+(`Spell.cpp` `CheckPower`), and every generator that pays a cost goes through `values.pay_power_steps` (ADR 1246).
 A rank whose
 record names a `CasterAuraSpell` gets that aura as a one-stack fixture (`set_aura`) right before the cast: without it
 the server refuses the cast with `SPELL_FAILED_CASTER_AURASTATE` (22, `Spell.cpp:5930`). Templar: Oath Chain 704576
@@ -85,7 +85,9 @@ rather than left for the reader to keep re-investigating),
 the hit scenario, a chance token, an aura of a passive or cast-time spell, a foreign amplitude or an amplitude of a
 passive effect, another spell's effect or radius that `Spell.dbc` does not define or that `disabled_foreign_effects`
 names, which `spell_effect_value`/`spell_effect_radius` refuse). A class file's `removed_own_effects` (ADR 0364) keeps an effect a class contract removes from being the
-rank's first effect for its unreadable tokens (Runic Harvest 562210-562213, effect 0). Only `unmeasurable` expectations may lack a
+rank's first effect for its unreadable tokens (Runic Harvest 562210-562213, effect 0); since ADR 1140 an own
+`$aN` of such an effect is `unmeasurable` and an own `$d` skips it when it picks the aura (Voodoo Cauldron 804684,
+effect 2). Only `unmeasurable` expectations may lack a
 measurement step. The rank's own radius (`$aN`), own period (`$tN`/`$TN` after an instant cast) and own stack count
 (`$u`) are measured, through `spell_effect_radius`, `aura_amplitude_ms` and `spell_max_stacks`; `$i`
 (`MaxAffectedTargets`) still has no no-combat metric.
@@ -109,7 +111,7 @@ A foreign effect token that totals a periodic effect over its ticks (the periodi
 [tooltip-reading.md](tooltip-reading.md) re-reads the rank's whole tooltip at the token's ordinal, so a token of an
 `@s:` expansion keeps its expansion's `$d`, `$T1` and `$m1`) goes to the hit scenario as a periodic total; any other
 non-empty probe reason on a foreign token makes it `unmeasurable`, never one tick compared with the total. A class
-file's `per_tick_foreign_totals` (`{spell, effect, reason}`, ADR 1079) keeps a listed total as a no-combat
+file's `per_tick_foreign_totals` (`{spell, effect, reason}`, ADR 1248) keeps a listed total as a no-combat
 `effect_value` instead: the step reads `spell_effect_value` (one tick), the model carries `ticks` (duration over
 amplitude) and `compare` expects the token divided by it, with the total's flat band divided by it too, so
 one point off per tick alerts. A listed effect whose points roll, or whose token is not a

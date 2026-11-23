@@ -1028,16 +1028,31 @@ class GameplayTests(WorkspaceTest):
         requested = verify_all.parser().parse_args([])
         self.assertEqual(verify_all.gameplay_concurrency(requested, {'gameplay_jobs': 3}, 32)[0], 1)
 
-    def test_windows_selections_beyond_the_command_line_limit_are_rejected(self):
+    def test_windows_selections_beyond_the_command_line_limit_pass_through_a_list_file(self):
         workspace = self.workspace()
         selection = [f'scenario-{index:05d}-' + 'x' * 40 for index in range(800)]
         small, large = workspace.context(scenarios=selection[:10]), workspace.context(scenarios=selection)
         with patch.object(verify_all, 'WINDOWS', False):
-            verify_all.check_command_length(large)
+            self.assertEqual(verify_all.gameplay_command(large)[-801:], ['--scenario', *selection])
         with patch.object(verify_all, 'WINDOWS', True):
-            verify_all.check_command_length(small)
-            with self.assertRaisesRegex(ValueError, '800 scenarios exceeds the Windows command-line limit'):
-                verify_all.check_command_length(large)
+            self.assertEqual(verify_all.gameplay_command(small)[-11:], ['--scenario', *selection[:10]])
+            command = verify_all.gameplay_command(large)
+            listed = f'@{verify_all.scenario_list_path(large)}'
+            self.assertEqual(command[-1], listed)
+            verify_all.check_command_length(large)
+            large.output.mkdir(parents=True, exist_ok=True)
+            verify_all.write_scenario_list(large, command)
+            lines = verify_all.scenario_list_path(large).read_text(encoding='utf-8').splitlines()
+            self.assertEqual(lines, ['--scenario', *selection])
+            self.assertNotIn(listed, verify_all.gameplay_command(small))
+
+    def test_scenario_list_files_expand_in_both_parsers(self):
+        workspace = self.workspace()
+        listed = write(workspace.base / 'list.txt', ''.join(f'{line}\n' for line in ('--scenario', 'first', 'second')))
+        self.assertEqual(verify_all.parser().parse_args([f'@{listed}']).scenario, ['first', 'second'])
+        batch = verify_all.gameplay_module('batch')
+        required = ['--worldserver', 'w', '--config', 'c', '--mysql', 'm', '--mysqldump', 'd', '--output', 'o']
+        self.assertEqual(batch.parser().parse_args([*required, f'@{listed}']).scenario, ['first', 'second'])
 
 
 class ReportTests(WorkspaceTest):

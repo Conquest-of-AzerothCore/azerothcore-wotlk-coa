@@ -12,6 +12,8 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SharedDefines.h"
+#include "Tokenize.h"
+#include "Util.h"
 #include "WorldSession.h"
 
 #include <array>
@@ -26,6 +28,9 @@ namespace
     std::atomic<uint32> s_keepDays{30};
     std::mutex s_mutex;
     std::vector<CoAChatRow> s_rows;
+    std::mutex s_ignoreMutex;
+    std::vector<std::string> s_ignoredChannels;
+    std::vector<std::string> s_ignoredChannelMessageStarts;
 
     constexpr uint32 FlushIntervalMs = 1000;
     constexpr uint32 CleanupBatch = 10000;
@@ -64,6 +69,26 @@ namespace
             ++seen;
         }
         return std::string(text);
+    }
+
+    std::vector<std::string> Words(std::string const& text)
+    {
+        std::vector<std::string> words;
+        for (std::string_view word : Acore::Tokenize(text, ' ', false))
+            words.emplace_back(word);
+        return words;
+    }
+
+    bool IsIgnoredChannelChat(std::string_view channel, std::string_view message)
+    {
+        std::lock_guard lock(s_ignoreMutex);
+        for (std::string const& name : s_ignoredChannels)
+            if (StringEqualI(name, channel))
+                return true;
+        for (std::string const& start : s_ignoredChannelMessageStarts)
+            if (StringStartsWith(message, start))
+                return true;
+        return false;
     }
 }
 
@@ -244,7 +269,7 @@ namespace
 
         void OnPlayerAfterChat(Player* player, uint32 type, uint32 lang, std::string const& msg, Channel* channel) override
         {
-            if (!channel || !CoAChatLog::ShouldLog(player, lang))
+            if (!channel || !CoAChatLog::ShouldLog(player, lang) || IsIgnoredChannelChat(channel->GetName(), msg))
                 return;
             CoAChatRow row = CoAChatLog::From(player, uint8(type), lang, msg);
             row.channel = channel->GetName();
@@ -294,6 +319,15 @@ namespace
         {
             s_enabled = sConfigMgr->GetOption<bool>("CoA.ChatLog.Enable", false);
             s_keepDays = sConfigMgr->GetOption<uint32>("CoA.ChatLog.KeepDays", 30);
+            std::vector<std::string> channels = Words(sConfigMgr->GetOption<std::string>("CoA.ChatLog.IgnoreChannels",
+                "BBLC25C KLCE25C questiecomm FSK FSK-EVT xtensionxtooltip2 ConquestFinder JohnnysAddons "
+                "CoARUru ALCSync K_LFGForwarder2IIll"));
+            std::vector<std::string> starts = Words(sConfigMgr->GetOption<std::string>(
+                "CoA.ChatLog.IgnoreChannelMessagesStartingWith",
+                "LC1: LCPOI1: LCR1 LCRD1 LCS3; PFQ6: DCOAS3; DCOAL31; DCOAR2"));
+            std::lock_guard lock(s_ignoreMutex);
+            s_ignoredChannels = std::move(channels);
+            s_ignoredChannelMessageStarts = std::move(starts);
         }
 
         void OnStartup() override

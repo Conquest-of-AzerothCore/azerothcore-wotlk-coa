@@ -87,7 +87,7 @@
     "spell": 300465,
     "clause": "Reduces the duration of movement impairing effects on you by $s1%.",
     "labels": [
-      "300465 behaviour_duration_ratio"
+      "300465 behaviour_duration_ratio snare"
     ],
     "kind": "claim"
   },
