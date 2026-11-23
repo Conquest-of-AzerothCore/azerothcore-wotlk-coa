@@ -2316,3 +2316,5 @@ Options with a module:
   an uncast control window and again under the trigger, its casts read, void trials stated (ADR 1040)
 - [`use_time_contrast`](metric_delta_options/use_time_contrast.md): an opt-in learned contrast for a cast time or
   power cost read, judged with the partner arms the entry names (ADR 1024)
+- [`ended_read`](metric_delta_options/ended_read.md): a third reading after unlearning the gate, past the triggered
+  aura's DBC duration, that must equal the before reading of the same scenario (ADR 1078)
