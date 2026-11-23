@@ -2911,11 +2911,19 @@
       "tolerance": 0,
       "wait_ms": 2500,
       "expire_ms": 500,
-      "observe_source": "520246 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 800058 (Felfury); Fel Fireball 801312 (CastingTimeIndex 16 = 1500 ms). The Felfury aura 800058 (StackAmount 6) stacks on the caster are read 2500 ms after one real cast of Fel Fireball 801312 at the dummy, before (control: 520246 not learned) and after a real learn: without a forced critical strike the learn adds no Felfury (gain 0), the control that only a critical strike counts. No critical rating is forced, the reference character's critical strike chance for the spell is 0 (read as 0 in the Felfire Adept 560836 entry). Reference search 2026-11-23: coa-history spell 520246: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Critical strikes with Fel Fireball now generate 1 Felfury.'. Fel Fireball's own cast grants 1 Felfury (Effect[1] TRIGGER_SPELL 800058), so the read before the learn is 1. The Felfury of the first phase is removed at the start of the second (after_auras, 800058 at 0 stacks, a named precondition fixture), so the second phase counts only its own cast: 1 from the cast and 1 more from a critical strike (the first design carried the stack over and read 1 to 2 and 1 to 3).",
+      "observe_source": "520246 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 800058 (Felfury); Fel Fireball 801312 (CastingTimeIndex 16 = 1500 ms). The Felfury aura 800058 (StackAmount 6) stacks on the caster are read 2500 ms after one real cast of Fel Fireball 801312 at the dummy, before (control: 520246 not learned) and after a real learn: without a forced critical strike the learn adds no Felfury (gain 0), the control that only a critical strike counts. No critical rating is forced, and the caster carries Reg's Test Aura 984954 in both phases (Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE, base points -1001, set by the harness as a precondition fixture, the claim's subject being the Felfury gain; the same fixture as the Demonic Machinations 806111 bleed_noncrit entry): no Fel Fireball can critically strike, where the first design assumed a crit chance of 0 and read 2 Felfury after a crit in one run of the first pair (fw-b3g1c). Reference search 2026-11-23: coa-history spell 520246: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Critical strikes with Fel Fireball now generate 1 Felfury.'. Fel Fireball's own cast grants 1 Felfury (Effect[1] TRIGGER_SPELL 800058), so the read before the learn is 1. The Felfury of the first phase is removed at the start of the second (after_auras, 800058 at 0 stacks, a named precondition fixture), so the second phase counts only its own cast: 1 from the cast and 1 more from a critical strike (the first design carried the stack over and read 1 to 2 and 1 to 3).",
       "after_auras": [
         [
           800058,
           0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_auras": [
+        [
+          984954,
+          1,
           "caster",
           "caster"
         ]
@@ -4268,7 +4276,7 @@
         ]
       ],
       "after_wait_ms": 2000,
-      "margin_ms": 40,
+      "margin_ms": 25,
       "label_suffix": "cd_805239",
       "cast_auras": [
         {
@@ -4280,7 +4288,7 @@
           "reason": "Sargeron Smite 802060 consumes 2 Felfury (AscensionFelswornAbilities.cpp:234-237 reduces the cooldowns on a spender cast) and is refused SPELL_FAILED_NO_POWER without them (prove_p2 refused Ruin): 800058 at 2 stacks is set on the caster before each Smite cast, a named precondition fixture; the claim measured is the cooldown cut."
         }
       ],
-      "observe_source": "520240 Effect[0] aura 42 PROC_TRIGGER_SPELL of 520830; 520830 effects 0-2 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -501 + EffectDieSides 1 = -500 ms (500 ms = $/1000;520830S1 sec 0.5), MiscValue 705129 / 800209 / 805239 (Spell.dbc). The class code reduces the cooldown by 500 ms of each of the three when a Felfury spender (Sargeron Smite 802060 here: instant, Consumes 2 Felfury; Ruin has a 2500 ms cast time that ends after the 1000 ms read) is cast (AscensionFelswornAbilities.cpp:234-237). Behaviour route (review fw-r2b I-2: cooldown_ms is a readback): the gated spell 805239 (Burning Hatred) is primed, Sargeron Smite is cast 2000 ms later, and the gated spell is attempted at its cooldown less 500 ms plus/minus 40 ms. A cut of 450 or 550 ms (10% off) falls inside the 40 ms margins on the wrong side, so the through and refused arms exclude both; the control arm is the talent unknown (refused at the same wait). Reference search 2026-11-23: coa-history spells 520240 and 520830: 0 events in 186 logs; nothing found for the value.",
+      "observe_source": "520240 Effect[0] aura 42 PROC_TRIGGER_SPELL of 520830; 520830 effects 0-2 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -501 + EffectDieSides 1 = -500 ms (500 ms = $/1000;520830S1 sec 0.5), MiscValue 705129 / 800209 / 805239 (Spell.dbc). The class code reduces the cooldown by 500 ms of each of the three when a Felfury spender (Sargeron Smite 802060 here: instant, Consumes 2 Felfury; Ruin has a 2500 ms cast time that ends after the 1000 ms read) is cast (AscensionFelswornAbilities.cpp:234-237). Behaviour route (review fw-r2b I-2: cooldown_ms is a readback): the gated spell 805239 (Burning Hatred) is primed, Sargeron Smite is cast 2000 ms later, and the gated spell is attempted at its cooldown less 500 ms plus/minus 25 ms. A cut of 450 or 550 ms (10% off) falls outside the 25 ms margins (a cut of 450 or 550 ms moves the opening 50 ms) on the wrong side, so the through and refused arms exclude both; the control arm is the talent unknown (refused at the same wait). Reference search 2026-11-23: coa-history spells 520240 and 520830: 0 events in 186 logs; nothing found for the value.",
       "variant": "cd_805239"
     },
     {
@@ -4299,7 +4307,7 @@
         ]
       ],
       "after_wait_ms": 2000,
-      "margin_ms": 40,
+      "margin_ms": 25,
       "label_suffix": "cd_705129",
       "cast_auras": [
         {
@@ -4311,7 +4319,7 @@
           "reason": "Sargeron Smite 802060 consumes 2 Felfury (AscensionFelswornAbilities.cpp:234-237 reduces the cooldowns on a spender cast) and is refused SPELL_FAILED_NO_POWER without them (prove_p2 refused Ruin): 800058 at 2 stacks is set on the caster before each Smite cast, a named precondition fixture; the claim measured is the cooldown cut."
         }
       ],
-      "observe_source": "520240 Effect[0] aura 42 PROC_TRIGGER_SPELL of 520830; 520830 effects 0-2 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -501 + EffectDieSides 1 = -500 ms (500 ms = $/1000;520830S1 sec 0.5), MiscValue 705129 / 800209 / 805239 (Spell.dbc). The class code reduces the cooldown by 500 ms of each of the three when a Felfury spender (Sargeron Smite 802060 here: instant, Consumes 2 Felfury; Ruin has a 2500 ms cast time that ends after the 1000 ms read) is cast (AscensionFelswornAbilities.cpp:234-237). Behaviour route (review fw-r2b I-2: cooldown_ms is a readback): the gated spell 705129 (Hateforged Barrier) is primed, Sargeron Smite is cast 2000 ms later, and the gated spell is attempted at its cooldown less 500 ms plus/minus 40 ms. A cut of 450 or 550 ms (10% off) falls inside the 40 ms margins on the wrong side, so the through and refused arms exclude both; the control arm is the talent unknown (refused at the same wait). Reference search 2026-11-23: coa-history spells 520240 and 520830: 0 events in 186 logs; nothing found for the value.",
+      "observe_source": "520240 Effect[0] aura 42 PROC_TRIGGER_SPELL of 520830; 520830 effects 0-2 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -501 + EffectDieSides 1 = -500 ms (500 ms = $/1000;520830S1 sec 0.5), MiscValue 705129 / 800209 / 805239 (Spell.dbc). The class code reduces the cooldown by 500 ms of each of the three when a Felfury spender (Sargeron Smite 802060 here: instant, Consumes 2 Felfury; Ruin has a 2500 ms cast time that ends after the 1000 ms read) is cast (AscensionFelswornAbilities.cpp:234-237). Behaviour route (review fw-r2b I-2: cooldown_ms is a readback): the gated spell 705129 (Hateforged Barrier) is primed, Sargeron Smite is cast 2000 ms later, and the gated spell is attempted at its cooldown less 500 ms plus/minus 25 ms. A cut of 450 or 550 ms (10% off) falls outside the 25 ms margins (a cut of 450 or 550 ms moves the opening 50 ms) on the wrong side, so the through and refused arms exclude both; the control arm is the talent unknown (refused at the same wait). Reference search 2026-11-23: coa-history spells 520240 and 520830: 0 events in 186 logs; nothing found for the value.",
       "variant": "cd_705129"
     },
     {
@@ -4330,7 +4338,7 @@
         ]
       ],
       "after_wait_ms": 2000,
-      "margin_ms": 40,
+      "margin_ms": 25,
       "label_suffix": "cd_800209",
       "cast_auras": [
         {
@@ -4342,7 +4350,7 @@
           "reason": "Sargeron Smite 802060 consumes 2 Felfury (AscensionFelswornAbilities.cpp:234-237 reduces the cooldowns on a spender cast) and is refused SPELL_FAILED_NO_POWER without them (prove_p2 refused Ruin): 800058 at 2 stacks is set on the caster before each Smite cast, a named precondition fixture; the claim measured is the cooldown cut."
         }
       ],
-      "observe_source": "520240 Effect[0] aura 42 PROC_TRIGGER_SPELL of 520830; 520830 effects 0-2 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -501 + EffectDieSides 1 = -500 ms (500 ms = $/1000;520830S1 sec 0.5), MiscValue 705129 / 800209 / 805239 (Spell.dbc). The class code reduces the cooldown by 500 ms of each of the three when a Felfury spender (Sargeron Smite 802060 here: instant, Consumes 2 Felfury; Ruin has a 2500 ms cast time that ends after the 1000 ms read) is cast (AscensionFelswornAbilities.cpp:234-237). Behaviour route (review fw-r2b I-2: cooldown_ms is a readback): the gated spell 800209 (Demonic Will) is primed, Sargeron Smite is cast 2000 ms later, and the gated spell is attempted at its cooldown less 500 ms plus/minus 40 ms. A cut of 450 or 550 ms (10% off) falls inside the 40 ms margins on the wrong side, so the through and refused arms exclude both; the control arm is the talent unknown (refused at the same wait). Reference search 2026-11-23: coa-history spells 520240 and 520830: 0 events in 186 logs; nothing found for the value.",
+      "observe_source": "520240 Effect[0] aura 42 PROC_TRIGGER_SPELL of 520830; 520830 effects 0-2 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -501 + EffectDieSides 1 = -500 ms (500 ms = $/1000;520830S1 sec 0.5), MiscValue 705129 / 800209 / 805239 (Spell.dbc). The class code reduces the cooldown by 500 ms of each of the three when a Felfury spender (Sargeron Smite 802060 here: instant, Consumes 2 Felfury; Ruin has a 2500 ms cast time that ends after the 1000 ms read) is cast (AscensionFelswornAbilities.cpp:234-237). Behaviour route (review fw-r2b I-2: cooldown_ms is a readback): the gated spell 800209 (Demonic Will) is primed, Sargeron Smite is cast 2000 ms later, and the gated spell is attempted at its cooldown less 500 ms plus/minus 25 ms. A cut of 450 or 550 ms (10% off) falls outside the 25 ms margins (a cut of 450 or 550 ms moves the opening 50 ms) on the wrong side, so the through and refused arms exclude both; the control arm is the talent unknown (refused at the same wait). Reference search 2026-11-23: coa-history spells 520240 and 520830: 0 events in 186 logs; nothing found for the value.",
       "variant": "cd_800209"
     },
     {
@@ -12299,6 +12307,231 @@
         "hit_arm": true
       },
       "observe_source": "Spell.dbc 802678 (server set /srv/coa/server-data/dbc) Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 1000, DurationIndex 32 = 6000 ms (6 ticks), EffectBasePoints 8, EffectDieSides 1, EffectRealPointsPerLevel 0.5, BaseLevel 10, SpellLevel 10, MaxLevel 0. Expected per tick at level 60: 8 + 1 (DieSides 1 adds 1) + int(0.5 x (60 - 10)) = 34 (SpellInfo.cpp CalcValue), plus the tooltip term $SP*.05 = int(0.05 x spell power). The displayed ${($d*1000/$T1)*($m1+0+$SP*.05)} reads 54 = 6 x 9 on the client (ADR 0006: no SkillLineAbility row, base points only); owner ruling O-19: the server keeps 34 per tick and the displayed text is to be corrected in a client patch, so the value is counted on the server formula, not on the displayed 54. Behaviour read: the caster casts Felstrike 802678 on the dummy and the dummy's spell_damage_total of 802678 is read 1500 ms later, one tick (EffectAmplitude 1000, the second tick at 2000 ms); the unread arm before the cast reads 0 (control). Criticals are made impossible (64481) and the dummy's magic resistance is removed (823764), as the Immolation Aura tick entries do. Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and the Felstrike tick events of coa-history (spell 802678, gear and level differ, no figure decides). Contrast arm of the spell power term: +10000 spell power must move the tick by int(0.05 x 10000) = 500 to 534; a server that dropped the term or used another coefficient cannot pass both arms."
+    },
+    {
+      "spell": 572804,
+      "name": "Annihilan Strike (critical share above 75% health)",
+      "kind": "hit_ratio",
+      "variant": "crit_above_75",
+      "label_suffix": "crit_above_75",
+      "quote": "This ability is guaranteed to critically strike against enemies above 75% health.",
+      "observe_spell": 801913,
+      "cast_spell": 572804,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "control": {
+        "auras": [],
+        "target_health_pct": 50
+      },
+      "treatment": {
+        "auras": [],
+        "target_health_pct": 90
+      },
+      "expected": 1.0,
+      "rate": "critical",
+      "expected_points": 100,
+      "trials": 40,
+      "parts": 4,
+      "expected_source": "Annihilan Strike 572804 (Effect[0] and [1] TRIGGER_SPELL_WITH_VALUE, main hand 801913, off hand 801914; Energy cost 40, cast_power 100 before each cast) states 'guaranteed to critically strike against enemies above 75% health' (Spell.dbc description of 572804 and 801913). The critical share of the main-hand strike 801913 on the dummy is compared between a control arm with the dummy held at 50% health and a treatment arm at 90% (above and below the 75% threshold). Both arms use the same spell, the same weapons and the same real cast, so the only difference is the target's health. The critical share rises by 100 points (every strike above 75% is critical, none below). The reference character's melee critical strike chance is expected to be 0 (the Witch Hunter Stake 681328 entries rely on the same reading; not read for this class, so a control arm whose share is not 0 alerts the claim 'no gain below 75%' rather than hiding it). Reference search 2026-11-23: coa-history spell 572804: 0 events; spell 801913 Annihilan Strike: SPELL_DAMAGE 70 events in 4 logs (34 crits, min 98 max 394: real play shows crits at all healths, gear differs so no figure decides); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 572804,
+      "name": "Annihilan Strike (control: no gain between two healths below 75%)",
+      "kind": "hit_ratio",
+      "variant": "crit_below_75",
+      "label_suffix": "crit_below_75",
+      "quote": "This ability is guaranteed to critically strike against enemies above 75% health.",
+      "observe_spell": 801913,
+      "cast_spell": 572804,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "control": {
+        "auras": [],
+        "target_health_pct": 50
+      },
+      "treatment": {
+        "auras": [],
+        "target_health_pct": 60
+      },
+      "expected": 1.0,
+      "rate": "critical",
+      "expected_points": 0,
+      "trials": 40,
+      "parts": 4,
+      "expected_source": "Annihilan Strike 572804 (Effect[0] and [1] TRIGGER_SPELL_WITH_VALUE, main hand 801913, off hand 801914; Energy cost 40, cast_power 100 before each cast) states 'guaranteed to critically strike against enemies above 75% health' (Spell.dbc description of 572804 and 801913). The critical share of the main-hand strike 801913 on the dummy is compared between a control arm with the dummy held at 50% health and a treatment arm at 60% (both below the 75% threshold). Both arms use the same spell, the same weapons and the same real cast, so the only difference is the target's health. The critical share does not change (0 points): below 75% the strike is not guaranteed to critically strike, at either health. The reference character's melee critical strike chance is expected to be 0 (the Witch Hunter Stake 681328 entries rely on the same reading; not read for this class, so a control arm whose share is not 0 alerts the claim 'no gain below 75%' rather than hiding it). Reference search 2026-11-23: coa-history spell 572804: 0 events; spell 801913 Annihilan Strike: SPELL_DAMAGE 70 events in 4 logs (34 crits, min 98 max 394: real play shows crits at all healths, gear differs so no figure decides); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 803904,
+      "kind": "metric_delta",
+      "quote": "Gorge on fel energy, guaranteeing your next direct instance of damage to critically strike, but causing it to consume 5% of your maximum health.",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "setup_casts": [
+        803904
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 500,
+      "cast_power": 100,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Annihilation (the next direct hit is a critical strike)",
+      "variant": "next_crit",
+      "label_suffix": "next_crit",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 801312,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "observe_source": "803904 Annihilation (RecoveryTime 60000, ProcCharges 5): AscensionFelswornAbilities.cpp:178-190 (OnSpellCalculatedTarget) sets the hit to critical for a direct hit of the caster while the aura holds a charge and deals 5% of the maximum health to the caster (CountPctFromMaxHealth(5)). The phase before casts Fel Fireball 801312 at the dummy without Annihilation (the control); the phase after casts Annihilation 803904 first (a real cast), then the same Fel Fireball. The caster carries Reg's Test Aura 984954 in both phases (Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE, base points -1001; harness set_aura, a precondition fixture, the claim's subject being the guarantee, as in the Demonic Machinations 806111 bleed_noncrit entry), so the control cast cannot critically strike by chance: the critical hits of Fel Fireball on the dummy read 0 before and 1 after Annihilation. Reference search 2026-11-23: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS in 15 of 186 logs (the cast is real play); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 803904,
+      "kind": "metric_delta",
+      "quote": "Gorge on fel energy, guaranteeing your next direct instance of damage to critically strike, but causing it to consume 5% of your maximum health.",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "setup_casts": [
+        803904
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 500,
+      "cast_power": 100,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Annihilation (the guaranteed hit consumes 5% of the maximum health)",
+      "variant": "health_cost",
+      "label_suffix": "health_cost",
+      "metric": "health",
+      "fields": {},
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "disable_regeneration": true,
+      "before_expected": 50000,
+      "expected": 45000,
+      "tolerance": 0.5,
+      "observe_source": "803904 Annihilation (RecoveryTime 60000, ProcCharges 5): AscensionFelswornAbilities.cpp:178-190 (OnSpellCalculatedTarget) sets the hit to critical for a direct hit of the caster while the aura holds a charge and deals 5% of the maximum health to the caster (CountPctFromMaxHealth(5)). The phase before casts Fel Fireball 801312 at the dummy without Annihilation (the control); the phase after casts Annihilation 803904 first (a real cast), then the same Fel Fireball. The caster is held at 50000 of 100000 health with regeneration off in both phases (caster_health, the layout of the Burning Rage 707907 immolation_cost entry): the health read after the Fel Fireball is 50000 before (control, no Annihilation) and 50000 - 5% x 100000 = 45000 after, which excludes a cost of 4.5% and 5.5% (45500 and 44500). Reference search 2026-11-23: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS in 15 of 186 logs (the cast is real play); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 803475,
+      "kind": "metric_delta",
+      "quote": "$?s804216[ Inner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
+      "trigger_spell": 803475,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 804216
+      },
+      "cast_power": 100,
+      "wait_ms": 100,
+      "expire_ms": 10500,
+      "name": "Azzinoth's Assault (extends Inner Demon by 3 sec)",
+      "variant": "extend",
+      "label_suffix": "extend",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 1000,
+      "expected": 4000,
+      "expected_gain": 3000,
+      "tolerance": 250,
+      "observe_source": "803475 Azzinoth's Assault (Energy 20, Consumes 2 Felfury) casts 801904 Azzinoth's Assault; AscensionFelswornAbilities.cpp:324-325 casts 803089 on the caster for a damaging hit of it while Inner Demon is active (Inner(player)), and 803089 Effect[0] is SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 2999 + 1 = 3000 ms ($/1000;803089s1 = 3 sec), applied to Inner Demon 804216 (ExtendInnerDemon, AscensionFelswornAbilities.cpp:479-481). The remaining duration of 804216 on the caster is read 100 ms after the cast of Assault at the dummy (after) against a read with no cast (before, the control: only the 100 ms of decay): the gain is the extension. Felfury 800058 x6 and At Least 2 Felfury 803468 (needed by Assault, AscensionFelsworn.cpp:219-228) are set on the caster by harness set_aura as precondition fixtures in both phases, and Inner Demon 804216 by harness set_aura as the precondition the extension acts on (the Evolving Hellfire 807438 and Hellfire Command 806235 duration entries use the same fixture); the claim measured is the 3 s extension. Reference search 2026-11-23: coa-history spell 803475: 0 events in 186 logs (positive control 801904 Azzinoth's Assault: 21 casts); expected values come from the tooltip and the DBC only.Tolerance 250 on the gain excludes a 10% error on 3000 (2700 and 3300)."
+    },
+    {
+      "spell": 803475,
+      "kind": "metric_delta",
+      "quote": "$?s804216[ Inner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
+      "trigger_spell": 803475,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 804216
+      },
+      "cast_power": 100,
+      "wait_ms": 100,
+      "expire_ms": 10500,
+      "name": "Azzinoth's Assault (control: no Inner Demon, nothing to extend)",
+      "variant": "extend_absent",
+      "label_suffix": "extend_absent",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 1,
+      "observe_source": "Control of extend on the same build: the same cast of Assault 803475 with Inner Demon 804216 absent from the caster (the conditional text is Inner Demon's): the duration of 804216 reads 0 before and after, no aura is created or extended. 803475 Azzinoth's Assault (Energy 20, Consumes 2 Felfury) casts 801904 Azzinoth's Assault; AscensionFelswornAbilities.cpp:324-325 casts 803089 on the caster for a damaging hit of it while Inner Demon is active (Inner(player)), and 803089 Effect[0] is SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 2999 + 1 = 3000 ms ($/1000;803089s1 = 3 sec), applied to Inner Demon 804216 (ExtendInnerDemon, AscensionFelswornAbilities.cpp:479-481). Reference search 2026-11-23: coa-history spell 803475: 0 events in 186 logs (positive control 801904: 21 casts); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 704370,
+      "name": "Curse of Argus (one application adds 1% damage taken from the caster)",
+      "kind": "metric_delta",
+      "variant": "stack_value",
+      "label_suffix": "stack_value",
+      "quote": "Each time Bane of Chaos deals damage its damage is increased on the target by $707511s1% for $707511d,",
+      "trigger_spell": 704368,
+      "gate_spell": 704370,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 707511,
+        "effect": 0,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0.01,
+      "wait_ms": 3300,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "observe_source": "704370 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 707511 (Curse of Argus: Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER, BasePoints 0 + 1 = 1 ($707511s1) per stack, StackAmount 20); AscensionFelswornEvents.cpp:211-212 casts 707511 on the target of each damage event of Bane of Chaos 704368. Bane of Chaos 704368 has Effect[0] PERIODIC_DAMAGE with a 3000 ms period (Spell.dbc EffectAmplitude[0]), so the first damage event lands 3000 ms after the cast: the amount of effect 0 of 707511 (caster = the caster) on the dummy is read 3300 ms after one real cast, before the learn of 704370 (control: 0, no aura) and after it: 1, the amount of one stack (the engine multiplies the amount by the stack count, AuraEffect::CalculateAmount), and the aura's own stock handler 271 applies it to the damage the caster deals to that target. Not a damage ratio: 20 stacks need 60 s of Bane ticks per trial, past what the scenario cap holds for the sample a 2-point band needs, and the handler is the stock aura 271. Reference search 2026-11-23: coa-history spell 704370: 0 events in 186 logs (a passive leaves no event); spell 707511 Curse of Argus: SPELL_AURA_APPLIED_DOSE 690 events in 4 logs (it stacks in real play); nothing states another value; expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],
