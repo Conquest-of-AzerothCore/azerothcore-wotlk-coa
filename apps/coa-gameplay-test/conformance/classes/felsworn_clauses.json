@@ -3250,8 +3250,14 @@
   {
     "spell": 572804,
     "clause": "This ability is guaranteed to critically strike against enemies above 75% health.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "572804 behaviour_hit_ratio crit_guarantee_76_74",
+      "572804 behaviour_hit_ratio crit_strict_76_75",
+      "572804 behaviour_hit_ratio crit_normal_74"
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 803475,
