@@ -2,19 +2,23 @@ from dataclasses import dataclass, replace
 import math
 from pathlib import Path
 
-from behaviours import BEHAVIOUR_METRIC_DELTA, ally_group_steps, ally_players, behaviour_entry, prose_rule, waited_ms
+from behaviours import (BEHAVIOUR_METRIC_DELTA, ally_group_steps, ally_players, behaviour_entry, dummy_fixture,
+                        dummy_id, prose_rule, waited_ms)
 from compare import NO_CAST_FAILURE, Run, Verdict, missing_measurement
 from hits import MAX_ACCELERATED_SCENARIO_MS, timed
 from procs import HEAL_COUNT, HEAL_POOL, rate_band, residual_sizing, residual_z, wilson_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
-from values import ALLY, CAST_MARGIN_MS, Expectation, dataset, facts_of
+from values import ALLY, CAST_MARGIN_MS, Expectation, cast_distance, dataset, facts_of
 
 HEAL_RATE = 'heal_rate'
+DAMAGE_RATE = 'damage_rate'
+DAMAGE_FEED_TARGET = 'dummy'
+SCHOOL_DAMAGE = 2
 FEED_TARGETS = {'ally': ALLY, 'self': CASTER}
 RATE_FIELDS = {'spell', 'name', 'kind', 'variant', 'label_suffix', 'quote', 'feed_spell', 'aura', 'chance_spell',
                'feed_target', 'feed_power', 'rolls', 'residual_target', 'min_detectable', 'observe_source',
-               'haste_aura', 'parts', 'spare_parts', 'haste_agreement'}
+               'haste_aura', 'parts', 'spare_parts', 'haste_agreement', 'learn_talent'}
 COOLDOWN_FIELDS = ('RecoveryTime', 'CategoryRecoveryTime')
 APPLY_AURA = 6
 MOD_CASTING_SPEED_NOT_STACK = 65
@@ -41,16 +45,27 @@ class RateSpec:
     parts: int = 1
     spare_parts: int = 0
     haste_agreement: str = ''
+    learn_talent: bool = True
+
+
+def rate_family(variant: str) -> str | None:
+    return next((family for family in (HEAL_RATE, DAMAGE_RATE)
+                 if variant == family or variant.startswith(f'{family}_')), None)
 
 
 def is_rate(entry: dict) -> bool:
-    variant = entry.get('variant', '')
-    return variant == HEAL_RATE or variant.startswith(f'{HEAL_RATE}_')
+    return rate_family(entry.get('variant', '')) is not None
+
+
+def is_rate_model(model: dict) -> bool:
+    return model.get('variant') in (HEAL_RATE, DAMAGE_RATE)
 
 
 def rate_spec(entry: dict) -> RateSpec:
-    unknown = set(entry) - RATE_FIELDS
-    if unknown or entry.get('feed_target') not in FEED_TARGETS or not isinstance(entry.get('rolls'), int) \
+    damage = rate_family(entry.get('variant', '')) == DAMAGE_RATE
+    unknown = set(entry) - (RATE_FIELDS - {'haste_aura', 'haste_agreement'} if damage else RATE_FIELDS - {'learn_talent'})
+    targets = {DAMAGE_FEED_TARGET} if damage else FEED_TARGETS
+    if unknown or entry.get('feed_target') not in targets or not isinstance(entry.get('rolls'), int) \
             or entry['rolls'] < 1:
         raise ValueError(f'{entry.get("spell")} aura_fed_effect {HEAL_RATE} takes {sorted(RATE_FIELDS)}, a '
                          f'feed_target of {sorted(FEED_TARGETS)} and a positive integer rolls; unknown '
@@ -62,11 +77,15 @@ def rate_spec(entry: dict) -> RateSpec:
             or (pooled and entry.get('haste_aura') and not str(entry.get('haste_agreement', '')).strip()):
         raise ValueError(f'{entry.get("spell")} {HEAL_RATE} pooled parts need 1 <= spare_parts < parts, and a '
                          f'haste_aura on pooled parts needs its haste_agreement')
+    learn = entry.get('learn_talent', True)
+    if not isinstance(learn, bool) or (not learn and pooled):
+        raise ValueError(f'{entry.get("spell")} {DAMAGE_RATE} learn_talent is a boolean, and false (the control arm) '
+                         f'takes a single part')
     return RateSpec(int(entry['spell']), entry['name'], entry['quote'], int(entry['feed_spell']), int(entry['aura']),
                     int(entry.get('chance_spell', entry['spell'])), entry['feed_target'], int(entry['feed_power']),
                     entry['rolls'], float(entry['residual_target']), float(entry['min_detectable']),
                     entry['label_suffix'], int(entry.get('haste_aura', 0)), parts, spare,
-                    str(entry.get('haste_agreement', '')))
+                    str(entry.get('haste_agreement', '')), learn)
 
 
 def mark(spec: RateSpec, read: str) -> str:
@@ -115,6 +134,8 @@ def roll_ms(records: Records, spec: RateSpec) -> int:
 
 
 def rate_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
+    if rate_family(entry.get('variant', '')) == DAMAGE_RATE:
+        return damage_rate_scenario(class_file, entry)
     spec = rate_spec(entry)
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     chance, sizing = rate_sizing(records, spec)
@@ -235,7 +256,16 @@ def part_counts(run: Run, model: dict) -> tuple[float, float, float | None, str 
     return sum(auras), float(len(auras)), cast_time, None
 
 
+def control_judgement(base: Verdict, events: float, trials: float, needed: int, notes: str) -> Verdict:
+    status = 'alert' if events else 'ok' if trials >= needed else 'unmeasured'
+    return replace(base, status=status, measured=events / trials, expected=0.0, low=0.0, high=0.0,
+                   explanation=f'{events:g} of {trials:g} rolls read the aura with the talent unlearned, 0 expected'
+                               + ('' if status != 'unmeasured' else f'; the arm needs {needed} rolls') + notes)
+
+
 def rate_judgement(base: Verdict, events: float, trials: float, model: dict, needed: int, notes: str) -> Verdict:
+    if model.get('control'):
+        return control_judgement(base, events, trials, needed, notes)
     low, high = wilson_interval(events, trials, model['z'])
     chance, band = model['expected'], model['band']
     inside = chance - band <= low and high <= chance + band
@@ -255,8 +285,12 @@ def cast_note(times: list[float]) -> str:
     return f'; hasted cast time read {", ".join(f"{value:g}" for value in sorted(set(times)))} ms' if times else ''
 
 
+def counts_of(model: dict):
+    return damage_part_counts if model['variant'] == DAMAGE_RATE else part_counts
+
+
 def rate_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
-    events, trials, cast_time, problem = part_counts(run, model)
+    events, trials, cast_time, problem = counts_of(model)(run, model)
     if problem is not None:
         return replace(base, status='unmeasured', explanation=problem)
     return rate_judgement(base, events, trials, model, model['needed'],
@@ -266,7 +300,7 @@ def rate_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
 def pooled_rate_verdict(base: Verdict, runs: list[Run], model: dict) -> Verdict:
     events, trials, times, excluded = 0.0, 0.0, [], []
     for index, run in enumerate(runs):
-        part_events, part_trials, cast_time, problem = part_counts(run, model)
+        part_events, part_trials, cast_time, problem = counts_of(model)(run, model)
         if problem is not None:
             excluded.append(f'part {index + 1}: {problem}')
             continue
@@ -278,3 +312,122 @@ def pooled_rate_verdict(base: Verdict, runs: list[Run], model: dict) -> Verdict:
         return replace(base, status='unmeasured',
                        explanation=f'{trials:g} pooled rolls, {model["needed"]} needed for the band{notes}')
     return rate_judgement(base, events, trials, model, model['needed'], notes)
+
+
+def damage_roll_ms(records: Records, spec: RateSpec) -> int:
+    effects = [records.field('Spell', spec.feed_spell, f'Effect[{index}]') for index in EFFECTS]
+    if SCHOOL_DAMAGE not in effects or records.field('Spell', spec.feed_spell, 'Speed'):
+        raise ValueError(f'{spec.spell} {DAMAGE_RATE} feed {spec.feed_spell} needs a SCHOOL_DAMAGE effect and no '
+                         f'travel')
+    return facts_of(records, spec.feed_spell).cast_time_ms + CAST_MARGIN_MS
+
+
+CONTROL_CONTRACT = (
+    'Control arm: {spec.spell} is unlearned and never learned. One stationary dummy stands {distance:g} yd from the '
+    'caster. {rolls} rolls, each one {spec.feed_spell} cast at the dummy with ignore_gcd after {spec.aura} is '
+    'cancelled on the caster and the cooldown of {spec.feed_spell} is reset; {step} ms later (cast time {cast} + '
+    '{margin} ms) {spec.aura} is read on the caster. At the end spell_go_count of {spec.feed_spell} and its '
+    'spell_damage_count on the dummy must equal the rolls, the last cast failure must be 0, and the dummy must read '
+    'alive with health above 0, else the run is unmeasured. The aura is never set by the harness. Any roll reading '
+    '{spec.aura} alerts; {rolls} rolls with none is ok (a {spec.spell} rate of 40% would leave none with probability '
+    '0.6^{rolls}).')
+
+
+def damage_rate_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
+    spec = rate_spec(entry)
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    chance, sizing = rate_sizing(records, spec)
+    step_ms = damage_roll_ms(records, spec)
+    power = facts_of(records, spec.feed_spell).power_type
+    target = dummy_id(0)
+    distance = cast_distance(records, spec.feed_spell)
+    described = behaviour_entry(records, spec.spell, spec.name, 'aura_fed_effect', spec.quote, chance)
+    kept = (spec.parts - spec.spare_parts) * spec.rolls
+    control = not spec.learn_talent
+    if spec.parts > 1 and kept < sizing['trials']:
+        raise ValueError(f'{spec.spell} {DAMAGE_RATE} pools {spec.parts} parts of {spec.rolls} rolls with '
+                         f'{spec.spare_parts} spare: {kept} rolls, below the {sizing["trials"]} the band needs')
+
+    def roll(index: int) -> list[dict]:
+        return [{'action': 'cancel_aura', 'actor': CASTER, 'spell': spec.aura},
+                {'action': 'set_power', 'actor': CASTER, 'power': power, 'value': spec.feed_power},
+                {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.feed_spell},
+                {'action': 'cast', 'actor': CASTER, 'spell': spec.feed_spell, 'target': target, 'ignore_gcd': True},
+                {'action': 'wait', 'label': f'roll {index} lands', 'ms': step_ms},
+                measurement(mark(spec, f'roll {index} aura'), CASTER, 'aura', spell=spec.aura)]
+
+    steps = (base_steps(class_file)
+             + ([{'action': 'unlearn', 'actor': CASTER, 'spell': spec.spell}] if control else [])
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spell}
+                for spell in dict.fromkeys((spec.feed_spell,) if control else (spec.feed_spell, spec.spell))])
+    for index in range(spec.rolls):
+        steps += roll(index)
+    steps += [measurement(mark(spec, 'casts'), CASTER, 'spell_go_count', spell=spec.feed_spell),
+              measurement(mark(spec, 'hits'), CASTER, 'spell_damage_count', spell=spec.feed_spell, target=target),
+              measurement(mark(spec, 'failure'), CASTER, 'cast_failure', spell=spec.feed_spell),
+              measurement(mark(spec, 'dummy alive'), target, 'alive'),
+              measurement(mark(spec, 'dummy health'), target, 'health')]
+    band = rate_band(chance)
+    z = residual_z(spec.residual_target)
+    reads = {'rolls': [mark(spec, f'roll {index} aura') for index in range(spec.rolls)],
+             'casts': mark(spec, 'casts'), 'hits': mark(spec, 'hits'), 'failure': mark(spec, 'failure'),
+             'alive': mark(spec, 'dummy alive'), 'health': mark(spec, 'dummy health')}
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour aura fed rate',
+        'contract': (CONTROL_CONTRACT.format(spec=spec, rolls=spec.rolls, distance=distance, step=step_ms,
+                                             cast=facts_of(records, spec.feed_spell).cast_time_ms,
+                                             margin=CAST_MARGIN_MS) if control else
+                     f'{spec.spell} is learned. One stationary dummy stands {distance:g} yd from the caster. '
+                     f'{spec.rolls} rolls, each one {spec.feed_spell} cast at the dummy with ignore_gcd after '
+                     f'{spec.aura} is cancelled on the caster and the cooldown of {spec.feed_spell} is reset; '
+                     f'{step_ms} ms later (cast time {facts_of(records, spec.feed_spell).cast_time_ms} + '
+                     f'{CAST_MARGIN_MS} ms) {spec.aura} is read on the caster (1 = the roll succeeded). At the end '
+                     f'spell_go_count of {spec.feed_spell} and its spell_damage_count on the dummy must equal the '
+                     f'rolls (no refused, extra or empty cast), the last cast failure of {spec.feed_spell} must be '
+                     f'{NO_CAST_FAILURE}, and the dummy must read alive with health above 0, else the run is '
+                     f'unmeasured. The aura is never set by the harness. The rate is the share of rolls reading '
+                     f'{spec.aura}; the Wilson interval at z {z:.3f} (residual_target {spec.residual_target:g} per '
+                     f'pair) must lie inside {(chance - band) * 100:g}% to {(chance + band) * 100:g}% (ProcChance '
+                     f'{chance * 100:g} of {spec.chance_spell}, band max(5% relative, 2 points), G-20); an interval '
+                     f'outside the band alerts, one straddling its edge is unmeasured with the interval stated; the '
+                     f'band needs {sizing["trials"]} rolls at a {spec.min_detectable:g}-point minimum detectable '
+                     f'shift.'
+                     + (f' Pooled: {spec.parts} identical parts of {spec.rolls} rolls, {spec.spare_parts} of them '
+                        f'spare; a part with any void or missing read is excluded whole, and the pooled rolls of the '
+                        f'kept parts must reach {sizing["trials"]}, else the run is unmeasured (fixed before the '
+                        f'run: {kept} rolls if {spec.spare_parts} part(s) drop out).' if spec.parts > 1 else '')),
+        'players': [player_fixture(class_file)],
+        'creatures': [dummy_fixture(0, class_file, distance)],
+        'steps': steps}
+    model = {'kind': 'aura_fed_effect', 'variant': DAMAGE_RATE, 'metric': 'aura', 'quote': described.quote,
+             'expected': chance, 'band': band, 'z': z, 'needed': sizing['trials'], 'reads': reads}
+    if control:
+        model.update({'control': True, 'expected': 0.0, 'band': 0.0, 'needed': spec.rolls})
+    expectation = Expectation(mark(spec, '').rstrip(), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.feed_spell, None,
+                              f'{chance:g}', prose_rule(described.quote, spec.spell), model)
+    return timed(scenario, waited_ms(steps), MAX_ACCELERATED_SCENARIO_MS), [expectation]
+
+
+def damage_part_counts(run: Run, model: dict) -> tuple[float, float, float | None, str | None]:
+    reads = model['reads']
+    labels = list(reads['rolls']) + [reads[key] for key in ('casts', 'hits', 'failure', 'alive', 'health')]
+    missing = next((label for label in labels if run.values.get(label) is None), None)
+    if missing is not None:
+        return 0.0, 0.0, None, missing_measurement(run, missing)
+    rolls = len(reads['rolls'])
+    casts, hits = run.values[reads['casts']], run.values[reads['hits']]
+    if casts != rolls:
+        return 0.0, 0.0, None, f'void: {casts:g} feed casts went off for {rolls} rolls (a refused or extra cast)'
+    if hits != rolls:
+        return 0.0, 0.0, None, f'void: {hits:g} feed hits on the dummy for {rolls} rolls (a cast that landed nothing)'
+    failure = run.values[reads['failure']]
+    if failure != NO_CAST_FAILURE:
+        return 0.0, 0.0, None, f'void: last feed cast failure {failure:g}'
+    alive, health = run.values[reads['alive']], run.values[reads['health']]
+    if alive != 1.0 or health <= 0:
+        return 0.0, 0.0, None, f'void: the dummy read alive {alive:g}, health {health:g} at the part end'
+    auras = [run.values[label] for label in reads['rolls']]
+    if any(value not in (0.0, 1.0) for value in auras):
+        return 0.0, 0.0, None, f'aura reads outside 0 and 1: {sorted(set(auras))}'
+    return sum(auras), float(len(auras)), None, None
