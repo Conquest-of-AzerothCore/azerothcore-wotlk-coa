@@ -339,17 +339,42 @@ int32 Share(Bonus bonus, int32 amount)
     int32 const share = std::max(0, int32(bonus(2 * size)) - int32(bonus(size)));
     return amount < 0 ? -share : share;
 }
+WeaponAttackType SpellAttackType(SpellInfo const* info)
+{
+    switch (info->DmgClass)
+    {
+        case SPELL_DAMAGE_CLASS_MELEE:
+            return info->HasAttribute(SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON) ? OFF_ATTACK : BASE_ATTACK;
+        case SPELL_DAMAGE_CLASS_RANGED:
+            return info->IsRangedWeaponSpell() ? RANGED_ATTACK : BASE_ATTACK;
+        default:
+            return info->HasAttribute(SPELL_ATTR2_AUTO_REPEAT) ? RANGED_ATTACK : BASE_ATTACK;
+    }
+}
+UnitMods WeaponDamageMod(WeaponAttackType attack)
+{
+    switch (attack)
+    {
+        case OFF_ATTACK:
+            return UNIT_MOD_DAMAGE_OFFHAND;
+        case RANGED_ATTACK:
+            return UNIT_MOD_DAMAGE_RANGED;
+        default:
+            return UNIT_MOD_DAMAGE_MAINHAND;
+    }
+}
 std::pair<int32, int32> DirectShares(Unit* caster, Unit* target, SpellInfo const* info, uint8 effect, int32 raw)
 {
     SpellSchoolMask const school = info->GetSchoolMask();
     if (info->Effects[effect].Effect == SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
     {
+        WeaponAttackType const attack = SpellAttackType(info);
         if (school & SPELL_SCHOOL_MASK_NORMAL)
-            raw = int32(raw * caster->GetPctModifierValue(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_PCT));
+            raw = int32(raw * caster->GetPctModifierValue(WeaponDamageMod(attack), TOTAL_PCT));
         int32 const done = Share([&](uint32 amount)
-            { return caster->MeleeDamageBonusDone(target, amount, BASE_ATTACK, info, school); }, raw);
+            { return caster->MeleeDamageBonusDone(target, amount, attack, info, school); }, raw);
         int32 const taken = Share([&](uint32 amount)
-            { return target->MeleeDamageBonusTaken(caster, amount, BASE_ATTACK, info, school); }, done);
+            { return target->MeleeDamageBonusTaken(caster, amount, attack, info, school); }, done);
         return {done, taken};
     }
     int32 const done = Share([&](uint32 amount)

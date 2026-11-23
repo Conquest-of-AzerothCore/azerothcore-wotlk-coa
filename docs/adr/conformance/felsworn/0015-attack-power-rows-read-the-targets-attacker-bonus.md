@@ -32,8 +32,8 @@ Two classes already add the aura by hand:
 
 ## Options
 
-- (a) Ranger placement: a SpellScript per Felsworn spell. Closest to stock, but one SQL binding per spell and a
-  list to keep in step with the data rows.
+- (a) Ranger placement: a SpellScript per Felsworn spell. Closest to stock, but one `spell_script_names` SQL binding
+  per spell, which the task forbade (no SQL change), and a list to keep in step with the data rows.
 - (b) Witch Hunter placement with stock arithmetic: every Felsworn row with an attack power coefficient adds
   coefficient x the target's signed aura 165 total on a damage effect, per target, before the class's own factors,
   through the engine's done, taken and area functions.
@@ -41,8 +41,14 @@ Two classes already add the aura by hand:
 
 ## Decision
 
-Option (b), in Felsworn class code only (`Owner()` requires class 14; rows from `FelswornCoefficients`):
-- direct damage and normalized weapon damage effects at launch, and the value a
+Option (b), with the stock sign: the signed aura total is read as in Unit.cpp:9962 and 13786, where the Witch Hunter
+keeps only a positive total (`AscensionWitchHunterCompletion.cpp:59`), so a negative attacker bonus lowers the term as
+it lowers stock attack power. In Felsworn class code only (`Owner()` requires class 14; rows from `FelswornCoefficients`):
+- direct damage and normalized weapon damage effects at launch; a normalized weapon row takes the spell's own attack
+  type as `Spell::Spell` sets it (Spell.cpp:597-615), so the off-hand strike of Azzinoth's Assault 572585
+  (`SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON`) scales the term by the off-hand `UNIT_MOD_DAMAGE_OFFHAND` TOTAL_PCT
+  (0.5 at base, Unit.cpp:519) and passes `OFF_ATTACK` to the melee done and taken modifiers, as
+  `Spell::EffectWeaponDmg` does for its fixed bonus (SpellEffects.cpp:4689-4708); and the value a
   `SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE` row hands its triggered spell (Immolation Aura -> 800208), in
   `felsworn_casts::OnSpellCalculatedTarget` (`AscensionFelsworn::AddVictimAttackPower`);
 - health leech effects (Felspill 555742), whose damage is computed at hit, in
@@ -62,5 +68,9 @@ power row, so only the melee aura is read. The engine is untouched.
 - A periodic damage row on a unit aura, a ranged attack power row, or an infernal's owner-scaled damage
   (AscensionFelswornSummons.cpp:57) would not read the target's aura; none of the first two exists in class 14, and the
   infernal's own swings read the aura through the engine.
-- Regression: the class file entry `scar_ap_gaze` (570158, Tyrant's Gaze observed, hit_ratio, expected 1.01325,
-  control arm without the scar).
+- Against the same scar the off-hand strike 572585 gains int32(0.145 x 19) = 2 x 0.5 = 1 before modifiers, the
+  main-hand strike 520262 gains 2.
+- Regressions, class file entries keyed to 570158: `scar_ap_gaze` (Tyrant's Gaze observed, hit_ratio, expected
+  1.01325, control arm without the scar); `scar_ap_gaze_pin` (metric_delta, the scarred Gaze hit 459 within 1, which
+  excludes no term, 453, and a doubled term, 466); `scar_ap_offhand` (metric_delta, the off-hand strike against a
+  scar fixture of 200100: gain 14507 + 68 to 74, excluding the main-hand share 29014).
