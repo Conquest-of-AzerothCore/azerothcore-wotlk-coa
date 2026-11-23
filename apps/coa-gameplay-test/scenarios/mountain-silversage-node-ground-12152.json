@@ -1,0 +1,73 @@
+{
+    "schema":  1,
+    "name":  "Mountain Silversage node 200889 is above the Eastern Plaguelands ground (#12152)",
+    "contract":  "#12152 reported a buried Mountain Silversage node. Guid 200889 (entry 176586, pool 20068) stood 3.43 yd below the ground the server measures. It now rests on the measured ground at z 122.402. Expected: the node is grounded. The spawn is checked through its data, so the pool does not need to pick it.",
+    "timeout_ms":  60000,
+    "location":  {
+                     "map":  0,
+                     "x":  1739.77,
+                     "y":  -5557.74,
+                     "z":  122.8,
+                     "o":  0
+                 },
+    "players":  [
+                    {
+                        "id":  "p",
+                        "race":  1,
+                        "class":  12,
+                        "level":  60
+                    }
+                ],
+    "steps":  [
+                  {
+                      "action":  "set_phase",
+                      "actor":  "p",
+                      "value":  1
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  3000
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the node stays at its spot, raised to the ground",
+                      "metric":  "spawn_distance",
+                      "x":  1738.77,
+                      "y":  -5557.74,
+                      "z":  122.402,
+                      "max":  0.3,
+                      "guid":  200889,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "DISCRIMINATING: the herb node rests on the ground instead of 3.43 yd under it",
+                      "metric":  "spawn_ground_gap",
+                      "min":  -0.3,
+                      "max":  0.3,
+                      "guid":  200889,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is grounded within 0.8 yd",
+                      "metric":  "spawn_placement",
+                      "tolerance":  0.8,
+                      "equals":  0,
+                      "guid":  200889,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is not under water",
+                      "metric":  "spawn_submerged",
+                      "equals":  0,
+                      "guid":  200889,
+                      "spawn_type":  "gameobject"
+                  }
+              ]
+}

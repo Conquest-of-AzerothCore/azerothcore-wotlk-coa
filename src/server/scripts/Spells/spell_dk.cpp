@@ -34,6 +34,7 @@
 enum DeathKnightSpells
 {
     SPELL_DK_DEATH_AND_DECAY_TRIGGER            = 52212,
+    SPELL_DK_SKELETON_KING                      = 299140,  // Ascension talent
     SPELL_DK_GLYPH_OF_SCOURGE_STRIKE            = 58642,
     SPELL_DK_WANDERING_PLAGUE_TRIGGER           = 50526,
     SPELL_DK_GLYPH_OF_THE_GHOUL                 = 58686,
@@ -1633,7 +1634,9 @@ class spell_dk_death_pact : public SpellScript
         if (target)
         {
             // xinef: remove all auras preventing effect execution
-            target->RemoveAllAurasOnDeath();
+            // Ascension Skeleton King: Death Pact no longer sacrifices the minion, which then keeps its auras
+            if (!GetCaster()->HasAura(SPELL_DK_SKELETON_KING))
+                target->RemoveAllAurasOnDeath();
             targetList.push_back(target);
         }
     }

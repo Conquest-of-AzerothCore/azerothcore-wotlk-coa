@@ -231,6 +231,7 @@ namespace ApexScaling
 
         creature->SetMaxHealth(baseHealth);
         creature->SetHealth(baseHealth);
+        creature->ResetPlayerDamageReq();
     }
 
     void TuneHitbox(Creature* creature)

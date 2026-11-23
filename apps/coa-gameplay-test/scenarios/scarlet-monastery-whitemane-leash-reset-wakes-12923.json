@@ -1,0 +1,189 @@
+{
+  "schema": 1,
+  "name": "Scarlet Monastery: a Heroic leash reset of Whitemane wakes the group from Deep Sleep (#12923)",
+  "contract": "#12923: on Heroic, High Inquisitor Whitemane (3977) left her 75 yd leash while her Deep Sleep (9256, 60 s stun) held the group. Actionlist 397700 disables her evade, so the CoA leash reset only fires her SMART_EVENT_EVADE rows (11 -> 12, instance data 1 = 2) and the Deep Sleep removal in actionlist 397701 never runs: the players stayed asleep for the whole 60 s. In a Heroic Scarlet Monastery the player moves 40 yd from a summoned Whitemane, out of her Holy Smite range, so she chases off her summon point, then drops her below 50% so she casts Deep Sleep, then a GM shrinks her leash to 2 yd so the next update resets her. Expected: the reset is announced and the player wakes within 3 s, far short of the 60 s aura. The leash is restored to its shipped 75 yd at the end.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 189,
+      "x": 1069.61,
+      "y": 1397.51,
+      "z": 30.7628,
+      "o": 0.0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "CONTROL: p is in a Heroic Scarlet Monastery",
+      "metric": "map_difficulty",
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 100000000,
+      "maximum": 100000000
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "as": "wm",
+      "entry": 3977,
+      "distance": 3
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "wm"
+    },
+    {
+      "action": "assert",
+      "actor": "wm",
+      "label": "CONTROL: Whitemane is in combat",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "relocate",
+      "label": "p pulls her into the chapel, step 1",
+      "actor": "p",
+      "dx": 20
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "relocate",
+      "label": "p pulls her into the chapel, step 2",
+      "actor": "p",
+      "dx": 20
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "CONTROL: Whitemane chased p more than 5 yd from her summon point",
+      "metric": "nearby_creature_count",
+      "entry": 3977,
+      "min_home_distance": 5,
+      "equals": 1
+    },
+    {
+      "action": "set_health_pct",
+      "actor": "p",
+      "pct": 40,
+      "target": "wm"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "CONTROL: Whitemane puts p into Deep Sleep",
+      "metric": "aura",
+      "spell": 9256,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "CONTROL: p still sleeps before the leash breach",
+      "metric": "aura",
+      "spell": 9256,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "wm",
+      "label": "CONTROL: Whitemane is still in combat",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "monster_chat_count",
+      "save_as": "chats"
+    },
+    {
+      "action": "command",
+      "actor": "p",
+      "command": ".leash radius 2 3977"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "CONTROL: the leash reset is announced",
+      "metric": "monster_chat_count",
+      "relative_to": "chats",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: p wakes from Deep Sleep when Whitemane resets, not after 60 s",
+      "metric": "aura",
+      "spell": 9256,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Waking was not caused by death",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "actor": "p",
+      "command": ".leash radius 75 3977"
+    }
+  ]
+}
