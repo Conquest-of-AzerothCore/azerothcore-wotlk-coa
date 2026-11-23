@@ -347,10 +347,10 @@
     "spell": 300480,
     "clause": "Direct damage dealt now has a $h% chance to reset the cooldown of Infernal.",
     "labels": [
-      "300480 effect_value #0",
       "300480 behaviour_metric_delta swing_reset_rate"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The chance value label 300480 effect_value #0 is unmodelled (its generated rule is a chance_pct token without a no-combat metric, and compare judges it unmodelled, never ok) and its rule text points at a proc_rate label no entry emits, so it is dropped: the swing_reset_rate label measures the stated $h on auto-attack hits (the Sun Cleric 806699 precedent)."
   },
   {
     "spell": 300483,
@@ -3314,6 +3314,15 @@
       "802076 effect_value e0 #0",
       "802076 behaviour_metric_delta charges"
     ],
+    "tool_gap": {
+      "reason": "The charges read gives the count the aura stores right after the cast (data: a stored modifier read back), not the attacks it affects or lasts: consumption per auto-attack and per direct hit (AscensionFelswornEvents.cpp case 803904, AscensionFelswornAbilities.cpp OnSpellCalculatedTarget) is not read. A consumption arm needs the script_count option to allow swings and a count of the swings that landed (plain_layout refuses attack_swings today); a shared option change that waits for the controller's go.",
+      "attempts": [
+        {
+          "agent": "fw-tg3b",
+          "report": ".agents/plans/fw-tg3b/report.md"
+        }
+      ]
+    },
     "kind": "claim"
   },
   {
@@ -3354,6 +3363,15 @@
       "802110 effect_value e0 #0",
       "802110 behaviour_metric_delta charges"
     ],
+    "tool_gap": {
+      "reason": "The charges read gives the count the aura stores right after the cast (data: a stored modifier read back), not the attacks it affects or lasts: consumption per auto-attack and per direct hit (AscensionFelswornEvents.cpp case 803904, AscensionFelswornAbilities.cpp OnSpellCalculatedTarget) is not read. A consumption arm needs the script_count option to allow swings and a count of the swings that landed (plain_layout refuses attack_swings today); a shared option change that waits for the controller's go.",
+      "attempts": [
+        {
+          "agent": "fw-tg3b",
+          "report": ".agents/plans/fw-tg3b/report.md"
+        }
+      ]
+    },
     "kind": "claim"
   },
   {
@@ -3460,13 +3478,32 @@
   {
     "spell": 803904,
     "clause": "Lasts for $n attacks or $d.",
-    "labels": [
-      "803904 behaviour_metric_delta held",
-      "803904 behaviour_metric_delta gone",
-      "803904 effect_value #1",
-      "803904 behaviour_metric_delta charges"
+    "claims": [
+      {
+        "claim": "Lasts for $n attacks",
+        "labels": [
+          "803904 behaviour_metric_delta charges"
+        ]
+      },
+      {
+        "claim": "or $d",
+        "labels": [
+          "803904 behaviour_metric_delta held",
+          "803904 behaviour_metric_delta gone"
+        ]
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "The charges read gives the count the aura stores right after the cast (data: a stored modifier read back), not the attacks it affects or lasts: consumption per auto-attack and per direct hit (AscensionFelswornEvents.cpp case 803904, AscensionFelswornAbilities.cpp OnSpellCalculatedTarget) is not read. A consumption arm needs the script_count option to allow swings and a count of the swings that landed (plain_layout refuses attack_swings today); a shared option change that waits for the controller's go.",
+      "attempts": [
+        {
+          "agent": "fw-tg3b",
+          "report": ".agents/plans/fw-tg3b/report.md"
+        }
+      ]
+    },
+    "kind": "claim",
+    "reason": "The value label 803904 effect_value #1 is unreadable ($n) and is dropped: the $n part is the charges claim and the $d part the held and gone claims. The $n part stays unproven (tool gap): the charges read is the stored count, not the attacks the aura lasts."
   },
   {
     "spell": 803905,
