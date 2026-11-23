@@ -14206,6 +14206,628 @@
       ],
       "observe_source": "Hellfire Carver 707444 Description (server DBC set): 'Casting Carve now makes your next Fel Fireball instant cast and causes it to strike 1 additional enemy near the primary target based on how long you channeled, up to a maximum of 10 enemies, dealing less damage with each target struck.' Carve 800206 is a 2500 ms channel (DurationIndex 66); its full channel is ten 250 ms ticks and the aura 807424 it leaves has StackAmount 10 in the DBC. Fel Fireball 801312 has EffectChainTarget 1 (the primary only without the passive). A real Carve is cast first (a setup cast, kept in both phases) and its 2500 ms channel ends after 3000 ms; then one real Fel Fireball at the primary dummy at 3 yd, with nine more dummies at 3.2 to 4.8 yd from the caster (all within 2 yd of the primary and so inside the 10 yd search of the extra targets). The hits of Fel Fireball on the primary and the nine area dummies are summed: the count is cumulative over the scenario: before (control: Hellfire Carver not learned) 1, the primary only; after the learn 11, that 1 plus 10 more in the second cast (the primary and all nine additional enemies offered), a gain of 10 (a full channel offers up to 10, the harness admits nine area dummies). The cap of 10 and the growth with the channel length are not read here. Reference search 2026-11-23: coa-history spell 807424 (the Carve aura): SPELL_AURA_APPLIED 171 events and SPELL_AURA_APPLIED_DOSE 1516 events in 4 logs, about 9 doses per application (the buff exists in play and stacks with the channel; no target count decides); spells 707444 and 801312: 0 events under those ids; bindmysoul snapshot has no value beyond the tooltip; nothing else found.",
       "expected_gain": 10
+    },
+    {
+      "spell": 800352,
+      "name": "Embracing Evil (Bane of Fire duration)",
+      "kind": "metric_delta",
+      "quote": "Increases the duration",
+      "trigger_spell": 707901,
+      "gate_spell": 800352,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 707901
+      },
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expire_ms": 500,
+      "setup_casts": [
+        707901
+      ],
+      "setup_wait_ms": 1600,
+      "trigger_reset_after_setup": true,
+      "variant": "bane_held",
+      "label_suffix": "bane_held",
+      "wait_ms": 19900,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          19850,
+          20050
+        ]
+      },
+      "observe_source": "800352 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 19 + 1 = 20 ($s1 percent), class mask word 0 0x20 matching Bane of Fire 707901 (SpellFamilyFlags[0] 32, DurationIndex 85 = 18000 ms, SpellDuration.dbc): 18000 x 1.20 = 21600 ms. Bane of Fire is cast on the dummy in both phases (control: 800352 not learned, 18000 ms; treatment: after a real learn, 21600 ms) and the aura 707901 on the dummy is read as present or absent at a game-time stamp. Held: Bane of Fire is still on the dummy about 19900 ms after the cast (0.92 of 21600 ms is 19872 ms; the stamp window 19850 to 20050 ms excludes a duration 10% short, 19440 ms, and the unmodified 18000 ms, which reads absent in the control phase). Reference search 2026-11-23: coa-history spell 800352: 0 events in 186 logs (passive); spell 707901: 360 SPELL_AURA_APPLIED by players in 11 logs (positive control); bindmysoul talents snapshot: 'Increases the duration and reduces the Energy cost of Banes by 20%.' (same figure); expected values come from the tooltip and the DBC only. The harness equips the weapon sets after the scenario settle, so a cast issued at once is refused by the global cooldown; a setup cast of 707901 with a 1600 ms wait and a cooldown reset precedes the timed cast in both phases, and the timed cast then refreshes the aura to its full duration."
+    },
+    {
+      "spell": 800352,
+      "name": "Embracing Evil (Bane of Fire duration)",
+      "kind": "metric_delta",
+      "quote": "Increases the duration",
+      "trigger_spell": 707901,
+      "gate_spell": 800352,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 707901
+      },
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expire_ms": 500,
+      "setup_casts": [
+        707901
+      ],
+      "setup_wait_ms": 1600,
+      "trigger_reset_after_setup": true,
+      "variant": "bane_gone",
+      "label_suffix": "bane_gone",
+      "wait_ms": 23300,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          23250,
+          23450
+        ]
+      },
+      "observe_source": "800352 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 19 + 1 = 20 ($s1 percent), class mask word 0 0x20 matching Bane of Fire 707901 (SpellFamilyFlags[0] 32, DurationIndex 85 = 18000 ms, SpellDuration.dbc): 18000 x 1.20 = 21600 ms. Bane of Fire is cast on the dummy in both phases (control: 800352 not learned, 18000 ms; treatment: after a real learn, 21600 ms) and the aura 707901 on the dummy is read as present or absent at a game-time stamp. Gone: Bane of Fire is absent about 23300 ms after the cast (1.08 of 21600 ms is 23328 ms; the stamp window 23250 to 23450 ms excludes a duration 10% long, 23760 ms). The claim needs the held and the gone label together. Reference search 2026-11-23: coa-history spell 800352: 0 events in 186 logs (passive); spell 707901: 360 SPELL_AURA_APPLIED by players in 11 logs (positive control); bindmysoul talents snapshot: 'Increases the duration and reduces the Energy cost of Banes by 20%.' (same figure); expected values come from the tooltip and the DBC only. The harness equips the weapon sets after the scenario settle, so a cast issued at once is refused by the global cooldown; a setup cast of 707901 with a 1600 ms wait and a cooldown reset precedes the timed cast in both phases, and the timed cast then refreshes the aura to its full duration."
+    },
+    {
+      "spell": 555738,
+      "name": "Fury Unleashed (immune, movement)",
+      "kind": "immunity",
+      "variant": "movement",
+      "quote": "You are immune to movement impairing and loss of control effects.",
+      "effects": [
+        {
+          "spell": 38767,
+          "words": "movement impairing"
+        },
+        {
+          "spell": 47021,
+          "words": "movement impairing"
+        }
+      ],
+      "observe_source": "555738 Effect[2] aura 147 SPELL_AURA_MECHANIC_IMMUNITY_MASK, MiscValue 1733, DurationIndex 28 = 5000 ms (Spell.dbc). The tooltip sentence is read as: movement impairing = root and snare; loss of control = stun, fear and sleep; the expectation is the tooltip's words, not the mask. One entry per group so that the casts fit the 5000 ms aura (each fixture takes 3 casts x 500 ms). Fixtures, each landed by a real creature cast at the caster inside the window: Daze 38767 (Mechanic 11 snare, aura 33); Net 47021 (Mechanic 7 root, aura 26). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands. Reference search 2026-11-23: coa-history spell 555738: 2 SPELL_CAST_SUCCESS in 2 of 186 logs, no landed crowd-control read; bindmysoul talents snapshot (older state): 'Spin your glaives for 5 seconds, increasing movement speed by 30% ... You are immune to movement impairing and loss of control effects.' (same wording); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 555738,
+      "name": "Fury Unleashed (immune, loss_stun_fear)",
+      "kind": "immunity",
+      "variant": "loss_stun_fear",
+      "quote": "You are immune to movement impairing and loss of control effects.",
+      "effects": [
+        {
+          "spell": 56,
+          "words": "loss of control"
+        },
+        {
+          "spell": 12096,
+          "words": "loss of control"
+        }
+      ],
+      "observe_source": "555738 Effect[2] aura 147 SPELL_AURA_MECHANIC_IMMUNITY_MASK, MiscValue 1733, DurationIndex 28 = 5000 ms (Spell.dbc). The tooltip sentence is read as: movement impairing = root and snare; loss of control = stun, fear and sleep; the expectation is the tooltip's words, not the mask. One entry per group so that the casts fit the 5000 ms aura (each fixture takes 3 casts x 500 ms). Fixtures, each landed by a real creature cast at the caster inside the window: Stun 56 (Mechanic 12, aura 12); Fear 12096 (Mechanic 5, aura 7). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands. Reference search 2026-11-23: coa-history spell 555738: 2 SPELL_CAST_SUCCESS in 2 of 186 logs, no landed crowd-control read; bindmysoul talents snapshot (older state): 'Spin your glaives for 5 seconds, increasing movement speed by 30% ... You are immune to movement impairing and loss of control effects.' (same wording); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 555738,
+      "name": "Fury Unleashed (immune, loss_sleep)",
+      "kind": "immunity",
+      "variant": "loss_sleep",
+      "quote": "You are immune to movement impairing and loss of control effects.",
+      "effects": [
+        {
+          "spell": 9159,
+          "words": "loss of control"
+        }
+      ],
+      "observe_source": "555738 Effect[2] aura 147 SPELL_AURA_MECHANIC_IMMUNITY_MASK, MiscValue 1733, DurationIndex 28 = 5000 ms (Spell.dbc). The tooltip sentence is read as: movement impairing = root and snare; loss of control = stun, fear and sleep; the expectation is the tooltip's words, not the mask. One entry per group so that the casts fit the 5000 ms aura (each fixture takes 3 casts x 500 ms). Fixtures, each landed by a real creature cast at the caster inside the window: Sleep 9159 (Mechanic 10, aura 12). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands. Reference search 2026-11-23: coa-history spell 555738: 2 SPELL_CAST_SUCCESS in 2 of 186 logs, no landed crowd-control read; bindmysoul talents snapshot (older state): 'Spin your glaives for 5 seconds, increasing movement speed by 30% ... You are immune to movement impairing and loss of control effects.' (same wording); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 561216,
+      "name": "Fury of the Illidari (immune, stun)",
+      "kind": "immunity",
+      "variant": "stun",
+      "quote": "While active you are immune to crowd control effects.",
+      "caster_auras": [
+        804216
+      ],
+      "effects": [
+        {
+          "spell": 56,
+          "words": "crowd control"
+        }
+      ],
+      "observe_source": "561216 Effect[2] aura 263 in Spell.dbc; the immunity mask is set by AscensionFelswornContracts.cpp:189-195 (read as a hint, not an expectation). The tooltip says 'immune to crowd control effects', read as: stun, fear, root, snare (and sleep). The aura lasts 3000 ms (6 assaults x 500 ms, the tooltip's own count and period), so one fixture per entry fits the window (3 casts x 500 ms). Fixtures, each landed by a real creature cast at the caster inside the window: Stun 56 (Mechanic 12, aura 12). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): 'While active you are immune to crowd control effects.' (same wording); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 561216,
+      "name": "Fury of the Illidari (immune, fear)",
+      "kind": "immunity",
+      "variant": "fear",
+      "quote": "While active you are immune to crowd control effects.",
+      "caster_auras": [
+        804216
+      ],
+      "effects": [
+        {
+          "spell": 12096,
+          "words": "crowd control"
+        }
+      ],
+      "observe_source": "561216 Effect[2] aura 263 in Spell.dbc; the immunity mask is set by AscensionFelswornContracts.cpp:189-195 (read as a hint, not an expectation). The tooltip says 'immune to crowd control effects', read as: stun, fear, root, snare (and sleep). The aura lasts 3000 ms (6 assaults x 500 ms, the tooltip's own count and period), so one fixture per entry fits the window (3 casts x 500 ms). Fixtures, each landed by a real creature cast at the caster inside the window: Fear 12096 (Mechanic 5, aura 7). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): 'While active you are immune to crowd control effects.' (same wording); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 561216,
+      "name": "Fury of the Illidari (immune, root)",
+      "kind": "immunity",
+      "variant": "root",
+      "quote": "While active you are immune to crowd control effects.",
+      "caster_auras": [
+        804216
+      ],
+      "effects": [
+        {
+          "spell": 47021,
+          "words": "crowd control"
+        }
+      ],
+      "observe_source": "561216 Effect[2] aura 263 in Spell.dbc; the immunity mask is set by AscensionFelswornContracts.cpp:189-195 (read as a hint, not an expectation). The tooltip says 'immune to crowd control effects', read as: stun, fear, root, snare (and sleep). The aura lasts 3000 ms (6 assaults x 500 ms, the tooltip's own count and period), so one fixture per entry fits the window (3 casts x 500 ms). Fixtures, each landed by a real creature cast at the caster inside the window: Net 47021 (Mechanic 7 root, aura 26). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): 'While active you are immune to crowd control effects.' (same wording); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806109,
+      "name": "Illidan's Guile (no melee swings under the aura)",
+      "kind": "metric_delta",
+      "variant": "no_attack",
+      "label_suffix": "no_attack",
+      "quote": "you cannot attack",
+      "trigger_spell": 806109,
+      "gate_spell": 806109,
+      "gate_cast": true,
+      "target": "dummy",
+      "attack_swings": 2,
+      "metric": "melee_attack_count",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "expected_gain": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "806109 DurationIndex 31 = 8000 ms (Spell.dbc): the aura is on the caster for the whole after phase (2 swing intervals of the reference weapon, 2 x 2300 ms = 4600 ms, then the reading). The tooltip says that during the aura 'you cannot attack': the caster's native melee combat packets (melee_attack_count, misses included) are counted in the control phase (no aura, at least 1 packet) and again in the treatment phase (806109 cast at the caster between the phases), and the treatment phase must add none. Expected value 0 comes from the tooltip's 'cannot attack'. Reference search 2026-11-23: coa-history spell 806109 finds 6 SPELL_CAST_SUCCESS, 6 SPELL_AURA_APPLIED and 6 SPELL_AURA_REMOVED by a player in 1 of 186 logs, none reaches $d (left early); bindmysoul talents snapshot: 'becoming immune to all physical attacks and spells for 8 seconds, but during that time you cannot attack, move or cast spells' (same wording); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806109,
+      "name": "Illidan's Guile (a Bane of Fire cast is not completed under the aura)",
+      "kind": "metric_delta",
+      "variant": "no_cast",
+      "label_suffix": "no_cast",
+      "quote": "or cast spells",
+      "trigger_spell": 707901,
+      "gate_spell": 806109,
+      "setup_casts": [
+        806109
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 707901
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 600,
+      "expire_ms": 8600,
+      "observe_source": "806109 DurationIndex 31 = 8000 ms. The tooltip says that during the aura 'you cannot ... cast spells'. Control phase: Bane of Fire 707901 (40 Energy, Energy set to 100) is cast at the dummy and completes (spell_cast_count 1). Treatment phase, after 8600 ms: 806109 is cast at the caster, 1600 ms later (past the global cooldown) the same Bane cast is attempted while the aura is held: it must not complete, so the count stays 1. Expected 'no completed cast' comes from the tooltip's 'cannot cast spells'. Reference search 2026-11-23: coa-history spell 806109 finds 6 SPELL_CAST_SUCCESS, 6 SPELL_AURA_APPLIED and 6 SPELL_AURA_REMOVED by a player in 1 of 186 logs, none reaches $d (left early); bindmysoul talents snapshot: 'becoming immune to all physical attacks and spells for 8 seconds, but during that time you cannot attack, move or cast spells' (same wording); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806109,
+      "name": "Illidan's Guile (aura is on the caster during the no-swing phase)",
+      "kind": "metric_delta",
+      "variant": "no_attack_applied",
+      "label_suffix": "no_attack_applied",
+      "quote": "you cannot attack",
+      "trigger_spell": 806109,
+      "gate_spell": 806109,
+      "gate_cast": true,
+      "target": "dummy",
+      "attack_swings": 2,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 806109
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Equivalence arm of no_attack (mentor D-67 spirit: the aura must really be on the caster when the swings are judged): the same flow as the no_attack entry (806109 cast at the caster between the phases, 2 swing intervals of attacks at the dummy, readings 500 ms after), reading aura_stacks of 806109 on the caster: absent in the control phase (0), present at the end of the treatment phase (1; 8000 ms DurationIndex 31, the readings come 500 + 4600 + 500 ms after the cast). Reference search 2026-11-23: coa-history spell 806109 finds 6 SPELL_CAST_SUCCESS in 1 of 186 logs (aura left early); bindmysoul talents snapshot (older state): same sentence; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "trigger_spell": 561216,
+      "gate_spell": 561216,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "void_on_cast_failure": true,
+      "expire_ms": 3500,
+      "spell": 561216,
+      "name": "Fury of the Illidari (1 Felfury per strike)",
+      "kind": "metric_delta",
+      "variant": "felfury",
+      "label_suffix": "felfury",
+      "quote": "generating 1 Felfury with each strike.",
+      "cast_in_before": false,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 1250,
+      "same_arm_ratio": {
+        "metric": "spell_cast_count",
+        "fields": {
+          "spell": 808303
+        },
+        "ratio": 1.0,
+        "tolerance": 0.01,
+        "least": 2,
+        "source": "the tooltip: 'attacking them every $t1 sec ... generating 1 Felfury with each strike': one Felfury per strike, so the Felfury gain equals the number of strikes made in the same window"
+      },
+      "observe_source": "561216 Effect[0] aura 226 SPELL_AURA_PERIODIC_DUMMY every 500 ms (the tooltip's $t1 = 0.5 sec), 6 assaults. The Felfury 800058 (StackAmount 6, DBC) stacks on the caster are read 1250 ms after a real cast, before the 6-strike total can reach the stack cap (a read at the cap could not tell 1 per strike from more); the judged value is the Felfury gain divided by the gain of spell_cast_count of the strike Twin Slice 808303 read in the same window: 1 per strike. The control phase makes no cast (0 Felfury, 0 casts). Inner Demon 804216 (CasterAuraSpell of 561216) is set by harness set_aura as a precondition fixture, the claim's subject being the strikes. 808303 is the strike spell the cast produces (its Effect[0] is SPELL_EFFECT_NORMALIZED_WEAPON_DMG 121), read as a measurement target, never as an expected value. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): same sentences; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "trigger_spell": 561216,
+      "gate_spell": 561216,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "void_on_cast_failure": true,
+      "expire_ms": 3500,
+      "spell": 561216,
+      "name": "Fury of the Illidari (hits the same target more than once)",
+      "kind": "metric_delta",
+      "variant": "same_target",
+      "label_suffix": "same_target",
+      "quote": "Can hit the same target multiple times.",
+      "cast_in_before": false,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808303,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "after_at_least": 2,
+      "wait_ms": 3500,
+      "observe_source": "The tooltip says one assault is made on each strike for 6 assaults and that the same target can be hit more than once: with ONE enemy near the caster (the stock dummy, no other creature in the scenario) the strike spell Twin Slice 808303 must land on it at least twice (at least 2 damage events on the dummy, an arbitrary floor above 1 that excludes a single hit). The control phase makes no cast (0 events). Inner Demon 804216 is a precondition fixture (harness set_aura). Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): same sentences; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "trigger_spell": 561216,
+      "gate_spell": 561216,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "expire_ms": 3500,
+      "spell": 561216,
+      "name": "Fury of the Illidari (does not hit a stealth target)",
+      "kind": "metric_delta",
+      "variant": "no_hit_stealth",
+      "label_suffix": "no_hit_stealth",
+      "quote": "Cannot hit invisible or stealthed targets.",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808303,
+        "target": "dummy"
+      },
+      "before_expected": 2,
+      "expected": 2,
+      "expected_gain": 0,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "after_auras": [
+        [
+          1784,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "observe_source": "Control phase: Fury of the Illidari is cast with the dummy plain and Twin Slice 808303 lands on it (at least 2 events, the entry's floor). Treatment phase, after 3500 ms: the dummy carries Stealth 1784 (aura 16 MOD_STEALTH) (harness set_aura on the dummy, a precondition fixture: the claim's subject is the strikes, not the aura) and the same cast must add no strike event on it (gain 0). The caster stays out of the dummy's reach of detection (the dummy is a passive creature). Inner Demon 804216 is a precondition fixture (harness set_aura) in both phases; 2 charges allow the two casts. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): same sentences; expected values come from the tooltip and the DBC only. Review fw-rea2 I-1: a second visible enemy (area1, 3 yd) stands beside the dummy in both phases, and a refused cast of 561216 makes the verdict unmeasured (void_on_cast_failure); the sibling entry no_hit_stealth_visible reads that the same cast puts at least 2 strikes on area1 while the dummy takes none, so a cast that did not run cannot read as 'cannot hit'.",
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        3
+      ]
+    },
+    {
+      "trigger_spell": 561216,
+      "gate_spell": 561216,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "expire_ms": 3500,
+      "spell": 561216,
+      "name": "Fury of the Illidari (still strikes the visible second enemy beside a stealth target)",
+      "kind": "metric_delta",
+      "variant": "no_hit_stealth_visible",
+      "label_suffix": "no_hit_stealth_visible",
+      "quote": "Cannot hit invisible or stealthed targets.",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808303,
+        "target": "area1"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 3500,
+      "after_auras": [
+        [
+          1784,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "observe_source": "Fury of the Illidari assaults a visible enemy in turn (AscensionFelswornAuras.cpp 561216 branch: the stealthed unit is filtered out, the rest are struck in turn) and the aura is removed when none is left to strike. The dummy carries the Stealth 1784 fixture aura (harness set_aura, precondition) and a second, visible dummy area1 stands 3 yd from the caster; no cast is made in the before phase (0 on area1), and after the cast at least 2 Twin Slice 808303 events land on area1 in 3500 ms (the 6 assaults, floor 2). A refused or skipped cast reads 0 and is unmeasured through void_on_cast_failure. Its sibling no_hit_stealth reads the dummy's own gain, 0. Expected values come from the tooltip and the DBC only.",
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        3
+      ],
+      "cast_in_before": false,
+      "after_at_least": 2
+    },
+    {
+      "trigger_spell": 561216,
+      "gate_spell": 561216,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "expire_ms": 3500,
+      "spell": 561216,
+      "name": "Fury of the Illidari (does not hit a invisible target)",
+      "kind": "metric_delta",
+      "variant": "no_hit_invisible",
+      "label_suffix": "no_hit_invisible",
+      "quote": "Cannot hit invisible or stealthed targets.",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808303,
+        "target": "dummy"
+      },
+      "before_expected": 2,
+      "expected": 2,
+      "expected_gain": 0,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "after_auras": [
+        [
+          32612,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "observe_source": "Control phase: Fury of the Illidari is cast with the dummy plain and Twin Slice 808303 lands on it (at least 2 events, the entry's floor). Treatment phase, after 3500 ms: the dummy carries Invisibility 32612 (aura 18 MOD_INVISIBILITY) (harness set_aura on the dummy, a precondition fixture: the claim's subject is the strikes, not the aura) and the same cast must add no strike event on it (gain 0). The caster stays out of the dummy's reach of detection (the dummy is a passive creature). Inner Demon 804216 is a precondition fixture (harness set_aura) in both phases; 2 charges allow the two casts. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): same sentences; expected values come from the tooltip and the DBC only. Review fw-rea2 I-1: a second visible enemy (area1, 3 yd) stands beside the dummy in both phases, and a refused cast of 561216 makes the verdict unmeasured (void_on_cast_failure); the sibling entry no_hit_invisible_visible reads that the same cast puts at least 2 strikes on area1 while the dummy takes none, so a cast that did not run cannot read as 'cannot hit'.",
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        3
+      ]
+    },
+    {
+      "trigger_spell": 561216,
+      "gate_spell": 561216,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "expire_ms": 3500,
+      "spell": 561216,
+      "name": "Fury of the Illidari (still strikes the visible second enemy beside a invisible target)",
+      "kind": "metric_delta",
+      "variant": "no_hit_invisible_visible",
+      "label_suffix": "no_hit_invisible_visible",
+      "quote": "Cannot hit invisible or stealthed targets.",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808303,
+        "target": "area1"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 3500,
+      "after_auras": [
+        [
+          32612,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "observe_source": "Fury of the Illidari assaults a visible enemy in turn (AscensionFelswornAuras.cpp 561216 branch: the stealthed unit is filtered out, the rest are struck in turn) and the aura is removed when none is left to strike. The dummy carries the Invisibility 32612 fixture aura (harness set_aura, precondition) and a second, visible dummy area1 stands 3 yd from the caster; no cast is made in the before phase (0 on area1), and after the cast at least 2 Twin Slice 808303 events land on area1 in 3500 ms (the 6 assaults, floor 2). A refused or skipped cast reads 0 and is unmeasured through void_on_cast_failure. Its sibling no_hit_invisible reads the dummy's own gain, 0. Expected values come from the tooltip and the DBC only.",
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        3
+      ],
+      "cast_in_before": false,
+      "after_at_least": 2
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon extension on a Ruin critical strike)",
+      "kind": "metric_delta",
+      "variant": "duration_ruin",
+      "label_suffix": "duration_ruin",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 501298,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "spell",
+      "cast_power": 100,
+      "before_expected": 1000,
+      "expected": 2000,
+      "expected_gain": 1000,
+      "tolerance": 90,
+      "wait_ms": 3300,
+      "expire_ms": 10500,
+      "observe_source": "The tooltip names Ruin and Azzinoth's Assault among the Felfury spenders (the spells whose own tooltip says 'Consumes 2 Felfury': Ruin 501298, Spell.dbc Description). Ruin has a direct Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE (a 2500 ms cast time, Spell.dbc), so with its hit forced critical (spell crit rating forced by the harness) one direct critical strike must extend Inner Demon 804216 by $806236s1 = 1000 ms (806236 BasePoints 999 + 1, same figure as the Sargeron Smite entry of this spell); the remaining duration of 804216 2600 ms after the cast is read before the learn (control: 806235 not learned) and after: gain 1000, tolerance 90 excludes 10% on the gain. Inner Demon 804216, Felfury 800058 x2 (the cost of the spender) and At Least 2 Felfury 803468 (the spender's CasterAuraSpell) are set by harness set_aura on the caster in both phases as precondition fixtures. Reference search 2026-11-23: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec and cause enemies struck to have a 3% increased chance to be hit by spells for 12 seconds.' (same figures); expected values come from the tooltip and the DBC only. Review fw-rea2 I-3: the read was moved from 2600 ms to 3300 ms: Ruin has a 2500 ms cast (CastingTimeIndex 19) and a projectile Speed 30 yd/s over 3 yd, so the hit lands about 2600 ms plus tick latency; the read now follows the hit by about 700 ms."
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon extension on a Felwrath critical strike)",
+      "kind": "metric_delta",
+      "variant": "duration_felwrath",
+      "label_suffix": "duration_felwrath",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 520693,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "spell",
+      "cast_power": 100,
+      "before_expected": 1000,
+      "expected": 2000,
+      "expected_gain": 1000,
+      "tolerance": 90,
+      "wait_ms": 2100,
+      "expire_ms": 10500,
+      "observe_source": "The tooltip names Ruin and Azzinoth's Assault among the Felfury spenders (the spells whose own tooltip says 'Consumes 2 Felfury': Felwrath 520693, Spell.dbc Description). Felwrath has a direct Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE (a 2000 ms cast time, Spell.dbc), so with its hit forced critical (spell crit rating forced by the harness) one direct critical strike must extend Inner Demon 804216 by $806236s1 = 1000 ms (806236 BasePoints 999 + 1, same figure as the Sargeron Smite entry of this spell); the remaining duration of 804216 2100 ms after the cast is read before the learn (control: 806235 not learned) and after: gain 1000, tolerance 90 excludes 10% on the gain. Inner Demon 804216, Felfury 800058 x2 (the cost of the spender) and At Least 2 Felfury 803468 (the spender's CasterAuraSpell) are set by harness set_aura on the caster in both phases as precondition fixtures. Reference search 2026-11-23: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec and cause enemies struck to have a 3% increased chance to be hit by spells for 12 seconds.' (same figures); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon extension on two Azzinoth's Assault critical strikes)",
+      "kind": "metric_delta",
+      "variant": "duration_azzinoth",
+      "label_suffix": "duration_azzinoth",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 801904,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "melee",
+      "cast_power": 100,
+      "before_expected": 1000,
+      "expected": 3000,
+      "expected_gain": 2000,
+      "tolerance": 180,
+      "wait_ms": 600,
+      "expire_ms": 10500,
+      "observe_source": "Azzinoth's Assault 801904 (Spell.dbc Description: 'Strike an enemy for Weapon Damage ... with both weapons'; Effect[0] and Effect[1] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE, 520262 and 572585) makes two weapon strikes: with melee crit forced, two direct critical strikes of a Felfury spender, each extending Inner Demon 804216 by $806236s1 = 1000 ms: gain 2000, tolerance 180 excludes 10% on the gain (1800, 2200). The spell's own Inner Demon extension (Description, $803089s1) is present in both phases and cancels in the before/after difference (control: 806235 not learned). The earlier lead of the first author (gain 17000) is the thing this arm re-measures. Inner Demon 804216, Felfury 800058 x2 and 803468 are harness set_aura preconditions. Reference search 2026-11-23: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: same figures as the tooltip; expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],
