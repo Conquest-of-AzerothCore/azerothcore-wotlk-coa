@@ -4691,7 +4691,7 @@
         ]
       }
     ],
-    "reason": "Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip; control = 0 before the learn. $704931m2 = 21 + 33 (EffectRealPointsPerLevel 1.0 from BaseLevel 27) + (1..2) = 55..56 at level 60; the first probe read 56 and 1856 because the dummy's Holy resistance cut every hit by 10% ((55.5 + 7) x 0.9 = 56.25); with 823764 the hit reads [62, 63] and the contrast arms match. Reference search: nothing found beyond the server DBC."
+    "reason": "Pair 20261120-221023 / 20261120-221237, build 8f46b717, server commit f7f72e2668ad, no flip; control = 0 before the learn. $704931m2 = 21 + 33 (EffectRealPointsPerLevel 1.0 from BaseLevel 27) + (1..2) = 55..56 at level 60; the first probe read 56 and 1856 because the dummy's Holy resistance cut every hit by 10% ((55.5 + 7) x 0.9 = 56.25); with 823764 the hit reads [62, 63] and the contrast arms match. HELD for the owner (D-292): the claim reads the engine value, while ADR 0014 displays $704931m2 at 704931's own rank (no ability row, rank 0, so 22..23 without the per-level term). The +33 is EffectRealPointsPerLevel[1] 1.0 x (60 - 27) added by stock CalcValue (SpellInfo.cpp:485-497). Reference search: nothing found beyond the server DBC."
   },
   {
     "spell": 704932,
