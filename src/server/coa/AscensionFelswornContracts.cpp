@@ -196,8 +196,7 @@ void ApplyContracts(SpellInfo* info)
         periodic(0, 500);
         info->DurationEntry = sSpellDurationStore.LookupEntry(27);
         info->Effects[1].Effect = 0;
-        info->Effects[2].ApplyAuraName = SPELL_AURA_MECHANIC_IMMUNITY_MASK;
-        info->Effects[2].MiscValue = IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
+        info->Effects[2].ApplyAuraName = SPELL_AURA_DUMMY;
     }
     if (id == 803904)
         dummy(0);
