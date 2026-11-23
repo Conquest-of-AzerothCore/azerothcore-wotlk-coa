@@ -2917,6 +2917,34 @@ namespace
             player->GetExactDist(entrance.position_x, entrance.position_y, entrance.position_z) > 8.0f;
     }
 
+    bool IsShelteredAtStageEntrance(Player const* player, GameTele const* entrance, bool bubbleStands)
+    {
+        return bubbleStands && entrance && player->IsAlive() && !player->IsInFlight() &&
+            !HasPlayerLeftStageEntrance(player, player->FindMap(), *entrance);
+    }
+
+    void ShelterUnitAtStageEntrance(Unit* unit)
+    {
+        if (!unit || !unit->IsAlive() || !unit->IsInWorld())
+            return;
+
+        if (Aura* aura = unit->GetAura(SPELL_SAFETY_BUBBLE_HELPER))
+            aura->RefreshDuration();
+        else
+            unit->CastSpell(unit, SPELL_SAFETY_BUBBLE_HELPER, true);
+    }
+
+    void ShelterAtStageEntrance(Player* player)
+    {
+        if (!player->HasAura(SPELL_SAFETY_BUBBLE_HELPER))
+            player->CombatStopWithPets();
+
+        ShelterUnitAtStageEntrance(player);
+        for (Unit* companion : player->m_Controlled)
+            if (companion && companion->GetOwnerGUID() == player->GetGUID())
+                ShelterUnitAtStageEntrance(companion);
+    }
+
     void ApplySafetyBubbleProtection(Unit* unit, ManastormRun const& run)
     {
         if (!unit || !unit->IsAlive() || !unit->IsInWorld() ||
@@ -6534,7 +6562,11 @@ bool ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
         }
         for (auto guid : run->GetMembers())
             if (Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid)))
-            ClearSafetyBubble(member, true);
+            {
+                ClearSafetyBubble(member, true);
+                if (DynamicObject* bubble = member->GetDynObject(SPELL_SAFETY_BUBBLE))
+                    bubble->SetDuration(-1);
+            }
         run->SetState(ManastormRunState::Active);
 
         //
@@ -10152,30 +10184,29 @@ void ManastormMgr::Update(uint32 diff)
                 run.GetInstanceId())
             {
                 //
-                // Safety Bubble protection belongs only to PREPARING.
-                // Remove any stale/re-applied controller or combat-preventer
-                // aura while the authoritative stage is already active.
+                // An active stage keeps the entrance Safety Bubble standing:
+                // members who step back inside it drop combat and stay
+                // sheltered while inside; everyone else loses the protection.
                 //
-                for (auto guid :
-                    run.GetMembers())
+                std::vector<Player*> stageMembers;
+                for (auto guid : run.GetMembers())
                 {
-                    Player* member =
-                        ObjectAccessor::FindConnectedPlayer(
-                            ObjectGuid::Create<
-                                HighGuid::Player>(
-                                    guid));
+                    Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid));
+                    if (member && member->IsInWorld() && !member->IsBeingTeleported() &&
+                        member->GetMapId() == run.GetSegment().MapId &&
+                        member->GetInstanceId() == run.GetInstanceId())
+                        stageMembers.push_back(member);
+                }
 
-                    if (member &&
-                        member->IsInWorld() &&
-                        !member->IsBeingTeleported() &&
-                        member->GetMapId() ==
-                            run.GetSegment().MapId &&
-                        member->GetInstanceId() ==
-                            run.GetInstanceId())
-                    {
-                        ClearSafetyBubble(
-                            member, true);
-                    }
+                bool const bubbleStands = std::any_of(stageMembers.begin(), stageMembers.end(),
+                    [](Player* member) { return member->GetDynObject(SPELL_SAFETY_BUBBLE) != nullptr; });
+                GameTele const* entrance = sObjectMgr->GetGameTele(run.GetSegment().StartGameTeleId);
+                for (Player* member : stageMembers)
+                {
+                    if (IsShelteredAtStageEntrance(member, entrance, bubbleStands))
+                        ShelterAtStageEntrance(member);
+                    else
+                        ClearSafetyBubble(member, true);
                 }
             }
         }
