@@ -3117,11 +3117,28 @@
   {
     "spell": 807431,
     "clause": "Casting Felfury spenders now increases your Energy regeneration by $521234s1% for $521234d,",
-    "labels": [
-      "807431 effect_value 521234e0 #0",
-      "807431 spell_duration 521234 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting Felfury spenders now increases your Energy regeneration",
+        "labels": [
+          "807431 behaviour_metric_delta stack_one"
+        ]
+      },
+      {
+        "claim": "by $521234s1%",
+        "labels": [
+          "807431 behaviour_metric_delta regen_amount"
+        ]
+      },
+      {
+        "claim": "for $521234d,",
+        "labels": [
+          "807431 behaviour_metric_delta held",
+          "807431 behaviour_metric_delta gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 807431,

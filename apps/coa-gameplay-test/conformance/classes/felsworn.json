@@ -3568,6 +3568,160 @@
         74
       ],
       "observe_source": "802180 Effect[0] aura 112 (SPELL_AURA_OVERRIDE_CLASS_SCRIPTS; AscensionFelswornContracts.cpp:110-114 sets ASCENSION_STATE_MASKED_CRIT with AURA_STATE_HEALTH_ABOVE_75_PERCENT), BasePoints 19 + 1 = 20 ($s1). The caster's critical strike chance of Ruin 801895 (Player::SpellDoneCritChance then Unit::SpellTakenCritChance of the dummy, which adds the conditional modifier of Unit.cpp:10657, metric spell_taken_crit_chance) against the dummy is read before (control: 802180 unknown) and after a real learn of 802180, with the dummy at 99% in the control phase (no 802180) and at 74% in the treatment phase (just below 75%, the control claim): gain 0. Reference search 2026-11-23: coa-history spell 802180: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 807431,
+      "kind": "metric_delta",
+      "variant": "regen_amount",
+      "label_suffix": "regen_amount",
+      "quote": "Casting Felfury spenders now increases your Energy regeneration by $521234s1% for $521234d,",
+      "trigger_spell": 803475,
+      "gate_spell": 807431,
+      "target": "dummy",
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 521234,
+        "effect": 0
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Abyssal Conditioning (Energy regeneration amount)",
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0,
+      "observe_source": "807431 Effect[0] aura 42 PROC_TRIGGER_SPELL (AscensionFelswornAbilities.cpp:236, cast of 521234 on the caster after a Felfury spender, here Azzinoth's Assault 803475); 521234 Effect[0] aura 110 SPELL_AURA_MOD_POWER_REGEN_PERCENT, MiscValue 3 (Energy), BasePoints 4 + 1 = 5 ($s1), StackAmount 4 ($u), DurationIndex 1 (10000 ms, $d). A real cast of Azzinoth's Assault at the dummy in both phases, 807431 learned between them, so the first phase is the control (passive unknown, no 521234). Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and At Least 2 Felfury 803468 on the caster before each cast (Azzinoth's Assault 801904 needs 803468 and consumes 2 Felfury). The amount of effect 0 of 521234 on the caster 500 ms after the cast: 0 before the learn (control) and 5 after. Reference search 2026-11-23: coa-history spell 807431 and 521234: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 807431,
+      "kind": "metric_delta",
+      "variant": "stack_one",
+      "label_suffix": "stack_one",
+      "quote": "Casting Felfury spenders now increases your Energy regeneration by $521234s1% for $521234d,",
+      "trigger_spell": 803475,
+      "gate_spell": 807431,
+      "target": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 521234
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Abyssal Conditioning (one stack per spender cast)",
+      "before_expected": 0,
+      "expected": 1,
+      "observe_source": "807431 Effect[0] aura 42 PROC_TRIGGER_SPELL (AscensionFelswornAbilities.cpp:236, cast of 521234 on the caster after a Felfury spender, here Azzinoth's Assault 803475); 521234 Effect[0] aura 110 SPELL_AURA_MOD_POWER_REGEN_PERCENT, MiscValue 3 (Energy), BasePoints 4 + 1 = 5 ($s1), StackAmount 4 ($u), DurationIndex 1 (10000 ms, $d). A real cast of Azzinoth's Assault at the dummy in both phases, 807431 learned between them, so the first phase is the control (passive unknown, no 521234). Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and At Least 2 Felfury 803468 on the caster before each cast (Azzinoth's Assault 801904 needs 803468 and consumes 2 Felfury). The stacks of 521234 on the caster after one cast: 0 before the learn (control) and 1 after. The cap of $521234u = 4 is not read: five spender casts would need Felfury and Energy refilled between casts, which refill_power_after_setup_casts refuses on a quote that names Energy (tool gap, recorded in the report). Reference search 2026-11-23: coa-history spell 807431 and 521234: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 807431,
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "Casting Felfury spenders now increases your Energy regeneration by $521234s1% for $521234d,",
+      "trigger_spell": 803475,
+      "gate_spell": 807431,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 521234
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "wait_ms": 9900,
+      "expire_ms": 500,
+      "name": "Abyssal Conditioning (aura held 9900 ms)",
+      "before_expected": 0,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          9850,
+          9950
+        ]
+      },
+      "observe_source": "807431 Effect[0] aura 42 PROC_TRIGGER_SPELL (AscensionFelswornAbilities.cpp:236, cast of 521234 on the caster after a Felfury spender, here Azzinoth's Assault 803475); 521234 Effect[0] aura 110 SPELL_AURA_MOD_POWER_REGEN_PERCENT, MiscValue 3 (Energy), BasePoints 4 + 1 = 5 ($s1), StackAmount 4 ($u), DurationIndex 1 (10000 ms, $d). A real cast of Azzinoth's Assault at the dummy in both phases, 807431 learned between them, so the first phase is the control (passive unknown, no 521234). Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and At Least 2 Felfury 803468 on the caster before each cast (Azzinoth's Assault 801904 needs 803468 and consumes 2 Felfury). The aura is still on the caster 9900 ms after the cast (excludes a duration 10% short, 9000 ms), 0 before the learn (control). Reference search 2026-11-23: coa-history spell 807431 and 521234: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 807431,
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "Casting Felfury spenders now increases your Energy regeneration by $521234s1% for $521234d,",
+      "trigger_spell": 803475,
+      "gate_spell": 807431,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 521234
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "wait_ms": 10100,
+      "expire_ms": 500,
+      "name": "Abyssal Conditioning (aura gone 10100 ms)",
+      "before_expected": 0,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          10050,
+          10150
+        ]
+      },
+      "observe_source": "807431 Effect[0] aura 42 PROC_TRIGGER_SPELL (AscensionFelswornAbilities.cpp:236, cast of 521234 on the caster after a Felfury spender, here Azzinoth's Assault 803475); 521234 Effect[0] aura 110 SPELL_AURA_MOD_POWER_REGEN_PERCENT, MiscValue 3 (Energy), BasePoints 4 + 1 = 5 ($s1), StackAmount 4 ($u), DurationIndex 1 (10000 ms, $d). A real cast of Azzinoth's Assault at the dummy in both phases, 807431 learned between them, so the first phase is the control (passive unknown, no 521234). Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and At Least 2 Felfury 803468 on the caster before each cast (Azzinoth's Assault 801904 needs 803468 and consumes 2 Felfury). The aura is gone 10100 ms after the cast (excludes a duration 10% long, 11000 ms). The held entry shows it present at 9900 ms with the passive, so gone is not a cast that never applied. Reference search 2026-11-23: coa-history spell 807431 and 521234: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],
