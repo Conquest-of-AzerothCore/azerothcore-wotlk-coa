@@ -36,8 +36,9 @@ class EnemyShooterTests(unittest.TestCase):
         _, [expectation] = behaviour_scenario(class_file(), entry or shooter_entry())
         model = expectation.model
         shot = model['enemy_shooter']
+        timed = {shot['attack_time']['label']: shot['attack_time']['value']} if 'attack_time' in shot else {}
         fake = FakeRun({model['before_label']: 1.0, model['after_label']: 1.0, shot['distance_label']: 12.0,
-                        shot['applied_label']: 1.0, **values})
+                        shot['applied_label']: 1.0, **timed, **values})
         fake.cast_failures = failures or {807778: [27]}
         return judge_behaviour(base_verdict(expectation), fake, expectation)
 
@@ -74,6 +75,57 @@ class EnemyShooterTests(unittest.TestCase):
         _, [expectation] = behaviour_scenario(class_file(), entry)
         near = {expectation.model['enemy_shooter']['distance_label']: 2.0}
         self.assertEqual(self.judged(near, {807778: [27], 572848: [29]}, entry).status, 'ok')
+
+    def test_the_attack_time_guard_reads_the_enemy_before_the_control_window(self):
+        timed = shooter_entry()
+        timed = shooter(timed, attack_time_ms={'hand': 2, 'value': 2434.78, 'tolerance': 0.5})
+        scenario, [expectation] = behaviour_scenario(class_file(), timed)
+        run.validate(scenario)
+        label = expectation.model['enemy_shooter']['attack_time']['label']
+        reads = [(index, step) for index, step in enumerate(scenario['steps']) if step.get('label') == label]
+        self.assertEqual(len(reads), 1)
+        index, step = reads[0]
+        self.assertEqual((step['actor'], step['metric'], step['hand']), ('enemy', 'attack_time_ms', 2))
+        waits = [at for at, other in enumerate(scenario['steps'])
+                 if other.get('label') == 'enemy control window without the trigger']
+        self.assertTrue(index < waits[0])
+        self.assertIn('attack time of hand 2', scenario['contract'])
+        self.assertEqual(self.judged({}, entry=timed).status, 'ok')
+        self.assertEqual(self.judged({label: 2434.3}, entry=timed).status, 'ok')
+
+    def test_a_different_attack_time_or_no_read_makes_the_trial_unmeasured_never_ok(self):
+        timed = shooter(shooter_entry(), attack_time_ms={'hand': 2, 'value': 2434.78, 'tolerance': 0.5})
+        _, [expectation] = behaviour_scenario(class_file(), timed)
+        label = expectation.model['enemy_shooter']['attack_time']['label']
+        for read in (2800.0, 2433.0, 2436.0, None):
+            with self.subTest(read=read):
+                verdict = self.judged({label: read}, entry=timed) if read is not None else self.judged_without(
+                    label, timed)
+                self.assertEqual(verdict.status, 'unmeasured')
+                self.assertIn('attack time of hand 2', verdict.explanation)
+
+    def judged_without(self, label, entry):
+        _, [expectation] = behaviour_scenario(class_file(), entry)
+        model = expectation.model
+        shot = model['enemy_shooter']
+        fake = FakeRun({model['before_label']: 1.0, model['after_label']: 1.0, shot['distance_label']: 12.0,
+                        shot['applied_label']: 1.0})
+        fake.cast_failures = {807778: [27]}
+        return judge_behaviour(base_verdict(expectation), fake, expectation)
+
+    def test_without_the_attack_time_option_the_scenario_and_model_are_unchanged(self):
+        scenario, [expectation] = behaviour_scenario(class_file(), shooter_entry())
+        self.assertNotIn('attack_time', expectation.model['enemy_shooter'])
+        self.assertFalse([step for step in scenario['steps'] if step.get('metric') == 'attack_time_ms'])
+        self.assertNotIn('attack time of hand', scenario['contract'])
+
+    def test_a_malformed_attack_time_option_is_refused(self):
+        good = shooter_entry()['enemy_shooter']
+        for bad in ({'hand': 3, 'value': 2434.78, 'tolerance': 0.5}, {'hand': 2, 'value': 0, 'tolerance': 0.5},
+                    {'hand': 2, 'value': 2434.78, 'tolerance': -1}, {'hand': 2, 'value': 2434.78},
+                    {'hand': True, 'value': 2434.78, 'tolerance': 0.5}, 'fast'):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                parse({**good, 'attack_time_ms': bad})
 
     def test_a_malformed_option_is_refused(self):
         good = shooter_entry()['enemy_shooter']

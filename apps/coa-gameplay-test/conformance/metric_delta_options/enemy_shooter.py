@@ -4,9 +4,11 @@ NAME = 'enemy_shooter'
 ORDER = 28
 MODES = ('ranged', 'ability')
 KEYS = {'mode', 'class', 'weapons', 'skills', 'learn', 'spell', 'power', 'relocate', 'window_ms', 'distance_yd',
-        'native_refusals', 'source'}
-OPTIONAL_KEYS = {'power', 'relocate', 'native_refusals'}
+        'native_refusals', 'source', 'attack_time_ms'}
+OPTIONAL_KEYS = {'power', 'relocate', 'native_refusals', 'attack_time_ms'}
 WEAPON_KEYS = {'item', 'slot'}
+ATTACK_TIME_KEYS = {'hand', 'value', 'tolerance'}
+MAX_HAND = 2
 MIN_WINDOW_MS = 3000
 MAX_WINDOW_MS = 20000
 SKILL_VALUE = 300
@@ -29,6 +31,7 @@ class EnemyShooter:
     distance_yd: tuple[float, float]
     native_refusals: tuple[tuple[int, int], ...]
     source: str
+    attack_time: tuple[int, float, float] | None = None
 
 
 def integer(value) -> bool:
@@ -43,10 +46,17 @@ def number(value) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
+def attack_time_valid(raw) -> bool:
+    return isinstance(raw, dict) and set(raw) == ATTACK_TIME_KEYS and integer(raw['hand']) \
+        and 0 <= raw['hand'] <= MAX_HAND and number(raw['value']) and raw['value'] > 0 \
+        and number(raw['tolerance']) and raw['tolerance'] >= 0
+
+
 def parse(raw) -> EnemyShooter:
     if not isinstance(raw, dict) or not KEYS - OPTIONAL_KEYS <= set(raw) <= KEYS:
         raise ValueError(f'enemy_shooter is {{"mode", "class", "weapons", "skills", "learn", "spell", "window_ms", '
-                         f'"distance_yd", "source"[, "power", "relocate", "native_refusals"]}}, not {raw!r}')
+                         f'"distance_yd", "source"[, "power", "relocate", "native_refusals", "attack_time_ms"]}}, '
+                         f'not {raw!r}')
     weapons, refusals = raw['weapons'], raw.get('native_refusals', [])
     if raw['mode'] not in MODES or not integer(raw['class']) or not MIN_CLASS <= raw['class'] <= MAX_CLASS \
             or not isinstance(weapons, list) or not weapons \
@@ -60,21 +70,29 @@ def parse(raw) -> EnemyShooter:
             or not integer(raw['window_ms']) or not MIN_WINDOW_MS <= raw['window_ms'] <= MAX_WINDOW_MS \
             or not pair(raw['distance_yd'], number) or not 0 <= raw['distance_yd'][0] < raw['distance_yd'][1] \
             or not isinstance(refusals, list) or any(not pair(refusal, integer) for refusal in refusals) \
+            or ('attack_time_ms' in raw and not attack_time_valid(raw['attack_time_ms'])) \
             or not isinstance(raw['source'], str) or not raw['source']:
         raise ValueError(f'enemy_shooter needs a mode of {MODES}, a CoA class {MIN_CLASS}..{MAX_CLASS}, listed '
                          f'weapons {{"item", "slot"}}, integer skills and learned spells, an integer spell, a window '
                          f'of {MIN_WINDOW_MS}..{MAX_WINDOW_MS} ms, a [least, most] distance, a source, and optional '
-                         f'[type, value] power, [dx, dy] relocate and [spell, reason] native_refusals, not {raw!r}')
+                         f'[type, value] power, [dx, dy] relocate, [spell, reason] native_refusals and an '
+                         f'attack_time_ms {{"hand": 0..{MAX_HAND}, "value": ms > 0, "tolerance": ms >= 0}}, not {raw!r}')
     return EnemyShooter(raw['mode'], raw['class'], tuple((weapon['item'], weapon['slot']) for weapon in weapons),
                         tuple(raw['skills']), tuple(raw['learn']), raw['spell'],
                         tuple(raw['power']) if 'power' in raw else None,
                         tuple(float(edge) for edge in raw['relocate']) if 'relocate' in raw else None,
                         raw['window_ms'], tuple(float(edge) for edge in raw['distance_yd']),
-                        tuple((spell, reason) for spell, reason in refusals), raw['source'])
+                        tuple((spell, reason) for spell, reason in refusals), raw['source'],
+                        (raw['attack_time_ms']['hand'], float(raw['attack_time_ms']['value']),
+                         float(raw['attack_time_ms']['tolerance'])) if 'attack_time_ms' in raw else None)
 
 
 def distance_label(spec) -> str:
     return f'{spec.spell} enemy_shooter distance'
+
+
+def attack_time_label(spec) -> str:
+    return f'{spec.spell} enemy_shooter attack time'
 
 
 def applied_label(spec) -> str:
@@ -121,6 +139,8 @@ def phase_steps(spec, value: EnemyShooter, after: bool) -> list[dict]:
     if value.relocate:
         steps.append({'action': 'relocate', 'actor': ENEMY_PLAYER, 'dx': value.relocate[0], 'dy': value.relocate[1]})
     steps.append(measurement(distance_label(spec), ENEMY_PLAYER, 'distance_2d', target=CASTER))
+    if value.attack_time:
+        steps.append(measurement(attack_time_label(spec), ENEMY_PLAYER, 'attack_time_ms', hand=value.attack_time[0]))
     steps += enemy_cast_steps(value)
     steps.append({'action': 'wait', 'label': 'enemy control window without the trigger', 'ms': value.window_ms})
     return steps
@@ -154,15 +174,23 @@ def fixtures(class_file: dict, spec, value: EnemyShooter, scenario: dict):
                              + f'. The aura of the trigger on the enemy is read {APPLIED_READ_MS} ms after the '
                              f'trigger, and the enemy\'s distance to the caster before the control window; the '
                              f'after reading less the before reading is what the enemy did while the trigger was '
-                             f'on it. {value.source}')
+                             f'on it.'
+                             + (f' The enemy\'s attack time of hand {value.attack_time[0]} is read before the control '
+                                f'window and must be {value.attack_time[1]} ms within {value.attack_time[2]} ms, '
+                                f'else the trial is void.' if value.attack_time else '')
+                             + f' {value.source}')
 
 
 def model(spec, value: EnemyShooter) -> dict:
     from behaviours import metric_delta_label
-    return {NAME: {'mode': value.mode, 'class': value.player_class, 'window_ms': value.window_ms,
-                   'distance_label': distance_label(spec), 'distance_yd': list(value.distance_yd),
-                   'applied_label': applied_label(spec), 'before_label': metric_delta_label(spec, 'before'),
-                   'native_refusals': [list(refusal) for refusal in value.native_refusals]}}
+    shooter = {'mode': value.mode, 'class': value.player_class, 'window_ms': value.window_ms,
+               'distance_label': distance_label(spec), 'distance_yd': list(value.distance_yd),
+               'applied_label': applied_label(spec), 'before_label': metric_delta_label(spec, 'before'),
+               'native_refusals': [list(refusal) for refusal in value.native_refusals]}
+    if value.attack_time:
+        shooter['attack_time'] = {'label': attack_time_label(spec), 'hand': value.attack_time[0],
+                                  'value': value.attack_time[1], 'tolerance': value.attack_time[2]}
+    return {NAME: shooter}
 
 
 def void_reason(run, value: dict) -> str | None:
@@ -180,6 +208,13 @@ def void_reason(run, value: dict) -> str | None:
         return f'the control without the trigger read {before}, so the enemy never acted and the trial is void'
     if distance is None or not least <= distance <= most:
         return f'the enemy stood {distance} yd from the caster, outside {value["distance_yd"]}'
+    attack_time = value.get('attack_time')
+    if attack_time:
+        read = run.values.get(attack_time['label'])
+        if read is None or abs(read - attack_time['value']) > attack_time['tolerance']:
+            return (f'the enemy\'s attack time of hand {attack_time["hand"]} read {read} ms, not '
+                    f'{attack_time["value"]} within {attack_time["tolerance"]}, so the shooter is not the one the '
+                    f'control count assumes')
     if applied is None or applied < 1:
         return f'the trigger aura read {applied} on the enemy, so the trigger never landed'
     return None
