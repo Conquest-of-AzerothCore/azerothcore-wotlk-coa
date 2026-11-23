@@ -1589,7 +1589,10 @@
         "labels": [
           "570158 behaviour_metric_delta scar_amount",
           "570158 behaviour_metric_delta scar_amount_agility",
-          "570158 behaviour_hit_ratio scar_ap_swing"
+          "570158 behaviour_hit_ratio scar_ap_swing",
+          "570158 behaviour_hit_ratio scar_ap_gaze",
+          "570158 behaviour_metric_delta scar_ap_gaze_pin",
+          "570158 behaviour_metric_delta scar_ap_offhand"
         ]
       },
       {
