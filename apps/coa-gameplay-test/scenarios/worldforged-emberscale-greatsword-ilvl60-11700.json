@@ -4,7 +4,7 @@
   "contract": [
     "ItemAddon.dbc lists Emberscale Greatsword 515223 (item level 47) with an epic item level 60 variant 1388927 and the",
     "Zul'Gurub variant 1379216 (item level 64). The first-rank recipe 1082 went from the base straight to 1379216. The base",
-    "now upgrades into the item level 60 variant (store key 4388927, always open, 29300 Runes of Ascension) and that variant",
+    "now upgrades into the item level 60 variant (store key 4388927, always open, 11700 Runes of Ascension) and that variant",
     "into 1379216 (the old recipe 1082, 43400 runes, open once the account has defeated Hakkar). The base can no longer be",
     "bought up to the Zul'Gurub tier directly."
   ],
@@ -31,11 +31,11 @@
     { "action": "wait", "ms": 500 },
     { "action": "assert", "label": "The ilvl 60 variant is sold", "actor": "hero", "metric": "item_count", "item": 1388927, "equals": 1 },
     { "action": "assert", "label": "in place of the base", "actor": "hero", "metric": "item_count", "item": 515223, "equals": 0 },
-    { "action": "assert", "label": "for 29300 runes, on top of Hakkar's 2500", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 53200 },
+    { "action": "assert", "label": "for 11700 runes, on top of Hakkar's 2500", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 70800 },
     { "action": "client_packet", "label": "Upgrade the ilvl 60 variant to the Zul'Gurub tier", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1082}, {"u32": 1}] },
     { "action": "wait", "ms": 500 },
     { "action": "assert", "label": "The Zul'Gurub tier is sold", "actor": "hero", "metric": "item_count", "item": 1379216, "equals": 1 },
     { "action": "assert", "label": "in place of the ilvl 60 variant", "actor": "hero", "metric": "item_count", "item": 1388927, "equals": 0 },
-    { "action": "assert", "label": "for another 43400 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 9800 }
+    { "action": "assert", "label": "for another 43400 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 27400 }
   ]
 }
