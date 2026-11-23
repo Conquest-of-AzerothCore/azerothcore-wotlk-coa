@@ -3,8 +3,8 @@
 - Status: proposed
 - Date: 2026-11-24
 - Related: [ADR 0196](0196-count-how-often-a-strike-takes-hold-on-the-caster.md) (the `resist_rate` judge),
-  [ADR 0999](0999-a-taken-hit-arm-can-open-with-striker-casts-and-attributed-auras.md) (striker fixtures), [ADR 0120](0120-two-proof-statuses-computed-by-clause-coverage.md)
-  (the closed evidence tables, unchanged here).
+  [ADR 0999](0999-a-taken-hit-arm-can-open-with-striker-casts-and-attributed-auras.md) (striker fixtures),
+  [ADR 0120](0120-two-proof-statuses-computed-by-clause-coverage.md) (the closed evidence tables, unchanged here).
 - Decided by: controller go of 2026-11-23 (Felsworn last round, batch L1).
 
 ## Context
