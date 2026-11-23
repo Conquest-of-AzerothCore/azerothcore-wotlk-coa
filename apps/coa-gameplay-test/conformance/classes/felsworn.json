@@ -2183,129 +2183,6 @@
       "measure_actor": "dummy"
     },
     {
-      "spell": 520240,
-      "name": "Nether Strength (Burning Hatred cooldown after a Ruin)",
-      "kind": "metric_delta",
-      "variant": "cd_805239",
-      "label_suffix": "cd_805239",
-      "quote": "Casting Felfury spenders now reduces the cooldown of Burning Hatred, Hateforged Barrier, and Demonic Will by $/1000;520830S1 sec.",
-      "trigger_spell": 802060,
-      "gate_spell": 520240,
-      "target": "dummy",
-      "setup_casts": [
-        805239
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 1600,
-      "phase_auras": [
-        [
-          800058,
-          2,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "cooldown_ms",
-      "fields": {
-        "spell": 805239
-      },
-      "before_expected": 117400,
-      "expected": 116900,
-      "tolerance": 25,
-      "wait_ms": 1000,
-      "expire_ms": 500,
-      "game_time": {
-        "after": [
-          980,
-          1020
-        ]
-      },
-      "void_on_cast_failure": true,
-      "observe_source": "520240 Effect[0] aura 42 PROC_TRIGGER_SPELL of 520830; 520830 effects 0-2 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -501 + EffectDieSides 1 = -500 ms (500 ms = $/1000;520830S1 sec 0.5), MiscValue 705129 / 800209 / 805239 (Spell.dbc). The class code reduces the cooldown by 500 ms of each of the three when a Felfury spender (Sargeron Smite 802060 here: instant, Consumes 2 Felfury; Ruin has a 2500 ms cast time that ends after the 1000 ms read) is cast (AscensionFelswornAbilities.cpp:234-237). Burning Hatred 805239 (120000 ms recovery) is cast first (setup cast), 2 stacks of Felfury 800058 and the caster aura 803468 are precondition fixtures so Smite is castable (pair 20261123 prove_p2 refused Ruin, SPELL_FAILED_NO_POWER), then Sargeron Smite is cast at the dummy and the remaining cooldown is read 1000 ms later (game time 980..1020 ms). Expected without the passive: 120000 - 1600 (setup wait) - 1000 (read) = 117400; with 520240 learned the same minus 500 = 116900. A cut of 450 or 550 ms (10% off) reads 50 ms away, so tolerance 25 excludes both. The before phase (passive unknown) is the control arm: it reads the plain elapsed time and no cut. Reference search 2026-11-23: coa-history spells 520240 and 520830: 0 events in 186 logs; snapshots list Nether Strength 520240 (DemonHunter Demonology talent) without a value; nothing found for the value."
-    },
-    {
-      "spell": 520240,
-      "name": "Nether Strength (Hateforged Barrier cooldown after a Ruin)",
-      "kind": "metric_delta",
-      "variant": "cd_705129",
-      "label_suffix": "cd_705129",
-      "quote": "Casting Felfury spenders now reduces the cooldown of Burning Hatred, Hateforged Barrier, and Demonic Will by $/1000;520830S1 sec.",
-      "trigger_spell": 802060,
-      "gate_spell": 520240,
-      "target": "dummy",
-      "setup_casts": [
-        705129
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 1600,
-      "phase_auras": [
-        [
-          800058,
-          2,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "cooldown_ms",
-      "fields": {
-        "spell": 705129
-      },
-      "before_expected": 27400,
-      "expected": 26900,
-      "tolerance": 25,
-      "wait_ms": 1000,
-      "expire_ms": 500,
-      "game_time": {
-        "after": [
-          980,
-          1020
-        ]
-      },
-      "void_on_cast_failure": true,
-      "observe_source": "520240 Effect[0] aura 42 PROC_TRIGGER_SPELL of 520830; 520830 effects 0-2 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -501 + EffectDieSides 1 = -500 ms (500 ms = $/1000;520830S1 sec 0.5), MiscValue 705129 / 800209 / 805239 (Spell.dbc). The class code reduces the cooldown by 500 ms of each of the three when a Felfury spender (Sargeron Smite 802060 here: instant, Consumes 2 Felfury; Ruin has a 2500 ms cast time that ends after the 1000 ms read) is cast (AscensionFelswornAbilities.cpp:234-237). Hateforged Barrier 705129 (30000 ms recovery) is cast first (setup cast), 2 stacks of Felfury 800058 and the caster aura 803468 are precondition fixtures so Smite is castable (pair 20261123 prove_p2 refused Ruin, SPELL_FAILED_NO_POWER), then Sargeron Smite is cast at the dummy and the remaining cooldown is read 1000 ms later (game time 980..1020 ms). Expected without the passive: 30000 - 1600 (setup wait) - 1000 (read) = 27400; with 520240 learned the same minus 500 = 26900. A cut of 450 or 550 ms (10% off) reads 50 ms away, so tolerance 25 excludes both. The before phase (passive unknown) is the control arm: it reads the plain elapsed time and no cut. Reference search 2026-11-23: coa-history spells 520240 and 520830: 0 events in 186 logs; snapshots list Nether Strength 520240 (DemonHunter Demonology talent) without a value; nothing found for the value."
-    },
-    {
-      "spell": 520240,
-      "name": "Nether Strength (Demonic Will cooldown after a Ruin)",
-      "kind": "metric_delta",
-      "variant": "cd_800209",
-      "label_suffix": "cd_800209",
-      "quote": "Casting Felfury spenders now reduces the cooldown of Burning Hatred, Hateforged Barrier, and Demonic Will by $/1000;520830S1 sec.",
-      "trigger_spell": 802060,
-      "gate_spell": 520240,
-      "target": "dummy",
-      "setup_casts": [
-        800209
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 1600,
-      "phase_auras": [
-        [
-          800058,
-          2,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "cooldown_ms",
-      "fields": {
-        "spell": 800209
-      },
-      "before_expected": 42400,
-      "expected": 41900,
-      "tolerance": 25,
-      "wait_ms": 1000,
-      "expire_ms": 500,
-      "game_time": {
-        "after": [
-          980,
-          1020
-        ]
-      },
-      "void_on_cast_failure": true,
-      "observe_source": "520240 Effect[0] aura 42 PROC_TRIGGER_SPELL of 520830; 520830 effects 0-2 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -501 + EffectDieSides 1 = -500 ms (500 ms = $/1000;520830S1 sec 0.5), MiscValue 705129 / 800209 / 805239 (Spell.dbc). The class code reduces the cooldown by 500 ms of each of the three when a Felfury spender (Sargeron Smite 802060 here: instant, Consumes 2 Felfury; Ruin has a 2500 ms cast time that ends after the 1000 ms read) is cast (AscensionFelswornAbilities.cpp:234-237). Demonic Will 800209 (45000 ms recovery) is cast first (setup cast), 2 stacks of Felfury 800058 and the caster aura 803468 are precondition fixtures so Smite is castable (pair 20261123 prove_p2 refused Ruin, SPELL_FAILED_NO_POWER), then Sargeron Smite is cast at the dummy and the remaining cooldown is read 1000 ms later (game time 980..1020 ms). Expected without the passive: 45000 - 1600 (setup wait) - 1000 (read) = 42400; with 520240 learned the same minus 500 = 41900. A cut of 450 or 550 ms (10% off) reads 50 ms away, so tolerance 25 excludes both. The before phase (passive unknown) is the control arm: it reads the plain elapsed time and no cut. Reference search 2026-11-23: coa-history spells 520240 and 520830: 0 events in 186 logs; snapshots list Nether Strength 520240 (DemonHunter Demonology talent) without a value; nothing found for the value."
-    },
-    {
       "spell": 524950,
       "name": "Black Magic (Ruin damage)",
       "kind": "hit_ratio",
@@ -2392,33 +2269,6 @@
     },
     {
       "spell": 704602,
-      "name": "Whirling Vengeance (Fury Unleashed cooldown)",
-      "kind": "metric_delta",
-      "variant": "cd",
-      "label_suffix": "cd",
-      "quote": "Reduces the cooldown of Fury Unleashed by $/1000;S1 sec.",
-      "trigger_spell": 555738,
-      "gate_spell": 704602,
-      "target": "caster",
-      "metric": "cooldown_ms",
-      "fields": {
-        "spell": 555738
-      },
-      "before_expected": 179500,
-      "expected": 119500,
-      "tolerance": 150,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "game_time": {
-        "after": [
-          480,
-          520
-        ]
-      },
-      "observe_source": "$/1000;S1 = 60 s: 704602 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 11 (SPELLMOD_COOLDOWN), EffectBasePoints -60001 + EffectDieSides 1 = -60000 ms (Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Fury Unleashed 555738 has RecoveryTime 180000 (Spell.dbc). It is cast without the passive (control arm, the first phase) and with 704602 learned, and its remaining cooldown is read 500 ms after the cast (game time 480..520 ms): 180000 - 500 = 179500 without, 120000 - 500 = 119500 with. A cut of 54 s or 66 s (10 percent off) reads 6000 ms away, so tolerance 150 excludes both. Reference search 2026-11-23: coa-history spell 704602 and 806096: 0 events in 186 logs; snapshots list Whirling Vengeance 704602 without a value beyond the tooltip; nothing found for the value."
-    },
-    {
-      "spell": 704602,
       "name": "Whirling Vengeance (strike when Fury Unleashed ends)",
       "kind": "script_hit",
       "variant": "strike",
@@ -2443,6 +2293,39 @@
       "unresisted": true,
       "settle_ms": 6500,
       "observe_source": "AscensionFelswornAuras.cpp:208-209: when 555738 ends with 704602 known the caster casts 806096; 806096 Effect[0] SCHOOL_DAMAGE EffectBasePoints 749 + 1, TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, radius index 14 (8 yd). Fury Unleashed lasts 5000 ms (SpellDuration 28). Each trial casts Fury Unleashed and waits settle_ms 6500 for its end; the tooltip formula of 806096 effect 0 read with the measured attack power gives the amount. The control arm makes the same cast without 704602 learned and must count no 806096 hit. Reference search 2026-11-23: coa-history spell 806096: 0 events in 186 logs; nothing found for the value."
+    },
+    {
+      "spell": 704602,
+      "name": "Whirling Vengeance (strike, AP contrast arm)",
+      "kind": "script_hit",
+      "variant": "strike_ap",
+      "label_suffix": "strike_ap",
+      "quote": "When Fury Unleashed ends, you strike all nearby enemies for ${$806096m1+$806096ppl1+$AP*0.5614286} Shadowflame Damage",
+      "hit_spell": 806096,
+      "hit_effect": 0,
+      "trials": 6,
+      "minimum_hits": 4,
+      "casts": [
+        [
+          555738,
+          "caster"
+        ]
+      ],
+      "caster_auras": [
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 6500,
+      "observe_source": "AscensionFelswornAuras.cpp:208-209: when 555738 ends with 704602 known the caster casts 806096; 806096 Effect[0] SCHOOL_DAMAGE EffectBasePoints 749 + 1, TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, radius index 14 (8 yd). Fury Unleashed lasts 5000 ms (SpellDuration 28). Each trial casts Fury Unleashed and waits settle_ms 6500 for its end; the tooltip formula of 806096 effect 0 read with the measured attack power gives the amount. The control arm makes the same cast without 704602 learned and must count no 806096 hit. Reference search 2026-11-23: coa-history spell 806096: 0 events in 186 logs; nothing found for the value. AP contrast arm (review fw-r2b I-1): the same entry with stat_auras 10031 (the attack-power fixture the Sun Cleric _ap entries use) set before the stats are measured, so the mean is read at a second attack power; a server that dropped the 0.5614286 x AP term or used another coefficient with the same product at the first AP cannot pass both.",
+      "stat_auras": [
+        [
+          10031,
+          1
+        ]
+      ]
     },
     {
       "spell": 801892,
@@ -2471,7 +2354,7 @@
       "expire_ms": 500,
       "before_expected": 1,
       "expected": 3,
-      "observe_source": "The tooltip gives 'an additional 1 Felfury' per critical strike; Twin Slice 801901 states 'Generates 1 Felfury' and strikes with both weapons (808303 per hand, Effect[0] and Effect[1] TRIGGER_SPELL), so with every strike forced to crit (melee crit rating forced by the harness) the expected stacks of Felfury 800058 are 1 (own generation, the first phase, passive unknown = control arm) and 1 + 2 critical strikes x 1 = 3 with 801892 learned. The per-strike reading is the tooltip's own words; a per-cast reading would give 2: when the measured value is 2 the claim goes to status 5 as a question. Felfury is cleared before each phase (phase_auras stacks 0). The code path AscensionFelswornEvents.cpp:228-231 gains 1 per critical Twin or Direct strike event with 801892 known. Reference search 2026-11-23: coa-history spell 801892: 0 events in 186 logs (passive); spell 800058 (Felfury) logged; snapshots list Twin Fury 801892 without a value beyond the tooltip; nothing found for the value."
+      "observe_source": "The tooltip gives 'an additional 1 Felfury' per critical strike; Twin Slice 801901 states 'Generates 1 Felfury' and strikes with both weapons (808303 per hand, Effect[0] and Effect[1] TRIGGER_SPELL), so with every strike forced to crit (melee crit rating forced by the harness) the expected stacks of Felfury 800058 are 1 (own generation, the first phase, passive unknown = control arm) and 1 + 2 critical strikes x 1 = 3 with 801892 learned. The per-strike reading is the tooltip's own words; a per-cast reading would give 2: when the measured value is 2 the claim goes to status 5 as a question. Felfury is cleared before each phase (phase_auras stacks 0). The code path AscensionFelswornAbilities.cpp:358-361 gains 1 per critical Twin and Direct strike with 801892 known. Reference search 2026-11-23: coa-history spell 801892: 0 events in 186 logs (passive); spell 800058 (Felfury) logged; snapshots list Twin Fury 801892 without a value beyond the tooltip; nothing found for the value."
     },
     {
       "spell": 801892,
@@ -2584,6 +2467,108 @@
         "spell_power": 20000
       },
       "observe_source": "$s1 = 10 (300475 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER, EffectBasePoints 9 + EffectDieSides 1, MiscValue 127 all schools, on the enemy target for 8000 ms). Each trial casts Ruin 801895 (a Fire and Shadow direct hit that applies Expose when 300474 is learned) at the dummy, then the observed Sargeron Smite 802060; the mean damage of the non-critical Smite hits must rise by 10 percent with 300474 learned against the same trials without it (control arm; band 8..12, G-19). Felfury 800058 x4 (Ruin and Smite each consume 2) and the spell penetration aura 823764 are named precondition fixtures; spell power +20000 is a fixture in both arms. Expose is the 8 s aura of the Ruin cast just before the Smite. Reference search 2026-11-23: as the applies entry: nothing found for the value."
+    },
+    {
+      "spell": 520240,
+      "name": "Nether Strength (Burning Hatred cooldown after Sargeron Smite, behaviour)",
+      "kind": "cost_gate",
+      "quote": "Casting Felfury spenders now reduces the cooldown of Burning Hatred, Hateforged Barrier, and Demonic Will by $/1000;520830S1 sec.",
+      "gated_spell": 805239,
+      "resource": "cooldown",
+      "reduction": 500,
+      "target": "caster",
+      "after_casts": [
+        [
+          802060,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 2000,
+      "margin_ms": 40,
+      "label_suffix": "cd_805239",
+      "cast_auras": [
+        {
+          "spell": 802060,
+          "auras": [
+            800058
+          ],
+          "stacks": 2,
+          "reason": "Sargeron Smite 802060 consumes 2 Felfury (AscensionFelswornAbilities.cpp:234-237 reduces the cooldowns on a spender cast) and is refused SPELL_FAILED_NO_POWER without them (prove_p2 refused Ruin): 800058 at 2 stacks is set on the caster before each Smite cast, a named precondition fixture; the claim measured is the cooldown cut."
+        }
+      ],
+      "observe_source": "520240 Effect[0] aura 42 PROC_TRIGGER_SPELL of 520830; 520830 effects 0-2 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -501 + EffectDieSides 1 = -500 ms (500 ms = $/1000;520830S1 sec 0.5), MiscValue 705129 / 800209 / 805239 (Spell.dbc). The class code reduces the cooldown by 500 ms of each of the three when a Felfury spender (Sargeron Smite 802060 here: instant, Consumes 2 Felfury; Ruin has a 2500 ms cast time that ends after the 1000 ms read) is cast (AscensionFelswornAbilities.cpp:234-237). Behaviour route (review fw-r2b I-2: cooldown_ms is a readback): the gated spell 805239 (Burning Hatred) is primed, Sargeron Smite is cast 2000 ms later, and the gated spell is attempted at its cooldown less 500 ms plus/minus 40 ms. A cut of 450 or 550 ms (10% off) falls inside the 40 ms margins on the wrong side, so the through and refused arms exclude both; the control arm is the talent unknown (refused at the same wait). Reference search 2026-11-23: coa-history spells 520240 and 520830: 0 events in 186 logs; nothing found for the value."
+    },
+    {
+      "spell": 520240,
+      "name": "Nether Strength (Hateforged Barrier cooldown after Sargeron Smite, behaviour)",
+      "kind": "cost_gate",
+      "quote": "Casting Felfury spenders now reduces the cooldown of Burning Hatred, Hateforged Barrier, and Demonic Will by $/1000;520830S1 sec.",
+      "gated_spell": 705129,
+      "resource": "cooldown",
+      "reduction": 500,
+      "target": "caster",
+      "after_casts": [
+        [
+          802060,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 2000,
+      "margin_ms": 40,
+      "label_suffix": "cd_705129",
+      "cast_auras": [
+        {
+          "spell": 802060,
+          "auras": [
+            800058
+          ],
+          "stacks": 2,
+          "reason": "Sargeron Smite 802060 consumes 2 Felfury (AscensionFelswornAbilities.cpp:234-237 reduces the cooldowns on a spender cast) and is refused SPELL_FAILED_NO_POWER without them (prove_p2 refused Ruin): 800058 at 2 stacks is set on the caster before each Smite cast, a named precondition fixture; the claim measured is the cooldown cut."
+        }
+      ],
+      "observe_source": "520240 Effect[0] aura 42 PROC_TRIGGER_SPELL of 520830; 520830 effects 0-2 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -501 + EffectDieSides 1 = -500 ms (500 ms = $/1000;520830S1 sec 0.5), MiscValue 705129 / 800209 / 805239 (Spell.dbc). The class code reduces the cooldown by 500 ms of each of the three when a Felfury spender (Sargeron Smite 802060 here: instant, Consumes 2 Felfury; Ruin has a 2500 ms cast time that ends after the 1000 ms read) is cast (AscensionFelswornAbilities.cpp:234-237). Behaviour route (review fw-r2b I-2: cooldown_ms is a readback): the gated spell 705129 (Hateforged Barrier) is primed, Sargeron Smite is cast 2000 ms later, and the gated spell is attempted at its cooldown less 500 ms plus/minus 40 ms. A cut of 450 or 550 ms (10% off) falls inside the 40 ms margins on the wrong side, so the through and refused arms exclude both; the control arm is the talent unknown (refused at the same wait). Reference search 2026-11-23: coa-history spells 520240 and 520830: 0 events in 186 logs; nothing found for the value."
+    },
+    {
+      "spell": 520240,
+      "name": "Nether Strength (Demonic Will cooldown after Sargeron Smite, behaviour)",
+      "kind": "cost_gate",
+      "quote": "Casting Felfury spenders now reduces the cooldown of Burning Hatred, Hateforged Barrier, and Demonic Will by $/1000;520830S1 sec.",
+      "gated_spell": 800209,
+      "resource": "cooldown",
+      "reduction": 500,
+      "target": "caster",
+      "after_casts": [
+        [
+          802060,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 2000,
+      "margin_ms": 40,
+      "label_suffix": "cd_800209",
+      "cast_auras": [
+        {
+          "spell": 802060,
+          "auras": [
+            800058
+          ],
+          "stacks": 2,
+          "reason": "Sargeron Smite 802060 consumes 2 Felfury (AscensionFelswornAbilities.cpp:234-237 reduces the cooldowns on a spender cast) and is refused SPELL_FAILED_NO_POWER without them (prove_p2 refused Ruin): 800058 at 2 stacks is set on the caster before each Smite cast, a named precondition fixture; the claim measured is the cooldown cut."
+        }
+      ],
+      "observe_source": "520240 Effect[0] aura 42 PROC_TRIGGER_SPELL of 520830; 520830 effects 0-2 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -501 + EffectDieSides 1 = -500 ms (500 ms = $/1000;520830S1 sec 0.5), MiscValue 705129 / 800209 / 805239 (Spell.dbc). The class code reduces the cooldown by 500 ms of each of the three when a Felfury spender (Sargeron Smite 802060 here: instant, Consumes 2 Felfury; Ruin has a 2500 ms cast time that ends after the 1000 ms read) is cast (AscensionFelswornAbilities.cpp:234-237). Behaviour route (review fw-r2b I-2: cooldown_ms is a readback): the gated spell 800209 (Demonic Will) is primed, Sargeron Smite is cast 2000 ms later, and the gated spell is attempted at its cooldown less 500 ms plus/minus 40 ms. A cut of 450 or 550 ms (10% off) falls inside the 40 ms margins on the wrong side, so the through and refused arms exclude both; the control arm is the talent unknown (refused at the same wait). Reference search 2026-11-23: coa-history spells 520240 and 520830: 0 events in 186 logs; nothing found for the value."
+    },
+    {
+      "spell": 704602,
+      "name": "Whirling Vengeance (Fury Unleashed cooldown, behaviour)",
+      "kind": "cost_gate",
+      "quote": "Reduces the cooldown of Fury Unleashed by $/1000;S1 sec.",
+      "gated_spell": 555738,
+      "resource": "cooldown",
+      "reduction": 60000,
+      "target": "caster",
+      "label_suffix": "cd",
+      "observe_source": "704602 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -60001 + 1 die side = -60000 ms ($/1000;S1 = 60 sec). Fury Unleashed 555738 RecoveryTime 180000 ms, so the reduced cooldown is 120000 ms. Arms timed from a priming cast: an attempt 120500 ms later without the talent (refused), with it (goes through), and 119500 ms later with it (refused). A cut 10% off (54000 or 66000 ms) moves the end by 6000 ms, far outside the 500 ms margin. Reference search 2026-11-23: nothing found for the value beyond the tooltip."
     }
   ],
   "player_observations": [],
