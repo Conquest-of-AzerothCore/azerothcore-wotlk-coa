@@ -674,6 +674,16 @@ def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: Target
                          aura_names=facts.aura_names, modifiers=modifiers, ticks=ticks, rolls=rolls,
                          triggered=triggered, records=records, rank_id=rank_id,
                          percent_before_flat=percent_before_flat, weapon_part=weapon_part)
+    losses = {index: loss for index in indexes
+              if kind in SCRIPT_HIT_KINDS and (loss := per_level_fraction(records, rank_id, index, caster.level))}
+    if losses:
+        engine = expected_hit(shown, facts.effects, attacker, weapon_profile(class_file), mitigation,
+                              aura_names=facts.aura_names, modifiers=modifiers, ticks=ticks,
+                              rolls=engine_rolls(shown, indexes, rolls, losses), triggered=triggered, records=records,
+                              rank_id=rank_id, percent_before_flat=percent_before_flat, weapon_part=weapon_part)
+        terms = ', '.join(f'effect {index} loses {loss:.6g}' for index, loss in losses.items())
+        model = replace(model, engine=replace(engine, displayed=model.displayed),
+                        engine_rule=f'{PER_LEVEL_ENGINE_RULE}: {terms}')
     return RankHit(model, readout, facts, school_mask, indexes, duration, hit_spell)
 
 

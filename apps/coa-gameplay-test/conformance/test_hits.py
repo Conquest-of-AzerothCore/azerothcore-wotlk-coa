@@ -1040,6 +1040,34 @@ class HitScenarioTest(unittest.TestCase):
             self.assertEqual(hit_expectation(expectations).check, 'hit_mean')
             self.assertLessEqual(scenario['timeout_ms'], MAX_SCENARIO_MS)
 
+    def test_a_rank_hit_with_a_truncated_per_level_term_is_ok_only_around_the_engine_mean(self):
+        model = reference_hit_model(self.templar, RECKONING_MAX_RANK)
+        self.assertIsNotNone(model.engine)
+        self.assertIn('effect 0 loses 0.5072', model.engine_rule)
+        self.assertLess(model.engine.mean, model.mean)
+        self.assertGreater(model.engine.mean, model.mean - 1)
+        scenario, expectations = hit_parts(self.templar, self.spells[RECKONING], RECKONING_CASTS_NEEDED)[0]
+        hit = hit_expectation(expectations)
+        measured = measured_reference(self.templar, hit)
+        judged = measured_hit_model(self.templar, hit, measured)
+        labels, count = hit.model['measurements'], 40000
+        base = Verdict(label=hit.label, status='unmeasured', measured=None, expected=None, low=None, high=None,
+                       explanation='')
+
+        def verdict(mean):
+            found = Run(key='seeded', status='ok', message='', steps=[], max_step_ms=None,
+                        values={**measured, labels['total']: mean * count, labels['count']: count})
+            return judge_hit(base, self.templar, [(scenario, found, hit)], measured_hit_model)
+
+        engine = verdict(judged.engine.mean)
+        self.assertEqual(engine.status, 'ok')
+        self.assertIn('inside the engine model mean', engine.explanation)
+        self.assertEqual(engine.detail[PER_LEVEL_ROUNDING]['engine_mean'], judged.engine.mean)
+        mutant = verdict(judged.engine.mean - 0.06 * judged.mean)
+        self.assertEqual(mutant.status, 'alert')
+        self.assertIn('does not explain it either', mutant.explanation)
+        self.assertEqual(mutant.detail[PER_LEVEL_ROUNDING]['rule'], model.engine_rule)
+
     def test_vindication_equips_the_one_hand_weapon(self):
         scenario, expectations = hit_scenario(self.templar, self.spells[VINDICATION], 1)
         run.validate(scenario)

@@ -625,8 +625,10 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   error gives exactly the engine's integer set and cannot be told apart from it. A fixed (`EffectDieSides` 0 or 1)
   `effect_value` with a fractional per-level term takes the same rule instead of the `max(1, 0.5%)` band: `ok` only
   when the read is the int32 truncation of the tooltip value or, under the same model checks, of that value less
-  the lost fraction; otherwise an `alert`, labelled "not modelled" when a model check failed. A `hit_mean`,
-  `melee_mean` or `periodic_total` alert on a rank with such a term says
+  the lost fraction; otherwise an `alert`, labelled "not modelled" when a model check failed. A `hit_mean` of a
+  `school` or `heal` hit (rank or script hit) on such a term carries an engine model, the same rolls less the lost
+  fraction (ADR 1069): outside the tooltip model it is `ok` only inside the engine model's 99% interval, else an
+  alert naming the engine mean. A `melee_mean`, `periodic_total` or other hit alert on a rank with such a term says
   "per-level truncation, engine computation not modelled" and stays an alert. Fewer reads than the count the mean
   needs at the measured stats (`detail['reads_needed']`), or a mean of 0, give `measured`. A single read inside the
   roll range proves nothing about a constant offset smaller than the range: the fix round of the phase-2 Templar
