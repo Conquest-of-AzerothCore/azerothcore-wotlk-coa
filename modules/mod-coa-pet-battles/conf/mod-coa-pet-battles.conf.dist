@@ -1,0 +1,25 @@
+[worldserver]
+
+# Loads the pet battle data tables (coa_pet_*) at startup. 0 disables the module.
+CoAPetBattles.Enable = 1
+
+# Highest battle pet level.
+CoAPetBattles.MaxLevel = 25
+
+# Relative chance of a wild pet being poor, common, uncommon or rare: four whole numbers.
+CoAPetBattles.QualityWeights = "55 28 13 4"
+
+# A wild pet can be captured at or below this fraction of its maximum health.
+CoAPetBattles.CaptureHealth = 0.35
+
+# Pets regain RegenPercent of their maximum health every RegenSeconds, also while offline.
+CoAPetBattles.RegenPercent = 1
+CoAPetBattles.RegenSeconds = 10
+
+# A fed pet regains FedPercent of its maximum health every FedStepSeconds for FedSeconds.
+CoAPetBattles.FedPercent = 10
+CoAPetBattles.FedStepSeconds = 2
+CoAPetBattles.FedSeconds = 20
+
+# Experience reduction per level the defeated pet is below the winning pet.
+CoAPetBattles.XpStep = 0.20
