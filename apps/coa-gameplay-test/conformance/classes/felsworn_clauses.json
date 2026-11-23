@@ -330,7 +330,16 @@
     "labels": [
       "300480 effect_value #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The proc only calls Reduce(player, 560284, INT32_MAX) (AscensionFelswornEvents.cpp:145-146): the reset of the cooldown of Infernal casts nothing, so no procs event_metric counts it. proc_reset (Legionfall) reads a marker spell that 300480 lacks, and cooldown_delta of triggers is a fixed 100% reduction, not a chance. The nearest kind is behaviours proc_reset with the Infernal cooldown read as the marker.",
+      "attempts": [
+        {
+          "agent": "fw-chance",
+          "report": ".agents/plans/fw-chance/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 300483,
@@ -404,11 +413,21 @@
   {
     "spell": 300490,
     "clause": "Periodic damage dealt now has a $h% chance to grant you Felforged for $806104d.",
-    "labels": [
-      "300490 effect_value #0",
-      "300490 spell_duration 806104 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "$h% chance",
+        "labels": [
+          "300490 proc_rate"
+        ]
+      },
+      {
+        "claim": "grant you Felforged for $806104d",
+        "labels": [
+          "300490 spell_duration 806104 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 300490,
@@ -1038,7 +1057,16 @@
     "labels": [
       "560639 effect_value #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The proc is Gain(player, 1) (AscensionFelswornEvents.cpp:172-176), a stack of aura 800058 that no procs event_metric reads. The trigger side is available (Bane of Chaos 704368 ticks, as the counted Felforged 300490 entry) so only the aura-stack event metric is missing. The nearest kind is procs cast with trigger_lands_no_hit and an aura-stack event metric.",
+      "attempts": [
+        {
+          "agent": "fw-chance",
+          "report": ".agents/plans/fw-chance/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 560641,
@@ -1370,7 +1398,7 @@
       {
         "claim": "$h% chance",
         "labels": [
-          "681376 effect_value #0"
+          "681376 proc_rate"
         ]
       },
       {
@@ -2746,7 +2774,7 @@
       {
         "claim": "$h% chance",
         "labels": [
-          "804822 effect_value #0"
+          "804822 proc_rate avoided"
         ]
       },
       {
@@ -2759,13 +2787,31 @@
           "804822 effect_value 807163e0 #1"
         ]
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "Two parts of the clause have no label: the 10 Twin Slice instances (a counted application of 807163 on Twin Slice damage) and the parry leg of 'Dodging or parrying'. Class 14 can parry: Nether Disciple 560576 and 561343 (CharacterAdvancement 6338, obtainable per ~/CoaServer/reference/coa-obtainable) carry Effect[0] APPLY_AURA 47 SPELL_AURA_MOD_PARRY_PERCENT, and HandleAuraModParryPercent calls SetCanParry(true) (SpellAuraEffects.cpp:4870-4884). The reference character does not learn them, so a parry set by set_combat_avoidance lets the swing land (guard landed failed in the first attempt); the proc_rate avoided entry proves the chance on the dodge leg only. The avoided trigger of procs has no field that learns a precondition spell on the caster (TRIGGER_FIELDS of proc_avoided.py; chance_modifiers learns spells but feeds the chance expectation), so a parry arm (Nether Disciple learned, dodge 0, parry 100, read from melee_attacks_taken victim state 3) needs a new option. Code reading, not run. The nearest kind for the instances is metric_delta on 807163 charges.",
+      "attempts": [
+        {
+          "agent": "fw-chance2",
+          "report": ".agents/plans/fw-chance2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 804822,
     "clause": "and generate 1 Felfury.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The Felfury of this clause is not gained by the proc: the Proc of 804822 only casts 807163 (AscensionFelswornEvents.cpp:157-158). Each direct Twin Slice damage while 807163 is up calls Gain(player, 1) and counts the 10 charges down (AscensionFelswornAbilities.cpp:358-369; charges set at AscensionFelswornAuras.cpp:74-75). The gain is deterministic per Twin Slice hit and belongs with the 'next 10 instances' claim, not with a chance event. It is a ModStackAmount of aura 800058 that is not a cast, an energize or a first application, and no existing metric reads a stack gain per cast. The nearest kind is metric_delta aura_stacks 800058 around one Twin Slice cast with and without 807163 from a real proc.",
+      "attempts": [
+        {
+          "agent": "fw-chance2",
+          "report": ".agents/plans/fw-chance2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 804823,
@@ -2994,7 +3040,16 @@
     "labels": [
       "805245 effect_value #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Two gaps. (1) The Felfury gain is Gain(player, 1), a stack of aura 800058 that no procs or triggers metric reads (same as 804822). (2) The handler needs Demonic Will 800209 or Hateforged Barrier 705129 active (AscensionFelswornEvents.cpp:44-45), and procs attempt_auras is refused for an avoided trigger (procs.py attempt_auras: cast trigger only), so the condition cannot be held while the strikers swing. Damage taken needs a taken_hit trigger, also without the fixture. The nearest kind is procs avoided with attempt_auras and an aura-stack event metric.",
+      "attempts": [
+        {
+          "agent": "fw-chance",
+          "report": ".agents/plans/fw-chance/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 805246,
@@ -3034,10 +3089,30 @@
   {
     "spell": 805249,
     "clause": "Dodging an attack now generates $521210s1 Energy.",
-    "labels": [
-      "805249 effect_value 521210e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Dodging an attack now generates Energy",
+        "labels": [
+          "805249 trigger_count"
+        ]
+      },
+      {
+        "claim": "$521210s1 Energy",
+        "labels": [
+          "805249 effect_value 521210e0 #0"
+        ]
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "The amount of Energy per dodge (the 521210 energize value) is read only as data. triggers counts the energize events (spell_energize_count) per dodge but has no amount field; procs energize_amounts needs a chance token. The nearest kind is procs energize_amounts.",
+      "attempts": [
+        {
+          "agent": "fw-chance",
+          "report": ".agents/plans/fw-chance/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 805255,
