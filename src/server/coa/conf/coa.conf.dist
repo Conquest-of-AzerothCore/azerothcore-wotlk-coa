@@ -643,9 +643,9 @@ Bloodforged.EliteHeroicUpgradePercent = 2.5
 #                     High-Risk release stage 0-8 (HighRisk.ReleaseStage). The lowest allowed
 #                     value is 57, the lowest item level of the level 60 blue items: a lower value is
 #                     raised to 57 and logged. Raid gear of released raids is not limited by it.
-#        Default:     "57 57 57 57 57 57 57 57 57"
+#        Default:     "60 60 60 60 60 60 60 60 60"
 
-Bloodforged.BlueMaxItemLevelByStage = "57 57 57 57 57 57 57 57 57"
+Bloodforged.BlueMaxItemLevelByStage = "60 60 60 60 60 60 60 60 60"
 
 #    Bloodforged.EpicMaxItemLevelByStage
 #        Description: Highest item level of an epic Bloodforged item that drops, one value per
@@ -750,16 +750,25 @@ Bloodforged.EndgameRareMinRequiredLevel = 60
 #    Bloodforged.RareHiddenCachePercent
 #    Bloodforged.EpicHiddenCachePercent
 #        Description: High-Risk Hidden Caches (loot 9670 / 9671 / 9672, opened with an Ephemeral Key) add
-#                     Bloodforged items that require level 60 within the stage cap. A Hidden Cache always
-#                     gives one rare (blue) item. A Rare Hidden Cache always gives one epic and has the
-#                     two percent chances for a Heroic Bloodforged item and for raid gear of a released
-#                     raid. An Epic Hidden Cache always gives one raid item of a released raid (an epic
-#                     before any raid is released) and one epic; the two percent chances are for the raid
-#                     item to be its Heroic copy and for the epic to be a Heroic Bloodforged item.
+#                     Bloodforged items within the stage cap. A Hidden Cache always gives one rare (blue)
+#                     item that requires level Bloodforged.HiddenCacheBlueMinRequiredLevel to 60; the other
+#                     caches give items that require level 60. A Rare Hidden Cache always gives one epic
+#                     and has the two percent chances for a Heroic Bloodforged item and for raid gear of a
+#                     released raid. An Epic Hidden Cache always gives one raid item of a released raid (an
+#                     epic before any raid is released) and one epic; the two percent chances are for the
+#                     raid item to be its Heroic copy and for the epic to be a Heroic Bloodforged item.
 #        Default:     "15 5", "5 15"
 
 Bloodforged.RareHiddenCachePercent = "15 5"
 Bloodforged.EpicHiddenCachePercent = "5 15"
+
+#    Bloodforged.HiddenCacheBlueMinRequiredLevel
+#        Description: Lowest required level of the rare (blue) Bloodforged item a Hidden Cache (loot 9670)
+#                     gives; the item requires this level up to 60 and stays within
+#                     Bloodforged.BlueMaxItemLevelByStage. Values above 60 count as 60.
+#        Default:     55
+
+Bloodforged.HiddenCacheBlueMinRequiredLevel = 55
 
 #    Bloodforged.EphemeralKeyPercent
 #        Description: Percent chance for an Ephemeral Key (967680, opens a Hidden Cache) from a creature
