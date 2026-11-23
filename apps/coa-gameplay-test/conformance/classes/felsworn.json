@@ -2222,10 +2222,17 @@
         {
           "spell": 705121,
           "auras": [
-            803468,
+            803468
+          ],
+          "reason": "Sunder 705121 needs the caster aura 803468 (At Least 2 Felfury, CasterAuraSpell in Spell.dbc); a precondition fixture set before every attempt, the claim is the Energy cost."
+        },
+        {
+          "spell": 705121,
+          "auras": [
             800058
           ],
-          "reason": "Sunder 705121 needs the caster aura 803468 (At Least 2 Felfury, CasterAuraSpell in Spell.dbc) and consumes the Felfury resource 800058 (AscensionCustomResourceData.h:535, Fixed 2); both auras are precondition fixtures set before every attempt, the claim is the Energy cost."
+          "stacks": 2,
+          "reason": "Sunder 705121 consumes 2 of the Felfury resource 800058 (AscensionCustomResourceData.h:535, Fixed 2), so the fixture holds 2 stacks before every attempt; a precondition fixture, the claim is the Energy cost."
         }
       ],
       "observe_source": "$s1 = 10 (520885 Effect[0] aura 107 SPELLMOD_COST, flat -10, class mask word 0 0x80000 = SpellFamilyFlags[0] of Sunder 705121). Sunder 705121 ManaCost 30, PowerType 3, RecoveryTime 8000: 20 allowed, 19 beyond (the cooldown is cleared before each attempt). Arms: 20 Energy without the passive (refused), 20 with it (through), 19 with it (refused). Reference search 2026-11-23: coa-history spell 520885: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
@@ -2320,11 +2327,11 @@
       "fixture": {
         "attack_power": 20000
       },
-      "observe_source": "$s1 = 100 (705150 Effect[0] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, EffectBasePoints 99, MiscValue 127 all schools). Native semantics as for Pious 300943 (docs/coa/sun-cleric-completion.md:53): the aura multiplies the whole critical figure, so a critical hit reads 2.0 times the same critical hit without the passive (the same recorded choice, no new total-critical-damage multiplier invented). Carve strike 803715 forced to critical, attack power fixture 20000 in both arms. Reference search 2026-11-23: coa-history spell 705150: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+      "observe_source": "$s1 = 100 (705150 Effect[0] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, EffectBasePoints 99, MiscValue 127 all schools). Native semantics as for Pious 300943 (docs/coa/sun-cleric-completion.md:53) and the engine lines Unit.cpp:10656-10667 (AddPct on crit_bonus, which is 2 x damage for melee-class spells) and Unit.cpp:1745-1755: the aura multiplies the whole critical figure, so a critical hit reads 2.0 times the same critical hit without the passive (the same recorded choice, no new total-critical-damage multiplier invented). Carve strike 803715 forced to critical, attack power fixture 20000 in both arms. Reference search 2026-11-23: coa-history spell 705150: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
     },
     {
       "spell": 300470,
-      "name": "Dark Lord (damage taken above 75% health)",
+      "name": "Dark Lord (damage taken at 76% health, just above 75%)",
       "kind": "taken_hit",
       "variant": "above75",
       "label_suffix": "above75",
@@ -2332,7 +2339,7 @@
       "expected": 0.95,
       "quote": "While above 75% health, your damage taken is reduced by $801573s1%",
       "strike_spell": 41394,
-      "caster_health_pct": 90,
+      "caster_health_pct": 76,
       "caster_max_health": 100000,
       "trials": 20,
       "arms": [
@@ -2364,11 +2371,11 @@
         }
       ],
       "health_loss": true,
-      "observe_source": "$s1 = 5 and $s2 = 5 (801573 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127, EffectBasePoints -6 + 1 = -5; Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127, +4 + 1 = +5; 300470 Effect[0] aura 23 triggers 801573 every 500 ms, Effect[1] aura 4 dummy; Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Light of the Naaru 41394 (1100 Holy, non-critical) strikes the caster without (control) and with the passive learned (treatment); the ratio of the health lost is judged against 0.95. The caster holds 90% of 100000 health before every strike (above the 75% threshold, 1100 damage leaves it above). The health the caster loses is read (health_loss), not the logged damage. Reference search 2026-11-23: coa-history spell 300470: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+      "observe_source": "$s1 = 5 and $s2 = 5 (801573 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127, EffectBasePoints -6 + 1 = -5; Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127, +4 + 1 = +5; 300470 Effect[0] aura 23 triggers 801573 every 500 ms, Effect[1] aura 4 dummy; Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Light of the Naaru 41394 (1100 Holy, non-critical) strikes the caster without (control) and with the passive learned (treatment); the ratio of the health lost is judged against 0.95. The caster holds 90% of 100000 health before every strike (above the 75% threshold, 1100 damage leaves it above). The health the caster loses is read (health_loss), not the logged damage. Reference search 2026-11-23: coa-history spell 300470: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip. Edge bracket: the arms sit just inside (76% of 100000) and just outside (74%) the stated 75%, so a gate at any other threshold fails one of the two."
     },
     {
       "spell": 300470,
-      "name": "Dark Lord (control: damage taken at 70% health)",
+      "name": "Dark Lord (control: damage taken at 74% health, just below 75%)",
       "kind": "taken_hit",
       "variant": "below75",
       "label_suffix": "below75",
@@ -2376,7 +2383,7 @@
       "expected": 1.0,
       "quote": "While above 75% health, your damage taken is reduced by $801573s1%",
       "strike_spell": 41394,
-      "caster_health_pct": 70,
+      "caster_health_pct": 74,
       "caster_max_health": 100000,
       "trials": 20,
       "arms": [
@@ -2408,7 +2415,7 @@
         }
       ],
       "health_loss": true,
-      "observe_source": "$s1 = 5 and $s2 = 5 (801573 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127, EffectBasePoints -6 + 1 = -5; Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127, +4 + 1 = +5; 300470 Effect[0] aura 23 triggers 801573 every 500 ms, Effect[1] aura 4 dummy; Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Same strike at 70% of 100000 health (below the threshold): the treatment ratio must read 1.0, the health gate of the clause. Reference search 2026-11-23: coa-history spell 300470: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+      "observe_source": "$s1 = 5 and $s2 = 5 (801573 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127, EffectBasePoints -6 + 1 = -5; Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127, +4 + 1 = +5; 300470 Effect[0] aura 23 triggers 801573 every 500 ms, Effect[1] aura 4 dummy; Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Same strike at 70% of 100000 health (below the threshold): the treatment ratio must read 1.0, the health gate of the clause. Reference search 2026-11-23: coa-history spell 300470: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip. Edge bracket: the arms sit just inside (76% of 100000) and just outside (74%) the stated 75%, so a gate at any other threshold fails one of the two."
     },
     {
       "spell": 300470,
@@ -2468,7 +2475,7 @@
           "source": "Two-Handed Sword: 2529, the Tyrant weapon set item"
         }
       ],
-      "observe_source": "92089 Effect[2] SPELL_EFFECT_TITAN_GRIP (155) (installed DBC, Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Control: the same four off-hand equips with 92089 unlearned are refused (the harness fails the step if one is accepted); learned, each is accepted and both hands hold their items; skill lines 172, 160, 229 and 55 are set so proficiency is not what refuses the equip. Reference search 2026-11-23: coa-history spell 92089: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) carries an older text of the same passive that adds 'based on your dodge rating, but reducing your damage dealt by -10%' where the tooltip and the DBC say attack power and carry no damage penalty (G-9: an older state, the tooltip wins)."
+      "observe_source": "92089 grants the wield through Player::CanTitanGrip (Player.cpp:14200-14218, the Burning Commander path; the DBC Effect[2] 155 is zeroed by AscensionFelswornContracts.cpp:134-137), Spell.dbc read with apps/coa-dbc/inspect_dbc.py. Control: the same four off-hand equips with 92089 unlearned are refused (the harness fails the step if one is accepted); learned, each is accepted and both hands hold their items; skill lines 172, 160, 229 and 55 are set so proficiency is not what refuses the equip. Reference search 2026-11-23: coa-history spell 92089: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) carries an older text of the same passive that adds 'based on your dodge rating, but reducing your damage dealt by -10%' where the tooltip and the DBC say attack power and carry no damage penalty (G-9: an older state, the tooltip wins)."
     },
     {
       "spell": 704361,
@@ -2530,7 +2537,17 @@
       "fixture": {
         "spell_power": 20000
       },
-      "expected_source": "$s1 = 6 (807902 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 126 (the six magic schools), EffectBasePoints 5 + 1, read from Spell.dbc). Sargeron Smite 802060 (level 1 rank, the Smite the class code scales, AscensionFelswornContracts.cpp:143-149, school mask 36 Fire and Shadow, AP 0.19 and SP 0.6 in AscensionFelswornData.h) non-critical hits at the dummy without the passive (control) and with it learned (treatment); 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; spell power fixture 20000 in both arms. Reference search 2026-11-23: coa-history spell 807902: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+      "expected_source": "$s1 = 6 (807902 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 126 (the six magic schools), EffectBasePoints 5 + 1, read from Spell.dbc). Sargeron Smite 802060 (level 1 rank, the Smite the class code scales, AscensionFelswornContracts.cpp:143-149, school mask 36 Fire and Shadow, AP 0.19 and SP 0.6 in AscensionFelswornData.h) non-critical hits at the dummy without the passive (control) and with it learned (treatment); 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; spell power fixture 20000 in both arms. Reference search 2026-11-23: coa-history spell 807902: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip. Sargeron Smite 802060 needs the caster aura 803468 and consumes 2 of the Felfury resource 800058 (AscensionCustomResourceData.h:533); both are set on the caster before every cast, in both arms (cast_unit_auras, precondition fixtures).",
+      "cast_unit_auras": [
+        [
+          803468,
+          1
+        ],
+        [
+          800058,
+          2
+        ]
+      ]
     }
   ],
   "player_observations": [],
@@ -2546,10 +2563,9 @@
     {
       "spell": 802060,
       "auras": [
-        803468,
-        800058
+        803468
       ],
-      "reason": "Sargeron Smite 802060 needs the caster aura 803468 (At Least 2 Felfury, CasterAuraSpell in Spell.dbc); the hit scenario cast 0 landing hits without it. 803468 and the Felfury resource 800058 are precondition fixtures set before every cast (the same pair as the Sunder cost gate); the claim is the damage."
+      "reason": "Sargeron Smite 802060 needs the caster aura 803468 (At Least 2 Felfury, CasterAuraSpell in Spell.dbc), set at one stack before every cast of its hit scenarios. It also consumes 2 of the Felfury resource 800058, which this section cannot set at 2 stacks; the Magic damage entry of 807902 sets both through cast_unit_auras."
     }
   ],
   "hit_casts": [],

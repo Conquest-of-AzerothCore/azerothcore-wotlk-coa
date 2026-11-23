@@ -74,9 +74,7 @@
       },
       {
         "claim": "grants you additional Armor and magic resistance based on your attack power",
-        "labels": [
-          "92089 behaviour_metric_delta armor"
-        ]
+        "labels": []
       }
     ]
   },
