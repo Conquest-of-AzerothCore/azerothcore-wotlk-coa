@@ -13861,5 +13861,34 @@ class HitRatioArmCastTargetTests(unittest.TestCase):
             behaviour_scenario(CLASS_FILE, entry)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class PhaseAuraStrikerTests(unittest.TestCase):
+    PARRY = [10019, 1, 'striker', 'striker']
+
+    def pushback_entry(self, **changes) -> dict:
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                     if entry.get('spell') == 807813 and entry.get('variant') == 'pushback_held')
+        return {**entry, **changes}
+
+    def test_a_striker_aura_is_set_on_the_striker_in_each_phase(self):
+        entry = self.pushback_entry(phase_auras=[*self.pushback_entry().get('phase_auras', []), self.PARRY])
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        run.validate(scenario)
+        steps = [step for step in scenario['steps'] if step.get('action') == 'set_aura' and step.get('spell') == 10019]
+        self.assertEqual(len(steps), 2)
+        self.assertTrue(all(step.get('target') == 'striker' and 'caster' not in step for step in steps))
+
+    def test_a_striker_aura_without_a_strike_is_refused(self):
+        entry = {key: value for key, value in self.pushback_entry().items() if key != 'strike'}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**entry, 'phase_auras': [self.PARRY]})
+
+    def test_mutant_without_the_striker_unit_alerts_this_suite(self):
+        entry = self.pushback_entry(phase_auras=[self.PARRY])
+        with mock.patch('behaviours.PHASE_AURA_UNITS', frozenset({'caster', 'dummy'})):
+            with self.assertRaises(ValueError):
+                behaviour_scenario(load_fixture_class_file(23), entry)
+
+
 if __name__ == '__main__':
     unittest.main()

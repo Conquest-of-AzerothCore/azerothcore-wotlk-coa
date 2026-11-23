@@ -1779,7 +1779,9 @@ Four kinds can set auras around their casts. Without the fields every scenario i
   `caster` or `dummy` (the holder and the aura's caster). `phase_auras` are set at the start of both phases,
   `after_auras` at the start of the after phase only, before the phase auras; a stack count of 0 removes the aura.
   Crusader's Brand 300513: Courage 707754 on the dummy before and after a brand cast (`speed_cap`), and a fear 12096
-  set on the caster by the dummy in both phases with the brand set on it in the second (`flee`).
+  set on the caster by the dummy in both phases with the brand set on it in the second (`flee`). `on` and `by` may
+  also be `striker` when the entry has a `strike` (ADR 1059; refused otherwise): Heaven's Appraisal 300353 sets QA
+  Test 100% Parry 10019 on an aggressive striker that turns to the caster.
 - `fixed_count` `auras`: `[spell, stacks]` set on the caster before every cast. Libram of Consecration 803893 is held
   before each Chastise, so 804148 strikes the primary and 4 nearby enemies.
 - `absorb_pierce_ratio` `target_auras`: `[spell, stacks]` set on the dummy before both casts. Blessed Resilience

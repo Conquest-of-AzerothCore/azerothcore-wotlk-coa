@@ -33001,7 +33001,7 @@
           }
         ]
       },
-      "observe_source": "Design D-233 (no confound): Bless 804247 is cast at ally 1 (ally_casts) and the critical Daybreak 503624 at ally2, so a 301005 on ally 1 can only come from the Holy Form heal 807994, which AscensionSunClericAbilities.cpp:390-405 sends to the ally recorded by Bless whatever the heal target. The Redeemer 300339 (learned in both phases) casts 301005 on a critical heal's target for 30% of the heal (AscensionSunClericEvents.cpp:142, :379); 301005 on a strike removes itself and ally 1 casts the heal 301004 for that amount on itself (:380-387). Mana set to 1749 then 1771 before the setup casts; Bless is cast first (ally_casts, before the mana is set), so the Holy Form (545) and Daybreak (354) costs of Spell.dbc ManaCostPercentage 40 and 26 of base mana 1363 leave 850 below and 872 above the 860.4 gate at the hook, as ally_bless_mana; Holy Form removed at each phase start. After the trigger the striker hits ally 1 and ally2 once each (ally_strikes, ally_arm; ally health 5000 of 10000 so the strike is a hit, not a kill). The Redeemer heal 301004 is recorded with the Cleric as caster (original caster of the ally's cast; probe of 2026-11-22: caster read target ally 1, target ally2 2, reads cast by ally or ally2 0), so it is read on the caster with fields.target ally. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found. Main reading: heal events 301004 on ally 1, 0 below the gate and 1 above it; ratio of the 301004 total to the critical 807994 total expected 0.30.",
+      "observe_source": "Design D-233 (no confound): Bless 804247 is cast at ally 1 (ally_casts) and the critical Daybreak 503624 at ally2, so a 301005 on ally 1 can only come from the Holy Form heal 807994, which AscensionSunClericAbilities.cpp:390-405 sends to the ally recorded by Bless whatever the heal target. The Redeemer 300339 (learned in both phases) casts 301005 on a critical heal's target for 30% of the heal (AscensionSunClericEvents.cpp:142, :379); 301005 on a strike removes itself and ally 1 casts the heal 301004 for that amount on itself (:380-387). Mana set to 1749 then 1771 before the setup casts; Bless is cast first (ally_casts, before the mana is set), so the Holy Form (545) and Daybreak (354) costs of Spell.dbc ManaCostPercentage 40 and 26 of base mana 1363 leave 850 below and 872 above the 860.4 gate at the hook, as ally_bless_mana; Holy Form removed at each phase start. After the trigger the striker hits ally 1 and ally2 once each (ally_strikes, ally_arm; ally health 5000 of 10000 so the strike is a hit, not a kill). The Redeemer heal 301004 is recorded with the Cleric as caster (original caster of the ally's cast; probe of 2026-11-22: caster read target ally 1, target ally2 2, reads cast by ally or ally2 0), so it is read on the caster with fields.target ally. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found. Main reading: heal events 301004 on ally 1, 0 below the gate and 1 above it; ratio of the 301004 total to the critical 807994 total expected 0.30. Read at the after start (D-242, ADR 1059): 301005 must be absent on ally and ally2 right after the after phase's aura steps (after_start_reads actor), so a Redeemer aura left from the before phase voids the run instead of being read as an after-phase proc.",
       "tolerance": 0,
       "disable_regeneration": true,
       "void_on_cast_failure": true,
@@ -33022,7 +33022,19 @@
         "count": 1,
         "wait_ms": 300,
         "after_trigger_ms": 1600
-      }
+      },
+      "after_start_reads": [
+        {
+          "spell": 301005,
+          "expected": 0,
+          "actor": "ally"
+        },
+        {
+          "spell": 301005,
+          "expected": 0,
+          "actor": "ally2"
+        }
+      ]
     },
     {
       "spell": 805301,
@@ -33171,7 +33183,7 @@
         ],
         "ally_strikes": true
       },
-      "observe_source": "Design D-233 (no confound): Bless 804247 is cast at ally 1 (ally_casts) and the critical Daybreak 503624 at ally2, so a 301005 on ally 1 can only come from the Holy Form heal 807994, which AscensionSunClericAbilities.cpp:390-405 sends to the ally recorded by Bless whatever the heal target. The Redeemer 300339 (learned in both phases) casts 301005 on a critical heal's target for 30% of the heal (AscensionSunClericEvents.cpp:142, :379); 301005 on a strike removes itself and ally 1 casts the heal 301004 for that amount on itself (:380-387). Mana set to 1749 then 1771 before the setup casts; Bless is cast first (ally_casts, before the mana is set), so the Holy Form (545) and Daybreak (354) costs of Spell.dbc ManaCostPercentage 40 and 26 of base mana 1363 leave 850 below and 872 above the 860.4 gate at the hook, as ally_bless_mana; Holy Form removed at each phase start. After the trigger the striker hits ally 1 and ally2 once each (ally_strikes, ally_arm; ally health 5000 of 10000 so the strike is a hit, not a kill). The Redeemer heal 301004 is recorded with the Cleric as caster (original caster of the ally's cast; probe of 2026-11-22: caster read target ally 1, target ally2 2, reads cast by ally or ally2 0), so it is read on the caster with fields.target ally. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found. Control without the forced crit: 807994 reads non-critical (its critical arm 0), no 301004 on strike. A baseline crit would turn an arm off, never pass the control.",
+      "observe_source": "Design D-233 (no confound): Bless 804247 is cast at ally 1 (ally_casts) and the critical Daybreak 503624 at ally2, so a 301005 on ally 1 can only come from the Holy Form heal 807994, which AscensionSunClericAbilities.cpp:390-405 sends to the ally recorded by Bless whatever the heal target. The Redeemer 300339 (learned in both phases) casts 301005 on a critical heal's target for 30% of the heal (AscensionSunClericEvents.cpp:142, :379); 301005 on a strike removes itself and ally 1 casts the heal 301004 for that amount on itself (:380-387). Mana set to 1749 then 1771 before the setup casts; Bless is cast first (ally_casts, before the mana is set), so the Holy Form (545) and Daybreak (354) costs of Spell.dbc ManaCostPercentage 40 and 26 of base mana 1363 leave 850 below and 872 above the 860.4 gate at the hook, as ally_bless_mana; Holy Form removed at each phase start. After the trigger the striker hits ally 1 and ally2 once each (ally_strikes, ally_arm; ally health 5000 of 10000 so the strike is a hit, not a kill). The Redeemer heal 301004 is recorded with the Cleric as caster (original caster of the ally's cast; probe of 2026-11-22: caster read target ally 1, target ally2 2, reads cast by ally or ally2 0), so it is read on the caster with fields.target ally. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found. Control without the forced crit: 807994 reads non-critical (its critical arm 0), no 301004 on strike. A baseline crit would turn an arm off, never pass the control. Forced non-critical (round C, D-242): the precondition fixture 984954 'Reg's Test Aura' is set on the caster in both phases; its Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 leaves no magic heal a crit (Effect[0] aura 52 is weapon crit only), as noncrit_heal_return. Read at the after start (D-242, ADR 1059): 301005 must be absent on ally and ally2 right after the after phase's aura steps (after_start_reads actor), so a Redeemer aura left from the before phase voids the run instead of being read as an after-phase proc.",
       "tolerance": 0,
       "disable_regeneration": true,
       "void_on_cast_failure": true,
@@ -33179,6 +33191,12 @@
         [
           805301,
           0,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
           "caster",
           "caster"
         ]
@@ -33191,7 +33209,19 @@
         "count": 1,
         "wait_ms": 300,
         "after_trigger_ms": 1600
-      }
+      },
+      "after_start_reads": [
+        {
+          "spell": 301005,
+          "expected": 0,
+          "actor": "ally"
+        },
+        {
+          "spell": 301005,
+          "expected": 0,
+          "actor": "ally2"
+        }
+      ]
     },
     {
       "spell": 805301,
@@ -33337,7 +33367,7 @@
         ],
         "ally_strikes": true
       },
-      "observe_source": "Design D-233 (no confound): Bless 804247 is cast at ally 1 (ally_casts) and the critical Daybreak 503624 at ally2, so a 301005 on ally 1 can only come from the Holy Form heal 807994, which AscensionSunClericAbilities.cpp:390-405 sends to the ally recorded by Bless whatever the heal target. The Redeemer 300339 (learned in both phases) casts 301005 on a critical heal's target for 30% of the heal (AscensionSunClericEvents.cpp:142, :379); 301005 on a strike removes itself and ally 1 casts the heal 301004 for that amount on itself (:380-387). Mana set to 1749 then 1771 before the setup casts; Bless is cast first (ally_casts, before the mana is set), so the Holy Form (545) and Daybreak (354) costs of Spell.dbc ManaCostPercentage 40 and 26 of base mana 1363 leave 850 below and 872 above the 860.4 gate at the hook, as ally_bless_mana; Holy Form removed at each phase start. After the trigger the striker hits ally 1 and ally2 once each (ally_strikes, ally_arm; ally health 5000 of 10000 so the strike is a hit, not a kill). The Redeemer heal 301004 is recorded with the Cleric as caster (original caster of the ally's cast; probe of 2026-11-22: caster read target ally 1, target ally2 2, reads cast by ally or ally2 0), so it is read on the caster with fields.target ally. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found. Control without Holy Form (setup cast dropped): no 807994, Daybreak critical at ally2 only, no 301004 on ally 1.",
+      "observe_source": "Design D-233 (no confound): Bless 804247 is cast at ally 1 (ally_casts) and the critical Daybreak 503624 at ally2, so a 301005 on ally 1 can only come from the Holy Form heal 807994, which AscensionSunClericAbilities.cpp:390-405 sends to the ally recorded by Bless whatever the heal target. The Redeemer 300339 (learned in both phases) casts 301005 on a critical heal's target for 30% of the heal (AscensionSunClericEvents.cpp:142, :379); 301005 on a strike removes itself and ally 1 casts the heal 301004 for that amount on itself (:380-387). Mana set to 1749 then 1771 before the setup casts; Bless is cast first (ally_casts, before the mana is set), so the Holy Form (545) and Daybreak (354) costs of Spell.dbc ManaCostPercentage 40 and 26 of base mana 1363 leave 850 below and 872 above the 860.4 gate at the hook, as ally_bless_mana; Holy Form removed at each phase start. After the trigger the striker hits ally 1 and ally2 once each (ally_strikes, ally_arm; ally health 5000 of 10000 so the strike is a hit, not a kill). The Redeemer heal 301004 is recorded with the Cleric as caster (original caster of the ally's cast; probe of 2026-11-22: caster read target ally 1, target ally2 2, reads cast by ally or ally2 0), so it is read on the caster with fields.target ally. Reference search 2026-11-22: coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC; nothing found. Control without Holy Form (setup cast dropped): no 807994, Daybreak critical at ally2 only, no 301004 on ally 1. Read at the after start (D-242, ADR 1059): 301005 must be absent on ally and ally2 right after the after phase's aura steps (after_start_reads actor), so a Redeemer aura left from the before phase voids the run instead of being read as an after-phase proc.",
       "tolerance": 0,
       "disable_regeneration": true,
       "void_on_cast_failure": true,
@@ -33358,7 +33388,19 @@
         "count": 1,
         "wait_ms": 300,
         "after_trigger_ms": 1600
-      }
+      },
+      "after_start_reads": [
+        {
+          "spell": 301005,
+          "expected": 0,
+          "actor": "ally"
+        },
+        {
+          "spell": 301005,
+          "expected": 0,
+          "actor": "ally2"
+        }
+      ]
     },
     {
       "spell": 804632,
@@ -33854,6 +33896,415 @@
         ]
       ],
       "observe_source": "Code path: AscensionSunClericAbilities.cpp:343-356, a damaging Gavel of Light 800611 copies CalculatePct(damage, share) to the caster as the heal 707522 and, when the caster has Holy Form and 300353, the same amount as Holy Shield 805489 (Spell.dbc Effect[0] aura 69 SCHOOL_ABSORB MiscValue 127, all schools, DurationIndex 8). The setup is the one of the gavel_heal entries (Gavel of Light at the dummy, caster health 50%, player_attack_power 20000, 984954 and 823764 on the caster). The presence of 805489 on the caster is read 1500 ms after the cast. Without Holy Form on the caster the condition is false: no shield in either phase, 0 before and 0 after 300353 is learned. Reference search 2026-11-22: as light_shield; nothing else found."
+    },
+    {
+      "spell": 300353,
+      "kind": "metric_delta",
+      "gate_spell": 300353,
+      "trigger_spell": 800617,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "cast_power": 1363,
+      "setup_casts": [
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617,
+        800617
+      ],
+      "setup_wait_ms": 1600,
+      "refill_power_after_setup_casts": {
+        "power": 0
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800617,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 140,
+      "expected_gain": 140,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 600,
+      "void_on_cast_failure": true,
+      "quote": "Your Gavels can no longer be missed, dodged, or parried",
+      "name": "Heaven's Appraisal (140 Gavels of Wrath with no hit rating all land)",
+      "variant": "gavel_unmissed",
+      "label_suffix": "gavel_unmissed",
+      "player_ratings": {
+        "melee_hit_rating": 0
+      },
+      "phase_auras": [
+        [
+          805301,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "300353 Heaven's Appraisal: Spell.dbc Effect[0] aura 107 ADD_FLAT_MODIFIER MiscValue 16 (SPELLMOD_RESIST_MISS_CHANCE) BasePoints 999 on class mask word 1 = 32; Gavel of Wrath 800617 carries SpellFamilyFlags[1] = 32 and DmgClass 2 (melee), so Unit::MeleeSpellMissChance (Unit.cpp:16938-16956) applies the modifier to hitChance and clamps the miss chance to 0. The class file's melee_hit_rating 10000 is set to 0 here (player_ratings) so the control can miss; expertise_rating 10000 is kept, so neither dodge nor parry hides a miss. Each phase casts 140 Gavels of Wrath at the dummy (the trigger and 139 setup casts, 1600 ms apart, past the 1500 ms global cooldown, the 5000 ms category cooldown reset before each, the mana refilled to 1363 after each: 800617 costs ManaCostPercentage 10 of base mana 1363); a missed Gavel logs no damage event (SPELLLOGMISS). Judged: the gain of spell_damage_count of 800617 on the dummy over the learned phase is 140, every cast landed. Control: the before phase (300353 not learned) must read fewer than 140; a control that lands every cast proves nothing and the entry is unmeasured by review. Holy Form 805301 is set on the caster in both phases (harness set_aura, a precondition fixture). The extra Gavel strikes of Heaven's Appraisal go to other enemies only (enemy != target, AscensionSunClericAbilities.cpp:366), so the dummy counts one event per landed cast. Reference search 2026-11-22: bindmysoul snapshot (2026-07-22) carries the same tooltip for 300353; nothing else found. Size: diagnostic 1 (20261123-000330/diag, 60 casts per phase) read 53 control events from 59 casts that ran (the trigger was refused NOT_READY, now cleared by trigger_reset_after_setup) and 59 of 59 with 300353; diagnostic 2 (diag2, 100 casts) read 98 of 100 and 100 of 100. Pooled control miss rate p = 8/159 = 0.050. N = 140 casts per phase: (1 - p)^N = 7.6e-4 <= 0.001, so a control that lands every cast is improbable at that rate.",
+      "trigger_reset_after_setup": true
+    },
+    {
+      "spell": 300353,
+      "kind": "metric_delta",
+      "gate_spell": 300353,
+      "trigger_spell": 800611,
+      "target": "dummy",
+      "dummy_distance": 3,
+      "cast_power": 1363,
+      "caster_health_pct": 50,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 707522,
+        "target": "caster"
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "quote": "Gavel of Light: Places an absorption shield equal to the amount healed.",
+      "name": "Heaven's Appraisal (the Gavel of Light shield absorbs as much as the Gavel healed)",
+      "variant": "light_shield_amount",
+      "label_suffix": "light_shield_amount",
+      "phase_auras": [
+        [
+          805301,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "strike": {
+        "spell": 92559,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500,
+        "reaction": 0
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_absorb_total",
+            "count_metric": "spell_log_count",
+            "fields": {
+              "spell": 92559,
+              "caster": "striker",
+              "target": "caster"
+            },
+            "source": "the absorbed part of the striker's Void Zone 92559 on the caster: the whole Holy Shield 805489 when the hit is larger than the shield"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 707522,
+              "target": "caster"
+            },
+            "source": "the Gavel of Light self heal 707522 of the same cast (SPELL_ATTR2_CANT_CRIT)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 805489
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "no Holy Shield 805489 is left after the strike: the hit used the whole shield"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_log_count",
+            "fields": {
+              "spell": 92559,
+              "caster": "striker",
+              "target": "caster"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "one Void Zone 92559 per phase reached the caster"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 1.0,
+            "tolerance": 0.02,
+            "source": "tooltip: 'an absorption shield equal to the amount healed'; the band 0.98 to 1.02 holds the integer rounding of both totals and excludes 0.9 and 1.1 (10% off both sides)"
+          }
+        ]
+      },
+      "observe_source": "Code path: AscensionSunClericAbilities.cpp:343-356, a damaging Gavel of Light 800611 copies CalculatePct(damage, share) to the caster as the heal 707522 and, with Holy Form and 300353, the same amount as Holy Shield 805489 (Spell.dbc Effect[0] aura 69 SCHOOL_ABSORB MiscValue 127, all schools); 707522 carries SPELL_ATTR2_CANT_CRIT. Each phase: Holy Form 805301 on the caster (set_aura, precondition fixture), caster at 50% health, one Gavel of Light at the dummy, then 500 ms later one Void Zone 92559 (Effect[0] SCHOOL_DAMAGE BasePoints 999 + 1 = 1000 Physical, DmgClass 0: no miss, no crit) from a passive striker (reaction 0, it never melees, so nothing else reaches the shield first). The hit must exceed the shield: 1000 against a shield equal to half of one Gavel of Light hit without an attack power fixture (707521 share 50%), and the arm on 805489 must read 0 after the strike (the shield was used up). Judged on the learned phase: the absorbed total of 92559 over the heal total of 707522, both after-phase deltas, is 1.0 (tooltip). Control: the before phase without 300353 places no shield (absorb 0, see light_shield_control). Reference search 2026-11-22: bindmysoul snapshot (2026-07-22) carries the same tooltip for 300353; nothing else found."
+    },
+    {
+      "spell": 300353,
+      "kind": "metric_delta",
+      "gate_spell": 300353,
+      "target": "striker",
+      "cast_power": 1363,
+      "setup_wait_ms": 1600,
+      "metric": "spell_damage_count",
+      "before_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 600,
+      "void_on_cast_failure": true,
+      "quote": "Your Gavels can no longer be missed, dodged, or parried",
+      "player_ratings": {
+        "expertise_rating": 0
+      },
+      "phase_auras": [
+        [
+          805301,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          10019,
+          1,
+          "striker",
+          "striker"
+        ]
+      ],
+      "strike": {
+        "spell": 47632,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "reaction": 1
+      },
+      "trigger_spell": 800617,
+      "setup_casts": [
+        500154,
+        800617,
+        800617,
+        800617,
+        800617
+      ],
+      "fields": {
+        "spell": 800617,
+        "target": "striker"
+      },
+      "expected": 5,
+      "name": "Heaven's Appraisal (a Gavel of Wrath is not parried by a 100% parry striker that faces the caster)",
+      "variant": "gavel_unparried_facing",
+      "label_suffix": "gavel_unparried_facing",
+      "observe_source": "Design 1 (gavel_unparried, at the dummy) could not parry a control Gavel because of facing: the dummy is summoned at the caster's x + 3 with the caster's orientation (CoAGameplayTest.cpp:3496-3499) and, passive (REACT_PASSIVE), never turns (Unit::SetInFront is called from Creature::SelectVictim only, Unit.cpp:12884), so the caster, which faces the dummy to cast, stands behind it and Unit::MeleeSpellHitResult clears canParry (!victim->HasInArc(M_PI, this), Unit.cpp:3826-3840); creature 36 has flags_extra 0 (no CREATURE_FLAG_EXTRA_NO_PARRY, acore_world.creature_template). Design 2: the striker (entry 36, summoned at the caster's x + 3, CoAGameplayTest.cpp:3496-3499, so the caster lies at bearing pi from it) is defensive (strike reaction 1): engaged by the first setup cast it selects the caster and turns to it (Unit.cpp:12884). QA Test 100% Parry 10019 (Effect[0] aura 47 MOD_PARRY_PERCENT BasePoints 99 + 1) is set on the striker in both phases (phase_auras striker, ADR 1059); the caster's expertise_rating is 0 (player_ratings) and its melee_hit_rating 10000 is kept (no miss). Holy Form 805301 on the caster in both phases (precondition fixture). Each phase casts 5 Gavels of Wrath 800617 at the striker (4 setup casts and the trigger, 1600 ms apart, past the 1500 ms global cooldown, the 5000 ms category cooldown reset before each). Control without 300353: every Gavel avoided, 0 damage events; with 300353 learned (Effects 1 and 2 IGNORE_COMBAT_RESULT parry and dodge, AscensionSunClericContracts.cpp:184-189) all 5 land, cumulative 5. The parry of the striker itself is shown by gavel_unparried_facing_control (a non-Gavel melee strike parried in both phases); this entry means something only when that control is ok in the same run. Reference search 2026-11-22: bindmysoul snapshot (2026-07-22) carries the same tooltip for 300353; nothing else found. Engagement: each phase's first setup cast is Horusath Blast 500154 at the striker (DmgClass 1 magic, not counted; its 572050 is -25 attack power on the striker, aura 344, AscensionSunClericAbilities.cpp:333): the striker is defensive (reaction 1; an aggressive one engaged the caster at spawn and refused its equipment, equip error 39, diagnostic 20261123-000330), so the blast engages it and it turns to the caster before the first counted strike. Mana: 500154 costs 33% of base mana 1363 (449), within the 1363 set at each phase start with the five counted casts. trigger_reset_after_setup clears the trigger's category cooldown after the setup casts (the diagnostic refused the trigger, SPELL_FAILED_NOT_READY).",
+      "trigger_reset_after_setup": true
+    },
+    {
+      "spell": 300353,
+      "kind": "metric_delta",
+      "gate_spell": 300353,
+      "target": "striker",
+      "cast_power": 1363,
+      "setup_wait_ms": 1600,
+      "metric": "spell_damage_count",
+      "before_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 600,
+      "void_on_cast_failure": true,
+      "quote": "Your Gavels can no longer be missed, dodged, or parried",
+      "player_ratings": {
+        "expertise_rating": 0
+      },
+      "phase_auras": [
+        [
+          805301,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          10019,
+          1,
+          "striker",
+          "striker"
+        ]
+      ],
+      "strike": {
+        "spell": 47632,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "reaction": 1
+      },
+      "trigger_spell": 806980,
+      "setup_casts": [
+        500154,
+        806980,
+        806980,
+        806980,
+        806980
+      ],
+      "fields": {
+        "spell": 806980,
+        "target": "striker"
+      },
+      "expected": 0,
+      "name": "Heaven's Appraisal (control: the striker parries a non-Gavel melee strike, Justicar's Wrath)",
+      "variant": "gavel_unparried_facing_control",
+      "label_suffix": "gavel_unparried_facing_control",
+      "observe_source": "Design 1 (gavel_unparried, at the dummy) could not parry a control Gavel because of facing: the dummy is summoned at the caster's x + 3 with the caster's orientation (CoAGameplayTest.cpp:3496-3499) and, passive (REACT_PASSIVE), never turns (Unit::SetInFront is called from Creature::SelectVictim only, Unit.cpp:12884), so the caster, which faces the dummy to cast, stands behind it and Unit::MeleeSpellHitResult clears canParry (!victim->HasInArc(M_PI, this), Unit.cpp:3826-3840); creature 36 has flags_extra 0 (no CREATURE_FLAG_EXTRA_NO_PARRY, acore_world.creature_template). Design 2: the striker (entry 36, summoned at the caster's x + 3, CoAGameplayTest.cpp:3496-3499, so the caster lies at bearing pi from it) is defensive (strike reaction 1): engaged by the first setup cast it selects the caster and turns to it (Unit.cpp:12884). QA Test 100% Parry 10019 (Effect[0] aura 47 MOD_PARRY_PERCENT BasePoints 99 + 1) is set on the striker in both phases (phase_auras striker, ADR 1059); the caster's expertise_rating is 0 (player_ratings) and its melee_hit_rating 10000 is kept (no miss). Holy Form 805301 on the caster in both phases (precondition fixture). Control of gavel_unparried_facing on a non-Gavel strike: Justicar's Wrath 806980 (DmgClass 2 melee, SpellFamilyFlags[1] 0, outside the class mask word 1 = 32 of 300353's IGNORE_COMBAT_RESULT effects; its 572067 adds 10% damage taken, aura 87, AscensionSunClericAbilities.cpp:341) is cast 5 times per phase at the same striker, the same way (4 setup casts and the trigger, 1600 ms apart, the 6000 ms category cooldown reset before each). Forced rate: 10019 gives the striker 100% parry, so all 10 strikes are avoided, 0 damage events before and after the learn. A striker that did not face the caster could not parry (Unit.cpp:3826-3840); design 1's control Gavel from behind the dummy, under the same 100% parry fixture and expertise 0, landed in both runs. Reference search 2026-11-22: nothing found beyond the tooltip and the DBC. Engagement: each phase's first setup cast is Horusath Blast 500154 at the striker (DmgClass 1 magic, not counted; its 572050 is -25 attack power on the striker, aura 344, AscensionSunClericAbilities.cpp:333): the striker is defensive (reaction 1; an aggressive one engaged the caster at spawn and refused its equipment, equip error 39, diagnostic 20261123-000330), so the blast engages it and it turns to the caster before the first counted strike. Mana: 500154 costs 33% of base mana 1363 (449), within the 1363 set at each phase start with the five counted casts. trigger_reset_after_setup clears the trigger's category cooldown after the setup casts (the diagnostic refused the trigger, SPELL_FAILED_NOT_READY).",
+      "trigger_reset_after_setup": true
     },
     {
       "spell": 560492,
