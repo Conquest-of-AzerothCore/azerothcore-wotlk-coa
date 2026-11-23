@@ -4925,7 +4925,21 @@
         "consumed"
       ],
       "void_on_cast_failure": true,
-      "observe_source": "560838 Effect[0] aura 42 PROC_TRIGGER_SPELL; AscensionFelswornAbilities.cpp:261-262 casts Sculptor of Doom 555277 on the caster after an Annihilation 803904 cast when 560838 is known. 555277 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -101, DurationIndex 31 = 8000 ms ($555277d); Ruin 801895 has CastingTimeIndex 19 = 2500 ms (SpellCastTimes.dbc). Annihilation 803904 is cast first (setup cast, both phases), then Ruin 801895 is cast; the Ruin cast time read after it is 2500 ms again in both phases (the aura is consumed: gain 0). Reference search 2026-11-23: coa-history spell 560838: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22): The True Blessing 560838 'Casting Annihilation now grants you Sculptor of Doom. Your next Ruin within 8 seconds is instant cast.', same figures; expected values come from the tooltip and the DBC only."
+      "observe_source": "560838 Effect[0] aura 42 PROC_TRIGGER_SPELL; AscensionFelswornAbilities.cpp:261-262 casts Sculptor of Doom 555277 on the caster after an Annihilation 803904 cast when 560838 is known. 555277 Effect[0] aura 108 ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -101, DurationIndex 31 = 8000 ms ($555277d); Ruin 801895 has CastingTimeIndex 19 = 2500 ms (SpellCastTimes.dbc). Annihilation 803904 is cast first (setup cast, both phases), then Ruin 801895 is cast; the Ruin cast time read after it is 2500 ms again in both phases (the aura is consumed: gain 0). Reference search 2026-11-23: coa-history spell 560838: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22): The True Blessing 560838 'Casting Annihilation now grants you Sculptor of Doom. Your next Ruin within 8 seconds is instant cast.', same figures; expected values come from the tooltip and the DBC only.",
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 560838,
@@ -4969,7 +4983,21 @@
       "wait_ms": 3500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "560840 Effect[0] aura 4 dummy; AscensionFelswornAbilities.cpp:278-283 counts Ruin 801895 and Felwrath 520236 casts in the caster's state and on every 3rd summons creature 51320 (572163, 15000 ms, AscensionFelswornSummons.cpp:17-24). Two Ruin casts then the timed third, each at the dummy with Energy refilled (setup_casts, both phases): the owned creature count of entry 51320 is 0 without 560840 (control) and 1 with it. Reference search 2026-11-23: coa-history spell 560840: 0 events in 186 logs (a passive leaves no event); spell 572163 Fel Doom: SPELL_SUMMON 424 events in 4 logs (positive control: the logged result); bindmysoul talents snapshot (fetched 2026-07-22): Infernal Ruin 560840 'Every 3rd Ruin or Felwrath now spawns an Infernal to fight by your side for 15 seconds.', same figures; expected values come from the tooltip and the DBC only."
+      "observe_source": "560840 Effect[0] aura 4 dummy; AscensionFelswornAbilities.cpp:278-283 counts Ruin 801895 and Felwrath 520236 casts in the caster's state and on every 3rd summons creature 51320 (572163, 15000 ms, AscensionFelswornSummons.cpp:17-24). Two Ruin casts then the timed third, each at the dummy with Energy refilled (setup_casts, both phases): the owned creature count of entry 51320 is 0 without 560840 (control) and 1 with it. Reference search 2026-11-23: coa-history spell 560840: 0 events in 186 logs (a passive leaves no event); spell 572163 Fel Doom: SPELL_SUMMON 424 events in 4 logs (positive control: the logged result); bindmysoul talents snapshot (fetched 2026-07-22): Infernal Ruin 560840 'Every 3rd Ruin or Felwrath now spawns an Infernal to fight by your side for 15 seconds.', same figures; expected values come from the tooltip and the DBC only.",
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 560840,
@@ -4995,7 +5023,21 @@
       "wait_ms": 3500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "560840 Effect[0] aura 4 dummy; AscensionFelswornAbilities.cpp:278-283 counts Ruin 801895 and Felwrath 520236 casts in the caster's state and on every 3rd summons creature 51320 (572163, 15000 ms, AscensionFelswornSummons.cpp:17-24). Control for 'every 3rd': one setup Ruin then the timed second: no Infernal with 560840 learned. Reference search 2026-11-23: coa-history spell 560840: 0 events in 186 logs (a passive leaves no event); spell 572163 Fel Doom: SPELL_SUMMON 424 events in 4 logs (positive control: the logged result); bindmysoul talents snapshot (fetched 2026-07-22): Infernal Ruin 560840 'Every 3rd Ruin or Felwrath now spawns an Infernal to fight by your side for 15 seconds.', same figures; expected values come from the tooltip and the DBC only."
+      "observe_source": "560840 Effect[0] aura 4 dummy; AscensionFelswornAbilities.cpp:278-283 counts Ruin 801895 and Felwrath 520236 casts in the caster's state and on every 3rd summons creature 51320 (572163, 15000 ms, AscensionFelswornSummons.cpp:17-24). Control for 'every 3rd': one setup Ruin then the timed second: no Infernal with 560840 learned. Reference search 2026-11-23: coa-history spell 560840: 0 events in 186 logs (a passive leaves no event); spell 572163 Fel Doom: SPELL_SUMMON 424 events in 4 logs (positive control: the logged result); bindmysoul talents snapshot (fetched 2026-07-22): Infernal Ruin 560840 'Every 3rd Ruin or Felwrath now spawns an Infernal to fight by your side for 15 seconds.', same figures; expected values come from the tooltip and the DBC only.",
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 560840,
@@ -5022,7 +5064,21 @@
       "wait_ms": 3500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "560840 Effect[0] aura 4 dummy; AscensionFelswornAbilities.cpp:278-283 counts Ruin 801895 and Felwrath 520236 casts in the caster's state and on every 3rd summons creature 51320 (572163, 15000 ms, AscensionFelswornSummons.cpp:17-24). Ruin, Felwrath 520236, then the timed Ruin: the count shared by both spells reaches 3: one Infernal. Reference search 2026-11-23: coa-history spell 560840: 0 events in 186 logs (a passive leaves no event); spell 572163 Fel Doom: SPELL_SUMMON 424 events in 4 logs (positive control: the logged result); bindmysoul talents snapshot (fetched 2026-07-22): Infernal Ruin 560840 'Every 3rd Ruin or Felwrath now spawns an Infernal to fight by your side for 15 seconds.', same figures; expected values come from the tooltip and the DBC only."
+      "observe_source": "560840 Effect[0] aura 4 dummy; AscensionFelswornAbilities.cpp:278-283 counts Ruin 801895 and Felwrath 520236 casts in the caster's state and on every 3rd summons creature 51320 (572163, 15000 ms, AscensionFelswornSummons.cpp:17-24). Ruin, Felwrath 520236, then the timed Ruin: the count shared by both spells reaches 3: one Infernal. Reference search 2026-11-23: coa-history spell 560840: 0 events in 186 logs (a passive leaves no event); spell 572163 Fel Doom: SPELL_SUMMON 424 events in 4 logs (positive control: the logged result); bindmysoul talents snapshot (fetched 2026-07-22): Infernal Ruin 560840 'Every 3rd Ruin or Felwrath now spawns an Infernal to fight by your side for 15 seconds.', same figures; expected values come from the tooltip and the DBC only.",
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 704374,
@@ -5341,7 +5397,21 @@
       "disable_regeneration": true,
       "expire_ms": 3000,
       "void_on_cast_failure": true,
-      "observe_source": "704611 Effect[0] aura 107 ADD_FLAT_MODIFIER (the flag read by the script, $s1 = 1); Carve 800206 (DurationIndex 66 = 2500 ms) is rewritten to tick every 250 ms (AscensionFelswornContracts.cpp:156-162); each tick adds one to the aura's tick count and its Effect[1] MOD_DODGE_PERCENT amount is set to min(10, ticks) when 704611 is known (AscensionFelswornAuras.cpp:33-34, :112-118). The caster's live dodge chance is read during the channel, before (control: 704611 not learned) and after the learn. Read 1000 ms after the cast: 4 ticks of 250 ms, +4 points (tolerance 1 point for the tick phase). Reference search 2026-11-23: coa-history spell 704611: 0 events in 186 logs (a passive leaves no event); spell 800206 Carve: logged by other ids only, nothing found that decides the slope; bindmysoul talents snapshot (fetched 2026-07-22): Battle Finesse 704611 'While channeling Carve, your chance to dodge is now increased by 1% based on how long you channel, up to a maximum of 10%.', same figures; expected values come from the tooltip and the DBC only."
+      "observe_source": "704611 Effect[0] aura 107 ADD_FLAT_MODIFIER (the flag read by the script, $s1 = 1); Carve 800206 (DurationIndex 66 = 2500 ms) is rewritten to tick every 250 ms (AscensionFelswornContracts.cpp:156-162); each tick adds one to the aura's tick count and its Effect[1] MOD_DODGE_PERCENT amount is set to min(10, ticks) when 704611 is known (AscensionFelswornAuras.cpp:33-34, :112-118). The caster's live dodge chance is read during the channel, before (control: 704611 not learned) and after the learn. Read 1000 ms after the cast: 4 ticks of 250 ms, +4 points (tolerance 1 point for the tick phase). Reference search 2026-11-23: coa-history spell 704611: 0 events in 186 logs (a passive leaves no event); spell 800206 Carve: logged by other ids only, nothing found that decides the slope; bindmysoul talents snapshot (fetched 2026-07-22): Battle Finesse 704611 'While channeling Carve, your chance to dodge is now increased by 1% based on how long you channel, up to a maximum of 10%.', same figures; expected values come from the tooltip and the DBC only.",
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 704611,
@@ -5364,7 +5434,21 @@
       "disable_regeneration": true,
       "expire_ms": 3000,
       "void_on_cast_failure": true,
-      "observe_source": "704611 Effect[0] aura 107 ADD_FLAT_MODIFIER (the flag read by the script, $s1 = 1); Carve 800206 (DurationIndex 66 = 2500 ms) is rewritten to tick every 250 ms (AscensionFelswornContracts.cpp:156-162); each tick adds one to the aura's tick count and its Effect[1] MOD_DODGE_PERCENT amount is set to min(10, ticks) when 704611 is known (AscensionFelswornAuras.cpp:33-34, :112-118). The caster's live dodge chance is read during the channel, before (control: 704611 not learned) and after the learn. Read 2400 ms after the cast, inside the 2500 ms channel: at least 9 ticks, +9 to +10 points (tolerance 0.51 around 9.5 would not exclude 9; the read is judged as 10 within 1 so +9..+11 and a 20-point uncapped slope is excluded). Reference search 2026-11-23: coa-history spell 704611: 0 events in 186 logs (a passive leaves no event); spell 800206 Carve: logged by other ids only, nothing found that decides the slope; bindmysoul talents snapshot (fetched 2026-07-22): Battle Finesse 704611 'While channeling Carve, your chance to dodge is now increased by 1% based on how long you channel, up to a maximum of 10%.', same figures; expected values come from the tooltip and the DBC only."
+      "observe_source": "704611 Effect[0] aura 107 ADD_FLAT_MODIFIER (the flag read by the script, $s1 = 1); Carve 800206 (DurationIndex 66 = 2500 ms) is rewritten to tick every 250 ms (AscensionFelswornContracts.cpp:156-162); each tick adds one to the aura's tick count and its Effect[1] MOD_DODGE_PERCENT amount is set to min(10, ticks) when 704611 is known (AscensionFelswornAuras.cpp:33-34, :112-118). The caster's live dodge chance is read during the channel, before (control: 704611 not learned) and after the learn. Read 2400 ms after the cast, inside the 2500 ms channel: at least 9 ticks, +9 to +10 points (tolerance 0.51 around 9.5 would not exclude 9; the read is judged as 10 within 1 so +9..+11 and a 20-point uncapped slope is excluded). Reference search 2026-11-23: coa-history spell 704611: 0 events in 186 logs (a passive leaves no event); spell 800206 Carve: logged by other ids only, nothing found that decides the slope; bindmysoul talents snapshot (fetched 2026-07-22): Battle Finesse 704611 'While channeling Carve, your chance to dodge is now increased by 1% based on how long you channel, up to a maximum of 10%.', same figures; expected values come from the tooltip and the DBC only.",
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 570077,
