@@ -4876,7 +4876,8 @@
         "labels": [
           "704941 behaviour_metric_delta parry_next",
           "704941 behaviour_metric_delta parry_held",
-          "704941 behaviour_metric_delta parry_gone"
+          "704941 behaviour_metric_delta parry_gone",
+          "704941 behaviour_metric_delta parry_regrant"
         ]
       },
       {
@@ -4886,7 +4887,7 @@
         ]
       }
     ],
-    "reason": "Owner ruling O-31 (Sun Cleric ADR 0039): the bonus is consumed by the next melee attack taken against the caster, parried or not; a spell does not consume it. Before (recorded, owner packet): parry_next read 30 after a landed Night Slaughter 23583, expected 0 (pair 20261122-220055 / 20261122-220128, build 8d020c35a858); the same on this branch's pre-fix build (pair 20261123-074609 / 20261123-074902, worldserver 40dbb7b6c03e). After: all seven 704941 entries ok in pair 20261123-075028 / 20261123-075125 (worldserver 8b815e544867). Fix: the 704941 case of the class check accepts every non-periodic melee attack taken from another unit and its proc removes 707843, then casts it again on a parry (AscensionSunClericEvents.cpp). Entries: parry_next (landed melee consumes it), parry_spell (Grave Coil 47632, a magic spell, leaves 30), parry_held / parry_gone (without a further attack 30 just before 5 s, 0 just after, apply-stamp bracketed). Data: 707843 ProcCharges 0, ProcFlags 0, AuraInterruptFlags 0, DurationIndex 28 = 5000 ms (SpellDuration.dbc). A parried next attack consumes the bonus and grants a new one (the parry itself, per the tooltip); that arm is not built: second_strike forces the caster's parry to 0 (tool need)."
+    "reason": "Owner ruling O-31 (Sun Cleric ADR 0039): the bonus is consumed by the next melee attack taken against the caster, parried or not; a spell does not consume it. Before (recorded, owner packet): parry_next read 30 after a landed Night Slaughter 23583, expected 0 (pair 20261122-220055 / 20261122-220128, build 8d020c35a858); the same on this branch's pre-fix build (pair 20261123-074609 / 20261123-074902, worldserver 40dbb7b6c03e). After: all seven 704941 entries ok in pair 20261123-075028 / 20261123-075125 (worldserver 8b815e544867). Fix: the 704941 case of the class check accepts every non-periodic melee attack taken from another unit and its proc removes 707843, then casts it again on a parry (AscensionSunClericEvents.cpp). Entries: parry_next (landed melee consumes it), parry_spell (Grave Coil 47632, a magic spell, leaves 30), parry_held / parry_gone (without a further attack 30 just before 5 s, 0 just after, apply-stamp bracketed). Data: 707843 ProcCharges 0, ProcFlags 0, AuraInterruptFlags 0, DurationIndex 28 = 5000 ms (SpellDuration.dbc). Parried next attack: parry_regrant (two Speed Slash 2118233 both parried at 100%) reads aura_apply_count of 707843 on the caster 0 in the control and 2 with 704941 (the second parry consumes the bonus and the tooltip's own parry applies it again; a kept bonus would read 1); parry_next carries an aura_apply_count arm that reads 1 after a landed second strike (consumed, nothing applied again). Pair 20261123-075953 / 20261123-080038 (worldserver 5739e5e60335), 8 entries ok in both, no flip."
   },
   {
     "spell": 704942,

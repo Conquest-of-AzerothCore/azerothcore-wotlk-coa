@@ -33885,8 +33885,57 @@
         "spell": 23583,
         "present": 30
       },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 707843
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the parry of the first strike applies 707843 once; the landed second strike consumes it and, not being parried, applies nothing: 1 in the treatment phase, 0 in the control phase"
+          }
+        ]
+      },
       "void_on_cast_failure": true,
       "observe_source": "707843 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT BasePoints 29 + 1 = 30 ($707843s1), DurationIndex 28 (5000 ms), ProcCharges 0, ProcFlags 0, AuraInterruptFlags 0 (Spell.dbc, /srv/coa/server-data/dbc); the class code only casts it on a parry (AscensionSunClericEvents.cpp). The scenario is the one of the parry entry (a Speed Slash 2118233 parried at a caster parry chance forced to 100%, harness set_combat_avoidance, a named precondition fixture; Holy Form 805301 the trigger cast; 704941 learned between the phases), then metric_delta second_strike: right after the Holy Form cast the aura amount is read and must be 30 in the treatment phase (the aura the next attack meets), the caster's dodge and parry are set to 0% and the striker casts Night Slaughter 23583 at the caster (SPELL_ATTR0_NO_ACTIVE_DEFENSE: never dodged or parried, so it cannot re-apply the aura through a parry), 300 ms, then the entry's 500 ms wait and the read of the amount of effect 0 of 707843 on the caster. Expected from the tooltip ('the next attack'): 0, the bonus consumed by the attack that followed; control: the phase without 704941 has no aura, 0. The read comes about 1.1 s after the parry, inside the 5000 ms duration, so a 0 cannot be the aura's expiry. The damage logs of 23583 are counted after the after reading: no landed second strike, or a present read other than 30, makes the trial unmeasured. Owner ruling O-31 (Sun Cleric ADR 0039): the next melee attack taken against the caster consumes the bonus, parried or not; a spell does not (AscensionSunClericEvents.cpp, case 704941 of the check and of the proc). Reference search 2026-11-22: as the parry entry (bindmysoul snapshot 2026-07-22 carries the same tooltip; coa-history 707843: 2 SPELL_AURA_APPLIED and 2 SPELL_AURA_REMOVED in 2 logs, no consumption timing); nothing found on consumption."
+    },
+    {
+      "spell": 704941,
+      "kind": "metric_delta",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "strike": {
+        "spell": 2118233,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 2,
+        "wait_ms": 1500
+      },
+      "caster_avoidance": {
+        "parry": 100
+      },
+      "name": "Light of the Sun (a parried next attack grants the +30% parry again)",
+      "variant": "parry_regrant",
+      "label_suffix": "parry_regrant",
+      "quote": "and increases your chance to parry the next attack by $707843s1%.",
+      "metric": "aura_apply_count",
+      "fields": {
+        "spell": 707843
+      },
+      "expected": 2,
+      "tolerance": 0,
+      "void_on_cast_failure": true,
+      "observe_source": "707843 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT BasePoints 29 + 1 = 30 ($707843s1), DurationIndex 28 (5000 ms, SpellDuration.dbc), ProcCharges 0, ProcFlags 0, AuraInterruptFlags 0 (Spell.dbc, /srv/coa/server-data/dbc). Owner ruling O-31: the bonus is consumed by the next melee attack taken against the caster, parried or not (Sun Cleric ADR 0039); a parried next attack is also a parry, so the tooltip's own parry grants the bonus again. The scenario is the one of the parry entry (Speed Slash 2118233, SPELL_ATTR7_NO_ATTACK_MISS so it cannot miss, parried at a caster parry chance forced to 100% by harness set_combat_avoidance, a named precondition fixture; Holy Form 805301 the trigger cast; 704941 learned between the phases), with the strike cast twice 1500 ms apart and the caster's parry left at 100% for both, so the second strike is parried too. The read is aura_apply_count of 707843 on the caster (CoAGameplayTest.cpp AuraApplyCounter, one count per OnAuraApply: a refresh of a live aura is not counted): the first parry applies the aura (1), the second parry consumes it and applies it again (2); a bonus kept by the second parry would read 1. Control: the phase without 704941 applies nothing, 0. Reference search 2026-11-23: as the parry_next entry (bindmysoul snapshot 2026-07-22 carries the same tooltip; coa-history 707843: 2 SPELL_AURA_APPLIED and 2 SPELL_AURA_REMOVED in 2 logs, no consumption timing); nothing found on consumption. Residual failure probability 0: Speed Slash cannot miss and the parry chance is forced to 100%, and the count reads exactly 2 only when both strikes were parried."
     },
     {
       "spell": 704941,
