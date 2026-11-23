@@ -7754,24 +7754,32 @@
       "spell": 570077,
       "name": "Blighted Strikes (healing received reduced by 20%)",
       "kind": "metric_delta",
-      "variant": "amount",
-      "label_suffix": "amount",
+      "variant": "healing",
+      "label_suffix": "healing",
       "quote": "While Inner Demon is active your melee attacks reduce the target's healing received by $567578s1% for $567578d,",
+      "expected": 160,
+      "before_expected": 200,
+      "expected_ratio": 0.8,
+      "tolerance": 0.006,
       "trigger_spell": 803715,
       "gate_spell": 570077,
-      "metric": "aura_amount",
-      "fields": {
-        "spell": 567578,
-        "effect": 0,
-        "caster": "caster"
-      },
-      "before_expected": 0,
-      "expected": -20,
-      "tolerance": 0.01,
-      "wait_ms": 1000,
-      "target": "dummy",
       "cast_power": 100,
-      "measure_actor": "dummy",
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "enemy_casts": [
+        25222
+      ],
+      "enemy_cast_wait_ms": 6800,
+      "enemy_casts_in_before": true,
+      "cast_in_before": false,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 25222,
+        "target": "enemy"
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
       "phase_auras": [
         [
           800058,
@@ -7787,8 +7795,7 @@
         ]
       ],
       "void_on_cast_failure": true,
-      "expire_ms": 500,
-      "observe_source": "570077 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 567578 (Effect[0] aura 118 MOD_HEALING_PCT MiscValue 127, EffectBasePoints -21 + 1 = -20, DurationIndex 31 = 8000 ms, StackAmount 2); AscensionFelswornEvents.cpp:80-81, :189-190 casts 567578 on the target of every outgoing non-derived melee damage event while Inner Demon 804216 is on the caster (no chance roll: the DBC ProcChance 20 on 567578 is not rolled by the handler). Inner Demon is set on the caster by harness set_aura in both arms (a precondition fixture). Carve 803715 is the melee hit. The amount of Effect[0] of 567578 on the dummy is read before (control: 570077 not learned, aura absent) and after a Carve hit with it learned: -20. Reference search 2026-11-23: coa-history spell 570077: 0 events in 186 logs (a passive leaves no event; positive control 803715 Carve has 1086 events); spell 567578 Blighted Strike: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Blighted Strikes 570077 \"While Inner Demon is active your melee attacks reduce the target's healing received by -20% for 8 seconds, stacking 2 times.\", same figures; expected values come from the tooltip and the DBC only. Felfury 800058 (6) is set before Inner Demon so that Inner Demon lasts 30 s in both phases (it lasts 5000 ms per Felfury stack; set_aura keeps the remaining duration of an aura it finds)."
+      "observe_source": "570077 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 567578 (Effect[0] aura 118 MOD_HEALING_PCT MiscValue 127, EffectBasePoints -21 + 1 = -20, DurationIndex 31 = 8000 ms, StackAmount 2); AscensionFelswornEvents.cpp:80-81, :189-190 casts 567578 on the target of every outgoing non-derived melee damage event while Inner Demon 804216 is on the caster. Applied heal: an enemy player (race 2, PvP) puts Renew 25222 (EffectBasePoints 104 + 1 = 105 every 3000 ms, DurationIndex 8) on itself and the spell_heal_total of the heal log is read after two ticks (6800 ms): once without the debuff (before phase, 570077 not learned, no Carve), once after one Carve 803715 hit with 570077 learned and Inner Demon on the caster, so the debuff 567578 is on the healed player for both ticks (8000 ms, ticks at about 3 s and 6 s after the cast). Expected after/before = 0.8 ($567578s1 = -20%, one stack after one hit); a missing or half debuff reads 1.0 or 0.9. The class file's hit and expertise ratings remove misses, dodges and parries of the Carve hit. Inner Demon is set on the caster by harness set_aura (a precondition fixture), Felfury 800058 (6) before it so that it lasts 30 s. Reference search 2026-11-23: coa-history spell 570077: 0 events in 186 logs (a passive leaves no event; positive control 803715 Carve has 1086 events); spell 567578 Blighted Strike: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Blighted Strikes 570077 \"While Inner Demon is active your melee attacks reduce the target's healing received by -20% for 8 seconds, stacking 2 times.\", same figures; Necromancer precedent Plague of Undeath 503640 holy_healing (enemy player Renew read as spell_heal_total); expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 570077,
@@ -7989,26 +7996,34 @@
     },
     {
       "spell": 560822,
-      "name": "Anti-Magic (reduces Magic damage taken by 15%)",
-      "kind": "metric_delta",
-      "variant": "amount",
-      "label_suffix": "amount",
+      "name": "Anti-Magic (Magic damage taken reduced by 15%)",
+      "kind": "taken_hit",
+      "variant": "damage_taken",
+      "label_suffix": "damage_taken",
       "quote": "When Hateforged Barrier is removed from you, you now reduce $561203s% of all Magic damage taken for $561203d.",
-      "trigger_spell": 705129,
-      "gate_spell": 560822,
-      "target": "caster",
-      "metric": "aura_amount",
-      "fields": {
-        "spell": 561203,
-        "effect": 0
-      },
-      "before_expected": 0,
-      "expected": -15,
-      "tolerance": 0.01,
-      "wait_ms": 31000,
-      "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "observe_source": "560822 Effect[0] aura 4 dummy; AscensionFelswornAuras.cpp:206-207 casts Anti-Magic 561203 on the caster when a Hateforged Barrier 705129 aura is removed while the caster is alive and 560822 is known. 561203 Effect[0] aura 87 MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (all magic schools), BasePoints -16 + 1 = -15 ($561203s), DurationIndex 31 = 8000 ms ($561203d). Hateforged Barrier 705129 lasts 30000 ms (DurationIndex 9) unless its absorb is spent, so a real removal is the expiry after a real cast. The amount of Effect[0] of 561203 on the caster 31000 ms after the Barrier cast is -15. Reference search 2026-11-23: coa-history spell 560822: 0 events in 186 logs (a passive leaves no event); spell 561203 Anti-Magic: SPELL_AURA_APPLIED 1 event in 1 log (the logged result of the proc, no figure); bindmysoul talents snapshot (fetched 2026-07-22): Anti-Magic 560822 'reduce -10% of all Magic damage taken for 8 seconds', an older state (our Spell.dbc 561203 says 15%); the tooltip and the DBC prevail (G-9); expected values come from the tooltip and the DBC only."
+      "judge": "damage_ratio",
+      "expected": 0.85,
+      "strike_spell": 41394,
+      "caster_max_health": 100000,
+      "caster_health_pct": 100,
+      "cast_power": 100,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              561203,
+              1
+            ]
+          ],
+          "refresh": true
+        }
+      ],
+      "observe_source": "560822 Effect[0] aura 4 dummy; AscensionFelswornAuras.cpp:206-207 casts Anti-Magic 561203 on the caster when a Hateforged Barrier 705129 aura is removed. 561203 Effect[0] aura 87 MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (all magic schools), EffectBasePoints -16 + 1 = -15 ($561203s), DurationIndex 31 = 8000 ms. Light of the Naaru 41394 (1100 Holy, magic class, DmgClass 1) strikes the caster, 20 trials per arm, damage read from the damage logs: 1100 in the control arm, 935 (0.85) with 561203 on the caster. 561203 is set on the caster by set_aura as a precondition fixture in the treatment arm, refreshed every trial (8000 ms is shorter than the arm); that the aura follows the removal of the Barrier is the 'applies' label, and its 8 s duration the 'duration' label. Reference search 2026-11-23: coa-history spell 560822: 0 events in 186 logs (a passive leaves no event); spell 561203 Anti-Magic: SPELL_AURA_APPLIED 1 event in 1 log (no figure); bindmysoul talents snapshot (fetched 2026-07-22): Anti-Magic 560822 'reduce -10% of all Magic damage taken for 8 seconds', an older state (our Spell.dbc 561203 says 15%); the tooltip and the DBC prevail (G-9); expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 560822,

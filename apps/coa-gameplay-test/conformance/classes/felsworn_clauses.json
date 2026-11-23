@@ -1129,10 +1129,10 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "When Hateforged Barrier is removed from you, you now reduce $561203s% of all Magic damage taken (data readback of the amount; the damage reduction itself is not entered)",
+        "claim": "When Hateforged Barrier is removed from you, you now reduce $561203s% of all Magic damage taken",
         "labels": [
           "560822 behaviour_metric_delta applies",
-          "560822 behaviour_metric_delta amount"
+          "560822 behaviour_hit_ratio damage_taken"
         ]
       },
       {
@@ -1307,7 +1307,7 @@
       {
         "claim": "reduce the target's healing received by $567578s1%",
         "labels": [
-          "570077 behaviour_metric_delta amount",
+          "570077 behaviour_metric_delta healing",
           "570077 behaviour_metric_delta no_inner"
         ],
         "evidence": "behaviour"
