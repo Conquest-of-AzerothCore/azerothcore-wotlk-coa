@@ -431,6 +431,52 @@
     },
     {
       "spell": 805240,
+      "name": "Tyrant's Gaze (an enemy nearby above 35% health is struck)",
+      "kind": "metric_delta",
+      "variant": "nearby_hit",
+      "label_suffix": "nearby_hit",
+      "quote": "Set your fiery gaze upon an enemy and all enemies nearby",
+      "trigger_spell": 805240,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805240,
+        "target": "area1",
+        "critical": false
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 453.0,
+      "after_at_least": 452,
+      "after_at_most": 454,
+      "observe_source": "805240 Effect[0] TargetA 6 (TARGET_UNIT_TARGET_ENEMY), EffectChainTarget 25, EffectRadiusIndex 14 = 8 yd (SpellRadius.dbc): the spell chains from the primary to enemies within 8 yd. AscensionFelswornContracts.cpp:22-23 sets AscensionTargetAuraStateOnlyPrimary, so only the primary needs the 35% state (SpellInfo.cpp:2147). The primary dummy is held at 34% and area1, 4 yd from the caster and inside 8 yd of the primary, stays at full health: the tooltip says all enemies nearby, so area1 must take the same hit as the primary (expected 453, the tooltip value of the damage entry). Before the cast area1 has taken none (control). Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and SpellRadius.dbc. The server hits which targets is read from this arm; 'intimidating them' has no DBC effect on Effect[0] and is a question, not a label.",
+      "phase_target_health_pct": [
+        34,
+        30
+      ],
+      "area_dummies": [
+        4.0
+      ]
+    },
+    {
+      "spell": 805240,
       "name": "Tyrant's Gaze (heal at the reference attack power)",
       "kind": "metric_delta",
       "variant": "heal",
@@ -1000,22 +1046,138 @@
       },
       "cast_in_before": false,
       "before_expected": 0,
-      "wait_ms": 400,
+      "wait_ms": 300,
       "expire_ms": 500,
       "expected": 0,
       "game_time": {
         "after": [
-          5850,
-          6000
+          6250,
+          6400
         ]
       },
-      "observe_source": "800355 DurationIndex 571 = 5500 ms ($d). The slow is gone from the dummy 5900 ms after the cast (excludes a duration 10% long, 6050 ms). Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. Energy is held at 100 every 500 ms after the cast (hold_power_during_wait): the stock ManaPerSecond 30 drain (SpellAuras.cpp:771-801) removes the channel when the pool is below 30, so a single power fixture ended it near 4000 ms (fw-r1d review alert a).",
+      "observe_source": "800355 DurationIndex 571 = 5500 ms ($d); the slow 800833 lasts 600 ms after the last periodic trigger (mentor D-15). The slow is absent from the dummy 6300 ms after the cast: the channel end plus 600 ms plus a 200 ms margin; the bound is not widened. The reading before the cast (cast_in_before false) is the control arm without the channel: slow absent. 6300 ms also excludes a duration 10% long (6050 ms). Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. Energy is held at 100 every 500 ms after the cast (hold_power_during_wait): the stock ManaPerSecond 30 drain (SpellAuras.cpp:771-801) removes the channel when the pool is below 30, so a single power fixture ended it near 4000 ms (fw-r1d review alert a).",
       "measure_actor": "dummy",
       "hold_power_during_wait": {
         "power": 3,
         "every_ms": 500,
-        "count": 11
+        "count": 12
       }
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (uncounted: channel aura at 3700 ms without the power hold)",
+      "kind": "metric_delta",
+      "variant": "free_3700",
+      "label_suffix": "free_3700",
+      "quote": "Channel a beam of fel magic upon an enemy",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [],
+      "metric": "aura",
+      "fields": {
+        "spell": 800355
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 3700,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          3650,
+          3800
+        ]
+      },
+      "observe_source": "Uncounted observation for the owner (mentor D-16): without hold_power_during_wait, from full Energy (cast_power 100) with ManaPerSecond 30 Energy, the aura 800355 on the dummy is read 3700 ms after the cast, to bracket how long the channel lasts. No ledger label.",
+      "measure_actor": "dummy"
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (uncounted: channel aura at 3900 ms without the power hold)",
+      "kind": "metric_delta",
+      "variant": "free_3900",
+      "label_suffix": "free_3900",
+      "quote": "Channel a beam of fel magic upon an enemy",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [],
+      "metric": "aura",
+      "fields": {
+        "spell": 800355
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 3900,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          3850,
+          4000
+        ]
+      },
+      "observe_source": "Uncounted observation for the owner (mentor D-16): without hold_power_during_wait, from full Energy (cast_power 100) with ManaPerSecond 30 Energy, the aura 800355 on the dummy is read 3900 ms after the cast, to bracket how long the channel lasts. No ledger label.",
+      "measure_actor": "dummy"
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (uncounted: channel aura at 4100 ms without the power hold)",
+      "kind": "metric_delta",
+      "variant": "free_4100",
+      "label_suffix": "free_4100",
+      "quote": "Channel a beam of fel magic upon an enemy",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [],
+      "metric": "aura",
+      "fields": {
+        "spell": 800355
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 4100,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          4050,
+          4200
+        ]
+      },
+      "observe_source": "Uncounted observation for the owner (mentor D-16): without hold_power_during_wait, from full Energy (cast_power 100) with ManaPerSecond 30 Energy, the aura 800355 on the dummy is read 4100 ms after the cast, to bracket how long the channel lasts. No ledger label.",
+      "measure_actor": "dummy"
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (uncounted: channel aura at 4300 ms without the power hold)",
+      "kind": "metric_delta",
+      "variant": "free_4300",
+      "label_suffix": "free_4300",
+      "quote": "Channel a beam of fel magic upon an enemy",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [],
+      "metric": "aura",
+      "fields": {
+        "spell": 800355
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 4300,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          4250,
+          4400
+        ]
+      },
+      "observe_source": "Uncounted observation for the owner (mentor D-16): without hold_power_during_wait, from full Energy (cast_power 100) with ManaPerSecond 30 Energy, the aura 800355 on the dummy is read 4300 ms after the cast, to bracket how long the channel lasts. No ledger label.",
+      "measure_actor": "dummy"
     }
   ],
   "player_observations": [],

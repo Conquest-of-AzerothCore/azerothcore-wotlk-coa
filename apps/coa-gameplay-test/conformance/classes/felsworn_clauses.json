@@ -2577,9 +2577,20 @@
   {
     "spell": 805240,
     "clause": "Set your fiery gaze upon an enemy and all enemies nearby, intimidating them and causing them to combust, dealing ${$m1+0+$AP*0.35} Shadowflame Damage to them.",
-    "labels": [
-      "805240 behaviour_metric_delta damage",
-      "805240 behaviour_metric_delta damage_ap"
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$AP*0.35} Shadowflame Damage to them",
+        "labels": [
+          "805240 behaviour_metric_delta damage",
+          "805240 behaviour_metric_delta damage_ap"
+        ]
+      },
+      {
+        "claim": "upon an enemy and all enemies nearby",
+        "labels": [
+          "805240 behaviour_metric_delta nearby_hit"
+        ]
+      }
     ],
     "kind": "claim"
   },
