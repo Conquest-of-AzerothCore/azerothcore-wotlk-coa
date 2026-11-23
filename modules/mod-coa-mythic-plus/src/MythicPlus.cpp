@@ -1602,7 +1602,8 @@ public:
             return;
         std::lock_guard<std::recursive_mutex> guard(g_lock);
         Run const* run = RunFor(owner->GetMap());
-        if (!run || !run->Active())
+        // Reward chests can unlock after the timer has been resolved.
+        if (!run || !run->Scaled())
             return;
         loot->items.clear();
         loot->quest_items.clear();
