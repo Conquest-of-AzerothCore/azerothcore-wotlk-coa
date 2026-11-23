@@ -36,3 +36,15 @@ alerts when a dummy outside the cone is struck.
   `alert`, a misplaced orientation or dummy `unmeasured`.
 - Measured on Shield Radiance 504580 (90 degrees, `spell_cone` 800654): bearings 40.5, 49.5 and 135 read back as planned
   and only the inside dummy was struck, in both runs of the counted pair.
+
+## Addendum (mentor D-259, 2026-11-23): the edge form
+
+Hope 680637 ("split between enemies within $570187a1 yds") needed the radius edge of a triggered explosion: the
+`radius_edge` kind casts its spell directly and cannot deplete The Chosen's shield, and a first design with an outside
+dummy at 11 yd was struck, consistent with the 8 yd radius plus the target's combat reach (Spell.cpp:9437-9442) and
+the player's area leeway (Spell.cpp:1388-1394, Object.cpp:1787-1808, as in ADR 1020). `area_dummies` also takes
+`{"edge": {"radius", "source", "reach", "reach_source", "leeway", optional "margin_pct"}}`: the reach and the leeway
+are inputs from the data and the code, the in-run reads of positions, reaches and run speed rate only check them
+(off -> `unmeasured`), `area1` and `area2` stand `margin_pct` (default 10) percent either side of the edge, and a
+struck `area2` or an unstruck `area1` alerts. Opt-in: the list and cone forms are unchanged and the finished classes
+regenerate byte-identical. Tests: `AreaDummiesEdgeTests` (test_area_dummies_edge.py).

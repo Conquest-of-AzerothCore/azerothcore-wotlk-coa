@@ -366,7 +366,10 @@
           62531,
           2116852
         ],
-        "count_misses": true
+        "count_misses": true,
+        "miss_exclusion": {
+          "min_share": 0.04
+        }
       },
       "residual_target": 0.001,
       "min_detectable": 4,
@@ -25979,6 +25982,15 @@
         }
       ],
       "observe_source": "560861 The Coming Dawn Effect[0] aura 42 PROC_TRIGGER_SPELL 560860 (Effect[0] and Effect[1] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN 165, BasePoints -1001, so 1000 ms each, $/1000;560860S1 = 1 sec, MiscValue 806118 Dawnfall and 301266 Solar Concord). The class code (AscensionSunClericEvents.cpp:116, :263-272) reduces both cooldowns by 1000 ms on every own damage hit of Radiant Flame's tick 807058 while Dawn 807440 is on the caster. Radiant Flame 806060 lasts 4000 ms with EffectAmplitude 1000 and SPELL_ATTR5_EXTRA_INITIAL_PERIOD (AttributesEx5 0x200), so one cast ticks 807058 five times (4000 / 1000 + 1, as the flame_hits entry of 806024 derives and measures), 5 x 1000 = 5000 ms in all. Route: Solar Concord 301266 (30000 ms cooldown, Spell.dbc RecoveryTime) is cast, Radiant Flame is cast at the dummy 1600 ms later with Dawn up (Dawn 804584 cast for real as the setup cast, Solar Power fixture 500149), and Solar Concord 301266 is attempted again 25250 ms after its cast (25000 ms plus 250 ms): refused without the passive (SPELL_FAILED_NOT_READY 67, the control arm), accepted with it, refused again at 24750 ms (beyond), so the five-tick cut lies in [4750, 5250] ms, which excludes 4500 and 5500 ms (10% off on both sides). The unset arm keeps the passive learned and skips the Dawn setup cast: Radiant Flame ticks without Dawn and the attempt is refused, the control of the clause 'While Dawn is active'. Each arm waits 40000 ms more before it starts (arm_wait_ms): the arms of this 30000 ms cooldown would otherwise be about 27000 ms apart, and a Dawn cast over a Dawn still up (807440 lasts 60000 ms) switches it off, which a first exploratory run measured (807440 read 0 after the second Dawn cast, the cut missing in the with arm); at 67000 ms between arms the Dawn of the earlier arm is gone before the next one. Reference search 2026-11-22: coa-history spell 560861: 0 events in 186 logs (a passive); nothing found beyond the tooltip and the DBC.",
+      "priming_reads": [
+        {
+          "spell": 807440,
+          "expected": 1,
+          "arm_expected": {
+            "unset": 0
+          }
+        }
+      ],
       "unset_arm": true,
       "arm_wait_ms": 40000
     },
@@ -27255,6 +27267,68 @@
       "observe_source": "807749 Effect[1] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS BasePoints 9 (+1 = 10, $s2): the Vow adds 10% to the auto attack damage the caster deals (AscensionSunClericContracts.cpp:354-355, AddPct(damage, Amount(807749, 1))). Behaviour: each phase auto attacks the dummy for 5 reference swing intervals with both Valkyr weapons (10 landed hits, as the swings entry reads), the first phase without the Vow (control), the second after a real cast of the Vow (gate_cast, no set_aura of the Vow), and melee_damage_total is cumulative over the scenario, so the after reading over the before reading is 1 + 1.10 = 2.10 for a bonus of 10%; the band is 2 points on the +10% (the larger of 5% of 10 and 2 points, G-19): 2.08 to 2.12. The attack power fixture 100000 makes the attack power part of a hit (about 20000 per main-hand swing) dominate the weapon roll of 73 to 103, so the per-hit spread is below 0.1% and the 2% band is excluded with a residual failure probability far below 0.1% per pair; force_crit melee (ADR 0692) sets the forced melee crit rating on the caster, so every hit of both phases is a critical strike alike, a precondition fixture that cancels in the ratio. The confound it removes: the contract remaps 807749 Effect[2] to SPELL_AURA_MOD_CRIT_PCT (+5%, AscensionSunClericContracts.cpp:119-124), which would raise the crit rate of the after phase alone; with every hit forced to crit in both phases that term cannot move the ratio, and the +10% (AddPct on all caster melee damage, :362-364) is isolated. Misses would change the hit count between phases: a miss only alerts, never passes, because a different count moves the ratio outside the band (this entry does not read the hit count; the swings entry reads it in its own scenario). Reference search 2026-11-22: coa-history spell 807749 (138 casts in 11 logs), 506823 and 506824 (1391 and 1388 Vow auto attack events); bindmysoul text identical to the streamed one; nothing found beyond the tooltip and the DBC for the +10% value.",
       "expected": 210000,
       "force_crit": "melee"
+    },
+    {
+      "spell": 680637,
+      "name": "Hope (explosion split between three enemies within the radius, none outside)",
+      "kind": "metric_delta",
+      "variant": "split_radius",
+      "label_suffix": "split_radius",
+      "quote": "When the absorption shield from The Chosen is depleted, it explodes for ${$570187m1*$<scalingbp>+$AP*0.25+$sph*0.45} Holy damage, split between enemies within $570187a1 yds.",
+      "gate_spell": 680637,
+      "learn": [
+        704936
+      ],
+      "trigger_spell": 500143,
+      "target": "caster",
+      "caster_health_pct": 30,
+      "cast_power": 1363,
+      "strike": {
+        "spell": 47632,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 3200
+      },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 570187,
+        "target": "dummy"
+      },
+      "dummy_distance": 5,
+      "area_dummies": {
+        "edge": {
+          "radius": 8,
+          "source": "570187 Effect[0] EffectRadiusIndex 14 = SpellRadius 14 RadiusMin 8 yd ($570187a1), TargetA 22 TARGET_SRC_CASTER, TargetB 15 TARGET_UNIT_SRC_AREA_ENEMY (server DBC set)",
+          "reach": 1.275,
+          "reach_source": "creature 36 Harvest Golem: creature_template_model display 367 scale 1 (data/sql/base/db_world/creature_template_model.sql:50), creature_model_info 367 CombatReach 1.275 (creature_model_info.sql:259), set as CombatReach x scale by Creature::SetDisplayId (Creature.cpp:3877)",
+          "leeway": true,
+          "margin_pct": 10
+        }
+      },
+      "area_sum": true,
+      "void_on_cast_failure": true,
+      "before_expected": 0,
+      "expected": 64,
+      "tolerance": 2.0,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "observe_source": "Expected from the tooltip and the DBC: 570187 Effect[0] BasePoints 79 with the 0.25 x attack power term at the reference attack power 70 gives the hit 96 (96.494 displayed, the ledger entry 190 hit at the measured stats), split by the number of enemy targets within radius index 14 = 8 yd (570187 Effect[0] TargetB 15 TARGET_UNIT_SRC_AREA_ENEMY around TargetA 22 TARGET_SRC_CASTER). The area search of a player caster adds the player's area leeway 2.66 yd to the radius (Spell.cpp:1388-1394, Object.cpp:1787-1808) and each non-player target's combat reach, 1.275 yd for the dummy entry 36 (Spell.cpp:9437-9442; creature_model_info 367), so the edge lies 8 + 2.66 + 1.275 = 11.935 yd from the caster (mentor D-259); the first design's area2 at 11 yd was inside it. Three enemies stand inside: the striker (3 yd), the dummy (5 yd) and area1 10% inside the edge (10.7415 yd); area2 stands 10% beyond it (13.1285 yd). The edge option reads the positions, reaches and run speed rate, voids a layout that does not bracket the stated edge, and alerts when area1 is unstruck or area2 struck. Each of the three takes 96 / 3 = 32, and the sum read on the dummy, area1 and area2 is 32 + 32 + 0 = 64. A server that does not split reads 192, one that counts and strikes area2 reads 24 + 24 + 24 = 72, one without the reach or the leeway leaves area1 out and reads 48 + 0 + 0 = 48; the tolerance 2 separates all of them. Control arm: before the gate (680637 not learned) the same heal and strike must read 0. The hit is made non-critical and unresisted by 984954 and 823764 (precondition fixtures, as the explosion entries). Reference search 2026-11-22: nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 680637,
@@ -39888,6 +39962,15 @@
       "after_wait_ms": 1600,
       "margin_ms": 250,
       "cast_power": 1363,
+      "priming_reads": [
+        {
+          "spell": 807440,
+          "expected": 1,
+          "arm_expected": {
+            "unset": 0
+          }
+        }
+      ],
       "unset_arm": true,
       "cast_auras": [
         {

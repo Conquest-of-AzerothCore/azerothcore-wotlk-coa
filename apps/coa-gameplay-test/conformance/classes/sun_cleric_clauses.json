@@ -3330,7 +3330,8 @@
     "spell": 680637,
     "clause": "split between enemies within $570187a1 yds.",
     "labels": [
-      "680637 effect_radius 570187e0 #1"
+      "680637 effect_radius 570187e0 #1",
+      "680637 behaviour_metric_delta split_radius"
     ],
     "kind": "claim"
   },

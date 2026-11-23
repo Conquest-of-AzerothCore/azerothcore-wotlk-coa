@@ -8,7 +8,8 @@ DODGED, PARRIED, LANDED, FULL_BLOCKED = 2, 3, 1, 5
 TRIAL_STATES = {'dodged': DODGED, 'parried': PARRIED}
 GUARD_STATES = {'landed': LANDED, 'blocked': FULL_BLOCKED}
 TRIALS_PER_ATTEMPT = 'trials_per_attempt'
-TRIGGER_FIELDS = {'action', 'striker_entry', 'swing_ms', 'dodge', 'parry', 'strikers', 'striker_auras', 'count_misses'}
+TRIGGER_FIELDS = {'action', 'striker_entry', 'swing_ms', 'dodge', 'parry', 'strikers', 'striker_auras', 'count_misses',
+                  'miss_exclusion'}
 READING_NAME = 'avoided swings (dodged + parried)'
 MISSES_READING_NAME = 'avoided swings (dodged + parried + missed)'
 MISSED = 'missed'
@@ -42,6 +43,13 @@ def checked_trigger(entry: dict) -> dict:
         raise ValueError(f'Proc {aura} avoided trigger striker_auras must be a list of positive spell ids')
     if type(trigger.get('count_misses', False)) is not bool:
         raise ValueError(f'Proc {aura} avoided trigger count_misses is a boolean')
+    exclusion = trigger.get('miss_exclusion')
+    if exclusion is not None and (not counts_misses(entry) or not isinstance(exclusion, dict)
+                                  or set(exclusion) != {'min_share'} or isinstance(exclusion['min_share'], bool)
+                                  or not isinstance(exclusion['min_share'], (int, float))
+                                  or not 0 < exclusion['min_share'] < 0.5):
+        raise ValueError(f'Proc {aura} avoided trigger miss_exclusion is {{"min_share": 0 to 0.5 exclusive}} and '
+                         f'needs count_misses true')
     if entry.get('trial_readings') or entry.get(TRIALS_PER_ATTEMPT):
         raise ValueError(f'Proc {aura} avoided trigger sets its own trial reading and trials per attempt')
     return trigger
@@ -49,6 +57,16 @@ def checked_trigger(entry: dict) -> dict:
 
 def counts_misses(entry: dict) -> bool:
     return entry['trigger'].get('count_misses', False) is True
+
+
+def miss_exclusion_share(entry: dict) -> float | None:
+    exclusion = entry['trigger'].get('miss_exclusion')
+    return None if exclusion is None else float(exclusion['min_share'])
+
+
+def miss_exclusion_model(entry: dict, trials_label: str) -> dict | None:
+    share = miss_exclusion_share(entry)
+    return None if share is None else {'min_share': share, 'missed': trial_labels(trials_label, True)[MISSED]}
 
 
 def striker_auras(entry: dict) -> list:
@@ -162,7 +180,11 @@ def trial_rule(entry: dict) -> str:
             f'the caster\'s own auto attacks and the landed or fully blocked swings since the engage must be 0, or '
             f'the part fails before its reads (a second trigger source is never judged)'
             + (f'; part 1 holds baseline swing intervals before the learn, with no event allowed'
-               if entry.get('baseline') else ''))
+               if entry.get('baseline') else '')
+            + (f'; the miss share is read in the same run: under {miss_exclusion_share(entry):g} the part cannot '
+               f'separate a server that ignores misses and is unmeasured, otherwise the rate that server would '
+               f'read, the stated chance x (1 - miss share), must lie outside the interval'
+               if miss_exclusion_share(entry) is not None else ''))
 
 
 def engage_ms(entry: dict) -> int:
