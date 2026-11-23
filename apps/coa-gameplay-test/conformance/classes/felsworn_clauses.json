@@ -2550,12 +2550,9 @@
   {
     "spell": 707444,
     "clause": "up to a maximum of 10 enemies, dealing less damage with each target struck.",
-    "labels": [
-      "707444 behaviour_metric_delta extras_cap"
-    ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "The cap of 10 needs eleven candidates around the primary after a full channel and the 'less damage with each target' direction needs a per-target damage order. The fixed_count cap arm (Norgannon's Wrath 524739 cap) was tried (cap and cap_control entries, one real Carve as a setup cast): fixed_count sets the setup cast with no Felfury (the Carve is refused for lack of power) and waits 1600 ms after it, shorter than the 2500 ms channel, so no Fel Fireball follows a finished channel; the harness admits nine area dummies in metric_delta, one short of the eleven the cap needs. A fixed_count setup fixture (setup auras and setup wait) is a tool change. The nearest kind is fixed_count cap.",
+      "reason": "The cap claim is judged by extras_cap (area_dummies admits 11 dummies since fw-l2). The claim 'dealing less damage with each target struck.' needs a per-target damage order of one Fel Fireball cast: no kind or metric_delta option reads the damage of each target of one cast in hit order, and ratio_to_metric refuses a summed reading. Earlier attempt (fw-ea5): fixed_count cap arm refused for the cap. The nearest kind is fixed_count.",
       "attempts": [
         {
           "agent": "fw-ea5",
@@ -2563,7 +2560,19 @@
         }
       ]
     },
-    "reason": "HELD (fw-l2, controller t5 2026-11-23): the cap is judged (extras_cap: primary + 10 additional enemies struck of 11 offered, ok in both runs of prove3); 'dealing less damage with each target struck' is not judged: no judge compares the damage of one cast across its targets (the code factor is max(0.2, 1 - 0.1 x index), AscensionFelswornAbilities.cpp:208-218). The row stays held until that read exists."
+    "reason": "Split by claim (fw-l2b, review fw-rl2 I-1): 'up to a maximum of 10 enemies' is judged by extras_cap (primary + 10 additional enemies struck of 11 offered, ok in both runs of prove3 20261123-230759 / -230830). 'dealing less damage with each target struck.' stays unlabelled: no judge compares the damage of one cast across its targets (ratio_to_metric refuses a summed reading); the code factor is max(0.2, 1 - 0.1 x index), AscensionFelswornAbilities.cpp:208-218.",
+    "claims": [
+      {
+        "claim": "up to a maximum of 10 enemies",
+        "labels": [
+          "707444 behaviour_metric_delta extras_cap"
+        ]
+      },
+      {
+        "claim": "dealing less damage with each target struck.",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 707513,
@@ -2719,14 +2728,28 @@
   {
     "spell": 800203,
     "clause": "Interrupt a spell from being cast, preventing the target from casting spells of that school for $d and draining mana from the target based on your Spirit.",
-    "labels": [
-      "800203 aura_duration_ms #0",
-      "800203 behaviour_metric_delta interrupt",
-      "800203 behaviour_metric_delta lockout_held",
-      "800203 behaviour_metric_delta lockout_free"
-    ],
     "kind": "claim",
-    "reason": "HELD (fw-l2, controller t5 2026-11-23): the interrupt and the school lockout window are judged (interrupt, lockout_held, lockout_free ok in both runs of prove2, 20261123-225953 / -230029); 'draining mana from the target based on your Spirit' is not judged: an entry on Scarlet Magi 1832 channelling Evocation read an unset control mana (5206 / 5340), so it was removed. The row stays held until a drain read with a fixed target mana exists."
+    "reason": "Split by claim (fw-l2b, review fw-rl2 I-2): 'Interrupt a spell from being cast' is judged by interrupt and 'preventing the target from casting spells of that school for $d' by lockout_held / lockout_free (3000 ms window, DurationIndex 27) and aura_duration_ms #0, ok in both runs of prove2 20261123-225953 / -230029. 'and draining mana from the target based on your Spirit.' stays unlabelled: an entry on Scarlet Magi 1832 channelling Evocation read an unset control mana (5206 / 5340), so it was removed (e2ff868f34); a drain read needs the target's mana set right before the cast lands.",
+    "claims": [
+      {
+        "claim": "Interrupt a spell from being cast",
+        "labels": [
+          "800203 behaviour_metric_delta interrupt"
+        ]
+      },
+      {
+        "claim": "preventing the target from casting spells of that school for $d",
+        "labels": [
+          "800203 aura_duration_ms #0",
+          "800203 behaviour_metric_delta lockout_held",
+          "800203 behaviour_metric_delta lockout_free"
+        ]
+      },
+      {
+        "claim": "and draining mana from the target based on your Spirit.",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 800203,
