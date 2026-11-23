@@ -2324,6 +2324,41 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "705146 StackAmount 5 ($705146u), DurationIndex 18 = 20000 ms. Dancing Blades 92087 (learned in both phases) passes every critical melee ability hit that is not periodic (AscensionFelswornEvents.cpp:51-52), and its Proc casts 705146 on the caster when 705145 is known (AscensionFelswornEvents.cpp:141-142). Three Azzinoth's Assault 803475 casts at the dummy 1100 ms apart (the level 60 rank, its strikes 520262 and 572585 are melee hits, at least 6 landed critical hits under the melee crit rating fixture and the class file's hit and expertise ratings) against a cap of 5: without 705145 (control) 0 stacks, with it learned 5 and not 6. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before the casts (803475 needs 803468 and consumes 2 Felfury per cast; 3 casts use the 6), as in the Fel Blades 300484 entry."
+    },
+    {
+      "spell": 802058,
+      "name": "Reckoning (stacks cap at 4)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "quote": "stacking $524632u times.",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "setup_casts": [
+        801312,
+        801312,
+        801312,
+        801312
+      ],
+      "setup_wait_ms": 2000,
+      "after_auras": [
+        [
+          802058,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 524632
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "524632 StackAmount 4 ($524632u), DurationIndex 8 = 15000 ms. The Felsworn cast hook (AscensionFelswornAbilities.cpp:330-333) casts 524632 on the caster for every damaging Fel Fireball 801312 while the caster has the Reckoning aura 802058 (DurationIndex 1 = 10000 ms). Five Fel Fireball casts at the dummy 2000 ms apart (a 1500 ms cast without Reckoning, the class file's spell hit rating): before (control) no Reckoning aura and 0 stacks; after, the Reckoning aura set on the caster by harness set_aura as the phase's precondition (after_auras), so the five hits within its 10000 ms give 5 applications against a cap of 4: the stacks read 4 and not 5."
     }
   ],
   "player_observations": [],
