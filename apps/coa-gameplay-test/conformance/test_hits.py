@@ -1849,7 +1849,8 @@ class MeasuredHitModelRoleTest(unittest.TestCase):
     def roles(self, check: str) -> list[str]:
         roles = []
 
-        def modelled(class_file, rank_id, caster, target, auras, learned=None, role='hit_mean'):
+        def modelled(class_file, rank_id, caster, target, auras, learned=None, role='hit_mean', flat=None,
+                     percent_part=None):
             roles.append(role)
             return types.SimpleNamespace(model=self.MODEL)
 
