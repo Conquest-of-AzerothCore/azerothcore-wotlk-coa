@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "name": "Scholomance Heroic: killing a Scholomance Acolyte gives Argent Dawn reputation like Normal (#13374)",
+  "contract": "#13374: kills in Heroic and Mythic Stratholme and Scholomance give no Argent Dawn reputation. The core looks up reputation on kill by the creature's own template, and the CoA Heroic and Mythic copies (entry + 100000 / + 200000) had no creature_onkill_reputation rows, except Zul'Gurub's. Expected (same as Zul'Gurub): the copies give the base creature's reputation, so a Heroic Scholomance Acolyte (10471 -> 110471) gives the same 5 Argent Dawn reputation as on Normal.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "p",
+      "value": 1,
+      "label": "p sets Heroic"
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 289,
+      "x": 225.0,
+      "y": 0.0,
+      "z": 115.8,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: p is in Heroic Scholomance",
+      "actor": "p",
+      "metric": "map_id",
+      "equals": 289
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "reputation",
+      "id": 529,
+      "save_as": "before",
+      "label": "Argent Dawn standing before the kill"
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "p",
+      "entry": 10471,
+      "kill": true,
+      "radius": 60,
+      "label": "p kills the nearest Scholomance Acolyte"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the kill gives 5 Argent Dawn reputation, as on Normal",
+      "actor": "p",
+      "metric": "reputation",
+      "id": 529,
+      "relative_to": "before",
+      "equals": 5,
+      "within_ms": 3000
+    }
+  ]
+}
