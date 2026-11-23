@@ -10358,11 +10358,86 @@
       "kind": "duration_ratio",
       "quote": "and reduces the duration of disarm effects by $s2%.",
       "expected_ratio": 0.85,
-      "vehicle_spell": 8379,
+      "vehicle_spell": 13534,
       "striker_entry": 36,
       "attempts": 1,
       "margin_ms": 50,
-      "observe_source": "807507 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -16 + 1 = -15 ($s2 = 15): disarm durations on the caster x0.85. Vehicle Disarm 8379 (Mechanic 3, aura 67 MOD_DISARM, Speed 0, DurationIndex 32 = 6000 ms in SpellDuration.dbc, DurationPerLevel 0) landed once per phase (attempts 1) by the striker entry 36. A first design used Melt Weapon 301235 (Speed 20, same 6000 ms): both runs of pair 1 read the aura 5751 ms 509 ms after the landing, 260 ms more than the full duration, the missile travel (about 5 yd at 20 yd/s) that the landing time does not include, and the margin path voids a trial when the landing offset exceeds the margin (the delta itself read -891 ms against -900 and -1791 ms against -1800); Disarm 8379 has no travel time. Expected delta = 6000 x (0.85 - 1) = -900 ms between the landing-corrected durations (each read plus its elapsed time since the cast); margin 50 ms plus the run's tick overshoot, unmeasured unless below 10% of the expected delta (90 ms), so a 10% deviation either side is excluded. Control: the before phase without 807507. The gap between the phases exceeds the 15 s diminishing-returns reset. Expected from the installed DBC and the tooltip; nothing from a run. Reference search (G-11), prior rounds 2026-11-22 (ledger 434 reason): coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+      "observe_source": "807507 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -16 + 1 = -15 ($s2 = 15): disarm durations on the caster x0.85. Vehicle Disarm 13534 (D-271: DmgClass 0 aura only, never rolls a miss; replaces 8379, DmgClass 2 melee, whose strike did not apply in one expiry run of pair 20261123-003219) (Mechanic 3, aura 67 MOD_DISARM on EffectImplicitTargetA 6, Speed 0, DurationIndex 1 = 10000 ms in SpellDuration.dbc) landed once per phase (attempts 1) by the striker entry 36. A first design used Melt Weapon 301235 (Speed 20, 6000 ms): both runs of pair 1 read the aura 5751 ms 509 ms after the landing, 260 ms more than the full duration, the missile travel (about 5 yd at 20 yd/s) that the landing time does not include, and the margin path voids a trial when the landing offset exceeds the margin (the delta itself read -891 ms against -900 and -1791 ms against -1800); Disarms 8379 and 13534 have no travel time. Expected delta = 10000 x (0.85 - 1) = -1500 ms between the landing-corrected durations (each read plus its elapsed time since the cast); margin 50 ms plus the run's tick overshoot, unmeasured unless below 10% of the expected delta (150 ms), so a 10% deviation either side is excluded. Control: the before phase without 807507. The gap between the phases exceeds the 15 s diminishing-returns reset. Expected from the installed DBC and the tooltip; nothing from a run. Reference search (G-11), prior rounds 2026-11-22 (ledger 434 reason): coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 807507,
+      "name": "Valkyr's Grip 807507 (window: disarm still held past its reduced end less 10%)",
+      "kind": "metric_delta",
+      "variant": "window_held",
+      "label_suffix": "window_held",
+      "quote": "and reduces the duration of disarm effects by $s2%.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "cast_in_before": false,
+      "strike": {
+        "spell": 13534,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 8380,
+        "in_before": true,
+        "striker_entry": 36
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 13534
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 25,
+      "expire_ms": 21000,
+      "game_time": {
+        "after": [
+          20,
+          60
+        ]
+      },
+      "void_on_cast_failure": true,
+      "vehicle_landed": true,
+      "observe_source": "807507 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -16 + 1 = -15 ($s2 = 15): Disarm 13534 (Mechanic 3, Effect[0] 6 APPLY_AURA on EffectImplicitTargetA 6, the strike's target, the caster; aura 67 MOD_DISARM, DurationIndex 1 = 10000 ms, Speed 0, DmgClass 0 with only an aura effect, so Unit::SpellHitResult never rolls a miss) lasts 10000 x 85% = 8500 ms with the talent. A 15% cut 10% larger (16.5%) would end it at 8350 ms. Held arm: the striker casts 13534 at the caster, 8380 ms pass, the game time is stamped, Holy Form 805301 (the trigger) is cast, 25 ms pass and the after reading is stamped; the reading's age since the strike is at least 8380 + the stamped gap (window 20..60 ms), so at least 8400 ms, and at least 8375 ms if the aura were applied one world step (25 ms, each run's max_step_ms) after the strike step; held at that age proves the reduced end is past 8350 ms. The before phase, without the talent, reads the same disarm held. vehicle_landed voids a phase whose 13534 did not apply (a first design with Disarm 8379, DmgClass 2 melee, can be missed, dodged or parried: round B4 read no aura after about 4 of 40 first strikes and rc6 draft pair 20261123-002432 1 of 16 strikes). The gone arm (window_gone) excludes the other side. Expected from the installed DBC and the tooltip; nothing from a run."
+    },
+    {
+      "spell": 807507,
+      "name": "Valkyr's Grip 807507 (window: disarm gone by its reduced end plus 10%, held without the talent)",
+      "kind": "metric_delta",
+      "variant": "window_gone",
+      "label_suffix": "window_gone",
+      "quote": "and reduces the duration of disarm effects by $s2%.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "strike": {
+        "spell": 13534,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 8500,
+        "after_trigger_ms": 100,
+        "striker_entry": 36
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 13534
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 25,
+      "expire_ms": 21000,
+      "game_time": {
+        "after": [
+          8625,
+          8720
+        ]
+      },
+      "void_on_cast_failure": true,
+      "vehicle_landed": {
+        "max_step_ms": 25
+      },
+      "observe_source": "807507 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -16 + 1 = -15 ($s2 = 15): Disarm 13534 (Mechanic 3, Effect[0] 6 APPLY_AURA on EffectImplicitTargetA 6, the caster; DurationIndex 1 = 10000 ms, Speed 0, DmgClass 0) lasts 8500 ms with the talent. A 15% cut 10% smaller (13.5%) would end it at 8650 ms. Gone arm: the game time is stamped, Holy Form 805301 is cast, 100 ms pass, the striker casts 13534 at the caster, 8500 ms and 25 ms pass and the after reading is stamped and read on the next step; the reading's age since the strike is at most the stamped gap less the 100 ms wait plus one world tick, so with the window 8625..8720 ms at most 8620 + 25 = 8645 ms (25 ms: each run's max_step_ms), below 8650 ms; gone at that age proves the reduced end is before 8650 ms. Control: the before phase, without the talent, runs the same steps and reads the disarm still held at an age of at least 8500 + 25 = 8525 ms, past the reduced end 8500 ms. vehicle_landed voids a phase whose 13534 did not apply. Expected from the installed DBC and the tooltip; nothing from a run. The gone bound (age at most the stamped gap - 100 + one step) relies on one world step of at most 25 ms: vehicle_landed max_step_ms 25 voids a run whose max_step_ms is unrecorded or above it (D-271)."
     },
     {
       "spell": 807873,
@@ -10370,11 +10445,86 @@
       "kind": "duration_ratio",
       "quote": "and reduces the duration of disarm effects by $s2%.",
       "expected_ratio": 0.7,
-      "vehicle_spell": 8379,
+      "vehicle_spell": 13534,
       "striker_entry": 36,
       "attempts": 1,
       "margin_ms": 50,
-      "observe_source": "807873 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -31 + 1 = -30 ($s2 = 30): disarm durations on the caster x0.7. Vehicle Disarm 8379 (Mechanic 3, aura 67 MOD_DISARM, Speed 0, DurationIndex 32 = 6000 ms in SpellDuration.dbc, DurationPerLevel 0) landed once per phase (attempts 1) by the striker entry 36. A first design used Melt Weapon 301235 (Speed 20, same 6000 ms): both runs of pair 1 read the aura 5751 ms 509 ms after the landing, 260 ms more than the full duration, the missile travel (about 5 yd at 20 yd/s) that the landing time does not include, and the margin path voids a trial when the landing offset exceeds the margin (the delta itself read -891 ms against -900 and -1791 ms against -1800); Disarm 8379 has no travel time. Expected delta = 6000 x (0.7 - 1) = -1800 ms between the landing-corrected durations (each read plus its elapsed time since the cast); margin 50 ms plus the run's tick overshoot, unmeasured unless below 10% of the expected delta (180 ms), so a 10% deviation either side is excluded. Control: the before phase without 807873. The gap between the phases exceeds the 15 s diminishing-returns reset. Expected from the installed DBC and the tooltip; nothing from a run. Reference search (G-11), prior rounds 2026-11-22 (ledger 434 reason): coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+      "observe_source": "807873 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -31 + 1 = -30 ($s2 = 30): disarm durations on the caster x0.7. Vehicle Disarm 13534 (D-271: DmgClass 0 aura only, never rolls a miss; replaces 8379, DmgClass 2 melee, whose strike did not apply in one expiry run of pair 20261123-003219) (Mechanic 3, aura 67 MOD_DISARM on EffectImplicitTargetA 6, Speed 0, DurationIndex 1 = 10000 ms in SpellDuration.dbc) landed once per phase (attempts 1) by the striker entry 36. A first design used Melt Weapon 301235 (Speed 20, 6000 ms): both runs of pair 1 read the aura 5751 ms 509 ms after the landing, 260 ms more than the full duration, the missile travel (about 5 yd at 20 yd/s) that the landing time does not include, and the margin path voids a trial when the landing offset exceeds the margin (the delta itself read -891 ms against -900 and -1791 ms against -1800); Disarms 8379 and 13534 have no travel time. Expected delta = 10000 x (0.7 - 1) = -3000 ms between the landing-corrected durations (each read plus its elapsed time since the cast); margin 50 ms plus the run's tick overshoot, unmeasured unless below 10% of the expected delta (300 ms), so a 10% deviation either side is excluded. Control: the before phase without 807873. The gap between the phases exceeds the 15 s diminishing-returns reset. Expected from the installed DBC and the tooltip; nothing from a run. Reference search (G-11), prior rounds 2026-11-22 (ledger 434 reason): coa-history and the bindmysoul snapshot give nothing beyond the tooltip and the DBC for this value; nothing found."
+    },
+    {
+      "spell": 807873,
+      "name": "Valkyr's Grip (rank 2) 807873 (window: disarm still held past its reduced end less 10%)",
+      "kind": "metric_delta",
+      "variant": "window_held",
+      "label_suffix": "window_held",
+      "quote": "and reduces the duration of disarm effects by $s2%.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "cast_in_before": false,
+      "strike": {
+        "spell": 13534,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 6750,
+        "in_before": true,
+        "striker_entry": 36
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 13534
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 25,
+      "expire_ms": 21000,
+      "game_time": {
+        "after": [
+          20,
+          60
+        ]
+      },
+      "void_on_cast_failure": true,
+      "vehicle_landed": true,
+      "observe_source": "807873 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -31 + 1 = -30 ($s2 = 30): Disarm 13534 (Mechanic 3, Effect[0] 6 APPLY_AURA on EffectImplicitTargetA 6, the strike's target, the caster; aura 67 MOD_DISARM, DurationIndex 1 = 10000 ms, Speed 0, DmgClass 0 with only an aura effect, so Unit::SpellHitResult never rolls a miss) lasts 10000 x 70% = 7000 ms with the talent. A 30% cut 10% larger (33%) would end it at 6700 ms. Held arm: the striker casts 13534 at the caster, 6750 ms pass, the game time is stamped, Holy Form 805301 (the trigger) is cast, 25 ms pass and the after reading is stamped; the reading's age since the strike is at least 6750 + the stamped gap (window 20..60 ms), so at least 6770 ms, and at least 6745 ms if the aura were applied one world step (25 ms, each run's max_step_ms) after the strike step; held at that age proves the reduced end is past 6700 ms. The before phase, without the talent, reads the same disarm held. vehicle_landed voids a phase whose 13534 did not apply (a first design with Disarm 8379, DmgClass 2 melee, can be missed, dodged or parried: round B4 read no aura after about 4 of 40 first strikes and rc6 draft pair 20261123-002432 1 of 16 strikes). The gone arm (window_gone) excludes the other side. Expected from the installed DBC and the tooltip; nothing from a run."
+    },
+    {
+      "spell": 807873,
+      "name": "Valkyr's Grip (rank 2) 807873 (window: disarm gone by its reduced end plus 10%, held without the talent)",
+      "kind": "metric_delta",
+      "variant": "window_gone",
+      "label_suffix": "window_gone",
+      "quote": "and reduces the duration of disarm effects by $s2%.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "strike": {
+        "spell": 13534,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 7020,
+        "after_trigger_ms": 100,
+        "striker_entry": 36
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 13534
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 25,
+      "expire_ms": 21000,
+      "game_time": {
+        "after": [
+          7145,
+          7370
+        ]
+      },
+      "void_on_cast_failure": true,
+      "vehicle_landed": {
+        "max_step_ms": 25
+      },
+      "observe_source": "807873 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 3 (DISARM), EffectBasePoints -31 + 1 = -30 ($s2 = 30): Disarm 13534 (Mechanic 3, Effect[0] 6 APPLY_AURA on EffectImplicitTargetA 6, the caster; DurationIndex 1 = 10000 ms, Speed 0, DmgClass 0) lasts 7000 ms with the talent. A 30% cut 10% smaller (27%) would end it at 7300 ms. Gone arm: the game time is stamped, Holy Form 805301 is cast, 100 ms pass, the striker casts 13534 at the caster, 7020 ms and 25 ms pass and the after reading is stamped and read on the next step; the reading's age since the strike is at most the stamped gap less the 100 ms wait plus one world tick, so with the window 7145..7370 ms at most 7270 + 25 = 7295 ms (25 ms: each run's max_step_ms), below 7300 ms; gone at that age proves the reduced end is before 7300 ms. Control: the before phase, without the talent, runs the same steps and reads the disarm still held at an age of at least 7020 + 25 = 7045 ms, past the reduced end 7000 ms. vehicle_landed voids a phase whose 13534 did not apply. Expected from the installed DBC and the tooltip; nothing from a run. The gone bound (age at most the stamped gap - 100 + one step) relies on one world step of at most 25 ms: vehicle_landed max_step_ms 25 voids a run whose max_step_ms is unrecorded or above it (D-271)."
     },
     {
       "spell": 807507,
@@ -13305,6 +13455,82 @@
       "attempts": 1,
       "margin_ms": 50,
       "observe_source": "704581 Effect[1] $s2 = 20: stun durations on the caster x0.8. Vehicle Stun 2880 (installed DBC duration 10000 ms) cast once per phase (attempts 1) so the read is a single, undiminished landing: the earlier design landed it three times 500 ms apart and read a diminished re-application (1994 ms before). Expected delta = 10000 x (0.8 - 1) = -2000 ms between the landing-corrected durations (each read plus its elapsed time since the cast); margin 50 ms plus the run's tick overshoot, unmeasured unless below 10% of the expected delta (200 ms), so a 10% deviation either side is excluded. The 27 s gap between the phases exceeds the 15 s diminishing-returns reset. Control: the before phase without 704581. Expected from the installed DBC and the tooltip; nothing from a run. Reference search 2026-11-22 (G-11): ~/CoaServer/reference snapshots (ascension-data, bindmysoul, sidekick) and coa-history (186 logs); bindmysoul gives the same -20%; 0 logged events; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 704581,
+      "name": "Solar Guardian 704581 (window: stun still held past its reduced end less 10%)",
+      "kind": "metric_delta",
+      "variant": "window_held",
+      "label_suffix": "window_held",
+      "quote": "Reduces the duration of stun effects on you by $s2%.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "strike": {
+        "spell": 2880,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 7904,
+        "after_trigger_ms": 100,
+        "striker_entry": 36
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 2880
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 25,
+      "expire_ms": 21000,
+      "game_time": {
+        "after": [
+          8030,
+          8100
+        ]
+      },
+      "void_on_cast_failure": true,
+      "vehicle_landed": {
+        "max_step_ms": 25
+      },
+      "observe_source": "704581 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 12 (STUN), EffectBasePoints -21 + 1 = -20 ($s2 = 20): stun durations on the caster x0.8. Vehicle Stun 2880 (Mechanic 12, Effect[0] 6 APPLY_AURA aura 12 on EffectImplicitTargetA 6, the strike's target, the caster; DurationIndex 1 = 10000 ms; DmgClass 1 with the striker's spell_hit_bonus 100, landing counted by vehicle_landed). Reduced end 8000 ms; 10% of the 2000 ms cut = 200 ms, excluded ends 7800 and 8200 ms. Third design (D-271, repaired design B): Holy Form 805301 is cast before the strike (after_trigger_ms 100), so the stun never blocks it (design B was void on SPELL_FAILED_STUNNED). Between the trigger stamp and the strike: the trigger cast, a 100 ms wait, set_health and the strike cast, each step at most 25 ms (max_step_ms 25 bound, voided above), the aura at most one step later: strike landing between stamp + 100 and stamp + 225 ms; the read one step after the after stamp. window_held: wait 7904 ms after the strike; a stamped gap of at least 8030 ms puts the read at an age of at least 8030 - 225 = 7805 ms > 7800, so a held read proves the end is past 7800. Control: the before phase without the talent, same steps, full 10000 ms, held. Expected from the installed DBC and the tooltip; nothing from a run."
+    },
+    {
+      "spell": 704581,
+      "name": "Solar Guardian 704581 (window: stun gone by its reduced end plus 10%, held without the talent)",
+      "kind": "metric_delta",
+      "variant": "window_gone",
+      "label_suffix": "window_gone",
+      "quote": "Reduces the duration of stun effects on you by $s2%.",
+      "trigger_spell": 805301,
+      "target": "caster",
+      "strike": {
+        "spell": 2880,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 8050,
+        "after_trigger_ms": 100,
+        "striker_entry": 36
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 2880
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 25,
+      "expire_ms": 21000,
+      "game_time": {
+        "after": [
+          8175,
+          8270
+        ]
+      },
+      "void_on_cast_failure": true,
+      "vehicle_landed": {
+        "max_step_ms": 25
+      },
+      "observe_source": "704581 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 12 (STUN), EffectBasePoints -21 + 1 = -20 ($s2 = 20): stun durations on the caster x0.8. Vehicle Stun 2880 (Mechanic 12, Effect[0] 6 APPLY_AURA aura 12 on EffectImplicitTargetA 6, the strike's target, the caster; DurationIndex 1 = 10000 ms; DmgClass 1 with the striker's spell_hit_bonus 100, landing counted by vehicle_landed). Reduced end 8000 ms; 10% of the 2000 ms cut = 200 ms, excluded ends 7800 and 8200 ms. Third design (D-271, repaired design B): Holy Form 805301 is cast before the strike (after_trigger_ms 100), so the stun never blocks it (design B was void on SPELL_FAILED_STUNNED). Between the trigger stamp and the strike: the trigger cast, a 100 ms wait, set_health and the strike cast, each step at most 25 ms (max_step_ms 25 bound, voided above), the aura at most one step later: strike landing between stamp + 100 and stamp + 225 ms; the read one step after the after stamp. window_gone: wait 8050 ms after the strike; a stamped gap of at most 8270 ms puts the read at an age of at most 8270 - 100 + 25 = 8195 ms < 8200, so a gone read proves the end is before 8200. Control: the before phase without the talent, same steps, held at the full 10000 ms. Expected from the installed DBC and the tooltip; nothing from a run."
     },
     {
       "spell": 805581,
