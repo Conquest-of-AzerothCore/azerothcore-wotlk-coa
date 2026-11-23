@@ -170,7 +170,9 @@
     "labels": [
       "300474 behaviour_metric_delta applies"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
   },
   {
     "spell": 300474,
@@ -178,7 +180,9 @@
     "labels": [
       "300474 behaviour_hit_ratio damage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
   },
   {
     "spell": 300474,
