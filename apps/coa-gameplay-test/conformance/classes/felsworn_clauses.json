@@ -1335,11 +1335,10 @@
   {
     "spell": 704607,
     "clause": "Increases your critical damage by $s2%",
+    "kind": "claim",
     "labels": [
-      "704607 behaviour_metric_delta crit_damage_spell",
-      "704607 behaviour_metric_delta crit_damage_melee"
-    ],
-    "kind": "claim"
+      "704607 behaviour_hit_ratio crit_damage"
+    ]
   },
   {
     "spell": 704607,
@@ -1349,13 +1348,13 @@
       {
         "claim": "increases your critical strike chance by $s1%",
         "labels": [
-          "704607 behaviour_metric_delta crit_chance_elemental"
+          "704607 behaviour_hit_ratio crit_chance_elemental"
         ]
       },
       {
         "claim": "while fighting Elementals",
         "labels": [
-          "704607 behaviour_metric_delta crit_chance_other_type"
+          "704607 behaviour_hit_ratio crit_chance_other_type"
         ]
       }
     ]

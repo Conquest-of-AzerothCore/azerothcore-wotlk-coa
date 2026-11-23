@@ -335,97 +335,6 @@
       "observe_source": "560836 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9 + 1 = 10 ($s1), EffectSpellClassMask word 1 = 2048, the SpellFamilyFlags word 1 of Sargeron Smite 802060 (SpellFamilyName 20). The caster's critical strike chance of Sargeron Smite 802060 (Player::SpellDoneCritChance with spell mods) is read before (control) and after a real learn of 560836: gain 10 points. Reference search 2026-11-23: coa-history spell 560836: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot repeats the tooltip; expected values come from the tooltip and the DBC only."
     },
     {
-      "spell": 704607,
-      "name": "Elemental Bane (melee critical strike chance against an Elemental)",
-      "kind": "metric_delta",
-      "variant": "crit_chance_elemental",
-      "label_suffix": "crit_chance_elemental",
-      "quote": "and additionally increases your critical strike chance by $s1% while fighting Elementals",
-      "trigger_spell": 804432,
-      "gate_spell": 704607,
-      "target": "dummy",
-      "metric": "melee_crit_chance_against",
-      "fields": {
-        "target": "dummy"
-      },
-      "before_expected": 0,
-      "expected": 15,
-      "tolerance": 0.0001,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "expected_gain": 15,
-      "target_entry": 2022,
-      "observe_source": "704607 Effect[0] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, MiscValue 20008 rewritten to ASCENSION_CREATURE_GLOBAL_CRIT (AscensionFelswornContracts.cpp:106), MiscValueB 8 (creature type Elemental, mask 1 << 3), BasePoints 14 + 1 = 15 ($s1). The caster's melee critical strike chance against a Timberling 2022 (Elemental, creature_template type 4, as the Necromancer corpse entry reads it) is read before (control) and after a real learn of 704607 with the harmless Guard Strike 804432 cast at it: gain 15 points. Reference search 2026-11-23: coa-history spell 704607: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot repeats the tooltip; expected values come from the tooltip and the DBC only."
-    },
-    {
-      "spell": 704607,
-      "name": "Elemental Bane (control: melee critical strike chance against a non-Elemental)",
-      "kind": "metric_delta",
-      "variant": "crit_chance_other_type",
-      "label_suffix": "crit_chance_other_type",
-      "quote": "and additionally increases your critical strike chance by $s1% while fighting Elementals",
-      "trigger_spell": 804432,
-      "gate_spell": 704607,
-      "target": "dummy",
-      "metric": "melee_crit_chance_against",
-      "fields": {
-        "target": "dummy"
-      },
-      "before_expected": 0,
-      "expected": 0,
-      "tolerance": 0.0001,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "expected_gain": 0,
-      "observe_source": "704607 Effect[0] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, MiscValue 20008 rewritten to ASCENSION_CREATURE_GLOBAL_CRIT (AscensionFelswornContracts.cpp:106), MiscValueB 8 (creature type Elemental, mask 1 << 3), BasePoints 14 + 1 = 15 ($s1). The same read against the stock dummy (not an Elemental) before and after the learn: gain 0, the control that the 15 points need the creature type. Reference search 2026-11-23: coa-history spell 704607: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot repeats the tooltip; expected values come from the tooltip and the DBC only."
-    },
-    {
-      "spell": 704607,
-      "name": "Elemental Bane (spell critical damage)",
-      "kind": "metric_delta",
-      "variant": "crit_damage_spell",
-      "label_suffix": "crit_damage_spell",
-      "quote": "Increases your critical damage by $s2%",
-      "trigger_spell": 804432,
-      "gate_spell": 704607,
-      "target": "dummy",
-      "metric": "spell_critical_damage",
-      "fields": {
-        "spell": 802060,
-        "target": "dummy"
-      },
-      "before_expected": 1500,
-      "expected": 1650,
-      "tolerance": 0.002,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "expected_ratio": 1.1,
-      "observe_source": "704607 Effect[1] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, MiscValue 127 (all schools), BasePoints 9 + 1 = 10 ($s2). Unit::SpellCriticalDamageBonus on 1000 damage of Sargeron Smite 802060 (DmgClass 1, magic: crit 1000 + 500 = 1500) is read before (control) and after a real learn of 704607: AddPct 10% on the crit total gives 1650, ratio 1.10 within 0.002. Reference search 2026-11-23: coa-history spell 704607: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot repeats the tooltip; expected values come from the tooltip and the DBC only."
-    },
-    {
-      "spell": 704607,
-      "name": "Elemental Bane (melee critical damage)",
-      "kind": "metric_delta",
-      "variant": "crit_damage_melee",
-      "label_suffix": "crit_damage_melee",
-      "quote": "Increases your critical damage by $s2%",
-      "trigger_spell": 804432,
-      "gate_spell": 704607,
-      "target": "dummy",
-      "metric": "spell_critical_damage",
-      "fields": {
-        "spell": 801904,
-        "target": "dummy"
-      },
-      "before_expected": 2000,
-      "expected": 2200,
-      "tolerance": 0.002,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "expected_ratio": 1.1,
-      "observe_source": "704607 Effect[1] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, MiscValue 127 (all schools), BasePoints 9 + 1 = 10 ($s2). Unit::SpellCriticalDamageBonus on 1000 damage of Azzinoth's Assault 801904 (DmgClass 2, melee: crit 1000 + 1000 = 2000) is read before (control) and after a real learn of 704607: AddPct 10% on the crit total gives 2200, ratio 1.10 within 0.002. Reference search 2026-11-23: coa-history spell 704607: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot repeats the tooltip; expected values come from the tooltip and the DBC only."
-    },
-    {
       "spell": 560645,
       "name": "Fel Instincts (Azzinoth's Assault damage)",
       "kind": "hit_ratio",
@@ -572,6 +481,141 @@
         ]
       ],
       "observe_source": "560646 DurationIndex 28 = 5000 ms ($560646d). The presence of 560646 on the caster (metric aura) is read 5400 ms after a real Azzinoth's Assault 803475 cast, before (control: 560645 not learned, reads 0) and after the learn: absent at 5400 ms, excludes 5500 ms. Together with the other duration entry (present at 4600 ms, absent at 5400 ms) the reads exclude a duration 10% off on both sides (4500 and 5500 ms). Fixtures: Felfury 800058 x6 and 803468 set by harness set_aura before each cast as named preconditions. Reference search 2026-11-23: coa-history spell 560646: 0 events in 186 logs (positive control 801904: 21 casts); the bindmysoul snapshot repeats 5 seconds."
+    },
+    {
+      "spell": 704607,
+      "name": "Elemental Bane (critical strike chance against an Elemental)",
+      "kind": "hit_ratio",
+      "variant": "crit_chance_elemental",
+      "label_suffix": "crit_chance_elemental",
+      "quote": "and additionally increases your critical strike chance by $s1% while fighting Elementals",
+      "observe_spell": 520262,
+      "cast_spell": 803475,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "control": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ],
+        "learn": [
+          704607
+        ]
+      },
+      "expected": 1.0,
+      "rate": "critical",
+      "expected_points": 15,
+      "trials": 80,
+      "parts": 140,
+      "target_entry": 2022,
+      "expected_source": "704607 Effect[0] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, MiscValue 20008 rewritten to ASCENSION_CREATURE_GLOBAL_CRIT (AscensionFelswornContracts.cpp:106), MiscValueB 8 (creature type Elemental, mask 1 << 3), BasePoints 14 + 1 = 15 ($s1). The critical share of Assault strikes on a Timberling 2022 (Elemental, the creature entry the Necromancer corpse check reads as Elemental) is compared between a control arm without 704607 and a treatment arm with it learned: a difference of 15 points inside the 2-point band, pooled over 140 parts of 80 casts per arm. Reference search 2026-11-23: coa-history spell 704607: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats the tooltip. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before each cast of Azzinoth's Assault 803475 (it needs 803468; AscensionFelsworn.cpp:219-228), in both arms. Assault is cast at the dummy by a real cast and the hits of its main-hand strike 520262 are counted."
+    },
+    {
+      "spell": 704607,
+      "name": "Elemental Bane (control: no gain against a non-Elemental)",
+      "kind": "hit_ratio",
+      "variant": "crit_chance_other_type",
+      "label_suffix": "crit_chance_other_type",
+      "quote": "while fighting Elementals",
+      "observe_spell": 520262,
+      "cast_spell": 803475,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "control": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ],
+        "learn": [
+          704607
+        ]
+      },
+      "expected": 1.0,
+      "rate": "critical",
+      "expected_points": 0,
+      "trials": 80,
+      "parts": 20,
+      "expected_source": "704607 Effect[0] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, MiscValue 20008 rewritten to ASCENSION_CREATURE_GLOBAL_CRIT (AscensionFelswornContracts.cpp:106), MiscValueB 8 (creature type Elemental, mask 1 << 3), BasePoints 14 + 1 = 15 ($s1). The same comparison against the stock dummy, which is not an Elemental: a difference of 0 points inside the 2-point band, the control that the 15 points need the creature type. Reference search 2026-11-23: coa-history spell 704607: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats the tooltip. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before each cast of Azzinoth's Assault 803475 (it needs 803468; AscensionFelsworn.cpp:219-228), in both arms. Assault is cast at the dummy by a real cast and the hits of its main-hand strike 520262 are counted."
+    },
+    {
+      "spell": 704607,
+      "name": "Elemental Bane (critical damage)",
+      "kind": "hit_ratio",
+      "variant": "crit_damage",
+      "label_suffix": "crit_damage",
+      "quote": "Increases your critical damage by $s2%",
+      "observe_spell": 520262,
+      "cast_spell": 803475,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "control": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ],
+        "learn": [
+          704607
+        ]
+      },
+      "expected": 1.1,
+      "critical": true,
+      "force_crit": "melee",
+      "trials": 40,
+      "expected_source": "704607 Effect[1] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, MiscValue 127 (all schools), BasePoints 9 + 1 = 10 ($s2). Unit::SpellCriticalDamageBonus applies AddPct(crit_bonus, 10) to the whole crit total (2x of a melee hit), so a critical hit does 2.2x instead of 2.0x: whole-hit ratio 1.10 (the Sun Cleric Gavel entry applies the same reading to op 15). Forced melee crits, critical hits only, control without 704607 and treatment with it learned. Reference search 2026-11-23: coa-history spell 704607: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats the tooltip. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before each cast of Azzinoth's Assault 803475 (it needs 803468; AscensionFelsworn.cpp:219-228), in both arms. Assault is cast at the dummy by a real cast and the hits of its main-hand strike 520262 are counted."
     }
   ],
   "player_observations": [],
