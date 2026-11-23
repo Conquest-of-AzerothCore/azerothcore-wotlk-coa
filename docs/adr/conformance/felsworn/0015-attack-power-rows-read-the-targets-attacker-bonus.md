@@ -1,4 +1,4 @@
-# 0011. Felsworn attack power rows read the target's attacker attack power bonus
+# 0015. Felsworn attack power rows read the target's attacker attack power bonus
 
 - Status: accepted (mentor D-68, 2026-11-23)
 - Date: 2026-11-23
@@ -13,10 +13,14 @@ power meets a victim: `Unit::GetTotalAttackPowerValue` with a victim (Unit.cpp:1
 
 Felsworn abilities take their attack power term from the class data (`FelswornCoefficients`) in
 `felsworn_scaling::ModifySpellEffectBaseValue`, which reads `GetTotalAttackPowerValue(BASE_ATTACK)` with no victim:
-the hook has no target (SpellInfo.cpp:523). Tyrant's Gaze 805240 ("dealing ${$m1+0+$AP*0.35} Shadowflame Damage")
-read 453 against both the scarred and the unscarred dummy, zero variance, 320 hits per arm (pair 20261123-194225 /
-20261123-194305, build 494f7f5ebe77), where the tooltip coefficient gives 344 + int(0.35 x 331) = 459 against the
-scar of 19.
+the hook has no target (SpellInfo.cpp:523). `Unit::SpellDamageBonusDone` adds the victim term only with an attack
+power coefficient of its own, and Tyrant's Gaze 805240 ("dealing ${$m1+0+$AP*0.35} Shadowflame Damage") has none: its
+`damage_ap` entry reads exactly 344 + int(0.35 x attack power). So the Gaze ignores the scar, where the tooltip
+coefficient gives 344 + int(0.35 x 331) = 459 against the scar of 19 instead of 453.
+
+The D-61 diagnostic (453 in both arms, pair 20261123-194225 / 20261123-194305) did not show this: keyed to 805240, it
+ran with the Tyrant weapon set, under which Azzinoth's Assault 801904 fails with SPELL_FAILED_EQUIPPED_ITEM_CLASS, so
+the dummy was never scarred. The regression is keyed to Scars of Suffering 570158 and runs with the Slayer set.
 
 Two classes already add the aura by hand:
 - Ranger (`AscensionRangerScaling.cpp:44-46, 92, 138`): a per-spell SpellScript adds the signed aura total to attack
@@ -58,4 +62,5 @@ power row, so only the melee aura is read. The engine is untouched.
 - A periodic damage row on a unit aura, a ranged attack power row, or an infernal's owner-scaled damage
   (AscensionFelswornSummons.cpp:57) would not read the target's aura; none of the first two exists in class 14, and the
   infernal's own swings read the aura through the engine.
-- Regression: the class file entry `scar_ap_gaze` (805240, hit_ratio, expected 1.01325, control arm without the scar).
+- Regression: the class file entry `scar_ap_gaze` (570158, Tyrant's Gaze observed, hit_ratio, expected 1.01325,
+  control arm without the scar).
