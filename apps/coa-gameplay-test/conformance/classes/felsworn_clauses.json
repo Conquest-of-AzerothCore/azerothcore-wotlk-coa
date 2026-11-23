@@ -1281,11 +1281,10 @@
       },
       {
         "claim": "for $704397d",
-        "labels": [
-          "560641 behaviour_metric_delta duration"
-        ]
+        "labels": []
       }
-    ]
+    ],
+    "reason": "HELD 'for $704397d' (review fw-rl1b I-1): the duration entry 560641 behaviour_metric_delta duration reads ok in both runs, but its residual is 0.12^3 = 0.17%/run (0.35%/pair) > 0.1% (Cripple binary resist 12% on the dummy); a fourth cast is not payable at 100 Energy; label withheld until sized."
   },
   {
     "spell": 560645,
