@@ -65,3 +65,9 @@ the closed record without a scenario names its replacements; mutant without the 
 before; entries without replacements, with an empty list, naming the hit itself or with a blank reason are refused;
 the record stays closed with both replacements ok and alerts with one missing or one alert, unmeasured or tolerated.
 Finished classes 15, 19, 19 --stack and 23 regenerate and audit byte-identical (lr3 report).
+
+Addendum (lr4, mentor condition M-3): `conformance.superseded_hit` enforces the restriction in code. Outside class 27 an
+entry needs a `ruling` field holding a non-blank text that names a mentor decision (`D-<number>`); without it the
+generation raises `ValueError`. Class 27 needs no ruling. Tests (`test_compare.py`): a class other than 27 without a
+ruling, with a blank one, one naming no decision or a non-text one is refused; class 27 without a ruling and another
+class with one generate the closed record.

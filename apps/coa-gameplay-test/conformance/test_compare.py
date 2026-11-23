@@ -2194,14 +2194,15 @@ class GenerateTest(unittest.TestCase):
 
 SUPERSEDING = ['572027 hit_mean gate stacks 0', '572027 hit_mean gate']
 SUPERSEDED_ENTRY = {'spell': 572027, 'reason': 'seeded: its hits land on the debuff it applies',
-                    'replaced_by': SUPERSEDING}
+                    'replaced_by': SUPERSEDING, 'ruling': 'seeded mentor decision D-1'}
 
 
-def superseded_generate(out: Path, entries) -> dict:
+def superseded_generate(out: Path, entries, class_id: int | None = None) -> dict:
     from conformance import generate
 
-    def listed(class_id):
-        return {**load_fixture_class_file(class_id), 'superseded_hits': entries}
+    def listed(requested):
+        listed_file = {**load_fixture_class_file(requested), 'superseded_hits': entries}
+        return listed_file if class_id is None else {**listed_file, 'class_id': class_id}
 
     with mock.patch('conformance.load_class_file', listed):
         return json.loads(generate(CLASS_FILE['class_id'], out, spells=[RIGHTEOUS_UPHEAVAL]).read_text(
@@ -2240,11 +2241,36 @@ class SupersededHitTest(unittest.TestCase):
         for broken in ({key: value for key, value in SUPERSEDED_ENTRY.items() if key != 'replaced_by'},
                        {**SUPERSEDED_ENTRY, 'replaced_by': []},
                        {**SUPERSEDED_ENTRY, 'replaced_by': ['572027 hit_mean']},
-                       {**SUPERSEDED_ENTRY, 'reason': ' '}):
+                       {**SUPERSEDED_ENTRY, 'reason': ' '},
+                       {**SUPERSEDED_ENTRY, 'unknown_key': 1}):
             out = Path(tempfile.mkdtemp(prefix='conformance-superseded-'))
             try:
                 with self.subTest(broken=sorted(broken)), self.assertRaises(ValueError):
                     superseded_generate(out, [broken])
+            finally:
+                shutil.rmtree(out)
+
+
+    def test_mutant_a_class_other_than_27_without_a_mentor_ruling_is_refused(self):
+        without = {key: value for key, value in SUPERSEDED_ENTRY.items() if key != 'ruling'}
+        for broken in (without, {**SUPERSEDED_ENTRY, 'ruling': ''}, {**SUPERSEDED_ENTRY, 'ruling': 'the author says so'},
+                       {**SUPERSEDED_ENTRY, 'ruling': 17}):
+            out = Path(tempfile.mkdtemp(prefix='conformance-superseded-'))
+            try:
+                with self.subTest(ruling=broken.get('ruling')), self.assertRaisesRegex(ValueError, 'ruling'):
+                    superseded_generate(out, [broken])
+            finally:
+                shutil.rmtree(out)
+
+    def test_class_27_needs_no_ruling_and_a_ruling_is_accepted_elsewhere(self):
+        without = {key: value for key, value in SUPERSEDED_ENTRY.items() if key != 'ruling'}
+        for class_id, entry in ((27, without), (27, SUPERSEDED_ENTRY), (CLASS_FILE['class_id'], SUPERSEDED_ENTRY)):
+            out = Path(tempfile.mkdtemp(prefix='conformance-superseded-'))
+            try:
+                with self.subTest(class_id=class_id, ruling='ruling' in entry):
+                    manifest = superseded_generate(out, [entry], class_id=class_id)
+                    [hit] = [item for item in manifest['scenarios'] if item['kind'] == 'hit']
+                    self.assertIsNone(hit['file'])
             finally:
                 shutil.rmtree(out)
 
