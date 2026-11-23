@@ -31,7 +31,7 @@ GRANT_KEYS = frozenset({'spell', 'kind', 'mode', 'name', 'quote', 'aura', 'shiel
                        'control_trials', 'parts', 'block', 'chance_pct', 'half_width_points', 'label_suffix',
                        'void_on_cast_failure', 'observe_source', 'variant', 'duration_spell', 'duration_effect',
                        'min_granted', 'residual_target'})
-DURATION_WINDOWS = {'held': (0.9, 0.965), 'gone': (1.035, 1.1)}
+DURATION_WINDOWS = {'held': (0.905, 0.965), 'gone': (1.035, 1.095)}
 DURATION_READS = {'held': 0.93, 'gone': 1.07}
 PAIR_RUNS = 2
 MAXIMUM_STEPS = 10000

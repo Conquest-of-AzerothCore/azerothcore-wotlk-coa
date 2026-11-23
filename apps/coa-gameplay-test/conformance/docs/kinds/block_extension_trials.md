@@ -50,7 +50,7 @@ Opt-in on `mode: "grant"` at `block: 100`, without `chance_pct`, `control_trials
 `duration_effect`, `min_granted` and `residual_target`. The expected duration is `duration_spell`
 Effect[`duration_effect`] from the DBC. Each trial reads `game_time_ms` right before and right after the strike and the
 aura with game-time stamps at 0.93 and 1.07 times the duration after the strike. A trial whose strike granted the aura
-is judged when the read ages (bounded by the two strike stamps) lie in 0.9..0.965 and 1.035..1.1 times the duration
+is judged when the read ages (bounded by the two strike stamps) lie in 0.905..0.965 and 1.035..1.095 times the duration
 (ADR 1052's window shares, both inside +-10%); otherwise it is void, as is a trial with no grant or a strike not
 blocked once. A judged trial must show the aura on at the first read and gone at the second, else alert; fewer than
 `min_granted` judged trials is unmeasured. `trials` must reach the count at which fewer than `min_granted` grants come

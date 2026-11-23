@@ -34,3 +34,8 @@ stamps, so the "4 sec" claim had only the data label `707629 effect_value 712448
   grant on then gone is ok; mutants of the aura's own 12000 ms (still on) and of an early expiry alert; too few
   grants, read ages outside the windows or a wide strike bracket are unmeasured, never alert; the entry is refused
   below 47 trials, at block 0, with `chance_pct`, with control trials, or without its keys.
+
+Addendum (lr4, mentor D-295 TN-3 condition 'windows excluding +-10%'): the shares are 0.905..0.965 and 1.035..1.095, so
+the held window starts and the gone window ends strictly inside 0.9 and 1.1 times the duration (4000 ms: ages
+3620..3860 and 4140..4380). A read age exactly at 3600 or 4400 ms is void, never judged. Test
+`test_the_windows_exclude_a_duration_exactly_ten_percent_off`.
