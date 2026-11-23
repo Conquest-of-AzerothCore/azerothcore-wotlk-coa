@@ -20418,6 +20418,78 @@
       }
     },
     {
+      "spell": 680646,
+      "name": "Scroll of Hope (a holder already below 35% when the Scroll is cast is not healed by a hit)",
+      "kind": "metric_delta",
+      "variant": "heal_below_at_cast",
+      "label_suffix": "heal_below_at_cast",
+      "quote": "If any ally falls below 35% of their maximum health while this is active they are instantly healed once for $681383s1% of their maximum health.",
+      "trigger_spell": 680646,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 681383,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Edge case of owner ruling O-29 (Sun Cleric ADR 0039): the aura's holder is below 35% before the Scroll is cast and is hit while it is up, so the hit does not take it from at least 35% to below 35% (AscensionSunClericEvents.cpp:79-81, a fall) and 681383 is not cast: 0 heals. Fixture: one health set, caster_health 3000 of 10000 (30%), before the Scroll cast, regeneration disabled; the Scroll is cast for real in the after phase only (680646 cooldown 300000 ms, reset before the cast); 1600 ms later the passive striker (creature 36, spell hit bonus 100) casts Grave Coil 47632 (Shadow, 599 + 1 die side = 600, 420 under the -30% of 680646) once at the caster, no second health set. Reads: spell_heal_count of 681383 on the caster 0 in both phases; spell_damage_count of 47632 0 then 1 (the hit landed, so 0 heals is not a missing hit); caster health 3000 before, 3000 less 420 = 2580 after (tolerance 40): the holder stayed below 35% from the set to the hit and nothing healed it. Limit: no existing option reads health at the cast itself (before_trigger_reads reads auras only); the health fixed by the single set and the end read bracket it, a direct read at the trigger is a tool need. Control and re-fall: heal_each_fall and heal_amount (holder above 35% falling: 1 heal of 1500), heal_each_ally_fall_again (re-fall after going above 35%: a second heal). Reference search 2026-11-23: coa-history spells 680646, 681383 and 47632 had 0 events in 186 logs and the bindmysoul snapshot gives only the tooltip text; nothing found. Not probabilistic: the hit is forced (spell hit bonus 100), residual failure probability 0.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "tolerance": 0,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the one Grave Coil hit landed on the caster in the after phase only, so 0 heals is not a missing hit"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "health",
+            "before_expected": 3000,
+            "expected": 2580,
+            "tolerance": 40,
+            "source": "caster set to 3000 of 10000 (30%, below 35%) before the cast: 3000 before (no Scroll, no hit); 3000 less one Grave Coil of 420 (600 less 30%) = 2580 after, with no heal"
+          }
+        ]
+      },
+      "caster_health": [
+        3000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "after_trigger_strike": {
+        "spell": 47632,
+        "delay_ms": 1600,
+        "count": 1,
+        "wait_ms": 400
+      }
+    },
+    {
       "spell": 504848,
       "name": "Mercy (the cap: six receive it out of eight players)",
       "kind": "metric_delta",
