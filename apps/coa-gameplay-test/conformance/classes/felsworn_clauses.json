@@ -2948,7 +2948,8 @@
       {
         "claim": "Increases the duration",
         "labels": [
-          "800352 behaviour_metric_delta bane_duration"
+          "800352 behaviour_metric_delta bane_held",
+          "800352 behaviour_metric_delta bane_gone"
         ]
       },
       {

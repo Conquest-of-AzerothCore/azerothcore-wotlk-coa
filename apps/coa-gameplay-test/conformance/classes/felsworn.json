@@ -12940,30 +12940,67 @@
       "spell": 800352,
       "name": "Embracing Evil (Bane of Fire duration)",
       "kind": "metric_delta",
-      "variant": "bane_duration",
-      "label_suffix": "bane_duration",
       "quote": "Increases the duration",
       "trigger_spell": 707901,
       "gate_spell": 800352,
       "target": "dummy",
-      "metric": "aura_duration_ms",
+      "metric": "aura",
       "fields": {
         "spell": 707901
       },
       "measure_actor": "dummy",
       "cast_power": 100,
-      "before_expected": 17900,
-      "expected": 21500,
-      "expected_gain": 3600,
-      "tolerance": 300,
-      "wait_ms": 100,
-      "expire_ms": 18500,
-      "observe_source": "800352 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 19 + 1 = 20 ($s1 percent), class mask word 0 0x20 matching Bane of Fire 707901 (SpellFamilyFlags[0] 32, DurationIndex 85 = 18000 ms, SpellDuration.dbc): 18000 x 1.20 = 21600 ms. Bane of Fire is cast on the dummy before (control: 800352 not learned, 18000 less the 100 ms wait) and after a real learn (21600 less 100); the tolerance 300 excludes a gain 10% off (3240 or 3960 ms against 3600). Reference search 2026-11-23: coa-history spell 800352: 0 events in 186 logs (passive); spell 707901: 360 SPELL_AURA_APPLIED by players in 11 logs (positive control); bindmysoul talents snapshot: 'Increases the duration and reduces the Energy cost of Banes by 20%.' (same figure); expected values come from the tooltip and the DBC only. The harness equips the weapon sets after the scenario settle, so a cast issued at once is refused by the global cooldown (the first run read the before phase 0 for that reason); a setup cast of 707901 with a 1600 ms wait and a cooldown reset precedes the timed cast in both phases, and the timed cast then refreshes the aura to its full duration.",
+      "before_expected": 0,
+      "expire_ms": 500,
       "setup_casts": [
         707901
       ],
       "setup_wait_ms": 1600,
-      "trigger_reset_after_setup": true
+      "trigger_reset_after_setup": true,
+      "variant": "bane_held",
+      "label_suffix": "bane_held",
+      "wait_ms": 19900,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          19850,
+          20050
+        ]
+      },
+      "observe_source": "800352 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 19 + 1 = 20 ($s1 percent), class mask word 0 0x20 matching Bane of Fire 707901 (SpellFamilyFlags[0] 32, DurationIndex 85 = 18000 ms, SpellDuration.dbc): 18000 x 1.20 = 21600 ms. Bane of Fire is cast on the dummy in both phases (control: 800352 not learned, 18000 ms; treatment: after a real learn, 21600 ms) and the aura 707901 on the dummy is read as present or absent at a game-time stamp. Held: Bane of Fire is still on the dummy about 19900 ms after the cast (0.92 of 21600 ms is 19872 ms; the stamp window 19850 to 20050 ms excludes a duration 10% short, 19440 ms, and the unmodified 18000 ms, which reads absent in the control phase). Reference search 2026-11-23: coa-history spell 800352: 0 events in 186 logs (passive); spell 707901: 360 SPELL_AURA_APPLIED by players in 11 logs (positive control); bindmysoul talents snapshot: 'Increases the duration and reduces the Energy cost of Banes by 20%.' (same figure); expected values come from the tooltip and the DBC only. The harness equips the weapon sets after the scenario settle, so a cast issued at once is refused by the global cooldown; a setup cast of 707901 with a 1600 ms wait and a cooldown reset precedes the timed cast in both phases, and the timed cast then refreshes the aura to its full duration."
+    },
+    {
+      "spell": 800352,
+      "name": "Embracing Evil (Bane of Fire duration)",
+      "kind": "metric_delta",
+      "quote": "Increases the duration",
+      "trigger_spell": 707901,
+      "gate_spell": 800352,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 707901
+      },
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expire_ms": 500,
+      "setup_casts": [
+        707901
+      ],
+      "setup_wait_ms": 1600,
+      "trigger_reset_after_setup": true,
+      "variant": "bane_gone",
+      "label_suffix": "bane_gone",
+      "wait_ms": 23300,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          23250,
+          23450
+        ]
+      },
+      "observe_source": "800352 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 19 + 1 = 20 ($s1 percent), class mask word 0 0x20 matching Bane of Fire 707901 (SpellFamilyFlags[0] 32, DurationIndex 85 = 18000 ms, SpellDuration.dbc): 18000 x 1.20 = 21600 ms. Bane of Fire is cast on the dummy in both phases (control: 800352 not learned, 18000 ms; treatment: after a real learn, 21600 ms) and the aura 707901 on the dummy is read as present or absent at a game-time stamp. Gone: Bane of Fire is absent about 23300 ms after the cast (1.08 of 21600 ms is 23328 ms; the stamp window 23250 to 23450 ms excludes a duration 10% long, 23760 ms). The claim needs the held and the gone label together. Reference search 2026-11-23: coa-history spell 800352: 0 events in 186 logs (passive); spell 707901: 360 SPELL_AURA_APPLIED by players in 11 logs (positive control); bindmysoul talents snapshot: 'Increases the duration and reduces the Energy cost of Banes by 20%.' (same figure); expected values come from the tooltip and the DBC only. The harness equips the weapon sets after the scenario settle, so a cast issued at once is refused by the global cooldown; a setup cast of 707901 with a 1600 ms wait and a cooldown reset precedes the timed cast in both phases, and the timed cast then refreshes the aura to its full duration."
     },
     {
       "spell": 555738,
@@ -13251,7 +13288,22 @@
           "dummy"
         ]
       ],
-      "observe_source": "Control phase: Fury of the Illidari is cast with the dummy plain and Twin Slice 808303 lands on it (at least 2 events, the entry's floor). Treatment phase, after 3500 ms: the dummy carries Stealth 1784 (aura 16 MOD_STEALTH) (harness set_aura on the dummy, a precondition fixture: the claim's subject is the strikes, not the aura) and the same cast must add no strike event on it (gain 0). The caster stays out of the dummy's reach of detection (the dummy is a passive creature). Inner Demon 804216 is a precondition fixture (harness set_aura) in both phases; 2 charges allow the two casts. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): same sentences; expected values come from the tooltip and the DBC only."
+      "observe_source": "Control phase: Fury of the Illidari is cast with the dummy plain and Twin Slice 808303 lands on it (at least 2 events, the entry's floor). Treatment phase, after 3500 ms: the dummy carries Stealth 1784 (aura 16 MOD_STEALTH) (harness set_aura on the dummy, a precondition fixture: the claim's subject is the strikes, not the aura) and the same cast must add no strike event on it (gain 0). The caster stays out of the dummy's reach of detection (the dummy is a passive creature). Inner Demon 804216 is a precondition fixture (harness set_aura) in both phases; 2 charges allow the two casts. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): same sentences; expected values come from the tooltip and the DBC only. Review fw-rea2 I-1: a second visible enemy (area1, 3 yd) stands beside the dummy in both phases; the treatment cast must put at least 2 strikes on area1 while the dummy (carrying the aura) takes none, so a refused cast (gain 0 on area1, or a refused cast listed in cast_failures) is unmeasured, never ok.",
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        3
+      ],
+      "same_arm_ratio": {
+        "metric": "spell_damage_count",
+        "fields": {
+          "spell": 808303,
+          "target": "area1"
+        },
+        "ratio": 0.0,
+        "tolerance": 0.01,
+        "least": 2,
+        "source": "Fury of the Illidari 561216 aura effect (Spell.dbc, aura 226 every 500 ms, 6 assaults): the assaults must land on the visible second enemy and none on the stealthed or invisible dummy in the same window, so the dummy's gain over the gain on area1 is 0"
+      }
     },
     {
       "trigger_spell": 561216,
@@ -13291,7 +13343,22 @@
           "dummy"
         ]
       ],
-      "observe_source": "Control phase: Fury of the Illidari is cast with the dummy plain and Twin Slice 808303 lands on it (at least 2 events, the entry's floor). Treatment phase, after 3500 ms: the dummy carries Invisibility 32612 (aura 18 MOD_INVISIBILITY) (harness set_aura on the dummy, a precondition fixture: the claim's subject is the strikes, not the aura) and the same cast must add no strike event on it (gain 0). The caster stays out of the dummy's reach of detection (the dummy is a passive creature). Inner Demon 804216 is a precondition fixture (harness set_aura) in both phases; 2 charges allow the two casts. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): same sentences; expected values come from the tooltip and the DBC only."
+      "observe_source": "Control phase: Fury of the Illidari is cast with the dummy plain and Twin Slice 808303 lands on it (at least 2 events, the entry's floor). Treatment phase, after 3500 ms: the dummy carries Invisibility 32612 (aura 18 MOD_INVISIBILITY) (harness set_aura on the dummy, a precondition fixture: the claim's subject is the strikes, not the aura) and the same cast must add no strike event on it (gain 0). The caster stays out of the dummy's reach of detection (the dummy is a passive creature). Inner Demon 804216 is a precondition fixture (harness set_aura) in both phases; 2 charges allow the two casts. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): same sentences; expected values come from the tooltip and the DBC only. Review fw-rea2 I-1: a second visible enemy (area1, 3 yd) stands beside the dummy in both phases; the treatment cast must put at least 2 strikes on area1 while the dummy (carrying the aura) takes none, so a refused cast (gain 0 on area1, or a refused cast listed in cast_failures) is unmeasured, never ok.",
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        3
+      ],
+      "same_arm_ratio": {
+        "metric": "spell_damage_count",
+        "fields": {
+          "spell": 808303,
+          "target": "area1"
+        },
+        "ratio": 0.0,
+        "tolerance": 0.01,
+        "least": 2,
+        "source": "Fury of the Illidari 561216 aura effect (Spell.dbc, aura 226 every 500 ms, 6 assaults): the assaults must land on the visible second enemy and none on the stealthed or invisible dummy in the same window, so the dummy's gain over the gain on area1 is 0"
+      }
     },
     {
       "spell": 806235,
@@ -13333,9 +13400,9 @@
       "expected": 2000,
       "expected_gain": 1000,
       "tolerance": 90,
-      "wait_ms": 2600,
+      "wait_ms": 3300,
       "expire_ms": 10500,
-      "observe_source": "The tooltip names Ruin and Azzinoth's Assault among the Felfury spenders (the spells whose own tooltip says 'Consumes 2 Felfury': Ruin 501298, Spell.dbc Description). Ruin has a direct Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE (a 2500 ms cast time, Spell.dbc), so with its hit forced critical (spell crit rating forced by the harness) one direct critical strike must extend Inner Demon 804216 by $806236s1 = 1000 ms (806236 BasePoints 999 + 1, same figure as the Sargeron Smite entry of this spell); the remaining duration of 804216 2600 ms after the cast is read before the learn (control: 806235 not learned) and after: gain 1000, tolerance 90 excludes 10% on the gain. Inner Demon 804216, Felfury 800058 x2 (the cost of the spender) and At Least 2 Felfury 803468 (the spender's CasterAuraSpell) are set by harness set_aura on the caster in both phases as precondition fixtures. Reference search 2026-11-23: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec and cause enemies struck to have a 3% increased chance to be hit by spells for 12 seconds.' (same figures); expected values come from the tooltip and the DBC only."
+      "observe_source": "The tooltip names Ruin and Azzinoth's Assault among the Felfury spenders (the spells whose own tooltip says 'Consumes 2 Felfury': Ruin 501298, Spell.dbc Description). Ruin has a direct Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE (a 2500 ms cast time, Spell.dbc), so with its hit forced critical (spell crit rating forced by the harness) one direct critical strike must extend Inner Demon 804216 by $806236s1 = 1000 ms (806236 BasePoints 999 + 1, same figure as the Sargeron Smite entry of this spell); the remaining duration of 804216 2600 ms after the cast is read before the learn (control: 806235 not learned) and after: gain 1000, tolerance 90 excludes 10% on the gain. Inner Demon 804216, Felfury 800058 x2 (the cost of the spender) and At Least 2 Felfury 803468 (the spender's CasterAuraSpell) are set by harness set_aura on the caster in both phases as precondition fixtures. Reference search 2026-11-23: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec and cause enemies struck to have a 3% increased chance to be hit by spells for 12 seconds.' (same figures); expected values come from the tooltip and the DBC only. Review fw-rea2 I-3: the read was moved from 2600 ms to 3300 ms: Ruin has a 2500 ms cast (CastingTimeIndex 19) and a projectile Speed 30 yd/s over 3 yd, so the hit lands about 2600 ms plus tick latency; the read now follows the hit by about 700 ms."
     },
     {
       "spell": 806235,
