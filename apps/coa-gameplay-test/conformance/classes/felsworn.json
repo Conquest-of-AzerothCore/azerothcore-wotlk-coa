@@ -3601,19 +3601,19 @@
       "variant": "chaos_range",
       "label_suffix": "chaos_range",
       "quote": "Increases the range of $?s520853[Fel Torpedo][Chaos Rush] by $s2 yds",
-      "trigger_spell": 804521,
+      "trigger_spell": 500423,
       "target": "caster",
       "metric": "position_x",
       "fields": {},
       "displacement": {},
-      "before_expected": 3,
-      "expected": 6,
+      "before_expected": 10,
+      "expected": 13,
       "expected_gain": 3,
       "tolerance": 0.3,
       "wait_ms": 1500,
       "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "observe_source": "805244 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 6 (SPELLMOD_RADIUS), EffectBasePoints 2 (+3 yd, $s2), class mask word 2 0x2 of family 20. Chaos Rush 804521 (Effect[0] SPELL_EFFECT_CHARGE_DEST on TARGET_DEST_CASTER_FRONT, EffectRadiusIndex 15 = 3 yd in SpellRadius.dbc, SpellFamilyFlags[1] 0x80000, no SpellFamilyFlags[2]) does not carry that class mask (the Fel Torpedo jump 802028 does), so the data does not say the stated 3 yd more range reaches Chaos Rush itself. The entry asks the tooltip's default text (Chaos Rush, 520853 not learned): the caster's 2D displacement from right before each cast to 1500 ms after it, before (control, 805244 not learned) 3 yd by the data and 6 yd after a real learn by the tooltip, within 0.3 yd (a tenth of the stated 3 yd). A reading of 3 after the learn would be a lead, not a fix. Reference search 2026-11-23: coa-history spell 805244: 0 events in 186 logs (passive); spell 500610 Fel Torpedo: SPELL_CAST_SUCCESS 6 events in 1 log (positive control that the dash is logged; no distance in the log index); bindmysoul talents snapshot (fetched 2026-07-22): Legion March 805244 'Increases the range of Chaos Rush by 3 yds.' (an older, shorter text without the Fel Torpedo or crit parts; the figure 3 yd is the same as $s2); nothing else found."
+      "observe_source": "805244 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 6 (SPELLMOD_RADIUS), EffectBasePoints 2 (+3 yd, $s2), class mask word 2 0x2 of family 20. The player's Chaos Rush button is 500028 (ranks 500422 at 24, 500423 at 44; AscensionCustomClassData.h:104, AscensionSpellProgressionData.h:308-309; SkillLineAbility 85336/22111/22112), RangeIndex 1 (self); its Effect[1] TRIGGER_SPELL casts Chaos Rush Jump 802028 (Effect[0] CHARGE_DEST on TARGET_DEST_CASTER_FRONT, EffectRadiusIndex 13 = 10 yd, SpellFamilyFlags[2] 0x2), the spell 805244 Effect[1] reaches. The entry casts rank 500423 (the level 60 rank): the caster's 2D displacement from right before the cast to 1500 ms after it, before (control, 805244 not learned) 10 yd and after a real learn 13 yd by the tooltip (+3 yd, $s2), within 0.3 yd (a tenth of the stated 3 yd); a read of 10 after the learn is a lead (stop and report), not a fix. The earlier entry cast the orphan Chaos Rush 804521 (no SkillLineAbility, no trigger, 0 events in 186 logs), which no player casts (fix note fix-805244/note.md). Reference search 2026-11-23: coa-history spell 805244: 0 events in 186 logs (passive); spell 500423 Chaos Rush: 352 casts in 11 logs, 500422: 31 in 6 logs, 500028: 93 in 6 logs, 804521: 0 (the button is cast in real play; 802028 is ATTR0_DO_NOT_LOG, 0 events expected); bindmysoul talents snapshot (fetched 2026-07-22): Legion March 805244 'Increases the range of Chaos Rush by 3 yds.' (an older, shorter text; the figure 3 yd is the same as $s2); nothing else found."
     },
     {
       "spell": 572617,

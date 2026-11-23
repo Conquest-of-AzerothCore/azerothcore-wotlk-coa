@@ -1579,8 +1579,8 @@
     ],
     "kind": "claim",
     "evidence": "behaviour",
-    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068",
-    "reason": "Expected = 806096 Effect[0] BasePoints 749 + 1 = 750, plus the per-level term (RealPointsPerLevel 1.65, 6.6 at the caster's level; the verdict reports 'effect 0 loses 0.6'): tooltip $806096m1 + $806096ppl1 + AP x 0.5614286; the engine truncates the per-level term 6.6 to 6 before the sum (Rounding 3, SpellInfo.cpp:497). Arm strike at attack power 312: 750 + 6 + 312 x 0.5614286 = 931.17, measured 931 (6 hits, control 0). Contrast arm strike_ap at attack power 1312 (fixture 10031, +1000): 750 + 6 + 1312 x 0.5614286 = 1492.59 (1493.19 with the untruncated 6.6), measured 1493 (5 hits, control 0). The measured step 562 for 1000 attack power matches the coefficient 0.5614286 (561.4), so a flat 175 or another coefficient fails. Pair prove_m1, runs 20261123-162432 / 20261123-162739, build cc3e6ebbb4eb, server commit 250cee3eb11f, no flip."
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "reason": "Rendered formula (render 3, mentor D-48): 806096 Effect[0] BasePoints 749 + 1 = 750, plus the per-level term 1.65 x (60 - 56) = 6.6, plus AP x 0.5614286; the client prints the whole expression rounded to the nearest. The server truncates the per-level term to 6 before the sum (SpellInfo.cpp:497), under one point below the printed value, accepted as known engine rounding (ADR 0006 Addendum). Arm strike at attack power 312: rendered 750 + 6.6 + 175.17 = 931.77, engine 931, measured 931 (6 hits, control 0). Contrast arm strike_ap at attack power 1312 (fixture 10031, +1000): rendered 1493.19, engine 1492, measured 1492 (6 hits, control 0; verdict names the known engine rounding). The step of 561 for 1000 attack power matches 0.5614286, so a flat 175 or another coefficient fails. Pair prove3, runs 20261123-183230 / 20261123-183311, build 185eba2e36a7, server commit 1024abd9b9e6, no flip."
   },
   {
     "spell": 704602,
@@ -3131,13 +3131,15 @@
         "claim": "Increases the range of Fel Torpedo by $s2 yds",
         "labels": [
           "805244 behaviour_metric_delta torpedo_range"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "Increases the range of Chaos Rush by $s2 yds",
         "labels": [
           "805244 behaviour_metric_delta chaos_range"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "and its critical strike chance by $s1%",

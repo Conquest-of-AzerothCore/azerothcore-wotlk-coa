@@ -86,3 +86,20 @@ open owner question. No server change follows from this ADR.
 
 The `$ppl1` token on the unit-aura path counts the per-level part twice; the reconstruction's CFormula scaffold maps
 `ppl1` to the raw RPPL, which the 68 contradicts for the shipped client.
+
+## Addendum 2026-11-23: render 3 evidence and the truncation tolerance
+
+Render 3 (`.agents/plans/felsworn-conformance/render3/report.md`, lab client on slot 3) read seven sentences on spells
+without a SkillLineAbility row. It supersedes the statement above that `$<id>ppl1` is not rendered on a no-row spell:
+
+- `$<id>ppl1` prints the referenced effect's base plus RealPointsPerLevel x (60 - BaseLevel), unrounded, and the whole
+  `${...}` expression is rounded to the nearest (Doomscarring 64.5 prints 65, Illidari Barrier 431.96 prints 432).
+  Six sentences fit this decomposition: Illidari Barrier 300468 (432), Scars of the Past 520805 (200), Doomscarring
+  685321 (65), Whirling Vengeance 704602 (932), Fel Torpedo 500610 (304) and Felwrath 520236 (108).
+- Unphased 803645 now has a SkillLineAbility row (86011); its `-($m1)` prints 60, the server's -60 negated.
+- The server's `CalcValue` truncates the per-level points to an integer before the sum (SpellInfo.cpp:497), where the
+  client rounds the whole expression. For the fractional rates this differs by under one point: Whirling Vengeance
+  756 against 756.6 (931 measured, 932 printed) and Fel Torpedo 194 against 194.6, judged as its dice range 194 to 198.
+  Mentor decision D-48 accepts this as known engine rounding (the Sturdy precedent): a conformance expectation reads
+  the rendered formula and tolerates the truncation inside the engine model's interval; it does not become a defect.
+- No server, DBC or client text change follows.
