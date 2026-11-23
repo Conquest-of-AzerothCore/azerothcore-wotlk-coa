@@ -7757,10 +7757,9 @@
       "variant": "healing",
       "label_suffix": "healing",
       "quote": "While Inner Demon is active your melee attacks reduce the target's healing received by $567578s1% for $567578d,",
-      "expected": 160,
-      "before_expected": 200,
-      "expected_ratio": 0.8,
-      "tolerance": 0.006,
+      "expected": 378,
+      "before_expected": 210,
+      "tolerance": 1.0,
       "trigger_spell": 803715,
       "gate_spell": 570077,
       "cast_power": 100,
@@ -7795,7 +7794,8 @@
         ]
       ],
       "void_on_cast_failure": true,
-      "observe_source": "570077 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 567578 (Effect[0] aura 118 MOD_HEALING_PCT MiscValue 127, EffectBasePoints -21 + 1 = -20, DurationIndex 31 = 8000 ms, StackAmount 2); AscensionFelswornEvents.cpp:80-81, :189-190 casts 567578 on the target of every outgoing non-derived melee damage event while Inner Demon 804216 is on the caster. Applied heal: an enemy player (race 2, PvP) puts Renew 25222 (EffectBasePoints 104 + 1 = 105 every 3000 ms, DurationIndex 8) on itself and the spell_heal_total of the heal log is read after two ticks (6800 ms): once without the debuff (before phase, 570077 not learned, no Carve), once after one Carve 803715 hit with 570077 learned and Inner Demon on the caster, so the debuff 567578 is on the healed player for both ticks (8000 ms, ticks at about 3 s and 6 s after the cast). Expected after/before = 0.8 ($567578s1 = -20%, one stack after one hit); a missing or half debuff reads 1.0 or 0.9. The class file's hit and expertise ratings remove misses, dodges and parries of the Carve hit. Inner Demon is set on the caster by harness set_aura (a precondition fixture), Felfury 800058 (6) before it so that it lasts 30 s. Reference search 2026-11-23: coa-history spell 570077: 0 events in 186 logs (a passive leaves no event; positive control 803715 Carve has 1086 events); spell 567578 Blighted Strike: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Blighted Strikes 570077 \"While Inner Demon is active your melee attacks reduce the target's healing received by -20% for 8 seconds, stacking 2 times.\", same figures; Necromancer precedent Plague of Undeath 503640 holy_healing (enemy player Renew read as spell_heal_total); expected values come from the tooltip and the DBC only."
+      "observe_source": "570077 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 567578 (Effect[0] aura 118 MOD_HEALING_PCT MiscValue 127, EffectBasePoints -21 + 1 = -20, DurationIndex 31 = 8000 ms, StackAmount 2); AscensionFelswornEvents.cpp:80-81, :189-190 casts 567578 on the target of every outgoing non-derived melee damage event while Inner Demon 804216 is on the caster. Applied heal: an enemy player (race 2, PvP) puts Renew 25222 (EffectBasePoints 104 + 1 = 105 every 3000 ms, DurationIndex 8) on itself and the spell_heal_total of the heal log is read after two ticks (6800 ms): once without the debuff (before phase, 570077 not learned, no Carve), once after one Carve 803715 hit with 570077 learned and Inner Demon on the caster, so the debuff 567578 is on the healed player for both ticks (8000 ms, ticks at about 3 s and 6 s after the cast). spell_heal_total accumulates over the scenario (measured 210 then 378 in the first run: 168 more): the judged gain is the after reading less the before reading, 2 x int(105 x 0.8) = 168 ($567578s1 = -20%, one stack after one hit); a missing debuff gains 210 and a half debuff 189. The before reading (210) is the contrast arm. The class file's hit and expertise ratings remove misses, dodges and parries of the Carve hit. Inner Demon is set on the caster by harness set_aura (a precondition fixture), Felfury 800058 (6) before it so that it lasts 30 s. Reference search 2026-11-23: coa-history spell 570077: 0 events in 186 logs (a passive leaves no event; positive control 803715 Carve has 1086 events); spell 567578 Blighted Strike: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Blighted Strikes 570077 \"While Inner Demon is active your melee attacks reduce the target's healing received by -20% for 8 seconds, stacking 2 times.\", same figures; Necromancer precedent Plague of Undeath 503640 holy_healing (enemy player Renew read as spell_heal_total); expected values come from the tooltip and the DBC only.",
+      "expected_gain": 168
     },
     {
       "spell": 570077,
