@@ -415,8 +415,8 @@ class spell_dummyfix_generic_bonds_of_justice : public AuraScript
         caster->CastSpell(target, BONDS_OF_JUSTICE_DAMAGE, true);
         Position const landing = caster->GetNearPosition(2.0f, caster->GetRelativeAngle(target));
         float const speedXY = std::max(10.0f, target->GetExactDist2d(landing) * 2.0f);
-        target->GetMotionMaster()->MoveJump(landing.GetPositionX(), landing.GetPositionY(), landing.GetPositionZ(),
-            speedXY, 10.0f);
+        target->GetMotionMaster()->MoveJump(
+            landing.GetPositionX(), landing.GetPositionY(), landing.GetPositionZ(), speedXY, 10.0f);
     }
 
     void HandleTick(AuraEffect const* aurEff)
