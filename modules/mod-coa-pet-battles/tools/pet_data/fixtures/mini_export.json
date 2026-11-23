@@ -1,0 +1,33 @@
+{
+  "upstream": {"path": "fixture", "commit": "0000000"},
+  "tables": {
+    "coa_pet_species": [
+      [10, "Lil' K.T.", 100, 1, 1, 0, 0, 1, "Spell_Shadow_ShadowBolt", 0.0],
+      [20, "Café \"Rat\"", 200, 1, 0, 1, 1, 0, "Ability_Druid_Dash", 1.25]
+    ],
+    "coa_pet_kit": [[100, "Frostwolf Pup", 7, 100, 0, -100], [200, "Rat", 4, 0, 0, 0]],
+    "coa_pet_kit_ability": [[100, 0, 1, 1], [200, 0, 1, 2]],
+    "coa_pet_ability": [
+      [1, "Bite", 7, 0, "[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Bites at the enemy.", 0],
+      [2, "Zul'Drak Scratch", 4, 3, "line1\nline2\ttab a\\b", 1]
+    ],
+    "coa_pet_ability_turn": [[1, 1, 0, 255], [2, 1, 0, 255]],
+    "coa_pet_ability_effect": [[1, 1, 1, 24, 0, 20, 100, 0, 0, 0, 0], [2, 1, 1, 26, 831, 0, 100, 3, 0, -5, 0]],
+    "coa_pet_effect_property": [[24, 0, "Points"], [24, 1, "Accuracy"]],
+    "coa_pet_state": [[18, "Stat_Power"]],
+    "coa_pet_aura_state": [[2, "Mod_DamageDealtPercent", -25]],
+    "coa_pet_xp": [[1, 1, 50]],
+    "coa_pet_zone": [[12, "Elwynn Forest", 1, 2, 1, 10]],
+    "coa_pet_zone_species": [[12, 10], [12, 20]],
+    "coa_pet_presentation": [
+      [10, 0, 1, 1, 1, "Bite", "Bite", "Ability_Druid_Rake", "Bites.", 17253, 0, "melee", 0, 0, 1, 0],
+      [20, 0, 1, 1, 2, "Scratch", "Zul'Drak Scratch", "Ability_Druid_Rake", "", 0, 1, "", 133, 1, 0, 1]
+    ],
+    "coa_pet_model_size": [[10, 2.8737, 1.9689, 1.0772]],
+    "coa_pet_display_size": [[26, 0.929]],
+    "coa_pet_companion": [[10685, 10]]
+  },
+  "standins": {"species": [10], "scale": [[10, 0, 0.49202]]},
+  "dropped_companions": [[99999, 12345]],
+  "manifest": {}
+}
