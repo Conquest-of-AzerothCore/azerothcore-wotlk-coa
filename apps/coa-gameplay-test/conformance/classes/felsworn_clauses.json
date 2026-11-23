@@ -299,7 +299,16 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Both behaviour labels resolve to data under coverage.py. party_crit is a stat_delta read of melee_crit_chance_refreshed, a state metric whose verdict carries no contrast stamp (coverage.py:711-712, 741-742, 792), although the windows are in substance a learned contrast; stamping it is an evidence decision for the mentor. party_crit_duration reads aura_duration_ms, a readback metric (coverage.py:423), not an observed expiry. The nearest kind is avoided_swing_reads with a learned contrast stamp on the crit read and an expiry edge after the last dodge (held at 9 s, gone by 11 s).",
+      "attempts": [
+        {
+          "agent": "fw-tg4",
+          "report": ".agents/plans/fw-tg4/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 300477,
@@ -3968,7 +3977,7 @@
     ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "One leg left: damage taken. The avoided leg is the procs avoided entry 805245 proc_rate avoided: Felfury 800058 stack events (aura_stacks, tool ADR 1254, on the avoided trigger by ADR 1261, provisional) while Demonic Will 800209 is held by attempt_auras before every swing interval (the clause's condition, AscensionFelswornEvents.cpp:44-45). Damage taken needs a taken_hit trigger with the same condition and stack events, which procs does not combine (aura_stacks accepts a cast or an avoided trigger only). Hateforged Barrier 705129 as the condition is not read. The nearest kind is procs taken_hit with attempt_auras and aura_stacks events. fw-tg4 pairs (pair2, eaafe3bd73): the avoided leg entry 805245 proc_rate avoided was unmeasured in every part: 70 to 86 swings landed per part (guard landed) while Demonic Will 800209 was set before every interval; the dodge entries without attempt auras land none. Cause not established.",
+      "reason": "One leg left: damage taken. The avoided leg is the procs avoided entry 805245 proc_rate avoided: Felfury 800058 stack events (aura_stacks, tool ADR 1254, on the avoided trigger by ADR 1261, provisional) while Demonic Will 800209 is held by attempt_auras before every swing interval (the clause's condition, AscensionFelswornEvents.cpp:44-45). Damage taken needs a taken_hit trigger with the same condition and stack events, which procs does not combine (aura_stacks accepts a cast or an avoided trigger only). Hateforged Barrier 705129 as the condition is not read. The nearest kind is procs taken_hit with attempt_auras and aura_stacks events. fw-tg4 pairs (pair2, eaafe3bd73): the avoided leg entry 805245 proc_rate avoided was unmeasured in every part: 70 to 86 swings landed per part (guard landed) while Demonic Will 800209 was set before every interval; the dodge entries without attempt auras land none. Cause not established. Counting the landed swings as trials would change the avoided trial definition, a judge change outside this follow-up, so the avoided leg stays a tool gap.",
       "attempts": [
         {
           "agent": "fw-chance",
@@ -3977,6 +3986,10 @@
         {
           "agent": "fw-tg4",
           "report": ".agents/plans/fw-tg4/report.md"
+        },
+        {
+          "agent": "fw-tg4b",
+          "report": ".agents/plans/fw-tg4b/report.md"
         }
       ]
     }
