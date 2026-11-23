@@ -16230,7 +16230,7 @@
       ],
       "critical": false,
       "trials": 100,
-      "parts": 5,
+      "parts": 15,
       "control": {
         "auras": [
           [
@@ -16281,7 +16281,7 @@
           ]
         ]
       },
-      "expected_source": "$705146s1 = 8 (705146 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 7 + 1 = 8 per stack, StackAmount 5 = $705146u): five stacks add 8 x 5 = 40% to the damage of the spell its class mask names, a percent modifier that sums with other additive modifiers: expected ratio 1.40 of a Sargeron Smite 802060 hit with five stacks over the same hit without. The stacks are set on the caster by the harness (set_aura 705146 x5, a named precondition fixture; its grant by Dancing Blades and its 5-stack cap are proven by the stack_amount, stack_cap and consumed entries, and its own real-path grant is not the subject here). Increase Damage 37643 (aura 79 MiscValue 127) at amount 19900 is set in both arms, so each hit large so the engine's ceil adds under 0.1% (fixture size, not a claimed value). Control arm: no 705146. Band: the larger of 5% of the +40% gain and 2 points. Reference search 2026-11-24: coa-history spell 705146 and 802060: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots (bindmysoul, ascension-data advancement.tsv and coabuildhub index) list the talent name only, no values; expected values come from the tooltip and the DBC only. Sargeron Smite 802060 (CasterAuraSpell 803468, 'Consumes 2 Felfury'): Felfury 800058 x6 and 803468 are set on the caster before every cast in both arms (the spender's cost and caster aura, precondition fixtures)."
+      "expected_source": "$705146s1 = 8 (705146 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 7 + 1 = 8 per stack, StackAmount 5 = $705146u): five stacks add 8 x 5 = 40% to the damage of the spell its class mask names, a percent modifier that sums with other additive modifiers: expected ratio 1.40 of a Sargeron Smite 802060 hit with five stacks over the same hit without. The stacks are set on the caster by the harness (set_aura 705146 x5, a named precondition fixture; its grant by Dancing Blades and its 5-stack cap are proven by the stack_amount, stack_cap and consumed entries, and its own real-path grant is not the subject here). Increase Damage 37643 (aura 79 MiscValue 127) at amount 19900 is set in both arms, so each hit large so the engine's ceil adds under 0.1% (fixture size, not a claimed value). Control arm: no 705146. Band: the larger of 5% of the +40% gain and 2 points. Reference search 2026-11-24: coa-history spell 705146 and 802060: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots (bindmysoul, ascension-data advancement.tsv and coabuildhub index) list the talent name only, no values; expected values come from the tooltip and the DBC only. Sargeron Smite 802060 (CasterAuraSpell 803468, 'Consumes 2 Felfury'): Felfury 800058 x6 and 803468 are set on the caster before every cast in both arms (the spender's cost and caster aura, precondition fixtures). Sizing: the pilot of the first pair measured a per-hit spread (the Shadowflame hit takes the engine's partial resists) that needs 2429 trials per arm for the 99% half-width to stay at half the band (the verdict's own trials_needed), so the entry runs 15 parts of 100 trials."
     },
     {
       "spell": 806235,

@@ -626,13 +626,8 @@
     "spell": 520251,
     "clause": "Increases the effectiveness of your Intuitions by $s2%.",
     "kind": "claim",
-    "claims": [
-      {
-        "claim": "Increases the effectiveness of your Intuitions by $s2% (Illidari Intuition Agility)",
-        "labels": [
-          "520251 behaviour_metric_delta intuition"
-        ]
-      }
+    "labels": [
+      "520251 behaviour_metric_delta intuition"
     ]
   },
   {
