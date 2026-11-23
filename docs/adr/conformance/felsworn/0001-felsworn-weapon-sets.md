@@ -26,7 +26,7 @@ the Ranger (class 21), another class.
 |---|---|---|---|---|
 | Slayer (default) | 2027 Scimitar (1H sword, skill 43) | 2027 Scimitar | none | 674 Dual Wield |
 | Tyrant | 2529 Zweihander (2H sword, skill 55) | 2529 Zweihander | none | 674, 92089 Burning Commander |
-| Infernal | 2027 Scimitar | empty | none | none |
+| Infernal | 2027 Scimitar | empty | 5239 Blackbone Wand (wand, skill 228) | none |
 
 Sources:
 
@@ -43,7 +43,12 @@ Sources:
   class list; no Infernal weapon spell exists in the DBC. The item type is unsourced: the sword shares the Slayer item.
 - Items: effective world database (RAM `acore_world.item_template`, read 2026-11-23): Quality 1, `spellid_1..5` all 0,
   not Monster, `AllowableClass` -1. 2027 and 2529 are the items of the Sun Cleric sets.
-- Ranged: unsourced for all three specializations, none set. Throw 2764, Shoot 3018 and Wand 5019 stay outside the sets.
+- Ranged: unsourced for Slayer and Tyrant, none set. Infernal takes 5239 Blackbone Wand by the amendment of 2026-11-23
+  (mentor; VideoAgent kDdwUleXHk0, 2026-08-12, level 60 Infernal, "Wand" action button): Quality 1, inventory type 26,
+  1600 ms, 39-74 damage, `spellid_1..5` all 0, `AllowableClass` -1 (effective database); class 14 is granted Wand 5019
+  at level 1 (`AscensionCustomClassData.h:97`) and skill 228 is open to all races and classes (`SkillRaceClassInfo` 231).
+  477 Torch Flinger is not taken (Quality 2). Wand 5019 maps to Infernal in `spell_weapon_sets`. Throw 2764 and Shoot
+  3018 stay outside the sets.
 
 Rejected: 30749 and 30750 (`spellid_4` 101648 and 101696, "PvE Power" equip spells, the Sun Cleric lesson); 2528
 Falchion (inventory type 21, main hand only); the Monster placeholder 49340 and 72038 (removed from the class file).
@@ -51,7 +56,7 @@ Falchion (inventory type 21, main hand only); the Monster placeholder 49340 and 
 `default_weapon_set` is Slayer. `weapon` equals the Slayer main hand. `alternate_weapons` is empty.
 
 `spell_weapon_sets` maps every rank of the class spells of tab 37 to Slayer, tab 38 to Infernal and tab 18 to Tyrant
-(179 ranks); the class spells of tab 87 take the default set and are not listed. No spell needed a remap: every
+(180 ranks with Wand 5019); the class spells of tab 87 take the default set and are not listed. No spell needed a remap: every
 "Requires ..." weapon line is met by the set of its specialization. Burning Commander 92089 is a tab 18 spell that
 Tyrant learns as a set spell, so it leaves `spell_weapon_sets` and wears the default set (ADR 1012, as Valkyr's Grip in
 the Sun Cleric).

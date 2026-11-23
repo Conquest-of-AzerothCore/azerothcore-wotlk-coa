@@ -139,7 +139,17 @@
         "skill_line": 43
       },
       "off_hand": null,
-      "ranged": null
+      "ranged": {
+        "item": 5239,
+        "slot": 17,
+        "subclass": 19,
+        "min_damage": 39.0,
+        "max_damage": 74.0,
+        "speed_ms": 1600,
+        "inventory_type": 26,
+        "normalized_speed": 2.8,
+        "skill_line": 228
+      }
     }
   },
   "weapon_set_spells": {
@@ -153,6 +163,7 @@
   },
   "default_weapon_set": "Slayer",
   "spell_weapon_sets": {
+    "5019": "Infernal",
     "92087": "Slayer",
     "92088": "Infernal",
     "300466": "Tyrant",
