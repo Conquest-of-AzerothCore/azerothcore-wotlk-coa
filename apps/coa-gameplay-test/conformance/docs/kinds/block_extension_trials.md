@@ -43,3 +43,18 @@ Without `chance_pct` (block 0): no judged trial may show the aura, fewer than 24
 (block 100): judged trials must reach ceil(z^2 p(1-p) / h^2) (5444 for 30% and 1.6 points), and the share must lie in
 `chance_pct` +- `half_width_points`, else alert (a finding). The 99% Wilson interval is reported. The residual of a
 conformant server leaving the range is erfc(z / sqrt 2) = 1.0% per run, about 1e-4 when both runs of a pair must agree.
+
+### Granted duration (`duration_spell`, ADR 1073, provisional)
+
+Opt-in on `mode: "grant"` at `block: 100`, without `chance_pct`, `control_trials` or `parts`: keys `duration_spell`,
+`duration_effect`, `min_granted` and `residual_target`. The expected duration is `duration_spell`
+Effect[`duration_effect`] from the DBC. Each trial reads `game_time_ms` right before and right after the strike and the
+aura with game-time stamps at 0.93 and 1.07 times the duration after the strike. A trial whose strike granted the aura
+is judged when the read ages (bounded by the two strike stamps) lie in 0.9..0.965 and 1.035..1.1 times the duration
+(ADR 1052's window shares, both inside +-10%); otherwise it is void, as is a trial with no grant or a strike not
+blocked once. A judged trial must show the aura on at the first read and gone at the second, else alert; fewer than
+`min_granted` judged trials is unmeasured. `trials` must reach the count at which fewer than `min_granted` grants come
+with probability at most `residual_target` per pair (two runs) at the talent's `ProcChance`.
+
+Sun Cleric: Sunflare Aegis 707629 `block_grant_duration`, 712448 Effect[0] 4000 ms, 47 trials, at least 5 judged
+(7.9e-4 per pair at 30%).
