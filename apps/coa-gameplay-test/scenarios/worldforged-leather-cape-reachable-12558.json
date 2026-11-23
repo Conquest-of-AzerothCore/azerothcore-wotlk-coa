@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Leather Cape pickup is reachable (#12558)",
+  "contract": "#12558 reported the Worldforged Leather Cape pickup (entry 90579, guid 6941903). At -2392.1, 454.8, 76.517 on map 1 it sat 0.72 yd inside the rock at Palemane Rock. Expected: the pickup stands at -2392.1, 454.8, 77.241, rests on the ground, is not under water and opens with loot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -2391.1,
+    "y": 454.8,
+    "z": 77.741,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: the pickup is in the area",
+      "metric": "nearby_gameobject_count",
+      "entry": 90579,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the pickup stands at its corrected spot",
+      "metric": "spawn_distance",
+      "x": -2392.1,
+      "y": 454.8,
+      "z": 77.241,
+      "max": 0.3,
+      "guid": 6941903,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup rests on the ground (-0.35 to 0.35 yd)",
+      "metric": "spawn_ground_gap",
+      "min": -0.35,
+      "max": 0.35,
+      "guid": 6941903,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is not under water",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6941903,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 90579
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is within reach and opens",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "its loot is shown",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

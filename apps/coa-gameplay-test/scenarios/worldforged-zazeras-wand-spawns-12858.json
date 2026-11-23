@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "name": "Zazera's Wand pickup uses its own model (#12858)",
+  "contract": "#12858 reported the Worldforged Zazera's Wand pickup with the wrong model. Its spot (guid 6970033, map 1) spawned placeholder entry 9900031 (Rusty Shotgun) instead of the realm template 254577. Expected: the Zazera's Wand pickup stands there, the placeholder does not, and it opens with loot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -7208.0,
+    "y": -2978.46,
+    "z": 9.295,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the Zazera's Wand pickup is at the spot",
+      "metric": "nearby_gameobject_count",
+      "entry": 254577,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the placeholder pickup is gone",
+      "metric": "nearby_gameobject_count",
+      "entry": 9900031,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 254577
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is within reach and opens",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "its loot is shown",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}
