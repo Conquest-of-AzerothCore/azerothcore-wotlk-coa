@@ -48,6 +48,7 @@
 #include "AscensionAmmunitionData.h"
 #include "AscensionAverageItemLevel.h"
 #include "AscensionPersonalBank.h"
+#include "AscensionRealmLevelPurchase.h"
 #include "AscensionVanityOwnership.h"
 #include "AscensionIncarnation.h"
 #include "AscensionCosmeticPetTokens.h"
@@ -7374,6 +7375,9 @@ private:
             handler.SendSysMessage("That item cannot be bought with Bazaar Tokens.");
             return;
         }
+
+        if (AscensionRealmLevelPurchase::Refuse(player, itemId))
+            return;
 
         if (IsConsumableVanityItem(vanityItr->second))
         {
