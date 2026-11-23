@@ -26,6 +26,9 @@ void ApplyContracts(SpellInfo* info)
     uint32 id = info->Id;
     if (id == MannorothFelfury)
         info->Effects[EFFECT_0].MiscValue = 6;
+    if (id == BloodOfMannoroth &&
+        info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_MOD_ARMOR_PENETRATION_PCT)
+        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT;
     if (id == 300466)
     {
         info->Effects[EFFECT_0].SpellClassMask = flag96(128, 0, 2097152);
