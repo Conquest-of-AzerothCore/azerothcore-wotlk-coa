@@ -35,7 +35,7 @@ power before every recast so a costly trigger can be repeated. Absent, the scena
 Witch Hunter: Anguish 504742 `anguish_duration` (Dusk Blade 802258 cast 6 times 1600 ms apart on the dummy, Anguish
 500566 read on the caster, 15000 ms from the last application; claim 71.1).
 
-## Feed (opt-in, Felsworn ADR 0002, provisional)
+## Feed (opt-in, Felsworn ADR 0003, provisional)
 
 A grant that only a rolled proc earns, with no way to force the roll (Felsworn `Chance()` rolls the raw ProcChance,
 `AscensionFelsworn.cpp:231-239`), is earned for real: `feed: {"every_ms": ms, "stop_aura": spell}` replaces the single
@@ -53,6 +53,9 @@ cancels `stop_aura` on the caster first and is unmeasured when the aura is alrea
 before. The grant is dated by the stop: the step checks the aura on every world update, so the first poll is at most
 100 ms after it, and that read replaces the pre-loop read as the earlier end of the last application's bracket. The
 verdict is the unchanged bracket test of the kind, the explanation names the remaining duration read at the stop.
+An `ok` is voided (`unmeasured`) when the aura's age at that read, the expected duration less the remaining duration,
+is above 100 ms or negative, or the remaining duration is not above 0 (mentor D-21): the 100 ms stamp is then not
+proven. A failing bracket still alerts.
 `feed` excludes `repeat`, `forced_roll` and `no_refresh`.
 
 `force_crit` (`melee`, `spell` or `ranged`) sets the matching crit and hit rating fixtures for both arms, so every

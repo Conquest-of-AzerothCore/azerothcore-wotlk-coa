@@ -299,7 +299,7 @@ def last_application_reading(base, run, model: dict):
     control = rows['control']
     if control[-1][1] != control[0][1] or any(row[2] for row in control):
         return replace(base, status='alert', explanation='the control arm applied the aura without the gate')
-    treatment, fed = rows['treatment'], ''
+    treatment, fed, age_void = rows['treatment'], '', ''
     if feed:
         reads = feed['reads']['treatment']
         stop, remaining = run.values[reads['stop']], run.values[reads['remaining']]
@@ -311,6 +311,10 @@ def last_application_reading(base, run, model: dict):
                                        f'{feed["stop_aura"]} (a void trial, neither a pass nor a fail)')
         treatment = [(treatment[1][0] - feed['stamp_ms'], *treatment[0][1:])] + treatment[1:]
         fed = f'; fed until {feed["stop_aura"]} at the stop, {remaining:g} ms left on the aura then'
+        age = expected - remaining
+        if remaining <= 0 or not 0 <= age <= feed['stamp_ms']:
+            age_void = (f'treatment: the aura\'s age at the first read is unreadable or above {feed["stamp_ms"]:g} '
+                        f'ms ({remaining:g} ms left of {expected:g}), so the stamped bracket is not proven')
     refresh = no_refresh_reading(rows['treatment']) if model.get('no_refresh') else ''
     if refresh.startswith('alert'):
         return replace(base, status='alert', explanation=f'treatment: {refresh[len("alert: "):]}')
@@ -324,6 +328,8 @@ def last_application_reading(base, run, model: dict):
     low, high = bracket
     applications = treatment[-1][1] - treatment[0][1]
     if expected - band <= low and high <= expected + band:
+        if age_void:
+            return replace(base, status='unmeasured', explanation=age_void)
         status = 'ok'
     elif high < expected - band or low > expected + band:
         status = 'alert'

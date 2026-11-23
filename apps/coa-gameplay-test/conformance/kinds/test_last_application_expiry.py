@@ -175,16 +175,24 @@ FED = {**ENTRY, 'label_suffix': 'fed', 'gate_spell': 801899, 'expected_ms': 3000
        'caster': True, 'feed': {'every_ms': 1700}}
 
 
+MALICE = {'spell': 800214, 'name': "Malice of Gul'dan (Felstrike lasts $802678d)", 'kind': 'last_application_expiry',
+          'label_suffix': 'felstrike_duration', 'quote': 'over $d', 'gate_spell': 800214, 'trigger_spell': 801312,
+          'aura': 802678, 'expected_ms': 6000, 'control_window_ms': 500, 'window_ms': 8000, 'poll_ms': 50,
+          'caster': False, 'force_crit': 'spell', 'feed': {'every_ms': 2000, 'stop_aura': 800239},
+          'quote_spell': 802678}
+
+
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
 class FeedTests(unittest.TestCase):
     def judged(self, lasts_ms: float, stop: float = 1.0, control_applied: bool = False, before: float = 0.0,
-               entry: dict = FED) -> Verdict:
+               entry: dict = FED, remaining: float | None = None) -> Verdict:
         _, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
         values = {}
         for arm, rows in expectation.model['reads'].items():
             reads = expectation.model['feed']['reads'][arm]
             values[reads['stop']] = stop if arm == 'treatment' else 0.0
-            values[reads['remaining']] = lasts_ms - 20.0 if arm == 'treatment' else 0.0
+            values[reads['remaining']] = (lasts_ms - 20.0 if remaining is None else remaining) \
+                if arm == 'treatment' else 0.0
             for index, (time, applied, aura) in enumerate(rows):
                 now = 1000.0 if index == 0 else 61000.0 + (index - 1) * 34.0
                 values[time] = now
@@ -217,6 +225,19 @@ class FeedTests(unittest.TestCase):
         self.assertEqual((scenario['players'][0]['melee_crit_rating'], scenario['players'][0]['melee_hit_rating']),
                          (100000, 100000))
 
+    def test_a_quote_is_taken_from_an_embedded_tooltip(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), MALICE)
+        run.validate(scenario)
+        self.assertEqual(expectation.model['quote'], 'over $d')
+        self.assertEqual({step['max_casts'] for step in scenario['steps'] if step['action'] == 'cast_until_aura'}, {9})
+        self.assertEqual((scenario['players'][0]['spell_crit_rating'], scenario['players'][0]['spell_hit_rating']),
+                         (100000, 100000))
+        self.assertNotIn('melee_crit_rating', scenario['players'][0])
+
+    def test_a_quote_from_a_spell_the_tooltip_does_not_embed_is_refused(self):
+        with self.assertRaisesRegex(ValueError, 'does not embed'):
+            behaviour_scenario(load_fixture_class_file(23), {**MALICE, 'quote_spell': 801902})
+
     def test_a_dummy_aura_stops_on_a_named_caster_aura(self):
         entry = {**FED, 'caster': False, 'feed': {'every_ms': 1700, 'stop_aura': 707010}}
         scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
@@ -231,6 +252,14 @@ class FeedTests(unittest.TestCase):
         verdict = self.judged(3000.0)
         self.assertEqual(verdict.status, 'ok')
         self.assertLess(abs(verdict.measured - 3000.0), 200.0)
+
+    def test_an_aura_older_than_the_stamp_at_the_first_read_is_unmeasured(self):
+        self.assertEqual(self.judged(3000.0, remaining=2880.0).status, 'unmeasured')
+        self.assertEqual(self.judged(3000.0, remaining=2900.0).status, 'ok')
+
+    def test_an_unreadable_or_overlong_remaining_duration_is_unmeasured(self):
+        self.assertEqual(self.judged(3000.0, remaining=0.0).status, 'unmeasured')
+        self.assertEqual(self.judged(3000.0, remaining=3010.0).status, 'unmeasured')
 
     def test_a_longer_or_shorter_aura_alerts(self):
         self.assertEqual(self.judged(3900.0).status, 'alert')

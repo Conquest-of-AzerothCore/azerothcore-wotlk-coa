@@ -1,4 +1,4 @@
-# 0002. last_application_expiry feeds its trigger until the aura is granted
+# 0003. last_application_expiry feeds its trigger until the aura is granted
 
 - Status: proposed (class ADR, numbered at merge)
 - Date: 2026-11-23
@@ -36,3 +36,4 @@ judgement, written as a design note instead of built).
 - A feed run costs up to 2 x max_casts x every_ms of game time at the cap (80 s for Legionfall), about 10 s on
   average.
 - Reaching the cap is a void run, so a flaky roll never reads as a fail.
+- A `feed` `ok` is voided when the aura's age at the stop read (expected less remaining) is above 100 ms or the remaining duration cannot be read (mentor D-21); a failing bracket still alerts.
