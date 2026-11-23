@@ -3191,6 +3191,219 @@
       "cast_power": 100,
       "force_crit": "spell",
       "source": "300478 Effect[0] aura 42 PROC_TRIGGER_SPELL (300486, Cursed Flames: Effect[0] aura 107 ADD_FLAT_MODIFIER, MiscValue 7 SPELLMOD_CRITICAL_CHANCE, BasePoints 19 + 1 = 20 ($300486s1), EffectSpellClassMask word 1 = 1, the SpellFamilyFlags word 1 of Fel Fireball 801312, DurationIndex 1 = 10000 ms) and Effect[1] (301290); the handler (AscensionFelswornEvents.cpp:72-73, 179-181) casts both at the caster on a critical, non-periodic Fel Fireball hit when Chance(player, 300478, 5000) passes (ProcChance 100, a 5000 ms internal cooldown). The caster's spell critical strike rating is forced (force_crit spell), so every Fel Fireball critically strikes. Three real forced-critical Fel Fireball casts: the proc casts of 300486 (spell_cast_count) read no new cast 2500 ms after the first, and exactly one more once the 5000 ms window has passed. Reference search 2026-11-23: coa-history spell 300478: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Critically striking with Fel Fireball now increases the critical strike chance of your next Fel Fireball within 10 seconds by 20%.'."
+    },
+    {
+      "spell": 520244,
+      "name": "Perpetual Fury (Fury Unleashed cooldown)",
+      "kind": "cost_gate",
+      "gated_spell": 555738,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "margin_ms": 250,
+      "after_casts": [
+        [
+          800598,
+          "dummy"
+        ]
+      ],
+      "observe_source": "520244 Effect[0] aura 42 PROC_TRIGGER_SPELL 520816 (Effect[0] SPELL_EFFECT_MODIFY_COOLDOWN-type 165, BasePoints -1001 + 1 = -1000 ms = $/1000;520816S1 = 1 s, MiscValue 555738); the handler (AscensionFelswornEvents.cpp:36-37, 154-155) fires on a damaging hit of Dancing Blades 800598. Fury Unleashed 555738 has RecoveryTime 180000 ms. Arms, each timed from a priming cast of Fury Unleashed: a cast of Dancing Blades 800598 at the dummy, then an attempt of Fury Unleashed 179250 ms after the priming cast (180000 - 1000 + 250) without the talent (refused), with it (goes through) and 250 ms before the reduced end with it (refused): the reduction lies between 750 and 1250 ms, i.e. 1 s to within the 250 ms margin. Reference search 2026-11-23: coa-history spell 520244: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Dealing damage with Dancing Blades reduces the cooldown of Fury Unleashed by -1 sec.'.",
+      "quote": "Dealing damage with Dancing Blades reduces the cooldown of Fury Unleashed by $/1000;520816S1 sec"
+    },
+    {
+      "spell": 520805,
+      "name": "Scars of the Past (Chaos Rush Energy cost)",
+      "kind": "cost_gate",
+      "gated_spell": 500028,
+      "resource": "power",
+      "reduction": 5,
+      "observe_source": "520805 Effect[1] aura 107 ADD_FLAT_MODIFIER, MiscValue 14 (SPELLMOD_COST), BasePoints -6 + 1 = -5 ($s2 = 5), EffectSpellClassMask word 2 = 268435456, the SpellFamilyFlags word 2 of Chaos Rush 500028 (ManaCost 50, Energy). The caster's Energy is set to the reduced cost 45 before an attempt: refused without the talent (SPELL_FAILED_NO_POWER), through with it, and refused at 44 with it. Reference search 2026-11-23: coa-history spell 520805: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Reduces the Energy cost of Chaos Rush by -5 and casting Chaos Rush now heals you for 81 + 20% Stamina + 33% AP.'.",
+      "quote": "Reduces the Energy cost of Chaos Rush by $s2"
+    },
+    {
+      "spell": 520805,
+      "name": "Scars of the Past (Chaos Rush heal)",
+      "kind": "metric_delta",
+      "variant": "heal",
+      "label_suffix": "heal",
+      "quote": "now heals you for",
+      "trigger_spell": 500028,
+      "gate_spell": 520805,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 520806
+      },
+      "before_expected": 0,
+      "expected": 199.76,
+      "tolerance": 1.5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "520805 Effect[0] aura 42 PROC_TRIGGER_SPELL 520806 (Effect[0] SPELL_EFFECT_HEAL 10, BasePoints 49 + 1 = 50, EffectRealPointsPerLevel 1.0); the tooltip token resolved with the reference stats (Stamina 79, attack power 312, level 60) is 199.76 (packet of the spell, tokens table). The heal events of 520806 on the caster are summed 1500 ms after a real cast of Chaos Rush 500028 at the dummy: 0 before the learn (control) and 199.76 within 1.5 after. Reference search 2026-11-23: coa-history spell 520805: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'casting Chaos Rush now heals you for 81 + 20% Stamina + 33% AP'."
+    },
+    {
+      "spell": 524947,
+      "name": "Mark of Chaos (next direct damage +25%)",
+      "kind": "hit_ratio",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "increases the next instance of direct spell or ability damage within $525027d by $525027s1%",
+      "expected": 1.25,
+      "observe_spell": 802060,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "control": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          500028
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          500028
+        ],
+        "learn": [
+          524947
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "524947 Effect[0] aura 42 PROC_TRIGGER_SPELL 525027 (Effect[0] aura 108 ADD_PCT_MODIFIER, BasePoints 24 + 1 = 25 ($525027s1), DurationIndex 28 = 5000 ms, a mask over the direct damage spells). Chaos Rush 500028 is cast at the dummy before each observed Sargeron Smite 802060 (in both arms; the control arm does not know 524947): the mean non-critical hit of the treatment arm is 1.25 times the control's within the band of 2 points. Reference search 2026-11-23: coa-history spell 524947: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Using Chaos Rush increases the next instance of direct spell or ability damage within 5 seconds by 25%.'."
+    },
+    {
+      "spell": 524947,
+      "name": "Mark of Chaos (aura present at 4600 ms)",
+      "kind": "metric_delta",
+      "variant": "aura_held",
+      "label_suffix": "aura_held",
+      "quote": "within $525027d",
+      "trigger_spell": 500028,
+      "gate_spell": 524947,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "aura",
+      "fields": {
+        "spell": 525027
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 4600,
+      "expire_ms": 500,
+      "observe_source": "524947 triggers 525027 (DurationIndex 28 = 5000 ms) on a Chaos Rush cast. The aura 525027 on the caster is read 4600 ms after a real Chaos Rush cast at the dummy: absent before the learn (control) and present after it; with the 4600 / 5400 pair the duration lies between them, excluding 10% off on both sides (4500 and 5500). Reference search 2026-11-23: coa-history spell 524947: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Using Chaos Rush increases the next instance of direct spell or ability damage within 5 seconds by 25%.'."
+    },
+    {
+      "spell": 524947,
+      "name": "Mark of Chaos (aura gone at 5400 ms)",
+      "kind": "metric_delta",
+      "variant": "aura_gone",
+      "label_suffix": "aura_gone",
+      "quote": "within $525027d",
+      "trigger_spell": 500028,
+      "gate_spell": 524947,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "aura",
+      "fields": {
+        "spell": 525027
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 5400,
+      "expire_ms": 500,
+      "observe_source": "524947 triggers 525027 (DurationIndex 28 = 5000 ms) on a Chaos Rush cast. The aura 525027 on the caster is read 5400 ms after a real Chaos Rush cast at the dummy: absent before the learn (control) and gone after it; with the 4600 / 5400 pair the duration lies between them, excluding 10% off on both sides (4500 and 5500). Reference search 2026-11-23: coa-history spell 524947: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Using Chaos Rush increases the next instance of direct spell or ability damage within 5 seconds by 25%.'."
+    },
+    {
+      "spell": 555738,
+      "name": "Fury Unleashed (aura present at 4600 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "Spin your glaives for $d",
+      "trigger_spell": 555738,
+      "target": "caster",
+      "cast_power": 100,
+      "metric": "aura",
+      "fields": {
+        "spell": 555738
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 4600,
+      "expire_ms": 500,
+      "observe_source": "Fury Unleashed 555738 DurationIndex 28 = 5000 ms (Spell.dbc). The aura 555738 on the caster is read 4600 ms after a real cast: present; with the 4600 / 5400 pair the duration lies between them, excluding 4500 and 5500 (10% off on both sides). Reference search 2026-11-23: coa-history spell 555738: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Spin your glaives for 5 seconds, increasing movement speed by 30%'."
+    },
+    {
+      "spell": 555738,
+      "name": "Fury Unleashed (aura gone at 5400 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "quote": "Spin your glaives for $d",
+      "trigger_spell": 555738,
+      "target": "caster",
+      "cast_power": 100,
+      "metric": "aura",
+      "fields": {
+        "spell": 555738
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 5400,
+      "expire_ms": 500,
+      "observe_source": "Fury Unleashed 555738 DurationIndex 28 = 5000 ms (Spell.dbc). The aura 555738 on the caster is read 5400 ms after a real cast: gone; with the 4600 / 5400 pair the duration lies between them, excluding 4500 and 5500 (10% off on both sides). Reference search 2026-11-23: coa-history spell 555738: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Spin your glaives for 5 seconds, increasing movement speed by 30%'."
+    },
+    {
+      "spell": 555738,
+      "name": "Fury Unleashed (movement speed)",
+      "kind": "metric_delta",
+      "variant": "speed",
+      "label_suffix": "speed",
+      "quote": "increasing movement speed by $s2%",
+      "trigger_spell": 555738,
+      "target": "caster",
+      "cast_power": 100,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 1.3,
+      "tolerance": 0.005,
+      "wait_ms": 1000,
+      "expire_ms": 5500,
+      "observe_source": "555738 Effect[1] aura 31 SPELL_AURA_MOD_INCREASE_SPEED, BasePoints 29 + 1 = 30 ($s2 = 30). The caster's run speed rate (Unit::GetSpeedRate) is read 1000 ms after a real cast, before the cast (the control phase casts nothing: the base 1.0) and 1000 ms after a real cast, during the aura: 1.3. Reference search 2026-11-23: coa-history spell 555738: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'increasing movement speed by 30%'.",
+      "cast_in_before": false
     }
   ],
   "player_observations": [],

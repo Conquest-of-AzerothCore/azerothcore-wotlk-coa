@@ -500,7 +500,9 @@
     "spell": 520244,
     "clause": "Dealing damage with Dancing Blades reduces the cooldown of Fury Unleashed by $/1000;520816S1 sec.",
     "labels": [
-      "520244 effect_value 520816e0 #0"
+      "520244 cost_gate 555738 without",
+      "520244 cost_gate 555738 with",
+      "520244 cost_gate 555738 beyond"
     ],
     "kind": "claim"
   },
@@ -601,7 +603,9 @@
     "spell": 520805,
     "clause": "Reduces the Energy cost of Chaos Rush by $s2",
     "labels": [
-      "520805 effect_value e1 #0"
+      "520805 cost_gate 500028 without",
+      "520805 cost_gate 500028 with",
+      "520805 cost_gate 500028 beyond"
     ],
     "kind": "claim"
   },
@@ -609,7 +613,7 @@
     "spell": 520805,
     "clause": "and casting $?s520853[Fel Torpedo][Chaos Rush] now heals you for ${$520806m1+$520806ppl1+$STA*0.2+$AP*.33}.",
     "labels": [
-      "520805 effect_value 520806e0 #1"
+      "520805 behaviour_metric_delta heal"
     ],
     "kind": "claim"
   },
@@ -691,8 +695,9 @@
     "spell": 524947,
     "clause": "Using $?s520853[Fel Torpedo][Chaos Rush] increases the next instance of direct spell or ability damage within $525027d by $525027s1%.",
     "labels": [
-      "524947 spell_duration 525027 #0",
-      "524947 effect_value 525027e0 #1"
+      "524947 behaviour_hit_ratio damage",
+      "524947 behaviour_metric_delta aura_held",
+      "524947 behaviour_metric_delta aura_gone"
     ],
     "kind": "claim"
   },
@@ -735,7 +740,8 @@
     "spell": 555738,
     "clause": "Spin your glaives for $d,",
     "labels": [
-      "555738 aura_duration_ms #0"
+      "555738 behaviour_metric_delta duration_held",
+      "555738 behaviour_metric_delta duration_gone"
     ],
     "kind": "claim"
   },
@@ -743,8 +749,7 @@
     "spell": 555738,
     "clause": "increasing movement speed by $s2%",
     "labels": [
-      "555738 effect_value e1 #1",
-      "555738 aura_amount e1 #1"
+      "555738 behaviour_metric_delta speed"
     ],
     "kind": "claim"
   },
