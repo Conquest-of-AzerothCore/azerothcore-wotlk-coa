@@ -17,7 +17,8 @@ from values import (ALLY, AURA_STATE_FROZEN, AURA_STATE_HEALTHLESS_20_PERCENT, A
                     calc_amount_hooks_label, conditional_extra_values, effect_modifier_label,
                     disabled_foreign_effects, facts_of, fixture_health_step, foreign_aura_grants, foreign_effect,
                     foreign_radius, pay_power_steps, periodic_reason, required_target_health_steps, sample_labels,
-                    value_scenario, HEALTH_POWER)
+                    value_scenario, HEALTH_POWER, OVER_TICKS_REASON, PER_TICK_FOREIGN_TOTALS, per_tick_ticks,
+                    structure_stats)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -58,6 +59,10 @@ OATH_CHAIN = 704576
 SPELL_POWER_SCHOOLS = 6
 STAT_COUNT = 5
 SETTLE_MS = 5000
+MALICE_OF_GULDAN = 800214
+FELSTRIKE = 802678
+FELSTRIKE_LABEL = '800214 effect_value 802678e0 #1'
+FELSTRIKE_TOTAL = '${($d*1000/$T1)*($m1+0+$SP*.05)}'
 LIBERTY = 705266
 SCOURGEBANE_STRIKE = 801832
 IRON_PENANCE = 523712
@@ -694,6 +699,65 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         scenario, expectations, periodic_totals = value_scenario(self.class_file, spell, 500694)
         self.assertIn('500694 effect_value 803153e0 #0', [item.label for item in expectations])
         self.assertNotIn('500694 effect_value 803153e0 #0', [item['label'] for item in periodic_totals])
+
+    def malice_of_guldan(self, class_file):
+        spell = ClassSpell(MALICE_OF_GULDAN, str(MALICE_OF_GULDAN), (MALICE_OF_GULDAN,), MALICE_OF_GULDAN, 1, False)
+        return value_scenario(class_file, spell, MALICE_OF_GULDAN)
+
+    def test_an_expanded_foreign_total_is_probed_in_its_expansion(self):
+        records = Records(DataSet(DBC_DIR))
+        caster = structure_stats(self.class_file)
+        values = read_tooltip(DataSet(DBC_DIR), MALICE_OF_GULDAN, caster).values
+        ordinal = next(index for index, shown in enumerate(values) if shown.text == FELSTRIKE_TOTAL)
+        shown = values[ordinal]
+        self.assertTrue(periodic_reason(records, MALICE_OF_GULDAN, caster, shown, (FELSTRIKE, 0),
+                                        ordinal).startswith(OVER_TICKS_REASON))
+        self.assertIn('unreadable with a scaled duration or period',
+                      periodic_reason(records, MALICE_OF_GULDAN, caster, shown, (FELSTRIKE, 0)))
+
+    def test_an_unlisted_expanded_foreign_total_is_left_to_the_hit_scenario(self):
+        scenario, expectations, periodic_totals = self.malice_of_guldan(self.class_file)
+        self.assertNotIn(FELSTRIKE_LABEL, [item.label for item in expectations])
+        self.assertIn({'label': FELSTRIKE_LABEL, 'effect': 0, 'effect_spell': FELSTRIKE}, periodic_totals)
+        self.assertFalse(self.steps_of(scenario, FELSTRIKE_LABEL))
+
+    def test_a_listed_foreign_total_keeps_its_effect_value_read_judged_per_tick(self):
+        listed = {**self.class_file, PER_TICK_FOREIGN_TOTALS: [{'spell': FELSTRIKE, 'effect': 0, 'reason': 'x'}]}
+        scenario, expectations, periodic_totals = self.malice_of_guldan(listed)
+        run.validate(scenario)
+        item, = [item for item in expectations if item.label == FELSTRIKE_LABEL]
+        self.assertEqual((item.check, item.displayed, item.model),
+                         ('effect_value', FELSTRIKE_TOTAL, {'effect_spell': FELSTRIKE, 'effect': 0, 'ticks': 6}))
+        self.assertTrue(item.rule.startswith('read flat per tick'))
+        self.assertNotIn(FELSTRIKE_LABEL, [entry['label'] for entry in periodic_totals])
+        step, = [step for step in self.steps_of(scenario, FELSTRIKE_LABEL) if step['metric'] == 'spell_effect_value']
+        self.assertEqual((step['spell'], step['effect']), (FELSTRIKE, 0))
+
+    def test_a_foreign_ticking_token_with_an_unreadable_probe_is_unmeasurable(self):
+        reason = 'periodic token read mixed with a scaled duration or period'
+        original = periodic_reason
+
+        def probe(records, rank_id, caster, shown, token=None, ordinal=None):
+            if token == (FELSTRIKE, 0):
+                return reason
+            return original(records, rank_id, caster, shown, token, ordinal)
+
+        with mock.patch('values.periodic_reason', side_effect=probe):
+            scenario, expectations, periodic_totals = self.malice_of_guldan(self.class_file)
+        item, = [item for item in expectations if item.label == FELSTRIKE_LABEL]
+        self.assertEqual(item.rule, UNMEASURABLE + reason)
+        self.assertNotIn(FELSTRIKE_LABEL, [entry['label'] for entry in periodic_totals])
+        self.assertFalse(self.steps_of(scenario, FELSTRIKE_LABEL))
+
+    def test_a_listed_foreign_effect_read_per_tick_is_refused(self):
+        listed = {**self.class_file, PER_TICK_FOREIGN_TOTALS: [{'spell': 803153, 'effect': 0, 'reason': 'x'}]}
+        spell = ClassSpell(500694, '500694', (500694,), 500694, 1, False)
+        with self.assertRaisesRegex(ValueError, 'is no total over its ticks'):
+            value_scenario(listed, spell, 500694)
+
+    def test_a_listed_rolled_effect_is_refused(self):
+        with self.assertRaisesRegex(ValueError, 'whose points roll'):
+            per_tick_ticks(Records(DataSet(DBC_DIR)), VINDICATION_RANK_2, 0)
 
     def test_trailing_digit_on_a_proc_count_token_is_unmeasurable_not_unreadable(self):
         scenario, expectations = self.build(LIGHTKEEPER, LIGHTKEEPER)
