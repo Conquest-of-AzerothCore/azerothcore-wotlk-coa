@@ -100,6 +100,26 @@ int main()
                 assert(player.Count(803102) == 0);
             }
         }
+    {
+        constexpr uint32 EACH_HIT_SPELL = 805496;
+        constexpr uint32 EACH_HIT_RESOURCE = 807389;
+        constexpr int32 EACH_HIT_AMOUNT = 20;
+
+        Player player, first, second;
+        player.cls = 24;
+        Spell spell{&player, {EACH_HIT_SPELL}};
+
+        service.OnSpellHitResult(&spell, &first, 0, 0, false);
+        assert(player.Count(EACH_HIT_RESOURCE) == 0);
+        service.OnSpellHitResult(&spell, &first, 1, 100, false);
+        assert(player.Count(EACH_HIT_RESOURCE) == 0);
+        service.OnSpellHitResult(&spell, &first, 0, 100, false);
+        assert(player.Count(EACH_HIT_RESOURCE) == EACH_HIT_AMOUNT);
+        service.OnSpellHitResult(&spell, &second, 0, 100, false);
+        assert(player.Count(EACH_HIT_RESOURCE) == 2 * EACH_HIT_AMOUNT);
+        service.OnSpellHitResult(&spell, &second, 0, 100, true);
+        assert(player.Count(EACH_HIT_RESOURCE) == 3 * EACH_HIT_AMOUNT);
+    }
     struct Control { uint8 cls; uint32 id; };
     for (auto const& test : std::vector<Control>{
         {14, 801901}, {14, 501257}, {14, 547210}, {14, 801312}, {14, 501281},
