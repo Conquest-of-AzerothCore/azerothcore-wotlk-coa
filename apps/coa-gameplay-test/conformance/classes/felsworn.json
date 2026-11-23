@@ -12299,6 +12299,202 @@
         "hit_arm": true
       },
       "observe_source": "Spell.dbc 802678 (server set /srv/coa/server-data/dbc) Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 1000, DurationIndex 32 = 6000 ms (6 ticks), EffectBasePoints 8, EffectDieSides 1, EffectRealPointsPerLevel 0.5, BaseLevel 10, SpellLevel 10, MaxLevel 0. Expected per tick at level 60: 8 + 1 (DieSides 1 adds 1) + int(0.5 x (60 - 10)) = 34 (SpellInfo.cpp CalcValue), plus the tooltip term $SP*.05 = int(0.05 x spell power). The displayed ${($d*1000/$T1)*($m1+0+$SP*.05)} reads 54 = 6 x 9 on the client (ADR 0006: no SkillLineAbility row, base points only); owner ruling O-19: the server keeps 34 per tick and the displayed text is to be corrected in a client patch, so the value is counted on the server formula, not on the displayed 54. Behaviour read: the caster casts Felstrike 802678 on the dummy and the dummy's spell_damage_total of 802678 is read 1500 ms later, one tick (EffectAmplitude 1000, the second tick at 2000 ms); the unread arm before the cast reads 0 (control). Criticals are made impossible (64481) and the dummy's magic resistance is removed (823764), as the Immolation Aura tick entries do. Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and the Felstrike tick events of coa-history (spell 802678, gear and level differ, no figure decides). Contrast arm of the spell power term: +10000 spell power must move the tick by int(0.05 x 10000) = 500 to 534; a server that dropped the term or used another coefficient cannot pass both arms."
+    },
+    {
+      "spell": 800352,
+      "name": "Embracing Evil (Bane of Fire duration)",
+      "kind": "metric_delta",
+      "variant": "bane_duration",
+      "label_suffix": "bane_duration",
+      "quote": "Increases the duration",
+      "trigger_spell": 707901,
+      "gate_spell": 800352,
+      "target": "dummy",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 707901
+      },
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "before_expected": 17900,
+      "expected": 21500,
+      "expected_gain": 3600,
+      "tolerance": 300,
+      "wait_ms": 100,
+      "expire_ms": 18500,
+      "observe_source": "800352 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), BasePoints 19 + 1 = 20 ($s1 percent), class mask word 0 0x20 matching Bane of Fire 707901 (SpellFamilyFlags[0] 32, DurationIndex 85 = 18000 ms, SpellDuration.dbc): 18000 x 1.20 = 21600 ms. Bane of Fire is cast on the dummy before (control: 800352 not learned, 18000 less the 100 ms wait) and after a real learn (21600 less 100); the tolerance 300 excludes a gain 10% off (3240 or 3960 ms against 3600). Reference search 2026-11-23: coa-history spell 800352: 0 events in 186 logs (passive); spell 707901: 360 SPELL_AURA_APPLIED by players in 11 logs (positive control); bindmysoul talents snapshot: 'Increases the duration and reduces the Energy cost of Banes by 20%.' (same figure); expected values come from the tooltip and the DBC only. The harness equips the weapon sets after the scenario settle, so a cast issued at once is refused by the global cooldown (the first run read the before phase 0 for that reason); a setup cast of 707901 with a 1600 ms wait and a cooldown reset precedes the timed cast in both phases, and the timed cast then refreshes the aura to its full duration.",
+      "setup_casts": [
+        707901
+      ],
+      "setup_wait_ms": 1600,
+      "trigger_reset_after_setup": true
+    },
+    {
+      "spell": 555738,
+      "name": "Fury Unleashed (immune, movement)",
+      "kind": "immunity",
+      "variant": "movement",
+      "quote": "You are immune to movement impairing and loss of control effects.",
+      "effects": [
+        {
+          "spell": 38767,
+          "words": "movement impairing"
+        },
+        {
+          "spell": 47021,
+          "words": "movement impairing"
+        }
+      ],
+      "observe_source": "555738 Effect[2] aura 147 SPELL_AURA_MECHANIC_IMMUNITY_MASK, MiscValue 1733, DurationIndex 28 = 5000 ms (Spell.dbc). The tooltip sentence is read as: movement impairing = root and snare; loss of control = stun, fear and sleep; the expectation is the tooltip's words, not the mask. One entry per group so that the casts fit the 5000 ms aura (each fixture takes 3 casts x 500 ms). Fixtures, each landed by a real creature cast at the caster inside the window: Daze 38767 (Mechanic 11 snare, aura 33); Net 47021 (Mechanic 7 root, aura 26). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands. Reference search 2026-11-23: coa-history spell 555738: 2 SPELL_CAST_SUCCESS in 2 of 186 logs, no landed crowd-control read; bindmysoul talents snapshot (older state): 'Spin your glaives for 5 seconds, increasing movement speed by 30% ... You are immune to movement impairing and loss of control effects.' (same wording); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 555738,
+      "name": "Fury Unleashed (immune, loss_stun_fear)",
+      "kind": "immunity",
+      "variant": "loss_stun_fear",
+      "quote": "You are immune to movement impairing and loss of control effects.",
+      "effects": [
+        {
+          "spell": 56,
+          "words": "loss of control"
+        },
+        {
+          "spell": 12096,
+          "words": "loss of control"
+        }
+      ],
+      "observe_source": "555738 Effect[2] aura 147 SPELL_AURA_MECHANIC_IMMUNITY_MASK, MiscValue 1733, DurationIndex 28 = 5000 ms (Spell.dbc). The tooltip sentence is read as: movement impairing = root and snare; loss of control = stun, fear and sleep; the expectation is the tooltip's words, not the mask. One entry per group so that the casts fit the 5000 ms aura (each fixture takes 3 casts x 500 ms). Fixtures, each landed by a real creature cast at the caster inside the window: Stun 56 (Mechanic 12, aura 12); Fear 12096 (Mechanic 5, aura 7). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands. Reference search 2026-11-23: coa-history spell 555738: 2 SPELL_CAST_SUCCESS in 2 of 186 logs, no landed crowd-control read; bindmysoul talents snapshot (older state): 'Spin your glaives for 5 seconds, increasing movement speed by 30% ... You are immune to movement impairing and loss of control effects.' (same wording); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 555738,
+      "name": "Fury Unleashed (immune, loss_sleep)",
+      "kind": "immunity",
+      "variant": "loss_sleep",
+      "quote": "You are immune to movement impairing and loss of control effects.",
+      "effects": [
+        {
+          "spell": 9159,
+          "words": "loss of control"
+        }
+      ],
+      "observe_source": "555738 Effect[2] aura 147 SPELL_AURA_MECHANIC_IMMUNITY_MASK, MiscValue 1733, DurationIndex 28 = 5000 ms (Spell.dbc). The tooltip sentence is read as: movement impairing = root and snare; loss of control = stun, fear and sleep; the expectation is the tooltip's words, not the mask. One entry per group so that the casts fit the 5000 ms aura (each fixture takes 3 casts x 500 ms). Fixtures, each landed by a real creature cast at the caster inside the window: Sleep 9159 (Mechanic 10, aura 12). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands. Reference search 2026-11-23: coa-history spell 555738: 2 SPELL_CAST_SUCCESS in 2 of 186 logs, no landed crowd-control read; bindmysoul talents snapshot (older state): 'Spin your glaives for 5 seconds, increasing movement speed by 30% ... You are immune to movement impairing and loss of control effects.' (same wording); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 561216,
+      "name": "Fury of the Illidari (immune, stun)",
+      "kind": "immunity",
+      "variant": "stun",
+      "quote": "While active you are immune to crowd control effects.",
+      "caster_auras": [
+        804216
+      ],
+      "effects": [
+        {
+          "spell": 56,
+          "words": "crowd control"
+        }
+      ],
+      "observe_source": "561216 Effect[2] aura 263 in Spell.dbc; the immunity mask is set by AscensionFelswornContracts.cpp:189-195 (read as a hint, not an expectation). The tooltip says 'immune to crowd control effects', read as: stun, fear, root, snare (and sleep). The aura lasts 3000 ms (6 assaults x 500 ms, the tooltip's own count and period), so one fixture per entry fits the window (3 casts x 500 ms). Fixtures, each landed by a real creature cast at the caster inside the window: Stun 56 (Mechanic 12, aura 12). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): 'While active you are immune to crowd control effects.' (same wording); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 561216,
+      "name": "Fury of the Illidari (immune, fear)",
+      "kind": "immunity",
+      "variant": "fear",
+      "quote": "While active you are immune to crowd control effects.",
+      "caster_auras": [
+        804216
+      ],
+      "effects": [
+        {
+          "spell": 12096,
+          "words": "crowd control"
+        }
+      ],
+      "observe_source": "561216 Effect[2] aura 263 in Spell.dbc; the immunity mask is set by AscensionFelswornContracts.cpp:189-195 (read as a hint, not an expectation). The tooltip says 'immune to crowd control effects', read as: stun, fear, root, snare (and sleep). The aura lasts 3000 ms (6 assaults x 500 ms, the tooltip's own count and period), so one fixture per entry fits the window (3 casts x 500 ms). Fixtures, each landed by a real creature cast at the caster inside the window: Fear 12096 (Mechanic 5, aura 7). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): 'While active you are immune to crowd control effects.' (same wording); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 561216,
+      "name": "Fury of the Illidari (immune, root)",
+      "kind": "immunity",
+      "variant": "root",
+      "quote": "While active you are immune to crowd control effects.",
+      "caster_auras": [
+        804216
+      ],
+      "effects": [
+        {
+          "spell": 47021,
+          "words": "crowd control"
+        }
+      ],
+      "observe_source": "561216 Effect[2] aura 263 in Spell.dbc; the immunity mask is set by AscensionFelswornContracts.cpp:189-195 (read as a hint, not an expectation). The tooltip says 'immune to crowd control effects', read as: stun, fear, root, snare (and sleep). The aura lasts 3000 ms (6 assaults x 500 ms, the tooltip's own count and period), so one fixture per entry fits the window (3 casts x 500 ms). Fixtures, each landed by a real creature cast at the caster inside the window: Net 47021 (Mechanic 7 root, aura 26). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): 'While active you are immune to crowd control effects.' (same wording); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 561216,
+      "name": "Fury of the Illidari (immune, snare)",
+      "kind": "immunity",
+      "variant": "snare",
+      "quote": "While active you are immune to crowd control effects.",
+      "caster_auras": [
+        804216
+      ],
+      "effects": [
+        {
+          "spell": 38767,
+          "words": "crowd control"
+        }
+      ],
+      "observe_source": "561216 Effect[2] aura 263 in Spell.dbc; the immunity mask is set by AscensionFelswornContracts.cpp:189-195 (read as a hint, not an expectation). The tooltip says 'immune to crowd control effects', read as: stun, fear, root, snare (and sleep). The aura lasts 3000 ms (6 assaults x 500 ms, the tooltip's own count and period), so one fixture per entry fits the window (3 casts x 500 ms). Fixtures, each landed by a real creature cast at the caster inside the window: Daze 38767 (Mechanic 11 snare, aura 33). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): 'While active you are immune to crowd control effects.' (same wording); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806109,
+      "name": "Illidan's Guile (no melee swings under the aura)",
+      "kind": "metric_delta",
+      "variant": "no_attack",
+      "label_suffix": "no_attack",
+      "quote": "you cannot attack",
+      "trigger_spell": 806109,
+      "gate_spell": 806109,
+      "gate_cast": true,
+      "target": "dummy",
+      "attack_swings": 2,
+      "metric": "melee_attack_count",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "expected_gain": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "806109 DurationIndex 31 = 8000 ms (Spell.dbc): the aura is on the caster for the whole after phase (2 swing intervals of the reference weapon, 2 x 2300 ms = 4600 ms, then the reading). The tooltip says that during the aura 'you cannot attack': the caster's native melee combat packets (melee_attack_count, misses included) are counted in the control phase (no aura, at least 1 packet) and again in the treatment phase (806109 cast at the caster between the phases), and the treatment phase must add none. Expected value 0 comes from the tooltip's 'cannot attack'. Reference search 2026-11-23: coa-history spell 806109 finds 6 SPELL_CAST_SUCCESS, 6 SPELL_AURA_APPLIED and 6 SPELL_AURA_REMOVED by a player in 1 of 186 logs, none reaches $d (left early); bindmysoul talents snapshot: 'becoming immune to all physical attacks and spells for 8 seconds, but during that time you cannot attack, move or cast spells' (same wording); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806109,
+      "name": "Illidan's Guile (a Bane of Fire cast is not completed under the aura)",
+      "kind": "metric_delta",
+      "variant": "no_cast",
+      "label_suffix": "no_cast",
+      "quote": "or cast spells",
+      "trigger_spell": 707901,
+      "gate_spell": 806109,
+      "setup_casts": [
+        806109
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 707901
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 600,
+      "expire_ms": 8600,
+      "observe_source": "806109 DurationIndex 31 = 8000 ms. The tooltip says that during the aura 'you cannot ... cast spells'. Control phase: Bane of Fire 707901 (40 Energy, Energy set to 100) is cast at the dummy and completes (spell_cast_count 1). Treatment phase, after 8600 ms: 806109 is cast at the caster, 1600 ms later (past the global cooldown) the same Bane cast is attempted while the aura is held: it must not complete, so the count stays 1. Expected 'no completed cast' comes from the tooltip's 'cannot cast spells'. Reference search 2026-11-23: coa-history spell 806109 finds 6 SPELL_CAST_SUCCESS, 6 SPELL_AURA_APPLIED and 6 SPELL_AURA_REMOVED by a player in 1 of 186 logs, none reaches $d (left early); bindmysoul talents snapshot: 'becoming immune to all physical attacks and spells for 8 seconds, but during that time you cannot attack, move or cast spells' (same wording); expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],
