@@ -192,7 +192,9 @@ disable the others, so pair it with `--stages`; a filter for a stage that is not
   catalog definition counts as that catalog id. Any other valid scenario file is exploratory: it runs natively
   only, is reported separately, is excluded from registered numerical checks and is never labeled combined
   verification. It must still pass for the gameplay stage to pass, and a selection of exploratory files only
-  leaves the stage `unavailable` (`INCOMPLETE`) even when they pass.
+  leaves the stage `unavailable` (`INCOMPLETE`) even when they pass. `@FILE` reads arguments from a file, one per
+  line, so a selection of thousands of files fits one run; on Windows a selection beyond the command-line limit
+  reaches the gameplay runner through `gameplay-scenarios.txt` in the output directory.
 - `--spell ID`, `--quest ID`, `--query TEXT`: select gameplay scenarios through the catalog, as
   `apps/coa-gameplay-test/catalog.py` does.
 - `--harness NAME ...`: harness scripts by directory name or file stem.

@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Using a Great Raven Cache teaches its mount at once",
+  "contract": [
+    "Prophet's Great Raven Cache 199735 is a Vanity mount whose use spell 60034 \"Smoke\" has only dummy effects, so",
+    "using it did nothing; the mount 926024 only arrived from the Vanity collection at the next login.",
+    "Expected: using the cache teaches 926024 and spends the cache. A second cache used by a character that already",
+    "knows the mount stays in the bags."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8824.3, "y": 626.4, "z": 94.4, "o": 0},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 2000},
+    {"action": "add_item", "label": "Carry Prophet's Great Raven Cache", "actor": "hero", "item": 199735},
+    {"action": "assert", "label": "SETUP: the mount is not known yet", "actor": "hero", "metric": "knows_spell",
+     "spell": 926024, "equals": 0},
+    {"action": "use_item", "label": "Use the cache", "actor": "hero", "item": 199735, "spell": 60034},
+    {"action": "assert", "label": "DISCRIMINATING: the mount is learned", "actor": "hero", "metric": "knows_spell",
+     "spell": 926024, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "The cache is spent", "actor": "hero", "metric": "item_count", "item": 199735,
+     "equals": 0},
+    {"action": "add_item", "label": "Carry a second cache", "actor": "hero", "item": 199735},
+    {"action": "use_item", "label": "Use the second cache", "actor": "hero", "item": 199735, "spell": 60034},
+    {"action": "wait", "label": "Let the use resolve", "ms": 1000},
+    {"action": "assert", "label": "Control: a known mount leaves the second cache in the bags", "actor": "hero",
+     "metric": "item_count", "item": 199735, "equals": 1}
+  ]
+}

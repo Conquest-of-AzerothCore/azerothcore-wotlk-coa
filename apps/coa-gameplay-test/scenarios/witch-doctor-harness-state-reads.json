@@ -1,0 +1,177 @@
+{
+  "schema": 1,
+  "name": "Harness reads healing power, swim speed, skill bonus and casting regeneration of a Witch Doctor",
+  "contract": [
+    "ADR 1030 (provisional) adds the reads healing_power (Unit::SpellBaseHealingBonusDone), swim_speed_rate",
+    "(Unit::GetSpeedRate(MOVE_SWIM)) and skill_bonus (the permanent plus temporary bonus of a skill line), and the",
+    "conformance tool judges mana_regen_interrupted as a share of mana_regen. Each read is shown without and with",
+    "the aura that moves it: Spirit Healer 560280 (aura 175, 40% of Spirit as healing power, truncated), Natural",
+    "Alchemist 536213 (aura 98, Alchemy 171 +15), Ingredient: Fish Oil 801662 (its area aura 803269 carries aura 58,",
+    "+10% swim speed) and Spiritual Traditions 705911 (aura 134, 40% of the regeneration while casting)."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Spirit of the caster",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "spirit"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no healing power without Spirit Healer",
+      "actor": "doctor",
+      "metric": "healing_power",
+      "school": 3,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "label": "Spirit Healer",
+      "actor": "doctor",
+      "spell": 560280
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: healing power is 40% of Spirit, truncated",
+      "actor": "doctor",
+      "metric": "healing_power",
+      "school": 3,
+      "ratio_to": "spirit",
+      "min": 0.39,
+      "max": 0.4,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "label": "Alchemy at 1 of 300",
+      "actor": "doctor",
+      "skill": 171,
+      "value": 1,
+      "maximum": 300
+    },
+    {
+      "action": "unlearn",
+      "label": "Natural Alchemist is a class 13 starting spell",
+      "actor": "doctor",
+      "spell": 536213
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Alchemy bonus without Natural Alchemist",
+      "actor": "doctor",
+      "metric": "skill_bonus",
+      "skill": 171,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "label": "Natural Alchemist",
+      "actor": "doctor",
+      "spell": 536213
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the Alchemy bonus is 15",
+      "actor": "doctor",
+      "metric": "skill_bonus",
+      "skill": 171,
+      "equals": 15,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the pure Alchemy value stays 1",
+      "actor": "doctor",
+      "metric": "skill_value",
+      "skill": 171,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: base swim speed rate",
+      "actor": "doctor",
+      "metric": "swim_speed_rate",
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "label": "Spirit Healer leaves before the regeneration reads",
+      "actor": "doctor",
+      "spell": 560280
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no regeneration while casting without Spiritual Traditions",
+      "actor": "doctor",
+      "metric": "mana_regen_interrupted",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "label": "Spiritual Traditions",
+      "actor": "doctor",
+      "spell": 705911
+    },
+    {
+      "action": "snapshot",
+      "label": "Regeneration out of casting",
+      "actor": "doctor",
+      "metric": "mana_regen",
+      "save_as": "regen"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: 40% of the regeneration continues while casting",
+      "actor": "doctor",
+      "metric": "mana_regen_interrupted",
+      "ratio_to": "regen",
+      "min": 0.399,
+      "max": 0.401,
+      "within_ms": 1000
+    },
+    {
+      "action": "learn",
+      "label": "Ingredient: Fish Oil",
+      "actor": "doctor",
+      "spell": 801662
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "cast",
+      "label": "Brew Fish Oil",
+      "actor": "doctor",
+      "spell": 801662,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the Fish Oil Cauldron raises the swim speed rate to 1.1",
+      "actor": "doctor",
+      "metric": "swim_speed_rate",
+      "min": 1.099,
+      "max": 1.101,
+      "within_ms": 4500
+    }
+  ]
+}

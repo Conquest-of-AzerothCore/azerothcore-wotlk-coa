@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Hexfire Adept transforms only the top Malefic Wrath rank (#12539)",
+  "contract": [
+    "Report #12539: after Hexfire Wrath ends, Malefic Wrath on the action bar is replaced by a lower rank.",
+    "Malefic Wrath ranks are mana spells, so every learned rank stays active. SyncReplacements stood Hexfire",
+    "Wrath 807480 in for every known rank, and when Hexfire Ready 503626 ended the client got one",
+    "SMSG_SUPERCEDED_SPELL per rank in hash order, so a lower rank could land on the button. The Volley and Hex",
+    "branches already transform only the top rank. Expected: Hexfire Adept 704500 transforms only the top rank",
+    "808876; the lower rank 807037 is never replaced, so it gets no supersede when the transform ends."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "doctor", "race": 2, "class": 13, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "doctor", "entry": 36, "level": 60, "health": 4000000, "distance": 4 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let login, spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "label": "Malefic Wrath rank 1", "actor": "doctor", "spell": 807037 },
+    { "action": "learn", "label": "Malefic Wrath top rank", "actor": "doctor", "spell": 808876 },
+    { "action": "learn", "label": "Hexfire Adept", "actor": "doctor", "spell": 704500 },
+    { "action": "learn", "label": "Hexfire", "actor": "doctor", "spell": 573026 },
+    {
+      "action": "assert", "label": "CONTROL: the top rank stands for itself before Hexfire", "actor": "doctor",
+      "metric": "temporary_spell_replacement", "spell": 808876, "equals": 808876, "within_ms": 2000
+    },
+    { "action": "cast", "label": "Hexfire", "actor": "doctor", "spell": 573026, "target": "dummy" },
+    {
+      "action": "assert", "label": "SETUP: Hexfire Ready is on the Witch Doctor", "actor": "doctor",
+      "metric": "aura", "spell": 503626, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The top rank turns into Hexfire Wrath", "actor": "doctor",
+      "metric": "temporary_spell_replacement", "spell": 808876, "equals": 807480, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "THE FIX: the lower rank is not turned into Hexfire Wrath", "actor": "doctor",
+      "metric": "temporary_spell_replacement", "spell": 807037, "equals": 807037
+    },
+    {
+      "action": "assert", "label": "THE FIX: one supersede to Hexfire Wrath, for the top rank only", "actor": "doctor",
+      "metric": "spellbook_superseded_for", "spell": 807480, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Hexfire Ready ends", "actor": "doctor",
+      "metric": "aura", "spell": 503626, "equals": 0, "within_ms": 15000
+    },
+    {
+      "action": "assert", "label": "The top rank is restored", "actor": "doctor",
+      "metric": "temporary_spell_replacement", "spell": 808876, "equals": 808876, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "THE FIX: no supersede brings the lower rank back onto the bar", "actor": "doctor",
+      "metric": "spellbook_superseded_for", "spell": 807037, "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,205 @@
+{
+  "schema": 1,
+  "name": "Harness fixture creatures attack a Witch Doctor and record an allowed cast refusal",
+  "contract": [
+    "ADR 1027 (provisional) adds creature_attack (a fixture creature set aggressive melees a player, or stops),",
+    "allowed_refusal on a creature cast (the step passes when the cast is refused with exactly that",
+    "SpellCastResult) and creature_cast_result (the result of a creature's last cast of a spell, -1 before any).",
+    "Eye of Kimbul 802707 refuses a stealth spell of its carrier with SPELL_FAILED_CASTER_AURASTATE 22",
+    "(AscensionWitchDoctorAbilities.cpp OnSpellCheckCast, every caster, triggered or not): unmarked, the dummy",
+    "stealths (result 0); marked, the same triggered cast is refused (22) and no aura lands. A second creature 36",
+    "melees the doctor: at least 2 swings in 6000 ms (2000 ms swing timer), none in 6000 ms after it stops."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "brute",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "doctor",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no cast of Stealth Dummy recorded yet",
+      "actor": "dummy",
+      "metric": "creature_cast_result",
+      "spell": 2144558,
+      "equals": -1
+    },
+    {
+      "action": "cast",
+      "label": "The unmarked dummy casts Stealth Dummy",
+      "actor": "dummy",
+      "spell": 2144558,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the unmarked cast starts (SPELL_CAST_OK 255)",
+      "actor": "dummy",
+      "metric": "creature_cast_result",
+      "spell": 2144558,
+      "equals": 255
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the unmarked dummy is stealthed",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 2144558,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the stealth",
+      "actor": "doctor",
+      "target": "dummy",
+      "spell": 2144558,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Mark the dummy with Eye of Kimbul",
+      "actor": "doctor",
+      "target": "dummy",
+      "spell": 802707,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "The marked dummy casts Stealth Dummy, refusal 22 allowed",
+      "actor": "dummy",
+      "spell": 2144558,
+      "target": "dummy",
+      "allowed_refusal": 22
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the refusal is recorded as SPELL_FAILED_CASTER_AURASTATE",
+      "actor": "dummy",
+      "metric": "creature_cast_result",
+      "spell": 2144558,
+      "equals": 22
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the marked dummy is not stealthed",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 2144558,
+      "equals": 0
+    },
+    {
+      "action": "creature_attack",
+      "label": "The brute melees the doctor",
+      "actor": "brute",
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the doctor is the brute's victim",
+      "actor": "brute",
+      "metric": "victim",
+      "target": "doctor",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the brute engage",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "label": "Swings before the attack window",
+      "actor": "doctor",
+      "metric": "melee_attacks_taken",
+      "target": "brute",
+      "save_as": "swings_start"
+    },
+    {
+      "action": "wait",
+      "label": "Attack window",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the brute swings at the doctor",
+      "actor": "doctor",
+      "metric": "melee_attacks_taken",
+      "target": "brute",
+      "relative_to": "swings_start",
+      "min": 2
+    },
+    {
+      "action": "creature_attack",
+      "label": "The brute stops",
+      "actor": "brute",
+      "stop": true
+    },
+    {
+      "action": "wait",
+      "label": "Let a pending swing settle",
+      "ms": 2500
+    },
+    {
+      "action": "snapshot",
+      "label": "Swings after the stop",
+      "actor": "doctor",
+      "metric": "melee_attacks_taken",
+      "target": "brute",
+      "save_as": "swings_stopped"
+    },
+    {
+      "action": "wait",
+      "label": "Stopped window",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the stopped brute swings no more",
+      "actor": "doctor",
+      "metric": "melee_attacks_taken",
+      "target": "brute",
+      "relative_to": "swings_stopped",
+      "equals": 0
+    }
+  ]
+}

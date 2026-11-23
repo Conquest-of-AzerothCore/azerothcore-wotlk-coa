@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Tiki Splash heals an ally standing in the waters",
+  "contract": [
+    "Tiki Splash 500478 (the Spirit in a Bottle replacement while Tiki Splash 500053 is known and a Base is",
+    "active) is a persistent area aura with EffectImplicitTargetA 31 TARGET_UNIT_DEST_AREA_ALLY and no TargetB.",
+    "DynObjAura::FillTargetMap took the friendly search only for an ally TargetB or the CoA TargetA list, so the",
+    "waters used the enemy searcher and healed nobody: 0 heals in both final05 runs (cycle 8 R4-1). The fix adds",
+    "500478 to the TargetA ally list. The waters (EffectRadiusIndex 14 = 8 yd, 5000 ms, a heal at the apply and",
+    "every 1250 ms) are cast at the Witch Doctor after a real Base: Crystal Water 500962. Expected: the doctor and",
+    "a grouped ally 3 yd away are healed; a grouped ally 20 yd away, outside the waters, is not."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    },
+    {
+      "id": "far_ally",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Tiki Splash (the replacement)",
+      "actor": "doctor",
+      "spell": 500478
+    },
+    {
+      "action": "learn",
+      "label": "Base: Crystal Water",
+      "actor": "doctor",
+      "spell": 500962
+    },
+    {
+      "action": "learn",
+      "label": "Tiki Splash talent",
+      "actor": "doctor",
+      "spell": 500053
+    },
+    {
+      "action": "group",
+      "actor": "doctor",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "doctor",
+      "target": "far_ally"
+    },
+    {
+      "action": "relocate",
+      "actor": "ally",
+      "dx": 3
+    },
+    {
+      "action": "relocate",
+      "actor": "far_ally",
+      "dx": 20
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the near ally stands 3 yd from the Witch Doctor",
+      "actor": "ally",
+      "metric": "distance_2d",
+      "target": "doctor",
+      "min": 2.8,
+      "max": 3.2
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the far ally stands 20 yd from the Witch Doctor",
+      "actor": "far_ally",
+      "metric": "distance_2d",
+      "target": "doctor",
+      "min": 19.8,
+      "max": 20.2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: nothing has healed the ally yet",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 500478,
+      "target": "ally",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 500962
+    },
+    {
+      "action": "cast",
+      "label": "Base: Crystal Water",
+      "actor": "doctor",
+      "spell": 500962,
+      "target": "doctor"
+    },
+    {
+      "action": "wait",
+      "label": "Past the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 500478
+    },
+    {
+      "action": "cast",
+      "label": "Tiki Splash at the Witch Doctor's feet",
+      "actor": "doctor",
+      "spell": 500478,
+      "target": "doctor"
+    },
+    {
+      "action": "wait",
+      "label": "The apply heal and two periodic heals",
+      "ms": 3600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the waters heal the Witch Doctor standing in them",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 500478,
+      "target": "doctor",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the ally standing in the waters is healed",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 500478,
+      "target": "ally",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the ally 20 yd away, outside the 8 yd waters, is not healed",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 500478,
+      "target": "far_ally",
+      "equals": 0
+    }
+  ]
+}
