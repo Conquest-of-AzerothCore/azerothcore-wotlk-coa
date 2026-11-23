@@ -24,15 +24,16 @@ class HoldPowerDuringWaitTests(unittest.TestCase):
         plain = self.build()
         held = self.build(hold_power_during_wait={'power': 0, 'every_ms': 500, 'count': 4})
         run.validate(held)
-        self.assertEqual(len(power_steps(held)) - len(power_steps(plain)), 4)
+        self.assertEqual(len(power_steps(held)) - len(power_steps(plain)), 8)
         casts = [index for index, step in enumerate(held['steps']) if step['action'] == 'cast'
                  and step.get('spell') == entry()['trigger_spell']]
-        index = casts[-1]
-        following = held['steps'][index + 1:index + 9]
-        self.assertEqual([step['action'] for step in following], ['wait', 'set_power'] * 4)
-        self.assertEqual({step['ms'] for step in following if step['action'] == 'wait'}, {500})
-        self.assertEqual({(step['power'], step['value']) for step in following if step['action'] == 'set_power'},
-                         {(0, entry()['cast_power'])})
+        self.assertEqual(len(casts), 2)
+        for index in casts:
+            following = held['steps'][index + 1:index + 9]
+            self.assertEqual([step['action'] for step in following], ['wait', 'set_power'] * 4)
+            self.assertEqual({step['ms'] for step in following if step['action'] == 'wait'}, {500})
+            self.assertEqual({(step['power'], step['value']) for step in following if step['action'] == 'set_power'},
+                             {(0, entry()['cast_power'])})
         self.assertIn('every 500 ms, 4 times', held['contract'])
         self.assertNotIn('every 500 ms', plain['contract'])
 
