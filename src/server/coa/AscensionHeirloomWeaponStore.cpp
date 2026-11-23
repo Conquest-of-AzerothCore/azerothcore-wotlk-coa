@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionCompatOpcodes.h"
+#include "AscensionRealmLevelPurchase.h"
 
 #include "../../../modules/mod-worldforged-upgrades/src/WorldforgedUpgrades.h"
 
@@ -94,6 +95,12 @@ bool HandlePurchase(WorldSession* session, WorldPacket const& packet)
     uint32 const weapon = packet.read<uint32>(0);
     if (!IsHeirloomWeapon(weapon))
         return false;
+
+    if (AscensionRealmLevelPurchase::Refuse(player, weapon))
+    {
+        SendPurchaseResult(session, "PURCHASE_CUSTOM_STORE_ITEM_UNKNOWN");
+        return true;
+    }
 
     if (!player->HasItemCount(HEIRLOOM_WEAPON_TOKEN, TOKENS_PER_WEAPON))
     {
