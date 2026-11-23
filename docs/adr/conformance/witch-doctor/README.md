@@ -41,3 +41,4 @@ numbers ([ADR 0583](../../0583-class-conformance-adrs-live-in-a-per-class-folder
 | [0032](0032-voodoo-fire-strikes-up-to-three-enemies.md) | Voodoo Fire strikes up to three enemies | accepted |
 | [0033](0033-mojo-beam-drain-does-not-scale-with-branches.md) | Mojo Beam's drain does not scale with its branches | accepted, needs further investigation |
 | [0034](0034-mojo-beam-grows-one-branch-per-tick.md) | Mojo Beam grows one branch per tick, with no cap of 8 | accepted |
+| [0035](0035-malefic-arrow-keeps-one-rank-per-malefic-wrath-rank.md) | Malefic Arrow keeps one rank per Malefic Wrath rank | accepted |
