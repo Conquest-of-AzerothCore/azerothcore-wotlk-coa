@@ -1513,10 +1513,11 @@
   {
     "spell": 706420,
     "clause": "Can only have 1 Bane active on a target at a time.",
-    "labels": [
-      "706420 behaviour_metric_delta one_bane"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The one_bane metric_delta entry flipped (alert/ok) and its after phase reads no 707901 presence before the 706420 cast, so a never-landed Bane passes; metric_delta cannot read aura presence between setup and the trigger cast nor run sized trials (reviews fw-r3g3b I-2, fw-r3g3c C-1)."
+    }
   },
   {
     "spell": 706420,
