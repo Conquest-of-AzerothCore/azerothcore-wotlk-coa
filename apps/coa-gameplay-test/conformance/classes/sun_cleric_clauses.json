@@ -5260,7 +5260,8 @@
       {
         "claim": "for $/1000;712448s1 sec (4 sec)",
         "labels": [
-          "707629 effect_value 712448e0 #1"
+          "707629 effect_value 712448e0 #1",
+          "707629 behaviour_metric_delta block_grant_duration"
         ]
       }
     ],
