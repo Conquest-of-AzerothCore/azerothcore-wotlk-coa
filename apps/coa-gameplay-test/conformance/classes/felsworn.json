@@ -4955,6 +4955,171 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "$s2 = 15 (805236 Effect[1], EffectBasePoints 14 + EffectDieSides 1); the aura 807426 the script applies while Inner Demon 804216 and 805236 are both on the caster carries aura 138 SPELL_AURA_MOD_MELEE_HASTE with BasePoints 14 + 1 = 15 (AscensionFelswornContracts.cpp:81-92, AscensionFelsworn.cpp:274). The main-hand attack time of the reference weapon (Slayer item 2027, 2300 ms) is read 500 ms after a harmless Bless 804247 before (control: 805236 not learned) and after a real learn: 2300 / 1.15 = 2000 ms within 1. Inner Demon 804216 is set on the caster in both phases by harness set_aura (a precondition fixture, named as such). Reference search 2026-11-23: coa-history spell 805236, 807426, 807427: 0 events in 186 logs (a passive leaves no event; positive control 807554: 2923 events); the bindmysoul snapshot repeats the tooltip; nothing found that states another value."
+    },
+    {
+      "spell": 805235,
+      "kind": "metric_delta",
+      "trigger_spell": 805235,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 805235,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Whispers of the Pit (fears the target)",
+      "variant": "fear",
+      "label_suffix": "fear",
+      "quote": "fearing them",
+      "expected": 1,
+      "wait_ms": 500,
+      "observe_source": "Whispers of the Pit is cast at the target; 500 ms later its aura (Effect[0] fear) is on the target, read before the cast (absent, the control). Code: AscensionFelswornContracts.cpp:292-293 adds AURA_INTERRUPT_FLAG_TAKE_DAMAGE to 805235 and 807590; Spell.dbc 805235 Effect[0] aura 7 SPELL_AURA_MOD_FEAR, Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED BasePoints -81 + 1 = -80 ($s3), DurationIndex 31 = 8000 ms ($d). Kobold Vermin 6 is the target (the stock dummy 36 takes no fear or horror aura, measured in the Infernal entries of this class); the Whispers cast at the dummy lands its area at the dummy's position (radius index 14). Reference search 2026-11-23: coa-history spell 805235: 3 casts, 8 aura applications and 8 removals in 2 logs, 2 SPELL_AURA_BROKEN_SPELL (the effect is broken by damage; no duration or amount is logged); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
+    },
+    {
+      "spell": 805235,
+      "kind": "metric_delta",
+      "trigger_spell": 805235,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.5,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Whispers of the Pit (slows the target by 80%)",
+      "variant": "slow",
+      "label_suffix": "slow",
+      "quote": "slowing their movement speed by $s3%",
+      "expected": 0.1,
+      "expected_ratio": 0.2,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "observe_source": "$s3 = 80 (805235 Effect[2] aura 33, BasePoints -81 + 1). The target's run speed rate (Unit::GetSpeedRate of MOVE_RUN) is read before the cast (control, at least 0.5) and 500 ms after it: the ratio is 0.2 within 0.002, so 0.19 and 0.21 are excluded (the second snare 807590 is the same 80%, the strongest applies). Code: AscensionFelswornContracts.cpp:292-293 adds AURA_INTERRUPT_FLAG_TAKE_DAMAGE to 805235 and 807590; Spell.dbc 805235 Effect[0] aura 7 SPELL_AURA_MOD_FEAR, Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED BasePoints -81 + 1 = -80 ($s3), DurationIndex 31 = 8000 ms ($d). Kobold Vermin 6 is the target (the stock dummy 36 takes no fear or horror aura, measured in the Infernal entries of this class); the Whispers cast at the dummy lands its area at the dummy's position (radius index 14). Reference search 2026-11-23: coa-history spell 805235: 3 casts, 8 aura applications and 8 removals in 2 logs, 2 SPELL_AURA_BROKEN_SPELL (the effect is broken by damage; no duration or amount is logged); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
+    },
+    {
+      "spell": 805235,
+      "kind": "metric_delta",
+      "trigger_spell": 805235,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 805235,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Whispers of the Pit (effect held at 7400 ms)",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "for $d",
+      "expected": 1,
+      "wait_ms": 7400,
+      "game_time": {
+        "after": [
+          7350,
+          7550
+        ]
+      },
+      "observe_source": "The aura is on the target 7400 ms after the cast (game time 7350 to 7550 ms): a duration 10% short (7200) is excluded; the before read, absent, is the control. Code: AscensionFelswornContracts.cpp:292-293 adds AURA_INTERRUPT_FLAG_TAKE_DAMAGE to 805235 and 807590; Spell.dbc 805235 Effect[0] aura 7 SPELL_AURA_MOD_FEAR, Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED BasePoints -81 + 1 = -80 ($s3), DurationIndex 31 = 8000 ms ($d). Kobold Vermin 6 is the target (the stock dummy 36 takes no fear or horror aura, measured in the Infernal entries of this class); the Whispers cast at the dummy lands its area at the dummy's position (radius index 14). Reference search 2026-11-23: coa-history spell 805235: 3 casts, 8 aura applications and 8 removals in 2 logs, 2 SPELL_AURA_BROKEN_SPELL (the effect is broken by damage; no duration or amount is logged); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
+    },
+    {
+      "spell": 805235,
+      "kind": "metric_delta",
+      "trigger_spell": 805235,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 805235,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Whispers of the Pit (effect gone at 8600 ms)",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "for $d",
+      "expected": 0,
+      "wait_ms": 8600,
+      "game_time": {
+        "after": [
+          8550,
+          8700
+        ]
+      },
+      "observe_source": "The aura is gone from the target 8600 ms after the cast (game time 8550 to 8700 ms): a duration 10% long (8800) is excluded; paired with the 7400 ms read of held. Code: AscensionFelswornContracts.cpp:292-293 adds AURA_INTERRUPT_FLAG_TAKE_DAMAGE to 805235 and 807590; Spell.dbc 805235 Effect[0] aura 7 SPELL_AURA_MOD_FEAR, Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED BasePoints -81 + 1 = -80 ($s3), DurationIndex 31 = 8000 ms ($d). Kobold Vermin 6 is the target (the stock dummy 36 takes no fear or horror aura, measured in the Infernal entries of this class); the Whispers cast at the dummy lands its area at the dummy's position (radius index 14). Reference search 2026-11-23: coa-history spell 805235: 3 casts, 8 aura applications and 8 removals in 2 logs, 2 SPELL_AURA_BROKEN_SPELL (the effect is broken by damage; no duration or amount is logged); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
+    },
+    {
+      "spell": 805235,
+      "kind": "metric_delta",
+      "trigger_spell": 805235,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 805235,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Whispers of the Pit (damage breaks the effect)",
+      "variant": "broken",
+      "label_suffix": "broken",
+      "quote": "Damage caused may interrupt the effect.",
+      "expected": 0,
+      "setup_casts": [
+        704368
+      ],
+      "setup_wait_ms": 500,
+      "wait_ms": 3600,
+      "observe_source": "Bane of Chaos 704368 (periodic damage, first tick 3000 ms after its cast) is cast at the target 500 ms before Whispers; at 3600 ms after Whispers the aura is gone (the target took the tick; the control entry unbroken, same timing without the damage, reads it present). Code: AscensionFelswornContracts.cpp:292-293 adds AURA_INTERRUPT_FLAG_TAKE_DAMAGE to 805235 and 807590; Spell.dbc 805235 Effect[0] aura 7 SPELL_AURA_MOD_FEAR, Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED BasePoints -81 + 1 = -80 ($s3), DurationIndex 31 = 8000 ms ($d). Kobold Vermin 6 is the target (the stock dummy 36 takes no fear or horror aura, measured in the Infernal entries of this class); the Whispers cast at the dummy lands its area at the dummy's position (radius index 14). Reference search 2026-11-23: coa-history spell 805235: 3 casts, 8 aura applications and 8 removals in 2 logs, 2 SPELL_AURA_BROKEN_SPELL (the effect is broken by damage; no duration or amount is logged); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
+    },
+    {
+      "spell": 805235,
+      "kind": "metric_delta",
+      "trigger_spell": 805235,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 805235,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Whispers of the Pit (control: without damage the effect stays)",
+      "variant": "unbroken",
+      "label_suffix": "unbroken",
+      "quote": "Damage caused may interrupt the effect.",
+      "expected": 1,
+      "wait_ms": 3600,
+      "game_time": {
+        "after": [
+          3550,
+          3750
+        ]
+      },
+      "observe_source": "Control arm of broken: the same timing (3600 ms after the cast) with no damage on the target: the aura is still there, so its loss in broken comes from the damage. Code: AscensionFelswornContracts.cpp:292-293 adds AURA_INTERRUPT_FLAG_TAKE_DAMAGE to 805235 and 807590; Spell.dbc 805235 Effect[0] aura 7 SPELL_AURA_MOD_FEAR, Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED BasePoints -81 + 1 = -80 ($s3), DurationIndex 31 = 8000 ms ($d). Kobold Vermin 6 is the target (the stock dummy 36 takes no fear or horror aura, measured in the Infernal entries of this class); the Whispers cast at the dummy lands its area at the dummy's position (radius index 14). Reference search 2026-11-23: coa-history spell 805235: 3 casts, 8 aura applications and 8 removals in 2 logs, 2 SPELL_AURA_BROKEN_SPELL (the effect is broken by damage; no duration or amount is logged); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
     }
   ],
   "player_observations": [],

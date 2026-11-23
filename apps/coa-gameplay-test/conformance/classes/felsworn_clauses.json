@@ -2893,17 +2893,36 @@
   {
     "spell": 805235,
     "clause": "Unleash fel energy upon enemies at target location, fearing them and slowing their movement speed by $s3% for $d.",
-    "labels": [
-      "805235 effect_value e2 #0",
-      "805235 aura_amount e2 #0",
-      "805235 aura_duration_ms #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "fearing them",
+        "labels": [
+          "805235 behaviour_metric_delta fear"
+        ]
+      },
+      {
+        "claim": "slowing their movement speed by $s3%",
+        "labels": [
+          "805235 behaviour_metric_delta slow"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "805235 behaviour_metric_delta held",
+          "805235 behaviour_metric_delta gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 805235,
     "clause": "Damage caused may interrupt the effect.",
-    "labels": [],
+    "labels": [
+      "805235 behaviour_metric_delta broken",
+      "805235 behaviour_metric_delta unbroken"
+    ],
     "kind": "claim"
   },
   {
