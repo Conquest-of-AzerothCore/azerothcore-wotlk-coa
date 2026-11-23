@@ -62,6 +62,17 @@ PYTHONPATH=/tmp/lupa-lib python3 -B modules/mod-coa-pet-battles/tools/pet_data/e
   --upstream <azerothcore-linux-server checkout> --commit <commit> --out /tmp/export.json
 ```
 
-`sql_writer.write(export, directory, date, first_number, creature_template_columns(base schema))` then writes the
-pending SQL, and `sql_reader.read` reads it back for comparison with the export. Once the data is tuned in CoA, a
-fresh export would undo those changes, so treat a re-import as a deliberate replacement.
+Then write the pending SQL. The importer reads every data file back and refuses to finish unless it equals the
+export and its row counts:
+
+```sh
+python3 -B modules/mod-coa-pet-battles/tools/pet_data/import_data.py --export /tmp/export.json \
+  --date <YYYYMMDD> --first-number <first unused NN>
+```
+
+The committed files `rev_20261123_81..97` were generated this way from upstream commit `22bb7f3` (export sha256
+`f84767f102e3ca450f57c97a5f4b9d377bc1a1c8de13e98c7e6edc4bcea244fd`). Once the data is tuned in CoA, a fresh export
+would undo those changes, so treat a re-import as a deliberate replacement.
+
+A stand-in whose species is removed later keeps its `creature_template` row (that table is never deleted from), but
+loses its model rows on the next import; retire it with an explicit update rather than leaving the entry behind.

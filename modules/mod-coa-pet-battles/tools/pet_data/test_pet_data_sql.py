@@ -11,6 +11,7 @@ ROOT = HERE.parents[3]
 sys.path.insert(0, str(HERE))
 
 from tables import TABLES
+import import_data
 import sql_reader
 import sql_writer
 
@@ -155,6 +156,43 @@ class WriterTest(unittest.TestCase):
         self.assertIn('CreatureImmunitiesId', columns)
         self.assertNotIn('scale', columns)
         self.assertEqual(len(columns), len(set(columns)))
+
+
+class ImportTest(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        self.path = Path(self.directory.name)
+
+    def tearDown(self):
+        self.directory.cleanup()
+
+    def export_file(self, export):
+        path = self.path / 'export.json'
+        path.write_text(json.dumps(export), encoding='utf-8')
+        return path
+
+    def fixture_with_manifest(self):
+        export = load_fixture()
+        export['manifest'] = {name: len(rows) for name, rows in export['tables'].items()}
+        return export
+
+    def test_generate_writes_verified_sql(self):
+        sql = self.path / 'sql'
+        sql.mkdir()
+        paths = import_data.generate(self.export_file(self.fixture_with_manifest()), sql, '20261123', 81,
+                                     ROOT / 'data/sql/base/db_world/creature_template.sql')
+        self.assertEqual(len(paths), len(TABLES) + 1)
+        self.assertIn('`src`.`IconName` AS `IconName`', paths[-1].read_text(encoding='utf-8'))
+
+    def test_generate_rejects_a_manifest_that_does_not_match(self):
+        export = self.fixture_with_manifest()
+        export['manifest']['coa_pet_xp'] += 1
+        sql = self.path / 'sql'
+        sql.mkdir()
+        with self.assertRaises(ValueError):
+            import_data.generate(self.export_file(export), sql, '20261123', 81,
+                                 ROOT / 'data/sql/base/db_world/creature_template.sql')
+
 
 if __name__ == '__main__':
     unittest.main()
