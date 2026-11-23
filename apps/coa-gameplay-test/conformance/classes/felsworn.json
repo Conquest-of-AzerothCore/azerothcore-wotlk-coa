@@ -150,7 +150,7 @@
       "strike_spell": 92559,
       "caster_health_pct": 100,
       "caster_max_health": 100000,
-      "trials": 6,
+      "trials": 18,
       "arms": [
         {
           "name": "control",
@@ -186,8 +186,8 @@
         }
       ],
       "observe_source": "800209 Effect[2] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127, BasePoints -31 + 1 = -30 ($s3). Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) strikes the caster six times in each arm; the control arm has Demonic Will unlearned and absent, the treatment arm casts it for real (opening cast) and the aura reads present. Expected ratio 0.70. Reference search 2026-11-23: coa-history spell 800209: 13 casts, 13 aura applied and 13 removed in 4 logs, no value in a log event; nothing found beyond the tooltip and Spell.dbc.",
-      "strikes": 3,
-      "settle_ms": 100
+      "strikes": 1,
+      "settle_ms": 50
     },
     {
       "spell": 805239,
@@ -262,6 +262,596 @@
         ]
       },
       "observe_source": "805239 DurationIndex 8 = 15000 ms ($d). The aura is gone 15900 ms after the cast (excludes a duration 10% long, 16500 ms). Reference search 2026-11-23: coa-history spells 805239 and 807347: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 805240,
+      "name": "Tyrant's Gaze (usable only below 35% health)",
+      "kind": "cast_gate",
+      "variant": "health_gate",
+      "quote": "Only usable on enemies below 35% health.",
+      "observe_source": "805240 TargetAuraState 13 (AURA_STATE_HEALTHLESS_35_PERCENT). The gated spell is attempted at the dummy at full health (must refuse with SPELL_FAILED_TARGET_AURASTATE) and then with the dummy lowered below 35% (must go through). Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 805240,
+      "name": "Tyrant's Gaze (damage at the reference attack power)",
+      "kind": "metric_delta",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "dealing ${$m1+0+$AP*0.35} Shadowflame Damage to them",
+      "trigger_spell": 805240,
+      "target": "dummy",
+      "target_health_pct": 30,
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805240,
+        "target": "dummy",
+        "critical": false
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 453.0,
+      "after_at_least": 452,
+      "after_at_most": 454,
+      "observe_source": "805240 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, Shadowflame (SchoolMask 36), BasePoints 219 + 1 (DieSides 1 adds 1) = 220, RealPointsPerLevel 4.0 x (60 - BaseLevel 29) = 124, so m1 = 344 at level 60; the tooltip adds attack power x 0.35 ($AP*0.35); reference attack power 312 (class file reference_stats). The dummy's magic resistance is removed (823764, target resistance -9999 on the magic schools), critical hits are made impossible by 64481 and the dummy is held at 30% health (below 35%). Expected 344 + int(0.35 x 312 = 109.2) = 453. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 805240,
+      "name": "Tyrant's Gaze (damage at +20000 attack power)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "dealing ${$m1+0+$AP*0.35} Shadowflame Damage to them",
+      "trigger_spell": 805240,
+      "target": "dummy",
+      "target_health_pct": 30,
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805240,
+        "target": "dummy",
+        "critical": false
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 7453.0,
+      "after_at_least": 7452,
+      "after_at_most": 7454,
+      "player_attack_power": 20000,
+      "observe_source": "805240 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, Shadowflame (SchoolMask 36), BasePoints 219 + 1 (DieSides 1 adds 1) = 220, RealPointsPerLevel 4.0 x (60 - BaseLevel 29) = 124, so m1 = 344 at level 60; the tooltip adds attack power x 0.35 ($AP*0.35); reference attack power 312 (class file reference_stats). The dummy's magic resistance is removed (823764, target resistance -9999 on the magic schools), critical hits are made impossible by 64481 and the dummy is held at 30% health (below 35%). Contrast arm of the attack power term: +20000 attack power (player_attack_power): 344 + int(0.35 x 20312 = 7109.2) = 7453 against 453. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 805240,
+      "name": "Tyrant's Gaze (heal at the reference attack power)",
+      "kind": "metric_delta",
+      "variant": "heal",
+      "label_suffix": "heal",
+      "quote": "heals you for ${$805241m1+$AP*.5}",
+      "trigger_spell": 805240,
+      "target": "dummy",
+      "target_health_pct": 30,
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 805241,
+        "target": "caster",
+        "critical": false
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 302.0,
+      "after_at_least": 301,
+      "after_at_most": 303,
+      "observe_source": "805241 Effect[0] SPELL_EFFECT_HEAL, BasePoints 145 + 1 = 146 (the tooltip's $805241m1; the tooltip reads 302 = 146 + 0.5 x 312), plus attack power x 0.5 ($AP*.5); the heal lands on the caster, read as spell_heal_total of 805241 on the caster. The dummy is held at 30% health, criticals are made impossible by 64481. Expected 146 + int(0.5 x 312 = 156) = 302. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 805240,
+      "name": "Tyrant's Gaze (heal at +20000 attack power)",
+      "kind": "metric_delta",
+      "variant": "heal_ap",
+      "label_suffix": "heal_ap",
+      "quote": "heals you for ${$805241m1+$AP*.5}",
+      "trigger_spell": 805240,
+      "target": "dummy",
+      "target_health_pct": 30,
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 805241,
+        "target": "caster",
+        "critical": false
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 10302.0,
+      "after_at_least": 10301,
+      "after_at_most": 10303,
+      "player_attack_power": 20000,
+      "observe_source": "805241 Effect[0] SPELL_EFFECT_HEAL, BasePoints 145 + 1 = 146 (the tooltip's $805241m1; the tooltip reads 302 = 146 + 0.5 x 312), plus attack power x 0.5 ($AP*.5); the heal lands on the caster, read as spell_heal_total of 805241 on the caster. The dummy is held at 30% health, criticals are made impossible by 64481. Contrast arm of the attack power term: +20000 attack power: 146 + int(0.5 x 20312 = 10156) = 10302 against 302. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 805240,
+      "name": "Tyrant's Gaze (generates 1 Felfury)",
+      "kind": "metric_delta",
+      "variant": "felfury",
+      "label_suffix": "felfury",
+      "quote": "and generates 1 Felfury.",
+      "trigger_spell": 805240,
+      "target": "dummy",
+      "target_health_pct": 30,
+      "cast_power": 100,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "805241 Effect[1] SPELL_EFFECT_TRIGGER_SPELL 800058 (Felfury, caster aura), cast by the gaze's heal. Felfury stacks read 0 before the cast and 1 after one real cast at the dummy held at 30% health. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 560284,
+      "name": "Infernal (damage at 0 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "dealing ${$m2+0+$spfi*1.05} Fire damage to enemies in the radius",
+      "trigger_spell": 560284,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 560284,
+        "target": "dummy",
+        "critical": false
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 190.0,
+      "after_at_least": 189,
+      "after_at_most": 191,
+      "observe_source": "560284 Effect[1] SPELL_EFFECT_SCHOOL_DAMAGE, Fire (SchoolMask 4), BasePoints 101 + 1 (DieSides 1 adds 1) = 102, RealPointsPerLevel 2.85 x (60 - BaseLevel 29) = 88.35 truncated to 88, so m2 = 190 at level 60 (tooltip 190.35); the tooltip adds fire spell power x 1.05 ($spfi*1.05). The dummy's magic resistance is removed (823764), criticals are made impossible by 64481, the cast at the dummy lands the area at its position. Expected 190. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 560284,
+      "name": "Infernal (damage at +10000 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "dealing ${$m2+0+$spfi*1.05} Fire damage to enemies in the radius",
+      "trigger_spell": 560284,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 560284,
+        "target": "dummy",
+        "critical": false
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expected": 10690.0,
+      "after_at_least": 10689,
+      "after_at_most": 10691,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "observe_source": "560284 Effect[1] SPELL_EFFECT_SCHOOL_DAMAGE, Fire (SchoolMask 4), BasePoints 101 + 1 (DieSides 1 adds 1) = 102, RealPointsPerLevel 2.85 x (60 - BaseLevel 29) = 88.35 truncated to 88, so m2 = 190 at level 60 (tooltip 190.35); the tooltip adds fire spell power x 1.05 ($spfi*1.05). The dummy's magic resistance is removed (823764), criticals are made impossible by 64481, the cast at the dummy lands the area at its position. Contrast arm of the spell power term: +10000 spell power: 190 + int(1.05 x 10000 = 10500) = 10690 against 190. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 560284,
+      "name": "Infernal (horror held 2800 ms)",
+      "kind": "metric_delta",
+      "variant": "stun_held",
+      "label_suffix": "stun_held",
+      "quote": "horrifying them for $d,",
+      "trigger_spell": 560284,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 560284,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 2800,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          2750,
+          2900
+        ]
+      },
+      "observe_source": "560284 DurationIndex 27 = 3000 ms ($d); Effect[0] aura 12 SPELL_AURA_MOD_STUN (mechanic 24, horror) on TARGET_UNIT_DEST_AREA_ENEMY. The aura is still on the dummy 2800 ms after the cast (excludes a duration 10% short, 2700 ms); the before read, absent, is the control. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 560284,
+      "name": "Infernal (horror gone 3200 ms)",
+      "kind": "metric_delta",
+      "variant": "stun_gone",
+      "label_suffix": "stun_gone",
+      "quote": "horrifying them for $d,",
+      "trigger_spell": 560284,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 560284,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "wait_ms": 3200,
+      "expire_ms": 500,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          3150,
+          3250
+        ]
+      },
+      "observe_source": "560284 DurationIndex 27 = 3000 ms ($d). The aura is gone from the dummy 3200 ms after the cast (excludes a duration 10% long, 3300 ms). Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 560284,
+      "name": "Infernal (Infernal present 14100 ms)",
+      "kind": "metric_delta",
+      "variant": "life_held",
+      "label_suffix": "life_held",
+      "quote": "and spawning an Infernal to fight by your side for $572163d.",
+      "trigger_spell": 560284,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 51320
+      },
+      "before_expected": 0,
+      "wait_ms": 14100,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          14050,
+          14200
+        ]
+      },
+      "observe_source": "572183 summons creature 51320 (SummonProperties 61); AscensionFelswornSummons.cpp:22 times it 15000 ms (572163 DurationIndex 8 = 15000 ms, $572163d). The owned creature count of entry 51320 is read from the caster. The Infernal is still owned 14100 ms after the cast (excludes a duration 10% short, 13500 ms); the before read, 0, is the control. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 560284,
+      "name": "Infernal (Infernal gone 15900 ms)",
+      "kind": "metric_delta",
+      "variant": "life_gone",
+      "label_suffix": "life_gone",
+      "quote": "and spawning an Infernal to fight by your side for $572163d.",
+      "trigger_spell": 560284,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 51320
+      },
+      "before_expected": 0,
+      "wait_ms": 15900,
+      "expire_ms": 500,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          15850,
+          16000
+        ]
+      },
+      "observe_source": "572183 summons creature 51320 (SummonProperties 61); AscensionFelswornSummons.cpp:22 times it 15000 ms (572163 DurationIndex 8 = 15000 ms, $572163d). The owned creature count of entry 51320 is read from the caster. The Infernal is gone 15900 ms after the cast (excludes a duration 10% long, 16500 ms). Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 560284,
+      "name": "Infernal (Inner Demon: Infernal present 15900 ms)",
+      "kind": "metric_delta",
+      "variant": "inner_held",
+      "label_suffix": "inner_held",
+      "quote": "Inner Demon: Lasts $/1000;807421s3 additional sec.",
+      "trigger_spell": 560284,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 51320
+      },
+      "before_expected": 0,
+      "wait_ms": 15900,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          15850,
+          16000
+        ]
+      },
+      "learn": [
+        805239,
+        804216
+      ],
+      "setup_casts": [
+        805239,
+        804216
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "observe_source": "807421 Effect[2] aura 107 ADD_FLAT_MODIFIER BasePoints 999 + 1 = 1000 ms ($/1000;807421s3 = 1 s); AscensionFelswornSummons.cpp:22 adds 1000 ms when Inner Demon 804216 is on the caster. Inner Demon is a real precondition: Burning Hatred 805239 gives 6 Felfury, then Inner Demon 804216 (CasterAuraSpell 800058) is cast; the aura lasts 5000 ms per Felfury, so it covers the 16 s window. With Inner Demon the Infernal is still owned 15900 ms after the cast, where the same read without it (life_gone) is 0: the lifetime is above 15900 ms. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 560284,
+      "name": "Infernal (Inner Demon: Infernal gone 16100 ms)",
+      "kind": "metric_delta",
+      "variant": "inner_gone",
+      "label_suffix": "inner_gone",
+      "quote": "Inner Demon: Lasts $/1000;807421s3 additional sec.",
+      "trigger_spell": 560284,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 51320
+      },
+      "before_expected": 0,
+      "wait_ms": 16100,
+      "expire_ms": 500,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          16050,
+          16200
+        ]
+      },
+      "learn": [
+        805239,
+        804216
+      ],
+      "setup_casts": [
+        805239,
+        804216
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "observe_source": "807421 Effect[2] aura 107 ADD_FLAT_MODIFIER BasePoints 999 + 1 = 1000 ms ($/1000;807421s3 = 1 s); AscensionFelswornSummons.cpp:22 adds 1000 ms when Inner Demon 804216 is on the caster. Inner Demon is a real precondition: Burning Hatred 805239 gives 6 Felfury, then Inner Demon 804216 (CasterAuraSpell 800058) is cast; the aura lasts 5000 ms per Felfury, so it covers the 16 s window. With Inner Demon the Infernal is gone 16100 ms after the cast: the lifetime is below 16100 ms, so 16000 +- 100 ms with the read above. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (no damage before the end, 5100 ms)",
+      "kind": "metric_delta",
+      "variant": "damage_early",
+      "label_suffix": "damage_early",
+      "quote": "and dealing ${$cond($gt($spfi, $sps), $m2+0+$spfi*0.85, $m2+0+$sps*0.85)} Shadowflame Damage at the end of the duration.",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800355,
+        "target": "dummy"
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 5100,
+      "expire_ms": 500,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          5050,
+          5200
+        ]
+      },
+      "observe_source": "800355 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude set to the duration by AscensionFelswornContracts.cpp:232 (one tick at the end), DurationIndex 571 = 5500 ms ($d); BasePoints 694 + 1 = 695 + int(RealPointsPerLevel 9.55 x (60 - 59)) = 9 -> 704 at level 60 (tooltip 704.55); the tooltip adds 0.85 x the greater of fire spell power and shadow spell power ($cond). Dummy magic resistance removed (823764). No damage has landed 5100 ms after the cast (excludes an end 10% early, 4950 ms). Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (damage at the end, 0 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "and dealing ${$cond($gt($spfi, $sps), $m2+0+$spfi*0.85, $m2+0+$sps*0.85)} Shadowflame Damage at the end of the duration.",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800355,
+        "target": "dummy"
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 5900,
+      "expire_ms": 500,
+      "expected": 704.0,
+      "after_at_least": 703,
+      "after_at_most": 705,
+      "game_time": {
+        "after": [
+          5850,
+          6000
+        ]
+      },
+      "observe_source": "800355 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude set to the duration by AscensionFelswornContracts.cpp:232 (one tick at the end), DurationIndex 571 = 5500 ms ($d); BasePoints 694 + 1 = 695 + int(RealPointsPerLevel 9.55 x (60 - 59)) = 9 -> 704 at level 60 (tooltip 704.55); the tooltip adds 0.85 x the greater of fire spell power and shadow spell power ($cond). Dummy magic resistance removed (823764). The damage has landed 5900 ms after the cast (excludes an end 10% late, 6050 ms): 704. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (damage at +10000 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "and dealing ${$cond($gt($spfi, $sps), $m2+0+$spfi*0.85, $m2+0+$sps*0.85)} Shadowflame Damage at the end of the duration.",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800355,
+        "target": "dummy"
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 5900,
+      "expire_ms": 500,
+      "expected": 9204.0,
+      "after_at_least": 9203,
+      "after_at_most": 9205,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "game_time": {
+        "after": [
+          5850,
+          6000
+        ]
+      },
+      "observe_source": "800355 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude set to the duration by AscensionFelswornContracts.cpp:232 (one tick at the end), DurationIndex 571 = 5500 ms ($d); BasePoints 694 + 1 = 695 + int(RealPointsPerLevel 9.55 x (60 - 59)) = 9 -> 704 at level 60 (tooltip 704.55); the tooltip adds 0.85 x the greater of fire spell power and shadow spell power ($cond). Dummy magic resistance removed (823764). Contrast arm of the spell power term: +10000 spell power: 704 + int(0.85 x 10000) = 9204 against 704. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (slow)",
+      "kind": "metric_delta",
+      "variant": "slow",
+      "label_suffix": "slow",
+      "quote": "slowing your target's movement speed by $800833s1%",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.5,
+      "expected": 0.2,
+      "expected_ratio": 0.4,
+      "tolerance": 0.001,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "800833 Effect[0] aura 33 SPELL_AURA_MOD_DECREASE_SPEED, BasePoints -61 + 1 = -60 ($800833s1 = 60), applied to the dummy by the channel's periodic trigger every 500 ms. The dummy's run speed rate is read before and 1000 ms into the channel: the ratio is 0.40. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
     }
   ],
   "player_observations": [],
