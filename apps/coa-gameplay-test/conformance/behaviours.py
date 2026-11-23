@@ -7445,8 +7445,8 @@ TAKEN_HIT_OPENING_SETTLE_MS = 1500
 TAKEN_HIT_DEBT_MARGIN_MS = 500
 TAKEN_HIT_STRIKER_ENTRY = 36
 TAKEN_HIT_MINIMUM_SHARE = 0.5
-TAKEN_HIT_JUDGES = ('damage_ratio', 'absorb', 'resist_rate')
-TAKEN_HIT_ABSORBS = ('none', 'formula', 'share')
+TAKEN_HIT_JUDGES = ('damage_ratio', 'absorb', 'resist_rate', 'counts')
+TAKEN_HIT_ABSORBS = ('none', 'formula', 'share', 'capped_share')
 TAKEN_HIT_KEYS = ('damage', 'count', 'absorb', 'logs')
 TAKEN_HIT_REDUCTIONS = ('none', 'formula')
 TAKEN_HIT_RETURNED_KEYS = ('returned', 'returned count', 'returned logs', 'returned absorb', 'returned resist')
@@ -7476,6 +7476,10 @@ class TakenArm:
     transfer_pct: int | None = None
     striker_casts: tuple[int, ...] = ()
     opening_settle_ms: int | None = None
+    prime_gap_ms: int | None = None
+    cap_pct: int = 0
+    counts: tuple[tuple[str, int], ...] = ()
+    require: tuple[tuple[str, int], ...] = ()
 
 
 TAKEN_HIT_AURA_CASTERS = (TARGET,)
@@ -7533,6 +7537,12 @@ class TakenHitSpec:
     struck: str = CASTER
     transfer_spell: int = 0
     caster_health_from_pct: int | None = None
+    striker_spell_hit: bool = False
+    striker_untriggered: bool = False
+    count_reads: tuple[tuple[str, tuple[tuple[str, object], ...]], ...] = ()
+    count_total: tuple[str, ...] = ()
+    rising: tuple[str, ...] = ()
+    equal: tuple[tuple[str, str], ...] = ()
 
 
 TAKEN_HIT_STRUCK = (CASTER, ALLY)
@@ -7597,6 +7607,11 @@ def taken_hit_reads(spec: TakenHitSpec, arm: str, mark, debt: bool) -> list[dict
                               **transfer),
                   measurement(taken_hit_mark(spec, arm, mark, 'transfer count'), CASTER, 'spell_log_count',
                               **transfer)]
+    for name, fields in spec.count_reads:
+        named = dict(fields)
+        steps.append(measurement(taken_hit_mark(spec, arm, mark, name), named.get('actor', CASTER), named['metric'],
+                                 **{key: value for key, value in named.items()
+                                    if key not in ('metric', 'actor', 'state')}))
     return steps
 
 
@@ -7616,13 +7631,27 @@ def taken_rate_label(spec: TakenHitSpec, arm: str, trial: int) -> str:
     return taken_hit_mark(spec, arm, trial, 'applied')
 
 
+def taken_strike_step(spec: TakenHitSpec, target: str) -> dict:
+    return {'action': 'cast', 'actor': STRIKER, 'spell': spec.strike_spell, 'target': target,
+            **({'triggered': False} if spec.striker_untriggered else {})}
+
+
+def taken_prime_steps(spec: TakenHitSpec, arm: TakenArm, trial: int) -> list[dict]:
+    if arm.prime_gap_ms is None:
+        return []
+    return [taken_strike_step(spec, CASTER),
+            {'action': 'wait', 'label': f'{arm.name} prime {trial}', 'ms': arm.prime_gap_ms},
+            {'action': 'set_aura', 'actor': CASTER, 'spell': spec.strike_spell, 'stacks': 0}]
+
+
 def taken_rate_arm_steps(spec: TakenHitSpec, arm: TakenArm) -> list[dict]:
     auras = [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks} for spell, stacks in arm.auras]
     removals = [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0} for spell, _ in arm.auras]
     steps = []
     for trial in range(1, spec.trials + 1):
         steps += (removals if arm.refresh else []) + auras
-        steps += [{'action': 'cast', 'actor': STRIKER, 'spell': spec.strike_spell, 'target': CASTER},
+        steps += taken_prime_steps(spec, arm, trial)
+        steps += [taken_strike_step(spec, CASTER),
                   {'action': 'wait', 'label': f'{arm.name} strike {trial}', 'ms': TAKEN_HIT_STRIKE_WAIT_MS},
                   measurement(taken_rate_label(spec, arm.name, trial), CASTER, 'aura', spell=spec.strike_spell),
                   {'action': 'set_aura', 'actor': CASTER, 'spell': spec.strike_spell, 'stacks': 0}]
@@ -7679,7 +7708,7 @@ def taken_hit_arm_steps(records: Records, spec: TakenHitSpec, arm: TakenArm) -> 
         for spell, target in arm.casts:
             steps += taken_hit_cast(records, spec, spell, target, spec.cast_power)
         for _ in range(arm.strikes or spec.strikes):
-            steps += [{'action': 'cast', 'actor': STRIKER, 'spell': spec.strike_spell, 'target': spec.struck},
+            steps += [taken_strike_step(spec, spec.struck),
                       {'action': 'wait', 'label': f'{arm.name} strike {trial}', 'ms': TAKEN_HIT_STRIKE_WAIT_MS}]
         after = []
         for spell, target in arm.after_casts:
@@ -7754,7 +7783,7 @@ def taken_hit_validate(spec: TakenHitSpec):
     if len(set(names)) != len(names) or len(names) < 2:
         raise ValueError(f'{spec.spell} taken_hit needs at least two distinct arms, here {names}')
     if len({(arm.auras, arm.opening_casts, arm.casts, arm.after_casts, arm.select, arm.learn, arm.unlearn,
-             arm.striker_casts) for arm in spec.arms}) != len(spec.arms):
+             arm.striker_casts, arm.prime_gap_ms, arm.strikes) for arm in spec.arms}) != len(spec.arms):
         raise ValueError(f'{spec.spell} taken_hit arms are identical; the contrast would measure nothing')
     if spec.judge == 'damage_ratio' and names != list(HIT_RATIO_ARMS):
         raise ValueError(f'{spec.spell} taken_hit damage_ratio compares exactly the arms {HIT_RATIO_ARMS}')
@@ -7763,7 +7792,8 @@ def taken_hit_validate(spec: TakenHitSpec):
                          f'only')
     if spec.striker_force_crit is not None and (spec.striker_force_crit not in FORCE_CRIT_RATINGS
                                                 or spec.striker_force_crit == RANGED_FORCE_CRIT
-                                                or not spec.striker_race or not spec.critical):
+                                                or not spec.striker_race
+                                                or not (spec.critical or spec.judge == 'counts')):
         raise ValueError(f'{spec.spell} taken_hit forces the crits of a player striker only, for a critical read')
     for arm in spec.arms:
         if set(arm.learn) & set(arm.unlearn) or set(arm.learn + arm.unlearn) & set(spec.learn):
@@ -7823,6 +7853,44 @@ def taken_hit_validate(spec: TakenHitSpec):
                          f'{HIT_RATIO_ARMS} and reads no debt, return, absorb or health')
     if spec.returned_spell and (spec.judge != 'absorb' or all(arm.returned_pct == 0 for arm in spec.arms)):
         raise ValueError(f'{spec.spell} taken_hit returned_spell needs the absorb judge and an arm that returns')
+    taken_extension_validate(spec)
+
+
+def taken_extension_validate(spec: TakenHitSpec):
+    for arm in spec.arms:
+        if arm.prime_gap_ms is not None and (spec.judge != 'resist_rate' or arm.prime_gap_ms <= 0):
+            raise ValueError(f'{spec.spell} taken_hit arm {arm.name} primes its strike only for a resist_rate judge, '
+                             f'with a positive gap')
+        if (arm.absorb == 'capped_share') != (arm.cap_pct != 0) or arm.absorb == 'capped_share' and (
+                spec.judge != 'absorb' or (arm.strikes or spec.strikes) != 1 or not 0 < arm.share_pct <= 100
+                or not 0 < arm.cap_pct or spec.caster_health_pct != 100 or spec.caster_max_health is None):
+            raise ValueError(f'{spec.spell} taken_hit arm {arm.name} capped_share and cap_pct go together, for the '
+                             f'absorb judge of one strike per trial, a share of 1 to 100 and a caster held at 100% of '
+                             f'a stated caster_max_health')
+    names = [name for name, _ in spec.count_reads]
+    counting = spec.judge == 'counts'
+    if counting != bool(spec.count_reads) or counting != bool(spec.count_total) or len(set(names)) != len(names):
+        raise ValueError(f'{spec.spell} taken_hit count_reads (distinct names) and count_total go with the counts '
+                         f'judge')
+    for name, fields in spec.count_reads:
+        named = dict(fields)
+        if not name or name in (*TAKEN_HIT_KEYS, 'paid', *TAKEN_HIT_RETURNED_KEYS, *TAKEN_HIT_TRANSFER_KEYS) or \
+                'metric' not in named:
+            raise ValueError(f'{spec.spell} taken_hit count read {name!r} needs a new name and a metric')
+    stated = set(spec.count_total) | set(spec.rising) | {name for pair in spec.equal for name in pair}
+    stated |= {name for arm in spec.arms for name, _ in (*arm.counts, *arm.require)}
+    states = {name for name, fields in spec.count_reads if dict(fields).get('state')}
+    if any(name not in states for arm in spec.arms for name, _ in arm.require) or states & set(spec.count_total):
+        raise ValueError(f'{spec.spell} taken_hit arm requirements name state reads, which count_total leaves out')
+    if not stated <= set(names) or any(len(set(pair)) != 2 for pair in spec.equal) or (
+            counting and (spec.debt_spell or spec.returned_spell or spec.transfer_spell or spec.absorb_terms
+                          or spec.health_loss or not all(arm.counts for arm in spec.arms))) or (
+            not counting and (spec.rising or spec.equal or any(arm.counts for arm in spec.arms))):
+        raise ValueError(f'{spec.spell} taken_hit counts names only its count_reads, gives every arm its counts and '
+                         f'reads no debt, return, transfer, absorb formula or health loss')
+    if spec.striker_untriggered and spec.striker_race or spec.striker_spell_hit and spec.striker_race:
+        raise ValueError(f'{spec.spell} taken_hit striker_spell_hit and striker_untriggered are fixtures of a '
+                         f'creature striker')
 
 
 def taken_hit_strike_base(records: Records, spec: TakenHitSpec) -> int:
@@ -7857,7 +7925,7 @@ def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list
         raise NotModelled(f'{spec.spell} taken_hit waits {waited} ms, beyond one scenario\'s {MAX_SCENARIO_MS} ms')
     striker = {'id': STRIKER, 'owner': CASTER, 'entry': spec.striker_entry, 'level': class_file['level'],
                'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'stationary': True,
-               **({'spell_hit_bonus': 100} if taken_striker_casts(spec) else {})}
+               **({'spell_hit_bonus': 100} if taken_striker_casts(spec) or spec.striker_spell_hit else {})}
     creatures = ([] if spec.striker_race else [striker]) + ([creature_fixture(class_file)] if TARGET in targets else [])
     creatures += [{**creature_fixture(class_file), 'id': name, 'distance': distance} for name, distance in spec.targets]
     players = [player_fixture(class_file)] + ally_players(class_file, targets)
@@ -7897,6 +7965,8 @@ def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list
     if spec.struck == ALLY:
         scenario['contract'] += taken_hit_ally_contract(spec)
     scenario['contract'] += taken_striker_contract(spec)
+    if spec.count_reads:
+        scenario['contract'] += taken_counts_contract(spec)
     for arm in spec.arms:
         changes = ([f'unlearns {list(arm.unlearn)}'] if arm.unlearn else []) + (
             [f'learns {list(arm.learn)}'] if arm.learn else [])
@@ -7931,6 +8001,8 @@ def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list
             model['metric'] = 'health'
         return scenario, [Expectation(label, BEHAVIOUR_HIT_RATIO, spec.spell, spec.strike_spell, None,
                                       str(spec.expected), prose_rule(entry.quote, spec.spell), model)]
+    if spec.judge == 'counts':
+        return scenario, [taken_counts_expectation(spec, entry, label)]
     arms = []
     for arm in spec.arms:
         debt = arm.debt_removed_pct is not None
@@ -7953,7 +8025,9 @@ def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list
                      'marks': marks, 'terms': terms,
                      **({'reduction': arm.reduction} if arm.reduction != 'none' else {}),
                      **({'returned_pct': arm.returned_pct} if arm.returned_pct is not None else {}),
-                     **({'transfer_pct': arm.transfer_pct} if arm.transfer_pct is not None else {})})
+                     **({'transfer_pct': arm.transfer_pct} if arm.transfer_pct is not None else {}),
+                     **({'cap': arm.cap_pct * (spec.caster_max_health or FIXTURE_MAX_HEALTH) // 100}
+                        if arm.absorb == 'capped_share' else {})})
     model = {'kind': 'taken_hit', 'arms': arms, 'trials': spec.trials,
              'minimum_trials': max(1, int(spec.trials * TAKEN_HIT_MINIMUM_SHARE)),
              'absorb_constant': spec.absorb_constant, 'debt_ends': spec.debt_ends,
@@ -7966,8 +8040,19 @@ def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list
 
 def taken_striker_contract(spec: TakenHitSpec) -> str:
     text = ''
-    if taken_striker_casts(spec):
+    if taken_striker_casts(spec) or spec.striker_spell_hit:
         text += '; the striker holds a spell hit bonus of 100'
+    if spec.striker_untriggered:
+        text += '; the striker casts each strike untriggered'
+    for arm in spec.arms:
+        if arm.prime_gap_ms is not None:
+            text += (f'; in the {arm.name} arm each trial first casts a priming {spec.strike_spell} at the caster, '
+                     f'waits {arm.prime_gap_ms} ms and removes it before the judged strike')
+        if arm.absorb == 'capped_share':
+            maximum = spec.caster_max_health or FIXTURE_MAX_HEALTH
+            text += (f'; the {arm.name} arm absorbs {arm.share_pct}% of each strike until its absorbed total reaches '
+                     f'{arm.cap_pct * maximum // 100} ({arm.cap_pct}% of {maximum} maximum health), then only what is '
+                     f'left of it')
     for arm in spec.arms:
         if arm.striker_casts:
             settle = TAKEN_HIT_OPENING_SETTLE_MS if arm.opening_settle_ms is None else arm.opening_settle_ms
@@ -7977,6 +8062,40 @@ def taken_striker_contract(spec: TakenHitSpec) -> str:
         attributed = [f'{aura[0]} by the {aura[2]}' for aura in arm.auras if len(aura) > 2]
         if attributed:
             text += f'; the {arm.name} arm\'s auras {attributed} are set with that caster'
+    return text
+
+
+def taken_counts_expectation(spec: TakenHitSpec, entry, label: str) -> Expectation:
+    names = [name for name, _ in spec.count_reads]
+    arms = [{'name': arm.name, 'strikes': arm.strikes or spec.strikes, 'counts': dict(arm.counts),
+             **({'require': dict(arm.require)} if arm.require else {}),
+             'marks': {str(mark): {name: taken_hit_mark(spec, arm.name, mark, name) for name in names}
+                       for mark in ('start', *range(1, spec.trials + 1))}} for arm in spec.arms]
+    model = {'kind': 'taken_counts', 'arms': arms, 'trials': spec.trials,
+             'minimum_trials': max(1, int(spec.trials * TAKEN_HIT_MINIMUM_SHARE)), 'total': list(spec.count_total),
+             'rising': list(spec.rising), 'equal': [list(pair) for pair in spec.equal],
+             'states': [name for name, fields in spec.count_reads if dict(fields).get('state')], 'quote': entry.quote}
+    return Expectation(label, BEHAVIOUR_TAKEN_HIT, spec.spell, spec.strike_spell, None, '0',
+                       prose_rule(entry.quote, spec.spell), model)
+
+
+def taken_counts_contract(spec: TakenHitSpec) -> str:
+    reads = ', '.join(f'{name} ({dict(fields)["metric"]} of {dict(fields).get("spell")})'
+                      for name, fields in spec.count_reads)
+    text = (f'; the counts {reads} are read before the first trial and after each one; a trial is judged when '
+            f'{" + ".join(spec.count_total)} reaches its strikes, at least '
+            f'{max(1, int(spec.trials * TAKEN_HIT_MINIMUM_SHARE))} judged trials per arm, and each judged trial must '
+            f'read exactly ' + '; '.join(f'{arm.name} {dict(arm.counts)}' for arm in spec.arms))
+    states = [name for name, fields in spec.count_reads if dict(fields).get('state')]
+    if states:
+        text += (f'; {", ".join(states)} are states read after each trial, not counts, and a trial whose state '
+                 f'differs from its arm\'s requirement ' + '; '.join(f'{arm.name} {dict(arm.require)}'
+                                                                     for arm in spec.arms if arm.require)
+                 + ' is void')
+    if spec.rising:
+        text += f'; every judged {", ".join(spec.rising)} rises strictly from arm to arm in the listed order'
+    if spec.equal:
+        text += '; ' + ', '.join(f'{a} equals {b}' for a, b in spec.equal) + ' in every judged trial'
     return text
 
 
@@ -7991,7 +8110,7 @@ def taken_arm(raw: dict) -> TakenArm:
     unknown = set(raw) - {'name', 'auras', 'casts', 'after_casts', 'absorb', 'share_pct', 'debt_removed_pct',
                           'strikes', 'opening_casts', 'select', 'select_settle_ms', 'checks', 'reduction',
                           'returned_pct', 'refresh', 'learn', 'unlearn', 'transfer_pct', 'striker_casts',
-                          'opening_settle_ms'}
+                          'opening_settle_ms', 'prime_gap_ms', 'cap_pct', 'counts', 'require'}
     if unknown:
         raise ValueError(f'taken_hit arm fields {sorted(unknown)} are not known')
     return TakenArm(raw['name'], tuple((int(aura[0]), int(aura[1]), *(str(by) for by in aura[2:]))
@@ -8007,7 +8126,10 @@ def taken_arm(raw: dict) -> TakenArm:
                     tuple(int(spell) for spell in raw.get('learn', ())),
                     tuple(int(spell) for spell in raw.get('unlearn', ())), raw.get('transfer_pct'),
                     tuple(int(spell) for spell in raw.get('striker_casts', ())),
-                    None if raw.get('opening_settle_ms') is None else int(raw['opening_settle_ms']))
+                    None if raw.get('opening_settle_ms') is None else int(raw['opening_settle_ms']),
+                    None if raw.get('prime_gap_ms') is None else int(raw['prime_gap_ms']), int(raw.get('cap_pct', 0)),
+                    tuple((str(name), int(count)) for name, count in raw.get('counts', {}).items()),
+                    tuple((str(name), int(value)) for name, value in raw.get('require', {}).items()))
 
 
 def absorb_term(raw: dict) -> AbsorbTerm:
@@ -8031,7 +8153,13 @@ def taken_hit_spec(entry: dict) -> TakenHitSpec:
                         entry.get('ally_health_pct'), entry.get('health_loss', False),
                         bool(entry.get('critical', False)), entry.get('striker_force_crit'),
                         entry.get('struck', CASTER), entry.get('transfer_spell', 0),
-                        entry.get('caster_health_from_pct'))
+                        entry.get('caster_health_from_pct'), bool(entry.get('striker_spell_hit', False)),
+                        bool(entry.get('striker_untriggered', False)),
+                        tuple((str(name), tuple(sorted(fields.items())))
+                              for name, fields in entry.get('count_reads', {}).items()),
+                        tuple(str(name) for name in entry.get('count_total', ())),
+                        tuple(str(name) for name in entry.get('rising', ())),
+                        tuple((str(a), str(b)) for a, b in entry.get('equal', ())))
 
 
 THREAT_REDIRECT_SWINGS = 3
