@@ -1,4 +1,4 @@
-# 0009. Owner rulings O-16, O-18 and O-19
+# 0012. Owner rulings O-16, O-18 and O-19
 
 - Status: accepted (owner rulings O-16, O-18, O-19, 2026-11-23)
 - Date: 2026-11-23
