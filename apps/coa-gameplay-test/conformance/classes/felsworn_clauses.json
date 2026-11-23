@@ -235,10 +235,6 @@
         {
           "agent": "fw-b1d",
           "report": ".agents/plans/fw-b1d/report.md"
-        },
-        {
-          "agent": "fw-chance",
-          "report": ".agents/plans/fw-chance/report.md"
         }
       ]
     },
@@ -256,10 +252,6 @@
         {
           "agent": "fw-b1d",
           "report": ".agents/plans/fw-b1d/report.md"
-        },
-        {
-          "agent": "fw-chance",
-          "report": ".agents/plans/fw-chance/report.md"
         }
       ]
     },
@@ -288,10 +280,6 @@
         {
           "agent": "fw-b1d",
           "report": ".agents/plans/fw-b1d/report.md"
-        },
-        {
-          "agent": "fw-chance",
-          "report": ".agents/plans/fw-chance/report.md"
         }
       ]
     },
@@ -2753,11 +2741,11 @@
       }
     ],
     "tool_gap": {
-      "reason": "Two parts of the clause have no label: the 10 Twin Slice instances (a counted application of 807163 on Twin Slice damage) and the parry leg of 'Dodging or parrying'. The reference character of class 14 has Dodge 81 and no Parry in the class-map spell list, so a parry set by set_combat_avoidance lets the swing land (guard landed failed in the first attempt); the proc_rate avoided entry proves the chance on the dodge leg only. The nearest kind for the instances is behaviour proc_reset or metric_delta on 807163 charges.",
+      "reason": "Two parts of the clause have no label: the 10 Twin Slice instances (a counted application of 807163 on Twin Slice damage) and the parry leg of 'Dodging or parrying'. Class 14 can parry: Nether Disciple 560576 and 561343 (CharacterAdvancement 6338, obtainable per ~/CoaServer/reference/coa-obtainable) carry Effect[0] APPLY_AURA 47 SPELL_AURA_MOD_PARRY_PERCENT, and HandleAuraModParryPercent calls SetCanParry(true) (SpellAuraEffects.cpp:4870-4884). The reference character does not learn them, so a parry set by set_combat_avoidance lets the swing land (guard landed failed in the first attempt); the proc_rate avoided entry proves the chance on the dodge leg only. The avoided trigger of procs has no field that learns a precondition spell on the caster (TRIGGER_FIELDS of proc_avoided.py; chance_modifiers learns spells but feeds the chance expectation), so a parry arm (Nether Disciple learned, dodge 0, parry 100, read from melee_attacks_taken victim state 3) needs a new option. Code reading, not run. The nearest kind for the instances is metric_delta on 807163 charges.",
       "attempts": [
         {
-          "agent": "fw-chance",
-          "report": ".agents/plans/fw-chance/report.md"
+          "agent": "fw-chance2",
+          "report": ".agents/plans/fw-chance2/report.md"
         }
       ]
     }
@@ -2768,11 +2756,11 @@
     "labels": [],
     "kind": "claim",
     "tool_gap": {
-      "reason": "The Felfury gain is Gain(player, 1) (AscensionFelsworn.cpp:219-225), a ModStackAmount of aura 800058 that is not a cast, an energize or a first application. No procs event_metric (spell_cast_count, spell_damage_count, melee, minion, energize) reads a stack gain and aura_apply_count of triggers counts first applications only. The nearest kind is procs with an aura-stack event metric.",
+      "reason": "The Felfury of this clause is not gained by the proc: the Proc of 804822 only casts 807163 (AscensionFelswornEvents.cpp:157-158). Each direct Twin Slice damage while 807163 is up calls Gain(player, 1) and counts the 10 charges down (AscensionFelswornAbilities.cpp:358-369; charges set at AscensionFelswornAuras.cpp:74-75). The gain is deterministic per Twin Slice hit and belongs with the 'next 10 instances' claim, not with a chance event. It is a ModStackAmount of aura 800058 that is not a cast, an energize or a first application, and no existing metric reads a stack gain per cast. The nearest kind is metric_delta aura_stacks 800058 around one Twin Slice cast with and without 807163 from a real proc.",
       "attempts": [
         {
-          "agent": "fw-chance",
-          "report": ".agents/plans/fw-chance/report.md"
+          "agent": "fw-chance2",
+          "report": ".agents/plans/fw-chance2/report.md"
         }
       ]
     }
