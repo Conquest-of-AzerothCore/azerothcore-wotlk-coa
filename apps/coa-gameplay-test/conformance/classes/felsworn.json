@@ -9825,10 +9825,16 @@
       "aura": 704397,
       "expected_ms": 4000,
       "control_window_ms": 500,
-      "window_ms": 6000,
+      "window_ms": 8000,
       "poll_ms": 25,
       "caster": false,
-      "observe_source": "560641 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704397 (Crippling Pain, Effect[0] aura 290 MOD_CRIT_PCT -100000, DurationIndex 35 = 4000 ms); AscensionFelswornAbilities.cpp:321-322 casts 704397 on the target of a landed Cripple 704371 when 560641 is known. The aura on the dummy is polled with game-time stamps after a real Cripple cast. The no-critical part is a data readback only: no harness route makes an enemy attack and critically strike (not entered, see the report). Reference search 2026-11-23: coa-history spell 560641: 0 events in 186 logs (a passive leaves no event); 704397: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Warlock Training 560641 'Cripple now causes the enemy target to be unable to critically strike for 4 seconds.', same figure; expected values come from the tooltip and the DBC only."
+      "repeat": {
+        "count": 3,
+        "every_ms": 1300
+      },
+      "trigger_power": 90,
+      "poll_before_cast": true,
+      "observe_source": "560641 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704397 (Crippling Pain, Effect[0] aura 290 MOD_CRIT_PCT -100000, DurationIndex 35 = 4000 ms); AscensionFelswornAbilities.cpp:321-322 casts 704397 on the target of a landed Cripple 704371 when 560641 is known. The aura on the dummy is polled with game-time stamps after a real Cripple cast. The no-critical part is a data readback only: no harness route makes an enemy attack and critically strike (not entered, see the report). Reference search 2026-11-23: coa-history spell 560641: 0 events in 186 logs (a passive leaves no event); 704397: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Warlock Training 560641 'Cripple now causes the enemy target to be unable to critically strike for 4 seconds.', same figure; expected values come from the tooltip and the DBC only. Design 2 (2026-11-24; design 1, one Cripple per arm, was unmeasured in 3 of 15 recorded runs with 'no application is seen after the cast'): a probe read the caster's Shadow resist chance against the dummy at 12% (spell_resist_chance) and 4 of 30 Cripples left neither Cripple nor Crippling Pain on it, so a binary resist of Cripple is the cause, not a cast refusal (no cast_failures). The treatment arm now casts Cripple 3 times 1300 ms apart (energy 90 set once; the caster's maximum is 100 and regeneration is off, so a fourth cast cannot be paid) with a read before the first cast, and the aura is timed from its last application (a refresh is counted): all three resisted is 0.12^3 = 0.17% per run, an unmeasured outcome only."
     },
     {
       "spell": 704611,
@@ -16407,6 +16413,399 @@
       ],
       "observe_source": "Hellfire Carver 707444 Description (server DBC set): 'Casting Carve now makes your next Fel Fireball instant cast and causes it to strike 1 additional enemy near the primary target based on how long you channeled, up to a maximum of 10 enemies, dealing less damage with each target struck.' Reading of 'up to a maximum of 10 enemies': 10 ADDITIONAL enemies, the count that grows by 1 per channel tick (controller ruling of 2026-11-23), from two sources: the aura 807424 the channel leaves has StackAmount 10 in the DBC, and the server sets the extra targets to the channel's ticks, clamped to 10 at the channel's end (AscensionFelswornAuras.cpp:224-228, AscensionFelswornAbilities.cpp:136-147: every valid enemy within 10 yd of the primary while extra > 0). Carve 800206 is a 2500 ms channel (DurationIndex 66, ten 250 ms ticks). A real Carve is cast first (a setup cast, kept in both phases) and its channel ends after 3000 ms; then one real Fel Fireball at the primary dummy at 3 yd, with eleven more dummies at 3.2 to 5.2 yd from the caster (all within 2.2 yd of the primary, inside the 10 yd search), one more than the cap. The hits of Fel Fireball on the primary and the eleven area dummies are summed, cumulative over the scenario: before (control: Hellfire Carver not learned) 1, the primary only; after the learn 12, that 1 plus 11 in the second cast (the primary and 10 additional enemies; one offered dummy stays unhit), a gain of 11, which excludes a missing cap (12 in the cast, 13 summed). The 'less damage with each target struck' part is not judged here. Reference search 2026-11-23: coa-history spell 807424 (the Carve aura): SPELL_AURA_APPLIED 171 and SPELL_AURA_APPLIED_DOSE 1516 events in 4 logs, about 9 doses per application; spells 707444 and 801312: 0 events under those ids; bindmysoul snapshot has no value beyond the tooltip; nothing else found.",
       "expected_gain": 11
+    },
+    {
+      "spell": 525001,
+      "name": "Felbane (the cursed enemy's next spell is reflected onto it)",
+      "kind": "taken_hit",
+      "variant": "reflect",
+      "label_suffix": "reflect",
+      "judge": "counts",
+      "quote": "Curse an enemy, causing the next spell they cast within $d to be reflected onto them.",
+      "strike_spell": 41394,
+      "trials": 6,
+      "caster_health_pct": 100,
+      "caster_max_health": 20000,
+      "striker_spell_hit": true,
+      "striker_untriggered": true,
+      "count_reads": {
+        "landed": {
+          "metric": "spell_damage_count",
+          "spell": 41394,
+          "caster": "striker",
+          "target": "caster"
+        },
+        "reflected": {
+          "metric": "spell_damage_count",
+          "spell": 41394,
+          "caster": "striker",
+          "target": "striker"
+        }
+      },
+      "count_total": [
+        "landed",
+        "reflected"
+      ],
+      "arms": [
+        {
+          "name": "control",
+          "strikes": 2,
+          "counts": {
+            "landed": 2,
+            "reflected": 0
+          }
+        },
+        {
+          "name": "treatment",
+          "casts": [
+            [
+              525001,
+              "striker"
+            ]
+          ],
+          "strikes": 2,
+          "counts": {
+            "landed": 1,
+            "reflected": 1
+          }
+        }
+      ],
+      "observe_source": "525001 Felbane (DBC: Effect[0] SPELL_AURA_DUMMY on TARGET_UNIT_TARGET_ENEMY, Dispel 2 curse, DurationIndex 35 = 4000 ms, DmgClass magic). The server reflects the first non-triggered harmful magic-class spell a unit holding the caster's 525001 casts at another unit (missCondition SPELL_MISS_REFLECT) and removes 525001 (AscensionFelswornAbilities.cpp:102-117, OnSpellBeforeEffects). A stationary creature striker (entry 36) casts Light of the Naaru 41394 (SPELL_EFFECT_SCHOOL_DAMAGE, Holy, 1100, DmgClass magic, instant, no cost) at the caster twice per trial, untriggered (the harness creature cast with triggered false, TRIGGERED_NONE, so the hook's triggered check passes) and with a spell hit bonus of 100 (no natural miss, Unit.cpp:4039-4051); the caster player fixture holds 10000 spell hit rating, so its Felbane, cast at the striker before each trial's strikes in the treatment arm, always lands. Both 41394 damage logs are read from the caster's combat log: striker to caster (landed) and striker to striker (reflected). Control: 2 landed, 0 reflected; treatment: the first strike reflected onto the striker and the second landing (only the next spell), 1 and 1. A trial is judged when landed + reflected reaches 2. Reference search 2026-11-23: coa-history spell 525001: 10 SPELL_CAST_SUCCESS events by players in 5 of 186 logs, no reflected event recorded; bindmysoul talents snapshot not consulted for this ability; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 560641,
+      "name": "Warlock Training (a Crippled enemy cannot critically strike)",
+      "kind": "taken_hit",
+      "variant": "no_crit",
+      "label_suffix": "no_crit",
+      "judge": "counts",
+      "quote": "Cripple now causes the enemy target to be unable to critically strike for $704397d.",
+      "strike_spell": 41394,
+      "striker_race": 2,
+      "striker_force_crit": "spell",
+      "trials": 10,
+      "caster_health_pct": 100,
+      "caster_max_health": 20000,
+      "count_reads": {
+        "hits": {
+          "metric": "spell_damage_count",
+          "spell": 41394,
+          "caster": "striker",
+          "target": "caster"
+        },
+        "crits": {
+          "metric": "spell_damage_count",
+          "spell": 41394,
+          "caster": "striker",
+          "target": "caster",
+          "critical": true
+        },
+        "cripple": {
+          "metric": "aura",
+          "actor": "striker",
+          "spell": 704371,
+          "caster": "caster",
+          "state": true
+        },
+        "pain": {
+          "metric": "aura",
+          "actor": "striker",
+          "spell": 704397,
+          "caster": "caster",
+          "state": true
+        }
+      },
+      "count_total": [
+        "hits"
+      ],
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            560641
+          ],
+          "casts": [
+            [
+              704371,
+              "striker"
+            ]
+          ],
+          "require": {
+            "cripple": 1
+          },
+          "counts": {
+            "crits": 1,
+            "pain": 0
+          }
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            560641
+          ],
+          "casts": [
+            [
+              704371,
+              "striker"
+            ]
+          ],
+          "require": {
+            "cripple": 1
+          },
+          "counts": {
+            "crits": 0,
+            "pain": 1
+          }
+        }
+      ],
+      "observe_source": "560641 Warlock Training: Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704397 (Crippling Pain, Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT -100000, DurationIndex 35 = 4000 ms, tooltip 'Unable to critically strike.'); AscensionFelswornAbilities.cpp:336-337 casts 704397 on the target of Cripple 704371 when 560641 is known; on a player 290 is read by Player::UpdateAllSpellCritChances (SpellAuraEffects.cpp HandleAuraModCritPct). A PvP-flagged player striker (race 2) holding 100000 spell crit rating (every strike crits, the Resilient Constitution 552011 pattern) casts Light of the Naaru 41394 at the caster once per trial; before each strike the caster (the player fixture's 10000 spell hit rating) casts Cripple at the striker. Control unlearns 560641, treatment learns it (D-67, a real learn). After each trial the Cripple and Crippling Pain auras of the caster on the striker are read as states: a trial without Cripple on the striker is void; a judged trial must read 1 critical strike and no Crippling Pain in control, 0 critical strikes with Crippling Pain in treatment. A trial is judged when its strike landed. Reference search 2026-11-23: coa-history spell 704397: 0 events in 186 logs; 560641 is a passive with no event; bindmysoul talents snapshot (fetched 2026-07-22): Warlock Training 560641 'Cripple now causes the enemy target to be unable to critically strike for 4 seconds.'; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 804613,
+      "name": "Doomstride (the resist occurs at most once every 10 sec)",
+      "kind": "taken_hit",
+      "variant": "resist_icd",
+      "label_suffix": "resist_icd",
+      "judge": "resist_rate",
+      "expected_points": 100,
+      "quote": "Can only occur once every 10 sec.",
+      "strike_spell": 702,
+      "trials": 6,
+      "learn": [
+        804613
+      ],
+      "striker_spell_hit": true,
+      "arms": [
+        {
+          "name": "control",
+          "auras": [
+            [
+              706818,
+              0
+            ]
+          ],
+          "prime_gap_ms": 9000
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              706818,
+              0
+            ]
+          ],
+          "prime_gap_ms": 11000
+        }
+      ],
+      "observe_source": "804613 Doomstride tooltip: 'While at full health, your chance to resist the next Curse or Magic effect on you is increased by 100%. Can only occur once every 10 sec.' The server resists a non-positive Curse or Magic all-aura spell at a full-health owner of 804613 without 706818, then casts 706818 on the owner (AscensionFelsworn.cpp:76-93, ResistDebuff); 706818 lasts SpellDuration index 1 = 10000 ms (forced in AscensionFelswornContracts.cpp:263-266). 804613 is learned for every arm (D-67, a real learn) and the caster stays at full health (Curse of Weakness 702 deals no damage). A stationary creature striker (entry 36) with a spell hit bonus of 100 (no natural miss, Unit.cpp:4039-4051) casts 702 (Dispel 2 curse, DmgClass magic, two APPLY_AURA effects) at the caster: each trial removes 706818, casts a priming 702, waits the arm's gap, removes any 702 and casts the judged 702, read 300 ms later. Control gap 9000 ms (inside the 10 s): the judged curse must land; treatment gap 11000 ms (past it): it must be resisted; treatment resists 100 points more often. Deterministic with no natural miss, so 6 trials per arm. Reference search 2026-11-23: coa-history spell 804613 and 706818: 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 804823,
+      "name": "Tyrannical Resolve (the ignored damage stops at 100% of maximum health)",
+      "kind": "taken_hit",
+      "variant": "capped",
+      "label_suffix": "capped",
+      "judge": "absorb",
+      "quote": "up to 100% of your maximum health.",
+      "strike_spell": 41394,
+      "trials": 6,
+      "caster_health_pct": 100,
+      "caster_max_health": 2000,
+      "arms": [
+        {
+          "name": "control",
+          "absorb": "none"
+        },
+        {
+          "name": "resolve",
+          "opening_casts": [
+            [
+              804823,
+              "caster"
+            ]
+          ],
+          "absorb": "capped_share",
+          "share_pct": 50,
+          "cap_pct": 100
+        }
+      ],
+      "observe_source": "804823 Tyrannical Resolve: Effect[1] SCHOOL_ABSORB whose amount the server sets to half of each damage taken, capped by the caster's maximum health less what was already absorbed during the effect (AscensionFelswornAuras.cpp:315-333, aura_ascension_felsworn_resolve::Absorb; script value 804824 holds the absorbed total, reset on apply at AscensionFelswornAuras.cpp:102-104). The caster is held at 2000 of 2000 maximum health before every trial; a passive striker casts Light of the Naaru 41394 (1100) at it once per trial, 6 trials inside the 30000 ms effect cast once at the arm's start. The resolve arm must absorb floor(50% of each strike) until its absorbed total reaches 2000 (100% of maximum health), then only what is left: 550, 550, 550, 350, 0, 0; the judge needs a trial below the cap and a trial held by it. Control absorbs nothing. Reference search 2026-11-23: coa-history spell 804823: 0 events in 186 logs (see the half_damage entry); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 804823,
+      "name": "Tyrannical Resolve (the closing Felfire Blast leeches more after more hits)",
+      "kind": "taken_hit",
+      "variant": "end_leech",
+      "label_suffix": "end_leech",
+      "judge": "counts",
+      "quote": "When this ends, you unleash a Felfire Blast that leeches health from nearby enemies based on how many times you took damage with the effect active.",
+      "strike_spell": 41394,
+      "trials": 3,
+      "caster_health_pct": 100,
+      "caster_max_health": 20000,
+      "settle_ms": 31000,
+      "count_reads": {
+        "hits": {
+          "metric": "spell_log_count",
+          "spell": 41394,
+          "caster": "striker",
+          "target": "caster"
+        },
+        "blast": {
+          "metric": "spell_damage_total",
+          "spell": 807347,
+          "caster": "caster",
+          "target": "striker"
+        },
+        "blasts": {
+          "metric": "spell_damage_count",
+          "spell": 807347,
+          "caster": "caster",
+          "target": "striker"
+        },
+        "leech": {
+          "metric": "spell_heal_total",
+          "spell": 807347,
+          "target": "caster"
+        },
+        "named_blasts": {
+          "metric": "spell_damage_count",
+          "spell": 804825,
+          "caster": "caster",
+          "target": "striker"
+        }
+      },
+      "count_total": [
+        "hits"
+      ],
+      "rising": [
+        "blast"
+      ],
+      "equal": [
+        [
+          "blast",
+          "leech"
+        ]
+      ],
+      "arms": [
+        {
+          "name": "one",
+          "casts": [
+            [
+              804823,
+              "caster"
+            ]
+          ],
+          "strikes": 1,
+          "counts": {
+            "blasts": 1,
+            "named_blasts": 1
+          }
+        },
+        {
+          "name": "three",
+          "casts": [
+            [
+              804823,
+              "caster"
+            ]
+          ],
+          "strikes": 3,
+          "counts": {
+            "blasts": 1,
+            "named_blasts": 1
+          }
+        }
+      ],
+      "observe_source": "804823 Tyrannical Resolve: on its removal while the caster lives (not by death) the server counts the strikes absorbed during the effect (script value 804823, one per absorbed damage event, AscensionFelswornAuras.cpp:333) and casts 807347 (Effect[0] SPELL_EFFECT_HEALTH_LEECH, EffectValueMultiplier[0] 1.0, so the caster heals by the damage dealt) with an amount that grows with that count on every valid enemy within 10 yd in line of sight (AscensionFelswornAuras.cpp:263-269). Each trial: the caster is set to 20000 of 20000 health, casts 804823, a passive striker 3 yd away casts Light of the Naaru 41394 (1100) at it 1 or 3 times, then the trial waits 31000 ms past the 30000 ms duration (DurationIndex 9) for the natural end. Judged: exactly one 807347 hit on the striker per trial; its damage rises strictly from 1 to 3 hits (the tooltip states 'based on how many times you took damage', not a figure, so no per-hit value is judged); the caster's 807347 heal equals that damage (multiplier 1.0). The tooltip names the blast Felfire Blast: server DBC 804825 'Felfire Blast' (Effect[0] SPELL_EFFECT_HEALTH_LEECH, SchoolMask 36, RadiusIndex 13, Description 'Deals $s1 Felfire Damage to nearby enemies.') while 807347 is 'Burning Hatred' (SchoolMask 127); no server code casts 804825 and no DBC record links to it, so the named read expects exactly one 804825 hit on the striker per trial and alerts when the server unleashes only 807347. Reference search 2026-11-24: coa-history spell 804823, 804825, 807347, 'Felfire Blast', 'Burning Hatred': 0 events in 186 logs each; ~/CoaServer/reference snapshots (sidekick data.js, bindmysoul talents.normalized.json, coabuildhub spells_missing.json and spells_master_index.json) carry only the 804823 tooltip text, no record of 804825 or 807347; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 560641,
+      "name": "Warlock Training (a Crippled enemy cannot critically strike with a melee attack)",
+      "kind": "taken_hit",
+      "variant": "no_crit_melee",
+      "label_suffix": "no_crit_melee",
+      "judge": "counts",
+      "quote": "Cripple now causes the enemy target to be unable to critically strike for $704397d.",
+      "strike_spell": 21140,
+      "striker_race": 2,
+      "striker_force_crit": "melee",
+      "trials": 10,
+      "caster_health_pct": 100,
+      "caster_max_health": 20000,
+      "count_reads": {
+        "hits": {
+          "metric": "spell_damage_count",
+          "spell": 21140,
+          "caster": "striker",
+          "target": "caster"
+        },
+        "crits": {
+          "metric": "spell_damage_count",
+          "spell": 21140,
+          "caster": "striker",
+          "target": "caster",
+          "critical": true
+        },
+        "cripple": {
+          "metric": "aura",
+          "actor": "striker",
+          "spell": 704371,
+          "caster": "caster",
+          "state": true
+        },
+        "pain": {
+          "metric": "aura",
+          "actor": "striker",
+          "spell": 704397,
+          "caster": "caster",
+          "state": true
+        }
+      },
+      "count_total": [
+        "hits"
+      ],
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            560641
+          ],
+          "casts": [
+            [
+              704371,
+              "striker"
+            ]
+          ],
+          "require": {
+            "cripple": 1
+          },
+          "counts": {
+            "crits": 1,
+            "pain": 0
+          }
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            560641
+          ],
+          "casts": [
+            [
+              704371,
+              "striker"
+            ]
+          ],
+          "require": {
+            "cripple": 1
+          },
+          "counts": {
+            "crits": 0,
+            "pain": 1
+          }
+        }
+      ],
+      "observe_source": "560641 Warlock Training: Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704397 (Crippling Pain, Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT -100000, DurationIndex 35 = 4000 ms, tooltip 'Unable to critically strike.'); AscensionFelswornAbilities.cpp:336-337 casts 704397 on the target of Cripple 704371 when 560641 is known. The melee leg of the no_crit entry: on a player 290 also lowers the melee crit percentage (SpellAuraEffects.cpp HandleAuraModCritPct, UpdateAllWeaponDependentCritAuras), which a melee-class spell reads for its crit (Unit::SpellDoneCritChance, SPELL_DAMAGE_CLASS_MELEE -> PLAYER_CRIT_PERCENTAGE; code reading). A PvP-flagged player striker (race 2) holding 100000 melee crit rating (every strike crits) casts Fatal Wound 21140 (server DBC: Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE 240, SchoolMask 1 Physical, DmgClass 2 melee, Attributes 0, no cost, no cooldown, no weapon requirement, no server script) at the caster once per trial (harness cast, triggered); before each strike the caster (the player fixture's 10000 spell hit rating) casts Cripple at the striker. Control unlearns 560641, treatment learns it (D-67, a real learn). After each trial the Cripple and Crippling Pain auras of the caster on the striker are read as states: a trial without Cripple on the striker is void; a judged trial must read 1 critical strike and no Crippling Pain in control, 0 critical strikes with Crippling Pain in treatment. A trial is judged when its strike landed (a dodged, parried or missed strike logs no damage and is left out). Not covered here: a creature striker's melee (Unit.cpp:4567-4571) and spell (m_baseSpellCritChance) crit paths, which have no forced-crit fixture. Reference search 2026-11-24: coa-history spell 704397 and 21140: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22): Warlock Training 560641 'Cripple now causes the enemy target to be unable to critically strike for 4 seconds.'; expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],

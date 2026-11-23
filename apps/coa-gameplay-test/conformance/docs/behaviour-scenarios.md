@@ -1510,6 +1510,21 @@ needs a magic-class strike: a melee-class spell goes to `MeleeSpellHitResult`, w
 - `judge: "resist_rate"` with `expected_points` (ADR 0196) reads, 300 ms after each strike, whether its aura is on the
   caster and removes it; the arms' resisted shares, in percent, must differ by the stated points inside the larger of
   5% of them and 2 points. With `parts` the parts are pooled.
+- Arm `prime_gap_ms` (ADR 1262, `resist_rate` only) starts each trial with a priming strike, waits that many ms,
+  removes the strike's aura and then casts the judged strike: an arm per gap around an internal cooldown (Doomstride
+  804613: 9000 and 11000 ms around the 10 s of 706818).
+- `striker_spell_hit: true` (ADR 1262) gives the creature striker a spell hit bonus of 100 (no natural spell miss);
+  `striker_untriggered: true` casts each strike untriggered, for a script that ignores triggered casts (Felbane 525001).
+  Both are creature-striker fixtures, refused with `striker_race`.
+- Arm `absorb: "capped_share"` with `cap_pct` (ADR 1262) judges `share_pct` of each strike until the arm's absorbed
+  total reaches `cap_pct` of `caster_max_health`, then only what is left (one strike per trial, the caster held at
+  100%). The verdict is `unmeasured` unless one judged trial is below the cap and one is held by it.
+- `judge: "counts"` (ADR 1262) reads `count_reads` (`{name: {metric, ...fields, actor?, state?}}`) before the first
+  trial and after each one. A trial is judged when the deltas of `count_total` reach its strikes and every arm
+  `require` state (a `state: true` read, taken as read and not as a delta) holds; each judged trial must read the
+  arm's `counts` exactly, `equal` pairs equal, and `rising` reads rise strictly from arm to arm in the listed order.
+  Fewer than half the trials judged in an arm leaves the verdict `unmeasured`. Felbane 525001 (reflected strikes),
+  Warlock Training 560641 (critical strikes under Crippling Pain), Tyrannical Resolve 804823 (closing leech).
 
 The control arm is the negative arm: without the talent nothing is absorbed or reduced.
 

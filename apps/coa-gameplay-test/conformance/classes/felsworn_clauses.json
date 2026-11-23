@@ -928,7 +928,10 @@
       },
       {
         "claim": "causing the next spell they cast ... to be reflected onto them",
-        "labels": []
+        "labels": [
+          "525001 behaviour_taken_hit reflect"
+        ],
+        "evidence": "behaviour"
       }
     ]
   },
@@ -1265,24 +1268,17 @@
     "claims": [
       {
         "claim": "unable to critically strike",
-        "labels": []
+        "labels": [
+          "560641 behaviour_taken_hit no_crit",
+          "560641 behaviour_taken_hit no_crit_melee"
+        ]
       },
       {
         "claim": "for $704397d",
-        "labels": [
-          "560641 behaviour_metric_delta duration"
-        ]
+        "labels": []
       }
     ],
-    "tool_gap": {
-      "reason": "'unable to critically strike' needs an enemy attacker whose critical hits are counted with and without Crippling Pain 704397 on it. taken_hit damage_ratio reads only critical or only non-critical strikes of a striker and leaves a trial out when no log lands, so the debuffed arm has nothing to judge; crit_rate and hit_ratio count the caster's own hits; metric_delta has no enemy melee attacker with a critical filter. Nearest kind: taken_hit with striker_force_crit (Resilient Constitution 552011) and a Cripple 704371 cast on the striker, judged as a critical share per arm. Needs tool group B: critical-share judge for taken_hit strikes.",
-      "attempts": [
-        {
-          "agent": "fw-ea3",
-          "report": ".agents/plans/fw-ea3/report.md"
-        }
-      ]
-    }
+    "reason": "HELD 'for $704397d' (review fw-rl1b I-1): the duration entry 560641 behaviour_metric_delta duration reads ok in both runs, but its residual is 0.12^3 = 0.17%/run (0.35%/pair) > 0.1% (Cripple binary resist 12% on the dummy); a fourth cast is not payable at 100 Energy; label withheld until sized."
   },
   {
     "spell": 560645,
@@ -3809,7 +3805,9 @@
   {
     "spell": 804613,
     "clause": "Can only occur once every 10 sec.",
-    "labels": [],
+    "labels": [
+      "804613 behaviour_taken_hit resist_icd"
+    ],
     "kind": "claim"
   },
   {
@@ -3884,13 +3882,17 @@
   {
     "spell": 804823,
     "clause": "up to 100% of your maximum health.",
-    "labels": [],
+    "labels": [
+      "804823 behaviour_taken_hit capped"
+    ],
     "kind": "claim"
   },
   {
     "spell": 804823,
     "clause": "When this ends, you unleash a Felfire Blast that leeches health from nearby enemies based on how many times you took damage with the effect active.",
-    "labels": [],
+    "labels": [
+      "804823 behaviour_taken_hit end_leech"
+    ],
     "kind": "claim"
   },
   {

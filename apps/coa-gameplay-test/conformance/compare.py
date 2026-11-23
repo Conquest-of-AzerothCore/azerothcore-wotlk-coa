@@ -5306,7 +5306,7 @@ def taken_hit_trial_fault(arm: dict, trial: dict, expected_absorb: int | None, d
     absorbed, damage = trial['absorb'], trial['damage']
     if arm['absorb'] == 'none' and absorbed:
         return f'absorbed {absorbed:g} with no absorb stated'
-    if arm['absorb'] == 'formula' and absorbed != expected_absorb:
+    if arm['absorb'] in ('formula', 'capped_share') and absorbed != expected_absorb:
         return f'absorbed {absorbed:g} against {expected_absorb}'
     if arm['absorb'] == 'share':
         share = math.floor((absorbed + damage) * arm['share_pct'] / 100)
@@ -5454,9 +5454,66 @@ def behaviour_taken_rate_verdict(base: Verdict, run: Run | list[Run], model: dic
                                f'{delta_text(bonus)} points; {reason}{pooled}')
 
 
+def taken_counts_arm(run: Run, arm: dict, model: dict) -> tuple[list[dict] | str, list[str]]:
+    values = {}
+    for mark, labels in arm['marks'].items():
+        for name, label in labels.items():
+            value = run.values.get(label)
+            if value is None:
+                return missing_measurement(run, label), []
+            values[(mark, name)] = value
+    judged, faults = [], []
+    previous = 'start'
+    for trial in range(1, model['trials'] + 1):
+        mark = str(trial)
+        delta = {name: values[(mark, name)] if name in model.get('states', ()) else
+                 values[(mark, name)] - values[(previous, name)] for name in arm['marks'][mark]}
+        previous = mark
+        if sum(delta[name] for name in model['total']) < arm['strikes'] or any(
+                delta[name] != value for name, value in arm.get('require', {}).items()):
+            continue
+        judged.append(delta)
+        wrong = [f'{name} {delta[name]:g} (must be {count})' for name, count in arm['counts'].items()
+                 if delta[name] != count]
+        wrong += [f'{a} {delta[a]:g} against {b} {delta[b]:g} (must be equal)' for a, b in model['equal']
+                  if delta[a] != delta[b]]
+        if wrong:
+            faults.append(f'{arm["name"]} trial {trial}: {", ".join(wrong)}')
+    return judged, faults
+
+
+def behaviour_taken_counts_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    faults, short, summaries, judged_by_arm = [], [], [], {}
+    for arm in model['arms']:
+        judged, arm_faults = taken_counts_arm(run, arm, model)
+        if isinstance(judged, str):
+            return replace(base, explanation=judged)
+        faults += arm_faults
+        judged_by_arm[arm['name']] = judged
+        if len(judged) < model['minimum_trials']:
+            short.append(f'{arm["name"]} judged {len(judged)} of {model["trials"]} trials, below the '
+                         f'{model["minimum_trials"]} required')
+        summaries.append(f'{arm["name"]}: {len(judged)} judged trials, '
+                         + ', '.join(f'{name} {sorted({delta[name] for delta in judged})}'
+                                     for name in arm['marks']['start']))
+    for name in model['rising']:
+        for earlier, later in zip(model['arms'], model['arms'][1:]):
+            low = [delta[name] for delta in judged_by_arm[earlier['name']]]
+            high = [delta[name] for delta in judged_by_arm[later['name']]]
+            if low and high and min(high) <= max(low):
+                faults.append(f'{name} does not rise from {earlier["name"]} (up to {max(low):g}) to '
+                              f'{later["name"]} (from {min(high):g})')
+    status = 'alert' if faults else 'unmeasured' if short else 'ok'
+    reason = '; '.join(faults[:6]) if faults else '; '.join(short) if short else 'every judged trial matches'
+    return replace(base, status=status, measured=float(len(faults)), expected=0.0, low=0.0, high=0.0,
+                   explanation=f'{"; ".join(summaries)}; {reason}; each count, rise and equality is compared exactly')
+
+
 def behaviour_taken_hit_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     if model.get('kind') == 'taken_rate':
         return behaviour_taken_rate_verdict(base, run, model)
+    if model.get('kind') == 'taken_counts':
+        return behaviour_taken_counts_verdict(base, run, model)
     faults, summaries, short = [], [], []
     judged = 0
     landed_damage, reductions = {}, {}
@@ -5485,6 +5542,7 @@ def behaviour_taken_hit_verdict(base: Verdict, run: Run, model: dict) -> Verdict
         absorbs, damages = [], []
         returned = 0
         previous = 'start'
+        spent, bound = 0.0, set()
         for trial in range(1, model['trials'] + 1):
             mark = str(trial)
             delta = {key: values[(mark, key)] - values[(previous, key)]
@@ -5496,12 +5554,20 @@ def behaviour_taken_hit_verdict(base: Verdict, run: Run, model: dict) -> Verdict
                     delta[f'paid {moment}'] = values[(mark, f'paid {moment}')] - values[(previous, 'paid')]
                     delta[f'debt {moment}'] = values[(mark, f'debt {moment}')]
             previous = mark
+            capped_absorb = None
+            if arm['absorb'] == 'capped_share':
+                share = math.floor((delta['absorb'] + delta['damage']) * arm['share_pct'] / 100)
+                capped_absorb = min(share, max(0, int(arm['cap'] - spent)))
+                spent += delta['absorb']
             if delta['logs'] < arm['strikes']:
                 continue
+            if capped_absorb is not None:
+                bound.add('cap' if capped_absorb < share else 'share')
             landed += 1
             absorbs.append(delta['absorb'])
             damages.append(delta['damage'])
-            fault = taken_hit_trial_fault(arm, delta, expected_absorb, model.get('debt_ends', False))
+            fault = taken_hit_trial_fault(arm, delta, expected_absorb if capped_absorb is None else capped_absorb,
+                                          model.get('debt_ends', False))
             returned_fault, judged_return = taken_hit_returned_fault(arm, delta)
             returned += judged_return
             for found in (fault, returned_fault, taken_hit_transfer_fault(arm, delta)):
@@ -5510,11 +5576,15 @@ def behaviour_taken_hit_verdict(base: Verdict, run: Run, model: dict) -> Verdict
         landed_damage[arm['name']] = damages
         if landed < model['minimum_trials']:
             short.append(f'{arm["name"]} landed {landed} of {model["trials"]} trials')
+        if arm['absorb'] == 'capped_share' and bound != {'cap', 'share'}:
+            short.append(f'{arm["name"]} judged no trial ' + ('below' if 'share' not in bound else 'held by')
+                         + f' its cap {arm["cap"]}')
         if arm.get('returned_pct') and returned < model['minimum_trials']:
             short.append(f'{arm["name"]} returned a non-critical hit in {returned} of {model["trials"]} trials')
         judged += landed
         stated = {'none': 'no absorb', 'formula': f'{expected_absorb} absorbed',
-                  'share': f'{arm["share_pct"]}% absorbed'}[arm['absorb']]
+                  'share': f'{arm["share_pct"]}% absorbed',
+                  'capped_share': f'{arm["share_pct"]}% absorbed up to {arm.get("cap")} in all'}[arm['absorb']]
         debt = ('' if arm['debt_removed_pct'] is None else
                 f', debt paid by its end less {arm["debt_removed_pct"]}% removed'
                 + (', part of it still unpaid just before its end' if model.get('debt_ends') else ''))
