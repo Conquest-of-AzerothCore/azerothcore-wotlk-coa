@@ -2565,8 +2565,9 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
             addhealth += tickheal * tickcount;
 
-            // Glyph of Swiftmend
-            if (!caster->HasAura(54824))
+            // Glyph of Swiftmend (118033: the classless glyph; Ascension's 54824 is another glyph)
+            // 415014 Everliving (Mystic Enchant): the HoTs stay too
+            if (!caster->HasAura(54824) && !caster->HasAura(118033) && !caster->HasAura(415014))
                 unitTarget->RemoveAura(targetAura->GetId(), targetAura->GetCasterGUID());
 
             //addhealth += tickheal * tickcount;
