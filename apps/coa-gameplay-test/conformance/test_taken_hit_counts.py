@@ -171,8 +171,11 @@ class CappedShareTests(unittest.TestCase):
     def test_a_run_that_never_reaches_the_cap_or_starts_on_it_is_unmeasured(self):
         _, [expectation] = behaviour_scenario(CLASS_FILE, capped_entry(trials=3))
         self.assertEqual(self.verdict(expectation, [550, 550, 550]).status, 'unmeasured')
-        _, [expectation] = behaviour_scenario(CLASS_FILE, capped_entry(caster_max_health=1000, trials=4))
-        self.assertEqual(self.verdict(expectation, [500, 500, 0, 0], strike=1000.0).status, 'unmeasured')
+        arms = capped_entry()['arms']
+        _, [expectation] = behaviour_scenario(CLASS_FILE, capped_entry(arms=[arms[0], {**arms[1], 'cap_pct': 10}],
+                                                                       trials=3))
+        self.assertEqual(self.verdict(expectation, [200, 0, 0]).status, 'unmeasured')
+        self.assertEqual(self.verdict(expectation, [550, 0, 0]).status, 'alert')
 
     @NEEDS_DBC
     def test_a_cap_without_its_percent_or_with_two_strikes_is_refused(self):
