@@ -163,4 +163,4 @@ def label(entry: dict) -> list[str]:
 
 
 JUDGES = {BEHAVIOUR_METRIC_DELTA: move_under_aura_verdict}
-METRIC_EVIDENCE = {MOVED_METRIC: 'event'}
+METRIC_EVIDENCE = {MOVED_METRIC: 'event', BLOCKED_METRIC: 'event'}
