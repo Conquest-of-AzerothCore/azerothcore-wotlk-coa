@@ -1990,12 +1990,13 @@
     "kind": "claim",
     "labels": [
       "572617 behaviour_metric_delta duration_up_to"
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
   },
   {
     "spell": 572617,
     "clause": "dealing ${$m1+0+$spfi*.3+$AP*.23} Fire Damage to nearby enemies every $t1 sec.",
-    "kind": "claim",
     "claims": [
       {
         "claim": "dealing ${$m1+0+$spfi*.3+$AP*.23} Fire Damage to nearby enemies",
@@ -2003,16 +2004,21 @@
           "572617 behaviour_metric_delta tick_base",
           "572617 behaviour_metric_delta tick_spell_power",
           "572617 behaviour_metric_delta tick_attack_power"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "every $t1 sec",
         "labels": [
           "572617 behaviour_metric_delta tick_period",
           "572617 behaviour_metric_delta tick_count"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
   },
   {
     "spell": 800209,
