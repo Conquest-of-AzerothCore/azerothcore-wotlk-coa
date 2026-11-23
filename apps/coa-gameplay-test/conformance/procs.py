@@ -290,9 +290,9 @@ def cast_baseline_steps(class_file: dict, entry: dict, plan: ProcPlan) -> list[d
 
 
 def same_roll(entry: dict, other: dict) -> bool:
-    from proc_avoided import is_avoided
+    from proc_avoided import is_avoided, learned
     return other['aura'] == entry['aura'] and chance_modifiers(other) == chance_modifiers(entry) \
-        and is_avoided(other) == is_avoided(entry)
+        and is_avoided(other) == is_avoided(entry) and (not is_avoided(entry) or learned(other) == learned(entry))
 
 
 def shares_aura(class_file: dict, entry: dict) -> bool:
@@ -316,9 +316,10 @@ def chance_modifiers(entry: dict) -> tuple[tuple[int, str], ...]:
 
 
 def modifier_key(entry: dict) -> tuple:
-    from proc_avoided import AVOIDED, is_avoided
+    from proc_avoided import AVOIDED, is_avoided, learned
     return tuple(part for spell, _ in chance_modifiers(entry) for part in ('with', spell)) \
-        + ((AVOIDED,) if is_avoided(entry) else ())
+        + ((AVOIDED,) if is_avoided(entry) else ()) \
+        + (tuple(part for spell in learned(entry) for part in ('learn', spell)) if is_avoided(entry) else ())
 
 
 def entry_proc_label(class_file: dict, entry: dict) -> str:
@@ -754,8 +755,9 @@ def trials_step(entry: dict, label: str) -> dict:
 
 def attempt_auras(entry: dict) -> list[dict]:
     auras = entry.get('attempt_auras', [])
-    if auras and entry['trigger']['action'] != CAST:
-        raise ValueError(f'Proc {entry["aura"]} sets attempt_auras without a cast trigger')
+    from proc_avoided import AVOIDED
+    if auras and entry['trigger']['action'] not in (CAST, AVOIDED):
+        raise ValueError(f'Proc {entry["aura"]} sets attempt_auras without a cast or avoided trigger')
     for aura in auras:
         if set(aura) - {'target'} != {'spell', 'stacks', 'source'} or not isinstance(aura['stacks'], int) \
                 or aura['stacks'] < 0:
@@ -861,9 +863,13 @@ def attempt_steps(class_file: dict, entry: dict, plan: ProcPlan, labels: dict[st
                 measurement(labels['attempts'], CASTER, 'melee_attack_count', **hand_fields(entry))]
     from proc_avoided import attempt_steps as avoided_attempts, counts_misses, guard_steps, is_avoided, trial_steps
     if is_avoided(entry):
-        return (avoided_attempts(entry, plan.per_part, plan.attempt_ms)
-                + [{'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}] + guard_steps(entry)
-                + trial_steps(labels['trials'], labels['attempts'], counts_misses(entry)))
+        drain = {'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}
+        if counts_stacks(entry):
+            from proc_stacks import avoided_attempt_steps
+            swings = avoided_attempt_steps(entry, plan.per_part, plan.attempt_ms) + stack_drain_steps(entry, drain)
+        else:
+            swings = avoided_attempts(entry, plan.per_part, plan.attempt_ms) + [drain]
+        return swings + guard_steps(entry) + trial_steps(labels['trials'], labels['attempts'], counts_misses(entry))
     if entry['trigger']['action'] == TAKEN_HIT:
         return (taken_hit_attempts(entry, plan, plan.per_part)
                 + [{'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}, taken_hit_trials(entry, labels['trials']),

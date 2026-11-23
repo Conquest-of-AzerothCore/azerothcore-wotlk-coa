@@ -323,3 +323,104 @@ class AvoidedProcMissesTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class AvoidedProcPreconditionTest(unittest.TestCase):
+    PRECONDITION = 560576
+    CONDITION = 800209
+
+    def setUp(self):
+        from profile import for_entry
+        self.class_file = for_entry(class_file(), DAWN_KNIGHT)
+        self.entry = avoided_entry(self.class_file, DAWN_KNIGHT)
+
+    def learning(self) -> dict:
+        return {**self.entry, 'trigger': {**self.entry['trigger'], 'learn': [self.PRECONDITION]}}
+
+    def test_the_learn_list_is_learned_before_every_engage(self):
+        steps = run.validate(proc_scenario(self.class_file, self.learning())[0])['steps']
+        learns = [index for index, step in enumerate(steps)
+                  if step['action'] == 'learn' and step.get('spell') == self.PRECONDITION]
+        engages = [index for index, step in enumerate(steps) if step['action'] == 'attack']
+        passive = index_of(steps, lambda step: step['action'] == 'learn' and step.get('spell') == DAWN_KNIGHT)
+        self.assertTrue(learns)
+        self.assertLess(learns[0], min(engages))
+        self.assertLess(learns[0], passive)
+
+    def test_without_a_learn_list_no_precondition_is_learned(self):
+        steps = run.validate(proc_scenario(self.class_file, self.entry)[0])['steps']
+        self.assertFalse([step for step in steps
+                          if step['action'] == 'learn' and step.get('spell') == self.PRECONDITION])
+
+    def test_a_faulty_learn_list_is_refused(self):
+        for learn in ([0], [True], self.PRECONDITION, [self.PRECONDITION, self.PRECONDITION], [DAWN_KNIGHT]):
+            with self.subTest(learn=learn), self.assertRaises(ValueError):
+                proc_plan(self.class_file, {**self.entry, 'trigger': {**self.entry['trigger'], 'learn': learn}})
+
+    def test_a_learn_list_names_its_own_roll_and_keeps_the_plain_label(self):
+        source = {**self.class_file, 'procs': [*self.class_file['procs'], self.learning()]}
+        self.assertFalse(shares_aura(source, self.entry))
+        self.assertEqual(entry_proc_label(source, self.entry), f'{DAWN_KNIGHT} proc_rate avoided')
+        self.assertEqual(entry_proc_label(source, self.learning()),
+                         f'{DAWN_KNIGHT} proc_rate avoided learn {self.PRECONDITION}')
+
+    def test_attempt_auras_are_set_before_every_swing_interval(self):
+        entry = {**self.entry, 'attempt_auras': [{'spell': self.CONDITION, 'stacks': 1, 'source': 'seeded'}]}
+        steps = run.validate(proc_scenario(self.class_file, entry)[0])['steps']
+        avoidance = [index for index, step in enumerate(steps) if step['action'] == 'set_combat_avoidance']
+        self.assertTrue(avoidance)
+        for index in avoidance:
+            self.assertEqual(steps[index - 1]['action'], 'set_aura')
+            self.assertEqual(steps[index - 1]['spell'], self.CONDITION)
+            self.assertNotIn('target', steps[index - 1])
+
+    def test_an_attempt_aura_on_another_trigger_than_a_cast_or_an_avoided_swing_is_refused(self):
+        from procs import attempt_auras
+        entry = {**self.entry, 'trigger': {'action': 'taken_hit'},
+                 'attempt_auras': [{'spell': self.CONDITION, 'stacks': 1, 'source': 'seeded'}]}
+        with self.assertRaises(ValueError):
+            attempt_auras(entry)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class AvoidedProcStackEventsTest(unittest.TestCase):
+    STACK = 800058
+
+    def setUp(self):
+        from profile import for_entry
+        self.class_file = for_entry(class_file(), DAWN_KNIGHT)
+        self.entry = {**avoided_entry(self.class_file, DAWN_KNIGHT), 'event_metric': 'aura_stacks',
+                      'stack_aura': self.STACK, 'stack_set': 0, 'stack_per_cast': 0, 'stack_cap': 6,
+                      'events_per_proc': 1, 'baseline': True,
+                      'attempt_auras': [{'spell': self.STACK, 'stacks': 0, 'source': 'seeded'}]}
+
+    def test_the_stacks_are_reset_before_and_read_after_every_swing_interval(self):
+        scenario, [expectation] = proc_scenario(self.class_file, self.entry)
+        steps = run.validate(scenario)['steps']
+        waits = [index for index, step in enumerate(steps) if step['action'] == 'wait' and 'label' not in step]
+        reads = [index for index, step in enumerate(steps)
+                 if step.get('metric') == 'aura_stacks' and step.get('spell') == self.STACK]
+        self.assertTrue(waits)
+        for wait in waits:
+            self.assertIn(wait + 1, reads)
+        model = expectation.model
+        self.assertEqual(model['stack_events']['cap'], 6)
+        self.assertEqual(model['stack_events']['per_cast'], 0)
+        self.assertEqual(len(model['event_labels']), model['part_attempts'] + 1)
+
+    def test_an_avoided_stack_entry_needs_no_cast_change_and_a_cap(self):
+        for change in ({'stack_per_cast': 1}, {'stack_cap': None}, {'stack_cap': 0}):
+            entry = {key: value for key, value in {**self.entry, **change}.items() if value is not None}
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                proc_plan(self.class_file, entry)
+
+    def test_a_read_at_the_cap_voids_the_part_and_reads_below_it_count(self):
+        from proc_stacks import capped, events
+        _, [expectation] = proc_scenario(self.class_file, self.entry)
+        model = expectation.model
+        values = {label: 1.0 for label in model['event_labels']}
+        self.assertEqual(capped(model, values), [])
+        self.assertEqual(events(model['stack_events'], list(values.values()), len(values), 999.0), len(values))
+        values[model['event_labels'][3]] = 6.0
+        self.assertEqual(capped(model, values), [model['event_labels'][3]])

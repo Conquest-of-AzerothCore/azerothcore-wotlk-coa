@@ -61,6 +61,36 @@ class MoveUnderAuraTests(unittest.TestCase):
                 self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status,
                                  'unmeasured')
 
+    def test_a_blocked_entry_is_ok_when_the_player_stays_under_the_held_aura(self):
+        _, [expectation] = self.built(expect='blocked')
+        self.assertEqual(expectation.model['metric'], 'move_under_aura_blocked')
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(self.values(expectation, aura_moved=0.0)),
+                                  expectation)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('attempt: own forward movement', verdict.explanation)
+
+    def test_mutant_a_blocked_entry_alerts_when_the_player_moves_or_the_aura_drops(self):
+        _, [expectation] = self.built(expect='blocked')
+        for values in (self.values(expectation), self.values(expectation, aura_moved=0.0, auras=(1, 0, 0))):
+            with self.subTest(values=values):
+                self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status,
+                                 'alert')
+
+    def test_a_blocked_entry_without_a_moving_control_is_unmeasured(self):
+        _, [expectation] = self.built(expect='blocked')
+        values = self.values(expectation, aura_moved=0.0, control_moved=0.0)
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status,
+                         'unmeasured')
+
+    def test_the_default_entry_keeps_the_moved_metric_and_no_expect_key(self):
+        _, [expectation] = self.built()
+        self.assertEqual(expectation.model['metric'], 'move_under_aura_moved')
+        self.assertNotIn('expect', expectation.model)
+
+    def test_an_unknown_expect_is_refused(self):
+        with self.assertRaisesRegex(ValueError, 'move_under_aura expects'):
+            move_under_aura_spec(entry(expect='stuck'))
+
     def test_a_step_out_of_range_is_refused(self):
         for step in (0.1, 20):
             with self.subTest(step=step), self.assertRaisesRegex(ValueError, 'move_under_aura'):

@@ -13,3 +13,10 @@ anything) or when the aura was not held before the move; `ok` when under the aur
 `move_under_aura_moved` is an event: the movement handler acting on the request.
 
 Sun Cleric: Sunstorm 760379 (mentor D-171, no harness action).
+
+`expect: "blocked"` (opt-in, default `"moved"`; ADR 1264, mentor D-74) judges a sentence that says the caster cannot
+move: the same control phase must move the full step, the aura must come from the real cast of `spell` (never
+`set_aura`), and under the held aura the same own-movement attempt must leave the position within 0.1 yd of where it
+was. The verdict names the attempt (own forward movement through the movement handler). Its derived metric
+`move_under_aura_blocked` is an event as well. Felsworn: Illidan's Guile 806109 "you cannot attack, move or cast
+spells" (the `move` part).

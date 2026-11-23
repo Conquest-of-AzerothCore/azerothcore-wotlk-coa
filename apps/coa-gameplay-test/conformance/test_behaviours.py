@@ -67,9 +67,10 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB
                         target_count_scenario, target_count_spec, threat_tick_ratio_scenario,
                         threat_tick_ratio_spec)
 from bonus import bonus_band
-from behaviours import hit_arm, hit_ratio_entry_label, metric_delta_strike, cast_combat_spec
+from behaviours import (RUN_DEFAULT_TIMEOUT_MS, hit_arm, hit_ratio_entry_label, metric_delta_strike, cast_combat_spec,
+                        waited_ms)
 from compare import STACKED_SAME, Verdict, judge_behaviour
-from hits import MAX_SCENARIO_MS, aura_modifiers, creature_fixture
+from hits import MAX_SCENARIO_MS, TIMEOUT_MARGIN_MS, aura_modifiers, creature_fixture
 import hit_ratio_versus
 from mitigation import armor_reduction
 from passives import BEHAVIOUR_LABELS
@@ -2123,6 +2124,20 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         return {'spell': 802006, 'name': 'Hunt (charges and recharge)', 'kind': 'charge_recharge',
                 'quote': '2 Charges, 25 sec recharge', 'max_charges': 2, 'recharge_ms': 25000, 'target': 'dummy',
                 **changes}
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_charge_recharge_waiting_past_the_run_default_timeout_carries_its_own_timeout(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, self.hunt_charge_entry(recharge_ms=90000))
+        run.validate(scenario)
+        waited = waited_ms(scenario['steps'])
+        self.assertGreaterEqual(waited, RUN_DEFAULT_TIMEOUT_MS)
+        self.assertEqual(scenario['timeout_ms'], waited + TIMEOUT_MARGIN_MS)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_charge_recharge_inside_the_run_default_timeout_keeps_no_timeout_key(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, self.hunt_charge_entry())
+        self.assertLess(waited_ms(scenario['steps']), RUN_DEFAULT_TIMEOUT_MS)
+        self.assertNotIn('timeout_ms', scenario)
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_charge_with_a_dummy_distance_steps_back_before_every_cast_after_the_first(self):
