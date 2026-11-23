@@ -71,6 +71,7 @@ from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECT_MODIFIER_BASE, EFFEC
                     sizing_stats)
 
 NOT_MEASURED = 'not_measured'
+SUPERSEDED_BY = 'superseded_by'
 STATUSES = ('ok', 'tolerated', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials',
             'unmeasured', MEASURED, 'closed', NOT_MEASURED)
 NOT_ALERTS = frozenset({'ok', MEASURED, 'closed', NOT_MEASURED})
@@ -5751,7 +5752,9 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
                                    f'--gameplay-clock {required_clock} to exercise the tooltip clause, so this '
                                    f'attempt cannot prove or disprove it')
     if rule.startswith(CLOSED):
-        return replace(base, status='closed', measured=measured, explanation=rule)
+        replaced_by = (expectation.model or {}).get(SUPERSEDED_BY)
+        return replace(base, status='closed', measured=measured, explanation=rule,
+                       **({'detail': {SUPERSEDED_BY: list(replaced_by)}} if replaced_by else {}))
     if (check == 'unmodelled' or rule.startswith(UNMODELLED) or rule.startswith(UNMEASURABLE)
             or rule.startswith(GENERIC)):
         return replace(base, status='unmodelled', measured=measured, explanation=rule)
@@ -5868,6 +5871,25 @@ def linked_references(verdict: Verdict) -> list[str]:
 
 def own_status(verdict: Verdict) -> str:
     return (verdict.detail or {}).get(LINKED_FROM, verdict.status)
+
+
+def resolve_superseded(verdicts: list[Verdict]) -> list[Verdict]:
+    by_label = {verdict.label: verdict for verdict in verdicts}
+    resolved = []
+    for verdict in verdicts:
+        replaced_by = (verdict.detail or {}).get(SUPERSEDED_BY)
+        if not replaced_by:
+            resolved.append(verdict)
+            continue
+        found = {label: by_label[label].status if label in by_label else 'missing' for label in replaced_by}
+        text = ', '.join(f'"{label}" ({status})' for label, status in found.items())
+        if all(status == 'ok' for status in found.values()):
+            resolved.append(replace(verdict, explanation=f'{verdict.explanation}; replaced by {text}'))
+        else:
+            resolved.append(replace(verdict, status='alert',
+                                    explanation=f'{verdict.explanation}; a superseded hit needs every replacing '
+                                                f'label measured and ok: {text}'))
+    return resolved
 
 
 def resolve_linked_statuses(verdicts: list[Verdict], labels: set[str] | None = None) -> list[Verdict]:
@@ -6007,8 +6029,8 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
     by_rule = rule_only_labels(manifest)
     stamped = [with_provenance(verdict, judged, label_runs.get(verdict.label) or scenario_runs(runs, verdict),
                                verdict.label in by_rule)
-               for verdict in resolve_base_roll_links(
-                   resolve_linked_statuses(apply_value_links(verdicts, manifest['class_file'])))]
+               for verdict in resolve_superseded(resolve_base_roll_links(
+                   resolve_linked_statuses(apply_value_links(verdicts, manifest['class_file']))))]
     return Comparison(manifest, runs, missing, stamped, judged, other_build)
 
 

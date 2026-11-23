@@ -11,16 +11,16 @@ from typing import Sequence
 
 from behaviours import behaviour_entries, behaviour_scenario, sized_behaviour
 from classes import CHARACTER_LEVEL, PROGRESSION_HEADER, ClassSpell, class_spells
-from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, VERDICTS_FILE, BuildMismatch, ScenarioDrift,
-                     evaluate, literal_values, write_levers, write_outputs)
+from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, SUPERSEDED_BY, VERDICTS_FILE, BuildMismatch,
+                     ScenarioDrift, evaluate, literal_values, write_levers, write_outputs)
 from coverage import (COVERAGE_FILE, EvidenceError, clause_coverage, clause_coverage_lines, fragment_entries,
                       load_clauses, load_consumption, write_coverage, write_fragment)
 from diff import IMPACT_FILE, diff_directories, write_impact
 from expiry import EXPIRY_KIND, behaviour_expiry, trigger_expiry
 from packets import PacketError, write_packets
 from passives import passive_scenario
-from hits import (REFERENCE_TARGET, UNMODELLED, Unmodelled, aura_modifiers, casts_needed, floored_casts, gate_stacks,
-                  MELEE_LABEL, hit_parts, melee_parts, rank_hit, records_of, reference_caster, reference_hit_model,
+from hits import (CLOSED, REFERENCE_TARGET, UNMODELLED, Unmodelled, aura_modifiers, casts_needed, floored_casts,
+                  gate_stacks, MELEE_LABEL, hit_parts, melee_parts, rank_hit, records_of, reference_caster, reference_hit_model,
                   reference_melee_model)
 from ledger import ledger, parse_text_bases, write_ledger
 from procs import (DELTA_CHECK, delta_proc_plan, delta_proc_scenario, modifier_key, proc_entries, proc_plan,
@@ -140,10 +140,34 @@ def add_values(writer: ManifestWriter, spell: ClassSpell, dbc_dir: Path):
             add_periodic_total(writer, spell, rank_id, item)
 
 
+SUPERSEDED_HITS = 'superseded_hits'
+
+
+def superseded_hit(class_file: dict, rank_id: int) -> dict | None:
+    entry = next((entry for entry in class_file.get(SUPERSEDED_HITS, ()) if entry['spell'] == rank_id), None)
+    if entry is None:
+        return None
+    replaced_by = entry.get('replaced_by')
+    if (set(entry) != {'spell', 'reason', 'replaced_by'} or not isinstance(entry['reason'], str)
+            or not entry['reason'].strip() or not isinstance(replaced_by, list) or not replaced_by
+            or not all(isinstance(label, str) and label.strip() for label in replaced_by)
+            or f'{rank_id} hit_mean' in replaced_by):
+        raise ValueError(f'{SUPERSEDED_HITS} {rank_id} takes spell, a non-blank reason and replaced_by, the labels '
+                         f'that replace the hit (not the hit itself), not {entry!r}')
+    return entry
+
+
 def add_hit(writer: ManifestWriter, spell: ClassSpell):
     class_file = writer.class_file
     key = scenario_key(class_file['name'], 'hit', spell.max_rank)
     label = f'{spell.max_rank} hit_mean'
+    superseded = superseded_hit(class_file, spell.max_rank)
+    if superseded is not None:
+        writer.add(key, 'hit', spell, spell.max_rank,
+                   [Expectation(label, 'unmodelled', spell.spell_id, spell.max_rank, None, '',
+                                f'{CLOSED}no check needed: {superseded["reason"]}',
+                                {SUPERSEDED_BY: list(superseded['replaced_by'])})])
+        return
     try:
         casts = floored_casts(class_file, spell.max_rank,
                               casts_needed(reference_hit_model(class_file, spell.max_rank)))

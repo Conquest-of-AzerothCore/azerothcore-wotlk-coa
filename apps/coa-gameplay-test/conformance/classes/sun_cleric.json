@@ -44239,5 +44239,15 @@
       "effect": 0,
       "source": "806479 Solar Prayer Effect[0] SPELL_EFFECT_HEAL_PCT, BasePoints 24 + DieSides 1 = 25 ($s1, percent of the maximum health of the healed unit, the caster): Spell::EffectHealPct heals SpellHealingBonusDone(CountPctFromMaxHealth(25)) beside Effect[1] SPELL_EFFECT_HEAL in the same heal event; spell_bonus_data 806479 is all zero, so the spell power term stays on Effect[1] (behaviour entries heal_base 4120, heal_half_health 2120 and heal_sp 5720 read 0.8 x (25% of the maximum health + 150 + spell power))"
     }
+  ],
+  "superseded_hits": [
+    {
+      "spell": 806980,
+      "reason": "the plain hit scenario casts Justicar's Wrath every 2000 ms on one dummy, and each landed hit re-applies 572067 (+10% spell damage taken, 15 s; AscensionSunClericAbilities.cpp:342), so its hits mix one clean hit with debuffed ones by design; replaced by the two target_aura_gates arms, which set 572067 at 0 and at 1 stack before every cast (mentor D-288, lr3)",
+      "replaced_by": [
+        "806980 hit_mean wrath_taken stacks 0",
+        "806980 hit_mean wrath_taken"
+      ]
+    }
   ]
 }

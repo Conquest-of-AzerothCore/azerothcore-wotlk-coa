@@ -38,3 +38,30 @@ Effect[1].
   raises the missing measurement; the truncation follows `CountPctFromMaxHealth`; a non-HEAL_PCT effect is refused.
 - `SPELL_EFFECT_HEAL_PCT` with a rolled value, on a periodic or dual-target heal, or in a scripted hit model is not
   handled.
+
+## Addendum: a superseded plain hit is closed only while its replacements hold
+
+- Date: 2026-11-23
+- Decided by: mentor D-288 and its conditions on the key (Sun Cleric 27, Justicar's Wrath 806980)
+
+Context: the plain `806980 hit_mean` scenario casts every 2000 ms on one dummy and each landed hit re-applies 572067
+(+10% spell damage taken, AscensionSunClericAbilities.cpp:342), so its hits mix one clean hit with debuffed ones by
+design. Two `target_aura_gates` arms (`806980 hit_mean wrath_taken stacks 0` and `806980 hit_mean wrath_taken`) set
+572067 at 0 and at 1 stack before every cast and replace it. The plain hit is generated from the class spell list,
+and no class-file lever dropped a modelled hit (`hit_notes` applies only to an unmodelled rank).
+
+Decision:
+- Class-file key `superseded_hits`: `{spell (the rank), reason, replaced_by}`; `replaced_by` is a non-empty list of the
+  replacing labels and may not name the hit itself; an entry without it is refused.
+- `conformance.add_hit` writes the closed record an unmodelled rank with a "no check needed" note gets (check
+  `unmodelled`, rule `closed: no check needed: <reason>`, no scenario), its model carrying `superseded_by`.
+- `compare.judge_expectation` stamps `superseded_by` on that closed verdict; `compare.resolve_superseded` keeps it
+  `closed` only when every replacing label is in the same comparison and `ok`, else `alert` naming each label's
+  status (`missing` when absent).
+- Finished classes may not use the key; using it needs a mentor ruling.
+
+Consequences: the Sun Cleric 806980 hit scenarios (four parts) are no longer generated. Tests (`test_compare.py`):
+the closed record without a scenario names its replacements; mutant without the key generates the plain hit as
+before; entries without replacements, with an empty list, naming the hit itself or with a blank reason are refused;
+the record stays closed with both replacements ok and alerts with one missing or one alert, unmeasured or tolerated.
+Finished classes 15, 19, 19 --stack and 23 regenerate and audit byte-identical (lr3 report).
