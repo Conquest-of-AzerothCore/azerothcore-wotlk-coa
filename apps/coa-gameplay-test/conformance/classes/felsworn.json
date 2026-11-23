@@ -4765,7 +4765,8 @@
         "least": 1,
         "source": "tooltip of 807461: $s1 = 50 (Spell.dbc 807461 EffectBasePoints[0] 49 + 1)% of the damage dealt"
       },
-      "observe_source": "$s1 = 50 (807461 EffectBasePoints[0] 49 + EffectDieSides 1). Bane of Chaos 704368 is cast at the dummy; one first tick at 3000 ms (read at 3500 ms); 807554 on a second dummy 4 yd from the caster (inside 8 yd of the first) is read before and after a real learn of 807461 (the before phase is the control) against the gain of the Bane damage on the first dummy in the same window: ratio 0.5 within 0.025, so 0.45 and 0.55 are excluded. 823764 on the caster removes partial resists in both phases (precondition fixture). Code: AscensionFelswornEvents.cpp:249-257 (damage / 2 per enemy). Reference search 2026-11-23: coa-history spell 807461 and 807554: 0 events in 186 logs for 807461 (a passive leaves no event); 807554: 2923 damage events in 4 logs (min 44, max 3364, mean 311, 0 crits, consistent with SPELL_ATTR2_CANT_CRIT on 807554); nothing found beyond the tooltip."
+      "observe_source": "$s1 = 50 (807461 EffectBasePoints[0] 49 + EffectDieSides 1). Bane of Chaos 704368 is cast at the dummy; one first tick at 3000 ms (read at 3500 ms); 807554 on a second dummy 4 yd from the caster (inside 8 yd of the first) is read before and after a real learn of 807461 (the before phase is the control) against the gain of the Bane damage on the first dummy in the same window: ratio 0.5 within 0.025, so 0.45 and 0.55 are excluded. 823764 on the caster removes partial resists in both phases (precondition fixture). Code: AscensionFelswornEvents.cpp:249-257 (damage / 2 per enemy). Reference search 2026-11-23: coa-history spell 807461 and 807554: 0 events in 186 logs for 807461 (a passive leaves no event); 807554: 2923 damage events in 4 logs (min 44, max 3364, mean 311, 0 crits, consistent with SPELL_ATTR2_CANT_CRIT on 807554); nothing found beyond the tooltip. A spell power fixture of 20000 (player_spell_power) makes the Bane tick thousands of points, so the integer halving (33 read 16 at spell power 0: 0.4848, pair G2) is below 0.1%.",
+      "player_spell_power": 20000
     },
     {
       "spell": 805248,
@@ -4774,7 +4775,7 @@
       "target": "dummy",
       "target_entry": 1832,
       "void_on_cast_failure": true,
-      "wait_ms": 1500,
+      "wait_ms": 300,
       "expire_ms": 500,
       "name": "Manaburn (mana burnt: 200% of Stamina)",
       "variant": "drain_base",
@@ -4804,7 +4805,7 @@
           "caster"
         ]
       ],
-      "observe_source": "Tooltip 805248: mana equal to 200% of Stamina: 2 x 79 = 158. The target's mana is read before the cast and after it (the before read, no cast, is the control): a loss of 158 within 1 (integer mana). Code: AscensionFelswornContracts.cpp:340-341 sets Effect[0] of Manaburn to 2.0 x the caster's Stamina (Spell.dbc Effect[0] is SPELL_EFFECT_POWER_BURN with no base points). Scarlet Magi 1832 (a mana-using mage, so the burn lands) is the target; the caster's critical strikes are made impossible (64481) and partial resists removed (823764) by harness set_aura, precondition fixtures; reference stat 2 (Stamina) = 79.0 from the class file. Reference search 2026-11-23: coa-history spell 805248: 25 casts, 22 damage events (58 to 352, mean 193, 7 crits), 22 drains (58 to 591, mean 181), 2 misses in 4 logs (the players' Stamina is not recorded, so no figure decides); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
+      "observe_source": "Tooltip 805248: mana equal to 200% of Stamina: 2 x 79 = 158. The target's mana is read before the cast and after it (the before read, no cast, is the control): a loss of 158 within 1 (integer mana). Code: AscensionFelswornContracts.cpp:340-341 sets Effect[0] of Manaburn to 2.0 x the caster's Stamina (Spell.dbc Effect[0] is SPELL_EFFECT_POWER_BURN with no base points). Scarlet Magi 1832 (a mana-using mage, so the burn lands) is the target; the caster's critical strikes are made impossible (64481) and partial resists removed (823764) by harness set_aura, precondition fixtures; reference stat 2 (Stamina) = 79.0 from the class file. Reference search 2026-11-23: coa-history spell 805248: 25 casts, 22 damage events (58 to 352, mean 193, 7 crits), 22 drains (58 to 591, mean 181), 2 misses in 4 logs (the players' Stamina is not recorded, so no figure decides); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value. The read follows the cast by 300 ms: the target's own mana regeneration added 17 in the 1500 ms window of the first pair G2 (reads -141 and -171 against 158 and 188 burnt by damage), so the window is shortened."
     },
     {
       "spell": 805248,
@@ -4813,7 +4814,7 @@
       "target": "dummy",
       "target_entry": 1832,
       "void_on_cast_failure": true,
-      "wait_ms": 1500,
+      "wait_ms": 300,
       "expire_ms": 500,
       "name": "Manaburn (mana burnt follows Stamina)",
       "variant": "drain_stamina",
@@ -4826,9 +4827,9 @@
         "power": 0
       },
       "before_expected": 1000,
-      "expected": 810.4,
-      "expected_gain": -189.60000000000002,
-      "tolerance": 1.5,
+      "expected": 812,
+      "expected_gain": -188,
+      "tolerance": 1.0,
       "phase_auras": [
         [
           64481,
@@ -4843,7 +4844,7 @@
           "caster"
         ]
       ],
-      "observe_source": "Contrast arm of drain_base: after a real learn of 500067 the Stamina reads 94.8, so the second cast burns 2 x 94.8 = 189.6 (within 1.5, integer mana), against 158 in the first cast of the same scenario. Code: AscensionFelswornContracts.cpp:340-341 sets Effect[0] of Manaburn to 2.0 x the caster's Stamina (Spell.dbc Effect[0] is SPELL_EFFECT_POWER_BURN with no base points). Scarlet Magi 1832 (a mana-using mage, so the burn lands) is the target; the caster's critical strikes are made impossible (64481) and partial resists removed (823764) by harness set_aura, precondition fixtures; reference stat 2 (Stamina) = 79.0 from the class file. Reference search 2026-11-23: coa-history spell 805248: 25 casts, 22 damage events (58 to 352, mean 193, 7 crits), 22 drains (58 to 591, mean 181), 2 misses in 4 logs (the players' Stamina is not recorded, so no figure decides); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value.",
+      "observe_source": "Contrast arm of drain_base: after a real learn of 500067 the Stamina reads 94.8, so the second cast burns 2 x 94.8 = 189.6 (within 1.5, integer mana), against 158 in the first cast of the same scenario. Code: AscensionFelswornContracts.cpp:340-341 sets Effect[0] of Manaburn to 2.0 x the caster's Stamina (Spell.dbc Effect[0] is SPELL_EFFECT_POWER_BURN with no base points). Scarlet Magi 1832 (a mana-using mage, so the burn lands) is the target; the caster's critical strikes are made impossible (64481) and partial resists removed (823764) by harness set_aura, precondition fixtures; reference stat 2 (Stamina) = 79.0 from the class file. Reference search 2026-11-23: coa-history spell 805248: 25 casts, 22 damage events (58 to 352, mean 193, 7 crits), 22 drains (58 to 591, mean 181), 2 misses in 4 logs (the players' Stamina is not recorded, so no figure decides); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value. The read follows the cast by 300 ms: the target's own mana regeneration added 17 in the 1500 ms window of the first pair G2 (reads -141 and -171 against 158 and 188 burnt by damage), so the window is shortened. The Stamina the player sees and the engine multiplies is the integer total: Fel Monstrosity 500067 makes it 79 x 1.2 = 94.8, shown as 94 (the exact-stat entry 500067 stamina reads 94.8; the integer is its floor), so the amount is 2 x 94 = 188 (first pair G2 read 188 for the damage).",
       "gate_spell": 500067
     },
     {
@@ -4907,7 +4908,7 @@
         "critical": false
       },
       "before_expected": 158,
-      "expected": 347.6,
+      "expected": 346,
       "phase_auras": [
         [
           64481,
@@ -4922,10 +4923,10 @@
           "caster"
         ]
       ],
-      "observe_source": "Contrast arm of damage_base: the damage total reads 158 after the first cast and, after a real learn of 500067 (Stamina 94.8), 189.6 more after the second: the damage follows the burnt mana 2 x Stamina, as drain_stamina reads. Code: AscensionFelswornContracts.cpp:340-341 sets Effect[0] of Manaburn to 2.0 x the caster's Stamina (Spell.dbc Effect[0] is SPELL_EFFECT_POWER_BURN with no base points). Scarlet Magi 1832 (a mana-using mage, so the burn lands) is the target; the caster's critical strikes are made impossible (64481) and partial resists removed (823764) by harness set_aura, precondition fixtures; reference stat 2 (Stamina) = 79.0 from the class file. Reference search 2026-11-23: coa-history spell 805248: 25 casts, 22 damage events (58 to 352, mean 193, 7 crits), 22 drains (58 to 591, mean 181), 2 misses in 4 logs (the players' Stamina is not recorded, so no figure decides); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value.",
+      "observe_source": "Contrast arm of damage_base: the damage total reads 158 after the first cast and, after a real learn of 500067 (Stamina 94.8), 189.6 more after the second: the damage follows the burnt mana 2 x Stamina, as drain_stamina reads. Code: AscensionFelswornContracts.cpp:340-341 sets Effect[0] of Manaburn to 2.0 x the caster's Stamina (Spell.dbc Effect[0] is SPELL_EFFECT_POWER_BURN with no base points). Scarlet Magi 1832 (a mana-using mage, so the burn lands) is the target; the caster's critical strikes are made impossible (64481) and partial resists removed (823764) by harness set_aura, precondition fixtures; reference stat 2 (Stamina) = 79.0 from the class file. Reference search 2026-11-23: coa-history spell 805248: 25 casts, 22 damage events (58 to 352, mean 193, 7 crits), 22 drains (58 to 591, mean 181), 2 misses in 4 logs (the players' Stamina is not recorded, so no figure decides); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value. The Stamina the player sees and the engine multiplies is the integer total: Fel Monstrosity 500067 makes it 79 x 1.2 = 94.8, shown as 94 (the exact-stat entry 500067 stamina reads 94.8; the integer is its floor), so the amount is 2 x 94 = 188 (first pair G2 read 188 for the damage).",
       "gate_spell": 500067,
-      "expected_gain": 189.60000000000002,
-      "tolerance": 1.5
+      "expected_gain": 188,
+      "tolerance": 1.0
     },
     {
       "spell": 805236,
@@ -4949,12 +4950,13 @@
         ]
       ],
       "quote": "While Inner Demon is active, your melee haste is now increased by $s2%",
-      "before_expected": 2300,
-      "expected": 2000.0,
-      "tolerance": 1,
+      "before_expected": 2000,
+      "expected": 1739.1304,
+      "tolerance": 0.001,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "$s2 = 15 (805236 Effect[1], EffectBasePoints 14 + EffectDieSides 1); the aura 807426 the script applies while Inner Demon 804216 and 805236 are both on the caster carries aura 138 SPELL_AURA_MOD_MELEE_HASTE with BasePoints 14 + 1 = 15 (AscensionFelswornContracts.cpp:81-92, AscensionFelsworn.cpp:274). The main-hand attack time of the reference weapon (Slayer item 2027, 2300 ms) is read 500 ms after a harmless Bless 804247 before (control: 805236 not learned) and after a real learn: 2300 / 1.15 = 2000 ms within 1. Inner Demon 804216 is set on the caster in both phases by harness set_aura (a precondition fixture, named as such). Reference search 2026-11-23: coa-history spell 805236, 807426, 807427: 0 events in 186 logs (a passive leaves no event; positive control 807554: 2923 events); the bindmysoul snapshot repeats the tooltip; nothing found that states another value."
+      "observe_source": "$s2 = 15 (805236 Effect[1], EffectBasePoints 14 + EffectDieSides 1); the aura 807426 the script applies while Inner Demon 804216 and 805236 are both on the caster carries aura 138 SPELL_AURA_MOD_MELEE_HASTE with BasePoints 14 + 1 = 15 (AscensionFelswornContracts.cpp:81-92, AscensionFelsworn.cpp:274). The main-hand attack time is read 500 ms after a harmless Bless 804247 before (control: 805236 not learned) and after a real learn, with Inner Demon 804216 set on the caster in both phases by harness set_aura (a precondition fixture): the after time over the before time is 1/1.15 = 0.869565 within 0.001, so 14% and 16% are excluded. The absolute time is not stated: Inner Demon itself changes the weapon time (2800 ms read before the learn in the first pair G2, against 2300 ms without it), which this claim does not state. Reference search 2026-11-23: coa-history spell 805236, 807426, 807427: 0 events in 186 logs (a passive leaves no event; positive control 807554: 2923 events); the bindmysoul snapshot repeats the tooltip; nothing found that states another value.",
+      "expected_ratio": 0.8695652
     },
     {
       "spell": 805235,
@@ -5087,9 +5089,9 @@
       "setup_casts": [
         704368
       ],
-      "setup_wait_ms": 500,
-      "wait_ms": 3600,
-      "observe_source": "Bane of Chaos 704368 (periodic damage, first tick 3000 ms after its cast) is cast at the target 500 ms before Whispers; at 3600 ms after Whispers the aura is gone (the target took the tick; the control entry unbroken, same timing without the damage, reads it present). Code: AscensionFelswornContracts.cpp:292-293 adds AURA_INTERRUPT_FLAG_TAKE_DAMAGE to 805235 and 807590; Spell.dbc 805235 Effect[0] aura 7 SPELL_AURA_MOD_FEAR, Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED BasePoints -81 + 1 = -80 ($s3), DurationIndex 31 = 8000 ms ($d). Kobold Vermin 6 is the target (the stock dummy 36 takes no fear or horror aura, measured in the Infernal entries of this class); the Whispers cast at the dummy lands its area at the dummy's position (radius index 14). Reference search 2026-11-23: coa-history spell 805235: 3 casts, 8 aura applications and 8 removals in 2 logs, 2 SPELL_AURA_BROKEN_SPELL (the effect is broken by damage; no duration or amount is logged); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
+      "setup_wait_ms": 1700,
+      "wait_ms": 2800,
+      "observe_source": "Bane of Chaos 704368 (periodic damage, first tick 3000 ms after its cast) is cast at the target 500 ms before Whispers; at 3600 ms after Whispers the aura is gone (the target took the tick; the control entry unbroken, same timing without the damage, reads it present). Code: AscensionFelswornContracts.cpp:292-293 adds AURA_INTERRUPT_FLAG_TAKE_DAMAGE to 805235 and 807590; Spell.dbc 805235 Effect[0] aura 7 SPELL_AURA_MOD_FEAR, Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED BasePoints -81 + 1 = -80 ($s3), DurationIndex 31 = 8000 ms ($d). Kobold Vermin 6 is the target (the stock dummy 36 takes no fear or horror aura, measured in the Infernal entries of this class); the Whispers cast at the dummy lands its area at the dummy's position (radius index 14). Reference search 2026-11-23: coa-history spell 805235: 3 casts, 8 aura applications and 8 removals in 2 logs, 2 SPELL_AURA_BROKEN_SPELL (the effect is broken by damage; no duration or amount is logged); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value. Whispers follows the Bane cast by 1700 ms (the first pair G2 refused it at 500 ms: global cooldown, SPELL_FAILED_NOT_READY); the Bane tick at 3000 ms lands 1300 ms after it and the read is at 2800 ms."
     },
     {
       "spell": 805235,
@@ -5112,11 +5114,11 @@
       "label_suffix": "unbroken",
       "quote": "Damage caused may interrupt the effect.",
       "expected": 1,
-      "wait_ms": 3600,
+      "wait_ms": 2800,
       "game_time": {
         "after": [
-          3550,
-          3750
+          2750,
+          2950
         ]
       },
       "observe_source": "Control arm of broken: the same timing (3600 ms after the cast) with no damage on the target: the aura is still there, so its loss in broken comes from the damage. Code: AscensionFelswornContracts.cpp:292-293 adds AURA_INTERRUPT_FLAG_TAKE_DAMAGE to 805235 and 807590; Spell.dbc 805235 Effect[0] aura 7 SPELL_AURA_MOD_FEAR, Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED BasePoints -81 + 1 = -80 ($s3), DurationIndex 31 = 8000 ms ($d). Kobold Vermin 6 is the target (the stock dummy 36 takes no fear or horror aura, measured in the Infernal entries of this class); the Whispers cast at the dummy lands its area at the dummy's position (radius index 14). Reference search 2026-11-23: coa-history spell 805235: 3 casts, 8 aura applications and 8 removals in 2 logs, 2 SPELL_AURA_BROKEN_SPELL (the effect is broken by damage; no duration or amount is logged); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
