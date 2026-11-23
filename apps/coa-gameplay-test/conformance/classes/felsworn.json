@@ -121,6 +121,25 @@
       "per_trigger_text": "causes off-hand Weapon Damage to attackers",
       "observe_source": "EffectTriggerSpell[0] of 300476 (804336). AscensionFelswornEvents.cpp:42-47 passes an incoming dodge (not a landed or parried swing) when Chance(player, 300476) succeeds (300476 ProcChance 100, so every dodge) and :223-224 casts 804336 at the attacker and 520256 on the caster. An aggressive striker (creature 36) swings at the caster, who wears Evasion 26669 (+50% dodge) refreshed before every 2000 ms attempt as a precondition fixture (the trigger action avoided, ADR 0709); every dodged (victim_state 2) or parried (victim_state 3) swing is a trial and the spell_cast_count of 804336 must match it. Reference search 2026-11-23: coa-history spell 804336: 3 damage events in 2 logs (14 to 74); 520256: 42 aura applications and 42 removals in 2 logs; nothing decides a value.",
       "trial_attempts_reason": "An attempt is one striker swing interval; only the dodged or parried swings are trials (Evasion gives +50% dodge, the rest hit or miss), so 2.5 times the swings are scheduled to reach the trigger trials."
+    },
+    {
+      "aura": 805249,
+      "name": "Illidari Training",
+      "tooltip": "Dodging an attack now generates $521210s1 Energy.",
+      "trigger": {
+        "action": "avoided",
+        "striker_entry": 36,
+        "swing_ms": 2000
+      },
+      "trigger_text": "Dodging an attack",
+      "trial_metric": "melee_attacks_taken",
+      "trial_attempts_factor": 2.5,
+      "observe_spell": 521210,
+      "observe_metric": "spell_energize_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now generates Energy",
+      "observe_source": "805249 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell[0] 521210 (Effect[0] 30 SPELL_EFFECT_ENERGIZE, BasePoints 2 + 1 = 3, MiscValue 3 Energy), ProcChance 100. An aggressive striker (creature 36) swings at the caster, who wears Evasion 26669 (+50% dodge) refreshed before every 2000 ms attempt as a precondition fixture (the trigger action avoided, ADR 0709); every dodged (victim_state 2) or parried (victim_state 3) swing is a trial and the spell_energize_count of 521210 must match it; the baseline part without the passive learned must read 0. The Energy amount is not read by this count. Reference search 2026-11-23: coa-history spell 805249: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only.",
+      "trial_attempts_reason": "An attempt is one striker swing interval; only the dodged or parried swings are trials (Evasion gives +50% dodge, the rest hit or miss), so 2.5 times the swings are scheduled to reach the trigger trials."
     }
   ],
   "talent_modifiers": [],
@@ -3206,6 +3225,237 @@
         }
       ],
       "observe_source": "806109 Effect[1] aura 39 SPELL_AURA_SCHOOL_IMMUNITY, EffectMiscValue 127 (every school including Physical), DurationIndex 31 (8000 ms). Fixtures, each landed by a real creature cast at the caster inside the window: Daze 38767 (SchoolMask 1 Physical, one aura 33 effect, per witch_hunter.json 'Physical landing control') for 'physical attacks' and Chilled Blood 35317 (SchoolMask 16 Frost, DmgClass 1 magic, aura 33) for 'spells'. The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands. 'cannot attack, move or cast spells' has its own claims and no check here. Reference search 2026-11-23: coa-history spell 806109 finds 6 SPELL_CAST_SUCCESS, 6 SPELL_AURA_APPLIED and 6 SPELL_AURA_REMOVED by a player in 1 of 186 logs, intervals 1.59 to 6.09 s (left early, mechanic felsworn-illidans-guile-early-exit-9993); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 804610,
+      "name": "Reckless Assault (Azzinoth's Assault damage against a slowed enemy)",
+      "kind": "hit_ratio",
+      "variant": "assault_slowed",
+      "label_suffix": "assault_slowed",
+      "quote": "Increases the damage of Azzinoth's Assault, Annihilan Strike, and Twin Slice by $s1% against slowed enemies.",
+      "expected": 1.15,
+      "observe_spell": 520262,
+      "cast_wait_ms": 1600,
+      "target_auras": [
+        [
+          38767,
+          1
+        ]
+      ],
+      "control": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ],
+        "learn": [
+          804610
+        ]
+      },
+      "trials": 20,
+      "critical": false,
+      "cast_spell": 803475,
+      "cast_power": 100,
+      "expected_source": "804610 Effect[0] aura 112, BasePoints 14 + 1 = 15 ($s1), against slowed enemies. The non-critical hits of the 520262 main-hand strike of Azzinoth's Assault 801904 (cast 803475, needs Felfury 800058 x6 and At Least 2 Felfury 803468 as precondition fixtures by set_aura) are averaged in a control arm without 804610 and a treatment arm with it learned, on a dummy slowed by Daze 38767 (aura 33 SPELL_AURA_MOD_DECREASE_SPEED, set on the dummy before every cast as a precondition fixture): ratio 1.15, within the 2-point band. Reference search 2026-11-23: coa-history spell 804610: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 804610,
+      "name": "Reckless Assault (Azzinoth's Assault damage control: not slowed)",
+      "kind": "hit_ratio",
+      "variant": "assault_control",
+      "label_suffix": "assault_control",
+      "quote": "Increases the damage of Azzinoth's Assault, Annihilan Strike, and Twin Slice by $s1% against slowed enemies.",
+      "expected": 1.0,
+      "observe_spell": 520262,
+      "cast_wait_ms": 1600,
+      "control": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ],
+        "learn": [
+          804610
+        ]
+      },
+      "trials": 20,
+      "critical": false,
+      "cast_spell": 803475,
+      "cast_power": 100,
+      "expected_source": "804610 Effect[0] aura 112, BasePoints 14 + 1 = 15 ($s1), against slowed enemies. The non-critical hits of the 520262 main-hand strike of Azzinoth's Assault 801904 (cast 803475, needs Felfury 800058 x6 and At Least 2 Felfury 803468 as precondition fixtures by set_aura) are averaged in a control arm without 804610 and a treatment arm with it learned, on a dummy with no slow (the control claim: the passive adds nothing against an unslowed enemy): ratio 1.00, within the 2-point band, which excludes 1.15. Reference search 2026-11-23: coa-history spell 804610: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 804610,
+      "name": "Reckless Assault (Annihilan Strike damage against a slowed enemy)",
+      "kind": "hit_ratio",
+      "variant": "annihilan_slowed",
+      "label_suffix": "annihilan_slowed",
+      "quote": "Increases the damage of Azzinoth's Assault, Annihilan Strike, and Twin Slice by $s1% against slowed enemies.",
+      "expected": 1.15,
+      "observe_spell": 801913,
+      "cast_wait_ms": 1600,
+      "target_auras": [
+        [
+          38767,
+          1
+        ]
+      ],
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "auras": [],
+        "learn": [
+          804610
+        ]
+      },
+      "trials": 80,
+      "parts": 8,
+      "critical": false,
+      "cast_spell": 801903,
+      "cast_power": 100,
+      "expected_source": "804610 Effect[0] aura 112, BasePoints 14 + 1 = 15 ($s1), against slowed enemies. The non-critical hits of the 801913 main-hand strike of Annihilan Strike 801903 (Effect[0] TRIGGER_SPELL_WITH_VALUE, ManaCost 40 energy) are averaged in a control arm without 804610 and a treatment arm with it learned, on a dummy slowed by Daze 38767 (aura 33 SPELL_AURA_MOD_DECREASE_SPEED, set on the dummy before every cast as a precondition fixture): ratio 1.15, within the 2-point band. Reference search 2026-11-23: coa-history spell 804610: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 804610,
+      "name": "Reckless Assault (Annihilan Strike damage control: not slowed)",
+      "kind": "hit_ratio",
+      "variant": "annihilan_control",
+      "label_suffix": "annihilan_control",
+      "quote": "Increases the damage of Azzinoth's Assault, Annihilan Strike, and Twin Slice by $s1% against slowed enemies.",
+      "expected": 1.0,
+      "observe_spell": 801913,
+      "cast_wait_ms": 1600,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "auras": [],
+        "learn": [
+          804610
+        ]
+      },
+      "trials": 80,
+      "parts": 6,
+      "critical": false,
+      "cast_spell": 801903,
+      "cast_power": 100,
+      "expected_source": "804610 Effect[0] aura 112, BasePoints 14 + 1 = 15 ($s1), against slowed enemies. The non-critical hits of the 801913 main-hand strike of Annihilan Strike 801903 (Effect[0] TRIGGER_SPELL_WITH_VALUE, ManaCost 40 energy) are averaged in a control arm without 804610 and a treatment arm with it learned, on a dummy with no slow (the control claim: the passive adds nothing against an unslowed enemy): ratio 1.00, within the 2-point band, which excludes 1.15. Reference search 2026-11-23: coa-history spell 804610: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 804610,
+      "name": "Reckless Assault (Twin Slice damage against a slowed enemy)",
+      "kind": "hit_ratio",
+      "variant": "twin_slice_slowed",
+      "label_suffix": "twin_slice_slowed",
+      "quote": "Increases the damage of Azzinoth's Assault, Annihilan Strike, and Twin Slice by $s1% against slowed enemies.",
+      "expected": 1.15,
+      "observe_spell": 808303,
+      "cast_wait_ms": 1600,
+      "target_auras": [
+        [
+          38767,
+          1
+        ]
+      ],
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "auras": [],
+        "learn": [
+          804610
+        ]
+      },
+      "trials": 80,
+      "parts": 6,
+      "critical": false,
+      "cast_spell": 801901,
+      "cast_power": 100,
+      "expected_source": "804610 Effect[0] aura 112, BasePoints 14 + 1 = 15 ($s1), against slowed enemies. The non-critical hits of the 808303 main-hand strike of Twin Slice 801901 (Effect[0] TRIGGER_SPELL, ManaCost 45 energy) are averaged in a control arm without 804610 and a treatment arm with it learned, on a dummy slowed by Daze 38767 (aura 33 SPELL_AURA_MOD_DECREASE_SPEED, set on the dummy before every cast as a precondition fixture): ratio 1.15, within the 2-point band. Reference search 2026-11-23: coa-history spell 804610: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 804610,
+      "name": "Reckless Assault (Twin Slice damage control: not slowed)",
+      "kind": "hit_ratio",
+      "variant": "twin_slice_control",
+      "label_suffix": "twin_slice_control",
+      "quote": "Increases the damage of Azzinoth's Assault, Annihilan Strike, and Twin Slice by $s1% against slowed enemies.",
+      "expected": 1.0,
+      "observe_spell": 808303,
+      "cast_wait_ms": 1600,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "auras": [],
+        "learn": [
+          804610
+        ]
+      },
+      "trials": 80,
+      "parts": 5,
+      "critical": false,
+      "cast_spell": 801901,
+      "cast_power": 100,
+      "expected_source": "804610 Effect[0] aura 112, BasePoints 14 + 1 = 15 ($s1), against slowed enemies. The non-critical hits of the 808303 main-hand strike of Twin Slice 801901 (Effect[0] TRIGGER_SPELL, ManaCost 45 energy) are averaged in a control arm without 804610 and a treatment arm with it learned, on a dummy with no slow (the control claim: the passive adds nothing against an unslowed enemy): ratio 1.00, within the 2-point band, which excludes 1.15. Reference search 2026-11-23: coa-history spell 804610: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 802108,
+      "name": "Hidden Power (spell power from Intellect and Spirit)",
+      "kind": "metric_delta",
+      "variant": "spell_power",
+      "label_suffix": "spell_power",
+      "quote": "Increases your spell damage by $s1% of your Intellect and Spirit.",
+      "trigger_spell": 804247,
+      "gate_spell": 802108,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 12.6,
+      "expected_gain": 12.6,
+      "tolerance": 0.7,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "802108 Effect[0] and Effect[1] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, MiscValue 126 (the six magic schools), MiscValueB 3 (Intellect) and 4 (Spirit), BasePoints 14 + 1 = 15 ($s1). The caster's Shadow spell power is read before (control) and after a real learn of 802108: 15% x Intellect 34 + 15% x Spirit 50 (class file reference_stats stat 3 and 4) = 5.1 + 7.5 = 12.6, tolerance 0.7 for the integer parts (12 or 13), so the 10% and 20% neighbours (8.4 and 16.8) are excluded. The second clause, Inner Demon's extra Spirit share, is not read here. Reference search 2026-11-23: coa-history spell 802108: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],

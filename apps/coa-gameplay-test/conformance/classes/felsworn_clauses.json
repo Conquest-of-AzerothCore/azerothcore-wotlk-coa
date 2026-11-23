@@ -2442,7 +2442,7 @@
     "spell": 802108,
     "clause": "Increases your spell damage by $s1% of your Intellect and Spirit.",
     "labels": [
-      "802108 effect_value e0 #0"
+      "802108 behaviour_metric_delta spell_power"
     ],
     "kind": "claim"
   },
@@ -2621,10 +2621,30 @@
   {
     "spell": 804610,
     "clause": "Increases the damage of Azzinoth's Assault, Annihilan Strike, and Twin Slice by $s1% against slowed enemies.",
-    "labels": [
-      "804610 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the damage of Azzinoth's Assault,",
+        "labels": [
+          "804610 behaviour_hit_ratio assault_slowed",
+          "804610 behaviour_hit_ratio assault_control"
+        ]
+      },
+      {
+        "claim": "Annihilan Strike,",
+        "labels": [
+          "804610 behaviour_hit_ratio annihilan_slowed",
+          "804610 behaviour_hit_ratio annihilan_control"
+        ]
+      },
+      {
+        "claim": "and Twin Slice by $s1% against slowed enemies.",
+        "labels": [
+          "804610 behaviour_hit_ratio twin_slice_slowed",
+          "804610 behaviour_hit_ratio twin_slice_control"
+        ]
+      }
+    ]
   },
   {
     "spell": 804611,
@@ -2942,10 +2962,21 @@
   {
     "spell": 805249,
     "clause": "Dodging an attack now generates $521210s1 Energy.",
-    "labels": [
-      "805249 effect_value 521210e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Dodging an attack now generates",
+        "labels": [
+          "805249 trigger_count"
+        ]
+      },
+      {
+        "claim": "$521210s1 Energy.",
+        "labels": [
+          "805249 effect_value 521210e0 #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 805255,
