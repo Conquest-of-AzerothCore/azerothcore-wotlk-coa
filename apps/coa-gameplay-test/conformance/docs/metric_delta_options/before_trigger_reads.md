@@ -1,4 +1,4 @@
-# Before trigger reads (`metric_delta` `before_trigger_reads`, ADR 1064, provisional)
+# Before trigger reads (`metric_delta` `before_trigger_reads`, ADR 1233, provisional)
 
 `before_trigger_reads` is a non-empty list of `{"spell": id, "expected": 0 or 1, "actor": "caster" or "dummy"}`. Right
 after the entry's `phase_auras` and `after_auras` are set, with no wait before the trigger cast, the scenario reads

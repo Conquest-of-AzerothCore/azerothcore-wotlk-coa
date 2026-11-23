@@ -295,11 +295,11 @@ not in the table fails the whole run (`EvidenceError`, no default):
   `spell_done_crit_chance` does with the crit words (ADR 0691), and `spell_taken_crit_chance`, the target-side
   chance with the attacker's conditional rules, the same way (ADR 0800). `spell_done_crit_chance_scripted`, the done
   chance passed through the CoA crit hook (`ScriptMgr::OnSpellCritChance`), takes the same row and crit words plus a
-  partner gate (`coverage.PARTNERED_CONTRASTS`, ADR 1018): its learned verdict is behaviour only when the ledger row's
+  partner gate (`coverage.PARTNERED_CONTRASTS`, ADR 1188): its learned verdict is behaviour only when the ledger row's
   conformant learned verdicts of the metric hold a non-zero expected gain and, unless every row of the spell joined is
   a plain unconditional stat sentence (`coverage.PLAIN_CRIT_SENTENCE`), also a zero gain. That the zero arm's fixture
   breaks the condition, and that each condition has an arm, is a review check; the tool does not see it.
-  `critical_block_chance` (the engine's `SPELL_AURA_MOD_BLOCK_CRIT_CHANCE` total, ADR 1023) is a readback with the learned
+  `critical_block_chance` (the engine's `SPELL_AURA_MOD_BLOCK_CRIT_CHANCE` total, ADR 1193) is a readback with the learned
   contrast, the words "critical block" and the same partner gate; its text is never a plain crit sentence, so the zero
   arm is always required. A
   `behaviour_group_stack_cap` state read is behaviour for a no-stack clause ("does not stack",

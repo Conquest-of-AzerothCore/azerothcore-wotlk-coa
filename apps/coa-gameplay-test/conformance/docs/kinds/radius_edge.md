@@ -14,7 +14,7 @@ With `corpse` (`entry`, `health`, `kill_spell`, `reach`) the primary is that cre
 cast before the arms; the edge adds its object size as well (a script search with `IsWithinDistInMap`). `cast_at:
 caster` casts a self-targeted spell. A `gate_spell` equal to `cast_spell` is learned only between the arms.
 
-With `leeway: true` (ADR 1020) the edge adds the player caster's area leeway, computed from the engine rule: 2.66 yd
+With `leeway: true` (ADR 1190) the edge adds the player caster's area leeway, computed from the engine rule: 2.66 yd
 (`LEEWAY_BONUS_RANGE`) when the caster's run speed rate times 7.0 exceeds 4.97 (`LEEWAY_MIN_MOVE_SPEED`), else 0
 (`Spell.cpp:1388-1394`, `Object.cpp:1787-1808`). Generation refuses it unless the caster is the player (no
 `caster_entry`) and an effect of `cast_spell` has TargetA or TargetB 15, 20 or 56; the dummies stand on the edge at

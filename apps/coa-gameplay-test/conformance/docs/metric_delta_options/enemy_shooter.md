@@ -1,4 +1,4 @@
-# Enemy shooter (`metric_delta` `enemy_shooter`, ADR 1040, provisional)
+# Enemy shooter (`metric_delta` `enemy_shooter`, ADR 1209, provisional)
 
 `enemy_shooter` makes the enemy player of `enemy_player_race` act in the uncast before phase and read what it did
 while the trigger was on it. Keys (all required except `power`, `relocate`, `native_refusals` and

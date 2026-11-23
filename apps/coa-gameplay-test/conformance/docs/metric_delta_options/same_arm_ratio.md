@@ -1,4 +1,4 @@
-# Same-arm ratio (`metric_delta` `same_arm_ratio`, ADR 1068, provisional)
+# Same-arm ratio (`metric_delta` `same_arm_ratio`, ADR 1237, provisional)
 
 `same_arm_ratio` is `{"metric": M, "fields": {...}, "ratio": R, "tolerance": T, "least": N, "source": text}` with an
 optional `"main_below": B`. Right after the entry's before and after readings the scenario reads `M` with `fields`

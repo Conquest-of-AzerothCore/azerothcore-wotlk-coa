@@ -10,7 +10,7 @@ Named point: `fixtures` (the extra creatures).
 Witch Hunter: Slayer's Mark 804068 (claim 351.1, Witch Hunter ADR 0024): Witchblight 681220 strikes three dummies;
 only the marked one gains the attacker bonus (`ap_melee_area`, `ap_melee_area_unmarked`, `ap_melee_area_control`).
 
-## Cone form (ADR 1055)
+## Cone form (ADR 1224)
 
 `area_dummies` may instead be `{"cone": {"angle": degrees, "radius": yd, "source": text, optional "offset" (yd, default
 6), "margin_pct" (default 10), "behind" (degrees, default 135)}}`. `source` cites the data or the code line that sets the
@@ -24,13 +24,13 @@ It refuses a setup cast, `area_sum`, `relocate_before_trigger` and a trigger cas
 
 Sun Cleric: Shield Radiance 504580 `cone_edge` (90 degrees from `spell_cone` 800654, Spell.cpp:1277-1279).
 
-## Edge form (ADR 1055 addendum)
+## Edge form (ADR 1224 addendum)
 
 `area_dummies` may instead be `{"edge": {"radius": yd, "source": text, "reach": yd, "reach_source": text, "leeway":
 bool, optional "margin_pct" (default 10)}}`. The edge is the DBC radius (`source`) plus the dummy's combat reach
 (`reach`, cited from the data rows in `reach_source`) that a player caster's area search adds to a non-player unit
 target (Spell.cpp:9437-9442), plus, with `leeway`, the player caster's area leeway 2.66 yd (Spell.cpp:1388-1394,
-Object.cpp:1787-1808, ADR 1020; the hit spell needs TargetA/B 15, 20 or 56). `area1` stands `margin_pct` percent
+Object.cpp:1787-1808, ADR 1190; the hit spell needs TargetA/B 15, 20 or 56). `area1` stands `margin_pct` percent
 inside the edge and `area2` as far beyond it, on the dummy's line. Before the last trigger cast the option reads the
 positions of the caster, `area1` and `area2`, their combat reaches and, with `leeway`, the caster's run speed rate;
 after the after reading it reads the hit spell's `spell_damage_count` on `area1` and `area2`. The verdict recomputes

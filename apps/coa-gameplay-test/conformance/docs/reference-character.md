@@ -61,7 +61,7 @@ take the default set.
 
 `weapon_set_spells` {set name: [spell ids]} names the spells a set needs before it can be equipped (Valkyr's Grip
 707072 for two two-handers, `Player::CanTitanGrip`, `PlayerStorage.cpp:2090-2091`; ADR
-[1012](../../../../docs/adr/1012-a-weapon-set-can-learn-the-spells-it-needs-to-be-equipped.md)). `base_steps` learns
+[1012](../../../../docs/adr/1182-a-weapon-set-can-learn-the-spells-it-needs-to-be-equipped.md)). `base_steps` learns
 them with real `learn` steps after the settle wait and before the set's equip steps, only in the scenarios that wear
 that set. `check_weapon_set_spells` refuses a key that is not a set name or a value that is not a non-empty list of
 distinct positive ids; `procs.control_weapon` refuses a control set whose spells the scenario's own set does not learn;

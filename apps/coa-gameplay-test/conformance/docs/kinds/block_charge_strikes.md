@@ -1,4 +1,4 @@
-# Block charge strikes (`behaviour_metric_delta`, `kind: "block_charge_strikes"`, ADR 1025, provisional)
+# Block charge strikes (`behaviour_metric_delta`, `kind: "block_charge_strikes"`, ADR 1195, provisional)
 
 How many real blocks an aura with block charges lasts, without and with a talent that adds blocks. `shield` is equipped
 with Block 107 learned, and each arm sets `set_combat_avoidance` with `block: 100` and dodge and parry at 0 (owner

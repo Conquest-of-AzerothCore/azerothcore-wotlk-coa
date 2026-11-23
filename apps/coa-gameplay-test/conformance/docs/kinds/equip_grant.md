@@ -1,4 +1,4 @@
-# Equip grant (`behaviour_metric_delta`, `kind: "equip_grant"`, ADR 1028)
+# Equip grant (`behaviour_metric_delta`, `kind: "equip_grant"`, ADR 1198)
 
 A passive that allows a weapon in the off hand ("Allows you to dual wield and to wield a Two-Handed Mace, Sword, or
 Polearm in each hand"), read on the equip result itself. After the base steps the skill line of every pair is set,

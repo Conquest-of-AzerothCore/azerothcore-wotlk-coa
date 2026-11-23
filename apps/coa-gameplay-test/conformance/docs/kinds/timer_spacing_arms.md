@@ -1,4 +1,4 @@
-# Timer spacing arms (`behaviour_metric_delta`, `kind: "timer_spacing_arms"`, ADR 1025, provisional)
+# Timer spacing arms (`behaviour_metric_delta`, `kind: "timer_spacing_arms"`, ADR 1195, provisional)
 
 An internal timer ("Can occur only once per sec.") bracketed by two real hits spaced on either side of it. `spell` is
 learned; each of two arms makes two real `hit_spell` casts, the second with the harness `cast` key `ignore_gcd`
@@ -12,7 +12,7 @@ learned; each of two arms makes two real `hit_spell` casts, the second with the 
   read and above by that sum plus `max_step_ms` per step; a window holding more than one whole count is unmeasured.
 - `variant: "chain_copy"`: each arm seeds `seed_spell` on the primary dummy and hits it twice; the effect is the count
   of new `aura_spell` copies of the caster on `spares` spare dummies within `radius` yd.
-- `variant: "chain_control"` (ADR 1044, provisional): `chain_copy` with a control arm before `spell` is learned:
+- `variant: "chain_control"` (ADR 1213, provisional): `chain_copy` with a control arm before `spell` is learned:
   the same seed and two hits `gaps[1]` ms apart must give no new copy (else `alert`); its spacing must lie in the
   allowed band and its opening cast count 1 (else `unmeasured`); the later arms then count 2 and 3 opening casts.
 

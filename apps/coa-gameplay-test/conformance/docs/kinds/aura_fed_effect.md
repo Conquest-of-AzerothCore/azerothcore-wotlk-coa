@@ -1,4 +1,4 @@
-# Aura fed effect (`behaviour_metric_delta`, `kind: "aura_fed_effect"`, ADR 1025, provisional)
+# Aura fed effect (`behaviour_metric_delta`, `kind: "aura_fed_effect"`, ADR 1195, provisional)
 
 The effect of a proc-granted aura, with the aura earned for real instead of set by the harness. Control trials cancel
 `aura` and cast `effect_spell`; treatment trials run the harness step `cast_until_aura` (owner ruling O-17): `feed_spell`
@@ -16,7 +16,7 @@ Every trial reads `aura` right before the judged cast: 0 in the control, 1 in th
   trial: a fed cast that did not go off alerts, a control one makes the run unmeasured.
 - `variant: "damage"`: `trials` per arm, non-critical hits only; the mean fed hit must be `expected` times the control
   mean within `expected * EffectDieSides[0] / control mean`.
-- `variant: "damage"` with `sized: true` (ADR 1033, opt-in; absent, the band above is unchanged): `aura`
+- `variant: "damage"` with `sized: true` (ADR 1202, opt-in; absent, the band above is unchanged): `aura`
   Effect[`figure_effect`] (default 0) must be `ADD_PCT_MODIFIER` on `SPELLMOD_DAMAGE` and `expected` must equal 1 plus
   its value / 100 (the figure f), else the entry is refused. The 99% Welch-t interval of the fed to control mean hit
   ratio must lie wholly inside [1 + 0.9 f, 1 + 1.1 f] (G-19); an arm with fewer than `min_hits` non-critical hits
@@ -27,7 +27,7 @@ Every trial reads `aura` right before the judged cast: 0 in the control, 1 in th
   residual) before the run and state the sizing in the entry; a `fixture` spell power narrows the dice share
   (`Unit::SpellDamageBonusDone`, Unit.cpp:9973, multiplies the whole hit). Sized entries run on the accelerated
   scenario cap.
-- `variant: "heal"` or `"heal_<suffix>"` (ADR 1033): `trials` per arm, the feed and effect cast at an ally set to 1
+- `variant: "heal"` or `"heal_<suffix>"` (ADR 1202): `trials` per arm, the feed and effect cast at an ally set to 1
   health of a 2000000000 maximum before every trial; `chance_spell` (default `spell`) gives the ProcChance, one roll
   per feed cast. `aura` Effect[0] must be `ADD_PCT_MODIFIER` on `SPELLMOD_DAMAGE` and `expected` must equal 1 plus its
   value / 100 (the figure f), else the entry is refused. Non-critical heals on the ally only: the 99% Welch-t interval
@@ -36,7 +36,7 @@ Every trial reads `aura` right before the judged cast: 0 in the control, 1 in th
   `EffectDieSides[0] / control mean` (consumed once). Size `trials` before the run from the heal's measured spread; a
   `fixture` spell power narrows the dice share.
 
-- `variant: "cooldown"` (ADR 1037, opt-in): a real `effect_spell` cast (cooldown from `CategoryRecoveryTime`) is
+- `variant: "cooldown"` (ADR 1206, opt-in): a real `effect_spell` cast (cooldown from `CategoryRecoveryTime`) is
   followed by the feed every `every_ms` until `aura`; the cooldown read right after the aura is the reset, judged only
   when at most two feed casts went off (`spell_go_count` of the feed); control trials read the natural cooldown at the
   same times. The effect cooldown is then reset as a fixture and the effect is cast (A), read 500 ms later
@@ -45,12 +45,12 @@ Every trial reads `aura` right before the judged cast: 0 in the control, 1 in th
   `expected` is 0.
   `evidence_metric: "cast_failure"` (opt-in, cooldown variant only) stamps the verdict with `cast_failure`, the
   recast reads, instead of the readback `cooldown_ms`; without it the stamp is unchanged.
-  `evidence_metric: "aura_fed_instant_casting"` (opt-in, instant variant only, ADR 1072, provisional) stamps the
+  `evidence_metric: "aura_fed_instant_casting"` (opt-in, instant variant only, ADR 1241, provisional) stamps the
   verdict with that metric and the contrast `aura_fed`: casting 1 in the control arm (aura cancelled) against casting 0
   in the fed arm, both read 300 ms after the cast and both judged. The kind's `METRIC_EVIDENCE` (state),
   `CONTRAST_PROOF` and `STATE_PROMISES` (`instant`) rows make an ok verdict behaviour on a clause that says "instant"
   and data otherwise; judging and the ok are unchanged, and without the option the stamp stays `casting`.
-- `variant: "cooldown_reset_recast"` (ADR 1037 addendum, opt-in): every trial resets the effect cooldown as a
+- `variant: "cooldown_reset_recast"` (ADR 1206 addendum, opt-in): every trial resets the effect cooldown as a
   fixture, casts the effect for real (primer) and reads `cooldown_ms` after the global cooldown; treatment trials then
   feed until `aura`, control trials cast no feed. After the global cooldown the effect is cast again (R): R goes off
   (`cast_failure` 0, `spell_go_count` +1 over the primer) in the treatment and is refused with
@@ -58,7 +58,7 @@ Every trial reads `aura` right before the judged cast: 0 in the control, 1 in th
   selection on the aura timing, never on R). A refused feed cast or a primer read not natural within 10% voids the
   run (unmeasured); the control's refusal of R is the judged read. The verdict is stamped `cast_failure`. `trials`
   must keep a run without a selected trial at most `residual_target` per pair (15 at ProcChance 40 and 0.001).
-- `variant: "heal_rate"` or `"heal_rate_<suffix>"` (ADR 1066, opt-in): a proc rate per feed heal, no control arm.
+- `variant: "heal_rate"` or `"heal_rate_<suffix>"` (ADR 1235, opt-in): a proc rate per feed heal, no control arm.
   `feed_target` is `ally` or `self`, set once to 1 health of a 2000000000 maximum; each of `rolls` rolls cancels
   `aura` on the caster, casts `feed_spell` once at the target and, after the cast time + 500 ms, reads `aura` on the
   caster. At the end, `spell_heal_count` of the feed on the target must equal the rolls, its effective healing must
@@ -70,19 +70,19 @@ Every trial reads `aura` right before the judged cast: 0 in the control, 1 in th
   before the rolls, reads it at the start and end (1, else void), reads the feed's cast time and casts with
   `ignore_gcd`; the roll step shrinks to the hasted cast time + 500 ms. A roll is 5 steps: at most about 1900 rolls
   fit the 10000-step scenario limit.
-- `heal_rate` pooled (`parts` > 1, ADR 1066, opt-in, the kind's `POOLED_JUDGE`): `parts` identical scenarios of
+- `heal_rate` pooled (`parts` > 1, ADR 1235, opt-in, the kind's `POOLED_JUDGE`): `parts` identical scenarios of
   `rolls` each, `spare_parts` (1 or more) fixed before the run, and `(parts - spare_parts) * rolls` must reach the
   band's roll count or the entry is refused. A part with any void or missing read is excluded whole; the kept parts'
   rolls pool into one Wilson interval, judged as above, and fewer pooled rolls than the band needs is unmeasured. A
   pooled hasted entry names `haste_agreement`, the step 1 agreement that justifies the haste aura, in its contract.
-- `variant: "damage_rate"` or `"damage_rate_<suffix>"` (ADR 1076, opt-in): the `heal_rate` judge, sizing and pooling
+- `variant: "damage_rate"` or `"damage_rate_<suffix>"` (ADR 1245, opt-in): the `heal_rate` judge, sizing and pooling
   for a damage feed with a cooldown, no control arm. `feed_target` is `dummy` (one stationary dummy at the feed's cast
   distance); the feed needs a SCHOOL_DAMAGE effect and no travel, and `haste_aura` is refused. Each of `rolls` rolls
   cancels `aura` on the caster, sets the feed power, resets the feed's cooldown (`reset_cooldown`), casts it at the
   dummy with `ignore_gcd` and, after the cast time + 500 ms, reads `aura` on the caster. At the end `spell_go_count` of
   the feed and its `spell_damage_count` on the dummy must equal the rolls, the last feed cast failure must be 0 and the
   dummy must read `alive` 1 with `health` above 0, else the part is void (excluded whole when pooled). A roll is 6
-  steps: at most about 1600 rolls fit the 10000-step scenario limit. `learn_talent: false` (single part, ADR 1076
+  steps: at most about 1600 rolls fit the 10000-step scenario limit. `learn_talent: false` (single part, ADR 1245
   addendum) is the control arm: the talent is unlearned, the judge is `ok` only with 0 grants of `aura` over `rolls`
   rolls, any grant alerts.
 
@@ -95,7 +95,7 @@ Divinity 704920 (`heal` and `heal_cascade`: Radiant Cascade 500141 and Illuminat
 `heal_rate_*` self and ally rate arms of both tiers, with and without Fast Cast 50336, and the hasted
 `_pooled` arms sized for the G-20 band: 17 parts of 1900 rolls at 40%, 12 at 20%, one spare each).
 
-## Window variant (`variant: "window"`, ADR 1052, provisional)
+## Window variant (`variant: "window"`, ADR 1221, provisional)
 
 Judges an earned aura's stated duration through the effect it enables, on both sides of it. Fields: `feed_spell`,
 `aura`, `effect_spell`, `every_ms` (at least the 1600 ms global cooldown wait), `residual_target`, `feed_power`,
@@ -114,7 +114,7 @@ the channel still runs, a tick or a re-application follows the relearn, or the c
 
 Evidence: the verdict carries the metric `aura_fed_window_casting` with the contrast `aura_window` (aura held against
 aura gone), declared in the kind's `METRIC_EVIDENCE`, `CONTRAST_PROOF` and `STATE_PROMISES` rows; an ok verdict is
-behaviour on a clause that says "within" and data otherwise (ADR 1052 addendum).
+behaviour on a clause that says "within" and data otherwise (ADR 1221 addendum).
 
 Calibration reads rb7 (2026-11-22, throwaway probes, never counted): 9981 ms of 10000 left at the stop in 6 of 6
 trials; 807299 sends no SPELL_GO (so no event dating); `set_moving` does not stop Radiant Flame; a 1600 ms feed gives
