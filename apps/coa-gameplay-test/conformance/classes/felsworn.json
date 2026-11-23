@@ -16322,6 +16322,63 @@
       "poll_ms": 50,
       "caster": true,
       "observe_source": "300481 DurationIndex 32 = 6000 ms ($300481d). A real Felstrike 802678 cast at the dummy gives the buff on every tick (Chaotic Intuition 300483 known); the caster's aura_apply_count of 300481 and its presence are polled every 50 ms over 14 s: the last application lies between the two reads where the count last rises and the removal between the last read with the aura and the first without; the bracket must lie inside the G-19 band around 6000 ms, which excludes a duration 10% off on both sides. The control (before learn) casts Felstrike without the talent and must apply nothing. Reference search 2026-11-23: coa-history spells 300483 and 300481: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 704612,
+      "kind": "metric_delta",
+      "quote": "Increases the effectiveness of your Pacts by $s1%.",
+      "trigger_spell": 803885,
+      "gate_spell": 803885,
+      "target": "dummy",
+      "measure_actor": "ally",
+      "metric": "resistance",
+      "fields": {
+        "school": 5
+      },
+      "ally_arm": {
+        "allies": 1
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Pact Hunter (control: Vengeful Pact raises an ally's Shadow resistance by 65)",
+      "variant": "pact_resist",
+      "label_suffix": "pact_resist",
+      "expected": 65,
+      "tolerance": 0.5,
+      "observe_source": "Pact Hunter 704612 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 49 + 1 = 50 ($s1%), SpellClassMask word 2 256 = SpellFamilyFlags[2] 256 of every Pact (800031, 803488, 803718, 804764, 803343, 803885). Vengeful Pact 803885 Description: 'Emanate an aura that increases nearby allies' Shadow Resistance by ${$m1+0}', Effect[0] aura 143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE, MiscValue 32 (Shadow), BasePoints 64 + 1 = 65, area aura on the party (SPELL_EFFECT_APPLY_AREA_AURA_RAID, radius index 23). Behaviour read: a real Vengeful Pact cast by the caster; the Shadow resistance of the grouped ally (resistance, school 5) is read before the cast (no Pact, 0) and after it. The control entry (pact_resist) has no Pact Hunter; the treatment entry (pact_resist_hunter) has Pact Hunter learned in both phases: 65 + 50% = 97.5, read as the integer 97 (the engine's integer percent modifier, tolerance 0.5 judges to the rounding, G-19). Demonfire Pact's +3 crit chance reads +4 with Pact Hunter (3 x 1.5 = 4.5 truncated): an integer-rounding case outside this claim's band, so it is not used. Reference search 2026-11-23: coa-history spells 704612 and 803885: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. "
+    },
+    {
+      "spell": 704612,
+      "kind": "metric_delta",
+      "quote": "Increases the effectiveness of your Pacts by $s1%.",
+      "trigger_spell": 803885,
+      "gate_spell": 803885,
+      "target": "dummy",
+      "measure_actor": "ally",
+      "metric": "resistance",
+      "fields": {
+        "school": 5
+      },
+      "ally_arm": {
+        "allies": 1
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Pact Hunter (Vengeful Pact raises an ally's Shadow resistance by 97.5)",
+      "variant": "pact_resist_hunter",
+      "label_suffix": "pact_resist_hunter",
+      "learn": [
+        704612
+      ],
+      "expected": 97.5,
+      "tolerance": 0.5,
+      "observe_source": "Pact Hunter 704612 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 49 + 1 = 50 ($s1%), SpellClassMask word 2 256 = SpellFamilyFlags[2] 256 of every Pact (800031, 803488, 803718, 804764, 803343, 803885). Vengeful Pact 803885 Description: 'Emanate an aura that increases nearby allies' Shadow Resistance by ${$m1+0}', Effect[0] aura 143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE, MiscValue 32 (Shadow), BasePoints 64 + 1 = 65, area aura on the party (SPELL_EFFECT_APPLY_AREA_AURA_RAID, radius index 23). Behaviour read: a real Vengeful Pact cast by the caster; the Shadow resistance of the grouped ally (resistance, school 5) is read before the cast (no Pact, 0) and after it. The control entry (pact_resist) has no Pact Hunter; the treatment entry (pact_resist_hunter) has Pact Hunter learned in both phases: 65 + 50% = 97.5, read as the integer 97 (the engine's integer percent modifier, tolerance 0.5 judges to the rounding, G-19). Demonfire Pact's +3 crit chance reads +4 with Pact Hunter (3 x 1.5 = 4.5 truncated): an integer-rounding case outside this claim's band, so it is not used. Reference search 2026-11-23: coa-history spells 704612 and 803885: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. "
     }
   ],
   "player_observations": [],
