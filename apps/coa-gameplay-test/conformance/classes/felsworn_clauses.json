@@ -247,13 +247,13 @@
     "clause": "increasing their critical strike chance by $520256s1% for $520256d.",
     "claims": [
       {
-        "claim": "increasing their critical strike chance by $520256s1% (2%)",
+        "claim": "increasing their critical strike chance by $520256s1%",
         "labels": [
           "300476 effect_value 520256e0 #2"
         ]
       },
       {
-        "claim": "for $520256d (10 s)",
+        "claim": "for $520256d",
         "labels": [
           "300476 spell_duration 520256 #3"
         ]
