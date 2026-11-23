@@ -15,6 +15,7 @@ constexpr uint32 SpellRangeAnywhere = 13;
 constexpr uint32 SunDownDuration = 39;
 constexpr uint32 SunwellVisual = 560124;
 constexpr uint32 FervorOfTheSunProc = 680623;
+constexpr uint32 Calm = 804057;
 void ApplyContracts(SpellInfo* info)
 {
     if (!info || info->SpellFamilyName != 33)
@@ -56,6 +57,11 @@ void ApplyContracts(SpellInfo* info)
         effect.TargetA = SpellImplicitTargetInfo(target);
         effect.TargetB = SpellImplicitTargetInfo();
     };
+    if (id == Calm)
+    {
+        aura(EFFECT_0, SPELL_AURA_MOD_DISARM_RANGED, 0, 0, TARGET_UNIT_TARGET_ENEMY);
+        info->Effects[EFFECT_0].Mechanic = MECHANIC_DISARM;
+    }
     for (auto list : {std::pair(SunClericEvents, std::size(SunClericEvents)),
                      std::pair(SunClericDrivers, std::size(SunClericDrivers)),
                      std::pair(SunClericFinite, std::size(SunClericFinite))})

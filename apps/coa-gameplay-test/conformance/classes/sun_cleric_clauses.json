@@ -5886,7 +5886,9 @@
       },
       {
         "claim": "and ranged weapons",
-        "labels": []
+        "labels": [
+          "804057 behaviour_metric_delta flag_ranged"
+        ]
       },
       {
         "claim": "for $d",
@@ -5895,7 +5897,7 @@
         ]
       }
     ],
-    "reason": "Open, finding for the owner: Calm sets DISARMED 0x00200000 and DISARM_OFFHAND 0x80 (both read 1) but not DISARM_RANGED 0x400 (read 0), and its DBC has aura 67 and 254 with no aura 278, which the core handles (SpellAuraEffects.cpp:3302). An enemy Witch Hunter fires 3 Auto Shots in the control and +2 under Calm (expected 0), so ranged attacks continue; the positive control Justice 572848 is refused under Calm. Pair 20261122-213945 / -214041, build d0e42dc9, no flip. The flag_ranged and shooter_ranged entries alerted in both runs and are archived in removed-entries.json (rev1fix) until the owner chooses: add aura 278 to Calm or correct the text. The melee disarm and the duration keep their own labels."
+    "reason": "Owner ruling O-28 (2026-11-23): Calm disarms ranged weapons; Sun Cleric ADR 0039 puts aura 278 in Effect[0] through the class contract and casts the trigger 807778 from the class. Pre-fix pair 20261123-075212 / 20261123-075514 (build 09562e0306eb): flag_ranged 0 (expected 1), shooter_ranged 3 Auto Shots in the control and +2 under Calm (expected +0). Post-fix pair 20261123-075703 / 20261123-075808 (build 4025f8e56181), no flip: flag_ranged reads UNIT_FLAG2_DISARM_RANGED 0x400 = 1 after the cast and 0 before it, ok in both runs, with the positive controls flag_main and flag_offhand at 1; shooter_ranged reads 3 and +0 but is void in both runs on Auto Shot 75 refused with reason 40 (SPELL_FAILED_INTERRUPTED), which its native_refusals do not state, so it carries no label. The melee disarm and the duration keep their own labels."
   },
   {
     "spell": 804057,
