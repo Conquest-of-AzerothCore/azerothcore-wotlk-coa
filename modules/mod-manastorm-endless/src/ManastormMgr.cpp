@@ -3128,9 +3128,75 @@ namespace
         player->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
     }
 
+    bool IsRunMemberGuid(ManastormRun const& run, ObjectGuid guid)
+    {
+        auto const& members = run.GetMembers();
+        return guid.IsPlayer() && std::find(members.begin(), members.end(), guid.GetCounter()) != members.end();
+    }
+
+    void CaptureStageLink(Aura const* aura, ManastormRun& run)
+    {
+        if (aura->GetType() != UNIT_AURA_TYPE || !aura->IsSingleTarget() || aura->IsPassive())
+            return;
+        Unit const* target = aura->GetUnitOwner();
+        AuraApplication const* application = aura->GetApplicationOfTarget(target->GetGUID());
+        if (!application || !application->IsPositive() || aura->GetCasterGUID() == target->GetGUID() ||
+            !IsRunMemberGuid(run, aura->GetCasterGUID()) || !IsRunMemberGuid(run, target->GetGUID()))
+            return;
+        bool const known = std::any_of(run.StageLinks.begin(), run.StageLinks.end(),
+            [aura, target](ManastormRun::StageLink const& link)
+            {
+                return link.Spell == aura->GetId() && link.Caster == aura->GetCasterGUID() &&
+                    link.Target == target->GetGUID();
+            });
+        if (!known)
+            run.StageLinks.push_back({aura->GetId(), aura->GetCasterGUID(), target->GetGUID(), run.GetInstanceId(),
+                aura->GetDuration(), aura->GetCharges()});
+    }
+
+    void CaptureStageLinks(Player* player, ManastormRun& run)
+    {
+        if (!run.HasPreviousStage() || !run.IsPendingStageTransfer(player->GetGUID().GetCounter()) ||
+            player->GetMapId() != run.GetPreviousSegment().MapId ||
+            player->GetInstanceId() != run.GetPreviousInstanceId())
+            return;
+        std::erase_if(run.StageLinks, [&run](ManastormRun::StageLink const& link)
+        {
+            return link.DestinationInstanceId != run.GetInstanceId();
+        });
+        for (auto const& [spellId, application] : player->GetAppliedAuras())
+            CaptureStageLink(application->GetBase(), run);
+        for (Aura const* aura : player->GetSingleCastAuras())
+            CaptureStageLink(aura, run);
+    }
+
+    void RestoreStageLinks(Player* player, ManastormRun& run)
+    {
+        std::erase_if(run.StageLinks, [player, &run](ManastormRun::StageLink const& link)
+        {
+            if (link.DestinationInstanceId != run.GetInstanceId() ||
+                (link.Caster != player->GetGUID() && link.Target != player->GetGUID()))
+                return false;
+            Player* caster = ObjectAccessor::GetPlayer(*player, link.Caster);
+            Player* target = ObjectAccessor::GetPlayer(*player, link.Target);
+            if (!caster || !target || !caster->IsAlive() || !target->IsAlive() ||
+                caster->GetInstanceId() != run.GetInstanceId() || target->GetInstanceId() != run.GetInstanceId())
+                return false;
+            if (!target->GetAura(link.Spell, link.Caster))
+                if (Aura* aura = caster->AddAura(link.Spell, target))
+                {
+                    aura->SetDuration(link.Duration);
+                    if (link.Charges)
+                        aura->SetCharges(link.Charges);
+                }
+            return true;
+        });
+    }
+
     bool PrepareStageMemberTransfer(Player* player, ManastormRun& run)
     {
         CaptureStageCompanions(player, run);
+        CaptureStageLinks(player, run);
         CaptureStageRecovery(player, run);
         if (run.HasPreviousStage() && !player->IsAlive())
         {
@@ -6353,6 +6419,7 @@ bool ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
     {
         RestoreStageRecovery(player, *run);
         RestoreStageCompanions(player, *run);
+        RestoreStageLinks(player, *run);
     }
 
     if (run->GetState() == ManastormRunState::Preparing)
