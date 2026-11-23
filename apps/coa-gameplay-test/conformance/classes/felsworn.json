@@ -3722,6 +3722,75 @@
         ]
       },
       "observe_source": "807431 Effect[0] aura 42 PROC_TRIGGER_SPELL (AscensionFelswornAbilities.cpp:236, cast of 521234 on the caster after a Felfury spender, here Azzinoth's Assault 803475); 521234 Effect[0] aura 110 SPELL_AURA_MOD_POWER_REGEN_PERCENT, MiscValue 3 (Energy), BasePoints 4 + 1 = 5 ($s1), StackAmount 4 ($u), DurationIndex 1 (10000 ms, $d). A real cast of Azzinoth's Assault at the dummy in both phases, 807431 learned between them, so the first phase is the control (passive unknown, no 521234). Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and At Least 2 Felfury 803468 on the caster before each cast (Azzinoth's Assault 801904 needs 803468 and consumes 2 Felfury). The aura is gone 10100 ms after the cast (excludes a duration 10% long, 11000 ms). The held entry shows it present at 9900 ms with the passive, so gone is not a cast that never applied. Reference search 2026-11-23: coa-history spell 807431 and 521234: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 807438,
+      "name": "Evolving Hellfire (Inner Demon duration per Felfury generated)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Generating Felfury now extends the duration of Inner Demon by 0.5 sec.",
+      "trigger_spell": 801901,
+      "gate_spell": 807438,
+      "target": "dummy",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "before_expected": 1000,
+      "expected": 1500,
+      "expected_gain": 500,
+      "tolerance": 40,
+      "wait_ms": 100,
+      "expire_ms": 10500,
+      "observe_source": "807438 is a scripted passive (AscensionFelsworn.cpp:208-209: each Felfury generated extends Inner Demon 804216 by 500 ms). Inner Demon (DurationIndex 1 set by AscensionFelswornContracts.cpp:76-80, 10000 ms) is set on the caster by harness set_aura as a precondition fixture in both phases; a real Twin Slice 801901 (states 'Generates 1 Felfury') is cast at the dummy: the remaining duration of 804216 100 ms after it reads 10000 - 100 = 9900 before the learn (control: 807438 not learned) and 9900 + 500 after; tolerance 40 excludes 10% on the gain (450 and 550). Reference search 2026-11-23: coa-history spell 807438: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon extension on a Sargeron Smite critical strike)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 802060,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "spell",
+      "cast_power": 100,
+      "before_expected": 2000,
+      "expected": 3000,
+      "expected_gain": 1000,
+      "tolerance": 90,
+      "wait_ms": 100,
+      "expire_ms": 10500,
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a Felfury spender extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Sargeron Smite 802060 is a spender (AscensionFelsworn.cpp:56-60) with one direct hit (Effect[0] SCHOOL_DAMAGE), so with the strike forced to critical (spell crit rating forced by the harness) one critical strike extends by 1000 ms. Fixtures by harness set_aura, preconditions: Inner Demon 804216 and Felfury 800058 x2 (the cost of the spender, as the Expose entries use) on the caster in both phases. The remaining duration of 804216 100 ms after the cast is read before the learn (control: 806235 not learned) and after: gain 1000, tolerance 90 excludes 10% on the gain (900 and 1100), and the before reading must stay above the gain. Azzinoth's Assault 801904 was tried first (two strikes, a measured gain of 17000 ms against 2 x 1000 expected) and is recorded as a lead in the report, not counted. Reference search 2026-11-23: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],

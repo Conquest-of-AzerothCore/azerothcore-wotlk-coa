@@ -3092,10 +3092,19 @@
   {
     "spell": 806235,
     "clause": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
-    "labels": [
-      "806235 effect_value 806236e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec (Sargeron Smite)",
+        "labels": [
+          "806235 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "Direct critical strikes with the other Felfury spenders (Azzinoth's Assault, Ruin and the rest)",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 806235,
@@ -3151,7 +3160,9 @@
   {
     "spell": 807438,
     "clause": "Generating Felfury now extends the duration of Inner Demon by 0.5 sec.",
-    "labels": [],
+    "labels": [
+      "807438 behaviour_metric_delta duration"
+    ],
     "kind": "claim"
   },
   {
