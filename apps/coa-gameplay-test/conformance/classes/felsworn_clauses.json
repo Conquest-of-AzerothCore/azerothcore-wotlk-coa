@@ -1139,10 +1139,6 @@
       }
     ],
     "claim": "When Hateforged Barrier is removed from you, you now reduce $561203s% of all Magic damage taken (data readback of the amount; the damage reduction itself is not entered)",
-    "labels": [
-      "560822 behaviour_metric_delta applies",
-      "560822 behaviour_metric_delta amount"
-    ],
     "evidence": "behaviour",
     "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
@@ -1210,11 +1206,6 @@
       }
     ],
     "claim": "Every 3rd Ruin or Felwrath now spawns an Infernal",
-    "labels": [
-      "560840 behaviour_metric_delta third_ruin",
-      "560840 behaviour_metric_delta second_ruin",
-      "560840 behaviour_metric_delta third_mixed"
-    ],
     "evidence": "behaviour",
     "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
