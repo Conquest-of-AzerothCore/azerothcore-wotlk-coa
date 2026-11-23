@@ -109,7 +109,7 @@ A foreign effect token that totals a periodic effect over its ticks (the periodi
 [tooltip-reading.md](tooltip-reading.md) re-reads the rank's whole tooltip at the token's ordinal, so a token of an
 `@s:` expansion keeps its expansion's `$d`, `$T1` and `$m1`) goes to the hit scenario as a periodic total; any other
 non-empty probe reason on a foreign token makes it `unmeasurable`, never one tick compared with the total. A class
-file's `per_tick_foreign_totals` (`{spell, effect, reason}`, ADR 1078) keeps a listed total as a no-combat
+file's `per_tick_foreign_totals` (`{spell, effect, reason}`, ADR 1079) keeps a listed total as a no-combat
 `effect_value` instead: the step reads `spell_effect_value` (one tick), the model carries `ticks` (duration over
 amplitude) and `compare` expects the token divided by it, with the total's flat band divided by it too, so
 one point off per tick alerts. A listed effect whose points roll, or whose token is not a

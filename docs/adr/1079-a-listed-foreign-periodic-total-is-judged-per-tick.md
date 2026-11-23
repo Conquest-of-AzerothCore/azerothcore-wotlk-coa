@@ -1,4 +1,4 @@
-# 1078. A listed foreign periodic total is judged per tick
+# 1079. A listed foreign periodic total is judged per tick
 
 - Status: proposed (provisional number, numbered at merge)
 - Date: 2026-11-23
