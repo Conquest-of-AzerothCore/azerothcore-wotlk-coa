@@ -13288,22 +13288,55 @@
           "dummy"
         ]
       ],
-      "observe_source": "Control phase: Fury of the Illidari is cast with the dummy plain and Twin Slice 808303 lands on it (at least 2 events, the entry's floor). Treatment phase, after 3500 ms: the dummy carries Stealth 1784 (aura 16 MOD_STEALTH) (harness set_aura on the dummy, a precondition fixture: the claim's subject is the strikes, not the aura) and the same cast must add no strike event on it (gain 0). The caster stays out of the dummy's reach of detection (the dummy is a passive creature). Inner Demon 804216 is a precondition fixture (harness set_aura) in both phases; 2 charges allow the two casts. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): same sentences; expected values come from the tooltip and the DBC only. Review fw-rea2 I-1: a second visible enemy (area1, 3 yd) stands beside the dummy in both phases; the treatment cast must put at least 2 strikes on area1 while the dummy (carrying the aura) takes none, so a refused cast (gain 0 on area1, or a refused cast listed in cast_failures) is unmeasured, never ok.",
+      "observe_source": "Control phase: Fury of the Illidari is cast with the dummy plain and Twin Slice 808303 lands on it (at least 2 events, the entry's floor). Treatment phase, after 3500 ms: the dummy carries Stealth 1784 (aura 16 MOD_STEALTH) (harness set_aura on the dummy, a precondition fixture: the claim's subject is the strikes, not the aura) and the same cast must add no strike event on it (gain 0). The caster stays out of the dummy's reach of detection (the dummy is a passive creature). Inner Demon 804216 is a precondition fixture (harness set_aura) in both phases; 2 charges allow the two casts. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): same sentences; expected values come from the tooltip and the DBC only. Review fw-rea2 I-1: a second visible enemy (area1, 3 yd) stands beside the dummy in both phases, and a refused cast of 561216 makes the verdict unmeasured (void_on_cast_failure); the sibling entry no_hit_stealth_visible reads that the same cast puts at least 2 strikes on area1 while the dummy takes none, so a cast that did not run cannot read as 'cannot hit'.",
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        3
+      ]
+    },
+    {
+      "trigger_spell": 561216,
+      "gate_spell": 561216,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "expire_ms": 3500,
+      "spell": 561216,
+      "name": "Fury of the Illidari (still strikes the visible second enemy beside a stealth target)",
+      "kind": "metric_delta",
+      "variant": "no_hit_stealth_visible",
+      "label_suffix": "no_hit_stealth_visible",
+      "quote": "Cannot hit invisible or stealthed targets.",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808303,
+        "target": "area1"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 3500,
+      "after_auras": [
+        [
+          1784,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "observe_source": "Fury of the Illidari assaults a visible enemy in turn (AscensionFelswornAuras.cpp 561216 branch: the stealthed unit is filtered out, the rest are struck in turn) and the aura is removed when none is left to strike. The dummy carries the Stealth 1784 fixture aura (harness set_aura, precondition) and a second, visible dummy area1 stands 3 yd from the caster; no cast is made in the before phase (0 on area1), and after the cast at least 2 Twin Slice 808303 events land on area1 in 3500 ms (the 6 assaults, floor 2). A refused or skipped cast reads 0 and is unmeasured through void_on_cast_failure. Its sibling no_hit_stealth reads the dummy's own gain, 0. Expected values come from the tooltip and the DBC only.",
       "void_on_cast_failure": true,
       "area_dummies": [
         3
       ],
-      "same_arm_ratio": {
-        "metric": "spell_damage_count",
-        "fields": {
-          "spell": 808303,
-          "target": "area1"
-        },
-        "ratio": 0.0,
-        "tolerance": 0.01,
-        "least": 2,
-        "source": "Fury of the Illidari 561216 aura effect (Spell.dbc, aura 226 every 500 ms, 6 assaults): the assaults must land on the visible second enemy and none on the stealthed or invisible dummy in the same window, so the dummy's gain over the gain on area1 is 0"
-      }
+      "cast_in_before": false,
+      "after_at_least": 2
     },
     {
       "trigger_spell": 561216,
@@ -13343,22 +13376,55 @@
           "dummy"
         ]
       ],
-      "observe_source": "Control phase: Fury of the Illidari is cast with the dummy plain and Twin Slice 808303 lands on it (at least 2 events, the entry's floor). Treatment phase, after 3500 ms: the dummy carries Invisibility 32612 (aura 18 MOD_INVISIBILITY) (harness set_aura on the dummy, a precondition fixture: the claim's subject is the strikes, not the aura) and the same cast must add no strike event on it (gain 0). The caster stays out of the dummy's reach of detection (the dummy is a passive creature). Inner Demon 804216 is a precondition fixture (harness set_aura) in both phases; 2 charges allow the two casts. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): same sentences; expected values come from the tooltip and the DBC only. Review fw-rea2 I-1: a second visible enemy (area1, 3 yd) stands beside the dummy in both phases; the treatment cast must put at least 2 strikes on area1 while the dummy (carrying the aura) takes none, so a refused cast (gain 0 on area1, or a refused cast listed in cast_failures) is unmeasured, never ok.",
+      "observe_source": "Control phase: Fury of the Illidari is cast with the dummy plain and Twin Slice 808303 lands on it (at least 2 events, the entry's floor). Treatment phase, after 3500 ms: the dummy carries Invisibility 32612 (aura 18 MOD_INVISIBILITY) (harness set_aura on the dummy, a precondition fixture: the claim's subject is the strikes, not the aura) and the same cast must add no strike event on it (gain 0). The caster stays out of the dummy's reach of detection (the dummy is a passive creature). Inner Demon 804216 is a precondition fixture (harness set_aura) in both phases; 2 charges allow the two casts. Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): same sentences; expected values come from the tooltip and the DBC only. Review fw-rea2 I-1: a second visible enemy (area1, 3 yd) stands beside the dummy in both phases, and a refused cast of 561216 makes the verdict unmeasured (void_on_cast_failure); the sibling entry no_hit_invisible_visible reads that the same cast puts at least 2 strikes on area1 while the dummy takes none, so a cast that did not run cannot read as 'cannot hit'.",
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        3
+      ]
+    },
+    {
+      "trigger_spell": 561216,
+      "gate_spell": 561216,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "expire_ms": 3500,
+      "spell": 561216,
+      "name": "Fury of the Illidari (still strikes the visible second enemy beside a invisible target)",
+      "kind": "metric_delta",
+      "variant": "no_hit_invisible_visible",
+      "label_suffix": "no_hit_invisible_visible",
+      "quote": "Cannot hit invisible or stealthed targets.",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808303,
+        "target": "area1"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 3500,
+      "after_auras": [
+        [
+          32612,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "observe_source": "Fury of the Illidari assaults a visible enemy in turn (AscensionFelswornAuras.cpp 561216 branch: the stealthed unit is filtered out, the rest are struck in turn) and the aura is removed when none is left to strike. The dummy carries the Invisibility 32612 fixture aura (harness set_aura, precondition) and a second, visible dummy area1 stands 3 yd from the caster; no cast is made in the before phase (0 on area1), and after the cast at least 2 Twin Slice 808303 events land on area1 in 3500 ms (the 6 assaults, floor 2). A refused or skipped cast reads 0 and is unmeasured through void_on_cast_failure. Its sibling no_hit_invisible reads the dummy's own gain, 0. Expected values come from the tooltip and the DBC only.",
       "void_on_cast_failure": true,
       "area_dummies": [
         3
       ],
-      "same_arm_ratio": {
-        "metric": "spell_damage_count",
-        "fields": {
-          "spell": 808303,
-          "target": "area1"
-        },
-        "ratio": 0.0,
-        "tolerance": 0.01,
-        "least": 2,
-        "source": "Fury of the Illidari 561216 aura effect (Spell.dbc, aura 226 every 500 ms, 6 assaults): the assaults must land on the visible second enemy and none on the stealthed or invisible dummy in the same window, so the dummy's gain over the gain on area1 is 0"
-      }
+      "cast_in_before": false,
+      "after_at_least": 2
     },
     {
       "spell": 806235,

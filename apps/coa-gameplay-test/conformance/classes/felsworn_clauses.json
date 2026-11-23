@@ -1480,7 +1480,9 @@
     "clause": "Cannot hit invisible or stealthed targets.",
     "labels": [
       "561216 behaviour_metric_delta no_hit_invisible",
-      "561216 behaviour_metric_delta no_hit_stealth"
+      "561216 behaviour_metric_delta no_hit_stealth",
+      "561216 behaviour_metric_delta no_hit_invisible_visible",
+      "561216 behaviour_metric_delta no_hit_stealth_visible"
     ],
     "kind": "claim"
   },
