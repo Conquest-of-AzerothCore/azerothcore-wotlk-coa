@@ -6430,6 +6430,7 @@ def duration_refresh_spec(entry: dict) -> DurationRefreshSpec:
 
 CHARGE_RECHARGE_TARGETS = frozenset({CASTER, TARGET, ALLY})
 DEFAULT_CHARGE_RECHARGE_TOLERANCE = 0.05
+RUN_DEFAULT_TIMEOUT_MS = 90000
 
 
 @dataclass(frozen=True)
@@ -6530,6 +6531,8 @@ def charge_recharge_scenario(class_file: dict, spec: ChargeRechargeSpec) -> tupl
         if returns:
             scenario['contract'] += (f' {spec.spell} closes the distance, so the caster steps {placement:g} yd back '
                                      f'from the dummy before every cast after the first.')
+    if waited_ms(scenario['steps']) >= RUN_DEFAULT_TIMEOUT_MS:
+        timed(scenario, waited_ms(scenario['steps']))
 
     label = f'{spec.spell} behaviour_charge_recharge'
     model = {'kind': 'charge_recharge', 'initial_label': initial_label, 'attempt_labels': attempt_labels,

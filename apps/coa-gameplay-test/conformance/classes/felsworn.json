@@ -15972,6 +15972,441 @@
       "casts": 8,
       "cast_gap_ms": 1100,
       "observe_source": "Mentor D-67: 807163 is obtained by the real route: 804822 learned, dodged swings (dodge 100) until the Chance(player, 804822) roll procs (AscensionFelswornEvents.cpp:42-47, :157-158 casts 807163 on the caster). 807163's apply sets script value 807163 to 10 (AscensionFelswornAuras.cpp:84-85); every direct Twin Slice damage instance (Twin(info) && Direct(info)) while it is held gains 1 Felfury and decrements it, removing the aura at the last (AscensionFelswornAbilities.cpp:375-384). Twin Slice 801901 strikes with both weapons (EffectTriggerSpell 808303 and 808304) and gains 1 Felfury itself (EffectTriggerSpell[2] 800058), read as the control arm's own gain; ManaCost 45 Energy (PowerType 3), set before each cast; StartRecoveryTime 1000 ms, so casts 1100 ms apart. Felfury 800058 StackAmount 6, set to 0 before each cast (at most 3 gained per cast). Twin Fury 801892 is not learned, so a critical strike adds no Felfury. 807163 DurationIndex 1 (10 s): an expiry by duration voids the run. Reference search 2026-11-24: coa-history spell 804822 and 807163: 0 events in 186 logs; nothing found that decides the 10 instances or the Felfury gain."
+    },
+    {
+      "spell": 561216,
+      "name": "Fury of the Illidari (charges and recharge)",
+      "kind": "charge_recharge",
+      "quote": "2 Charges, 1.5 min recharge",
+      "max_charges": 2,
+      "recharge_ms": 90000,
+      "target": "dummy",
+      "observe_source": "SpellCharges.dbc row Spell=561216 points at SpellChargesCategory.dbc row 365 (MaxCharges 2, RecoveryTime 90000 ms; coa-dbc-viewer record --table SpellCharges --id 561216, --table SpellChargesCategory --id 365); Spell.dbc 561216 carries RecoveryTime 0. Inner Demon 804216 is 561216's CasterAuraSpell and is set before each cast as a precondition fixture (required_aura_steps); the claim's subject is the charge count and the recharge. The tooltip 'Requires a nearby enemy to cast' is met by the stock dummy. The pair brackets the recharge at 5% (85500 / 94500 ms), which excludes a recharge 10% off on both sides (81000 and 99000 ms). The scenario waits 99500 ms, past the run's 90000 ms default, so it carries its own timeout (waits + 60000 ms; the first attempt, runs 20261123-205143/-205258, timed out without it). Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): '2 Charges, 1.5 min recharge' (same figures); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 802058,
+      "name": "Reckoning (falling speed slowed)",
+      "kind": "metric_delta",
+      "variant": "feather_fall",
+      "label_suffix": "feather_fall",
+      "quote": "For the duration, your falling speed is slowed",
+      "trigger_spell": 802058,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "server_packets",
+      "fields": {
+        "opcode": 242
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "802058 Effect[2] is aura 42 in Spell.dbc; the class contract turns it into SPELL_AURA_FEATHER_FALL (AscensionFelswornContracts.cpp:234-241), whose handler calls Unit::SetFeatherFall: for a client-controlled player the server sends SMSG_MOVE_FEATHER_FALL (opcode 0x0F2 = 242, Opcodes.h:272) to the controlling client (Unit.cpp:18337-18348), which is what slows the fall; the server sets no movement flag itself until the client acknowledges. The harness records that opcode (server_packets). Control: before the cast, no feather-fall packet (0). After a real cast of 802058 on the caster: one packet (1), read 500 ms later, inside the 10000 ms aura (DurationIndex 1). Reference search 2026-11-23: coa-history spell 802058: 78 casts, 78 aura applied and 78 removed in 6 logs (combat logs carry no fall speed); expected values come from the tooltip, the DBC and the class contract only."
+    },
+    {
+      "spell": 802058,
+      "name": "Reckoning (no fall damage under the aura)",
+      "kind": "fall_damage",
+      "variant": "landing",
+      "label_suffix": "landing",
+      "quote": "For the duration, your falling speed is slowed",
+      "cast_spell": 802058,
+      "height": 30,
+      "receiver": "caster",
+      "observe_source": "802058 Effect[2] is aura 42 in Spell.dbc; the class contract turns it into SPELL_AURA_FEATHER_FALL (AscensionFelswornContracts.cpp:234-241). DurationIndex 1 = 10000 ms. Player::HandleFall (Player.cpp:15123-15160), the server's landing handler that MSG_MOVE_FALL_LAND reaches (MovementHandler.cpp:628-630), skips fall damage for a player with a feather-fall aura (!HasFeatherFallAura(), Player.cpp:15129-15131); the slower descent itself is rendered by the client. The caster lands from 30 yd at 10000 maximum health without the aura (the control: health lost above 0 proves the handler ran on this fall) and again about 2000 ms after a real cast of 802058 (aura read present 1500 ms after the cast, 500 ms before the landing, inside its 10000 ms): health lost 0 expected. The landing is harness-simulated (ADR 0237): the fall action feeds Player::HandleFall, not a relocate; its refusal of a feather-falling player was lifted for this read (mentor D-77, ADR 1265). The SMSG_MOVE_FEATHER_FALL packet read (feather_fall) stays as data. Reference search 2026-11-23: coa-history spell 802058: 78 casts, 78 aura applied and 78 removed in 6 logs, no value in a log event; expected values come from the tooltip, Spell.dbc and the server code only."
+    },
+    {
+      "spell": 800203,
+      "kind": "metric_delta",
+      "quote": "Interrupt a spell from being cast, preventing the target from casting spells of that school for $d and draining mana from the target based on your Spirit.",
+      "trigger_spell": 800203,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "void_on_cast_failure": true,
+      "target_casts_before": [
+        12051
+      ],
+      "expire_ms": 500,
+      "name": "Felbreak (interrupts the target's channel)",
+      "variant": "interrupt",
+      "label_suffix": "interrupt",
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "observe_source": "Felbreak 800203 (server DBC set): CastingTimeIndex 3 = 500 ms, Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 = 3000 ms ($d, SpellDuration.dbc), RangeIndex 3; the class contract clears Effect[2] (AscensionFelswornContracts.cpp:136-137) and the class script casts Spellbreak 804809 (SPELL_EFFECT_POWER_DRAIN) at the target on a successful interrupt (AscensionFelswornAbilities.cpp:396-400). Spell::EffectInterruptCast stops a channel whose ChannelInterruptFlags hold CHANNEL_INTERRUPT_FLAG_INTERRUPT and locks that spell's school for the duration (ProhibitSpellSchool, SpellEffects.cpp). The target channels Evocation 12051 (Arcane, SchoolMask 64, 8000 ms) on itself right before the trigger (target_casts_before), the same fixture as the counted moving_cast entry. The before phase casts nothing (the control). Control: the channel is running (1). After a real Felbreak cast (500 ms cast) at the channelling target, read 1500 ms after the cast starts: the target no longer casts (0). Reference search 2026-11-23: coa-history spell 800203: SPELL_CAST_START 8 events and SPELL_INTERRUPT 6 events by players in 1 log (no lockout or drain figure); the bindmysoul snapshot has no value beyond the tooltip; expected values come from the tooltip and the DBC only. Residual risk, code reading only: a missed Felbreak leaves the channel running and alerts; the counted moving_cast entry carries the same single landing."
+    },
+    {
+      "spell": 800203,
+      "kind": "metric_delta",
+      "quote": "Interrupt a spell from being cast, preventing the target from casting spells of that school for $d and draining mana from the target based on your Spirit.",
+      "trigger_spell": 800203,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "void_on_cast_failure": true,
+      "target_casts_before": [
+        12051
+      ],
+      "expire_ms": 500,
+      "name": "Felbreak (Arcane lockout still held 2850 ms after the interrupt)",
+      "variant": "lockout_held",
+      "label_suffix": "lockout_held",
+      "metric": "school_prohibited",
+      "fields": {
+        "school_mask": 64
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3350,
+      "observe_source": "Felbreak 800203 (server DBC set): CastingTimeIndex 3 = 500 ms, Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 = 3000 ms ($d, SpellDuration.dbc), RangeIndex 3; the class contract clears Effect[2] (AscensionFelswornContracts.cpp:136-137) and the class script casts Spellbreak 804809 (SPELL_EFFECT_POWER_DRAIN) at the target on a successful interrupt (AscensionFelswornAbilities.cpp:396-400). Spell::EffectInterruptCast stops a channel whose ChannelInterruptFlags hold CHANNEL_INTERRUPT_FLAG_INTERRUPT and locks that spell's school for the duration (ProhibitSpellSchool, SpellEffects.cpp). The target channels Evocation 12051 (Arcane, SchoolMask 64, 8000 ms) on itself right before the trigger (target_casts_before), the same fixture as the counted moving_cast entry. The before phase casts nothing (the control). The Arcane lockout of the target is read with school_prohibited: none in the control (0); 3350 ms after the cast starts, 2850 ms after the 500 ms cast lands, still held (1), which excludes a lockout 10% short (2700 ms). Reference search 2026-11-23: coa-history spell 800203: SPELL_CAST_START 8 events and SPELL_INTERRUPT 6 events by players in 1 log (no lockout or drain figure); the bindmysoul snapshot has no value beyond the tooltip; expected values come from the tooltip and the DBC only. Residual risk, code reading only: a missed Felbreak leaves the channel running and alerts; the counted moving_cast entry carries the same single landing."
+    },
+    {
+      "spell": 800203,
+      "kind": "metric_delta",
+      "quote": "Interrupt a spell from being cast, preventing the target from casting spells of that school for $d and draining mana from the target based on your Spirit.",
+      "trigger_spell": 800203,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "void_on_cast_failure": true,
+      "target_casts_before": [
+        12051
+      ],
+      "expire_ms": 500,
+      "name": "Felbreak (Arcane lockout gone 3150 ms after the interrupt)",
+      "variant": "lockout_free",
+      "label_suffix": "lockout_free",
+      "metric": "school_prohibited",
+      "fields": {
+        "school_mask": 64
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 3650,
+      "observe_source": "Felbreak 800203 (server DBC set): CastingTimeIndex 3 = 500 ms, Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 = 3000 ms ($d, SpellDuration.dbc), RangeIndex 3; the class contract clears Effect[2] (AscensionFelswornContracts.cpp:136-137) and the class script casts Spellbreak 804809 (SPELL_EFFECT_POWER_DRAIN) at the target on a successful interrupt (AscensionFelswornAbilities.cpp:396-400). Spell::EffectInterruptCast stops a channel whose ChannelInterruptFlags hold CHANNEL_INTERRUPT_FLAG_INTERRUPT and locks that spell's school for the duration (ProhibitSpellSchool, SpellEffects.cpp). The target channels Evocation 12051 (Arcane, SchoolMask 64, 8000 ms) on itself right before the trigger (target_casts_before), the same fixture as the counted moving_cast entry. The before phase casts nothing (the control). The Arcane lockout is read 3650 ms after the cast starts, 3150 ms after the 500 ms cast lands: gone (0), which excludes a lockout 10% long (3300 ms); the lockout_held arm shows it was applied. Reference search 2026-11-23: coa-history spell 800203: SPELL_CAST_START 8 events and SPELL_INTERRUPT 6 events by players in 1 log (no lockout or drain figure); the bindmysoul snapshot has no value beyond the tooltip; expected values come from the tooltip and the DBC only. Residual risk, code reading only: a missed Felbreak leaves the channel running and alerts; the counted moving_cast entry carries the same single landing."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (Fel Fireball is instant while channeling)",
+      "kind": "metric_delta",
+      "variant": "instant_fel_fireball",
+      "label_suffix": "instant_fel_fireball",
+      "quote": "For the duration, you may instant cast Fel Fireball and Ruin while channeling and they refund their cost.",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 801312
+      },
+      "before_expected": 1500,
+      "expected": 0,
+      "tolerance": 1,
+      "wait_ms": 700,
+      "expire_ms": 6000,
+      "observe_source": "Sargeras Embrace 800355 (server DBC set): a channel (AttributesEx SPELL_ATTR1_IS_CHANNELED), DurationIndex 571 (5500 ms), ManaCost 30 Energy plus ManaPerSecond 30, drained every 1000 ms (SpellAuras.cpp:771-801). While it is the caster's active channel, Unit::CanCastDuringChannel (Unit.cpp:5143-5159) admits a Felsworn spell of family 20 whose SpellFamilyFlags[1] has bit 1 or 2: Fel Fireball 801312 (flags[1] 1) and Ruin 501298 (flags[1] 2); Unit::ModSpellCastTime then sets their cast time to 0 (Unit.cpp:13146-13150), and the class script stores the paid cost of such a cast and energizes it back as spell 800355 (AscensionFelswornAbilities.cpp:177-178, :246-247). The cast time the server uses for Fel Fireball 801312 (CalcCastTime with the caster, which applies ModSpellCastTime) is read without the channel (the control: 1500 ms, SpellCastTimes.dbc) and 700 ms after a real cast of 800355 at the dummy from 100 Energy, inside the channel and before its first 1000 ms drain: 0. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (Ruin is instant while channeling)",
+      "kind": "metric_delta",
+      "variant": "instant_ruin",
+      "label_suffix": "instant_ruin",
+      "quote": "For the duration, you may instant cast Fel Fireball and Ruin while channeling and they refund their cost.",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 501298
+      },
+      "before_expected": 2500,
+      "expected": 0,
+      "tolerance": 1,
+      "wait_ms": 700,
+      "expire_ms": 6000,
+      "observe_source": "Sargeras Embrace 800355 (server DBC set): a channel (AttributesEx SPELL_ATTR1_IS_CHANNELED), DurationIndex 571 (5500 ms), ManaCost 30 Energy plus ManaPerSecond 30, drained every 1000 ms (SpellAuras.cpp:771-801). While it is the caster's active channel, Unit::CanCastDuringChannel (Unit.cpp:5143-5159) admits a Felsworn spell of family 20 whose SpellFamilyFlags[1] has bit 1 or 2: Fel Fireball 801312 (flags[1] 1) and Ruin 501298 (flags[1] 2); Unit::ModSpellCastTime then sets their cast time to 0 (Unit.cpp:13146-13150), and the class script stores the paid cost of such a cast and energizes it back as spell 800355 (AscensionFelswornAbilities.cpp:177-178, :246-247). The cast time the server uses for Ruin 501298 (CalcCastTime with the caster, which applies ModSpellCastTime) is read without the channel (the control: 2500 ms, SpellCastTimes.dbc) and 700 ms after a real cast of 800355 at the dummy from 100 Energy, inside the channel and before its first 1000 ms drain: 0. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (Fel Fireball cast while channeling refunds its cost)",
+      "kind": "metric_delta",
+      "variant": "refund_fel_fireball",
+      "label_suffix": "refund_fel_fireball",
+      "quote": "For the duration, you may instant cast Fel Fireball and Ruin while channeling and they refund their cost.",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "setup_casts": [
+        800355
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "cast_power": 100,
+      "measure_actor": "caster",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 800355
+      },
+      "before_expected": 0,
+      "expected": 35,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 6000,
+      "observe_source": "Sargeras Embrace 800355 (server DBC set): a channel (AttributesEx SPELL_ATTR1_IS_CHANNELED), DurationIndex 571 (5500 ms), ManaCost 30 Energy plus ManaPerSecond 30, drained every 1000 ms (SpellAuras.cpp:771-801). While it is the caster's active channel, Unit::CanCastDuringChannel (Unit.cpp:5143-5159) admits a Felsworn spell of family 20 whose SpellFamilyFlags[1] has bit 1 or 2: Fel Fireball 801312 (flags[1] 1) and Ruin 501298 (flags[1] 2); Unit::ModSpellCastTime then sets their cast time to 0 (Unit.cpp:13146-13150), and the class script stores the paid cost of such a cast and energizes it back as spell 800355 (AscensionFelswornAbilities.cpp:177-178, :246-247). Energy given back by spell 800355 is read with spell_energize_total. Control: Fel Fireball 801312 cast at the dummy with no channel: no 800355 energize (0). After: a real 800355 cast at the dummy, 300 ms later Fel Fireball is cast at the same dummy from 100 Energy while the channel runs: one energize of its paid cost, 35 Energy (ManaCost 35, Spell.dbc), read 500 ms after the cast. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (Ruin cast while channeling refunds its cost)",
+      "kind": "metric_delta",
+      "variant": "refund_ruin",
+      "label_suffix": "refund_ruin",
+      "quote": "For the duration, you may instant cast Fel Fireball and Ruin while channeling and they refund their cost.",
+      "trigger_spell": 501298,
+      "target": "dummy",
+      "setup_casts": [
+        800355
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "cast_power": 100,
+      "measure_actor": "caster",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 800355
+      },
+      "before_expected": 0,
+      "expected": 30,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 6000,
+      "observe_source": "Sargeras Embrace 800355 (server DBC set): a channel (AttributesEx SPELL_ATTR1_IS_CHANNELED), DurationIndex 571 (5500 ms), ManaCost 30 Energy plus ManaPerSecond 30, drained every 1000 ms (SpellAuras.cpp:771-801). While it is the caster's active channel, Unit::CanCastDuringChannel (Unit.cpp:5143-5159) admits a Felsworn spell of family 20 whose SpellFamilyFlags[1] has bit 1 or 2: Fel Fireball 801312 (flags[1] 1) and Ruin 501298 (flags[1] 2); Unit::ModSpellCastTime then sets their cast time to 0 (Unit.cpp:13146-13150), and the class script stores the paid cost of such a cast and energizes it back as spell 800355 (AscensionFelswornAbilities.cpp:177-178, :246-247). Energy given back by spell 800355 is read with spell_energize_total. Control: Ruin 501298 cast at the dummy with no channel: no 800355 energize (0). After: a real 800355 cast at the dummy, 300 ms later Ruin is cast at the same dummy from 100 Energy while the channel runs: one energize of its paid cost, 30 Energy (ManaCost 30, Spell.dbc), read 500 ms after the cast. Ruin is a Felfury spender: 6 Felfury 800058 and At Least 2 Felfury 803468 are set on the caster in both arms as named precondition fixtures, the same pair as the counted Ruin entries (moving_cast_control, consumes). Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc; expected values come from the tooltip and the DBC only.",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (the channel survives an instant Fel Fireball)",
+      "kind": "metric_delta",
+      "variant": "channel_held_fel_fireball",
+      "label_suffix": "channel_held_fel_fireball",
+      "quote": "For the duration, you may instant cast Fel Fireball and Ruin while channeling",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "setup_casts": [
+        800355
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "cast_power": 100,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 800355
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 6000,
+      "observe_source": "Sargeras Embrace 800355 (server DBC set): a channel, DurationIndex 571 (5500 ms). Casting Fel Fireball 801312 or Ruin 501298 while it is the caster's active channel keeps the channel only if every interrupt path admits them through Unit::CanCastDuringChannel (Unit.cpp:5143-5159): the cast-in-progress refusal (Spell.cpp:3604-3611), the generic-spell interrupt of the channel in SetCurrentCastedSpell (Unit.cpp:4832-4842) and the aura-interrupt path (Unit.cpp:6305-6315). The channel aura 800355 on the dummy is read; free_3900 / free_4100 show the read sees the channel end. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc; expected values come from the tooltip and the DBC only. Control: Fel Fireball cast at the dummy with no channel: no 800355 aura (0). After: a real 800355 cast at the dummy from 100 Energy, Fel Fireball cast 300 ms later, the channel aura read 500 ms after it, before the first 1000 ms drain: present (1). The positive control is channel_break_felbreak."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (the channel survives an instant Ruin)",
+      "kind": "metric_delta",
+      "variant": "channel_held_ruin",
+      "label_suffix": "channel_held_ruin",
+      "quote": "For the duration, you may instant cast Fel Fireball and Ruin while channeling",
+      "trigger_spell": 501298,
+      "target": "dummy",
+      "setup_casts": [
+        800355
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "cast_power": 100,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 800355
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 6000,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Sargeras Embrace 800355 (server DBC set): a channel, DurationIndex 571 (5500 ms). Casting Fel Fireball 801312 or Ruin 501298 while it is the caster's active channel keeps the channel only if every interrupt path admits them through Unit::CanCastDuringChannel (Unit.cpp:5143-5159): the cast-in-progress refusal (Spell.cpp:3604-3611), the generic-spell interrupt of the channel in SetCurrentCastedSpell (Unit.cpp:4832-4842) and the aura-interrupt path (Unit.cpp:6305-6315). The channel aura 800355 on the dummy is read; free_3900 / free_4100 show the read sees the channel end. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc; expected values come from the tooltip and the DBC only. Control: Ruin cast at the dummy with no channel: no 800355 aura (0). After: a real 800355 cast at the dummy from 100 Energy, Ruin cast 300 ms later, the channel aura read 500 ms after it: present (1). Ruin is a Felfury spender: 6 Felfury 800058 and At Least 2 Felfury 803468 are set on the caster in both arms as named precondition fixtures, the same pair as refund_ruin. The positive control is channel_break_felbreak."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (control: Felbreak, not admitted, ends the channel)",
+      "kind": "metric_delta",
+      "variant": "channel_break_felbreak",
+      "label_suffix": "channel_break_felbreak",
+      "quote": "For the duration, you may instant cast Fel Fireball and Ruin while channeling",
+      "trigger_spell": 800203,
+      "target": "dummy",
+      "setup_casts": [
+        800355
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "cast_power": 100,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 800355
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 800,
+      "expire_ms": 6000,
+      "observe_source": "Sargeras Embrace 800355 (server DBC set): a channel, DurationIndex 571 (5500 ms). Casting Fel Fireball 801312 or Ruin 501298 while it is the caster's active channel keeps the channel only if every interrupt path admits them through Unit::CanCastDuringChannel (Unit.cpp:5143-5159): the cast-in-progress refusal (Spell.cpp:3604-3611), the generic-spell interrupt of the channel in SetCurrentCastedSpell (Unit.cpp:4832-4842) and the aura-interrupt path (Unit.cpp:6305-6315). The channel aura 800355 on the dummy is read; free_3900 / free_4100 show the read sees the channel end. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc; expected values come from the tooltip and the DBC only. Positive control of channel_held_*: Felbreak 800203 (family 20, SpellFamilyFlags[1] 0, so CanCastDuringChannel refuses it; CastingTimeIndex 3 = 500 ms, a generic spell) cast at the dummy 300 ms after a real 800355 cast: the generic-spell interrupt ends the channel, so the 800355 aura is absent 800 ms after the Felbreak cast (0). A read that missed the end of a channel would read 1 here."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (end damage still lands after an instant Fel Fireball)",
+      "kind": "metric_delta",
+      "variant": "damage_after_fel_fireball",
+      "label_suffix": "damage_after_fel_fireball",
+      "quote": "For the duration, you may instant cast Fel Fireball and Ruin while channeling",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "setup_casts": [
+        800355
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800355,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 704.0,
+      "after_at_least": 703,
+      "after_at_most": 705,
+      "wait_ms": 100,
+      "expire_ms": 500,
+      "hold_power_during_wait": {
+        "power": 3,
+        "every_ms": 500,
+        "count": 11
+      },
+      "observe_source": "Sargeras Embrace 800355 (server DBC set): a channel, DurationIndex 571 (5500 ms). Casting Fel Fireball 801312 or Ruin 501298 while it is the caster's active channel keeps the channel only if every interrupt path admits them through Unit::CanCastDuringChannel (Unit.cpp:5143-5159): the cast-in-progress refusal (Spell.cpp:3604-3611), the generic-spell interrupt of the channel in SetCurrentCastedSpell (Unit.cpp:4832-4842) and the aura-interrupt path (Unit.cpp:6305-6315). The channel aura 800355 on the dummy is read; free_3900 / free_4100 show the read sees the channel end. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc; expected values come from the tooltip and the DBC only. The channel's end damage (one SPELL_AURA_PERIODIC_DAMAGE tick at the end, AscensionFelswornContracts.cpp:232; 704 at level 60 and 0 spell power, as the counted damage entry) still lands when Fel Fireball was cast 300 ms into the channel: read 5600 ms after the Fel Fireball cast (11 power holds of 500 ms, then 100 ms), about 5900 ms after the channel cast. Control: Fel Fireball alone, no 800355 damage (0). Energy is held at 100 every 500 ms after the Fel Fireball cast (hold_power_during_wait), as the damage entry. The dummy's resistance is removed by the spell-penetration fixture 823764 (aura 123, MiscValue 126, -9999)."
+    },
+    {
+      "spell": 707444,
+      "name": "Hellfire Carver (a full Carve channel: Fel Fireball strikes 10 additional enemies of 11 offered)",
+      "kind": "metric_delta",
+      "variant": "extras_cap",
+      "label_suffix": "extras_cap",
+      "quote": "up to a maximum of 10 enemies",
+      "trigger_spell": 801312,
+      "gate_spell": 707444,
+      "target": "dummy",
+      "cast_power": 100,
+      "setup_casts": [
+        800206
+      ],
+      "setup_wait_ms": 3000,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 801312,
+        "target": "dummy"
+      },
+      "area_dummies": [
+        3.2,
+        3.4,
+        3.6,
+        3.8,
+        4.0,
+        4.2,
+        4.4,
+        4.6,
+        4.8,
+        5.0,
+        5.2
+      ],
+      "area_sum": true,
+      "before_expected": 1,
+      "expected": 12,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Hellfire Carver 707444 Description (server DBC set): 'Casting Carve now makes your next Fel Fireball instant cast and causes it to strike 1 additional enemy near the primary target based on how long you channeled, up to a maximum of 10 enemies, dealing less damage with each target struck.' Reading of 'up to a maximum of 10 enemies': 10 ADDITIONAL enemies, the count that grows by 1 per channel tick (controller ruling of 2026-11-23), from two sources: the aura 807424 the channel leaves has StackAmount 10 in the DBC, and the server sets the extra targets to the channel's ticks, clamped to 10 at the channel's end (AscensionFelswornAuras.cpp:224-228, AscensionFelswornAbilities.cpp:136-147: every valid enemy within 10 yd of the primary while extra > 0). Carve 800206 is a 2500 ms channel (DurationIndex 66, ten 250 ms ticks). A real Carve is cast first (a setup cast, kept in both phases) and its channel ends after 3000 ms; then one real Fel Fireball at the primary dummy at 3 yd, with eleven more dummies at 3.2 to 5.2 yd from the caster (all within 2.2 yd of the primary, inside the 10 yd search), one more than the cap. The hits of Fel Fireball on the primary and the eleven area dummies are summed, cumulative over the scenario: before (control: Hellfire Carver not learned) 1, the primary only; after the learn 12, that 1 plus 11 in the second cast (the primary and 10 additional enemies; one offered dummy stays unhit), a gain of 11, which excludes a missing cap (12 in the cast, 13 summed). The 'less damage with each target struck' part is not judged here. Reference search 2026-11-23: coa-history spell 807424 (the Carve aura): SPELL_AURA_APPLIED 171 and SPELL_AURA_APPLIED_DOSE 1516 events in 4 logs, about 9 doses per application; spells 707444 and 801312: 0 events under those ids; bindmysoul snapshot has no value beyond the tooltip; nothing else found.",
+      "expected_gain": 11
     }
   ],
   "player_observations": [],

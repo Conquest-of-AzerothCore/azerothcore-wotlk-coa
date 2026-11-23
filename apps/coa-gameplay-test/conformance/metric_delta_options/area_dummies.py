@@ -3,7 +3,7 @@ from math import atan2, degrees, dist, hypot, radians, sin, tan
 
 NAME = 'area_dummies'
 ORDER = 6
-MAX_AREA_DUMMIES = 9
+MAX_AREA_DUMMIES = 11
 CONE_KEYS = {'angle', 'source', 'radius'}
 CONE_OPTIONAL = {'offset', 'margin_pct', 'behind'}
 CONE_BEARING_TOLERANCE_DEG = 1.0

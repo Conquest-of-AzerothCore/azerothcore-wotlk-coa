@@ -2099,6 +2099,8 @@ sets 64481 in both arms instead of only selecting non-critical ticks.
   (a harness-simulated landing through `Player::HandleFall`), before and after a real cast of `cast_spell`; its health
   is read right before and right after each landing, and the aura on it after the cast. The loss with the aura must be
   at least 0 and below the loss without it. Harmonic Disposition 560653: 2973 and 1173 from 30 yd.
+  A feather-fall aura is admitted on the receiver (ADR 1265): `Player::HandleFall` itself skips the damage, so a
+  Reckoning 802058 landing reads 0 against the control's loss above 0.
 - A cost gate that removes a cooldown states, in its verdict, the time of the second cast, the spell's global
   cooldown and that a cooldown left below that time reads the same as none.
 - `hit_ratio` `stated` (`bonus`, `parts`, ADR 0239) judges a talent that scales other effects in the talent's own unit:

@@ -1423,13 +1423,17 @@
   {
     "spell": 561216,
     "clause": "2 Charges,",
-    "labels": [],
+    "labels": [
+      "561216 behaviour_charge_recharge"
+    ],
     "kind": "claim"
   },
   {
     "spell": 561216,
     "clause": "1.5 min recharge",
-    "labels": [],
+    "labels": [
+      "561216 behaviour_charge_recharge"
+    ],
     "kind": "claim"
   },
   {
@@ -2070,14 +2074,19 @@
     "labels": [],
     "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
     "tool_gap": {
-      "reason": "The cap cannot be seen on this server. Carve 800206 ticks every 250 ms over 2500 ms, so a channel has at most 10 ticks, and both the tick count and the dodge amount are clamped to 10 (AscensionFelswornAuras.cpp:33-34, :114-118); a server without the clamp reads the same 9 at 2400 ms and 10 at the end. Haste scales period and duration together and cannot add ticks, and the only way to exceed 10 ticks is a SPELLMOD_DURATION modifier on Carve, which the harness generator does not offer for metric_delta entries (spell_mod_mutant is emitted for forced rolls only). The slope is judged by the mid label of the previous clause; the cap stays unproven until a duration mutant exists.",
+      "reason": "The cap cannot be seen on this server. Carve 800206 ticks every 250 ms over 2500 ms (class contract periodic(0, 250), AscensionFelswornContracts.cpp:163-170, DurationIndex 66), so a channel has at most 10 ticks; the dodge amount is clamped to 10 ticks (AscensionFelswornAuras.cpp:42) and the end clamp sets 10 ticks (AscensionFelswornAuras.cpp:224-227). A server without the clamp reads the same 9 at 2400 ms and 10 at the end. Haste scales period and duration together and cannot add ticks. First design (fw-b3g2r3): a duration mutant; the harness generator offers spell_mod_mutant for forced rolls only. Second design (fw-l2, completed by fw-l2b): a scan of every Spell.dbc row of the server DBC set for aura 107/108 with MiscValue 1 (SPELLMOD_DURATION), 19 (SPELLMOD_ACTIVATION_TIME) or 22, family 20 and a class mask on Carve's SpellFamilyFlags[2] 2097152 finds only Quick Carving 520254: Effect[0] ADD_FLAT_MODIFIER SPELLMOD_DURATION -1000 ms and Effect[1] ADD_PCT_MODIFIER SPELLMOD_ACTIVATION_TIME -40% (BasePoints -41 + 1), which AuraEffect::CalculatePeriodic applies to the tick period (SpellAuraEffects.cpp:725). Together: 2500 - 1000 = 1500 ms at 250 x 0.6 = 150 ms, still 10 ticks. The class contracts add no duration or period modifier to Carve. No obtainable state gives Carve an eleventh tick, so the 10% cap can never bind in play; the clamp is read in code only.",
       "attempts": [
         {
           "agent": "fw-b3g2r3",
           "report": ".agents/plans/fw-b3g2r3/report.md"
+        },
+        {
+          "agent": "fw-l2",
+          "report": ".agents/plans/fw-l2/report.md"
         }
       ]
-    }
+    },
+    "reason": "Status 3 shape (guide section 2, G-24): two agents with different designs found no behaviour route, and the reason above shows the cap cannot bind in play; not status 4, because nothing here is client-only. The clamp is server code (AscensionFelswornAuras.cpp:42, :224-227). Reference search 2026-11-24: coa-history spells 704611 and 520254: 0 events in 186 logs; nothing beyond the tooltip, Spell.dbc and the server code (scan: .agents/plans/fw-l2b/scratch/modscan.py)."
   },
   {
     "spell": 704612,
@@ -2536,17 +2545,29 @@
   {
     "spell": 707444,
     "clause": "up to a maximum of 10 enemies, dealing less damage with each target struck.",
-    "labels": [],
     "kind": "claim",
     "tool_gap": {
-      "reason": "The cap of 10 needs eleven candidates around the primary after a full channel and the 'less damage with each target' direction needs a per-target damage order. The fixed_count cap arm (Norgannon's Wrath 524739 cap) was tried (cap and cap_control entries, one real Carve as a setup cast): fixed_count sets the setup cast with no Felfury (the Carve is refused for lack of power) and waits 1600 ms after it, shorter than the 2500 ms channel, so no Fel Fireball follows a finished channel; the harness admits nine area dummies in metric_delta, one short of the eleven the cap needs. A fixed_count setup fixture (setup auras and setup wait) is a tool change. The nearest kind is fixed_count cap.",
+      "reason": "The cap claim is judged by extras_cap (area_dummies admits 11 dummies since fw-l2). The claim 'dealing less damage with each target struck.' needs a per-target damage order of one Fel Fireball cast: no kind or metric_delta option reads the damage of each target of one cast in hit order, and ratio_to_metric refuses a summed reading. Earlier attempt (fw-ea5): fixed_count cap arm refused for the cap. The nearest kind is fixed_count.",
       "attempts": [
         {
           "agent": "fw-ea5",
           "report": ".agents/plans/fw-ea5/report.md"
         }
       ]
-    }
+    },
+    "reason": "Split by claim (fw-l2b, review fw-rl2 I-1): 'up to a maximum of 10 enemies' is judged by extras_cap (primary + 10 additional enemies struck of 11 offered, ok in both runs of prove3 20261123-230759 / -230830). 'dealing less damage with each target struck.' stays unlabelled: no judge compares the damage of one cast across its targets (ratio_to_metric refuses a summed reading); the code factor is max(0.2, 1 - 0.1 x index), AscensionFelswornAbilities.cpp:208-218.",
+    "claims": [
+      {
+        "claim": "up to a maximum of 10 enemies",
+        "labels": [
+          "707444 behaviour_metric_delta extras_cap"
+        ]
+      },
+      {
+        "claim": "dealing less damage with each target struck.",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 707513,
@@ -2702,10 +2723,28 @@
   {
     "spell": 800203,
     "clause": "Interrupt a spell from being cast, preventing the target from casting spells of that school for $d and draining mana from the target based on your Spirit.",
-    "labels": [
-      "800203 aura_duration_ms #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Split by claim (fw-l2b, review fw-rl2 I-2): 'Interrupt a spell from being cast' is judged by interrupt and 'preventing the target from casting spells of that school for $d' by lockout_held / lockout_free (3000 ms window, DurationIndex 27) and aura_duration_ms #0, ok in both runs of prove2 20261123-225953 / -230029. 'and draining mana from the target based on your Spirit.' stays unlabelled: an entry on Scarlet Magi 1832 channelling Evocation read an unset control mana (5206 / 5340), so it was removed (e2ff868f34); a drain read needs the target's mana set right before the cast lands.",
+    "claims": [
+      {
+        "claim": "Interrupt a spell from being cast",
+        "labels": [
+          "800203 behaviour_metric_delta interrupt"
+        ]
+      },
+      {
+        "claim": "preventing the target from casting spells of that school for $d",
+        "labels": [
+          "800203 aura_duration_ms #0",
+          "800203 behaviour_metric_delta lockout_held",
+          "800203 behaviour_metric_delta lockout_free"
+        ]
+      },
+      {
+        "claim": "and draining mana from the target based on your Spirit.",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 800203,
@@ -3015,7 +3054,16 @@
         "evidence": "behaviour"
       }
     ],
-    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "tool_gap": {
+      "reason": "'and it now affects all allies' needs more allies than Infernal Whipcrack 805243's 8-target cap (MaxAffectedTargets 8, $i). With 800220 the class script adds every friendly unit within the radius (AscensionFelswornAbilities.cpp:149-154), but 805243 carries SPELL_ATTR3_ONLY_ON_PLAYER (AttributesEx3 256, Spell.dbc), so friendly creatures are refused targets: a friendly-creature arm (fw-l2, ten creatures of entry 631, faction 35) read the aura on none of them in both runs of prove3 (20261123-230759 / -230830), an incorrect fixture and not a defect. The arm needs at least nine ally players beside the caster (scenario schema 2, run.py MAX_PLAYERS 25), while metric_delta ally_arm offers 1 to 7 allies on schema 1 (ally_arm.py ALLY_IDS); the read would sum the aura over the caster and the allies: 8 of 10 without 800220 (the stock cap) and 10 with it. That ally_arm extension is a tool change not built in this round.",
+      "attempts": [
+        {
+          "agent": "fw-l2",
+          "report": ".agents/plans/fw-l2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 800225,
@@ -3109,9 +3157,18 @@
   {
     "spell": 800355,
     "clause": "For the duration, you may instant cast Fel Fireball and Ruin while channeling and they refund their cost.",
-    "labels": [],
+    "labels": [
+      "800355 behaviour_metric_delta instant_fel_fireball",
+      "800355 behaviour_metric_delta instant_ruin",
+      "800355 behaviour_metric_delta refund_fel_fireball",
+      "800355 behaviour_metric_delta refund_ruin",
+      "800355 behaviour_metric_delta channel_held_fel_fireball",
+      "800355 behaviour_metric_delta channel_held_ruin",
+      "800355 behaviour_metric_delta channel_break_felbreak",
+      "800355 behaviour_metric_delta damage_after_fel_fireball"
+    ],
     "tool_gap": {
-      "reason": "Instant cast and cost refund of two named spells while the channel runs: AscensionFelswornAbilities.cpp:165 and :232-233 (OnSpellCast energizes the paid cost back, CanCastDuringChannel). The channel costs ManaPerSecond 30 Energy (Spell.dbc 800355), drained every 1000 ms by Aura::Update, which removes the aura when the pool is below 30 (SpellAuras.cpp:771-801); the earlier counted pair set Energy once to 100, so the channel ended near 4000 ms: an incorrect test, not a property of the build. With Energy held at 100 by hold_power_during_wait the channel runs its 5500 ms (slow_held and damage ok in both runs of pair q2). No kind reads the cast time of a spell cast during another spell's channel; cast_period and shot_ramp read cast-to-cast spacing of one spell, energize_range reads an energize of one cast. The nearest is cast_period. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc.",
+      "reason": "Read since fw-l2 / fw-l2b by metric_delta entries: the cast time of Fel Fireball and Ruin during the channel (instant_fel_fireball, instant_ruin, spell_cast_time_ms 0), the refund of their paid cost energized by 800355 (refund_fel_fireball, refund_ruin) and, for 'while channeling', the channel aura 800355 still on the dummy after each instant cast (channel_held_fel_fireball, channel_held_ruin), its positive control (channel_break_felbreak: Felbreak, not admitted by CanCastDuringChannel, ends the channel) and the end damage still landing after a Fel Fireball (damage_after_fel_fireball). Earlier attempts found no kind for the cast time of a spell cast during another spell's channel. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc.",
       "attempts": [
         {
           "agent": "fw-b1d",
@@ -3120,6 +3177,10 @@
         {
           "agent": "fw-b1d2",
           "report": ".agents/plans/fw-b1d2/report.md"
+        },
+        {
+          "agent": "fw-l2b",
+          "report": ".agents/plans/fw-l2b/report.md"
         }
       ]
     },
@@ -3371,7 +3432,10 @@
     "claims": [
       {
         "claim": "your falling speed is slowed",
-        "labels": []
+        "labels": [
+          "802058 behaviour_fall_damage landing with reduced",
+          "802058 behaviour_fall_damage landing with aura"
+        ]
       },
       {
         "claim": "damage dealt by your Fel Fireball increases your damage dealt by $524632s2%",
@@ -3388,14 +3452,19 @@
       }
     ],
     "tool_gap": {
-      "reason": "The claim 'your falling speed is slowed' is the effective Effect[2] SPELL_AURA_FEATHER_FALL of 802058 (AscensionFelswornContracts.cpp:228-235). No metric reads the feather-fall state or MOVEMENTFLAG_FALLING_SLOW, and the harness fall action refuses a feather-falling player ('Fall needs a living player that a landing can hurt'), so the fall_damage kind cannot compare the landing with the aura. Needs a read of the caster's feather-fall state (tool group, named B-8 here); nothing else reaches it.",
+      "reason": "Read since fw-l2b by the fall_damage kind on the caster (mentor D-77): the fall action used to refuse a feather-falling player ('Fall needs a living player that a landing can hurt'), which blocked the fw-ea4 design; the refusal of feather fall alone was lifted (ADR 1265). The earlier packet read proves only the order sent to the client.",
       "attempts": [
         {
           "agent": "fw-ea4",
           "report": ".agents/plans/fw-ea4/report.md (design 1: fall_damage kind, cast 802058 then land from 30 yd on the caster; prove2b runs ['20261123-205807', '20261123-205838']: the post-cast landing was refused with 'Fall needs a living player that a landing can hurt'; no second design exists with the current metrics)"
+        },
+        {
+          "agent": "fw-l2b",
+          "report": ".agents/plans/fw-l2b/report.md"
         }
       ]
-    }
+    },
+    "reason": "Mentor D-77 (2026-11-24): the SMSG_MOVE_FEATHER_FALL packet read (802058 behaviour_metric_delta feather_fall) is not behaviour by itself (the slower descent is rendered by the client) and stays as data. The claim is read through the server's consequence of the feather-fall aura: Player::HandleFall skips fall damage under it (Player.cpp:15129-15131); the caster lands from 30 yd without the aura (loss above 0, the handler ran) and after a real cast of 802058 (aura present, loss 0). The harness fall action's refusal of a feather-falling player was lifted for this read (fw-l2b, ADR 1265)."
   },
   {
     "spell": 802058,
@@ -4241,7 +4310,8 @@
           "806109 behaviour_metric_delta no_cast"
         ]
       }
-    ]
+    ],
+    "reason": "'move' (fw-l2b, review fw-rl2 M-2): the move_blocked arm alerts in both runs (2 yd under the aura), but its positive control alerts too: under a stock root put on the caster by a real cast of Root Self 35340 (aura 26 SPELL_AURA_MOD_ROOT, held at start, moved and stopped) the same own-movement attempt also moved 2 yd in both runs of fw-l2b prove1. Code reading: for a client-controlled player Unit::SendMoveRoot only sends SMSG_FORCE_MOVE_ROOT (Unit.cpp:16163-16170) and sets MOVEMENTFLAG_ROOT only through the client's acknowledgement, while Unit::IsRooted reads that flag (Unit.h:1759) for the movement handler's refusal (MovementHandler.cpp:601-604). The probe therefore cannot see any movement lock on a player, so the 806109 alert is not a defect proof; the claim stays unproven. Both alerting entries (806109 move_blocked, 35340 root control) were removed so the class-end pair carries no by-construction alert; tool gap: no harness route observes a movement lock on a client-controlled player (G-39)."
   },
   {
     "spell": 806109,
