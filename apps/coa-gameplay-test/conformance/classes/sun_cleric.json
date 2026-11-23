@@ -19516,6 +19516,7 @@
       "expected": 10,
       "wait_ms": 500,
       "expire_ms": 500,
+      "void_on_cast_failure": true,
       "observe_source": "Support of heal_once. Grave Coil 47632 hits the caster five times in each phase (strike count 5, the passive striker, spell hit bonus 100); spell_damage_count of 47632 by the striker on the caster is cumulative, so the control phase (no Scroll) reads 5 and the Scroll phase gains 5 more: all five hits landed, which the heal_once arithmetic (the fifth hit is a second fall below 35% for any five landed hits of at least 420) needs. Reference search 2026-11-22: as the heal_once entry; nothing else found.",
       "phase_auras": [
         [
