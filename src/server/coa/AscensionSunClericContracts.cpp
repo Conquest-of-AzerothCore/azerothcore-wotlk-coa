@@ -58,10 +58,7 @@ void ApplyContracts(SpellInfo* info)
         effect.TargetB = SpellImplicitTargetInfo();
     };
     if (id == Calm)
-    {
         aura(EFFECT_0, SPELL_AURA_MOD_DISARM_RANGED, 0, 0, TARGET_UNIT_TARGET_ENEMY);
-        info->Effects[EFFECT_0].Mechanic = MECHANIC_DISARM;
-    }
     for (auto list : {std::pair(SunClericEvents, std::size(SunClericEvents)),
                      std::pair(SunClericDrivers, std::size(SunClericDrivers)),
                      std::pair(SunClericFinite, std::size(SunClericFinite))})
