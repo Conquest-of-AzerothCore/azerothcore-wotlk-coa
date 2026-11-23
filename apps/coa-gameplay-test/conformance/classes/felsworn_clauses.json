@@ -64,8 +64,19 @@
   {
     "spell": 92089,
     "clause": "Allows you to wield a Two-Handed Axe, Mace, Polearm or Sword in each hand and grants you additional Armor and magic resistance based on your attack power.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Allows you to wield a Two-Handed Axe, Mace, Polearm or Sword in each hand",
+        "labels": [
+          "92089 behaviour_metric_delta equip"
+        ]
+      },
+      {
+        "claim": "grants you additional Armor and magic resistance based on your attack power",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 300465,
@@ -154,14 +165,18 @@
   {
     "spell": 300470,
     "clause": "While above 75% health,",
-    "labels": [],
+    "labels": [
+      "300470 behaviour_hit_ratio above75",
+      "300470 behaviour_hit_ratio below75"
+    ],
     "kind": "claim"
   },
   {
     "spell": 300470,
     "clause": "your damage taken is reduced by $801573s1%",
     "labels": [
-      "300470 effect_value 801573e0 #0"
+      "300470 behaviour_hit_ratio above75",
+      "300470 behaviour_hit_ratio below75"
     ],
     "kind": "claim"
   },
@@ -169,7 +184,7 @@
     "spell": 300470,
     "clause": "and damage dealt is increased by $801573s2%.",
     "labels": [
-      "300470 effect_value 801573e1 #1"
+      "300470 behaviour_hit_ratio damage_dealt"
     ],
     "kind": "claim"
   },
@@ -572,7 +587,8 @@
     "spell": 520253,
     "clause": "While Inner Demon is active, your Armor contribution from cloth and leather items is increased by $s1%.",
     "labels": [
-      "520253 effect_value e0 #0"
+      "520253 behaviour_metric_delta armor_with_inner_demon",
+      "520253 behaviour_metric_delta armor_without_inner_demon"
     ],
     "kind": "claim"
   },
@@ -702,10 +718,25 @@
   {
     "spell": 520885,
     "clause": "Reduces the Energy cost of Twin Slice and Sunder by $s1.",
-    "labels": [
-      "520885 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the Energy cost of Twin Slice",
+        "labels": [
+          "520885 cost_gate 547211 twin_slice without",
+          "520885 cost_gate 547211 twin_slice with",
+          "520885 cost_gate 547211 twin_slice beyond"
+        ]
+      },
+      {
+        "claim": "and Sunder by $s1",
+        "labels": [
+          "520885 cost_gate 705121 sunder without",
+          "520885 cost_gate 705121 sunder with",
+          "520885 cost_gate 705121 sunder beyond"
+        ]
+      }
+    ]
   },
   {
     "spell": 524947,
@@ -977,10 +1008,23 @@
   {
     "spell": 560578,
     "clause": "Increases the damage dealt and reduces the Energy cost of Fury Unleashed by $s1%.",
-    "labels": [
-      "560578 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the damage dealt",
+        "labels": [
+          "560578 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "reduces the Energy cost of Fury Unleashed by $s1%",
+        "labels": [
+          "560578 cost_gate 555738 fury_unleashed without",
+          "560578 cost_gate 555738 fury_unleashed with",
+          "560578 cost_gate 555738 fury_unleashed beyond"
+        ]
+      }
+    ]
   },
   {
     "spell": 560637,
@@ -1240,7 +1284,9 @@
     "spell": 574143,
     "clause": "While Inner Demon is active, direct melee ability critical strikes now refund $592521s1 Energy.",
     "labels": [
-      "574143 effect_value 592521e0 #0"
+      "574143 behaviour_metric_delta refund_crit",
+      "574143 behaviour_metric_delta refund_noncrit",
+      "574143 behaviour_metric_delta refund_no_inner"
     ],
     "kind": "claim"
   },
@@ -1394,7 +1440,7 @@
     "spell": 704361,
     "clause": "Increases your off-hand weapon damage by $s1%",
     "labels": [
-      "704361 effect_value e0 #0"
+      "704361 behaviour_hit_ratio offhand_swing"
     ],
     "kind": "claim"
   },
@@ -1402,7 +1448,9 @@
     "spell": 704361,
     "clause": "and reduces the Energy cost of Twin Slice by $s2.",
     "labels": [
-      "704361 effect_value e1 #1"
+      "704361 cost_gate 547211 twin_slice without",
+      "704361 cost_gate 547211 twin_slice with",
+      "704361 cost_gate 547211 twin_slice beyond"
     ],
     "kind": "claim"
   },
@@ -1784,7 +1832,7 @@
     "spell": 705150,
     "clause": "Increases your critical damage dealt by $s1%.",
     "labels": [
-      "705150 effect_value e0 #0"
+      "705150 behaviour_hit_ratio crit_damage"
     ],
     "kind": "claim"
   },
@@ -2565,7 +2613,7 @@
     "spell": 803840,
     "clause": "Increases your Agility by $s1%",
     "labels": [
-      "803840 effect_value e0 #0"
+      "803840 behaviour_metric_delta agility"
     ],
     "kind": "claim"
   },
@@ -2573,7 +2621,7 @@
     "spell": 803840,
     "clause": "and dodge chance by $s2%.",
     "labels": [
-      "803840 effect_value e1 #1"
+      "803840 behaviour_metric_delta dodge"
     ],
     "kind": "claim"
   },
@@ -3148,7 +3196,7 @@
     "spell": 807902,
     "clause": "Increases your Magic damage dealt by $s1%",
     "labels": [
-      "807902 effect_value e0 #0"
+      "807902 behaviour_hit_ratio magic_damage"
     ],
     "kind": "claim"
   },
@@ -3156,7 +3204,7 @@
     "spell": 807902,
     "clause": "and your spell hit chance by $s2%.",
     "labels": [
-      "807902 effect_value e1 #1"
+      "807902 behaviour_metric_delta spell_hit"
     ],
     "kind": "claim"
   },
