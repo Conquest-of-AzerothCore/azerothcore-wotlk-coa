@@ -235,6 +235,9 @@
         "rating": "spell",
         "source": "AscensionFelswornEvents.cpp:97-98: case 800214: return crit && !periodic && Chance(player, id); a non-critical direct hit never rolls"
       },
+      "residual_target": 0.001,
+      "min_detectable": 6,
+      "min_parts": 81,
       "event_metric": "spell_cast_count",
       "proc_spell": 800239,
       "proc_spell_source": "Effect[0] of 800214 is aura 42 on 800239; the handler casts Fragment of Malice 800239 on the caster with Felstrike 802678 on the target (AscensionFelswornEvents.cpp:227-229)",
@@ -274,6 +277,9 @@
         "rating": "spell",
         "source": "AscensionFelswornEvents.cpp:97-98: case 800214: return crit && !periodic && Chance(player, id); a non-critical direct hit never rolls"
       },
+      "residual_target": 0.001,
+      "min_detectable": 6,
+      "min_parts": 81,
       "event_metric": "spell_cast_count",
       "proc_spell": 802678,
       "proc_spell_source": "Effect[0] of 800214 is aura 42 on 800239; the same Proc branch casts Felstrike 802678 on the target with Fragment of Malice 800239 on the caster (AscensionFelswornEvents.cpp:227-229), so the Felstrike casts are counted as their own proc events",

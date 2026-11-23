@@ -194,7 +194,7 @@
     ],
     "kind": "claim",
     "evidence": "behaviour",
-    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 300474,
@@ -204,7 +204,7 @@
     ],
     "kind": "claim",
     "evidence": "behaviour",
-    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 300474,
@@ -786,7 +786,7 @@
     ],
     "kind": "claim",
     "evidence": "behaviour",
-    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 525001,
@@ -2231,19 +2231,22 @@
         "labels": [
           "800214 proc_rate 800239",
           "800214 proc_rate 802678"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "to trigger a Felstrike",
         "labels": [
           "800214 proc_rate 802678"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "and generate a Fragment of Malice",
         "labels": [
           "800214 proc_rate 800239"
-        ]
+        ],
+        "evidence": "behaviour"
       }
     ],
     "reason": "fw-tgs2 (review I3): the clause declares its claims. The label '800214 effect_value #0' is dropped: $h is a chance, not a value (guide 9.4, 'A $h chance cannot be measured as a value'; Necromancer 300235 C8 precedent), and it resolved to unmodelled. The chance is judged by two proc entries sharing the roll (AscensionFelswornEvents.cpp:97-98, one Proc branch casting Felstrike 802678 on the target and Fragment of Malice 800239 on the caster, :227-229): '800214 proc_rate 800239' counts the Fragment casts and '800214 proc_rate 802678' the Felstrike casts, each on critical Fel Fireball 801312 hits only with the critical_trials control (non-critical hits proc 0). The old label '800214 proc_rate' is renamed by the second entry (shares_aura).",
@@ -2255,7 +2258,8 @@
           "report": ".agents/plans/fw-tgs2/report.md"
         }
       ]
-    }
+    },
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 800214,
