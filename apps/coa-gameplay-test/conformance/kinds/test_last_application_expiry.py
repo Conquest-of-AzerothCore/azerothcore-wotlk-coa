@@ -169,3 +169,92 @@ class ForcedRollTests(unittest.TestCase):
         entry = {key: value for key, value in FORCED.items() if key != 'repeat'}
         with self.assertRaises(ValueError):
             behaviour_scenario(load_fixture_class_file(23), entry)
+
+
+FED = {**ENTRY, 'label_suffix': 'fed', 'gate_spell': 801899, 'expected_ms': 3000, 'window_ms': 4000, 'poll_ms': 25,
+       'caster': True, 'feed': {'every_ms': 1700}}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class FeedTests(unittest.TestCase):
+    def judged(self, lasts_ms: float, stop: float = 1.0, control_applied: bool = False, before: float = 0.0,
+               entry: dict = FED) -> Verdict:
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
+        values = {}
+        for arm, rows in expectation.model['reads'].items():
+            reads = expectation.model['feed']['reads'][arm]
+            values[reads['stop']] = stop if arm == 'treatment' else 0.0
+            values[reads['remaining']] = lasts_ms - 20.0 if arm == 'treatment' else 0.0
+            for index, (time, applied, aura) in enumerate(rows):
+                now = 1000.0 if index == 0 else 61000.0 + (index - 1) * 34.0
+                values[time] = now
+                if arm == 'control':
+                    values[applied] = 1.0 if control_applied and index else 0.0
+                    values[aura] = 0.0
+                    continue
+                granted = index > 0
+                values[applied] = 1.0 if granted else 0.0
+                values[aura] = before if index == 0 else (1.0 if now < 61000.0 - 20.0 + lasts_ms else 0.0)
+        base = Verdict(expectation.label, 'alert', None, None, None, None, '', 'fake', expectation.spell_id,
+                       expectation.rank_id, expectation.check)
+        return judge_behaviour(base, FakeRun(values), expectation)
+
+    def test_the_loop_is_capped_by_the_proc_chance_and_both_arms_are_fed(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), FED)
+        run.validate(scenario)
+        loops = [step for step in scenario['steps'] if step['action'] == 'cast_until_aura']
+        self.assertEqual([step['max_casts'] for step in loops], [47, 47])
+        self.assertTrue(all(step['aura'] == 707010 and step['every_ms'] == 1700 and step['reset_cooldown']
+                            for step in loops))
+        self.assertEqual(expectation.model['feed']['max_casts'], 47)
+        self.assertFalse([step for step in scenario['steps'] if step['action'] == 'cast'])
+
+    def test_a_sixty_percent_roll_needs_nine_forced_crit_casts(self):
+        entry = {**FED, 'gate_spell': 800214, 'force_crit': 'melee'}
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        run.validate(scenario)
+        self.assertEqual({step['max_casts'] for step in scenario['steps'] if step['action'] == 'cast_until_aura'}, {9})
+        self.assertEqual(scenario['players'][0]['melee_crit_rating'], 100000)
+
+    def test_a_dummy_aura_stops_on_a_named_caster_aura(self):
+        entry = {**FED, 'caster': False, 'feed': {'every_ms': 1700, 'stop_aura': 707010}}
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        loop = next(step for step in scenario['steps'] if step['action'] == 'cast_until_aura')
+        self.assertEqual(loop['aura'], 707010)
+        reads = [step for step in scenario['steps'] if step.get('metric') == 'aura_duration_ms']
+        self.assertTrue(reads and all(step['actor'] == 'dummy' for step in reads))
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**entry, 'feed': {'every_ms': 1700}})
+
+    def test_three_seconds_after_the_grant_passes(self):
+        verdict = self.judged(3000.0)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertLess(abs(verdict.measured - 3000.0), 200.0)
+
+    def test_a_longer_or_shorter_aura_alerts(self):
+        self.assertEqual(self.judged(3900.0).status, 'alert')
+        self.assertEqual(self.judged(2100.0).status, 'alert')
+
+    def test_a_loop_that_reached_its_cap_is_unmeasured(self):
+        verdict = self.judged(3000.0, stop=0.0)
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('cap of 47 casts', verdict.explanation)
+
+    def test_an_aura_left_before_the_feed_is_unmeasured(self):
+        self.assertEqual(self.judged(3000.0, before=1.0).status, 'unmeasured')
+
+    def test_a_control_application_alerts(self):
+        self.assertEqual(self.judged(3000.0, control_applied=True).status, 'alert')
+
+    def test_the_feed_rules(self):
+        for changes in ({'repeat': {'count': 2, 'every_ms': 500}}, {'no_refresh': True},
+                        {'feed': {'every_ms': 1000}}, {'feed': {'every_ms': 1700, 'cap': 5}}, {'feed': {}},
+                        {'gate_spell': 801902}, {'force_crit': 'fire'}):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                behaviour_scenario(load_fixture_class_file(23), {**FED, **changes})
+
+    def test_without_the_option_nothing_changes(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), ENTRY)
+        self.assertNotIn('feed', expectation.model)
+        self.assertNotIn('cast_until_aura', [step['action'] for step in scenario['steps']])
+        self.assertNotIn('melee_crit_rating', scenario['players'][0])
