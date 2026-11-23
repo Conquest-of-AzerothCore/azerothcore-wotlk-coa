@@ -654,8 +654,7 @@
         "claim": "Casting Inner Demon with at least 6 Felfury",
         "labels": [
           "520257 behaviour_metric_delta energy_at_six",
-          "520257 behaviour_metric_delta control_five_felfury",
-          "520257 behaviour_metric_delta fixture_six_felfury"
+          "520257 behaviour_metric_delta control_four_felfury"
         ]
       },
       {
