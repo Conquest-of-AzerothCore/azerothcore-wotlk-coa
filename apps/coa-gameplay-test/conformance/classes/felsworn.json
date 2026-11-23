@@ -616,6 +616,169 @@
       "force_crit": "melee",
       "trials": 40,
       "expected_source": "704607 Effect[1] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, MiscValue 127 (all schools), BasePoints 9 + 1 = 10 ($s2). Unit::SpellCriticalDamageBonus applies AddPct(crit_bonus, 10) to the whole crit total (2x of a melee hit), so a critical hit does 2.2x instead of 2.0x: whole-hit ratio 1.10 (the Sun Cleric Gavel entry applies the same reading to op 15). Forced melee crits, critical hits only, control without 704607 and treatment with it learned. Reference search 2026-11-23: coa-history spell 704607: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats the tooltip. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before each cast of Azzinoth's Assault 803475 (it needs 803468; AscensionFelsworn.cpp:219-228), in both arms. Assault is cast at the dummy by a real cast and the hits of its main-hand strike 520262 are counted."
+    },
+    {
+      "spell": 300484,
+      "name": "Fel Blades (stacks cap at 5)",
+      "kind": "metric_delta",
+      "variant": "max_stacks",
+      "label_suffix": "max_stacks",
+      "quote": "stacking $300482u times",
+      "trigger_spell": 803475,
+      "gate_spell": 300484,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        803475,
+        803475
+      ],
+      "setup_wait_ms": 1100,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 300482
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "300484 Effect[0] aura 42 PROC_TRIGGER_SPELL 300482 (AscensionFelswornEvents.cpp:99,231-232: each landed hit of Azzinoth's Assault or its strikes 520262 and 572585 casts 300482 at the target); 300482 Effect[0] aura 101 SPELL_AURA_MOD_RESISTANCE_PCT, MiscValue 1 (armor), BasePoints -5 + 1 = -4 ($300482s1), StackAmount 5 ($300482u), DurationIndex 1 = 10000 ms ($300482d). Three real Assault casts at the dummy (two setup casts and the trigger, 1100 ms apart; at least 6 landed hits against a cap of 5) with 300484 learned between the phases: the dummy's 300482 stacks read 5 and not 6 or more (before the learn, the control phase, 0). Reference search 2026-11-23: coa-history spell 300484 and 300482: 0 events in 186 logs (a passive and its debuff leave no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says -4% for 10 seconds, stacking 5 times, the same as the tooltip. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before the casts (Azzinoth's Assault 803475, the level 60 rank, needs 803468 and consumes 2 Felfury per cast; 3 casts use the 6)."
+    },
+    {
+      "spell": 300484,
+      "name": "Fel Blades (armor reduction at the stack cap)",
+      "kind": "metric_delta",
+      "variant": "armor_at_cap",
+      "label_suffix": "armor_at_cap",
+      "quote": "reduces the enemy's armor by $300482s1%",
+      "trigger_spell": 803475,
+      "gate_spell": 300484,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        803475,
+        803475
+      ],
+      "setup_wait_ms": 1100,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 50,
+      "expected": 40,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "expected_ratio": 0.8,
+      "observe_source": "300484 Effect[0] aura 42 PROC_TRIGGER_SPELL 300482 (AscensionFelswornEvents.cpp:99,231-232: each landed hit of Azzinoth's Assault or its strikes 520262 and 572585 casts 300482 at the target); 300482 Effect[0] aura 101 SPELL_AURA_MOD_RESISTANCE_PCT, MiscValue 1 (armor), BasePoints -5 + 1 = -4 ($300482s1), StackAmount 5 ($300482u), DurationIndex 1 = 10000 ms ($300482d). The dummy's armor is read before and after the same three Assault casts (control: 300484 not learned, no change); at the cap of 5 stacks of -4% each the armor is 1 - 5 x 0.04 = 0.80 of the before reading, ratio judged within 0.01 so -3% and -5% per stack (0.85 and 0.75) are excluded. Reference search 2026-11-23: coa-history spell 300484 and 300482: 0 events in 186 logs (a passive and its debuff leave no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says -4% for 10 seconds, stacking 5 times, the same as the tooltip. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before the casts (Azzinoth's Assault 803475, the level 60 rank, needs 803468 and consumes 2 Felfury per cast; 3 casts use the 6)."
+    },
+    {
+      "spell": 300484,
+      "name": "Fel Blades (debuff lasts 10 s, present at 9600 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_present",
+      "label_suffix": "duration_present",
+      "quote": "for $300482d",
+      "trigger_spell": 803475,
+      "gate_spell": 300484,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        803475,
+        803475
+      ],
+      "setup_wait_ms": 1100,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 300482
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 9600,
+      "expire_ms": 500,
+      "observe_source": "300484 Effect[0] aura 42 PROC_TRIGGER_SPELL 300482 (AscensionFelswornEvents.cpp:99,231-232: each landed hit of Azzinoth's Assault or its strikes 520262 and 572585 casts 300482 at the target); 300482 Effect[0] aura 101 SPELL_AURA_MOD_RESISTANCE_PCT, MiscValue 1 (armor), BasePoints -5 + 1 = -4 ($300482s1), StackAmount 5 ($300482u), DurationIndex 1 = 10000 ms ($300482d). The presence of 300482 on the dummy is read 9600 ms after the last of three real Assault casts: present (control phase without 300484 reads 0), excluding a duration of 9000 ms (10% short). Reference search 2026-11-23: coa-history spell 300484 and 300482: 0 events in 186 logs (a passive and its debuff leave no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says -4% for 10 seconds, stacking 5 times, the same as the tooltip. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before the casts (Azzinoth's Assault 803475, the level 60 rank, needs 803468 and consumes 2 Felfury per cast; 3 casts use the 6)."
+    },
+    {
+      "spell": 300484,
+      "name": "Fel Blades (debuff lasts 10 s, absent at 10400 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_absent",
+      "label_suffix": "duration_absent",
+      "quote": "for $300482d",
+      "trigger_spell": 803475,
+      "gate_spell": 300484,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        803475,
+        803475
+      ],
+      "setup_wait_ms": 1100,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 300482
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 10400,
+      "expire_ms": 500,
+      "observe_source": "300484 Effect[0] aura 42 PROC_TRIGGER_SPELL 300482 (AscensionFelswornEvents.cpp:99,231-232: each landed hit of Azzinoth's Assault or its strikes 520262 and 572585 casts 300482 at the target); 300482 Effect[0] aura 101 SPELL_AURA_MOD_RESISTANCE_PCT, MiscValue 1 (armor), BasePoints -5 + 1 = -4 ($300482s1), StackAmount 5 ($300482u), DurationIndex 1 = 10000 ms ($300482d). The presence of 300482 on the dummy is read 10400 ms after the last of three real Assault casts: absent, excluding a duration of 11000 ms (10% long); together with the present entry the duration lies between 9600 and 10400 ms. Reference search 2026-11-23: coa-history spell 300484 and 300482: 0 events in 186 logs (a passive and its debuff leave no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says -4% for 10 seconds, stacking 5 times, the same as the tooltip. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before the casts (Azzinoth's Assault 803475, the level 60 rank, needs 803468 and consumes 2 Felfury per cast; 3 casts use the 6)."
     }
   ],
   "player_observations": [],

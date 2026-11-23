@@ -275,17 +275,28 @@
   {
     "spell": 300484,
     "clause": "Damage dealt by Azzinoth's Assault now reduces the enemy's armor by $300482s1% for $300482d,",
-    "labels": [
-      "300484 effect_value 300482e0 #0",
-      "300484 spell_duration 300482 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reduces the enemy's armor by $300482s1%",
+        "labels": [
+          "300484 behaviour_metric_delta armor_at_cap"
+        ]
+      },
+      {
+        "claim": "for $300482d",
+        "labels": [
+          "300484 behaviour_metric_delta duration_present",
+          "300484 behaviour_metric_delta duration_absent"
+        ]
+      }
+    ]
   },
   {
     "spell": 300484,
     "clause": "stacking $300482u times.",
     "labels": [
-      "300484 max_stacks 300482 #2"
+      "300484 behaviour_metric_delta max_stacks"
     ],
     "kind": "claim"
   },
