@@ -4,7 +4,6 @@ from unittest import mock
 
 from behaviours import behaviour_scenario, metric_delta_spec
 from compare import judge_behaviour
-from coverage import EvidenceError
 from metric_delta_options import script_count
 from profile import DBC_DIR, load_fixture_class_file
 import run
@@ -154,9 +153,19 @@ class ScriptCountTests(unittest.TestCase):
         _, evidence = judged_read(annihilation(), 'Gorge on fel energy.', 0, 5)
         self.assertEqual(evidence, ['data'])
 
-    def test_the_plain_script_value_read_has_no_evidence_row(self):
-        with self.assertRaises(EvidenceError):
-            judged_read(without_option(annihilation()), ANNIHILATION_TEXT, 0, 5)
+    def test_the_plain_script_value_read_stays_data(self):
+        verdict, evidence = judged_read(without_option(annihilation()), ANNIHILATION_TEXT, 0, 5)
+        self.assertEqual((verdict.status, verdict.detail['metric'], evidence), ('ok', 'aura_script_value', ['data']))
+        verdict, evidence = judged_read(without_option(pit_lord()), PIT_LORD_TEXT, 5, 6)
+        self.assertEqual((verdict.status, evidence), ('ok', ['data']))
+
+    def test_mutant_with_the_count_row_on_the_plain_read_makes_it_behaviour(self):
+        rows = {**script_count.STATE_PROMISES, 'aura_script_value': script_count.STATE_PROMISES['aura_script_count']}
+        with mock.patch.dict('coverage.METRIC_EVIDENCE', {'aura_script_value': 'state'}), \
+                mock.patch.object(script_count, 'STATE_PROMISES', rows), \
+                mock.patch.object(script_count, 'METRIC_EVIDENCE', {'aura_script_count': 'state'}):
+            _, evidence = judged_read(without_option(annihilation()), ANNIHILATION_TEXT, 0, 5)
+            self.assertEqual(evidence, ['behaviour'])
 
 
 if __name__ == '__main__':

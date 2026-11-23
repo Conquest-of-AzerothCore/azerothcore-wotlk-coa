@@ -10,7 +10,7 @@ SETTER = 'set_aura'
 DRIVER_ACTIONS = frozenset({'cast', 'learn', 'assert', 'reset_cooldown'})
 ABSENT = 'absent'
 DIFFERENT = 'different'
-METRIC_EVIDENCE = {EVIDENCE_METRIC: 'state'}
+METRIC_EVIDENCE = {READ_METRIC: 'readback', EVIDENCE_METRIC: 'state'}
 STATE_PROMISES = {EVIDENCE_METRIC: r'attacks?|charges?|stacks?'}
 
 

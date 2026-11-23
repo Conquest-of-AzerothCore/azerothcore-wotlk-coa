@@ -1,11 +1,11 @@
 # Script count (`metric_delta` `script_count`, ADR 1258, provisional)
 
 `script_count: {"noun": "attack" | "charge" | "stack"}` is for an `aura_script_value` entry whose script value is the
-count the tooltip sentence states (an aura that keeps its remaining attacks in a script value while
-`Aura::GetCharges` stays 0). The read stays `aura_script_value`; the verdict stamps `aura_script_count`, a STATE metric
-of the option module with the promise words `attacks?|charges?|stacks?`. Without the option, `aura_script_value` has
-no evidence row and coverage refuses the verdict (EvidenceError), and an entry that names `evidence_metric:
-"aura_script_count"` without the option is refused.
+count the tooltip sentence states (an aura that keeps its remaining attacks in a script value while `Aura::GetCharges`
+stays 0). The read stays `aura_script_value`; the verdict stamps `aura_script_count`, a STATE metric of the option
+module with the promise words `attacks?|charges?|stacks?`. The module also classes `aura_script_value` itself as
+READBACK with no `CONTRAST_PROOF` row, so a read without the option is data, never behaviour (mentor D-70), and an entry
+that names `evidence_metric: "aura_script_count"` without the option is refused.
 
 The generator refuses the opted entry unless:
 

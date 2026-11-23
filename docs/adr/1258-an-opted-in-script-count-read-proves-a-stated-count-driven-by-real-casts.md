@@ -20,7 +20,8 @@ on the metric would let every such read count.
 
 ## Options
 
-- Register `aura_script_value` in `METRIC_EVIDENCE`. Rejected by the mentor (D-70): it applies to every script value.
+- Register `aura_script_value` in `METRIC_EVIDENCE` as a class that can reach behaviour. Rejected by the mentor
+  (D-70): it applies to every script value.
 - Keep the reads out of coverage. The three tooltip counts could then never be measured.
 - An opt-in the entry asks for, refused at generation unless the read is the count the sentence states, real play
   drives it, and a contrast arm reads another value when the driving event is absent or different.
@@ -41,16 +42,22 @@ The third option, as the option module `metric_delta_options/script_count.py` (n
   false, no trigger cast before the before reading) or casts it under another gate than the trigger, and the two
   expected readings differ by more than twice the tolerance; the read is judged exactly (no ratio, floor, ceiling or
   own `evidence_metric`).
-- An entry naming `evidence_metric: "aura_script_count"` without the option is refused. `aura_script_value` keeps no
-  evidence row.
+- An entry naming `evidence_metric: "aura_script_count"` without the option is refused.
+- The module classes `aura_script_value` itself as READBACK, with no `CONTRAST_PROOF` row: a read without the option is
+  data, never behaviour (D-70: "without the opt-in the evidence stays data"). The cross-class guards of
+  `test_coverage.py` need a row for every raw `metric` a class file uses, so a metric without any row cannot stay in a
+  class file; the controller chose this row over pulling the entries (2026-11-23).
 
 ## Consequences
 
 - Tests: `metric_delta_options/test_script_count.py`: the stamp and driver, unchanged steps without the option, the
   option's shape, the refused unopted stamp, each refusal rule with its case and a mutant per rule (the rule removed
   lets its case through), seeded scenarios for the step and cast rules, behaviour for a right count, an alert for a
-  wrong one, data for a claim without the counted word, and EvidenceError without the option.
-- Finished classes use no entry with the field; their generated scenarios regenerate byte-identical.
+  wrong one, data for a claim without the counted word, data without the option, and a mutant that classes the plain
+  read as state with the count words (it then counts as behaviour).
+- Finished classes use no entry with the field and no class file other than Felsworn names `aura_script_value`; the
+  Templar `oath_consumption_removal` kind reads it but carries its own BEHAVIOUR check class, which coverage settles
+  before any metric class. Their generated scenarios regenerate byte-identical.
 - The read is the server's stored count at the first reading after the cast, not the number of attacks the aura
   actually lasts; a claim about consumption per attack needs another read.
 - Number provisional: shared ADRs are numbered at merge.
