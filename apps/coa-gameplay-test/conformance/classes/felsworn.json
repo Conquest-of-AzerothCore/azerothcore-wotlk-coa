@@ -823,6 +823,64 @@
       "count_primary": false,
       "observe_source": "520592 Effect[0] SPELLMOD_JUMP_TARGETS +5 on the class mask of Manaburn; the number of dummies struck by Manaburn 805248 (spell_damage_count per dummy) is read in a control arm without 520592 (the primary only) and a treatment arm with it learned: the primary and exactly 4 additional ones (more candidates are offered inside the radius, so a fifth strike would show), on Scarlet Magi 1832 (a level 56-57 mana-using mage, unit_class 8: Manaburn damage equals the mana drained, so a creature with no mana would never be struck), with one dummy outside the jump radius never struck. Reference search 2026-11-23: coa-history spell 520592 and 805248: 0 events in 186 logs (positive control 801904: 21 casts); the bindmysoul snapshot repeats the tooltip.",
       "dummy_entry": 1832
+    },
+    {
+      "spell": 520252,
+      "name": "Demon Hide (armor of leather items with Inner Demon)",
+      "kind": "metric_delta",
+      "variant": "armor_with_inner_demon",
+      "label_suffix": "armor_with_inner_demon",
+      "quote": "While Inner Demon is active, your Armor contribution from cloth and leather items is increased by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 520252,
+      "target": "caster",
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 92.4,
+      "expected_gain": 92.4,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "shield_after_learn": {
+        "item": 236,
+        "slot": 4,
+        "rejected_before": false
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "520252 Effect[0] aura 107 rewritten to SPELL_AURA_MOD_BASE_RESISTANCE_PCT (AscensionFelswornContracts.cpp:151-156) with MiscValue SPELL_SCHOOL_MASK_NORMAL and MiscValueB 6 (1 << cloth 1 | 1 << leather 2), BasePoints 119 + 1 = 120 ($s1); the amount is 0 unless Inner Demon 804216 is on the caster (AscensionFelswornContracts.cpp:352). Player::UpdateArmor scales the armor of cloth and leather items by it (StatSystem.cpp, GetItemArmorBySubclass). The caster's armor is read before (control: 520252 not learned) and after a real learn of 520252, with Inner Demon 804216 set on the caster in both phases (a precondition fixture by harness set_aura, named as such) and the 77-armor leather chest worn in both: gain 120% of 77 = 92.4, within 1 for the integer armor. Reference search 2026-11-23: coa-history spell 520252: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats 'While Inner Demon is active, your Armor contribution from cloth and leather items is increased by 120%'. The item is Cured Leather Armor 236 (acore_world.item_template of the repository's data/sql/base/db_world/item_template.sql: class 4, subclass 2 leather, InventoryType 5 chest, equip slot 4, RequiredLevel 17, armor 77, no stats), equipped by the shield_after_learn option in both phases (its slot read is the contrast of the option, named as a fixture)."
+    },
+    {
+      "spell": 520252,
+      "name": "Demon Hide (control: no gain without Inner Demon)",
+      "kind": "metric_delta",
+      "variant": "armor_without_inner_demon",
+      "label_suffix": "armor_without_inner_demon",
+      "quote": "While Inner Demon is active, your Armor contribution from cloth and leather items is increased by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 520252,
+      "target": "caster",
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "shield_after_learn": {
+        "item": 236,
+        "slot": 4,
+        "rejected_before": false
+      },
+      "observe_source": "520252 Effect[0] aura 107 rewritten to SPELL_AURA_MOD_BASE_RESISTANCE_PCT (AscensionFelswornContracts.cpp:151-156) with MiscValue SPELL_SCHOOL_MASK_NORMAL and MiscValueB 6 (1 << cloth 1 | 1 << leather 2), BasePoints 119 + 1 = 120 ($s1); the amount is 0 unless Inner Demon 804216 is on the caster (AscensionFelswornContracts.cpp:352). Player::UpdateArmor scales the armor of cloth and leather items by it (StatSystem.cpp, GetItemArmorBySubclass). The same reading without Inner Demon on the caster: the learn adds 0 armor, the control that the 120% is conditional on Inner Demon (the tooltip's 'While Inner Demon is active'). Reference search 2026-11-23: coa-history spell 520252: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats 'While Inner Demon is active, your Armor contribution from cloth and leather items is increased by 120%'. The item is Cured Leather Armor 236 (acore_world.item_template of the repository's data/sql/base/db_world/item_template.sql: class 4, subclass 2 leather, InventoryType 5 chest, equip slot 4, RequiredLevel 17, armor 77, no stats), equipped by the shield_after_learn option in both phases (its slot read is the contrast of the option, named as a fixture)."
     }
   ],
   "player_observations": [],
