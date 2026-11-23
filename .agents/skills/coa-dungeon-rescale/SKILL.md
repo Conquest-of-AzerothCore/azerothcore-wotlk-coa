@@ -11,6 +11,8 @@ description: >-
 Follow the checkout's AGENTS.md and coa-development skill for repository procedures. Creating or editing this
 skill does not convert content or authorize live changes. For Hellfire's dungeon boundaries and existing scaling
 paths, read [the Hellfire reference](references/hellfire-peninsula.md) when converting that zone.
+See the [Coilfang conversion](../../../docs/coa/coilfang-dungeon-rescale.md) for a worked example of
+explicit difficulty item levels, Mythic access and spawn review, and an encounter health exception.
 
 When changing gear or item requirements, also read
 [fixed item rescaling](../../docs/systems/fixed-item-rescaling.md) for runtime ownership, existing-copy
@@ -21,11 +23,13 @@ persistence, cache delivery and client-patch boundaries. Keep this skill's speci
 Required invocation inputs are **zone** and **target Normal item level**. Resolve the zone and all its five-player
 instance maps from effective data, rather than requiring IDs from the owner. Discover entrances, satellite
 wings and dungeon quest chains. Exclude raids even when they share the same entrance complex.
+Use explicit item levels for any supplied modes and the defaults below for omitted modes. Use a named raid
+tier as the tuning and reward benchmark. Add a raidphase access gate only when the owner explicitly requests it.
 
 Optional Normal **health baseline multiplier** and **damage baseline multiplier** default independently to 1.
 A common baseline multiplier may set both; explicit individual values override it. Preserve already supplied
 values. Require finite positive multipliers and a positive integral item level supported by the installed
-budget data; do not silently clamp unsupported inputs.
+budget data for every mode; do not silently clamp unsupported inputs.
 
 - Target players: level 60. Non-boss combat creatures, including elite trash and ordinary encounter adds: 60.
   Bosses: 63. Classify actual encounter roles from scripts/data rather than treating every named elite as a boss.
@@ -62,11 +66,14 @@ budget data; do not silently clamp unsupported inputs.
 Let `I` be the input Normal item level. The factors below are ratios of the same converted Normal baseline,
 not repeated multiplication of the preceding mode or additional factors over native Heroic template stats.
 
-| Difficulty | Equipment ilvl | Health factor | Damage factor |
+| Difficulty | Default equipment ilvl | Health factor | Damage factor |
 |---|---:|---:|---:|
 | Normal | I | 1.00 | 1.00 |
 | Heroic | I + 3 | 1.44 | 1.50 |
 | Mythic | I + 6 | 1.88 | 2.00 |
+
+Use the owner's explicit item levels in place of the corresponding defaults. Health and damage ratios
+remain independent of the item-level ladder.
 
 An owner-approved retune may override damage factors for specific encounter roles or modes. Record the
 baseline, exact map/template set and every affected form/summon; preserve unrelated trash, health and other
@@ -95,8 +102,10 @@ specific exception is needed; disclose exceptions rather than silently multiplyi
 
 1. Identify all selected instance maps, encounter layouts, native difficulty templates and spawn masks,
    scripted summons, dynamic chests, doors, events, access requirements and difficulty-specific spell ranks.
-   Verify whether Mythic exists and how the core selects it; do not assume a raid difficulty ID or that adding
-   spawn bits alone creates a working mode.
+   Audit Mythic in three places: effective map difficulty and runtime selection, creature and gameobject
+   spawn masks, and direct-entry and Dungeon Finder requirements. Check whether each access path has an
+   explicit row or uses a fallback. When reusing Heroic spawn masks, review seasonal encounters, attunement
+   NPCs and other mode-specific spawns individually before inheriting their flags.
 2. Trace boss, trash, chest and scripted equipment loot through nested references, conditions and loot groups.
    A stored zero chance can mean an equal-chance group member. Include guaranteed rewards, end-of-run chests,
    dungeon completion spoils, dungeon-specific completion caches and quest turn-ins. These paths must issue
@@ -121,7 +130,11 @@ melee hits and major boss abilities against a representative level-60 five-playe
 gear/build benchmark, tank health/armor, relevant resistances and defensive assumptions from actual data.
 Show raw and mitigated noncritical damage, swing intervals, tick intervals/target counts for major abilities,
 and relevant burst combinations across all three modes. Separate calculated expectations from measured
-combat results. Difficulty ratios alone do not establish that Normal is balanced. Resolve only material
+combat results. Flag health outliers by showing the standard formula's result and assessing the whole
+encounter, including adds, phases, and whether the party can bypass mechanics by burning down the boss.
+If a tuning exception is needed, document the original result, proposed per-mode health, affected adds or
+forms, and what the playtest must confirm. Difficulty ratios alone do not establish that Normal is balanced.
+Resolve only material
 missing choices; routine effect mappings do not require per-item owner review. Creating the skill does not
 run a conversion.
 
@@ -131,7 +144,7 @@ Use pinned original templates, effective DBC/SQL spells and original class-level
 from that baseline, not multiply already converted live values. Retain stable original-to-variant mappings and
 apply follow-up migrations instead of rewriting already applied migration files.
 
-- Rebudget primary stats, ratings and resistances by installed quality/slot budgets at I/I+3/I+6.
+- Rebudget primary stats, ratings and resistances using installed quality/slot budgets at the resolved item level for each mode.
   Apply [Classic PvE Power by slot](../../docs/systems/fixed-item-rescaling.md#pve-power-by-slot)
   across all three modes, and verify the equipped rating and tooltip.
   Derive armor, shield block and weapon DPS from matching slot/subclass and caster/physical comparables.
