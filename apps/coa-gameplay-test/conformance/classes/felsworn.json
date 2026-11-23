@@ -58,8 +58,57 @@
   "literal_tokens": [],
   "effect_notes": [],
   "passive_targets": [],
-  "procs": [],
-  "triggers": [],
+  "procs": [
+    {
+      "aura": 705137,
+      "name": "Azzinoth's Battery",
+      "tooltip": "Your |cffffffffAzzinoth's Assault|r now has a $h% chance to not consume |cff32cd32Felfury|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 801904
+      },
+      "trial_casts": true,
+      "trigger_text": "Azzinoth's Assault",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 801024,
+      "events_per_proc": 1,
+      "proc_spell_source": "EffectTriggerSpell[0] of 705137 (aura 42 PROC_TRIGGER_SPELL, ProcChance 30): 801024 Add 2 Felfury, Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS (175) on the caster, refunds the Felfury the cast consumed. Reference search 2026-11-23: coa-history spells 705137 and 801024: 801024 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc.",
+      "handler": "705137 is listed in FelswornCastDrivers (AscensionFelswornData.h:89) and has no scripted OnProc case in AscensionFelswornEvents.cpp; the engine rolls the DBC ProcChance 30 on the Azzinoth's Assault 801904 cast.",
+      "dbc": {
+        "705137": {
+          "ProcChance": 30,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
+    }
+  ],
+  "triggers": [
+    {
+      "aura": 300476,
+      "name": "Betrayer",
+      "tooltip": "Dodging attacks causes $804336s2% off-hand Weapon Damage to attackers and enrages your party and raid members within $520256a1 yds, increasing their critical strike chance by $520256s1% for $520256d.",
+      "trigger": {
+        "action": "avoided",
+        "striker_entry": 36,
+        "swing_ms": 2000
+      },
+      "trigger_text": "Dodging attacks",
+      "trial_metric": "melee_attacks_taken",
+      "trial_attempts_factor": 2.5,
+      "observe_spell": 804336,
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "causes off-hand Weapon Damage to attackers",
+      "observe_source": "EffectTriggerSpell[0] of 300476 (804336). AscensionFelswornEvents.cpp:42-47 passes an incoming dodge (not a landed or parried swing) when Chance(player, 300476) succeeds (300476 ProcChance 100, so every dodge) and :223-224 casts 804336 at the attacker and 520256 on the caster. An aggressive striker (creature 36) swings at the caster, who wears Evasion 26669 (+50% dodge) refreshed before every 2000 ms attempt as a precondition fixture (the trigger action avoided, ADR 0709); every dodged (victim_state 2) or parried (victim_state 3) swing is a trial and the spell_cast_count of 804336 must match it. Reference search 2026-11-23: coa-history spell 804336: 3 damage events in 2 logs (14 to 74); 520256: 42 aura applications and 42 removals in 2 logs; nothing decides a value.",
+      "trial_attempts_reason": "An attempt is one striker swing interval; only the dodged or parried swings are trials (Evasion gives +50% dodge, the rest hit or miss), so 2.5 times the swings are scheduled to reach the trigger trials."
+    }
+  ],
   "talent_modifiers": [],
   "rotation": [],
   "stack": [],
@@ -284,12 +333,6 @@
       "cast_power": 100,
       "phase_auras": [
         [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
           64481,
           1,
           "caster",
@@ -309,7 +352,7 @@
       "expected": 453.0,
       "after_at_least": 452,
       "after_at_most": 454,
-      "observe_source": "805240 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, Shadowflame (SchoolMask 36), BasePoints 219 + 1 (DieSides 1 adds 1) = 220, RealPointsPerLevel 4.0 x (60 - BaseLevel 29) = 124, so m1 = 344 at level 60; the tooltip adds attack power x 0.35 ($AP*0.35); reference attack power 312 (class file reference_stats). The dummy's magic resistance is removed (823764, target resistance -9999 on the magic schools), critical hits are made impossible by 64481 and the dummy is held at 30% health (below 35%). Expected 344 + int(0.35 x 312 = 109.2) = 453. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+      "observe_source": "805240 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, Shadowflame (SchoolMask 36), BasePoints 219 + 1 (DieSides 1 adds 1) = 220, RealPointsPerLevel 4.0 x (60 - BaseLevel 29) = 124, so m1 = 344 at level 60; the tooltip adds attack power x 0.35 ($AP*0.35); reference attack power 312 (class file reference_stats). Critical hits are made impossible by 64481; no resistance aura is set (823764 zeroes this Shadowflame hit, measured), the dummy's Fire and Shadow resistance reads 0 in the scenario, and the dummy is held at 30% health (below 35%). Expected 344 + int(0.35 x 312 = 109.2) = 453. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
     },
     {
       "spell": 805240,
@@ -323,12 +366,6 @@
       "target_health_pct": 30,
       "cast_power": 100,
       "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
         [
           64481,
           1,
@@ -350,7 +387,7 @@
       "after_at_least": 7452,
       "after_at_most": 7454,
       "player_attack_power": 20000,
-      "observe_source": "805240 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, Shadowflame (SchoolMask 36), BasePoints 219 + 1 (DieSides 1 adds 1) = 220, RealPointsPerLevel 4.0 x (60 - BaseLevel 29) = 124, so m1 = 344 at level 60; the tooltip adds attack power x 0.35 ($AP*0.35); reference attack power 312 (class file reference_stats). The dummy's magic resistance is removed (823764, target resistance -9999 on the magic schools), critical hits are made impossible by 64481 and the dummy is held at 30% health (below 35%). Contrast arm of the attack power term: +20000 attack power (player_attack_power): 344 + int(0.35 x 20312 = 7109.2) = 7453 against 453. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+      "observe_source": "805240 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, Shadowflame (SchoolMask 36), BasePoints 219 + 1 (DieSides 1 adds 1) = 220, RealPointsPerLevel 4.0 x (60 - BaseLevel 29) = 124, so m1 = 344 at level 60; the tooltip adds attack power x 0.35 ($AP*0.35); reference attack power 312 (class file reference_stats). Critical hits are made impossible by 64481; no resistance aura is set (823764 zeroes this Shadowflame hit, measured), the dummy's Fire and Shadow resistance reads 0 in the scenario, and the dummy is held at 30% health (below 35%). Contrast arm of the attack power term: +20000 attack power (player_attack_power): 344 + int(0.35 x 20312 = 7109.2) = 7453 against 453. Reference search 2026-11-23: coa-history spell 805240: 13 casts and 13 damage events in 3 logs (min 210, max 1521, mean 688, 2 crits), spell 805241: 13 heals (627 to 940, mean 728); the players' gear and attack power differ, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
     },
     {
       "spell": 805240,
@@ -364,12 +401,6 @@
       "target_health_pct": 30,
       "cast_power": 100,
       "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
         [
           64481,
           1,
@@ -404,12 +435,6 @@
       "target_health_pct": 30,
       "cast_power": 100,
       "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
         [
           64481,
           1,
@@ -561,7 +586,8 @@
           2900
         ]
       },
-      "observe_source": "560284 DurationIndex 27 = 3000 ms ($d); Effect[0] aura 12 SPELL_AURA_MOD_STUN (mechanic 24, horror) on TARGET_UNIT_DEST_AREA_ENEMY. The aura is still on the dummy 2800 ms after the cast (excludes a duration 10% short, 2700 ms); the before read, absent, is the control. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+      "observe_source": "Creature 6 (Kobold Vermin) is the target because the stock dummy 36 never takes the horror aura (measured: aura absent 500 ms after the cast, while 560284 hits it). 560284 DurationIndex 27 = 3000 ms ($d); Effect[0] aura 12 SPELL_AURA_MOD_STUN (mechanic 24, horror) on TARGET_UNIT_DEST_AREA_ENEMY. The aura is still on the dummy 2800 ms after the cast (excludes a duration 10% short, 2700 ms); the before read, absent, is the control. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc.",
+      "target_entry": 6
     },
     {
       "spell": 560284,
@@ -589,7 +615,8 @@
           3250
         ]
       },
-      "observe_source": "560284 DurationIndex 27 = 3000 ms ($d). The aura is gone from the dummy 3200 ms after the cast (excludes a duration 10% long, 3300 ms). Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+      "observe_source": "Creature 6 (Kobold Vermin) is the target because the stock dummy 36 never takes the horror aura (measured: aura absent 500 ms after the cast, while 560284 hits it). 560284 DurationIndex 27 = 3000 ms ($d). The aura is gone from the dummy 3200 ms after the cast (excludes a duration 10% long, 3300 ms). Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc.",
+      "target_entry": 6
     },
     {
       "spell": 560284,
@@ -725,14 +752,7 @@
       "trigger_spell": 800355,
       "target": "dummy",
       "cast_power": 100,
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
+      "phase_auras": [],
       "metric": "spell_damage_total",
       "fields": {
         "spell": 800355,
@@ -749,7 +769,7 @@
           5200
         ]
       },
-      "observe_source": "800355 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude set to the duration by AscensionFelswornContracts.cpp:232 (one tick at the end), DurationIndex 571 = 5500 ms ($d); BasePoints 694 + 1 = 695 + int(RealPointsPerLevel 9.55 x (60 - 59)) = 9 -> 704 at level 60 (tooltip 704.55); the tooltip adds 0.85 x the greater of fire spell power and shadow spell power ($cond). Dummy magic resistance removed (823764). No damage has landed 5100 ms after the cast (excludes an end 10% early, 4950 ms). Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+      "observe_source": "800355 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude set to the duration by AscensionFelswornContracts.cpp:232 (one tick at the end), DurationIndex 571 = 5500 ms ($d); BasePoints 694 + 1 = 695 + int(RealPointsPerLevel 9.55 x (60 - 59)) = 9 -> 704 at level 60 (tooltip 704.55); the tooltip adds 0.85 x the greater of fire spell power and shadow spell power ($cond). No damage has landed 5100 ms after the cast (excludes an end 10% early, 4950 ms). Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. No resistance aura is set (823764 zeroes a Shadowflame hit on this dummy, measured on Tyrant's Gaze)."
     },
     {
       "spell": 800355,
@@ -761,14 +781,7 @@
       "trigger_spell": 800355,
       "target": "dummy",
       "cast_power": 100,
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
+      "phase_auras": [],
       "metric": "spell_damage_total",
       "fields": {
         "spell": 800355,
@@ -787,7 +800,7 @@
           6000
         ]
       },
-      "observe_source": "800355 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude set to the duration by AscensionFelswornContracts.cpp:232 (one tick at the end), DurationIndex 571 = 5500 ms ($d); BasePoints 694 + 1 = 695 + int(RealPointsPerLevel 9.55 x (60 - 59)) = 9 -> 704 at level 60 (tooltip 704.55); the tooltip adds 0.85 x the greater of fire spell power and shadow spell power ($cond). Dummy magic resistance removed (823764). The damage has landed 5900 ms after the cast (excludes an end 10% late, 6050 ms): 704. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+      "observe_source": "800355 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude set to the duration by AscensionFelswornContracts.cpp:232 (one tick at the end), DurationIndex 571 = 5500 ms ($d); BasePoints 694 + 1 = 695 + int(RealPointsPerLevel 9.55 x (60 - 59)) = 9 -> 704 at level 60 (tooltip 704.55); the tooltip adds 0.85 x the greater of fire spell power and shadow spell power ($cond). The damage has landed 5900 ms after the cast (excludes an end 10% late, 6050 ms): 704. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. No resistance aura is set (823764 zeroes a Shadowflame hit on this dummy, measured on Tyrant's Gaze)."
     },
     {
       "spell": 800355,
@@ -799,14 +812,7 @@
       "trigger_spell": 800355,
       "target": "dummy",
       "cast_power": 100,
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
+      "phase_auras": [],
       "metric": "spell_damage_total",
       "fields": {
         "spell": 800355,
@@ -829,7 +835,7 @@
           6000
         ]
       },
-      "observe_source": "800355 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude set to the duration by AscensionFelswornContracts.cpp:232 (one tick at the end), DurationIndex 571 = 5500 ms ($d); BasePoints 694 + 1 = 695 + int(RealPointsPerLevel 9.55 x (60 - 59)) = 9 -> 704 at level 60 (tooltip 704.55); the tooltip adds 0.85 x the greater of fire spell power and shadow spell power ($cond). Dummy magic resistance removed (823764). Contrast arm of the spell power term: +10000 spell power: 704 + int(0.85 x 10000) = 9204 against 704. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+      "observe_source": "800355 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude set to the duration by AscensionFelswornContracts.cpp:232 (one tick at the end), DurationIndex 571 = 5500 ms ($d); BasePoints 694 + 1 = 695 + int(RealPointsPerLevel 9.55 x (60 - 59)) = 9 -> 704 at level 60 (tooltip 704.55); the tooltip adds 0.85 x the greater of fire spell power and shadow spell power ($cond). Contrast arm of the spell power term: +10000 spell power: 704 + int(0.85 x 10000) = 9204 against 704. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. No resistance aura is set (823764 zeroes a Shadowflame hit on this dummy, measured on Tyrant's Gaze)."
     },
     {
       "spell": 800355,
@@ -852,6 +858,64 @@
       "wait_ms": 1000,
       "expire_ms": 500,
       "observe_source": "800833 Effect[0] aura 33 SPELL_AURA_MOD_DECREASE_SPEED, BasePoints -61 + 1 = -60 ($800833s1 = 60), applied to the dummy by the channel's periodic trigger every 500 ms. The dummy's run speed rate is read before and 1000 ms into the channel: the ratio is 0.40. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (slow_held)",
+      "kind": "metric_delta",
+      "variant": "slow_held",
+      "label_suffix": "slow_held",
+      "quote": "slowing your target's movement speed by $800833s1% for $d",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [],
+      "metric": "aura",
+      "fields": {
+        "spell": 800833
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 5100,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          5050,
+          5200
+        ]
+      },
+      "observe_source": "800355 DurationIndex 571 = 5500 ms ($d); the slow 800833 is applied by the channel's periodic trigger. The slow is still on the dummy 5100 ms after the cast (excludes a duration 10% short, 4950 ms). Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc.",
+      "measure_actor": "dummy"
+    },
+    {
+      "spell": 800355,
+      "name": "Sargeras Embrace (slow_gone)",
+      "kind": "metric_delta",
+      "variant": "slow_gone",
+      "label_suffix": "slow_gone",
+      "quote": "slowing your target's movement speed by $800833s1% for $d",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [],
+      "metric": "aura",
+      "fields": {
+        "spell": 800833
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 5900,
+      "expire_ms": 500,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          5850,
+          6000
+        ]
+      },
+      "observe_source": "800355 DurationIndex 571 = 5500 ms ($d). The slow is gone from the dummy 5900 ms after the cast (excludes a duration 10% long, 6050 ms). Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc.",
+      "measure_actor": "dummy"
     }
   ],
   "player_observations": [],
