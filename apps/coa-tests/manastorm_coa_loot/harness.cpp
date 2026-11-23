@@ -22,4 +22,10 @@ int main()
     assert(Award(10, 1000, 1000) == 0);
     assert(Award(25, 0, 0) == 0);
     assert(Award(std::numeric_limits<std::uint32_t>::max(), 995, 1000) == 5);
+    ClientCache const native = ClientCacheState({1278050, 35.0f}, false);
+    assert(native.Item == 1278050);
+    assert(native.ChancePct == 35.0f);
+    ClientCache const coaLoot = ClientCacheState({1278050, 35.0f}, true);
+    assert(coaLoot.Item == 1278050);
+    assert(coaLoot.ChancePct == 0.0f);
 }

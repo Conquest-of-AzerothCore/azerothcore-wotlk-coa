@@ -3671,12 +3671,11 @@ void ManastormMgr::SendClientState(
                 rewardError);
         }
 
-        if (ManastormRewards::Instance().IsCoALootMode(player->GetGUID().GetCounter()))
-        {
-            cacheChancePct = 0;
-            if (!guaranteedCaches)
-                cacheItemId = 0;
-        }
+        ManastormCoALoot::ClientCache const clientCache = ManastormCoALoot::ClientCacheState(
+            { cacheItemId, float(cacheChancePct) },
+            ManastormRewards::Instance().IsCoALootMode(player->GetGUID().GetCounter()));
+        cacheItemId = clientCache.Item;
+        cacheChancePct = int32(clientCache.ChancePct);
 
         message
             << "1|"
