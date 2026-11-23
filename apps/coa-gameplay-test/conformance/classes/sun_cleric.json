@@ -43741,7 +43741,21 @@
   ],
   "self_stack_bonus": [],
   "dual_target_effects": [],
-  "target_aura_gates": [],
+  "target_aura_gates": [
+    {
+      "spell": 806980,
+      "name": "Justicar's Wrath",
+      "quote": "and increasing the target's spell damage taken by $572067s1% for $572067d.",
+      "rank": 806980,
+      "gate_spell": 572067,
+      "percent": 10.0,
+      "label_suffix": "wrath_taken",
+      "stack_arms": [
+        0
+      ],
+      "reason": "Cause of the plain 806980 hit_mean alert (lr1 TN-5): every judged hit lands on the same dummy, and each landed hit casts Justicar's Wrath's debuff 572067 on it (AscensionSunClericAbilities.cpp:341-342, info->Id == 806980: Cast(player, target, 572067)): 572067 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 126 (Holy, Fire, Nature, Frost, Shadow, Arcane), BasePoints 9 + DieSides 1 = 10% ($572067s1), DurationIndex 8 = 15000 ms, StackAmount 0, while the hit scenario casts every 2000 ms; so every hit after the first is +10%: the model 472.05 x 1.10 = 519.26 against the measured 518.3 (846 hits). The model's 472.05 sits 12.1% under the tooltip mean 536.81 because the tooltip mean carries no mitigation and the model applies the linear monster resistance the server uses for a creature (Unit::GetEffectiveResistChance, Unit.cpp:2563-2606, CoA.MonsterResistance.PerLevel 1.0 x dummy level 60 = 60 resistance, PerPercent 5: 12% average resist, the 11 partial-resist steps of CalcAbsorbResist): neither figure is computed wrongly. These arms give each hit a clean target: the gate fixture sets 572067 at 0 stacks on the dummy before every cast (stacks 0 arm, expected the model mean) and at 1 stack (the cap arm, StackAmount 0 counts as 1, expected the model mean x 1.10 from $572067s1). The plain 806980 hit_mean stays an alert of the scenario design, cited by no clause."
+    }
+  ],
   "learned_hits": [],
   "cast_auras": [],
   "hit_casts": [],
