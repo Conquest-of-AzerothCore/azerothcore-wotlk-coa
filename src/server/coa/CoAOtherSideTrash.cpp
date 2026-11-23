@@ -143,6 +143,7 @@ constexpr float FissureHalfWidth = 2.0f;
 constexpr float BroodRange = 30.0f;
 std::atomic<uint32> TrapActiveMs = 1500;
 std::atomic<uint32> TrapPauseMs = 6000;
+std::atomic<uint32> TrapFadeMs = 1500;
 constexpr uint32 TrapGapMs = 1000;
 constexpr uint32 TrapTickMs = 500;
 constexpr uint32 TrapMaxActiveMs = 60000;
@@ -436,10 +437,12 @@ struct npc_coa_other_side_venom_trap : public ScriptedAI
             _rankIn -= diff;
 
         uint32 const active = TrapActiveMs.load();
-        uint32 const slot = active + TrapGapMs;
+        uint32 const burning = active + TrapFadeMs.load();
+        uint32 const slot = burning + TrapGapMs;
         uint32 const cycle = _levels * slot + TrapPauseMs.load();
         uint32 const now = uint32(GameTime::GetGameTimeMS().count() % cycle);
-        bool const breathing = now >= _level * slot && now < _level * slot + active;
+        uint32 const start = _level * slot;
+        bool const breathing = now >= start && now < start + burning;
         if (breathing && !_breathing)
         {
             if (!me->GetVehicle())
@@ -456,7 +459,8 @@ struct npc_coa_other_side_venom_trap : public ScriptedAI
             return;
         }
         _tickIn = TrapTickMs;
-        me->SendPlaySpellVisual(BreathKits[BreathKitIndex.load()].kit);
+        if (now - start < active)
+            me->SendPlaySpellVisual(BreathKits[BreathKitIndex.load()].kit);
         for (auto const& ref : me->GetMap()->GetPlayers())
             if (Player* player = ref.GetSource())
                 if (InTrapBreath(me, player))
@@ -741,19 +745,23 @@ public:
         return true;
     }
 
-    static bool HandleTiming(ChatHandler* handler, uint32 activeMs, Optional<uint32> pauseMs)
+    static bool HandleTiming(ChatHandler* handler, uint32 activeMs, Optional<uint32> pauseMs, Optional<uint32> fadeMs)
     {
-        if (activeMs < TrapTickMs || activeMs > TrapMaxActiveMs || (pauseMs && *pauseMs > TrapMaxPauseMs))
+        if (activeMs < TrapTickMs || activeMs > TrapMaxActiveMs || (pauseMs && *pauseMs > TrapMaxPauseMs)
+            || (fadeMs && *fadeMs > TrapMaxActiveMs))
         {
-            handler->SendErrorMessage("Breaths last {} to {} ms; pauses at most {} ms.", TrapTickMs, TrapMaxActiveMs,
-                TrapMaxPauseMs);
+            handler->SendErrorMessage("Breaths last {} to {} ms; pauses at most {} ms; fades at most {} ms.", TrapTickMs,
+                TrapMaxActiveMs, TrapMaxPauseMs, TrapMaxActiveMs);
             return false;
         }
         TrapActiveMs = activeMs;
         if (pauseMs)
             TrapPauseMs = *pauseMs;
-        handler->PSendSysMessage("Each statue breathes {} ms, the next one up {} ms later; {} ms pause after the top. "
-            "Until the next restart.", TrapActiveMs.load(), TrapGapMs, TrapPauseMs.load());
+        if (fadeMs)
+            TrapFadeMs = *fadeMs;
+        handler->PSendSysMessage("Each statue breathes {} ms and keeps burning {} ms after its last breath, the next one up "
+            "{} ms later; {} ms pause after the top. Until the next restart.", TrapActiveMs.load(), TrapFadeMs.load(),
+            TrapGapMs, TrapPauseMs.load());
         return true;
     }
 
@@ -894,8 +902,8 @@ public:
             handler->PSendSysMessage("Trap {}: {:.2f} {:.2f} {:.2f}, facing {:.3f}", trap->GetSpawnId(),
                 trap->GetPositionX(), trap->GetPositionY(), trap->GetPositionZ(),
                 trap->GetHomePosition().GetOrientation());
-        handler->PSendSysMessage("{} traps; each breathes {} ms, {} ms gap to the next, {} ms pause after the top.", traps.size(),
-            TrapActiveMs.load(), TrapGapMs, TrapPauseMs.load());
+        handler->PSendSysMessage("{} traps; each breathes {} ms and burns {} ms longer, {} ms gap to the next, {} ms pause "
+            "after the top.", traps.size(), TrapActiveMs.load(), TrapFadeMs.load(), TrapGapMs, TrapPauseMs.load());
         return true;
     }
 };
