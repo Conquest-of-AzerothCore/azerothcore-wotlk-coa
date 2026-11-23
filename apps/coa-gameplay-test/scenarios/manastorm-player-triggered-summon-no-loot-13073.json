@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Manastorm: a hostile creature summoned by a player's trigger drops no native loot (#13073)",
+  "contract": [
+    "#13073: in a Zul'Farrak Manastorm stage, opening a Shallow Grave casts 10247 from the player and summons a Zul'Farrak Zombie (7286) or Dead Hero (7276) with the player as summoner. TempSummon::InitStats marks such a creature as created by a player, and IsPlayerControlledCreature counted every player-created creature as the player's own, so the Manastorm stage rules (loot mode 0, stage registration, level and health scaling) skipped these hostile mobs and their corpses carried native loot and gold.",
+    "A player-created creature now counts as the player's own only when it is not hostile to its summoner, so the player's own friendly summons stay excluded while hostile summons follow the stage rules.",
+    "The case summons the zombie with the player as summoner, the same creation path as the grave. CONTROL: outside Manastorm the zombie's corpse holds its native gold (template 300-396 copper), which shows that the kill, the loot request and the gold metric work for this summon. Inside the Zul'Farrak stage (segment 197), outside the preparation bubble, the same summon's corpse must hold no gold; before the fix it held the native gold."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "n", "race": 5, "class": 23, "level": 60, "security": 2}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "summon", "label": "CONTROL: a zombie summoned by the player outside Manastorm", "actor": "n", "as": "control", "entry": 7286, "distance": 5},
+    {"action": "assert", "actor": "n", "metric": "nearby_creature_count", "entry": 7286, "min": 1, "within_ms": 3000},
+    {"action": "attack_nearby", "actor": "n", "entry": 7286, "kill": true},
+    {"action": "wait", "ms": 1500},
+    {"action": "loot_nearby", "actor": "n", "entry": 7286},
+    {"action": "assert", "label": "CONTROL: outside Manastorm the corpse holds its native gold", "actor": "n", "metric": "loot_gold", "min": 300},
+    {"action": "close_loot", "actor": "n"},
+    {"action": "command", "actor": "n", "command": ".manastorm segment test 197"},
+    {"action": "assert", "label": "The player entered a private Manastorm instance", "actor": "n", "metric": "private_instance", "within_ms": 10000, "equals": 1},
+    {"action": "teleport_to_spawn", "label": "Leave the preparation bubble at a Zul'Farrak stage spawn", "actor": "n", "guid": 81523},
+    {"action": "assert", "label": "Leaving the preparation bubble clears its safety aura", "actor": "n", "metric": "aura", "spell": 93307, "within_ms": 3000, "equals": 0},
+    {"action": "summon", "label": "A zombie summoned by the player, like one from a Shallow Grave", "actor": "n", "as": "zombie", "entry": 7286, "distance": 5},
+    {"action": "assert", "actor": "n", "metric": "nearby_creature_count", "entry": 7286, "min": 1, "within_ms": 3000},
+    {"action": "attack_nearby", "actor": "n", "entry": 7286, "kill": true},
+    {"action": "wait", "ms": 1500},
+    {"action": "loot_nearby", "actor": "n", "entry": 7286},
+    {"action": "assert", "label": "DISCRIMINATING: the stage zombie's corpse holds no native gold", "actor": "n", "metric": "loot_gold", "equals": 0},
+    {"action": "command", "actor": "n", "command": ".manastorm stop"}
+  ]
+}

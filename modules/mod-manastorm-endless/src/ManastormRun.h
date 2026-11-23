@@ -51,6 +51,7 @@ public:
         uint8 Charges = 0;
         uint8 RecalculateMask = 0;
         int32 MaxDuration = 0;
+        int32 Duration = 0;
         std::array<int32, 3> Amounts{};
         std::array<int32, 3> BaseAmounts{};
     };
@@ -62,6 +63,18 @@ public:
     };
 
     std::unordered_map<ObjectGuid::LowType, StageRecovery> StageRecoveries;
+
+    struct StageLink
+    {
+        uint32 Spell = 0;
+        ObjectGuid Caster;
+        ObjectGuid Target;
+        uint32 DestinationInstanceId = 0;
+        int32 Duration = 0;
+        uint8 Charges = 0;
+    };
+
+    std::vector<StageLink> StageLinks;
 
     uint64 GetRunId() const { return _runId; }
     uint64 GetSeed() const { return _seed; }

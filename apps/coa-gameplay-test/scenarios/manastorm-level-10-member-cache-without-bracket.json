@@ -1,0 +1,1051 @@
+{
+  "schema": 1,
+  "name": "Manastorm: a level-10 member who wins a cache does not fail the floor for the run",
+  "contract": [
+    "Issues #12699, #12821 and #12972. Manastorm admits members from level 10, but the normal-track cache brackets",
+    "in manastorm_cache_bracket start at level 11 (97877, 11-24). ManastormRewards::PrepareStageCompletion",
+    "resolved a physical cache for every member who won one and returned false when no bracket matched, so",
+    "RecordStageCompletion failed and FailRun(\"Progression persistence failed.\") ejected the whole run.",
+    "A fresh character starts at cache_chance_pct 0 and each floor without a cache adds 13 (CACHE_PITY_STEP_PCT),",
+    "so the member's chance on runs 1-9 is 0, 13, 26, 39, 52, 65, 78, 91 and 100: at least one of the nine",
+    "completed floors awards the level-10 member a normal cache. Every completed floor must advance the run",
+    "(entrance protection 93307 returns on the next floor) and keep the member in the private instance."
+  ],
+  "timeout_ms": 600000,
+  "players": [
+    {
+      "id": "leader",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2
+    },
+    {
+      "id": "member",
+      "race": 5,
+      "class": 23,
+      "level": 10,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "label": "member joins the leader's group so both are run members",
+      "actor": "leader",
+      "target": "member"
+    },
+    {
+      "action": "set_level",
+      "label": "run 1/9: the member is level 10 when the floor completes",
+      "actor": "member",
+      "value": 10
+    },
+    {
+      "action": "command",
+      "label": "run 1/9: start segment 1",
+      "actor": "leader",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 1/9: the leader entered a private Manastorm instance",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 1/9: the level-10 member was brought into the same run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "run 1/9: Servant's Errand blocks kill XP so the member stays level 10",
+      "actor": "member",
+      "command": ".aura 192"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 1/9: the member is level 10 before the objective dies",
+      "actor": "member",
+      "metric": "level",
+      "equals": 10
+    },
+    {
+      "action": "set_phase",
+      "label": "run 1/9: match the native phase 1 Manastorm room",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "run 1/9: only the leader goes to Taragaman",
+      "actor": "leader",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 1/9: the leader left the entrance protection at the boss",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "leader",
+      "entry": 11520,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "run 1/9: the floor committed and the run advanced, restoring entrance protection",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 12000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "run 1/9: the level-10 member was not ejected by the floor completion",
+      "actor": "member",
+      "metric": "private_instance",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "run 1/9: the leader leaves the run",
+      "actor": "leader",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 1/9: the leader left the run",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "run 1/9: the member ends the run",
+      "actor": "member",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 1/9: the member left the run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "label": "run 2/9: the member is level 10 when the floor completes",
+      "actor": "member",
+      "value": 10
+    },
+    {
+      "action": "command",
+      "label": "run 2/9: start segment 1",
+      "actor": "leader",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 2/9: the leader entered a private Manastorm instance",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 2/9: the level-10 member was brought into the same run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "run 2/9: Servant's Errand blocks kill XP so the member stays level 10",
+      "actor": "member",
+      "command": ".aura 192"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 2/9: the member is level 10 before the objective dies",
+      "actor": "member",
+      "metric": "level",
+      "equals": 10
+    },
+    {
+      "action": "set_phase",
+      "label": "run 2/9: match the native phase 1 Manastorm room",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "run 2/9: only the leader goes to Taragaman",
+      "actor": "leader",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 2/9: the leader left the entrance protection at the boss",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "leader",
+      "entry": 11520,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "run 2/9: the floor committed and the run advanced, restoring entrance protection",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 12000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "run 2/9: the level-10 member was not ejected by the floor completion",
+      "actor": "member",
+      "metric": "private_instance",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "run 2/9: the leader leaves the run",
+      "actor": "leader",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 2/9: the leader left the run",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "run 2/9: the member ends the run",
+      "actor": "member",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 2/9: the member left the run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "label": "run 3/9: the member is level 10 when the floor completes",
+      "actor": "member",
+      "value": 10
+    },
+    {
+      "action": "command",
+      "label": "run 3/9: start segment 1",
+      "actor": "leader",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 3/9: the leader entered a private Manastorm instance",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 3/9: the level-10 member was brought into the same run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "run 3/9: Servant's Errand blocks kill XP so the member stays level 10",
+      "actor": "member",
+      "command": ".aura 192"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 3/9: the member is level 10 before the objective dies",
+      "actor": "member",
+      "metric": "level",
+      "equals": 10
+    },
+    {
+      "action": "set_phase",
+      "label": "run 3/9: match the native phase 1 Manastorm room",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "run 3/9: only the leader goes to Taragaman",
+      "actor": "leader",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 3/9: the leader left the entrance protection at the boss",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "leader",
+      "entry": 11520,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "run 3/9: the floor committed and the run advanced, restoring entrance protection",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 12000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "run 3/9: the level-10 member was not ejected by the floor completion",
+      "actor": "member",
+      "metric": "private_instance",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "run 3/9: the leader leaves the run",
+      "actor": "leader",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 3/9: the leader left the run",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "run 3/9: the member ends the run",
+      "actor": "member",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 3/9: the member left the run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "label": "run 4/9: the member is level 10 when the floor completes",
+      "actor": "member",
+      "value": 10
+    },
+    {
+      "action": "command",
+      "label": "run 4/9: start segment 1",
+      "actor": "leader",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 4/9: the leader entered a private Manastorm instance",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 4/9: the level-10 member was brought into the same run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "run 4/9: Servant's Errand blocks kill XP so the member stays level 10",
+      "actor": "member",
+      "command": ".aura 192"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 4/9: the member is level 10 before the objective dies",
+      "actor": "member",
+      "metric": "level",
+      "equals": 10
+    },
+    {
+      "action": "set_phase",
+      "label": "run 4/9: match the native phase 1 Manastorm room",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "run 4/9: only the leader goes to Taragaman",
+      "actor": "leader",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 4/9: the leader left the entrance protection at the boss",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "leader",
+      "entry": 11520,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "run 4/9: the floor committed and the run advanced, restoring entrance protection",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 12000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "run 4/9: the level-10 member was not ejected by the floor completion",
+      "actor": "member",
+      "metric": "private_instance",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "run 4/9: the leader leaves the run",
+      "actor": "leader",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 4/9: the leader left the run",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "run 4/9: the member ends the run",
+      "actor": "member",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 4/9: the member left the run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "label": "run 5/9: the member is level 10 when the floor completes",
+      "actor": "member",
+      "value": 10
+    },
+    {
+      "action": "command",
+      "label": "run 5/9: start segment 1",
+      "actor": "leader",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 5/9: the leader entered a private Manastorm instance",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 5/9: the level-10 member was brought into the same run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "run 5/9: Servant's Errand blocks kill XP so the member stays level 10",
+      "actor": "member",
+      "command": ".aura 192"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 5/9: the member is level 10 before the objective dies",
+      "actor": "member",
+      "metric": "level",
+      "equals": 10
+    },
+    {
+      "action": "set_phase",
+      "label": "run 5/9: match the native phase 1 Manastorm room",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "run 5/9: only the leader goes to Taragaman",
+      "actor": "leader",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 5/9: the leader left the entrance protection at the boss",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "leader",
+      "entry": 11520,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "run 5/9: the floor committed and the run advanced, restoring entrance protection",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 12000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "run 5/9: the level-10 member was not ejected by the floor completion",
+      "actor": "member",
+      "metric": "private_instance",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "run 5/9: the leader leaves the run",
+      "actor": "leader",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 5/9: the leader left the run",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "run 5/9: the member ends the run",
+      "actor": "member",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 5/9: the member left the run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "label": "run 6/9: the member is level 10 when the floor completes",
+      "actor": "member",
+      "value": 10
+    },
+    {
+      "action": "command",
+      "label": "run 6/9: start segment 1",
+      "actor": "leader",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 6/9: the leader entered a private Manastorm instance",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 6/9: the level-10 member was brought into the same run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "run 6/9: Servant's Errand blocks kill XP so the member stays level 10",
+      "actor": "member",
+      "command": ".aura 192"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 6/9: the member is level 10 before the objective dies",
+      "actor": "member",
+      "metric": "level",
+      "equals": 10
+    },
+    {
+      "action": "set_phase",
+      "label": "run 6/9: match the native phase 1 Manastorm room",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "run 6/9: only the leader goes to Taragaman",
+      "actor": "leader",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 6/9: the leader left the entrance protection at the boss",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "leader",
+      "entry": 11520,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "run 6/9: the floor committed and the run advanced, restoring entrance protection",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 12000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "run 6/9: the level-10 member was not ejected by the floor completion",
+      "actor": "member",
+      "metric": "private_instance",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "run 6/9: the leader leaves the run",
+      "actor": "leader",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 6/9: the leader left the run",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "run 6/9: the member ends the run",
+      "actor": "member",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 6/9: the member left the run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "label": "run 7/9: the member is level 10 when the floor completes",
+      "actor": "member",
+      "value": 10
+    },
+    {
+      "action": "command",
+      "label": "run 7/9: start segment 1",
+      "actor": "leader",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 7/9: the leader entered a private Manastorm instance",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 7/9: the level-10 member was brought into the same run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "run 7/9: Servant's Errand blocks kill XP so the member stays level 10",
+      "actor": "member",
+      "command": ".aura 192"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 7/9: the member is level 10 before the objective dies",
+      "actor": "member",
+      "metric": "level",
+      "equals": 10
+    },
+    {
+      "action": "set_phase",
+      "label": "run 7/9: match the native phase 1 Manastorm room",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "run 7/9: only the leader goes to Taragaman",
+      "actor": "leader",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 7/9: the leader left the entrance protection at the boss",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "leader",
+      "entry": 11520,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "run 7/9: the floor committed and the run advanced, restoring entrance protection",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 12000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "run 7/9: the level-10 member was not ejected by the floor completion",
+      "actor": "member",
+      "metric": "private_instance",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "run 7/9: the leader leaves the run",
+      "actor": "leader",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 7/9: the leader left the run",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "run 7/9: the member ends the run",
+      "actor": "member",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 7/9: the member left the run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "label": "run 8/9: the member is level 10 when the floor completes",
+      "actor": "member",
+      "value": 10
+    },
+    {
+      "action": "command",
+      "label": "run 8/9: start segment 1",
+      "actor": "leader",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 8/9: the leader entered a private Manastorm instance",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 8/9: the level-10 member was brought into the same run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "run 8/9: Servant's Errand blocks kill XP so the member stays level 10",
+      "actor": "member",
+      "command": ".aura 192"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 8/9: the member is level 10 before the objective dies",
+      "actor": "member",
+      "metric": "level",
+      "equals": 10
+    },
+    {
+      "action": "set_phase",
+      "label": "run 8/9: match the native phase 1 Manastorm room",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "run 8/9: only the leader goes to Taragaman",
+      "actor": "leader",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 8/9: the leader left the entrance protection at the boss",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "leader",
+      "entry": 11520,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "run 8/9: the floor committed and the run advanced, restoring entrance protection",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 12000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "run 8/9: the level-10 member was not ejected by the floor completion",
+      "actor": "member",
+      "metric": "private_instance",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "run 8/9: the leader leaves the run",
+      "actor": "leader",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 8/9: the leader left the run",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "run 8/9: the member ends the run",
+      "actor": "member",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 8/9: the member left the run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "label": "run 9/9: the member is level 10 when the floor completes",
+      "actor": "member",
+      "value": 10
+    },
+    {
+      "action": "command",
+      "label": "run 9/9: start segment 1",
+      "actor": "leader",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 9/9: the leader entered a private Manastorm instance",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 9/9: the level-10 member was brought into the same run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "run 9/9: Servant's Errand blocks kill XP so the member stays level 10",
+      "actor": "member",
+      "command": ".aura 192"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 9/9: the member is level 10 before the objective dies",
+      "actor": "member",
+      "metric": "level",
+      "equals": 10
+    },
+    {
+      "action": "set_phase",
+      "label": "run 9/9: match the native phase 1 Manastorm room",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "run 9/9: only the leader goes to Taragaman",
+      "actor": "leader",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 9/9: the leader left the entrance protection at the boss",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "leader",
+      "entry": 11520,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "run 9/9: the floor committed and the run advanced, restoring entrance protection",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 12000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "run 9/9: the level-10 member was not ejected by the floor completion",
+      "actor": "member",
+      "metric": "private_instance",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "label": "run 9/9: the leader leaves the run",
+      "actor": "leader",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 9/9: the leader left the run",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "run 9/9: the member ends the run",
+      "actor": "member",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL run 9/9: the member left the run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    }
+  ]
+}

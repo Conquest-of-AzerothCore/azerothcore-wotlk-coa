@@ -1741,31 +1741,22 @@ bool ManastormRewards::PrepareStageCompletion(
 
         if (cacheCount)
         {
-            uint32 playerLevel =
-                player
-                ? uint32(
-                    player->GetLevel())
-                : 0;
-
-            if (!run.IsEndgame() &&
-                !playerLevel)
+            uint32 playerLevel = player ? player->GetLevel() : 0;
+            if (!run.IsEndgame() && !player)
             {
-                QueryResult levelResult =
-                    CharacterDatabase.Query(
-                        "SELECT level "
-                        "FROM characters "
-                        "WHERE guid = {} "
-                        "LIMIT 1",
-                        characterGuid);
-
-                if (levelResult)
+                CharacterDatabasePreparedStatement* statement =
+                    CharacterDatabase.GetPreparedStatement(CHAR_SEL_MANASTORM_XP_LEVEL);
+                statement->SetData(0, characterGuid);
+                PreparedQueryResult levelResult = CharacterDatabase.Query(statement);
+                if (!levelResult)
                 {
-                    playerLevel =
-                        uint32(
-                            levelResult->
-                                Fetch()[0]
-                                .Get<uint8>());
+                    error = "Unable to read offline Manastorm member level for cache rewards: character=" +
+                        std::to_string(characterGuid) + ".";
+                    publications.clear();
+                    return false;
                 }
+
+                playerLevel = levelResult->Fetch()[0].Get<uint8>();
             }
 
             if (!ResolveCacheItemEntry(
@@ -1777,30 +1768,30 @@ bool ManastormRewards::PrepareStageCompletion(
                     uint8(run.GetMode()),
                     run.GetDepth()))
             {
-                error =
-                    "No enabled Manastorm cache bracket matches "
-                    "track=" +
-                    std::to_string(
-                        uint32(track)) +
-                    " depth=" +
-                    std::to_string(
-                        run.GetDepth()) +
-                    " level=" +
-                    std::to_string(
-                        playerLevel) +
-                    ".";
+                if (run.IsEndgame())
+                {
+                    error = "No enabled Manastorm cache bracket matches track=" + std::to_string(uint32(track)) +
+                        " depth=" + std::to_string(run.GetDepth()) + ".";
+                    LOG_ERROR(LOG_FILTER, "Cannot resolve physical Manastorm cache for character {}: track={} depth={}.",
+                        characterGuid, uint32(track), run.GetDepth());
+                    publications.clear();
+                    return false;
+                }
 
-                LOG_ERROR(
+                LOG_WARN(
                     LOG_FILTER,
-                    "Cannot resolve physical Manastorm cache for "
-                    "character {}: track={} depth={} level={}.",
+                    "No Manastorm cache bracket matches character {}: track={} depth={} level={}. "
+                    "The stage completes without a cache for this character.",
                     characterGuid,
                     uint32(track),
                     run.GetDepth(),
                     playerLevel);
 
-                publications.clear();
-                return false;
+                if (wonNormalCache)
+                    nextCacheChance = state.CacheChancePct;
+
+                wonNormalCache = false;
+                cacheCount = 0;
             }
         }
 
