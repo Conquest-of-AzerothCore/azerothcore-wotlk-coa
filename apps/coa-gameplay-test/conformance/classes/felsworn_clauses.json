@@ -966,7 +966,32 @@
   {
     "spell": 555738,
     "clause": "You are immune to movement impairing and loss of control effects.",
-    "labels": [],
+    "labels": [
+      "555738 immunity loss_sleep 555738 applied",
+      "555738 immunity loss_sleep 555738 cast",
+      "555738 immunity loss_sleep 555738 expired",
+      "555738 immunity loss_sleep 9159 control",
+      "555738 immunity loss_sleep 9159 with",
+      "555738 immunity loss_sleep 9159 without",
+      "555738 immunity loss_stun_fear 12096 control",
+      "555738 immunity loss_stun_fear 12096 with",
+      "555738 immunity loss_stun_fear 12096 without",
+      "555738 immunity loss_stun_fear 555738 applied",
+      "555738 immunity loss_stun_fear 555738 cast",
+      "555738 immunity loss_stun_fear 555738 expired",
+      "555738 immunity loss_stun_fear 56 control",
+      "555738 immunity loss_stun_fear 56 with",
+      "555738 immunity loss_stun_fear 56 without",
+      "555738 immunity movement 38767 control",
+      "555738 immunity movement 38767 with",
+      "555738 immunity movement 38767 without",
+      "555738 immunity movement 47021 control",
+      "555738 immunity movement 47021 with",
+      "555738 immunity movement 47021 without",
+      "555738 immunity movement 555738 applied",
+      "555738 immunity movement 555738 cast",
+      "555738 immunity movement 555738 expired"
+    ],
     "kind": "claim"
   },
   {
@@ -1395,25 +1420,51 @@
   {
     "spell": 561216,
     "clause": "generating 1 Felfury with each strike.",
-    "labels": [],
+    "labels": [
+      "561216 behaviour_metric_delta felfury"
+    ],
     "kind": "claim"
   },
   {
     "spell": 561216,
     "clause": "While active you are immune to crowd control effects.",
-    "labels": [],
+    "labels": [
+      "561216 immunity fear 12096 control",
+      "561216 immunity fear 12096 with",
+      "561216 immunity fear 12096 without",
+      "561216 immunity fear 561216 applied",
+      "561216 immunity fear 561216 cast",
+      "561216 immunity fear 561216 expired",
+      "561216 immunity root 47021 control",
+      "561216 immunity root 47021 with",
+      "561216 immunity root 47021 without",
+      "561216 immunity root 561216 applied",
+      "561216 immunity root 561216 cast",
+      "561216 immunity root 561216 expired",
+      "561216 immunity stun 56 control",
+      "561216 immunity stun 56 with",
+      "561216 immunity stun 56 without",
+      "561216 immunity stun 561216 applied",
+      "561216 immunity stun 561216 cast",
+      "561216 immunity stun 561216 expired"
+    ],
     "kind": "claim"
   },
   {
     "spell": 561216,
     "clause": "Can hit the same target multiple times.",
-    "labels": [],
+    "labels": [
+      "561216 behaviour_metric_delta same_target"
+    ],
     "kind": "claim"
   },
   {
     "spell": 561216,
     "clause": "Cannot hit invisible or stealthed targets.",
-    "labels": [],
+    "labels": [
+      "561216 behaviour_metric_delta no_hit_invisible",
+      "561216 behaviour_metric_delta no_hit_stealth"
+    ],
     "kind": "claim"
   },
   {
@@ -2868,7 +2919,9 @@
     "claims": [
       {
         "claim": "Increases the duration",
-        "labels": []
+        "labels": [
+          "800352 behaviour_metric_delta bane_duration"
+        ]
       },
       {
         "claim": "reduces the Energy cost of Banes by $s1%.",
@@ -3956,7 +4009,10 @@
       },
       {
         "claim": "you cannot attack",
-        "labels": []
+        "labels": [
+          "806109 behaviour_metric_delta no_attack",
+          "806109 behaviour_metric_delta no_attack_applied"
+        ]
       },
       {
         "claim": "move",
@@ -3964,7 +4020,9 @@
       },
       {
         "claim": "or cast spells",
-        "labels": []
+        "labels": [
+          "806109 behaviour_metric_delta no_cast"
+        ]
       }
     ]
   },
@@ -4014,7 +4072,11 @@
       },
       {
         "claim": "Direct critical strikes with the other Felfury spenders (Azzinoth's Assault, Ruin and the rest)",
-        "labels": []
+        "labels": [
+          "806235 behaviour_metric_delta duration_azzinoth",
+          "806235 behaviour_metric_delta duration_felwrath",
+          "806235 behaviour_metric_delta duration_ruin"
+        ]
       }
     ]
   },
