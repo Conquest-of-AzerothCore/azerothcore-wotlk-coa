@@ -12744,6 +12744,50 @@
       "wait_ms": 2100,
       "expire_ms": 10500,
       "observe_source": "The tooltip names Ruin and Azzinoth's Assault among the Felfury spenders (the spells whose own tooltip says 'Consumes 2 Felfury': Felwrath 520693, Spell.dbc Description). Felwrath has a direct Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE (a 2000 ms cast time, Spell.dbc), so with its hit forced critical (spell crit rating forced by the harness) one direct critical strike must extend Inner Demon 804216 by $806236s1 = 1000 ms (806236 BasePoints 999 + 1, same figure as the Sargeron Smite entry of this spell); the remaining duration of 804216 2100 ms after the cast is read before the learn (control: 806235 not learned) and after: gain 1000, tolerance 90 excludes 10% on the gain. Inner Demon 804216, Felfury 800058 x2 (the cost of the spender) and At Least 2 Felfury 803468 (the spender's CasterAuraSpell) are set by harness set_aura on the caster in both phases as precondition fixtures. Reference search 2026-11-23: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec and cause enemies struck to have a 3% increased chance to be hit by spells for 12 seconds.' (same figures); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon extension on two Azzinoth's Assault critical strikes)",
+      "kind": "metric_delta",
+      "variant": "duration_azzinoth",
+      "label_suffix": "duration_azzinoth",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 801904,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "melee",
+      "cast_power": 100,
+      "before_expected": 1000,
+      "expected": 3000,
+      "expected_gain": 2000,
+      "tolerance": 180,
+      "wait_ms": 600,
+      "expire_ms": 10500,
+      "observe_source": "Azzinoth's Assault 801904 (Spell.dbc Description: 'Strike an enemy for Weapon Damage ... with both weapons'; Effect[0] and Effect[1] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE, 520262 and 572585) makes two weapon strikes: with melee crit forced, two direct critical strikes of a Felfury spender, each extending Inner Demon 804216 by $806236s1 = 1000 ms: gain 2000, tolerance 180 excludes 10% on the gain (1800, 2200). The spell's own Inner Demon extension (Description, $803089s1) is present in both phases and cancels in the before/after difference (control: 806235 not learned). The earlier lead of the first author (gain 17000) is the thing this arm re-measures. Inner Demon 804216, Felfury 800058 x2 and 803468 are harness set_aura preconditions. Reference search 2026-11-23: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: same figures as the tooltip; expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],
