@@ -2062,7 +2062,7 @@
     "clause": "dealing ${$m1+0+$spfi*.3+$AP*.23} Fire Damage to nearby enemies every $t1 sec.",
     "claims": [
       {
-        "claim": "dealing ${$m1+0+$spfi*.3+$AP*.23} Fire Damage to nearby enemies",
+        "claim": "dealing ${$m1+0+$spfi*.3+$AP*.23} Fire Damage",
         "labels": [
           "572617 behaviour_metric_delta tick_base",
           "572617 behaviour_metric_delta tick_spell_power",
