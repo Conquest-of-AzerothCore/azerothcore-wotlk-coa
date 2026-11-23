@@ -121,7 +121,8 @@
     },
     {
       "action": "console",
-      "command": "crows barrens 2"
+      "command": "crows barrens 2",
+      "restore": "crows cancel"
     },
     {
       "action": "assert",
