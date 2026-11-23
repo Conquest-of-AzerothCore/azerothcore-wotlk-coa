@@ -1,4 +1,4 @@
-# 0039. Light of the Sun's parry bonus is consumed by the next melee attack taken
+# 0042. Light of the Sun's parry bonus is consumed by the next melee attack taken
 
 - Status: accepted (owner ruling O-31, 2026-11-23)
 - Date: 2026-11-23
