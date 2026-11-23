@@ -1,0 +1,163 @@
+DROP TABLE IF EXISTS `coa_pet_species`;
+CREATE TABLE `coa_pet_species` (
+  `entry` INT UNSIGNED NOT NULL,
+  `name` VARCHAR(100) NOT NULL DEFAULT '',
+  `kit` INT UNSIGNED NOT NULL DEFAULT 0,
+  `wild` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  `companion` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  `critter` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  `synthetic` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  `standin` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  `icon` VARCHAR(100) NOT NULL DEFAULT '',
+  `scale` FLOAT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`entry`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `coa_pet_kit`;
+CREATE TABLE `coa_pet_kit` (
+  `id` INT UNSIGNED NOT NULL,
+  `name` VARCHAR(100) NOT NULL DEFAULT '',
+  `family` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  `power` SMALLINT NOT NULL DEFAULT 0,
+  `speed` SMALLINT NOT NULL DEFAULT 0,
+  `stamina` SMALLINT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `coa_pet_kit_ability`;
+CREATE TABLE `coa_pet_kit_ability` (
+  `kit` INT UNSIGNED NOT NULL,
+  `slot` TINYINT UNSIGNED NOT NULL,
+  `unlock_level` TINYINT UNSIGNED NOT NULL,
+  `ability` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`kit`, `slot`, `unlock_level`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `coa_pet_ability`;
+CREATE TABLE `coa_pet_ability` (
+  `id` INT UNSIGNED NOT NULL,
+  `name` VARCHAR(100) NOT NULL DEFAULT '',
+  `family` TINYINT NOT NULL DEFAULT 0,
+  `cooldown` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  `description` TEXT NOT NULL,
+  `base` INT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `coa_pet_ability_turn`;
+CREATE TABLE `coa_pet_ability_turn` (
+  `ability` INT UNSIGNED NOT NULL,
+  `turn_index` TINYINT UNSIGNED NOT NULL,
+  `turn` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  `event` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`ability`, `turn_index`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `coa_pet_ability_effect`;
+CREATE TABLE `coa_pet_ability_effect` (
+  `ability` INT UNSIGNED NOT NULL,
+  `turn_index` TINYINT UNSIGNED NOT NULL,
+  `effect_index` TINYINT UNSIGNED NOT NULL,
+  `property` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  `aura` INT UNSIGNED NOT NULL DEFAULT 0,
+  `param0` INT NOT NULL DEFAULT 0,
+  `param1` INT NOT NULL DEFAULT 0,
+  `param2` INT NOT NULL DEFAULT 0,
+  `param3` INT NOT NULL DEFAULT 0,
+  `param4` INT NOT NULL DEFAULT 0,
+  `param5` INT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`ability`, `turn_index`, `effect_index`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `coa_pet_effect_property`;
+CREATE TABLE `coa_pet_effect_property` (
+  `property` SMALLINT UNSIGNED NOT NULL,
+  `param_index` TINYINT UNSIGNED NOT NULL,
+  `label` VARCHAR(64) NOT NULL DEFAULT '',
+  PRIMARY KEY (`property`, `param_index`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `coa_pet_state`;
+CREATE TABLE `coa_pet_state` (
+  `id` SMALLINT UNSIGNED NOT NULL,
+  `name` VARCHAR(64) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `coa_pet_aura_state`;
+CREATE TABLE `coa_pet_aura_state` (
+  `aura` INT UNSIGNED NOT NULL,
+  `state` VARCHAR(64) NOT NULL,
+  `value` INT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`aura`, `state`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `coa_pet_xp`;
+CREATE TABLE `coa_pet_xp` (
+  `level` TINYINT UNSIGNED NOT NULL,
+  `wins` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  `xp_per_win` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`level`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `coa_pet_zone`;
+CREATE TABLE `coa_pet_zone` (
+  `zone` INT UNSIGNED NOT NULL,
+  `name` VARCHAR(100) NOT NULL DEFAULT '',
+  `pet_level_min` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  `pet_level_max` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  `mob_level_min` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  `mob_level_max` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  PRIMARY KEY (`zone`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `coa_pet_zone_species`;
+CREATE TABLE `coa_pet_zone_species` (
+  `zone` INT UNSIGNED NOT NULL,
+  `species` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`zone`, `species`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `coa_pet_presentation`;
+CREATE TABLE `coa_pet_presentation` (
+  `species` INT UNSIGNED NOT NULL,
+  `slot` TINYINT UNSIGNED NOT NULL,
+  `option` TINYINT UNSIGNED NOT NULL,
+  `unlock_level` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  `ability` INT UNSIGNED NOT NULL,
+  `name` VARCHAR(100) NOT NULL DEFAULT '',
+  `retail_name` VARCHAR(100) NOT NULL DEFAULT '',
+  `icon` VARCHAR(100) NOT NULL DEFAULT '',
+  `tooltip` TEXT NOT NULL,
+  `visual_spell` INT UNSIGNED NOT NULL DEFAULT 0,
+  `ranged` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  `visual_mode` VARCHAR(16) NOT NULL DEFAULT '',
+  `pre_spell` INT UNSIGNED NOT NULL DEFAULT 0,
+  `hop` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  `spell_deals_damage` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  `goes_first` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`species`, `slot`, `option`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `coa_pet_model_size`;
+CREATE TABLE `coa_pet_model_size` (
+  `species` INT UNSIGNED NOT NULL,
+  `width` FLOAT NOT NULL DEFAULT 0,
+  `height` FLOAT NOT NULL DEFAULT 0,
+  `silhouette` FLOAT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`species`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `coa_pet_display_size`;
+CREATE TABLE `coa_pet_display_size` (
+  `display` INT UNSIGNED NOT NULL,
+  `silhouette` FLOAT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`display`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `coa_pet_companion`;
+CREATE TABLE `coa_pet_companion` (
+  `spell` INT UNSIGNED NOT NULL,
+  `species` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`spell`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
