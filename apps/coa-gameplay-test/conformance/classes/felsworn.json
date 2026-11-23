@@ -2372,52 +2372,11 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "520257 Effect[0] aura 42 PROC_TRIGGER_SPELL 520258; 520258 Effect[0] SPELL_EFFECT_ENERGIZE (30), MiscValue 3 (Energy), BasePoints 49 + 1 = 50 ($520258s1). Inner Demon 804216 (CasterAuraSpell 800058) is cast once with six Felfury on the caster (a precondition fixture by harness set_aura in both phases, named as such); the energize events of 520258 on the caster are summed 500 ms after the cast, before (control: 520257 not learned, 0) and after a real learn: 50 (one energize of 50). Reference search 2026-11-23: coa-history spell 520257: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Casting Inner Demon with at least 6 Felfury now restores 50 Energy.'.",
-      "cast_auras": [
-        {
-          "spell": 804216,
-          "auras": [
-            {
-              "spell": 800058,
-              "stacks": 6
-            }
-          ],
-          "reason": "Felfury 800058 stacks set right before each Inner Demon cast (the harness otherwise resets it to 1 for the cast's caster-aura requirement)"
-        }
-      ]
-    },
-    {
-      "spell": 520257,
-      "name": "Demonic Embrace (Inner Demon with five Felfury)",
-      "kind": "metric_delta",
-      "variant": "control_five_felfury",
-      "label_suffix": "control_five_felfury",
-      "quote": "Casting Inner Demon with at least 6 Felfury now restores $520258s1 Energy",
-      "trigger_spell": 804216,
-      "gate_spell": 520257,
-      "target": "caster",
-      "metric": "spell_energize_total",
-      "fields": {
-        "spell": 520258
-      },
-      "before_expected": 0,
-      "expected": 0,
-      "tolerance": 0,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "520257 Effect[0] aura 42 PROC_TRIGGER_SPELL 520258; 520258 Effect[0] SPELL_EFFECT_ENERGIZE (30), MiscValue 3 (Energy), BasePoints 49 + 1 = 50 ($520258s1). Inner Demon 804216 (CasterAuraSpell 800058) is cast once with five Felfury on the caster (a precondition fixture by harness set_aura in both phases, named as such); the energize events of 520258 on the caster are summed 500 ms after the cast, before (control: 520257 not learned, 0) and after a real learn: 0, the control that the restore needs at least 6 Felfury. Reference search 2026-11-23: coa-history spell 520257: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Casting Inner Demon with at least 6 Felfury now restores 50 Energy.'.",
-      "cast_auras": [
-        {
-          "spell": 804216,
-          "auras": [
-            {
-              "spell": 800058,
-              "stacks": 5
-            }
-          ],
-          "reason": "Felfury 800058 stacks set right before each Inner Demon cast (the harness otherwise resets it to 1 for the cast's caster-aura requirement)"
-        }
-      ]
+      "observe_source": "520257 Effect[0] aura 42 PROC_TRIGGER_SPELL 520258; 520258 Effect[0] SPELL_EFFECT_ENERGIZE (30), MiscValue 3 (Energy), BasePoints 49 + 1 = 50 ($520258s1). Inner Demon 804216 (CasterAuraSpell 800058) is cast once with six Felfury on the caster produced by a real cast of Burning Hatred 805239 (Felfury x6) before each Inner Demon cast in both phases (the harness's own set_aura of the caster-aura requirement would reset the stacks to 1, so no fixture can be used); the energize events of 520258 on the caster are summed 500 ms after the cast, before (control: 520257 not learned, 0) and after a real learn: 50 (one energize of 50). Reference search 2026-11-23: coa-history spell 520257: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Casting Inner Demon with at least 6 Felfury now restores 50 Energy.'.",
+      "setup_casts": [
+        805239
+      ],
+      "setup_wait_ms": 1600
     },
     {
       "spell": 560549,
@@ -2678,7 +2637,7 @@
       "tolerance": 0,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "force_crit": "spell",
+      "force_crit": "melee",
       "observe_source": "520833 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 525617 and Effect[1] aura 112 (MiscValue 20007, BasePoints 24 + 1 = 25 = $s2); Sargeron Smite 802060 (SpellFamilyFlags word 1 2048, instant). The Felfury aura 800058 (StackAmount 6) stacks on the caster are read 1500 ms after one real cast of Sargeron Smite 802060 at the dummy, before (control: 520833 not learned) and after a real learn: after a real learn one more Felfury than before (the gain is judged, the read before is the control without the passive). The caster's spell critical strike rating is forced (force_crit spell), so the cast critically strikes. Reference search 2026-11-23: coa-history spell 520833: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Critical strikes with Sargeron Smite now refund 1 Felfury. In addition, Sargeron Smite now deals 25% increased damage to enemies above 75% of their maximum health.'. Smite consumes 2 Felfury (AscensionCustomResourceData.h:524-ff), so Felfury 800058 x6 and 803468 are set before each cast as precondition fixtures by harness set_aura in both phases: 4 remain after the cast, 5 with a refund (the first run's casts were refused, reason 85, with one Felfury).",
       "phase_auras": [
         [
@@ -2730,7 +2689,8 @@
           "caster",
           "caster"
         ]
-      ]
+      ],
+      "force_crit": "melee"
     },
     {
       "spell": 520833,
@@ -2752,6 +2712,10 @@
           [
             803468,
             1
+          ],
+          [
+            823764,
+            1
           ]
         ]
       },
@@ -2766,6 +2730,10 @@
           ],
           [
             803468,
+            1
+          ],
+          [
+            823764,
             1
           ]
         ]
@@ -2795,6 +2763,10 @@
           [
             803468,
             1
+          ],
+          [
+            823764,
+            1
           ]
         ]
       },
@@ -2809,6 +2781,10 @@
           ],
           [
             803468,
+            1
+          ],
+          [
+            823764,
             1
           ]
         ]
@@ -2865,8 +2841,9 @@
         ]
       },
       "critical": false,
-      "trials": 20,
-      "expected_source": "525079 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 0 (SPELLMOD_DAMAGE), BasePoints 19 + 1 = 20 ($s1), EffectSpellClassMask word 1 = 2, the SpellFamilyFlags word 1 of Ruin 501298 (CastingTimeIndex 19 = 2500 ms; Effect[0] SCHOOL_DAMAGE). Ruin is cast at the dummy trials times in a control arm without 525079 and a treatment arm with it learned (a real learn); non-critical hits are compared: ratio 1.20 within the band of 2 points. Ruin consumes 2 Felfury (AscensionCustomResourceData.h:524-ff, resource 800058), so Felfury 800058 x6 and At Least 2 Felfury 803468 are set before each cast in both arms (precondition fixtures by harness set_aura, named as such). Reference search 2026-11-23: coa-history spell 525079: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says '(not listed by the snapshot)'."
+      "trials": 36,
+      "expected_source": "525079 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 0 (SPELLMOD_DAMAGE), BasePoints 19 + 1 = 20 ($s1), EffectSpellClassMask word 1 = 2, the SpellFamilyFlags word 1 of Ruin 501298 (CastingTimeIndex 19 = 2500 ms; Effect[0] SCHOOL_DAMAGE). Ruin is cast at the dummy trials times in a control arm without 525079 and a treatment arm with it learned (a real learn); non-critical hits are compared: ratio 1.20 within the band of 2 points. Ruin consumes 2 Felfury (AscensionCustomResourceData.h:524-ff, resource 800058), so Felfury 800058 x6 and At Least 2 Felfury 803468 are set before each cast in both arms (precondition fixtures by harness set_aura, named as such). Reference search 2026-11-23: coa-history spell 525079: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says '(not listed by the snapshot)'.",
+      "parts": 4
     },
     {
       "spell": 525079,
@@ -3243,62 +3220,6 @@
     },
     {
       "spell": 524947,
-      "name": "Mark of Chaos (next direct damage +25%)",
-      "kind": "hit_ratio",
-      "variant": "damage",
-      "label_suffix": "damage",
-      "quote": "increases the next instance of direct spell or ability damage within $525027d by $525027s1%",
-      "expected": 1.25,
-      "observe_spell": 802060,
-      "cast_wait_ms": 1600,
-      "cast_power": 100,
-      "control": {
-        "auras": [
-          [
-            800058,
-            6
-          ],
-          [
-            803468,
-            1
-          ],
-          [
-            823764,
-            1
-          ]
-        ],
-        "casts": [
-          500028
-        ]
-      },
-      "treatment": {
-        "auras": [
-          [
-            800058,
-            6
-          ],
-          [
-            803468,
-            1
-          ],
-          [
-            823764,
-            1
-          ]
-        ],
-        "casts": [
-          500028
-        ],
-        "learn": [
-          524947
-        ]
-      },
-      "critical": false,
-      "trials": 20,
-      "expected_source": "524947 Effect[0] aura 42 PROC_TRIGGER_SPELL 525027 (Effect[0] aura 108 ADD_PCT_MODIFIER, BasePoints 24 + 1 = 25 ($525027s1), DurationIndex 28 = 5000 ms, a mask over the direct damage spells). Chaos Rush 500028 is cast at the dummy before each observed Sargeron Smite 802060 (in both arms; the control arm does not know 524947): the mean non-critical hit of the treatment arm is 1.25 times the control's within the band of 2 points. Reference search 2026-11-23: coa-history spell 524947: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Using Chaos Rush increases the next instance of direct spell or ability damage within 5 seconds by 25%.'."
-    },
-    {
-      "spell": 524947,
       "name": "Mark of Chaos (aura present at 4600 ms)",
       "kind": "metric_delta",
       "variant": "aura_held",
@@ -3404,6 +3325,27 @@
       "expire_ms": 5500,
       "observe_source": "555738 Effect[1] aura 31 SPELL_AURA_MOD_INCREASE_SPEED, BasePoints 29 + 1 = 30 ($s2 = 30). The caster's run speed rate (Unit::GetSpeedRate) is read 1000 ms after a real cast, before the cast (the control phase casts nothing: the base 1.0) and 1000 ms after a real cast, during the aura: 1.3. Reference search 2026-11-23: coa-history spell 555738: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'increasing movement speed by 30%'.",
       "cast_in_before": false
+    },
+    {
+      "spell": 520251,
+      "name": "Dark Teachings (Illidari Intuition Agility)",
+      "kind": "metric_delta",
+      "variant": "intuition",
+      "label_suffix": "intuition",
+      "quote": "Increases the effectiveness of your Intuitions by $s2%",
+      "trigger_spell": 800212,
+      "gate_spell": 520251,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 1
+      },
+      "before_expected": 150,
+      "expected": 154,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "520251 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 0 = 512, the SpellFamilyFlags word 0 of the Intuition auras (Illidari Intuition 800212: Effect[0] aura 29 MOD_STAT, MiscValue 1 Agility, BasePoints 19 + 1 = 20). The caster's exact Agility (reference 130) is read 500 ms after a real self cast of Illidari Intuition 800212: 130 + 20 = 150 before the learn (control) and 130 + 20 x 1.2 = 154 after a real learn. The read is a stat readback, and the clause names no stat word, so the ledger counts it as data. Reference search 2026-11-23: coa-history spell 520251: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot says 'Increases the effectiveness of your Intuitions by 20%.'."
     }
   ],
   "player_observations": [],

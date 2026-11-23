@@ -536,7 +536,7 @@
     "spell": 520251,
     "clause": "Increases the effectiveness of your Intuitions by $s2%.",
     "labels": [
-      "520251 effect_value e1 #0"
+      "520251 behaviour_metric_delta intuition"
     ],
     "kind": "claim"
   },
@@ -570,8 +570,7 @@
     "spell": 520257,
     "clause": "Casting Inner Demon with at least 6 Felfury now restores $520258s1 Energy.",
     "labels": [
-      "520257 behaviour_metric_delta energy_at_six",
-      "520257 behaviour_metric_delta control_five_felfury"
+      "520257 behaviour_metric_delta energy_at_six"
     ],
     "kind": "claim"
   },
@@ -695,7 +694,6 @@
     "spell": 524947,
     "clause": "Using $?s520853[Fel Torpedo][Chaos Rush] increases the next instance of direct spell or ability damage within $525027d by $525027s1%.",
     "labels": [
-      "524947 behaviour_hit_ratio damage",
       "524947 behaviour_metric_delta aura_held",
       "524947 behaviour_metric_delta aura_gone"
     ],
