@@ -24382,6 +24382,30 @@
     },
     {
       "spell": 680648,
+      "name": "Sacred Vessel (no critical strike chance gain without expending Angelic Presence)",
+      "kind": "metric_delta",
+      "variant": "crit_no_expend",
+      "label_suffix": "crit_no_expend",
+      "quote": "Expending Angelic Presence increases your critical strike chance and healing by $681254s1% for $681254d,",
+      "trigger_spell": 500143,
+      "gate_spell": 680648,
+      "target": "caster",
+      "cast_power": 1363,
+      "metric": "spell_crit_chance",
+      "fields": {
+        "school": 1
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 2000,
+      "observe_source": "Control of crit_gain for the cause: 680648 is learned between the phases in both entries and Illumination 500143 is the trigger cast, but Angelic Presence 800722 is never cast, so nothing is expended: AscensionSunClericAbilities.cpp:78-90 adds a stack of 681254 only when an Illumination cast consumes Angelic Presence 800722 and the caster holds 680648. 681254 Effect[0] aura 290 MOD_CRIT_PCT, EffectBasePoints 0 + 1 = 1 ($681254s1): the live Holy spell crit percentage reads the same 2500 ms after the Illumination before and after the learn (gain 0, expected from the DBC: no 681254, no 1 point), against the gain of 1 of crit_gain in the same pair. Reference search 2026-11-23: coa-history spell 681254: 0 events in 186 logs; nothing else found.",
+      "expected_gain": 0,
+      "tolerance": 0.0001,
+      "void_on_cast_failure": true
+    },
+    {
+      "spell": 680648,
       "name": "Sacred Vessel (aura held at 0.9 of its duration)",
       "kind": "metric_delta",
       "variant": "window_held",
@@ -24402,13 +24426,13 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 20900,
+      "wait_ms": 18900,
       "expire_ms": 22000,
-      "observe_source": "681254 Sacred Vessel: DurationIndex 18 = 20000 ms (Spell.dbc and SpellDuration.dbc, $681254d), StackAmount 10. Angelic Presence 800722 is cast for real, then Illumination 500143 (CastingTimeIndex 5 = 2000 ms, SpellCastTimes.dbc) consumes it and, with 680648 learned between the phases, adds one stack of 681254 (AscensionSunClericAbilities.cpp:78-90, AscensionSunCleric.cpp:236-243). The same sequence runs in the before phase without 680648: that phase is the control and reads 681254 absent. The aura lands when the Illumination cast ends, 2000 ms after the cast starts, plus at most 150 ms (the measured landing of Sunflare 800231 on 505342 was 2011 to 2111 ms after its cast started, pair 20261122-042851 / 20261122-042945), so the read at game time G after the cast start has age G - 2150 .. G - 2000. Held read: game time window 20400..21500 ms gives an age of 18250 to 19500 ms, inside 18000 (0.9 of the duration) and 20000: a present aura excludes a duration 10% short (18000 ms). Reference search 2026-11-23: coa-history spell 681254: 0 events in 186 logs (a positive control, spell 805639, is found with 4959 damage events); the bindmysoul talents snapshot (fetched 2026-07-22) carries \"Expending Angelic Presence increases your critical strike chance and healing by 1% for 20 seconds, stacking up to 10 times.\" (agrees); nothing else found.",
+      "observe_source": "681254 Sacred Vessel: DurationIndex 18 = 20000 ms (Spell.dbc and SpellDuration.dbc, $681254d), StackAmount 10. Angelic Presence 800722 is cast for real, then Illumination 500143 consumes it and, with 680648 learned between the phases, adds one stack of 681254 (AscensionSunClericAbilities.cpp:78-90, AscensionSunCleric.cpp:236-243). The same sequence runs in the before phase without 680648: that phase is the control and reads 681254 absent. Landing: a diagnostic read of the after phase (not counted; scratch scenario in .agents/plans/sun-cleric-lr1/diag-680648-20261123, run 20261123-031300) found 681254 with 19488 ms left 509 ms after the trigger cast stamp and 17476 ms left 2521 ms after it, 19997 ms from the stamp both times: the aura starts within 3 ms of the stamp, so no cast time of Illumination elapses before it lands in this sequence, and it lasts 20000 ms. Allowing 150 ms for the landing, a read at game time G after the stamp has the age G - 150 .. G. Held read: game time window 18200..19900 ms gives an age of 18050 to 19900 ms, inside 18000 (0.9 of the duration) and 20000: a present aura excludes a duration 10% short (18000 ms). Reference search 2026-11-23: coa-history spell 681254: 0 events in 186 logs (a positive control, spell 805639, is found with 4959 damage events); the bindmysoul talents snapshot (fetched 2026-07-22) carries \"Expending Angelic Presence increases your critical strike chance and healing by 1% for 20 seconds, stacking up to 10 times.\" (agrees); nothing else found.",
       "game_time": {
         "after": [
-          20400,
-          21500
+          18200,
+          19900
         ]
       },
       "void_on_cast_failure": true
@@ -24435,13 +24459,13 @@
       },
       "before_expected": 0,
       "expected": 0,
-      "wait_ms": 23000,
+      "wait_ms": 21000,
       "expire_ms": 22000,
-      "observe_source": "681254 Sacred Vessel: DurationIndex 18 = 20000 ms (Spell.dbc and SpellDuration.dbc, $681254d), StackAmount 10. Angelic Presence 800722 is cast for real, then Illumination 500143 (CastingTimeIndex 5 = 2000 ms, SpellCastTimes.dbc) consumes it and, with 680648 learned between the phases, adds one stack of 681254 (AscensionSunClericAbilities.cpp:78-90, AscensionSunCleric.cpp:236-243). The same sequence runs in the before phase without 680648: that phase is the control and reads 681254 absent. The aura lands when the Illumination cast ends, 2000 ms after the cast starts, plus at most 150 ms (the measured landing of Sunflare 800231 on 505342 was 2011 to 2111 ms after its cast started, pair 20261122-042851 / 20261122-042945), so the read at game time G after the cast start has age G - 2150 .. G - 2000. Gone read: game time window 22300..23800 ms gives an age of 20150 to 21800 ms, past 20000 and inside 22000 (1.1 of the duration): an absent aura excludes a duration 10% long (22000 ms); the held entry of the same pair shows the aura present before it. Reference search 2026-11-23: coa-history spell 681254: 0 events in 186 logs (a positive control, spell 805639, is found with 4959 damage events); the bindmysoul talents snapshot (fetched 2026-07-22) carries \"Expending Angelic Presence increases your critical strike chance and healing by 1% for 20 seconds, stacking up to 10 times.\" (agrees); nothing else found.",
+      "observe_source": "681254 Sacred Vessel: DurationIndex 18 = 20000 ms (Spell.dbc and SpellDuration.dbc, $681254d), StackAmount 10. Angelic Presence 800722 is cast for real, then Illumination 500143 consumes it and, with 680648 learned between the phases, adds one stack of 681254 (AscensionSunClericAbilities.cpp:78-90, AscensionSunCleric.cpp:236-243). The same sequence runs in the before phase without 680648: that phase is the control and reads 681254 absent. Landing: a diagnostic read of the after phase (not counted; scratch scenario in .agents/plans/sun-cleric-lr1/diag-680648-20261123, run 20261123-031300) found 681254 with 19488 ms left 509 ms after the trigger cast stamp and 17476 ms left 2521 ms after it, 19997 ms from the stamp both times: the aura starts within 3 ms of the stamp, so no cast time of Illumination elapses before it lands in this sequence, and it lasts 20000 ms. Allowing 150 ms for the landing, a read at game time G after the stamp has the age G - 150 .. G. Gone read: game time window 20300..21900 ms gives an age of 20150 to 21900 ms, past 20000 and inside 22000 (1.1 of the duration): an absent aura excludes a duration 10% long (22000 ms); the held entry of the same pair shows the aura present before it. Reference search 2026-11-23: coa-history spell 681254: 0 events in 186 logs (a positive control, spell 805639, is found with 4959 damage events); the bindmysoul talents snapshot (fetched 2026-07-22) carries \"Expending Angelic Presence increases your critical strike chance and healing by 1% for 20 seconds, stacking up to 10 times.\" (agrees); nothing else found.",
       "game_time": {
         "after": [
-          22300,
-          23800
+          20300,
+          21900
         ]
       },
       "void_on_cast_failure": true

@@ -3601,7 +3601,8 @@
       {
         "claim": "Expending Angelic Presence increases your critical strike chance by $681254s1%",
         "labels": [
-          "680648 behaviour_metric_delta crit_gain"
+          "680648 behaviour_metric_delta crit_gain",
+          "680648 behaviour_metric_delta crit_no_expend"
         ]
       },
       {
@@ -3619,7 +3620,7 @@
         ]
       }
     ],
-    "reason": "Heal part: design 1 (hit_ratio arms) ran and alerted (ratio 0.99988), probable cause (not proven): Illumination 500143 EffectImplicitTargetA 21 (ally target) while the hit_ratio arm casts go to the dummy; tool need: a per-cast target in hit_ratio arms. Reference search 2026-11-22: coa-history spell 681254: 0 events in 186 logs; nothing else found. Stays open, no status 3 or 5. Round lr1 (2026-11-23): the label 680648 effect_value 681254e0 #0 is removed from the crit claim because it can never be measured (one DoEffectCalcAmount hook of the aura scripts of 681254 sets the amount after CalcValue, so the read is not_measured in every run); the crit gain is read on the live Holy crit percentage after a real expend of Angelic Presence (crit_gain, control = the same sequence before the learn, gain 1 = $681254s1). Duration claim: window_held (read at game time 20400..21500 ms, age 18250..19500 ms) and window_gone (22300..23800 ms, age 20150..21800 ms) on 681254 exclude a duration 10% short or long of 20000 ms, with the before phase as the control."
+    "reason": "Heal part: design 1 (hit_ratio arms) ran and alerted (ratio 0.99988), probable cause (not proven): Illumination 500143 EffectImplicitTargetA 21 (ally target) while the hit_ratio arm casts go to the dummy; tool need: a per-cast target in hit_ratio arms. Reference search 2026-11-22: coa-history spell 681254: 0 events in 186 logs; nothing else found. Stays open, no status 3 or 5. Round lr1 (2026-11-23): the label 680648 effect_value 681254e0 #0 is removed from the crit claim because it can never be measured (one DoEffectCalcAmount hook of the aura scripts of 681254 sets the amount after CalcValue, so the read is not_measured in every run); the crit gain is read on the live Holy crit percentage after a real expend of Angelic Presence (crit_gain, control = the same sequence before the learn, gain 1 = $681254s1). Duration claim: window_held (read at game time 18200..19900 ms, age 18050..19900 ms) and window_gone (20300..21900 ms, age 20150..21900 ms) on 681254 exclude a duration 10% short or long of 20000 ms, with the before phase as the control. crit_no_expend is the control without an expend: 680648 learned, Illumination cast, Angelic Presence never cast, gain 0."
   },
   {
     "spell": 680648,
