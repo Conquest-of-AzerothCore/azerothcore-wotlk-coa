@@ -4,7 +4,9 @@
 #include "Catalog.h"
 #include "Rng.h"
 #include <array>
+#include <initializer_list>
 #include <map>
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
@@ -50,6 +52,41 @@ namespace CoAPetBattles::Engine
         std::optional<double> hot;
     };
 
+    class AuraTable
+    {
+    public:
+        using List = std::vector<Aura>;
+
+        AuraTable() : _list(std::make_shared<List>()) { }
+        AuraTable(std::initializer_list<Aura> auras) : _list(std::make_shared<List>(auras)) { }
+        AuraTable(AuraTable const& other) : _list(std::make_shared<List>(*other._list)) { }
+        AuraTable& operator=(AuraTable const& other)
+        {
+            _list = std::make_shared<List>(*other._list);
+            return *this;
+        }
+
+        std::shared_ptr<List> Share() const { return _list; }
+        void Replace() { _list = std::make_shared<List>(); }
+
+        List::iterator begin() { return _list->begin(); }
+        List::iterator end() { return _list->end(); }
+        List::const_iterator begin() const { return _list->begin(); }
+        List::const_iterator end() const { return _list->end(); }
+        size_t size() const { return _list->size(); }
+        bool empty() const { return _list->empty(); }
+        Aura& operator[](size_t index) { return (*_list)[index]; }
+        Aura const& operator[](size_t index) const { return (*_list)[index]; }
+        Aura& front() { return _list->front(); }
+        void push_back(Aura const& aura) { _list->push_back(aura); }
+        List::iterator erase(List::iterator first, List::iterator last) { return _list->erase(first, last); }
+        List::iterator erase(List::iterator position) { return _list->erase(position); }
+        void clear() { _list->clear(); }
+
+    private:
+        std::shared_ptr<List> _list;
+    };
+
     struct Channel
     {
         int32_t slot = 0;
@@ -78,7 +115,7 @@ namespace CoAPetBattles::Engine
         double hp = 0;
         double power = 0;
         double speed = 0;
-        std::vector<Aura> auras;
+        AuraTable auras;
         std::optional<Channel> channel;
         double lastTaken = 0;
         std::optional<double> undeadLeft;

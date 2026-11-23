@@ -15,6 +15,7 @@ ROUND_LIMIT = 60
 TARGET_HITS = 8
 MAX_TARGET_BATTLES = 40
 EXTRA_POOL = 40
+LIBRARY_ABILITIES = (277, 522, 325, 1344, 1073)
 
 
 def prop_is(*props):
@@ -212,7 +213,7 @@ def data_rows(export_path, species_used):
     for row in tables['coa_pet_ability_effect']:
         effects_by_ability.setdefault(row[0], []).append(row)
     bases = {row[0]: row[5] for row in tables['coa_pet_ability']}
-    reach, pending = set(), [row[3] for row in kit_abilities]
+    reach, pending = set(), [row[3] for row in kit_abilities] + list(LIBRARY_ABILITIES)
     while pending:
         ability = pending.pop()
         if ability in reach:

@@ -4,6 +4,7 @@
 #include "Event.h"
 #include "Types.h"
 #include <array>
+#include <map>
 #include <optional>
 #include <string>
 #include <vector>
@@ -65,6 +66,7 @@ namespace CoAPetBattles::Engine
         std::array<bool, 2> acted { false, false };
         std::vector<int32_t> captured;
         bool resolving = false;
+        std::map<uint16_t, int32_t> unknown;
 
         std::vector<Pet>& Team(Side side) { return pets[static_cast<size_t>(side)]; }
         std::vector<Pet> const& Team(Side side) const { return pets[static_cast<size_t>(side)]; }
