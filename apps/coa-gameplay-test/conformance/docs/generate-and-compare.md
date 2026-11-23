@@ -577,6 +577,12 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   rule. A `$/N;` token expects N times the value it shows, except a `$/1000;sN sec` token of kind `duration_ms`,
   which the reader already gives in ms. A token of another spell reads its points, sign and rolls from that
   spell's effect (`model`).
+- Aura 227 carriers (`effect_value`, `aura_amount` of a fixed-roll effect whose `EffectApplyAuraName` is 227
+  PERIODIC_TRIGGER_SPELL_WITH_VALUE): the expected value is the token read with attack, ranged attack and spell
+  power set to 0; the carrier's amount is only the base point 0 handed to the triggered spell
+  (`SpellAuraEffects.cpp:6566`), whose hit labels carry the power term. The verdict keeps `full_value`,
+  `power_term` and `judged_amount` in `detail.trigger_with_value`; a token without a power term at the measured
+  stats is judged as before (ADR 1070, mentor D-292).
 - Counts (`max_stacks`): `measured == expected`, no tolerance.
 - Sign: the client shows `$sN`, `$mN` and `$MN` (with or without `$/N;` or a spell id) unsigned, while the
   `Spell.dbc` record is signed. The expected value of such a token takes the sign of the points it shows
