@@ -3663,7 +3663,9 @@
       },
       {
         "claim": "next 10 instances of damage with Twin Slice",
-        "labels": []
+        "labels": [
+          "804822 behaviour_metric_delta twin_slice_instances instances"
+        ]
       },
       {
         "claim": "deal $807163s1% increased damage",
@@ -3671,35 +3673,15 @@
           "804822 effect_value 807163e0 #1"
         ]
       }
-    ],
-    "tool_gap": {
-      "reason": "One part of the clause has no label: the 10 Twin Slice instances (807163 counts them in its script value 807163, set to 10 on apply, AscensionFelswornAuras.cpp:84-85, and decremented per direct Twin Slice damage instance, AscensionFelswornAbilities.cpp:375-384). The parry leg of 'Dodging or parrying' is now the procs avoided entry with the learn list (Nether Disciple 560576, ADR 1261, provisional; label 804822 proc_rate avoided learn 560576), beside the dodge leg. Mentor D-67 for the instances: the treatment must obtain 807163 by the real route (804822 learned and a dodge that procs it), and aura_script_value is a readback (guard only). The nearest kind is avoided_swing_reads with an instance read after a real proc.",
-      "attempts": [
-        {
-          "agent": "fw-chance2",
-          "report": ".agents/plans/fw-chance2/report.md"
-        },
-        {
-          "agent": "fw-tg4",
-          "report": ".agents/plans/fw-tg4/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 804822,
     "clause": "and generate 1 Felfury.",
-    "labels": [],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "The Felfury of this clause is not gained by the proc: the Proc of 804822 only casts 807163 (AscensionFelswornEvents.cpp:157-158). Each direct Twin Slice damage while 807163 is up calls Gain(player, 1) and counts the 10 charges down (AscensionFelswornAbilities.cpp:358-369; charges set at AscensionFelswornAuras.cpp:74-75). The gain is deterministic per Twin Slice hit and belongs with the 'next 10 instances' claim, not with a chance event. It is a ModStackAmount of aura 800058 that is not a cast, an energize or a first application, and no existing metric reads a stack gain per cast. The nearest kind is metric_delta aura_stacks 800058 around one Twin Slice cast with and without 807163 from a real proc. The procs aura_stacks event metric (tool ADR 1254) reads a stack gain per cast attempt, but this gain is deterministic per Twin Slice hit while 807163 is up, not a chance, so it stays with the 10-instance claim (B-7).",
-      "attempts": [
-        {
-          "agent": "fw-chance2",
-          "report": ".agents/plans/fw-chance2/report.md"
-        }
-      ]
-    }
+    "labels": [
+      "804822 behaviour_metric_delta twin_slice_instances gain_per_instance"
+    ],
+    "kind": "claim"
   },
   {
     "spell": 804823,
@@ -3986,7 +3968,7 @@
     ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "One leg left: damage taken. The avoided leg is the procs avoided entry 805245 proc_rate avoided: Felfury 800058 stack events (aura_stacks, tool ADR 1254, on the avoided trigger by ADR 1261, provisional) while Demonic Will 800209 is held by attempt_auras before every swing interval (the clause's condition, AscensionFelswornEvents.cpp:44-45). Damage taken needs a taken_hit trigger with the same condition and stack events, which procs does not combine (aura_stacks accepts a cast or an avoided trigger only). Hateforged Barrier 705129 as the condition is not read. The nearest kind is procs taken_hit with attempt_auras and aura_stacks events.",
+      "reason": "One leg left: damage taken. The avoided leg is the procs avoided entry 805245 proc_rate avoided: Felfury 800058 stack events (aura_stacks, tool ADR 1254, on the avoided trigger by ADR 1261, provisional) while Demonic Will 800209 is held by attempt_auras before every swing interval (the clause's condition, AscensionFelswornEvents.cpp:44-45). Damage taken needs a taken_hit trigger with the same condition and stack events, which procs does not combine (aura_stacks accepts a cast or an avoided trigger only). Hateforged Barrier 705129 as the condition is not read. The nearest kind is procs taken_hit with attempt_auras and aura_stacks events. fw-tg4 pairs (pair2, eaafe3bd73): the avoided leg entry 805245 proc_rate avoided was unmeasured in every part: 70 to 86 swings landed per part (guard landed) while Demonic Will 800209 was set before every interval; the dodge entries without attempt auras land none. Cause not established.",
       "attempts": [
         {
           "agent": "fw-chance",
