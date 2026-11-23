@@ -143,6 +143,7 @@ constexpr float FissureHalfWidth = 2.0f;
 constexpr float BroodRange = 30.0f;
 std::atomic<uint32> TrapActiveMs = 1500;
 std::atomic<uint32> TrapPauseMs = 6000;
+constexpr uint32 TrapGapMs = 1000;
 constexpr uint32 TrapTickMs = 500;
 constexpr uint32 TrapMaxActiveMs = 60000;
 constexpr uint32 TrapMaxPauseMs = 600000;
@@ -201,7 +202,7 @@ constexpr float TrapReach = 11.0f;
 constexpr float TrapHalfWidth = 3.0f;
 constexpr float TrapMaxDrop = 8.0f;
 constexpr float TrapMaxRise = 3.0f;
-constexpr float TrapMouthOffset = 1.5f;
+constexpr float TrapSightOffset = 5.5f;
 constexpr float TrapDamagePct = 15.0f;
 
 uint8 DifficultyBit(Map const* map)
@@ -361,8 +362,8 @@ BreathCheck CheckTrapBreath(Creature const* trap, Player const* player)
     float const ahead = dx * dirX + dy * dirY;
     float const side = std::fabs(dy * dirX - dx * dirY);
     float const drop = mouth.GetPositionZ() - player->GetPositionZ();
-    bool const sight = player->IsWithinLOS(mouth.GetPositionX() + TrapMouthOffset * dirX,
-        mouth.GetPositionY() + TrapMouthOffset * dirY, mouth.GetPositionZ(), VMAP::ModelIgnoreFlags::M2);
+    bool const sight = player->IsWithinLOS(mouth.GetPositionX() + TrapSightOffset * dirX,
+        mouth.GetPositionY() + TrapSightOffset * dirY, mouth.GetPositionZ(), VMAP::ModelIgnoreFlags::M2);
     bool const inside = ahead >= 0.0f && ahead <= TrapReach && side <= TrapHalfWidth
         && drop <= TrapMaxDrop && drop >= -TrapMaxRise && sight;
     return { ahead, side, drop, sight, inside };
@@ -435,9 +436,10 @@ struct npc_coa_other_side_venom_trap : public ScriptedAI
             _rankIn -= diff;
 
         uint32 const active = TrapActiveMs.load();
-        uint32 const cycle = _levels * active + TrapPauseMs.load();
+        uint32 const slot = active + TrapGapMs;
+        uint32 const cycle = _levels * slot + TrapPauseMs.load();
         uint32 const now = uint32(GameTime::GetGameTimeMS().count() % cycle);
-        bool const breathing = now >= _level * active && now < (_level + 1) * active;
+        bool const breathing = now >= _level * slot && now < _level * slot + active;
         if (breathing && !_breathing)
         {
             if (!me->GetVehicle())
@@ -750,8 +752,8 @@ public:
         TrapActiveMs = activeMs;
         if (pauseMs)
             TrapPauseMs = *pauseMs;
-        handler->PSendSysMessage("Each statue breathes {} ms, then the next one up; {} ms pause after the top. "
-            "Until the next restart.", TrapActiveMs.load(), TrapPauseMs.load());
+        handler->PSendSysMessage("Each statue breathes {} ms, the next one up {} ms later; {} ms pause after the top. "
+            "Until the next restart.", TrapActiveMs.load(), TrapGapMs, TrapPauseMs.load());
         return true;
     }
 
@@ -892,8 +894,8 @@ public:
             handler->PSendSysMessage("Trap {}: {:.2f} {:.2f} {:.2f}, facing {:.3f}", trap->GetSpawnId(),
                 trap->GetPositionX(), trap->GetPositionY(), trap->GetPositionZ(),
                 trap->GetHomePosition().GetOrientation());
-        handler->PSendSysMessage("{} traps; each breathes {} ms, {} ms pause after the top.", traps.size(),
-            TrapActiveMs.load(), TrapPauseMs.load());
+        handler->PSendSysMessage("{} traps; each breathes {} ms, {} ms gap to the next, {} ms pause after the top.", traps.size(),
+            TrapActiveMs.load(), TrapGapMs, TrapPauseMs.load());
         return true;
     }
 };
