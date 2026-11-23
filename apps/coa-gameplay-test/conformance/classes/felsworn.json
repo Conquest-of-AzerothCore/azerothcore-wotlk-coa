@@ -14897,6 +14897,89 @@
         }
       ],
       "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK without snare and daze (SharedDefines.h:1469), the list of the CoA spell with the same tooltip wording, Vial of Moonwell Water 804652 'Immune to crowd control effects.' (SpellInfo.cpp:2788-2790, ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Piercing Howl 12323 (Mechanic 11 snare, aura 33), outside the list: snare and daze are not in the same-wording source, so the snare must land while the aura is on. Whether 'crowd control' covers snare is an open owner question; this entry reads the list as built, not that answer. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 300476,
+      "kind": "avoided_swing_reads",
+      "name": "Betrayer (party radius)",
+      "label_suffix": "party_radius",
+      "quote": "enrages your party and raid members within $520256a1 yds",
+      "read": "aura_edge",
+      "observe_spell": 520256,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852
+      ],
+      "swing_ms": 500,
+      "control_windows": 10,
+      "windows": 20,
+      "observe_source": "AscensionFelswornEvents.cpp:42-47 passes an incoming dodge when Chance(player, 300476) succeeds (ProcChance 100) and :223-224 casts 804336 at the attacker and 520256 on the caster; 520256 Effect[0] APPLY_AURA SPELL_AURA_MOD_CRIT_PCT, TargetA 22 SRC_CASTER, TargetB 30 UNIT_SRC_AREA_ALLY, RadiusIndex 9, DurationIndex 1 (server DBC). Spell.cpp:9449-9459 adds no combat reach for a player target of a player caster. Strikers: the 804822 proc shape, ten aggressive stationary creature 36 with 42716, 62531 and 2116852, dodge 100 before every 500 ms window."
+    },
+    {
+      "spell": 300476,
+      "kind": "avoided_swing_reads",
+      "name": "Betrayer (party crit)",
+      "label_suffix": "party_crit",
+      "quote": "increasing their critical strike chance by $520256s1%",
+      "read": "stat_delta",
+      "observe_spell": 520256,
+      "metric": "melee_crit_chance",
+      "ally_yd": 10,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852
+      ],
+      "swing_ms": 500,
+      "control_windows": 10,
+      "windows": 20,
+      "observe_source": "AscensionFelswornEvents.cpp:42-47 passes an incoming dodge when Chance(player, 300476) succeeds (ProcChance 100) and :223-224 casts 804336 at the attacker and 520256 on the caster; 520256 Effect[0] APPLY_AURA SPELL_AURA_MOD_CRIT_PCT, TargetA 22 SRC_CASTER, TargetB 30 UNIT_SRC_AREA_ALLY, RadiusIndex 9, DurationIndex 1 (server DBC). Spell.cpp:9449-9459 adds no combat reach for a player target of a player caster. Strikers: the 804822 proc shape, ten aggressive stationary creature 36 with 42716, 62531 and 2116852, dodge 100 before every 500 ms window."
+    },
+    {
+      "spell": 300476,
+      "kind": "avoided_swing_reads",
+      "name": "Betrayer (party crit duration)",
+      "label_suffix": "party_crit_duration",
+      "quote": "for $520256d.",
+      "read": "duration_max",
+      "observe_spell": 520256,
+      "ally_yd": 10,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852
+      ],
+      "swing_ms": 500,
+      "control_windows": 10,
+      "windows": 30,
+      "observe_source": "AscensionFelswornEvents.cpp:42-47 passes an incoming dodge when Chance(player, 300476) succeeds (ProcChance 100) and :223-224 casts 804336 at the attacker and 520256 on the caster; 520256 Effect[0] APPLY_AURA SPELL_AURA_MOD_CRIT_PCT, TargetA 22 SRC_CASTER, TargetB 30 UNIT_SRC_AREA_ALLY, RadiusIndex 9, DurationIndex 1 (server DBC). Spell.cpp:9449-9459 adds no combat reach for a player target of a player caster. Strikers: the 804822 proc shape, ten aggressive stationary creature 36 with 42716, 62531 and 2116852, dodge 100 before every 500 ms window."
+    },
+    {
+      "spell": 805249,
+      "kind": "avoided_swing_reads",
+      "name": "Illidari Training (energy per dodge)",
+      "label_suffix": "energy_per_dodge",
+      "quote": "Dodging an attack now generates $521210s1 Energy.",
+      "read": "per_event",
+      "observe_spell": 521210,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852
+      ],
+      "swing_ms": 500,
+      "control_windows": 10,
+      "windows": 60,
+      "observe_source": "AscensionFelswornEvents.cpp:42-47 passes an incoming dodge when Chance(player, 805249) succeeds (ProcChance 100) and :208-209 casts 521210 on the caster; 521210 Effect[0] ENERGIZE, MiscValue 3 Energy (server DBC). SpellEffects.cpp EffectEnergize passes the effect value to Unit::EnergizeBySpell, which logs it uncapped (Unit.cpp:9330-9348), so each energize log carries the full amount. Strikers: the 804822 proc shape, dodge 100 before every 500 ms window."
     }
   ],
   "player_observations": [],
