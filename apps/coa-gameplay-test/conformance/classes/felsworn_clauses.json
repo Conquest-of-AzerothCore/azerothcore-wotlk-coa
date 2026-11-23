@@ -2266,8 +2266,10 @@
   {
     "spell": 803903,
     "clause": "While active, Blood of Mannoroth now also causes you to ignore all enemy Armor.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "803903 behaviour_metric_delta armor_ignore"
+    ]
   },
   {
     "spell": 803904,
@@ -2287,18 +2289,18 @@
   {
     "spell": 803905,
     "clause": "Reduces the cooldown of Annihilation by $/1000;s1 sec",
+    "kind": "claim",
     "labels": [
-      "803905 effect_value e0 #0"
-    ],
-    "kind": "claim"
+      "803905 behaviour_metric_delta annihilation_cooldown"
+    ]
   },
   {
     "spell": 803905,
     "clause": "and Sunder by $/1000;s2 sec.",
+    "kind": "claim",
     "labels": [
-      "803905 effect_value e1 #1"
-    ],
-    "kind": "claim"
+      "803905 behaviour_metric_delta sunder_cooldown"
+    ]
   },
   {
     "spell": 804219,
@@ -2311,18 +2313,18 @@
   {
     "spell": 804609,
     "clause": "Increases the effectiveness of your Skull of Gul'dan by $s1%,",
+    "kind": "claim",
     "labels": [
-      "804609 effect_value e0 #0"
-    ],
-    "kind": "claim"
+      "804609 behaviour_metric_delta skull_energy"
+    ]
   },
   {
     "spell": 804609,
     "clause": "but its cooldown is increased by $/1000;s2 sec.",
+    "kind": "claim",
     "labels": [
-      "804609 effect_value e1 #1"
-    ],
-    "kind": "claim"
+      "804609 behaviour_metric_delta skull_cooldown"
+    ]
   },
   {
     "spell": 804610,
