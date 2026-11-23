@@ -2270,8 +2270,7 @@
     "spell": 707527,
     "clause": "While the barrier holds, you take $s2% reduced Physical Damage.",
     "labels": [
-      "707527 effect_value e1 #2",
-      "707527 aura_amount e1 #2"
+      "707527 behaviour_metric_delta physical_taken"
     ],
     "kind": "claim"
   },
@@ -2413,7 +2412,7 @@
     "spell": 706266,
     "clause": "Reduces your chance to be hit by spells by $s1%",
     "labels": [
-      "706266 effect_value e0 #0"
+      "706266 behaviour_metric_delta spell_hit_taken"
     ],
     "kind": "claim"
   },
@@ -2602,7 +2601,7 @@
     "spell": 707844,
     "clause": "Reduces your chance to be hit by spells by $s1%",
     "labels": [
-      "707844 effect_value e0 #0"
+      "707844 behaviour_metric_delta spell_hit_taken"
     ],
     "kind": "claim"
   },
@@ -2701,7 +2700,8 @@
     "spell": 800188,
     "clause": "and dodge chance by $s2%.",
     "labels": [
-      "800188 effect_value e1 #1"
+      "800188 behaviour_metric_delta dodge",
+      "800188 behaviour_metric_delta agility_held"
     ],
     "kind": "claim"
   },
@@ -2777,8 +2777,9 @@
     "spell": 800206,
     "clause": "Inner Demon: Reduces affected enemies melee and ranged haste by $578317s1% for $578317d.",
     "labels": [
-      "800206 effect_value 578317e0 #1",
-      "800206 spell_duration 578317 #2"
+      "800206 behaviour_metric_delta haste",
+      "800206 behaviour_metric_delta haste_held",
+      "800206 behaviour_metric_delta haste_gone"
     ],
     "kind": "claim"
   },
@@ -2968,7 +2969,7 @@
     "spell": 800214,
     "clause": "Restores $s2 Energy",
     "labels": [
-      "800214 effect_value 800239e1 #4"
+      "800239 behaviour_metric_delta fragment_energy"
     ],
     "kind": "claim"
   },
@@ -2980,7 +2981,8 @@
       {
         "claim": "increases your critical strike chance by $s1%",
         "labels": [
-          "800214 effect_value 800239e0 #5"
+          "800239 behaviour_metric_delta fragment_crit_spell",
+          "800239 behaviour_metric_delta fragment_crit_melee"
         ]
       },
       {
@@ -3457,7 +3459,8 @@
     "spell": 802108,
     "clause": "In addition, Inner Demon now increases your spell damage and critical strike rating by an additional $801208s2% of your Spirit.",
     "labels": [
-      "802108 effect_value 801208e1 #1"
+      "802108 behaviour_metric_delta inner_spell_power",
+      "802108 behaviour_metric_delta inner_crit_rating"
     ],
     "kind": "claim"
   },
