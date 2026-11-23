@@ -48,8 +48,8 @@ class ScriptHitRelocateTests(unittest.TestCase):
         self.assertEqual(scenario['location'], POSITION)
         teleports = [index for index, step in enumerate(steps) if step['action'] == 'teleport']
         self.assertEqual(len(teleports), 2 * self.entry['trials'])
-        learn = next(index for index, step in enumerate(steps)
-                     if step['action'] == 'learn' and step['spell'] == SPELL)
+        learn = max(index for index, step in enumerate(steps)
+                    if step['action'] == 'learn' and step['spell'] == SPELL)
         self.assertEqual(sum(index < learn for index in teleports), self.entry['trials'])
         ends = teleports[1:] + [len(steps)]
         for start, end in zip(teleports, ends):
