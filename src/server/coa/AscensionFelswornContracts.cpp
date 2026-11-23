@@ -270,6 +270,8 @@ void ApplyContracts(SpellInfo* info)
         info->ProcCharges = 0;
     if (id == 707901)
         dummy(0);
+    if (Named(info, 801895))
+        info->AscensionIgnoreAbsorb = true;
     if (Named(info, 704368))
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             if (info->Effects[i].TriggerSpell == 803717)
