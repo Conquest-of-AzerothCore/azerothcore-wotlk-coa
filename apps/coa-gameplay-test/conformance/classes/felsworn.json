@@ -4084,30 +4084,6 @@
       ]
     },
     {
-      "spell": 500610,
-      "name": "Fel Torpedo (its hit carries the flat 225 threat)",
-      "kind": "threat_slope",
-      "variant": "threat",
-      "label_suffix": "threat",
-      "quote": "Generates a large amount of threat.",
-      "hit_spell": 500761,
-      "expected_slope": 1.0,
-      "flat": 34,
-      "observe_source": "Fel Torpedo damage 500761 (the claim sits in the Description of the Fel Torpedo ability 500610, so the entry is on 500610 and its labels are cited by ledger row 65 of 520853; Description: 'Generates a large amount of threat.' sits in the Fel Torpedo 500610 tooltip) Effect[0] SCHOOL_DAMAGE, Effect[1] 63 SPELL_EFFECT_THREAT BasePoints 224 + 1 = 225 flat threat per hit (the DBC's own encoding of the sentence), SpellLevel 34. threat_slope casts the hit once at a fresh dummy and reads the dummy's health lost and the caster's threat on it: threat = health lost x slope + the SPELL_EFFECT_THREAT points (225, read from the DBC by the judge) + the initial threat of the SpellLevel (34, Spell::HandleThreatSpells adds m_spellInfo->SpellLevel with no spell_threat row and no CU_NO_INITIAL_THREAT, Spell.cpp:5731-5737), so the slope reads 1 and a missing 225 reads below 1. Reference search 2026-11-23: coa-history spell 500761 and 500610: 0 events in 186 logs under those ids (nothing found for the Fel Torpedo hit); the bindmysoul snapshot has no value beyond the tooltip; nothing else found. Interpretation: the tooltip gives no figure, the DBC gives the flat 225, so 'large amount' is judged as that data (no owner figure exists for this wording, unlike 'High Threat')."
-    },
-    {
-      "spell": 500610,
-      "name": "Fel Torpedo (control: a hit with no threat effect gives only its initial threat)",
-      "kind": "threat_slope",
-      "variant": "threat_control",
-      "label_suffix": "threat_control",
-      "quote": "Generates a large amount of threat.",
-      "hit_spell": 803715,
-      "expected_slope": 1.0,
-      "flat": 11,
-      "observe_source": "Control of threat: Carve's strike 803715 has no SPELL_EFFECT_THREAT and SpellLevel 11 (Spell.dbc), so its threat is its damage plus 11 and (threat - 11) / damage = 1 with no flat 225: it shows the judge's flat part is the threat effect and the 225 of the Fel Torpedo hit is not a property of every hit. Reference search 2026-11-23: coa-history spell 500761 and 500610: 0 events in 186 logs under those ids (nothing found for the Fel Torpedo hit); the bindmysoul snapshot has no value beyond the tooltip; nothing else found. Interpretation: the tooltip gives no figure, the DBC gives the flat 225, so 'large amount' is judged as that data (no owner figure exists for this wording, unlike 'High Threat')."
-    },
-    {
       "spell": 524950,
       "name": "Black Magic (Ruin damage)",
       "kind": "hit_ratio",
@@ -13511,87 +13487,64 @@
     },
     {
       "spell": 707444,
-      "name": "Hellfire Carver (a full Carve channel: Fel Fireball strikes 10 additional enemies at most)",
-      "kind": "fixed_count",
-      "variant": "cap",
-      "label_suffix": "cap",
-      "quote": "up to a maximum of 10 enemies",
-      "expected": 10,
-      "radius": 10,
-      "radius_reason": "Fel Fireball 801312 Effect[0] target 6 (TARGET_UNIT_TARGET_ENEMY) with no ChainTarget beyond 1 in the DBC; the additional enemies come from the 10 yd search around the target in AscensionFelswornAbilities.cpp:140-150, so the candidate dummies stand within 2.5 yd of the primary",
-      "cast_spell": 801312,
-      "target_rank": 801312,
-      "repeats": 1,
-      "learn": [
-        707444
-      ],
+      "name": "Hellfire Carver (a full Carve channel: Fel Fireball strikes the nine additional enemies near the primary)",
+      "kind": "metric_delta",
+      "variant": "extras_full",
+      "label_suffix": "extras_full",
+      "quote": "causes it to strike 1 additional enemy near the primary target based on how long you channeled",
+      "trigger_spell": 801312,
+      "gate_spell": 707444,
+      "target": "dummy",
+      "cast_power": 100,
       "setup_casts": [
-        [
-          800206,
-          "caster"
-        ]
+        800206
       ],
-      "auras": [
+      "setup_wait_ms": 3000,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 801312,
+        "target": "dummy"
+      },
+      "area_dummies": [
+        3.2,
+        3.4,
+        3.6,
+        3.8,
+        4.0,
+        4.2,
+        4.4,
+        4.6,
+        4.8
+      ],
+      "area_sum": true,
+      "before_expected": 1,
+      "expected": 11,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
         [
           800058,
-          6
+          6,
+          "caster",
+          "caster"
         ],
         [
           803468,
-          1
+          1,
+          "caster",
+          "caster"
         ],
         [
           823764,
-          1
-        ]
-      ],
-      "headroom": 1,
-      "far_dummy": false,
-      "cluster_yd": 2.5,
-      "primary_distance_reads": true,
-      "count_primary": false,
-      "observe_source": "Fel Fireball 801312 Effect[0] SCHOOL_DAMAGE, TargetA 6 TARGET_UNIT_TARGET_ENEMY, EffectChainTarget 1 (the primary only without the passive). One real Carve (a setup cast, learned before; the full 2500 ms channel is 10 250 ms ticks, the aura 807424 StackAmount 10 in the DBC) then one Fel Fireball at the primary dummy; the dummies are all within 2.5 yd of the primary and so within the 10 yd search of the extra targets (Fel Fireball extras are found around the target within 10 yd, AscensionFelswornAbilities.cpp:140-150). Twelve creatures in all (the harness cap): the primary and eleven candidates. Of the eleven candidates exactly ten are struck by the Fel Fireball cast after the full channel (the cap), so the extras exist, scale to the 10 the tooltip names and stop there. The contrast arm cap_control casts the same Carve and Fel Fireball without Hellfire Carver and strikes none. Reference search 2026-11-23: coa-history spell 707444 and 801312: 0 events in 186 logs under those ids; spell 807424 (the Carve aura): SPELL_AURA_APPLIED 171 events and SPELL_AURA_APPLIED_DOSE 1516 events in 4 logs, about 9 doses per application (the buff exists in play and stacks with the channel; no cast time or target figure decides); bindmysoul snapshot has no value beyond the tooltip; nothing else found."
-    },
-    {
-      "spell": 707444,
-      "name": "Hellfire Carver (control: without it a Fel Fireball strikes no additional enemy)",
-      "kind": "fixed_count",
-      "variant": "cap_control",
-      "label_suffix": "cap_control",
-      "quote": "up to a maximum of 10 enemies",
-      "expected": 0,
-      "radius": 10,
-      "radius_reason": "Control arm of cap on the same layout: Fel Fireball 801312 without Hellfire Carver strikes the primary only (EffectChainTarget 1), so none of the dummies within 2.5 yd of it is struck",
-      "cast_spell": 801312,
-      "target_rank": 801312,
-      "repeats": 1,
-      "learn": [],
-      "setup_casts": [
-        [
-          800206,
+          1,
+          "caster",
           "caster"
         ]
       ],
-      "auras": [
-        [
-          800058,
-          6
-        ],
-        [
-          803468,
-          1
-        ],
-        [
-          823764,
-          1
-        ]
-      ],
-      "headroom": 1,
-      "far_dummy": false,
-      "cluster_yd": 2.5,
-      "primary_distance_reads": true,
-      "count_primary": false,
-      "observe_source": "Fel Fireball 801312 Effect[0] SCHOOL_DAMAGE, TargetA 6 TARGET_UNIT_TARGET_ENEMY, EffectChainTarget 1 (the primary only without the passive). One real Carve (a setup cast, learned before; the full 2500 ms channel is 10 250 ms ticks, the aura 807424 StackAmount 10 in the DBC) then one Fel Fireball at the primary dummy; the dummies are all within 2.5 yd of the primary and so within the 10 yd search of the extra targets (Fel Fireball extras are found around the target within 10 yd, AscensionFelswornAbilities.cpp:140-150). Twelve creatures in all (the harness cap): the primary and eleven candidates. Without 707444 learned no additional enemy is struck. Reference search 2026-11-23: coa-history spell 707444 and 801312: 0 events in 186 logs under those ids; spell 807424 (the Carve aura): SPELL_AURA_APPLIED 171 events and SPELL_AURA_APPLIED_DOSE 1516 events in 4 logs, about 9 doses per application (the buff exists in play and stacks with the channel; no cast time or target figure decides); bindmysoul snapshot has no value beyond the tooltip; nothing else found."
+      "observe_source": "Hellfire Carver 707444 Description (server DBC set): 'Casting Carve now makes your next Fel Fireball instant cast and causes it to strike 1 additional enemy near the primary target based on how long you channeled, up to a maximum of 10 enemies, dealing less damage with each target struck.' Carve 800206 is a 2500 ms channel (DurationIndex 66); its full channel is ten 250 ms ticks and the aura 807424 it leaves has StackAmount 10 in the DBC. Fel Fireball 801312 has EffectChainTarget 1 (the primary only without the passive). A real Carve is cast first (a setup cast, kept in both phases) and its 2500 ms channel ends after 3000 ms; then one real Fel Fireball at the primary dummy at 3 yd, with nine more dummies at 3.2 to 4.8 yd from the caster (all within 2 yd of the primary and so inside the 10 yd search of the extra targets). The hits of Fel Fireball on the primary and the nine area dummies are summed: the count is cumulative over the scenario: before (control: Hellfire Carver not learned) 1, the primary only; after the learn 11, that 1 plus 10 more in the second cast (the primary and all nine additional enemies offered), a gain of 10 (a full channel offers up to 10, the harness admits nine area dummies). The cap of 10 and the growth with the channel length are not read here. Reference search 2026-11-23: coa-history spell 807424 (the Carve aura): SPELL_AURA_APPLIED 171 events and SPELL_AURA_APPLIED_DOSE 1516 events in 4 logs, about 9 doses per application (the buff exists in play and stacks with the channel; no target count decides); spells 707444 and 801312: 0 events under those ids; bindmysoul snapshot has no value beyond the tooltip; nothing else found.",
+      "expected_gain": 10
     }
   ],
   "player_observations": [],
