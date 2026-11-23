@@ -4637,9 +4637,21 @@
           1,
           "caster",
           "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
-      "observe_source": "560637 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 521243 (Effect[0] SPELL_EFFECT_ENERGIZE, MiscValue 3 Energy, EffectBasePoints 19 + 1 = 20, the 'refunds 20 Energy'); AscensionFelswornAbilities.cpp:237-240 casts 521243 on the caster when a Ruin 801895, Felwrath 520236 or Sunder 705121 is cast while Inner Demon 804216 is on the caster and 560637 is known. Ruin 801895 is cast at the dummy once per phase with the Energy set to 100 before the cast; Inner Demon 804216 is set on the caster in both phases (a precondition fixture by harness set_aura); the refund is read as the energize total of 521243 after the learn (the before phase is the control without 560637). Reference search 2026-11-23: coa-history spell 560637: 0 events in 186 logs (a passive leaves no event); spell 521243 Energize +20 energy: SPELL_ENERGIZE 3098 events in 10 logs (positive control; it is the logged result of the proc); bindmysoul talents snapshot (fetched 2026-07-22): Dark Magician 560637 'While Inner Demon is active, casting Ruin, Sunder, or Felwrath now refunds 20 Energy.', same figure; expected values come from the tooltip and the DBC only."
+      "observe_source": "560637 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 521243 (Effect[0] SPELL_EFFECT_ENERGIZE, MiscValue 3 Energy, EffectBasePoints 19 + 1 = 20, the 'refunds 20 Energy'); AscensionFelswornAbilities.cpp:237-240 casts 521243 on the caster when a Ruin 801895, Felwrath 520236 or Sunder 705121 is cast while Inner Demon 804216 is on the caster and 560637 is known. Ruin 801895 is cast at the dummy once per phase with the Energy set to 100 before the cast; Inner Demon 804216 is set on the caster in both phases (a precondition fixture by harness set_aura); the refund is read as the energize total of 521243 after the learn (the before phase is the control without 560637). Reference search 2026-11-23: coa-history spell 560637: 0 events in 186 logs (a passive leaves no event); spell 521243 Energize +20 energy: SPELL_ENERGIZE 3098 events in 10 logs (positive control; it is the logged result of the proc); bindmysoul talents snapshot (fetched 2026-07-22): Dark Magician 560637 'While Inner Demon is active, casting Ruin, Sunder, or Felwrath now refunds 20 Energy.', same figure; expected values come from the tooltip and the DBC only. The Felfury 800058 (2) and the cast requirement aura 823764 are set as precondition fixtures in both phases: the first run of this entry (prove2) refused every cast with NO_POWER (reason 85) without them."
     },
     {
       "spell": 560637,
@@ -4669,9 +4681,21 @@
           1,
           "caster",
           "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
-      "observe_source": "560637 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 521243 (Effect[0] SPELL_EFFECT_ENERGIZE, MiscValue 3 Energy, EffectBasePoints 19 + 1 = 20, the 'refunds 20 Energy'); AscensionFelswornAbilities.cpp:237-240 casts 521243 on the caster when a Ruin 801895, Felwrath 520236 or Sunder 705121 is cast while Inner Demon 804216 is on the caster and 560637 is known. Sunder 705121 is cast at the dummy once per phase with the Energy set to 100 before the cast; Inner Demon 804216 is set on the caster in both phases (a precondition fixture by harness set_aura); the refund is read as the energize total of 521243 after the learn (the before phase is the control without 560637). Reference search 2026-11-23: coa-history spell 560637: 0 events in 186 logs (a passive leaves no event); spell 521243 Energize +20 energy: SPELL_ENERGIZE 3098 events in 10 logs (positive control; it is the logged result of the proc); bindmysoul talents snapshot (fetched 2026-07-22): Dark Magician 560637 'While Inner Demon is active, casting Ruin, Sunder, or Felwrath now refunds 20 Energy.', same figure; expected values come from the tooltip and the DBC only."
+      "observe_source": "560637 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 521243 (Effect[0] SPELL_EFFECT_ENERGIZE, MiscValue 3 Energy, EffectBasePoints 19 + 1 = 20, the 'refunds 20 Energy'); AscensionFelswornAbilities.cpp:237-240 casts 521243 on the caster when a Ruin 801895, Felwrath 520236 or Sunder 705121 is cast while Inner Demon 804216 is on the caster and 560637 is known. Sunder 705121 is cast at the dummy once per phase with the Energy set to 100 before the cast; Inner Demon 804216 is set on the caster in both phases (a precondition fixture by harness set_aura); the refund is read as the energize total of 521243 after the learn (the before phase is the control without 560637). Reference search 2026-11-23: coa-history spell 560637: 0 events in 186 logs (a passive leaves no event); spell 521243 Energize +20 energy: SPELL_ENERGIZE 3098 events in 10 logs (positive control; it is the logged result of the proc); bindmysoul talents snapshot (fetched 2026-07-22): Dark Magician 560637 'While Inner Demon is active, casting Ruin, Sunder, or Felwrath now refunds 20 Energy.', same figure; expected values come from the tooltip and the DBC only. The Felfury 800058 (2) and the cast requirement aura 823764 are set as precondition fixtures in both phases: the first run of this entry (prove2) refused every cast with NO_POWER (reason 85) without them."
     },
     {
       "spell": 560637,
@@ -4701,9 +4725,21 @@
           1,
           "caster",
           "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
-      "observe_source": "560637 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 521243 (Effect[0] SPELL_EFFECT_ENERGIZE, MiscValue 3 Energy, EffectBasePoints 19 + 1 = 20, the 'refunds 20 Energy'); AscensionFelswornAbilities.cpp:237-240 casts 521243 on the caster when a Ruin 801895, Felwrath 520236 or Sunder 705121 is cast while Inner Demon 804216 is on the caster and 560637 is known. Felwrath 520236 is cast at the dummy once per phase with the Energy set to 100 before the cast; Inner Demon 804216 is set on the caster in both phases (a precondition fixture by harness set_aura); the refund is read as the energize total of 521243 after the learn (the before phase is the control without 560637). Reference search 2026-11-23: coa-history spell 560637: 0 events in 186 logs (a passive leaves no event); spell 521243 Energize +20 energy: SPELL_ENERGIZE 3098 events in 10 logs (positive control; it is the logged result of the proc); bindmysoul talents snapshot (fetched 2026-07-22): Dark Magician 560637 'While Inner Demon is active, casting Ruin, Sunder, or Felwrath now refunds 20 Energy.', same figure; expected values come from the tooltip and the DBC only."
+      "observe_source": "560637 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 521243 (Effect[0] SPELL_EFFECT_ENERGIZE, MiscValue 3 Energy, EffectBasePoints 19 + 1 = 20, the 'refunds 20 Energy'); AscensionFelswornAbilities.cpp:237-240 casts 521243 on the caster when a Ruin 801895, Felwrath 520236 or Sunder 705121 is cast while Inner Demon 804216 is on the caster and 560637 is known. Felwrath 520236 is cast at the dummy once per phase with the Energy set to 100 before the cast; Inner Demon 804216 is set on the caster in both phases (a precondition fixture by harness set_aura); the refund is read as the energize total of 521243 after the learn (the before phase is the control without 560637). Reference search 2026-11-23: coa-history spell 560637: 0 events in 186 logs (a passive leaves no event); spell 521243 Energize +20 energy: SPELL_ENERGIZE 3098 events in 10 logs (positive control; it is the logged result of the proc); bindmysoul talents snapshot (fetched 2026-07-22): Dark Magician 560637 'While Inner Demon is active, casting Ruin, Sunder, or Felwrath now refunds 20 Energy.', same figure; expected values come from the tooltip and the DBC only. The Felfury 800058 (2) and the cast requirement aura 823764 are set as precondition fixtures in both phases: the first run of this entry (prove2) refused every cast with NO_POWER (reason 85) without them."
     },
     {
       "spell": 560637,
@@ -4727,8 +4763,21 @@
       "disable_regeneration": true,
       "wait_ms": 3500,
       "expire_ms": 500,
-      "phase_auras": [],
-      "observe_source": "560637 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 521243 (Effect[0] SPELL_EFFECT_ENERGIZE, MiscValue 3 Energy, EffectBasePoints 19 + 1 = 20, the 'refunds 20 Energy'); AscensionFelswornAbilities.cpp:237-240 casts 521243 on the caster when a Ruin 801895, Felwrath 520236 or Sunder 705121 is cast while Inner Demon 804216 is on the caster and 560637 is known. Control: the same Ruin cast with 560637 learned and no Inner Demon on the caster: no refund. Reference search 2026-11-23: coa-history spell 560637: 0 events in 186 logs (a passive leaves no event); spell 521243 Energize +20 energy: SPELL_ENERGIZE 3098 events in 10 logs (positive control; it is the logged result of the proc); bindmysoul talents snapshot (fetched 2026-07-22): Dark Magician 560637 'While Inner Demon is active, casting Ruin, Sunder, or Felwrath now refunds 20 Energy.', same figure; expected values come from the tooltip and the DBC only."
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "560637 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 521243 (Effect[0] SPELL_EFFECT_ENERGIZE, MiscValue 3 Energy, EffectBasePoints 19 + 1 = 20, the 'refunds 20 Energy'); AscensionFelswornAbilities.cpp:237-240 casts 521243 on the caster when a Ruin 801895, Felwrath 520236 or Sunder 705121 is cast while Inner Demon 804216 is on the caster and 560637 is known. Control: the same Ruin cast with 560637 learned and no Inner Demon on the caster: no refund. Reference search 2026-11-23: coa-history spell 560637: 0 events in 186 logs (a passive leaves no event); spell 521243 Energize +20 energy: SPELL_ENERGIZE 3098 events in 10 logs (positive control; it is the logged result of the proc); bindmysoul talents snapshot (fetched 2026-07-22): Dark Magician 560637 'While Inner Demon is active, casting Ruin, Sunder, or Felwrath now refunds 20 Energy.', same figure; expected values come from the tooltip and the DBC only. The Felfury 800058 (2) and the cast requirement aura 823764 are set as precondition fixtures in both phases: the first run of this entry (prove2) refused every cast with NO_POWER (reason 85) without them."
     },
     {
       "spell": 574140,

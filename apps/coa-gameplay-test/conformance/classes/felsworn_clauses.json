@@ -1369,16 +1369,20 @@
         "labels": [
           "574140 behaviour_metric_delta dodge",
           "574140 behaviour_metric_delta dodge_no_inner"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "critical damage dealt while active",
         "labels": [
           "574140 behaviour_hit_ratio crit_damage",
           "574140 behaviour_hit_ratio crit_damage_no_inner"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 574143,
@@ -1705,7 +1709,9 @@
       "704606 behaviour_metric_delta crit_spell",
       "704606 behaviour_metric_delta noncrit",
       "704606 behaviour_metric_delta phys_crit"
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 704607,
@@ -1780,7 +1786,9 @@
     "kind": "claim",
     "labels": [
       "705102 behaviour_metric_delta regen"
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 705105,
