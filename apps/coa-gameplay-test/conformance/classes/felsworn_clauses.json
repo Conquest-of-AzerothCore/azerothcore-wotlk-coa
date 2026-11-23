@@ -2713,7 +2713,11 @@
     "spell": 800203,
     "clause": "Interrupt a spell from being cast, preventing the target from casting spells of that school for $d and draining mana from the target based on your Spirit.",
     "labels": [
-      "800203 aura_duration_ms #0"
+      "800203 aura_duration_ms #0",
+      "800203 behaviour_metric_delta interrupt",
+      "800203 behaviour_metric_delta lockout_held",
+      "800203 behaviour_metric_delta lockout_free",
+      "800203 behaviour_metric_delta drain"
     ],
     "kind": "claim"
   },
