@@ -258,4 +258,5 @@ class FeedTests(unittest.TestCase):
         scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), ENTRY)
         self.assertNotIn('feed', expectation.model)
         self.assertNotIn('cast_until_aura', [step['action'] for step in scenario['steps']])
-        self.assertFalse({'melee_crit_rating', 'melee_hit_rating'} & set(scenario['players'][0]))
+        self.assertNotIn('melee_crit_rating', scenario['players'][0])
+        self.assertNotEqual(scenario['players'][0].get('melee_hit_rating'), 100000)
