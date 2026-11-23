@@ -3166,10 +3166,14 @@
       "800355 behaviour_metric_delta instant_fel_fireball",
       "800355 behaviour_metric_delta instant_ruin",
       "800355 behaviour_metric_delta refund_fel_fireball",
-      "800355 behaviour_metric_delta refund_ruin"
+      "800355 behaviour_metric_delta refund_ruin",
+      "800355 behaviour_metric_delta channel_held_fel_fireball",
+      "800355 behaviour_metric_delta channel_held_ruin",
+      "800355 behaviour_metric_delta channel_break_felbreak",
+      "800355 behaviour_metric_delta damage_after_fel_fireball"
     ],
     "tool_gap": {
-      "reason": "Instant cast and cost refund of two named spells while the channel runs: AscensionFelswornAbilities.cpp:165 and :232-233 (OnSpellCast energizes the paid cost back, CanCastDuringChannel). The channel costs ManaPerSecond 30 Energy (Spell.dbc 800355), drained every 1000 ms by Aura::Update, which removes the aura when the pool is below 30 (SpellAuras.cpp:771-801); the earlier counted pair set Energy once to 100, so the channel ended near 4000 ms: an incorrect test, not a property of the build. With Energy held at 100 by hold_power_during_wait the channel runs its 5500 ms (slow_held and damage ok in both runs of pair q2). No kind reads the cast time of a spell cast during another spell's channel; cast_period and shot_ramp read cast-to-cast spacing of one spell, energize_range reads an energize of one cast. The nearest is cast_period. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc.",
+      "reason": "Read since fw-l2 / fw-l2b by metric_delta entries: the cast time of Fel Fireball and Ruin during the channel (instant_fel_fireball, instant_ruin, spell_cast_time_ms 0), the refund of their paid cost energized by 800355 (refund_fel_fireball, refund_ruin) and, for 'while channeling', the channel aura 800355 still on the dummy after each instant cast (channel_held_fel_fireball, channel_held_ruin), its positive control (channel_break_felbreak: Felbreak, not admitted by CanCastDuringChannel, ends the channel) and the end damage still landing after a Fel Fireball (damage_after_fel_fireball). Earlier attempts found no kind for the cast time of a spell cast during another spell's channel. Reference search 2026-11-23: coa-history spells 800355 and 800833: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc.",
       "attempts": [
         {
           "agent": "fw-b1d",
@@ -3178,6 +3182,10 @@
         {
           "agent": "fw-b1d2",
           "report": ".agents/plans/fw-b1d2/report.md"
+        },
+        {
+          "agent": "fw-l2b",
+          "report": ".agents/plans/fw-l2b/report.md"
         }
       ]
     },
