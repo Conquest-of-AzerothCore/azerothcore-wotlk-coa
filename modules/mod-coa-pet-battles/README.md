@@ -2,7 +2,8 @@
 
 Open-world, turn-based pet battles for Conquest of Azeroth, ported from the ALE (Lua) pet battle system of
 [azerothcore-linux-server](https://github.com/catastrophic-impact/azerothcore-linux-server) (GPL-3.0, commit
-`22bb7f3`). The port is staged; this module currently holds **phase 1: the data**.
+`22bb7f3`). The port is staged; this module currently holds **phase 1: the data** and **phase 2: the battle
+engine** with a GM command to try it.
 
 ## What it does now
 
@@ -11,6 +12,41 @@ kit, kit → ability, turns and effects, presentation rows against each species'
 stand-in creature templates). Any error is logged and leaves pet battles disabled; nothing half-loads.
 
 Settings live in `conf/mod-coa-pet-battles.conf.dist` (`CoAPetBattles.*`), defaulting to the upstream values.
+
+## Battle engine
+
+`src/Engine/` is a C++ port of upstream's `pb_core.lua` and `pb_rules.lua`: pet stats and ability picks, tooltips
+with each pet's own numbers, round resolution with all 42 retail effect handlers, auras and weather, family
+passives, forced swaps, the trap and the enemy AI. It uses only the standard library and the loaded data, and draws
+every random number through one interface in upstream's order.
+
+It is proven against upstream by replay. `tools/pet_data/trace_upstream.py` ran 182 seeded battles (1v1 and 3v3,
+levels 1–25, 1,681 rounds) through upstream's own Lua and recorded every roll, command, event and pet state in
+`tests/fixtures/`. The unit tests replay each battle through the C++ engine and require identical events, statuses,
+pet state and rolls; every reachable effect handler occurs at least 9 times and the five handlers only unreferenced
+library abilities carry have their own tests.
+
+## Trying it: `.petbattle sim`
+
+GMs can run a whole battle between two pet species and read it in chat:
+
+```
+.petbattle sim <speciesA> <speciesB> [level] [seed]
+```
+
+Species are creature entries from `coa_pet_species`. Both pets are rare at the given level (default 25), the
+upstream AI plays both sides, and the battle stops after 50 rounds. The seed is printed so the same battle can be
+replayed.
+
+```
+[Pet sim] <pet A> (<level> rare) vs <pet B> (<level> rare), seed <seed>
+R<round> <pet>: <ability> -> <target> <damage> (<health>/<max health>)
+R<round> <pet> heals <amount> (<health>/<max health>)
+R<round> <target> dodges <ability>
+R<round> <pet>: <aura> (<rounds> rounds)
+R<round> <pet> faints.
+<pet> wins.
+```
 
 ## Data
 
