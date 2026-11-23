@@ -350,16 +350,7 @@
       "300480 effect_value #0",
       "300480 behaviour_metric_delta swing_reset_rate"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "The proc only calls Reduce(player, 560284, INT32_MAX) (AscensionFelswornEvents.cpp:145-146): the reset of the cooldown of Infernal casts nothing, so no procs event_metric counts it. proc_reset (Legionfall) reads a marker spell that 300480 lacks, and cooldown_delta of triggers is a fixed 100% reduction, not a chance. The nearest kind is behaviours proc_reset with the Infernal cooldown read as the marker.",
-      "attempts": [
-        {
-          "agent": "fw-chance",
-          "report": ".agents/plans/fw-chance/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 300483,
@@ -3323,16 +3314,7 @@
       "802076 effect_value e0 #0",
       "802076 behaviour_metric_delta charges"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "metric aura_script_value (the server keeps Annihilation's attack charges in the aura script value 803904, AscensionFelswornAuras.cpp:68-72; Aura::GetCharges stays 0) has no evidence class in coverage.METRIC_EVIDENCE, so coverage stops with EvidenceError; the measured pair gave 5 / 6 / 7 charges, ok in both runs (fw-b3g4 prove B)",
-      "attempts": [
-        {
-          "agent": "fw-b3g4",
-          "report": ".agents/plans/fw-b3g4/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 802076,
@@ -3372,16 +3354,7 @@
       "802110 effect_value e0 #0",
       "802110 behaviour_metric_delta charges"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "metric aura_script_value (the server keeps Annihilation's attack charges in the aura script value 803904, AscensionFelswornAuras.cpp:68-72; Aura::GetCharges stays 0) has no evidence class in coverage.METRIC_EVIDENCE, so coverage stops with EvidenceError; the measured pair gave 5 / 6 / 7 charges, ok in both runs (fw-b3g4 prove B)",
-      "attempts": [
-        {
-          "agent": "fw-b3g4",
-          "report": ".agents/plans/fw-b3g4/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 802110,
@@ -3493,16 +3466,7 @@
       "803904 effect_value #1",
       "803904 behaviour_metric_delta charges"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "metric aura_script_value (the server keeps Annihilation's attack charges in the aura script value 803904, AscensionFelswornAuras.cpp:68-72; Aura::GetCharges stays 0) has no evidence class in coverage.METRIC_EVIDENCE, so coverage stops with EvidenceError; the measured pair gave 5 / 6 / 7 charges, ok in both runs (fw-b3g4 prove B)",
-      "attempts": [
-        {
-          "agent": "fw-b3g4",
-          "report": ".agents/plans/fw-b3g4/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 803905,
@@ -3820,15 +3784,6 @@
         ]
       }
     ],
-    "tool_gap": {
-      "reason": "The leech is a script copy of 50% of a melee swing as Chaos damage (AscensionFelswornEvents.cpp:243-244 Copy(player, target, 807347, damage * 50 / 100)) whose heal is the copy's own damage. No existing kind compares an amount to the melee swing that caused it: amount_match reads two spell amounts of one cast, script_hit reads a hit against the tooltip value of its own spell, hit_ratio compares an observed hit across arms. The nearest is amount_match with the melee swing (spell 0) as its first side.",
-      "attempts": [
-        {
-          "agent": "fw-b1d",
-          "report": ".agents/plans/fw-b1d/report.md"
-        }
-      ]
-    },
     "kind": "claim"
   },
   {
