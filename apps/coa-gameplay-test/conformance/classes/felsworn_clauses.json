@@ -167,14 +167,16 @@
   {
     "spell": 300474,
     "clause": "Direct Fire and Shadow spell damage dealt now applies Expose to enemies.",
-    "labels": [],
+    "labels": [
+      "300474 behaviour_metric_delta applies"
+    ],
     "kind": "claim"
   },
   {
     "spell": 300474,
     "clause": "Damage taken from the Felsworn increased by $s1%",
     "labels": [
-      "300474 effect_value 300475e0 #0"
+      "300474 behaviour_hit_ratio damage"
     ],
     "kind": "claim"
   },
@@ -427,10 +429,32 @@
   {
     "spell": 520240,
     "clause": "Casting Felfury spenders now reduces the cooldown of Burning Hatred, Hateforged Barrier, and Demonic Will by $/1000;520830S1 sec.",
-    "labels": [
-      "520240 effect_value 520830e0 #0"
+    "claims": [
+      {
+        "claim": "Burning Hatred cooldown reduced by $/1000;520830S1 sec",
+        "labels": [
+          "520240 behaviour_metric_delta cd_805239"
+        ],
+        "evidence": "data"
+      },
+      {
+        "claim": "Hateforged Barrier cooldown reduced by $/1000;520830S1 sec",
+        "labels": [
+          "520240 behaviour_metric_delta cd_705129"
+        ],
+        "evidence": "data"
+      },
+      {
+        "claim": "Demonic Will cooldown reduced by $/1000;520830S1 sec",
+        "labels": [
+          "520240 behaviour_metric_delta cd_800209"
+        ],
+        "evidence": "data"
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "data",
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
   },
   {
     "spell": 520244,
@@ -611,10 +635,25 @@
   {
     "spell": 524950,
     "clause": "Increases the damage of your Bane of Chaos and Ruin by $s1%.",
-    "labels": [
-      "524950 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Ruin damage increased by $s1%",
+        "labels": [
+          "524950 behaviour_hit_ratio ruin"
+        ],
+        "evidence": "behaviour"
+      },
+      {
+        "claim": "Bane of Chaos damage increased by $s1%",
+        "labels": [
+          "524950 behaviour_hit_ratio bane"
+        ],
+        "evidence": "behaviour"
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
   },
   {
     "spell": 525001,
@@ -717,10 +756,26 @@
   {
     "spell": 560503,
     "clause": "While Inner Demon is active, Carve and Sargeron Smite now leeches $s1% of the damage dealt from the initial strike as Shadowflame Damage.",
-    "labels": [
-      "560503 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Sargeron Smite leeches $s1% of the strike as Shadowflame damage while Inner Demon is active",
+        "labels": []
+      },
+      {
+        "claim": "Carve leeches $s1% of the strike as Shadowflame damage while Inner Demon is active",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "No existing kind proves the leech share with a control arm: cast_leech_ratio (nearest, heal of 705124 over the strike damage) has no way to give the caster the 2 Felfury Sargeron Smite consumes before the control cast and the treatment cast (the control cast is refused with SPELL_FAILED_NO_POWER, so 'the control cast must land' fails, pair prove_p2), and its also-spell option for Carve's triggered strike 803715 is refused together with auras. Needs a caster aura fixture on both arms of cast_leech_ratio and a controlled Carve route.",
+      "attempts": [
+        {
+          "agent": "fw-b2b",
+          "report": ".agents/plans/fw-b2b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 560533,
@@ -1294,17 +1349,21 @@
     "spell": 704602,
     "clause": "Reduces the cooldown of Fury Unleashed by $/1000;S1 sec.",
     "labels": [
-      "704602 effect_value e0 #0"
+      "704602 behaviour_metric_delta cd"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "data",
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
   },
   {
     "spell": 704602,
     "clause": "When Fury Unleashed ends, you strike all nearby enemies for ${$806096m1+$806096ppl1+$AP*0.5614286} Shadowflame Damage",
     "labels": [
-      "704602 effect_value 806096e0 #1"
+      "704602 script_hit 806096 strike"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
   },
   {
     "spell": 704602,
@@ -2013,8 +2072,25 @@
   {
     "spell": 801892,
     "clause": "Critically striking with Twin Slice or Annihilan Strike now generates an additional 1 Felfury.",
-    "labels": [],
-    "kind": "claim"
+    "claims": [
+      {
+        "claim": "Twin Slice critical strikes generate an additional 1 Felfury",
+        "labels": [
+          "801892 behaviour_metric_delta twin_slice"
+        ],
+        "evidence": "behaviour"
+      },
+      {
+        "claim": "Annihilan Strike critical strikes generate an additional 1 Felfury",
+        "labels": [
+          "801892 behaviour_metric_delta annihilan"
+        ],
+        "evidence": "behaviour"
+      }
+    ],
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
   },
   {
     "spell": 501298,
