@@ -12874,6 +12874,128 @@
       "wait_ms": 500,
       "observe_source": "525027 Effect[0] aura 108 ADD_PCT_MODIFIER, BasePoints 24 + 1 = 25 ($525027s1, Spell.dbc). The amount of effect 0 of 525027 on the caster is read 500 ms after a real Chaos Rush cast at the dummy with 524947 learned (absent before: the control). Reference search 2026-11-23: coa-history spell 525027: 1 log, 9 applied and 9 removed, no value in a log event; expected values come from the tooltip and the DBC only.",
       "expire_ms": 500
+    },
+    {
+      "spell": 802058,
+      "kind": "fixed_count",
+      "quote": "and strikes up to $s2 targets.",
+      "radius": 8,
+      "far_dummy": true,
+      "metric": "spell_damage_count",
+      "cast_spell": 801312,
+      "target_rank": 801312,
+      "repeats": 3,
+      "count_primary": false,
+      "name": "Reckoning (Fel Fireball strikes up to 4 targets: the primary and 3 more)",
+      "variant": "fireball_targets",
+      "label_suffix": "fireball_targets",
+      "expected": 3,
+      "auras": [
+        [
+          802058,
+          1
+        ]
+      ],
+      "radius_reason": "Fel Fireball 801312 Effect[0] SCHOOL_DAMAGE on TARGET_UNIT_TARGET_ENEMY with ChainTarget 1 (a single target); 802058 Effect[1] BasePoints 3 + EffectDieSides 1 = 4 ($s2) targets; AscensionFelswornAbilities.cpp:137-150 adds up to 3 further enemies within Nearby(target, 10 yd), so the extra dummies stand inside 8 yd of the primary and one beyond it",
+      "observe_source": "Reckoning 802058 is held on the caster by harness set_aura (an active whose real cast, aura and duration have their own entries held/gone/instant) before each Fel Fireball, which it makes free and instant; the dummies struck (spell_damage_count) are read: the primary and exactly 3 more of the offered ones (a fourth extra would show). The control entry casts the same Fel Fireball without 802058. Reference search 2026-11-23: coa-history spell 802058: 78 casts, 78 aura applied and 78 removed in 6 logs, no value in a log event; Fel Fireball 801312 target counts are not logged per cast here; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 802058,
+      "kind": "fixed_count",
+      "quote": "and strikes up to $s2 targets.",
+      "radius": 8,
+      "far_dummy": true,
+      "metric": "spell_damage_count",
+      "cast_spell": 801312,
+      "target_rank": 801312,
+      "repeats": 3,
+      "count_primary": false,
+      "name": "Reckoning (control: Fel Fireball without Reckoning strikes no additional enemy)",
+      "variant": "fireball_targets_control",
+      "label_suffix": "fireball_targets_control",
+      "expected": 0,
+      "radius_reason": "Fel Fireball 801312 Effect[0] SCHOOL_DAMAGE on TARGET_UNIT_TARGET_ENEMY with ChainTarget 1 (a single target); 802058 Effect[1] BasePoints 3 + EffectDieSides 1 = 4 ($s2) targets; AscensionFelswornAbilities.cpp:137-150 adds up to 3 further enemies within Nearby(target, 10 yd), so the extra dummies stand inside 8 yd of the primary and one beyond it",
+      "observe_source": "Control arm of fireball_targets on the same build: Fel Fireball 801312 (single target, ChainTarget 1) without 802058 strikes no additional dummy. Reference search 2026-11-23: coa-history spell 802058: 78 casts, 78 aura applied and 78 removed in 6 logs, no value in a log event; Fel Fireball 801312 target counts are not logged per cast here; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 805244,
+      "name": "Legion March (Fel Torpedo critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "torpedo_crit",
+      "label_suffix": "torpedo_crit",
+      "quote": "and its critical strike chance by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 805244,
+      "learn": [
+        520853
+      ],
+      "target": "caster",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 500761,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "expected_gain": 10,
+      "observe_source": "805244 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 9 + 1 = 10 ($s1), EffectSpellClassMask word 2 = 33554432, the SpellFamilyFlags word 2 of Fel Torpedo's damage 500761 (SpellFamilyName 20, Spell.dbc); the tooltip's critical part is conditional on Fel Torpedo 520853 ($?s520853), learned in both phases. The caster's critical strike chance of 500761 (Player::SpellDoneCritChance with spell mods) is read before (control: 805244 not learned) and after a real learn of 805244: gain 10 points. Chaos Rush (no 520853) carries no critical part in the tooltip. Reference search 2026-11-23: coa-history spell 805244: 0 events in 186 logs (a passive leaves no event); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 805998,
+      "name": "Fel Flamecasting (Cripple spreads to 2 nearby enemies)",
+      "kind": "metric_delta",
+      "variant": "cripple_spread",
+      "label_suffix": "cripple_spread",
+      "quote": "Damage dealt by Sargeron Smite now spreads your Cripple to 2 nearby enemies.",
+      "gate_spell": 805998,
+      "trigger_spell": 802060,
+      "setup_casts": [
+        704371
+      ],
+      "setup_wait_ms": 1700,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": [
+        3,
+        4,
+        5
+      ],
+      "area_sum": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 704371
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "805998 Effect[0] aura 42 PROC_TRIGGER_SPELL 300491; AscensionFelswornEvents.cpp:62-63,163-164 on a non-periodic Sargeron Smite 802060 hit with 805998 known calls SpreadCripple (AscensionFelsworn.cpp:291-314): Cripple 704371 on the struck enemy is copied onto up to 2 enemies within Nearby(target, 10 yd) that do not carry it (the count stops at 2). Cripple is cast for real at the dummy, then a Smite; three further creatures stand 3, 4 and 5 yd from the caster (area_dummies, one more than the stated count) and the sum of the Cripple reads over the dummy and them is judged: 1 before the learn (the primary alone, the control) and 3 after (the primary and exactly 2 copies). Felfury and weapon fixtures set by harness for the Smite. Reference search 2026-11-23: coa-history spell 805998: 0 events in 186 logs (a passive leaves no event); expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],
