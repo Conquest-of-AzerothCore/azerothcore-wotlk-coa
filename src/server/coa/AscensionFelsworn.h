@@ -10,6 +10,7 @@
 class Player;
 class Unit;
 class Spell;
+struct TargetInfo;
 namespace AscensionFelsworn
 {
 enum FelswornSpells : uint32
@@ -61,6 +62,7 @@ bool Twin(SpellInfo const* info);
 bool Inner(Unit const* player);
 bool Triggered(Spell const* spell);
 int32 Amount(uint32 spell, uint8 effect = 0, Unit* caster = nullptr);
+void AddVictimAttackPower(Spell* spell, Unit* target, TargetInfo& hit);
 uint32 Fury(Unit const* player);
 void Gain(Player* player, uint32 amount);
 void Generated(Player* player, uint32 amount);

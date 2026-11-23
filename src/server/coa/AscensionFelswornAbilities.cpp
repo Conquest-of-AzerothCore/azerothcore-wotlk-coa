@@ -173,6 +173,7 @@ class felsworn_casts : public AllSpellScript
     }
     void OnSpellCalculatedTarget(Spell* spell, Unit* target, TargetInfo& hit) override
     {
+        AddVictimAttackPower(spell, target, hit);
         Player* player = Owner(spell->GetCaster());
         SpellInfo const* info = spell->GetSpellInfo();
         if (!player || !target || hit.damage <= 0 || hit.missCondition != SPELL_MISS_NONE || Derived(info))

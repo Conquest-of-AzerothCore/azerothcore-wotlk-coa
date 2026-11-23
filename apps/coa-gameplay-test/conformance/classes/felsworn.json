@@ -3357,7 +3357,7 @@
     },
     {
       "spell": 805240,
-      "name": "Scars of Suffering (Tyrant's Gaze against the scarred target, D-61 diagnostic)",
+      "name": "Scars of Suffering (Tyrant's Gaze against the scarred target)",
       "kind": "hit_ratio",
       "variant": "scar_ap_gaze",
       "label_suffix": "scar_ap_gaze",
@@ -3426,7 +3426,7 @@
       "control_excluded": {
         "residual": 0.0001
       },
-      "expected_source": "Mentor D-61 diagnostic (report the measured gain, change nothing): tooltip of 805240 reads ${$m1+0+$AP*0.35}; m1 = 219 + 1 + 4.0 x (60 - 29) = 344 and attack power 312 give 344 + int(0.35 x 312 = 109.2) = 453 in the control arm. With the scar the victim carries int32(0.15 x 130) = 19 attack power against it: 344 + int(0.35 x 331 = 115.85) = 459, expected mean ratio 1.01325 (+6 per hit); 1.0 if the class scaling hook reads attack power without the victim (AscensionFelswornContracts.cpp:342). Same fixtures as the 805240 damage entry (crit removed by 984954, partial resists by 823764, dummy below 35% health: 30%). Azzinoth's Assault 801904 is cast at the dummy before every Gaze in the treatment arm with 570158 learned. Reference search 2026-11-23: see the 805240 damage entry (coa-history: 13 casts, no decisive figure); nothing found on the scar."
+      "expected_source": "Regression of Felsworn ADR 0011 (mentor D-68; the D-61 diagnostic read 453 in both arms, pair 20261123-194225 / 20261123-194305): tooltip of 805240 reads ${$m1+0+$AP*0.35}; m1 = 219 + 1 + 4.0 x (60 - 29) = 344 and attack power 312 give 344 + int(0.35 x 312 = 109.2) = 453 in the control arm. With the scar the victim carries int32(0.15 x 130) = 19 attack power against it: 344 + int(0.35 x 331 = 115.85) = 459, expected mean ratio 1.01325 (+6 per hit); 1.0 if the class reads attack power without the victim, as the scaling hook alone does (felsworn_scaling::ModifySpellEffectBaseValue has no target); the victim term is added per target in felsworn_casts::OnSpellCalculatedTarget. The +6 per hit is int(0.35 x 19 = 6.65) with no damage modifier in either arm (control 453 = 344 + 109 exactly), so truncation cannot hide it: a single hit separates 453 from 459. Same fixtures as the 805240 damage entry (crit removed by 984954, partial resists by 823764, dummy below 35% health: 30%). Azzinoth's Assault 801904 is cast at the dummy before every Gaze in the treatment arm with 570158 learned. Reference search 2026-11-23: see the 805240 damage entry (coa-history: 13 casts, no decisive figure); nothing found on the scar."
     },
     {
       "spell": 803903,

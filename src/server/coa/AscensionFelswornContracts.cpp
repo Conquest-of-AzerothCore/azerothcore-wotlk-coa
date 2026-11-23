@@ -9,6 +9,8 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include <algorithm>
+#include <cstdlib>
+#include <utility>
 
 namespace AscensionFelsworn
 {
@@ -313,6 +315,119 @@ void ApplyContracts(SpellInfo* info)
 
 namespace
 {
+float AttackPowerCoefficient(uint32 spell, uint8 effect)
+{
+    float coefficient = 0.0f;
+    for (auto const& row : FelswornCoefficients)
+        if (row.spell == spell && row.effect == effect)
+            coefficient += row.ap;
+    return coefficient;
+}
+int32 VictimAttackPower(Unit const* victim, uint32 spell, uint8 effect)
+{
+    float const coefficient = AttackPowerCoefficient(spell, effect);
+    if (coefficient <= 0.0f)
+        return 0;
+    return int32(coefficient * victim->GetTotalAuraModifier(SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS));
+}
+template <typename Bonus>
+int32 Share(Bonus bonus, int32 amount)
+{
+    if (!amount)
+        return 0;
+    uint32 const size = uint32(std::abs(amount));
+    int32 const share = std::max(0, int32(bonus(2 * size)) - int32(bonus(size)));
+    return amount < 0 ? -share : share;
+}
+std::pair<int32, int32> DirectShares(Unit* caster, Unit* target, SpellInfo const* info, uint8 effect, int32 raw)
+{
+    SpellSchoolMask const school = info->GetSchoolMask();
+    if (info->Effects[effect].Effect == SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
+    {
+        if (school & SPELL_SCHOOL_MASK_NORMAL)
+            raw = int32(raw * caster->GetPctModifierValue(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_PCT));
+        int32 const done = Share([&](uint32 amount)
+            { return caster->MeleeDamageBonusDone(target, amount, BASE_ATTACK, info, school); }, raw);
+        int32 const taken = Share([&](uint32 amount)
+            { return target->MeleeDamageBonusTaken(caster, amount, BASE_ATTACK, info, school); }, done);
+        return {done, taken};
+    }
+    int32 const done = Share([&](uint32 amount)
+        { return caster->SpellDamageBonusDone(target, info, amount, SPELL_DIRECT_DAMAGE, effect); }, raw);
+    int32 const taken = Share([&](uint32 amount)
+        { return target->SpellDamageBonusTaken(caster, info, amount, SPELL_DIRECT_DAMAGE); }, done);
+    return {done, taken};
+}
+int32 AreaShare(Spell* spell, Unit* target, uint8 effect, int32 taken)
+{
+    SpellInfo const* info = spell->GetSpellInfo();
+    SpellEffectInfo const& data = info->Effects[effect];
+    if (!taken || !(data.IsAreaAuraEffect() || data.IsTargetingArea() ||
+                    (data.ChainTarget > 1 && info->DmgClass != SPELL_DAMAGE_CLASS_MAGIC)))
+        return taken;
+    Unit* caster = spell->GetCaster();
+    bool const npcCaster = !caster->IsControlledByPlayer() || info->HasAttribute(SPELL_ATTR7_TREAT_AS_NPC_AOE);
+    taken = target->CalculateAOEDamageReduction(taken, info->SchoolMask, npcCaster);
+    int32 const targets = int32(spell->GetUniqueTargetInfo()->size());
+    if (caster->IsPlayer() && targets > 10)
+        taken = taken * 10 / targets;
+    return taken;
+}
+int32 TriggeringAuraAttackPower(Spell* spell, Unit* target)
+{
+    SpellInfo const* aura = spell->GetTriggeredByAuraSpellInfo();
+    if (!aura)
+        return 0;
+    for (uint8 i = EFFECT_0; i < MAX_SPELL_EFFECTS; ++i)
+        if (aura->Effects[i].ApplyAuraName == SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE &&
+            aura->Effects[i].TriggerSpell == spell->GetSpellInfo()->Id)
+            return VictimAttackPower(target, aura->Id, i);
+    return 0;
+}
+int32 LeechAttackPower(Unit* target, Unit* attacker, SpellInfo const* info)
+{
+    int32 share = 0;
+    for (uint8 i = EFFECT_0; i < MAX_SPELL_EFFECTS; ++i)
+        if (info->Effects[i].Effect == SPELL_EFFECT_HEALTH_LEECH)
+            if (int32 const raw = VictimAttackPower(target, info->Id, i))
+                share += DirectShares(attacker, target, info, i, raw).second;
+    return share;
+}
+int32 AreaPeriodicAttackPower(Unit const* target, SpellInfo const* info)
+{
+    for (uint8 i = EFFECT_0; i < MAX_SPELL_EFFECTS; ++i)
+        if (info->Effects[i].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
+            info->Effects[i].ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE)
+            return VictimAttackPower(target, info->Id, i);
+    return 0;
+}
+}
+
+void AscensionFelsworn::AddVictimAttackPower(Spell* spell, Unit* target, TargetInfo& hit)
+{
+    Unit* caster = spell->GetCaster();
+    SpellInfo const* info = spell->GetSpellInfo();
+    if (!Owner(caster) || !target || target == caster || hit.damage <= 0 || hit.missCondition != SPELL_MISS_NONE)
+        return;
+    for (uint8 i = EFFECT_0; i < MAX_SPELL_EFFECTS; ++i)
+    {
+        uint32 const effect = info->Effects[i].Effect;
+        if (!(hit.effectMask & (1 << i)) ||
+            (effect != SPELL_EFFECT_SCHOOL_DAMAGE && effect != SPELL_EFFECT_NORMALIZED_WEAPON_DMG))
+            continue;
+        int32 raw = VictimAttackPower(target, info->Id, i);
+        if (!raw && i == EFFECT_0)
+            raw = TriggeringAuraAttackPower(spell, target);
+        if (!raw)
+            continue;
+        auto const [done, taken] = DirectShares(caster, target, info, i, raw);
+        hit.damageBeforeTakenMods = std::max(0, hit.damageBeforeTakenMods + done);
+        hit.damage = std::max(0, hit.damage + AreaShare(spell, target, i, taken));
+    }
+}
+
+namespace
+{
 using namespace AscensionFelsworn;
 float Shadowflame(Player* player)
 {
@@ -387,6 +502,8 @@ class felsworn_scaling : public UnitScript
     }
     void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* info) override
     {
+        if (info && target && target != attacker && Owner(attacker))
+            damage = std::max(0, damage + LeechAttackPower(target, attacker, info));
         if (info && !info->HasAttribute(SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS))
             damage = int32(damage * DamageFactor(target, attacker, info->SchoolMask, info));
     }
@@ -396,6 +513,8 @@ class felsworn_scaling : public UnitScript
     }
     void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const* info) override
     {
+        if (info && target && target != attacker && Owner(attacker))
+            damage = uint32(std::max(0, int32(damage) + AreaPeriodicAttackPower(target, info)));
         if (info && !info->HasAttribute(SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS))
             damage = uint32(damage * DamageFactor(target, attacker, info->SchoolMask, info));
     }
