@@ -3336,6 +3336,7 @@ namespace
     constexpr uint32 HEART_PICKUP_ARM_DELAY_MS = 1000;
     constexpr uint32 HEART_PICKUP_CHECK_INTERVAL_MS = 500;
     constexpr float HEART_PICKUP_DISTANCE = 1.0f;
+    constexpr float HEART_LANDING_DEPTH = 1.0f;
 
     constexpr float HEART_MIN_LANDING_DISTANCE = 10.0f;
     constexpr float HEART_MAX_LANDING_DISTANCE = 20.0f;
@@ -7398,7 +7399,7 @@ bool ManastormMgr::SpawnHeartProjectile(
     projectileCaster->CastSpell(
         destination.GetPositionX(),
         destination.GetPositionY(),
-        destination.GetPositionZ(),
+        destination.GetPositionZ() - HEART_LANDING_DEPTH,
         SPELL_MANASTORM_HEART_PROJECTILE,
         true);
 
@@ -9992,7 +9993,8 @@ void ManastormMgr::UpdateHeartPickups(uint32 diff)
             {
                 Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid));
                 if (member && member->IsInWorld() && member->IsAlive() && !member->IsBeingTeleported() &&
-                    member->FindMap() == map && member->GetExactDist(heart) <= HEART_PICKUP_DISTANCE)
+                    member->FindMap() == map && member->GetExactDist(heart->GetPositionX(), heart->GetPositionY(),
+                        heart->GetPositionZ() + HEART_LANDING_DEPTH) <= HEART_PICKUP_DISTANCE)
                 {
                     player = member;
                     break;

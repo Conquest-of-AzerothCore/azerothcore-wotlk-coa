@@ -154,6 +154,8 @@ struct Creature:Unit {
  void SetHealth(uint32 h){health=h;}void SetPower(int,uint32 p){power=p;}
  uint32 CountPctFromMaxHealth(float p) const{return uint32(maxhealth*p/100);}
  void DespawnOrUnsummon(){despawn=true;}
+ float x=0,y=0,z=0;
+ float GetPositionX() const{return x;} float GetPositionY() const{return y;} float GetPositionZ() const{return z;}
 };
 struct TempSummon:Creature {
  SummonPropertiesEntry const* m_Properties=nullptr; uint32 timer=20000; TempSummonType type=TEMPSUMMON_TIMED_DESPAWN;
@@ -188,7 +190,15 @@ struct Player:Unit {
  ObjectGuid GetGUID()const{return guid;}float GetExactDist(Creature*)const{return distance;}
  bool IsWithinDistInMap(Creature*,float r)const{return distance<r+10;}
 mutable uint32 entranceDistanceReads = 0;
-float GetExactDist(float, float, float) const { ++entranceDistanceReads; return distance; }
+mutable float measuredX = 0, measuredY = 0, measuredZ = 0;
+float GetExactDist(float px, float py, float pz) const
+{
+    ++entranceDistanceReads;
+    measuredX = px;
+    measuredY = py;
+    measuredZ = pz;
+    return distance;
+}
  int GetPosition()const{return 0;}Pet* GetPet(){return pet;}uint32 GetTemporaryUnsummonedPetNumber()const{return pendingPet;}
 std::vector<uint32> removedDynamicObjects;
 void RemoveDynObject(uint32 spell) { removedDynamicObjects.push_back(spell); }
@@ -675,4 +685,9 @@ int main(){
  mgr.UpdateHeartPickups(500);assert(player.heals==0);player.distance=1.1f;mgr.UpdateHeartPickups(500);
  assert(player.heals==0&&!heart.despawn);player.distance=0.9f;mgr.UpdateHeartPickups(500);
  assert(player.heals==1&&heart.despawn&&hearts.hearts.empty());mgr.UpdateHeartPickups(500);assert(player.heals==1);
+ static_assert(HEART_LANDING_DEPTH == 1.0f);
+ Creature sunkHeart;sunkHeart.guid={101};sunkHeart.map=&map;sunkHeart.x=12;sunkHeart.y=-7;sunkHeart.z=40;
+ map.creatures[101]=&sunkHeart;hearts.hearts[{101}]=0;player.distance=0.9f;mgr.UpdateHeartPickups(500);
+ assert(player.heals==2&&sunkHeart.despawn);
+ assert(player.measuredX==12&&player.measuredY==-7&&player.measuredZ==40+HEART_LANDING_DEPTH);
 }
