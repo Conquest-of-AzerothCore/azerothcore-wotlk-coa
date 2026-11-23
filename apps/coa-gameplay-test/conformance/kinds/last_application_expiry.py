@@ -7,7 +7,8 @@ from bonus import bonus_band
 from hits import MAX_ACCELERATED_SCENARIO_MS, creature_fixture, timed
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
-from values import Expectation, FORCE_CRIT_RATINGS, FORCED_CRIT_RATING, GCD_WAIT_MS, TARGET, dataset, facts_of
+from values import (DUMMY_ENTRY, Expectation, FORCE_CRIT_RATINGS, FORCED_CRIT_RATING, GCD_WAIT_MS, TARGET, dataset,
+                    facts_of)
 
 KIND = 'last_application_expiry'
 ORDER = 22
@@ -15,6 +16,7 @@ ORDER = 22
 LAST_APPLICATION_STEP_OVERHEAD_MS = 9
 FEED_STAMP_MS = 100
 FEED_RESIDUAL = 0.0005
+FEED_STAMPS = ('applies', 'first')
 FORCE_HIT_RATINGS = {'melee': 'melee_hit_rating', 'spell': 'spell_hit_rating', 'ranged': 'ranged_hit_rating'}
 ARMS = ('control', 'treatment')
 
@@ -154,6 +156,11 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
                      measurement(row[2], holder, 'aura', spell=spec.aura)]
             return reads + ([measurement(row[3], holder, 'aura_stacks', spell=spec.aura)] if spec.no_refresh else [])
 
+        stamped = feeding and name == ARMS[1]
+        if stamped:
+            start = last_application_label(spec, f'{name} timeline start')
+            steps += [measurement(start, CASTER, 'game_time_ms'),
+                      {'action': 'encounter_start', 'actor': CASTER, 'boss_entry': DUMMY_ENTRY}]
         if spec.no_refresh or feeding:
             steps += poll()
         if feeding:
@@ -168,6 +175,12 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
                       measurement(remaining, holder, 'aura_duration_ms', spell=spec.aura)]
         else:
             steps.append(cast)
+        if stamped:
+            applied = {'event': 'aura_applied', 'spell': spec.aura, 'target_actors': [holder]}
+            stamps = {stamp: last_application_label(spec, f'{name} timeline {stamp}') for stamp in FEED_STAMPS}
+            feed_reads[name] |= {'stamps': {'start': start, **stamps}}
+            steps += [measurement(stamps['applies'], CASTER, 'timeline_count', **applied),
+                      measurement(stamps['first'], CASTER, 'timeline_first_ms', **applied)]
         while elapsed <= window_ms:
             while recasts and recasts[0] <= elapsed:
                 recasts.pop(0)
@@ -222,7 +235,12 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
             f'application count are read, and nothing is cast but the loop, which stops at the first grant, so no '
             f'earlier grant is on. A loop that reaches its cap leaves the arm unmeasured. The grant is at most '
             f'{FEED_STAMP_MS} ms before the first poll after the loop, the remaining duration is read right after '
-            f'the stop, and the expected duration is the DBC one.')
+            f'the stop, and the expected duration is the DBC one. An encounter timeline opened before the measured '
+            f'feed (after a game time read) stamps every apply of {spec.aura} on the holder in the game time base: '
+            f'the aura\'s age at the first read after the loop is at most that read minus the start read and the '
+            f'first apply stamp; above {FEED_STAMP_MS} ms, without a stamp, or with any count of stamped applies '
+            f'but one (a refresh or a second apply leaves the last application unstamped), the arm is unmeasured. '
+            f'The timeline is process global, so the scenario runs exclusive in a batch.')
     if spec.repeat is not None:
         scenario['contract'] += (f' {spec.trigger_spell} is cast up to {spec.repeat[0]} times per arm (inside its '
                                  f'poll window), {spec.repeat[1]} ms apart.')
@@ -285,11 +303,28 @@ def last_application_verdict(base, run, model: dict):
     return replace(verdict, explanation=f'{verdict.explanation}; {fixture}, released at the end')
 
 
+def fed_age_void(run, stamps: dict, first_read: float, remaining: float, stamp_ms: float) -> str:
+    read = {name: run.values.get(label) for name, label in stamps.items()}
+    unreadable = [name for name, value in read.items() if value is None or not math.isfinite(float(value))]
+    if unreadable or remaining <= 0:
+        return (f'treatment: the aura\'s age at the first read is unreadable ({", ".join(unreadable) or "no aura"} at '
+                f'the stop), so the stamped bracket is not proven')
+    if read['applies'] != 1:
+        return (f'treatment: {read["applies"]:g} stamped applies, not one, so the last application is not the '
+                f'stamped one and the stamped bracket is not proven')
+    age = first_read - read['start'] - read['first']
+    if age > stamp_ms:
+        return (f'treatment: the aura is up to {age:g} ms old at the first read, above {stamp_ms:g} ms, so the '
+                f'stamped bracket is not proven')
+    return ''
+
+
 def last_application_reading(base, run, model: dict):
     from compare import missing_measurement
     feed = model.get('feed')
     labels = [label for rows in model['reads'].values() for row in rows for label in row]
-    labels += [label for reads in feed['reads'].values() for label in reads.values()] if feed else []
+    labels += [label for reads in feed['reads'].values() for key, label in reads.items() if key != 'stamps'] \
+        if feed else []
     missing = next((label for label in labels if run.values.get(label) is None), None)
     if missing is not None:
         return replace(base, explanation=missing_measurement(run, missing))
@@ -311,10 +346,7 @@ def last_application_reading(base, run, model: dict):
                                        f'{feed["stop_aura"]} (a void trial, neither a pass nor a fail)')
         treatment = [(treatment[1][0] - feed['stamp_ms'], *treatment[0][1:])] + treatment[1:]
         fed = f'; fed until {feed["stop_aura"]} at the stop, {remaining:g} ms left on the aura then'
-        age = expected - remaining
-        if remaining <= 0 or not 0 <= age <= feed['stamp_ms']:
-            age_void = (f'treatment: the aura\'s age at the first read is unreadable or above {feed["stamp_ms"]:g} '
-                        f'ms ({remaining:g} ms left of {expected:g}), so the stamped bracket is not proven')
+        age_void = fed_age_void(run, reads['stamps'], treatment[1][0], remaining, feed['stamp_ms'])
     refresh = no_refresh_reading(rows['treatment']) if model.get('no_refresh') else ''
     if refresh.startswith('alert'):
         return replace(base, status='alert', explanation=f'treatment: {refresh[len("alert: "):]}')

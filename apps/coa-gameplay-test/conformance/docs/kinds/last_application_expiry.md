@@ -53,9 +53,13 @@ cancels `stop_aura` on the caster first and is unmeasured when the aura is alrea
 before. The grant is dated by the stop: the step checks the aura on every world update, so the first poll is at most
 100 ms after it, and that read replaces the pre-loop read as the earlier end of the last application's bracket. The
 verdict is the unchanged bracket test of the kind, the explanation names the remaining duration read at the stop.
-An `ok` is voided (`unmeasured`) when the aura's age at that read, the expected duration less the remaining duration,
-is above 100 ms or negative, or the remaining duration is not above 0 (mentor D-21): the 100 ms stamp is then not
-proven. A failing bracket still alerts.
+The treatment arm reads the game time and opens an encounter timeline (`encounter_start` on the dummy) before its
+loop, and after the stop reads `timeline_count` and `timeline_first_ms` of `aura_applied` for `aura` on its holder;
+timeline stamps and `game_time_ms` share one game time base. The aura's age at the first poll is at most that poll's
+game time less the start read and the first apply stamp. An `ok` is voided (`unmeasured`) when that age is above
+100 ms, a stamp is missing, the stamped apply count is not one (a refresh or a second apply is not the stamped first
+apply), or the remaining duration is not above 0 (mentor D-21, Felsworn ADR 0004): the 100 ms stamp is then not
+proven. A failing bracket still alerts. The timeline is process global, so a fed scenario runs exclusive in a batch.
 `feed` excludes `repeat`, `forced_roll` and `no_refresh`.
 
 `force_crit` (`melee`, `spell` or `ranged`) sets the matching crit and hit rating fixtures for both arms, so every

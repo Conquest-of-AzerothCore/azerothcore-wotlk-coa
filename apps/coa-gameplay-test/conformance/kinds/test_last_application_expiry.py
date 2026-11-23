@@ -185,9 +185,16 @@ MALICE = {'spell': 800214, 'name': "Malice of Gul'dan (Felstrike lasts $802678d)
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
 class FeedTests(unittest.TestCase):
     def judged(self, lasts_ms: float, stop: float = 1.0, control_applied: bool = False, before: float = 0.0,
-               entry: dict = FED, remaining: float | None = None) -> Verdict:
+               entry: dict = FED, remaining: float | None = None, age: float = 20.0, applies: float = 1.0,
+               unstamped: tuple[str, ...] = ()) -> Verdict:
         _, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
         values = {}
+        stamps = expectation.model['feed']['reads']['treatment']['stamps']
+        values[stamps['start']] = 50000.0
+        values[stamps['applies']] = applies
+        values[stamps['first']] = 61000.0 - 50000.0 - age
+        for name in unstamped:
+            values[stamps[name]] = float('nan')
         for arm, rows in expectation.model['reads'].items():
             reads = expectation.model['feed']['reads'][arm]
             values[reads['stop']] = stop if arm == 'treatment' else 0.0
@@ -254,12 +261,33 @@ class FeedTests(unittest.TestCase):
         self.assertLess(abs(verdict.measured - 3000.0), 200.0)
 
     def test_an_aura_older_than_the_stamp_at_the_first_read_is_unmeasured(self):
-        self.assertEqual(self.judged(3000.0, remaining=2880.0).status, 'unmeasured')
-        self.assertEqual(self.judged(3000.0, remaining=2900.0).status, 'ok')
+        self.assertEqual(self.judged(3000.0, age=120.0).status, 'unmeasured')
+        self.assertEqual(self.judged(3000.0, age=100.0).status, 'ok')
 
-    def test_an_unreadable_or_overlong_remaining_duration_is_unmeasured(self):
+    def test_a_stale_stamp_hiding_a_longer_aura_is_unmeasured(self):
+        entry = {**MALICE, 'poll_ms': 25}
+        verdict = self.judged(6020.0, entry=entry, remaining=6000.0, age=400.0)
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('up to 400 ms old', verdict.explanation)
+        self.assertEqual(self.judged(6020.0, entry=entry, remaining=6000.0, age=20.0).status, 'ok')
+
+    def test_an_unstamped_or_refreshed_aura_is_unmeasured(self):
         self.assertEqual(self.judged(3000.0, remaining=0.0).status, 'unmeasured')
-        self.assertEqual(self.judged(3000.0, remaining=3010.0).status, 'unmeasured')
+        for name in ('start', 'applies', 'first'):
+            self.assertEqual(self.judged(3000.0, unstamped=(name,)).status, 'unmeasured')
+        self.assertEqual(self.judged(3000.0, applies=2.0).status, 'unmeasured')
+        self.assertEqual(self.judged(3000.0, applies=0.0).status, 'unmeasured')
+
+    def test_only_the_fed_treatment_opens_a_timeline(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), MALICE)
+        starts = [index for index, step in enumerate(scenario['steps']) if step['action'] == 'encounter_start']
+        loops = [index for index, step in enumerate(scenario['steps']) if step['action'] == 'cast_until_aura']
+        self.assertEqual(len(starts), 1)
+        self.assertTrue(loops[0] < starts[0] < loops[1])
+        self.assertNotIn('stamps', expectation.model['feed']['reads']['control'])
+        stamped = [step for step in scenario['steps'] if step.get('event') == 'aura_applied']
+        self.assertEqual({(step['spell'], tuple(step['target_actors'])) for step in stamped}, {(802678, ('dummy',))})
+        self.assertIn('exclusive in a batch', scenario['contract'])
 
     def test_a_longer_or_shorter_aura_alerts(self):
         self.assertEqual(self.judged(3900.0).status, 'alert')
