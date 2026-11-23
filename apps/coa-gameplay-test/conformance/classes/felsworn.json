@@ -63,7 +63,255 @@
   "talent_modifiers": [],
   "rotation": [],
   "stack": [],
-  "behaviours": [],
+  "behaviours": [
+    {
+      "spell": 500067,
+      "name": "Fel Monstrosity (Stamina)",
+      "kind": "metric_delta",
+      "variant": "stamina",
+      "label_suffix": "stamina",
+      "quote": "Increases your Stamina by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 500067,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 2
+      },
+      "before_expected": 79,
+      "expected": 94.8,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "expected_ratio": 1.2,
+      "observe_source": "500067 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue 2 (Stamina), BasePoints 19 + 1 = 20 ($s1). The caster's exact Stamina (Player::GetExactStatValue, unrounded) is read before and after a real learn of 500067 (the reading before is the control without it): reference stat 2 = 79 (class file) x 1.20 = 94.8, ratio judged within 0.002 so +19% (93.99) and +21% (95.6) are excluded. Bless 804247 is the harmless self cast in both phases. Reference search 2026-11-23: coa-history spell 500067: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state (it says Stamina 25%; the DBC tooltip says 20% and prevails); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 500067,
+      "name": "Fel Monstrosity (Agility)",
+      "kind": "metric_delta",
+      "variant": "agility",
+      "label_suffix": "agility",
+      "quote": "your Agility by $s3%",
+      "trigger_spell": 804247,
+      "gate_spell": 500067,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 1
+      },
+      "before_expected": 130,
+      "expected": 143.0,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "expected_ratio": 1.1,
+      "observe_source": "500067 Effect[2] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue 1 (Agility), BasePoints 9 + 1 = 10 ($s3). The caster's exact Agility is read before and after a real learn of 500067 (control: the reading before): reference stat 1 = 130 x 1.10 = 143.0, ratio judged within 0.002 so +9% (141.7) and +11% (144.3) are excluded. Reference search 2026-11-23: coa-history spell 500067: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state (it names no Agility part); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 574153,
+      "name": "Unbound (melee critical strike rating)",
+      "kind": "metric_delta",
+      "variant": "crit_melee",
+      "label_suffix": "crit_melee",
+      "quote": "Increases your dodge and critical strike rating by $s1% of your Agility",
+      "trigger_spell": 804247,
+      "gate_spell": 574153,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 8
+      },
+      "before_expected": 0,
+      "expected": 24.0,
+      "tolerance": 0.7,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          58451,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "574153 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 1 (Agility), 15% ($s1). Combat rating 8 (melee critical strike rating) is read with Agility 58451 (+30, DBC BasePoints 29 + 1; a precondition fixture by harness set_aura) set in both phases, so Agility is the reference 130 + 30 = 160, before and after a real learn of 574153 (the reading before is the control): 15% of 160 = 24.0, the engine adds the integer part, tolerance 0.7 excludes the 14% and 16% readings. Reference search 2026-11-23: coa-history spell 574153: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state (it names no critical strike rating part); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 574153,
+      "name": "Unbound (ranged critical strike rating)",
+      "kind": "metric_delta",
+      "variant": "crit_ranged",
+      "label_suffix": "crit_ranged",
+      "quote": "Increases your dodge and critical strike rating by $s1% of your Agility",
+      "trigger_spell": 804247,
+      "gate_spell": 574153,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 9
+      },
+      "before_expected": 0,
+      "expected": 24.0,
+      "tolerance": 0.7,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          58451,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "574153 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 1 (Agility), 15% ($s1). Combat rating 9 (ranged critical strike rating) is read with Agility 58451 (+30, DBC BasePoints 29 + 1; a precondition fixture by harness set_aura) set in both phases, so Agility is the reference 130 + 30 = 160, before and after a real learn of 574153 (the reading before is the control): 15% of 160 = 24.0, the engine adds the integer part, tolerance 0.7 excludes the 14% and 16% readings. Reference search 2026-11-23: coa-history spell 574153: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state (it names no critical strike rating part); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 574153,
+      "name": "Unbound (spell critical strike rating)",
+      "kind": "metric_delta",
+      "variant": "crit_spell",
+      "label_suffix": "crit_spell",
+      "quote": "Increases your dodge and critical strike rating by $s1% of your Agility",
+      "trigger_spell": 804247,
+      "gate_spell": 574153,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 10
+      },
+      "before_expected": 0,
+      "expected": 24.0,
+      "tolerance": 0.7,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          58451,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "574153 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 1 (Agility), 15% ($s1). Combat rating 10 (spell critical strike rating) is read with Agility 58451 (+30, DBC BasePoints 29 + 1; a precondition fixture by harness set_aura) set in both phases, so Agility is the reference 130 + 30 = 160, before and after a real learn of 574153 (the reading before is the control): 15% of 160 = 24.0, the engine adds the integer part, tolerance 0.7 excludes the 14% and 16% readings. Reference search 2026-11-23: coa-history spell 574153: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state (it names no critical strike rating part); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 574153,
+      "name": "Unbound (dodge rating)",
+      "kind": "metric_delta",
+      "variant": "dodge",
+      "label_suffix": "dodge",
+      "quote": "Increases your dodge and critical strike rating by $s1% of your Agility",
+      "trigger_spell": 804247,
+      "gate_spell": 574153,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 2
+      },
+      "before_expected": 0,
+      "expected": 24.0,
+      "tolerance": 0.7,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          58451,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "574153 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 1 (Agility), 15% ($s1). Combat rating 2 (dodge rating) is read with Agility 58451 (+30, DBC BasePoints 29 + 1; a precondition fixture by harness set_aura) set in both phases, so Agility is the reference 130 + 30 = 160, before and after a real learn of 574153 (the reading before is the control): 15% of 160 = 24.0, the engine adds the integer part, tolerance 0.7 excludes the 14% and 16% readings. Reference search 2026-11-23: coa-history spell 574153: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state (it names no critical strike rating part); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 574153,
+      "name": "Unbound (melee hit rating)",
+      "kind": "metric_delta",
+      "variant": "hit_melee",
+      "label_suffix": "hit_melee",
+      "quote": "and your hit rating by $s2% of your Agility",
+      "trigger_spell": 804247,
+      "gate_spell": 574153,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 5
+      },
+      "before_expected": 10000,
+      "expected": 10009.6,
+      "tolerance": 0.7,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          58451,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "574153 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 1 (Agility), 6% ($s2). Combat rating 5 (melee hit rating) is read with Agility 58451 (+30, DBC BasePoints 29 + 1; a precondition fixture by harness set_aura) set in both phases, so Agility is the reference 130 + 30 = 160, before and after a real learn of 574153 (the reading before is the control): 6% of 160 = 9.6, the engine adds the integer part, tolerance 0.7 excludes the 5% and 7% readings. Reference search 2026-11-23: coa-history spell 574153: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 574153,
+      "name": "Unbound (ranged hit rating)",
+      "kind": "metric_delta",
+      "variant": "hit_ranged",
+      "label_suffix": "hit_ranged",
+      "quote": "and your hit rating by $s2% of your Agility",
+      "trigger_spell": 804247,
+      "gate_spell": 574153,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 6
+      },
+      "before_expected": 0,
+      "expected": 9.6,
+      "tolerance": 0.7,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          58451,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "574153 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 1 (Agility), 6% ($s2). Combat rating 6 (ranged hit rating) is read with Agility 58451 (+30, DBC BasePoints 29 + 1; a precondition fixture by harness set_aura) set in both phases, so Agility is the reference 130 + 30 = 160, before and after a real learn of 574153 (the reading before is the control): 6% of 160 = 9.6, the engine adds the integer part, tolerance 0.7 excludes the 5% and 7% readings. Reference search 2026-11-23: coa-history spell 574153: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state; expected values come from the tooltip and the DBC only. The class file fixes spell and melee hit rating at 10000 and no ranged hit rating, so the ranged reading starts at 0."
+    },
+    {
+      "spell": 574153,
+      "name": "Unbound (spell hit rating)",
+      "kind": "metric_delta",
+      "variant": "hit_spell",
+      "label_suffix": "hit_spell",
+      "quote": "and your hit rating by $s2% of your Agility",
+      "trigger_spell": 804247,
+      "gate_spell": 574153,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 7
+      },
+      "before_expected": 10000,
+      "expected": 10009.6,
+      "tolerance": 0.7,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          58451,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "574153 aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValueB 1 (Agility), 6% ($s2). Combat rating 7 (spell hit rating) is read with Agility 58451 (+30, DBC BasePoints 29 + 1; a precondition fixture by harness set_aura) set in both phases, so Agility is the reference 130 + 30 = 160, before and after a real learn of 574153 (the reading before is the control): 6% of 160 = 9.6, the engine adds the integer part, tolerance 0.7 excludes the 5% and 7% readings. Reference search 2026-11-23: coa-history spell 574153: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state; expected values come from the tooltip and the DBC only."
+    }
+  ],
   "player_observations": [],
   "player_tooltip_readings": [],
   "hit_notes": [],

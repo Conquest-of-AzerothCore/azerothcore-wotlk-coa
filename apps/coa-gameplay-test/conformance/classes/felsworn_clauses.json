@@ -342,7 +342,7 @@
     "spell": 500067,
     "clause": "Increases your Stamina by $s1%,",
     "labels": [
-      "500067 effect_value e0 #0"
+      "500067 behaviour_metric_delta stamina"
     ],
     "kind": "claim"
   },
@@ -350,7 +350,7 @@
     "spell": 500067,
     "clause": "your Agility by $s3%,",
     "labels": [
-      "500067 effect_value e2 #1"
+      "500067 behaviour_metric_delta agility"
     ],
     "kind": "claim"
   },
@@ -358,7 +358,7 @@
     "spell": 500067,
     "clause": "and size by $s2%.",
     "labels": [
-      "500067 effect_value e1 #2"
+      "500067 behaviour_metric_delta size"
     ],
     "kind": "claim"
   },
@@ -1099,16 +1099,31 @@
   {
     "spell": 574153,
     "clause": "Increases your dodge and critical strike rating by $s1% of your Agility",
-    "labels": [
-      "574153 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "critical strike rating by $s1% of your Agility",
+        "labels": [
+          "574153 behaviour_metric_delta crit_melee",
+          "574153 behaviour_metric_delta crit_ranged",
+          "574153 behaviour_metric_delta crit_spell"
+        ]
+      },
+      {
+        "claim": "Increases your dodge",
+        "labels": [
+          "574153 behaviour_metric_delta dodge"
+        ]
+      }
+    ]
   },
   {
     "spell": 574153,
     "clause": "and your hit rating by $s2% of your Agility.",
     "labels": [
-      "574153 effect_value e1 #1"
+      "574153 behaviour_metric_delta hit_melee",
+      "574153 behaviour_metric_delta hit_ranged",
+      "574153 behaviour_metric_delta hit_spell"
     ],
     "kind": "claim"
   },
