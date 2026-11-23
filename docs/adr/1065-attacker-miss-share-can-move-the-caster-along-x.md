@@ -41,3 +41,20 @@ part `unmeasured`. Python only, opt-in, default off.
   option the steps are identical.
 - Finished-class scenario digests (15, 19, 19 `--stack`, 23) are unchanged.
 - Sun Cleric: 804632 `attacker_miss` sets `relocate_dx: -1`; the counted pair must show the part measured on both runs.
+
+## Addendum (2026-11-23, mentor D-319): -1.8 yd and the invalid-setup reason
+
+The Sun Cleric class-end pair (20261123-105051 / -112044) refused all 81 casts of 500154 in part 6 of run 2 (reason 134,
+`SPELL_FAILED_UNIT_NOT_INFRONT`), about 1 refusal in 160 parts at -1. A diagnostic of 16 full-length copies of that part
+(20261123-115905), with position reads after the relocate, at every cycle end and before the first cast, found the caster's
+orientation at 0 throughout and attacker1 fixed after settle (-59.4 to +62.2 degrees). A refusal therefore needs either a rare
+settle beyond 109.5 degrees or an overlap with the lane predecessor. The cause is not proven.
+
+- Sun Cleric 804632 now sets `relocate_dx: -1.8`. The front arc then covers attackers up to 126.9 degrees (cos >= -0.6), and
+  the farthest attacker is at most 4.8 yd away, inside the 5 yd minimum melee range (Unit.cpp:933-937). This widens the
+  margin; it is not a fix, and 40 reruns cannot show a 1-in-160 event gone.
+- When a part is unmeasured because an aura read is wrong, the judge appends the refused casts and their cast results
+  ("invalid setup: N casts of S refused, ..."). The status stays `unmeasured`. A run without refusals keeps the same text.
+- The scenario contract states the covered angle and says that the relocate is a margin, not a proof.
+- No existing harness step turns a player toward a unit. A "face unit" harness step is the proper fix for this kind of setup;
+  it is the owner's (G-39 list).

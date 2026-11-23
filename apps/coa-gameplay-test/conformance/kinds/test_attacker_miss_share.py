@@ -147,6 +147,20 @@ class AttackerMissShareTests(unittest.TestCase):
         self.assertEqual(self.pooled((160, 8000), (400, 8000)).status, 'unmeasured')
         self.assertEqual(self.pooled((400, 8000), (640, 8000), ran=1).status, 'unmeasured')
 
+    def test_refused_treatment_casts_are_named_as_an_invalid_setup(self):
+        _, expectation = self.built()
+        ready = {expectation.model['auras']['treatment'][0]: 0.0}
+        refused = FakeRun(self.values(expectation, (400, 8000), (640, 8000), ready))
+        refused.cast_failures = {572752: [134, 134, 0]}
+        verdict = share.POOLED_JUDGE(base_verdict(expectation), [refused], expectation.model)
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('; invalid setup: 2 casts of 572752 refused, ', verdict.explanation)
+        self.assertIn('(134)', verdict.explanation)
+        plain = FakeRun(self.values(expectation, (400, 8000), (640, 8000), ready))
+        verdict = share.POOLED_JUDGE(base_verdict(expectation), [plain], expectation.model)
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertNotIn('invalid setup', verdict.explanation)
+
     def test_a_treatment_read_of_hits_instead_of_misses_alerts(self):
         with mock.patch.object(share, 'MISS_VICTIM_STATE', 1):
             scenario, expectation = self.built(parts=2)

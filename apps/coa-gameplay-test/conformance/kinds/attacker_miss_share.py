@@ -213,8 +213,11 @@ def attacker_miss_share_scenario(class_file: dict, spec: AttackerMissShareSpec) 
                      + (f' Before the first read the caster is moved {spec.relocate_dx:+g} yd along x (the harness '
                         f'relocate step) so that every attacker, which settles on a {STRIKER_DISTANCE:g} yd circle around '
                         f'the caster, stays inside the 180 degree front arc of the caster, which faces +x, that the '
-                        f'player cast needs (Spell.cpp:7351-7352); a refused cast leaves the ready read at 0 and the '
-                        f'part unmeasured.' if spec.relocate_dx is not None else '')),
+                        f'player cast needs (Spell.cpp:7351-7352): the arc then covers attackers up to '
+                        f'{math.degrees(math.acos(max(-1.0, spec.relocate_dx / STRIKER_DISTANCE))):.1f} degrees from '
+                        f'the facing. This widens the margin; it is not a proof that no attacker settles behind (ADR '
+                        f'1065). A refused cast leaves the ready read at 0 and the part unmeasured, with the refusal '
+                        f'reason as invalid setup.' if spec.relocate_dx is not None else '')),
         'players': [player_fixture(class_file)],
         'creatures': creatures,
         'steps': steps}
@@ -237,8 +240,20 @@ def run_failure(base, run, model: dict, prefix: str):
         wrong = next((label for label in model['auras'][arm] if run.values[label] != wanted), None)
         if wrong is not None:
             return replace(base, status='unmeasured', explanation=f'{prefix}not judged: {wrong} read '
-                                                                  f'{run.values[wrong]:g}, not {wanted}')
+                                                                  f'{run.values[wrong]:g}, not {wanted}'
+                                                                  f'{refused_casts(run)}')
     return None
+
+
+def refused_casts(run) -> str:
+    from compare import cast_result_name, failure_reasons
+    refusals = []
+    for spell in sorted(run.cast_failures):
+        reasons = failure_reasons(run, spell)
+        if reasons:
+            names = ', '.join(sorted({cast_result_name(reason) for reason in reasons}))
+            refusals.append(f'{len(reasons)} casts of {spell} refused, {names}')
+    return f'; invalid setup: {"; ".join(refusals)}' if refusals else ''
 
 
 def arm_counts(runs: list, model: dict, arm: str) -> tuple[float, float]:
