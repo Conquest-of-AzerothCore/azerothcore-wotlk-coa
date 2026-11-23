@@ -16379,6 +16379,75 @@
       "expected": 97.5,
       "tolerance": 0.5,
       "observe_source": "Pact Hunter 704612 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 49 + 1 = 50 ($s1%), SpellClassMask word 2 256 = SpellFamilyFlags[2] 256 of every Pact (800031, 803488, 803718, 804764, 803343, 803885). Vengeful Pact 803885 Description: 'Emanate an aura that increases nearby allies' Shadow Resistance by ${$m1+0}', Effect[0] aura 143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE, MiscValue 32 (Shadow), BasePoints 64 + 1 = 65, area aura on the party (SPELL_EFFECT_APPLY_AREA_AURA_RAID, radius index 23). Behaviour read: a real Vengeful Pact cast by the caster; the Shadow resistance of the grouped ally (resistance, school 5) is read before the cast (no Pact, 0) and after it. The control entry (pact_resist) has no Pact Hunter; the treatment entry (pact_resist_hunter) has Pact Hunter learned in both phases: 65 + 50% = 97.5, read as the integer 97 (the engine's integer percent modifier, tolerance 0.5 judges to the rounding, G-19). Demonfire Pact's +3 crit chance reads +4 with Pact Hunter (3 x 1.5 = 4.5 truncated): an integer-rounding case outside this claim's band, so it is not used. Reference search 2026-11-23: coa-history spells 704612 and 803885: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. "
+    },
+    {
+      "spell": 802058,
+      "name": "Reckoning (a Fel Fireball hit raises the damage dealt by 4%)",
+      "kind": "hit_ratio",
+      "variant": "stack_damage",
+      "label_suffix": "stack_damage",
+      "quote": "damage dealt by your Fel Fireball increases your damage dealt by $524632s2%",
+      "expected": 1.04,
+      "observe_spell": 802060,
+      "learn": [
+        802060,
+        801312,
+        802058
+      ],
+      "control": {
+        "auras": [
+          [
+            524632,
+            0
+          ],
+          [
+            800058,
+            4
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 802058,
+            "target": "caster"
+          }
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            524632,
+            0
+          ],
+          [
+            800058,
+            4
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 802058,
+            "target": "caster"
+          },
+          {
+            "spell": 801312,
+            "target": "dummy"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "observe_source": "Reckoning 802058 Description: 'For the duration, your falling speed is slowed and damage dealt by your Fel Fireball increases your damage dealt by $524632s2% for $524632d, ...'. Effect[1] amount of 524632 = 4 ($s2, read by the sibling stack_amount value entry). Behaviour read (hit_ratio): each trial first cleans 524632, casts Reckoning 802058 on the caster and, in the treatment arm only, a real Fel Fireball 801312 at the dummy (its hit gives one stack of 524632), then casts the observed Sargeron Smite 802060 at the dummy; the mean damage of the non-critical Smite hits must rise by 4% (one stack) over the control arm, which makes the same casts without the Fel Fireball (control band 2 points, G-19). Felfury 800058 x4 (Smite consumes 2), spell penetration 823764 and spell power +20000 (so the damage die is negligible) are named precondition fixtures in both arms. Reference search 2026-11-23: coa-history spells 802058 and 524632: 78 and 588 aura events in 6 logs, no damage figures; nothing found beyond the tooltip and Spell.dbc. "
     }
   ],
   "player_observations": [],
