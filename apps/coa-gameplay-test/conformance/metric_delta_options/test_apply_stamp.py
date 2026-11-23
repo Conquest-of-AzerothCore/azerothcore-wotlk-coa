@@ -1,3 +1,4 @@
+from functools import cache
 import unittest
 
 from behaviours import behaviour_scenario
@@ -27,6 +28,13 @@ def class_entry(suffix: str) -> dict:
             'variant': suffix, 'label_suffix': suffix, 'game_time': {'after': after},
             'caster_avoidance': {'dodge': 0, 'parry': 0},
             'apply_stamp': {'aura': IMMUNITY, 'window': window, 'source': 'test duration 4000 ms'}}
+
+
+@cache
+def stamped(suffix: str, option: bool):
+    _, [expectation] = behaviour_scenario(load_class_file(27),
+                                          {**class_entry(suffix), **({} if option else {'apply_stamp': None})})
+    return expectation
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
@@ -65,7 +73,7 @@ class ApplyStampTests(unittest.TestCase):
 
     def judged(self, suffix='immunity_gone', aura=0.0, wait=4040, offset=90.0, count=4, cast_count=4, drop=None,
                option=True):
-        _, [expectation] = self.built(suffix, **({} if option else {'apply_stamp': None}))
+        expectation = stamped(suffix, option)
         model = expectation.model
         found = {model['before_label']: 0.0, model['after_label']: aura,
                  model['game_time']['cast_label']: 10000.0, model['game_time']['after_label']: 10000.0 + wait}
