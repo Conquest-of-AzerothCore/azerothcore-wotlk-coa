@@ -15753,6 +15753,268 @@
         "spell": 800058,
         "stacks": 6
       }
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "quote": "Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "learn": [
+        804216
+      ],
+      "setup_casts": [
+        804216
+      ],
+      "setup_wait_ms": 500,
+      "required_aura_stacks": {
+        "spell": 800058,
+        "stacks": 6
+      },
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 20500,
+      "name": "Bane of Chaos (Inner Demon: damage per Chaos hit at the reference spell power)",
+      "variant": "inner_damage",
+      "label_suffix": "inner_damage",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 802676,
+        "target": "dummy"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_count",
+        "fields": {
+          "spell": 802676,
+          "target": "dummy"
+        }
+      },
+      "before_expected": 599.6,
+      "expected": 599.6,
+      "tolerance": 30,
+      "wait_ms": 6500,
+      "observe_source": "Bane of Chaos 706420 Description (server DBC set /srv/coa/server-data/dbc): 'Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.'. $802676m1 = Chaos 802676 Effect[0] BasePoints 550 + 1 = 551 (DieSides 3, so 551 to 553); $<scalingbp> is SpellDescriptionVariables id 182 on 802676 and 706420: 0.0267291844060354 + 0.0048541098014737 x $PL + 0.0001859597762293 x $PL^2 = 0.98743 at the level-60 reference character; $t2 = EffectAmplitude[1] 6000 ms. Inner Demon 804216 Effect[1] aura 79 BasePoints 9 + 1 = +10% damage done ($s2 of its own tooltip), so a hit read on the Inner Demon caster is the tooltip value times 1.10. Inner Demon is made by one real setup cast with 6 Felfury as precondition fixture (800058 required_aura_stacks, it lasts 6 x 5000 ms), aura 64481 (no critical hits) and 823764 (spell penetration) are named precondition fixtures. Reference search 2026-11-23: coa-history spells 706420 and 802676: Bane of Chaos 1563 periodic events and Chaos 3327 hits in 12 logs, but Chaos is cast by several other spells, so the log hit gaps (0.5 s to 6.5 s, mode 2 s) decide nothing; nothing else found beyond the tooltip and Spell.dbc. Expected per hit: 551 x 0.98743 = 544.1 (m1 551) to 553 x 0.98743 = 546.0 (m1 553), x 1.10 = 598.5 to 600.6, plus $SP*0.48 with spell power 0 on the reference character. The reading is total over count of 802676 on the dummy, 6.5 s after the cast, in both phases (Inner Demon on the caster in both); tolerance 30 is the G-19 5% band. The no-Inner-Demon control is the sibling inner_none."
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "quote": "Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "learn": [
+        804216
+      ],
+      "setup_casts": [
+        804216
+      ],
+      "setup_wait_ms": 500,
+      "required_aura_stacks": {
+        "spell": 800058,
+        "stacks": 6
+      },
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 20500,
+      "name": "Bane of Chaos (Inner Demon: damage per Chaos hit at +10000 spell power)",
+      "variant": "inner_damage_sp",
+      "label_suffix": "inner_damage_sp",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 802676,
+        "target": "dummy"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_count",
+        "fields": {
+          "spell": 802676,
+          "target": "dummy"
+        }
+      },
+      "before_expected": 5879.6,
+      "expected": 5879.6,
+      "tolerance": 294,
+      "wait_ms": 6500,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "observe_source": "Bane of Chaos 706420 Description (server DBC set /srv/coa/server-data/dbc): 'Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.'. $802676m1 = Chaos 802676 Effect[0] BasePoints 550 + 1 = 551 (DieSides 3, so 551 to 553); $<scalingbp> is SpellDescriptionVariables id 182 on 802676 and 706420: 0.0267291844060354 + 0.0048541098014737 x $PL + 0.0001859597762293 x $PL^2 = 0.98743 at the level-60 reference character; $t2 = EffectAmplitude[1] 6000 ms. Inner Demon 804216 Effect[1] aura 79 BasePoints 9 + 1 = +10% damage done ($s2 of its own tooltip), so a hit read on the Inner Demon caster is the tooltip value times 1.10. Inner Demon is made by one real setup cast with 6 Felfury as precondition fixture (800058 required_aura_stacks, it lasts 6 x 5000 ms), aura 64481 (no critical hits) and 823764 (spell penetration) are named precondition fixtures. Reference search 2026-11-23: coa-history spells 706420 and 802676: Bane of Chaos 1563 periodic events and Chaos 3327 hits in 12 logs, but Chaos is cast by several other spells, so the log hit gaps (0.5 s to 6.5 s, mode 2 s) decide nothing; nothing else found beyond the tooltip and Spell.dbc. Contrast arm of the $SP*0.48 term: spell power +10000 on the caster in both phases: (551 x 0.98743 + 0.48 x 10000) x 1.10 = 5879.6, tolerance 294 (5%) against 599.6 at spell power 0."
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "quote": "Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "learn": [
+        804216
+      ],
+      "setup_casts": [
+        804216
+      ],
+      "setup_wait_ms": 500,
+      "required_aura_stacks": {
+        "spell": 800058,
+        "stacks": 6
+      },
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 20500,
+      "name": "Bane of Chaos (Inner Demon: one Chaos hit by 6 s, not before 6 s: count at 5.4 s)",
+      "variant": "inner_interval_a",
+      "label_suffix": "inner_interval_a",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 802676,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 5400,
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          5350,
+          5500
+        ]
+      },
+      "observe_source": "Bane of Chaos 706420 Description (server DBC set /srv/coa/server-data/dbc): 'Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.'. $802676m1 = Chaos 802676 Effect[0] BasePoints 550 + 1 = 551 (DieSides 3, so 551 to 553); $<scalingbp> is SpellDescriptionVariables id 182 on 802676 and 706420: 0.0267291844060354 + 0.0048541098014737 x $PL + 0.0001859597762293 x $PL^2 = 0.98743 at the level-60 reference character; $t2 = EffectAmplitude[1] 6000 ms. Inner Demon 804216 Effect[1] aura 79 BasePoints 9 + 1 = +10% damage done ($s2 of its own tooltip), so a hit read on the Inner Demon caster is the tooltip value times 1.10. Inner Demon is made by one real setup cast with 6 Felfury as precondition fixture (800058 required_aura_stacks, it lasts 6 x 5000 ms), aura 64481 (no critical hits) and 823764 (spell penetration) are named precondition fixtures. Reference search 2026-11-23: coa-history spells 706420 and 802676: Bane of Chaos 1563 periodic events and Chaos 3327 hits in 12 logs, but Chaos is cast by several other spells, so the log hit gaps (0.5 s to 6.5 s, mode 2 s) decide nothing; nothing else found beyond the tooltip and Spell.dbc. Interval claim, read 1 of 2 (10% short): with a Chaos hit every 6000 ms the first hit lands at 6000 ms, so the count 5400 ms after the cast is 0; an interval 10% short (5400 ms or less) would already show a hit. The before read has no cast (0)."
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "quote": "Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "learn": [
+        804216
+      ],
+      "setup_casts": [
+        804216
+      ],
+      "setup_wait_ms": 500,
+      "required_aura_stacks": {
+        "spell": 800058,
+        "stacks": 6
+      },
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 20500,
+      "name": "Bane of Chaos (Inner Demon: a Chaos hit by 6.6 s: count at 6.6 s)",
+      "variant": "inner_interval_b",
+      "label_suffix": "inner_interval_b",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 802676,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 6600,
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          6550,
+          6700
+        ]
+      },
+      "observe_source": "Bane of Chaos 706420 Description (server DBC set /srv/coa/server-data/dbc): 'Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.'. $802676m1 = Chaos 802676 Effect[0] BasePoints 550 + 1 = 551 (DieSides 3, so 551 to 553); $<scalingbp> is SpellDescriptionVariables id 182 on 802676 and 706420: 0.0267291844060354 + 0.0048541098014737 x $PL + 0.0001859597762293 x $PL^2 = 0.98743 at the level-60 reference character; $t2 = EffectAmplitude[1] 6000 ms. Inner Demon 804216 Effect[1] aura 79 BasePoints 9 + 1 = +10% damage done ($s2 of its own tooltip), so a hit read on the Inner Demon caster is the tooltip value times 1.10. Inner Demon is made by one real setup cast with 6 Felfury as precondition fixture (800058 required_aura_stacks, it lasts 6 x 5000 ms), aura 64481 (no critical hits) and 823764 (spell penetration) are named precondition fixtures. Reference search 2026-11-23: coa-history spells 706420 and 802676: Bane of Chaos 1563 periodic events and Chaos 3327 hits in 12 logs, but Chaos is cast by several other spells, so the log hit gaps (0.5 s to 6.5 s, mode 2 s) decide nothing; nothing else found beyond the tooltip and Spell.dbc. Interval claim, read 2 of 2 (10% long): with a hit every 6000 ms exactly one hit has landed 6600 ms after the cast (6000 ms; the next is at 12000 ms); an interval 10% long (6600 ms or more) would have none, one 10% short (5400 ms) would have one too, which read 1 excludes."
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "quote": "Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 20500,
+      "name": "Bane of Chaos (control: without Inner Demon no Chaos hit lands)",
+      "variant": "inner_none",
+      "label_suffix": "inner_none",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 802676,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 12600,
+      "cast_in_before": false,
+      "observe_source": "Control arm: the same Bane of Chaos cast and wait of 12.6 s without Inner Demon (no setup cast): no Chaos 802676 hit lands, because the script casts Chaos only while Inner Demon is on the caster (AscensionFelswornAuras.cpp, Inner(player)). Reference search 2026-11-23: as the sibling entries."
     }
   ],
   "player_observations": [],
