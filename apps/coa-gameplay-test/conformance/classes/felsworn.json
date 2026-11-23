@@ -3821,6 +3821,203 @@
       "observe_source": "Ruin 501298 Effect[0] SCHOOL_DAMAGE, BasePoints 2162 + 1 = 2163 ($m1 = 2163, the tooltip's value at 0 spell power), EffectDieSides 155 (a roll adding up to 154), coefficient 1.32 of spell power for the Shadowflame school ($sps*1.32; Spell power 10000 here, no higher fire power). One real Ruin cast at the dummy (no partial resists, 823764; Felfury x6 as precondition fixtures): the non-critical hit lies in [15363, 15517] at 10000 spell power: 0 before (the control phase casts nothing). Reference search 2026-11-23: coa-history spell 501298: 2522 SPELL_CAST_START events by players in 6 logs (the cast exists in play, the older logs' damage figures differ with gear and attack power, so no figure decides); the bindmysoul snapshot has no value beyond the tooltip."
     },
     {
+      "spell": 501298,
+      "name": "Ruin (leaves the absorb shield untouched)",
+      "kind": "metric_delta",
+      "variant": "pierce_shield",
+      "label_suffix": "pierce_shield",
+      "quote": "piercing all absorption effects",
+      "trigger_spell": 501298,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 706583,
+        "effect": 0
+      },
+      "wait_ms": 3200,
+      "expire_ms": 500,
+      "tolerance": 0,
+      "void_on_cast_failure": true,
+      "measure_actor": "dummy",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          706583,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          706583,
+          0,
+          5000
+        ]
+      ],
+      "before_expected": 5000,
+      "expected": 5000,
+      "observe_source": "Ruin 501298 Effect[0] SCHOOL_DAMAGE (Shadowflame, school mask 36), the tooltip says it pierces all absorption effects. The dummy carries Staffguard 706583 (Effect[0] aura 69 SPELL_AURA_SCHOOL_ABSORB, MiscValue 127 = every school) set by harness set_aura as a precondition fixture, its amount fixed at 5000 through ChangeAmount (phase_aura_amounts: far above one Ruin hit, 2163 to 2317 at 0 spell power), and Blessed Resilience 33143 (aura 197, -1001 attacker crit chance) so no cast crits; one real Ruin cast (CastingTimeIndex 19 = 2500 ms, then the missile). Shield amount read on the dummy before the cast (control phase, no cast: 5000) and 3200 ms after it: still 5000, the hit consumed none of it. The contrast arm pierce_shield_control casts a non-piercing Shadowflame spell at the same shield and reads it consumed. Reference search 2026-11-23: coa-history spell 501298: SPELL_CAST_START 2522 events by players in 6 logs, SPELL_DAMAGE 2422 events (1832 crits), DAMAGE_SHIELD_MISSED 7; no log read shows an absorbed amount of Ruin, so no figure decides; the bindmysoul snapshot has no value beyond the tooltip; nothing else found."
+    },
+    {
+      "spell": 501298,
+      "name": "Ruin (the whole hit reaches the shielded dummy)",
+      "kind": "metric_delta",
+      "variant": "pierce_damage",
+      "label_suffix": "pierce_damage",
+      "quote": "piercing all absorption effects",
+      "trigger_spell": 501298,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 501298,
+        "target": "dummy",
+        "critical": false
+      },
+      "wait_ms": 3200,
+      "expire_ms": 500,
+      "tolerance": 0,
+      "void_on_cast_failure": true,
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          706583,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          706583,
+          0,
+          5000
+        ]
+      ],
+      "before_expected": 0,
+      "expected": 2240.0,
+      "after_at_least": 2163,
+      "after_at_most": 2317,
+      "observe_source": "Ruin 501298 Effect[0] SCHOOL_DAMAGE (Shadowflame, school mask 36), the tooltip says it pierces all absorption effects. The dummy carries Staffguard 706583 (Effect[0] aura 69 SPELL_AURA_SCHOOL_ABSORB, MiscValue 127 = every school) set by harness set_aura as a precondition fixture, its amount fixed at 5000 through ChangeAmount (phase_aura_amounts: far above one Ruin hit, 2163 to 2317 at 0 spell power), and Blessed Resilience 33143 (aura 197, -1001 attacker crit chance) so no cast crits; one real Ruin cast (CastingTimeIndex 19 = 2500 ms, then the missile). Ruin's own spell_damage_total on the dummy (the damage that reached health) is read 3200 ms after the cast: the whole hit, 2163 to 2317 ($m1 = BasePoints 2162 + 1 at 0 spell power, EffectDieSides 155), with the shield up; 0 in the control phase that casts nothing. Reference search 2026-11-23: coa-history spell 501298: SPELL_CAST_START 2522 events by players in 6 logs, SPELL_DAMAGE 2422 events (1832 crits), DAMAGE_SHIELD_MISSED 7; no log read shows an absorbed amount of Ruin, so no figure decides; the bindmysoul snapshot has no value beyond the tooltip; nothing else found."
+    },
+    {
+      "spell": 501298,
+      "name": "Ruin (control: Felwrath, a non-piercing Shadowflame hit, depletes the same shield)",
+      "kind": "metric_delta",
+      "variant": "pierce_shield_control",
+      "label_suffix": "pierce_shield_control",
+      "quote": "piercing all absorption effects",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 706583,
+        "effect": 0
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "tolerance": 0,
+      "void_on_cast_failure": true,
+      "measure_actor": "dummy",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          706583,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          706583,
+          0,
+          5000
+        ]
+      ],
+      "before_expected": 5000,
+      "expected": 3700,
+      "after_at_least": 2600,
+      "after_at_most": 4800,
+      "observe_source": "Control arm of pierce_shield on the same shield with the same fixtures: one real Felwrath 520693 cast (Effect[0] SCHOOL_DAMAGE, Shadowflame school mask 36, no piercing flag in the DBC; consumes 2 Felfury, CastingTimeIndex 5 = 2000 ms) at the dummy depletes Staffguard: the amount falls from 5000 by the hit, which is at least 200 (a sixth of the 1231 floor of BasePoints 1230 + 1) and at most 2400 (judged inside 2600 to 4800). It shows the fixture shield absorbs a Shadowflame hit of this class, so an untouched shield after Ruin means Ruin pierced it. Reference search 2026-11-23: coa-history spell 520693: SPELL_CAST_START 365 events by players in 6 logs, SPELL_DAMAGE 1993 events; nothing else found."
+    },
+    {
       "spell": 520853,
       "name": "Fel Torpedo (generates 1 Felfury)",
       "kind": "metric_delta",
@@ -3885,6 +4082,30 @@
           "caster"
         ]
       ]
+    },
+    {
+      "spell": 500610,
+      "name": "Fel Torpedo (its hit carries the flat 225 threat)",
+      "kind": "threat_slope",
+      "variant": "threat",
+      "label_suffix": "threat",
+      "quote": "Generates a large amount of threat.",
+      "hit_spell": 500761,
+      "expected_slope": 1.0,
+      "flat": 34,
+      "observe_source": "Fel Torpedo damage 500761 (the claim sits in the Description of the Fel Torpedo ability 500610, so the entry is on 500610 and its labels are cited by ledger row 65 of 520853; Description: 'Generates a large amount of threat.' sits in the Fel Torpedo 500610 tooltip) Effect[0] SCHOOL_DAMAGE, Effect[1] 63 SPELL_EFFECT_THREAT BasePoints 224 + 1 = 225 flat threat per hit (the DBC's own encoding of the sentence), SpellLevel 34. threat_slope casts the hit once at a fresh dummy and reads the dummy's health lost and the caster's threat on it: threat = health lost x slope + the SPELL_EFFECT_THREAT points (225, read from the DBC by the judge) + the initial threat of the SpellLevel (34, Spell::HandleThreatSpells adds m_spellInfo->SpellLevel with no spell_threat row and no CU_NO_INITIAL_THREAT, Spell.cpp:5731-5737), so the slope reads 1 and a missing 225 reads below 1. Reference search 2026-11-23: coa-history spell 500761 and 500610: 0 events in 186 logs under those ids (nothing found for the Fel Torpedo hit); the bindmysoul snapshot has no value beyond the tooltip; nothing else found. Interpretation: the tooltip gives no figure, the DBC gives the flat 225, so 'large amount' is judged as that data (no owner figure exists for this wording, unlike 'High Threat')."
+    },
+    {
+      "spell": 500610,
+      "name": "Fel Torpedo (control: a hit with no threat effect gives only its initial threat)",
+      "kind": "threat_slope",
+      "variant": "threat_control",
+      "label_suffix": "threat_control",
+      "quote": "Generates a large amount of threat.",
+      "hit_spell": 803715,
+      "expected_slope": 1.0,
+      "flat": 11,
+      "observe_source": "Control of threat: Carve's strike 803715 has no SPELL_EFFECT_THREAT and SpellLevel 11 (Spell.dbc), so its threat is its damage plus 11 and (threat - 11) / damage = 1 with no flat 225: it shows the judge's flat part is the threat effect and the 225 of the Fel Torpedo hit is not a property of every hit. Reference search 2026-11-23: coa-history spell 500761 and 500610: 0 events in 186 logs under those ids (nothing found for the Fel Torpedo hit); the bindmysoul snapshot has no value beyond the tooltip; nothing else found. Interpretation: the tooltip gives no figure, the DBC gives the flat 225, so 'large amount' is judged as that data (no owner figure exists for this wording, unlike 'High Threat')."
     },
     {
       "spell": 524950,
@@ -12935,6 +13156,442 @@
         "residual": 0.0001
       },
       "expected_source": "Mentor D-61 diagnostic (report the measured gain, change nothing): tooltip of 805240 reads ${$m1+0+$AP*0.35}; m1 = 219 + 1 + 4.0 x (60 - 29) = 344 and attack power 312 give 344 + int(0.35 x 312 = 109.2) = 453 in the control arm. With the scar the victim carries int32(0.15 x 130) = 19 attack power against it: 344 + int(0.35 x 331 = 115.85) = 459, expected mean ratio 1.01325 (+6 per hit); 1.0 if the class scaling hook reads attack power without the victim (AscensionFelswornContracts.cpp:342). Same fixtures as the 805240 damage entry (crit removed by 984954, partial resists by 823764, dummy below 35% health: 30%). Azzinoth's Assault 801904 is cast at the dummy before every Gaze in the treatment arm with 570158 learned. Reference search 2026-11-23: see the 805240 damage entry (coa-history: 13 casts, no decisive figure); nothing found on the scar."
+    },
+    {
+      "spell": 520693,
+      "name": "Felwrath (consumes 2 Felfury)",
+      "kind": "metric_delta",
+      "variant": "consumes",
+      "label_suffix": "consumes",
+      "quote": "Consumes 2 Felfury",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "before_expected": 6,
+      "expected": 4,
+      "tolerance": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Felwrath 520693 resource rule {class 14, 520688-520693, resource 800058, 2, Fixed} (AscensionCustomResourceData.h:526). The Felfury 800058 stacks on the caster are read 3000 ms after a real Felwrath cast (CastingTimeIndex 5) from 6 set as a precondition fixture by harness set_aura: 4, and 6 in the control phase that casts nothing; a refused cast voids the trial. Reference search 2026-11-23: coa-history spell 520693: SPELL_CAST_START 365 events by players in 6 logs, SPELL_DAMAGE 1993 events (the cast exists in play; the damage figures differ with gear and attack power, so no figure decides); the bindmysoul snapshot has no value beyond the tooltip; nothing else found."
+    },
+    {
+      "spell": 520693,
+      "name": "Felwrath (Inner Demon: five enemies struck apply 520832)",
+      "kind": "metric_delta",
+      "variant": "inner_five",
+      "label_suffix": "inner_five",
+      "quote": "Inner Demon: Striking at least 5 enemies with this spell causes it to deal an additional ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d,",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 520832
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ],
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Felwrath 520693 (rank chain 520236-520693, Inner Demon rank 520832: Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, StackAmount 3, DurationIndex 32). Tooltip: 'Inner Demon: Striking at least 5 enemies with this spell causes it to deal an additional ... Shadowflame Damage over $520832d, stacking $520832u times.' Felwrath's area is Effect[0] TargetA 53 TARGET_DEST_TARGET_ENEMY and TargetB 16 TARGET_UNIT_DEST_AREA_ENEMY with radius index 14 = 8 yd (SpellRadius.dbc), so dummies standing 3 to 7 yd from the caster are within 4 yd of the primary at 3 yd and are all struck. Inner Demon 804216 is on the caster as a precondition fixture set by harness set_aura (the clause's own condition; its cast needs Felfury the arm also needs for Felwrath), 6 Felfury and Demonic 803468 cover the cast, 823764 keeps resists off. The 520832 stacks are read on the primary dummy 3500 ms after one real Felwrath cast (CastingTimeIndex 5 = 2000 ms): five enemies are struck (the primary and four more): the primary carries 520832 (1 stack), and 0 in the control phase that casts nothing. The contrast arm inner_four strikes four. Reference search 2026-11-23: coa-history spell 520832: SPELL_AURA_APPLIED 1558 events, SPELL_PERIODIC_DAMAGE 11712 events in 10 logs (the Inner Demon damage exists in play; the logs do not tell how many enemies each cast struck, so no figure decides); bindmysoul snapshot has no value beyond the tooltip; nothing else found."
+    },
+    {
+      "spell": 520693,
+      "name": "Felwrath (control: four enemies struck do not apply 520832)",
+      "kind": "metric_delta",
+      "variant": "inner_four",
+      "label_suffix": "inner_four",
+      "quote": "Inner Demon: Striking at least 5 enemies with this spell causes it to deal an additional ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d,",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 520832
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0
+      ],
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Felwrath 520693 (rank chain 520236-520693, Inner Demon rank 520832: Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, StackAmount 3, DurationIndex 32). Tooltip: 'Inner Demon: Striking at least 5 enemies with this spell causes it to deal an additional ... Shadowflame Damage over $520832d, stacking $520832u times.' Felwrath's area is Effect[0] TargetA 53 TARGET_DEST_TARGET_ENEMY and TargetB 16 TARGET_UNIT_DEST_AREA_ENEMY with radius index 14 = 8 yd (SpellRadius.dbc), so dummies standing 3 to 7 yd from the caster are within 4 yd of the primary at 3 yd and are all struck. Inner Demon 804216 is on the caster as a precondition fixture set by harness set_aura (the clause's own condition; its cast needs Felfury the arm also needs for Felwrath), 6 Felfury and Demonic 803468 cover the cast, 823764 keeps resists off. The 520832 stacks are read on the primary dummy 3500 ms after one real Felwrath cast (CastingTimeIndex 5 = 2000 ms): four enemies are struck (the primary and three more, one fewer than the 5 the tooltip names): the primary carries no 520832 (0), as in the control phase that casts nothing. Reference search 2026-11-23: coa-history spell 520832: SPELL_AURA_APPLIED 1558 events, SPELL_PERIODIC_DAMAGE 11712 events in 10 logs (the Inner Demon damage exists in play; the logs do not tell how many enemies each cast struck, so no figure decides); bindmysoul snapshot has no value beyond the tooltip; nothing else found."
+    },
+    {
+      "spell": 800206,
+      "name": "Carve (consumes 2 Felfury)",
+      "kind": "metric_delta",
+      "variant": "consumes",
+      "label_suffix": "consumes",
+      "quote": "Consumes 2 Felfury",
+      "trigger_spell": 800206,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "before_expected": 6,
+      "expected": 4,
+      "tolerance": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Carve 800206 resource rule {class 14, 800206-800206, resource 800058, 2, Fixed} (AscensionCustomResourceData.h:524). The Felfury 800058 stacks on the caster are read 3000 ms after a real Carve cast (a 2500 ms channel, DurationIndex 66) from 6 set as a precondition fixture by harness set_aura: 4, and 6 in the control phase that casts nothing; a refused cast voids the trial. Reference search 2026-11-23: coa-history spell 800206: SPELL_CAST_SUCCESS 200 events by players in 5 logs (the cast exists in play, no figure for the cost); the bindmysoul snapshot has no value beyond the tooltip; nothing else found."
+    },
+    {
+      "spell": 800203,
+      "name": "Felbreak (interrupts the dummy's channel while moving)",
+      "kind": "metric_delta",
+      "variant": "moving_cast",
+      "label_suffix": "moving_cast",
+      "quote": "Usable while moving.",
+      "trigger_spell": 800203,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "target_casts_before": [
+        12051
+      ],
+      "moving_before_trigger": {
+        "flag": "forward"
+      },
+      "observe_source": "Felbreak 800203 (server DBC set) CastingTimeIndex 3 = 500 ms, InterruptFlags 2 (SPELL_INTERRUPT_FLAG_INTERRUPT only, no SPELL_INTERRUPT_FLAG_MOVEMENT 0x01), Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, RangeIndex 3. Spell::prepare (Spell.cpp:3645-3657) refuses a player cast with a cast time and the movement interrupt flag while the caster moves (SPELL_FAILED_MOVING 51); Spell::update cancels it when the caster moves during the cast. The dummy channels Evocation 12051 (an 8000 ms channel) on itself right before the trigger (target_casts_before). Control phase, no Felbreak: the channel is still running (1). After: one real Felbreak cast with the caster holding the forward movement flag from right before the cast until the reading 1500 ms later (moving_before_trigger): the channel was interrupted (0), so the cast was neither refused (51) nor cancelled (40) and landed. The contrast arm moving_cast_control casts a movement-interruptible spell in the same state and reads it refused. Reference search 2026-11-23: coa-history spell 800203: SPELL_CAST_START 8 events and SPELL_INTERRUPT 6 events by players in 1 log (the cast and its interrupt exist in play; the logs do not tell whether the caster moved, so no figure decides); the bindmysoul snapshot has no value beyond the tooltip; nothing else found."
+    },
+    {
+      "spell": 800203,
+      "name": "Felbreak (control: Ruin, with the movement interrupt flag, is refused while moving)",
+      "kind": "metric_delta",
+      "variant": "moving_cast_control",
+      "label_suffix": "moving_cast_control",
+      "quote": "Usable while moving.",
+      "trigger_spell": 501298,
+      "target": "dummy",
+      "cast_power": 100,
+      "measure_actor": "caster",
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 501298
+      },
+      "before_expected": 51,
+      "expected": 51,
+      "tolerance": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "moving_before_trigger": {
+        "flag": "forward"
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Control arm of moving_cast with the same movement state (moving_before_trigger forward, the Boltslinger 92091 shape): Ruin 501298 has CastingTimeIndex 19 = 2500 ms and InterruptFlags 15 (bit 0x01, SPELL_INTERRUPT_FLAG_MOVEMENT, set), so Spell::prepare refuses its cast while the caster moves with SPELL_FAILED_MOVING (51) (Spell.cpp:3645-3657), before and after alike: it proves the harness movement flag does block a cast that is not usable while moving, so the 0 of Felbreak is a property of Felbreak. Reference search 2026-11-23: coa-history spell 800203: SPELL_CAST_START 8 events and SPELL_INTERRUPT 6 events by players in 1 log (the cast and its interrupt exist in play; the logs do not tell whether the caster moved, so no figure decides); the bindmysoul snapshot has no value beyond the tooltip; nothing else found."
+    },
+    {
+      "spell": 707444,
+      "name": "Hellfire Carver (the next Fel Fireball is instant cast)",
+      "kind": "metric_delta",
+      "variant": "instant",
+      "label_suffix": "instant",
+      "quote": "Casting Carve now makes your next Fel Fireball instant cast",
+      "trigger_spell": 800206,
+      "gate_spell": 707444,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 801312
+      },
+      "before_expected": 1500,
+      "expected": 0,
+      "expected_gain": -1500,
+      "tolerance": 1,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "use_time_contrast": [
+        "instant",
+        "consumed"
+      ],
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Hellfire Carver 707444 Description (server DBC set): 'Casting Carve now makes your next Fel Fireball instant cast and causes it to strike 1 additional enemy near the primary target based on how long you channeled, up to a maximum of 10 enemies, dealing less damage with each target struck.' Carve 800206 is a 2500 ms channel (DurationIndex 66) and the server's Carve ends at the channel's end; Fel Fireball 801312 has CastingTimeIndex 16 = 1500 ms (SpellCastTimes.dbc). The cast time of Fel Fireball 801312 is read as the caster's own use-time value 3000 ms after one real Carve cast (the channel ends at 2500 ms), before (control: Hellfire Carver not learned, 1500 ms) and after the learn (0 ms: instant). The consumed arm reads it back to 1500 after the Fel Fireball is cast. Reference search 2026-11-23: coa-history spell 707444 and 801312: 0 events in 186 logs under those ids; spell 807424 (the Carve aura): SPELL_AURA_APPLIED 171 events and SPELL_AURA_APPLIED_DOSE 1516 events in 4 logs, about 9 doses per application (the buff exists in play and stacks with the channel; no cast time or target figure decides); bindmysoul snapshot has no value beyond the tooltip; nothing else found."
+    },
+    {
+      "spell": 707444,
+      "name": "Hellfire Carver (the Fel Fireball consumes the instant cast)",
+      "kind": "metric_delta",
+      "variant": "consumed",
+      "label_suffix": "consumed",
+      "quote": "Casting Carve now makes your next Fel Fireball instant cast",
+      "trigger_spell": 801312,
+      "gate_spell": 707444,
+      "target": "dummy",
+      "cast_power": 100,
+      "setup_casts": [
+        800206
+      ],
+      "setup_wait_ms": 3000,
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 801312
+      },
+      "before_expected": 1500,
+      "expected": 1500,
+      "expected_gain": 0,
+      "tolerance": 1,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "use_time_contrast": [
+        "instant",
+        "consumed"
+      ],
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Hellfire Carver 707444 Description (server DBC set): 'Casting Carve now makes your next Fel Fireball instant cast and causes it to strike 1 additional enemy near the primary target based on how long you channeled, up to a maximum of 10 enemies, dealing less damage with each target struck.' Carve 800206 is a 2500 ms channel (DurationIndex 66) and the server's Carve ends at the channel's end; Fel Fireball 801312 has CastingTimeIndex 16 = 1500 ms (SpellCastTimes.dbc). A Carve is cast first (a setup cast, both phases) and its channel ends after 3000 ms, then Fel Fireball 801312 is cast; the Fel Fireball cast time read after that cast is 1500 ms again in both phases (the instant cast is consumed, gain 0). Reference search 2026-11-23: coa-history spell 707444 and 801312: 0 events in 186 logs under those ids; spell 807424 (the Carve aura): SPELL_AURA_APPLIED 171 events and SPELL_AURA_APPLIED_DOSE 1516 events in 4 logs, about 9 doses per application (the buff exists in play and stacks with the channel; no cast time or target figure decides); bindmysoul snapshot has no value beyond the tooltip; nothing else found."
+    },
+    {
+      "spell": 707444,
+      "name": "Hellfire Carver (a full Carve channel: Fel Fireball strikes 10 additional enemies at most)",
+      "kind": "fixed_count",
+      "variant": "cap",
+      "label_suffix": "cap",
+      "quote": "up to a maximum of 10 enemies",
+      "expected": 10,
+      "radius": 10,
+      "radius_reason": "Fel Fireball 801312 Effect[0] target 6 (TARGET_UNIT_TARGET_ENEMY) with no ChainTarget beyond 1 in the DBC; the additional enemies come from the 10 yd search around the target in AscensionFelswornAbilities.cpp:140-150, so the candidate dummies stand within 2.5 yd of the primary",
+      "cast_spell": 801312,
+      "target_rank": 801312,
+      "repeats": 1,
+      "learn": [
+        707444
+      ],
+      "setup_casts": [
+        [
+          800206,
+          "caster"
+        ]
+      ],
+      "auras": [
+        [
+          800058,
+          6
+        ],
+        [
+          803468,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "headroom": 1,
+      "far_dummy": false,
+      "cluster_yd": 2.5,
+      "primary_distance_reads": true,
+      "count_primary": false,
+      "observe_source": "Fel Fireball 801312 Effect[0] SCHOOL_DAMAGE, TargetA 6 TARGET_UNIT_TARGET_ENEMY, EffectChainTarget 1 (the primary only without the passive). One real Carve (a setup cast, learned before; the full 2500 ms channel is 10 250 ms ticks, the aura 807424 StackAmount 10 in the DBC) then one Fel Fireball at the primary dummy; the dummies are all within 2.5 yd of the primary and so within the 10 yd search of the extra targets (Fel Fireball extras are found around the target within 10 yd, AscensionFelswornAbilities.cpp:140-150). Twelve creatures in all (the harness cap): the primary and eleven candidates. Of the eleven candidates exactly ten are struck by the Fel Fireball cast after the full channel (the cap), so the extras exist, scale to the 10 the tooltip names and stop there. The contrast arm cap_control casts the same Carve and Fel Fireball without Hellfire Carver and strikes none. Reference search 2026-11-23: coa-history spell 707444 and 801312: 0 events in 186 logs under those ids; spell 807424 (the Carve aura): SPELL_AURA_APPLIED 171 events and SPELL_AURA_APPLIED_DOSE 1516 events in 4 logs, about 9 doses per application (the buff exists in play and stacks with the channel; no cast time or target figure decides); bindmysoul snapshot has no value beyond the tooltip; nothing else found."
+    },
+    {
+      "spell": 707444,
+      "name": "Hellfire Carver (control: without it a Fel Fireball strikes no additional enemy)",
+      "kind": "fixed_count",
+      "variant": "cap_control",
+      "label_suffix": "cap_control",
+      "quote": "up to a maximum of 10 enemies",
+      "expected": 0,
+      "radius": 10,
+      "radius_reason": "Control arm of cap on the same layout: Fel Fireball 801312 without Hellfire Carver strikes the primary only (EffectChainTarget 1), so none of the dummies within 2.5 yd of it is struck",
+      "cast_spell": 801312,
+      "target_rank": 801312,
+      "repeats": 1,
+      "learn": [],
+      "setup_casts": [
+        [
+          800206,
+          "caster"
+        ]
+      ],
+      "auras": [
+        [
+          800058,
+          6
+        ],
+        [
+          803468,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "headroom": 1,
+      "far_dummy": false,
+      "cluster_yd": 2.5,
+      "primary_distance_reads": true,
+      "count_primary": false,
+      "observe_source": "Fel Fireball 801312 Effect[0] SCHOOL_DAMAGE, TargetA 6 TARGET_UNIT_TARGET_ENEMY, EffectChainTarget 1 (the primary only without the passive). One real Carve (a setup cast, learned before; the full 2500 ms channel is 10 250 ms ticks, the aura 807424 StackAmount 10 in the DBC) then one Fel Fireball at the primary dummy; the dummies are all within 2.5 yd of the primary and so within the 10 yd search of the extra targets (Fel Fireball extras are found around the target within 10 yd, AscensionFelswornAbilities.cpp:140-150). Twelve creatures in all (the harness cap): the primary and eleven candidates. Without 707444 learned no additional enemy is struck. Reference search 2026-11-23: coa-history spell 707444 and 801312: 0 events in 186 logs under those ids; spell 807424 (the Carve aura): SPELL_AURA_APPLIED 171 events and SPELL_AURA_APPLIED_DOSE 1516 events in 4 logs, about 9 doses per application (the buff exists in play and stacks with the channel; no cast time or target figure decides); bindmysoul snapshot has no value beyond the tooltip; nothing else found."
     }
   ],
   "player_observations": [],
