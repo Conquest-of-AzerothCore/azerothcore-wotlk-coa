@@ -1646,7 +1646,8 @@
       {
         "claim": "Casting Dawnbreak now has a $h% chance to reset the cooldown of Gavels",
         "labels": [
-          "503690 behaviour_metric_delta rate_dawnbreak_pooled"
+          "503690 behaviour_metric_delta rate_dawnbreak_pooled",
+          "503690 behaviour_metric_delta rate_dawnbreak_unlearned"
         ]
       },
       {
@@ -1664,7 +1665,8 @@
       {
         "claim": "Dawnbreak grants the free-Gavel aura (rides the 40% chance, owner)",
         "labels": [
-          "503690 behaviour_metric_delta rate_dawnbreak_pooled"
+          "503690 behaviour_metric_delta rate_dawnbreak_pooled",
+          "503690 behaviour_metric_delta rate_dawnbreak_unlearned"
         ]
       }
     ],

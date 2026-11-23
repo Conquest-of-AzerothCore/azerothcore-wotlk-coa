@@ -41960,6 +41960,23 @@
       "observe_source": "D-302 sized pooled pair (G-20 band, dawn-sizing.md): 29078 rolls needed (procs.residual_sizing, residual 0.001 per pair, min_detectable 4); 20 parts of 1600 rolls = 32000, one spare part fixed before the run (30400 rolls if one part is excluded whole); 6 steps per roll at 500 ms keep a part under the 10000-step scenario limit and the 3600 s accelerated cap. AscensionSunClericAbilities.cpp:278-287: on a Dawnbreak 800654 cast (OnSpellCast), Chance(player, 503690) rolls roll_chance_i of the raw ProcChance 40 (AscensionSunCleric.cpp:196-205, no internal cooldown on this call), and a success reduces the Gavel roots 800611, 800614, 800617 and casts 503691 on the caster in the same block, so 503691 on the caster is the per-roll outcome. Dawnbreak 800654 (server Spell.dbc): instant, Category 111 CategoryRecoveryTime 6000, StartRecoveryTime 1500, Speed 0, SCHOOL_DAMAGE, shield required (the default Seraphim set equips shield 2129); each roll resets its cooldown (reset_cooldown, Player::RemoveSpellCooldown) and casts it with ignore_gcd at the dummy. A part is void (excluded whole) unless spell_go_count of 800654 and its spell_damage_count on the dummy equal the rolls, the last cast failure is 0 and the dummy reads alive with health above 0. Tool: aura_fed_effect damage_rate variant (ADR 1075)."
     },
     {
+      "spell": 503690,
+      "name": "Dawn's Arrival (control, talent unlearned, no 503691 grant per Dawnbreak 800654 cast)",
+      "kind": "aura_fed_effect",
+      "variant": "damage_rate_dawnbreak_unlearned",
+      "label_suffix": "rate_dawnbreak_unlearned",
+      "quote": "Casting Dawnbreak now has a $h% chance to reset the cooldown of Gavels",
+      "feed_spell": 800654,
+      "aura": 503691,
+      "feed_target": "dummy",
+      "feed_power": 1363,
+      "rolls": 300,
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "learn_talent": false,
+      "observe_source": "D-309 control arm for the rate_dawnbreak_pooled entry (claims 89.0 and 89.3, who grants the aura): the same roll (reset cooldown, Dawnbreak 800654 cast at the dummy with ignore_gcd, 503691 cancelled before and read 500 ms after) with 503690 unlearned (unlearn step, never learned), N = 300 rolls, 0 grants of 503691 expected (AscensionSunClericAbilities.cpp:278-287 rolls only for a player who has 503690); a 40% grant rate would leave none in 300 rolls with probability 0.6^300. The same void guards as the learned arm: spell_go_count of 800654 and spell_damage_count on the dummy equal the rolls, last cast failure 0, dummy alive with health above 0; any grant alerts. It adds evidence and closes nothing. Tool: aura_fed_effect damage_rate variant, learn_talent false (ADR 1075 addendum)."
+    },
+    {
       "spell": 300943,
       "name": "Pious (D-245 self heal arm)",
       "kind": "metric_delta",

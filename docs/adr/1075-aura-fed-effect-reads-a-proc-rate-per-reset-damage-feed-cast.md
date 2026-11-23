@@ -41,3 +41,13 @@ Python only, opt-in. No harness, coverage or evidence table change.
   entry, so their generated files and audits stay byte-identical.
 - The Sun Cleric entry pools 20 parts of 1600 rolls with one spare (30400 rolls if one part drops, 29078 needed).
 - No control arm: a server that never rolls reads 0% and alerts against the 38% to 42% band.
+
+## Addendum: control arm with the talent unlearned (mentor D-309)
+
+- Entry field `learn_talent` (boolean, default true; `false` takes a single part, damage variant only). With `false`
+  the scenario emits an `unlearn` of the talent and learns only the feed, so the same roll runs without the talent.
+- The model gets `control: true`, expected 0, `needed` = the rolls. The judge is `ok` only with 0 grants of the aura
+  over every roll and the same void guards; any grant alerts, fewer rolls than needed is unmeasured. A 40% rate would
+  leave 0 grants in 300 rolls with probability 0.6^300.
+- Entries without the field generate byte-identical scenarios; the heal variant refuses the field. The control adds
+  evidence and closes no claim.

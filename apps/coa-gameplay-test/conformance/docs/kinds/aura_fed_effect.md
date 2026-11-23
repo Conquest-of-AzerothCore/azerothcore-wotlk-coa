@@ -82,7 +82,9 @@ Every trial reads `aura` right before the judged cast: 0 in the control, 1 in th
   dummy with `ignore_gcd` and, after the cast time + 500 ms, reads `aura` on the caster. At the end `spell_go_count` of
   the feed and its `spell_damage_count` on the dummy must equal the rolls, the last feed cast failure must be 0 and the
   dummy must read `alive` 1 with `health` above 0, else the part is void (excluded whole when pooled). A roll is 6
-  steps: at most about 1600 rolls fit the 10000-step scenario limit.
+  steps: at most about 1600 rolls fit the 10000-step scenario limit. `learn_talent: false` (single part, ADR 1075
+  addendum) is the control arm: the talent is unlearned, the judge is `ok` only with 0 grants of `aura` over `rolls`
+  rolls, any grant alerts.
 
 Sun Cleric: Dawn's Arrival 503690 (`cooldown` with `evidence_metric`, label `fed_cooldown`;
 `cooldown_reset_recast`, label `fed_reset`; `damage_rate_dawnbreak_pooled`, label `rate_dawnbreak_pooled`);

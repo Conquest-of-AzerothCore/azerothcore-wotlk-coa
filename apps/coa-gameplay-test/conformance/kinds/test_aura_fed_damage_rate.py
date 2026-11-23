@@ -16,6 +16,8 @@ DAWN = {'spell': 503690, 'name': "Dawn's Arrival (rate per Dawnbreak cast)", 'ki
         'min_detectable': 4}
 POOLED = {**DAWN, 'variant': 'damage_rate_dawnbreak_pooled', 'label_suffix': 'rate_dawnbreak_pooled',
           'rolls': 1600, 'parts': 20, 'spare_parts': 1}
+CONTROL = {**DAWN, 'variant': 'damage_rate_dawnbreak_unlearned', 'label_suffix': 'rate_dawnbreak_unlearned',
+           'learn_talent': False, 'rolls': 300}
 SEED = 503690
 NEEDED_40 = 29078
 PART_ROLLS = 300
@@ -145,6 +147,43 @@ class AuraFedDamageRateTests(unittest.TestCase):
         verdict = self.pooled(0.40, broken={part: {'casts': 0} for part in range(4)})
         self.assertEqual(verdict.status, 'unmeasured')
         self.assertIn('28800 pooled rolls, 29078 needed', verdict.explanation)
+
+    def control_status(self, grants=0, **options):
+        _, expectation = self.generated(CONTROL)
+        reads = expectation.model['reads']
+        draws = [index < grants for index in range(len(reads['rolls']))]
+        return judge_behaviour(base_verdict(expectation), FakeRun(self.filled(reads, draws, **options)), expectation)
+
+    def test_the_control_arm_never_learns_the_talent(self):
+        scenario, expectation = self.generated(CONTROL)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        learned = [step['spell'] for step in scenario['steps'] if step['action'] == 'learn']
+        self.assertEqual(learned, [800654])
+        self.assertEqual([step['spell'] for step in scenario['steps'] if step['action'] == 'unlearn'], [503690])
+        self.assertTrue(expectation.model['control'])
+        self.assertIn('Control arm: 503690 is unlearned', scenario['contract'])
+
+    def test_the_control_arm_is_ok_with_no_grant_over_every_landed_cast(self):
+        self.assertEqual(self.control_status().status, 'ok')
+
+    def test_a_grant_in_the_control_arm_alerts(self):
+        verdict = self.control_status(grants=1)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('1 of 300 rolls read the aura', verdict.explanation)
+
+    def test_the_control_arm_voids_on_a_refused_or_empty_cast_or_a_dead_dummy(self):
+        for options in ({'casts': 299}, {'hits': 299}, {'failure': 67.0}, {'alive': 0.0, 'health': 0.0}):
+            with self.subTest(options=options):
+                self.assertEqual(self.control_status(**options).status, 'unmeasured')
+
+    def test_learn_talent_false_is_refused_when_pooled_and_unknown_elsewhere(self):
+        for broken in ({**POOLED, 'learn_talent': False}, {**DAWN, 'learn_talent': 0}):
+            with self.subTest(broken=broken), self.assertRaises(ValueError):
+                self.generated(broken)
+
+    def test_the_learned_arm_scenario_is_unchanged_by_the_field(self):
+        explicit = self.generated({**DAWN, 'learn_talent': True})[0]
+        self.assertEqual(explicit, self.generated(DAWN)[0])
 
 
 if __name__ == '__main__':
