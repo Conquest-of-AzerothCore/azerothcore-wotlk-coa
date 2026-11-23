@@ -106,6 +106,14 @@ void ZoneScaling::Load()
             if (Zones.count(row[0].Get<std::uint32_t>()))
                 Properties.emplace(std::make_pair(entry, row[2].Get<std::int32_t>()), row[3].Get<std::int32_t>());
         } while (result->NextRow());
+    if (WorldDatabase.Query("SHOW TABLES LIKE 'coa_reputation_item_budget'"))
+        if (QueryResult result = WorldDatabase.Query("SELECT entry,pve_power,pvp_power FROM coa_reputation_item_budget"))
+            do
+            {
+                Field* row = result->Fetch();
+                Items.insert_or_assign(row[0].Get<std::uint32_t>(),
+                    std::make_pair(row[1].Get<std::uint32_t>(), row[2].Get<std::uint32_t>()));
+            } while (result->NextRow());
     LOG_INFO("server.loading", "Loaded {} outdoor zones, {} creatures, {} items and {} property mappings",
         Zones.size(), Budgets.size(), Items.size(), Properties.size());
 }
