@@ -3,7 +3,7 @@
 - Status: proposed (class ADR, numbered at merge)
 - Date: 2026-11-23
 - Decided by: mentor D-21 (void when the aura's age at the first read exceeds 100 ms or cannot be read, else the
-  apply-stamp route of ADR 1067), review fw-rt1d2 I-1, controller go
+  apply-stamp route of ADR 1236), review fw-rt1d2 I-1, controller go
 
 ## Context
 
@@ -17,7 +17,7 @@ gives no maximum duration or apply time for an aura on any holder (`aura_duratio
 
 - A harness read of the live aura's maximum duration or apply time: new harness C++ (G-39).
 - State the residual and accept expected less remaining as the age proxy.
-- The encounter timeline of ADR 1067: `OnAuraApply` stamps every apply in `GameNowMs`, the base of `game_time_ms`.
+- The encounter timeline of ADR 1236: `OnAuraApply` stamps every apply in `GameNowMs`, the base of `game_time_ms`.
 
 ## Decision
 

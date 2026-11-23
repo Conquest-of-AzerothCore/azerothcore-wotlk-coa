@@ -16,7 +16,7 @@ the Ranger (class 21), another class.
 
 - One reference weapon with alternates (the scaffold shape).
 - One weapon set per specialization (`weapon_sets`, ADR 0681), with the spells a set needs learned before its equip
-  ([ADR 1012](../../1012-a-weapon-set-can-learn-the-spells-it-needs-to-be-equipped.md)).
+  ([ADR 1182](../../1182-a-weapon-set-can-learn-the-spells-it-needs-to-be-equipped.md)).
 
 ## Decision
 
@@ -58,7 +58,7 @@ Falchion (inventory type 21, main hand only); the Monster placeholder 49340 and 
 `spell_weapon_sets` maps every rank of the class spells of tab 37 to Slayer, tab 38 to Infernal and tab 18 to Tyrant
 (180 ranks with Wand 5019); the class spells of tab 87 take the default set and are not listed. No spell needed a remap: every
 "Requires ..." weapon line is met by the set of its specialization. Burning Commander 92089 is a tab 18 spell that
-Tyrant learns as a set spell, so it leaves `spell_weapon_sets` and wears the default set (ADR 1012, as Valkyr's Grip in
+Tyrant learns as a set spell, so it leaves `spell_weapon_sets` and wears the default set (ADR 1182, as Valkyr's Grip in
 the Sun Cleric).
 
 ## Consequences
