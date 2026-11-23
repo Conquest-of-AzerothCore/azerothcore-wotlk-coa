@@ -3588,12 +3588,12 @@
         "target": "dummy",
         "critical": false
       },
-      "expected": 62.5,
-      "after_at_least": 62,
-      "after_at_most": 63,
+      "expected": 29.5,
+      "after_at_least": 29,
+      "after_at_most": 30,
       "before_expected": 0,
       "wait_ms": 2500,
-      "observe_source": "704931 Effect[1] SCHOOL_DAMAGE: EffectBasePoints 21, EffectDieSides 2, EffectRealPointsPerLevel 1.0 from BaseLevel 27, MaxLevel 0 (no cap). At level 60 $704931m2 = 21 + 33 + (1..2) = 55..56 (per-level term truncated, SpellInfo.cpp:497). The tooltip adds $sph*0.125 = 0 at spell power 0 and $AP*0.1 = 7 at the reference attack power 70: [62, 63]. Non-critical hit read on the dummy 2500 ms after the instant Dawnbreak 800654 cast. Control: 0 before the learn. 823764 removes the dummy's magic resistance (precondition fixture; without it the dummy's Holy resistance cut every hit by 10%: 56 and 1856 read in the first probe).",
+      "observe_source": "704931 Effect[1] SCHOOL_DAMAGE: EffectBasePoints 21, EffectDieSides 2, EffectRealPointsPerLevel 1.0 in the DBC, cleared by the class contract (owner ruling O-37, Sun Cleric ADR 0039), the value the client displays at the spell's rank 0 (ADR 0014): $704931m2 = 21 + (1..2) = 22..23 at level 60 (the owner read 52 = 22 + 0.125 x 96 + 0.1 x 182 on the level-60 client). Before the fix the per-level term added 33 (55..56). The tooltip adds $sph*0.125 = 0 at spell power 0 and $AP*0.1 = 7 at the reference attack power 70: [29, 30]. Non-critical hit read on the dummy 2500 ms after the instant Dawnbreak 800654 cast. Control: 0 before the learn. 823764 removes the dummy's magic resistance (precondition fixture; without it the dummy's Holy resistance cut every hit by 10%: 56 and 1856 read in the first probe).",
       "phase_auras": [
         [
           823764,
@@ -3620,12 +3620,12 @@
         "target": "dummy",
         "critical": false
       },
-      "expected": 2062.5,
-      "after_at_least": 2062,
-      "after_at_most": 2063,
+      "expected": 2029.5,
+      "after_at_least": 2029,
+      "after_at_most": 2030,
       "before_expected": 0,
       "wait_ms": 2500,
-      "observe_source": "As damage with 20000 more attack power (player_attack_power, harness fixture): 55..56 + int(0.1 x (70 + 20000)) = 55..56 + 2007 = [2062, 2063], against [62, 63] at the reference attack power; the contrast on the same build is the damage entry. Control: 0 before the learn. 823764 removes the dummy's magic resistance (precondition fixture; without it the dummy's Holy resistance cut every hit by 10%: 56 and 1856 read in the first probe).",
+      "observe_source": "As damage with 20000 more attack power (player_attack_power, harness fixture): 22..23 + int(0.1 x (70 + 20000)) = 22..23 + 2007 = [2029, 2030], against [29, 30] at the reference attack power; the contrast on the same build is the damage entry. Control: 0 before the learn. 823764 removes the dummy's magic resistance (precondition fixture; without it the dummy's Holy resistance cut every hit by 10%: 56 and 1856 read in the first probe).",
       "player_attack_power": 20000,
       "phase_auras": [
         [
@@ -3653,12 +3653,12 @@
         "target": "dummy",
         "critical": false
       },
-      "expected": 1312.5,
-      "after_at_least": 1312,
-      "after_at_most": 1313,
+      "expected": 1279.5,
+      "after_at_least": 1279,
+      "after_at_most": 1280,
       "before_expected": 0,
       "wait_ms": 2500,
-      "observe_source": "As damage with 10000 spell power (player_spell_power hit_arm, harness fixture; the Holy spell power read before the reading is recorded on the verdict): 55..56 + 7 + 0.125 x 10000 = [1312, 1313], against [62, 63] at spell power 0; the contrast on the same build is the damage entry. 823764 removes the dummy's magic resistance. Control: 0 before the learn.",
+      "observe_source": "As damage with 10000 spell power (player_spell_power hit_arm, harness fixture; the Holy spell power read before the reading is recorded on the verdict): 22..23 + 7 + 0.125 x 10000 = [1279, 1280], against [29, 30] at spell power 0; the contrast on the same build is the damage entry. 823764 removes the dummy's magic resistance. Control: 0 before the learn.",
       "phase_auras": [
         [
           823764,
@@ -36753,13 +36753,13 @@
         "target": "caster"
       },
       "before_expected": 0,
-      "expected": 62,
+      "expected": 22,
       "wait_ms": 2600,
-      "observe_source": "Positive control of control_stacks (the identical scenario, 704562 never learned): the fulfilled Vow is observed through Sunlight 92136, which Fulfill (AscensionSunCleric.cpp:298-300) casts on up to its MaxAffectedTargets allies at every fulfilment: Sunlight 704911 heals the caster (50% health) for the DBC value x 0.8, 60..64, the same range as the Sunlight entry (92136, sunlight_heal). Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4).",
+      "observe_source": "Positive control of control_stacks (the identical scenario, 704562 never learned): the fulfilled Vow is observed through Sunlight 92136, which Fulfill (AscensionSunCleric.cpp:298-300) casts on up to its MaxAffectedTargets allies at every fulfilment: Sunlight 704911 heals the caster (50% health) for the displayed value x 0.8 (Sun Cleric ADR 0039), 20..24, the same range as the Sunlight entry (92136, sunlight_heal). Reference search: coa-history spell 704562: 0 events (a passive); Dawnguard 680672: 60 SPELL_AURA_APPLIED, 232 SPELL_AURA_APPLIED_DOSE, 562 SPELL_AURA_REFRESH and 60 SPELL_AURA_REMOVED in 4 logs, so the aura stacks and refreshes in the old logs (aggregates carry no stack count and no duration); git log origin/main --grep and gh pr list --search (704562, 680672, Dawnguard): nothing (guide section 4).",
       "cast_in_before": false,
       "setup_only_after": true,
-      "after_at_least": 60,
-      "after_at_most": 64,
+      "after_at_least": 20,
+      "after_at_most": 24,
       "after_setup_reads": [
         {
           "spell": 807440,
@@ -38952,10 +38952,10 @@
       "name": "Sunlight (heal on a fulfilled Vow)",
       "variant": "sunlight_heal",
       "label_suffix": "sunlight_heal",
-      "after_at_least": 60,
-      "after_at_most": 64,
-      "expected": 62,
-      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; AscensionSunCleric.cpp:298-300 casts Sunlight 704911 on up to its MaxAffectedTargets allies of the Vow fulfilment (Fulfill, requires a spell cast under Dawn 807440 and a Vow aura, here Vow of Radiance 803489, cast before Dawn). 704911 Effect[0] SPELL_EFFECT_HEAL, BasePoints 24, DieSides 7, per level 1.0 x (60 - 10): m1 = 75..81. Caster at 50% health; Dawn 804584 cast with 20 Solar Power 500149 set (harness precondition fixture), then Illumination 500143 (a direct heal, Holy) on the caster, in both phases; 92136 learned between the phases. Control (before): the same casts without 92136, 0 healed by Sunlight. Class tuning: 887015 CoA Aura - Sun Cleric Class: Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, MiscValue 127, BasePoints -1, DieSides 1, RealPointsPerLevel -0.4, BaseLevel 10: -1 + int(50 x -0.4) + 1 = -20% at level 60 (SpellInfo.cpp:487-497; known_auras; applied by AscensionClassTuning::Synchronize). Reference search: no 887015 in ~/CoaServer/reference snapshots, nothing found for the heal value. The heal is the DBC value x 0.8, truncated: 75..81 -> 60..64 (int(75 x 0.8) = 60, int(81 x 0.8) = 64); (75..81 + 3000) x 0.8 -> 2460..2464. Crit forced out by fixture 984954 (spell crit -1000 (Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE BasePoints -1001); its Effect[0] is aura 52 MOD_WEAPON_CRIT_PERCENT BasePoints 100, +101% weapon crit, which no spell subject of this entry reads, set on the caster in both phases). Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. Read time (mentor D-268): the trigger 500143 lands after its DBC cast time, so the read comes 2500 ms after the cast: 2000 ms cast plus the 500 ms margin of CAST_MARGIN_MS.",
+      "after_at_least": 20,
+      "after_at_most": 24,
+      "expected": 22,
+      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; AscensionSunCleric.cpp:298-300 casts Sunlight 704911 on up to its MaxAffectedTargets allies of the Vow fulfilment (Fulfill, requires a spell cast under Dawn 807440 and a Vow aura, here Vow of Radiance 803489, cast before Dawn). 704911 Effect[0] SPELL_EFFECT_HEAL, BasePoints 24, DieSides 7, EffectRealPointsPerLevel 1.0 in the DBC, cleared by the class contract (owner ruling O-37, Sun Cleric ADR 0039), the value the client displays at the spell's rank 0 (ADR 0014): m1 = 25..31 (before the fix 75..81, the per-level term adding 50). Caster at 50% health; Dawn 804584 cast with 20 Solar Power 500149 set (harness precondition fixture), then Illumination 500143 (a direct heal, Holy) on the caster, in both phases; 92136 learned between the phases. Control (before): the same casts without 92136, 0 healed by Sunlight. Class tuning: 887015 CoA Aura - Sun Cleric Class: Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, MiscValue 127, BasePoints -1, DieSides 1, RealPointsPerLevel -0.4, BaseLevel 10: -1 + int(50 x -0.4) + 1 = -20% at level 60 (SpellInfo.cpp:487-497; known_auras; applied by AscensionClassTuning::Synchronize). Reference search: no 887015 in ~/CoaServer/reference snapshots, nothing found for the heal value. The heal is the displayed value x 0.8 under 887015, the general class heal tuning (AscensionClassTuning.h:36; Sun Cleric ADR 0028, ADR 1074, Templar twin 887007), truncated: 25..31 -> 20..24 (int(25 x 0.8) = 20, int(31 x 0.8) = 24); (25..31 + 3000) x 0.8 -> 2420..2424. Whether the client applies aura 136 to the displayed value is not verified (no client reading of Sunlight). Crit forced out by fixture 984954 (spell crit -1000 (Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE BasePoints -1001); its Effect[0] is aura 52 MOD_WEAPON_CRIT_PERCENT BasePoints 100, +101% weapon crit, which no spell subject of this entry reads, set on the caster in both phases). Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. Read time (mentor D-268): the trigger 500143 lands after its DBC cast time, so the read comes 2500 ms after the cast: 2000 ms cast plus the 500 ms margin of CAST_MARGIN_MS.",
       "after_auras": [
         [
           807440,
@@ -39026,10 +39026,10 @@
         "amount": 20000,
         "hit_arm": true
       },
-      "after_at_least": 2460,
-      "after_at_most": 2464,
-      "expected": 2462,
-      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; AscensionSunCleric.cpp:298-300 casts Sunlight 704911 on up to its MaxAffectedTargets allies of the Vow fulfilment (Fulfill, requires a spell cast under Dawn 807440 and a Vow aura, here Vow of Radiance 803489, cast before Dawn). 704911 Effect[0] SPELL_EFFECT_HEAL, BasePoints 24, DieSides 7, per level 1.0 x (60 - 10): m1 = 75..81. Caster at 50% health; Dawn 804584 cast with 20 Solar Power 500149 set (harness precondition fixture), then Illumination 500143 (a direct heal, Holy) on the caster, in both phases; 92136 learned between the phases. With 20000 more spell power: 75..81 + int32(0.15 x 20000) = 3075..3081 (BH term), the contrast of sunlight_heal on the same build. Class tuning: 887015 CoA Aura - Sun Cleric Class: Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, MiscValue 127, BasePoints -1, DieSides 1, RealPointsPerLevel -0.4, BaseLevel 10: -1 + int(50 x -0.4) + 1 = -20% at level 60 (SpellInfo.cpp:487-497; known_auras; applied by AscensionClassTuning::Synchronize). Reference search: no 887015 in ~/CoaServer/reference snapshots, nothing found for the heal value. The heal is the DBC value x 0.8, truncated: 75..81 -> 60..64 (int(75 x 0.8) = 60, int(81 x 0.8) = 64); (75..81 + 3000) x 0.8 -> 2460..2464. Crit forced out by fixture 984954 (spell crit -1000 (Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE BasePoints -1001); its Effect[0] is aura 52 MOD_WEAPON_CRIT_PERCENT BasePoints 100, +101% weapon crit, which no spell subject of this entry reads, set on the caster in both phases). Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. Read time (mentor D-268): the trigger 500143 lands after its DBC cast time, so the read comes 2500 ms after the cast: 2000 ms cast plus the 500 ms margin of CAST_MARGIN_MS.",
+      "after_at_least": 2420,
+      "after_at_most": 2424,
+      "expected": 2422,
+      "observe_source": "92136 Effect[0] aura 42 PROC_TRIGGER_SPELL 704911; AscensionSunCleric.cpp:298-300 casts Sunlight 704911 on up to its MaxAffectedTargets allies of the Vow fulfilment (Fulfill, requires a spell cast under Dawn 807440 and a Vow aura, here Vow of Radiance 803489, cast before Dawn). 704911 Effect[0] SPELL_EFFECT_HEAL, BasePoints 24, DieSides 7, EffectRealPointsPerLevel 1.0 in the DBC, cleared by the class contract (owner ruling O-37, Sun Cleric ADR 0039), the value the client displays at the spell's rank 0 (ADR 0014): m1 = 25..31 (before the fix 75..81, the per-level term adding 50). Caster at 50% health; Dawn 804584 cast with 20 Solar Power 500149 set (harness precondition fixture), then Illumination 500143 (a direct heal, Holy) on the caster, in both phases; 92136 learned between the phases. With 20000 more spell power: 25..31 + int32(0.15 x 20000) = 3025..3031 (BH term), the contrast of sunlight_heal on the same build. Class tuning: 887015 CoA Aura - Sun Cleric Class: Effect[2] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, MiscValue 127, BasePoints -1, DieSides 1, RealPointsPerLevel -0.4, BaseLevel 10: -1 + int(50 x -0.4) + 1 = -20% at level 60 (SpellInfo.cpp:487-497; known_auras; applied by AscensionClassTuning::Synchronize). Reference search: no 887015 in ~/CoaServer/reference snapshots, nothing found for the heal value. The heal is the displayed value x 0.8 under 887015, the general class heal tuning (AscensionClassTuning.h:36; Sun Cleric ADR 0028, ADR 1074, Templar twin 887007), truncated: 25..31 -> 20..24 (int(25 x 0.8) = 20, int(31 x 0.8) = 24); (25..31 + 3000) x 0.8 -> 2420..2424. Whether the client applies aura 136 to the displayed value is not verified (no client reading of Sunlight). Crit forced out by fixture 984954 (spell crit -1000 (Effect[1] aura 57 MOD_SPELL_CRIT_CHANCE BasePoints -1001); its Effect[0] is aura 52 MOD_WEAPON_CRIT_PERCENT BasePoints 100, +101% weapon crit, which no spell subject of this entry reads, set on the caster in both phases). Dawn toggle (#5741, PR #6809, AscensionSunClericAbilities.cpp:513-519): a cast of Dawn 804584 while Dawn 807440 is up removes it (AURA_REMOVE_BY_CANCEL) instead of activating it. The before phase casts Dawn, so the after phase starts with Dawn 807440 removed by the harness (set_aura with 0 stacks in after_auras, a named precondition fixture, not the subject of the claim), and the after phase's Dawn cast always activates it, whatever the before phase left behind. Conversion round D-195 / D-196, 2026-11-22. Read time (mentor D-268): the trigger 500143 lands after its DBC cast time, so the read comes 2500 ms after the cast: 2000 ms cast plus the 500 ms margin of CAST_MARGIN_MS.",
       "after_auras": [
         [
           807440,

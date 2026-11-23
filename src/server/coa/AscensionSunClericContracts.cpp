@@ -96,7 +96,10 @@ void ApplyContracts(SpellInfo* info)
     {
         info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ALLY);
         info->Effects[0].TargetB = SpellImplicitTargetInfo();
+        info->Effects[0].RealPointsPerLevel = 0.0f;
     }
+    if (id == 704931)
+        info->Effects[1].RealPointsPerLevel = 0.0f;
     if (id == DawnCast)
     {
         info->CasterAuraSpell = 0;
