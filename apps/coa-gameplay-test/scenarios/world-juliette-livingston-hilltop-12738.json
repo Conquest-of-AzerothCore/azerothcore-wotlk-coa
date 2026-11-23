@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Hillsbrad: Juliette Livingston stands on the hilltop (#12738)",
+  "contract": "#12738/#12741 reported Juliette Livingston (entry 991521, guid 9951029) on the cliff face below the quest 1355 POI hilltop (-232, -1188, z 86.44; terrain slope about 58 degrees), out of reach. She now stands on level hilltop ground at (-233, -1218, 123.08), 30 yd south of the POI and 37 yd above the old spot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -233.0,
+    "y": -1218.0,
+    "z": 124.08,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "guid": 9951029,
+      "spawn_type": "creature",
+      "label": "DISCRIMINATING: Juliette Livingston stands at the new point (was 30 yd away on the cliff)",
+      "metric": "spawn_distance",
+      "x": -233.0,
+      "y": -1218.0,
+      "z": 123.08,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "guid": 9951029,
+      "spawn_type": "creature",
+      "label": "Juliette Livingston stands on the ground",
+      "metric": "spawn_ground_gap",
+      "min": -0.3,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "guid": 9951029,
+      "spawn_type": "creature",
+      "label": "Juliette Livingston is grounded within 0.8 yd",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "guid": 9951029,
+      "spawn_type": "creature",
+      "label": "Juliette Livingston is not under water",
+      "metric": "spawn_submerged",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "guid": 9951029,
+      "spawn_type": "creature",
+      "label": "Juliette Livingston is clear of walls, pillars and props",
+      "metric": "spawn_clearance",
+      "min": 1
+    }
+  ]
+}

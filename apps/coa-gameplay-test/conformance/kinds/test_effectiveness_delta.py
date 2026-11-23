@@ -52,6 +52,30 @@ class EffectivenessDeltaTests(unittest.TestCase):
         self.assertFalse(promised_state(found, 'Increases your spell power by 49.'))
         self.assertFalse(promised_state(replace(found, detail={**found.detail, 'contrast': 'condition'}), CLAUSE))
 
+    def test_a_dodge_or_parry_read_is_judged_as_its_effectiveness_state(self):
+        from coverage import STATE, metric_evidence, promised_state
+        for metric in ('dodge_chance', 'parry_chance'):
+            with self.subTest(metric=metric):
+                scenario, [expectation] = self.built(metric=metric, fields={}, before_expected=25, expected=32,
+                                                     expected_gain=7, tolerance=0.01)
+                run.validate(scenario, run.SIMULATED_CLOCK)
+                model = expectation.model
+                reads = [step for step in scenario['steps'] if step.get('label') in (model['before_label'],
+                                                                                      model['after_label'])]
+                self.assertEqual([step['metric'] for step in reads], [metric, metric])
+                self.assertEqual(model['metric'], f'effectiveness_{metric}')
+                self.assertEqual(metric_evidence()[f'effectiveness_{metric}'], STATE)
+
+                def judged(before: float, after: float):
+                    return judge_behaviour(base_verdict(expectation),
+                                           FakeRun({model['before_label']: before, model['after_label']: after}),
+                                           expectation)
+
+                self.assertEqual(judged(29.6024, 36.6024).status, 'ok')
+                self.assertEqual(judged(29.6024, 29.6024).status, 'alert')
+                self.assertEqual(judged(29.6024, 37.1024).status, 'alert')
+                self.assertTrue(promised_state(judged(29.6024, 36.6024), 'and increases its effectiveness by 25%.'))
+
     def test_an_entry_without_a_modifier_or_without_the_control_cast_is_refused(self):
         for changes in ({'gate_spell': None}, {'cast_in_before': False}, {'metric': 'aura'},
                         {'gate_timing': 'start'}):

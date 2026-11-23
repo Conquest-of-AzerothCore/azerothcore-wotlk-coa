@@ -1,15 +1,12 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "Player.h"
-#include "Opcodes.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellInfo.h"
 #include "SpellScript.h"
-#include "WorldPacket.h"
-#include "WorldSession.h"
 #include <algorithm>
 #include <array>
 
@@ -22,39 +19,38 @@ constexpr uint32 SPELL_BLOODSHATTER = 505326;
 constexpr uint32 SPELL_DECIMATION = 704193;
 constexpr uint32 SPELL_DECIMATION_COUNTER = 573289;
 constexpr uint32 SPELL_DECIMATE = 500523;
+constexpr uint32 SPELL_REAP_HEAL = 801327;
 
 constexpr std::array<uint32, 10> ReapRanks = { 354319, 500357, 504056, 504057, 504058, 504557,
-    505151, 573302, 573303, 801327 };
+    505151, 573302, 573303, SPELL_REAP_HEAL };
 
 bool IsReap(uint32 spellId)
 {
     return std::find(ReapRanks.begin(), ReapRanks.end(), spellId) != ReapRanks.end();
 }
 
-void SendTransformedBar(Player* player, uint32 replacement)
+bool DecimateReady(Player* player)
 {
-    if (!player->GetSession())
-        return;
+    Aura const* counter = player->GetAura(SPELL_DECIMATION_COUNTER, player->GetGUID());
+    return counter && counter->GetStackAmount() >= counter->GetSpellInfo()->StackAmount &&
+        player->HasActiveSpell(SPELL_DECIMATE);
+}
 
-    WorldPacket data(SMSG_ACTION_BUTTONS, 1 + (MAX_ACTION_BUTTONS * 4));
-    data << uint8(1);
-    for (uint8 button = 0; button < MAX_ACTION_BUTTONS; ++button)
-    {
-        ActionButton const* action = player->GetActionButton(button);
-        if (!action)
-        {
-            data << uint32(0);
-            continue;
-        }
+uint32 ReapReplacement(Player* player, uint32 ending)
+{
+    if (ending != SPELL_BLOODSHATTER_DUMMY && player->HasAura(SPELL_BLOODSHATTER_DUMMY))
+        return SPELL_BLOODSHATTER;
+    if (ending != SPELL_THRESH_DUMMY && player->HasAura(SPELL_THRESH_DUMMY))
+        return SPELL_THRESH;
+    return DecimateReady(player) ? SPELL_DECIMATE : 0;
+}
 
-        uint32 packed = action->packedData;
-        if (action->GetType() == ACTION_BUTTON_SPELL && IsReap(action->GetAction()))
-            packed = replacement | (uint32(ACTION_BUTTON_SPELL) << 24);
-
-        data << uint32(packed);
-    }
-
-    player->GetSession()->SendPacket(&data);
+void ReplaceReap(Player* player, uint32 ending = 0)
+{
+    uint32 const replacement = ReapReplacement(player, ending);
+    for (uint32 rank : ReapRanks)
+        if (rank != SPELL_REAP_HEAL && player->HasActiveSpell(rank))
+            player->SetTemporarySpellReplacement(rank, replacement);
 }
 
 class aura_ascension_reaper_decimation_counter : public AuraScript
@@ -77,6 +73,8 @@ class aura_ascension_reaper_decimation_counter : public AuraScript
             return;
         if (!player->HasActiveSpell(SPELL_DECIMATE))
             player->addSpell(SPELL_DECIMATE, player->GetActiveSpecMask(), true, true, true);
+        if (player->HasAura(SPELL_THRESH_DUMMY) || player->HasAura(SPELL_BLOODSHATTER_DUMMY))
+            return;
         for (uint32 rank : ReapRanks)
             if (player->HasActiveSpell(rank))
                 player->SetTemporarySpellReplacement(rank, SPELL_DECIMATE);
@@ -133,6 +131,19 @@ public:
         if (caster->IsPlayer() && caster->getClass() == CLASS_REAPER && !spell->IsTriggered() &&
             info->Id == SPELL_DECIMATE)
             caster->RemoveAurasDueToSpell(SPELL_DECIMATION_COUNTER, caster->GetGUID());
+    }
+};
+
+class reaper_redshade_casts : public AllSpellScript
+{
+public:
+    reaper_redshade_casts() : AllSpellScript("reaper_redshade_casts", {ALLSPELLHOOK_ON_CAST}) { }
+
+    void OnSpellCast(Spell* spell, Unit* caster, SpellInfo const* info, bool) override
+    {
+        if (caster->IsPlayer() && caster->getClass() == CLASS_REAPER && !spell->IsTriggered() &&
+            info->Id == SPELL_BLOODSHATTER)
+            caster->RemoveAurasDueToSpell(SPELL_BLOODSHATTER_DUMMY);
     }
 };
 
@@ -203,11 +214,6 @@ class aura_ascension_reaper_redshade_transform : public AuraScript
 {
     PrepareAuraScript(aura_ascension_reaper_redshade_transform);
 
-    uint32 Replacement() const
-    {
-        return GetId() == SPELL_BLOODSHATTER_DUMMY ? SPELL_BLOODSHATTER : SPELL_THRESH;
-    }
-
     bool Validate(SpellInfo const*) override
     {
         return ValidateSpellInfo({ SPELL_THRESH, SPELL_BLOODSHATTER });
@@ -216,21 +222,13 @@ class aura_ascension_reaper_redshade_transform : public AuraScript
     void Apply(AuraEffect const*, AuraEffectHandleModes)
     {
         if (Player* player = GetTarget()->ToPlayer())
-            SendTransformedBar(player, player->HasAura(SPELL_BLOODSHATTER_DUMMY) ? SPELL_BLOODSHATTER : Replacement());
+            ReplaceReap(player);
     }
 
     void Remove(AuraEffect const*, AuraEffectHandleModes)
     {
-        Player* player = GetTarget()->ToPlayer();
-        if (!player)
-            return;
-
-        uint32 const other = GetId() == SPELL_BLOODSHATTER_DUMMY ? SPELL_THRESH_DUMMY
-            : SPELL_BLOODSHATTER_DUMMY;
-        if (player->HasAura(other))
-            SendTransformedBar(player, other == SPELL_BLOODSHATTER_DUMMY ? SPELL_BLOODSHATTER : SPELL_THRESH);
-        else
-            player->SendActionButtons(1);
+        if (Player* player = GetTarget()->ToPlayer())
+            ReplaceReap(player, GetId());
     }
 
     void Register() override
@@ -273,6 +271,7 @@ class spell_ascension_reaper_redshade_reap : public SpellScript
 void AddSC_AscensionReaperRedshade()
 {
     new reaper_decimation_casts();
+    new reaper_redshade_casts();
     new reaper_decimation_events();
     RegisterSpellScript(aura_ascension_reaper_decimation_counter);
     RegisterSpellScript(aura_ascension_reaper_redshade_spells);

@@ -1911,14 +1911,15 @@ namespace CoAChallenges
             return true;
         }
 
-        // NO_FETCH_QUEST_EXPERIENCE covers fetch and collection quests; other rewards stay.
+        // NO_FETCH_QUEST_EXPERIENCE: quests with no objectives (talk-to and
+        // delivery quests) grant no experience; other rewards stay.
         void OnPlayerQuestComputeXP(Player* player, Quest const* quest, uint32& xpValue) override
         {
             if (!player || !quest)
                 return;
             if (!PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_FETCH_QUEST_EXPERIENCE"))
                 return;
-            if (IsFetchOrCollectionQuest(quest))
+            if (IsQuestWithoutObjectives(quest))
                 xpValue = 0;
         }
 

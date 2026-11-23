@@ -753,21 +753,28 @@ class spell_ascension_bloodmage_excision : public SpellScript
 
 void SyncRunningWildJourneyman(Player* player)
 {
-    bool const runningWild = player->HasSpell(SPELL_RUNNING_WILD);
+    bool const wanted = player->HasSpell(SPELL_RUNNING_WILD) &&
+        player->GetBaseSkillValue(SKILL_RIDING) >= RIDING_SKILL_JOURNEYMAN;
     bool const journeyman = player->HasSpell(SPELL_RUNNING_WILD_JOURNEYMAN);
-    if (runningWild && !journeyman)
+    if (wanted && !journeyman)
         player->learnSpell(SPELL_RUNNING_WILD_JOURNEYMAN);
-    else if (!runningWild && journeyman)
+    else if (!wanted && journeyman)
         player->removeSpell(SPELL_RUNNING_WILD_JOURNEYMAN, SPEC_MASK_ALL, false);
+
+    if (AuraEffect* speed = player->GetAuraEffect(SPELL_RUNNING_WILD, EFFECT_0))
+        speed->RecalculateAmount();
 }
 
 class bloodmage_running_wild_journeyman : public PlayerScript
 {
 public:
     bloodmage_running_wild_journeyman() : PlayerScript("bloodmage_running_wild_journeyman",
-        {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEARN_SPELL, PLAYERHOOK_ON_FORGOT_SPELL}) { }
+        {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEARN_SPELL, PLAYERHOOK_ON_FORGOT_SPELL, PLAYERHOOK_ON_SET_SKILL,
+        PLAYERHOOK_ON_MAP_CHANGED}) { }
 
     void OnPlayerLogin(Player* player) override { SyncRunningWildJourneyman(player); }
+
+    void OnPlayerMapChanged(Player* player) override { SyncRunningWildJourneyman(player); }
 
     void OnPlayerLearnSpell(Player* player, uint32 spell) override
     {
@@ -779,6 +786,27 @@ public:
     {
         if (spell == SPELL_RUNNING_WILD)
             SyncRunningWildJourneyman(player);
+    }
+
+    void OnPlayerSetSkill(Player* player, uint32 skill, uint32, uint32, uint32, uint32) override
+    {
+        if (skill == SKILL_RIDING && player->IsInWorld())
+            SyncRunningWildJourneyman(player);
+    }
+};
+
+constexpr uint32 RunningWildTransformKit = 14140;
+
+class bloodmage_running_wild_transform_visual : public UnitScript
+{
+public:
+    bloodmage_running_wild_transform_visual() : UnitScript("bloodmage_running_wild_transform_visual", true,
+        {UNITHOOK_ON_AURA_APPLY}) { }
+
+    void OnAuraApply(Unit* unit, Aura* aura) override
+    {
+        if (aura->GetId() == SPELL_RUNNING_WILD)
+            unit->SendPlaySpellVisual(RunningWildTransformKit);
     }
 };
 
@@ -913,4 +941,5 @@ void AddSC_AscensionBloodmageSecondary()
     RegisterSpellScript(aura_ascension_bloodmage_hemal_excision);
     RegisterSpellScript(spell_ascension_bloodmage_excision);
     new bloodmage_running_wild_journeyman();
+    new bloodmage_running_wild_transform_visual();
 }

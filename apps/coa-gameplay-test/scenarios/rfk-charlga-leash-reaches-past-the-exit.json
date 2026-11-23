@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "name": "Charlga Razorflank can be tanked past her room's exit on Heroic",
+  "contract": [
+    "Groups tank Charlga Razorflank (4421) at the vines just outside her room (#12656). Her Heroic and Mythic leash area",
+    "reaches about 15 yards past the north-west exit at 2172.0 1913.8, so she keeps fighting there."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 47,
+      "x": 2190.4,
+      "y": 1866.3,
+      "z": 79.2,
+      "o": 1.9
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: p is in a Heroic Razorfen Kraul",
+      "actor": "p",
+      "metric": "map_difficulty",
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 100000000,
+      "maximum": 100000000
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "as": "charlga",
+      "entry": 4421,
+      "distance": 2
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "charlga"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Charlga is in combat",
+      "actor": "charlga",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "relocate",
+      "label": "p pulls her toward the north-west exit, step 1",
+      "actor": "p",
+      "dx": -8.2,
+      "dy": 18.4
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "relocate",
+      "label": "p pulls her toward the north-west exit, step 2",
+      "actor": "p",
+      "dx": -8.2,
+      "dy": 18.4
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Charlga followed p more than 40 yards from where she was pulled",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 4421,
+      "min_home_distance": 40,
+      "equals": 1
+    },
+    {
+      "action": "relocate",
+      "label": "p pulls her toward the north-west exit, step 3",
+      "actor": "p",
+      "dx": -8.2,
+      "dy": 18.4
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "Charlga keeps fighting p at the vines past the exit",
+      "actor": "charlga",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "She does not reset",
+      "actor": "p",
+      "metric": "nearby_creature_at_client",
+      "entry": 4421,
+      "equals": 1
+    }
+  ]
+}

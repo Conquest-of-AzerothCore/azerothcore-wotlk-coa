@@ -5,5 +5,5 @@
 
 void AddSC_AscensionTrainerProficiency()
 {
-    TrainerProficiencyFilter::Owner.store(&AscensionTrainerProficiency::Refuses, std::memory_order_relaxed);
+    TrainerProficiencyFilter::Owner.store(&AscensionTrainerProficiency::RefusesRow, std::memory_order_relaxed);
 }

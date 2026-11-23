@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-from classes import class_spells
+from classes import ClassSpell, class_spells
 from profile import (CASTER, armed, base_steps, caster_stats_from, class_file_paths, load_class_file, load_fixture_class_file, skill_label,
                     unfit_reason)
 from test_tooltip import FIXTURE_CASTER, FIXTURE_SPELLS, FIXTURE_VARIABLES, write_fixture
@@ -677,6 +677,23 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         self.assertFalse([item for item in expectations if item.rule.startswith(UNREADABLE)])
         self.assertEqual(len(periodic_totals), 1)
 
+    def test_a_foreign_token_totalled_over_its_own_spell_ticks_is_left_to_the_hit_scenario(self):
+        for rank_id, label, effect_spell in ((500056, '500056 effect_value 500564e0 #0', 500564),
+                                             (680238, '680238 effect_value 681177e0 #4', 681177)):
+            with self.subTest(rank_id=rank_id):
+                spell = ClassSpell(rank_id, str(rank_id), (rank_id,), rank_id, 1, False)
+                scenario, expectations, periodic_totals = value_scenario(self.class_file, spell, rank_id)
+                run.validate(scenario)
+                self.assertNotIn(label, [item.label for item in expectations])
+                self.assertIn({'label': label, 'effect': 0, 'effect_spell': effect_spell}, periodic_totals)
+                self.assertFalse(self.steps_of(scenario, label))
+
+    def test_a_foreign_token_read_per_tick_keeps_its_effect_value_read(self):
+        spell = ClassSpell(500694, '500694', (500694,), 500694, 1, False)
+        scenario, expectations, periodic_totals = value_scenario(self.class_file, spell, 500694)
+        self.assertIn('500694 effect_value 803153e0 #0', [item.label for item in expectations])
+        self.assertNotIn('500694 effect_value 803153e0 #0', [item['label'] for item in periodic_totals])
+
     def test_trailing_digit_on_a_proc_count_token_is_unmeasurable_not_unreadable(self):
         scenario, expectations = self.build(LIGHTKEEPER, LIGHTKEEPER)
         run.validate(scenario)
@@ -814,6 +831,69 @@ class FixtureHealthStepTest(unittest.TestCase):
 
     def test_the_actor_is_used_verbatim(self):
         self.assertEqual(fixture_health_step(CASTER, 100)['actor'], CASTER)
+
+
+DECIMATE = 804194
+LESSER_SHADOW_HOUND = 50224
+HOUNDMASTERS_CALL = 802273
+HOUNDMASTER = 705450
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class SummonAuraCarrierTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.class_file = {**load_fixture_class_file(TEMPLAR_CLASS_ID), 'summon_aura_carriers': [
+            {'spell': DECIMATE, 'entry': LESSER_SHADOW_HOUND, 'summon': HOUNDMASTERS_CALL, 'learn': [HOUNDMASTER],
+             'reason': 'test'}]}
+        cls.decimate = ClassSpell(DECIMATE, 'Decimate', (DECIMATE,), DECIMATE, 0, False)
+
+    def build(self, class_file):
+        scenario, expectations, _ = value_scenario(class_file, self.decimate, DECIMATE)
+        return scenario, {item.label: item for item in expectations}
+
+    def reads(self, scenario, label):
+        return [step for step in scenario['steps'] if step.get('label') == label]
+
+    def test_an_aura_applied_to_summons_is_read_on_the_summoned_carrier(self):
+        scenario, expectations = self.build(self.class_file)
+        run.validate(scenario)
+        read, = self.reads(scenario, f'{DECIMATE} aura_duration_ms #0')
+        self.assertEqual((read['actor'], read['metric'], read['entry'], read['spell']),
+                         (CASTER, 'owned_creature_aura_max_duration_ms', LESSER_SHADOW_HOUND, DECIMATE))
+        self.assertTrue(expectations[f'{DECIMATE} aura_duration_ms #0'].rule.startswith('read '))
+        present, = self.reads(scenario, f'{DECIMATE} aura_present')
+        self.assertEqual((present['metric'], present['entry']), ('owned_creature_count', LESSER_SHADOW_HOUND))
+
+    def test_the_carrier_is_summoned_before_the_cast_at_a_placed_dummy(self):
+        scenario, _ = self.build(self.class_file)
+        steps = scenario['steps']
+        casts = [step for step in steps if step.get('action') == 'cast']
+        self.assertEqual([(step['spell'], step.get('target')) for step in casts],
+                         [(HOUNDMASTERS_CALL, TARGET), (DECIMATE, None)])
+        setup = next(step for step in steps if step.get('label', '').startswith('SETUP:'))
+        self.assertLess(steps.index(casts[0]), steps.index(setup))
+        self.assertLess(steps.index(setup), steps.index(casts[1]))
+        self.assertEqual((setup['metric'], setup['entry'], setup['equals']),
+                         ('owned_creature_count', LESSER_SHADOW_HOUND, 1))
+        learned = [step['spell'] for step in steps if step.get('action') == 'learn']
+        self.assertLess(learned.index(HOUNDMASTER), learned.index(HOUNDMASTERS_CALL))
+        self.assertEqual([creature['id'] for creature in scenario['creatures']], [TARGET])
+
+    def test_an_amount_no_owned_metric_reads_is_unmeasurable_and_not_read(self):
+        scenario, expectations = self.build(self.class_file)
+        amount = expectations[f'{DECIMATE} aura_amount e0 #1']
+        self.assertTrue(amount.rule.startswith(UNMEASURABLE))
+        self.assertIn('summons only', amount.rule)
+        self.assertFalse(self.reads(scenario, amount.label))
+
+    def test_mutant_without_the_carrier_reads_the_caster_that_holds_no_application(self):
+        plain = {key: value for key, value in self.class_file.items() if key != 'summon_aura_carriers'}
+        scenario, expectations = self.build(plain)
+        read, = self.reads(scenario, f'{DECIMATE} aura_duration_ms #0')
+        self.assertEqual((read['actor'], read['metric']), (CASTER, 'aura_duration_ms'))
+        self.assertFalse([step for step in scenario['steps'] if step.get('label', '').startswith('SETUP:')])
+        self.assertTrue(expectations[f'{DECIMATE} aura_amount e0 #1'].rule.startswith('read '))
 
 
 if __name__ == '__main__':

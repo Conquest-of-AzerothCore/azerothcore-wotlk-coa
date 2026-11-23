@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Sentry Ward reveals a stealthed enemy (#12534)",
+  "contract": [
+    "#12534 Sentry Ward 674303 'reveals all stealthed and invisible enemies near it'. The ward (NPC 51104,",
+    "npc_ascension_witch_doctor) puts 505173 on hostile units within 30 yards. 505173 only has two",
+    "SPELL_AURA_DISPEL_IMMUNITY effects for the Stealth (5) and Invisibility (6) dispel types and lacks",
+    "SPELL_ATTR1_IMMUNITY_PURGES_EFFECT, so it never removed a stealth or invisibility aura the enemy already had:",
+    "a stealthed enemy stayed stealthed. Expected: an enemy that is stealthed with Stealth 1784 when the ward is",
+    "placed carries 505173 and loses its stealth within a few seconds."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wd",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "sneak",
+      "owner": "wd",
+      "entry": 28168,
+      "health": 100000,
+      "level": 60,
+      "distance": 6
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "sneak",
+      "spell": 1784,
+      "label": "the enemy stealths"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the enemy is stealthed",
+      "actor": "sneak",
+      "metric": "aura",
+      "spell": 1784,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "wd",
+      "spell": 674303
+    },
+    {
+      "action": "cast",
+      "actor": "wd",
+      "spell": 674303,
+      "label": "place a Sentry Ward"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a Sentry Ward stands near the Witch Doctor",
+      "actor": "wd",
+      "metric": "nearby_creature_template",
+      "entry": 51104,
+      "equals": 51104,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the ward marks the enemy",
+      "actor": "sneak",
+      "metric": "aura",
+      "spell": 505173,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the enemy's stealth is removed",
+      "actor": "sneak",
+      "metric": "aura",
+      "spell": 1784,
+      "equals": 0,
+      "within_ms": 5000
+    }
+  ]
+}

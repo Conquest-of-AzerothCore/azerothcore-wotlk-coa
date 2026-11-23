@@ -1,0 +1,675 @@
+{
+  "schema": 1,
+  "name": "Arbalest Mastery stacks carry across chained Witchbane casts up to ten",
+  "contract": [
+    "Arbalest Mastery 706240: \"Each subsequent shot of a Witchbane cast deals 15% more damage, up to a maximum of 150%.\" Its progress aura 706241 stacks to 10 (StackAmount 10, EffectBasePoints 14 / DieSides 1 = 15% per stack) and lasts 1200 ms (DurationIndex 509); each Witchbane shot 704342 is multiplied by 1 + 0.15 x stacks, then adds a stack and refreshes the timer. Mentor rulings D-148 and D-152 read the tooltip by the live logs: stacks carry across chained casts (a cast issued as the previous channel's last shot lands) and drop 1.2 s after the last shot. A Witchbane channel (800165, 3000 ms, 750 ms period, extra initial tick) delivers five shots (D-143). The reference is the talented hunter's own first shot (no stack, multiplier 1), read alone before the second shot of the first channel; ratios to it cancel armor and the caster's stats. The control Witch Hunter has the same talents without Arbalest Mastery: its channel shows that no progress is granted without the talent, and its unstacked mean is kept as a diagnostic snapshot only; both players carry +10000 ranged attack power so a shot deals several hundred points and per-hit integer truncation stays near 0.1% (at the bare level 60 fixture a 63-point shot truncated a channel by 1.1%); the band is 1%. Each dummy carries Blessed Resilience 33143 (aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, EffectBasePoints -1001, 6000 ms), a precondition fixture renewed right after every cast, so no shot is a critical hit (asserted) and every channel total is deterministic. Expected sums of multipliers: a channel from no stack 1 + 1.15 + 1.3 + 1.45 + 1.6 = 6.5; the chained second channel (stacks 5 to 9) 5 + 0.15 x 35 = 10.25; the third and fourth channels (stacks 10) 2.5 per shot, 12.5 per channel. After the twentieth shot the aura holds 10 stacks with a refreshed timer, outlasts the channel end and is gone when read about 1.5 s after the last shot launched (expiry 1.2 s after it); a fifth cast after that starts again from no stack (6.5). Timing reads are candidate batch_sensitive."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "ranged_attack_power": 10000
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "ranged_attack_power": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 8
+    },
+    {
+      "id": "control_target",
+      "owner": "control",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "specialization",
+      "actor": "hunter",
+      "id": 10
+    },
+    {
+      "action": "specialization",
+      "actor": "control",
+      "id": 10
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "hunter",
+      "entry": 31160,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "hunter",
+      "entry": 6615,
+      "rank": 3
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "hunter",
+      "entry": 34570,
+      "rank": 2
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "hunter",
+      "entry": 29372,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "hunter",
+      "entry": 9750,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "control",
+      "entry": 31160,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "control",
+      "entry": 6615,
+      "rank": 3
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "control",
+      "entry": 34570,
+      "rank": 2
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "control",
+      "entry": 29372,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "control",
+      "entry": 9750,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "hunter",
+      "entry": 7458,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 706240,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 706240,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "hunter",
+      "item": 15807
+    },
+    {
+      "action": "equip",
+      "actor": "hunter",
+      "item": 15807,
+      "slot": 17
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 15807
+    },
+    {
+      "action": "equip",
+      "actor": "control",
+      "item": 15807,
+      "slot": 17
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "knows_spell",
+      "spell": 800165,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "knows_spell",
+      "spell": 800165,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 800165,
+      "target": "control_target"
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "target": "control_target",
+      "spell": 33143,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "target": "control_target",
+      "spell": 33143,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "An untalented Witchbane channel delivers five shots",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 704342,
+      "target": "control_target",
+      "equals": 5,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "No sixth untalented shot",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 704342,
+      "target": "control_target",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "No untalented shot is a critical hit",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 704342,
+      "target": "control_target",
+      "critical": true,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "An untalented channel grants no progress",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 706241,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 704342,
+      "target": "control_target",
+      "save_as": "unstacked_count"
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_damage_total",
+      "spell": 704342,
+      "target": "control_target",
+      "save_as": "unstacked_five"
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_damage_total",
+      "spell": 704342,
+      "target": "control_target",
+      "ratio_to": "unstacked_count",
+      "save_as": "unstacked_shot"
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 800165,
+      "target": "target"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "target": "target",
+      "spell": 33143,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "target": "target",
+      "spell": 33143,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The first talented shot lands",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 704342,
+      "target": "target",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 704342,
+      "target": "target",
+      "save_as": "first_shot"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 704342,
+      "target": "target",
+      "ratio_to": "unstacked_shot",
+      "save_as": "first_shot_to_untalented"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 704342,
+      "target": "target",
+      "equals": 5,
+      "within_ms": 5000,
+      "label": "The first talented channel delivers five shots"
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 800165,
+      "target": "target"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "target": "target",
+      "spell": 33143,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "target": "target",
+      "spell": 33143,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 704342,
+      "target": "target",
+      "save_as": "after_first"
+    },
+    {
+      "action": "assert",
+      "label": "A channel from no stack deals 6.5 unstacked shots (1 + 1.15 + 1.3 + 1.45 + 1.6)",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 704342,
+      "target": "target",
+      "ratio_to": "first_shot",
+      "min": 6.435,
+      "max": 6.565
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 704342,
+      "target": "target",
+      "equals": 10,
+      "within_ms": 5000,
+      "label": "The chained second channel delivers five more shots"
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 800165,
+      "target": "target"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "target": "target",
+      "spell": 33143,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "target": "target",
+      "spell": 33143,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 704342,
+      "target": "target",
+      "save_as": "after_second"
+    },
+    {
+      "action": "assert",
+      "label": "The chained second channel carries stacks 5 to 9 (10.25 unstacked shots)",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 704342,
+      "target": "target",
+      "relative_to": "after_first",
+      "ratio_to": "first_shot",
+      "min": 10.15,
+      "max": 10.35
+    },
+    {
+      "action": "assert",
+      "label": "Ten shots reach the ten-stack cap",
+      "actor": "hunter",
+      "metric": "aura_stacks",
+      "spell": 706241,
+      "caster": "hunter",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 704342,
+      "target": "target",
+      "equals": 15,
+      "within_ms": 5000,
+      "label": "The chained third channel delivers five more shots"
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 800165,
+      "target": "target"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "target": "target",
+      "spell": 33143,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "target": "target",
+      "spell": 33143,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 704342,
+      "target": "target",
+      "save_as": "after_third"
+    },
+    {
+      "action": "assert",
+      "label": "The five tenth-stack shots of the third channel deal 12.5 unstacked shots (2.5 each)",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 704342,
+      "target": "target",
+      "relative_to": "after_second",
+      "ratio_to": "first_shot",
+      "min": 12.375,
+      "max": 12.625
+    },
+    {
+      "action": "assert",
+      "label": "Fifteen shots stay at ten stacks",
+      "actor": "hunter",
+      "metric": "aura_stacks",
+      "spell": 706241,
+      "caster": "hunter",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 704342,
+      "target": "target",
+      "equals": 20,
+      "within_ms": 5000,
+      "label": "The chained fourth channel delivers five more shots"
+    },
+    {
+      "action": "assert",
+      "label": "The five tenth-stack shots of the fourth channel deal 12.5 unstacked shots (2.5 each)",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 704342,
+      "target": "target",
+      "relative_to": "after_third",
+      "ratio_to": "first_shot",
+      "min": 12.375,
+      "max": 12.625
+    },
+    {
+      "action": "assert",
+      "label": "Twenty shots stay at ten stacks",
+      "actor": "hunter",
+      "metric": "aura_stacks",
+      "spell": 706241,
+      "caster": "hunter",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "The last shot refreshed the 1200 ms progress timer",
+      "actor": "hunter",
+      "metric": "aura_duration_ms",
+      "spell": 706241,
+      "caster": "hunter",
+      "min": 700,
+      "max": 1200
+    },
+    {
+      "action": "wait",
+      "ms": 750
+    },
+    {
+      "action": "assert",
+      "label": "Progress outlasts the channel end",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 706241,
+      "caster": "hunter",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "Progress is gone 1.2 s after the last shot",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 706241,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 704342,
+      "target": "target",
+      "save_as": "after_drop"
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 800165,
+      "target": "target"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "target": "target",
+      "spell": 33143,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "target": "target",
+      "spell": 33143,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 704342,
+      "target": "target",
+      "equals": 25,
+      "within_ms": 5000,
+      "label": "The unchained fifth channel delivers five shots"
+    },
+    {
+      "action": "assert",
+      "label": "An unchained channel after the progress dropped deals 6.5 unstacked shots",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 704342,
+      "target": "target",
+      "relative_to": "after_drop",
+      "ratio_to": "first_shot",
+      "min": 6.435,
+      "max": 6.565
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "No sixth talented shot in any channel",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 704342,
+      "target": "target",
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "No talented shot is a critical hit",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 704342,
+      "target": "target",
+      "critical": true,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Progress never becomes an enemy debuff",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 706241,
+      "equals": 0
+    }
+  ]
+}

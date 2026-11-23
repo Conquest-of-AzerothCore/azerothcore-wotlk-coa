@@ -8,7 +8,11 @@ A `procs` entry of the class file describes one proc aura:
 | `tooltip` | its `Description[enUS]`, copied verbatim from the client DBC |
 | `chance_token` | the `$h` or `$<id>h` token of the tooltip that shows the chance |
 | `trigger` | `{"action": "attack", "spell": 0}` for auto attacks, `{"action": "cast", "spell": <rank>}` for a cast at |
-| | `dummy`, with `"target": "ally"` for a cast at a second player |
+| | `dummy`, with `"target": "ally"` for a cast at a second player, or `{"action": "taken_hit", "spell": <id>, |
+| | "striker_entry": <entry>}`: a stationary striker casts `spell` at the caster (full health before every strike) and |
+| | each damage event of it on the caster is a trial; `baseline` runs the strikes before the learn (ADR 0710) |
+| | or `{"action": "avoided", "striker_entry", "swing_ms", "dodge", "parry", "strikers", "striker_auras"}`: dodged and |
+| | parried melee swings of aggressive strikers are the trials (see "Avoided-swing trials" below, ADR 0900) |
 | `trigger_text` | the words of the tooltip that name the trigger |
 | `proc_spell`, `proc_spell_source` | the spell each proc casts, and where that id comes from |
 | `event_metric` | `spell_cast_count`, `spell_damage_count` or `spell_energize_count` (a proc that only energizes, ADR 0497), the metric of `proc_spell`; `melee_attack_count` (a `cast` |
@@ -19,11 +23,20 @@ A `procs` entry of the class file describes one proc aura:
 | `events_per_proc` | the events in one proc |
 | `trial_readings` | readings of the trials, `{"name", "meaning", "adds", "minus_events", "trials_metric"}`, if the |
 | | text allows several; `"trials_metric": "spell_cast_count"` counts the completed trigger casts as the trials |
+| `trigger_spells` | a `cast` trigger whose cast lands more than one rolling hit: the trigger spell first, then the |
+| | other spells; a trial is one landed hit (`spell_damage_count` on the dummy) of any listed spell, the baseline |
+| | hits of each taken out; needs `trigger_spells_source` (which strikes roll the proc, and the residual failure |
+| | probability), written into the scenario contract, and no `trial_readings` (ADR 0684) |
 | `readings_question` | the log evidence that tells the readings apart without counting, for `questions.md` |
 | `handler` | the code that rolls a proc without a `spell_proc` or `spell_script_names` row |
 | `dbc` | `ProcChance`, `ProcFlags`, `ProcCharges` of the aura and of the spell of the chance token |
 | `spell_proc` | the `spell_proc` row of each spell, `{}` without one |
 | `internal_cooldown_ms` | the `spell_proc` `Cooldown`, the internal cooldown between procs |
+| `base_mana_per_attempt` | `true` sets the caster's mana to the class file's `base_mana` before every attempt of a `cast` trigger that costs a percentage of base mana (`hits.base_mana_steps`), the baseline casts included; refused for a trigger without such a cost (ADR 0700) |
+| `control_weapon` | the name of a class-file weapon set with a one-handed main hand, for an `attack` trigger whose own |
+| | set wields a two-handed one: part 1 first swings that main hand with the aura learned, then re-equips the own |
+| | weapon; any event in the control hits alerts, fewer landed hits than the baseline attempts are not judged (ADR 0751) |
+| `dummy_distance` | yd, 0 < d <= 100: the dummy's placement, for a ranged trigger that the melee default refuses as too close (ADR 0700); absent, the default |
 | `status`, `reason` | `ambiguous_tooltip` or `unmodelled` for an entry without a scenario, and why |
 | `attempt_auras` | `{"spell", "stacks", "source"}` set before every cast of a `cast` trigger, for a fixture that keeps another |
 | | roll out of the trials (Blade Sermon 572548: Oath Chain at its cap, so Vindication grants no Oath: Vindication) |
@@ -355,6 +368,17 @@ and 2 points) and judges the Wilson interval inside the band: `ok` inside, `aler
 `trial_excluded_spells` (with `trial_excluded_reason`) removes the minion's hits of those spells from the trials,
 for hits the event script cannot roll on (Plague Horde's Zombie Plague 504022, cast inside its own handler).
 
+`residual_target` (a per-pair false-alert probability, with `min_detectable` in percentage points, on a `band` entry;
+ADR 0781) judges each run's pooled Wilson interval at confidence `1 - residual_target / 2` instead of 99% and the
+between-part interval. It needs `band + 2 x half-width <= min_detectable` at that confidence, so a server off the
+chance by `min_detectable` cannot pass; `min_detectable` lies at or beyond the band (D-198). Generate fails when the
+scheduled attempts are short ("under-sized: needs N attempts"; raise `min_parts`), and the judge refuses fewer trials
+than the sizing needs. The verdict row states the confidence, the trials and "a deviation of D points from the chance
+rejected with probability >= X", with X and the per-pair false alert computed by the tool from the normal
+approximation at the measured trials. Wilson coverage is nominal, not exact: the stated probabilities are
+approximate (close at the thousands of trials these entries use). Shadow Rage 804192: 0.001 per pair, 5 points,
+110 parts.
+
 ### Summon procs (ADR 0351)
 
 A proc whose event is a creature the code spawns directly (no spell event; Unrelenting Army 705747/707880, Muck
@@ -367,6 +391,13 @@ any summon there is an alert. `trials_per_attempt` divides the scheduled casts w
 `min_parts` splits a proc into at least that many parts of the same attempts per part, adding attempts (the
 between-part t interval needs 10 parts, ADR 0647).
 
+When the trigger spell summons the same creature by itself (Unleash the Hounds 807933 summons two Lesser Shadow
+Hounds 50224; Kennel Master 706365/707891 adds a third at its chance), `events_baseline_per_attempt: N` (ADR 0960,
+provisional) subtracts N per completed cast from every part's events. It needs `baseline: true` and
+`trial_casts: true`, and no `trial_readings` or `events_exclude_trigger_casts`; such an entry may use a non-hostile
+cast trigger (cast with the dummy selected). The baseline arm must read exactly N per completed cast: a missing or
+empty arm is `unmeasured`, another count is an alert, and a part with fewer than N per cast after the learn alerts.
+
 ### Chance modifiers learned with the aura (ADR 0586)
 
 `chance_modifiers` lists `[spell, token]` pairs of spells that raise the aura's roll: each spell is learned right
@@ -376,3 +407,39 @@ server DBC set, or generation refuses the entry. The label and the scenario keys
 the plain entry of the same aura keeps its label; `compare` reads the modifier's token again from the tooltip and adds
 it to the chance it judges. Necromancer: Refreshing Chill 300940 ($h = 20) with Frigid Winds 504357 ($s1 = 5),
 judged at 25% in the 23-27% band (claim 83.0, pooled like 92122).
+
+A modifier whose own tooltip shows no such token (an empty Description) may name a reference token
+`$<modifier>s<n>` that the aura's own tooltip shows (ADR 0715): the points are read there, the effect is `<n> - 1` of the
+modifier spell (still a flat `SPELLMOD_CHANCE_OF_SUCCESS`), and the model's `chance_modifier_tooltips` maps the
+modifier to the aura, so `compare` reads the token again from the aura's tooltip. A modifier that is an aura held
+while active (not a learned passive) also needs `attempt_auras`. Witch Hunter: Flames of the Sinned 560207 with
+Flames of Sin 803422 (`$803422s3` = 10, judged at 35%, claim 97.0; 803422 set before every Smite Evil cast).
+
+### Off-hand trials of an attack proc (ADR 0718)
+
+`trial_hand: 1` on an `attack` proc without `most_procs_per_trigger` counts the trials and attempts on the off hand
+(`melee_damage_count` and `melee_attack_count` hand 1) and spaces the swings by the off-hand weapon's speed, read from
+the entry's weapon set (an off hand is required). Main-hand swings still happen but are not trials, so the proc's
+handler must accept off-hand swings only. Absent or `0`, the main hand stays the trial hand. Witch Hunter: Brushin'
+Off The Dusk 681329 (10%) and 681488 (20%), each proc counted by its single Replenishment 1257670 cast (claims 214.0,
+228.0).
+
+### Avoided-swing trials (ADR 0900)
+
+`{"action": "avoided", "striker_entry": <entry>, "swing_ms": <ms>, "dodge": <pct>, "parry": <pct>, "strikers": <n>}`
+(opt-in; `strikers` 1 to 10, default 1; `dodge + parry` must be 100; `"striker_auras": [<spell>, ...]` optional).
+`strikers` aggressive stationary creatures (`striker`, `striker_2`, ...) melee the caster, each given the
+`striker_auras` first (harness `set_aura` on the striker): `stationary` alone did not keep several strikers in front
+of the caster, where a player cannot dodge or parry, so the Witch Hunter entries root them with Self Root Forever (No
+Visual) 42716 and hasten them with Molten 62531 and Enrage 2116852 (Templar ADR 0161 fixtures), with a 500 ms
+`swing_ms`. Each striker is engaged once by a caster auto attack, then
+`stop_attack`, all before the aura is learned, so a proc that also rolls on the caster's own auto attacks never
+rolls on them with the aura. Before every engage and every `swing_ms` attempt the caster's health is set to full and
+its dodge and parry to the stated percentages (`set_combat_avoidance`), so no swing lands. The dodged
+(`melee_attacks_taken` victim state 2) and parried (state 3) swings are summed into one reading; the swings up to
+the learn are a held baseline in every part (no event allowed), and with `baseline` part 1 also runs baseline swing
+intervals before the learn. After the window the caster's own auto attacks and the landed (state 1) or fully
+blocked (state 5) swings since the engage must be 0: these asserts come before the reads, so a second trigger
+source fails the part instead of being judged. Trials per attempt are the striker count; `trials_per_attempt`,
+`trial_readings` and an internal cooldown are refused. The label is `<aura> proc_rate avoided` and the key ends in
+`avoided`; an avoided entry does not rename a sibling entry of the same aura.

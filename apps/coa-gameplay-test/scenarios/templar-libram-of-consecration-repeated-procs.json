@@ -1,0 +1,644 @@
+{
+  "schema": 1,
+  "name": "Libram of Consecration adds its Holy damage to every damaging ability and Zealotry hit under one buff, never to auto attacks",
+  "contract": "Libram of Consecration 803893: \"causing damaging abilities to deal an additional Holy damage to your target and 4 nearby enemies for $d\" (804148). #12670 reports a 1 s internal cooldown; spell_proc 803893 has Cooldown 0 and the script no timer. The owner ruled on 2026-11-18 that Zealotry 801450 hits trigger it, as on live (256 of 281 isolated Zealotry hits), and that auto attacks do not (0 of 160 swings) (ADR 1011). One level 60 Templar, hit and expertise forced, dual wields Frostmane Club 2259 and Ancient Bone Mace 30754 (Zealotry needs an off-hand weapon); resistance removed by 823764. Arm cleave: one Libram buff, five Holy Cleave 573049 casts at one dummy, spaced 1300 ms because Holy Cleave's own global cooldown is 1250 ms (asserted); five hits give five 804148 hits. Arm zealotry, same buff: five direct Zealotry casts 1000 ms apart (no global cooldown) give five 804148 hits. Arm no zealotry swing: Libram removed (absence asserted) and read again, 92108 not learned, auto attack with both hands for 9 s: main- and off-hand swings land and give zero 804148 hits, so auto attacks never proc it. Arm swing: Libram removed and read again, the Level 10 passive 92108 learned, auto attack for 9 s: each off-hand swing casts Zealotry inside the Templar event guard, and 804148 hits equal Zealotry hits, so those nested Zealotry hits proc it. The dummies stand 40 yd apart, beyond 804148's 5 yd jump radius and Holy Cleave's second target. No step is probabilistic: 803893 and 92108 proc at 100%, hit and expertise are forced.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d_cleave",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "d_zealotry",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 43,
+      "stationary": true
+    },
+    {
+      "id": "d_swing",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 83,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "templar",
+      "item": 2259
+    },
+    {
+      "action": "equip",
+      "actor": "templar",
+      "item": 2259,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "templar",
+      "skill": 54,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "templar",
+      "item": 30754
+    },
+    {
+      "action": "equip",
+      "actor": "templar",
+      "item": 30754,
+      "slot": 16
+    },
+    {
+      "action": "unlearn",
+      "actor": "templar",
+      "spell": 92108
+    },
+    {
+      "action": "assert",
+      "label": "No off-hand Zealotry passive before the swing arm",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 92108,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 573049
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 801450
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 803893
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 803893
+    },
+    {
+      "action": "assert",
+      "label": "Libram of Consecration is read",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 803893,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 35
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 573049,
+      "target": "d_cleave"
+    },
+    {
+      "action": "assert",
+      "label": "Holy Cleave 1 is not refused",
+      "actor": "templar",
+      "metric": "cast_failure",
+      "spell": 573049,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Holy Cleave's own global cooldown is longer than 1000 ms (StartRecoveryTime 1250), so the Holy Cleave arm is spaced 1300 ms",
+      "actor": "templar",
+      "metric": "global_cooldown_ms",
+      "spell": 573049,
+      "min": 1100,
+      "max": 1250
+    },
+    {
+      "action": "wait",
+      "label": "cleave: next Holy Cleave after its global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 35
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 573049,
+      "target": "d_cleave"
+    },
+    {
+      "action": "assert",
+      "label": "Holy Cleave 2 is not refused",
+      "actor": "templar",
+      "metric": "cast_failure",
+      "spell": 573049,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "cleave: next Holy Cleave after its global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 35
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 573049,
+      "target": "d_cleave"
+    },
+    {
+      "action": "assert",
+      "label": "Holy Cleave 3 is not refused",
+      "actor": "templar",
+      "metric": "cast_failure",
+      "spell": 573049,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "cleave: next Holy Cleave after its global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 35
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 573049,
+      "target": "d_cleave"
+    },
+    {
+      "action": "assert",
+      "label": "Holy Cleave 4 is not refused",
+      "actor": "templar",
+      "metric": "cast_failure",
+      "spell": 573049,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "cleave: next Holy Cleave after its global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 35
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 573049,
+      "target": "d_cleave"
+    },
+    {
+      "action": "assert",
+      "label": "Holy Cleave 5 is not refused",
+      "actor": "templar",
+      "metric": "cast_failure",
+      "spell": 573049,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "cleave: let the last hit and its Libram damage land",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "cleave: five Holy Cleave hits landed on the dummy",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 573049,
+      "target": "d_cleave",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "cleave: every Holy Cleave hit under one Libram buff dealt the extra Holy damage, five of five",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 804148,
+      "target": "d_cleave",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "cleave: the same Libram buff is still held",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 803893,
+      "equals": 1
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": 20
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": 20
+    },
+    {
+      "action": "assert",
+      "label": "The Templar stands 3 yd from d_zealotry",
+      "actor": "templar",
+      "metric": "distance",
+      "target": "d_zealotry",
+      "min": 2.5,
+      "max": 3.5
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 801450,
+      "target": "d_zealotry"
+    },
+    {
+      "action": "assert",
+      "label": "Zealotry 1 is not refused",
+      "actor": "templar",
+      "metric": "cast_failure",
+      "spell": 801450,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "zealotry: next Zealotry 1000 ms later",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 801450,
+      "target": "d_zealotry"
+    },
+    {
+      "action": "assert",
+      "label": "Zealotry 2 is not refused",
+      "actor": "templar",
+      "metric": "cast_failure",
+      "spell": 801450,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "zealotry: next Zealotry 1000 ms later",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 801450,
+      "target": "d_zealotry"
+    },
+    {
+      "action": "assert",
+      "label": "Zealotry 3 is not refused",
+      "actor": "templar",
+      "metric": "cast_failure",
+      "spell": 801450,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "zealotry: next Zealotry 1000 ms later",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 801450,
+      "target": "d_zealotry"
+    },
+    {
+      "action": "assert",
+      "label": "Zealotry 4 is not refused",
+      "actor": "templar",
+      "metric": "cast_failure",
+      "spell": 801450,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "zealotry: next Zealotry 1000 ms later",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 801450,
+      "target": "d_zealotry"
+    },
+    {
+      "action": "assert",
+      "label": "Zealotry 5 is not refused",
+      "actor": "templar",
+      "metric": "cast_failure",
+      "spell": 801450,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "zealotry: let the last hit and its Libram damage land",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "zealotry: five Zealotry hits landed on the dummy",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 801450,
+      "target": "d_zealotry",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "zealotry: every Zealotry hit 1000 ms apart dealt the Libram extra Holy damage, five of five (owner ruling 2026-11-18, ADR 1011)",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 804148,
+      "target": "d_zealotry",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "zealotry: the Libram buff read before the Holy Cleave arm is still held",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 803893,
+      "equals": 1
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": 20
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": 20
+    },
+    {
+      "action": "assert",
+      "label": "The Templar stands 3 yd from d_swing",
+      "actor": "templar",
+      "metric": "distance",
+      "target": "d_swing",
+      "min": 2.5,
+      "max": 3.5
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 803893
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 803893,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "no zealotry swing: the earlier Libram buff is removed before the recast",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 803893,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 803893
+    },
+    {
+      "action": "assert",
+      "label": "no zealotry swing: Libram of Consecration is read again by this cast",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 803893,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "templar",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "save_as": "plain_main_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "templar",
+      "metric": "melee_damage_count",
+      "hand": 1,
+      "save_as": "plain_off_before"
+    },
+    {
+      "action": "attack",
+      "actor": "templar",
+      "target": "d_swing"
+    },
+    {
+      "action": "wait",
+      "label": "no zealotry swing: auto attack with both hands, 92108 not learned",
+      "ms": 9000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "templar"
+    },
+    {
+      "action": "wait",
+      "label": "no zealotry swing: let the last swing resolve",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "no zealotry swing: main-hand auto attacks hit the dummy",
+      "actor": "templar",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "relative_to": "plain_main_before",
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "no zealotry swing: off-hand auto attacks hit the dummy",
+      "actor": "templar",
+      "metric": "melee_damage_count",
+      "hand": 1,
+      "relative_to": "plain_off_before",
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "no zealotry swing: without 92108 no Zealotry fires",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 801450,
+      "target": "d_swing",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "no zealotry swing: auto attacks of both hands under the Libram buff never deal its extra Holy damage",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 804148,
+      "target": "d_swing",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 92108
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 803893
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 803893,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "swing: the earlier Libram buff is removed before the recast",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 803893,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 803893
+    },
+    {
+      "action": "assert",
+      "label": "swing: Libram of Consecration is read again by this cast",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 803893,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "templar",
+      "target": "d_swing"
+    },
+    {
+      "action": "wait",
+      "label": "swing: auto attack with both hands",
+      "ms": 9000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "templar"
+    },
+    {
+      "action": "wait",
+      "label": "swing: let the last swing resolve",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "swing: main-hand auto attacks hit the dummy",
+      "actor": "templar",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "swing: off-hand auto attacks triggered Zealotry through 92108 inside its Templar event",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 801450,
+      "target": "d_swing",
+      "min": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 801450,
+      "target": "d_swing",
+      "save_as": "swing_zealotry"
+    },
+    {
+      "action": "assert",
+      "label": "swing: each Zealotry from an off-hand swing dealt the Libram extra Holy damage; the arm without 92108 dealt none, so the swings themselves never do",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 804148,
+      "target": "d_swing",
+      "ratio_to": "swing_zealotry",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

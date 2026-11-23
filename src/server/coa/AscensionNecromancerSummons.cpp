@@ -22,6 +22,7 @@
 #include "WorldSession.h"
 #include <algorithm>
 #include <cmath>
+#include <optional>
 
 namespace AscensionNecromancer
 {
@@ -1013,6 +1014,109 @@ class spell_ascension_necromancer_warrior_strike : public SpellScript
     }
 };
 
+class spell_ascension_necromancer_command_area : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_necromancer_command_area);
+
+    static std::optional<Targets> EnemyArea(SpellEffectInfo const& effect)
+    {
+        for (Targets target : {effect.TargetA.GetTarget(), effect.TargetB.GetTarget()})
+            switch (target)
+            {
+                case TARGET_UNIT_SRC_AREA_ENEMY:
+                case TARGET_UNIT_CONE_ENEMY_24:
+                case TARGET_UNIT_CONE_ENEMY_54:
+                case TARGET_UNIT_CONE_ENEMY_104:
+                    return target;
+                default:
+                    break;
+            }
+        return std::nullopt;
+    }
+
+    static bool AvoidsArea(Creature const* creature)
+    {
+        if (creature->IsAvoidingAOE())
+            return true;
+        CreatureImmunities const* immunities =
+            sSpellMgr->GetCreatureImmunities(creature->GetCreatureTemplate()->CreatureImmunitiesId);
+        return immunities && immunities->ImmuneAoE;
+    }
+
+    static float Radians(float degrees)
+    {
+        return degrees * static_cast<float>(M_PI) / 180.0f;
+    }
+
+    float ConeAngle(Targets target)
+    {
+        if (SpellCone const* cone = sSpellMgr->GetSpellCone(GetSpellInfo()->Id))
+            return Radians(static_cast<float>(cone->cone_degrees));
+        switch (target)
+        {
+            case TARGET_UNIT_CONE_ENEMY_24:
+                return Radians(24.0f);
+            case TARGET_UNIT_CONE_ENEMY_54:
+                return Radians(54.0f);
+            case TARGET_UNIT_CONE_ENEMY_104:
+                return Radians(104.0f);
+            default:
+                return Radians(60.0f);
+        }
+    }
+
+    void Reach(std::list<WorldObject*>& targets, SpellEffIndex effIndex)
+    {
+        Unit* caster = GetCaster();
+        Player* player = Owner(caster);
+        if (!player || !IsMinion(player, caster))
+            return;
+        Creature* focus = ObjectAccessor::GetCreature(*caster, State(player).focus);
+        if (!focus || !focus->IsAlive() || !AvoidsArea(focus) ||
+            std::find(targets.begin(), targets.end(), focus) != targets.end())
+            return;
+        SpellEffectInfo const& effect = GetSpellInfo()->Effects[effIndex];
+        Targets target = *EnemyArea(effect);
+        float radius = effect.CalcRadius(caster) + caster->GetLeewayBonusRadius();
+        if (!caster->IsWithinDistInMap(focus, radius) || !caster->IsWithinLOSInMap(focus) ||
+            !caster->IsValidAttackTarget(focus, GetSpellInfo()))
+            return;
+        if (target != TARGET_UNIT_SRC_AREA_ENEMY && !caster->isInFront(focus, ConeAngle(target)))
+            return;
+        targets.push_back(focus);
+    }
+
+    void Reach0(std::list<WorldObject*>& targets) { Reach(targets, EFFECT_0); }
+    void Reach1(std::list<WorldObject*>& targets) { Reach(targets, EFFECT_1); }
+    void Reach2(std::list<WorldObject*>& targets) { Reach(targets, EFFECT_2); }
+
+    void Register() override
+    {
+        SpellInfo const* info = sSpellMgr->GetSpellInfo(m_scriptSpellId);
+        for (uint8 index = EFFECT_0; index < MAX_SPELL_EFFECTS; ++index)
+        {
+            std::optional<Targets> target = EnemyArea(info->Effects[index]);
+            if (!target)
+                continue;
+            switch (index)
+            {
+                case EFFECT_0:
+                    OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
+                        spell_ascension_necromancer_command_area::Reach0, EFFECT_0, *target);
+                    break;
+                case EFFECT_1:
+                    OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
+                        spell_ascension_necromancer_command_area::Reach1, EFFECT_1, *target);
+                    break;
+                default:
+                    OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
+                        spell_ascension_necromancer_command_area::Reach2, EFFECT_2, *target);
+                    break;
+            }
+        }
+    }
+};
+
 class npc_ascension_necromancer_script : public GenericCreatureScript<npc_ascension_necromancer>
 {
 public:
@@ -1032,6 +1136,7 @@ void AddAscensionNecromancerSummonScripts()
 {
     new npc_ascension_necromancer_script();
     RegisterSpellScript(spell_ascension_necromancer_warrior_strike);
+    RegisterSpellScript(spell_ascension_necromancer_command_area);
     RegisterSpellScript(spell_ascension_necromancer_summon);
     new necromancer_minion_dismiss();
 }

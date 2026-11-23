@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "Interrogator's Fire damage over time stacks Dawn (#12708)",
+  "contract": [
+    "Dawn 705484 reads 'Dealing Fire damage now increases the damage dealt by Torchlight and Dusk Blade by",
+    "$503658s1% for $503658d, stacking $503658u times.' Interrogator 806188 reads 'Damage dealt by Dawn Blade now",
+    "deals an additional 100% of the damage dealt over $807262d as Fire damage.' Its damage over time 807262",
+    "(SchoolMask 4, 1 sec ticks for 10 sec) is in Extra(), so aura_ascension_witch_hunter_event::Check rejected its",
+    "ticks for Dawn before the Fire school test, as it did for Flames of Sin 802850 before #12448. Ascension",
+    "footage reviewed by the user on 2026-11-18 shows these ticks stacking Dawn. One Dawn Blade 802024 (Holyfire,",
+    "SchoolMask 6) stacks Dawn 503658 once by its own hit; with no auto attacks and no Flames of Sin, any further",
+    "stack comes from 807262 ticks. Expected: after at least three ticks Dawn has at least three stacks.",
+    "Ratings remove the Dawn Blade miss, dodge and parry; the fixture dual-wields as in",
+    "witch-hunter-dawn-from-flames-of-sin-12448."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter", "race": 1, "class": 15, "level": 60, "melee_hit_rating": 10000,
+      "expertise_rating": 10000, "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "hunter", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "hunter", "spell": 201 },
+    { "action": "learn", "actor": "hunter", "spell": 1180 },
+    { "action": "learn", "actor": "hunter", "spell": 674 },
+    { "action": "learn", "actor": "hunter", "spell": 705484 },
+    { "action": "learn", "actor": "hunter", "spell": 806188 },
+    { "action": "learn", "actor": "hunter", "spell": 802024 },
+    { "action": "add_item", "actor": "hunter", "item": 25 },
+    { "action": "equip", "actor": "hunter", "item": 25, "slot": 15 },
+    { "action": "add_item", "actor": "hunter", "item": 2092 },
+    { "action": "equip", "actor": "hunter", "item": 2092, "slot": 16 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "SETUP: Dawn is active", "actor": "hunter",
+      "metric": "aura", "spell": 705484, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: Interrogator is active", "actor": "hunter",
+      "metric": "aura", "spell": 806188, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: no Dawn stack before the strike", "actor": "hunter",
+      "metric": "aura", "spell": 503658, "equals": 0
+    },
+    { "action": "cast", "label": "One Dawn Blade", "actor": "hunter", "spell": 802024, "target": "enemy" },
+    {
+      "action": "assert", "label": "SETUP: Dawn Blade lands", "actor": "hunter",
+      "metric": "spell_damage_count", "spell": 802024, "target": "enemy", "min": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: Interrogator ticks three times", "actor": "hunter",
+      "metric": "spell_damage_count", "spell": 807262, "target": "enemy", "min": 3, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Interrogator's Fire ticks stack Dawn", "actor": "hunter",
+      "metric": "aura_stacks", "spell": 503658, "caster": "hunter", "min": 3, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Only one Dawn Blade was cast", "actor": "hunter",
+      "metric": "spell_cast_count", "spell": 802024, "equals": 1
+    },
+    { "action": "assert", "actor": "hunter", "metric": "alive", "equals": 1 }
+  ]
+}

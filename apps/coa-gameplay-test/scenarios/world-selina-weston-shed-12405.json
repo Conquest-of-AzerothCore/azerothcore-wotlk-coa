@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Brill: Selina Weston stands in front of the shed, not inside it (#12405)",
+  "contract": "#12405 reported Selina Weston (creature guid 33710, entry 3548) inside a shack north of Brill. patch-WB1 places WESTFALLSHED.M2 (uid 136593, origin 2329.72 243.19 28.14) over her vanilla spot (2330.42, 242.518, 28.4739): it lies 1.15 yd inside the shed's south long face, with walls on every side and the roof about 3.3 yd above. She moves 3 yd out along that face's normal to (2331.893, 239.905, 28.08) on the terrain, still facing away from the shed (orientation unchanged), where the client geometry leaves the shed 1.87 yd behind her and nothing above.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": 2331.75,
+    "y": 236.5,
+    "z": 28.1,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 5,
+      "class": 1,
+      "level": 12
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Selina Weston stands at the spot in front of the shed",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": 2331.893,
+      "y": 239.905,
+      "z": 28.08,
+      "max": 0.3,
+      "guid": 33710,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "Selina Weston stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.3,
+      "max": 0.3,
+      "guid": 33710,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Selina Weston keeps 1.5 yd from the shed walls (was about 1 yd, enclosed)",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "min": 1.5,
+      "guid": 33710,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no shed roof within 5 yd above Selina Weston (was about 3.3 yd)",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "min": 5,
+      "guid": 33710,
+      "spawn_type": "creature"
+    }
+  ]
+}

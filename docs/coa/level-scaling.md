@@ -304,12 +304,13 @@ The preview lets each character see the version they would receive before it is 
 | Auction list | the instance level in the auction's unused flags word, the item level for an unscaled one |
 
 An item whose key equals its own item level is the authored item: the server answers the client's
-`0x6FF` query for that key with the authored stats instead of a ladder row.
+`0x6FF` query for that key with the authored stats instead of a ladder row, and an owned instance stored at
+that key uses the authored template too (required level, stats, armor).
 
-A stat query carries only `(item ID, level)`. Carried, banked and mailed items resolve the ambiguity between
-a stored key that equals the item level and an unowned preview by asking whether the character owns an
-instance stored at that key. Inspect, trade and auction queries cannot be tied to the viewer's own items, so
-for them a key equal to the item level is still answered with the authored item.
+A stat query carries only `(item ID, level)`, and the client caches each answer. An owned item stored at its
+own item level used to take the ladder row while its corpse preview, asked before the item was owned, got the
+authored one, so the tooltip and the server disagreed (#12700). Treating that key as the authored item
+everywhere removes the ambiguity: no answer depends on who owns what.
 
 ### Many characters, one creature
 

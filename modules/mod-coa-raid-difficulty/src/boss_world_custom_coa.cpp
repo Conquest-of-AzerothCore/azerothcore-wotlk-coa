@@ -54,8 +54,9 @@
  * 25.08.2026, same spell damage on both, see the level table for health)
  *   Spectral Bolt       every 1.5s    his tank, stacking shadow damage taken
  *   Spectral Volley     every 12s     3s cast, everyone
- *   Land of the Dead    every 61.4s   six seconds: a Damned Wight a second at
- *                                     the raid, a choking cloud every other
+ *   Land of the Dead    every 61.4s   six seconds: a choking cloud every other
+ *                                     second at a player, a Damned Wight a
+ *                                     second rising from the last cloud
  *   Spectral Veil       at 80/60/40/20%  a channel of up to 100s: shadow damage
  *                                     to everyone each second, growing. The four
  *                                     Soul Vessels open: each spawns Restless
@@ -1235,6 +1236,7 @@ namespace
         NPC_ATALZUL             = 67532,
         NPC_ZULROGG             = 67533,
         NPC_DAMNED_WIGHT        = 67534,
+        NPC_INVISIBLE_TRIGGER   = 12999,
         NPC_RESTLESS_SPIRIT     = 67535,
         NPC_SOUL_VESSEL         = 67536,
         NPC_VESSEL_BARRIER      = 67537,
@@ -1553,6 +1555,7 @@ namespace
             _nextVeil = 80;
             _phase = false;
             _dormant = true;
+            _raise = 0;
             me->RemoveAurasDueToSpell(SPELL_VEIL_POWER);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
@@ -1649,11 +1652,20 @@ namespace
                 Unit* t = RandomPlayer(false);
                 if (!t)
                     return;
-                Position pos = me->GetNearPosition(8.0f + 3.0f * float(_raise % 3), 2.4f * float(_raise));
-                me->UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
-                me->SummonCreature(NPC_DAMNED_WIGHT, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
                 if (_raise++ % 2 == 0)
-                    CastAt(t->GetPosition(), SPELL_CHOKING_CLOUD);
+                {
+                    _cloud = t->GetPosition();
+                    if (Creature* cloud = me->SummonCreature(NPC_INVISIBLE_TRIGGER, _cloud,
+                            TEMPSUMMON_TIMED_DESPAWN, 60000))
+                    {
+                        cloud->SetFaction(me->GetFaction());
+                        cloud->CastSpell(_cloud.GetPositionX(), _cloud.GetPositionY(), _cloud.GetPositionZ(),
+                            SPELL_CHOKING_CLOUD, true);
+                    }
+                }
+                Position pos = _cloud;
+                me->MovePosition(pos, frand(1.0f, 4.0f), frand(0.0f, 2.0f * float(M_PI)));
+                me->SummonCreature(NPC_DAMNED_WIGHT, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
             }
             else if (spell->Id == SPELL_VEIL_TRIGGER)
             {
@@ -1785,6 +1797,7 @@ namespace
         uint32 _hovered = 0;
         uint8 _nextVeil = 80;
         uint32 _raise = 0;
+        Position _cloud;
         bool _phase = false;
         bool _dormant = true;
     };

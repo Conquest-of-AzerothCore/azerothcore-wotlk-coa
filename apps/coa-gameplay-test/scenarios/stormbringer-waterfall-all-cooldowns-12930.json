@@ -1,0 +1,427 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Waterfall critical damage reduces all Stormbringer cooldowns (#12930)",
+  "contract": [
+    "#12930: Waterfall 806412 reads 'Dealing critical damage now reduces all of your cooldowns by 0.5 sec.', with",
+    "no internal cooldown. Its trigger Waterfall [CDR1] 807661 has three SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN",
+    "effects naming Overload Mechanical 707365, Gust of Wind 500932 and Torrential Wrath 503352, so every other",
+    "cooldown was untouched. The PR author ruled that 'all of your cooldowns' means every Stormbringer spell on",
+    "cooldown and that any critical damage counts. spell_ascension_stormbringer_waterfall now takes 807661's -500",
+    "ms off every spell of its family on the player's cooldown map, and 806412's spell_proc row accepts every",
+    "damage class and periodic damage, still on critical hits only. Setup and timing follow",
+    "stormbringer-fix-random-chance-procs-waterfall: a control Stormbringer without Waterfall starts the same",
+    "Gust of Wind and Stormcloak 804833 cooldowns at the same moment, so elapsed time cancels out. Stormcloak (30",
+    "s, self-cast, off the global cooldown) is not one of the three named spells. Its cooldown only starts when",
+    "its 15 s buff ends (the first run read a placeholder cooldown until then and the reductions were lost), so",
+    "both casters cancel the buff straight after casting it, and its cooldown then runs normally, so its 4-5 *",
+    "500 ms reduction after four or five critical Shocks proves 'all'. Five Shocks with at least four Waterfall",
+    "procs, as in the #3638 scenario, because the taken-side crit roll is not a hard 100%. With at least four",
+    "procs asserted, both final cooldown checks accept -1900 to -2600 ms: four or five 500 ms reductions with 100",
+    "ms of timing slack (the baseline offset between the casters measured 6 ms), while three reductions (-1500",
+    "ms) fail."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "control",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "wf",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "wf",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 20
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 500932
+    },
+    {
+      "action": "learn",
+      "actor": "wf",
+      "spell": 500932
+    },
+    {
+      "action": "learn",
+      "actor": "wf",
+      "spell": 804020
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "set_power",
+      "actor": "wf",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "SETUP: both casters start the same 35000 ms Gust of Wind cooldown",
+      "actor": "control",
+      "spell": 500932
+    },
+    {
+      "action": "cast",
+      "actor": "wf",
+      "spell": 500932
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 804833
+    },
+    {
+      "action": "learn",
+      "actor": "wf",
+      "spell": 804833
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "set_power",
+      "actor": "wf",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "SETUP: both casters start the same 30000 ms Stormcloak cooldown",
+      "actor": "control",
+      "spell": 804833,
+      "target": "control"
+    },
+    {
+      "action": "cast",
+      "actor": "wf",
+      "spell": 804833,
+      "target": "wf"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both Stormcloak casts were accepted",
+      "actor": "wf",
+      "metric": "cast_failure",
+      "spell": 804833,
+      "equals": 0
+    },
+    {
+      "action": "cancel_aura",
+      "label": "Stormcloak's cooldown starts when its buff ends, so both casters drop it now",
+      "actor": "control",
+      "spell": 804833
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "wf",
+      "spell": 804833
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Gust of Wind is on cooldown for the control caster",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 500932,
+      "min": 30000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Gust of Wind is on cooldown for the Waterfall caster",
+      "actor": "wf",
+      "metric": "cooldown_ms",
+      "spell": 500932,
+      "min": 30000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Stormcloak is on cooldown for the control caster",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 804833,
+      "min": 25000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Stormcloak is on cooldown for the Waterfall caster",
+      "actor": "wf",
+      "metric": "cooldown_ms",
+      "spell": 804833,
+      "min": 25000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the 10000 spell crit rating makes every Shock a critical strike",
+      "actor": "wf",
+      "metric": "spell_done_crit_chance",
+      "spell": 804020,
+      "target": "dummy",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the enemy stands outside Gust of Wind's 12 yard cone and inside Shock's 35 yard range",
+      "actor": "wf",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 13,
+      "max": 34
+    },
+    {
+      "action": "set_power",
+      "actor": "wf",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "wf",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "wf",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "wf",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the second Shock land (1500 ms cast plus 500 ms flight over 20 yd) before Waterfall is learned",
+      "ms": 2500
+    },
+    {
+      "action": "snapshot",
+      "label": "Control caster's remaining Gust of Wind cooldown after the untalented crits",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 500932,
+      "save_as": "control_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Control caster's remaining Stormcloak cooldown after the untalented crits",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 804833,
+      "save_as": "control_cloak_before"
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: two critical strikes without Waterfall leave Stormcloak at elapsed time only",
+      "actor": "wf",
+      "metric": "cooldown_ms",
+      "spell": 804833,
+      "relative_to": "control_cloak_before",
+      "min": -600,
+      "max": 600
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: two critical strikes without Waterfall move the cooldown by nothing but elapsed time",
+      "actor": "wf",
+      "metric": "cooldown_ms",
+      "spell": 500932,
+      "relative_to": "control_before",
+      "min": -600,
+      "max": 600
+    },
+    {
+      "action": "learn",
+      "actor": "wf",
+      "spell": 806412
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Waterfall proc has happened yet",
+      "actor": "wf",
+      "metric": "spell_proc_count",
+      "spell": 806412,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "wf",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "wf",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "wf",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "wf",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "wf",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "wf",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "wf",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "wf",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "wf",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Fifth Shock: one spare attempt, since the crit roll is not a hard 100%",
+      "actor": "wf",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the fifth Shock land (1500 ms cast plus 500 ms flight over 20 yd)",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: at least four of the five critical strikes procced Waterfall (806412 ProcChance 100)",
+      "actor": "wf",
+      "metric": "spell_proc_count",
+      "spell": 806412,
+      "min": 4
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the proc cast the cooldown-reduction spell 807661",
+      "actor": "wf",
+      "metric": "spell_cast_count",
+      "spell": 807661,
+      "min": 4
+    },
+    {
+      "action": "snapshot",
+      "label": "Control caster's remaining Gust of Wind cooldown, with no Waterfall contribution",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 500932,
+      "save_as": "control_after"
+    },
+    {
+      "action": "assert",
+      "label": "Gust of Wind still loses 4-5 * 500 ms (2000-2500, +/-100 ms) more than elapsed time",
+      "actor": "wf",
+      "metric": "cooldown_ms",
+      "spell": 500932,
+      "relative_to": "control_after",
+      "min": -2600,
+      "max": -1900
+    },
+    {
+      "action": "snapshot",
+      "label": "Control caster's remaining Stormcloak cooldown, with no Waterfall contribution",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 804833,
+      "save_as": "control_cloak_after"
+    },
+    {
+      "action": "assert",
+      "label": "#12930: the crits took 4-5 * 500 ms (+/-100) off Stormcloak, which 807661 never named",
+      "actor": "wf",
+      "metric": "cooldown_ms",
+      "spell": 804833,
+      "relative_to": "control_cloak_after",
+      "min": -2600,
+      "max": -1900
+    }
+  ]
+}

@@ -49,6 +49,7 @@
 #include "AscensionWarcraftRebornHunter.h"
 #include "AscensionWarcraftRebornMage.h"
 #include "AscensionWarcraftRebornShaman.h"
+#include "AscensionDummyFixes.h"
 #include "AscensionWarcraftRebornPaladin.h"
 #include "AscensionWarcraftRebornPriest.h"
 #include "AscensionWarcraftRebornRogue.h"
@@ -181,6 +182,7 @@ constexpr uint32 SPELL_RANGER_HUNTING_QUIVER = 800262;
 constexpr uint32 SPELL_RANGER_SKIRMISHERS_QUIVER = 801069;
 constexpr uint32 SPELL_RANGER_SEARING_QUIVER_DAMAGE = 681109;
 constexpr uint32 SPELL_RANGER_POISON_QUIVER_DAMAGE = 500104;
+constexpr uint32 SPELL_RANGER_QUICK_WITTED_STAB = 704314;
 constexpr uint32 SPELL_RANGER_BOUNTY_HUNTER = 803114;
 constexpr uint32 SPELL_RANGER_BOUNTY_HUNTER_DEBUFF = 560722;
 constexpr uint32 SPELL_RANGER_RUSTY_SHIV_DAMAGE = 681459;
@@ -1120,6 +1122,21 @@ void ApplyAscensionClassMechanics(SpellInfo* spellInfo)
     ApplyAscensionWarcraftRebornWarlockContracts(spellInfo);
     ApplyAscensionWarcraftRebornDruidContracts(spellInfo);
     ApplyAscensionWarcraftRebornShamanContracts(spellInfo);
+    ApplyAscensionDummyFixDeathKnightContracts(spellInfo);
+    ApplyAscensionDummyFixDruidContracts(spellInfo);
+    ApplyAscensionDummyFixGenericContracts(spellInfo);
+    ApplyAscensionDummyFixHunterContracts(spellInfo);
+    ApplyAscensionDummyFixMageContracts(spellInfo);
+    ApplyAscensionDummyFixPaladinContracts(spellInfo);
+    ApplyAscensionDummyFixPriestContracts(spellInfo);
+    ApplyAscensionDummyFixRogueContracts(spellInfo);
+    ApplyAscensionDummyFixShamanContracts(spellInfo);
+    ApplyAscensionDummyFixWarlockContracts(spellInfo);
+    ApplyAscensionDummyFixWarriorContracts(spellInfo);
+    ApplyAscensionDummySystemMeleeContracts(spellInfo);
+    ApplyAscensionDummySystemCasterContracts(spellInfo);
+    ApplyAscensionDummySystemTimeContracts(spellInfo);
+    ApplyAscensionDummySystemHealingContracts(spellInfo);
     ApplyAscensionHeroHunterContracts(spellInfo);
     ApplyAscensionHeroRogueContracts(spellInfo); ApplyAscensionHeroPriestContracts(spellInfo); ApplyAscensionHeroWarlockContracts(spellInfo); ApplyAscensionHeroPaladinContracts(spellInfo);
     ApplyTinkerScrapResourceContract(spellInfo);
@@ -1323,7 +1340,11 @@ void HandleAscensionClassMechanicsHit(Spell* spell, Player* player,
 
     uint32 spellId = spell->GetSpellInfo()->Id;
     if (player->getClass() == CLASS_RANGER)
+    {
         HandleRangerBountyHunterHit(player, target, spellId, damage);
+        if (spellId == SPELL_RANGER_QUICK_WITTED_STAB && spell->IsTriggered())
+            HandleRangerQuiverHit(player, target, spell->GetSpellInfo(), damage);
+    }
 
     if (spell->IsTriggered())
         return;

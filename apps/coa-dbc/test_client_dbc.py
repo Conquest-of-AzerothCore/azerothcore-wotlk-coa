@@ -58,6 +58,17 @@ class FakeMpq:
         return target
 
 
+class FakeDatabase:
+    def __init__(self, tables):
+        self.data = tables
+
+    def tables(self):
+        return set(self.data)
+
+    def rows(self, query):
+        return self.data[query.split("`")[1]]
+
+
 class ClientDbcTest(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
@@ -157,6 +168,43 @@ class ClientDbcTest(unittest.TestCase):
         mpq = FakeMpq({"patch.MPQ": {"DBFilesClient\\spellrank.dbc": wdbc([(1, 100, 100, 1)], 4)}})
         client_dbc.extract(client, self.path / "out", mpq, log=lambda _: None, root=self.root)
         self.assertTrue((self.path / "out" / "SpellRank.dbc").is_file())
+
+    def test_override_drift_keeps_empty_strings_and_reports_differing_and_absent_rows(self):
+        table = client_dbc.Table("Foo.dbc", wdbc([(7, 1, 3), (8, 7, 4)], 3, b"\0Alpha\0Beta\0"))
+        report = client_dbc.override_drift(table, "nsi", [["7", "", "3"], ["8", "Beta", "5"], ["9", "Gamma", "1"]])
+        self.assertEqual(report, {"rows": 3, "differs": [8], "absent": [9], "layout": []})
+
+    def test_override_drift_reports_a_client_layout_the_core_cannot_read(self):
+        table = client_dbc.Table("Foo.dbc", wdbc([(7, 1)], 2, b"\0A\0"))
+        self.assertEqual(client_dbc.override_drift(table, "nsi", [["7", "A", "1"]])["layout"],
+                         ["2 fields, the core expects 3"])
+
+    def test_drift_compares_the_server_set_and_spares_server_only_rows(self):
+        client = valid_set(self.path / "client")
+        server = valid_set(self.path / "server")
+        (server / "Foo.dbc").write_bytes(wdbc([(7, 1, 4)], 3, b"\0Alpha\0"))
+        database = FakeDatabase({"foo_dbc": [["7", "Alpha", "3"], ["50", "Server", "0"]], "gtbar_dbc": []})
+        report = client_dbc.drift(client, database, server, server_only=(), root=self.root)
+        self.assertEqual([entry["file"] for entry in report["server"]], ["Foo.dbc"])
+        self.assertEqual(report["overrides"]["foo_dbc"]["absent"], [50])
+        self.assertNotIn("gtbar_dbc", report["overrides"])
+        self.assertEqual(client_dbc.drift_failures(report), 2)
+        spared = client_dbc.drift(client, database, server_only=("foo_dbc",), root=self.root)
+        self.assertEqual(client_dbc.drift_failures(spared), 0)
+
+    def test_spell_text_drift_reads_description_and_tooltip_after_the_name_and_rank_runs(self):
+        fmt = "n" + "ssx" + "ssx" + "xxx" + "xxx"
+        self.assertEqual(client_dbc.spell_text_fields(fmt), (7, 10))
+        records = [(1,) + (0,) * 6 + (1,) + (0,) * 2 + (5,) + (0,) * 2,
+                   (2,) + (0,) * 6 + (1,) + (0,) * 5]
+        table = client_dbc.Table("Spell.dbc", wdbc(records, 13, b"\0Old\0Tip\0"))
+        self.assertEqual(client_dbc.spell_texts(table, fmt), {1: (b"Old", b"Tip"), 2: (b"Old", b"")})
+        report = client_dbc.spell_text_drift(table, fmt, [["1", "Old", ""], ["2", "New", "Tip"], ["3", "X", ""]])
+        self.assertEqual(report, {"rows": 3, "differs": [2], "absent": [3]})
+
+    def test_mysql_batch_values_are_unescaped(self):
+        self.assertIsNone(client_dbc.mysql_value("NULL"))
+        self.assertEqual(client_dbc.mysql_value("a\\tb\\nc\\\\d"), "a\tb\nc\\d")
 
     def test_original_reads_untouched_archive_copies(self):
         client = self.path / "Data"

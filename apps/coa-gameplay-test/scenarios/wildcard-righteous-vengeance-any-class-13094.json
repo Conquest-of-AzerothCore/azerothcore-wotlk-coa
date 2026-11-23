@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Wildcard: Righteous Vengeance procs from another class's critical spell (#13094)",
+  "contract": [
+    "Righteous Vengeance rank 3 (53382) reads 'Direct critical strikes with spells and abilities make your target",
+    "take 30% additional damage over 8 sec as Holy damage' and names no class. The #10355 fix zeroed the spell_proc",
+    "ability masks for -53380 but kept SpellFamilyName 10, and SpellInfo::IsAffected rejects any spell from another",
+    "family, so a Wildcard hero's critical Mage Fire Blast (2136, SpellFamilyName 3) never applied the DoT (61840).",
+    "With SpellFamilyName 0 the row accepts every family. Spell crit rating forces the critical strike."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 100000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "hero",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "hero", "spell": 53382 },
+    { "action": "learn", "actor": "hero", "spell": 2136 },
+    {
+      "action": "assert", "label": "SETUP: the Righteous Vengeance talent is active",
+      "actor": "hero", "metric": "aura", "spell": 53382, "equals": 1
+    },
+    {
+      "action": "assert", "label": "No Righteous Vengeance DoT on the dummy before any cast",
+      "actor": "dummy", "metric": "aura", "spell": 61840, "caster": "hero", "equals": 0
+    },
+    { "action": "cast", "actor": "hero", "spell": 2136, "target": "dummy", "label": "A critical Mage Fire Blast" },
+    {
+      "action": "assert", "label": "SETUP: the Fire Blast hit the dummy",
+      "actor": "hero", "metric": "spell_damage_count", "spell": 2136, "target": "dummy", "min": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "CONTRACT (#13094): a critical non-Paladin spell applies the Righteous Vengeance DoT",
+      "actor": "dummy", "metric": "aura", "spell": 61840, "caster": "hero", "equals": 1, "within_ms": 5000
+    }
+  ]
+}

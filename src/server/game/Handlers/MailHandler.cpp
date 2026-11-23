@@ -384,13 +384,14 @@ void WorldSession::HandleSendMail(WorldPacket& recvData)
         COD = 0;
 
     // will delete item or place to receiver mail list
-    draft
+    uint32 const mailId = draft
     .AddMoney(money)
     .AddCOD(COD)
     .SendMailTo(trans, MailReceiver(receive, receiverGuid.GetCounter()), MailSender(player), body.empty() ? MAIL_CHECK_MASK_COPIED : MAIL_CHECK_MASK_HAS_BODY, deliver_delay);
 
     player->SaveInventoryAndGoldToDB(trans);
     CharacterDatabase.CommitTransaction(trans);
+    sScriptMgr->OnPlayerAfterSendMail(player, receiverGuid, rc_account, receiver, mailId, subject, body);
 
     LOG_INFO("entities.player.mail", "Mail: Account: {} (IP: {}), Player [{}] ({}) sent mail to Player [{}] ({}): subject='{}', body='{}', {} copper, {} COD copper, sent item(s) [{}]",
         GetAccountId(), GetRemoteAddress(), player->GetName(), player->GetGUID().GetCounter(),

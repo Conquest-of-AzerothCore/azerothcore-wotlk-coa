@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "name": "Halrin Kenari sells the Cenarion Circle reputation rewards",
+  "contract": [
+    "Halrin Kenari <Cenarion Circle Quartermaster> 115175 had no template, so nobody sold the Cenarion Circle",
+    "rewards such as Formula: Enchant Bracer - Lesser Expertise 46514. His shop opens and lists the formula at",
+    "100 gold (Exiles DB vendor page) and the Ascension rewards from the captured vendor list (SUB npc_vendor,",
+    "2026-10-04); a vendor_price of -1 means the item is not on the shelves."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -6866.81,
+    "y": 736.435,
+    "z": 45.6623,
+    "o": 5.19951
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "halrin",
+      "owner": "p",
+      "entry": 115175,
+      "faction": 35,
+      "level": 57,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask Halrin Kenari for his wares",
+      "actor": "p",
+      "opcode": 414,
+      "fields": [
+        {
+          "actor_guid": "halrin"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: his shop opens",
+      "actor": "p",
+      "metric": "vendor_list_packets",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Formula: Enchant Bracer - Lesser Expertise 46514 for 100 gold",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 46514,
+      "equals": 1000000
+    },
+    {
+      "action": "assert",
+      "label": "Cowl of the Inside Circle 856000 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 856000,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Cenarion Infantry Helmet 1519807 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1519807,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Sandcovered Libram 1519873 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1519873,
+      "min": 0
+    }
+  ]
+}

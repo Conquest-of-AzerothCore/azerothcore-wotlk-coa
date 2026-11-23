@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "name": "Wildcard: Fiery Bash unleashes from Shield Slam and Shield of Righteousness (#13263)",
+  "contract": [
+    "Fiery Bash 284690: 'Your Shield Bash, Shield Slam and Shield of Righteousness unleash a Fiery Bash' (284689). The",
+    "DBC proc kept only the Shield Bash class mask 0x800, so Shield Slam and Shield of Righteousness never fired it.",
+    "The enchant now uses coa_mystic_enchant_proc 'damage' rules listing every Shield Slam (stock, Reborn and elemental),",
+    "Shield of Righteousness and Shield Bash rank. Expected: Blazing Shield Slam 910900 and Shield of Righteousness",
+    "61411 each cast Fiery Bash 284689 on the enemy."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Harnessa" },
+    { "action": "learn", "actor": "hero", "spell": 201 },
+    { "action": "learn", "label": "Shield proficiency", "actor": "hero", "spell": 9116 },
+    { "action": "learn", "label": "Defensive Stance", "actor": "hero", "spell": 71 },
+    { "action": "learn", "label": "Fiery Bash", "actor": "hero", "spell": 284690 },
+    { "action": "learn", "label": "Blazing Shield Slam", "actor": "hero", "spell": 910900 },
+    { "action": "learn", "label": "Shield of Righteousness", "actor": "hero", "spell": 61411 },
+    { "action": "add_item", "actor": "hero", "item": 25 },
+    { "action": "equip", "actor": "hero", "item": 25, "slot": 15 },
+    { "action": "add_item", "actor": "hero", "item": 2362 },
+    { "action": "equip", "actor": "hero", "item": 2362, "slot": 16 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "cast_no_target", "actor": "hero", "spell": 71 },
+    { "action": "assert", "label": "SETUP hero is in Defensive Stance", "actor": "hero", "metric": "aura", "spell": 71, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP hero has Fiery Bash", "actor": "hero", "metric": "aura", "spell": 284690, "equals": 1 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "set_power", "actor": "hero", "power": 1, "value": 1000 },
+    {
+      "action": "snapshot", "actor": "hero", "metric": "spell_cast_count", "spell": 284689,
+      "save_as": "fiery_bash_before_shield_slam"
+    },
+    { "action": "cast", "actor": "hero", "spell": 910900, "target": "enemy" },
+    {
+      "action": "assert", "label": "SETUP Blazing Shield Slam hit the enemy", "actor": "hero", "metric": "spell_damage_count",
+      "spell": 910900, "target": "enemy", "min": 1, "within_ms": 3000
+    },
+    { "action": "wait", "ms": 1600 },
+    {
+      "action": "assert", "label": "CONTRACT (#13263) Blazing Shield Slam unleashed exactly one Fiery Bash",
+      "actor": "hero", "metric": "spell_cast_count", "spell": 284689,
+      "relative_to": "fiery_bash_before_shield_slam", "equals": 1
+    },
+    { "action": "set_power", "actor": "hero", "power": 0, "value": 1000 },
+    {
+      "action": "snapshot", "actor": "hero", "metric": "spell_cast_count", "spell": 284689,
+      "save_as": "fiery_bash_before_righteousness"
+    },
+    { "action": "cast", "actor": "hero", "spell": 61411, "target": "enemy" },
+    {
+      "action": "assert", "label": "SETUP Shield of Righteousness hit the enemy", "actor": "hero", "metric": "spell_damage_count",
+      "spell": 61411, "target": "enemy", "min": 1, "within_ms": 3000
+    },
+    { "action": "wait", "ms": 1600 },
+    {
+      "action": "assert", "label": "CONTRACT (#13263) Shield of Righteousness unleashed exactly one Fiery Bash",
+      "actor": "hero", "metric": "spell_cast_count", "spell": 284689,
+      "relative_to": "fiery_bash_before_righteousness", "equals": 1
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Aeroblast hits again for 40% after 1 sec (#11834)",
+  "contract": "Every Aeroblast rank reads 'dealing ... Nature damage to them and then an additional time for $705700s2% of the damage dealt after $802750d', rendered 40% after 1 sec (client and server Spell.dbc identical). The echo comes from Tempest Calling 707615, which the Aeroblast talent replacement grants with Aeroblast: its Effect1 is SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT (aura 354) with amount 40 and TriggerSpell 802750, a one-tick PERIODIC_DAMAGE (amplitude 999 ms, duration 1000 ms, CANT_CRIT, NOT_A_PROC). 707615 had DBC ProcFlags 0, no spell_proc row and was missing from the aura-354 handler, so the echo never happened. The fix adds a spell_proc row restricted to SpellFamilyName 22 / SpellFamilyMask0 8388608 (set only by the Aeroblast records) and handles 707615 as an outgoing proc on the damaged target. The echo is its own Nature hit, so monster linear resistance (docs/coa/monster-linear-resistance.md) rolls a partial resist on it after the Aeroblast hit was already resisted; ADR 0092 reads such a copy's fraction before the target's resist. The player therefore carries Increased Spell Penetration 56399 (68) and 46055 (43), aura 123 on school mask 124, which take the dummy's Nature resistance to zero. The player is level 60 and carries PvE Power from the starting gear (the melee probe deals more than 1000). PvE Power already raised the Aeroblast hit, so 802750 is marked as inheriting both the resolved amount and the power scaling: PvE and PvP Power and the target's damage-taken modifiers skip the tick. Without that, the measured ratio was 0.4072 with +38 PvE Power. Unresisted, the echo must be 40% of the Aeroblast damage dealt, crit or not, within integer truncation, must land after the hit rather than with it, and must tick exactly once: the count is read again 2 s after the first tick, past the 1 s aura duration. Expected before the fix: no 707615 proc and no 802750 damage.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "p1", "race": 8, "class": 16, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "t1", "owner": "p1", "entry": 36, "level": 59, "health": 1000000, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and local level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "p1", "spell": 707615 },
+    { "action": "learn", "actor": "p1", "spell": 501455 },
+    {
+      "action": "assert", "label": "SETUP: Tempest Calling is active",
+      "actor": "p1", "metric": "aura", "spell": 707615, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the player carries PvE Power",
+      "actor": "p1", "metric": "script_melee_damage_dealt", "target": "t1", "min": 1001
+    },
+    { "action": "set_aura", "actor": "p1", "spell": 803102, "stacks": 100 },
+    { "action": "set_aura", "label": "Increased Spell Penetration 68", "actor": "p1", "spell": 56399, "stacks": 1 },
+    { "action": "set_aura", "label": "Increased Spell Penetration 43", "actor": "p1", "spell": 46055, "stacks": 1 },
+    {
+      "action": "snapshot", "actor": "p1", "metric": "spell_damage_total", "spell": 501455, "target": "t1",
+      "save_as": "aeroblast_before"
+    },
+    {
+      "action": "snapshot", "actor": "p1", "metric": "spell_damage_total", "spell": 802750, "target": "t1",
+      "save_as": "echo_before"
+    },
+    { "action": "cast", "actor": "p1", "spell": 501455, "target": "t1" },
+    {
+      "action": "assert", "label": "SETUP: Aeroblast hits the dummy",
+      "actor": "p1", "metric": "spell_damage_count", "spell": 501455, "target": "t1", "min": 1, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "SETUP: penetration leaves the Aeroblast hit unresisted",
+      "actor": "p1", "metric": "spell_resist_total", "spell": 501455, "target": "t1", "equals": 0
+    },
+    {
+      "action": "assert", "label": "SUPPORTING: the echo has not landed together with the hit",
+      "actor": "p1", "metric": "spell_damage_count", "spell": 802750, "target": "t1", "equals": 0
+    },
+    {
+      "action": "snapshot", "actor": "p1", "metric": "spell_damage_total", "spell": 501455, "target": "t1",
+      "relative_to": "aeroblast_before", "save_as": "aeroblast_damage"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Aeroblast hit procs Tempest Calling",
+      "actor": "p1", "metric": "spell_proc_count", "spell": 707615, "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the echo deals damage after about 1 sec",
+      "actor": "p1", "metric": "spell_damage_count", "spell": 802750, "target": "t1", "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Outlast the 1 sec echo aura", "ms": 2000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the echo ticks exactly once",
+      "actor": "p1", "metric": "spell_damage_count", "spell": 802750, "target": "t1", "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the echo deals 40% of the Aeroblast damage dealt",
+      "actor": "p1", "metric": "spell_damage_total", "spell": 802750, "target": "t1",
+      "relative_to": "echo_before", "ratio_to": "aeroblast_damage", "min": 0.395, "max": 0.405
+    }
+  ]
+}

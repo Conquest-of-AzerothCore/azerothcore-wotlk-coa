@@ -162,6 +162,9 @@ Other harness simulations are allowed only with a ruling, and the verdict states
   (G-19). Each report states the interval actually excluded.
   - The band is for random measurements: damage, healing, rates.
   - Deterministic stat readings are judged to the rounding instead (G-19; ADR 0135).
+  - A stated value whose band holds 0 (+2% with a 2-point band) counts only if the interval excludes the control, the
+    trials and the residual failure probability are stated, and the estimate lies in the band (D-178; hit ratio
+    `control_excluded`, ADR 0722).
 - **Pilot sizing.** For hit-ratio entries, `prove` first runs a pilot at 20 trials. The pilot then sizes the judged runs
   so that the 99% half-width is 0.8 of half the band, capped at what one scenario holds (`G&C`, prove runner; ADR 0125).
 - **Pooling.** When one scenario cannot hold enough trials, the pooling extension (ADR 0195) combines runs. It accepts
@@ -394,6 +397,20 @@ remove`. `prove` defaults to `coa-verify` (`prove.py:57`; section 13).
   - Pass `--gameplay-db-workers 4` while others run.
   - Check the disk before each batch: `docker exec coa-test-mysql df -h /var/lib/mysql`. Above 97%, start no new
     parallel run. A run that fails for lack of space is not a verdict.
+  - Drop stale test databases without asking (owner instruction, 2026-11-15, Witch Hunter mentor rulings D-20 and
+    D-22).
+    - A `coa_test_*_world` database named by any worktree's `.cache/coa-gameplay-tests/world-cache/**/world.json` in
+      state `ready` is owned by that cache, not stale: the runner reuses it without checking that it exists. A cache
+      entry whose worktree no longer exists does not count. Find the owners with
+      `grep -rl <id> <projects>/*/.cache/coa-gameplay-tests/world-cache`.
+    - A database is stale when no such cache names it and no live process uses it (no running `verify_all.py`,
+      `coa-verify` or worldserver). Which session created it does not matter.
+    - Before each batch and after each agent ends, list the `coa_test_*` databases, drop the stale ones, and record
+      the names and the disk figure before and after in the class's state file.
+    - Never drop an owned or live database; check the processes first, including other sessions' runs on the bench.
+      Above 97% with only owned or live databases, remove your own worktrees' cache entries first (the next run
+      rebuilds them), then start no new parallel run.
+    - This bench housekeeping is decided by the working agent or the mentor; it does not go to the owner.
 
 ### 9.1 Class map first
 
@@ -751,8 +768,10 @@ runs, in order: the guard-class gate, the digests, generate, the source stage, r
 check; above 97% it stops), compare and audit per run, the tally, the refactor gate, the archive and `checkpoint.md` /
 `.json`. It stops at the first failure and names the step and its log (`OUT/logs/NN-step.log`). `decisions.json` holds,
 by claim key, `candidates` (`{key: why}`), `rulings` (`{key: {status, why}}`, status 2 to 5, needed again in every
-cycle for each status 3-5 claim, or the tally stops; a key that names no claim of the ledger stops it too), `counted` (ledger-only re-audit corrections, counted at once, G-17) and `text_changed` (owner text
-items). A re-audit of an archived pair is the same command with `--skip gate --skip digests --skip generate --skip
+cycle for each status 3-5 claim, or the tally stops; a key that names no claim of the ledger stops it too), `counted` (ledger-only re-audit corrections, counted at once, G-17), `text_changed` (owner text
+items) and `held` (`{key: why}`, parts kept not final until a fix is reviewed, checked first; a held key
+that names no claim or is also a candidate or counted stops the tally; the checkpoint lists them, ADR 0722).
+A re-audit of an archived pair is the same command with `--skip gate --skip digests --skip generate --skip
 source --skip runs --skip compare` and `pair.stamps` / `pair.compare` set. Agents are used only where the script
 stops: a merge conflict, the cause of a flip, a candidate ruling. The controller records the cost with
 `conformance.py cost` before the cycle runs and names the file in the `cost` field, since the checkpoint step copies it

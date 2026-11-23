@@ -245,7 +245,10 @@ class LocalSelectTest(unittest.TestCase):
             config.write_text('WorldDatabaseInfo = "127.0.0.1;3306;fixture_user;fixture_secret;world"\n')
             commands = []
 
-            def database(command, *, input, **kwargs):
+            def database(command, *, input=None, **kwargs):
+                if input is None:
+                    return SimpleNamespace(returncode=0, stdout='  --no-login-paths  Do not read login paths.\n',
+                                           stderr='')
                 commands.append((command, input))
                 self.assertNotIn('fixture_secret', ' '.join(command))
                 return SimpleNamespace(returncode=0, stdout='{"race": 1}\n{"race": 3}\n', stderr='')
@@ -255,6 +258,18 @@ class LocalSelectTest(unittest.TestCase):
             self.assertEqual(rows, [{'race': 1}, {'race': 3}])
             self.assertEqual(len(commands), 1)
             self.assertEqual(commands[0][1], scaffold.playercreateinfo_sql(19))
+
+    def test_login_paths_are_disabled_only_when_the_client_supports_it(self):
+        for help_text, expected in (('  --no-login-paths  Do not read login paths.\n', True),
+                                    ('  --login-path=name  Read this path from the login file.\n', False)):
+            with patch.object(scaffold.subprocess, 'run',
+                             return_value=SimpleNamespace(returncode=0, stdout=help_text, stderr='')):
+                self.assertEqual(scaffold.login_path_options('mysql'),
+                                 ['--no-login-paths'] if expected else [])
+
+    def test_an_unreadable_client_help_keeps_login_paths_disabled(self):
+        with patch.object(scaffold.subprocess, 'run', side_effect=OSError):
+            self.assertEqual(scaffold.login_path_options('missing-mysql'), ['--no-login-paths'])
 
     def test_a_nonzero_exit_is_a_scaffold_error(self):
         import tempfile

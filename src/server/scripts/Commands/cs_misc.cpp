@@ -785,7 +785,38 @@ public:
             }
 
             Map* map = targetPlayer->GetMap();
-            if (map->IsBattlegroundOrArena())
+            // Entering or leaving a private copy: the copy shares its map id with ordinary copies of that map, so
+            // the near branch of TeleportTo would keep the game master in the wrong copy.
+            bool farTransfer = false;
+            // A refused transfer puts back the copy the game master still observes.
+            Optional<Player::ScriptedPrivateObserverState> const previousObservation = _player->GetScriptedPrivateObserverState();
+            if (map->IsScriptedPrivateInstance())
+            {
+                // A scripted private copy (Manastorm) admits only its own members. A game master in GM mode
+                // follows the player into that exact copy as an observer and never joins those members.
+                if (!_player->IsGameMaster())
+                {
+                    handler->SendErrorMessage(LANG_CANNOT_GO_TO_INST_GM, nameLink);
+                    return false;
+                }
+
+                if (_player->GetScriptedPrivateMapId() != MAPID_INVALID && !_player->IsScriptedPrivateObserver())
+                {
+                    handler->SendErrorMessage("Leave your own private instance before you appear in another one.", false);
+                    return false;
+                }
+
+                if (_player->GetMap() != map)
+                {
+                    // Observing another copy keeps the location the first observed copy saved for a logout.
+                    WorldLocation const returnLocation = _player->IsScriptedPrivateObserver()
+                        ? _player->GetScriptedPrivateReturn() : WorldLocation(_player->GetMapId(), *_player);
+                    _player->PrepareScriptedPrivateObserver(map->GetId(), map->GetInstanceId(), returnLocation,
+                        map->GetScriptedPrivateOwner(), map->LoadsScriptedPrivateDatabaseSpawns());
+                    farTransfer = true;
+                }
+            }
+            else if (map->IsBattlegroundOrArena())
             {
                 // only allow if gm mode is on
                 if (!_player->IsGameMaster())
@@ -845,6 +876,13 @@ public:
                 }
             }
 
+            // An observer appearing at a player outside private copies leaves the observed copy.
+            if (previousObservation && !map->IsScriptedPrivateInstance())
+            {
+                _player->ClearScriptedPrivateInstance();
+                farTransfer = true;
+            }
+
             handler->PSendSysMessage(LANG_APPEARING_AT, nameLink);
 
             // stop flight if need
@@ -880,13 +918,17 @@ public:
 
                 transport->AddPassenger(_player, false);
 
-                if (_player->TeleportTo(transport->GetMapId(), worldX, worldY, worldZ + 0.25f, worldO, TELE_TO_NOT_LEAVE_TRANSPORT | TELE_TO_GM_MODE, targetPlayer))
+                if (_player->TeleportTo(transport->GetMapId(), worldX, worldY, worldZ + 0.25f, worldO, TELE_TO_NOT_LEAVE_TRANSPORT | TELE_TO_GM_MODE, targetPlayer, farTransfer))
                     _player->SetPhaseMask(targetPlayer->GetPhaseMask() | 1, false);
+                else if (farTransfer)
+                    _player->RestoreScriptedPrivateObserver(previousObservation);
             }
             else
             {
-                if (_player->TeleportTo(targetPlayer->GetMapId(), targetPlayer->GetPositionX(), targetPlayer->GetPositionY(), targetPlayer->GetPositionZ() + 0.25f, _player->GetOrientation(), TELE_TO_GM_MODE, targetPlayer))
+                if (_player->TeleportTo(targetPlayer->GetMapId(), targetPlayer->GetPositionX(), targetPlayer->GetPositionY(), targetPlayer->GetPositionZ() + 0.25f, _player->GetOrientation(), TELE_TO_GM_MODE, targetPlayer, farTransfer))
                     _player->SetPhaseMask(targetPlayer->GetPhaseMask() | 1, false);
+                else if (farTransfer)
+                    _player->RestoreScriptedPrivateObserver(previousObservation);
             }
         }
         else
@@ -1364,7 +1406,18 @@ public:
             targetPlayer->CleanupAfterTaxiFlight();
         }
 
-        targetPlayer->TeleportTo(targetPlayer->m_recallMap, targetPlayer->m_recallX, targetPlayer->m_recallY, targetPlayer->m_recallZ, targetPlayer->m_recallO);
+        // An observer leaves its private copy. On the copy's own map id the near branch of TeleportTo would keep it
+        // inside, so end the observation and force the far transfer; a refused transfer keeps it observing.
+        Optional<Player::ScriptedPrivateObserverState> const observation = targetPlayer->GetScriptedPrivateObserverState();
+        if (observation)
+            targetPlayer->ClearScriptedPrivateInstance();
+
+        if (!targetPlayer->TeleportTo(targetPlayer->m_recallMap, targetPlayer->m_recallX, targetPlayer->m_recallY,
+            targetPlayer->m_recallZ, targetPlayer->m_recallO, 0, nullptr, observation.has_value()) && observation)
+        {
+            targetPlayer->RestoreScriptedPrivateObserver(observation);
+        }
+
         return true;
     }
 

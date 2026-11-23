@@ -95,7 +95,8 @@ public:
     void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& amount,
         SpellInfo const* spell) override
     {
-        if (spell && !spell->IsPositive() && !spell->HasAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT))
+        if (spell && !spell->IsPositive() && !spell->HasAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT) &&
+            !spell->AscensionInheritsPowerScaling)
             amount = Damage(target, attacker, amount);
     }
 

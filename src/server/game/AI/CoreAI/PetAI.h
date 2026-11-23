@@ -40,7 +40,10 @@ enum SpecialPets
     IMP_FIREBOLT_RANK_8         = 27267,
     IMP_FIREBOLT_RANK_9         = 47964,
     WATER_ELEMENTAL_WATERBOLT_1 = 31707,
-    WATER_ELEMENTAL_WATERBOLT_2 = 72898
+    WATER_ELEMENTAL_WATERBOLT_2 = 72898,
+
+    ENTRY_COA_AIR_ELEMENTAL     = 500941,
+    COA_AIR_ELEMENTAL_WINDPELT  = 806016
 };
 
 class PetAI : public CreatureAI
@@ -69,6 +72,7 @@ public:
     void SpellHit(Unit* caster, SpellInfo const* spellInfo) override;
 
     void PetStopAttack() override;
+    void RefreshChaseRange();
 
 private:
     bool _isVisible(Unit*) const;
@@ -87,6 +91,7 @@ private:
     Unit* SelectNextTarget(bool allowAutoSelect) const;
     void HandleReturnMovement();
     void DoAttack(Unit* target, bool chase);
+    void ChaseVictim(Unit* target);
     bool CanAttack(Unit* target, SpellInfo const* spellInfo = nullptr);
     void ClearCharmInfoFlags();
 };

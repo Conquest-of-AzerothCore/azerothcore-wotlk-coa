@@ -11,6 +11,12 @@
 - `streamed.py`: `streamed_texts()` replays the `coa_client_spell_description` rows of the world SQL updates and
   `streamed_field(spell, name)` gives the `Description[enUS]` or non-empty `ToolTip[enUS]` the server streams
   (ADR 0192).
+- `bonus_data.py`: `bonus_table()` replays `spell_bonus_data` as the world updater builds it: the world baseline
+  package (or the base dump), then every `updates_include` directory and module `data/sql/*world*` directory in the
+  updater's order, skipping files the package records as applied; a statement other than a keyed DELETE or an INSERT,
+  or a module file naming the table, makes it unreadable. `bonus_terms` gives the modelled AP/SP terms (ADR 0679);
+  `client_first_ranks` reads the `SpellRank.dbc` chains as `SpellMgr::LoadClientSpellRankChains` keeps them, and
+  `bonus_row` falls back to the first rank's row for a rank without its own (ADR 0688).
 - `profile.py`: the reference character of a class file and `base_steps(class_file)`, the steps every scenario starts
   with; `spell_dbc_sha256(dbc_dir)` hashes a set's `Spell.dbc` and `server_dbc_dir(dbc_dir)` /
   `require_server_sha(sha, source)` raise `DbcSetMismatch` for a set other than the server's (`load_class_file`

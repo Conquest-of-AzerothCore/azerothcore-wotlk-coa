@@ -1182,5 +1182,35 @@ class GeneratePassiveTest(unittest.TestCase):
             fixture_generate(TEMPLAR_CLASS_ID, self.out, passives=[RECKONING_AT_60])
 
 
+class RangedHasteModelTest(unittest.TestCase):
+    HEARTSEEKING_BOLT = 805754
+    BENEDICTION = 578276
+    ARMED = {'weapon_set': 'Bow', 'weapon_sets': {'Bow': {'ranged': {'item': 15809, 'speed_ms': 2900}}}}
+
+    def model(self, target, metric='spell_cast_time_ms', relation='add', armed=None):
+        from passives import MetricPlan, Probe, ranged_haste_model
+        from profile import DBC_DIR
+        records = Records(dataset(DBC_DIR))
+        probe = Probe(f'1 e1 {metric} {target}', metric, {'spell': target}, target, True, True)
+        return ranged_haste_model(self.ARMED if armed is None else armed, records, MetricPlan(metric, {}, relation),
+                                  probe)
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'server DBC set not found')
+    def test_a_flat_cast_time_probe_on_a_ranged_spell_reads_the_ranged_attack_time(self):
+        self.assertEqual(self.model(self.HEARTSEEKING_BOLT), {
+            'before': f'1 e1 spell_cast_time_ms {self.HEARTSEEKING_BOLT} ranged attack_time_ms before',
+            'after': f'1 e1 spell_cast_time_ms {self.HEARTSEEKING_BOLT} ranged attack_time_ms after',
+            'base_ms': 2900, 'item': 15809})
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'server DBC set not found')
+    def test_other_probes_keep_no_haste_read(self):
+        self.assertIsNone(self.model(self.BENEDICTION))
+        self.assertIsNone(self.model(self.HEARTSEEKING_BOLT, relation='spell_mod_pct'))
+        self.assertIsNone(self.model(self.HEARTSEEKING_BOLT, metric='spell_modifier'))
+        self.assertIsNone(self.model(self.HEARTSEEKING_BOLT, armed={'weapon_set': 'Bow',
+                                                                    'weapon_sets': {'Bow': {'ranged': None}}}))
+        self.assertIsNone(self.model(self.HEARTSEEKING_BOLT, armed={}))
+
+
 if __name__ == '__main__':
     unittest.main()

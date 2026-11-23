@@ -627,6 +627,16 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
             // Allow only 1 persistent area aura to affect our targets if a custom flag is set.
             if (itr->first->HasAura(GetId()) && GetSpellInfo()->HasAttribute(SPELL_ATTR0_CU_ONLY_ONE_AREA_AURA))
                 addUnit = false;
+
+            // CoA: keep the application an overlapping same caster ground effect already holds instead of swapping it.
+            Unit::AuraApplicationMapBounds same = itr->first->GetAppliedAuras().equal_range(GetId());
+            for (Unit::AuraApplicationMap::const_iterator iter = same.first; addUnit && iter != same.second; ++iter)
+            {
+                Aura const* other = iter->second->GetBase();
+                if (other != this && other->GetType() == DYNOBJ_AURA_TYPE &&
+                    other->GetCasterGUID() == GetCasterGUID() && !CanStackWith(other))
+                    addUnit = false;
+            }
             }
             // unit auras can not stack with each other
             else // (GetType() == UNIT_AURA_TYPE)
@@ -1501,7 +1511,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     if (aurEff)
                     {
                         uint32 spellId = 0;
-                        switch (aurEff->GetId())
+                        switch (sSpellMgr->GetSpellTwinSource(aurEff->GetId()))
                         {
                             // Ebon Plague
                             case 51161:
@@ -1526,7 +1536,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             default:
                                 LOG_ERROR("spells.aura", "Aura::HandleAuraSpecificMods: Unknown rank of Crypt Fever/Ebon Plague ({}) found", aurEff->GetId());
                         }
-                        caster->CastSpell(target, spellId, true, 0, GetEffect(0));
+                        if (spellId)
+                            caster->CastSpell(target, sSpellMgr->GetSpellTwinFor(spellId, aurEff->GetId()), true, 0,
+                                GetEffect(0));
                     }
                 }
                 // Unholy blight
@@ -1636,7 +1648,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             case SPELLFAMILY_WARLOCK:
                 if (!caster)
                     break;
-                if (GetSpellInfo()->SpellFamilyFlags[1] & 0x00000400)
+                // Improved Fear: the Nightmare follows the end of the Fear ("when the fear effect ends"), so a refresh of
+                // a Fear still on the target (SetStackAmount re-runs these mods with onReapply) does not apply it
+                if (!onReapply && GetSpellInfo()->SpellFamilyFlags[1] & 0x00000400)
                 {
                     if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 98, 0))
                     {
@@ -1741,7 +1755,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         }
                     }
                 }
-                switch (GetId())
+                switch (sSpellMgr->GetSpellTwinSource(GetId()))
                 {
                     case 47788: // Guardian Spirit
                     {
@@ -1754,7 +1768,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         // Glyph of Guardian Spirit
                         if (AuraEffect* aurEff = player->GetAuraEffectOfRankedSpellOrTwin(63231, 0))
                         {
-                            if (!player->HasSpellCooldown(47788))
+                            if (!player->HasSpellCooldown(GetId()))
                                 break;
 
                             player->AddSpellCooldown(GetSpellInfo()->Id, 0, aurEff->GetAmount()*IN_MILLISECONDS);
@@ -1887,19 +1901,20 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             }
             break;
         case SPELLFAMILY_HUNTER:
-            switch (GetId())
+            switch (sSpellMgr->GetSpellTwinSource(GetId()) == 19574 ? 19574 : GetId())
             {
                 case 19574: // Bestial Wrath
                     // The Beast Within cast on owner if talent present
                     if (Unit* owner = target->GetOwner())
                     {
                         // Search talent
-                        if (owner->HasAura(34692))
+                        if (owner->HasAuraOrTwin(34692))
                         {
+                            uint32 const beastWithin = sSpellMgr->GetSpellTwinFor(34471, GetId());
                             if (apply)
-                                owner->CastSpell(owner, 34471, true, 0, GetEffect(0));
+                                owner->CastSpell(owner, beastWithin, true, 0, GetEffect(0));
                             else
-                                owner->RemoveAurasDueToSpell(34471);
+                                owner->RemoveAurasDueToSpell(beastWithin);
                         }
                     }
                     break;
@@ -2922,6 +2937,10 @@ void UnitAura::FillTargetMap(std::map<Unit*, uint8>& targets, Unit* caster)
                             Acore::AnyGroupedUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius, GetSpellInfo()->Effects[effIndex].Effect == SPELL_EFFECT_APPLY_AREA_AURA_RAID);
                             Acore::UnitListSearcher<Acore::AnyGroupedUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
                             Cell::VisitObjects(GetUnitOwner(), searcher, radius);
+                            targetList.remove_if([this](Unit* target)
+                            {
+                                return !sScriptMgr->CanUnitAssist(GetUnitOwner(), target, GetSpellInfo());
+                            });
                             break;
                         }
                     case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
@@ -2930,6 +2949,10 @@ void UnitAura::FillTargetMap(std::map<Unit*, uint8>& targets, Unit* caster)
                             Acore::AnyFriendlyUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius);
                             Acore::UnitListSearcher<Acore::AnyFriendlyUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
                             Cell::VisitObjects(GetUnitOwner(), searcher, radius);
+                            targetList.remove_if([this](Unit* target)
+                            {
+                                return !sScriptMgr->CanUnitAssist(GetUnitOwner(), target, GetSpellInfo());
+                            });
                             break;
                         }
                     case SPELL_EFFECT_APPLY_AREA_AURA_ENEMY:
@@ -3030,6 +3053,10 @@ void DynObjAura::FillTargetMap(std::map<Unit*, uint8>& targets, Unit* /*caster*/
             Acore::AnyFriendlyUnitInObjectRangeCheck u_check(GetDynobjOwner(), dynObjOwnerCaster, radius);
             Acore::UnitListSearcher<Acore::AnyFriendlyUnitInObjectRangeCheck> searcher(GetDynobjOwner(), targetList, u_check);
             Cell::VisitObjects(GetDynobjOwner(), searcher, radius);
+            targetList.remove_if([this, dynObjOwnerCaster](Unit* target)
+            {
+                return dynObjOwnerCaster && !sScriptMgr->CanUnitAssist(dynObjOwnerCaster, target, GetSpellInfo());
+            });
         }
         // pussywizard: TARGET_DEST_DYNOBJ_NONE is supposed to search for both friendly and unfriendly targets, so for any unit
         // what about EffectImplicitTargetA?

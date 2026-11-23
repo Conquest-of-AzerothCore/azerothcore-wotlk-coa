@@ -14,6 +14,7 @@
 #include "SpellScript.h"
 #include <algorithm>
 #include <cmath>
+#include <utility>
 
 namespace
 {
@@ -39,7 +40,10 @@ enum WitchHunterCastSpells
     SPELL_SHADOWSTORM = 520277,
     SPELL_SHADOWSTORM_DAMAGE = 520278,
     SPELL_SHADOWSTORM_HEAL = 520793,
-    SPELL_SHADOWSTORM_LEECH = 520794
+    SPELL_SHADOWSTORM_LEECH = 520794,
+    SPELL_SMITE_EVIL_WICKEDNESS = 802844,
+    SPELL_COLLECT_BOUNTY = 504687,
+    SPELL_PAVISE_EFFECT = 1108180
 };
 
 enum WitchHunterHounds
@@ -47,6 +51,79 @@ enum WitchHunterHounds
     NPC_SHADOWHOUND = 50124,
     NPC_LESSER_SHADOWHOUND = 50224
 };
+
+bool CarriesAttackerBonus(SpellEffectInfo const& effect)
+{
+    return effect.Effect == SPELL_EFFECT_SCHOOL_DAMAGE || effect.Effect == SPELL_EFFECT_NORMALIZED_WEAPON_DMG;
+}
+
+template <typename Bonus>
+int32 MarginalShare(Bonus bonus, int32 amount)
+{
+    return amount > 0 ? std::max(0, bonus(uint32(2 * amount)) - bonus(uint32(amount))) : 0;
+}
+
+std::pair<int32, int32> RangedWeaponShares(Unit* caster, Unit* target, SpellInfo const* info, uint32 raw)
+{
+    SpellSchoolMask const school = info->GetSchoolMask();
+    int32 const scaled = int32(raw * caster->GetPctModifierValue(UNIT_MOD_DAMAGE_RANGED, TOTAL_PCT));
+    int32 const done = MarginalShare([&](uint32 amount)
+        { return int32(caster->MeleeDamageBonusDone(target, amount, RANGED_ATTACK, info, school)); }, scaled);
+    int32 const taken = MarginalShare([&](uint32 amount)
+        { return int32(target->MeleeDamageBonusTaken(caster, amount, RANGED_ATTACK, info, school)); }, done);
+    return {done, taken};
+}
+
+std::pair<int32, int32> SpellShares(Unit* caster, Unit* target, SpellInfo const* info, uint32 raw, uint8 effIndex)
+{
+    int32 const done = std::max(0, SpellDoneShare(caster, target, info, raw, SPELL_DIRECT_DAMAGE, effIndex, 0.0f));
+    int32 const taken = int32(target->SpellDamageBonusTaken(caster, info, uint32(done), SPELL_DIRECT_DAMAGE)) -
+                        int32(target->SpellDamageBonusTaken(caster, info, 0, SPELL_DIRECT_DAMAGE));
+    return {done, taken};
+}
+
+int32 AreaShare(Spell* spell, Unit* target, uint8 effIndex, int32 taken)
+{
+    SpellInfo const* info = spell->GetSpellInfo();
+    SpellEffectInfo const& effect = info->Effects[effIndex];
+    if (taken <= 0 || !(effect.IsAreaAuraEffect() || effect.IsTargetingArea() ||
+                        (effect.ChainTarget > 1 && info->DmgClass != SPELL_DAMAGE_CLASS_MAGIC)))
+        return taken;
+    Unit* caster = spell->GetCaster();
+    bool const npcCaster = !caster->IsControlledByPlayer() || info->HasAttribute(SPELL_ATTR7_TREAT_AS_NPC_AOE);
+    taken = target->CalculateAOEDamageReduction(taken, info->SchoolMask, npcCaster);
+    int32 const targets = int32(spell->GetUniqueTargetInfo()->size());
+    if (caster->IsPlayer() && targets > 10)
+        taken = taken * 10 / targets;
+    return taken;
+}
+
+void AddVictimAttackerBonus(Spell* spell, Unit* target, TargetInfo& hit)
+{
+    SpellInfo const* info = spell->GetSpellInfo();
+    uint32 raw = 0;
+    uint8 effIndex = EFFECT_0;
+    for (uint8 i = EFFECT_0; i < MAX_SPELL_EFFECTS && !raw; ++i)
+        if ((hit.effectMask & (1 << i)) && CarriesAttackerBonus(info->Effects[i]))
+        {
+            raw = VictimAttackerBonus(target, info->Id, i);
+            effIndex = i;
+        }
+    SpellInfo const* aura = spell->GetTriggeredByAuraSpellInfo();
+    if (!raw && aura && aura->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE &&
+        aura->Effects[EFFECT_0].TriggerSpell == info->Id)
+    {
+        raw = VictimAttackerBonus(target, aura->Id, EFFECT_0);
+        effIndex = EFFECT_0;
+    }
+    if (!raw)
+        return;
+    Unit* caster = spell->GetCaster();
+    auto const [done, taken] = info->Effects[effIndex].Effect == SPELL_EFFECT_NORMALIZED_WEAPON_DMG ?
+        RangedWeaponShares(caster, target, info, raw) : SpellShares(caster, target, info, raw, effIndex);
+    hit.damageBeforeTakenMods += done;
+    hit.damage += AreaShare(spell, target, effIndex, taken);
+}
 
 void GrantShadowRageToHounds(Player* player)
 {
@@ -85,6 +162,149 @@ void LeapVault(Player* player, float distance, float angle)
                                           12.0f * player->GetSpeed(MOVE_RUN));
 }
 
+float SilverBulletsCreatureTypeShare(Player* player, Unit* target, SpellInfo const* info)
+{
+    for (uint32 id : {SPELL_SILVER_BULLETS_R2, SPELL_SILVER_BULLETS_R1})
+    {
+        AuraEffect const* damage = player->GetAuraEffect(id, EFFECT_0);
+        AuraEffect const* creatureType = player->GetAuraEffect(id, EFFECT_1);
+        if (!damage || !creatureType)
+            continue;
+        if (!creatureType->IsAffectedOnSpell(info) ||
+            !(target->GetCreatureTypeMask() & uint32(creatureType->GetMiscValueB())))
+            return 1.0f;
+        return float(100 + damage->GetAmount() + creatureType->GetAmount()) / float(100 + damage->GetAmount());
+    }
+    return 1.0f;
+}
+
+float SilverBoltsDoubledShare(Player* player, Unit* target, SpellInfo const* info)
+{
+    AuraEffect const* doubled = player->GetAuraEffect(SPELL_SILVER_BOLTS, EFFECT_0);
+    AuraEffect const* base = player->GetAuraEffect(SPELL_SILVER_BOLTS, EFFECT_2);
+    if (!doubled || !base || !doubled->IsAffectedOnSpell(info))
+        return 1.0f;
+    if (!(target->GetCreatureTypeMask() & uint32(doubled->GetMiscValueB())) && !target->HasAura(SPELL_SHADOW_TRAPPED))
+        return 1.0f;
+    return float(100 + base->GetAmount() + doubled->GetAmount()) / float(100 + base->GetAmount());
+}
+
+bool PeriodicDamageAura(uint32 aura)
+{
+    return aura == SPELL_AURA_PERIODIC_DAMAGE || aura == SPELL_AURA_PERIODIC_LEECH ||
+           aura == SPELL_AURA_PERIODIC_DAMAGE_PERCENT;
+}
+
+bool WitchblightDamaging(SpellInfo const* info)
+{
+    return std::any_of(std::begin(info->Effects), std::end(info->Effects), [](SpellEffectInfo const& effect)
+    {
+        switch (effect.Effect)
+        {
+            case SPELL_EFFECT_SCHOOL_DAMAGE:
+            case SPELL_EFFECT_WEAPON_DAMAGE:
+            case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+            case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+            case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
+            case SPELL_EFFECT_HEALTH_LEECH:
+            case SPELL_EFFECT_POWER_BURN:
+            case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
+                return true;
+            default:
+                return effect.IsAura() && PeriodicDamageAura(effect.ApplyAuraName);
+        }
+    });
+}
+
+bool PersistentAreaDamage(SpellInfo const* info)
+{
+    return std::any_of(std::begin(info->Effects), std::end(info->Effects), [](SpellEffectInfo const& effect)
+    {
+        return effect.Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA && PeriodicDamageAura(effect.ApplyAuraName);
+    });
+}
+
+void WitchblightMiss(Spell* spell, Unit* caster, SpellInfo const* info)
+{
+    Unit* attacker = spell->GetOriginalCaster() ? spell->GetOriginalCaster() : caster;
+    if (!attacker || !CarriesWitchblight(attacker) || !WitchblightDamaging(info) ||
+        PulseOfEffectNotLaunchedUnderWitchblight(spell, info, attacker))
+        return;
+    bool attempted = PersistentAreaDamage(info);
+    if (attempted)
+        spell->SetSpellValue(SPELLVALUE_AURA_DURATION, 1);
+    for (TargetInfo& target : *spell->GetUniqueTargetInfo())
+    {
+        Unit* victim = target.targetGUID == attacker->GetGUID() ? nullptr :
+                       ObjectAccessor::GetUnit(*attacker, target.targetGUID);
+        if (!victim || attacker->IsFriendlyTo(victim))
+            continue;
+        attempted = true;
+        if (target.missCondition == SPELL_MISS_NONE)
+            target.missCondition = SPELL_MISS_MISS;
+    }
+    if (attempted)
+        for (uint32 rank : WitchblightRanks)
+            attacker->RemoveAurasDueToSpell(rank);
+}
+
+bool MagicDeflectRolled(Unit* attacker, Unit* victim, SpellInfo const* info)
+{
+    return (victim->IsAlive() || victim->IsPlayer()) && !attacker->IsVehicle() &&
+           !info->HasAttribute(SPELL_ATTR7_NO_ATTACK_MISS);
+}
+
+bool DeflectRolledFromFront(Unit* attacker, Unit* victim, SpellInfo const* info)
+{
+    if (info->HasAttribute(SPELL_ATTR3_ALWAYS_HIT) ||
+        ((info->IsPositive() || info->HasEffect(SPELL_EFFECT_DISPEL)) && !attacker->IsHostileTo(victim)))
+        return false;
+    switch (info->DmgClass)
+    {
+        case SPELL_DAMAGE_CLASS_RANGED:
+            return !info->HasAttribute(SPELL_ATTR0_NO_ACTIVE_DEFENSE);
+        case SPELL_DAMAGE_CLASS_NONE:
+            return !info->SpellFamilyName &&
+                   std::none_of(std::begin(info->Effects), std::end(info->Effects), [](SpellEffectInfo const& effect)
+                   {
+                       return effect.Effect && effect.Effect != SPELL_EFFECT_SCHOOL_DAMAGE &&
+                              effect.ApplyAuraName != SPELL_AURA_PERIODIC_DAMAGE;
+                   }) && MagicDeflectRolled(attacker, victim, info);
+        case SPELL_DAMAGE_CLASS_MAGIC:
+            return MagicDeflectRolled(attacker, victim, info);
+        default:
+            return false;
+    }
+}
+
+int32 PaviseDeflectChance(Unit* victim)
+{
+    int32 chance = 0;
+    for (AuraEffect const* effect : victim->GetAuraEffectsByType(SPELL_AURA_DEFLECT_SPELLS))
+        if (effect->GetId() == SPELL_PAVISE_EFFECT)
+            chance += effect->GetAmount();
+    return chance;
+}
+
+void PaviseDeflectFromBehind(Spell* spell, SpellInfo const* info)
+{
+    Unit* attacker = spell->GetOriginalCaster();
+    if (!attacker)
+        return;
+    for (TargetInfo& target : *spell->GetUniqueTargetInfo())
+    {
+        if (target.missCondition != SPELL_MISS_NONE || target.targetGUID == attacker->GetGUID())
+            continue;
+        Unit* victim = ObjectAccessor::GetUnit(*attacker, target.targetGUID);
+        if (!victim || victim->HasInArc(M_PI, attacker) || victim->HasIgnoreHitDirectionAura() ||
+            victim->HasUnitState(UNIT_STATE_STUNNED))
+            continue;
+        int32 const chance = PaviseDeflectChance(victim);
+        if (chance > 0 && DeflectRolledFromFront(attacker, victim, info) && roll_chance_i(chance))
+            target.missCondition = SPELL_MISS_DEFLECT;
+    }
+}
+
 class witch_hunter_casts : public AllSpellScript
 {
   public:
@@ -107,6 +327,9 @@ class witch_hunter_casts : public AllSpellScript
 
     void OnSpellCast(Spell* spell, Unit* caster, SpellInfo const* info, bool) override
     {
+        Unit* launcher = spell->GetOriginalCaster() ? spell->GetOriginalCaster() : caster;
+        if (launcher && CarriesWitchblight(launcher))
+            StampWitchblightLaunch(launcher, info->Id);
         Player* player = Owner(caster);
         if (!player)
             return;
@@ -127,6 +350,8 @@ class witch_hunter_casts : public AllSpellScript
 
     void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
     {
+        PaviseDeflectFromBehind(spell, info);
+        WitchblightMiss(spell, caster, info);
         Player* player = Owner(caster);
         if (!player || spell->IsTriggered())
             return;
@@ -146,32 +371,23 @@ class witch_hunter_casts : public AllSpellScript
         if (!player || !target || target == player || hit.damage <= 0)
             return;
         SpellInfo const* info = spell->GetSpellInfo();
+        AddVictimAttackerBonus(spell, target, hit);
         float multiplier = 1.0f;
         if (info->Id == SPELL_BRAND_OF_THE_DAMNED_DAMAGE && info->SpellFamilyName == 21 &&
             hit.missCondition == SPELL_MISS_NONE && (target->GetCreatureTypeMask() & CREATURE_TYPEMASK_DEMON_OR_UNDEAD))
             multiplier *= 2.0f;
         bool brand = target->HasAura(680517, player->GetGUID());
-        if (brand && Noctis(info) && player->HasAura(707067))
-            multiplier *= 1.5f;
-        if (brand && (Noctis(info) || info->Id == 680483) && player->HasAura(681098))
+        if (brand && Noctis(info) && player->HasAura(681098))
             multiplier *= 1.2f;
         if (info->Id == SPELL_WITCHBANE_SHOT && player->HasAura(SPELL_ARBALEST_MASTERY))
             if (Aura* mastery = player->GetAura(SPELL_ARBALEST_MASTERY_PROGRESS))
                 multiplier *= 1.0f + mastery->GetStackAmount() * 0.15f;
+        multiplier *= SilverBulletsCreatureTypeShare(player, target, info);
         hit.damage = int32(hit.damage * multiplier);
         hit.damageBeforeTakenMods = int32(hit.damageBeforeTakenMods * multiplier);
-        if (Heartseeking(info))
-            if (AuraEffect* bounty = player->GetAuraEffect(504478, EFFECT_0))
-            {
-                int32 raw =
-                    bounty->GetAmount() + int32((player->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.3f +
-                                                 player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) * 0.45f) *
-                                                bounty->GetBase()->GetStackAmount());
-                uint32 done =
-                    player->SpellDamageBonusDone(target, info, std::max(0, raw), SPELL_DIRECT_DAMAGE, EFFECT_0);
-                hit.damageBeforeTakenMods += done;
-                hit.damage += target->SpellDamageBonusTaken(player, info, done, SPELL_DIRECT_DAMAGE);
-            }
+        float bolts = SilverBoltsDoubledShare(player, target, info);
+        hit.damage = int32(hit.damage * bolts);
+        hit.damageBeforeTakenMods = int32(hit.damageBeforeTakenMods * bolts);
     }
 
     void OnSpellCheckCast(Spell* spell, bool, SpellCastResult& result) override
@@ -194,10 +410,13 @@ class witch_hunter_casts : public AllSpellScript
             result = SPELL_FAILED_CASTER_AURASTATE;
             return;
         }
+        if (id == 500085 && SubmittedByPlayer(spell) && player->HasUnitState(UNIT_STATE_ROOT))
+        {
+            result = SPELL_FAILED_ROOTED;
+            return;
+        }
         if (spell->IsTriggered())
             return;
-        if (id == 500085 && player->HasUnitState(UNIT_STATE_ROOT))
-            result = SPELL_FAILED_ROOTED;
         if (id == 802281 &&
             (!player->FindMap() || player->GetMap()->IsDungeon() || player->GetMap()->IsBattlegroundOrArena() ||
              !target || target->IsControlledByPlayer() || !(target->GetCreatureTypeMask() & 36)))
@@ -225,6 +444,8 @@ class spell_ascension_witch_hunter_ability : public SpellScript
     bool _anguish = false;
     bool _oath = false;
     bool _bounty = false;
+    int32 _bountyAmount = 0;
+    bool _bountyPending = false;
     uint32 _hits = 0;
     std::vector<ObjectGuid> _flock;
 
@@ -239,6 +460,30 @@ class spell_ascension_witch_hunter_ability : public SpellScript
         _anguish = caster->HasAura(500566);
         _oath = caster->HasAura(680498);
         _bounty = caster->HasAura(504478);
+        if (Heartseeking(GetSpellInfo()) && !GetSpell()->IsTriggered())
+            if (Player* player = Owner(caster))
+                if (AuraEffect* bounty = player->GetAuraEffect(504478, EFFECT_0))
+                {
+                    _bountyAmount = std::max(
+                        0, bounty->GetAmount() +
+                               int32((player->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.3f +
+                                      player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) * 0.45f) *
+                                     bounty->GetBase()->GetStackAmount()));
+                    _bountyPending = true;
+                }
+    }
+
+    void BeforeHitTarget(SpellMissInfo missInfo)
+    {
+        if (!_bountyPending || missInfo != SPELL_MISS_NONE)
+            return;
+        Player* player = Owner(GetCaster());
+        Unit* target = GetHitUnit();
+        if (!player || !target || target == player || !target->IsAlive())
+            return;
+        _bountyPending = false;
+        player->CastCustomSpell(SPELL_COLLECT_BOUNTY, SPELLVALUE_BASE_POINT0, _bountyAmount, target,
+                                TRIGGERED_FULL_MASK);
     }
 
     void Hit()
@@ -278,20 +523,18 @@ class spell_ascension_witch_hunter_ability : public SpellScript
                 int32(CalculatePct(uint64(dealt),
                                    sSpellMgr->AssertSpellInfo(SPELL_SHADOWSTORM_LEECH)->Effects[EFFECT_0].CalcValue())),
                 player, TRIGGERED_FULL_MASK);
-        if (id == 503662 && dealt && player->HasAura(680544))
-            for (uint32 stack : {681413, 681523})
-                if (Aura* aura = target->GetAura(stack, player->GetGUID()))
-                {
-                    uint32 count = aura->GetStackAmount();
-                    target->RemoveAurasDueToSpell(stack, player->GetGUID());
-                    uint32 child = stack == 681413 ? 681415 : 681524;
-                    SpellInfo const* helper = sSpellMgr->GetSpellInfo(child);
-                    float value = helper->Effects[EFFECT_0].CalcValue(player) +
-                                  player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) * 0.25f +
-                                  player->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45f;
-                    player->CastCustomSpell(child, SPELLVALUE_BASE_POINT0, int32(value * count), target,
-                                            TRIGGERED_FULL_MASK);
-                }
+        if (id == 503662 && dealt && player->HasAura(680544) &&
+            (target->HasAura(681413, player->GetGUID()) || target->HasAura(681523, player->GetGUID())))
+        {
+            uint32 child = roll_chance_i(50) ? 681415 : 681524;
+            SpellInfo const* helper = sSpellMgr->GetSpellInfo(child);
+            float value = helper->Effects[EFFECT_0].BasePoints + 1 +
+                          player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) * 0.25f +
+                          player->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45f;
+            player->CastCustomSpell(child, SPELLVALUE_BASE_POINT0, int32(value), target, TRIGGERED_FULL_MASK);
+            target->RemoveAurasDueToSpell(681413, player->GetGUID());
+            target->RemoveAurasDueToSpell(681523, player->GetGUID());
+        }
         if (id == 520271 && dealt && player->HasAura(500056))
         {
             _flock.push_back(target->GetGUID());
@@ -476,10 +719,41 @@ class spell_ascension_witch_hunter_ability : public SpellScript
             player->SetDisplayId(target->GetDisplayId());
     }
 
+    void Launch(SpellEffIndex index)
+    {
+        SpellEffectInfo const& effect = GetSpellInfo()->Effects[index];
+        if (effect.Effect != SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE ||
+            effect.TriggerSpell != SPELL_SMITE_EVIL_WICKEDNESS)
+            return;
+        SpellInfo const* strike = sSpellMgr->GetSpellInfo(effect.TriggerSpell);
+        if (strike && strike->CasterAuraSpell && !GetCaster()->HasAura(strike->CasterAuraSpell))
+            PreventHitDefaultEffect(index);
+    }
+
+    void LeechMark(SpellEffIndex index)
+    {
+        SpellInfo const* info = GetSpellInfo();
+        if (info->Effects[index].Effect != SPELL_EFFECT_HEALTH_LEECH)
+            return;
+        Unit* caster = GetCaster();
+        Player* player = caster->GetCharmerOrOwnerPlayerOrPlayerItself();
+        if (!player || player->getClass() != CLASS_WITCH_HUNTER)
+            return;
+        int32 const raw = int32(VictimAttackerBonus(GetHitUnit(), info->Id, index));
+        SetEffectValue(GetEffectValue() + MarginalShare([&](uint32 amount)
+            { return int32(caster->ApplyEffectModifiers(info, index, float(amount))); }, raw));
+    }
+
     void Register() override
     {
         BeforeCast += SpellCastFn(spell_ascension_witch_hunter_ability::Before);
+        OnEffectLaunch += SpellEffectFn(spell_ascension_witch_hunter_ability::Launch, EFFECT_ALL, SPELL_EFFECT_ANY);
+        OnEffectLaunchTarget +=
+            SpellEffectFn(spell_ascension_witch_hunter_ability::Launch, EFFECT_ALL, SPELL_EFFECT_ANY);
+        BeforeHit += BeforeSpellHitFn(spell_ascension_witch_hunter_ability::BeforeHitTarget);
         AfterHit += SpellHitFn(spell_ascension_witch_hunter_ability::Hit);
+        OnEffectHitTarget +=
+            SpellEffectFn(spell_ascension_witch_hunter_ability::LeechMark, EFFECT_ALL, SPELL_EFFECT_ANY);
         AfterCast += SpellCastFn(spell_ascension_witch_hunter_ability::After);
     }
 };

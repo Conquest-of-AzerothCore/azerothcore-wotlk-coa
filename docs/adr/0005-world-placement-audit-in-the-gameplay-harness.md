@@ -32,8 +32,8 @@ Option 1. A pure module, `CoAGameplayPlacement`, classifies a sample; the harnes
 - Metrics return the raw gap; a verdict metric requires the scenario's own `tolerance`.
 - A display is known to the client when its id is a record of the `DataDir/dbc` client file, the client set that
   `DBCStores.cpp` enforces. A display only in the server store is reported apart as `server_only_display`, not as
-  an anomaly, because the display patch service (`AscensionDisplayPatchService`, `CoA.SendDisplayPatches`) streams
-  those rows to clients.
+  an anomaly, because those rows reach clients through the client archives (ADR 1012; until PR #12775 the display
+  patch service streamed them).
 - Spawns that a game event adds (positive event ids in the server's `game_event_creature` and
   `game_event_gameobject` data) are listed apart with their event id, not counted as anomalies: they exist only while
   the event runs and are often hung on buildings or doodads. In Moonglade they are 128 of the 145 rows at 0.8 yards.

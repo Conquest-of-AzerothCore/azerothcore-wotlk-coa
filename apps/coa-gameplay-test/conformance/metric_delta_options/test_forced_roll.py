@@ -106,3 +106,46 @@ class ForcedRollReleaseTests(unittest.TestCase):
         self.assertEqual(judged(3.0, 0.0), 'alert')
         self.assertEqual(judged(0.0, 0.0), 'alert')
         self.assertEqual(judged(2.0, 1.0), 'alert')
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class ForcedPercentTests(unittest.TestCase):
+    def test_an_entry_percent_replaces_the_default_in_the_mutant_contract_and_model(self):
+        class_file = load_fixture_class_file(23)
+        entry = caster_haste_entry(forced_roll={'talent': 300235, 'forced_percent': 1200})
+        scenario, [expectation] = behaviour_scenario(class_file, entry)
+        run.validate(scenario)
+        mutant = scenario['steps'][len(base_steps(class_file))]
+        self.assertEqual((mutant['action'], mutant['spell'], mutant['percent']), ('spell_mod_mutant', 300235, 1200))
+        self.assertIn('raises the roll of 300235 by 1200%', scenario['contract'])
+        self.assertEqual(expectation.model['forced_roll']['forced_percent'], 1200)
+
+    def test_without_a_percent_the_default_stays_and_the_model_names_none(self):
+        class_file = load_fixture_class_file(23)
+        scenario, [expectation] = behaviour_scenario(class_file, caster_haste_entry(forced_roll={'talent': 300235}))
+        self.assertEqual(scenario['steps'][len(base_steps(class_file))]['percent'], 1000)
+        self.assertNotIn('forced_percent', expectation.model['forced_roll'])
+        self.assertEqual(behaviour_scenario(class_file, caster_haste_entry())[0], scenario)
+
+    def test_the_verdict_names_the_entry_percent(self):
+        entry = caster_haste_entry(forced_roll={'talent': 300235, 'forced_percent': 1200})
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
+        values = {expectation.model['before_label']: 1.0, expectation.model['after_label']: 0.833333,
+                  expectation.model['forced_roll']['released_label']: 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('SPELLMOD_CHANCE_OF_SUCCESS +1200% spell modifier mutant', verdict.explanation)
+
+    def test_a_percent_is_a_positive_whole_number_up_to_the_cap(self):
+        for percent in (0, -5, 12.5, True, '1200', 10001):
+            with self.subTest(percent=percent), self.assertRaises(ValueError):
+                behaviour_scenario(load_fixture_class_file(23),
+                                   caster_haste_entry(forced_roll={'talent': 300235, 'forced_percent': percent}))
+
+    def test_the_finished_class_files_name_no_percent(self):
+        from profile import load_class_file
+        for class_id in (19, 23):
+            with self.subTest(class_id=class_id):
+                self.assertEqual([entry['spell'] for entry in load_class_file(class_id).get('behaviours', [])
+                                  if isinstance(entry.get('forced_roll'), dict)
+                                  and 'forced_percent' in entry['forced_roll']], [])

@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Tinker: Overcharge on a Restorative Beacon heals the Tinker and allies near the beacon (#12379)",
+  "contract": [
+    "#12379 reports that Overcharge (524835) on a Restorative Beacon (50037) does not heal. With Beacon Charging",
+    "(524834), Overcharge casts Overcharge: Restorative Beacon (560710) on every raid ally within 15 yd of the",
+    "beacon. The heal must come from the beacon: the Tinker 8 yd from the beacon and a grouped ally 10 yd from it",
+    "on the opposite side (18 yd from the Tinker) must both receive a 560710 heal. The beacon spawns 5 yd in front",
+    "of the Tinker (TARGET_DEST_CASTER_FRONT, radius index 8 = 5 yd). Regeneration is off for both players."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "tinker", "race": 1, "class": 28, "level": 80, "allow_regeneration": false },
+    { "id": "ally", "race": 1, "class": 1, "level": 80, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "teleport", "actor": "tinker", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "ally", "map": 0, "x": -9616.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "group", "actor": "tinker", "target": "ally" },
+    { "action": "learn", "actor": "tinker", "spell": 801801 },
+    { "action": "learn", "actor": "tinker", "spell": 524835 },
+    { "action": "set_aura", "actor": "tinker", "spell": 524834, "stacks": 1 },
+    { "action": "cast", "actor": "tinker", "spell": 801801 },
+    {
+      "action": "assert", "label": "SETUP: the Restorative Beacon is summoned", "actor": "tinker",
+      "metric": "owned_creature_count", "entry": 50037, "equals": 1, "within_ms": 3000
+    },
+    { "action": "teleport", "actor": "tinker", "map": 0, "x": -9620.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "ally", "map": 0, "x": -9602.06, "y": -288.949, "z": 57.3053, "o": 3.14159 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "set_health", "actor": "tinker", "value": 100 },
+    { "action": "set_health", "actor": "ally", "value": 100 },
+    { "action": "cast", "actor": "tinker", "spell": 524835 },
+    {
+      "action": "assert", "label": "The beacon's Overcharge heal reaches the Tinker", "actor": "tinker",
+      "metric": "spell_heal_count", "spell": 560710, "caster_entry": 50037, "target": "tinker", "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The Overcharge heal reaches the ally 18 yd from the Tinker", "actor": "ally",
+      "metric": "spell_heal_count", "spell": 560710, "caster_entry": 50037, "target": "ally", "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

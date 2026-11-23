@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Witch Doctors can use The Greatest Race of Hunters, take quest 7503 and wear its trinket",
+  "contract": [
+    "Request: Shadowhunting Witch Doctors could not use item 18361 (The Greatest Race of Hunters, AllowableClass 516: Hunter only after the loader's Hunter-family expansion) nor take the quest it starts, 7503 (quest_template_addon AllowableClasses 4, kept single-class by the quest loader).",
+    "Expected: a level 60 Witch Doctor (class 13) passes the native item and quest class checks for 18361 and 7503 and can equip the reward trinket 18473 (Fighter's Seal of Eldre'Thalas); the Hunter keeps both, the Ranger keeps the item, and a Necromancer stays excluded from both."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "doctor", "race": 1, "class": 13, "level": 60 },
+    { "id": "hunter", "race": 4, "class": 3, "level": 60 },
+    { "id": "ranger", "race": 1, "class": 21, "level": 60 },
+    { "id": "necro", "race": 1, "class": 23, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+
+    { "action": "assert", "label": "CONTROL: the Hunter can use the book", "actor": "hunter", "metric": "item_usable", "item": 18361, "equals": 1 },
+    { "action": "assert", "label": "CONTROL: the Hunter can take the quest", "actor": "hunter", "metric": "quest_takeable", "quest": 7503, "equals": 1 },
+    { "action": "assert", "label": "CONTROL: the Ranger keeps the Hunter-family book", "actor": "ranger", "metric": "item_usable", "item": 18361, "equals": 1 },
+    { "action": "assert", "label": "CONTROL: the Necromancer cannot use the book", "actor": "necro", "metric": "item_usable", "item": 18361, "equals": 0 },
+    { "action": "assert", "label": "CONTROL: the Necromancer cannot take the quest", "actor": "necro", "metric": "quest_takeable", "quest": 7503, "equals": 0 },
+
+    { "action": "assert", "label": "DISCRIMINATING: the Witch Doctor can use the book", "actor": "doctor", "metric": "item_usable", "item": 18361, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the Witch Doctor can take the quest", "actor": "doctor", "metric": "quest_takeable", "quest": 7503, "equals": 1 },
+    { "action": "assert", "label": "The Witch Doctor can use the reward trinket", "actor": "doctor", "metric": "item_usable", "item": 18473, "equals": 1 },
+    { "action": "add_item", "actor": "doctor", "item": 18473, "count": 1 },
+    { "action": "equip", "actor": "doctor", "item": 18473, "slot": 12 },
+    { "action": "assert", "label": "The Witch Doctor wears the reward trinket", "actor": "doctor", "metric": "equipped_item", "slot": 12, "equals": 18473, "within_ms": 2000 }
+  ]
+}

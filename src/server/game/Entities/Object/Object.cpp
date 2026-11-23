@@ -16,6 +16,7 @@
  */
 
 #include "Object.h"
+#include "AscensionBattlegroundCombat.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "CellImpl.h"
@@ -2102,7 +2103,12 @@ bool WorldObject::CanDetectStealthOf(WorldObject const* obj, bool checkAlert) co
         // Level difference: 5 point / level, starting from level 1.
         // There may be spells for this and the starting points too, but
         // not in the DBCs of the client.
-        detectionValue += int32(getLevelForTarget(obj) - 1) * 5;
+        uint8 detectionLevel = getLevelForTarget(obj);
+        // A stealth aura's strength follows its owner's real level, so two player-controlled units in a widened
+        // battleground roll detection at that level instead of the bracket top.
+        if (uint8 const stealthLevel = AscensionBattlegroundCombat::StealthDetectionLevel(ToUnit(), obj->ToUnit()))
+            detectionLevel = stealthLevel;
+        detectionValue += int32(detectionLevel - 1) * 5;
 
         // Apply modifiers
         detectionValue += m_stealthDetect.GetValue(StealthType(i));

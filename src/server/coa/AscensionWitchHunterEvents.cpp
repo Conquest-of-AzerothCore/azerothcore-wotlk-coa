@@ -58,6 +58,11 @@ bool Extra(SpellInfo const* info)
     }
 }
 
+bool DawnFromFireExtra(uint32 aura, SpellInfo const* info)
+{
+    return aura == 705484 && info && (info->Id == 802850 || info->Id == 807262);
+}
+
 bool HasOwnedTormentor(Unit* target, ObjectGuid caster)
 {
     for (auto const& [key, application] : target->GetAppliedAuras())
@@ -119,7 +124,7 @@ class aura_ascension_witch_hunter_event : public AuraScript
         bool critical = event.GetHitMask() & PROC_HIT_CRITICAL;
         bool avoid = event.GetHitMask() & (PROC_HIT_DODGE | PROC_HIT_PARRY);
         SpellInfo const* info = event.GetSpellInfo();
-        if (outgoing && Extra(info))
+        if (outgoing && Extra(info) && !DawnFromFireExtra(id, info))
             return false;
         bool autoMelee = event.GetTypeMask() & PROC_FLAG_DONE_MELEE_AUTO_ATTACK;
         bool autoRanged = event.GetTypeMask() & PROC_FLAG_DONE_RANGED_AUTO_ATTACK;
@@ -400,9 +405,14 @@ class aura_ascension_witch_hunter_event : public AuraScript
                 }
                 break;
             case 681329:
+                Cast(owner, other, 681392);
+                Cast(owner, other, 681392);
+                self(1257670);
+                break;
             case 681488:
-                Cast(owner, other, 681392);
-                Cast(owner, other, 681392);
+                Cast(owner, other, 681489);
+                Cast(owner, other, 681489);
+                Cast(owner, other, 681489);
                 self(1257670);
                 break;
             case 806195:

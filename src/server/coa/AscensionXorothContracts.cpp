@@ -35,7 +35,10 @@ void ApplyContracts(SpellInfo* info)
         info->RangeEntry = sSpellRangeStore.LookupEntry(SPELL_RANGE_THIRTY_YARDS);
     }
     if (id == SPELL_DRAG_THROUGH_HELL)
+    {
         info->RangeEntry = sSpellRangeStore.LookupEntry(SPELL_RANGE_ANYWHERE);
+        info->AttributesEx2 |= SPELL_ATTR2_IGNORE_LINE_OF_SIGHT;
+    }
     if (id == 520440 || id == 520441)
         for (auto& effect : info->Effects)
             effect.Effect = 0;
@@ -81,6 +84,8 @@ void ApplyContracts(SpellInfo* info)
             info->ProcFlags = 0;
             info->ProcCharges = 0;
         }
+    if (Named(info, 800340))
+        info->AscensionFlatAfterWeaponPercent = true;
     if (id == 680197)
     {
         info->Effects[0].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
@@ -424,7 +429,7 @@ void ApplyContracts(SpellInfo* info)
         SpellEffectInfo& cost = info->Effects[EFFECT_1];
         cost.Effect = SPELL_EFFECT_APPLY_AURA;
         cost.ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
-        cost.BasePoints = -5;
+        cost.BasePoints = -50;
         cost.DieSides = 0;
         cost.MiscValue = SPELLMOD_COST;
         cost.SpellClassMask = flag96(0, 256, 0);

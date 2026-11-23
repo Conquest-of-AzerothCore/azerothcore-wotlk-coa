@@ -1104,7 +1104,8 @@ public:
 
     // Unit level methods
     [[nodiscard]] uint8 GetLevel() const { return uint8(GetUInt32Value(UNIT_FIELD_LEVEL)); }
-    uint8 getLevelForTarget(WorldObject const* /*target*/) const override { return GetLevel(); }
+    uint8 getLevelForTarget(WorldObject const* target) const override;
+    [[nodiscard]] uint8 getRewardLevelForTarget(WorldObject const* target) const;
     void SetLevel(uint8 lvl, bool showLevelChange = true);
 
     // Health methods
@@ -1269,6 +1270,9 @@ public:
     float SpellPctDamageModsDone(Unit* victim, SpellInfo const* spellProto, DamageEffectType damagetype);
     float GetSpellAttackPowerCoefficientMultiplier(SpellInfo const* spellInfo, bool periodic) const;
     float GetSpellAttackPowerCoefficientFlatBonus(SpellInfo const* spellInfo) const;
+    // Ascension's server-side coefficient and damage-by-victim spell modifiers (SPELLMOD_AP_COEFFICIENT and on)
+    float ApplyAscensionCoefficientMods(SpellInfo const* spellInfo, bool periodic, bool attackPower, float coeff) const;
+    void ApplyAscensionVictimDamageMods(SpellInfo const* spellInfo, Unit const* victim, float& damage) const;
     float GetSpellPowerCoefficientFlatBonus(SpellInfo const* spellInfo) const;
     uint32 SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint8 effIndex, float TotalMod = 0.0f, uint32 stack = 1);
     uint32 SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack = 1);

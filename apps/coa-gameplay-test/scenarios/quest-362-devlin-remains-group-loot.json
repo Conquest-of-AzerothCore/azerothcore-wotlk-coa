@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "The Haunted Mills: both party members on the quest loot Devlin's Remains from one Devlin Agamand",
+  "contract": "Devlin Agamand (1657) is a shared named quest target, so his quest loot is free for all: every eligible participant on The Haunted Mills (362) gets their own Devlin's Remains (2831). Two grouped players are both on the quest and one of them kills Devlin. Each player must be offered exactly one Devlin's Remains from the corpse and must end with one in the bags.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "hero", "race": 5, "class": 1, "level": 10 },
+    { "id": "friend", "race": 5, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "group", "actor": "hero", "target": "friend" },
+    { "action": "prepare_quest", "actor": "hero", "quest": 362 },
+    { "action": "prepare_quest", "actor": "friend", "quest": 362 },
+    { "action": "destroy_item", "actor": "hero", "item": 2831 },
+    { "action": "destroy_item", "actor": "friend", "item": 2831 },
+    { "action": "summon", "actor": "hero", "entry": 1657, "as": "devlin", "distance": 3 },
+    { "action": "wait", "ms": 300 },
+    { "action": "attack_nearby", "actor": "hero", "entry": 1657, "kill": true },
+    { "action": "assert", "actor": "devlin", "metric": "alive", "equals": 0, "within_ms": 5000 },
+    { "action": "loot_creature", "actor": "hero", "target": "devlin" },
+    { "action": "assert", "label": "The killer is offered the remains",
+      "actor": "hero", "metric": "loot_offered_item_count", "item": 2831, "equals": 1 },
+    { "action": "loot_slot", "actor": "hero", "item": 2831 },
+    { "action": "close_loot", "actor": "hero" },
+    { "action": "assert", "label": "The killer's remains reach the bags",
+      "actor": "hero", "metric": "item_count", "item": 2831, "equals": 1 },
+    { "action": "loot_creature", "actor": "friend", "target": "devlin" },
+    { "action": "assert", "label": "The party member is offered their own remains",
+      "actor": "friend", "metric": "loot_offered_item_count", "item": 2831, "equals": 1 },
+    { "action": "loot_slot", "actor": "friend", "item": 2831 },
+    { "action": "close_loot", "actor": "friend" },
+    { "action": "assert", "label": "The party member's remains reach the bags",
+      "actor": "friend", "metric": "item_count", "item": 2831, "equals": 1 }
+  ]
+}

@@ -1,11 +1,12 @@
 {
   "schema": 1,
-  "name": "Jergosh's Incinerate and Immolate and Archmage Arugal's Wrath and Curse reach 30 yards and need line of sight",
+  "name": "Jergosh's Incinerate and Immolate reach 30 yards and need line of sight; Archmage Arugal's Wrath and Curse keep their Spell.dbc reach",
   "contract": [
     "Ascension's kit spells for Jergosh the Invoker (11518) and Archmage Arugal (4275) have 100 yards or unlimited range in",
     "Spell.dbc, and Arugal's two also ignore line of sight. Our tester saw Jergosh's Incinerate hit from any distance and Curse",
     "of Arugal through a wall. Incinerate 2102540, Immolate 2102536, Wrath of Arugal 2102677 and Curse of Arugal 2102679 now",
-    "reach 30 yards (SpellRange 4) and need line of sight. The bosses' other spells keep their data."
+    "reach 30 yards (SpellRange 4) and need line of sight. The bosses' other spells keep their data.",
+    "Wrath and Curse of Arugal later got their Spell.dbc range and line-of-sight rule back (rev_20261117_31): at 30 yards with line of sight Arugal left his desk for players at the lair door. He resets instead when his target leaves his lair."
   ],
   "timeout_ms": 30000,
   "location": {
@@ -46,35 +47,35 @@
     },
     {
       "action": "assert",
-      "label": "Wrath of Arugal (2102677) reaches 30 yards",
+      "label": "Wrath of Arugal (2102677) keeps its 100 yards, so Arugal reaches the whole lair from his desk",
       "actor": "p",
       "metric": "spell_max_range",
       "spell": 2102677,
-      "equals": 30
+      "equals": 100
     },
     {
       "action": "assert",
-      "label": "Curse of Arugal (2102679) reaches 30 yards",
+      "label": "Curse of Arugal (2102679) keeps its Spell.dbc range, so Arugal reaches the whole lair from his desk",
       "actor": "p",
       "metric": "spell_max_range",
       "spell": 2102679,
-      "equals": 30
+      "min": 100
     },
     {
       "action": "assert",
-      "label": "Wrath of Arugal (2102677) needs line of sight",
+      "label": "Wrath of Arugal (2102677) ignores line of sight again, as in Spell.dbc",
       "actor": "p",
       "metric": "spell_ignores_los",
       "spell": 2102677,
-      "equals": 0
+      "equals": 1
     },
     {
       "action": "assert",
-      "label": "Curse of Arugal (2102679) needs line of sight",
+      "label": "Curse of Arugal (2102679) ignores line of sight again, as in Spell.dbc",
       "actor": "p",
       "metric": "spell_ignores_los",
       "spell": 2102679,
-      "equals": 0
+      "equals": 1
     },
     {
       "action": "assert",

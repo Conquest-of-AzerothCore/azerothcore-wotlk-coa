@@ -235,7 +235,7 @@ ItemTemplate const* InstanceTemplate(Item const* item)
 
     uint8 const level = StoredLevel(item);
     ItemTemplate const* base = level ? item->GetTemplate() : nullptr;
-    if (!base)
+    if (!base || level == base->ItemLevel)
         return nullptr;
 
     ItemLadder::Row const* row = LadderStore::Instance().Row(base->ItemId, level);
@@ -298,21 +298,6 @@ void ForEachCarriedItem(Player const* player, Visitor&& visit)
 void SendAllLevels(Player* player)
 {
     ForEachCarriedItem(player, [player](Item const* item) { SendLevel(player, item); });
-}
-
-bool OwnsStoredKey(Player* player, uint32 itemId, uint32 key)
-{
-    bool owns = false;
-    auto check = [&](Item const* item)
-    {
-        owns = owns || (item->GetEntry() == itemId && StoredLevel(item) == key);
-    };
-    ForEachCarriedItem(player, check);
-    for (Mail const* mail : player->GetMails())
-        for (MailItemInfo const& info : mail->items)
-            if (Item const* item = player->GetMItem(info.item_guid))
-                check(item);
-    return owns;
 }
 
 void ItemArrived(Player* player, Item* item)
@@ -528,8 +513,7 @@ void AnswerPendingStatQueries(Player* player)
 
     for (uint32 const itemId : pendingStatQueries.Take(session->GetAccountId()))
         if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId))
-            SendStatReply(session, itemId, proto->ItemLevel, proto,
-                !OwnsStoredKey(player, itemId, proto->ItemLevel));
+            SendStatReply(session, itemId, proto->ItemLevel, proto, true);
 }
 
 void DiscardPendingStatQueries(Player* player)

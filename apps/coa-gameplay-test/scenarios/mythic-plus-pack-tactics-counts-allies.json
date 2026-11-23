@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "name": "Mythic+ Pack Tactics counts only nearby allies, not the player itself",
+  "contract": [
+    "Pack Tactics (80054) links Pack Tactics 80055, a 10 yd friendly area aura worth 11% damage dealt and 8% less",
+    "damage taken. Our testers saw five 80055 in a party of five: a player's own 80055 counted for itself. A player now gets",
+    "one 80055 from each friendly player within 10 yards and none from itself, at most four in a party of five."
+  ],
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "a",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "b",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "c",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "d",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "group",
+      "label": "a, b and c form a party",
+      "actor": "a",
+      "target": "b"
+    },
+    {
+      "action": "group",
+      "actor": "a",
+      "target": "c"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "set_aura",
+      "label": "a gets the Pack Tactics affix as a Mythic+ run gives it",
+      "actor": "a",
+      "spell": 80054,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "b gets the Pack Tactics affix as a Mythic+ run gives it",
+      "actor": "b",
+      "spell": 80054,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "c gets the Pack Tactics affix as a Mythic+ run gives it",
+      "actor": "c",
+      "spell": 80054,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "d gets the Pack Tactics affix as a Mythic+ run gives it",
+      "actor": "d",
+      "spell": 80054,
+      "stacks": 1
+    },
+    {
+      "action": "relocate",
+      "label": "d walks 20 yards away",
+      "actor": "d",
+      "dx": 20.0
+    },
+    {
+      "action": "relocate",
+      "label": "d walks another 20 yards away, alone",
+      "actor": "d",
+      "dx": 20.0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: all players stand together",
+      "actor": "a",
+      "metric": "distance",
+      "target": "b",
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "a gets Pack Tactics from b",
+      "actor": "a",
+      "metric": "aura",
+      "spell": 80055,
+      "caster": "b",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "a gets Pack Tactics from c",
+      "actor": "a",
+      "metric": "aura",
+      "spell": 80055,
+      "caster": "c",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "a does not get Pack Tactics from itself",
+      "actor": "a",
+      "metric": "aura",
+      "spell": 80055,
+      "caster": "a",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a keeps the affix penalty",
+      "actor": "a",
+      "metric": "aura",
+      "spell": 80054,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "d, 40 yards from everyone, gets no Pack Tactics, not even its own",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 80055,
+      "equals": 0
+    }
+  ]
+}

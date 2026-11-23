@@ -183,7 +183,7 @@ void MailDraft::SendReturnToSender(uint32 /*sender_acc*/, ObjectGuid::LowType se
     SendMailTo(trans, MailReceiver(receiver, receiver_guid), MailSender(MAIL_NORMAL, sender_guid), MAIL_CHECK_MASK_RETURNED, 0);
 }
 
-void MailDraft::SendMailTo(CharacterDatabaseTransaction trans, MailReceiver const& receiver, MailSender const& sender, MailCheckMask checked, uint32 deliver_delay, uint32 custom_expiration, bool deleteMailItemsFromDB, bool sendMail)
+uint32 MailDraft::SendMailTo(CharacterDatabaseTransaction trans, MailReceiver const& receiver, MailSender const& sender, MailCheckMask checked, uint32 deliver_delay, uint32 custom_expiration, bool deleteMailItemsFromDB, bool sendMail)
 {
     sScriptMgr->OnBeforeMailDraftSendMailTo(this, receiver, sender, checked, deliver_delay, custom_expiration, deleteMailItemsFromDB, sendMail);
 
@@ -191,7 +191,7 @@ void MailDraft::SendMailTo(CharacterDatabaseTransaction trans, MailReceiver cons
         deleteIncludedItems(trans, true);
 
     if (!sendMail) // can be changed in the hook
-        return;
+        return 0;
 
     Player* pReceiver = receiver.GetPlayer();               // can be nullptr
 
@@ -200,6 +200,7 @@ void MailDraft::SendMailTo(CharacterDatabaseTransaction trans, MailReceiver cons
 
     StagedMail const staged = AppendMailRows(trans, receiver.GetPlayerGUIDLow(), sender, checked, deliver_delay, custom_expiration);
     PublishStagedMail(staged, pReceiver);
+    return staged.mailId;
 }
 
 Optional<StagedMail> MailDraft::StageMailTo(CharacterDatabaseTransaction trans, ObjectGuid::LowType receiverGuidLow, MailSender const& sender, MailCheckMask checked, uint32 custom_expiration)

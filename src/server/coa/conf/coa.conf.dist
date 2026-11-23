@@ -55,10 +55,11 @@ CoA.LevelBoostNpc.RuneOfDescensionReward = 2000000
 # Log each consumed extension packet during protocol discovery.
 CoA.LogConsumedPackets = 1
 
-# Realm Bound Bazaar Tokens from the Elite Warchest (2977351). The 1500 Bazaar Tokens (975001) it holds are
-# counted as a per-account reserve: purchases use the reserve first, and tokens can only be traded, mailed to
-# another account, auctioned or put in a guild bank while the account keeps at least the reserve. Mail between
-# the account's own characters is free. Farmed tokens above the reserve stay tradeable.
+# Realm Bound Bazaar Tokens from the Elite Warchest (2977351) and the Daily Login Reward. The 1500 Bazaar Tokens
+# (975001) the warchest holds and the reward's tokens are counted as a per-account reserve: purchases use the
+# reserve first, and tokens can only be traded, mailed to another account, auctioned or put in a guild bank while
+# the account keeps at least the reserve. Mail between the account's own characters is free. Refunded tokens come
+# back into the reserve. Farmed tokens above the reserve stay tradeable.
 CoA.BazaarTokens.WarchestRealmBound = 1
 
 CoA.BazaarTokens.HourlyCap.Amount = 0
@@ -280,16 +281,10 @@ CoA.ItemScaling.Native.RebornArmor = 1
 # tree's free nodes are granted either way: the books do not sell them. Reloadable.
 CoA.AutoProgression = 0
 
-# Stream the CreatureDisplayInfo patch rows the installed Ascension client cannot
-# resolve from its own files (custom display ids). The stream starts after the
-# client's extension handshake, with a short login fallback when it never arrives.
+# Send the per-player client rows that the client files cannot carry: spell notice
+# and swap rows, character advancement swap entries and race-restricted quest super
+# track rows. Static client data ships in the client MPQs.
 CoA.SendDisplayPatches = 1
-
-# Unpatched copy of the client's CreatureDisplayInfo.dbc, used to stream exactly
-# the rows the client is missing. Empty selects DataDir/dbc_clientset; when the
-# copy is unavailable, the server's own DataDir/dbc/CreatureDisplayInfo.dbc is used,
-# so only rows added through creaturedisplayinfo_dbc are streamed.
-CoA.ClientDbcDirectory = ""
 
 # Extension range derived from the installed client's opcode dispatch table.
 # Keep these values decimal because ConfigMgr numeric values are parsed as decimal.
@@ -386,6 +381,35 @@ HighRisk.Losses = 0
 HighRisk.GearChance = 50
 HighRisk.ResourceChance = 50
 HighRisk.GoldChance = 50
+
+###################################################################################################
+# BATTLEGROUND BRACKETS
+#
+#    CoA.Battleground.WideBrackets.Enable
+#        Description: Merge the stock ten-level battleground brackets below level 60 into the wider
+#                     brackets of CoA.Battleground.WideBrackets.Ranges. Arenas and the brackets from
+#                     level 60 up keep their stock ranges. Read at startup only.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled, stock brackets)
+
+CoA.Battleground.WideBrackets.Enable = 1
+
+#    CoA.Battleground.WideBrackets.Ranges
+#        Description: Comma-separated, ascending level ranges between 1 and 59. Each range must hold
+#                     whole stock brackets (10-19, 20-29, ...) and keep the same lead bracket on every
+#                     battleground. An invalid value logs an error and keeps the stock brackets. Read at
+#                     startup only.
+#        Default:     "10-29,30-49,50-59"
+
+CoA.Battleground.WideBrackets.Ranges = "10-29,30-49,50-59"
+
+#    CoA.Battleground.WideBrackets.MaxLiftLevels
+#        Description: Most levels the health lift and output scaling bridge for a player or pet below the
+#                     bracket top. Combat rolls still use the bracket top. Read at startup only.
+#        Default:     0 - (No cap)
+#                     N - (Lift to at most own level + N)
+
+CoA.Battleground.WideBrackets.MaxLiftLevels = 0
 
 ###################################################################################################
 # RATED SOLO ARENA
@@ -1099,6 +1123,16 @@ CrowsCache.GoldenMarksOfWar = "10 10"
 #        Default:     400
 
 CrowsCache.BazaarTokens = 400
+
+#
+#    CrowsCache.WallRange
+#        Description: Yards around a Crow's Cache (chest, carrier or dropped cache) in which a
+#                     Mercenary for Hire! player and a player without it cannot attack, heal or
+#                     buff each other, also when grouped. Applies when either of the two is in range.
+#                     0 = no wall. Maximum 500.
+#        Default:     100
+
+CrowsCache.WallRange = 100
 CrowsCache.X = -7831
 CrowsCache.Y = -3465
 CrowsCache.Z = 56.87
@@ -1130,5 +1164,7 @@ XPHotspots.BuffSpell = 993945
 # Brand: a short label (32 characters at most, no "|") the client shows with the hotspots; empty = none.
 XPHotspots.Brand = ""
 
+CoA.ChatLog.Enable = 0
+CoA.ChatLog.KeepDays = 30
 CoA.EconomyLog.Enable = 0
 CoA.EconomyLog.KeepDays = 90

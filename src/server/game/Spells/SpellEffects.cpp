@@ -1347,7 +1347,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             {
                                 if (AuraEffect* aurEff = owner->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_WARLOCK, 214, 0))
                                 {
-                                    int32 bp0 = aurEff->GetId() == 54037 ? 4 : 8;
+                                    int32 bp0 = sSpellMgr->GetSpellTwinSource(aurEff->GetId()) == 54037 ? 4 : 8;
                                     m_caster->CastCustomSpell(m_caster, 54425, &bp0, nullptr, nullptr, true);
                                 }
                             }
@@ -2565,8 +2565,9 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
             addhealth += tickheal * tickcount;
 
-            // Glyph of Swiftmend
-            if (!caster->HasAura(54824))
+            // Glyph of Swiftmend (118033: the classless glyph; Ascension's 54824 is another glyph)
+            // 415014 Everliving (Mystic Enchant): the HoTs stay too
+            if (!caster->HasAura(54824) && !caster->HasAura(118033) && !caster->HasAura(415014))
                 unitTarget->RemoveAura(targetAura->GetId(), targetAura->GetCasterGUID());
 
             //addhealth += tickheal * tickcount;
@@ -4536,7 +4537,7 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
             }
         case SPELLFAMILY_PALADIN:
             {
-                switch (m_spellInfo->Id)
+                switch (sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 53385 ? 53385 : m_spellInfo->Id)
                 {
                     case 20467: // Seal of Command Unleashed
                         spell_bonus += int32(0.08f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK));

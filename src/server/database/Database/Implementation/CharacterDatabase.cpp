@@ -96,6 +96,12 @@ void CharacterDatabaseConnection::DoPrepareStatements()
 
     PrepareStatement(CHAR_INS_ACCOUNT_VANITY_COLLECTION,
         "INSERT IGNORE INTO account_vanity_collection (account_id, item_id) VALUES (?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_ACCOUNT_VANITY_COLLECTION,
+        "DELETE FROM account_vanity_collection WHERE account_id = ? AND item_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_ASCENSION_BANK_STORED_ITEMS,
+        "SELECT ii.itemEntry, ii.flags FROM mod_ascension_bank_item bi INNER JOIN item_instance ii "
+        "ON bi.item_guid = ii.guid WHERE (bi.owner_kind = ? AND bi.owner_id = ?) OR (bi.owner_kind = ? AND bi.owner_id = ?)",
+        CONNECTION_SYNCH);
     PrepareStatement(CHAR_DEL_WORLDFORGED_LOOT,
         "DELETE FROM character_worldforged_loot WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_LOTTERY_RECENT_WINNERS,
@@ -1045,6 +1051,9 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "UNION ALL SELECT 0,0,'','',0,0 ORDER BY owner_guid,original_guid,flags", CONNECTION_SYNCH);
 
     PrepareStatement(CHAR_INS_PLAYER_ANTICHEAT_ALERT, "INSERT INTO player_anticheat_alert (account, guid, name, reason, details, size) VALUES (?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_COA_CHAT_LOG, "INSERT INTO coa_chat_log (time, account, guid, name, type, lang, team, channel, target_guid, "
+        "target_account, target_name, group_id, guild_id, map, zone, x, y, z, emote, mail_id, subject, message) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
 #ifdef MOD_MANASTORM_ENDLESS
     PrepareStatement(CHAR_SEL_MANASTORM_XP_LEVEL,
         "SELECT level, playerFlags FROM characters WHERE guid = ?", CONNECTION_SYNCH);

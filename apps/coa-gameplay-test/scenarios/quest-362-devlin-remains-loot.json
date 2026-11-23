@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "The Haunted Mills: Devlin Agamand's world spawn drops Devlin's Remains for a player on the quest",
+  "contract": "The Haunted Mills (362) asks for Devlin's Remains (2831), which Devlin Agamand (1657) drops at 100% for players who need it (creature_loot_template 1657, QuestRequired 1). Players reported that quest items around Brill, Devlin's corpse among them, could not be looted. A player on the quest kills Devlin's Agamand Mills spawn 44611 in the world phase and loots the corpse with CMSG_LOOT, as the client does; the corpse must offer exactly one Devlin's Remains, and looting it must put the remains in the bags and complete the quest.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": 2606.5, "y": 894.0, "z": 107.9, "o": 0.0 },
+  "players": [
+    { "id": "hero", "race": 5, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_phase", "actor": "hero", "value": 1 },
+    { "action": "teleport", "actor": "hero", "map": 0, "x": 2606.5, "y": 894.0, "z": 107.9 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "prepare_quest", "actor": "hero", "quest": 362 },
+    { "action": "destroy_item", "actor": "hero", "item": 2831 },
+    { "action": "assert", "label": "The quest still needs the remains", "actor": "hero", "metric": "quest_status",
+      "quest": 362, "equals": 3, "within_ms": 2000 },
+    { "action": "attack_nearby", "actor": "hero", "entry": 1657, "kill": true },
+    { "action": "wait", "ms": 1000 },
+    { "action": "client_packet", "label": "Loot Devlin's corpse", "actor": "hero", "opcode": 349, "consumed": false,
+      "fields": [ { "nearest_creature_guid": 1657 } ] },
+    { "action": "assert", "label": "The corpse offers Devlin's Remains",
+      "actor": "hero", "metric": "loot_offered_item_count", "item": 2831, "equals": 1 },
+    { "action": "loot_slot", "actor": "hero", "item": 2831 },
+    { "action": "close_loot", "actor": "hero" },
+    { "action": "assert", "label": "Devlin's Remains reach the bags",
+      "actor": "hero", "metric": "item_count", "item": 2831, "equals": 1 },
+    { "action": "assert", "label": "The quest is complete", "actor": "hero", "metric": "quest_status",
+      "quest": 362, "equals": 1, "within_ms": 2000 }
+  ]
+}

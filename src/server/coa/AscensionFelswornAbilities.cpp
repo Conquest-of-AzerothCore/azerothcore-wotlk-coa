@@ -291,8 +291,11 @@ class felsworn_casts : public AllSpellScript
             }
         }
         if (info->Id == 560284)
-            Summon(player, spell->m_targets.HasDst() ? Position(*spell->m_targets.GetDstPos()) : player->GetPosition(),
-                   Inner(player));
+        {
+            Position const& drop =
+                spell->m_targets.HasDst() ? *spell->m_targets.GetDstPos() : static_cast<Position const&>(*player);
+            player->CastSpell(drop.GetPositionX(), drop.GetPositionY(), drop.GetPositionZ(), 572183, true);
+        }
     }
     void OnSpellHitResult(Spell* spell, Unit* target, uint8 miss, uint32 damage, uint32, bool crit) override
     {

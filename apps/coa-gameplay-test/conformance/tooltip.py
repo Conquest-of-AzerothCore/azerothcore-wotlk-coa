@@ -35,6 +35,7 @@ WEAPON_EFFECT = 25
 CHARACTER_LEVEL_ATTRIBUTE_EX2 = 0x1000000
 SKILL_PER_LEVEL = 5
 AMPLITUDE_LETTERS = 'tT'
+CHAIN_TARGET_LETTERS = 'xX'
 FIRST_PROC_FLAG = 1
 FIRST_PROC_FLAG_PERIOD_MS = 5000
 HASTED_PERIOD_ATTRIBUTE_EX5 = 0x2000
@@ -61,7 +62,8 @@ SECONDS_UNIT = re.compile(r'\s*sec')
 VARIABLE_DEFINITION = re.compile(r'\$(\w+)=')
 VARIABLE_EXPRESSION = re.compile(r'\$\{([^}]*)\}(?:\.[1-9])?')
 EXPRESSION_TOKEN = re.compile(r'\s*(?:(?P<number>\d+\.?\d*|\.\d+)|\$<(?P<variable>\w+)>'
-                              r'|\$(?P<spell>\d*)(?P<name>[A-Za-z]+\d?)|(?P<operator>[-+*/()]))')
+                              r'|\$(?P<spell>\d*)(?P<name>[A-Za-z]+\d?)|(?P<operator>[-+*/(),]))')
+EXPRESSION_FUNCTIONS = {'cond': 3, 'gt': 2}
 PLURAL_OR_GENDER = 'lLgG'
 
 
@@ -339,6 +341,9 @@ def spell_rank(records: Records, spell_id: int, caster: CasterStats) -> int:
     max_level = records.field('Spell', ranked, 'MaxLevel')
     if max_level > 0 and rank >= SKILL_PER_LEVEL * max_level:
         rank = SKILL_PER_LEVEL * max_level
+    own_max_level = records.field('Spell', spell_id, 'MaxLevel')
+    if 0 < own_max_level < caster.level:
+        rank = min(rank, SKILL_PER_LEVEL * own_max_level)
     return max(rank, 0)
 
 
@@ -432,6 +437,8 @@ class Tooltip:
             position = match.end()
         parser = ExpressionParser(self, tokens)
         value = parser.sum()
+        if parser.position == len(tokens) - 1 and is_stray_closing_parenthesis(expression, tokens[-1]):
+            parser.position += 1
         if parser.position != len(tokens):
             raise Unreadable
         return value, parser.effect_index, parser.spell_id
@@ -499,6 +506,9 @@ class Tooltip:
                 return self.records.amplitude_ms(spell_id, effect), None, None
             return (self.effect_points(spell_id, effect, upper=name[0] == 'M'), self.own_effect(spell_id, effect),
                     spell_id)
+        if len(name) == 2 and name[0] in CHAIN_TARGET_LETTERS and name[1] in EFFECT_DIGITS:
+            spell_id = self.spell_reference(digits)
+            return float(self.records.field('Spell', spell_id, f'EffectChainTarget[{int(name[1]) - 1}]')), None, None
         if name[:-1] == 'ppl' and name[-1:] in EFFECT_DIGITS:
             spell_id = self.spell_reference(digits)
             effect = int(name[-1]) - 1
@@ -736,6 +746,8 @@ class ExpressionParser:
         if token.group('variable'):
             context = self.spell_id if self.spell_id is not None else self.tooltip.spell_id
             return self.tooltip.variable(token.group('variable'), context).value
+        if token.group('name') and not token.group('spell') and token.group('name') in EXPRESSION_FUNCTIONS:
+            return self.function(token.group('name'))
         if token.group('name'):
             value, effect_index, spell_id = self.tooltip.math_variable(token.group('spell'), token.group('name'))
             if self.effect_index is None:
@@ -744,6 +756,25 @@ class ExpressionParser:
                 self.spell_id = spell_id
             return value
         raise Unreadable
+
+    def function(self, name: str) -> float:
+        if self.peek() != '(':
+            raise Unreadable
+        self.position += 1
+        arguments = [self.sum()]
+        while self.peek() == ',':
+            self.position += 1
+            arguments.append(self.sum())
+        if self.peek() != ')' or len(arguments) != EXPRESSION_FUNCTIONS[name]:
+            raise Unreadable
+        self.position += 1
+        if name == 'gt':
+            return 1.0 if arguments[0] > arguments[1] else 0.0
+        return arguments[1] if arguments[0] else arguments[2]
+
+
+def is_stray_closing_parenthesis(expression: str, token: re.Match) -> bool:
+    return token.group('operator') == ')' and token.end() == len(expression)
 
 
 def expansion_refusal(records: Records, markup: re.Match, expanding: tuple[int, ...]) -> Unreadable | None:
@@ -797,9 +828,10 @@ def conditional_bounds(text: str, start: int) -> tuple[int, int, int, int, int, 
     return true_start, true_end, false_start, false_end, end, False
 
 
-def period_reading(records: Records, spell_id: int, caster: CasterStats, shown: Displayed, effect: int) -> str:
+def period_reading(records: Records, spell_id: int, caster: CasterStats, shown: Displayed, effect: int,
+                   period_spell: int | None = None) -> str:
     def reread(duration_factor: int, amplitude_factor: int) -> float:
-        scaled = ScaledPeriod(records.dbc, spell_id, effect, duration_factor, amplitude_factor)
+        scaled = ScaledPeriod(records.dbc, period_spell or spell_id, effect, duration_factor, amplitude_factor)
         values = Tooltip(scaled, spell_id, caster).read(shown.text).values
         if len(values) != 1:
             raise Unreadable(f'{shown.text} is unreadable with a scaled duration or period')

@@ -5541,6 +5541,18 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Effects[EFFECT_0].BasePoints = 353;
     });
 
+    // Ascension's cast-time Reach talents carry their range bonus on an unmasked EFFECT1 modifier with no
+    // SpellAffect.dbc row, which matches nothing; it is the range modifier SpellInfo::IsAffectedBySpellMod limits to
+    // damaging spells with a cast time or channel.
+    for (uint32 spellId : AscensionReach::CastTimeSpells)
+        ApplySpellFix({ spellId }, [](SpellInfo* spellInfo)
+        {
+            for (SpellEffectInfo& effect : spellInfo->Effects)
+                if (effect.ApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER && effect.MiscValue == SPELLMOD_EFFECT1 &&
+                    effect.SpellClassMask == flag96(0, 0, 0))
+                    effect.MiscValue = SPELLMOD_RANGE;
+        });
+
     for (uint32 i = 0; i < GetSpellInfoStoreSize(); ++i)
     {
         SpellInfo* spellInfo = mSpellInfoMap[i];

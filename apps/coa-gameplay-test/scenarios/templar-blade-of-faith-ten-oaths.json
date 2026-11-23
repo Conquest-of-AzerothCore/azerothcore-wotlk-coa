@@ -1,0 +1,307 @@
+{
+  "schema": 1,
+  "name": "Ten Oath stacks on one Blade of Faith cast: ten Lunge stacks gain 300%, ten Condemn stacks keep aura 271",
+  "contract": "Blade of Faith 803880 at level 60, crit chance forced to 0 and resistance removed, as in templar-blade-of-faith-consumed-oaths. Ten stacks are the Oath chain's maximum (GrantOath stops at ten chain grants). Owner ruling 2026-11-18 (#12519, #12358; ADR 1010): each consumed Lunge or Retribution stack adds the Oath's own Effect[2] amount, +30%, additive, so ten Lunge stacks give x4.00. Ten Condemn stacks raise Blade's Effect[1] aura 271 by +25 per stack through Condemn's Effect[1] SPELLMOD_EFFECT2, +250% in total (x3.50, computed; multi-stack Condemn was never measured before), and get no Lunge bonus. Each arm reads the first tick against the no-Oath tick on its own dummy, 11 yd apart.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d_none",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "d_lunge_ten",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 14,
+      "stationary": true
+    },
+    {
+      "id": "d_condemn_ten",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 25,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 803880
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 64481,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 35
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 803880
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 803880,
+      "target": "d_none"
+    },
+    {
+      "action": "wait",
+      "label": "none: first tick at 3 sec",
+      "ms": 4700
+    },
+    {
+      "action": "assert",
+      "label": "none: one non-critical tick landed",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 803880,
+      "target": "d_none",
+      "critical": false,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "none: the no-Oath tick reads 191 at level 60",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "spell": 803880,
+      "target": "d_none",
+      "critical": false,
+      "equals": 191
+    },
+    {
+      "action": "snapshot",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "spell": 803880,
+      "target": "d_none",
+      "critical": false,
+      "save_as": "tick_none"
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": 11
+    },
+    {
+      "action": "assert",
+      "label": "The Templar stands 3 yd from d_lunge_ten",
+      "actor": "templar",
+      "metric": "distance",
+      "target": "d_lunge_ten",
+      "min": 2.5,
+      "max": 3.5
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 64481,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 804904,
+      "stacks": 10
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 35
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 803880
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 803880,
+      "target": "d_lunge_ten"
+    },
+    {
+      "action": "wait",
+      "label": "lunge_ten: first tick at 3 sec",
+      "ms": 4700
+    },
+    {
+      "action": "assert",
+      "label": "lunge_ten: one non-critical tick landed",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 803880,
+      "target": "d_lunge_ten",
+      "critical": false,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "lunge_ten: the cast consumed the Oaths",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 804904,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Ten stacks of Oath: Righteous Lunge count as ten consumed Oaths: the tick gains 300%",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "spell": 803880,
+      "target": "d_lunge_ten",
+      "critical": false,
+      "ratio_to": "tick_none",
+      "min": 3.98,
+      "max": 4.03
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": 11
+    },
+    {
+      "action": "assert",
+      "label": "The Templar stands 3 yd from d_condemn_ten",
+      "actor": "templar",
+      "metric": "distance",
+      "target": "d_condemn_ten",
+      "min": 2.5,
+      "max": 3.5
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 64481,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 804922,
+      "stacks": 10
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 35
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 803880
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 803880,
+      "target": "d_condemn_ten"
+    },
+    {
+      "action": "wait",
+      "label": "condemn_ten: first tick at 3 sec",
+      "ms": 4700
+    },
+    {
+      "action": "assert",
+      "label": "condemn_ten: one non-critical tick landed",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 803880,
+      "target": "d_condemn_ten",
+      "critical": false,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "condemn_ten: the cast consumed the Oaths",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 804922,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Control: ten stacks of Oath: Condemn raise aura 271 to +250% (x3.50) and get no Lunge bonus",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "spell": 803880,
+      "target": "d_condemn_ten",
+      "critical": false,
+      "ratio_to": "tick_none",
+      "min": 3.47,
+      "max": 3.53
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Blacksmithing uses the standard profession tier labels (#5523)",
-  "contract": "Shipped Blacksmithing spells2018/3100/3538/9785/29844/51300 carry Rank1..6 while the reviewed matching Alchemy and Tailoring tiers are Apprentice/Journeyman/Expert/Artisan/Master/GrandMaster. The client Spell patch stream must correct those six label strings while preserving attributes, effects, skill164 and descriptions. Native login/relog packets are observed, with ordinary skill learning and Alchemy/Tailoring controls. No rendered skill-window acceptance is claimed. No SQL replacement of shipped client DBC rows is permitted by the DBC guide.",
+  "contract": "Shipped Blacksmithing spells2018/3100/3538/9785/29844/51300 carry Rank1..6 while the reviewed matching Alchemy and Tailoring tiers are Apprentice/Journeyman/Expert/Artisan/Master/GrandMaster. The client's spell rows must correct those six label strings while preserving attributes, effects, skill164 and descriptions. The client rows are read after login and relog, with ordinary skill learning and Alchemy/Tailoring controls. No rendered skill-window acceptance is claimed. No SQL replacement of shipped client DBC rows is permitted by the DBC guide.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -27,27 +27,26 @@
     {
       "action": "assert",
       "actor": "other",
-      "metric": "server_packets",
-      "opcode": 2346,
-      "row": 2259,
-      "equals": 0,
+      "metric": "client_spell_row_u32",
+      "spell": 2259,
+      "index": 0,
+      "equals": -1,
       "label": "Alchemy receives no replacement row"
     },
     {
       "action": "assert",
       "actor": "other",
-      "metric": "server_packets",
-      "opcode": 2346,
-      "row": 3908,
-      "equals": 0,
+      "metric": "client_spell_row_u32",
+      "spell": 3908,
+      "index": 0,
+      "equals": -1,
       "label": "Tailoring receives no replacement row"
     },
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 2018,
+      "metric": "client_spell_row_contains",
+      "spell": 2018,
       "text": "Apprentice",
       "equals": 1,
       "label": "Blacksmithing2018 carries the standard Apprentice label"
@@ -55,9 +54,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 2018,
+      "metric": "client_spell_row_contains",
+      "spell": 2018,
       "text": "Rank 1",
       "equals": 0,
       "label": "The shipped numeric label is absent"
@@ -65,9 +63,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_u32",
-      "opcode": 2346,
-      "row": 2018,
+      "metric": "client_spell_row_u32",
+      "spell": 2018,
       "index": 71,
       "equals": 47,
       "label": "The native trade-skill effect is preserved"
@@ -75,9 +72,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_u32",
-      "opcode": 2346,
-      "row": 2018,
+      "metric": "client_spell_row_u32",
+      "spell": 2018,
       "index": 111,
       "equals": 164,
       "label": "The Blacksmithing skill selector is preserved"
@@ -85,9 +81,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 3100,
+      "metric": "client_spell_row_contains",
+      "spell": 3100,
       "text": "Journeyman",
       "equals": 1,
       "label": "Blacksmithing3100 carries the standard Journeyman label"
@@ -95,9 +90,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 3100,
+      "metric": "client_spell_row_contains",
+      "spell": 3100,
       "text": "Rank 2",
       "equals": 0,
       "label": "The shipped numeric label is absent"
@@ -105,9 +99,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_u32",
-      "opcode": 2346,
-      "row": 3100,
+      "metric": "client_spell_row_u32",
+      "spell": 3100,
       "index": 71,
       "equals": 47,
       "label": "The native trade-skill effect is preserved"
@@ -115,9 +108,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_u32",
-      "opcode": 2346,
-      "row": 3100,
+      "metric": "client_spell_row_u32",
+      "spell": 3100,
       "index": 111,
       "equals": 164,
       "label": "The Blacksmithing skill selector is preserved"
@@ -125,9 +117,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 3538,
+      "metric": "client_spell_row_contains",
+      "spell": 3538,
       "text": "Expert",
       "equals": 1,
       "label": "Blacksmithing3538 carries the standard Expert label"
@@ -135,9 +126,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 3538,
+      "metric": "client_spell_row_contains",
+      "spell": 3538,
       "text": "Rank 3",
       "equals": 0,
       "label": "The shipped numeric label is absent"
@@ -145,9 +135,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_u32",
-      "opcode": 2346,
-      "row": 3538,
+      "metric": "client_spell_row_u32",
+      "spell": 3538,
       "index": 71,
       "equals": 47,
       "label": "The native trade-skill effect is preserved"
@@ -155,9 +144,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_u32",
-      "opcode": 2346,
-      "row": 3538,
+      "metric": "client_spell_row_u32",
+      "spell": 3538,
       "index": 111,
       "equals": 164,
       "label": "The Blacksmithing skill selector is preserved"
@@ -165,9 +153,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 9785,
+      "metric": "client_spell_row_contains",
+      "spell": 9785,
       "text": "Artisan",
       "equals": 1,
       "label": "Blacksmithing9785 carries the standard Artisan label"
@@ -175,9 +162,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 9785,
+      "metric": "client_spell_row_contains",
+      "spell": 9785,
       "text": "Rank 4",
       "equals": 0,
       "label": "The shipped numeric label is absent"
@@ -185,9 +171,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_u32",
-      "opcode": 2346,
-      "row": 9785,
+      "metric": "client_spell_row_u32",
+      "spell": 9785,
       "index": 71,
       "equals": 47,
       "label": "The native trade-skill effect is preserved"
@@ -195,9 +180,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_u32",
-      "opcode": 2346,
-      "row": 9785,
+      "metric": "client_spell_row_u32",
+      "spell": 9785,
       "index": 111,
       "equals": 164,
       "label": "The Blacksmithing skill selector is preserved"
@@ -205,9 +189,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 29844,
+      "metric": "client_spell_row_contains",
+      "spell": 29844,
       "text": "Master",
       "equals": 1,
       "label": "Blacksmithing29844 carries the standard Master label"
@@ -215,9 +198,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 29844,
+      "metric": "client_spell_row_contains",
+      "spell": 29844,
       "text": "Rank 5",
       "equals": 0,
       "label": "The shipped numeric label is absent"
@@ -225,9 +207,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_u32",
-      "opcode": 2346,
-      "row": 29844,
+      "metric": "client_spell_row_u32",
+      "spell": 29844,
       "index": 71,
       "equals": 47,
       "label": "The native trade-skill effect is preserved"
@@ -235,9 +216,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_u32",
-      "opcode": 2346,
-      "row": 29844,
+      "metric": "client_spell_row_u32",
+      "spell": 29844,
       "index": 111,
       "equals": 164,
       "label": "The Blacksmithing skill selector is preserved"
@@ -245,9 +225,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 51300,
+      "metric": "client_spell_row_contains",
+      "spell": 51300,
       "text": "Grand Master",
       "equals": 1,
       "label": "Blacksmithing51300 carries the standard Grand Master label"
@@ -255,9 +234,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 51300,
+      "metric": "client_spell_row_contains",
+      "spell": 51300,
       "text": "Rank 6",
       "equals": 0,
       "label": "The shipped numeric label is absent"
@@ -265,9 +243,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_u32",
-      "opcode": 2346,
-      "row": 51300,
+      "metric": "client_spell_row_u32",
+      "spell": 51300,
       "index": 71,
       "equals": 47,
       "label": "The native trade-skill effect is preserved"
@@ -275,9 +252,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_u32",
-      "opcode": 2346,
-      "row": 51300,
+      "metric": "client_spell_row_u32",
+      "spell": 51300,
       "index": 111,
       "equals": 164,
       "label": "The Blacksmithing skill selector is preserved"
@@ -285,9 +261,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_u32",
-      "opcode": 2346,
-      "row": 2018,
+      "metric": "client_spell_row_u32",
+      "spell": 2018,
       "index": 4,
       "equals": 16842768,
       "label": "Apprentice attributes remain unchanged"
@@ -295,9 +270,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 2018,
+      "metric": "client_spell_row_contains",
+      "spell": 2018,
       "text": "Allows a Blacksmith to make basic weapons and armor up to a maximum potential skill of 75.",
       "equals": 1,
       "label": "The original description is preserved"
@@ -370,9 +344,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 2018,
+      "metric": "client_spell_row_contains",
+      "spell": 2018,
       "text": "Apprentice",
       "equals": 1,
       "label": "Apprentice survives a native relog"
@@ -380,9 +353,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 3100,
+      "metric": "client_spell_row_contains",
+      "spell": 3100,
       "text": "Journeyman",
       "equals": 1,
       "label": "Journeyman survives a native relog"
@@ -390,9 +362,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 3538,
+      "metric": "client_spell_row_contains",
+      "spell": 3538,
       "text": "Expert",
       "equals": 1,
       "label": "Expert survives a native relog"
@@ -400,9 +371,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 9785,
+      "metric": "client_spell_row_contains",
+      "spell": 9785,
       "text": "Artisan",
       "equals": 1,
       "label": "Artisan survives a native relog"
@@ -410,9 +380,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 29844,
+      "metric": "client_spell_row_contains",
+      "spell": 29844,
       "text": "Master",
       "equals": 1,
       "label": "Master survives a native relog"
@@ -420,9 +389,8 @@
     {
       "action": "assert",
       "actor": "smith",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 51300,
+      "metric": "client_spell_row_contains",
+      "spell": 51300,
       "text": "Grand Master",
       "equals": 1,
       "label": "Grand Master survives a native relog"

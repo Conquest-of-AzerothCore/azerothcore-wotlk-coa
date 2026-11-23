@@ -1,0 +1,113 @@
+{
+    "schema":  1,
+    "name":  "Worldforged Glinting Sack stands at its recorded spot (#11968)",
+    "contract":  "#11968 reported the Glinting Sack pickup (entry 90618, guid 6940416) away from its spot. The first-pass position 3257.9, -3368.8 (row 6901011) is restored with the same height, which the server measures on the ground. Expected: the pickup is at that spot, grounded, and opens.",
+    "timeout_ms":  60000,
+    "location":  {
+                     "map":  0,
+                     "x":  3258.9,
+                     "y":  -3368.8,
+                     "z":  146,
+                     "o":  0
+                 },
+    "players":  [
+                    {
+                        "id":  "p",
+                        "race":  1,
+                        "class":  12,
+                        "level":  60
+                    }
+                ],
+    "steps":  [
+                  {
+                      "action":  "set_phase",
+                      "actor":  "p",
+                      "value":  1
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  3000
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "SETUP: the pickup is in the area",
+                      "metric":  "nearby_gameobject_count",
+                      "entry":  90618,
+                      "equals":  1
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "DISCRIMINATING: the sack stands at its first-pass spot (3257.9, -3368.8) instead of 10 yd away",
+                      "metric":  "spawn_distance",
+                      "x":  3257.9,
+                      "y":  -3368.8,
+                      "z":  145.55,
+                      "max":  0.3,
+                      "guid":  6940416,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the sack rests on the ground",
+                      "metric":  "spawn_ground_gap",
+                      "min":  -0.5,
+                      "max":  0.5,
+                      "guid":  6940416,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is grounded within 0.8 yd",
+                      "metric":  "spawn_placement",
+                      "tolerance":  0.8,
+                      "equals":  0,
+                      "guid":  6940416,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is not under water",
+                      "metric":  "spawn_submerged",
+                      "equals":  0,
+                      "guid":  6940416,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "set_aura",
+                      "actor":  "p",
+                      "spell":  642,
+                      "stacks":  1
+                  },
+                  {
+                      "action":  "cast",
+                      "actor":  "p",
+                      "spell":  3365,
+                      "target_gameobject":  90618
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  5500
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is within reach and opens",
+                      "metric":  "cast_failure",
+                      "spell":  3365,
+                      "equals":  0
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "its loot is shown",
+                      "metric":  "loot_count",
+                      "min":  1,
+                      "within_ms":  3000
+                  }
+              ]
+}

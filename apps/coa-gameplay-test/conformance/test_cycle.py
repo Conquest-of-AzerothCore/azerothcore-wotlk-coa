@@ -298,6 +298,14 @@ class SkipTest(CycleCase):
         run_cycle(self.replay(), [step for step in STEPS if step != 'digests'], runner, write_digests=True)
         self.assertEqual(runner.kinds(), ['snapshots.py write'])
 
+    def test_an_unfinished_class_skips_its_own_digest_check_with_a_note(self):
+        runner = FakeRunner(self.root)
+        run_cycle(self.replay(class_id=15), [step for step in STEPS if step != 'digests'], runner)
+        self.assertEqual(runner.kinds(), [])
+        notes = (self.root / 'out').rglob('*digests*')
+        self.assertTrue(any('class 15 is not a finished class' in path.read_text(encoding='utf-8')
+                            for path in notes if path.is_file()))
+
 
 class RefusalTest(CycleCase):
     def test_a_disk_above_the_limit_stops_before_the_run(self):
@@ -384,6 +392,16 @@ class CheckpointTest(CycleCase):
         markdown = (self.root / 'out' / CHECKPOINT_MD).read_text(encoding='utf-8')
         self.assertIn('- Count: **13 / 14 = 92.9%**, delta **-1** vs 14 (final16-status.json)', markdown)
         self.assertIn('- Cost: not recorded', markdown)
+
+    def test_the_checkpoint_lists_the_held_parts_and_their_reasons(self):
+        self.decisions.write_text(json.dumps({**DECISIONS, 'held': {'389.0': 'c10 C-1, fix not reviewed'}}),
+                                  encoding='utf-8')
+        run_cycle(self.replay(), REPLAY, FakeRunner(self.root))
+        document = self.checkpoint()
+        self.assertEqual(document['held'], [{'key': '389.0', 'why': 'c10 C-1, fix not reviewed'}])
+        self.assertEqual((document['count'], document['lost']), (13, ['389.0']))
+        markdown = (self.root / 'out' / CHECKPOINT_MD).read_text(encoding='utf-8')
+        self.assertIn('- Held: 389.0 (c10 C-1, fix not reviewed)', markdown)
 
     def test_the_checkpoint_states_the_record_scenarios_matched(self):
         run_cycle(self.replay(), REPLAY, FakeRunner(self.root))

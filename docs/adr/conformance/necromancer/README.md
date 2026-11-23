@@ -21,7 +21,7 @@ class half is here, its tool half keeps the old number in `docs/adr/`.
 | [0008](0008-bone-reliquary-heals-only-the-missing-health-it-states.md) | 0406 | Bone Reliquary heals only the missing health it states | moved |
 | [0009](0009-cast-while-casting-necromancer-spells-roll-the-on-cast-talents.md) | 0408 | Cast-while-casting Necromancer spells roll the on-cast talents | moved |
 | [0010](0010-damnation-doubles-its-increase-below-35-percent.md) | 0409 | Damnation doubles its increase below 35% health | moved |
-| [0011](0011-bonefreeze-takes-the-damage-interrupt-outside-the-family-contracts.md) | 0421 | Bonefreeze takes the damage interrupt outside the family contracts | moved |
+| [0011](0011-bonefreeze-takes-the-damage-interrupt-outside-the-family-contracts.md) | 0421 | Bonefreeze takes the damage interrupt outside the family contracts | moved, superseded by 0082 |
 | [0012](0012-flesh-to-worms-ticks-can-critically-strike.md) | 0442 | Flesh to Worms's ticks can critically strike | moved |
 | [0013](0013-plague-horde-is-cast-by-the-minion-on-itself.md) | 0483 | Plague Horde is cast by the minion on itself | moved |
 | [0014](0014-tomb-king-claws-copy-only-other-minions-hits.md) | 0486 | Tomb King claws copy only other minions' hits | moved |
@@ -61,6 +61,8 @@ class half is here, its tool half keeps the old number in `docs/adr/`.
 | [0065](0065-parasites-leech-needs-only-the-players-debuff.md) | - | The Parasites leech needs only the player's debuff | new |
 | [0080](0080-vampiric-aura-trials-start-after-the-aura-reaches-the-minion.md) | - | Vampiric Aura trials start after the aura reaches the minion | new |
 | [0081](0081-the-ghoul-mastery-snare-control-needs-an-undazed-ghoul.md) | - | The Ghoul Mastery snare control needs an undazed Ghoul | new |
+| [0082](0082-bonefreeze-breaks-on-the-stock-damage-cap.md) | - | Bonefreeze breaks on the stock damage cap | new, supersedes 0011 |
+| [0083](0083-undead-stances-use-the-normal-global-cooldown.md) | - | Undead stances use the normal global cooldown | new |
 
 ## Re-auditable verdict set
 

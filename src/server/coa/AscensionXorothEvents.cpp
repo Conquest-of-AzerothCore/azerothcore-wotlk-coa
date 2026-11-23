@@ -178,6 +178,8 @@ class aura_ascension_xoroth_event : public AuraScript
             Gain(player, 1);
             break;
         case 800997:
+            if (player->HasAura(524922))
+                player->EnergizeBySpell(player, 524922, Amount(524922), POWER_RAGE);
             Blood(player);
             break;
         case 801065:
