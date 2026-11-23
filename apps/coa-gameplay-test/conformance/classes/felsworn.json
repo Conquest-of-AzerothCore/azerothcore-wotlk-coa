@@ -46,7 +46,19 @@
   },
   "log_queries": {},
   "alternate_weapons": [],
-  "off_hand_weapons": [],
+  "off_hand_weapons": [
+    {
+      "item": 2027,
+      "slot": 16,
+      "subclass": 7,
+      "min_damage": 17.25,
+      "max_damage": 28.75,
+      "speed_ms": 2300,
+      "inventory_type": 13,
+      "normalized_speed": 2.4,
+      "skill_line": 43
+    }
+  ],
   "known_auras": [],
   "probe_auras": [],
   "extra_spells": [],
@@ -504,6 +516,69 @@
         }
       ],
       "observe_source": "92089 Effect[2] SPELL_EFFECT_TITAN_GRIP (155) (installed DBC, Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Control: the same four off-hand equips with 92089 unlearned are refused (the harness fails the step if one is accepted); learned, each is accepted and both hands hold their items; skill lines 172, 160, 229 and 55 are set so proficiency is not what refuses the equip. Reference search 2026-11-23: coa-history spell 92089: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) carries an older text of the same passive that adds 'based on your dodge rating, but reducing your damage dealt by -10%' where the tooltip and the DBC say attack power and carry no damage penalty (G-9: an older state, the tooltip wins)."
+    },
+    {
+      "spell": 704361,
+      "name": "Slice & Dice (off-hand swing)",
+      "kind": "hit_ratio",
+      "variant": "offhand_swing",
+      "label_suffix": "offhand_swing",
+      "quote": "Increases your off-hand weapon damage by $s1%",
+      "expected": 1.25,
+      "swing_hand": 1,
+      "metric": "melee_damage_total",
+      "control": {},
+      "treatment": {
+        "learn": [
+          704361
+        ]
+      },
+      "critical": false,
+      "off_hand_item": 2027,
+      "trials": 30,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "expected_source": "$s1 = 25 (704361 Effect[0] aura 122 SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT, EffectBasePoints 24 + 1, read from Spell.dbc): the off-hand damage multiplier grows a plain off-hand white swing by 1.25, as Brooding Hatred 301251 (Witch Hunter) and Bursting Impact 705276. Applied hits: the caster auto attacks the dummy for one off-hand swing interval per trial and the plain (not critical, not glancing) off-hand hits are read, without the passive (control) and with 704361 learned (treatment). Weapons: the Slayer set (class file weapon_sets), off-hand 2027. Attack power fixture 20000 in both arms. Reference search 2026-11-23: coa-history spell 704361: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 807902,
+      "name": "Wrath of Sargeras (Magic damage)",
+      "kind": "hit_ratio",
+      "variant": "magic_damage",
+      "label_suffix": "magic_damage",
+      "quote": "Increases your Magic damage dealt by $s1%",
+      "expected": 1.06,
+      "observe_spell": 501321,
+      "learn": [
+        501321
+      ],
+      "cast_power": 1373,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          807902
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "expected_source": "$s1 = 6 (807902 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 126 (the six magic schools), EffectBasePoints 5 + 1, read from Spell.dbc). Sargeron Smite 501321 (level 60 rank, school mask 36 Fire and Shadow, AP 0.19 and SP 0.6 in AscensionFelswornData.h) non-critical hits at the dummy without the passive (control) and with it learned (treatment); 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; spell power fixture 20000 in both arms. Reference search 2026-11-23: coa-history spell 807902: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
     }
   ],
   "player_observations": [],
