@@ -40778,6 +40778,401 @@
           }
         ]
       }
+    },
+    {
+      "spell": 800602,
+      "name": "Empowered Holy Form (Bless mana sacrifice doubled: extra heal = 100% of the mana fraction x the heal)",
+      "kind": "metric_delta",
+      "variant": "holy_form_bless_mana_doubled",
+      "label_suffix": "holy_form_bless_mana_doubled",
+      "quote": "Doubles the effectiveness of your Holy Form",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "caster",
+      "learn": [
+        804247,
+        800602
+      ],
+      "setup_casts": [
+        804247,
+        805301
+      ],
+      "setup_wait_ms": 2000,
+      "phase_power": [
+        0,
+        2021,
+        2043
+      ],
+      "expire_ms": 500,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 850,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          10000,
+          100000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "max_power",
+            "fields": {
+              "power": 0
+            },
+            "before_expected": 2868,
+            "expected": 2868,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "the caster's maximum mana is 2868 (BaseMana 1363 + 20 + 15 x (Intellect 119 - 20), StatSystem.cpp:421-429), the denominator of the mana fraction the code multiplies by; a different maximum voids the trial"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_effective_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally"
+            },
+            "source": "the extra heal 807994 on the Bless ally, read as effective healing (the ally has 90000 missing health, so none is overhealed); none in the before phase (850, below 30%), one in the after phase (872)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_effective_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally"
+            },
+            "source": "the Daybreak 503624 heal the extra heal is taken from, effective healing on the Bless ally, one per phase"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 1,
+            "denominator": 2,
+            "expected": 0.304045,
+            "tolerance": 0.003,
+            "floor_count": 1,
+            "source": "Expected 872 / 2868 x 100 / 100 = 0.304042 (amount 50 doubled to 100 by 800602); truncation of one unit over the heal total is covered by floor_count, and the band 0.301 to 0.307 excludes the control's 0.152 and a 10% error either side (0.274, 0.334)."
+          }
+        ]
+      },
+      "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY BasePoints 49 + 1 = 50 ($s2); 800602 Effect[0] aura 108 ADD_PCT_MODIFIER SPELLMOD_ALL_EFFECTS BasePoints 99 + 1 = +100% on the class mask of Holy Form (Spell.dbc), so the amount is 100 with 800602 learned. AscensionSunClericAbilities.cpp:390-405: a heal with Holy Form on at or above 30% of maximum mana casts 807994 on the Bless ally for extra = healing x mana / maximum mana x amount / 100, truncated, and pays (extra + 3) / 4; 807994 carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (Spell.dbc), so the heal takes no healing-done modifier of Holy Form or 800602. Same phases, setups and mana as ally_bless_mana: Bless 804247 at the ally and Holy Form 805301 on the caster 2000 ms apart, the caster's mana set to 2043 before the setup casts (Bless 272, Holy Form 545, Daybreak 354 taken from Spell.dbc ManaCostPercentage 20, 40, 26 of base mana 1363) so that 872 is the mana at the hook, against a maximum mana of 2868 (BaseMana 1363 + 20 + 15 x (Intellect 119 - 20), StatSystem.cpp:421-429); the before phase (2021, 850 at the hook, 29.6%) is below the gate and pays nothing, so the ratios read the after phase alone. The ally is set to 10000 of 100000 health so that no heal is capped by the missing health. Ratio of the 807994 heal total to the Daybreak 503624 heal total, both on the ally and read on the caster: Expected 872 / 2868 x 100 / 100 = 0.304042 (amount 50 doubled to 100 by 800602); truncation of one unit over the heal total is covered by floor_count, and the band 0.301 to 0.307 excludes the control's 0.152 and a 10% error either side (0.274, 0.334). void_on_cast_failure: a refused cast voids the trial (cast_failures are stated in the report). Reference search 2026-11-22/23: coa-history spell 800602: 0 events in 186 logs; bindmysoul snapshot \"Doubles the effectiveness of your Holy Form.\"; rb4 report row 300 (threat part of the same clause, doubled); nothing found that states an amount for the mana part.",
+      "tolerance": 0,
+      "after_at_least": 0,
+      "after_at_most": 871,
+      "disable_regeneration": true,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          805301,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 871
+    },
+    {
+      "spell": 800602,
+      "name": "Empowered Holy Form (control without 800602: extra heal = 50% of the mana fraction x the heal)",
+      "kind": "metric_delta",
+      "variant": "holy_form_bless_mana_control",
+      "label_suffix": "holy_form_bless_mana_control",
+      "quote": "Doubles the effectiveness of your Holy Form",
+      "trigger_spell": 503624,
+      "target": "ally",
+      "measure_actor": "caster",
+      "learn": [
+        804247
+      ],
+      "setup_casts": [
+        804247,
+        805301
+      ],
+      "setup_wait_ms": 2000,
+      "phase_power": [
+        0,
+        2021,
+        2043
+      ],
+      "expire_ms": 500,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 850,
+      "wait_ms": 1500,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          10000,
+          100000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "max_power",
+            "fields": {
+              "power": 0
+            },
+            "before_expected": 2868,
+            "expected": 2868,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "the caster's maximum mana is 2868 (BaseMana 1363 + 20 + 15 x (Intellect 119 - 20), StatSystem.cpp:421-429), the denominator of the mana fraction the code multiplies by; a different maximum voids the trial"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_effective_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 807994,
+              "target": "ally"
+            },
+            "source": "the extra heal 807994 on the Bless ally, read as effective healing (the ally has 90000 missing health, so none is overhealed); none in the before phase (850, below 30%), one in the after phase (872)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_effective_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 503624,
+              "target": "ally"
+            },
+            "source": "the Daybreak 503624 heal the extra heal is taken from, effective healing on the Bless ally, one per phase"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 1,
+            "denominator": 2,
+            "expected": 0.152022,
+            "tolerance": 0.003,
+            "floor_count": 1,
+            "source": "Control arm, 800602 never learned: 872 / 2868 x 50 / 100 = 0.152021 (Holy Form Effect[1] 49 + 1 = 50); the band 0.149 to 0.155 excludes the treatment's 0.304 and a 10% error either side (0.137, 0.167)."
+          }
+        ]
+      },
+      "observe_source": "805301 Holy Form Effect[1] aura 4 SPELL_AURA_DUMMY BasePoints 49 + 1 = 50 ($s2); 800602 Effect[0] aura 108 ADD_PCT_MODIFIER SPELLMOD_ALL_EFFECTS BasePoints 99 + 1 = +100% on the class mask of Holy Form (Spell.dbc), so the amount is 100 with 800602 learned. AscensionSunClericAbilities.cpp:390-405: a heal with Holy Form on at or above 30% of maximum mana casts 807994 on the Bless ally for extra = healing x mana / maximum mana x amount / 100, truncated, and pays (extra + 3) / 4; 807994 carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (Spell.dbc), so the heal takes no healing-done modifier of Holy Form or 800602. Same phases, setups and mana as ally_bless_mana: Bless 804247 at the ally and Holy Form 805301 on the caster 2000 ms apart, the caster's mana set to 2043 before the setup casts (Bless 272, Holy Form 545, Daybreak 354 taken from Spell.dbc ManaCostPercentage 20, 40, 26 of base mana 1363) so that 872 is the mana at the hook, against a maximum mana of 2868 (BaseMana 1363 + 20 + 15 x (Intellect 119 - 20), StatSystem.cpp:421-429); the before phase (2021, 850 at the hook, 29.6%) is below the gate and pays nothing, so the ratios read the after phase alone. The ally is set to 10000 of 100000 health so that no heal is capped by the missing health. Ratio of the 807994 heal total to the Daybreak 503624 heal total, both on the ally and read on the caster: Control arm, 800602 never learned: 872 / 2868 x 50 / 100 = 0.152021 (Holy Form Effect[1] 49 + 1 = 50); the band 0.149 to 0.155 excludes the treatment's 0.304 and a 10% error either side (0.137, 0.167). void_on_cast_failure: a refused cast voids the trial (cast_failures are stated in the report). Reference search 2026-11-22/23: coa-history spell 800602: 0 events in 186 logs; bindmysoul snapshot \"Doubles the effectiveness of your Holy Form.\"; rb4 report row 300 (threat part of the same clause, doubled); nothing found that states an amount for the mana part.",
+      "tolerance": 0,
+      "after_at_least": 0,
+      "after_at_most": 871,
+      "disable_regeneration": true,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          805301,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 871
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Critical strikes with Gavels or Dawnbreak now increases the healing of your next Illumination within $680642d by $680642s1%,",
+      "trigger_spell": 800611,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "melee",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sun Strider (critical Gavel of Light: the self heal never crits, one stack from the strike)",
+      "variant": "gavel_heal_crit_strike",
+      "label_suffix": "gavel_heal_crit_strike",
+      "void_on_cast_failure": true,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 800611,
+              "target": "dummy",
+              "critical": true
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "cumulative count: the Gavel of Light strike lands once per phase and is critical in both"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 707522,
+              "target": "caster"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "cumulative count: the Gavel of Light self heal 707522 (Copy of the damage, AscensionSunClericAbilities.cpp:344-354) lands once per phase"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 707522,
+              "target": "caster",
+              "critical": true
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "707522 carries SPELL_ATTR2_CANT_CRIT (Spell.dbc): the Gavel's heal never critically strikes"
+          }
+        ]
+      },
+      "observe_source": "MEASURE ONLY (mentor D-278), no verdict claimed on 680641's clause: AscensionSunClericEvents.cpp:126 accepts `damage && critical && (Gavel(info) || Named(info,800654))`, so a heal event never passes. The Gavels 800611, 800614, 800617 and Dawnbreak 800654 target enemies only (TARGET_UNIT_TARGET_ENEMY, TARGET_UNIT_CONE_ENEMY_24, Spell.dbc), Gavel of Grace restores mana (Effect[2] trigger with value), Dawnbreak has one SCHOOL_DAMAGE effect, so the only healing Gavel is Gavel of Light 800611, whose self heal 707522 is a Copy of the damage (SPELL_ATTR2_CANT_CRIT). Arm: Gavel of Light 800611 cast at the dummy with forced melee crits (harness crit rating fixture), 680641 learned between the phases: the strike is critical, the self heal 707522 lands and is never critical; stacks read after the heal landed (1500 ms after the cast; the heal is read in the same pair)."
+    },
+    {
+      "spell": 680641,
+      "kind": "metric_delta",
+      "quote": "Critical strikes with Gavels or Dawnbreak now increases the healing of your next Illumination within $680642d by $680642s1%,",
+      "trigger_spell": 800611,
+      "gate_spell": 680641,
+      "target": "dummy",
+      "dummy_distance": 5,
+      "force_crit": "spell",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 680642
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "name": "Sun Strider (Gavel of Light with spell crits forced and melee crits removed: heal still not critical, no stack)",
+      "variant": "gavel_heal_noncrit_strike",
+      "label_suffix": "gavel_heal_noncrit_strike",
+      "void_on_cast_failure": true,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "phase_aura_amounts": [
+        [
+          984954,
+          0,
+          -1000
+        ],
+        [
+          984954,
+          1,
+          0
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 800611,
+              "target": "dummy",
+              "critical": false
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "cumulative count: the Gavel of Light strike lands once per phase and is not critical in both"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 707522,
+              "target": "caster"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "cumulative count: the Gavel of Light self heal 707522 (Copy of the damage, AscensionSunClericAbilities.cpp:344-354) lands once per phase"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 707522,
+              "target": "caster",
+              "critical": true
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "707522 carries SPELL_ATTR2_CANT_CRIT (Spell.dbc): the Gavel's heal never critically strikes"
+          }
+        ]
+      },
+      "observe_source": "MEASURE ONLY (mentor D-278), no verdict claimed on 680641's clause: AscensionSunClericEvents.cpp:126 accepts `damage && critical && (Gavel(info) || Named(info,800654))`, so a heal event never passes. The Gavels 800611, 800614, 800617 and Dawnbreak 800654 target enemies only (TARGET_UNIT_TARGET_ENEMY, TARGET_UNIT_CONE_ENEMY_24, Spell.dbc), Gavel of Grace restores mana (Effect[2] trigger with value), Dawnbreak has one SCHOOL_DAMAGE effect, so the only healing Gavel is Gavel of Light 800611, whose self heal 707522 is a Copy of the damage (SPELL_ATTR2_CANT_CRIT). Arm: spell crit forced (harness crit rating fixture) and the melee crit chance removed by the fixture 984954 (Effect[0] amount -1000, Effect[1] spell crit amount 0, a precondition fixture, never the subject): the strike is a non-critical hit, the only chance of a critical heal is a spell crit of 707522, which CANT_CRIT forbids; the stacks must stay 0."
     }
   ],
   "player_observations": [],

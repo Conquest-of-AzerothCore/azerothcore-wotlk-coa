@@ -5542,8 +5542,15 @@
         ]
       },
       {
-        "claim": "Doubles the effectiveness of your Holy Form: the threat reduction (Effect[2], -50%) and the mana sacrifice of the Blessed ally (Effect[1])",
+        "claim": "Doubles the effectiveness of your Holy Form: the threat reduction (Effect[2], -50%)",
         "labels": []
+      },
+      {
+        "claim": "Doubles the effectiveness of your Holy Form: the mana sacrifice of the Blessed ally (Effect[1]): the extra heal is taken at twice the mana fraction",
+        "labels": [
+          "800602 behaviour_metric_delta holy_form_bless_mana_doubled",
+          "800602 behaviour_metric_delta holy_form_bless_mana_control"
+        ]
       },
       {
         "claim": "and reduces the tick rate of Ancient Rites by $/1000;s2 sec",
