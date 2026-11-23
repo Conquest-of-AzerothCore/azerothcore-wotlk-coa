@@ -24,7 +24,10 @@
   {
     "spell": 92088,
     "clause": "While Inner Demon is active, your Fel Fireball will now unleash a Felstrike on your target.",
-    "labels": [],
+    "labels": [
+      "92088 behaviour_metric_delta applied",
+      "92088 behaviour_metric_delta no_inner_demon"
+    ],
     "kind": "claim"
   },
   {
@@ -50,7 +53,7 @@
     "spell": 92088,
     "clause": "stacking $u times.",
     "labels": [
-      "92088 max_stacks 802678 #2"
+      "92088 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -71,7 +74,7 @@
     "spell": 300465,
     "clause": "Reduces the duration of movement impairing effects on you by $s1%.",
     "labels": [
-      "300465 effect_value e0 #0"
+      "300465 behaviour_duration_ratio"
     ],
     "kind": "claim"
   },
@@ -285,15 +288,18 @@
     "spell": 300478,
     "clause": "Critically striking with Fel Fireball now increases the critical strike chance of your next Fel Fireball within $300486d by $300486s1%.",
     "labels": [
-      "300478 spell_duration 300486 #0",
-      "300478 effect_value 300486e0 #1"
+      "300478 behaviour_metric_delta crit_bonus",
+      "300478 behaviour_metric_delta aura_held",
+      "300478 behaviour_metric_delta aura_gone"
     ],
     "kind": "claim"
   },
   {
     "spell": 300478,
     "clause": "Can occur only once every 5 seconds.",
-    "labels": [],
+    "labels": [
+      "300478 behaviour_internal_cooldown_gate"
+    ],
     "kind": "claim"
   },
   {
@@ -395,7 +401,7 @@
     "spell": 301287,
     "clause": "Each Felfury active now increases your haste by $s1%.",
     "labels": [
-      "301287 effect_value e0 #0"
+      "301287 behaviour_metric_delta haste"
     ],
     "kind": "claim"
   },
@@ -501,14 +507,17 @@
   {
     "spell": 520246,
     "clause": "Critical strikes with Fel Fireball now generate 1 Felfury.",
-    "labels": [],
+    "labels": [
+      "520246 behaviour_metric_delta crit_gain",
+      "520246 behaviour_metric_delta control_no_crit"
+    ],
     "kind": "claim"
   },
   {
     "spell": 520249,
     "clause": "Increases your critical strike chance by $s1%",
     "labels": [
-      "520249 effect_value e0 #0"
+      "520249 behaviour_metric_delta crit_all"
     ],
     "kind": "claim"
   },
@@ -516,7 +525,8 @@
     "spell": 520249,
     "clause": "and an additional $s2% against Demons.",
     "labels": [
-      "520249 effect_value e1 #1"
+      "520249 behaviour_metric_delta crit_demon",
+      "520249 behaviour_metric_delta crit_other_type"
     ],
     "kind": "claim"
   },
@@ -558,7 +568,8 @@
     "spell": 520257,
     "clause": "Casting Inner Demon with at least 6 Felfury now restores $520258s1 Energy.",
     "labels": [
-      "520257 effect_value 520258e0 #0"
+      "520257 behaviour_metric_delta energy_at_six",
+      "520257 behaviour_metric_delta control_five_felfury"
     ],
     "kind": "claim"
   },
@@ -613,30 +624,27 @@
   {
     "spell": 520831,
     "clause": "Fully channeling Carve now refunds 1 Felfury.",
-    "labels": [],
+    "labels": [
+      "520831 behaviour_metric_delta refund"
+    ],
     "kind": "claim"
   },
   {
     "spell": 520833,
     "clause": "Critical strikes with Sargeron Smite now refund 1 Felfury.",
-    "labels": [],
+    "labels": [
+      "520833 behaviour_metric_delta crit_gain",
+      "520833 behaviour_metric_delta control_no_crit"
+    ],
     "kind": "claim"
   },
   {
     "spell": 520833,
     "clause": "In addition, Sargeron Smite now deals $s2% increased damage to enemies above 75% of their maximum health.",
     "kind": "claim",
-    "claims": [
-      {
-        "claim": "$s2% increased damage",
-        "labels": [
-          "520833 effect_value e1 #0"
-        ]
-      },
-      {
-        "claim": "above 75% of their maximum health",
-        "labels": []
-      }
+    "labels": [
+      "520833 behaviour_hit_ratio above_75",
+      "520833 behaviour_hit_ratio control_below_75"
     ]
   },
   {
@@ -707,10 +715,21 @@
   {
     "spell": 525079,
     "clause": "Increases the damage of your Bane of Chaos and Ruin by $s1%.",
-    "labels": [
-      "525079 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Ruin damage +$s1% (20)",
+        "labels": [
+          "525079 behaviour_hit_ratio ruin"
+        ]
+      },
+      {
+        "claim": "Bane of Chaos damage +$s1% (20)",
+        "labels": [
+          "525079 behaviour_hit_ratio bane"
+        ]
+      }
+    ]
   },
   {
     "spell": 555738,
@@ -822,22 +841,23 @@
     "spell": 560533,
     "clause": "Increases critical strike chance of all party and raid members within $a1 by $s1%.",
     "labels": [
-      "560533 effect_radius e0 #0",
-      "560533 effect_value e0 #1"
+      "560533 behaviour_party_stat_ratio party_crit"
     ],
     "kind": "claim"
   },
   {
     "spell": 560533,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "560533 behaviour_group_stack_cap"
+    ],
     "kind": "claim"
   },
   {
     "spell": 560533,
     "clause": "In addition, increases your critical strike chance by $s2%.",
     "labels": [
-      "560533 effect_value e1 #2"
+      "560533 behaviour_metric_delta personal_crit"
     ],
     "kind": "claim"
   },
@@ -845,7 +865,7 @@
     "spell": 560542,
     "clause": "Emanate a powerful aura, granting $s1% increased melee",
     "labels": [
-      "560542 effect_value e0 #0"
+      "560542 behaviour_party_stat_ratio melee_haste"
     ],
     "kind": "claim"
   },
@@ -853,14 +873,16 @@
     "spell": 560542,
     "clause": "and ranged haste to party and raid members within $a1 yds.",
     "labels": [
-      "560542 effect_radius e0 #1"
+      "560542 behaviour_party_stat_ratio ranged_haste"
     ],
     "kind": "claim"
   },
   {
     "spell": 560542,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "560542 behaviour_group_stack_cap"
+    ],
     "kind": "claim"
   },
   {
@@ -875,7 +897,7 @@
     "spell": 560549,
     "clause": "Grant $s1% increased melee",
     "labels": [
-      "560549 effect_value e0 #0"
+      "560549 behaviour_party_stat_ratio melee_haste"
     ],
     "kind": "claim"
   },
@@ -883,23 +905,36 @@
     "spell": 560549,
     "clause": "and ranged haste to party and raid members within $a1 yds.",
     "labels": [
-      "560549 effect_radius e0 #1"
+      "560549 behaviour_party_stat_ratio ranged_haste"
     ],
     "kind": "claim"
   },
   {
     "spell": 560549,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "560549 behaviour_group_stack_cap"
+    ],
     "kind": "claim"
   },
   {
     "spell": 560549,
     "clause": "In addition, your Stamina and attack power is increased by $s2%.",
-    "labels": [
-      "560549 effect_value e1 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Stamina +$s2% (4)",
+        "labels": [
+          "560549 behaviour_metric_delta stamina"
+        ]
+      },
+      {
+        "claim": "attack power +$s2% (4)",
+        "labels": [
+          "560549 behaviour_metric_delta attack_power"
+        ]
+      }
+    ]
   },
   {
     "spell": 560573,
