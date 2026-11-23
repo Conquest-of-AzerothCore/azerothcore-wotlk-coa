@@ -7963,7 +7963,7 @@ private:
             float const height = step.get<float>("height");
             Require(height > 0.0f, "Fall needs a positive height");
             Require(player->IsAlive() && !player->IsGameMaster() && !player->GetCommandStatus(CHEAT_GOD) &&
-                !player->HasHoverAura() && !player->HasFeatherFallAura() && !player->HasFlyAura() &&
+                !player->HasHoverAura() && !player->HasFlyAura() &&
                 !player->IsInFlight() && !player->IsInWater() &&
                 !player->IsImmunedToDamageOrSchool(SPELL_SCHOOL_MASK_NORMAL),
                 "Fall needs a living player that a landing can hurt");

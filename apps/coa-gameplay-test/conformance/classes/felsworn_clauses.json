@@ -3427,7 +3427,8 @@
       {
         "claim": "your falling speed is slowed",
         "labels": [
-          "802058 behaviour_metric_delta feather_fall"
+          "802058 behaviour_fall_damage landing with reduced",
+          "802058 behaviour_fall_damage landing with aura"
         ]
       },
       {
@@ -3445,14 +3446,19 @@
       }
     ],
     "tool_gap": {
-      "reason": "The claim 'your falling speed is slowed' is the effective Effect[2] SPELL_AURA_FEATHER_FALL of 802058 (AscensionFelswornContracts.cpp:228-235). No metric reads the feather-fall state or MOVEMENTFLAG_FALLING_SLOW, and the harness fall action refuses a feather-falling player ('Fall needs a living player that a landing can hurt'), so the fall_damage kind cannot compare the landing with the aura. Needs a read of the caster's feather-fall state (tool group, named B-8 here); nothing else reaches it.",
+      "reason": "Read since fw-l2b by the fall_damage kind on the caster (mentor D-77): the fall action used to refuse a feather-falling player ('Fall needs a living player that a landing can hurt'), which blocked the fw-ea4 design; the refusal of feather fall alone was lifted (ADR 1265). The earlier packet read proves only the order sent to the client.",
       "attempts": [
         {
           "agent": "fw-ea4",
           "report": ".agents/plans/fw-ea4/report.md (design 1: fall_damage kind, cast 802058 then land from 30 yd on the caster; prove2b runs ['20261123-205807', '20261123-205838']: the post-cast landing was refused with 'Fall needs a living player that a landing can hurt'; no second design exists with the current metrics)"
+        },
+        {
+          "agent": "fw-l2b",
+          "report": ".agents/plans/fw-l2b/report.md"
         }
       ]
-    }
+    },
+    "reason": "Mentor D-77 (2026-11-24): the SMSG_MOVE_FEATHER_FALL packet read (802058 behaviour_metric_delta feather_fall) is not behaviour by itself (the slower descent is rendered by the client) and stays as data. The claim is read through the server's consequence of the feather-fall aura: Player::HandleFall skips fall damage under it (Player.cpp:15129-15131); the caster lands from 30 yd without the aura (loss above 0, the handler ran) and after a real cast of 802058 (aura present, loss 0). The harness fall action's refusal of a feather-falling player was lifted for this read (fw-l2b, ADR 1265)."
   },
   {
     "spell": 802058,

@@ -15674,6 +15674,18 @@
       "observe_source": "802058 Effect[2] is aura 42 in Spell.dbc; the class contract turns it into SPELL_AURA_FEATHER_FALL (AscensionFelswornContracts.cpp:234-241), whose handler calls Unit::SetFeatherFall: for a client-controlled player the server sends SMSG_MOVE_FEATHER_FALL (opcode 0x0F2 = 242, Opcodes.h:272) to the controlling client (Unit.cpp:18337-18348), which is what slows the fall; the server sets no movement flag itself until the client acknowledges. The harness records that opcode (server_packets). Control: before the cast, no feather-fall packet (0). After a real cast of 802058 on the caster: one packet (1), read 500 ms later, inside the 10000 ms aura (DurationIndex 1). Reference search 2026-11-23: coa-history spell 802058: 78 casts, 78 aura applied and 78 removed in 6 logs (combat logs carry no fall speed); expected values come from the tooltip, the DBC and the class contract only."
     },
     {
+      "spell": 802058,
+      "name": "Reckoning (no fall damage under the aura)",
+      "kind": "fall_damage",
+      "variant": "landing",
+      "label_suffix": "landing",
+      "quote": "For the duration, your falling speed is slowed",
+      "cast_spell": 802058,
+      "height": 30,
+      "receiver": "caster",
+      "observe_source": "802058 Effect[2] is aura 42 in Spell.dbc; the class contract turns it into SPELL_AURA_FEATHER_FALL (AscensionFelswornContracts.cpp:234-241). DurationIndex 1 = 10000 ms. Player::HandleFall (Player.cpp:15123-15160), the server's landing handler that MSG_MOVE_FALL_LAND reaches (MovementHandler.cpp:628-630), skips fall damage for a player with a feather-fall aura (!HasFeatherFallAura(), Player.cpp:15129-15131); the slower descent itself is rendered by the client. The caster lands from 30 yd at 10000 maximum health without the aura (the control: health lost above 0 proves the handler ran on this fall) and again about 2000 ms after a real cast of 802058 (aura read present 1500 ms after the cast, 500 ms before the landing, inside its 10000 ms): health lost 0 expected. The landing is harness-simulated (ADR 0237): the fall action feeds Player::HandleFall, not a relocate; its refusal of a feather-falling player was lifted for this read (mentor D-77, ADR 1265). The SMSG_MOVE_FEATHER_FALL packet read (feather_fall) stays as data. Reference search 2026-11-23: coa-history spell 802058: 78 casts, 78 aura applied and 78 removed in 6 logs, no value in a log event; expected values come from the tooltip, Spell.dbc and the server code only."
+    },
+    {
       "spell": 806109,
       "name": "Illidan's Guile (the caster cannot move under the aura)",
       "kind": "move_under_aura",

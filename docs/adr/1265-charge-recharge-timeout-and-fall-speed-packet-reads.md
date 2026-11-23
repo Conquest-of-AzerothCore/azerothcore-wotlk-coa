@@ -35,7 +35,17 @@ creatures, so it had no user and no positive read in game (review fw-rl2 I-5). T
 `test_cross_class_guard_the_sun_cleric_lockout_read_without_its_evidence_row_is_found` now expects Felsworn beside
 Sun Cleric among the users of `school_prohibited` (Felbreak 800203 lockout reads; controller go, guard logic unchanged).
 
+The packet read alone is not behaviour (mentor D-77, 2026-11-24: the slower descent is rendered by the client). The
+claim is read instead through the server's own consequence of the aura: `Player::HandleFall` skips fall damage for a
+player with a feather-fall aura (Player.cpp:15129-15131). The harness `fall` action (ADR 0237) feeds that handler a
+landing, but refused a feather-falling player: the refusal kept a landing that cannot hurt from passing as a
+reduction. It is lifted for feather fall only (hover, flight and physical immunity stay refused), because the
+`fall_damage` judge already requires the control arm's loss above 0 on the same fall, which proves the handler ran,
+and the treatment's aura read proves the aura was present. No passing scenario landed under feather fall, so none
+changes. Reckoning 802058 reads 0 under the aura (controller go of 2026-11-24, G-39).
+
 ## Consequences
 
 Recharge windows past 90 s can run; a cap of up to 10 extra targets can be read. The
-fall-speed read proves the order sent to the client, not the client's fall.
+fall-speed packet read proves the order sent to the client only; the landing read proves the server's fall-damage
+exemption.
