@@ -891,12 +891,16 @@
       {
         "claim": "by $525027s1%",
         "labels": [
-          "524947 behaviour_hit_ratio damage"
+          "524947 behaviour_hit_ratio damage",
+          "524947 behaviour_metric_delta grant_amount"
         ]
       },
       {
         "claim": "the next instance of direct spell or ability damage",
-        "labels": []
+        "labels": [
+          "524947 behaviour_metric_delta consumed",
+          "524947 behaviour_metric_delta kept"
+        ]
       }
     ]
   },
@@ -2295,7 +2299,10 @@
     "claims": [
       {
         "claim": "Triggering Dancing Blades now increases the damage of next Sargeron Smite",
-        "labels": []
+        "labels": [
+          "705145 behaviour_metric_delta consumed",
+          "705145 behaviour_metric_delta kept"
+        ]
       },
       {
         "claim": "by $705146s1%",
@@ -2305,7 +2312,10 @@
       },
       {
         "claim": "for $705146d,",
-        "labels": []
+        "labels": [
+          "705145 behaviour_metric_delta duration_held",
+          "705145 behaviour_metric_delta duration_gone"
+        ]
       }
     ]
   },
@@ -2391,7 +2401,10 @@
     "claims": [
       {
         "claim": "your next Sargeron Smite",
-        "labels": []
+        "labels": [
+          "706425 behaviour_metric_delta consumed",
+          "706425 behaviour_metric_delta kept"
+        ]
       },
       {
         "claim": "within $706269d",
@@ -3061,15 +3074,23 @@
     "claims": [
       {
         "claim": "Your next Ruin",
-        "labels": []
+        "labels": [
+          "555277 behaviour_metric_delta consumed",
+          "555277 behaviour_metric_delta kept"
+        ]
       },
       {
         "claim": "within $d",
-        "labels": []
+        "labels": [
+          "555277 behaviour_metric_delta held",
+          "555277 behaviour_metric_delta gone"
+        ]
       },
       {
         "claim": "is instant cast.",
-        "labels": []
+        "labels": [
+          "555277 behaviour_metric_delta instant"
+        ]
       }
     ]
   },
@@ -3245,7 +3266,10 @@
       },
       {
         "claim": "and strikes up to $s2 targets.",
-        "labels": []
+        "labels": [
+          "802058 fireball_targets behaviour_fixed_count",
+          "802058 fireball_targets_control behaviour_fixed_count"
+        ]
       }
     ]
   },
@@ -3271,7 +3295,16 @@
           "802058 behaviour_metric_delta stack_duration_gone"
         ]
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "The claim 'your falling speed is slowed' is the effective Effect[2] SPELL_AURA_FEATHER_FALL of 802058 (AscensionFelswornContracts.cpp:228-235). No metric reads the feather-fall state or MOVEMENTFLAG_FALLING_SLOW, and the harness fall action refuses a feather-falling player ('Fall needs a living player that a landing can hurt'), so the fall_damage kind cannot compare the landing with the aura. Needs a read of the caster's feather-fall state (tool group, named B-8 here); nothing else reaches it.",
+      "attempts": [
+        {
+          "agent": "fw-ea4",
+          "report": ".agents/plans/fw-ea4/report.md (design 1: fall_damage kind, cast 802058 then land from 30 yd on the caster; prove2b runs ['20261123-205807', '20261123-205838']: the post-cast landing was refused with 'Fall needs a living player that a landing can hurt'; no second design exists with the current metrics)"
+        }
+      ]
+    }
   },
   {
     "spell": 802058,
@@ -3904,7 +3937,9 @@
       },
       {
         "claim": "and its critical strike chance by $s1%",
-        "labels": []
+        "labels": [
+          "805244 behaviour_metric_delta torpedo_crit"
+        ]
       }
     ]
   },
@@ -4026,7 +4061,9 @@
   {
     "spell": 805998,
     "clause": "Damage dealt by Sargeron Smite now spreads your Cripple to 2 nearby enemies.",
-    "labels": [],
+    "labels": [
+      "805998 behaviour_metric_delta cripple_spread"
+    ],
     "kind": "claim"
   },
   {
