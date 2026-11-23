@@ -1088,7 +1088,7 @@
       {
         "claim": "for $704397d",
         "labels": [
-          "560641 behaviour_last_application_expiry duration"
+          "560641 behaviour_metric_delta duration"
         ]
       }
     ]
@@ -1136,7 +1136,7 @@
       {
         "claim": "for $561203d",
         "labels": [
-          "560822 behaviour_last_application_expiry duration"
+          "560822 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -1641,7 +1641,7 @@
       {
         "claim": "for $707511d",
         "labels": [
-          "704370 behaviour_last_application_expiry duration"
+          "704370 behaviour_metric_delta duration"
         ]
       }
     ]
