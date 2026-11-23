@@ -1586,6 +1586,66 @@
       "observe_source": "805239 DurationIndex 8 = 15000 ms ($d). The aura is gone 15900 ms after the cast (excludes a duration 10% long, 16500 ms). Reference search 2026-11-23: coa-history spells 805239 and 807347: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
     },
     {
+      "spell": 805239,
+      "name": "Burning Hatred (Chaos copy is 50% of the swing damage)",
+      "kind": "metric_delta",
+      "variant": "leech_damage",
+      "label_suffix": "leech_damage",
+      "quote": "causing your melee damage to leech health to you equal to $s1% of the damage dealt as Chaos damage",
+      "trigger_spell": 805239,
+      "gate_spell": 805239,
+      "gate_cast": true,
+      "target": "dummy",
+      "attack_swings": 5,
+      "measure_actor": "caster",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807347,
+        "target": "dummy"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {},
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.5,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "The Chaos damage of 807347 on the dummy over the caster's swing damage. 805239 Effect[0] aura 354, BasePoints 49 + 1 = 50 ($s1), DurationIndex 8 = 15000 ms ($d). The event script (AscensionFelswornEvents.cpp: Check case 805239 returns melee, Proc case 805239 calls Copy(player, target, 807347, damage * 50 / 100), :243-244) casts 807347 with that amount as BasePoint0 (AscensionFelsworn.cpp:158-163). 807347 is SPELL_EFFECT_HEALTH_LEECH with EffectValueMultiplier 1.0, school mask 127 (Chaos), NO_ACTIVE_DEFENSE, NO_ATTACK_MISS, CANT_CRIT, IGNORE_CASTER_MODIFIERS and IGNORE_DAMAGE_TAKEN_MODIFIERS, and as a Felsworn copy it ignores armor (AscensionFelswornContracts.cpp:61-67) and never procs the script again (Derived). The caster auto-attacks the dummy for 5 swing intervals (14000 ms) before and after a real cast of 805239; the after phase starts its attack 500 ms after the cast and stops it 14500 ms after it, inside the 15000 ms aura, so every swing the ratio divides by ran under Burning Hatred. Misses, dodges and parries add nothing to either side: the harness adds a swing to melee_damage_total only with damage (CoAGameplayTest.cpp:1778-1783, the SMSG_ATTACKERSTATEUPDATE damage, the sum of both sub-damages after absorb and resist, Unit.cpp:7800-7829) and the script copies only a damaging hit (Check: !damage returns false). the ratio divides the increase of the read over the after phase by the increase of the caster's own swing damage (melee_damage_total, both hands). The before arm reads 0 (no Burning Hatred, so no copy). Expected 0.5 from $s1; tolerance 0.02 (0.48 to 0.52) excludes 45%, 55%, a full copy (1.0) and no copy (0), and holds the integer division (at most half a point per odd swing). Reference search 2026-11-23: coa-history spells 805239 and 807347: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 805239,
+      "name": "Burning Hatred (leech heal is 50% of the swing damage)",
+      "kind": "metric_delta",
+      "variant": "leech_heal",
+      "label_suffix": "leech_heal",
+      "quote": "causing your melee damage to leech health to you equal to $s1% of the damage dealt as Chaos damage",
+      "trigger_spell": 805239,
+      "gate_spell": 805239,
+      "gate_cast": true,
+      "target": "dummy",
+      "attack_swings": 5,
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 807347,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {},
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.5,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "The heal of 807347 on the caster (the leech of the copy) over the caster's swing damage. 805239 Effect[0] aura 354, BasePoints 49 + 1 = 50 ($s1), DurationIndex 8 = 15000 ms ($d). The event script (AscensionFelswornEvents.cpp: Check case 805239 returns melee, Proc case 805239 calls Copy(player, target, 807347, damage * 50 / 100), :243-244) casts 807347 with that amount as BasePoint0 (AscensionFelsworn.cpp:158-163). 807347 is SPELL_EFFECT_HEALTH_LEECH with EffectValueMultiplier 1.0, school mask 127 (Chaos), NO_ACTIVE_DEFENSE, NO_ATTACK_MISS, CANT_CRIT, IGNORE_CASTER_MODIFIERS and IGNORE_DAMAGE_TAKEN_MODIFIERS, and as a Felsworn copy it ignores armor (AscensionFelswornContracts.cpp:61-67) and never procs the script again (Derived). The caster auto-attacks the dummy for 5 swing intervals (14000 ms) before and after a real cast of 805239; the after phase starts its attack 500 ms after the cast and stops it 14500 ms after it, inside the 15000 ms aura, so every swing the ratio divides by ran under Burning Hatred. Misses, dodges and parries add nothing to either side: the harness adds a swing to melee_damage_total only with damage (CoAGameplayTest.cpp:1778-1783, the SMSG_ATTACKERSTATEUPDATE damage, the sum of both sub-damages after absorb and resist, Unit.cpp:7800-7829) and the script copies only a damaging hit (Check: !damage returns false). the ratio divides the increase of the read over the after phase by the increase of the caster's own swing damage (melee_damage_total, both hands). The before arm reads 0 (no Burning Hatred, so no copy). Expected 0.5 from $s1; tolerance 0.02 (0.48 to 0.52) excludes 45%, 55%, a full copy (1.0) and no copy (0), and holds the integer division (at most half a point per odd swing). Reference search 2026-11-23: coa-history spells 805239 and 807347: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
       "spell": 805240,
       "name": "Tyrant's Gaze (usable only below 35% health)",
       "kind": "cast_gate",
@@ -2099,6 +2159,21 @@
       "setup_target": "caster",
       "setup_wait_ms": 1600,
       "observe_source": "807421 Effect[2] aura 107 ADD_FLAT_MODIFIER BasePoints 999 + 1 = 1000 ms ($/1000;807421s3 = 1 s); AscensionFelswornSummons.cpp:22 adds 1000 ms when Inner Demon 804216 is on the caster. Inner Demon is a real precondition: Burning Hatred 805239 gives 6 Felfury, then Inner Demon 804216 (CasterAuraSpell 800058) is cast; the aura lasts 5000 ms per Felfury, so it covers the 16 s window. With Inner Demon the Infernal is gone 16100 ms after the cast: the lifetime is below 16100 ms, so 16000 +- 100 ms with the read above. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 300480,
+      "name": "Infernal Summoner (Infernal swing reset rate)",
+      "kind": "swing_reset_rate",
+      "quote": "Direct damage dealt now has a $h% chance to reset the cooldown of Infernal.",
+      "talent": 300480,
+      "reset_spell": 560284,
+      "chance_pct": 5,
+      "control_ms": 60000,
+      "attack_ms": 3400000,
+      "parts": 6,
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "observe_source": "300480 ProcChance 5 ($h, server DBC set). spell_proc 300480 has ProcFlags 1048575 and Chance 100 (rev_20260909_05_felsworn_completion.sql:9, restored to 100 by rev_20261003_10_coa_script_rolled_proc_chance.sql), so every outgoing non-periodic damaging hit reaches the event script: Check case 300480 is !periodic && Chance(player, 300480) (AscensionFelswornEvents.cpp:54-55, a 5% roll on the DBC ProcChance, AscensionFelsworn.cpp:231-239), and Proc case 300480 calls Reduce(player, 560284, INT32_MAX) (AscensionFelswornEvents.cpp:145-146), which calls Player::RemoveSpellCooldown(id, true) for every known Infernal rank (AscensionFelsworn.cpp:241-249) and so sends one SMSG_CLEAR_COOLDOWN of 560284 whether a cooldown ran or not (Player.cpp:3953-3959). Infernal 560284 is learned and read with server_packets opcode 0x1DE row 560284. A landed auto-attack hit is direct damage (white swings carry no spell, so Derived is false): trials are the landed damaging auto-attack hits of the 2027 main hand (2300 ms; the generated scenario lists that one weapon speed, a bound of 1478 swings per part). Control: 60 s of swings before 300480 is learned: no packet. Treatment: 300480 learned (mentor D-67), 6 pooled parts of 3400 s (8868 swings at most, for at least 5755 landed hits), judged with residual_target 0.001 per pair and min_detectable 4 points (5755 landed hits, the class's residual sizing). Reference search 2026-11-23: coa-history spell 300480: 0 events in 186 logs (the reset casts nothing); Infernal 560284: 156 SPELL_CAST_SUCCESS by players in 6 logs, not usable as a rate (the talent of each caster is unknown); nothing found beyond the tooltip and the DBC."
     },
     {
       "spell": 800355,
@@ -7814,6 +7889,73 @@
         ]
       },
       "observe_source": "803904 duration $d = 12000 ms (Spell.dbc DurationIndex). The aura is gone 12100 ms after the cast (excludes a duration 10% long, 13200 ms). Reference search 2026-11-23: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS, 281 SPELL_AURA_APPLIED and 280 SPELL_AURA_REMOVED by players in 15 of 186 logs. Applied-to-removed intervals of the 280 pairs: longest 12.07 to 12.44 s (the $d = 12000 ms expiry), the others 1.37 s and up (the aura also ends after $n attacks, so a shorter interval is not an expiry); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 802076,
+      "name": "Pit Lord's Strength 802076 (Annihilation attacks)",
+      "kind": "metric_delta",
+      "variant": "charges",
+      "label_suffix": "charges",
+      "quote": "Your Annihilation now affects $s1 additional attack",
+      "trigger_spell": 803904,
+      "gate_spell": 802076,
+      "target": "caster",
+      "metric": "aura_script_value",
+      "fields": {
+        "spell": 803904,
+        "key": 803904
+      },
+      "before_expected": 5,
+      "expected": 6,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "802076 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 0 + 1 = 1 ($s1), on Annihilation 803904 (ProcCharges 5). The charges of Annihilation on the caster are read 500 ms after a real cast, before a learn of 802076 (the control, 5) and after it: 6. Reference search 2026-11-23: coa-history spell 802076: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only. Read without the script_count opt-in: the stored count right after the cast is data, not consumption (the attacks the aura lasts are not read)."
+    },
+    {
+      "spell": 802110,
+      "name": "Pit Lord's Strength 802110 (Annihilation attacks)",
+      "kind": "metric_delta",
+      "variant": "charges",
+      "label_suffix": "charges",
+      "quote": "Your Annihilation now affects $s1 additional attack",
+      "trigger_spell": 803904,
+      "gate_spell": 802110,
+      "target": "caster",
+      "metric": "aura_script_value",
+      "fields": {
+        "spell": 803904,
+        "key": 803904
+      },
+      "before_expected": 5,
+      "expected": 7,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "802110 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 1 + 1 = 2 ($s1), on Annihilation 803904 (ProcCharges 5). The charges of Annihilation on the caster are read 500 ms after a real cast, before a learn of 802110 (the control, 5) and after it: 7. Reference search 2026-11-23: coa-history spell 802110: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only. Read without the script_count opt-in: the stored count right after the cast is data, not consumption (the attacks the aura lasts are not read)."
+    },
+    {
+      "spell": 803904,
+      "name": "Annihilation (attacks)",
+      "kind": "metric_delta",
+      "variant": "charges",
+      "label_suffix": "charges",
+      "quote": "Lasts for $n attacks or $d.",
+      "trigger_spell": 803904,
+      "gate_spell": 803904,
+      "target": "caster",
+      "metric": "aura_script_value",
+      "fields": {
+        "spell": 803904,
+        "key": 803904
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "803904 ProcCharges 5 (Spell.dbc; $n attacks). The charges of the aura on the caster (script value 803904, set to 5 plus the SPELLMOD_CHARGES mods, AscensionFelswornAuras.cpp:68-72) are read 500 ms after a real cast: 0 before the cast (control) and 5 after. Reference search 2026-11-23: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS, 281 SPELL_AURA_APPLIED and 280 SPELL_AURA_REMOVED by players in 15 of 186 logs. Applied-to-removed intervals of the 280 pairs: longest 12.07 to 12.44 s (the $d = 12000 ms expiry), the others 1.37 s and up (the aura also ends after $n attacks, so a shorter interval is not an expiry); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only. Read without the script_count opt-in: the stored count right after the cast is data, not consumption (the attacks the aura lasts are not read)."
     },
     {
       "spell": 806109,

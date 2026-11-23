@@ -2372,6 +2372,9 @@ Options with a module:
   an uncast control window and again under the trigger, its casts read, void trials stated (ADR 1209)
 - [`use_time_contrast`](metric_delta_options/use_time_contrast.md): an opt-in learned contrast for a cast time or
   power cost read, judged with the partner arms the entry names (ADR 1194)
+- [`script_count`](metric_delta_options/script_count.md): an opt-in count read of an aura script value, refused unless
+  the quote states the count, real casts drive it and the before arm lacks or changes the driving cast (ADR 1258,
+  provisional)
 - [`ended_read`](metric_delta_options/ended_read.md): a third reading after unlearning the gate, past the triggered
   aura's DBC duration, that must equal the before reading of the same scenario (ADR 1247)
 - [`ratio_to_metric`](metric_delta_options/ratio_to_metric.md): each judged reading divided by a second metric of the
