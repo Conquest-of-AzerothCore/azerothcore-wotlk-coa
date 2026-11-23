@@ -779,6 +779,50 @@
       "wait_ms": 10400,
       "expire_ms": 500,
       "observe_source": "300484 Effect[0] aura 42 PROC_TRIGGER_SPELL 300482 (AscensionFelswornEvents.cpp:99,231-232: each landed hit of Azzinoth's Assault or its strikes 520262 and 572585 casts 300482 at the target); 300482 Effect[0] aura 101 SPELL_AURA_MOD_RESISTANCE_PCT, MiscValue 1 (armor), BasePoints -5 + 1 = -4 ($300482s1), StackAmount 5 ($300482u), DurationIndex 1 = 10000 ms ($300482d). The presence of 300482 on the dummy is read 10400 ms after the last of three real Assault casts: absent, excluding a duration of 11000 ms (10% long); together with the present entry the duration lies between 9600 and 10400 ms. Reference search 2026-11-23: coa-history spell 300484 and 300482: 0 events in 186 logs (a passive and its debuff leave no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says -4% for 10 seconds, stacking 5 times, the same as the tooltip. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before the casts (Azzinoth's Assault 803475, the level 60 rank, needs 803468 and consumes 2 Felfury per cast; 3 casts use the 6)."
+    },
+    {
+      "spell": 520592,
+      "name": "Illidan's Favor (Felbane Energy cost removed)",
+      "kind": "metric_delta",
+      "variant": "felbane_cost",
+      "label_suffix": "felbane_cost",
+      "quote": "Removes the Energy cost of your Felbane and Manaburn",
+      "trigger_spell": 525001,
+      "gate_spell": 520592,
+      "target": "dummy",
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 525001
+      },
+      "cast_power": 0,
+      "before_expected": 85,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "520592 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 14 (SPELLMOD_COST), BasePoints -101 + 1 = -100%. Felbane 525001 is cast at the dummy with the caster's Energy held at 0 (cast_power 0), before (control) and after a real learn of 520592: the control refuses it with SPELL_FAILED_NO_POWER (85) when it has a cost, the learn lets it through (0). Reference search 2026-11-23: coa-history spell 520592: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats the tooltip; Manaburn 805248 and Felbane 525001 not in the logs either (0 events)."
+    },
+    {
+      "spell": 520592,
+      "name": "Illidan's Favor (Manaburn strikes 4 additional enemies)",
+      "kind": "fixed_count",
+      "variant": "manaburn_targets",
+      "label_suffix": "manaburn_targets",
+      "quote": "your Manaburn now strikes 4 additional enemies near the primary target",
+      "expected": 4,
+      "radius": 8,
+      "far_dummy": true,
+      "metric": "spell_damage_count",
+      "radius_reason": "Manaburn 805248 Effect[0] target 6 (TARGET_UNIT_TARGET_ENEMY), no ChainTarget in the DBC; 520592 Effect[0] aura 107, MiscValue 17 (SPELLMOD_JUMP_TARGETS), BasePoints 4 + 1 = 5 added to a chain count of 0, so the chain search picks maxTargets - 1 = 4 further targets (Spell::SelectImplicitChainTargets, Spell.cpp:1919-1934); the engine's jump radius for a magic spell (DmgClass 1) is 10 yd (Spell::SearchChainTargets, Spell.cpp:2218-2221), so the additional dummies stand inside 8 yd of the primary and one beyond it",
+      "cast_spell": 805248,
+      "target_rank": 805248,
+      "repeats": 3,
+      "learn": [
+        520592
+      ],
+      "count_primary": false,
+      "observe_source": "520592 Effect[0] SPELLMOD_JUMP_TARGETS +5 on the class mask of Manaburn; the number of dummies struck by Manaburn 805248 (spell_damage_count per dummy) is read in a control arm without 520592 (the primary only) and a treatment arm with it learned: the primary and exactly 4 additional ones (more candidates are offered inside the radius, so a fifth strike would show), on Scarlet Magi 1832 (a level 56-57 mana-using mage, unit_class 8: Manaburn damage equals the mana drained, so a creature with no mana would never be struck), with one dummy outside the jump radius never struck. Reference search 2026-11-23: coa-history spell 520592 and 805248: 0 events in 186 logs (positive control 801904: 21 casts); the bindmysoul snapshot repeats the tooltip.",
+      "dummy_entry": 1832
     }
   ],
   "player_observations": [],

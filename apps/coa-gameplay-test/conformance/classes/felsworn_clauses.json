@@ -497,8 +497,19 @@
   {
     "spell": 520592,
     "clause": "Removes the Energy cost of your Felbane and Manaburn and your Manaburn now strikes 4 additional enemies near the primary target.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Removes the Energy cost of your Felbane",
+        "labels": [
+          "520592 behaviour_metric_delta felbane_cost"
+        ]
+      },
+      {
+        "claim": "and Manaburn",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 520805,
