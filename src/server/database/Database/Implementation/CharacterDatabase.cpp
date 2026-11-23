@@ -96,6 +96,12 @@ void CharacterDatabaseConnection::DoPrepareStatements()
 
     PrepareStatement(CHAR_INS_ACCOUNT_VANITY_COLLECTION,
         "INSERT IGNORE INTO account_vanity_collection (account_id, item_id) VALUES (?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_ACCOUNT_VANITY_COLLECTION,
+        "DELETE FROM account_vanity_collection WHERE account_id = ? AND item_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_ASCENSION_BANK_STORED_ITEMS,
+        "SELECT ii.itemEntry, ii.flags FROM mod_ascension_bank_item bi INNER JOIN item_instance ii "
+        "ON bi.item_guid = ii.guid WHERE (bi.owner_kind = ? AND bi.owner_id = ?) OR (bi.owner_kind = ? AND bi.owner_id = ?)",
+        CONNECTION_SYNCH);
     PrepareStatement(CHAR_DEL_WORLDFORGED_LOOT,
         "DELETE FROM character_worldforged_loot WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_LOTTERY_RECENT_WINNERS,
