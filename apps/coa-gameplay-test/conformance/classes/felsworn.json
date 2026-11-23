@@ -15486,6 +15486,37 @@
       "control_windows": 10,
       "windows": 60,
       "observe_source": "AscensionFelswornEvents.cpp:42-47 passes an incoming dodge when Chance(player, 805249) succeeds (ProcChance 100) and :208-209 casts 521210 on the caster; 521210 Effect[0] ENERGIZE, MiscValue 3 Energy (server DBC). SpellEffects.cpp EffectEnergize passes the effect value to Unit::EnergizeBySpell, which logs it uncapped (Unit.cpp:9330-9348), so each energize log carries the full amount. Strikers: the 804822 proc shape, dodge 100 before every 500 ms window."
+    },
+    {
+      "spell": 804822,
+      "kind": "avoided_proc_instances",
+      "name": "Vengeance Is Mine (Twin Slice instances)",
+      "variant": "twin_slice_instances",
+      "label_suffix": "twin_slice_instances",
+      "quote": "next 10 instances of damage with Twin Slice",
+      "gain_quote": "and generate 1 Felfury.",
+      "proc_aura": 807163,
+      "cast_spell": 801901,
+      "hit_spells": [
+        808303,
+        808304
+      ],
+      "stack_aura": 800058,
+      "instances": 10,
+      "power": 3,
+      "power_value": 45,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852
+      ],
+      "swing_ms": 500,
+      "proc_windows": 30,
+      "casts": 8,
+      "cast_gap_ms": 1100,
+      "observe_source": "Mentor D-67: 807163 is obtained by the real route: 804822 learned, dodged swings (dodge 100) until the Chance(player, 804822) roll procs (AscensionFelswornEvents.cpp:42-47, :157-158 casts 807163 on the caster). 807163's apply sets script value 807163 to 10 (AscensionFelswornAuras.cpp:84-85); every direct Twin Slice damage instance (Twin(info) && Direct(info)) while it is held gains 1 Felfury and decrements it, removing the aura at the last (AscensionFelswornAbilities.cpp:375-384). Twin Slice 801901 strikes with both weapons (EffectTriggerSpell 808303 and 808304) and gains 1 Felfury itself (EffectTriggerSpell[2] 800058), read as the control arm's own gain; ManaCost 45 Energy (PowerType 3), set before each cast; StartRecoveryTime 1000 ms, so casts 1100 ms apart. Felfury 800058 StackAmount 6, set to 0 before each cast (at most 3 gained per cast). Twin Fury 801892 is not learned, so a critical strike adds no Felfury. 807163 DurationIndex 1 (10 s): an expiry by duration voids the run."
     }
   ],
   "player_observations": [],
