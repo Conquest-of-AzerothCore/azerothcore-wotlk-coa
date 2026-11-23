@@ -1741,31 +1741,22 @@ bool ManastormRewards::PrepareStageCompletion(
 
         if (cacheCount)
         {
-            uint32 playerLevel =
-                player
-                ? uint32(
-                    player->GetLevel())
-                : 0;
-
-            if (!run.IsEndgame() &&
-                !playerLevel)
+            uint32 playerLevel = player ? player->GetLevel() : 0;
+            if (!run.IsEndgame() && !player)
             {
-                QueryResult levelResult =
-                    CharacterDatabase.Query(
-                        "SELECT level "
-                        "FROM characters "
-                        "WHERE guid = {} "
-                        "LIMIT 1",
-                        characterGuid);
-
-                if (levelResult)
+                CharacterDatabasePreparedStatement* statement =
+                    CharacterDatabase.GetPreparedStatement(CHAR_SEL_MANASTORM_XP_LEVEL);
+                statement->SetData(0, characterGuid);
+                PreparedQueryResult levelResult = CharacterDatabase.Query(statement);
+                if (!levelResult)
                 {
-                    playerLevel =
-                        uint32(
-                            levelResult->
-                                Fetch()[0]
-                                .Get<uint8>());
+                    error = "Unable to read offline Manastorm member level for cache rewards: character=" +
+                        std::to_string(characterGuid) + ".";
+                    publications.clear();
+                    return false;
                 }
+
+                playerLevel = levelResult->Fetch()[0].Get<uint8>();
             }
 
             if (!ResolveCacheItemEntry(

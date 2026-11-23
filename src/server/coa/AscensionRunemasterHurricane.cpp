@@ -9,6 +9,8 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 
+#include <algorithm>
+
 namespace
 {
 enum HurricaneSpells : uint32
@@ -83,7 +85,7 @@ bool StrikeHurricane(Unit* player, Aura* aura)
             target->GetPositionZ(), x, y, z, false))
     {
         if (player->IsUnderWater())
-            z = target->GetPositionZ();
+            z = std::max(z, target->GetPositionZ());
         player->NearTeleportTo(x, y, z, player->GetOrientation());
     }
     player->SetFacingToObject(target);
