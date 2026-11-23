@@ -7731,6 +7731,44 @@
       "observe_source": "707907 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE and Effect[1] SPELLMOD_DOT, BasePoints 19 + 1 = +20% ($s1), class masks matching Sunder 705121 and Immolation Aura 800207. The periodic tick of 556503 (Effect[0] aura 3 every 3000 ms) of a real cast of Sunder is read one tick per trial. Fixtures set by harness set_aura, named as preconditions and identical in both arms: Felfury 800058 x2 and At Least 2 Felfury 803468 (Sunder consumes 2 Felfury and needs 803468), spell penetration 823764 (removes the dummy's partial resists), spell power +20000 (integer truncation far inside the band). Non-critical hits only, mean damage must rise by 20 percent (band 18..22, G-19). Reference search 2026-11-23: coa-history spell 707907: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: a Burning Rage node exists; its text was not compared; expected values come from the tooltip and the DBC only. Immolation Aura damage is not measured: the hit_ratio setup asserts the DBC health cost 10 of Immolation Aura 800207, which the talent lowers to 8 in the treatment arm (the first pair failed that setup)."
     },
     {
+      "spell": 707907,
+      "kind": "hit_ratio",
+      "quote": "Increases the damage and reduces the cost of Sunder and Immolation Aura by $s1%.",
+      "expected": 1.2,
+      "critical": false,
+      "trials": 10,
+      "learn": [],
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          707907
+        ]
+      },
+      "fixture": {
+        "spell_power": 20000
+      },
+      "name": "Burning Rage (Immolation Aura damage)",
+      "variant": "immolation_aura",
+      "label_suffix": "immolation_aura",
+      "observe_spell": 800208,
+      "cast_spell": 800207,
+      "cast_wait_ms": 3500,
+      "observe_source": "707907 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE, BasePoints 19 + 1 = +20% ($s1), class mask word 2 = 0x80000200: bit 9 = SpellFamilyFlags[2] 512 of Immolation 800208, the instant SCHOOL_DAMAGE (Effect[0]) that Immolation Aura 800207 triggers; the Sunder explosion 712399 is bit 31 (entries sunder_explosion and sunder_dot). The hits of 800208 after a real cast of Immolation Aura 800207 at the caster (3500 ms per trial) are counted, without the passive (control) and with it learned (treatment); non-critical hits only, mean damage must rise by 20 percent (band 18..22, G-19). Health cost per arm: 800207 PowerType -2 (health), ManaCost 10, so the cast pays 10 health in the control arm and 8 with 707907 learned (SPELLMOD_COST -20%, proven by immolation_cost); the setup assert of the kind requires health above the DBC cost 10 before every cast, which both arms satisfy, and 10 trials per arm (180 health in all against the caster's pool) keep the health above it in every trial. Fixtures set by harness set_aura, named as preconditions and identical in both arms: spell penetration 823764 (removes the dummy's partial resists), spell power +20000 (integer truncation far inside the band). Reference search 2026-11-23: coa-history spell 707907: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); coa-history spell 800207: 29 SPELL_CAST_SUCCESS and 29 SPELL_AURA_APPLIED in 2 logs, no damage figure decides; bindmysoul talents snapshot: a Burning Rage node exists; its text was not compared; expected values come from the tooltip and the DBC only."
+    },
+    {
       "spell": 705145,
       "kind": "metric_delta",
       "gate_spell": 705145,

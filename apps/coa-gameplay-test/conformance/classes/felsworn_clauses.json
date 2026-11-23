@@ -2199,7 +2199,8 @@
         "claim": "Increases the damage",
         "labels": [
           "707907 behaviour_hit_ratio sunder_explosion",
-          "707907 behaviour_hit_ratio sunder_dot"
+          "707907 behaviour_hit_ratio sunder_dot",
+          "707907 behaviour_hit_ratio immolation_aura"
         ]
       },
       {
