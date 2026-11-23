@@ -62,7 +62,7 @@ def is_rate_model(model: dict) -> bool:
 
 def rate_spec(entry: dict) -> RateSpec:
     damage = rate_family(entry.get('variant', '')) == DAMAGE_RATE
-    unknown = set(entry) - RATE_FIELDS - ({'haste_aura', 'haste_agreement'} if damage else set())
+    unknown = set(entry) - (RATE_FIELDS - {'haste_aura', 'haste_agreement'} if damage else RATE_FIELDS)
     targets = {DAMAGE_FEED_TARGET} if damage else FEED_TARGETS
     if unknown or entry.get('feed_target') not in targets or not isinstance(entry.get('rolls'), int) \
             or entry['rolls'] < 1:
