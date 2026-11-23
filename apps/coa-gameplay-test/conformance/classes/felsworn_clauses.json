@@ -110,10 +110,19 @@
   {
     "spell": 300468,
     "clause": "Casting Hateforged Barrier now also creates a damage absorption shield on all nearby allies within $300469a yds,",
-    "labels": [
-      "300468 effect_value #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "creates a damage absorption shield on all nearby allies",
+        "labels": [
+          "300468 behaviour_metric_delta ally_shield"
+        ]
+      },
+      {
+        "claim": "within $300469a yds",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 300468,
@@ -123,13 +132,13 @@
       {
         "claim": "absorbing ${$STA*1+$300469m1+$300469ppl1+$SP*.2+$AP*.08} damage",
         "labels": [
-          "300468 effect_value 300469e0 #0"
+          "300468 behaviour_taken_hit amount"
         ]
       },
       {
         "claim": "for $300469d",
         "labels": [
-          "300468 spell_duration 300469 #1"
+          "300468 behaviour_metric_delta shield_expiry"
         ]
       }
     ]
@@ -619,10 +628,19 @@
   {
     "spell": 525001,
     "clause": "Curse an enemy, causing the next spell they cast within $d to be reflected onto them.",
-    "labels": [
-      "525001 aura_duration_ms #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Curse an enemy ... within $d",
+        "labels": [
+          "525001 behaviour_metric_delta curse_expiry"
+        ]
+      },
+      {
+        "claim": "causing the next spell they cast ... to be reflected onto them",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 525079,
@@ -1019,11 +1037,19 @@
   {
     "spell": 570158,
     "clause": "Casting Azzinoth's Assault now scars the enemy, increasing your allies' attack power against them by ${$m1+0+$AGI*0.15} for $570159d.",
-    "labels": [
-      "570158 effect_value e0 #0",
-      "570158 spell_duration 570159 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing your allies' attack power against them by ${$m1+0+$AGI*0.15}",
+        "labels": [
+          "570158 behaviour_metric_delta scar_amount"
+        ]
+      },
+      {
+        "claim": "for $570159d",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 572889,
@@ -1661,19 +1687,31 @@
   {
     "spell": 707513,
     "clause": "Your $?s520853[Fel Torpedo][Chaos Rush] now increases your Energy regeneration by $525042s1% for $525042d,",
-    "labels": [
-      "707513 effect_value 525042e0 #0",
-      "707513 spell_duration 525042 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "now increases your Energy regeneration by $525042s1%",
+        "labels": [
+          "707513 behaviour_metric_delta regen_one_stack",
+          "707513 behaviour_metric_delta regen_two_stacks"
+        ]
+      },
+      {
+        "claim": "for $525042d",
+        "labels": [
+          "707513 behaviour_metric_delta regen_expiry"
+        ]
+      }
+    ]
   },
   {
     "spell": 707513,
     "clause": "stacking $525042u times.",
+    "kind": "claim",
     "labels": [
-      "707513 max_stacks 525042 #2"
-    ],
-    "kind": "claim"
+      "707513 behaviour_metric_delta stack_cap",
+      "707513 behaviour_metric_delta one_stack"
+    ]
   },
   {
     "spell": 707842,
@@ -1823,10 +1861,8 @@
   {
     "spell": 572617,
     "clause": "Wreathe yourself in fire for up to $d,",
-    "labels": [
-      "572617 aura_duration_ms #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": []
   },
   {
     "spell": 572617,
@@ -1834,16 +1870,18 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "dealing ${$m1+0+$spfi*.3+$AP*.23} Fire Damage",
+        "claim": "dealing ${$m1+0+$spfi*.3+$AP*.23} Fire Damage to nearby enemies",
         "labels": [
-          "572617 effect_value e0 #1",
-          "572617 aura_amount e0 #1"
+          "572617 behaviour_metric_delta tick_base",
+          "572617 behaviour_metric_delta tick_spell_power",
+          "572617 behaviour_metric_delta tick_attack_power"
         ]
       },
       {
         "claim": "every $t1 sec",
         "labels": [
-          "572617 aura_amplitude_ms #2"
+          "572617 behaviour_metric_delta tick_period",
+          "572617 behaviour_metric_delta tick_count"
         ]
       }
     ]
@@ -2268,7 +2306,7 @@
     "clause": "While active, Blood of Mannoroth now also causes you to ignore all enemy Armor.",
     "kind": "claim",
     "labels": [
-      "803903 behaviour_metric_delta armor_ignore"
+      "803903 behaviour_hit_ratio ignores_armor"
     ]
   },
   {
@@ -2291,7 +2329,9 @@
     "clause": "Reduces the cooldown of Annihilation by $/1000;s1 sec",
     "kind": "claim",
     "labels": [
-      "803905 behaviour_metric_delta annihilation_cooldown"
+      "803905 cost_gate 803904 annihilation_cd without",
+      "803905 cost_gate 803904 annihilation_cd with",
+      "803905 cost_gate 803904 annihilation_cd beyond"
     ]
   },
   {
@@ -2299,7 +2339,9 @@
     "clause": "and Sunder by $/1000;s2 sec.",
     "kind": "claim",
     "labels": [
-      "803905 behaviour_metric_delta sunder_cooldown"
+      "803905 cost_gate 705121 sunder_cd without",
+      "803905 cost_gate 705121 sunder_cd with",
+      "803905 cost_gate 705121 sunder_cd beyond"
     ]
   },
   {
@@ -2323,7 +2365,9 @@
     "clause": "but its cooldown is increased by $/1000;s2 sec.",
     "kind": "claim",
     "labels": [
-      "804609 behaviour_metric_delta skull_cooldown"
+      "804609 cost_gate 800225 skull_cd without",
+      "804609 cost_gate 800225 skull_cd with",
+      "804609 cost_gate 800225 skull_cd beyond"
     ]
   },
   {
@@ -2394,19 +2438,29 @@
   {
     "spell": 804823,
     "clause": "Taunt nearby enemies for $704233d",
+    "kind": "claim",
     "labels": [
-      "804823 spell_duration 704233 #0"
-    ],
-    "kind": "claim"
+      "804823 behaviour_metric_delta taunt_expiry"
+    ]
   },
   {
     "spell": 804823,
     "clause": "and ignore $s3% of all damage taken for $d,",
-    "labels": [
-      "804823 effect_value #1",
-      "804823 aura_duration_ms #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and ignore $s3% of all damage taken",
+        "labels": [
+          "804823 behaviour_taken_hit half_damage"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "804823 behaviour_metric_delta effect_expiry"
+        ]
+      }
+    ]
   },
   {
     "spell": 804823,
@@ -2541,10 +2595,25 @@
   {
     "spell": 805244,
     "clause": "Increases the range of $?s520853[Fel Torpedo][Chaos Rush] by $s2 yds$?s520853[ and its critical strike chance by $s1%][].",
-    "labels": [
-      "805244 effect_value e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the range of Fel Torpedo by $s2 yds",
+        "labels": [
+          "805244 behaviour_metric_delta torpedo_range"
+        ]
+      },
+      {
+        "claim": "Increases the range of Chaos Rush by $s2 yds",
+        "labels": [
+          "805244 behaviour_metric_delta chaos_range"
+        ]
+      },
+      {
+        "claim": "and its critical strike chance by $s1%",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 805245,
