@@ -1429,13 +1429,17 @@
   {
     "spell": 561216,
     "clause": "2 Charges,",
-    "labels": [],
+    "labels": [
+      "561216 behaviour_charge_recharge"
+    ],
     "kind": "claim"
   },
   {
     "spell": 561216,
     "clause": "1.5 min recharge",
-    "labels": [],
+    "labels": [
+      "561216 behaviour_charge_recharge"
+    ],
     "kind": "claim"
   },
   {
@@ -3374,7 +3378,9 @@
     "claims": [
       {
         "claim": "your falling speed is slowed",
-        "labels": []
+        "labels": [
+          "802058 behaviour_metric_delta feather_fall"
+        ]
       },
       {
         "claim": "damage dealt by your Fel Fireball increases your damage dealt by $524632s2%",

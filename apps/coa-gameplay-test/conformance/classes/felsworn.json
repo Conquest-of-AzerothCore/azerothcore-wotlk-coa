@@ -15641,6 +15641,37 @@
         ]
       ],
       "observe_source": "Below-six arm of energy_at_six (50 Energy at six Felfury). The caster builds a real count of 5 Felfury 800058 (StackAmount 6) before each Inner Demon 804216 cast: Burning Hatred 805239 at the caster ('instantly generating 6 Felfury'), Sargeron Smite 802060 at the dummy ('Consumes 2 Felfury'), Bane of Fire 707901 at the dummy (a Bane hit on an enemy gives Gain(player, 1), AscensionFelswornAbilities.cpp:329-333; Fel Torpedo was dropped because its dash carried the caster past the dummy and the next Sargeron Smite was refused with SPELL_FAILED_UNIT_NOT_INFRONT, pair fw-tg1 proveP1); the per-cast targets are the setup_cast_targets option (ADR 1256) and the count is read at exactly 5 after the last setup cast of each phase (after_setup_stacks, ADR 1257), a mismatch voids the run. Inner Demon's own aura from the before phase is removed at the start of the after phase (after_auras), so both arms cast it the same way. The handler casts 520258 only when the Felfury consumed is at least 6 (AscensionFelswornAbilities.cpp:265-266): the energize events of 520258 on the caster are 0 before the learn of 520257 and 0 after it at five, where a threshold of 5 would restore 50. Reference search: as energy_at_six (2026-11-23)."
+    },
+    {
+      "spell": 561216,
+      "name": "Fury of the Illidari (charges and recharge)",
+      "kind": "charge_recharge",
+      "quote": "2 Charges, 1.5 min recharge",
+      "max_charges": 2,
+      "recharge_ms": 90000,
+      "target": "dummy",
+      "observe_source": "SpellCharges.dbc row Spell=561216 points at SpellChargesCategory.dbc row 365 (MaxCharges 2, RecoveryTime 90000 ms; coa-dbc-viewer record --table SpellCharges --id 561216, --table SpellChargesCategory --id 365); Spell.dbc 561216 carries RecoveryTime 0. Inner Demon 804216 is 561216's CasterAuraSpell and is set before each cast as a precondition fixture (required_aura_steps); the claim's subject is the charge count and the recharge. The tooltip 'Requires a nearby enemy to cast' is met by the stock dummy. The pair brackets the recharge at 5% (85500 / 94500 ms), which excludes a recharge 10% off on both sides (81000 and 99000 ms). The scenario waits 99500 ms, past the run's 90000 ms default, so it carries its own timeout (waits + 60000 ms; the first attempt, runs 20261123-205143/-205258, timed out without it). Reference search 2026-11-23: coa-history spell 561216: 0 events in 186 logs (positive control 806109: 6 casts); bindmysoul talents snapshot (older state): '2 Charges, 1.5 min recharge' (same figures); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 802058,
+      "name": "Reckoning (falling speed slowed)",
+      "kind": "metric_delta",
+      "variant": "feather_fall",
+      "label_suffix": "feather_fall",
+      "quote": "For the duration, your falling speed is slowed",
+      "trigger_spell": 802058,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "server_packets",
+      "fields": {
+        "opcode": 242
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "802058 Effect[2] is aura 42 in Spell.dbc; the class contract turns it into SPELL_AURA_FEATHER_FALL (AscensionFelswornContracts.cpp:234-241), whose handler calls Unit::SetFeatherFall: for a client-controlled player the server sends SMSG_MOVE_FEATHER_FALL (opcode 0x0F2 = 242, Opcodes.h:272) to the controlling client (Unit.cpp:18337-18348), which is what slows the fall; the server sets no movement flag itself until the client acknowledges. The harness records that opcode (server_packets). Control: before the cast, no feather-fall packet (0). After a real cast of 802058 on the caster: one packet (1), read 500 ms later, inside the 10000 ms aura (DurationIndex 1). Reference search 2026-11-23: coa-history spell 802058: 78 casts, 78 aura applied and 78 removed in 6 logs (combat logs carry no fall speed); expected values come from the tooltip, the DBC and the class contract only."
     }
   ],
   "player_observations": [],
