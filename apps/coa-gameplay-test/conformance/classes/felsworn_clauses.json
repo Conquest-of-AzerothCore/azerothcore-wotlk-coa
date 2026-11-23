@@ -2080,11 +2080,15 @@
     "labels": [],
     "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
     "tool_gap": {
-      "reason": "The cap cannot be seen on this server. Carve 800206 ticks every 250 ms over 2500 ms, so a channel has at most 10 ticks, and both the tick count and the dodge amount are clamped to 10 (AscensionFelswornAuras.cpp:33-34, :114-118); a server without the clamp reads the same 9 at 2400 ms and 10 at the end. Haste scales period and duration together and cannot add ticks, and the only way to exceed 10 ticks is a SPELLMOD_DURATION modifier on Carve, which the harness generator does not offer for metric_delta entries (spell_mod_mutant is emitted for forced rolls only). The slope is judged by the mid label of the previous clause; the cap stays unproven until a duration mutant exists.",
+      "reason": "The cap cannot be seen on this server. Carve 800206 ticks every 250 ms over 2500 ms, so a channel has at most 10 ticks, and both the tick count and the dodge amount are clamped to 10 (AscensionFelswornAuras.cpp:33-34, :114-118); a server without the clamp reads the same 9 at 2400 ms and 10 at the end. Haste scales period and duration together and cannot add ticks, and the only way to exceed 10 ticks is a SPELLMOD_DURATION modifier on Carve, which the harness generator does not offer for metric_delta entries (spell_mod_mutant is emitted for forced rolls only). The slope is judged by the mid label of the previous clause; the cap stays unproven until a duration mutant exists. Second design (fw-l2, duration modifier): a scan of every Spell.dbc row of the server DBC set for aura 107/108 with MiscValue 1 (SPELLMOD_DURATION), family 20 and a class mask on Carve's SpellFamilyFlags[2] 2097152 finds only Quick Carving 520254 (ADD_FLAT_MODIFIER -1000 ms), which shortens the channel, and the class contracts add no duration modifier (AscensionFelswornContracts.cpp:163-170 changes Carve's period and effect 1 only): no obtainable state gives Carve an eleventh tick, so the 10% cap can never bind in play (proven impossibility, status 4 candidate; inventory2 162.0 named this fallback).",
       "attempts": [
         {
           "agent": "fw-b3g2r3",
           "report": ".agents/plans/fw-b3g2r3/report.md"
+        },
+        {
+          "agent": "fw-l2",
+          "report": ".agents/plans/fw-l2/report.md"
         }
       ]
     }
