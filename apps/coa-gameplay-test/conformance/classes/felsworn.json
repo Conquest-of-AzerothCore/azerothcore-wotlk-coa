@@ -4637,7 +4637,7 @@
           "caster"
         ],
         [
-          64481,
+          984954,
           1,
           "caster",
           "caster"
@@ -4653,7 +4653,7 @@
       "expected": 0,
       "wait_ms": 6000,
       "expire_ms": 500,
-      "observe_source": "Control arm of bleed_ratio on the same build: 806111 learned, crits made impossible on the caster (64481, harness set_aura), so Sargeron Smite lands a non-critical hit (a refused cast voids the trial) and the bleed total of 806112 stays 0: the bleed comes from the critical strike, not from the passive alone. Sargeron Smite 802060 (Spell.dbc: DmgClass magic, SchoolMask 36) needs the caster aura 803468 and consumes 2 Felfury 800058 (AscensionFelswornAbilities.cpp:234-237; refused without them), both set on the caster before every cast as precondition fixtures (harness set_aura, phase_auras), in both phases. Code: AscensionFelswornEvents.cpp:106-107 passes a non-periodic critical hit of Sargeron Smite 802060 and :246-247 casts the bleed 806112 on the target with 50% of the damage over its 5 ticks (CopyDot, AscensionFelsworn.cpp:164-169). Reference search 2026-11-23: coa-history spell 806111: 0 events in 186 logs (a passive leaves no event; 806112: 0 events; positive control 807554: 2923 events); ~/CoaServer/reference snapshots and the bindmysoul talent snapshot repeat the tooltip or name the talent only; nothing found that states a different value; expected values come from the tooltip and the DBC only."
+      "observe_source": "Control arm of bleed_ratio on the same build: 806111 learned, the caster's spell crit chance is removed by Reg's Test Aura 984954 (Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE, base -1001; Unit.cpp:10329-10355 reads the player's PLAYER_SPELL_CRIT_PERCENTAGE for a magic spell, StatSystem.cpp:1012-1013 sums aura 57 into it), so the magic hit cannot be critical, so Sargeron Smite lands a non-critical hit (a refused cast voids the trial) and the bleed total of 806112 stays 0: the bleed comes from the critical strike, not from the passive alone. Sargeron Smite 802060 (Spell.dbc: DmgClass magic, SchoolMask 36) needs the caster aura 803468 and consumes 2 Felfury 800058 (AscensionFelswornAbilities.cpp:234-237; refused without them), both set on the caster before every cast as precondition fixtures (harness set_aura, phase_auras), in both phases. Code: AscensionFelswornEvents.cpp:106-107 passes a non-periodic critical hit of Sargeron Smite 802060 and :246-247 casts the bleed 806112 on the target with 50% of the damage over its 5 ticks (CopyDot, AscensionFelsworn.cpp:164-169). Reference search 2026-11-23: coa-history spell 806111: 0 events in 186 logs (a passive leaves no event; 806112: 0 events; positive control 807554: 2923 events); ~/CoaServer/reference snapshots and the bindmysoul talent snapshot repeat the tooltip or name the talent only; nothing found that states a different value; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 807461,
@@ -4771,8 +4771,7 @@
         "least": 1,
         "source": "tooltip of 807461: $s1 = 50 (Spell.dbc 807461 EffectBasePoints[0] 49 + 1)% of the damage dealt"
       },
-      "observe_source": "$s1 = 50 (807461 EffectBasePoints[0] 49 + EffectDieSides 1). Bane of Chaos 704368 is cast at the dummy; one first tick at 3000 ms (read at 3500 ms); 807554 on a second dummy 4 yd from the caster (inside 8 yd of the first) is read before and after a real learn of 807461 (the before phase is the control) against the gain of the Bane damage on the first dummy in the same window: ratio 0.5 within 0.025, so 0.45 and 0.55 are excluded. 823764 on the caster removes partial resists in both phases (precondition fixture). Code: AscensionFelswornEvents.cpp:249-257 (damage / 2 per enemy). Reference search 2026-11-23: coa-history spell 807461 and 807554: 0 events in 186 logs for 807461 (a passive leaves no event); 807554: 2923 damage events in 4 logs (min 44, max 3364, mean 311, 0 crits, consistent with SPELL_ATTR2_CANT_CRIT on 807554); nothing found beyond the tooltip. A spell power fixture of 20000 (player_spell_power) makes the Bane tick thousands of points, so the integer halving (33 read 16 at spell power 0: 0.4848, pair G2) is below 0.1%.",
-      "player_spell_power": 20000
+      "observe_source": "$s1 = 50 (807461 EffectBasePoints[0] 49 + EffectDieSides 1). Bane of Chaos 704368 is cast at the dummy; one first tick at 3000 ms (read at 3500 ms); 807554 on a second dummy 4 yd from the caster (inside 8 yd of the first) is read before and after a real learn of 807461 (the before phase is the control) against the gain of the Bane damage on the first dummy in the same window: ratio 0.5 within 0.025, so 0.45 and 0.55 are excluded. 823764 on the caster removes partial resists in both phases (precondition fixture). Code: AscensionFelswornEvents.cpp:249-257 (damage / 2 per enemy). Reference search 2026-11-23: coa-history spell 807461 and 807554: 0 events in 186 logs for 807461 (a passive leaves no event); 807554: 2923 damage events in 4 logs (min 44, max 3364, mean 311, 0 crits, consistent with SPELL_ATTR2_CANT_CRIT on 807554); nothing found beyond the tooltip. No spell power fixture is used: a fixture of 20000 spell power did not scale Bane of Chaos (both pairs G4 runs read a Bane gain of 34 and a 807554 gain of 17). The integer quantum 1/34 exceeds the 0.025 half band, so a correct 50% reads 0.4848 (odd tick 33, 16 on the hit) or 0.5, inside the band, while the 10% boundaries read 0.441 (0.45 x 34 -> 15) and 0.529 (0.55 x 34 -> 18), outside it: both are excluded without any spell power term."
     },
     {
       "spell": 805248,
@@ -4799,7 +4798,7 @@
       "tolerance": 1.0,
       "phase_auras": [
         [
-          64481,
+          984954,
           1,
           "caster",
           "caster"
@@ -4811,7 +4810,7 @@
           "caster"
         ]
       ],
-      "observe_source": "Tooltip 805248: mana equal to 200% of Stamina: 2 x 79 = 158. The target's mana is read before the cast and after it (the before read, no cast, is the control): a loss of 158 within 1 (integer mana). Code: AscensionFelswornContracts.cpp:340-341 sets Effect[0] of Manaburn to 2.0 x the caster's Stamina (Spell.dbc Effect[0] is SPELL_EFFECT_POWER_BURN with no base points). Scarlet Magi 1832 (a mana-using mage, so the burn lands) is the target; the caster's critical strikes are made impossible (64481) and partial resists removed (823764) by harness set_aura, precondition fixtures; reference stat 2 (Stamina) = 79.0 from the class file. Reference search 2026-11-23: coa-history spell 805248: 25 casts, 22 damage events (58 to 352, mean 193, 7 crits), 22 drains (58 to 591, mean 181), 2 misses in 4 logs (the players' Stamina is not recorded, so no figure decides); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value. The read follows the cast by 300 ms: the target's own mana regeneration added 17 in the 1500 ms window of the first pair G2 (reads -141 and -171 against 158 and 188 burnt by damage), so the window is shortened."
+      "observe_source": "Tooltip 805248: mana equal to 200% of Stamina: 2 x 79 = 158. The target's mana is read before the cast and after it (the before read, no cast, is the control): a loss of 158 within 1 (integer mana). Code: AscensionFelswornContracts.cpp:340-341 sets Effect[0] of Manaburn to 2.0 x the caster's Stamina (Spell.dbc Effect[0] is SPELL_EFFECT_POWER_BURN with no base points). Scarlet Magi 1832 (a mana-using mage, so the burn lands) is the target; the caster's spell crit chance is removed by Reg's Test Aura 984954 (Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE, base -1001; Unit.cpp:10329-10355 reads the player's PLAYER_SPELL_CRIT_PERCENTAGE for a magic spell, StatSystem.cpp:1012-1013 sums aura 57 into it), so the magic hit cannot be critical and partial resists removed (823764) by harness set_aura, precondition fixtures; reference stat 2 (Stamina) = 79.0 from the class file. Reference search 2026-11-23: coa-history spell 805248: 25 casts, 22 damage events (58 to 352, mean 193, 7 crits), 22 drains (58 to 591, mean 181), 2 misses in 4 logs (the players' Stamina is not recorded, so no figure decides); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value. The read follows the cast by 300 ms: the target's own mana regeneration added 17 in the 1500 ms window of the first pair G2 (reads -141 and -171 against 158 and 188 burnt by damage), so the window is shortened."
     },
     {
       "spell": 805248,
@@ -4838,7 +4837,7 @@
       "tolerance": 1.0,
       "phase_auras": [
         [
-          64481,
+          984954,
           1,
           "caster",
           "caster"
@@ -4850,7 +4849,7 @@
           "caster"
         ]
       ],
-      "observe_source": "Contrast arm of drain_base: after a real learn of 500067 the Stamina reads 94.8, so the second cast burns 2 x 94.8 = 189.6 (within 1.5, integer mana), against 158 in the first cast of the same scenario. Code: AscensionFelswornContracts.cpp:340-341 sets Effect[0] of Manaburn to 2.0 x the caster's Stamina (Spell.dbc Effect[0] is SPELL_EFFECT_POWER_BURN with no base points). Scarlet Magi 1832 (a mana-using mage, so the burn lands) is the target; the caster's critical strikes are made impossible (64481) and partial resists removed (823764) by harness set_aura, precondition fixtures; reference stat 2 (Stamina) = 79.0 from the class file. Reference search 2026-11-23: coa-history spell 805248: 25 casts, 22 damage events (58 to 352, mean 193, 7 crits), 22 drains (58 to 591, mean 181), 2 misses in 4 logs (the players' Stamina is not recorded, so no figure decides); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value. The read follows the cast by 300 ms: the target's own mana regeneration added 17 in the 1500 ms window of the first pair G2 (reads -141 and -171 against 158 and 188 burnt by damage), so the window is shortened. The Stamina the player sees and the engine multiplies is the integer total: Fel Monstrosity 500067 makes it 79 x 1.2 = 94.8, shown as 94 (the exact-stat entry 500067 stamina reads 94.8; the integer is its floor), so the amount is 2 x 94 = 188 (first pair G2 read 188 for the damage). The entry casts once, after the learn (cast_in_before false), so the read window is one 300 ms window like drain_base: the first pair G3 cast twice and its second window gained 17 mana of regeneration (-171 read, 188 burnt by damage in the same cast).",
+      "observe_source": "Contrast arm of drain_base: after a real learn of 500067 the Stamina reads 94.8, so the burn is 188 (2 x the integer Stamina 94, within 1.0; Unit.h:1061 GetStat returns the integer UNIT_FIELD_STAT0 value, AscensionFelswornContracts.cpp:340-341 multiplies it by 2.0). Code: AscensionFelswornContracts.cpp:340-341 sets Effect[0] of Manaburn to 2.0 x the caster's Stamina (Spell.dbc Effect[0] is SPELL_EFFECT_POWER_BURN with no base points). Scarlet Magi 1832 (a mana-using mage, so the burn lands) is the target; the caster's spell crit chance is removed by Reg's Test Aura 984954 (Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE, base -1001; Unit.cpp:10329-10355 reads the player's PLAYER_SPELL_CRIT_PERCENTAGE for a magic spell, StatSystem.cpp:1012-1013 sums aura 57 into it), so the magic hit cannot be critical and partial resists removed (823764) by harness set_aura, precondition fixtures; reference stat 2 (Stamina) = 79.0 from the class file. Reference search 2026-11-23: coa-history spell 805248: 25 casts, 22 damage events (58 to 352, mean 193, 7 crits), 22 drains (58 to 591, mean 181), 2 misses in 4 logs (the players' Stamina is not recorded, so no figure decides); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value. The read follows the cast by 300 ms: the target's own mana regeneration added 17 in the 1500 ms window of the first pair G2 (reads -141 and -171 against 158 and 188 burnt by damage), so the window is shortened. The Stamina the player sees and the engine multiplies is the integer total: Fel Monstrosity 500067 makes it 79 x 1.2 = 94.8, shown as 94 (the exact-stat entry 500067 stamina reads 94.8; the integer is its floor), so the amount is 2 x 94 = 188. The entry casts once, after the learn (cast_in_before false), so the read window is one 300 ms window like drain_base: the first pair G3 cast twice and its second window gained 17 mana of regeneration (-171 read, 188 burnt by damage in the same cast).",
       "gate_spell": 500067
     },
     {
@@ -4879,7 +4878,7 @@
       "after_at_most": 159,
       "phase_auras": [
         [
-          64481,
+          984954,
           1,
           "caster",
           "caster"
@@ -4891,7 +4890,7 @@
           "caster"
         ]
       ],
-      "observe_source": "Tooltip 805248: damage equal to the mana drained, and the drained mana is 200% of Stamina (2 x 79 = 158): the damage of the cast at the target is read (before: none, the control) and must equal the 158 that drain_base reads as burnt mana, within 1. Code: AscensionFelswornContracts.cpp:340-341 sets Effect[0] of Manaburn to 2.0 x the caster's Stamina (Spell.dbc Effect[0] is SPELL_EFFECT_POWER_BURN with no base points). Scarlet Magi 1832 (a mana-using mage, so the burn lands) is the target; the caster's critical strikes are made impossible (64481) and partial resists removed (823764) by harness set_aura, precondition fixtures; reference stat 2 (Stamina) = 79.0 from the class file. Reference search 2026-11-23: coa-history spell 805248: 25 casts, 22 damage events (58 to 352, mean 193, 7 crits), 22 drains (58 to 591, mean 181), 2 misses in 4 logs (the players' Stamina is not recorded, so no figure decides); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
+      "observe_source": "Tooltip 805248: damage equal to the mana drained, and the drained mana is 200% of Stamina (2 x 79 = 158): the damage of the cast at the target is read (before: none, the control) and must equal the 158 that drain_base reads as burnt mana, within 1. Code: AscensionFelswornContracts.cpp:340-341 sets Effect[0] of Manaburn to 2.0 x the caster's Stamina (Spell.dbc Effect[0] is SPELL_EFFECT_POWER_BURN with no base points). Scarlet Magi 1832 (a mana-using mage, so the burn lands) is the target; the caster's spell crit chance is removed by Reg's Test Aura 984954 (Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE, base -1001; Unit.cpp:10329-10355 reads the player's PLAYER_SPELL_CRIT_PERCENTAGE for a magic spell, StatSystem.cpp:1012-1013 sums aura 57 into it), so the magic hit cannot be critical and partial resists removed (823764) by harness set_aura, precondition fixtures; reference stat 2 (Stamina) = 79.0 from the class file. Reference search 2026-11-23: coa-history spell 805248: 25 casts, 22 damage events (58 to 352, mean 193, 7 crits), 22 drains (58 to 591, mean 181), 2 misses in 4 logs (the players' Stamina is not recorded, so no figure decides); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
     },
     {
       "spell": 805248,
@@ -4917,7 +4916,7 @@
       "expected": 346,
       "phase_auras": [
         [
-          64481,
+          984954,
           1,
           "caster",
           "caster"
@@ -4929,7 +4928,7 @@
           "caster"
         ]
       ],
-      "observe_source": "Contrast arm of damage_base: the damage total reads 158 after the first cast and, after a real learn of 500067 (Stamina 94.8), 189.6 more after the second: the damage follows the burnt mana 2 x Stamina, as drain_stamina reads. Code: AscensionFelswornContracts.cpp:340-341 sets Effect[0] of Manaburn to 2.0 x the caster's Stamina (Spell.dbc Effect[0] is SPELL_EFFECT_POWER_BURN with no base points). Scarlet Magi 1832 (a mana-using mage, so the burn lands) is the target; the caster's critical strikes are made impossible (64481) and partial resists removed (823764) by harness set_aura, precondition fixtures; reference stat 2 (Stamina) = 79.0 from the class file. Reference search 2026-11-23: coa-history spell 805248: 25 casts, 22 damage events (58 to 352, mean 193, 7 crits), 22 drains (58 to 591, mean 181), 2 misses in 4 logs (the players' Stamina is not recorded, so no figure decides); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value. The Stamina the player sees and the engine multiplies is the integer total: Fel Monstrosity 500067 makes it 79 x 1.2 = 94.8, shown as 94 (the exact-stat entry 500067 stamina reads 94.8; the integer is its floor), so the amount is 2 x 94 = 188 (first pair G2 read 188 for the damage).",
+      "observe_source": "Contrast arm of damage_base: the damage total reads 158 after the first cast and, after a real learn of 500067 (integer Stamina 94), 188 more after the second: the damage follows the burnt mana 2 x Stamina, as drain_stamina reads. Code: AscensionFelswornContracts.cpp:340-341 sets Effect[0] of Manaburn to 2.0 x the caster's Stamina (Spell.dbc Effect[0] is SPELL_EFFECT_POWER_BURN with no base points). Scarlet Magi 1832 (a mana-using mage, so the burn lands) is the target; the caster's spell crit chance is removed by Reg's Test Aura 984954 (Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE, base -1001; Unit.cpp:10329-10355 reads the player's PLAYER_SPELL_CRIT_PERCENTAGE for a magic spell, StatSystem.cpp:1012-1013 sums aura 57 into it), so the magic hit cannot be critical and partial resists removed (823764) by harness set_aura, precondition fixtures; reference stat 2 (Stamina) = 79.0 from the class file. Reference search 2026-11-23: coa-history spell 805248: 25 casts, 22 damage events (58 to 352, mean 193, 7 crits), 22 drains (58 to 591, mean 181), 2 misses in 4 logs (the players' Stamina is not recorded, so no figure decides); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value. The Stamina the player sees and the engine multiplies is the integer total: Fel Monstrosity 500067 makes it 79 x 1.2 = 94.8, shown as 94 (the exact-stat entry 500067 stamina reads 94.8; the integer is its floor), so the amount is 2 x 94 = 188: Unit.h:1061 GetStat returns the integer UNIT_FIELD_STAT0 value and AscensionFelswornContracts.cpp:340-341 multiplies it by 2.0.",
       "gate_spell": 500067,
       "expected_gain": 188,
       "tolerance": 1.0
@@ -4963,6 +4962,29 @@
       "expire_ms": 500,
       "observe_source": "$s2 = 15 (805236 Effect[1], EffectBasePoints 14 + EffectDieSides 1); the aura 807426 the script applies while Inner Demon 804216 and 805236 are both on the caster carries aura 138 SPELL_AURA_MOD_MELEE_HASTE with BasePoints 14 + 1 = 15 (AscensionFelswornContracts.cpp:81-92, AscensionFelsworn.cpp:274). The main-hand attack time is read 500 ms after a harmless Bless 804247 before (control: 805236 not learned) and after a real learn, with Inner Demon 804216 set on the caster in both phases by harness set_aura (a precondition fixture): the after time over the before time is 1/1.15 = 0.869565 within 0.001, so 14% and 16% are excluded. The absolute time is not stated: Inner Demon itself changes the weapon time (2800 ms read before the learn in the first pair G2, against 2300 ms without it), which this claim does not state. Reference search 2026-11-23: coa-history spell 805236, 807426, 807427: 0 events in 186 logs (a passive leaves no event; positive control 807554: 2923 events); the bindmysoul snapshot repeats the tooltip; nothing found that states another value.",
       "expected_ratio": 0.8695652
+    },
+    {
+      "spell": 805236,
+      "kind": "metric_delta",
+      "name": "Grommash's Folly (control: no melee haste without Inner Demon)",
+      "variant": "haste_no_inner_demon",
+      "label_suffix": "haste_no_inner_demon",
+      "trigger_spell": 804247,
+      "gate_spell": 805236,
+      "target": "caster",
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "phase_auras": [],
+      "quote": "While Inner Demon is active, your melee haste is now increased by $s2%",
+      "before_expected": 2000,
+      "expected": 2000,
+      "tolerance": 0.001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Contrast arm of haste for the condition 'While Inner Demon is active': the same main-hand attack time read 500 ms after a harmless Bless 804247 before (805236 not learned) and after a real learn of 805236, with no Inner Demon 804216 on the caster in either phase: the after time over the before time is 1.0 within 0.001, so the 15% haste (ratio 0.8696) is absent. The script toggles aura 807426 only when Inner Demon and 805236 are both on the caster (AscensionFelsworn.cpp:274). Reference search 2026-11-23: coa-history spell 805236, 807426, 807427: 0 events in 186 logs (a passive leaves no event; positive control 807554: 2923 events); the bindmysoul snapshot repeats the tooltip; nothing found that states another value.",
+      "expected_ratio": 1.0
     },
     {
       "spell": 805235,
@@ -5157,12 +5179,18 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "quote": "Casting Sunder causes you to cast Fel Explosion twice over the next 4 sec.",
-      "name": "Pure Hatred (one Fel Explosion by 3500 ms)",
+      "name": "Pure Hatred (one Fel Explosion by 3800 ms)",
       "variant": "cast_early",
       "label_suffix": "cast_early",
       "expected": 1,
-      "wait_ms": 3500,
-      "observe_source": "Casts of Fel Explosion 804600 counted 3500 ms after Sunder: one (the 2000 ms cast, not yet the 4000 ms one). Code: AscensionFelswornAbilities.cpp:446-455: after a Sunder 705121 hit with 803478 on the caster, 804600 (Fel Explosion) is cast on the caster at 2000 and at 4000 ms. Sunder 705121 needs the caster aura 803468 and consumes 2 Felfury 800058 (set on the caster before every cast in both phases: harness set_aura, precondition fixtures). The before phase (Sunder cast without 803478) is the control: 0 casts of Fel Explosion. Reference search 2026-11-23: coa-history spell 803478 and 804600: 0 events for 803478 in 186 logs (a passive leaves no event; positive control 807554: 2923 events); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
+      "wait_ms": 3800,
+      "observe_source": "Casts of Fel Explosion 804600 counted at 3800 ms after Sunder (game_time window 3750..3950 ms): one (the 2000 ms cast, not yet the 4000 ms one); a second cast 10% early (3600 ms) would read two, so it is excluded. Code: AscensionFelswornAbilities.cpp:446-455: after a Sunder 705121 hit with 803478 on the caster, 804600 (Fel Explosion) is cast on the caster at 2000 and at 4000 ms. Sunder 705121 needs the caster aura 803468 and consumes 2 Felfury 800058 (set on the caster before every cast in both phases: harness set_aura, precondition fixtures). The before phase (Sunder cast without 803478) is the control: 0 casts of Fel Explosion. Reference search 2026-11-23: coa-history spell 803478 and 804600: 0 events for 803478 in 186 logs (a passive leaves no event; positive control 807554: 2923 events); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value.",
+      "game_time": {
+        "after": [
+          3750,
+          3950
+        ]
+      }
     },
     {
       "spell": 803478,
@@ -5192,12 +5220,18 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "quote": "Casting Sunder causes you to cast Fel Explosion twice over the next 4 sec.",
-      "name": "Pure Hatred (two Fel Explosions by 4500 ms)",
+      "name": "Pure Hatred (two Fel Explosions by 4200 ms)",
       "variant": "cast_twice",
       "label_suffix": "cast_twice",
       "expected": 2,
-      "wait_ms": 4500,
-      "observe_source": "Casts of Fel Explosion 804600 counted 4500 ms after Sunder: two, so both fall inside the 4 sec. Code: AscensionFelswornAbilities.cpp:446-455: after a Sunder 705121 hit with 803478 on the caster, 804600 (Fel Explosion) is cast on the caster at 2000 and at 4000 ms. Sunder 705121 needs the caster aura 803468 and consumes 2 Felfury 800058 (set on the caster before every cast in both phases: harness set_aura, precondition fixtures). The before phase (Sunder cast without 803478) is the control: 0 casts of Fel Explosion. Reference search 2026-11-23: coa-history spell 803478 and 804600: 0 events for 803478 in 186 logs (a passive leaves no event; positive control 807554: 2923 events); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
+      "wait_ms": 4200,
+      "observe_source": "Casts of Fel Explosion 804600 counted at 4200 ms after Sunder (game_time window 4150..4350 ms): two, so both fall inside the 4 sec; a second cast 10% late (4400 ms) would read one, so it is excluded. Code: AscensionFelswornAbilities.cpp:446-455: after a Sunder 705121 hit with 803478 on the caster, 804600 (Fel Explosion) is cast on the caster at 2000 and at 4000 ms. Sunder 705121 needs the caster aura 803468 and consumes 2 Felfury 800058 (set on the caster before every cast in both phases: harness set_aura, precondition fixtures). The before phase (Sunder cast without 803478) is the control: 0 casts of Fel Explosion. Reference search 2026-11-23: coa-history spell 803478 and 804600: 0 events for 803478 in 186 logs (a passive leaves no event; positive control 807554: 2923 events); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value.",
+      "game_time": {
+        "after": [
+          4150,
+          4350
+        ]
+      }
     },
     {
       "spell": 803478,
@@ -5232,7 +5266,13 @@
       "label_suffix": "cast_only_twice",
       "expected": 2,
       "wait_ms": 6500,
-      "observe_source": "Casts of Fel Explosion 804600 counted 6500 ms after Sunder: still two, so no third cast. Code: AscensionFelswornAbilities.cpp:446-455: after a Sunder 705121 hit with 803478 on the caster, 804600 (Fel Explosion) is cast on the caster at 2000 and at 4000 ms. Sunder 705121 needs the caster aura 803468 and consumes 2 Felfury 800058 (set on the caster before every cast in both phases: harness set_aura, precondition fixtures). The before phase (Sunder cast without 803478) is the control: 0 casts of Fel Explosion. Reference search 2026-11-23: coa-history spell 803478 and 804600: 0 events for 803478 in 186 logs (a passive leaves no event; positive control 807554: 2923 events); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value."
+      "observe_source": "Casts of Fel Explosion 804600 counted 6500 ms after Sunder: still two, so no third cast. Code: AscensionFelswornAbilities.cpp:446-455: after a Sunder 705121 hit with 803478 on the caster, 804600 (Fel Explosion) is cast on the caster at 2000 and at 4000 ms. Sunder 705121 needs the caster aura 803468 and consumes 2 Felfury 800058 (set on the caster before every cast in both phases: harness set_aura, precondition fixtures). The before phase (Sunder cast without 803478) is the control: 0 casts of Fel Explosion. Reference search 2026-11-23: coa-history spell 803478 and 804600: 0 events for 803478 in 186 logs (a passive leaves no event; positive control 807554: 2923 events); the bindmysoul snapshot and ~/CoaServer/reference repeat the tooltip; nothing found that states another value.",
+      "game_time": {
+        "after": [
+          6450,
+          6700
+        ]
+      }
     },
     {
       "spell": 560576,

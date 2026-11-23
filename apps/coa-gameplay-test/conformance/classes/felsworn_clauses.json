@@ -3003,7 +3003,8 @@
     "spell": 805236,
     "clause": "While Inner Demon is active, your melee haste is now increased by $s2%",
     "labels": [
-      "805236 behaviour_metric_delta haste"
+      "805236 behaviour_metric_delta haste",
+      "805236 behaviour_metric_delta haste_no_inner_demon"
     ],
     "kind": "claim",
     "evidence": "behaviour",
