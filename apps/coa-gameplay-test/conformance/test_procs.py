@@ -1905,12 +1905,6 @@ class CriticalTrialsScenarioTest(unittest.TestCase):
 
 
 class CriticalControlVerdictTest(unittest.TestCase):
-    def setUp(self):
-        self.workspace = Workspace()
-
-    def tearDown(self):
-        self.workspace.close()
-
     def verdict(self, events=0, crits=0, hits=9, drop=None):
         expectation = proc_expectation()
         expectation.model[KEY] = CONTROL
@@ -1920,8 +1914,10 @@ class CriticalControlVerdictTest(unittest.TestCase):
         if drop:
             reads.pop(drop)
         steps = proc_steps(1699, 340) + [assert_step(label, str(value)) for label, value in reads.items()]
-        self.workspace.scenario(PROC_KEY, 'proc', [expectation], steps=steps)
-        manifest, results = self.workspace.manifest()
+        workspace = Workspace()
+        self.addCleanup(workspace.close)
+        workspace.scenario(PROC_KEY, 'proc', [expectation], steps=steps)
+        manifest, results = workspace.manifest()
         from compare import compare
         [verdict] = [verdict for verdict in compare(manifest, results, tooltips=chance_reader())
                      if verdict.check == PROC_CHECK]
