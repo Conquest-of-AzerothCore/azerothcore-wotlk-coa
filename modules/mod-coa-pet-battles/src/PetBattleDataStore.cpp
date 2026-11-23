@@ -135,6 +135,20 @@ namespace CoAPetBattles
         }
     }
 
+    namespace
+    {
+        double ReadDecimal(std::string const& key, double fallback)
+        {
+            std::string const text = sConfigMgr->GetOption<std::string>(key, "");
+            if (text.empty())
+                return fallback;
+            if (std::optional<double> value = ParseDecimal(text))
+                return *value;
+            LOG_ERROR("server.loading", "{} '{}' is not a decimal number; using {}", key, text, fallback);
+            return fallback;
+        }
+    }
+
     PetBattleDataStore* PetBattleDataStore::instance()
     {
         static PetBattleDataStore store;
@@ -152,14 +166,14 @@ namespace CoAPetBattles
         else
             LOG_ERROR("server.loading", "CoAPetBattles.QualityWeights '{}' is not four whole numbers; using defaults",
                 weights);
-        settings.captureHealth = sConfigMgr->GetOption<float>("CoAPetBattles.CaptureHealth", settings.captureHealth);
+        settings.captureHealth = ReadDecimal("CoAPetBattles.CaptureHealth", settings.captureHealth);
         settings.regenPercent = sConfigMgr->GetOption<uint32>("CoAPetBattles.RegenPercent", settings.regenPercent);
         settings.regenSeconds = sConfigMgr->GetOption<uint32>("CoAPetBattles.RegenSeconds", settings.regenSeconds);
         settings.fedPercent = sConfigMgr->GetOption<uint32>("CoAPetBattles.FedPercent", settings.fedPercent);
         settings.fedStepSeconds = sConfigMgr->GetOption<uint32>("CoAPetBattles.FedStepSeconds",
             settings.fedStepSeconds);
         settings.fedSeconds = sConfigMgr->GetOption<uint32>("CoAPetBattles.FedSeconds", settings.fedSeconds);
-        settings.xpStep = sConfigMgr->GetOption<float>("CoAPetBattles.XpStep", settings.xpStep);
+        settings.xpStep = ReadDecimal("CoAPetBattles.XpStep", settings.xpStep);
         _settings = settings;
     }
 

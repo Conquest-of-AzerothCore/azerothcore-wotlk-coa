@@ -1,5 +1,7 @@
 #include "PetBattleData.h"
 #include <charconv>
+#include <cmath>
+#include <cstdlib>
 #include <set>
 #include <sstream>
 #include <tuple>
@@ -165,5 +167,16 @@ namespace CoAPetBattles
         if (count != weights.size() || sum == 0)
             return std::nullopt;
         return weights;
+    }
+
+    std::optional<double> ParseDecimal(std::string const& text)
+    {
+        if (text.empty())
+            return std::nullopt;
+        char* end = nullptr;
+        double const value = std::strtod(text.c_str(), &end);
+        if (end != text.c_str() + text.size() || !std::isfinite(value))
+            return std::nullopt;
+        return value;
     }
 }

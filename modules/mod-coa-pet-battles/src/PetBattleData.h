@@ -187,18 +187,19 @@ namespace CoAPetBattles
     {
         uint8_t maxLevel = 25;
         std::array<uint32_t, 4> qualityWeights = { 55, 28, 13, 4 };
-        float captureHealth = 0.35f;
+        double captureHealth = 0.35;
         uint32_t regenPercent = 1;
         uint32_t regenSeconds = 10;
         uint32_t fedPercent = 10;
         uint32_t fedStepSeconds = 2;
         uint32_t fedSeconds = 20;
-        float xpStep = 0.20f;
+        double xpStep = 0.20;
     };
 
     uint32_t StandInEntry(DataSet const& data, uint32_t species);
     Report Validate(DataSet const& data, std::function<bool(uint32_t)> const& creatureTemplateExists);
     std::optional<std::array<uint32_t, 4>> ParseQualityWeights(std::string const& text);
+    std::optional<double> ParseDecimal(std::string const& text);
 }
 
 #endif

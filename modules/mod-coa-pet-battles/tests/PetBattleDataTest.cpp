@@ -158,3 +158,14 @@ TEST(CoAPetBattles, QualityWeightsParseStrictly)
     EXPECT_FALSE(ParseQualityWeights("55 28 13 4 1").has_value());
     EXPECT_FALSE(ParseQualityWeights("-1 28 13 4").has_value());
 }
+
+TEST(CoAPetBattles, DecimalsParseLikeLua)
+{
+    ASSERT_TRUE(ParseDecimal("0.35").has_value());
+    EXPECT_EQ(*ParseDecimal("0.35"), 0.35);
+    EXPECT_EQ(*ParseDecimal("1"), 1.0);
+    EXPECT_FALSE(ParseDecimal("").has_value());
+    EXPECT_FALSE(ParseDecimal("0.3x").has_value());
+    EXPECT_FALSE(ParseDecimal("nan").has_value());
+    EXPECT_FALSE(ParseDecimal("inf").has_value());
+}
