@@ -46,3 +46,4 @@ Class 27. Numbered inside this folder (ADR 0583).
 | [0040](0040-scroll-of-hope-heals-each-ally-once-per-fall.md) | Scroll of Hope heals each ally that falls below 35%, once per fall, not the Cleric (owner ruling O-29) |
 | [0041](0041-lights-of-absolution-restores-missing-resources-not-mana.md) | Lights of Absolution restores 2% of the missing Energy, Focus, Runic Power and Rage, and no mana (owner ruling O-30; supersedes the energize line of 0028) |
 | [0042](0042-light-of-the-sun-parry-bonus-is-consumed-by-the-next-melee-attack.md) | Light of the Sun's parry bonus is consumed by the next melee attack taken, parried or not; a spell leaves it (owner O-31) |
+| [0043](0043-valkyrs-calling-lands-on-its-stored-victim.md) | Valkyr's Calling's charge-back lands on its stored victim, whatever the selection (owner O-32, mentor D-302) |

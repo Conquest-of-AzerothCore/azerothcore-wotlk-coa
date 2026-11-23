@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Valkyr's Calling's charge-back damage lands on its cast target whatever the player has selected",
+  "contract": [
+    "Valkyr's Calling 520024 reads 'Target an enemy and leap into the air ... At the end of the duration, you charge",
+    "back down, dealing ... Holy damage to all enemies within $570034a1 yds.' Owner ruling O-32: the charge-back lands",
+    "on the stored original victim whatever the player's selection. The landing spell 570034 has EffectImplicitTargetA[0]",
+    "53 TARGET_DEST_TARGET_ENEMY and TargetB 16 TARGET_UNIT_DEST_AREA_ENEMY (8 yd): it needs a unit target and centres",
+    "its area on it. The landing cast passed only a position, so Spell::InitExplicitTargets took the player's selection:",
+    "no selection or a friendly one refused 570034 (cast_failure 27) and another enemy selected moved the area onto that",
+    "enemy. The landing now casts 570034 at the victim stored at the cast. Four level-60 Sun Clerics each cast 520024 at",
+    "their own dummy 3 yd away: one with no selection, one with itself selected (friendly), one with a second hostile",
+    "dummy 20 yd away selected (17 yd from the victim, outside the 8 yd area) and the control with the victim selected,",
+    "which landed before the change. Each 520024 cast must be accepted; 5000 ms after it (2000 ms flight, then the",
+    "charge) the victim has taken 570034 damage from its caster, 570034 has no refusal and the decoy has taken none",
+    "(Sun Cleric ADR 0043)."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "unselected", "race": 1, "class": 27, "level": 60, "spell_hit_rating": 10000 },
+    { "id": "friendly", "race": 1, "class": 27, "level": 60, "spell_hit_rating": 10000 },
+    { "id": "decoyed", "race": 1, "class": 27, "level": 60, "spell_hit_rating": 10000 },
+    { "id": "control", "race": 1, "class": 27, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "unselected_dummy", "owner": "unselected", "entry": 36, "level": 60, "health": 50000000, "distance": 3, "stationary": true },
+    { "id": "friendly_dummy", "owner": "friendly", "entry": 36, "level": 60, "health": 50000000, "distance": 3, "stationary": true },
+    { "id": "decoyed_dummy", "owner": "decoyed", "entry": 36, "level": 60, "health": 50000000, "distance": 3, "stationary": true },
+    { "id": "decoy", "owner": "decoyed", "entry": 36, "level": 60, "health": 50000000, "distance": 20, "stationary": true },
+    { "id": "control_dummy", "owner": "control", "entry": 36, "level": 60, "health": 50000000, "distance": 3, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "unselected", "spell": 520024 },
+    { "action": "learn", "actor": "friendly", "spell": 520024 },
+    { "action": "learn", "actor": "decoyed", "spell": 520024 },
+    { "action": "learn", "actor": "control", "spell": 520024 },
+    { "action": "select", "actor": "friendly", "target": "friendly" },
+    { "action": "select", "actor": "decoyed", "target": "decoy" },
+    { "action": "select", "actor": "control", "target": "control_dummy" },
+    { "action": "reset_cooldown", "actor": "unselected", "spell": 520024 },
+    { "action": "reset_cooldown", "actor": "friendly", "spell": 520024 },
+    { "action": "reset_cooldown", "actor": "decoyed", "spell": 520024 },
+    { "action": "reset_cooldown", "actor": "control", "spell": 520024 },
+    { "action": "cast", "actor": "unselected", "spell": 520024, "target": "unselected_dummy" },
+    { "action": "cast", "actor": "friendly", "spell": 520024, "target": "friendly_dummy" },
+    { "action": "cast", "actor": "decoyed", "spell": 520024, "target": "decoyed_dummy" },
+    { "action": "cast", "actor": "control", "spell": 520024, "target": "control_dummy" },
+    { "action": "assert", "label": "SETUP: the cast with no selection is accepted", "actor": "unselected", "metric": "cast_failure", "spell": 520024, "equals": 0, "within_ms": 1000 },
+    { "action": "assert", "label": "SETUP: the cast with a friendly selection is accepted", "actor": "friendly", "metric": "cast_failure", "spell": 520024, "equals": 0, "within_ms": 1000 },
+    { "action": "assert", "label": "SETUP: the cast with the decoy selected is accepted", "actor": "decoyed", "metric": "cast_failure", "spell": 520024, "equals": 0, "within_ms": 1000 },
+    { "action": "assert", "label": "SETUP: the control cast is accepted", "actor": "control", "metric": "cast_failure", "spell": 520024, "equals": 0, "within_ms": 1000 },
+    { "action": "wait", "label": "Let the 2000 ms flight end and the charge land", "ms": 5000 },
+    { "action": "assert", "label": "CONTROL: with the victim selected the charge-back damages the victim", "actor": "control", "metric": "spell_damage_count", "spell": 570034, "target": "control_dummy", "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: with no selection the landing spell is not refused", "actor": "unselected", "metric": "cast_failure", "spell": 570034, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: with no selection the charge-back damages the victim", "actor": "unselected", "metric": "spell_damage_count", "spell": 570034, "target": "unselected_dummy", "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: with a friendly selection the landing spell is not refused", "actor": "friendly", "metric": "cast_failure", "spell": 570034, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: with a friendly selection the charge-back damages the victim", "actor": "friendly", "metric": "spell_damage_count", "spell": 570034, "target": "friendly_dummy", "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: with another enemy selected the charge-back damages the victim", "actor": "decoyed", "metric": "spell_damage_count", "spell": 570034, "target": "decoyed_dummy", "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the selected enemy 17 yd from the victim takes no charge-back damage", "actor": "decoyed", "metric": "spell_damage_count", "spell": 570034, "target": "decoy", "equals": 0 }
+  ]
+}
