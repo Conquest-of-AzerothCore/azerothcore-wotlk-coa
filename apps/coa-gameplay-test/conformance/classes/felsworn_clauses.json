@@ -1080,12 +1080,20 @@
     "spell": 560641,
     "clause": "Cripple now causes the enemy target to be unable to critically strike for $704397d.",
     "kind": "claim",
-    "claim": "for $704397d",
-    "labels": [
-      "560641 behaviour_metric_delta duration"
-    ],
-    "evidence": "behaviour",
-    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
+    "claims": [
+      {
+        "claim": "unable to critically strike",
+        "labels": [
+          "560641 behaviour_metric_delta no_crit"
+        ]
+      },
+      {
+        "claim": "for $704397d",
+        "labels": [
+          "560641 behaviour_metric_delta duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 560645,
@@ -1125,20 +1133,15 @@
         "labels": [
           "560822 behaviour_metric_delta applies",
           "560822 behaviour_metric_delta amount"
-        ],
-        "evidence": "behaviour"
+        ]
       },
       {
         "claim": "for $561203d",
         "labels": [
           "560822 behaviour_metric_delta duration"
-        ],
-        "evidence": "behaviour"
+        ]
       }
-    ],
-    "claim": "When Hateforged Barrier is removed from you, you now reduce $561203s% of all Magic damage taken (data readback of the amount; the damage reduction itself is not entered)",
-    "evidence": "behaviour",
-    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
+    ]
   },
   {
     "spell": 560836,
@@ -1187,13 +1190,21 @@
     "spell": 560840,
     "clause": "Every 3rd Ruin or Felwrath now spawns an Infernal to fight by your side for $572163d.",
     "kind": "claim",
-    "claim": "Every 3rd Ruin or Felwrath now spawns an Infernal",
-    "evidence": "behaviour",
-    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
-    "labels": [
-      "560840 behaviour_metric_delta third_ruin",
-      "560840 behaviour_metric_delta second_ruin",
-      "560840 behaviour_metric_delta third_mixed"
+    "claims": [
+      {
+        "claim": "Every 3rd Ruin or Felwrath now spawns an Infernal",
+        "labels": [
+          "560840 behaviour_metric_delta third_ruin",
+          "560840 behaviour_metric_delta second_ruin",
+          "560840 behaviour_metric_delta third_mixed"
+        ]
+      },
+      {
+        "claim": "for $572163d (duration pending: a summon timed from its third cast, not entered)",
+        "labels": [
+          "560840 spell_duration 572163 #0"
+        ]
+      }
     ]
   },
   {
@@ -1540,13 +1551,21 @@
     "spell": 704360,
     "clause": "Your $?s520853[Fel Torpedo][Chaos Rush] now reduces all damage taken by $524633s1% for $524633d,",
     "kind": "claim",
-    "claim": "for $524633d",
-    "labels": [
-      "704360 behaviour_metric_delta held",
-      "704360 behaviour_metric_delta gone"
-    ],
-    "evidence": "behaviour",
-    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
+    "claims": [
+      {
+        "claim": "now reduces all damage taken by $524633s1%",
+        "labels": [
+          "704360 behaviour_hit_ratio damage_taken"
+        ]
+      },
+      {
+        "claim": "for $524633d",
+        "labels": [
+          "704360 behaviour_metric_delta held",
+          "704360 behaviour_metric_delta gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 704360,
@@ -1618,12 +1637,20 @@
     "spell": 704370,
     "clause": "Each time Bane of Chaos deals damage its damage is increased on the target by $707511s1% for $707511d,",
     "kind": "claim",
-    "claim": "for $707511d",
-    "labels": [
-      "704370 behaviour_metric_delta duration"
-    ],
-    "evidence": "behaviour",
-    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
+    "claims": [
+      {
+        "claim": "damage is increased on the target by $707511s1%",
+        "labels": [
+          "704370 behaviour_metric_delta stack_value"
+        ]
+      },
+      {
+        "claim": "for $707511d",
+        "labels": [
+          "704370 behaviour_metric_delta duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 704370,
