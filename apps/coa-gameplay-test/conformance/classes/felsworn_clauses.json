@@ -1224,9 +1224,7 @@
     "claims": [
       {
         "claim": "unable to critically strike",
-        "labels": [
-          "560641 behaviour_metric_delta no_crit"
-        ]
+        "labels": []
       },
       {
         "claim": "for $704397d",
@@ -1234,7 +1232,16 @@
           "560641 behaviour_metric_delta duration"
         ]
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "'unable to critically strike' needs an enemy attacker whose critical hits are counted with and without Crippling Pain 704397 on it. taken_hit damage_ratio reads only critical or only non-critical strikes of a striker and leaves a trial out when no log lands, so the debuffed arm has nothing to judge; crit_rate and hit_ratio count the caster's own hits; metric_delta has no enemy melee attacker with a critical filter. Nearest kind: taken_hit with striker_force_crit (Resilient Constitution 552011) and a Cripple 704371 cast on the striker, judged as a critical share per arm. Needs tool group B: critical-share judge for taken_hit strikes.",
+      "attempts": [
+        {
+          "agent": "fw-ea3",
+          "report": ".agents/plans/fw-ea3/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 560645,
@@ -3107,11 +3114,11 @@
     "spell": 803475,
     "clause": "$?s804216[\r\n\r\nInner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
     "labels": [
-      "803475 behaviour_metric_delta extend",
-      "803475 behaviour_metric_delta extend_absent",
-      "803475 behaviour_metric_delta extend_casts"
+      "803475 behaviour_metric_delta extend_casts",
+      "803475 behaviour_metric_delta extend_absent"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "One extension cast per Assault is proven (extend_casts: 803089 cast 0 -> 1) and none without Inner Demon (extend_absent); the 3000 ms of the extension is the DBC value of 803089 Effect[0] (2999 + 1). The duration read of Inner Demon after Assault gained 28009 ms in both runs of the pair 20261123-220340 / -220424 (4991 -> 33000), 25000 ms more than the extension: another source of Inner Demon duration acts in that cast (not isolated, no control spender run), so the 3 s itself is not counted as a duration; the figure is an alert lead in the report."
   },
   {
     "spell": 802058,
@@ -3277,7 +3284,16 @@
     "spell": 803478,
     "clause": "Your Hateforged Barrier now also scales with your maximum health.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "'also scales with your maximum health': Hateforged Barrier 705129 absorb (Effect[0] 176 + 1..32, plus STA x 1) gains 10% of maximum health with 803478 (AscensionFelswornContracts.cpp:356-357), a term no tooltip number states, so only the direction can be judged. power_term_direction is built on attack power (aura 99) and has no maximum-health variant; 805256 Infernal Constitution (+10% maximum health) gives the contrast arm. Needs tool group B: a max-health analogue of power_term_direction with arms control low/high and learned low/high.",
+      "attempts": [
+        {
+          "agent": "fw-ea3",
+          "report": ".agents/plans/fw-ea3/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 803478,

@@ -12441,49 +12441,6 @@
       "cast_power": 100,
       "wait_ms": 100,
       "expire_ms": 10500,
-      "name": "Azzinoth's Assault (extends Inner Demon by 3 sec)",
-      "variant": "extend",
-      "label_suffix": "extend",
-      "phase_auras": [
-        [
-          804216,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          800058,
-          6,
-          "caster",
-          "caster"
-        ],
-        [
-          803468,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "before_expected": 1000,
-      "expected": 4000,
-      "expected_gain": 3000,
-      "tolerance": 250,
-      "observe_source": "803475 Azzinoth's Assault (Energy 20, Consumes 2 Felfury) casts 801904 Azzinoth's Assault; AscensionFelswornAbilities.cpp:324-325 casts 803089 on the caster for a damaging hit of it while Inner Demon is active (Inner(player)), and 803089 Effect[0] is SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 2999 + 1 = 3000 ms ($/1000;803089s1 = 3 sec), applied to Inner Demon 804216 (ExtendInnerDemon, AscensionFelswornAbilities.cpp:479-481). The remaining duration of 804216 on the caster is read 100 ms after the cast of Assault at the dummy (after) against a read with no cast (before, the control: only the 100 ms of decay): the gain is the extension. Felfury 800058 x6 and At Least 2 Felfury 803468 (needed by Assault, AscensionFelsworn.cpp:219-228) are set on the caster by harness set_aura as precondition fixtures in both phases, and Inner Demon 804216 by harness set_aura as the precondition the extension acts on (the Evolving Hellfire 807438 and Hellfire Command 806235 duration entries use the same fixture); the claim measured is the 3 s extension. Reference search 2026-11-23: coa-history spell 803475: 0 events in 186 logs (positive control 801904 Azzinoth's Assault: 21 casts); expected values come from the tooltip and the DBC only.Tolerance 250 on the gain excludes a 10% error on 3000 (2700 and 3300)."
-    },
-    {
-      "spell": 803475,
-      "kind": "metric_delta",
-      "quote": "$?s804216[ Inner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
-      "trigger_spell": 803475,
-      "target": "dummy",
-      "cast_in_before": false,
-      "metric": "aura_duration_ms",
-      "fields": {
-        "spell": 804216
-      },
-      "cast_power": 100,
-      "wait_ms": 100,
-      "expire_ms": 10500,
       "name": "Azzinoth's Assault (control: no Inner Demon, nothing to extend)",
       "variant": "extend_absent",
       "label_suffix": "extend_absent",
@@ -12505,7 +12462,7 @@
       "expected": 0,
       "expected_gain": 0,
       "tolerance": 1,
-      "observe_source": "Control of extend on the same build: the same cast of Assault 803475 with Inner Demon 804216 absent from the caster (the conditional text is Inner Demon's): the duration of 804216 reads 0 before and after, no aura is created or extended. 803475 Azzinoth's Assault (Energy 20, Consumes 2 Felfury) casts 801904 Azzinoth's Assault; AscensionFelswornAbilities.cpp:324-325 casts 803089 on the caster for a damaging hit of it while Inner Demon is active (Inner(player)), and 803089 Effect[0] is SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 2999 + 1 = 3000 ms ($/1000;803089s1 = 3 sec), applied to Inner Demon 804216 (ExtendInnerDemon, AscensionFelswornAbilities.cpp:479-481). Reference search 2026-11-23: coa-history spell 803475: 0 events in 186 logs (positive control 801904: 21 casts); expected values come from the tooltip and the DBC only."
+      "observe_source": "Control of extend_casts on the same build: the same cast of Assault 803475 with Inner Demon 804216 absent from the caster (the conditional text is Inner Demon's): the duration of 804216 reads 0 before and after, no aura is created or extended. 803475 Azzinoth's Assault (Energy 20, Consumes 2 Felfury) casts 801904 Azzinoth's Assault; AscensionFelswornAbilities.cpp:324-325 casts 803089 on the caster for a damaging hit of it while Inner Demon is active (Inner(player)), and 803089 Effect[0] is SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 2999 + 1 = 3000 ms ($/1000;803089s1 = 3 sec), applied to Inner Demon 804216 (ExtendInnerDemon, AscensionFelswornAbilities.cpp:479-481). Reference search 2026-11-23: coa-history spell 803475: 0 events in 186 logs (positive control 801904: 21 casts); expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 704370,
