@@ -653,13 +653,17 @@
   {
     "spell": 520853,
     "clause": "Transforms your Chaos Rush into Fel Torpedo.",
-    "labels": [],
+    "labels": [
+      "520853 behaviour_metric_delta replaced"
+    ],
     "kind": "claim"
   },
   {
     "spell": 520853,
     "clause": "Generates 1 Felfury",
-    "labels": [],
+    "labels": [
+      "520853 behaviour_metric_delta felfury"
+    ],
     "kind": "claim"
   },
   {
@@ -2246,16 +2250,29 @@
   {
     "spell": 501298,
     "clause": "Consumes 2 Felfury",
-    "labels": [],
+    "labels": [
+      "501298 behaviour_metric_delta consumes"
+    ],
     "kind": "claim"
   },
   {
     "spell": 501298,
     "clause": "Bring doom upon an enemy, dealing ${$cond($gt($spfi, $sps), $m1+0+$spfi*1, $m1+0+$sps*1.32)} Shadowflame Damage to an enemy, piercing all absorption effects.",
-    "labels": [
-      "501298 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${...} at 0 spell power (2163 to the roll's end)",
+        "labels": [
+          "501298 behaviour_metric_delta damage_0sp"
+        ]
+      },
+      {
+        "claim": "the 1.32 spell power coefficient",
+        "labels": [
+          "501298 behaviour_metric_delta damage_sp"
+        ]
+      }
+    ]
   },
   {
     "spell": 501298,

@@ -2637,7 +2637,7 @@
       "tolerance": 0,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "force_crit": "melee",
+      "force_crit": "spell",
       "observe_source": "520833 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 525617 and Effect[1] aura 112 (MiscValue 20007, BasePoints 24 + 1 = 25 = $s2); Sargeron Smite 802060 (SpellFamilyFlags word 1 2048, instant). The Felfury aura 800058 (StackAmount 6) stacks on the caster are read 1500 ms after one real cast of Sargeron Smite 802060 at the dummy, before (control: 520833 not learned) and after a real learn: after a real learn one more Felfury than before (the gain is judged, the read before is the control without the passive). The caster's spell critical strike rating is forced (force_crit spell), so the cast critically strikes. Reference search 2026-11-23: coa-history spell 520833: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Critical strikes with Sargeron Smite now refund 1 Felfury. In addition, Sargeron Smite now deals 25% increased damage to enemies above 75% of their maximum health.'. Smite consumes 2 Felfury (AscensionCustomResourceData.h:524-ff), so Felfury 800058 x6 and 803468 are set before each cast as precondition fixtures by harness set_aura in both phases: 4 remain after the cast, 5 with a refund (the first run's casts were refused, reason 85, with one Felfury).",
       "phase_auras": [
         [
@@ -2690,7 +2690,7 @@
           "caster"
         ]
       ],
-      "force_crit": "melee"
+      "force_crit": "spell"
     },
     {
       "spell": 520833,
@@ -3346,6 +3346,187 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "520251 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 0 = 512, the SpellFamilyFlags word 0 of the Intuition auras (Illidari Intuition 800212: Effect[0] aura 29 MOD_STAT, MiscValue 1 Agility, BasePoints 19 + 1 = 20). The caster's exact Agility (reference 130) is read 500 ms after a real self cast of Illidari Intuition 800212: 130 + 20 = 150 before the learn (control) and 130 + 20 x 1.2 = 154 after a real learn. The read is a stat readback, and the clause names no stat word, so the ledger counts it as data. Reference search 2026-11-23: coa-history spell 520251: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot says 'Increases the effectiveness of your Intuitions by 20%.'."
+    },
+    {
+      "spell": 501298,
+      "name": "Ruin (consumes 2 Felfury)",
+      "kind": "metric_delta",
+      "variant": "consumes",
+      "label_suffix": "consumes",
+      "quote": "Consumes 2 Felfury",
+      "trigger_spell": 501298,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "before_expected": 6,
+      "expected": 4,
+      "tolerance": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Ruin 501298 resource rule {class 14, 801895-501299, resource 800058, 2, Fixed} (AscensionCustomResourceData.h:524-ff). The Felfury 800058 stacks on the caster are read 3000 ms after a real Ruin cast (CastingTimeIndex 19 = 2500 ms) from 6 set as a precondition fixture by harness set_aura: 4, and 6 in the control phase that casts nothing. Reference search 2026-11-23: coa-history spell 501298: 2522 SPELL_CAST_START events by players in 6 logs (the cast exists in play, the older logs' damage figures differ with gear and attack power, so no figure decides); the bindmysoul snapshot has no value beyond the tooltip."
+    },
+    {
+      "spell": 501298,
+      "name": "Ruin (damage at 0 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_0sp",
+      "label_suffix": "damage_0sp",
+      "quote": "dealing ${$cond($gt($spfi, $sps), $m1+0+$spfi*1, $m1+0+$sps*1.32)} Shadowflame Damage to an enemy",
+      "trigger_spell": 501298,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 501298,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 2240.0,
+      "after_at_least": 2163,
+      "after_at_most": 2317,
+      "tolerance": 0,
+      "wait_ms": 3200,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Ruin 501298 Effect[0] SCHOOL_DAMAGE, BasePoints 2162 + 1 = 2163 ($m1 = 2163, the tooltip's value at 0 spell power), EffectDieSides 155 (a roll adding up to 154), coefficient 1.32 of spell power for the Shadowflame school ($sps*1.32; Spell power 0 here, no higher fire power). One real Ruin cast at the dummy (no partial resists, 823764; Felfury x6 as precondition fixtures): the non-critical hit lies in [2163, 2317] at 0 spell power: 0 before (the control phase casts nothing). Reference search 2026-11-23: coa-history spell 501298: 2522 SPELL_CAST_START events by players in 6 logs (the cast exists in play, the older logs' damage figures differ with gear and attack power, so no figure decides); the bindmysoul snapshot has no value beyond the tooltip."
+    },
+    {
+      "spell": 501298,
+      "name": "Ruin (damage at 10000 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "dealing ${$cond($gt($spfi, $sps), $m1+0+$spfi*1, $m1+0+$sps*1.32)} Shadowflame Damage to an enemy",
+      "trigger_spell": 501298,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 501298,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 15440.0,
+      "after_at_least": 15363,
+      "after_at_most": 15517,
+      "tolerance": 0,
+      "wait_ms": 3200,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "observe_source": "Ruin 501298 Effect[0] SCHOOL_DAMAGE, BasePoints 2162 + 1 = 2163 ($m1 = 2163, the tooltip's value at 0 spell power), EffectDieSides 155 (a roll adding up to 154), coefficient 1.32 of spell power for the Shadowflame school ($sps*1.32; Spell power 10000 here, no higher fire power). One real Ruin cast at the dummy (no partial resists, 823764; Felfury x6 as precondition fixtures): the non-critical hit lies in [15363, 15517] at 10000 spell power: 0 before (the control phase casts nothing). Reference search 2026-11-23: coa-history spell 501298: 2522 SPELL_CAST_START events by players in 6 logs (the cast exists in play, the older logs' damage figures differ with gear and attack power, so no figure decides); the bindmysoul snapshot has no value beyond the tooltip."
+    },
+    {
+      "spell": 520853,
+      "name": "Fel Torpedo (Chaos Rush replaced)",
+      "kind": "metric_delta",
+      "variant": "replaced",
+      "label_suffix": "replaced",
+      "quote": "Transforms your Chaos Rush into Fel Torpedo",
+      "trigger_spell": 804247,
+      "gate_spell": 520853,
+      "target": "caster",
+      "learn": [
+        500028
+      ],
+      "metric": "temporary_spell_replacement",
+      "fields": {
+        "spell": 500028
+      },
+      "before_expected": 500028,
+      "expected": 500610,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "AscensionTalentReplacementData.h:29 {class 14, 520853, Chaos Rush 500028 -> Fel Torpedo 500610}. The spell the caster's Chaos Rush 500028 resolves to is read before (control: 520853 not learned: 500028) and after a real learn: 500610. Reference search 2026-11-23: coa-history spell 520853: 0 events in 186 logs (a passive-like replacement leaves no event); the bindmysoul snapshot says 'Transforms your Chaos Rush into Fel Torpedo.'."
+    },
+    {
+      "spell": 520853,
+      "name": "Fel Torpedo (generates 1 Felfury)",
+      "kind": "metric_delta",
+      "variant": "felfury",
+      "label_suffix": "felfury",
+      "quote": "Transforms your Chaos Rush into Fel Torpedo",
+      "trigger_spell": 500610,
+      "gate_spell": 520853,
+      "target": "dummy",
+      "cast_power": 100,
+      "learn": [
+        500610
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Fel Torpedo 500610 cast with the talent 520853 learned gives Gain(player, 1) (AscensionFelswornAbilities.cpp:272-273); the Felfury 800058 stacks on the caster are read 1500 ms after a real cast of 500610 at the dummy: 0 before the learn of 520853 (control) and 1 after. Fel Torpedo's Effect[1] TRIGGER_SPELL 802028 is the spell's own effect, shared with Chaos Rush 500028. Reference search 2026-11-23: coa-history spell 520853: 0 events in 186 logs; the bindmysoul snapshot says 'Generates 1 Felfury'."
     }
   ],
   "player_observations": [],
