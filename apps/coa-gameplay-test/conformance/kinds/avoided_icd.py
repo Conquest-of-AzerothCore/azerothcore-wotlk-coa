@@ -18,6 +18,8 @@ NEIGHBOUR_PCT = 10
 MIN_INTERVALS = 20
 MIN_AVOIDED_PER_HIT = 10
 DODGE, PARRY = 50, 50
+QUIET_SHIFT_YD = 20
+QUIET_WAIT_MS = 200
 FIELDS = {'spell', 'name', 'kind', 'variant', 'label_suffix', 'quote', 'hit_spell', 'timer_ms', 'striker_entry',
           'strikers', 'striker_auras', 'swing_ms', 'control_windows', 'windows', 'observe_source'}
 
@@ -65,6 +67,23 @@ def mark(spec: AvoidedIcdSpec, read: str) -> str:
     return f'{spec.spell} {BEHAVIOUR_METRIC_DELTA} {spec.label_suffix} {read}'
 
 
+def quiet_distance_label(spec: AvoidedIcdSpec, striker: str) -> str:
+    return mark(spec, f'quiet distance {striker}')
+
+
+def quiet_minimum_yd() -> float:
+    from behaviours import STRIKER_DISTANCE
+    return QUIET_SHIFT_YD - STRIKER_DISTANCE
+
+
+def quiet_steps(spec: AvoidedIcdSpec, avoided: dict) -> list[dict]:
+    return ([{'action': 'relocate', 'actor': CASTER, 'dx': QUIET_SHIFT_YD},
+             {'action': 'wait', 'label': 'quiet', 'ms': QUIET_WAIT_MS}]
+            + [measurement(quiet_distance_label(spec, striker), CASTER, 'distance', target=striker)
+               for striker in proc_avoided.striker_ids(avoided)]
+            + [measurement(mark(spec, 'attacks first'), CASTER, 'melee_attacks_taken')])
+
+
 def band(spec: AvoidedIcdSpec) -> tuple[float, float]:
     margin = spec.timer_ms * BAND_PCT / 100
     return spec.timer_ms - margin, spec.timer_ms + margin
@@ -97,6 +116,7 @@ def avoided_icd_scenario(class_file: dict, spec: AvoidedIcdSpec) -> tuple[dict, 
              + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
              + proc_avoided.attempt_steps(avoided, spec.windows, spec.swing_ms)
              + [{'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}] + proc_avoided.guard_steps(avoided)
+             + quiet_steps(spec, avoided)
              + proc_avoided.trial_steps(trials, attempts, True)
              + [measurement(mark(spec, 'hits'), CASTER, 'spell_damage_count', **hits),
                 measurement(mark(spec, 'shortest'), CASTER, METRIC, stream='spell_damage', **hits),
@@ -113,7 +133,10 @@ def avoided_icd_scenario(class_file: dict, spec: AvoidedIcdSpec) -> tuple[dict, 
                      f'shortest interval between two {spec.hit_spell} hits must lie in [{low:g}, {high:g}] ms, which '
                      f'excludes a timer {NEIGHBOUR_PCT}% shorter or longer than {spec.timer_ms} ms; the run is void '
                      f'with fewer than {MIN_INTERVALS} intervals, fewer than {MIN_AVOIDED_PER_HIT} avoided swings '
-                     f'per hit, attacks taken other than the dodged, parried and missed swings, or a refused cast; '
+                     f'per hit, attacks taken other than the dodged, parried and missed swings, a total of '
+                     f'attacks taken that changed while the swing outcomes were read, a caster that stayed within '
+                     f'{quiet_minimum_yd():g} yd of a striker after the {QUIET_SHIFT_YD} yd relocation that quiets '
+                     f'the strikers before the reads, or a refused cast; '
                      f'{residual_text(spec)}.'),
         'players': [player_fixture(class_file)],
         'creatures': proc_avoided.striker_fixtures(class_file, avoided),
@@ -125,7 +148,10 @@ def avoided_icd_scenario(class_file: dict, spec: AvoidedIcdSpec) -> tuple[dict, 
              'reads': {'control_hits': mark(spec, 'control hits'), 'hits': mark(spec, 'hits'),
                        'shortest': mark(spec, 'shortest'), 'median': mark(spec, 'median'),
                        'avoided': list(labels.values()), 'start_avoided': list(start_labels.values()),
-                       'attacks': attempts},
+                       'attacks': attempts, 'attacks_first': mark(spec, 'attacks first'),
+                       'quiet_distances': [quiet_distance_label(spec, striker)
+                                           for striker in proc_avoided.striker_ids(avoided)]},
+             'quiet_minimum_yd': quiet_minimum_yd(),
              'residual': residual_text(spec)}
     expectation = Expectation(mark(spec, '').rstrip(), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.hit_spell, None,
                               str(spec.timer_ms), prose_rule(entry.quote, spec.spell), model)
@@ -134,7 +160,8 @@ def avoided_icd_scenario(class_file: dict, spec: AvoidedIcdSpec) -> tuple[dict, 
 
 def avoided_icd_verdict(base: Verdict, run, model: dict) -> Verdict:
     reads = model['reads']
-    labels = [reads[name] for name in ('control_hits', 'hits', 'attacks')] + reads['avoided'] + reads['start_avoided']
+    labels = ([reads[name] for name in ('control_hits', 'hits', 'attacks', 'attacks_first')] + reads['avoided']
+              + reads['start_avoided'] + reads['quiet_distances'])
     missing = next((label for label in labels if run.values.get(label) is None), None)
     if missing is not None:
         return replace(base, status='unmeasured', explanation=missing_measurement(run, missing))
@@ -142,6 +169,17 @@ def avoided_icd_verdict(base: Verdict, run, model: dict) -> Verdict:
     refused = '; '.join(f'{spell}: {describe_failures(reasons)}' for spell, reasons in failures.items() if reasons)
     if refused:
         return replace(base, status='unmeasured', explanation=f'void: refused casts {refused}')
+    nearest = min(run.values[label] for label in reads['quiet_distances'])
+    if nearest < model['quiet_minimum_yd']:
+        return replace(base, status='unmeasured',
+                       explanation=f'void: the caster stands {nearest:g} yd from a striker after the relocation that '
+                                   f'quiets the strikers, below {model["quiet_minimum_yd"]:g} yd, so a swing may '
+                                   f'still land in the reads')
+    first, last = run.values[reads['attacks_first']], run.values[reads['attacks']]
+    if first != last:
+        return replace(base, status='unmeasured',
+                       explanation=f'void: attacks taken changed from {first:g} to {last:g} while the swing '
+                                   f'outcomes were read')
     imbalance = proc_avoided.attack_imbalance({'total': reads['attacks'], 'parts': reads['avoided']}, run.values)
     if imbalance:
         return replace(base, status='unmeasured', explanation=f'void: {imbalance}')

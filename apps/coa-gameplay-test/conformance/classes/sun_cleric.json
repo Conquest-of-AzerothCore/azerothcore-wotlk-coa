@@ -23786,6 +23786,9 @@
       "gate_timing": "start",
       "wait_ms": 1900,
       "expiry_wait_ms": 250,
+      "relocate_before_trigger": {
+        "dx": 2.5
+      },
       "expire_ms": 500,
       "game_time": {
         "after": [
@@ -23797,7 +23800,7 @@
           2200
         ]
       },
-      "observe_source": "Charge-back time bracket: Spell.dbc 520025 duration 2000 ms (the aura of 520024), the landing cast 570034 comes with its end. One cast of 520024 at the dummy with the dummy selected (without a selection the landing fails, cast_failure 27); 570034 damage to the dummy read at 1800 to 1950 ms of game time after the cast (before the end of $d, expected 0, the 10% margin 200 ms excluded) and at 2050 to 2200 ms (after it, expected 497.6, the DBC figure of the counted charge_hit entry, 570034 at the reference stats). The windows exclude a value 10% off the 2000 ms on both sides. Control: the no-cast first phase reads 0. Reference search 2026-11-22: coa-history spell 570034 and 520024 give no timing of the landing; nothing found."
+      "observe_source": "Charge-back time bracket: Spell.dbc 520025 duration 2000 ms (the aura of 520024), the landing cast 570034 comes with its end. One cast of 520024 at the dummy with the dummy selected (without a selection the landing fails, cast_failure 27); 570034 damage to the dummy read at 1800 to 1950 ms of game time after the cast (before the end of $d, expected 0, the 10% margin 200 ms excluded) and at 2050 to 2200 ms (after it, expected 497.6, the DBC figure of the counted charge_hit entry, 570034 at the reference stats). The windows exclude a value 10% off the 2000 ms on both sides. Control: the no-cast first phase reads 0. Landing time. Code (AscensionSunClericSummons.cpp:44-95): a scheduler task fires when the flight aura 520025 ends, calls MoveCharge at speed 50 toward the target, re-checks every 50 ms until the movespline is finalized and then casts 570034; the dummy stands 3 yd from the caster. Measured 2026-11-23 on four runs of probe copies of this entry: damage 0 at 2128 ms and 497 at 2168 ms after the cast, so the landing lies in (2128, 2168] ms, within 40 ms of this entry's 2168 ms read; the entry read 497 in three runs and 0 in one loaded 15-lane run (base14 run 2). The caster is therefore moved dx 2.5 along x before the cast (relocate_before_trigger, a precondition fixture: 0.5 yd from the dummy, 10 ms of travel at speed 50): four probe runs read 0 at 2031 ms and 497 at 2081 ms, the landing lies in (2031, 2081] ms, at least 87 ms before the 2168 ms read, which a loaded run would need to delay by more than one 50 ms re-check to miss. Report .agents/plans/fl/report.md. Reference search 2026-11-22: coa-history spell 570034 and 520024 give no timing of the landing; nothing found."
     },
     {
       "spell": 520024,

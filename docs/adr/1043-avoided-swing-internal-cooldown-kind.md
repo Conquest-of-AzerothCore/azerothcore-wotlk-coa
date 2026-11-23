@@ -22,3 +22,15 @@ contract states the residual (at most 2^-20 per run under independent uniform sw
 - A new kind module, used by no finished class.
 - Seeded tests: a simulated 1000 ms timer is ok, 900 ms and 1100 ms timers and no timer alert (mentor D-213), the
   window conditions void.
+
+## Addendum (2026-11-23, mentor D-299): atomic identity reads
+
+Base pair 14 flipped `560492 behaviour_metric_delta icd` (ok in run 1, unmeasured in run 2: 1047 attacks against
+1046 dodged, parried and missed). The four identity reads are four assert steps, and the harness runs one step per
+world tick (`CoAGameplayTest.cpp` `Progress()`), while the strikers keep swinging: a swing landing between the first
+state read and the total read adds to the total only. Before each read group (start and end) the kind now relocates
+the caster out of the strikers' reach and waits, reads the distance to each striker (void when it is under the
+reach bound), and reads the total before and after the state reads (void when they differ), so a residual race voids
+instead of misjudging. Seeded tests and a mutant cover each void; finished classes 15/19/19 --stack/23 generate and
+audit unchanged (no finished class uses the kind). `proc_avoided` reads its counts the same way and is not changed
+here (owner G-39 list).
