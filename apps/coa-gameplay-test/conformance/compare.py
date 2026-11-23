@@ -66,7 +66,8 @@ from triggers import (COOLDOWN_CHECK, COOLDOWN_GATE_CHECK, DURATION_CHECK, EVENT
                       MAGNITUDE_CHECK, MINION, MINION_COOLDOWN_BAND, PERIODIC, SELF_TRIGGER_CHECK, TRIGGER_CHECK,
                       cooldown_trial_label, duration_trial_label, minion_cooldown_event_label)
 from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECT_MODIFIER_BASE, EFFECTS, FIXED_DIE_SIDES,
-                    GAP_CLOSER_DISTANCE, GAP_CLOSER_MARGIN_YD, GENERIC, UNMEASURABLE, UNREADABLE, Expectation,
+                    GAP_CLOSER_DISTANCE, GAP_CLOSER_MARGIN_YD, GENERIC, PER_TICK_TICKS, UNMEASURABLE, UNREADABLE,
+                    Expectation,
                     calc_amount_hooks_label, dataset, effect_modifier_label, mean_samples, roll_range, sample_labels,
                     sizing_stats)
 
@@ -799,7 +800,8 @@ def per_level_model_gap(label: str, run: Run, tooltips: TooltipSource, expectati
     unscaled = tooltips.read(expectation.rank_id, tokens.caster, forced, unscaled=True).values
     if index >= len(scaled) or index >= len(unscaled):
         return 'the tooltip term cannot be read without its per-level part'
-    continuous = undivided(scaled[index]) - undivided(unscaled[index])
+    continuous = (undivided(scaled[index]) - undivided(unscaled[index])) / ((expectation.model or {}).get(
+        PER_TICK_TICKS) or 1)
     if abs(continuous - per_level.term) > PER_LEVEL_TERM_TOLERANCE:
         return (f'the tooltip adds {continuous:g} per level where stock CalcValue adds {per_level.term:g} '
                 f'({per_level.levels} levels after its level clamp)')
@@ -928,11 +930,12 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
                                 f'{token.text} read from SpellDuration against the {SPELL_DURATION_SCOPE}')
         return replace(verdict, detail={**(verdict.detail or {}), 'scope': SPELL_DURATION_SCOPE})
     effect = token_effect(expectation)
-    base_roll = base_roll_entry(tooltips, *effect) if effect is not None and expectation.check == 'effect_value' \
-        else None
+    ticks = (expectation.model or {}).get(PER_TICK_TICKS)
+    base_roll = base_roll_entry(tooltips, *effect) \
+        if effect is not None and expectation.check == 'effect_value' and not ticks else None
     if base_roll is not None:
         return judge_base_roll(base, expectation, measured, tokens, tooltips, index, base_roll)
-    if effect is not None:
+    if effect is not None and not ticks:
         base_points, die_sides = tooltips.effect_points(*effect)
         if die_sides not in FIXED_DIE_SIDES:
             return judge_roll(base, expectation, run, measured, tokens, tooltips, index,
@@ -940,12 +943,14 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
         carried = judge_trigger_with_value(base, expectation, measured, tokens, tooltips, index, effect)
         if carried is not None:
             return carried
-    expected = undivided(token)
+    expected = undivided(token) / ticks if ticks else undivided(token)
+    per_tick = (f', divided by its {ticks:g} ticks: {undivided(token):g} over the application, {expected:g} per '
+                'tick' if ticks else '')
     plain = PLAIN_TOKEN.fullmatch(token.text)
     if plain:
         points = displayed_points(tooltips, plain, token.spell_id or expectation.rank_id)
         why = (f'{token.text} is shown unsigned; the expected value takes the sign of its Spell.dbc points '
-               f'{points}')
+               f'{points}{per_tick}')
         signed = expected * plain_sign(points)
         return (judge_fixed_per_level(base, expectation, run, measured, tokens, tooltips, index, signed, why)
                 or deterministic(base, measured, measured, signed, why))
@@ -953,7 +958,7 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
         return replace(base, status='ambiguous_tooltip', measured=measured, expected=expected,
                        explanation=f'{token.text} evaluates to {expected:g}, the measured value has the opposite sign',
                        detail={'question': sign_question(base, name, token.text, measured, expected)})
-    why = f'{token.text} read with the measured stats'
+    why = f'{token.text} read with the measured stats{per_tick}'
     return (judge_fixed_per_level(base, expectation, run, measured, tokens, tooltips, index, expected, why)
             or deterministic(base, measured, measured, expected, why))
 

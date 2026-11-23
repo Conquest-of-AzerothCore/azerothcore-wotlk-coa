@@ -52,6 +52,13 @@
   "extra_spells": [],
   "disabled_foreign_effects": [],
   "foreign_aura_grants": [],
+  "per_tick_foreign_totals": [
+    {
+      "spell": 802678,
+      "effect": 0,
+      "reason": "Felstrike: Malice of Gul'dan 800214 and Fel Apprentice 92088 expand ${($d*1000/$T1)*($m1+0+$SP*.05)}, the total over its six ticks; spell_effect_value reads one tick (mentor D-23)"
+    }
+  ],
   "effect_overrides": [],
   "item_armor_subclass_effects": [],
   "unmodelled_effects": [],
