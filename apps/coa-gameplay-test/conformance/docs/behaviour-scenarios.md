@@ -2224,6 +2224,8 @@ Options with a module:
   each phase, a mismatch is `unmeasured` (ADR 1058)
 - [`same_arm_ratio`](metric_delta_options/same_arm_ratio.md): a second metric read right after each reading, the
   gain of the reading per gain of that metric over the after arm judged against a stated ratio (ADR 1064)
+- [`apply_stamp`](metric_delta_options/apply_stamp.md): an encounter timeline stamps the aura apply and the trigger
+  cast in one time base, and the after reading's bracket from the apply is judged against a window (ADR 1067)
 - [`corpse`](metric_delta_options/corpse.md): a creature corpse a real setup cast kills in the treatment phase (ADR
   0493)
 - [`player_spell_power`](metric_delta_options/player_spell_power.md): the caster's spell-power fixture (ADR 0364)
