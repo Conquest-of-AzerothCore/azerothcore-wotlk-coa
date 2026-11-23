@@ -16216,6 +16216,45 @@
         },
         "increments": true
       }
+    },
+    {
+      "spell": 300474,
+      "name": "Expose (an ally's critical strike chance against the exposed target is 3 points higher)",
+      "kind": "metric_delta",
+      "variant": "crit_ally",
+      "label_suffix": "crit_ally",
+      "quote": "Direct Fire and Shadow spell damage dealt now applies Expose to enemies.",
+      "trigger_spell": 801895,
+      "gate_spell": 300474,
+      "target": "dummy",
+      "measure_actor": "ally",
+      "metric": "spell_taken_crit_chance",
+      "fields": {
+        "spell": 802060,
+        "target": "dummy"
+      },
+      "ally_arm": {
+        "allies": 1
+      },
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0.05,
+      "wait_ms": 1500,
+      "expire_ms": 2500,
+      "void_on_cast_failure": true,
+      "observe_source": "Expose 300474 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL casts Expose 300475 on a Fire or Shadow direct hit (applied by the sibling 'applies' entry). 300475 Effect[1] aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, MiscValue 127 all schools, BasePoints 2 + 1 = 3 ($s2). Behaviour read: a real Ruin 801895 hit (a Fire and Shadow direct hit, learning Expose 300474 between the phases) applies Expose to the dummy; the critical strike chance of the grouped ally against the dummy, Sargeron Smite 802060 through the engine's own Player::SpellDoneCritChance then Unit::SpellTakenCritChance of the dummy, is read before (no Expose on the dummy) and after. Felfury 800058 x2 (Ruin consumes 2) is a named precondition fixture. Reference search 2026-11-23: coa-history spells 300474 and 300475: 300475 has 88 aura applications in 1 log, no event carries a crit figure; nothing else found beyond the tooltip and Spell.dbc. The before reading is the control (Expose not learned, so no Expose on the dummy).",
+      "learn": [
+        801895
+      ]
     }
   ],
   "player_observations": [],
