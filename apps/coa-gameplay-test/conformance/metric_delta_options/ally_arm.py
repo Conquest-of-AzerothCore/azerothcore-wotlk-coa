@@ -17,7 +17,8 @@ CASTER_ENTRY_METRICS = {'spell_heal_count', 'spell_heal_total', 'spell_effective
 CONTROL_LABEL = 'timed no-cast control'
 EXPIRE_LABEL = 'let the first effect fully expire'
 KEYS = {'allies', 'ally_health', 'ally_casts', 'control_wait', 'arms', 'ratios', 'reach_source', 'ally_attacks',
-        'ally_strikes', 'ally_class'}
+        'ally_strikes', 'ally_class', 'ally_power'}
+MAX_POWERS = 7
 ALLY_ATTACK_KEYS = {'spell', 'power', 'source'}
 ALLY_ATTACK_SETTLE_MS = 2000
 COA_CLASSES = range(12, 33)
@@ -74,6 +75,7 @@ class AllyArm:
     ally_strikes: bool = False
     ally_strike_health: int | None = None
     ally_class: int | None = None
+    ally_power: tuple[tuple[int, int], ...] = ()
 
     @property
     def ally_ids(self) -> tuple[str, ...]:
@@ -229,6 +231,14 @@ def parse(raw) -> AllyArm:
     if 'ally_class' in raw and (type(ally_class) is not int or ally_class not in COA_CLASSES or allies == 0):
         raise ValueError(f'ally_arm ally_class is a CoA class id {COA_CLASSES.start} to {COA_CLASSES.stop - 1} and '
                          f'needs at least one ally, not {ally_class!r}')
+    power = raw.get('ally_power', [])
+    if not isinstance(power, list) or ('ally_power' in raw and (not power or allies == 0)) \
+            or not all(isinstance(pair, list) and len(pair) == 2 and all(type(value) is int for value in pair)
+                       and 0 <= pair[0] < MAX_POWERS and pair[1] >= 0 for pair in power) \
+            or len({pair[0] for pair in power}) != len(power):
+        raise ValueError(f'ally_arm ally_power is a non-empty list of [power, value], a power index 0 to '
+                         f'{MAX_POWERS - 1} once each and a value of at least 0, and needs at least one ally, '
+                         f'not {power!r}')
     if raw.get('control_wait', True) is not True:
         raise ValueError(f'ally_arm control_wait is true, not {raw["control_wait"]!r}')
     arms = raw.get('arms', [])
@@ -262,7 +272,7 @@ def parse(raw) -> AllyArm:
                    tuple(dict.fromkeys(cast for cast in stated if cast[1] > 1)),
                    parsed_ratios, raw.get('reach_source', ''),
                    tuple(parse_ally_attack(attack) for attack in attacks), 'ally_strikes' in raw, strike_health,
-                   ally_class)
+                   ally_class, tuple(tuple(pair) for pair in power))
 
 
 def check(spec, ally):
@@ -435,6 +445,8 @@ def phase_steps(spec, ally: AllyArm, after: bool) -> list[dict]:
         value, maximum = ally.ally_health
         steps += [{'action': 'set_health', 'actor': unit, 'value': value, 'maximum': maximum}
                   for unit in ally.ally_ids]
+    steps += [{'action': 'set_power', 'actor': unit, 'power': power, 'value': value}
+              for power, value in ally.ally_power for unit in ally.ally_ids]
     if ally.control_wait and not after:
         steps.append({'action': 'wait', 'label': CONTROL_LABEL, 'ms': spec.wait_ms})
     if not after and uncast_before(spec):
@@ -530,6 +542,9 @@ def fixtures(class_file: dict, spec, ally: AllyArm, scenario: dict):
             contract += f' Each {spell} cast at {ALLY_IDS[0]} counts {count} SPELL_GO ({source}).'
     if ally.ally_health is not None:
         contract += f' Each phase sets the allies\' health to {ally.ally_health[0]} of {ally.ally_health[1]}.'
+    for power, value in ally.ally_power:
+        contract += (f' Each phase sets the allies\' power {power} to {value} ahead of the trigger (the harness '
+                     f'refuses a value above the maximum).')
     if ally.ally_strikes:
         contract += (f' After the trigger and the caster\'s strikes (at the start of an uncast before phase), each '
                      f'ally is set to {spec.strike.health if ally.ally_strike_health is None else ally.ally_strike_health}'
@@ -585,7 +600,9 @@ def model(spec, ally: AllyArm) -> dict:
                } if ally.ally_strikes else {}
     arms = [arm_model(spec, index, arm) for index, arm in enumerate(ally.arms)]
     return {NAME: {'allies': list(ally.ally_ids),
-                   **({'ally_class': ally.ally_class} if ally.ally_class is not None else {}), 'arms': arms,
+                   **({'ally_class': ally.ally_class} if ally.ally_class is not None else {}),
+                   **({'ally_power': [list(pair) for pair in ally.ally_power]} if ally.ally_power else {}),
+                   'arms': arms,
                    **(ratios if ally.ratios else {}), **strikes}}
 
 

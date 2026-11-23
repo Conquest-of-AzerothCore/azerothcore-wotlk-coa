@@ -35567,6 +35567,595 @@
       "cast_power": 1363
     },
     {
+      "spell": 807343,
+      "kind": "metric_delta",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807523,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "disable_regeneration": true,
+      "expire_ms": 500,
+      "measure_actor": "caster",
+      "name": "Lights of Absolution (Rage restore on a rage ally, partly empty pool)",
+      "variant": "restore_rage_partial",
+      "label_suffix": "restore_rage_partial",
+      "quote": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 807525,
+        "power": 1,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "after_at_least": 10,
+      "after_at_most": 10,
+      "wait_ms": 1000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_class": 17,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "active_power",
+            "fields": {
+              "power": 1
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "the ally's class 17 (Fleshwarden) is active in power type 1 (HasActivePowerType), read at the start of the trial; a wrong class voids it"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "max_power",
+            "fields": {
+              "power": 1
+            },
+            "before_expected": 1000,
+            "expected": 1000,
+            "tolerance": 0,
+            "source": "Unit::GetCreatePowers gives 1000 for power type 1 (Unit.cpp:13984-14000), so the percent restore is of 1000"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "power",
+            "fields": {
+              "power": 1
+            },
+            "before_expected": 500,
+            "expected": 510,
+            "tolerance": 0,
+            "source": "ally_power sets the class ally's rage to 500 of 1000 in both phases ahead of the trigger (set_power on the ally, CoAGameplayTest.cpp:9073-9085), regeneration off: the before phase (no Light of Absolution) keeps 500, the after phase gains 2% of the 500 missing = 10, so 510; a server that restores nothing reads 500, the stock maximum-power base (Spell::EffectEnergizePct, SpellEffects.cpp:3040-3044, CalculatePct(GetMaxPower, 2)) reads 520"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807525,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "reach guard: 807524 triggers 807526 and 807525 on the same TargetB 30 area, and the ally at 3000 of 10000 health (ally_health) takes one 807525 heal from the one gated Solar Flare of the after phase, none before the fixture"
+          }
+        ],
+        "ally_health": [
+          3000,
+          10000
+        ],
+        "ally_power": [
+          [
+            1,
+            500
+          ]
+        ]
+      },
+      "observe_source": "Owner ruling O-30 (class ADR 0039, superseding the energize line of class ADR 0028): Light of Absolution restores 2% of the missing Energy, Focus, Runic Power and Rage, as for health (O-13), and no mana. A damaging Solar Flare 807175 hit by a caster holding Light of Absolution 807523 casts 807524, whose Effect[0]/[1] trigger 807526 and 807525 on TargetB 30 SRC_AREA_ALLY (40 yd, the ally here stands on the caster's point). 807525 Effect[1] ENERGIZE_PCT MiscValue 0 (mana), Effect[2] MiscValue 1 (rage); 807526 Effect[0..2] MiscValue 2, 3, 6 (focus, energy, runic power); every ENERGIZE_PCT is BasePoints 1 + DieSides 1 = 2 ($807525s1). spell_ascension_sun_cleric_lights_of_absolution (AscensionSunClericAbilities.cpp Restore, bound to 807525 and 807526) replaces Spell::EffectEnergizePct: CalculatePct(GetMaxPower - GetPower, 2) for every power but mana, skipped for a player not active in the power type (Unit::CanReceivePowerFromSpell), no log for a 0 gain; mana restores nothing. The read is the logged gain (spell_energize_total, before the cap). Control: the phase before the Light of Absolution fixture (807523 by set_aura, the subject is the restore) reads 0. Pool: ally_power sets the class 17 (Fleshwarden) ally's rage to 500 of 1000 (max_power arm) in both phases ahead of the trigger: 2% of the 500 missing = 10 (CalculatePct truncates 500 x 2 / 100 = 10), where a server that restores nothing logs 0 and the stock maximum-power base (Spell::EffectEnergizePct, SpellEffects.cpp:3040-3044, CalculatePct(GetMaxPower, 2)) logs 20. The pool arm reads the ally's rage after landing: 500 before, 510 after. The reach arm shows the restore landed on the ally. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and no value; nothing else found."
+    },
+    {
+      "spell": 807343,
+      "kind": "metric_delta",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807523,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "disable_regeneration": true,
+      "expire_ms": 500,
+      "measure_actor": "caster",
+      "name": "Lights of Absolution (Runic Power restore on a runic ally, partly empty pool)",
+      "variant": "restore_runic_partial",
+      "label_suffix": "restore_runic_partial",
+      "quote": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 807526,
+        "power": 6,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "after_at_least": 10,
+      "after_at_most": 10,
+      "wait_ms": 1000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_class": 30,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "active_power",
+            "fields": {
+              "power": 6
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "the ally's class 30 (Reaper) is active in power type 6 (HasActivePowerType), read at the start of the trial; a wrong class voids it"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "max_power",
+            "fields": {
+              "power": 6
+            },
+            "before_expected": 1000,
+            "expected": 1000,
+            "tolerance": 0,
+            "source": "Unit::GetCreatePowers gives 1000 for power type 6 (Unit.cpp:13984-14000), so the percent restore is of 1000"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "power",
+            "fields": {
+              "power": 6
+            },
+            "before_expected": 500,
+            "expected": 510,
+            "tolerance": 0,
+            "source": "ally_power sets the class ally's runic power to 500 of 1000 in both phases ahead of the trigger (set_power on the ally, CoAGameplayTest.cpp:9073-9085), regeneration off: the before phase (no Light of Absolution) keeps 500, the after phase gains 2% of the 500 missing = 10, so 510; a server that restores nothing reads 500, the stock maximum-power base (Spell::EffectEnergizePct, SpellEffects.cpp:3040-3044, CalculatePct(GetMaxPower, 2)) reads 520"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807525,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "reach guard: 807524 triggers 807526 and 807525 on the same TargetB 30 area, and the ally at 3000 of 10000 health (ally_health) takes one 807525 heal from the one gated Solar Flare of the after phase, none before the fixture"
+          }
+        ],
+        "ally_health": [
+          3000,
+          10000
+        ],
+        "ally_power": [
+          [
+            6,
+            500
+          ]
+        ]
+      },
+      "observe_source": "Owner ruling O-30 (class ADR 0039, superseding the energize line of class ADR 0028): Light of Absolution restores 2% of the missing Energy, Focus, Runic Power and Rage, as for health (O-13), and no mana. A damaging Solar Flare 807175 hit by a caster holding Light of Absolution 807523 casts 807524, whose Effect[0]/[1] trigger 807526 and 807525 on TargetB 30 SRC_AREA_ALLY (40 yd, the ally here stands on the caster's point). 807525 Effect[1] ENERGIZE_PCT MiscValue 0 (mana), Effect[2] MiscValue 1 (rage); 807526 Effect[0..2] MiscValue 2, 3, 6 (focus, energy, runic power); every ENERGIZE_PCT is BasePoints 1 + DieSides 1 = 2 ($807525s1). spell_ascension_sun_cleric_lights_of_absolution (AscensionSunClericAbilities.cpp Restore, bound to 807525 and 807526) replaces Spell::EffectEnergizePct: CalculatePct(GetMaxPower - GetPower, 2) for every power but mana, skipped for a player not active in the power type (Unit::CanReceivePowerFromSpell), no log for a 0 gain; mana restores nothing. The read is the logged gain (spell_energize_total, before the cap). Control: the phase before the Light of Absolution fixture (807523 by set_aura, the subject is the restore) reads 0. Pool: ally_power sets the class 30 (Reaper) ally's runic power to 500 of 1000 (max_power arm) in both phases ahead of the trigger: 2% of the 500 missing = 10 (CalculatePct truncates 500 x 2 / 100 = 10), where a server that restores nothing logs 0 and the stock maximum-power base (Spell::EffectEnergizePct, SpellEffects.cpp:3040-3044, CalculatePct(GetMaxPower, 2)) logs 20. The pool arm reads the ally's runic power after landing: 500 before, 510 after. The reach arm shows the restore landed on the ally. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and no value; nothing else found."
+    },
+    {
+      "spell": 807343,
+      "kind": "metric_delta",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807523,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "disable_regeneration": true,
+      "expire_ms": 500,
+      "measure_actor": "caster",
+      "name": "Lights of Absolution (Energy restore on an energy ally, partly empty pool)",
+      "variant": "restore_energy_partial",
+      "label_suffix": "restore_energy_partial",
+      "quote": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 807526,
+        "power": 3,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "after_at_most": 1,
+      "wait_ms": 1000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_class": 19,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "active_power",
+            "fields": {
+              "power": 3
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "the ally's class 19 (Templar) is active in power type 3 (HasActivePowerType), read at the start of the trial; a wrong class voids it"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "max_power",
+            "fields": {
+              "power": 3
+            },
+            "before_expected": 100,
+            "expected": 100,
+            "tolerance": 0,
+            "source": "Unit::GetCreatePowers gives 100 for power type 3 (Unit.cpp:13984-14000), so the percent restore is of 100"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "power",
+            "fields": {
+              "power": 3
+            },
+            "before_expected": 50,
+            "expected": 51,
+            "tolerance": 0,
+            "source": "ally_power sets the class ally's energy to 50 of 100 in both phases ahead of the trigger (set_power on the ally, CoAGameplayTest.cpp:9073-9085), regeneration off: the before phase (no Light of Absolution) keeps 50, the after phase gains 2% of the 50 missing = 1, so 51; a server that restores nothing reads 50, the stock maximum-power base (Spell::EffectEnergizePct, SpellEffects.cpp:3040-3044, CalculatePct(GetMaxPower, 2)) reads 52"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807525,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "reach guard: 807524 triggers 807526 and 807525 on the same TargetB 30 area, and the ally at 3000 of 10000 health (ally_health) takes one 807525 heal from the one gated Solar Flare of the after phase, none before the fixture"
+          }
+        ],
+        "ally_health": [
+          3000,
+          10000
+        ],
+        "ally_power": [
+          [
+            3,
+            50
+          ]
+        ]
+      },
+      "observe_source": "Owner ruling O-30 (class ADR 0039, superseding the energize line of class ADR 0028): Light of Absolution restores 2% of the missing Energy, Focus, Runic Power and Rage, as for health (O-13), and no mana. A damaging Solar Flare 807175 hit by a caster holding Light of Absolution 807523 casts 807524, whose Effect[0]/[1] trigger 807526 and 807525 on TargetB 30 SRC_AREA_ALLY (40 yd, the ally here stands on the caster's point). 807525 Effect[1] ENERGIZE_PCT MiscValue 0 (mana), Effect[2] MiscValue 1 (rage); 807526 Effect[0..2] MiscValue 2, 3, 6 (focus, energy, runic power); every ENERGIZE_PCT is BasePoints 1 + DieSides 1 = 2 ($807525s1). spell_ascension_sun_cleric_lights_of_absolution (AscensionSunClericAbilities.cpp Restore, bound to 807525 and 807526) replaces Spell::EffectEnergizePct: CalculatePct(GetMaxPower - GetPower, 2) for every power but mana, skipped for a player not active in the power type (Unit::CanReceivePowerFromSpell), no log for a 0 gain; mana restores nothing. The read is the logged gain (spell_energize_total, before the cap). Control: the phase before the Light of Absolution fixture (807523 by set_aura, the subject is the restore) reads 0. Pool: ally_power sets the class 19 (Templar) ally's energy to 50 of 100 (max_power arm) in both phases ahead of the trigger: 2% of the 50 missing = 1 (CalculatePct truncates 50 x 2 / 100 = 1), where a server that restores nothing logs 0 and the stock maximum-power base (Spell::EffectEnergizePct, SpellEffects.cpp:3040-3044, CalculatePct(GetMaxPower, 2)) logs 2. The pool arm reads the ally's energy after landing: 50 before, 51 after. The reach arm shows the restore landed on the ally. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and no value; nothing else found."
+    },
+    {
+      "spell": 807343,
+      "kind": "metric_delta",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807523,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "disable_regeneration": true,
+      "expire_ms": 500,
+      "measure_actor": "caster",
+      "name": "Lights of Absolution (Focus restore on a focus ally, partly empty pool)",
+      "variant": "restore_focus_partial",
+      "label_suffix": "restore_focus_partial",
+      "quote": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 807526,
+        "power": 2,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "after_at_most": 1,
+      "wait_ms": 1000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_class": 21,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "active_power",
+            "fields": {
+              "power": 2
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "the ally's class 21 (Ranger) is active in power type 2 (HasActivePowerType), read at the start of the trial; a wrong class voids it"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "max_power",
+            "fields": {
+              "power": 2
+            },
+            "before_expected": 100,
+            "expected": 100,
+            "tolerance": 0,
+            "source": "Unit::GetCreatePowers gives 100 for power type 2 (Unit.cpp:13984-14000), so the percent restore is of 100"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "power",
+            "fields": {
+              "power": 2
+            },
+            "before_expected": 50,
+            "expected": 51,
+            "tolerance": 0,
+            "source": "ally_power sets the class ally's focus to 50 of 100 in both phases ahead of the trigger (set_power on the ally, CoAGameplayTest.cpp:9073-9085), regeneration off: the before phase (no Light of Absolution) keeps 50, the after phase gains 2% of the 50 missing = 1, so 51; a server that restores nothing reads 50, the stock maximum-power base (Spell::EffectEnergizePct, SpellEffects.cpp:3040-3044, CalculatePct(GetMaxPower, 2)) reads 52"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807525,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "reach guard: 807524 triggers 807526 and 807525 on the same TargetB 30 area, and the ally at 3000 of 10000 health (ally_health) takes one 807525 heal from the one gated Solar Flare of the after phase, none before the fixture"
+          }
+        ],
+        "ally_health": [
+          3000,
+          10000
+        ],
+        "ally_power": [
+          [
+            2,
+            50
+          ]
+        ]
+      },
+      "observe_source": "Owner ruling O-30 (class ADR 0039, superseding the energize line of class ADR 0028): Light of Absolution restores 2% of the missing Energy, Focus, Runic Power and Rage, as for health (O-13), and no mana. A damaging Solar Flare 807175 hit by a caster holding Light of Absolution 807523 casts 807524, whose Effect[0]/[1] trigger 807526 and 807525 on TargetB 30 SRC_AREA_ALLY (40 yd, the ally here stands on the caster's point). 807525 Effect[1] ENERGIZE_PCT MiscValue 0 (mana), Effect[2] MiscValue 1 (rage); 807526 Effect[0..2] MiscValue 2, 3, 6 (focus, energy, runic power); every ENERGIZE_PCT is BasePoints 1 + DieSides 1 = 2 ($807525s1). spell_ascension_sun_cleric_lights_of_absolution (AscensionSunClericAbilities.cpp Restore, bound to 807525 and 807526) replaces Spell::EffectEnergizePct: CalculatePct(GetMaxPower - GetPower, 2) for every power but mana, skipped for a player not active in the power type (Unit::CanReceivePowerFromSpell), no log for a 0 gain; mana restores nothing. The read is the logged gain (spell_energize_total, before the cap). Control: the phase before the Light of Absolution fixture (807523 by set_aura, the subject is the restore) reads 0. Pool: ally_power sets the class 21 (Ranger) ally's focus to 50 of 100 (max_power arm) in both phases ahead of the trigger: 2% of the 50 missing = 1 (CalculatePct truncates 50 x 2 / 100 = 1), where a server that restores nothing logs 0 and the stock maximum-power base (Spell::EffectEnergizePct, SpellEffects.cpp:3040-3044, CalculatePct(GetMaxPower, 2)) logs 2. The pool arm reads the ally's focus after landing: 50 before, 51 after. The reach arm shows the restore landed on the ally. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and no value; nothing else found."
+    },
+    {
+      "spell": 807343,
+      "kind": "metric_delta",
+      "trigger_spell": 807175,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          807523,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "disable_regeneration": true,
+      "expire_ms": 500,
+      "measure_actor": "caster",
+      "name": "Lights of Absolution (Mana restore on a mana ally, partly empty pool)",
+      "variant": "restore_mana_partial",
+      "label_suffix": "restore_mana_partial",
+      "quote": "Damage dealt by Horusath Blast now grants you Light of Absolution for $807523d.",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 807525,
+        "power": 0,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "after_at_least": 0,
+      "after_at_most": 0,
+      "wait_ms": 1000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "active_power",
+            "fields": {
+              "power": 0
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "the ally is a Sun Cleric (the class under test), active in power type 0 (HasActivePowerType), read at the start of the trial"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "max_power",
+            "fields": {
+              "power": 0
+            },
+            "before_expected": 2868,
+            "expected": 2868,
+            "tolerance": 1,
+            "source": "player_class_stats BaseMana 1363 at level 60 (class file base_mana) + Player intellect bonus 20 + (119 - 20) x 15 = 1505 (GetManaBonusFromIntellect, the reference intellect of the class file, 119) = 2868, so 2% is 57.36 and CalculatePct truncates to 57"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "power",
+            "fields": {
+              "power": 0
+            },
+            "before_expected": 1400,
+            "expected": 1400,
+            "tolerance": 0,
+            "source": "ally_power sets the Sun Cleric ally's mana to 1400 of 2868 in both phases ahead of the trigger (set_power on the ally, CoAGameplayTest.cpp:9073-9085), regeneration off: O-30 restores no mana, so 1400 in both phases; the stock maximum-power base (Spell::EffectEnergizePct, SpellEffects.cpp:3040-3044, CalculatePct(GetMaxPower, 2)) reads 1457, a missing-mana base 1429"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807525,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "reach guard: 807524 triggers 807526 and 807525 on the same TargetB 30 area, and the ally at 3000 of 10000 health (ally_health) takes one 807525 heal from the one gated Solar Flare of the after phase, none before the fixture"
+          }
+        ],
+        "ally_health": [
+          3000,
+          10000
+        ],
+        "ally_power": [
+          [
+            0,
+            1400
+          ]
+        ]
+      },
+      "observe_source": "Owner ruling O-30 (class ADR 0039, superseding the energize line of class ADR 0028): Light of Absolution restores 2% of the missing Energy, Focus, Runic Power and Rage, as for health (O-13), and no mana. A damaging Solar Flare 807175 hit by a caster holding Light of Absolution 807523 casts 807524, whose Effect[0]/[1] trigger 807526 and 807525 on TargetB 30 SRC_AREA_ALLY (40 yd, the ally here stands on the caster's point). 807525 Effect[1] ENERGIZE_PCT MiscValue 0 (mana), Effect[2] MiscValue 1 (rage); 807526 Effect[0..2] MiscValue 2, 3, 6 (focus, energy, runic power); every ENERGIZE_PCT is BasePoints 1 + DieSides 1 = 2 ($807525s1). spell_ascension_sun_cleric_lights_of_absolution (AscensionSunClericAbilities.cpp Restore, bound to 807525 and 807526) replaces Spell::EffectEnergizePct: CalculatePct(GetMaxPower - GetPower, 2) for every power but mana, skipped for a player not active in the power type (Unit::CanReceivePowerFromSpell), no log for a 0 gain; mana restores nothing. The read is the logged gain (spell_energize_total, before the cap). Control: the phase before the Light of Absolution fixture (807523 by set_aura, the subject is the restore) reads 0. Mana: ally_power sets the Sun Cleric ally's mana to 1400 of 2868 (max_power arm) in both phases ahead of the trigger, a partly empty pool: O-30 restores no mana, 0, where the stock maximum-power base (Spell::EffectEnergizePct, SpellEffects.cpp:3040-3044, CalculatePct(GetMaxPower, 2)) logs 57 (2% of 2868) and a missing-mana base 29 (2% of 1468). The pool arm reads the ally's mana after landing: 1400 in both phases. The reach arm (the ally at 3000 of 10000 health, ally_health) shows one 807525 heal landed on the ally. Reference search 2026-11-22: bindmysoul talents snapshot (fetched 2026-07-22) carries the same sentence and no value; nothing else found."
+    },
+    {
       "spell": 572848,
       "kind": "metric_delta",
       "quote": "Your main-hand strike will deal Physical damage and your off-hand strike will deal Fire damage.",
