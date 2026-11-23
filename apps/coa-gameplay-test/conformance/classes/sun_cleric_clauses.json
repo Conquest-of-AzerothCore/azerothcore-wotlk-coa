@@ -3562,7 +3562,8 @@
       {
         "claim": "healed for 15% of their maximum health",
         "labels": [
-          "680646 behaviour_metric_delta heal_amount"
+          "680646 behaviour_metric_delta heal_amount",
+          "680646 behaviour_metric_delta heal_each_ally"
         ]
       },
       {
@@ -3574,18 +3575,31 @@
         ]
       },
       {
-        "claim": "healed once (the caster)",
+        "claim": "healed once per fall below 35%, armed again above 35% (owner ruling O-29)",
         "labels": [
-          "680646 behaviour_metric_delta heal_once",
-          "680646 behaviour_metric_delta heal_once_hits"
+          "680646 behaviour_metric_delta heal_each_fall",
+          "680646 behaviour_metric_delta heal_once_hits",
+          "680646 behaviour_metric_delta heal_stays_below",
+          "680646 behaviour_metric_delta heal_each_ally_fall_again"
         ]
       },
       {
-        "claim": "any ally, once for each ally",
-        "labels": []
+        "claim": "any ally, once for each ally, the Cleric not healed for an ally's fall (owner ruling O-29)",
+        "labels": [
+          "680646 behaviour_metric_delta heal_each_ally",
+          "680646 behaviour_metric_delta heal_each_ally_fall_again"
+        ]
+      },
+      {
+        "claim": "a holder already below 35% when the Scroll is cast is healed only at its next fall, not by a hit while below (owner ruling O-29, edge case)",
+        "labels": [
+          "680646 behaviour_metric_delta heal_below_at_cast",
+          "680646 behaviour_metric_delta heal_each_fall",
+          "680646 behaviour_metric_delta heal_each_ally_fall_again"
+        ]
       }
     ],
-    "reason": "Pair 20261122-080705 / 20261122-080744, build 22d8bd4d, class-file entries on server commit 0610a77c3b (no C++ change since the previous pair f7a4e43e), no flip, 26 of 26 ok in both runs. Control = the same strike without the Scroll (before phase): no heal. Caster at 3800 of 10000, Grave Coil takes it to 33.8% (below 35%): heal 681383 read 1500 = 15% of 10000, tolerance 15. Threshold bracket: heal at 33.8% excludes a threshold at or below 33.8% (31.5% included); no heal at 37.9% (start 4215, hit about 424) excludes a threshold above 37.9% (38.5% and 50%); start 6000 (55.8%): 0. So the threshold lies in (33.8%, 37.9%]. Five hits: the heal total stays 1500; that the five hits landed is read by heal_once_hits (spell_damage_count of Grave Coil 47632 by the striker on the caster, a gain of 5), and the second fall below 35% follows from the DBC hit of at least 420 (600 less 30%). One maximum health only (10000): a flat 1500 would also pass. All reads are on the caster; \"any ally, once for each ally\" is a finding for the owner packet, with the shared once flag recorded as a lead. Reference search: as the previous clause; nothing else found. Finding (D-242): with the ally struck below 35% after the caster, the ally arm reads 0 heal events at the ally (expected 1) in every run of the three archived entries heal_each_ally, _a and _b (removed-entries.json in .agents/plans/sun-cleric-rb1/rev1fix); the heal 1500 lands on the Cleric once per cast, and an ally that stays above 35% reads 0. The tooltip claim for allies is therefore not met as written: owner packet, no server change on this check. Pair 20261122-230808 / 20261122-230857 (recheck rc1 c1), build 7b299d888600, server commit 346b5c7dbe45+, no flip, 80 of 80 entries ok in both runs, cast_failures empty on every entry changed here. The once check now reads that five Grave Coil hits landed (heal_once_hits, gain 5) and derives the second fall below 35% from the DBC hit."
+    "reason": "Pair 20261122-080705 / 20261122-080744, build 22d8bd4d, class-file entries on server commit 0610a77c3b (no C++ change since the previous pair f7a4e43e), no flip, 26 of 26 ok in both runs. Control = the same strike without the Scroll (before phase): no heal. Caster at 3800 of 10000, Grave Coil takes it to 33.8% (below 35%): heal 681383 read 1500 = 15% of 10000, tolerance 15. Threshold bracket: heal at 33.8% excludes a threshold at or below 33.8% (31.5% included); no heal at 37.9% (start 4215, hit about 424) excludes a threshold above 37.9% (38.5% and 50%); start 6000 (55.8%): 0. So the threshold lies in (33.8%, 37.9%]. Five hits: the heal total stays 1500; that the five hits landed is read by heal_once_hits (spell_damage_count of Grave Coil 47632 by the striker on the caster, a gain of 5), and the second fall below 35% follows from the DBC hit of at least 420 (600 less 30%). One maximum health only (10000): a flat 1500 would also pass. All reads are on the caster; \"any ally, once for each ally\" is a finding for the owner packet, with the shared once flag recorded as a lead. Reference search: as the previous clause; nothing else found. Finding (D-242): with the ally struck below 35% after the caster, the ally arm reads 0 heal events at the ally (expected 1) in every run of the three archived entries heal_each_ally, _a and _b (removed-entries.json in .agents/plans/sun-cleric-rb1/rev1fix); the heal 1500 lands on the Cleric once per cast, and an ally that stays above 35% reads 0. The tooltip claim for allies is therefore not met as written: owner packet, no server change on this check. Pair 20261122-230808 / 20261122-230857 (recheck rc1 c1), build 7b299d888600, server commit 346b5c7dbe45+, no flip, 80 of 80 entries ok in both runs, cast_failures empty on every entry changed here. The once check now reads that five Grave Coil hits landed (heal_once_hits, gain 5) and derives the second fall below 35% from the DBC hit. Owner ruling O-29 (packet \"187 Scroll of Hope\"), Sun Cleric ADR 0040: owner reading 'once per fall': the ally that falls below 35% is healed, once per ally, armed again when it goes back above 35% (once per crossing, per ally); the Cleric is not healed for an ally's fall. Fix: the check accepts a hit that takes the holder from at least 35% to below 35% (health after + damage), and the holder casts 681383 on itself with the Cleric as original caster (AscensionSunClericEvents.cpp:79-81, :299-302); the shared script value is gone. heal_once (1500 over five hits) becomes heal_each_fall (3000: falls at the first and fifth hit, 3620 = 36.2% before the fifth). Before, pre-fix build 4af206be7c8c (commit 06c926cb875e+), pair 20261123-075048 / 20261123-075409, no flip: heal_each_ally ally 0, ally2 0, Cleric 1 heal (ally health 3376-3377, not healed); heal_each_ally_fall_again ally 0, ally2 0, Cleric 1; heal_each_fall 1500; heal_stays_below 1. After, build 291d19c46d43 (same commit + fix), pair 20261123-075539 / 20261123-075629, no flip, 14 of 14 ok in both runs: heal_each_ally ally 1, ally2 1, Cleric 0, ally health 4876 (expected 4880); heal_each_ally_fall_again 2 heals per ally, Cleric 0, ally health 4680 (expected 4700, tolerance 40 for the 5 to 6 extra per hit); heal_each_fall 3000; heal_stays_below 1 heal with Necrotic Poison 54121 (-99% healing taken) as fixture, health 1499 (expected 1515); heal_amount 1500, heal_above 0, heal_close_above 0, heal_once_hits 5 unchanged. Stated behaviour, not read in-game (ADR 0040 Consequences): a holder already below 35% when the Scroll is cast has not fallen and is healed only at its next fall (tooltip \"falls below 35%\"); the Cleric is a party member, so its own fall re-arms and triggers its own heal. Edge case, holder below 35% at the cast: entry heal_below_at_cast (caster set once to 30%, Scroll cast, one Grave Coil 1600 ms later) expects 0 heals of 681383, the hit landed (damage count 0 to 1) and health 3000 to 2580; the control is heal_each_fall and heal_amount (holder above 35% falling: 1 heal) and the re-fall arm is heal_each_ally_fall_again. Limit: no health read at the cast itself (tool need); the single set and the end health read bracket it. Pair 20261123-080629 / 20261123-080717 (stamps in the verify-all clock), no flip, 15 of 15 ok in both runs: heal count 0 before and after, Grave Coil damage count 0 then 1, health 3000 then 2577 and 2577 (expected 2580, tolerance 40)."
   },
   {
     "spell": 680647,

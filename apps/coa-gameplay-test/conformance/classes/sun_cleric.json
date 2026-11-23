@@ -19643,7 +19643,7 @@
       "expected": 1020,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Reduction: the cumulative amount Grave Coil dealt to the caster is read after each phase, c in the before phase (no Scroll) and c + h after the Scroll (one more hit h). The control hit measured 605 and 606 in the counted pair, not the 600 of the DBC base; the extra 5 to 6 is not explained and its cause is not established. The verdict therefore judges the gain against the measured control hit, as the ratio (c + h) / c = 1 + h / c = 2 - r, expected 1.70 for r = 30% with tolerance 0.02 (the 2-point band of 28% to 32% is 1.68 to 1.72): a 33% reduction reads 1.67 and a 27% reduction 1.73, both outside, and a control hit below 600 fails the floor. Scope: Shadow only (Grave Coil is Shadow); MiscValue 126 covers the six schools, and no other school and no physical control is read here. Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil, so it does not touch the hits read here, and a resisted hit could only lower a reading. Read timing (rc2): the enemy strike 47632 (Speed 24) lands 5/24 = 208 ms after its cast; the read after the strike moves from 300 to 400 ms (margin 192 ms).",
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code (Sun Cleric ADR 0040, owner ruling O-29): AscensionSunClericEvents.cpp:79-81 accepts a received damaging hit that takes the aura's holder from at least 35% to below 35% of its maximum health (a fall; health before the hit = health after + damage), :299-302 has the holder cast 681383 on itself with the Cleric as original caster, so the heal lands on the unit that fell, once per fall. The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Reduction: the cumulative amount Grave Coil dealt to the caster is read after each phase, c in the before phase (no Scroll) and c + h after the Scroll (one more hit h). The control hit measured 605 and 606 in the counted pair, not the 600 of the DBC base; the extra 5 to 6 is not explained and its cause is not established. The verdict therefore judges the gain against the measured control hit, as the ratio (c + h) / c = 1 + h / c = 2 - r, expected 1.70 for r = 30% with tolerance 0.02 (the 2-point band of 28% to 32% is 1.68 to 1.72): a 33% reduction reads 1.67 and a 27% reduction 1.73, both outside, and a control hit below 600 fails the floor. Scope: Shadow only (Grave Coil is Shadow); MiscValue 126 covers the six schools, and no other school and no physical control is read here. Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil, so it does not touch the hits read here, and a resisted hit could only lower a reading. Read timing (rc2): the enemy strike 47632 (Speed 24) lands 5/24 = 208 ms after its cast; the read after the strike moves from 300 to 400 ms (margin 192 ms).",
       "phase_auras": [
         [
           823764,
@@ -19681,7 +19681,7 @@
       "expected": 1,
       "wait_ms": 9100,
       "expire_ms": 500,
-      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Duration: the aura 680646 on the caster is present at about 9100 ms after the cast (above 9050 ms), so the duration excludes 9000 ms (-10%); the before phase has no cast and reads 0.",
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code (Sun Cleric ADR 0040, owner ruling O-29): AscensionSunClericEvents.cpp:79-81 accepts a received damaging hit that takes the aura's holder from at least 35% to below 35% of its maximum health (a fall; health before the hit = health after + damage), :299-302 has the holder cast 681383 on itself with the Cleric as original caster, so the heal lands on the unit that fell, once per fall. The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Duration: the aura 680646 on the caster is present at about 9100 ms after the cast (above 9050 ms), so the duration excludes 9000 ms (-10%); the before phase has no cast and reads 0.",
       "game_time": {
         "after": [
           9050,
@@ -19707,7 +19707,7 @@
       "expected": 0,
       "wait_ms": 10750,
       "expire_ms": 500,
-      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Duration: the aura 680646 on the caster is gone at about 10750 ms after the cast (at most 10950 ms), so the duration excludes 11000 ms (+10%); the before phase has no cast and reads 0.",
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code (Sun Cleric ADR 0040, owner ruling O-29): AscensionSunClericEvents.cpp:79-81 accepts a received damaging hit that takes the aura's holder from at least 35% to below 35% of its maximum health (a fall; health before the hit = health after + damage), :299-302 has the holder cast 681383 on itself with the Cleric as original caster, so the heal lands on the unit that fell, once per fall. The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Duration: the aura 680646 on the caster is gone at about 10750 ms after the cast (at most 10950 ms), so the duration excludes 11000 ms (+10%); the before phase has no cast and reads 0.",
       "game_time": {
         "after": [
           10600,
@@ -19733,7 +19733,7 @@
       "expected": 1,
       "wait_ms": 1000,
       "expire_ms": 500,
-      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Reach: five grouped allies (ally to ally5, the last two in raid subgroup 2) stand beside the caster; the aura 680646 is read on ally and, in one arm, summed over ally2 to ally5: 0 in the uncast control, 1 and 4 after the Scroll. The distance is not measured here: the 15 yd radius claim is not covered by this entry (tool need returned).",
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code (Sun Cleric ADR 0040, owner ruling O-29): AscensionSunClericEvents.cpp:79-81 accepts a received damaging hit that takes the aura's holder from at least 35% to below 35% of its maximum health (a fall; health before the hit = health after + damage), :299-302 has the holder cast 681383 on itself with the Cleric as original caster, so the heal lands on the unit that fell, once per fall. The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Reach: five grouped allies (ally to ally5, the last two in raid subgroup 2) stand beside the caster; the aura 680646 is read on ally and, in one arm, summed over ally2 to ally5: 0 in the uncast control, 1 and 4 after the Scroll. The distance is not measured here: the 15 yd radius claim is not covered by this entry (tool need returned).",
       "measure_actor": "ally",
       "cast_power": 1000,
       "ally_arm": {
@@ -19777,7 +19777,7 @@
       "expected": 1,
       "wait_ms": 1000,
       "expire_ms": 500,
-      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Edge: the area aura of Effect[0] selects grouped units with Acore::AnyGroupedUnitInObjectRangeCheck, whose last test is source->IsWithinDistInMap(unit, range) (GridNotifiers.h:1051), 3D and with both object sizes added (Object.cpp:1252-1264 _IsWithinDist with incOwnRadius and incTargetRadius). Radius index 18 = 15 yd; both players are Human (race 1), whose model infos 49 and 50 have combat reach 1.5 (creature_model_info, data/sql/base/db_world), so the object sizes add 3.0 yd and the reach is 18.0 yd between the two units. The caster is moved dx yd along x from the ally before the Scroll cast (relocate_before_trigger; the ally keeps its spawn and the harness relocates with dz 0, so the 3D and the 2D distances agree), and the 2D distance between ally and caster is read in the arm. Bracket 10% either side of 15 yd: a radius of 13.5 yd reaches 16.5 yd and a radius of 16.5 yd reaches 19.5 yd; an ally at 17.25 yd is out of the 13.5 yd reach and an ally at 18.75 yd is inside the 19.5 yd reach. In: the ally at 17.25 yd (2D, read) holds the aura, so the radius is above 14.25 yd (reach above 17.25 yd), which excludes 13.5 yd.",
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code (Sun Cleric ADR 0040, owner ruling O-29): AscensionSunClericEvents.cpp:79-81 accepts a received damaging hit that takes the aura's holder from at least 35% to below 35% of its maximum health (a fall; health before the hit = health after + damage), :299-302 has the holder cast 681383 on itself with the Cleric as original caster, so the heal lands on the unit that fell, once per fall. The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Edge: the area aura of Effect[0] selects grouped units with Acore::AnyGroupedUnitInObjectRangeCheck, whose last test is source->IsWithinDistInMap(unit, range) (GridNotifiers.h:1051), 3D and with both object sizes added (Object.cpp:1252-1264 _IsWithinDist with incOwnRadius and incTargetRadius). Radius index 18 = 15 yd; both players are Human (race 1), whose model infos 49 and 50 have combat reach 1.5 (creature_model_info, data/sql/base/db_world), so the object sizes add 3.0 yd and the reach is 18.0 yd between the two units. The caster is moved dx yd along x from the ally before the Scroll cast (relocate_before_trigger; the ally keeps its spawn and the harness relocates with dz 0, so the 3D and the 2D distances agree), and the 2D distance between ally and caster is read in the arm. Bracket 10% either side of 15 yd: a radius of 13.5 yd reaches 16.5 yd and a radius of 16.5 yd reaches 19.5 yd; an ally at 17.25 yd is out of the 13.5 yd reach and an ally at 18.75 yd is inside the 19.5 yd reach. In: the ally at 17.25 yd (2D, read) holds the aura, so the radius is above 14.25 yd (reach above 17.25 yd), which excludes 13.5 yd.",
       "measure_actor": "ally",
       "cast_power": 1000,
       "ally_arm": {
@@ -19833,7 +19833,7 @@
       "expected": 0,
       "wait_ms": 1000,
       "expire_ms": 500,
-      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Edge: the area aura of Effect[0] selects grouped units with Acore::AnyGroupedUnitInObjectRangeCheck, whose last test is source->IsWithinDistInMap(unit, range) (GridNotifiers.h:1051), 3D and with both object sizes added (Object.cpp:1252-1264 _IsWithinDist with incOwnRadius and incTargetRadius). Radius index 18 = 15 yd; both players are Human (race 1), whose model infos 49 and 50 have combat reach 1.5 (creature_model_info, data/sql/base/db_world), so the object sizes add 3.0 yd and the reach is 18.0 yd between the two units. The caster is moved dx yd along x from the ally before the Scroll cast (relocate_before_trigger; the ally keeps its spawn and the harness relocates with dz 0, so the 3D and the 2D distances agree), and the 2D distance between ally and caster is read in the arm. Bracket 10% either side of 15 yd: a radius of 13.5 yd reaches 16.5 yd and a radius of 16.5 yd reaches 19.5 yd; an ally at 17.25 yd is out of the 13.5 yd reach and an ally at 18.75 yd is inside the 19.5 yd reach. Out: the ally at 18.75 yd (2D, read) has no aura while the caster holds it, so the radius is below 15.75 yd (reach below 18.75 yd), which excludes 16.5 yd.",
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code (Sun Cleric ADR 0040, owner ruling O-29): AscensionSunClericEvents.cpp:79-81 accepts a received damaging hit that takes the aura's holder from at least 35% to below 35% of its maximum health (a fall; health before the hit = health after + damage), :299-302 has the holder cast 681383 on itself with the Cleric as original caster, so the heal lands on the unit that fell, once per fall. The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Edge: the area aura of Effect[0] selects grouped units with Acore::AnyGroupedUnitInObjectRangeCheck, whose last test is source->IsWithinDistInMap(unit, range) (GridNotifiers.h:1051), 3D and with both object sizes added (Object.cpp:1252-1264 _IsWithinDist with incOwnRadius and incTargetRadius). Radius index 18 = 15 yd; both players are Human (race 1), whose model infos 49 and 50 have combat reach 1.5 (creature_model_info, data/sql/base/db_world), so the object sizes add 3.0 yd and the reach is 18.0 yd between the two units. The caster is moved dx yd along x from the ally before the Scroll cast (relocate_before_trigger; the ally keeps its spawn and the harness relocates with dz 0, so the 3D and the 2D distances agree), and the 2D distance between ally and caster is read in the arm. Bracket 10% either side of 15 yd: a radius of 13.5 yd reaches 16.5 yd and a radius of 16.5 yd reaches 19.5 yd; an ally at 17.25 yd is out of the 13.5 yd reach and an ally at 18.75 yd is inside the 19.5 yd reach. Out: the ally at 18.75 yd (2D, read) has no aura while the caster holds it, so the radius is below 15.75 yd (reach below 18.75 yd), which excludes 16.5 yd.",
       "measure_actor": "ally",
       "cast_power": 1000,
       "ally_arm": {
@@ -19890,7 +19890,7 @@
       "expected": 1500,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Heal: the caster (a party member holding the aura) is set to 3800 of 10000 health; Grave Coil takes it to 3380 (33.8%, below 35%; 3200 without the reduction, also below); the heal 681383 the caster casts at itself is read: 0 in the before phase (no Scroll, no heal) and 15% x 10000 = 1500 after, tolerance 15 (1%, excludes 10% either side). The harness striker can only target the caster or a creature the caster owns (behaviours.py:1655-1662), so this reads the caster only: it does not show that an ally's aura procs, which stays open as the \"any ally\" claim. The read uses one maximum health (10000): a flat 1500 heal would also pass, so the 15% scaling is not separated from a flat amount here. Threshold: the heal at 33.8% after the hit excludes a threshold at or below 33.8% (33% and 31.5%); heal_close_above is the read from above. Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil, so it does not touch the hits read here, and a resisted hit could only lower a reading. Read timing (rc2): the enemy strike 47632 (Speed 24) lands 5/24 = 208 ms after its cast; the read after the strike moves from 300 to 400 ms (margin 192 ms).",
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code (Sun Cleric ADR 0040, owner ruling O-29): AscensionSunClericEvents.cpp:79-81 accepts a received damaging hit that takes the aura's holder from at least 35% to below 35% of its maximum health (a fall; health before the hit = health after + damage), :299-302 has the holder cast 681383 on itself with the Cleric as original caster, so the heal lands on the unit that fell, once per fall. The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Heal: the caster (a party member holding the aura) is set to 3800 of 10000 health; Grave Coil takes it to 3380 (33.8%, below 35%; 3200 without the reduction, also below); the heal 681383 the caster casts at itself is read: 0 in the before phase (no Scroll, no heal) and 15% x 10000 = 1500 after, tolerance 15 (1%, excludes 10% either side). This entry reads the caster only; the allies' falls are read by heal_each_ally and heal_each_ally_fall_again (ally_arm ally_strikes). The read uses one maximum health (10000): a flat 1500 heal would also pass, so the 15% scaling is not separated from a flat amount here. Threshold: the heal at 33.8% after the hit excludes a threshold at or below 33.8% (33% and 31.5%); heal_close_above is the read from above. Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil, so it does not touch the hits read here, and a resisted hit could only lower a reading. Read timing (rc2): the enemy strike 47632 (Speed 24) lands 5/24 = 208 ms after its cast; the read after the strike moves from 300 to 400 ms (margin 192 ms).",
       "phase_auras": [
         [
           823764,
@@ -19911,10 +19911,10 @@
     },
     {
       "spell": 680646,
-      "name": "Scroll of Hope (healed once)",
+      "name": "Scroll of Hope (healed again on the second fall below 35%)",
       "kind": "metric_delta",
-      "variant": "heal_once",
-      "label_suffix": "heal_once",
+      "variant": "heal_each_fall",
+      "label_suffix": "heal_each_fall",
       "quote": "If any ally falls below 35% of their maximum health while this is active they are instantly healed once for $681383s1% of their maximum health.",
       "trigger_spell": 680646,
       "target": "caster",
@@ -19925,10 +19925,10 @@
         "target": "caster"
       },
       "before_expected": 0,
-      "expected": 1500,
+      "expected": 3000,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Once: the same start, then five hits 300 ms apart. The 35% line is 3500 of 10000. A Grave Coil hit is 600 by the DBC (BasePoints 599 + 1 die side) and 420 after the Scroll's own -30%; the first hit takes 3800 below the line (any hit above 300 does), so the heal of 1500 fires; after it the health is at most 3800 - 420 + 1500 = 4880, and four more hits of at least 420 take it to at most 3200, below the line again: for five landed hits the fifth is at the latest a second fall below 35%, so a second heal would add 1500 and the sum stays 1500, tolerance 15. That the five hits landed is read by the heal_once_hits entry (spell_damage_count of 47632 by the striker on the caster, a gain of 5 in the Scroll phase). \"Once\" is read on the caster only; the once flag is the script value of the shared area Aura (AscensionSunClericEvents.cpp:289, checked at :79), so on this server one heal per cast for the whole group is possible, which a caster-only run cannot tell from one heal per ally. Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil, so it does not touch the hits read here, and a resisted hit could only lower a reading. Read timing (rc2): the enemy strike 47632 (Speed 24) lands 5/24 = 208 ms after its cast; the read after the strike moves from 300 to 400 ms (margin 192 ms).",
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code (Sun Cleric ADR 0040, owner ruling O-29): AscensionSunClericEvents.cpp:79-81 accepts a received damaging hit that takes the aura's holder from at least 35% to below 35% of its maximum health (a fall; health before the hit = health after + damage), :299-302 has the holder cast 681383 on itself with the Cleric as original caster, so the heal lands on the unit that fell, once per fall. The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Owner ruling O-29 (packet \"187 Scroll of Hope\", ledger 198): the ally that falls below 35% is healed, once per ally; an ally that goes back above 35% is armed again for its next fall (once per crossing, per ally); the Cleric is not healed for an ally's fall. Trial on the caster: Grave Coil strikes five times from 3800 of 10000: 3380 (first fall, heal to 4880), 4460, 4040, 3620 (36.2%, above 35%), then 3200 (second fall, heal to 4700); the heal total of 681383 on the caster is 0 in the before phase (no Scroll) and 2 x 1500 = 3000 after, tolerance 15. heal_once_hits reads that the five hits landed. Hit sizes from the DBC: Grave Coil 600 without the Scroll and 420 with its 30% reduction; the counted pairs of ledger 197 read 605 to 606 and 424 (cause of the extra 5 to 6 not established), so the health tolerances cover 6 per hit and stay far below one 1500 heal. Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil.",
       "phase_auras": [
         [
           823764,
@@ -19966,7 +19966,7 @@
       "expected": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Threshold control: the caster starts at 6000 of 10000, Grave Coil takes it to 5580 (55.8%) with the Scroll active: no heal in either phase (the positive reading is heal_amount, which differs only by the starting health). Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil, so it does not touch the hits read here, and a resisted hit could only lower a reading. Read timing (rc2): the enemy strike 47632 (Speed 24) lands 5/24 = 208 ms after its cast; the read after the strike moves from 300 to 400 ms (margin 192 ms).",
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code (Sun Cleric ADR 0040, owner ruling O-29): AscensionSunClericEvents.cpp:79-81 accepts a received damaging hit that takes the aura's holder from at least 35% to below 35% of its maximum health (a fall; health before the hit = health after + damage), :299-302 has the holder cast 681383 on itself with the Cleric as original caster, so the heal lands on the unit that fell, once per fall. The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Threshold control: the caster starts at 6000 of 10000, Grave Coil takes it to 5580 (55.8%) with the Scroll active: no heal in either phase (the positive reading is heal_amount, which differs only by the starting health). Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil, so it does not touch the hits read here, and a resisted hit could only lower a reading. Read timing (rc2): the enemy strike 47632 (Speed 24) lands 5/24 = 208 ms after its cast; the read after the strike moves from 300 to 400 ms (margin 192 ms).",
       "phase_auras": [
         [
           823764,
@@ -20004,7 +20004,7 @@
       "expected": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code: AscensionSunClericEvents.cpp:78 accepts a received damaging hit while the aura's target is below 35% health and the aura's script value is unset, :288-290 sets the value and casts 681383 at the target (once per aura). The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Threshold from above: the caster starts at 4215 of 10000, Grave Coil (about 424 with the Scroll, 420 by the DBC base) takes it to about 3791 (37.9%) with the Scroll active: no heal in either phase. A threshold above 37.9% would heal here, which excludes 38.5% (10% above 35%) and 50%; the heal at 33.8% in heal_amount excludes a threshold at or below 33.8% (31.5% included), so the threshold lies in (33.8%, 37.9%]. The 37% edge of the 2-point band stays inside it. Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil, so it does not touch the hits read here, and a resisted hit could only lower a reading. Read timing (rc2): the enemy strike 47632 (Speed 24) lands 5/24 = 208 ms after its cast; the read after the strike moves from 300 to 400 ms (margin 192 ms).",
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code (Sun Cleric ADR 0040, owner ruling O-29): AscensionSunClericEvents.cpp:79-81 accepts a received damaging hit that takes the aura's holder from at least 35% to below 35% of its maximum health (a fall; health before the hit = health after + damage), :299-302 has the holder cast 681383 on itself with the Cleric as original caster, so the heal lands on the unit that fell, once per fall. The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Threshold from above: the caster starts at 4215 of 10000, Grave Coil (about 424 with the Scroll, 420 by the DBC base) takes it to about 3791 (37.9%) with the Scroll active: no heal in either phase. A threshold above 37.9% would heal here, which excludes 38.5% (10% above 35%) and 50%; the heal at 33.8% in heal_amount excludes a threshold at or below 33.8% (31.5% included), so the threshold lies in (33.8%, 37.9%]. The 37% edge of the 2-point band stays inside it. Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil, so it does not touch the hits read here, and a resisted hit could only lower a reading. Read timing (rc2): the enemy strike 47632 (Speed 24) lands 5/24 = 208 ms after its cast; the read after the strike moves from 300 to 400 ms (margin 192 ms).",
       "phase_auras": [
         [
           823764,
@@ -20022,6 +20022,496 @@
         "after_trigger_ms": 1600
       },
       "tolerance": 1
+    },
+    {
+      "spell": 680646,
+      "name": "Scroll of Hope (each ally falling below 35% is healed, not the Cleric)",
+      "kind": "metric_delta",
+      "variant": "heal_each_ally",
+      "label_suffix": "heal_each_ally",
+      "quote": "If any ally falls below 35% of their maximum health while this is active they are instantly healed once for $681383s1% of their maximum health.",
+      "trigger_spell": 680646,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 681383,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code (Sun Cleric ADR 0040, owner ruling O-29): AscensionSunClericEvents.cpp:79-81 accepts a received damaging hit that takes the aura's holder from at least 35% to below 35% of its maximum health (a fall; health before the hit = health after + damage), :299-302 has the holder cast 681383 on itself with the Cleric as original caster, so the heal lands on the unit that fell, once per fall. The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Owner ruling O-29 (packet \"187 Scroll of Hope\", ledger 198): the ally that falls below 35% is healed, once per ally; an ally that goes back above 35% is armed again for its next fall (once per crossing, per ally); the Cleric is not healed for an ally's fall. Trial: the caster stays above 35% (9000 of 10000, 8580 after its hit, DBC), then ally and ally2 (ally_arm ally_strikes, health 3800) are each struck once by Grave Coil, from 3800 to 3380 (33.8%). Expected: one heal 681383 on ally and one on ally2, none on the Cleric (main reading: the heal total on the caster, 0). Heals are counted per unit target on the caster's log (681383 is credited to the Cleric as its original caster). Hit sizes from the DBC: Grave Coil 600 without the Scroll and 420 with its 30% reduction; the counted pairs of ledger 197 read 605 to 606 and 424 (cause of the extra 5 to 6 not established), so the health tolerances cover 6 per hit and stay far below one 1500 heal. Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "strike": {
+        "spell": 47632,
+        "health": 9000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 400,
+        "after_trigger_ms": 1600
+      },
+      "tolerance": 15,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 2,
+        "ally_strikes": {
+          "health": 3800
+        },
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681383,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "O-29: ally is healed once per fall below 35% (1 after 1 strike(s) from 3800 of 10000); none in the uncast control"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681383,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "O-29: ally2 is healed once per fall below 35% (1 after 1 strike(s) from 3800 of 10000); none in the uncast control"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681383,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "O-29: the Cleric is not healed for an ally's fall (the caster stays above 35% from 9000)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the striker's Grave Coil landed on ally 1 time(s) per phase (cumulative), so a missing heal is not a missing hit"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "ally2"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "the striker's Grave Coil landed on ally2 1 time(s) per phase (cumulative), so a missing heal is not a missing hit"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680646
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "ally holds the Scroll's area aura in the after phase only (reach_raid reads the same)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680646
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "ally2 holds the Scroll's area aura in the after phase only (reach_raid reads the same)"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "health",
+            "before_expected": 3200,
+            "expected": 4880,
+            "tolerance": 15,
+            "source": "ally: 3200 before (3800 less 1 x 600, no Scroll); 4880 after (3800 less 1 x 420, plus 1 heal(s) of 15% of 10000 = 1500 each)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "health",
+            "before_expected": 3200,
+            "expected": 4880,
+            "tolerance": 15,
+            "source": "ally2: 3200 before (3800 less 1 x 600, no Scroll); 4880 after (3800 less 1 x 420, plus 1 heal(s) of 15% of 10000 = 1500 each)"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 680646,
+      "name": "Scroll of Hope (an ally raised above 35% is healed again on its next fall)",
+      "kind": "metric_delta",
+      "variant": "heal_each_ally_fall_again",
+      "label_suffix": "heal_each_ally_fall_again",
+      "quote": "If any ally falls below 35% of their maximum health while this is active they are instantly healed once for $681383s1% of their maximum health.",
+      "trigger_spell": 680646,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 681383,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code (Sun Cleric ADR 0040, owner ruling O-29): AscensionSunClericEvents.cpp:79-81 accepts a received damaging hit that takes the aura's holder from at least 35% to below 35% of its maximum health (a fall; health before the hit = health after + damage), :299-302 has the holder cast 681383 on itself with the Cleric as original caster, so the heal lands on the unit that fell, once per fall. The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Owner ruling O-29 (packet \"187 Scroll of Hope\", ledger 198): the ally that falls below 35% is healed, once per ally; an ally that goes back above 35% is armed again for its next fall (once per crossing, per ally); the Cleric is not healed for an ally's fall. Trial: the caster stays above 35% (9000, 6900 after five hits, DBC); ally and ally2 (ally_strikes, health 3800) are each struck five times by Grave Coil: 3800 to 3380 (first fall, heal to 4880), 4460, 4040, 3620 (36.2%, above 35%), then 3200 (second fall, heal to 4700). Expected: two heals 681383 on each ally, none on the Cleric. Timing: the last ally strike lands about 7.6 s after the Scroll, inside its 10 s. Hit sizes from the DBC: Grave Coil 600 without the Scroll and 420 with its 30% reduction; the counted pairs of ledger 197 read 605 to 606 and 424 (cause of the extra 5 to 6 not established), so the health tolerances cover 6 per hit and stay far below one 1500 heal. Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "strike": {
+        "spell": 47632,
+        "health": 9000,
+        "max_health": 10000,
+        "count": 5,
+        "wait_ms": 400,
+        "after_trigger_ms": 1600
+      },
+      "tolerance": 15,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 2,
+        "ally_strikes": {
+          "health": 3800
+        },
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681383,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "O-29: ally is healed once per fall below 35% (2 after 5 strike(s) from 3800 of 10000); none in the uncast control"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681383,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "O-29: ally2 is healed once per fall below 35% (2 after 5 strike(s) from 3800 of 10000); none in the uncast control"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681383,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "O-29: the Cleric is not healed for an ally's fall (the caster stays above 35% from 9000)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "ally"
+            },
+            "before_expected": 5,
+            "expected": 10,
+            "tolerance": 0,
+            "source": "the striker's Grave Coil landed on ally 5 time(s) per phase (cumulative), so a missing heal is not a missing hit"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "ally2"
+            },
+            "before_expected": 5,
+            "expected": 10,
+            "tolerance": 0,
+            "source": "the striker's Grave Coil landed on ally2 5 time(s) per phase (cumulative), so a missing heal is not a missing hit"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680646
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "ally holds the Scroll's area aura in the after phase only (reach_raid reads the same)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680646
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "ally2 holds the Scroll's area aura in the after phase only (reach_raid reads the same)"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "health",
+            "before_expected": 800,
+            "expected": 4700,
+            "tolerance": 40,
+            "source": "ally: 800 before (3800 less 5 x 600, no Scroll); 4700 after (3800 less 5 x 420, plus 2 heal(s) of 15% of 10000 = 1500 each)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "health",
+            "before_expected": 800,
+            "expected": 4700,
+            "tolerance": 40,
+            "source": "ally2: 800 before (3800 less 5 x 600, no Scroll); 4700 after (3800 less 5 x 420, plus 2 heal(s) of 15% of 10000 = 1500 each)"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 680646,
+      "name": "Scroll of Hope (a unit still below 35% after the heal is not healed twice)",
+      "kind": "metric_delta",
+      "variant": "heal_stays_below",
+      "label_suffix": "heal_stays_below",
+      "quote": "If any ally falls below 35% of their maximum health while this is active they are instantly healed once for $681383s1% of their maximum health.",
+      "trigger_spell": 680646,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 681383,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "680646 Scroll of Hope Effect[0] APPLY_AREA_AURA_RAID TargetA 1 (caster), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 126 (the six magic schools), BasePoints -31 (-30 percent, $s1), radius index 18 (15 yd, $a1), DurationIndex 1 (10000 ms, $d); Effect[1] APPLY_AREA_AURA_RAID aura 42 PROC_TRIGGER_SPELL 681383; 681383 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 14 (+1 = 15 percent, $681383s1) on the caster-side target. Code (Sun Cleric ADR 0040, owner ruling O-29): AscensionSunClericEvents.cpp:79-81 accepts a received damaging hit that takes the aura's holder from at least 35% to below 35% of its maximum health (a fall; health before the hit = health after + damage), :299-302 has the holder cast 681383 on itself with the Cleric as original caster, so the heal lands on the unit that fell, once per fall. The Scroll is cast for real in the after phase only (cast_in_before false; 680646 has a 300000 ms cooldown, reset before the cast); the before phase is the control: the same strike without the Scroll. Strikes come from the passive striker (creature 36, spell hit bonus 100) with Grave Coil 47632 (Effect[0] SCHOOL_DAMAGE, Shadow, BasePoints 599 + 1 die side = 600, DmgClass magic, one hit, no tick), 1600 ms after the Scroll. Reference search 2026-11-22: coa-history spells 680646, 681383 and 47632: 0 events in 186 logs; ~/CoaServer/reference/snapshots/bindmysoul talents.normalized.json reads \"reducing Magic damage taken by party and raid members within 15 yds by -30% for 10 seconds ... below 35% ... healed once for 15%\" (agrees with the DBC); nothing else found. Owner ruling O-29 (packet \"187 Scroll of Hope\", ledger 198): the ally that falls below 35% is healed, once per ally; an ally that goes back above 35% is armed again for its next fall (once per crossing, per ally); the Cleric is not healed for an ally's fall. Trial on the caster, which holds the area aura as every party member does: phase aura 54121 Necrotic Poison (Effect[0] aura 118 SPELL_AURA_MOD_HEALING_PCT, BasePoints -100 = -99%, MiscValue 127, DurationIndex 9 = 30000 ms, DBC) is a precondition fixture in both phases, so the 15% heal of 10000 lands as 15 and cannot lift the caster back above 35%. Grave Coil strikes five times from 3600 of 10000: 3180 (fall below 35%, heal to 3195, still below), 2775, 2355, 1935, 1515. Expected: one heal 681383 on the caster, none for the four hits taken while still below. Control: no Scroll, no heal. Hit sizes from the DBC: Grave Coil 600 without the Scroll and 420 with its 30% reduction; the counted pairs of ledger 197 read 605 to 606 and 424 (cause of the extra 5 to 6 not established), so the health tolerances cover 6 per hit and stay far below one 1500 heal. Phase aura 823764 \"beeg spellpen\" (Effect[0] aura 123 MOD_TARGET_RESISTANCE, BasePoints -9999, MiscValue 126, DBC) is the class's standing resistance fixture, set on the caster in both phases: it lowers the resistance of what the caster hits, not the resistance the caster has against Grave Coil.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          54121,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "strike": {
+        "spell": 47632,
+        "health": 3600,
+        "max_health": 10000,
+        "count": 5,
+        "wait_ms": 400,
+        "after_trigger_ms": 1600
+      },
+      "tolerance": 0,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "caster"
+            },
+            "before_expected": 5,
+            "expected": 10,
+            "tolerance": 0,
+            "source": "the five Grave Coil hits landed on the caster in each phase (cumulative), so a single heal is not a missing hit"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 54121
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the Necrotic Poison fixture holds in both phases"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "health",
+            "before_expected": 600,
+            "expected": 1515,
+            "tolerance": 40,
+            "source": "caster: 3600 less 5 x 600 = 600 before (no Scroll); 3600 less 5 x 420 plus one heal of 15 (1500 at -99% healing taken) = 1515 after"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 680646,
+      "name": "Scroll of Hope (a holder already below 35% when the Scroll is cast is not healed by a hit)",
+      "kind": "metric_delta",
+      "variant": "heal_below_at_cast",
+      "label_suffix": "heal_below_at_cast",
+      "quote": "If any ally falls below 35% of their maximum health while this is active they are instantly healed once for $681383s1% of their maximum health.",
+      "trigger_spell": 680646,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 681383,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Edge case of owner ruling O-29 (Sun Cleric ADR 0040): the aura's holder is below 35% before the Scroll is cast and is hit while it is up, so the hit does not take it from at least 35% to below 35% (AscensionSunClericEvents.cpp:79-81, a fall) and 681383 is not cast: 0 heals. Fixture: one health set, caster_health 3000 of 10000 (30%), before the Scroll cast, regeneration disabled; the Scroll is cast for real in the after phase only (680646 cooldown 300000 ms, reset before the cast); 1600 ms later the passive striker (creature 36, spell hit bonus 100) casts Grave Coil 47632 (Shadow, 599 + 1 die side = 600, 420 under the -30% of 680646) once at the caster, no second health set. Reads: spell_heal_count of 681383 on the caster 0 in both phases; spell_damage_count of 47632 0 then 1 (the hit landed, so 0 heals is not a missing hit); caster health 3000 before, 3000 less 420 = 2580 after (tolerance 40): the holder stayed below 35% from the set to the hit and nothing healed it. Limit: no existing option reads health at the cast itself (before_trigger_reads reads auras only); the health fixed by the single set and the end read bracket it, a direct read at the trigger is a tool need. Control and re-fall: heal_each_fall and heal_amount (holder above 35% falling: 1 heal of 1500), heal_each_ally_fall_again (re-fall after going above 35%: a second heal). Reference search 2026-11-23: coa-history spells 680646, 681383 and 47632 had 0 events in 186 logs and the bindmysoul snapshot gives only the tooltip text; nothing found. Not probabilistic: the hit is forced (spell hit bonus 100), residual failure probability 0. Bracket (mentor): maximum health 10000, so the 35% threshold is 3500 points; health is set to 3000 before the cast and reads 2577 after the one hit with heal count 0, so at the cast it lay between 2577 and 3000, below 3500; regeneration is off for the caster (disable_regeneration), so nothing raises it between the set and the cast.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "tolerance": 0,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 47632,
+              "caster": "striker",
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "the one Grave Coil hit landed on the caster in the after phase only, so 0 heals is not a missing hit"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "health",
+            "before_expected": 3000,
+            "expected": 2580,
+            "tolerance": 40,
+            "source": "caster set to 3000 of 10000 (30%, below 35%) before the cast: 3000 before (no Scroll, no hit); 3000 less one Grave Coil of 420 (600 less 30%) = 2580 after, with no heal"
+          }
+        ]
+      },
+      "caster_health": [
+        3000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "after_trigger_strike": {
+        "spell": 47632,
+        "delay_ms": 1600,
+        "count": 1,
+        "wait_ms": 400
+      }
     },
     {
       "spell": 504848,
@@ -43785,7 +44275,7 @@
     },
     {
       "spell": 680646,
-      "name": "Scroll of Hope (the five hits of the once check landed)",
+      "name": "Scroll of Hope (the five hits of the second-fall check landed)",
       "kind": "metric_delta",
       "variant": "heal_once_hits",
       "label_suffix": "heal_once_hits",
@@ -43804,7 +44294,7 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Support of heal_once. Grave Coil 47632 hits the caster five times in each phase (strike count 5, the passive striker, spell hit bonus 100); spell_damage_count of 47632 by the striker on the caster is cumulative, so the control phase (no Scroll) reads 5 and the Scroll phase gains 5 more: all five hits landed, which the heal_once arithmetic (the fifth hit is a second fall below 35% for any five landed hits of at least 420) needs. Reference search 2026-11-22: as the heal_once entry; nothing else found.",
+      "observe_source": "Support of heal_each_fall. Grave Coil 47632 hits the caster five times in each phase (strike count 5, the passive striker, spell hit bonus 100); spell_damage_count of 47632 by the striker on the caster is cumulative, so the control phase (no Scroll) reads 5 and the Scroll phase gains 5 more: all five hits landed, which the heal_each_fall arithmetic (the fifth hit is a second fall below 35% for any five landed hits of at least 420) needs. Reference search 2026-11-22: as the heal_each_fall entry; nothing else found.",
       "phase_auras": [
         [
           823764,

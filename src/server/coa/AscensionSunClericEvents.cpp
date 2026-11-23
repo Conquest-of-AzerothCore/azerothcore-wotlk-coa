@@ -77,7 +77,8 @@ class aura_ascension_sun_cleric_event : public AuraScript
         if (id == 301005)
             return received && damage && !periodic;
         if (id == 680646)
-            return received && damage && GetTarget()->GetHealthPct() < 35 && !GetAura()->GetScriptValue(id);
+            return received && damage && GetTarget()->HealthBelowPct(35) &&
+                uint64(GetTarget()->GetHealth()) + damage >= GetTarget()->CountPctFromMaxHealth(35);
         if (id == 680911)
             return event.GetActor() == GetTarget() && damage && direct &&
                 (GetTarget()->GetHealthPct() < 35 || GetAura()->GetScriptValue(id));
@@ -296,8 +297,8 @@ class aura_ascension_sun_cleric_event : public AuraScript
             case 680663: Mana(player,CalculatePct(player->GetCreateMana(),Amount(504876))); break;
             case 680641: Cast(player,player,680642); break;
             case 680646:
-                GetAura()->SetScriptValue(id,1);
-                Cast(player,GetTarget(),681383);
+                if (GetTarget()->IsAlive())
+                    GetTarget()->CastSpell(GetTarget(), 681383, true, nullptr, nullptr, player->GetGUID());
                 break;
             case 704928:
                 Cast(player,player,704926);
