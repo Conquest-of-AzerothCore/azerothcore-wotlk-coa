@@ -4,7 +4,7 @@
   "contract": [
     "With the economy log on, every item the Manastorm module delivers (PrepareItemDelivery: a mail row first, moved into the bags of an online player) writes one reward row with source 4 (Manastorm) in the same transaction.",
     "A level 60 non-Wildcard leader's first clear of test segment 1 (Taragaman 11520) gives the first-clear Bonus Manastorm Cache 1478051 (BONUS_CACHE_OTHER): one row.",
-    "Stopping the run settles the floor's held-back currency (Bonzo Bolts 1297308, Bedlam Bullion 1297307, Runes of Ascension 375250): at least one row for the Bonzo Bolts.",
+    "Stopping the run settles the floor's held-back currency (Bonzo Bolts 1297308, Bedlam Bullion 1297307, Runes of Ascension 375250): exactly one row for the Bonzo Bolts (one stack; BONZO pays 336 at depth 1, at most x1.4 for the group and x2 for the segment).",
     "A Manastorm Cache (11-24) 97877 opens through the loot window: its item is one cache_open row with the cache as source."
   ],
   "timeout_ms": 120000,
@@ -98,23 +98,24 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: stopping the run pays its Bonzo Bolts",
+      "label": "CONTROL: stopping the run pays its Bonzo Bolts, at most 336 x 1.4 group x 2 segment",
       "actor": "leader",
       "metric": "item_count",
       "item": 1297308,
       "min": 1,
-      "within_ms": 10000
+      "within_ms": 10000,
+      "max": 941
     },
     {
       "action": "assert",
-      "label": "THE LOG: the Bonzo Bolts",
+      "label": "THE LOG: the Bonzo Bolts are one delivery row",
       "actor": "leader",
       "metric": "economy_log_rows",
       "economy_event": "reward",
       "item": 1297308,
       "economy_source": 4,
-      "min": 1,
-      "within_ms": 2000
+      "within_ms": 2000,
+      "equals": 1
     },
     {
       "action": "add_item",

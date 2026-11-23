@@ -6740,7 +6740,8 @@ private:
             }
             QueryResult result = CharacterDatabase.Query("SELECT COUNT(*) FROM coa_economy_log WHERE guid = {} AND event = {}{}",
                 player->GetGUID().GetCounter(), uint32(*event), filter);
-            return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
+            Require(result != nullptr, "economy_log_rows could not read coa_economy_log");
+            return double(result->Fetch()[0].Get<uint64>());
         }
         if (metric == "mail_count" || metric == "mail_item_count" || metric == "mail_has_item")
         {

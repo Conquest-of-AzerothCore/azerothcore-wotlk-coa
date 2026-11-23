@@ -104,10 +104,7 @@ public:
                     }
                 }
                 else if (Item* piece = Item::CreateItem(member, stack, player))
-                {
-                    CoAEconomyLog::CacheItem(player, cacheEntry, piece, stack);
                     mail.push_back(piece);
-                }
             }
         }
 
@@ -120,6 +117,8 @@ public:
                 for (std::size_t i = index; i < std::min(index + std::size_t(MAX_MAIL_ITEMS), mail.size()); ++i)
                 {
                     mail[i]->SaveToDB(trans);
+                    CoAEconomyLog::GainedInto(trans, player->GetGUID().GetCounter(),
+                        CoAEconomyLog::Tag(CoAEconomyEvent::CacheOpen, cacheEntry), mail[i], mail[i]->GetCount());
                     draft.AddItem(mail[i]);
                 }
                 draft.SendMailTo(trans, MailReceiver(player), MailSender(player));

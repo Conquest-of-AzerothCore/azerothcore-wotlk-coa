@@ -6,16 +6,24 @@
     "Brother Danil (152) sells five Refreshing Spring Water (159) for 25 copper and buys them back for 1 copper each; buying them back costs those 5 copper. A purchase the character cannot pay for writes nothing.",
     "Chromie (990782) sells a Potion of Experience (818046) for 300 Bazaar Tokens and no gold; Millhouse Manastorm (179538) sells the Doberman MK III whistle (532578) for 500 Bedlam (1297307).",
     "Each purchase row's source is the vendor list it was bought from: the vendor's own entry, or the list a gossip option opened. Tiraxis (900007) opens his fixed Convenience Items list 900008, where a Potion of Experience costs 100 Bazaar Tokens (ExtendedCost 2983); his rotating stock is his own entry.",
-    "Rows wait in memory until the character's inventory is saved: right after the first purchase the table has none. Selling to a vendor saves the inventory at once (item recovery), which writes the waiting rows."
+    "Rows wait in memory until the character's inventory is saved: right after the first purchase the table has none. Selling to a vendor saves the inventory at once (item recovery), which writes the waiting rows.",
+    "The buyer's account also has a level 60 character, because the Potion of Experience is in coa_item_purchase_requires_realm_level_60, which only sells it to accounts that reached level 60 on the realm."
   ],
   "timeout_ms": 90000,
   "economy_log": true,
   "players": [
     {
+      "id": "veteran",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
       "id": "buyer",
       "race": 1,
       "class": 1,
-      "level": 20
+      "level": 20,
+      "account_of": "veteran"
     }
   ],
   "creatures": [
@@ -50,6 +58,11 @@
     }
   ],
   "steps": [
+    {
+      "action": "relog",
+      "label": "SETUP: the level 60 character is saved on its account",
+      "actor": "veteran"
+    },
     {"action": "wait", "ms": 500},
     {"action": "set_money", "label": "fixture: a known purse", "actor": "buyer", "value": 10000},
     {"action": "snapshot", "label": "Money before the purchase", "actor": "buyer", "metric": "carried_money", "save_as": "purse"},

@@ -435,7 +435,7 @@ namespace
         void OnPlayerAfterStoreOrEquipNewItem(Player* player, uint32, Item* item, uint8 count, uint8, uint8,
             ItemTemplate const* proto, Creature* vendor, VendorItem const* crItem, bool) override
         {
-            if (!item || !proto || !crItem || !vendor)
+            if (!item || !proto || !crItem || !vendor || !Logs(player))
                 return;
             CoAEconomyRow row;
             row.event = CoAEconomyEvent::VendorBuy;

@@ -7,7 +7,8 @@
     "The level-10 Scroll of Fortune claim (0x6AD) gives 2 Scrolls of Fortune I 1101244 and 6 talent scrolls 97933: two reward rows.",
     "Revealing the five cards of a sealed pack 97885 pays one Darkmoon Ticket 246190 per card: one reward row for 5 tickets.",
     "Buying Starsurge 133169 from the Skill Cards store (0x6BB) for 250 Darkmoon Tickets: one store_buy row with the tickets as cost.",
-    "Buying two boosters (0x6DD) for 100 gold gives 2 Golden Ability packs 778998 and 2 Golden Talent packs 97870: two store_buy rows, the first carrying the 100 gold."
+    "Buying two boosters (0x6DD) for 100 gold gives 2 Golden Ability packs 778998 and 2 Golden Talent packs 97870: two store_buy rows, the first carrying the 100 gold.",
+    "With full bags, one booster for 50 gold is sent by mail (Deliver posts every reward), and the mailed Golden Ability pack still carries the 50 gold, the Golden Talent pack none."
   ],
   "timeout_ms": 60000,
   "economy_log": true,
@@ -281,6 +282,106 @@
       "economy_event": "store_buy",
       "item": 97870,
       "economy_count": 2,
+      "economy_gold": 0,
+      "economy_source": 10,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "destroy_item",
+      "actor": "wild",
+      "item": 778998
+    },
+    {
+      "action": "destroy_item",
+      "actor": "wild",
+      "item": 97870
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Golden Ability packs left to stack onto",
+      "actor": "wild",
+      "metric": "item_count",
+      "item": 778998,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Golden Talent packs left to stack onto",
+      "actor": "wild",
+      "metric": "item_count",
+      "item": 97870,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "fill_bags",
+      "actor": "wild"
+    },
+    {
+      "action": "set_money",
+      "actor": "wild",
+      "value": 500000
+    },
+    {
+      "action": "client_packet",
+      "label": "Buy one booster with full bags",
+      "actor": "wild",
+      "opcode": 1757,
+      "fields": [
+        {
+          "u32": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the booster cost 50 gold",
+      "actor": "wild",
+      "metric": "carried_money",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Golden Ability pack went to the mailbox",
+      "actor": "wild",
+      "metric": "mail_has_item",
+      "item": 778998,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and the Golden Talent pack",
+      "actor": "wild",
+      "metric": "mail_has_item",
+      "item": 97870,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the mailed Golden Ability pack carries the 50 gold",
+      "actor": "wild",
+      "metric": "economy_log_rows",
+      "economy_event": "store_buy",
+      "item": 778998,
+      "economy_count": 1,
+      "economy_gold": -500000,
+      "economy_source": 10,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: and the mailed Golden Talent pack comes with it",
+      "actor": "wild",
+      "metric": "economy_log_rows",
+      "economy_event": "store_buy",
+      "item": 97870,
+      "economy_count": 1,
       "economy_gold": 0,
       "economy_source": 10,
       "equals": 1,
