@@ -663,7 +663,9 @@
     "claims": [
       {
         "claim": "Casting Inner Demon with at least 6 Felfury",
-        "labels": []
+        "labels": [
+          "520257 behaviour_metric_delta below_six"
+        ]
       },
       {
         "claim": "now restores $520258s1 Energy",
@@ -671,16 +673,7 @@
           "520257 behaviour_metric_delta energy_at_six"
         ]
       }
-    ],
-    "tool_gap": {
-      "reason": "the below-six control needs Inner Demon cast with a real Felfury count under six: set_aura at 5 or 6 right before the cast reads 0 even at six (pair P1), and a Burning Hatred then Smite setup needs two setup targets (setup_target is one for all setup casts)",
-      "attempts": [
-        {
-          "agent": "fw-b3g1b",
-          "report": ".agents/plans/fw-b3g1b/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 520592,
@@ -789,17 +782,10 @@
   {
     "spell": 520853,
     "clause": "Transforms your Chaos Rush into Fel Torpedo.",
-    "labels": [],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "Chaos Rush is replaced only while specialization 9 is active (AscensionTalentReplacementData.h:29, SynchronizeTalentReplacements requires specializationId == SpecId); a metric_delta entry cannot set the active specialization, although the harness has a specialization step",
-      "attempts": [
-        {
-          "agent": "fw-b3g1b",
-          "report": ".agents/plans/fw-b3g1b/report.md"
-        }
-      ]
-    }
+    "labels": [
+      "520853 behaviour_metric_delta transform"
+    ],
+    "kind": "claim"
   },
   {
     "spell": 520853,
@@ -833,7 +819,11 @@
   {
     "spell": 520853,
     "clause": "Scales with modifiers to Chaos Rush",
-    "labels": [],
+    "labels": [
+      "520805 cost_gate 500610 without",
+      "520805 cost_gate 500610 with",
+      "520805 cost_gate 500610 beyond"
+    ],
     "kind": "claim"
   },
   {
@@ -1788,21 +1778,10 @@
   {
     "spell": 706420,
     "clause": "Can only have 1 Bane active on a target at a time.",
-    "labels": [],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "The one_bane metric_delta entry flipped (alert/ok) and its after phase reads no 707901 presence before the 706420 cast, so a never-landed Bane passes; metric_delta cannot read aura presence between setup and the trigger cast nor run sized trials (reviews fw-r3g3b I-2, fw-r3g3c C-1). The nearest kind is metric_delta with a presence read between setup and the trigger cast.",
-      "attempts": [
-        {
-          "agent": "fw-b3g3b",
-          "report": ".agents/plans/fw-b3g3b/report.md"
-        },
-        {
-          "agent": "fw-b3g3c",
-          "report": ".agents/plans/fw-b3g3c/report.md"
-        }
-      ]
-    }
+    "labels": [
+      "706420 behaviour_metric_delta one_bane"
+    ],
+    "kind": "claim"
   },
   {
     "spell": 706420,
