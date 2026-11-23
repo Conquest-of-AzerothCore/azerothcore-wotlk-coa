@@ -7,7 +7,9 @@
 ## Context
 
 A heal by the caster on the caster doubled nine procs of the class, while the same heal on an ally fired them once.
-The first eight come from the rc4 counted pair (verify stamps 20261122-230622 and 20261122-230702, self / ally):
+The first eight come from the valid self / ally readings. Pre-fix: verify stamps 20261122-234650 and 20261122-234725.
+Post-fix: 20261122-234822 and 20261122-234910, then 20261123-000746 and 20261123-001507. The table shows the pre-fix
+numbers:
 
 | Spell | Tooltip trigger | Read | Self | Ally |
 |---|---|---|---|---|
@@ -26,6 +28,9 @@ increase the healing of your next Radiant Cascade by $300354s1%." (Spell.dbc 704
 40). G-20 step 1 at 12062c774e (per-roll reads, 300 rolls per arm, verify stamps 20261122-235014 and 20261122-235115):
 self 0.62-0.66 on Illumination and 0.32-0.38 on Radiant Cascade, the doubled rate 1-(1-p)^2; ally 0.37-0.39 and
 0.18-0.21, at the chance.
+
+Effective spell_proc rows: the nine auras have one row each at `rev_20260909_13_sun_cleric_completion.sql`, ProcFlags
+1048575 (both sides); the six Vows carry the split rows of `rev_20260927_93`, 349524 (done) and 699048 (taken).
 
 Every trigger names the healer's side: a heal or critical strike the Sun Cleric deals.
 
