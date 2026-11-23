@@ -2664,6 +2664,489 @@
       "observe_source": "Expected 5000 ms: Spell.dbc 800239 DurationIndex 28, SpellDuration.dbc row 28 Duration 5000 (the $d of the clause 'increases your critical strike chance by $s1% for $d'). The Malice handler (AscensionFelswornEvents.cpp:97-98, :227-229) casts Fragment of Malice 800239 on the caster with Felstrike after a direct critical hit rolled Chance() on the raw ProcChance 60 (AscensionFelsworn.cpp:231-239), which no spell modifier forces. The spell crit and hit rating fixtures (no miss, no resist roll) makes every cast hit and critical, and the cast_until_aura step casts Fel Fireball every 2000 ms (a cast time of 1500 ms plus the projectile) until 800239 is on the caster, at most 9 casts (one 60% roll per cast leaves 0.4^9 = 0.03% of a run without a grant; a run at the cap is unmeasured, never a fail or a pass); both arms are fed alike and the control arm has no talent (800214 learned after it). Before the measured arm 800239 is cancelled on the caster and read absent with its application count; the loop stops at the first grant. After the stop, every 50 ms the game time, the caster's 800239 application count and presence are read; the grant is at most 100 ms before the first read and the aura must be gone 5000 ms (G-19 band 4750 to 5250) after the last application. No further cast and no auto attack follow the loop. Fel Fireball 801312 (SCHOOL_DAMAGE Fire, direct hit, 35 Energy, 1500 ms cast, projectile speed 35, no cooldown, Spell.dbc) is one direct hit per cast, so one 60% roll per cast; the Infernal weapon set (Scimitar 2027, Blackbone Wand 5239, ADR conformance/felsworn/0001) is the entry's set. Sargeron Smite 802060 cannot feed the loop: it costs 2 Felfury (AscensionCustomResourceData.h:533), which the step does not refill (18 of 18 casts refused with reason 85, NO_POWER, pair 20261123-152023). An encounter timeline opened before the measured feed (after a game time read) stamps every apply of 800239 on the caster in the game time base, so the aura's age at the first read after the loop is read, not derived from the expected duration (mentor D-21, review I-1): above 100 ms, without a stamp, or with a stamped apply count other than one (a refresh or a second apply is not the stamped first apply, so the last application would be unbounded) the arm is unmeasured. The timeline is process global, so the scenario runs exclusive in a batch. Reference search: coa-history spell 800214: 0 events in 186 logs; 802678 Felstrike has aura events (applied 1265, dose 1309, refresh 5692, removed 1267) but the summary carries no stack count or duration; raw logs (coa-history data/logs, last application or refresh to removed per spell, source and target, re-read 2026-11-23): 802678 n=1267, main cluster 5800-6099 ms (403 in 5900-5999; shorter intervals are removals before the expiry), 800239 n=678, median 5040 ms, p10 4769, p90 5266; 800239 Fragment of Malice: applied 678, refresh 4066, removed 678, energize 5 each (4744); the live intervals corroborate 6000 and 5000 ms; nothing found for a cap.",
       "quote_spell": 800239,
       "variant": "fragment"
+    },
+    {
+      "spell": 804611,
+      "name": "Azzinoth's Rage 804611 (expertise)",
+      "kind": "metric_delta",
+      "variant": "expertise",
+      "label_suffix": "expertise",
+      "quote": "and your expertise by $s2.",
+      "trigger_spell": 804247,
+      "gate_spell": 804611,
+      "target": "caster",
+      "metric": "expertise",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 4,
+      "expected_gain": 4,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "804611 Effect[1] aura 240 SPELL_AURA_MOD_EXPERTISE, BasePoints 3 + 1 = 4 ($s2). The caster's main-hand expertise (Player::GetExpertise) is read before and after a real learn of 804611 (the reading before is the control): the gain is 4, within 0.01. Reference search 2026-11-23: coa-history spell 804611: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 807901,
+      "name": "Azzinoth's Rage 807901 (expertise)",
+      "kind": "metric_delta",
+      "variant": "expertise",
+      "label_suffix": "expertise",
+      "quote": "and your expertise by $s2.",
+      "trigger_spell": 804247,
+      "gate_spell": 807901,
+      "target": "caster",
+      "metric": "expertise",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 8,
+      "expected_gain": 8,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807901 Effect[1] aura 240 SPELL_AURA_MOD_EXPERTISE, BasePoints 7 + 1 = 8 ($s2). The caster's main-hand expertise (Player::GetExpertise) is read before and after a real learn of 807901 (the reading before is the control): the gain is 8, within 0.01. Reference search 2026-11-23: coa-history spell 807901: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 807914,
+      "name": "Azzinoth's Rage 807914 (expertise)",
+      "kind": "metric_delta",
+      "variant": "expertise",
+      "label_suffix": "expertise",
+      "quote": "and your expertise by $s2.",
+      "trigger_spell": 804247,
+      "gate_spell": 807914,
+      "target": "caster",
+      "metric": "expertise",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 12,
+      "expected_gain": 12,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807914 Effect[1] aura 240 SPELL_AURA_MOD_EXPERTISE, BasePoints 11 + 1 = 12 ($s2). The caster's main-hand expertise (Player::GetExpertise) is read before and after a real learn of 807914 (the reading before is the control): the gain is 12, within 0.01. Reference search 2026-11-23: coa-history spell 807914: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 805246,
+      "name": "Hulking Demon (attack power)",
+      "kind": "metric_delta",
+      "variant": "attack_power",
+      "label_suffix": "attack_power",
+      "quote": "Increases your attack power by $s1% of your Stamina",
+      "trigger_spell": 804247,
+      "gate_spell": 805246,
+      "target": "caster",
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 23.7,
+      "expected_gain": 23.7,
+      "tolerance": 0.8,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "805246 Effect[0] aura 268 SPELL_AURA_MOD_ATTACK_POWER_OF_STAT_PERCENT, MiscValue 2 (Stamina), BasePoints 29 + 1 = 30 ($s1). The caster's attack power is read before and after a real learn of 805246 (the reading before is the control): reference Stamina 79 (class file reference_stats), gain 30% x 79 = 23.7, tolerance 0.8 for the integer part (a 29% or 31% effect, 22.9 or 24.5, is not separated from a rounding of 23 or 24, so the excluded interval is 28% to 32%). Reference search 2026-11-23: coa-history spell 805246: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 805246,
+      "name": "Hulking Demon (melee hit rating)",
+      "kind": "metric_delta",
+      "variant": "hit_melee",
+      "label_suffix": "hit_melee",
+      "quote": "and your hit rating by $s2% of your Agility.",
+      "trigger_spell": 804247,
+      "gate_spell": 805246,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 5
+      },
+      "before_expected": 0,
+      "expected": 7.8,
+      "expected_gain": 7.8,
+      "tolerance": 0.9,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "805246 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 160 (bits 5 and 7: melee and spell hit rating), MiscValueB 1 (Agility), BasePoints 5 + 1 = 6 ($s2). Combat rating 5 (melee hit rating) is read before and after a real learn of 805246 (the reading before is the control, the class file hit rating fixture 10000): reference Agility 130, gain 6% x 130 = 7.8, tolerance 0.9 for the integer part (excludes 5% and 7%, 6.5 and 9.1, which read 6 and 9). Reference search 2026-11-23: coa-history spell 805246: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 805246,
+      "name": "Hulking Demon (spell hit rating)",
+      "kind": "metric_delta",
+      "variant": "hit_spell",
+      "label_suffix": "hit_spell",
+      "quote": "and your hit rating by $s2% of your Agility.",
+      "trigger_spell": 804247,
+      "gate_spell": 805246,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 7
+      },
+      "before_expected": 0,
+      "expected": 7.8,
+      "expected_gain": 7.8,
+      "tolerance": 0.9,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "805246 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 160 (bits 5 and 7: melee and spell hit rating), MiscValueB 1 (Agility), BasePoints 5 + 1 = 6 ($s2). Combat rating 7 (spell hit rating) is read before and after a real learn of 805246 (the reading before is the control, the class file hit rating fixture 10000): reference Agility 130, gain 6% x 130 = 7.8, tolerance 0.9 for the integer part (excludes 5% and 7%, 6.5 and 9.1, which read 6 and 9). Reference search 2026-11-23: coa-history spell 805246: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 805256,
+      "name": "Infernal Constitution (maximum health)",
+      "kind": "metric_delta",
+      "variant": "max_health",
+      "label_suffix": "max_health",
+      "quote": "Increases your maximum health by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 805256,
+      "target": "caster",
+      "metric": "max_health",
+      "fields": {},
+      "before_expected": 1000,
+      "expected": 1100.0,
+      "expected_ratio": 1.1,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "805256 Effect[0] aura 133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT, BasePoints 9 + 1 = 10 ($s1). The caster's maximum health is read before and after a real learn of 805256 (the reading before is the control): ratio 1.10, judged within 0.002 so +9% and +11% are excluded. Reference search 2026-11-23: coa-history spell 805256: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 805256,
+      "name": "Infernal Constitution (off-hand weapon damage)",
+      "kind": "metric_delta",
+      "variant": "offhand_damage",
+      "label_suffix": "offhand_damage",
+      "quote": "and increases your off-hand weapon damage by $s2%.",
+      "trigger_spell": 804247,
+      "gate_spell": 805256,
+      "target": "caster",
+      "metric": "weapon_damage_min",
+      "fields": {
+        "hand": 1
+      },
+      "before_expected": 5,
+      "expected": 6.5,
+      "expected_ratio": 1.3,
+      "tolerance": 0.005,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "805256 Effect[1] aura 122 SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT, BasePoints 29 + 1 = 30 ($s2). The caster's minimum off-hand damage (hand 1, the Slayer item 2027 in the off hand) is read before and after a real learn of 805256 (the reading before is the control): ratio 1.30, judged within 0.005 so +29% and +31% are excluded. Reference search 2026-11-23: coa-history spell 805256: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806103,
+      "name": "Wrath of Sargeras (magic damage)",
+      "kind": "metric_delta",
+      "variant": "magic_damage",
+      "label_suffix": "magic_damage",
+      "quote": "Increases your Magic damage dealt by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 806103,
+      "target": "caster",
+      "metric": "spell_damage_done",
+      "fields": {
+        "spell": 805240,
+        "target": "dummy"
+      },
+      "before_expected": 500,
+      "expected": 515.0,
+      "expected_ratio": 1.03,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "806103 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 126 (the six magic schools), BasePoints 2 + 1 = 3 ($s1). The caster's outgoing spell damage of Tyrant's Gaze 805240 (Shadowflame, SchoolMask 36) on the dummy, from the fixed base of 1000 (Unit::SpellDamageBonusDone), is read before and after a real learn of 806103 (the reading before is the control): ratio 1.03, judged within 0.002 so +2% and +4% are excluded. Reference search 2026-11-23: coa-history spell 806103: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806103,
+      "name": "Wrath of Sargeras (spell hit chance)",
+      "kind": "metric_delta",
+      "variant": "spell_hit",
+      "label_suffix": "spell_hit",
+      "quote": "and your spell hit chance by $s2%.",
+      "trigger_spell": 804247,
+      "gate_spell": 806103,
+      "target": "caster",
+      "metric": "spell_hit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 2,
+      "expected_gain": 2,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "806103 Effect[1] aura 55 SPELL_AURA_MOD_SPELL_HIT_CHANCE, BasePoints 1 + 1 = 2 ($s2). The caster's spell hit chance (Unit::m_modSpellHitChance) is read before and after a real learn of 806103 (the reading before is the control): gain 2. Reference search 2026-11-23: coa-history spell 806103: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 802076,
+      "name": "Pit Lord's Strength 802076 (physical damage)",
+      "kind": "metric_delta",
+      "variant": "physical_damage",
+      "label_suffix": "physical_damage",
+      "quote": "your Physical damage dealt is now increased by $s2%.",
+      "trigger_spell": 804247,
+      "gate_spell": 802076,
+      "target": "caster",
+      "metric": "weapon_damage_min",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 5,
+      "expected": 5.15,
+      "expected_ratio": 1.03,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "802076 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 1 (Physical), BasePoints 2 + 1 = 3 ($s2). The caster's minimum main-hand damage (the Slayer item 2027) is read before and after a real learn of 802076 (the reading before is the control): ratio 1.03, judged within 0.002 so 2% and 4% are excluded. Reference search 2026-11-23: coa-history spell 802076: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 802110,
+      "name": "Pit Lord's Strength 802110 (physical damage)",
+      "kind": "metric_delta",
+      "variant": "physical_damage",
+      "label_suffix": "physical_damage",
+      "quote": "and your Physical damage dealt is now increased by $s2%.",
+      "trigger_spell": 804247,
+      "gate_spell": 802110,
+      "target": "caster",
+      "metric": "weapon_damage_min",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 5,
+      "expected": 5.3,
+      "expected_ratio": 1.06,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "802110 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 1 (Physical), BasePoints 5 + 1 = 6 ($s2). The caster's minimum main-hand damage (the Slayer item 2027) is read before and after a real learn of 802110 (the reading before is the control): ratio 1.06, judged within 0.002 so 5% and 7% are excluded. Reference search 2026-11-23: coa-history spell 802110: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 805255,
+      "name": "Mannoroth's Rage (Burning Hatred cooldown)",
+      "kind": "metric_delta",
+      "variant": "cooldown",
+      "label_suffix": "cooldown",
+      "quote": "Reduces the cooldown of Burning Hatred by $/1000;s1 sec.",
+      "trigger_spell": 805239,
+      "gate_spell": 805255,
+      "target": "caster",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 805239
+      },
+      "before_expected": 118000,
+      "expected": 58000,
+      "expected_gain": -60000,
+      "tolerance": 1500,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "805255 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -60001 + 1 = -60000 ms ($/1000;s1 = 60 s), EffectSpellClassMask word 0 262144 = SpellFamilyFlags word 0 of Burning Hatred 805239 (RecoveryTime 120000). The remaining cooldown of 805239 is read 500 ms after a real cast, before a learn of 805255 (the control) and after it: the gain is -60000, within 1500, so a cut of 54 s or 66 s (10% off) is excluded. The effect's equipped item mask (EquippedItemSubClassMask 41105) holds the reference Slayer subclass 7. Reference search 2026-11-23: coa-history spell 805255: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 803904,
+      "name": "Annihilation (aura held 11900 ms)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "Lasts for $n attacks or $d.",
+      "trigger_spell": 803904,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 803904
+      },
+      "before_expected": 0,
+      "wait_ms": 11900,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          11850,
+          11950
+        ]
+      },
+      "observe_source": "803904 duration $d = 12000 ms (Spell.dbc DurationIndex). The aura is still on the caster 11900 ms after the cast (excludes a duration 10% short, 10800 ms). Reference search 2026-11-23: coa-history spell 803904: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 803904,
+      "name": "Annihilation (aura gone 12100 ms)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "Lasts for $n attacks or $d.",
+      "trigger_spell": 803904,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 803904
+      },
+      "before_expected": 0,
+      "wait_ms": 12100,
+      "expire_ms": 500,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          12050,
+          12150
+        ]
+      },
+      "observe_source": "803904 duration $d = 12000 ms (Spell.dbc DurationIndex). The aura is gone 12100 ms after the cast (excludes a duration 10% long, 13200 ms). Reference search 2026-11-23: coa-history spell 803904: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806109,
+      "name": "Illidan's Guile (aura held 7900 ms)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "becoming immune to all physical attacks and spells for $d",
+      "trigger_spell": 806109,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 806109
+      },
+      "before_expected": 0,
+      "wait_ms": 7900,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          7850,
+          7950
+        ]
+      },
+      "observe_source": "806109 duration $d = 8000 ms (Spell.dbc DurationIndex). The aura is still on the caster 7900 ms after the cast (excludes a duration 10% short, 7200 ms). Reference search 2026-11-23: coa-history spell 806109: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806109,
+      "name": "Illidan's Guile (aura gone 8100 ms)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "becoming immune to all physical attacks and spells for $d",
+      "trigger_spell": 806109,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 806109
+      },
+      "before_expected": 0,
+      "wait_ms": 8100,
+      "expire_ms": 500,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          8050,
+          8150
+        ]
+      },
+      "observe_source": "806109 duration $d = 8000 ms (Spell.dbc DurationIndex). The aura is gone 8100 ms after the cast (excludes a duration 10% long, 8800 ms). Reference search 2026-11-23: coa-history spell 806109: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 805243,
+      "name": "Infernal Whipcrack (aura held 9900 ms)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "and increasing their haste by $s2% for $d.",
+      "trigger_spell": 805243,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 805243
+      },
+      "before_expected": 0,
+      "wait_ms": 9900,
+      "expire_ms": 500,
+      "expected": 1,
+      "game_time": {
+        "after": [
+          9850,
+          9950
+        ]
+      },
+      "observe_source": "805243 duration $d = 10000 ms (Spell.dbc DurationIndex). The aura is still on the caster 9900 ms after the cast (excludes a duration 10% short, 9000 ms). Reference search 2026-11-23: coa-history spell 805243: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 805243,
+      "name": "Infernal Whipcrack (aura gone 10100 ms)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "and increasing their haste by $s2% for $d.",
+      "trigger_spell": 805243,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 805243
+      },
+      "before_expected": 0,
+      "wait_ms": 10100,
+      "expire_ms": 500,
+      "expected": 0,
+      "game_time": {
+        "after": [
+          10050,
+          10150
+        ]
+      },
+      "observe_source": "805243 duration $d = 10000 ms (Spell.dbc DurationIndex). The aura is gone 10100 ms after the cast (excludes a duration 10% long, 11000 ms). Reference search 2026-11-23: coa-history spell 805243: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 805243,
+      "name": "Infernal Whipcrack (damage taken)",
+      "kind": "metric_delta",
+      "variant": "amount_e0",
+      "label_suffix": "amount_e0",
+      "quote": "reducing their damage taken by $s1%",
+      "trigger_spell": 805243,
+      "gate_spell": 805243,
+      "target": "caster",
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 805243,
+        "effect": 0
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": -15,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "805243 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, BasePoints -16 + 1 = -15 ($s1 = 15). The amount of effect 0 of the aura on the caster (TARGET_UNIT_CASTER_AREA_RAID includes the caster) is read 500 ms after a real cast: 0 before the cast (control) and -15 after. Reference search 2026-11-23: coa-history spell 805243: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 805243,
+      "name": "Infernal Whipcrack (haste)",
+      "kind": "metric_delta",
+      "variant": "amount_e1",
+      "label_suffix": "amount_e1",
+      "quote": "and increasing their haste by $s2% for $d.",
+      "trigger_spell": 805243,
+      "gate_spell": 805243,
+      "target": "caster",
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 805243,
+        "effect": 1
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "805243 Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 9 + 1 = 10 ($s2). The amount of effect 1 of the aura on the caster is read 500 ms after a real cast: 0 before the cast (control) and 10 after. Reference search 2026-11-23: coa-history spell 805243: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],
