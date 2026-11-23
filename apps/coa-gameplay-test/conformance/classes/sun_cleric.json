@@ -4481,6 +4481,30 @@
       "wait_ms": 1000
     },
     {
+      "spell": 804057,
+      "name": "Calm (disarm-immune Undead still pacified and rooted)",
+      "kind": "metric_delta",
+      "variant": "disarm_immune",
+      "label_suffix": "disarm_immune",
+      "quote": "If your target is an Undead or Demon, they are also unable to attack or move for $807778d.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 807778,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM, Effect[2] aura 254 MOD_DISARM_OFFHAND (EffectMechanic 3 DISARM each), Effect[0] TRIGGER_SPELL 807778 with EffectMechanic 0 in the DBC; the Sun Cleric class contract turns Effect[0] into aura 278 MOD_DISARM_RANGED and keeps its mechanic 0, and the class casts 807778 on the hit target (Sun Cleric ADR 0039). 807778: Mechanic 9 SILENCE, Effect[0] aura 25 MOD_PACIFY (EffectMechanic 9), Effect[1] aura 26 MOD_ROOT (EffectMechanic 0), TargetCreatureType 36 Undead or Demon. Target Nissa Agamand 1655 (type 6 Undead, no AIName or ScriptName, creature_immunities -113, MechanicsMask 0x1004428: DISARM, FEAR, SLEEP, KNOCKOUT and HORROR, not SILENCE or ROOT), so the two melee disarm effects are immune and Effect[0] is not: Unit::IsImmunedToSpell returns immune only when every effect is immune (Unit.cpp:11353-11372) and the Calm still hits. Before the fix the same holds by the code: Effect[0] was the trigger with mechanic 0, so a disarm-immune Undead still received 807778 (no pre-fix reading exists for this target). The aura 807778 reads 0 before the cast and 1 1000 ms after it. Control arm: undead_duration and demon_effect, the same reading on targets without the immunity, and silence_immune_pacify, 0 on a silence-immune Undead (Sun Cleric ADR 0005). Reference search 2026-11-23: nothing found beyond the tooltip, the DBC and the engine code cited.",
+      "target_entry": 1655,
+      "wait_ms": 1000
+    },
+    {
       "spell": 301266,
       "name": "Solar Concord (lasts 15 s)",
       "kind": "metric_delta",
@@ -34926,7 +34950,7 @@
         "mask": 2097152
       },
       "expected": 1,
-      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM (HandleAuraModDisarm sets UNIT_FLAG_DISARMED 0x00200000 in UNIT_FIELD_FLAGS, SpellAuraEffects.cpp:3290-3295), Effect[2] aura 254 MOD_DISARM_OFFHAND (UNIT_FLAG2_DISARM_OFFHAND 0x80, :3296-3300); no aura 278 MOD_DISARM_RANGED in the DBC (UNIT_FLAG2_DISARM_RANGED 0x400, :3302-3305), and no CoA code references it (src/server/coa has no DISARM_RANGED). The only consumer of the ranged flag is Unit::CanUseAttackType(RANGED_ATTACK) (Unit.h:1004). Imp 416 (Demon, no immunities; the demon_effect entry shows 807778 lands on it, so the trigger spell is not refused). Positive control (aura 67): UNIT_FLAG_DISARMED 0x00200000 in UNIT_FIELD_FLAGS reads 1 on the target 1000 ms after the cast, 0 before it. Reference search 2026-11-22: nothing found beyond the tooltip, the DBC and the engine code cited."
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM (HandleAuraModDisarm sets UNIT_FLAG_DISARMED 0x00200000 in UNIT_FIELD_FLAGS, SpellAuraEffects.cpp:3290-3295), Effect[2] aura 254 MOD_DISARM_OFFHAND (UNIT_FLAG2_DISARM_OFFHAND 0x80, :3296-3300); no aura 278 MOD_DISARM_RANGED in the DBC (UNIT_FLAG2_DISARM_RANGED 0x400, :3302-3305); the Sun Cleric class contract puts aura 278 in Effect[0], keeping its mechanic 0 (Spell.dbc EffectMechanic[0]) and the class casts the DBC's Effect[0] trigger 807778 on the hit target (Sun Cleric ADR 0039). The only consumer of the ranged flag is Unit::CanUseAttackType(RANGED_ATTACK) (Unit.h:1004). Imp 416 (Demon, no immunities; the demon_effect entry shows 807778 lands on it, so the trigger spell is not refused). Positive control (aura 67): UNIT_FLAG_DISARMED 0x00200000 in UNIT_FIELD_FLAGS reads 1 on the target 1000 ms after the cast, 0 before it. Reference search 2026-11-22: nothing found beyond the tooltip, the DBC and the engine code cited."
     },
     {
       "spell": 804057,
@@ -34951,7 +34975,91 @@
         "mask": 128
       },
       "expected": 1,
-      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM (HandleAuraModDisarm sets UNIT_FLAG_DISARMED 0x00200000 in UNIT_FIELD_FLAGS, SpellAuraEffects.cpp:3290-3295), Effect[2] aura 254 MOD_DISARM_OFFHAND (UNIT_FLAG2_DISARM_OFFHAND 0x80, :3296-3300); no aura 278 MOD_DISARM_RANGED in the DBC (UNIT_FLAG2_DISARM_RANGED 0x400, :3302-3305), and no CoA code references it (src/server/coa has no DISARM_RANGED). The only consumer of the ranged flag is Unit::CanUseAttackType(RANGED_ATTACK) (Unit.h:1004). Imp 416 (Demon, no immunities; the demon_effect entry shows 807778 lands on it, so the trigger spell is not refused). Positive control (aura 254): UNIT_FLAG2_DISARM_OFFHAND 0x80 in UNIT_FIELD_FLAGS_2 reads 1 on the target 1000 ms after the cast, 0 before it. Reference search 2026-11-22: nothing found beyond the tooltip, the DBC and the engine code cited."
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM (HandleAuraModDisarm sets UNIT_FLAG_DISARMED 0x00200000 in UNIT_FIELD_FLAGS, SpellAuraEffects.cpp:3290-3295), Effect[2] aura 254 MOD_DISARM_OFFHAND (UNIT_FLAG2_DISARM_OFFHAND 0x80, :3296-3300); no aura 278 MOD_DISARM_RANGED in the DBC (UNIT_FLAG2_DISARM_RANGED 0x400, :3302-3305); the Sun Cleric class contract puts aura 278 in Effect[0], keeping its mechanic 0 (Spell.dbc EffectMechanic[0]) and the class casts the DBC's Effect[0] trigger 807778 on the hit target (Sun Cleric ADR 0039). The only consumer of the ranged flag is Unit::CanUseAttackType(RANGED_ATTACK) (Unit.h:1004). Imp 416 (Demon, no immunities; the demon_effect entry shows 807778 lands on it, so the trigger spell is not refused). Positive control (aura 254): UNIT_FLAG2_DISARM_OFFHAND 0x80 in UNIT_FIELD_FLAGS_2 reads 1 on the target 1000 ms after the cast, 0 before it. Reference search 2026-11-22: nothing found beyond the tooltip, the DBC and the engine code cited."
+    },
+    {
+      "spell": 804057,
+      "kind": "metric_delta",
+      "quote": "Calm an enemy, disarming their melee and ranged weapons for $d.",
+      "trigger_spell": 804057,
+      "target": "dummy",
+      "metric": "unit_flag_set",
+      "before_expected": 0,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target_entry": 416,
+      "wait_ms": 1000,
+      "void_on_cast_failure": true,
+      "name": "Calm (ranged disarm flag)",
+      "variant": "flag_ranged",
+      "label_suffix": "flag_ranged",
+      "fields": {
+        "target": "dummy",
+        "field": 2,
+        "mask": 1024
+      },
+      "expected": 1,
+      "observe_source": "804057 Calm: Effect[1] aura 67 MOD_DISARM (HandleAuraModDisarm sets UNIT_FLAG_DISARMED 0x00200000 in UNIT_FIELD_FLAGS, SpellAuraEffects.cpp:3290-3295), Effect[2] aura 254 MOD_DISARM_OFFHAND (UNIT_FLAG2_DISARM_OFFHAND 0x80, :3296-3300); no aura 278 MOD_DISARM_RANGED in the DBC (UNIT_FLAG2_DISARM_RANGED 0x400, :3302-3305); the Sun Cleric class contract puts aura 278 in Effect[0], keeping its mechanic 0 (Spell.dbc EffectMechanic[0]) and the class casts the DBC's Effect[0] trigger 807778 on the hit target (Sun Cleric ADR 0039). The only consumer of the ranged flag is Unit::CanUseAttackType(RANGED_ATTACK) (Unit.h:1004). Imp 416 (Demon, no immunities; the demon_effect entry shows 807778 lands on it, so the trigger spell is not refused). The tooltip says ranged weapons are disarmed; the expectation 1 is the tooltip's, the flag UNIT_FLAG2_DISARM_RANGED 0x400 is what the core's ranged-disarm consumer reads. Control: 0 before the cast; the two positive controls flag_main and flag_offhand read 1 after the same cast. Reference search 2026-11-22: nothing found beyond the tooltip, the DBC and the engine code cited."
+    },
+    {
+      "spell": 804057,
+      "kind": "metric_delta",
+      "quote": "Calm an enemy, disarming their melee and ranged weapons for $d.",
+      "trigger_spell": 804057,
+      "target": "enemy",
+      "enemy_player_race": 2,
+      "measure_actor": "enemy",
+      "cast_in_before": false,
+      "before_expected": 1,
+      "expected": 1,
+      "expected_gain": 0,
+      "tolerance": 0,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "name": "Calm (an enemy player's Auto Shots stop)",
+      "variant": "shooter_ranged",
+      "label_suffix": "shooter_ranged",
+      "metric": "spell_go_count",
+      "fields": {
+        "spell": 75
+      },
+      "enemy_shooter": {
+        "mode": "ranged",
+        "class": 15,
+        "weapons": [
+          {
+            "item": 15809,
+            "slot": 17
+          }
+        ],
+        "skills": [
+          226
+        ],
+        "learn": [],
+        "spell": 75,
+        "relocate": [
+          -12,
+          0
+        ],
+        "window_ms": 5000,
+        "distance_yd": [
+          8,
+          30
+        ],
+        "native_refusals": [
+          [
+            807778,
+            27
+          ],
+          [
+            75,
+            40
+          ]
+        ],
+        "source": "Witch Hunter (class 15) with the crossbow of the 'Boltslinger' set of witch_hunter.json (item 15809, slot 17, skill line 226). Control: the same enemy shoots 5000 ms with no Calm on it; the trial is void unless it fired at least one Auto Shot (SPELL_GO of 75) there."
+      },
+      "observe_source": "Calm 804057 Effect[1] aura 67 MOD_DISARM and Effect[2] aura 254 MOD_DISARM_OFFHAND, no aura 278 in the DBC (read 2026-11-22); the class contract puts it in Effect[0] and the class casts the trigger 807778 on the hit target (Sun Cleric ADR 0039). Enemy player race 2. Calm on a player (not Undead or Demon) refuses its trigger 807778 with reason 27 (SPELL_FAILED_DONT_REPORT), and the ranged disarm interrupts the Auto Shot the enemy is repeating, reason 40 (SPELL_FAILED_INTERRUPTED): aura 278 applies through AuraEffect::HandleAuraModDisarm, which calls Player::ApplyItemDependentAuras(item, false) and Player::RemoveItemDependentAurasAndCasts, and that interrupts the current spell whose weapon requirement no other useable item meets (Player::HasItemFitToSpellRequirements through Player::GetUseableItemByPos and Unit::CanUseAttackType(RANGED_ATTACK), Unit.h:1004); Spell::cancel sends reason 40 for a spell still preparing. Both refusals are native to the cast and are stated in native_refusals; any other refusal voids the ranged trial. The pre-fix pair 20261123-075212 / 20261123-075514 ran this scenario with the control window unchanged and recorded no refusal of 75, with 3 shots in the control; the judged reading is the shot count. Auto Shot 75 SPELL_GO count of the enemy: the control window (no Calm) must read at least 1 (crossbow speed 2800 ms, so at least 1 in 5000 ms), and the window with Calm on the enemy (1000 ms + 4500 ms, the aura read first) must add 0 shots (the tooltip says ranged weapons are disarmed). Reference search 2026-11-22: nothing found beyond the tooltip, the DBC and the engine code cited."
     },
     {
       "spell": 804057,
@@ -35016,7 +35124,7 @@
         ],
         "source": "Sun Cleric (class 27) with the Valkyr set (2529 in both hands) casts Justice 572848, which requires a main-hand weapon (SPELL_ATTR3_REQUIRES_MAIN_HAND_WEAPON, EquippedItemClass 2); the cooldown is reset before each cast and mana set to 1363. Control: the first cast, with no Calm on the enemy, must go (SPELL_GO of 572848 at least 1)."
       },
-      "observe_source": "Calm 804057 Effect[1] aura 67 MOD_DISARM and Effect[2] aura 254 MOD_DISARM_OFFHAND, no aura 278 (DBC read 2026-11-22). Enemy player race 2. Calm on a player (not Undead or Demon) refuses its own Effect[0] trigger 807778 with reason 27 (SPELL_FAILED_DONT_REPORT): that refusal is native to the cast and is stated in native_refusals; any other refusal voids the ranged trial. Positive control of shooter_ranged on the same enemy: Justice 572848 requires a main-hand weapon, so with the main hand disarmed (aura 67, UNIT_FLAG_DISARMED) the cast is refused and no SPELL_GO is added; the cast in the control window must go. Refusals are expected here (the effect under test). Reference search 2026-11-22: nothing found beyond the tooltip, the DBC and the engine code cited."
+      "observe_source": "Calm 804057 Effect[1] aura 67 MOD_DISARM and Effect[2] aura 254 MOD_DISARM_OFFHAND, no aura 278 in the DBC (read 2026-11-22); the class contract puts it in Effect[0] and the class casts the trigger 807778 on the hit target (Sun Cleric ADR 0039). Enemy player race 2. Calm on a player (not Undead or Demon) refuses its trigger 807778 with reason 27 (SPELL_FAILED_DONT_REPORT): that refusal is native to the cast and is stated in native_refusals; any other refusal voids the ranged trial. Positive control of shooter_ranged on the same enemy: Justice 572848 requires a main-hand weapon, so with the main hand disarmed (aura 67, UNIT_FLAG_DISARMED) the cast is refused and no SPELL_GO is added; the cast in the control window must go. Refusals are expected here (the effect under test). Reference search 2026-11-22: nothing found beyond the tooltip, the DBC and the engine code cited."
     },
     {
       "spell": 807343,

@@ -26,6 +26,7 @@ constexpr uint32 ArbiterOfGrace = 301313;
 constexpr uint32 VowOfGrace = 803719;
 constexpr uint32 VowOfGraceArbiterShare = 807446;
 constexpr uint32 Calm = 804057;
+constexpr uint32 CalmUndeadOrDemon = 807778;
 bool SilenceImmune(Unit const* target)
 {
     return target->m_spellImmune[IMMUNITY_MECHANIC].count(MECHANIC_SILENCE) > 0;
@@ -138,7 +139,7 @@ class sun_cleric_spells : public AllSpellScript
 public:
     sun_cleric_spells() : AllSpellScript("sun_cleric_spells",
         {ALLSPELLHOOK_ON_SPELL_CHECK_CAST, ALLSPELLHOOK_ON_BEFORE_EFFECTS, ALLSPELLHOOK_ON_CAST,
-         ALLSPELLHOOK_ON_CRIT_CHANCE, ALLSPELLHOOK_ON_HIT_RESULT}) { }
+         ALLSPELLHOOK_ON_CRIT_CHANCE, ALLSPELLHOOK_ON_HIT_RESULT, ALLSPELLHOOK_ON_CALCULATED_TARGET}) { }
     void OnSpellCheckCast(Spell* spell, bool, SpellCastResult& result) override
     {
         Player* player = Owner(spell->GetCaster());
@@ -296,6 +297,13 @@ public:
             Valkyr(player, spell->m_targets.GetUnitTarget(),spell->GetScriptValue(DawnCast),spell->GetScriptValue(Dawn));
         Finish(player, spell);
         Refresh(player);
+    }
+    void OnSpellCalculatedTarget(Spell* spell, Unit* target, TargetInfo&) override
+    {
+        if (spell->GetSpellInfo()->Id == Calm && target)
+            spell->GetCaster()->CastSpell(target, CalmUndeadOrDemon,
+                TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_NO_PERIODIC_RESET), nullptr, nullptr,
+                spell->GetOriginalCasterGUID());
     }
     void OnSpellHitResult(Spell* spell, Unit* target, uint8 miss, uint32 damage, uint32 healing, bool critical) override
     {
