@@ -82,12 +82,15 @@ class StackFeedTests(unittest.TestCase):
         refeeds = [step for step in scenario['steps'] if step['action'] == 'set_aura' and step['spell'] == 704576]
         self.assertEqual(len(refeeds), TRIALS * len(class_entry()['setup_casts']))
 
-    def judged(self, trials: list[tuple[list[int], list[int]]], control: float = 0.0, spacing: int = 300):
+    def judged(self, trials: list[tuple[list[int], list[int]]], control: float = 0.0, spacing: int = 300,
+               dropped: tuple[str, ...] = ()):
         expectation = fed_expectation()
         model = expectation.model
         found = {model['before_label']: control, model['after_label']: float(CAP)}
         for labels, (counts, stacks) in zip(model['stack_feed']['labels'], trials):
             found.update(trial_reads(labels, counts, stacks, spacing))
+        for label in dropped:
+            found.pop(label)
         return judge_behaviour(base_verdict(expectation), FakeRun(found), expectation)
 
     def polls(self) -> int:
@@ -104,6 +107,26 @@ class StackFeedTests(unittest.TestCase):
         stacks[-1] = CAP + 1
         verdict = self.judged([(counts, stacks)] + [rising(self.polls())] * (TRIALS - 1))
         self.assertEqual(verdict.status, 'alert')
+
+    def test_a_read_above_the_cap_in_an_otherwise_void_trial_alerts(self):
+        polls = self.polls()
+        valid = [rising(polls)] * (TRIALS - 1)
+        few = [0] * (polls - 2) + [1, 2]
+        over = few[:-1] + [CAP + 1]
+        self.assertEqual(self.judged([(few, over)] + valid).status, 'alert')
+        counts, stacks = rising(polls)
+        stacks[1] = CAP + 1
+        first = fed_expectation().model['stack_feed']['labels'][0]
+        verdict = self.judged([(counts, stacks)] + valid, dropped=(first[-1]['count'],))
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.detail['stack_feed']['voided'], 0)
+        self.assertIn('above the cap', verdict.explanation)
+        counts, stacks = rising(polls)
+        stacks[0] = CAP + 1
+        self.assertEqual(self.judged([(counts, stacks)] + valid).status, 'alert')
+        counts, stacks = rising(polls)
+        stacks[-1] = CAP + 1
+        self.assertEqual(self.judged([(counts, stacks)] + valid, spacing=WINDOW).status, 'alert')
 
     def test_a_cap_below_the_tooltip_alerts(self):
         counts, _ = rising(self.polls())

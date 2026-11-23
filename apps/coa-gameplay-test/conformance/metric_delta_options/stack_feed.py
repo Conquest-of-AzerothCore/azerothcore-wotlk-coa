@@ -135,6 +135,13 @@ def finite(values: dict, name: str) -> float | None:
 
 def judged_trial(values: dict, labels: list[dict], cap: int, window: int) -> tuple[str, str, int, float]:
     reads = [{read: finite(values, poll[read]) for read in READS} for poll in labels]
+    above = [(poll['stacks'], found['stacks']) for poll, found in zip(labels, reads)
+             if found['stacks'] is not None and found['stacks'] > cap]
+    if above:
+        label, most = max(above, key=lambda pair: pair[1])
+        ends = (reads[0]['count'], reads[-1]['count'])
+        applications = int(ends[1] - ends[0]) if None not in ends else 0
+        return 'alert', f'{label} read {most:g} stacks, above the cap {cap}, before any void check', applications, most
     missing = [poll[read] for poll, found in zip(labels, reads) for read in READS if found[read] is None]
     if missing:
         return 'void', f'{missing[0]} missing', 0, 0.0

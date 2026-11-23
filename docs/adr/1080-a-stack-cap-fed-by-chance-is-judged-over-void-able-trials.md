@@ -23,18 +23,21 @@ than cap + 1 rolls succeed or two applications are more than the duration apart 
 
 ## Decision
 
-The `metric_delta` option `stack_feed` (`{aura, cap, window_ms, trials, source}`, optional `refeed_auras`) repeats
-the treatment phase as N trials and polls the apply count, the stacks and the game time at the start, after every feed
-cast and at the end of each. A trial is void without cap + 1 applications, with a span between application brackets
-or to the end read of `window_ms` or more, with stacks at its start or with the aura gone at its end; a valid trial
-passes when the most stacks read equal the cap and alerts above or below it. The control phase must read 0. The
-verdict reports v = voided / N and the residual v^N, which an entry sizes to at most 0.05% from the larger v of its
-counted pair. Python only, opt-in, default off; the evidence metric stays `aura_stacks`.
+The `metric_delta` option `stack_feed` (`{aura, cap, window_ms, trials, source}`, optional `refeed_auras`) repeats the
+treatment phase as N trials and polls the apply count, the stacks and the game time at the start, after every feed cast
+and at the end of each. Any stacks read above the cap alerts its trial before the void checks, so a cap that breaks only
+in an otherwise void trial still fails (controller go after review I4). Otherwise a trial is void without cap + 1
+applications, with a span between application brackets or to the end read of `window_ms` or more, with stacks at its
+start or with the aura gone at its end; a valid trial passes when the most stacks read equal the cap and alerts above or
+below it. The control phase must read 0. The verdict reports v = voided / N and the residual v^N, which an entry sizes
+to at most 0.05% from the larger v of its counted pair. Python only, opt-in, default off; the evidence metric stays
+`aura_stacks`.
 
 ## Consequences
 
-- Test: `StackFeedTests` (metric_delta_options/test_stack_feed.py), with the seeded mutants: a read above the cap and
-  a cap one below the tooltip alert; too few applications and a gap past the window are void, not failures.
+- Test: `StackFeedTests` (metric_delta_options/test_stack_feed.py), with the seeded mutants: a read above the cap
+  (also inside a trial that is otherwise void) and a cap one below the tooltip alert; too few applications and a gap
+  past the window are void, not failures.
 - Only entries that set the option change; finished-class scenario digests are unchanged.
 - An expiry and a re-application inside one poll interval can only be excluded through the poll spans, so the polls
   must be well inside the window (`setup_wait_ms`, `wait_ms` below `window_ms`).

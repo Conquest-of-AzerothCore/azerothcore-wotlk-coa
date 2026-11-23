@@ -14,14 +14,15 @@ at the start, after every feed cast (`setup_casts`) and after the trigger's `wai
 caster after every treatment feed cast, so a spender's resource fixture does not run out; they are preconditions,
 not the claim.
 
-A trial is void (never a pass or a fail) when a read is missing, `A` has stacks at its start, it counts fewer than
-C + 1 applications, a span from the poll before one application bracket to the poll that ends the next one (or the
-end read) reaches `W` (an expiry is possible inside it), or `A` is gone at the end read. A valid trial passes when
-the most stacks read equal C; more, or fewer after C + 1 applications without a possible expiry, alert. The verdict
-alerts when the control reading is not 0 or a valid trial alerts, is `ok` when at least one trial is valid and none
-alerts, and `unmeasured` when every trial is void. It states the void rate v (voided / N), the residual `v^N` (at
-most 0.05% is the target, sized from the larger v of a counted pair) and the applications per feed cast of the valid
-trials. Python only, opt-in: every read already exists.
+Any stacks read above C alerts its trial first, whatever the trial's validity (review I4): a cap that breaks only in a
+trial that is otherwise void still fails. Otherwise a trial is void (never a pass or a fail) when a read is missing, `A`
+has stacks at its start, it counts fewer than C + 1 applications, a span from the poll before one application bracket to
+the poll that ends the next one (or the end read) reaches `W` (an expiry is possible inside it), or `A` is gone at the
+end read. A valid trial passes when the most stacks read equal C; more, or fewer after C + 1 applications without a
+possible expiry, alert. The verdict alerts when the control reading is not 0 or a valid trial alerts, is `ok` when at
+least one trial is valid and none alerts, and `unmeasured` when every trial is void. It states the void rate v (voided /
+N), the residual `v^N` (at most 0.05% is the target, sized from the larger v of a counted pair) and the applications per
+feed cast of the valid trials. Python only, opt-in: every read already exists.
 
 Named points: `phase_steps` (the start poll), `setup_cast_steps` (the refeed and the poll after every feed cast),
 `fixtures` (the end poll, the repeated trials and the contract), `model`, `verdict`.
