@@ -518,12 +518,15 @@ def banded_status(value: float, low: float, high: float, expected: float) -> str
     return 'alert'
 
 
-def deterministic(base: Verdict, measured: float, judged: float, expected: float, why: str) -> Verdict:
-    margin = margin_of(expected)
+def deterministic(base: Verdict, measured: float, judged: float, expected: float, why: str,
+                  ticks: float = 1) -> Verdict:
+    margin = margin_of(expected * ticks) / ticks
     low, high = expected - margin, expected + margin
     status = banded_status(judged, low, high, expected)
     explanation = (f'{why}; |measured - expected| <= max({ABSOLUTE_TOLERANCE:g}, '
-                   f'{RELATIVE_TOLERANCE:.1%} of expected)')
+                   f'{RELATIVE_TOLERANCE:.1%} of expected)' if ticks == 1 else
+                   f'{why}; |measured x {ticks:g} - total| <= max({ABSOLUTE_TOLERANCE:g}, '
+                   f'{RELATIVE_TOLERANCE:.1%} of total), {margin:g} per tick')
     if status == 'tolerated':
         explanation += (f'; outside that band but within {TOLERATED_RELATIVE:.0%} of expected, deviation '
                         f'{(judged - expected) / expected if expected else judged - expected:+.1%}: tolerated')
@@ -953,14 +956,14 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
                f'{points}{per_tick}')
         signed = expected * plain_sign(points)
         return (judge_fixed_per_level(base, expectation, run, measured, tokens, tooltips, index, signed, why)
-                or deterministic(base, measured, measured, signed, why))
+                or deterministic(base, measured, measured, signed, why, ticks or 1))
     if measured * expected < 0:
         return replace(base, status='ambiguous_tooltip', measured=measured, expected=expected,
                        explanation=f'{token.text} evaluates to {expected:g}, the measured value has the opposite sign',
                        detail={'question': sign_question(base, name, token.text, measured, expected)})
     why = f'{token.text} read with the measured stats{per_tick}'
     return (judge_fixed_per_level(base, expectation, run, measured, tokens, tooltips, index, expected, why)
-            or deterministic(base, measured, measured, expected, why))
+            or deterministic(base, measured, measured, expected, why, ticks or 1))
 
 
 def base_roll_entry(tooltips: TooltipSource, spell_id: int, effect: int) -> dict | None:

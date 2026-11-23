@@ -111,7 +111,8 @@ A foreign effect token that totals a periodic effect over its ticks (the periodi
 non-empty probe reason on a foreign token makes it `unmeasurable`, never one tick compared with the total. A class
 file's `per_tick_foreign_totals` (`{spell, effect, reason}`, ADR 1078) keeps a listed total as a no-combat
 `effect_value` instead: the step reads `spell_effect_value` (one tick), the model carries `ticks` (duration over
-amplitude) and `compare` expects the token divided by it. A listed effect whose points roll, or whose token is not a
+amplitude) and `compare` expects the token divided by it, with the total's flat band divided by it too, so
+one point off per tick alerts. A listed effect whose points roll, or whose token is not a
 total over its ticks, stops generation. Felsworn lists Felstrike 802678 effect 0: Malice of Gul'dan 800214 and Fel
 Apprentice 92088 show `${($d*1000/$T1)*($m1+0+$SP*.05)}`, 54 over six ticks at SP 0, judged as 9 per tick.
 An aura that `SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS` (190) applies reaches the caster's summons only, never the

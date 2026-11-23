@@ -733,6 +733,22 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         step, = [step for step in self.steps_of(scenario, FELSTRIKE_LABEL) if step['metric'] == 'spell_effect_value']
         self.assertEqual((step['spell'], step['effect']), (FELSTRIKE, 0))
 
+    def test_a_foreign_ticking_token_with_an_unreadable_probe_is_unmeasurable(self):
+        reason = 'periodic token read mixed with a scaled duration or period'
+        original = periodic_reason
+
+        def probe(records, rank_id, caster, shown, token=None, ordinal=None):
+            if token == (FELSTRIKE, 0):
+                return reason
+            return original(records, rank_id, caster, shown, token, ordinal)
+
+        with mock.patch('values.periodic_reason', side_effect=probe):
+            scenario, expectations, periodic_totals = self.malice_of_guldan(self.class_file)
+        item, = [item for item in expectations if item.label == FELSTRIKE_LABEL]
+        self.assertEqual(item.rule, UNMEASURABLE + reason)
+        self.assertNotIn(FELSTRIKE_LABEL, [entry['label'] for entry in periodic_totals])
+        self.assertFalse(self.steps_of(scenario, FELSTRIKE_LABEL))
+
     def test_a_listed_foreign_effect_read_per_tick_is_refused(self):
         listed = {**self.class_file, PER_TICK_FOREIGN_TOTALS: [{'spell': 803153, 'effect': 0, 'reason': 'x'}]}
         spell = ClassSpell(500694, '500694', (500694,), 500694, 1, False)

@@ -36,13 +36,15 @@ ranks (800214 is a passive, as Feast of Talons 500056 is), so it would drop the 
   per tick: ...`; the model adds `ticks`, duration over amplitude of the listed spell, as the hit scenarios divide a
   total (`periodic_tick_readout`). `compare.judge_token` expects the token divided by `ticks` and skips the roll,
   base-roll and aura-227 branches; the per-level check divides the tooltip's per-level part by the same count.
+  The flat band is the total's band divided by `ticks` (`max(1, 0.5 %)` of the total, over `ticks`), so one
+  point off per tick, six off the application, alerts as it would against the total.
   Generation stops when a listed effect rolls or its token is not a total over its ticks.
 - Felsworn lists Felstrike 802678 effect 0.
 
 ## Consequences
 
-- The two Felsworn labels compare 9 per tick (SP 0) with the read; the read of 34 still alerts, the server value
-  being the owner question of D-23. No label of any class disappears or becomes unmeasurable or unmodelled.
+- The two Felsworn labels compare 9 per tick (SP 0, band 8.83 to 9.17) with the read; the read of 34 still alerts,
+  the server value being the owner question of D-23. No label of any class disappears or becomes unmeasurable or unmodelled.
 - Templar (both generations), Necromancer, Witch Hunter and Sun Cleric generate byte-identical output; Felsworn
   changes only the two expectations and its embedded class file in the manifest.
 - Witch Hunter 500056 and 680238 stay `unmodelled` periodic totals; listing their effects would judge them per
