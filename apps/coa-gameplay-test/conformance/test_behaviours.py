@@ -939,6 +939,7 @@ class FixedTargetCountScenarioTests(unittest.TestCase):
         self.assertEqual(spec.cast_spell, 1)
         self.assertEqual(spec.target_rank, 2)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dummy_distance_stands_the_primary_away_and_keeps_the_others_beyond_it(self):
         entry = holy_cleave_entry()
         plain, _ = behaviour_scenario(CLASS_FILE, entry)
@@ -951,6 +952,7 @@ class FixedTargetCountScenarioTests(unittest.TestCase):
         self.assertIn('The primary dummy stands 15 yd from the caster', distant['contract'])
         self.assertNotIn('The primary dummy stands', plain['contract'])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dummy_distance_conflicting_with_the_layout_is_refused(self):
         entry = holy_cleave_entry()
         for change in ({'cast_target': 'caster'}, {'layout': 'caster'}, {'behind_yd': 2.0}, {'dummy_distance': 0},
