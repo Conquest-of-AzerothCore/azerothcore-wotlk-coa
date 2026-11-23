@@ -49,7 +49,8 @@ class ApplyStampTests(unittest.TestCase):
         actions = [step['action'] for step in steps]
         self.assertEqual(actions.count('encounter_start'), 1)
         opened = actions.index('encounter_start')
-        learn = actions.index('learn')
+        learn = max(index for index, step in enumerate(steps)
+                    if step['action'] == 'learn' and step.get('spell') == STALWART)
         strikes = [index for index, step in enumerate(steps) if step.get('actor') == 'striker']
         self.assertTrue(learn < opened < min(index for index in strikes if index > learn))
         self.assertEqual(steps[opened]['boss_entry'], 36)
