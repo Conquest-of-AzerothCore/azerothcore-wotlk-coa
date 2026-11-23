@@ -44198,5 +44198,12 @@
       "effect": 0,
       "source": "AscensionSunClericContracts.cpp:324-325, ModifySpellEffectBaseValue adds Player::GetShieldBlockValue() (Player.cpp:5611-5618, flat + Strength x 0.5 - 10, times the block percent) to effect 0 of every rank named 800654, before the int32 truncation of CalcValue (SpellInfo.cpp:592); read as the harness metric block_value (CoAGameplayTest.cpp:5152-5153, the same GetShieldBlockValue); a code-level term, the tooltip states only scaling with your block value"
     }
+  ],
+  "heal_pct_terms": [
+    {
+      "spell": 806479,
+      "effect": 0,
+      "source": "806479 Solar Prayer Effect[0] SPELL_EFFECT_HEAL_PCT, BasePoints 24 + DieSides 1 = 25 ($s1, percent of the maximum health of the healed unit, the caster): Spell::EffectHealPct heals SpellHealingBonusDone(CountPctFromMaxHealth(25)) beside Effect[1] SPELL_EFFECT_HEAL in the same heal event; spell_bonus_data 806479 is all zero, so the spell power term stays on Effect[1] (behaviour entries heal_base 4120, heal_half_health 2120 and heal_sp 5720 read 0.8 x (25% of the maximum health + 150 + spell power))"
+    }
   ]
 }
