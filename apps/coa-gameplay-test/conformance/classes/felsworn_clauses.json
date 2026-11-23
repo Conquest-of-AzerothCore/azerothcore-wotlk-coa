@@ -38,7 +38,8 @@
       {
         "claim": "${($d*1000/$T1)*($m1+0+$SP*.05)} Shadowflame Damage",
         "labels": [
-          "92088 effect_value 802678e0 #0"
+          "802678 behaviour_metric_delta tick_value",
+          "802678 behaviour_metric_delta tick_spell_power"
         ]
       },
       {
@@ -47,7 +48,8 @@
           "92088 spell_duration 802678 #1"
         ]
       }
-    ]
+    ],
+    "reason": "Displayed text to be corrected in a client patch (O-19): the owner keeps the server value, 34 per tick at level 60 (Spell.dbc 802678 Effect[0] BasePoints 8 + DieSides 1, RealPointsPerLevel 0.5, BaseLevel 10, SpellLevel 10, MaxLevel 0; SpellEffectInfo::CalcValue = 8 + 1 + int(0.5 x (60 - 10)) = 34, the SP term 0 at the reference spell power), while the client shows 54 = 6 x 9 (base points only, ADR 0006). The value is counted on the server formula by the entry 802678 tick_value, not on the displayed 54; the corrected client text is prepared separately. Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and coa-history Felstrike ticks (gear and level differ)."
   },
   {
     "spell": 92088,
@@ -2755,7 +2757,8 @@
       {
         "claim": "${($d*1000/$T1)*($m1+0+$SP*.05)} Shadowflame Damage",
         "labels": [
-          "800214 effect_value 802678e0 #1"
+          "802678 behaviour_metric_delta tick_value",
+          "802678 behaviour_metric_delta tick_spell_power"
         ]
       },
       {
@@ -2765,7 +2768,8 @@
           "800214 behaviour_metric_delta felstrike_duration"
         ]
       }
-    ]
+    ],
+    "reason": "Displayed text to be corrected in a client patch (O-19): the owner keeps the server value, 34 per tick at level 60 (Spell.dbc 802678 Effect[0] BasePoints 8 + DieSides 1, RealPointsPerLevel 0.5, BaseLevel 10, SpellLevel 10, MaxLevel 0; SpellEffectInfo::CalcValue = 8 + 1 + int(0.5 x (60 - 10)) = 34, the SP term 0 at the reference spell power), while the client shows 54 = 6 x 9 (base points only, ADR 0006). The value is counted on the server formula by the entry 802678 tick_value, not on the displayed 54; the corrected client text is prepared separately. Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and coa-history Felstrike ticks (gear and level differ)."
   },
   {
     "spell": 800214,
@@ -3680,7 +3684,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Owner ruling O-16 (2026-11-23): \"intimidating them\" is flavour text, not a claim: the spell has no DBC effect for it and states no value (Sun Cleric precedent, sun_cleric_clauses.json, 'Flavour text with no stated mechanic'). The damage claim and the nearby-enemies claim of this row keep their labels."
   },
   {
     "spell": 805240,
