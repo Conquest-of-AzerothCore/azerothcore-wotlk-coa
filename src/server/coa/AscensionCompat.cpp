@@ -460,6 +460,7 @@ constexpr uint32 COMPANION_SPELL_BATCH_INTERVAL_MS = 200;
 enum AscensionItems : uint32
 {
     ITEM_HEARTWOOD_KEY = 1041710,
+    ITEM_PRISMATIC_SETTING = 8700100,
     ITEM_CUIRBOULLI_BOOTS = 2143,
     ITEM_RED_RIBBONED_WRAPPING_PAPER = 5042,
     ITEM_ASHEN_TABLET = 9302130
@@ -11911,6 +11912,7 @@ void AddAscensionCompatScripts() {
   Ascension::ClientItemPatches::Instance().Register(ITEM_CUIRBOULLI_BOOTS);
   Ascension::ClientItemPatches::Instance().Register(ITEM_RED_RIBBONED_WRAPPING_PAPER);
   Ascension::ClientItemPatches::Instance().Register(ITEM_ASHEN_TABLET);
+  Ascension::ClientItemPatches::Instance().Register(ITEM_PRISMATIC_SETTING);
   for (uint32 itemId : BUSHCRAFT_CRAFTED_ITEMS)
     Ascension::ClientItemPatches::Instance().Register(itemId);
   for (uint32 itemId : GOBLIN_SALVAGE_QUEST_ITEMS)

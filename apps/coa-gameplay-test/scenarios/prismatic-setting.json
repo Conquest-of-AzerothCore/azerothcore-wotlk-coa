@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "name": "Thorium Setting crafting and permanent enhancement exclusivity",
+  "contract": "Craft Thorium Setting using its original recipe. Reject use below 450 Jewelcrafting or on rings without consuming it, then swap between a prismatic socket and a permanent wrist enchant.",
+  "players": [
+    {
+      "id": "crafter",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_skill",
+      "actor": "crafter",
+      "skill": 755,
+      "value": 449,
+      "maximum": 450
+    },
+    {
+      "action": "set_skill",
+      "actor": "crafter",
+      "skill": 333,
+      "value": 75,
+      "maximum": 75
+    },
+    {
+      "action": "learn",
+      "actor": "crafter",
+      "spell": 26880
+    },
+    {
+      "action": "learn",
+      "actor": "crafter",
+      "spell": 7418
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 12359
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 10940
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 6218
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 11968
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 27447
+    },
+    {
+      "action": "cast",
+      "actor": "crafter",
+      "spell": 26880
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 21752,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 12359,
+      "equals": 0
+    },
+    {
+      "action": "use_item",
+      "actor": "crafter",
+      "item": 21752,
+      "spell": 8700101,
+      "target_item": 27447
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 21752,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_enchantment",
+      "item": 27447,
+      "slot": 6,
+      "equals": 0
+    },
+    {
+      "action": "set_skill",
+      "actor": "crafter",
+      "skill": 755,
+      "value": 450,
+      "maximum": 450
+    },
+    {
+      "action": "use_item",
+      "actor": "crafter",
+      "item": 21752,
+      "spell": 8700101,
+      "target_item": 11968
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 21752,
+      "equals": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "crafter",
+      "item": 21752,
+      "spell": 8700101,
+      "target_item": 27447
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_enchantment",
+      "item": 27447,
+      "slot": 6,
+      "equals": 3848,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_enchantment",
+      "item": 27447,
+      "slot": 0,
+      "equals": 3848
+    },
+    {
+      "action": "cast",
+      "actor": "crafter",
+      "spell": 7418,
+      "target_item": 27447
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_enchantment",
+      "item": 27447,
+      "slot": 0,
+      "equals": 41,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_enchantment",
+      "item": 27447,
+      "slot": 6,
+      "equals": 0
+    }
+  ]
+}
