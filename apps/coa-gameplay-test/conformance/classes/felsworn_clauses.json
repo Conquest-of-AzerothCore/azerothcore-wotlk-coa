@@ -1128,7 +1128,8 @@
     "spell": 572889,
     "clause": "stacking $705148u times.",
     "labels": [
-      "572889 max_stacks 705148 #2"
+      "572889 max_stacks 705148 #2",
+      "572889 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -1679,7 +1680,8 @@
     "spell": 705145,
     "clause": "stacking $705146u times.",
     "labels": [
-      "705145 max_stacks 705146 #2"
+      "705145 max_stacks 705146 #2",
+      "705145 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
