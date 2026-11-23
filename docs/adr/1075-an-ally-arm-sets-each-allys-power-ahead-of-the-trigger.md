@@ -4,11 +4,11 @@
 - Date: 2026-11-23
 - Decided by: owner ruling O-30 (mentor D-303), approved in the o30 dispatch on the condition that the harness
   `set_power` step already takes an actor other than the caster
-- Related: ADR 1016 (ally arm), ADR 1040 (`ally_class`), Sun Cleric ADR 0039
+- Related: ADR 1016 (ally arm), ADR 1040 (`ally_class`), Sun Cleric ADR 0041
 
 ## Context
 
-Lights of Absolution 807343 (O-30, Sun Cleric ADR 0039): 807525 and 807526 restore 2% of the missing Energy, Focus,
+Lights of Absolution 807343 (O-30, Sun Cleric ADR 0041): 807525 and 807526 restore 2% of the missing Energy, Focus,
 Runic Power and Rage, and no mana. The harness fills every power of every actor at setup
 (`CoAGameplayTest.cpp:3053-3054`), so an ally only ever showed a full pool: 0 restored, which a server that restores
 nothing also reads. `ally_arm` could
