@@ -1557,6 +1557,13 @@ spell with a damage and a heal effect (Raise: Ghoul 500971: Command: Ghouls 8015
 the owner, effect 2).
 `cast_power` (ADR 0401) sets that power, in each cast's own power type, before every cast of a trial, for a cast whose
 cost is paid after a cast time while the power decays (Ice Barrage 501997, 1000 Runic Power).
+`trial_position` (`{"map": id, "x", "y", "z": yards, "o": radians}`, `o` default 0; ADR 1083, provisional)
+starts the scenario at that position (`location`, so the dummy stands `dummy_distance` yards along x from it) and
+begins every trial of both arms with the harness `teleport` of the caster back there, before the trial's auras and
+casts, for a cast that moves the caster (Fel Torpedo 500610 dashes it 10 yd through Chaos Rush Jump 802028). The
+caster's `position_x` and `position_y` are then asserted within 0.5 yd (`within_ms` 2000, labels `SETUP position`),
+so a trial whose caster is not back fails the run, and the dummy's position is read. It needs casts and the dummy
+`receiver`; the judged expectation is unchanged.
 `multiplier` judges the mean hit against that share of the tooltip figure, for a script that splits the figure over
 several hits (0.5 for two hits per leap); `contract_note` adds the reason to the scenario contract (Houndmaster
 705450 `one_leap`: one cast, one hound, one leap, a window under the 20 s auto-leap).
@@ -2243,6 +2250,10 @@ Options with a module:
   gain of the reading per gain of that metric over the after arm judged against a stated ratio (ADR 1068)
 - [`apply_stamp`](metric_delta_options/apply_stamp.md): an encounter timeline stamps the aura apply and the trigger
   cast in one time base, and the after reading's bracket from the apply is judged against a window (ADR 1067)
+- [`stack_feed`](metric_delta_options/stack_feed.md): a stack cap fed by chance, judged over repeated trials polled
+  after every feed cast, a trial without cap + 1 applications inside the duration void (ADR 1080, provisional)
+- [`after_gate_cast`](metric_delta_options/after_gate_cast.md): a real cast of the gate at the caster at the start of
+  the after phase instead of an aura fixture, its aura read after it (ADR 1082, provisional)
 - [`corpse`](metric_delta_options/corpse.md): a creature corpse a real setup cast kills in the treatment phase (ADR
   0493)
 - [`player_spell_power`](metric_delta_options/player_spell_power.md): the caster's spell-power fixture (ADR 0364)

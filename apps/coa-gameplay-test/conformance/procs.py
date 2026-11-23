@@ -7,6 +7,8 @@ from typing import Sequence
 from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, PART_BUDGET_MS, UNMODELLED, Z_99, Unmodelled,
                   base_mana_steps, cast_steps, creature_fixture, records_of, reference_caster, scenario_shell, timed,
                   weapon_profile)
+from proc_critical import (KEY as CRITICAL_KEY, control_model, control_steps, critical_fields, critical_rating,
+                           forced_player, rule as critical_rule)
 from profile import (CASTER, EQUIPMENT_SLOT_MAIN_HAND, INVTYPE_WEAPON, INVTYPE_WEAPON_MAIN_HAND, SETTLE_MS,
                      measurement, player_fixture, weapon_set_spells)
 from tooltip import read_tooltip
@@ -726,7 +728,7 @@ def trials_step(entry: dict, label: str) -> dict:
         return measurement(label, CASTER, HEAL_COUNT, spell=spell, target=ALLY)
     if trigger_target(entry) == ALLY or entry.get('trial_casts'):
         return measurement(label, CASTER, CAST_COUNT, spell=spell)
-    return measurement(label, CASTER, 'spell_damage_count', spell=spell, target=TARGET)
+    return measurement(label, CASTER, 'spell_damage_count', spell=spell, target=TARGET, **critical_fields(entry))
 
 
 def attempt_auras(entry: dict) -> list[dict]:
@@ -984,7 +986,8 @@ def trial_readings(entry: dict) -> list[dict]:
 def added_trial_steps(entry: dict) -> list[dict]:
     terms = {added_trials_label(entry['aura'], term): term
              for reading in trial_readings(entry) for term in reading['adds']}
-    return [spell_count_step(label, term['metric'], term['spell']) for label, term in terms.items()]
+    return [{**spell_count_step(label, term['metric'], term['spell']),
+             **(critical_fields(entry) if term['metric'] == LANDED_HIT_METRIC else {})} for label, term in terms.items()]
 
 
 def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
@@ -1017,6 +1020,9 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
         steps = (cast_baseline_steps(class_file, entry, plan) if cast_baseline else []) + aura_steps(entry)
         steps += control_weapon_steps(class_file, entry, plan) if control else []
     limit = per_trigger_limit(entry)
+    critical = critical_rating(entry) is not None
+    hit_spells = [trigger_spell(entry)] + trigger_spells(entry)[1:] if critical else []
+    steps += control_steps(class_file, entry, plan, hit_spells, event_steps(entry)) if critical and part == 0 else []
     steps += attempt_steps(class_file, entry, plan, labels)
     if limit is None:
         steps += added_trial_steps(entry) + event_steps(entry) + energize_steps(entry) + excluded_trial_steps(entry)
@@ -1048,6 +1054,8 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
                                                                                                          entry)
         if entry.get(DUMMY_DISTANCE_FIELD) is not None:
             scenario['contract'] += f' The dummy stands {proc_dummy_distance(entry):g} yd from the caster.'
+    if critical:
+        scenario['players'][0] = forced_player(scenario['players'][0], entry)
     model = {'part': part, 'parts': plan.parts, 'chance_pct': plan.chance_pct, 'minimum_trials': plan.needed,
              'scheduled_attempts': plan.scheduled, 'part_attempts': plan.per_part, 'attempt_ms': plan.attempt_ms,
              'trigger': dict(entry['trigger']), 'proc_spell': entry['proc_spell'],
@@ -1092,6 +1100,8 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
                              'minimum_trials': baseline_attempts(plan.chance_pct)}
     if entry.get('band'):
         model['band'] = rate_band(plan.chance_pct / 100)
+    if critical and part == 0:
+        model[CRITICAL_KEY] = control_model(entry, plan, hit_spells, event_steps(entry))
     residual = residual_sizing(entry, plan.chance_pct)
     if residual:
         model['residual'] = residual
@@ -1108,6 +1118,8 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
         rule += (f'; {RESIDUAL_TARGET} {residual["target"]:g} per pair: Wilson confidence {residual["confidence"]:g} '
                  f'per run instead of 99%, at least {residual["trials"]} trials so that a deviation of '
                  f'{residual["min_detectable"] * 100:g} points is outside the band')
+    if critical:
+        rule += critical_rule(entry, plan)
     if entry.get('trial_excluded_spells'):
         rule += (f'; the minion hits of {entry["trial_excluded_spells"]} are left out of the trials '
                  f'({entry["trial_excluded_reason"]})')

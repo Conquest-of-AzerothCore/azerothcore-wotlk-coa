@@ -14,6 +14,7 @@ namespace AscensionFelsworn
 {
 enum FelswornSpells : uint32
 {
+    BloodOfMannoroth = 802075,
     BurningCommander = 92089,
     MannorothFelfury = 801043,
     Unphased = 803645

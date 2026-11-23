@@ -7948,6 +7948,8 @@ def threat_redirect_spec(entry: dict) -> ThreatRedirectSpec:
 
 SCRIPT_HIT_SETTLE_MS = 500
 SCRIPT_HIT_STACKS_WITHIN_MS = 9000
+SCRIPT_HIT_POSITION_TOLERANCE_YD = 0.5
+SCRIPT_HIT_POSITION_WITHIN_MS = 2000
 SCRIPT_HIT_RECEIVERS = (TARGET, STRIKER, CASTER)
 
 
@@ -7994,6 +7996,7 @@ class ScriptHitSpec:
     receiver_aura_removals: tuple[tuple[int, int], ...] = ()
     no_wait_after_casts: bool = False
     stacks_read_before_removal: tuple[int, int] | None = None
+    trial_position: tuple[int, float, float, float, float] | None = None
 
 
 def script_hit_label(spec: ScriptHitSpec) -> str:
@@ -8049,6 +8052,8 @@ def script_hit_validate(spec: ScriptHitSpec):
             spec.receiver != TARGET or not spec.receiver_auras or any(stacks < 1 for _, stacks in spec.receiver_auras)):
         raise ValueError(f'{spec.spell} script_hit receiver_auras hold at least one stack on the dummy receiver, and '
                          f'their timing needs them')
+    if spec.trial_position is not None and (spec.receiver != TARGET or not spec.casts):
+        raise ValueError(f'{spec.spell} script_hit trial_position restores a caster that casts at the dummy receiver')
 
 
 def script_hit_clean_start(spec: ScriptHitSpec, trial: int) -> list[dict]:
@@ -8059,8 +8064,28 @@ def script_hit_clean_start(spec: ScriptHitSpec, trial: int) -> list[dict]:
           'metric': 'aura_stacks', 'spell': spec.stacks_read_before_removal[0], 'equals': 0}]
 
 
+def script_hit_location(spec: ScriptHitSpec) -> dict:
+    map_id, x, y, z, orientation = spec.trial_position
+    return {'map': map_id, 'x': x, 'y': y, 'z': z, 'o': orientation}
+
+
+def script_hit_relocate(spec: ScriptHitSpec, arm: str, trial: int) -> list[dict]:
+    if spec.trial_position is None:
+        return []
+    location = script_hit_location(spec)
+    label = f'{script_hit_label(spec)} SETUP position {arm} {trial}'
+    return [{'action': 'teleport', 'actor': CASTER, **location}] + \
+        [{'action': 'assert', 'label': f'{label} {axis}', 'actor': CASTER, 'metric': f'position_{axis}',
+          'min': location[axis] - SCRIPT_HIT_POSITION_TOLERANCE_YD,
+          'max': location[axis] + SCRIPT_HIT_POSITION_TOLERANCE_YD, 'within_ms': SCRIPT_HIT_POSITION_WITHIN_MS}
+         for axis in ('x', 'y')] + \
+        [measurement(f'{script_hit_label(spec)} dummy position {arm} {trial} {axis}', TARGET, f'position_{axis}')
+         for axis in ('x', 'y')]
+
+
 def script_hit_trial(records: Records, spec: ScriptHitSpec, arm: str, trial: int) -> list[dict]:
-    steps = script_hit_clean_start(spec, trial) if spec.stacks_read_before_removal and arm == 'treatment' else []
+    steps = script_hit_relocate(spec, arm, trial)
+    steps += script_hit_clean_start(spec, trial) if spec.stacks_read_before_removal and arm == 'treatment' else []
     steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
               for spell, stacks in spec.caster_auras]
     if spec.caster_avoidance is not None:
@@ -8266,12 +8291,19 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
                     + (f' Each treatment trial reads the {spec.hit_spell} casts of its creature {spec.caster_entry} '
                        f'before its last cast and after its settle, which must differ by {spec.strikes_per_cast}; the '
                        f'{spec.hit_spell} hits of any outcome are counted as landed.'
-                       if spec.strikes_per_cast is not None else ''),
+                       if spec.strikes_per_cast is not None else '')
+                    + (f' The caster starts at map {spec.trial_position[0]} {list(spec.trial_position[1:4])} facing '
+                       f'{spec.trial_position[4]:g}, and every trial of both arms first teleports it back there and '
+                       f'reads its position within {SCRIPT_HIT_POSITION_TOLERANCE_YD:g} yd and the dummy\'s position '
+                       f'before the trial\'s auras and casts; a trial whose caster is not back voids the run.'
+                       if spec.trial_position is not None else ''),
         'players': [player_fixture(class_file)],
         'creatures': creatures,
         'steps': [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
                   for spell, stacks in spec.stat_auras] + base_steps(class_file) + steps,
         'timeout_ms': waited + TIMEOUT_MARGIN_MS}
+    if spec.trial_position is not None:
+        scenario['location'] = script_hit_location(spec)
     rule = f'{model.kind} hit of script-cast spell {spec.hit_spell} read from the {spec.spell} tooltip, ' \
            f'integer steps modelled; control arm {control_rule}; {prose_rule(entry.quote, spec.spell)}' + \
            (f'; the tooltip value times {spec.multiplier:g}' if spec.multiplier != 1.0 else '')
@@ -8337,7 +8369,21 @@ def script_hit_spec(entry: dict) -> ScriptHitSpec:
                          tuple((int(spell), int(delay)) for spell, delay in entry.get('receiver_aura_removals', ())),
                          entry.get('no_wait_after_casts', False) is True,
                          None if 'stacks_read_before_removal' not in entry
-                         else tuple(int(value) for value in entry['stacks_read_before_removal']))
+                         else tuple(int(value) for value in entry['stacks_read_before_removal']),
+                         script_hit_trial_position(entry))
+
+
+def script_hit_trial_position(entry: dict) -> tuple[int, float, float, float, float] | None:
+    if 'trial_position' not in entry:
+        return None
+    position = entry['trial_position']
+    if (type(position) is not dict or not {'map', 'x', 'y', 'z'} <= set(position) <= {'map', 'x', 'y', 'z', 'o'}
+            or type(position['map']) is not int
+            or any(type(position.get(axis, 0.0)) not in (int, float) for axis in ('x', 'y', 'z', 'o'))):
+        raise ValueError(f'{entry["spell"]} script_hit trial_position is {{"map": id, "x", "y", "z": yards, '
+                         f'optional "o": radians}}, not {position!r}')
+    return (position['map'], float(position['x']), float(position['y']), float(position['z']),
+            float(position.get('o', 0.0)))
 
 
 def script_hit_avoidance(entry: dict) -> tuple[float, float] | None:
