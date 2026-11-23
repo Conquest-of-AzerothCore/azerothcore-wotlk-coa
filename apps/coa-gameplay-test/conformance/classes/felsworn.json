@@ -16015,6 +16015,207 @@
       "wait_ms": 12600,
       "cast_in_before": false,
       "observe_source": "Control arm: the same Bane of Chaos cast and wait of 12.6 s without Inner Demon (no setup cast): no Chaos 802676 hit lands, because the script casts Chaos only while Inner Demon is on the caster (AscensionFelswornAuras.cpp, Inner(player)). Reference search 2026-11-23: as the sibling entries."
+    },
+    {
+      "spell": 704602,
+      "kind": "metric_delta",
+      "quote": "and increase their damage taken from Sunder by $806096s2% for $806096d.",
+      "target": "dummy",
+      "cast_power": 100,
+      "learn": [
+        704602
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 500,
+      "name": "Whirling Vengeance (the debuffed dummy takes 100% more damage from Sunder)",
+      "variant": "sunder_taken",
+      "label_suffix": "sunder_taken",
+      "trigger_spell": 705121,
+      "setup_casts": [
+        555738
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 6600,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 712399,
+        "target": "dummy"
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 304,
+      "expected": 608,
+      "tolerance": 0.05,
+      "expected_ratio": 2.0,
+      "wait_ms": 2500,
+      "observe_source": "Whirling Vengeance 704602 Description (server DBC set): 'When Fury Unleashed ends, you strike all nearby enemies for ... and increase their damage taken from Sunder by $806096s2% for $806096d.' 806096 Effect[1] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER, BasePoints 99 + 1 = 100 ($s2%), EffectSpellClassMask word 1 65536 (Annihilan Strike 572804) and word 2 2147483648 (Sunder 712399, SpellFamilyFlags[2] 2147483648), DurationIndex 8 = 15000 ms ($d). Fury Unleashed 555738 lasts 5000 ms (DurationIndex 28, its own duration entries), the strike 806096 and the debuff land when it ends. Reference search 2026-11-23: coa-history spells 704602 and 806096: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. Behaviour read: Sunder 705121 is cast at the dummy and the mean damage per hit of its explosion 712399 on the dummy (total over hit count, the after reading as the increase of both over the after phase) is read 2.5 s later, once without the debuff (before phase: Whirling Vengeance learned, no Fury Unleashed cast) and once after a real Fury Unleashed cast 6.6 s earlier whose end applied the debuff (setup_only_after). Expected per hit before = 245 x 0.98743 + 0.2 x 312 = 304.3, read as the integer 304 (Sunder 705121 tooltip: ${$712399m1*$<scalingbp>+$AP*0.2+$SP*.25}, m1 = 244 + 1, scalingbp 0.98743 at level 60, reference attack power 312, spell power 0); expected per hit after = 2 x before for +100%. Aura 64481 (no critical hits) and 823764 (spell penetration) are named precondition fixtures.",
+      "ratio_to_metric": {
+        "metric": "spell_damage_count",
+        "fields": {
+          "spell": 712399,
+          "target": "dummy"
+        },
+        "increments": true
+      }
+    },
+    {
+      "spell": 704602,
+      "kind": "metric_delta",
+      "quote": "and increase their damage taken from Sunder by $806096s2% for $806096d.",
+      "target": "dummy",
+      "cast_power": 100,
+      "learn": [
+        704602
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 500,
+      "name": "Whirling Vengeance (the debuff is on the dummy 13.8 s after the strike)",
+      "variant": "sunder_held",
+      "label_suffix": "sunder_held",
+      "trigger_spell": 555738,
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 806096,
+        "caster": "caster"
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 18800,
+      "game_time": {
+        "after": [
+          18750,
+          18900
+        ]
+      },
+      "observe_source": "Whirling Vengeance 704602 Description (server DBC set): 'When Fury Unleashed ends, you strike all nearby enemies for ... and increase their damage taken from Sunder by $806096s2% for $806096d.' 806096 Effect[1] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER, BasePoints 99 + 1 = 100 ($s2%), EffectSpellClassMask word 1 65536 (Annihilan Strike 572804) and word 2 2147483648 (Sunder 712399, SpellFamilyFlags[2] 2147483648), DurationIndex 8 = 15000 ms ($d). Fury Unleashed 555738 lasts 5000 ms (DurationIndex 28, its own duration entries), the strike 806096 and the debuff land when it ends. Reference search 2026-11-23: coa-history spells 704602 and 806096: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. Duration read 1 of 2: Fury Unleashed is cast (the strike and the debuff land at 5000 ms); the debuff 806096 is still on the dummy 18800 ms after the cast, 13800 ms after the strike (0.92 x 15000), which excludes a duration 10% short (13500 ms)."
+    },
+    {
+      "spell": 704602,
+      "kind": "metric_delta",
+      "quote": "and increase their damage taken from Sunder by $806096s2% for $806096d.",
+      "target": "dummy",
+      "cast_power": 100,
+      "learn": [
+        704602
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 500,
+      "name": "Whirling Vengeance (the debuff is gone from the dummy 16.2 s after the strike)",
+      "variant": "sunder_gone",
+      "label_suffix": "sunder_gone",
+      "trigger_spell": 555738,
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 806096,
+        "caster": "caster"
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 21200,
+      "game_time": {
+        "after": [
+          21150,
+          21300
+        ]
+      },
+      "observe_source": "Whirling Vengeance 704602 Description (server DBC set): 'When Fury Unleashed ends, you strike all nearby enemies for ... and increase their damage taken from Sunder by $806096s2% for $806096d.' 806096 Effect[1] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER, BasePoints 99 + 1 = 100 ($s2%), EffectSpellClassMask word 1 65536 (Annihilan Strike 572804) and word 2 2147483648 (Sunder 712399, SpellFamilyFlags[2] 2147483648), DurationIndex 8 = 15000 ms ($d). Fury Unleashed 555738 lasts 5000 ms (DurationIndex 28, its own duration entries), the strike 806096 and the debuff land when it ends. Reference search 2026-11-23: coa-history spells 704602 and 806096: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. Duration read 2 of 2: the debuff 806096 is gone from the dummy 21200 ms after the cast, 16200 ms after the strike (1.08 x 15000), which excludes a duration 10% long (16500 ms)."
+    },
+    {
+      "spell": 704602,
+      "kind": "metric_delta",
+      "quote": "and increase their damage taken from Sunder by $806096s2% for $806096d.",
+      "target": "dummy",
+      "cast_power": 100,
+      "learn": [
+        705121
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 500,
+      "name": "Whirling Vengeance (control: without it a Fury Unleashed cast leaves Sunder's damage unchanged)",
+      "variant": "sunder_taken_control",
+      "label_suffix": "sunder_taken_control",
+      "trigger_spell": 705121,
+      "setup_casts": [
+        555738
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 6600,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 712399,
+        "target": "dummy"
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 304,
+      "expected": 304,
+      "tolerance": 0.02,
+      "expected_ratio": 1.0,
+      "wait_ms": 2500,
+      "observe_source": "Control arm of sunder_taken: the same casts and reads with Whirling Vengeance 704602 never learned (the gate is Sunder 705121 itself): the Fury Unleashed cast leaves no debuff, so Sunder's explosion damage on the dummy reads the same in both phases (ratio 1.0, tolerance 0.02). Reference search 2026-11-23: as sunder_taken.",
+      "gate_spell": 705121,
+      "ratio_to_metric": {
+        "metric": "spell_damage_count",
+        "fields": {
+          "spell": 712399,
+          "target": "dummy"
+        },
+        "increments": true
+      }
     }
   ],
   "player_observations": [],
