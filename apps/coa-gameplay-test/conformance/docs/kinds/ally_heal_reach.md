@@ -73,7 +73,9 @@ Opt-in fields for claims that are not heals:
 - `immune_window`: the `immune` units refuse `aura` at the `early_ms` probe and take it at `late_ms` in the treatment,
   and take it at `early_ms` in the control.
 - `drain`: the power spent over the watch of `high_cast` exceeds that of `low_cast` (cast indexes with `power_reads`);
-  a `low_cast` that spent nothing is unmeasured. Evidence metric `power`, contrast `own_cast`.
+  a `low_cast` that spent nothing is unmeasured. Evidence metric `power`, contrast `own_cast`. With `relation`
+  `equal` (ADR 1181) the two casts must spend the same power within `tolerance`, for a drain that does not depend on
+  what tells the casts apart.
 - `health_share`: the `levelled` units (allies with a health fixture, or `caster` with `caster_health`) end the window
   within `tolerance` health points of each other from a start spread of at least ten tolerances (else unmeasured), and
   the `apart` units move by no more than the tolerance.

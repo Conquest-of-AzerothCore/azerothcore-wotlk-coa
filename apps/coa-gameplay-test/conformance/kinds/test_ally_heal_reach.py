@@ -316,9 +316,25 @@ class AllyEffectJudgeTests(unittest.TestCase):
         values[high_end] = 941
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status, 'alert')
 
+    def test_an_equal_drain_holds_the_two_casts_within_the_tolerance(self):
+        [check] = DRAIN_ENTRY['checks']
+        entry = {**DRAIN_ENTRY, 'checks': [{**check, 'relation': 'equal', 'tolerance': 1}]}
+        scenario, [expectation] = scenario_of(entry)
+        run.validate(scenario)
+        (low_start, low_end), (high_start, high_end) = expectation.model['power_reads']['treatment'].values()
+        values = {low_start: 1497, low_end: 942, high_start: 1497, high_end: 941}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status, 'ok')
+        values[high_end] = 767
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status, 'alert')
+
+    def test_a_more_drain_keeps_its_model(self):
+        _, [expectation] = scenario_of(DRAIN_ENTRY)
+        self.assertNotIn('relation', expectation.model)
+
     def test_refused_layouts(self):
         for check in ({'judge': 'aura_reach', 'aura': 1, 'reference': 'p', 'removed': ['n']},
                       {'judge': 'drain', 'low_cast': 0, 'high_cast': 0},
+                      {'judge': 'drain', 'low_cast': 0, 'high_cast': 1, 'relation': 'less'},
                       {'judge': 'count', 'reference': 'p'}):
             entry = {**DISPEL_ENTRY, 'checks': [{'name': 'x', 'spell': HEXBREAK, **check}]}
             with self.subTest(check=check), self.assertRaises(ValueError):

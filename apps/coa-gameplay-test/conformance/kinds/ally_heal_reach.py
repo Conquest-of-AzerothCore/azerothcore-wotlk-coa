@@ -19,6 +19,7 @@ READ_METRICS = {'count': COUNT_METRIC, 'total': TOTAL_METRIC, 'effective': EFFEC
 JUDGES_BY_NAME = ('reach', 'offsets', 'per_source', 'share', 'count', 'aura_reach', 'immune_window', 'drain',
                   'health_share')
 AURA_JUDGES = ('aura_reach', 'immune_window')
+DRAIN_RELATIONS = ('more', 'equal')
 AURA_METRIC = 'aura'
 POWER_METRIC = 'power'
 HEALTH_METRIC = 'health'
@@ -84,6 +85,7 @@ class ReachCheck:
     apart: tuple[str, ...] = ()
     tolerance: float = 0.0
     control_allowed: tuple[str, ...] = ()
+    relation: str = 'more'
 
 
 @dataclass(frozen=True)
@@ -128,7 +130,7 @@ def reach_check(raw: dict, quote: str) -> ReachCheck:
                       tuple(raw.get('removed', ())), tuple(raw.get('kept', ())), tuple(raw.get('immune', ())),
                       raw.get('early_ms'), raw.get('late_ms'), raw.get('low_cast'), raw.get('high_cast'),
                       tuple(raw.get('levelled', ())), tuple(raw.get('apart', ())), float(raw.get('tolerance', 0.0)),
-                      tuple(raw.get('control_allowed', ())))
+                      tuple(raw.get('control_allowed', ())), raw.get('relation', 'more'))
 
 
 def ally_heal_reach_spec(entry: dict) -> AllyHealReachSpec:
@@ -255,6 +257,9 @@ def validate_extended_check(spec: AllyHealReachSpec, check: ReachCheck) -> None:
         readable = [index for index, cast in enumerate(spec.casts) if cast.power_reads]
         if check.low_cast not in readable or check.high_cast not in readable or check.low_cast == check.high_cast:
             raise ValueError(f'{spec.spell} {KIND} check {check.name} compares the power reads of two casts')
+        if check.relation not in DRAIN_RELATIONS:
+            raise ValueError(f'{spec.spell} {KIND} check {check.name} relation {check.relation!r} is not one of '
+                             f'{DRAIN_RELATIONS}')
     if check.judge == 'health_share':
         named = set(check.levelled) | set(check.apart)
         if len(check.levelled) < 2 or not named <= known or check.tolerance <= 0:
@@ -460,7 +465,10 @@ def extended_model(spec: AllyHealReachSpec, check: ReachCheck) -> dict:
         reads = {phase: {str(index): [power_label(spec, phase, index, 'start'), power_label(spec, phase, index, 'end')]
                          for index, cast in enumerate(spec.casts) if cast.power_reads}
                  for phase in phases(spec)}
-        return {'low_cast': check.low_cast, 'high_cast': check.high_cast, 'contrast': OWN_CAST, 'power_reads': reads}
+        model = {'low_cast': check.low_cast, 'high_cast': check.high_cast, 'contrast': OWN_CAST, 'power_reads': reads}
+        if check.relation != 'more':
+            model |= {'relation': check.relation, 'tolerance': check.tolerance}
+        return model
     if check.judge == 'health_share':
         reads = {phase: {moment: {unit: {field: health_label(spec, phase, moment, unit, field)
                                          for field in ('health', 'max_health')}
@@ -566,6 +574,8 @@ def expected_text(check: ReachCheck) -> str:
     if check.judge == 'immune_window':
         return f'{len(check.immune)} immune'
     if check.judge == 'drain':
+        if check.relation == 'equal':
+            return f'cast {check.high_cast} equal to cast {check.low_cast}'
         return f'cast {check.high_cast} above cast {check.low_cast}'
     if check.judge == 'health_share':
         return f'{len(check.levelled)} levelled'
@@ -825,6 +835,12 @@ def drain_verdict(base, run, model: dict):
     if low <= 0:
         return replace(base, status='unmeasured', measured=low,
                        explanation=f'cast {model["low_cast"]} spent {low:g} power: the cast did not run')
+    if model.get('relation') == 'equal':
+        tolerance = float(model['tolerance'])
+        status = 'ok' if abs(high - low) <= tolerance else 'alert'
+        return replace(base, status=status, measured=high, expected=low, low=low - tolerance, high=low + tolerance,
+                       explanation=f'power spent over the watch: cast {model["low_cast"]} {low:g}, cast '
+                                   f'{model["high_cast"]} {high:g} (must be equal within {tolerance:g})')
     status = 'ok' if high > low else 'alert'
     return replace(base, status=status, measured=high, expected=low, low=low, high=None,
                    explanation=f'power spent over the watch: cast {model["low_cast"]} {low:g}, cast '
