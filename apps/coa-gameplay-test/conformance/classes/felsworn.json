@@ -2505,11 +2505,11 @@
         "since_spell": 572617
       },
       "before_expected": 3000,
-      "expected": 2400,
+      "expected": 2250,
       "tolerance": 50,
       "wait_ms": 20000,
       "expire_ms": 61000,
-      "observe_source": "300485 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 19 (SPELLMOD_ACTIVATION_TIME), BasePoints -26 + 1 = -25 ($s2 shown unsigned), EffectSpellClassMask word 2 = 2048, the SpellFamilyFlags word 2 of Immolation Aura 572617 (Effect[0] aura 227 with EffectAmplitude 3000 and EffectTriggerSpell 800208, Spell.dbc). The tooltip says the tick RATE rises by 25%: owner ruling O-24 (2026-11-22, Sun Cleric ADR 0031, the Blightbreaker/Mercy entry) reads such a tooltip literally, a rate of 1.25 times the base, so the interval is 3000 x 100 / 125 = 2400 ms (the stock -25% period modifier gives 2250 ms, a rate of 1.33). The median interval between the damage events of the tick spell 800208 on the dummy since the cast is read 20000 ms after a real cast, before (control: 300485 not learned, 3000 ms) and after a real learn, within 50 ms: 2250 is excluded. Reference search 2026-11-23: coa-history spell 300485: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Increases the tick rate of Immolation Aura by -25%.'. Immolation Aura costs health (PowerType health, ManaCost 50) and its aura drains the caster, so the caster is held at 99% of the health fixture before each cast (caster_health_pct), a setup fixture.",
+      "observe_source": "300485 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 19 (SPELLMOD_ACTIVATION_TIME), BasePoints -26 + 1 = -25 ($s2 shown unsigned), EffectSpellClassMask word 2 = 2048, the SpellFamilyFlags word 2 of Immolation Aura 572617 (Effect[0] aura 227 with EffectAmplitude 3000 and EffectTriggerSpell 800208, Spell.dbc). Owner ruling O-18 (2026-11-23): the data governs, not the Sun Cleric O-24 reading of a rate (not extended to this class). The expected interval comes from the DBC fields: Effect[1] BasePoints -26 + 1 = -25 (percent period modifier on SPELLMOD_ACTIVATION_TIME) applied to Immolation Aura 572617 Effect[0] EffectAmplitude 3000 ms: 3000 x (100 - 25) / 100 = 3000 x 0.75 = 2250 ms. The median interval between the damage events of the tick spell 800208 on the dummy since the cast is read 20000 ms after a real cast, before (control: 300485 not learned, 3000 ms) and after a real learn, within 50 ms: 2400 is excluded. Reference search 2026-11-23: coa-history spell 300485: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'Increases the tick rate of Immolation Aura by -25%.'. Immolation Aura costs health (PowerType health, ManaCost 50) and its aura drains the caster, so the caster is held at 99% of the health fixture before each cast (caster_health_pct), a setup fixture.",
       "caster_health_pct": 99
     },
     {
@@ -2628,7 +2628,7 @@
           "caster"
         ]
       ],
-      "observe_source": "Spell haste half of 301287: Felfury 800058 Effect[0] aura 216 HASTE_SPELLS carries 0 + 1% per stack under 301287 (SPELLMOD_ALL_EFFECTS, BasePoints 0 + 1), 6% at six stacks. The cast time of Fel Fireball 801312 (CastingTimeIndex 16 = 1500 ms, SpellCastTimes.dbc; DmgClass 1, so Unit::ModSpellCastTime multiplies by UNIT_MOD_CAST_SPEED, Unit.cpp:13158-13160) is read for the caster 500 ms after the stacks are set: 1500 ms before (control: 301287 not learned) and int32(1500 / 1.06) = 1415 ms after a real learn, within 1 ms. The Felfury stacks are a precondition fixture by harness set_aura in both phases, named as such. Reference search 2026-11-23: bindmysoul snapshot says 'Each Felfury active now increases your haste by 1%.'; coa-history spell 301287: 0 events in 186 logs."
+      "observe_source": "Spell haste half of 301287: Felfury 800058 Effect[0] aura 216 HASTE_SPELLS carries 0 + 1% per stack under 301287 (SPELLMOD_ALL_EFFECTS, BasePoints 0 + 1), 6% at six stacks. The cast time of Fel Fireball 801312 (CastingTimeIndex 16 = 1500 ms, SpellCastTimes.dbc; DmgClass 1, so Unit::ModSpellCastTime multiplies by UNIT_MOD_CAST_SPEED, Unit.cpp:13158-13160) is read for the caster 500 ms after the stacks are set: 1500 ms before (control: 301287 not learned) and int32(1500 / 1.06) = 1415 ms after a real learn, within 1 ms. The Felfury stacks are a precondition fixture by harness set_aura in both phases, named as such. Reference search 2026-11-23: bindmysoul snapshot says 'Each Felfury active now increases your haste by 1%.'; coa-history spell 301287: 0 events in 186 logs. Counted as data: spell_cast_time_ms is a readback of the computed cast time (coverage.py), not a behaviour read."
     },
     {
       "spell": 520257,
@@ -3453,7 +3453,7 @@
       "tolerance": 1.5,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "520805 Effect[0] aura 42 PROC_TRIGGER_SPELL 520806 (Effect[0] SPELL_EFFECT_HEAL 10, BasePoints 49 + 1 = 50, EffectRealPointsPerLevel 1.0); the tooltip token resolved with the reference stats (Stamina 79, attack power 312, level 60) is 199.76 (packet of the spell, tokens table). The heal events of 520806 on the caster are summed 1500 ms after a real cast of Chaos Rush 500028 at the dummy: 0 before the learn (control) and 199.76 within 1.5 after. The value part $520806m1+$520806ppl1 (50 + 31 at level 60) rests on EffectRealPointsPerLevel 1.0 and is PENDING RENDER (O-5): not counted. The attack power and Stamina terms are judged by the two contrast arms heal_ap and heal_sta of the same pair. Reference search 2026-11-23: coa-history spell 520805: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'casting Chaos Rush now heals you for 81 + 20% Stamina + 33% AP'."
+      "observe_source": "520805 Effect[0] aura 42 PROC_TRIGGER_SPELL 520806 (Effect[0] SPELL_EFFECT_HEAL 10, BasePoints 49 + 1 = 50, EffectRealPointsPerLevel 1.0); the tooltip token resolved with the reference stats (Stamina 79, attack power 312, level 60) is 199.76 (packet of the spell, tokens table). The heal events of 520806 on the caster are summed 1500 ms after a real cast of Chaos Rush 500028 at the dummy: 0 before the learn (control) and 199.76 within 1.5 after. The value part $520806m1+$520806ppl1 (50 + 31 at level 60) rests on EffectRealPointsPerLevel 1.0; the third client render (mentor D-48, accepted) shows 520805 as base plus per-level, 81, equal to the server's value. The attack power and Stamina terms are judged by the two contrast arms heal_ap and heal_sta of the same pair. Reference search 2026-11-23: coa-history spell 520805: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says 'casting Chaos Rush now heals you for 81 + 20% Stamina + 33% AP'."
     },
     {
       "spell": 520805,
@@ -3475,12 +3475,12 @@
       "tolerance": 1.5,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "Contrast arm of heal: the caster holds 3000 more attack power (harness fixture player_attack_power), so the $AP*.33 term of 520806 is 0.33 x (312 + 3000) = 1092.96 and the heal reads 81 + 0.2 x 79 + 1092.96 = 1189.76 within 1.5, against 199.76 at the reference 312; the base and Stamina terms cannot compensate the attack power term. The base 81 rests on $m1 + ppl1 and is PENDING RENDER (O-5): the label is not counted for it. Reference search 2026-11-23: bindmysoul snapshot says 'casting Chaos Rush now heals you for 81 + 20% Stamina + 33% AP'; coa-history spell 520805: 0 events in 186 logs.",
+      "observe_source": "Contrast arm of heal: the caster holds 3000 more attack power (harness fixture player_attack_power), so the $AP*.33 term of 520806 is 0.33 x (312 + 3000) = 1092.96 and the heal reads 81 + 0.2 x 79 + 1092.96 = 1189.76 within 1.5, against 199.76 at the reference 312; the base and Stamina terms cannot compensate the attack power term. The base 81 rests on $m1 + ppl1 and matches the accepted third client render (mentor D-48). Reference search 2026-11-23: bindmysoul snapshot says 'casting Chaos Rush now heals you for 81 + 20% Stamina + 33% AP'; coa-history spell 520805: 0 events in 186 logs.",
       "player_attack_power": 3000
     },
     {
       "spell": 520805,
-      "name": "Scars of the Past (Chaos Rush heal at +55 Stamina)",
+      "name": "Scars of the Past (Chaos Rush heal at +165 Stamina)",
       "kind": "metric_delta",
       "variant": "heal_sta",
       "label_suffix": "heal_sta",
@@ -3494,14 +3494,14 @@
         "spell": 520806
       },
       "before_expected": 0,
-      "expected": 210.76,
+      "expected": 232.76,
       "tolerance": 1.5,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "Contrast arm of heal: Power Word: Fortitude 25389 (Effect[0] aura 29 MOD_STAT, MiscValue 2 Stamina, BasePoints 54 + DieSides 1 = 55, Spell.dbc) is set on the caster in both phases as a named precondition fixture (harness set_aura), so the $STA*0.2 term of 520806 is 0.2 x (79 + 55) = 26.8 and the heal reads 81 + 26.8 + 102.96 = 210.76 within 1.5, against 199.76 without the aura; the base and attack power terms cannot compensate the Stamina term. The base 81 is PENDING RENDER (O-5): the label is not counted for it. Reference search 2026-11-23: bindmysoul snapshot says 'casting Chaos Rush now heals you for 81 + 20% Stamina + 33% AP'; coa-history spell 520805: 0 events in 186 logs.",
+      "observe_source": "Contrast arm of heal: Fortitude 72590 (Effect[0] aura 29 MOD_STAT, MiscValue 2 Stamina, BasePoints 164 + DieSides 1 = 165, EffectRealPointsPerLevel 0, Spell.dbc) is set on the caster in both phases as a named precondition fixture (harness set_aura), so the $STA*0.2 term of 520806 is 0.2 x (79 + 165) = 48.8 and the heal reads 81 + 48.8 + 102.96 = 232.76 within 1.5, against 199.76 without the aura. The Stamina term moves by 33 HP; with 1.5 on each reading the slope is read within 33 +- 3, so a coefficient of 0.15, 0.25 and even 0.18 or 0.22 (29.7 and 36.3 HP) falls outside; the base and attack power terms are unchanged between the two readings. The base 81 matches the accepted third client render (mentor D-48). Reference search 2026-11-23: bindmysoul snapshot says 'casting Chaos Rush now heals you for 81 + 20% Stamina + 33% AP'; coa-history spell 520805: 0 events in 186 logs.",
       "phase_auras": [
         [
-          25389,
+          72590,
           1,
           "caster",
           "caster"
