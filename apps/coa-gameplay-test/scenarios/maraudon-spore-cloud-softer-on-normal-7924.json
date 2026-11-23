@@ -1,0 +1,364 @@
+{
+  "schema": 1,
+  "name": "Maraudon: Spore Cloud from the Spore Trees deals 25% less on Normal",
+  "contract": "Issue #7924: the Spore Trees in Maraudon (178561-178569) cast Spore Cloud (21547, 87-116 nature damage per second for 5 s, rolled once per cloud) through the level 80 World Trigger (12999); in the dungeon that comes to about 2045-2730 per cloud (2070-2705 measured on Normal). A level 60 Heroic run took 2.8k of 4.9k health. Expected (project owner decision after that run): on Normal the cloud deals 25% less, about 1530-2050 per cloud; Heroic and Mythic keep their damage. Three clouds are checked on Normal so one low roll without the change cannot pass, and two clouds on Heroic must still deal the full 1990-2800 (2025-2685 measured at level 60).",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 45
+    },
+    {
+      "id": "p2",
+      "race": 1,
+      "class": 1,
+      "level": 45
+    },
+    {
+      "id": "p3",
+      "race": 1,
+      "class": 1,
+      "level": 45
+    },
+    {
+      "id": "p4",
+      "race": 1,
+      "class": 1,
+      "level": 45
+    },
+    {
+      "id": "p5",
+      "race": 1,
+      "class": 1,
+      "level": 45
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "p1",
+      "value": 0
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "p2",
+      "value": 0
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "p3",
+      "value": 0
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "p4",
+      "value": 1
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "p5",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "p1",
+      "map": 349,
+      "x": 1060.7,
+      "y": -268.2,
+      "z": -73.5,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "p2",
+      "map": 349,
+      "x": 1060.7,
+      "y": -268.2,
+      "z": -73.5,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "p3",
+      "map": 349,
+      "x": 1060.7,
+      "y": -268.2,
+      "z": -73.5,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "p4",
+      "map": 349,
+      "x": 1060.7,
+      "y": -268.2,
+      "z": -73.5,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "p5",
+      "map": 349,
+      "x": 1060.7,
+      "y": -268.2,
+      "z": -73.5,
+      "ignore_access": true
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: p1 is in Maraudon on Normal",
+      "actor": "p1",
+      "metric": "map_difficulty",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: p2 is in Maraudon on Normal",
+      "actor": "p2",
+      "metric": "map_difficulty",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: p3 is in Maraudon on Normal",
+      "actor": "p3",
+      "metric": "map_difficulty",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: p4 is in Maraudon on Heroic",
+      "actor": "p4",
+      "metric": "map_difficulty",
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: p5 is in Maraudon on Heroic",
+      "actor": "p5",
+      "metric": "map_difficulty",
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: p1 is in Maraudon",
+      "actor": "p1",
+      "metric": "map_id",
+      "equals": 349
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "summon",
+      "label": "an unowned World Trigger (12999) stands in for the Spore Tree, as the trap's own caster does",
+      "actor": "p1",
+      "as": "tree_p1",
+      "entry": 12999,
+      "distance": 3,
+      "unowned": true
+    },
+    {
+      "action": "set_health",
+      "actor": "p1",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p1",
+      "metric": "health",
+      "save_as": "before_p1"
+    },
+    {
+      "action": "cast",
+      "label": "a Spore Cloud lands on p1",
+      "actor": "tree_p1",
+      "spell": 21547,
+      "target": "p1"
+    },
+    {
+      "action": "summon",
+      "label": "an unowned World Trigger (12999) stands in for the Spore Tree, as the trap's own caster does",
+      "actor": "p2",
+      "as": "tree_p2",
+      "entry": 12999,
+      "distance": 3,
+      "unowned": true
+    },
+    {
+      "action": "set_health",
+      "actor": "p2",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p2",
+      "metric": "health",
+      "save_as": "before_p2"
+    },
+    {
+      "action": "cast",
+      "label": "a Spore Cloud lands on p2",
+      "actor": "tree_p2",
+      "spell": 21547,
+      "target": "p2"
+    },
+    {
+      "action": "summon",
+      "label": "an unowned World Trigger (12999) stands in for the Spore Tree, as the trap's own caster does",
+      "actor": "p3",
+      "as": "tree_p3",
+      "entry": 12999,
+      "distance": 3,
+      "unowned": true
+    },
+    {
+      "action": "set_health",
+      "actor": "p3",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p3",
+      "metric": "health",
+      "save_as": "before_p3"
+    },
+    {
+      "action": "cast",
+      "label": "a Spore Cloud lands on p3",
+      "actor": "tree_p3",
+      "spell": 21547,
+      "target": "p3"
+    },
+    {
+      "action": "summon",
+      "label": "an unowned World Trigger (12999) stands in for the Spore Tree, as the trap's own caster does",
+      "actor": "p4",
+      "as": "tree_p4",
+      "entry": 12999,
+      "distance": 3,
+      "unowned": true
+    },
+    {
+      "action": "set_health",
+      "actor": "p4",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p4",
+      "metric": "health",
+      "save_as": "before_p4"
+    },
+    {
+      "action": "cast",
+      "label": "a Spore Cloud lands on p4 on Heroic",
+      "actor": "tree_p4",
+      "spell": 21547,
+      "target": "p4"
+    },
+    {
+      "action": "summon",
+      "label": "an unowned World Trigger (12999) stands in for the Spore Tree, as the trap's own caster does",
+      "actor": "p5",
+      "as": "tree_p5",
+      "entry": 12999,
+      "distance": 3,
+      "unowned": true
+    },
+    {
+      "action": "set_health",
+      "actor": "p5",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p5",
+      "metric": "health",
+      "save_as": "before_p5"
+    },
+    {
+      "action": "cast",
+      "label": "a Spore Cloud lands on p5 on Heroic",
+      "actor": "tree_p5",
+      "spell": 21547,
+      "target": "p5"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the cloud on p1 deals a quarter less, at most 2100 instead of 2045-2730",
+      "actor": "p1",
+      "metric": "health",
+      "relative_to": "before_p1",
+      "min": -2100,
+      "max": -1450
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the cloud on p2 deals a quarter less, at most 2100 instead of 2045-2730",
+      "actor": "p2",
+      "metric": "health",
+      "relative_to": "before_p2",
+      "min": -2100,
+      "max": -1450
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the cloud on p3 deals a quarter less, at most 2100 instead of 2045-2730",
+      "actor": "p3",
+      "metric": "health",
+      "relative_to": "before_p3",
+      "min": -2100,
+      "max": -1450
+    },
+    {
+      "action": "assert",
+      "label": "Heroic keeps its damage: the cloud on p4 still deals 1990-2800",
+      "actor": "p4",
+      "metric": "health",
+      "relative_to": "before_p4",
+      "min": -2800,
+      "max": -1990
+    },
+    {
+      "action": "assert",
+      "label": "Heroic keeps its damage: the cloud on p5 still deals 1990-2800",
+      "actor": "p5",
+      "metric": "health",
+      "relative_to": "before_p5",
+      "min": -2800,
+      "max": -1990
+    }
+  ]
+}
