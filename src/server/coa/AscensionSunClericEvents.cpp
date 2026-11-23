@@ -104,7 +104,7 @@ class aura_ascension_sun_cleric_event : public AuraScript
             if (id == 300355)
                 return melee && critical && damage;
             if (id == 704941)
-                return event.GetHitMask() & PROC_HIT_PARRY;
+                return !own && melee && !periodic;
             if (id == 707629)
                 return block && Chance(player, id);
         }
@@ -305,7 +305,11 @@ class aura_ascension_sun_cleric_event : public AuraScript
                 Mana(player,uint32(std::max(0.0f, Amount(704926,1,player) +
                     .15f * player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY))),704926);
                 break;
-            case 704941: Cast(player,player,707843); break;
+            case 704941:
+                player->RemoveAurasDueToSpell(707843);
+                if (event.GetHitMask() & PROC_HIT_PARRY)
+                    Cast(player,player,707843);
+                break;
             case 807343: Cast(player,player,807523); break;
             case 707629: Extend(player,804751,4000); break;
             case 582832: Cast(player,player,582837); break;
