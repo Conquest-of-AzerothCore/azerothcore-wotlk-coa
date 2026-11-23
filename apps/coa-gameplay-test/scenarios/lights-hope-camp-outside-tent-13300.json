@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "name": "Light's Hope Chapel camp stands outside the tent and on the ground (#13300)",
+  "contract": "#13300: the CoA client patch patch-WB1.MPQ moved the Light's Hope tent (ADT Azeroth_42_27 doodad 554021) onto the stock positions of Betina Bigglezink (69680), Carlin Redpath (53737) and their campfire (45565), and Duke Nicholas Zverenhoff (54754) stood 0.15 yd under the terrain. rev_20261123_13300_lights_hope_camp_outside_tent.sql moves the campfire between the two chairs the patch placed east of the tent, stands the two NPCs beside it and lifts Duke to the ground. The tent wall was within 0.9 and 1.66 yd of the NPCs and 0.63 yd of the campfire; the vmap clearance and floor gap assertions discriminate.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": 2262.0,
+    "y": -5330.0,
+    "z": 87.5,
+    "o": 0.0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Betina Bigglezink stands clear of the tent",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "guid": 69680,
+      "spawn_type": "creature",
+      "min": 1.8
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Carlin Redpath stands clear of the tent",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "guid": 53737,
+      "spawn_type": "creature",
+      "min": 1.8
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the campfire is out of the tent",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "guid": 45565,
+      "spawn_type": "gameobject",
+      "min": 1.0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Duke Nicholas Zverenhoff's feet are on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 54754,
+      "spawn_type": "creature",
+      "min": 0.0,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "Betina Bigglezink stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 69680,
+      "spawn_type": "creature",
+      "min": -0.1,
+      "max": 0.4
+    },
+    {
+      "action": "assert",
+      "label": "Carlin Redpath stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 53737,
+      "spawn_type": "creature",
+      "min": -0.1,
+      "max": 0.4
+    },
+    {
+      "action": "assert",
+      "label": "The campfire sits on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 45565,
+      "spawn_type": "gameobject",
+      "min": -0.1,
+      "max": 0.4
+    }
+  ]
+}
