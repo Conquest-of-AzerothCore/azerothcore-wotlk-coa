@@ -6362,7 +6362,7 @@
       "before_expected": 0,
       "expected": 25,
       "tolerance": 0.5,
-      "observe_source": "705142 effect 0 amount, read on the caster 500 ms after a real cast of 500028 with 705141 learned (the same cast before the learn is the control: the aura is absent, amount 0). Spell.dbc: Pit Lord's Rage (Chaos Rush grants 705142) = 25. "
+      "observe_source": "705142 effect 0 amount, read on the caster 500 ms after a real cast of 500028 with 705141 learned (the same cast before the learn is the control: the aura is absent, amount 0). Spell.dbc: Pit Lord's Rage (Chaos Rush grants 705142) = 25. Reference search 2026-11-23: coa-history spell 705141: 0 events in 186 logs (a passive leaves no event); coa-history spell 705142: 8 SPELL_AURA_APPLIED, 8 SPELL_AURA_REMOVED and 14 SPELL_AURA_REFRESH in 1 log with no amount or duration in an event, Chaos Rush 500028 (93 casts in 6 logs) is the positive control of the grant path; coa-history spell 705143: 0 events; bindmysoul talents snapshot: text 'Casting Chaos Rush now increases your Physical damage by 15% for 10 seconds. Casting Felhoof Charge increases your critical strike chance by 6% for 15 seconds.' (an older state with other percents, G-9); expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 705141,
@@ -6389,7 +6389,7 @@
           9500
         ]
       },
-      "observe_source": "705142 DurationIndex gives 10000 ms ($d, SpellDuration.dbc). The aura is still on the caster 9400 ms after the cast (excludes a duration 10% short), read after a real cast of 500028 with 705141 learned. "
+      "observe_source": "705142 DurationIndex gives 10000 ms ($d, SpellDuration.dbc). The aura is still on the caster 9400 ms after the cast (excludes a duration 10% short), read after a real cast of 500028 with 705141 learned. Reference search 2026-11-23: coa-history spell 705141: 0 events in 186 logs (a passive leaves no event); coa-history spell 705142: 8 SPELL_AURA_APPLIED, 8 SPELL_AURA_REMOVED and 14 SPELL_AURA_REFRESH in 1 log with no amount or duration in an event, Chaos Rush 500028 (93 casts in 6 logs) is the positive control of the grant path; coa-history spell 705143: 0 events; bindmysoul talents snapshot: text 'Casting Chaos Rush now increases your Physical damage by 15% for 10 seconds. Casting Felhoof Charge increases your critical strike chance by 6% for 15 seconds.' (an older state with other percents, G-9); expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 705141,
@@ -6416,7 +6416,7 @@
           10700
         ]
       },
-      "observe_source": "705142 DurationIndex gives 10000 ms ($d, SpellDuration.dbc). The aura is gone 10600 ms after the cast (excludes a duration 10% long), read after a real cast of 500028 with 705141 learned. "
+      "observe_source": "705142 DurationIndex gives 10000 ms ($d, SpellDuration.dbc). The aura is gone 10600 ms after the cast (excludes a duration 10% long), read after a real cast of 500028 with 705141 learned. Reference search 2026-11-23: coa-history spell 705141: 0 events in 186 logs (a passive leaves no event); coa-history spell 705142: 8 SPELL_AURA_APPLIED, 8 SPELL_AURA_REMOVED and 14 SPELL_AURA_REFRESH in 1 log with no amount or duration in an event, Chaos Rush 500028 (93 casts in 6 logs) is the positive control of the grant path; coa-history spell 705143: 0 events; bindmysoul talents snapshot: text 'Casting Chaos Rush now increases your Physical damage by 15% for 10 seconds. Casting Felhoof Charge increases your critical strike chance by 6% for 15 seconds.' (an older state with other percents, G-9); expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 705141,
@@ -6439,7 +6439,7 @@
       "before_expected": 0,
       "expected": 15,
       "tolerance": 0.5,
-      "observe_source": "705143 effect 0 amount, read on the caster 500 ms after a real cast of 800204 with 705141 learned (the same cast before the learn is the control: the aura is absent, amount 0). Spell.dbc: Pit Lord's Rage (Felhoof Charge grants 705143) = 15. "
+      "observe_source": "705143 effect 0 amount, read on the caster 500 ms after a real cast of 800204 with 705141 learned (the same cast before the learn is the control: the aura is absent, amount 0). Spell.dbc: Pit Lord's Rage (Felhoof Charge grants 705143) = 15. Reference search 2026-11-23: coa-history spell 705141: 0 events in 186 logs (a passive leaves no event); coa-history spell 705142: 8 SPELL_AURA_APPLIED, 8 SPELL_AURA_REMOVED and 14 SPELL_AURA_REFRESH in 1 log with no amount or duration in an event, Chaos Rush 500028 (93 casts in 6 logs) is the positive control of the grant path; coa-history spell 705143: 0 events; bindmysoul talents snapshot: text 'Casting Chaos Rush now increases your Physical damage by 15% for 10 seconds. Casting Felhoof Charge increases your critical strike chance by 6% for 15 seconds.' (an older state with other percents, G-9); expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 705141,
@@ -6466,7 +6466,7 @@
           14500
         ]
       },
-      "observe_source": "705143 DurationIndex gives 15000 ms ($d, SpellDuration.dbc). The aura is still on the caster 14400 ms after the cast (excludes a duration 10% short), read after a real cast of 800204 with 705141 learned. "
+      "observe_source": "705143 DurationIndex gives 15000 ms ($d, SpellDuration.dbc). The aura is still on the caster 14400 ms after the cast (excludes a duration 10% short), read after a real cast of 800204 with 705141 learned. Reference search 2026-11-23: coa-history spell 705141: 0 events in 186 logs (a passive leaves no event); coa-history spell 705142: 8 SPELL_AURA_APPLIED, 8 SPELL_AURA_REMOVED and 14 SPELL_AURA_REFRESH in 1 log with no amount or duration in an event, Chaos Rush 500028 (93 casts in 6 logs) is the positive control of the grant path; coa-history spell 705143: 0 events; bindmysoul talents snapshot: text 'Casting Chaos Rush now increases your Physical damage by 15% for 10 seconds. Casting Felhoof Charge increases your critical strike chance by 6% for 15 seconds.' (an older state with other percents, G-9); expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 705141,
@@ -6493,7 +6493,7 @@
           15700
         ]
       },
-      "observe_source": "705143 DurationIndex gives 15000 ms ($d, SpellDuration.dbc). The aura is gone 15600 ms after the cast (excludes a duration 10% long), read after a real cast of 800204 with 705141 learned. "
+      "observe_source": "705143 DurationIndex gives 15000 ms ($d, SpellDuration.dbc). The aura is gone 15600 ms after the cast (excludes a duration 10% long), read after a real cast of 800204 with 705141 learned. Reference search 2026-11-23: coa-history spell 705141: 0 events in 186 logs (a passive leaves no event); coa-history spell 705142: 8 SPELL_AURA_APPLIED, 8 SPELL_AURA_REMOVED and 14 SPELL_AURA_REFRESH in 1 log with no amount or duration in an event, Chaos Rush 500028 (93 casts in 6 logs) is the positive control of the grant path; coa-history spell 705143: 0 events; bindmysoul talents snapshot: text 'Casting Chaos Rush now increases your Physical damage by 15% for 10 seconds. Casting Felhoof Charge increases your critical strike chance by 6% for 15 seconds.' (an older state with other percents, G-9); expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 705122,
@@ -6531,6 +6531,12 @@
               "spell": 500031,
               "equals": 0
             }
+          ],
+          "casts": [
+            [
+              804216,
+              "caster"
+            ]
           ]
         },
         {
@@ -6555,10 +6561,16 @@
               "spell": 500031,
               "equals": 1
             }
+          ],
+          "casts": [
+            [
+              804216,
+              "caster"
+            ]
           ]
         }
       ],
-      "observe_source": "500031 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127 (every school), BasePoints -6 + 1 = -5 ($500031s1); AscensionFelsworn.cpp:273 toggles 500031 on the caster while Inner Demon 804216 is active and 705122 is known. Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) strikes the caster six times in each arm; both arms cast Inner Demon for real (control: 705122 unlearned, 500031 absent; treatment: learned, 500031 present); expected ratio 0.95 within the band. Reference search 2026-11-23: coa-history spell 705122: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: text says -10% where the DBC tooltip and 500031 say 5% (an older state, the tooltip prevails, G-9); expected values come from the tooltip and the DBC only.",
+      "observe_source": "500031 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127 (every school), BasePoints -6 + 1 = -5 ($500031s1); AscensionFelsworn.cpp:273 toggles 500031 on the caster while Inner Demon 804216 is active and 705122 is known. Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) strikes the caster six times in each arm; both arms cast Inner Demon for real (control: 705122 unlearned, 500031 absent; treatment: learned, 500031 present); expected ratio 0.95 within the band. Reference search 2026-11-23: coa-history spell 705122: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: text says -10% where the DBC tooltip and 500031 say 5% (an older state, the tooltip prevails, G-9); expected values come from the tooltip and the DBC only. Each trial recasts Inner Demon 804216 before its strike (arm casts), so the 5 s of one Felfury (803465 DBC 4999 + 1 ms) never lapses inside the 60 trials; the first pair let it expire after 4 strikes (treatment 882 on strikes 1-4, 929 from strike 5, pooled -0.44% instead of -5%).",
       "strikes": 1,
       "settle_ms": 50
     },
@@ -6875,7 +6887,7 @@
       "quote": "Reduces your chance to be hit by spells by $s1%",
       "attacker_spell": 585,
       "expected": 2,
-      "observe_source": "706266 Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, EffectBasePoints -3 + EffectDieSides 1 = -2: 2 points ($s1), EffectMiscValue 126 (every magic school, Holy included). Path and arms as the Sun Shield 300348 entry (Unit::MagicSpellHitResult clamp [100, 10000]): four stationary hostile attackers cast Smite 585 at the caster at the 100% clamp and one point under it, without the passive (control) and with it learned; the expected 2 is the DBC amount, never a run. Reference search 2026-11-23: coa-history spell 706266: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: text 'by -2%' (same magnitude); expected values come from the tooltip and the DBC only."
+      "observe_source": "706266 Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, EffectBasePoints -3 + EffectDieSides 1 = -2: 2 points ($s1), EffectMiscValue 126 (every magic school, Holy included). Path and arms as the Sun Shield 300348 entry (Unit::MagicSpellHitResult clamp [100, 10000]): four stationary hostile attackers cast Smite 585 at the caster at the 100% clamp and one point under it, without the passive (control) and with it learned; the expected 2 is the DBC amount, never a run. Reference search 2026-11-23: coa-history spell 706266: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: text 'by -2%' (same magnitude); expected values come from the tooltip and the DBC only. Residual failure probability (fw-b3g3b, from the 826 casts per arm and the edge misses read in the pair proveF2, 4 to 11 per edge arm, mean 7.75, 0.94% of casts): P(no miss in one edge arm) = e^-7.8 = 4.1e-4, four edge arms per pair = 0.16% per pair, above the 0.1% limit: the claim is not counted in this pair; the cast count is fixed by the tool from an assumed 1% edge miss chance (kinds/attacker_miss_share.py spell_clamp_casts), about 1100 casts per edge arm would give under 0.1%."
     },
     {
       "spell": 707844,
@@ -6886,7 +6898,7 @@
       "quote": "Reduces your chance to be hit by spells by $s1%",
       "attacker_spell": 585,
       "expected": 4,
-      "observe_source": "707844 Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, EffectBasePoints -5 + EffectDieSides 1 = -4: 4 points ($s1), EffectMiscValue 126 (every magic school, Holy included). Path and arms as the Sun Shield 300348 entry (Unit::MagicSpellHitResult clamp [100, 10000]): four stationary hostile attackers cast Smite 585 at the caster at the 100% clamp and one point under it, without the passive (control) and with it learned; the expected 4 is the DBC amount, never a run. Reference search 2026-11-23: coa-history spell 707844: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: not listed; expected values come from the tooltip and the DBC only."
+      "observe_source": "707844 Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, EffectBasePoints -5 + EffectDieSides 1 = -4: 4 points ($s1), EffectMiscValue 126 (every magic school, Holy included). Path and arms as the Sun Shield 300348 entry (Unit::MagicSpellHitResult clamp [100, 10000]): four stationary hostile attackers cast Smite 585 at the caster at the 100% clamp and one point under it, without the passive (control) and with it learned; the expected 4 is the DBC amount, never a run. Reference search 2026-11-23: coa-history spell 707844: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: not listed; expected values come from the tooltip and the DBC only. Residual failure probability (fw-b3g3b, from the 826 casts per arm and the edge misses read in the pair proveF2, 4 to 11 per edge arm, mean 7.75, 0.94% of casts): P(no miss in one edge arm) = e^-7.8 = 4.1e-4, four edge arms per pair = 0.16% per pair, above the 0.1% limit: the claim is not counted in this pair; the cast count is fixed by the tool from an assumed 1% edge miss chance (kinds/attacker_miss_share.py spell_clamp_casts), about 1100 casts per edge arm would give under 0.1%."
     },
     {
       "spell": 705125,
@@ -6899,8 +6911,8 @@
       "resource": "cooldown",
       "reduction": 4000,
       "target": "dummy",
-      "margin_ms": 500,
-      "observe_source": "705125 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -21 + 1 = -20 ($s1 percent). Manaburn 805248 (RecoveryTime 20000) is cast, then attempted 16000 ms later (20% of 20000 = 4000) within 500 ms: refused without the talent (the control), through with it learned; 500 ms before the reduced cooldown it is refused (a cut of 3600 or 4400 ms, 10% off, falls outside the margins on the wrong side). The names 'Mana Burn' and 'Manaburn' are the same Felsworn spell. Reference search 2026-11-23: coa-history spell 705125: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: text 'by -20%' (same magnitude); expected values come from the tooltip and the DBC only."
+      "margin_ms": 300,
+      "observe_source": "705125 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -21 + 1 = -20 ($s1 percent). Manaburn 805248 (RecoveryTime 20000) is cast, then attempted 16000 ms later (20% of 20000 = 4000) within 300 ms (16300 ms with, 15700 ms beyond): refused without the talent (the control), through with it learned; 300 ms before the reduced cooldown it is refused (a cut of 3600 ms leaves 16400 ms and is refused at 16300 ms; a cut of 4400 ms leaves 15600 ms and is accepted at 15700 ms: a 10% under- or over-cut falls outside the 300 ms margins on the wrong side, 400 ms would not). The names 'Mana Burn' and 'Manaburn' are the same Felsworn spell. Reference search 2026-11-23: coa-history spell 705125: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: text 'by -20%' (same magnitude); expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 705125,
@@ -7655,7 +7667,7 @@
       "observe_spell": 712399,
       "cast_spell": 705121,
       "cast_power": 100,
-      "observe_source": "707907 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE and Effect[1] SPELLMOD_DOT, BasePoints 19 + 1 = +20% ($s1), class masks matching Sunder 705121 and Immolation Aura 800207. The explosion 712399 (Effect[0] SCHOOL_DAMAGE, SpellFamilyFlags[2] 0x80000000) of a real cast of Sunder 705121 at the dummy is counted, without the passive (control) and with it learned (treatment). Fixtures set by harness set_aura, named as preconditions and identical in both arms: Felfury 800058 x2 and At Least 2 Felfury 803468 (Sunder consumes 2 Felfury and needs 803468), spell penetration 823764 (removes the dummy's partial resists), spell power +20000 (integer truncation far inside the band). Non-critical hits only, mean damage must rise by 20 percent (band 18..22, G-19). Reference search 2026-11-23: coa-history spell 707907: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: a Burning Rage node exists; its text was not compared; expected values come from the tooltip and the DBC only."
+      "observe_source": "707907 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE and Effect[1] SPELLMOD_DOT, BasePoints 19 + 1 = +20% ($s1), class masks matching Sunder 705121 and Immolation Aura 800207. The explosion 712399 (Effect[0] SCHOOL_DAMAGE, SpellFamilyFlags[2] 0x80000000) of a real cast of Sunder 705121 at the dummy is counted, without the passive (control) and with it learned (treatment). Fixtures set by harness set_aura, named as preconditions and identical in both arms: Felfury 800058 x2 and At Least 2 Felfury 803468 (Sunder consumes 2 Felfury and needs 803468), spell penetration 823764 (removes the dummy's partial resists), spell power +20000 (integer truncation far inside the band). Non-critical hits only, mean damage must rise by 20 percent (band 18..22, G-19). Reference search 2026-11-23: coa-history spell 707907: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: a Burning Rage node exists; its text was not compared; expected values come from the tooltip and the DBC only. Immolation Aura damage is not measured: the hit_ratio setup asserts the DBC health cost 10 of Immolation Aura 800207, which the talent lowers to 8 in the treatment arm (the first pair failed that setup)."
     },
     {
       "spell": 707907,
@@ -7710,7 +7722,7 @@
       "cast_spell": 705121,
       "cast_power": 100,
       "cast_wait_ms": 3500,
-      "observe_source": "707907 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE and Effect[1] SPELLMOD_DOT, BasePoints 19 + 1 = +20% ($s1), class masks matching Sunder 705121 and Immolation Aura 800207. The periodic tick of 556503 (Effect[0] aura 3 every 3000 ms) of a real cast of Sunder is read one tick per trial. Fixtures set by harness set_aura, named as preconditions and identical in both arms: Felfury 800058 x2 and At Least 2 Felfury 803468 (Sunder consumes 2 Felfury and needs 803468), spell penetration 823764 (removes the dummy's partial resists), spell power +20000 (integer truncation far inside the band). Non-critical hits only, mean damage must rise by 20 percent (band 18..22, G-19). Reference search 2026-11-23: coa-history spell 707907: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: a Burning Rage node exists; its text was not compared; expected values come from the tooltip and the DBC only."
+      "observe_source": "707907 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE and Effect[1] SPELLMOD_DOT, BasePoints 19 + 1 = +20% ($s1), class masks matching Sunder 705121 and Immolation Aura 800207. The periodic tick of 556503 (Effect[0] aura 3 every 3000 ms) of a real cast of Sunder is read one tick per trial. Fixtures set by harness set_aura, named as preconditions and identical in both arms: Felfury 800058 x2 and At Least 2 Felfury 803468 (Sunder consumes 2 Felfury and needs 803468), spell penetration 823764 (removes the dummy's partial resists), spell power +20000 (integer truncation far inside the band). Non-critical hits only, mean damage must rise by 20 percent (band 18..22, G-19). Reference search 2026-11-23: coa-history spell 707907: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: a Burning Rage node exists; its text was not compared; expected values come from the tooltip and the DBC only. Immolation Aura damage is not measured: the hit_ratio setup asserts the DBC health cost 10 of Immolation Aura 800207, which the talent lowers to 8 in the treatment arm (the first pair failed that setup)."
     },
     {
       "spell": 705145,
@@ -7748,7 +7760,7 @@
     },
     {
       "spell": 800220,
-      "name": "Taskmaster's Army (Infernal Whipcrack reaches an ally at 34 yd, not one at 36 yd)",
+      "name": "Taskmaster's Army (Infernal Whipcrack reaches an ally at 38.7 yd, not one at 39.7 yd)",
       "kind": "metric_delta",
       "variant": "whipcrack_radius",
       "label_suffix": "whipcrack_radius",
@@ -7780,7 +7792,7 @@
             "before_expected": 0,
             "expected": 0,
             "tolerance": 0,
-            "source": "ally2 stands 40 yd from the caster, beyond the 20 + 15 = 35 yd of the widened radius and the leeway of the party area search (Spell.cpp:1400-1402); the first pair put ally2 at 36 yd, inside the leeway, and read the aura"
+            "source": "ally2 stands 39.7 yd from the caster, 0.46 yd beyond the widened edge 39.16 = 20 + 15 (SPELLMOD_RADIUS, 800220 Effect[1]) + 2.66 (party area leeway, Spell.cpp:1396-1401, Object.cpp:1787-1808 at run speed 7 > 4.97) + 1.5 (the ally's object size, IsWithinDist3d, Spell.cpp:9463-9464); a radius 10% high (+16.5 yd, edge 40.66) would reach it"
           },
           {
             "actors": [
@@ -7790,10 +7802,10 @@
             "fields": {
               "target": "caster"
             },
-            "before_expected": 34,
-            "expected": 34,
+            "before_expected": 38.7,
+            "expected": 38.7,
             "tolerance": 0.25,
-            "source": "ally_offsets moves ally 34 yd along x from the shared spawn, dz 0; the caster stays"
+            "source": "ally_offsets moves ally 38.7 yd along x from the shared spawn, dz 0; the caster stays"
           },
           {
             "actors": [
@@ -7803,18 +7815,40 @@
             "fields": {
               "target": "caster"
             },
-            "before_expected": 40,
-            "expected": 40,
+            "before_expected": 39.7,
+            "expected": 39.7,
             "tolerance": 0.25,
-            "source": "ally_offsets moves ally2 40 yd along x from the shared spawn, dz 0; the caster stays"
+            "source": "ally_offsets moves ally2 39.7 yd along x from the shared spawn, dz 0; the caster stays"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 1.5,
+            "expected": 1.5,
+            "tolerance": 0.01,
+            "precondition": true,
+            "source": "the ally's combat reach, the object size term of the edge (GetObjectSize = UNIT_FIELD_COMBATREACH, Object.cpp:2898-2901): 1.5 for the class file player (Player.h:1110); a read off 1.5 voids the trial (mentor D-169), it is not judged"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 1.5,
+            "expected": 1.5,
+            "tolerance": 0.01,
+            "precondition": true,
+            "source": "the ally2's combat reach, the object size term of the edge (GetObjectSize = UNIT_FIELD_COMBATREACH, Object.cpp:2898-2901): 1.5 for the class file player (Player.h:1110); a read off 1.5 voids the trial (mentor D-169), it is not judged"
           }
         ]
       },
       "ally_offsets": {
-        "ally": 34,
-        "ally2": 40
+        "ally": 38.7,
+        "ally2": 39.7
       },
-      "observe_source": "800220 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 6 (SPELLMOD_RADIUS), BasePoints 14 + 1 = +15 yd ($s2), on the Infernal Whipcrack effects with SpellRadius index 9 = 20 yd (805243 Effect[0] and Effect[1], TargetB 56) so the radius is 35 yd; AscensionFelswornAbilities.cpp:136-141 adds every friendly unit within the radius when 800220 is known. Infernal Whipcrack 805243 is cast by the caster; the aura 805243 is read on ally (34 yd, inside 35) before the learn (the control: absent, the base radius is 20 yd) and after it, and on ally2 (40 yd, beyond 35 plus the leeway): absent. Reference search 2026-11-23: coa-history spell 800220: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: nothing found; expected values come from the tooltip and the DBC only."
+      "observe_source": "800220 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 6 (SPELLMOD_RADIUS), BasePoints 14 + 1 = +15 yd ($s2), on the Infernal Whipcrack effects with SpellRadius index 9 = 20 yd (805243 Effect[0] and Effect[1], TargetB 56) so the radius is 35 yd; AscensionFelswornAbilities.cpp:136-141 adds every friendly unit within the radius when 800220 is known. Infernal Whipcrack 805243 is cast by the caster; the aura 805243 is read on ally (38.7 yd) before the learn (the control: absent, the base radius is 20 yd) and after it; edge arithmetic: the stock party area search (TargetB 56, Spell.cpp:1396-1401 adds the leeway 2.66, Spell.cpp:9463-9464 adds the ally's object size 1.5) reaches 35 + 2.66 + 1.5 = 39.16 yd, the script search (AscensionFelswornAbilities.cpp:136-141, IsWithinDistInMap with both object sizes) 35 + 1.5 + 1.5 = 38 yd; a radius 10% low (+13.5 yd, edge 37.66) misses the ally at 38.7 yd, one 10% high (+16.5 yd, edge 40.66) reaches the ally2 at 39.7 yd; both sizes are read in the arms. The earlier text:  before the learn (the control: absent, the base radius is 20 yd) and after it, and on ally2 (39.7 yd): absent. Reference search 2026-11-23: coa-history spell 800220: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: nothing found; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 705122,
@@ -7933,6 +7967,31 @@
       "after_at_most": 2032,
       "player_attack_power": 20000,
       "observe_source": "706267 Effect[0] aura 4 DUMMY; AscensionFelsworn.cpp:210-216 casts Felspill 555742 (Effect[0] SPELL_EFFECT_HEALTH_LEECH, Shadowflame SchoolMask 36, SPELL_ATTR2_CANT_CRIT, AscensionFelswornContracts.cpp:289-290) once per Felfury generated while 706267 is known; the tooltip states health leeched of ${$AP*0.1} (reference attack power 312: 31.2). Demonic Will 800209 (generates 1 Felfury) is cast with 706267 known: the damage of the leech on the dummy is read 1500 ms later (0 before the learn, the control, in which the same cast generates the Felfury but leeches nothing). Spell penetration 823764 (aura 123, MiscValue 126, -9999) is a named precondition fixture that removes the dummy's partial resists. Contrast arm of the attack power term: +20000 attack power (player_attack_power): int(0.1 x 20312 = 2031.2) = 2031 against 31. Reference search 2026-11-23: coa-history spell 706267: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); Felspill 555742: 2106 damage events (3..75, mean 32) and 2115 heals in 4 logs; the players' attack power differs, no figure decides; bindmysoul talents snapshot: same text as above."
+    },
+    {
+      "spell": 707907,
+      "kind": "metric_delta",
+      "trigger_spell": 800207,
+      "gate_spell": 707907,
+      "target": "caster",
+      "measure_actor": "caster",
+      "name": "Burning Rage (Immolation Aura health cost)",
+      "variant": "immolation_cost",
+      "label_suffix": "immolation_cost",
+      "quote": "Increases the damage and reduces the cost of Sunder and Immolation Aura by $s1%.",
+      "metric": "health",
+      "fields": {},
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "disable_regeneration": true,
+      "before_expected": 49990,
+      "expected": 49992,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707907 Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_COST, BasePoints -21 + 1 = -20 ($s1 percent), class mask word 2 = 2048 = SpellFamilyFlags[2] of Immolation Aura 800207. 800207 has PowerType -2 (Health), ManaCost 10, ManaCostPercentage 0 (Spell.dbc): 20% of 10 = 2, so the cast costs 10 health without the talent (the control) and 8 with it learned. Health is set to 50000 of 100000 with regeneration off before each cast and read 500 ms after it (before the first periodic tick of 1000 ms): 49990 without, 49992 with. A cut of 10% (1 health) would read 49991 or 49993 and falls outside the 0.5 tolerance. Reference search 2026-11-23: coa-history spell 707907: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); coa-history spell 800207: 29 SPELL_CAST_SUCCESS and 29 SPELL_AURA_APPLIED in 2 logs, no health amount in an event; expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],

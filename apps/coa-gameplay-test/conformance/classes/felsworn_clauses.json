@@ -1805,11 +1805,22 @@
   {
     "spell": 707527,
     "clause": "scaling with your Stamina, for $d.",
-    "labels": [
-      "707527 behaviour_metric_delta duration_held",
-      "707527 behaviour_metric_delta duration_gone"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "scaling with your Stamina,",
+        "labels": [
+          "707527 behaviour_metric_delta absorb_stamina"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "707527 behaviour_metric_delta duration_held",
+          "707527 behaviour_metric_delta duration_gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 707527,
@@ -1873,22 +1884,42 @@
   {
     "spell": 705141,
     "clause": "Casting $?s520853[Fel Torpedo][Chaos Rush] now increases your Physical damage by $705142s1% for $705142d.",
-    "labels": [
-      "705141 behaviour_metric_delta rush_damage_amount",
-      "705141 behaviour_metric_delta rush_damage_held",
-      "705141 behaviour_metric_delta rush_damage_gone"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting $?s520853[Fel Torpedo][Chaos Rush] now increases your Physical damage by $705142s1%",
+        "labels": [
+          "705141 behaviour_metric_delta rush_damage_amount"
+        ]
+      },
+      {
+        "claim": "for $705142d.",
+        "labels": [
+          "705141 behaviour_metric_delta rush_damage_held",
+          "705141 behaviour_metric_delta rush_damage_gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 705141,
     "clause": "Casting Felhoof Charge increases your critical strike chance by $705143s1% for $705143d.",
-    "labels": [
-      "705141 behaviour_metric_delta charge_crit_amount",
-      "705141 behaviour_metric_delta charge_crit_held",
-      "705141 behaviour_metric_delta charge_crit_gone"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting Felhoof Charge increases your critical strike chance by $705143s1%",
+        "labels": [
+          "705141 behaviour_metric_delta charge_crit_amount"
+        ]
+      },
+      {
+        "claim": "for $705143d.",
+        "labels": [
+          "705141 behaviour_metric_delta charge_crit_held",
+          "705141 behaviour_metric_delta charge_crit_gone"
+        ]
+      }
+    ]
   },
   {
     "spell": 705145,
@@ -1939,7 +1970,7 @@
     "spell": 706266,
     "clause": "Reduces your chance to be hit by spells by $s1%",
     "labels": [
-      "706266 behaviour_metric_delta spell_hit_taken"
+      "706266 effect_value e0 #0"
     ],
     "kind": "claim"
   },
@@ -2096,7 +2127,7 @@
     "spell": 707844,
     "clause": "Reduces your chance to be hit by spells by $s1%",
     "labels": [
-      "707844 behaviour_metric_delta spell_hit_taken"
+      "707844 effect_value e0 #0"
     ],
     "kind": "claim"
   },
@@ -2168,8 +2199,7 @@
         "claim": "Increases the damage",
         "labels": [
           "707907 behaviour_hit_ratio sunder_explosion",
-          "707907 behaviour_hit_ratio sunder_dot",
-          "707907 behaviour_hit_ratio immolation_aura"
+          "707907 behaviour_hit_ratio sunder_dot"
         ]
       },
       {
@@ -2177,7 +2207,8 @@
         "labels": [
           "707907 cost_gate 705121 sunder_cost without",
           "707907 cost_gate 705121 sunder_cost with",
-          "707907 cost_gate 705121 sunder_cost beyond"
+          "707907 cost_gate 705121 sunder_cost beyond",
+          "707907 behaviour_metric_delta immolation_cost"
         ]
       }
     ]
