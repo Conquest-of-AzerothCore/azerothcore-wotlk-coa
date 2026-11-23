@@ -132,13 +132,19 @@
         "claim": "creates a damage absorption shield on all nearby allies",
         "labels": [
           "300468 behaviour_metric_delta ally_shield"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "within $300469a yds",
-        "labels": []
+        "labels": [
+          "300468 behaviour_metric_delta ally_radius"
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 300468,
@@ -149,15 +155,20 @@
         "claim": "absorbing ${$STA*1+$300469m1+$300469ppl1+$SP*.2+$AP*.08} damage",
         "labels": [
           "300468 behaviour_taken_hit amount"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "for $300469d",
         "labels": [
-          "300468 behaviour_metric_delta shield_expiry"
-        ]
+          "300468 behaviour_metric_delta shield_held",
+          "300468 behaviour_metric_delta shield_gone"
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 300468,
@@ -805,7 +816,11 @@
     "labels": [
       "520853 effect_value 500761e0 #0",
       "500610 script_hit 500761 torpedo_hit",
-      "500610 script_hit 500761 torpedo_hit_ap"
+      "500610 script_hit 500761 torpedo_hit_ap",
+      "500610 behaviour_metric_delta torpedo_once caster",
+      "500610 behaviour_metric_delta torpedo_once_far caster",
+      "500610 behaviour_metric_delta torpedo_two_casters caster",
+      "500610 behaviour_metric_delta torpedo_two_casters caster2"
     ],
     "kind": "claim"
   },
@@ -899,8 +914,10 @@
       {
         "claim": "Curse an enemy ... within $d",
         "labels": [
-          "525001 behaviour_metric_delta curse_expiry"
-        ]
+          "525001 behaviour_metric_delta curse_held",
+          "525001 behaviour_metric_delta curse_gone"
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "causing the next spell they cast ... to be reflected onto them",
@@ -1534,12 +1551,18 @@
       {
         "claim": "increasing your allies' attack power against them by ${$m1+0+$AGI*0.15}",
         "labels": [
-          "570158 behaviour_metric_delta scar_amount"
+          "570158 behaviour_metric_delta scar_amount",
+          "570158 behaviour_metric_delta scar_amount_agility",
+          "570158 behaviour_hit_ratio scar_ap_swing"
         ]
       },
       {
         "claim": "for $570159d",
-        "labels": []
+        "labels": [
+          "570158 behaviour_metric_delta scar_held",
+          "570158 behaviour_metric_delta scar_gone"
+        ],
+        "evidence": "behaviour"
       }
     ]
   },
@@ -2454,15 +2477,20 @@
         "labels": [
           "707513 behaviour_metric_delta regen_one_stack",
           "707513 behaviour_metric_delta regen_two_stacks"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "for $525042d",
         "labels": [
-          "707513 behaviour_metric_delta regen_expiry"
-        ]
+          "707513 behaviour_metric_delta regen_held",
+          "707513 behaviour_metric_delta regen_gone"
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 707513,
@@ -2473,7 +2501,7 @@
     ],
     "kind": "claim",
     "evidence": "behaviour",
-    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 707842,
@@ -3511,7 +3539,10 @@
     "spell": 804613,
     "clause": "While at full health, your chance to resist the next Curse or Magic effect on you is increased by 100%.",
     "labels": [],
-    "kind": "claim"
+    "reason": "HELD (review fw-rea1 I-1..I-3): resist_next (804613 behaviour_taken_hit) proves the Curse leg only; the Magic leg (AscensionFelsworn.cpp:78-80) and the full-health gate are not contrasted, and the treatment sets 804613 itself (mentor ruling pending).",
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 804613,
@@ -3571,8 +3602,11 @@
     "clause": "Taunt nearby enemies for $704233d",
     "kind": "claim",
     "labels": [
-      "804823 behaviour_metric_delta taunt_expiry"
-    ]
+      "804823 behaviour_metric_delta taunt_held",
+      "804823 behaviour_metric_delta taunt_gone"
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 804823,
@@ -3583,15 +3617,20 @@
         "claim": "and ignore $s3% of all damage taken",
         "labels": [
           "804823 behaviour_taken_hit half_damage"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "for $d",
         "labels": [
-          "804823 behaviour_metric_delta effect_expiry"
-        ]
+          "804823 behaviour_metric_delta effect_held",
+          "804823 behaviour_metric_delta effect_gone"
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 804823,
@@ -4210,5 +4249,12 @@
       "807914 behaviour_metric_delta expertise"
     ],
     "kind": "claim"
+  },
+  {
+    "spell": 800355,
+    "clause": "30 Energy, plus 30 per sec",
+    "labels": [],
+    "kind": "claim",
+    "reason": "HELD (review fw-rf500610c I-1): the free_3900/free_4100 bracket admits an up-front cost 21-40 and a drain 28-33/s, so neither 10% error is excluded; needs direct Energy reads (up-front and per second). Cost line of the spell card, not the Description (lab render render2/answers/spell-800355.json: '30 Energy, plus 30 per sec'; Spell.dbc ManaCost 30, ManaPerSecond 30). Owner ruling O-24: the cost is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted (Felsworn ADR 0014). Counted on the measured drain: from 100 Energy with no power hold the channel aura is present at 3900 ms and gone at 4100 ms, the end of the fourth 30 Energy drain derived from the DBC and 10 Energy per second regeneration. No other ledger row represents a cost line (grep of every class ledger), so this row is new at the end of the ledger."
   }
 ]

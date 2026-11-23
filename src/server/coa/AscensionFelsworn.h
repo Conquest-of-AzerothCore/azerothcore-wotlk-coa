@@ -36,6 +36,7 @@ struct FelswornState
     TaskScheduler scheduler;
     std::vector<ObjectGuid> infernals;
     std::vector<Debt> debt;
+    std::vector<ObjectGuid> torpedoed;
     uint64 sequence = 0;
     uint32 fury = 0;
     uint32 ruin = 0;
