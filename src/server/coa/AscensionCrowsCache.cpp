@@ -738,7 +738,8 @@ void UpdateEvents()
                     if (Player* player = reference.GetSource())
                         if (player->IsAlive() && player->GetExactDist(&event.position) < AppearanceKnockbackRange)
                         {
-                            player->KnockbackFrom(event.position.GetPositionX(), event.position.GetPositionY(), 15, 6);
+                            player->KnockbackFrom(event.position.GetPositionX(), event.position.GetPositionY(),
+                                AppearanceKnockbackSpeedXY, AppearanceKnockbackSpeedZ);
                             if (Aura* debuff = player->AddAura(AppearanceDebuff, player))
                             {
                                 debuff->SetMaxDuration(AppearanceDebuffMs);

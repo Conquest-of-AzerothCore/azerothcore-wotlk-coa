@@ -3,7 +3,7 @@
   "name": "Crow's Cache: players on the spot when it appears are knocked back and take 50% more damage for one minute",
   "contract": [
     "When a Crow's Cache chest appears, every living player within 30 yards of the spot is knocked back (one",
-    "SMSG_MOVE_KNOCK_BACK, 15 wide and 6 high) and receives Amplify Damage (12248: SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN",
+    "SMSG_MOVE_KNOCK_BACK, 22.5 wide and 6 high) and receives Amplify Damage (12248: SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN",
     "50, all schools, a visible debuff) for 60 seconds instead of its DBC 10 seconds, so sitting on the chest while it",
     "materializes is punished. A player standing 45 yards away gets neither. The 50% is read from the native incoming",
     "spell and melee damage calculations against a baseline taken before the cache appears, with the other player as",
@@ -155,14 +155,14 @@
     },
     {
       "action": "assert",
-      "label": "and 15 wide",
+      "label": "and 22.5 wide",
       "actor": "sitter",
       "metric": "server_packet_float",
       "opcode": 239,
       "from_end": true,
       "index": 1,
-      "min": 14.99,
-      "max": 15.01
+      "min": 22.49,
+      "max": 22.51
     },
     {
       "action": "assert",
