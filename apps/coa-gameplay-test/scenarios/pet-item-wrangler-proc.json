@@ -1,0 +1,303 @@
+{
+  "schema": 1,
+  "name": "The Wrangler: melee auto attacks proc the CoA pet's attack speed buff",
+  "contract": [
+    "Expected values come from the item tooltips (CoA Tavern, SUB/db.exil.es 2026-10-04, AscensionDB WDB 2026-09-04) and the client Spell.dbc, not from the implementation. Each check runs for the CoA pet classes Primalist (spirit beast), Witch Hunter (Houndmaster spec, Shadowhound) and Tinker (Mechano-Bear).",
+    "Tooltip: 'Your melee attacks have a 33% chance to increase your pet's attack speed by 15% for 12 sec. (45sec. internal",
+    "cooldown)'. Base 415092 procs at its DBC ProcChance 33%. Each equip aura is PROC_TRIGGER_SPELL with DBC ProcFlags 0, so it",
+    "needs a melee spell_proc row. The proc decision must pass at the chance, and a real swing proc must put 313228 on the pet.",
+    "Witch Hunters have no Polearms proficiency on CoA, so this polearm runs for Primalist and Tinker."
+  ],
+  "timeout_ms": 400000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 60
+    },
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "primalist_beast",
+      "owner": "primalist",
+      "entry": 1188,
+      "level": 50,
+      "health": 100000,
+      "distance": 5
+    },
+    {
+      "id": "primalist_dummy",
+      "owner": "primalist",
+      "entry": 1188,
+      "level": 60,
+      "health": 2000000,
+      "distance": 4
+    },
+    {
+      "id": "tinker_dummy",
+      "owner": "tinker",
+      "entry": 1188,
+      "level": 60,
+      "health": 2000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 574301
+    },
+    {
+      "action": "cast",
+      "label": "primalist: harness the animal spirit",
+      "actor": "primalist",
+      "spell": 574301,
+      "target": "primalist_beast"
+    },
+    {
+      "action": "assert",
+      "label": "primalist: the pet is out",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 24000
+    },
+    {
+      "action": "assert",
+      "label": "primalist: out of combat before changing gear",
+      "actor": "primalist",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 803405
+    },
+    {
+      "action": "cast",
+      "label": "tinker: summon the pet",
+      "actor": "tinker",
+      "spell": 803405
+    },
+    {
+      "action": "assert",
+      "label": "tinker: the pet is out",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 60671,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "tinker: out of combat before changing gear",
+      "actor": "tinker",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 200
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 415092
+    },
+    {
+      "action": "equip",
+      "label": "primalist: equip 415092",
+      "actor": "primalist",
+      "item": 415092,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "primalist: the owner carries 304133",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 304133,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "primalist: melee auto attacks proc 304133 at its 33%",
+      "actor": "primalist",
+      "metric": "aura_proc_rate",
+      "spell": 304133,
+      "target": "primalist_dummy",
+      "type_mask": 4,
+      "min": 31.5,
+      "max": 34.5
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 1378683
+    },
+    {
+      "action": "equip",
+      "label": "primalist: equip 1378683",
+      "actor": "primalist",
+      "item": 1378683,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "primalist: the owner carries 313227",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 313227,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "primalist: melee auto attacks proc 313227 at its 33%",
+      "actor": "primalist",
+      "metric": "aura_proc_rate",
+      "spell": 313227,
+      "target": "primalist_dummy",
+      "type_mask": 4,
+      "min": 31.5,
+      "max": 34.5
+    },
+    {
+      "action": "set_skill",
+      "label": "primalist: Polearms skill at its level-60 maximum",
+      "actor": "primalist",
+      "skill": 229,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "attack",
+      "label": "primalist: melee the dummy",
+      "actor": "primalist",
+      "target": "primalist_dummy"
+    },
+    {
+      "action": "assert",
+      "label": "primalist: a melee proc puts 313228 on the pet",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 313228,
+      "equals": 1,
+      "within_ms": 90000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 200
+    },
+    {
+      "action": "add_item",
+      "actor": "tinker",
+      "item": 415092
+    },
+    {
+      "action": "equip",
+      "label": "tinker: equip 415092",
+      "actor": "tinker",
+      "item": 415092,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "tinker: the owner carries 304133",
+      "actor": "tinker",
+      "metric": "aura_stacks",
+      "spell": 304133,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "tinker: melee auto attacks proc 304133 at its 33%",
+      "actor": "tinker",
+      "metric": "aura_proc_rate",
+      "spell": 304133,
+      "target": "tinker_dummy",
+      "type_mask": 4,
+      "min": 31.5,
+      "max": 34.5
+    },
+    {
+      "action": "add_item",
+      "actor": "tinker",
+      "item": 1378683
+    },
+    {
+      "action": "equip",
+      "label": "tinker: equip 1378683",
+      "actor": "tinker",
+      "item": 1378683,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "tinker: the owner carries 313227",
+      "actor": "tinker",
+      "metric": "aura_stacks",
+      "spell": 313227,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "tinker: melee auto attacks proc 313227 at its 33%",
+      "actor": "tinker",
+      "metric": "aura_proc_rate",
+      "spell": 313227,
+      "target": "tinker_dummy",
+      "type_mask": 4,
+      "min": 31.5,
+      "max": 34.5
+    },
+    {
+      "action": "set_skill",
+      "label": "tinker: Polearms skill at its level-60 maximum",
+      "actor": "tinker",
+      "skill": 229,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "attack",
+      "label": "tinker: melee the dummy",
+      "actor": "tinker",
+      "target": "tinker_dummy"
+    },
+    {
+      "action": "assert",
+      "label": "tinker: a melee proc puts 313228 on the pet",
+      "actor": "tinker",
+      "metric": "pet_aura_stacks",
+      "spell": 313228,
+      "equals": 1,
+      "within_ms": 90000
+    }
+  ]
+}
