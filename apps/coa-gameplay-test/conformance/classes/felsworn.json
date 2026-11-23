@@ -9733,10 +9733,16 @@
       "aura": 704397,
       "expected_ms": 4000,
       "control_window_ms": 500,
-      "window_ms": 6000,
+      "window_ms": 8000,
       "poll_ms": 25,
       "caster": false,
-      "observe_source": "560641 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704397 (Crippling Pain, Effect[0] aura 290 MOD_CRIT_PCT -100000, DurationIndex 35 = 4000 ms); AscensionFelswornAbilities.cpp:321-322 casts 704397 on the target of a landed Cripple 704371 when 560641 is known. The aura on the dummy is polled with game-time stamps after a real Cripple cast. The no-critical part is a data readback only: no harness route makes an enemy attack and critically strike (not entered, see the report). Reference search 2026-11-23: coa-history spell 560641: 0 events in 186 logs (a passive leaves no event); 704397: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Warlock Training 560641 'Cripple now causes the enemy target to be unable to critically strike for 4 seconds.', same figure; expected values come from the tooltip and the DBC only."
+      "repeat": {
+        "count": 3,
+        "every_ms": 1300
+      },
+      "trigger_power": 90,
+      "poll_before_cast": true,
+      "observe_source": "560641 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704397 (Crippling Pain, Effect[0] aura 290 MOD_CRIT_PCT -100000, DurationIndex 35 = 4000 ms); AscensionFelswornAbilities.cpp:321-322 casts 704397 on the target of a landed Cripple 704371 when 560641 is known. The aura on the dummy is polled with game-time stamps after a real Cripple cast. The no-critical part is a data readback only: no harness route makes an enemy attack and critically strike (not entered, see the report). Reference search 2026-11-23: coa-history spell 560641: 0 events in 186 logs (a passive leaves no event); 704397: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Warlock Training 560641 'Cripple now causes the enemy target to be unable to critically strike for 4 seconds.', same figure; expected values come from the tooltip and the DBC only. Design 2 (2026-11-24; design 1, one Cripple per arm, was unmeasured in 3 of 15 recorded runs with 'no application is seen after the cast'): a probe read the caster's Shadow resist chance against the dummy at 12% (spell_resist_chance) and 4 of 30 Cripples left neither Cripple nor Crippling Pain on it, so a binary resist of Cripple is the cause, not a cast refusal (no cast_failures). The treatment arm now casts Cripple 3 times 1300 ms apart (energy 90 set once; the caster's maximum is 100 and regeneration is off, so a fourth cast cannot be paid) with a read before the first cast, and the aura is timed from its last application (a refresh is counted): all three resisted is 0.12^3 = 0.17% per run, an unmeasured outcome only."
     },
     {
       "spell": 704611,
