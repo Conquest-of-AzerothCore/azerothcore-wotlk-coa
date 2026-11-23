@@ -2,7 +2,8 @@
 
 - Status: proposed
 - Date: 2026-11-23
-- Related: [ADR 1198](1198-ratio-only-arms-single-landing-durations-and-no-cast-dispel-arms.md) (the `move_under_aura` kind),
+- Related: [ADR 1198](1198-ratio-only-arms-single-landing-durations-and-no-cast-dispel-arms.md)
+  (the `move_under_aura` kind),
   [ADR 0120](0120-two-proof-statuses-computed-by-clause-coverage.md) (the closed evidence tables).
 - Decided by: mentor D-74 (four conditions), controller go of 2026-11-23.
 

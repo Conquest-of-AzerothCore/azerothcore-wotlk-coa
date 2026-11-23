@@ -1,4 +1,4 @@
-# 1265. Charge recharge timeout and fall-speed packet reads
+# 1265. Charge recharge timeout, fall-speed packet reads and more area fixtures
 
 - Status: proposed
 - Date: 2026-11-23
@@ -26,6 +26,14 @@ only sends SMSG_MOVE_FEATHER_FALL to the client, and no metric read it.
 key, so every passing scenario regenerates byte-identical. The harness records the two fall opcodes (recording only,
 no gameplay effect); a `metric_delta` entry reads them with `server_packets` and its existing `event` row.
 
+Two `metric_delta` fixture options follow the same rule (controller go of 2026-11-23): `area_dummies` admits 11
+distances instead of 9 (the dummy and 11 fill the 12 creatures `run.py` admits), for a cap of 10 additional targets
+that needs an eleventh candidate (Hellfire Carver 707444); and a new option `friendly_creatures` adds friendly
+creatures outside the party (faction 35, entry 631) and sums the judged `aura` reading over them, for "all allies"
+beyond a spell's party cap (Taskmaster's Army 800220 on Infernal Whipcrack 805243). Both are opt-in; no existing
+scenario changes and no evidence row is added.
+
 ## Consequences
 
-Recharge windows past 90 s can run. The fall-speed read proves the order sent to the client, not the client's fall.
+Recharge windows past 90 s can run; a cap of up to 10 extra targets and an all-allies claim can be read. The
+fall-speed read proves the order sent to the client, not the client's fall.
