@@ -320,9 +320,11 @@ namespace
             s_enabled = sConfigMgr->GetOption<bool>("CoA.ChatLog.Enable", false);
             s_keepDays = sConfigMgr->GetOption<uint32>("CoA.ChatLog.KeepDays", 30);
             std::vector<std::string> channels = Words(sConfigMgr->GetOption<std::string>("CoA.ChatLog.IgnoreChannels",
-                "BBLC25C KLCE25C"));
+                "BBLC25C KLCE25C questiecomm FSK FSK-EVT xtensionxtooltip2 ConquestFinder JohnnysAddons "
+                "CoARUru ALCSync K_LFGForwarder2IIll"));
             std::vector<std::string> starts = Words(sConfigMgr->GetOption<std::string>(
-                "CoA.ChatLog.IgnoreChannelMessagesStartingWith", "LC1: LCPOI1: LCR1 LCRD1 LCS3;"));
+                "CoA.ChatLog.IgnoreChannelMessagesStartingWith",
+                "LC1: LCPOI1: LCR1 LCRD1 LCS3; PFQ6: DCOAS3; DCOAL31; DCOAR2"));
             std::lock_guard lock(s_ignoreMutex);
             s_ignoredChannels = std::move(channels);
             s_ignoredChannelMessageStarts = std::move(starts);
