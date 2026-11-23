@@ -175,11 +175,14 @@ namespace CoAPetBattles
         settings.fedSeconds = sConfigMgr->GetOption<uint32>("CoAPetBattles.FedSeconds", settings.fedSeconds);
         settings.xpStep = ReadDecimal("CoAPetBattles.XpStep", settings.xpStep);
         _settings = settings;
+        if (_loaded)
+            _catalog = std::make_unique<Engine::Catalog>(_data, _settings);
     }
 
     void PetBattleDataStore::Load()
     {
         _loaded = false;
+        _catalog.reset();
         _data = DataSet();
         if (!_enabled)
             return;
@@ -204,6 +207,7 @@ namespace CoAPetBattles
             data.zoneSpecies.size(), data.presentations.size(), data.modelSizes.size(), data.displaySizes.size(),
             data.companions.size());
         _data = std::move(data);
+        _catalog = std::make_unique<Engine::Catalog>(_data, _settings);
         _loaded = true;
     }
 

@@ -21,7 +21,10 @@ namespace
     };
 }
 
+void AddSC_coa_pet_battles_commands();
+
 void AddSC_coa_pet_battles()
 {
     new PetBattlesWorld();
+    AddSC_coa_pet_battles_commands();
 }
