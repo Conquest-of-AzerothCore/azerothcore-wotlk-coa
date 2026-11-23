@@ -31,7 +31,8 @@ class AvoidedIcdTests(unittest.TestCase):
         shortest = min(later - earlier for earlier, later in zip(hits, hits[1:]))
         return len(hits), round(shortest), len(swings)
 
-    def verdict(self, hits=30, shortest=1010.0, avoided=300, control=0, extra_attacks=0, failures=None, drop=None):
+    def verdict(self, hits=30, shortest=1010.0, avoided=300, control=0, extra_attacks=0, failures=None, drop=None,
+                first_attacks=0, distance=17.0):
         _, expectation = self.generated()
         reads = expectation.model['reads']
         start = dict(zip(reads['start_avoided'], ENGAGE))
@@ -39,6 +40,8 @@ class AvoidedIcdTests(unittest.TestCase):
         values = {**start, **{label: start_value + gained for (label, gained), start_value
                               in zip(zip(reads['avoided'], split), ENGAGE)}}
         values[reads['attacks']] = sum(ENGAGE) + avoided + extra_attacks
+        values[reads['attacks_first']] = values[reads['attacks']] - first_attacks
+        values.update({label: distance for label in reads['quiet_distances']})
         values.update({reads['control_hits']: control, reads['hits']: hits, reads['shortest']: shortest,
                        reads['median']: shortest + 30})
         if drop:
@@ -89,6 +92,35 @@ class AvoidedIcdTests(unittest.TestCase):
             with self.subTest(change=change):
                 verdict = self.verdict(**change)
                 self.assertEqual(verdict.status, 'unmeasured', verdict.explanation)
+
+    def test_the_strikers_are_quieted_before_the_outcome_reads(self):
+        scenario, expectation = self.generated()
+        steps = scenario['steps']
+        reads = expectation.model['reads']
+        labels = [step.get('label') for step in steps]
+        relocation = next(index for index, step in enumerate(steps) if step['action'] == 'relocate')
+        self.assertEqual(steps[relocation]['dx'], 20)
+        self.assertEqual(steps[relocation + 1]['action'], 'wait')
+        self.assertGreaterEqual(steps[relocation + 1]['ms'], 200)
+        self.assertEqual(labels.index(reads['attacks_first']), relocation + 2 + len(reads['quiet_distances']))
+        self.assertEqual(len(reads['quiet_distances']), 10)
+        self.assertLess(labels.index(reads['attacks_first']), labels.index(reads['avoided'][0]))
+        self.assertLess(labels.index(reads['avoided'][0]), labels.index(reads['attacks']))
+        self.assertEqual(expectation.model['quiet_minimum_yd'], 17.0)
+
+    def test_a_total_that_changed_while_the_outcomes_were_read_is_void(self):
+        verdict = self.verdict(first_attacks=1)
+        self.assertEqual(verdict.status, 'unmeasured', verdict.explanation)
+        self.assertIn('changed', verdict.explanation)
+
+    def test_a_failed_relocation_is_void(self):
+        verdict = self.verdict(distance=16.9)
+        self.assertEqual(verdict.status, 'unmeasured', verdict.explanation)
+        self.assertIn('quiets the strikers', verdict.explanation)
+        self.assertEqual(self.verdict(distance=17.0).status, 'ok')
+
+    def test_a_missing_quiet_read_is_void(self):
+        self.assertEqual(self.verdict(drop='attacks_first').status, 'unmeasured')
 
     def test_a_cast_failure_list_without_a_refusal_is_not_void(self):
         self.assertEqual(self.verdict(failures={560492: [0]}).status, 'ok')
