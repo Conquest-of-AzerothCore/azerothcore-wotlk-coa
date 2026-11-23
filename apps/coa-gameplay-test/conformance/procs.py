@@ -282,9 +282,9 @@ def cast_baseline_steps(class_file: dict, entry: dict, plan: ProcPlan) -> list[d
 
 
 def same_roll(entry: dict, other: dict) -> bool:
-    from proc_avoided import is_avoided
+    from proc_avoided import is_avoided, learned
     return other['aura'] == entry['aura'] and chance_modifiers(other) == chance_modifiers(entry) \
-        and is_avoided(other) == is_avoided(entry)
+        and is_avoided(other) == is_avoided(entry) and (not is_avoided(entry) or learned(other) == learned(entry))
 
 
 def shares_aura(class_file: dict, entry: dict) -> bool:
@@ -308,9 +308,10 @@ def chance_modifiers(entry: dict) -> tuple[tuple[int, str], ...]:
 
 
 def modifier_key(entry: dict) -> tuple:
-    from proc_avoided import AVOIDED, is_avoided
+    from proc_avoided import AVOIDED, is_avoided, learned
     return tuple(part for spell, _ in chance_modifiers(entry) for part in ('with', spell)) \
-        + ((AVOIDED,) if is_avoided(entry) else ())
+        + ((AVOIDED,) if is_avoided(entry) else ()) \
+        + (tuple(part for spell in learned(entry) for part in ('learn', spell)) if is_avoided(entry) else ())
 
 
 def entry_proc_label(class_file: dict, entry: dict) -> str:
@@ -733,8 +734,9 @@ def trials_step(entry: dict, label: str) -> dict:
 
 def attempt_auras(entry: dict) -> list[dict]:
     auras = entry.get('attempt_auras', [])
-    if auras and entry['trigger']['action'] != CAST:
-        raise ValueError(f'Proc {entry["aura"]} sets attempt_auras without a cast trigger')
+    from proc_avoided import AVOIDED
+    if auras and entry['trigger']['action'] not in (CAST, AVOIDED):
+        raise ValueError(f'Proc {entry["aura"]} sets attempt_auras without a cast or avoided trigger')
     for aura in auras:
         if set(aura) - {'target'} != {'spell', 'stacks', 'source'} or not isinstance(aura['stacks'], int) \
                 or aura['stacks'] < 0:

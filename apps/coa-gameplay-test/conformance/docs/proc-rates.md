@@ -53,6 +53,8 @@ A `procs` entry of the class file describes one proc aura:
 | | roll out of the trials (Blade Sermon 572548: Oath Chain at its cap, so Vindication grants no Oath: Vindication) |
 | | or, with `"target": "dummy"`, a state the trigger needs on the dummy (Soulfreeze 572023: Ice Lock 22856, a |
 | | Frost stun without interrupt flags, keeps the dummy Frozen through the damage, ADR 0491) |
+| | or, for an `avoided` trigger (ADR 1261, provisional), set on the caster before every swing interval and every |
+| | engage, for a condition the handler needs while strikers swing (Demonic Fortitude 805245: Demonic Will 800209) |
 | `applied_by` | `{"spell", "source"}`: the aura is not learned but granted by a cast of `spell` (an Oath), so the |
 | | scenario sets it (`set_aura`, 1 stack) instead of learning it, and the chance is the aura's own `$<aura>s1` |
 | | percent token in the tooltip of `spell`, which `tooltip` then copies (ADR 0151) |
@@ -464,6 +466,8 @@ source fails the part instead of being judged. Trials per attempt are the strike
 `avoided`; an avoided entry does not rename a sibling entry of the same aura.
 
 `count_misses: true` in the trigger (ADR 1210, provisional; mentor D-175) adds the swings that missed the caster (`melee_missed_taken`, read beside the dodged and parried swings and held in the baseline) to the trials, for a handler that rolls on a miss as well. Each counted part must then read as many attacks taken (`melee_attacks_taken`) as dodged, parried and missed swings, the guards having ruled out landed and blocked ones; otherwise the rate is `unmeasured` (void). Absent, the trials are the dodged and parried swings only.
+
+`learn: [<spell>, ...]` in the trigger (ADR 1261, provisional) lists precondition spells the caster learns before the engage in every part, for an avoidance the reference character lacks (Vengeance Is Mine 804822: Nether Disciple 560576 lets the caster parry, so a parry 100 entry reads the parry leg). The spells must be distinct positive ids other than the passive. An entry with a learn list is its own roll: its label ends in `learn <spell>` (`804822 proc_rate avoided learn 560576`) and it does not rename the entry without one. Absent, nothing changes.
 
 `miss_exclusion: {"min_share": s}` (ADR 1229, provisional; mentor D-252, D-253) needs `count_misses`. It reads the miss share m of the counted parts: under `s` the rate is `unmeasured`, otherwise expected x (1 - m), the rate of a server that ignores misses, must lie below the Wilson interval or the verdict is `alert`. Absent, nothing changes.
 

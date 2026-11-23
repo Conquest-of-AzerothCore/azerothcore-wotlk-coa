@@ -9,7 +9,7 @@ TRIAL_STATES = {'dodged': DODGED, 'parried': PARRIED}
 GUARD_STATES = {'landed': LANDED, 'blocked': FULL_BLOCKED}
 TRIALS_PER_ATTEMPT = 'trials_per_attempt'
 TRIGGER_FIELDS = {'action', 'striker_entry', 'swing_ms', 'dodge', 'parry', 'strikers', 'striker_auras', 'count_misses',
-                  'miss_exclusion'}
+                  'miss_exclusion', 'learn'}
 READING_NAME = 'avoided swings (dodged + parried)'
 MISSES_READING_NAME = 'avoided swings (dodged + parried + missed)'
 MISSED = 'missed'
@@ -50,6 +50,11 @@ def checked_trigger(entry: dict) -> dict:
                                   or not 0 < exclusion['min_share'] < 0.5):
         raise ValueError(f'Proc {aura} avoided trigger miss_exclusion is {{"min_share": 0 to 0.5 exclusive}} and '
                          f'needs count_misses true')
+    learn = trigger.get('learn', [])
+    if not isinstance(learn, list) or len(set(learn)) != len(learn) or aura in learn or any(
+            isinstance(spell, bool) or not isinstance(spell, int) or spell <= 0 for spell in learn):
+        raise ValueError(f'Proc {aura} avoided trigger learn is a list of distinct positive spell ids other than the '
+                         f'passive')
     if entry.get('trial_readings') or entry.get(TRIALS_PER_ATTEMPT):
         raise ValueError(f'Proc {aura} avoided trigger sets its own trial reading and trials per attempt')
     return trigger
@@ -67,6 +72,10 @@ def miss_exclusion_share(entry: dict) -> float | None:
 def miss_exclusion_model(entry: dict, trials_label: str) -> dict | None:
     share = miss_exclusion_share(entry)
     return None if share is None else {'min_share': share, 'missed': trial_labels(trials_label, True)[MISSED]}
+
+
+def learned(entry: dict) -> list:
+    return entry['trigger'].get('learn', [])
 
 
 def striker_auras(entry: dict) -> list:
@@ -110,8 +119,9 @@ def guard_reads(entry: dict) -> dict[str, dict]:
 
 def engage_steps(entry: dict) -> list[dict]:
     from behaviours import AVOIDING_ENGAGE_MS
-    steps = [{'action': 'set_aura', 'actor': CASTER, 'target': striker, 'caster': striker, 'spell': aura, 'stacks': 1}
-             for striker in striker_ids(entry) for aura in striker_auras(entry)]
+    steps = [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in learned(entry)]
+    steps += [{'action': 'set_aura', 'actor': CASTER, 'target': striker, 'caster': striker, 'spell': aura,
+               'stacks': 1} for striker in striker_ids(entry) for aura in striker_auras(entry)]
     for striker in striker_ids(entry):
         steps += avoidance_steps(entry) + [{'action': 'attack', 'actor': CASTER, 'target': striker},
                   {'action': 'wait', 'label': f'engage {striker}', 'ms': AVOIDING_ENGAGE_MS},
@@ -126,9 +136,11 @@ def guard_steps(entry: dict) -> list[dict]:
 
 
 def avoidance_steps(entry: dict) -> list[dict]:
+    from procs import attempt_auras
     trigger = entry['trigger']
     return [fixture_health_step(CASTER, 100),
-            {'action': 'set_combat_avoidance', 'actor': CASTER, 'dodge': trigger['dodge'], 'parry': trigger['parry']}]
+            {'action': 'set_combat_avoidance', 'actor': CASTER, 'dodge': trigger['dodge'], 'parry': trigger['parry']},
+            *attempt_auras(entry)]
 
 
 def attempt_steps(entry: dict, attempts: int, swing_ms: int) -> list[dict]:
@@ -174,7 +186,13 @@ def trial_rule(entry: dict) -> str:
                f'parried and missed swings is void)' if counts_misses(entry) else '')
             + f'; before every swing interval the caster\'s health is set to full and '
             f'its dodge and parry to {trigger["dodge"]:g}% and {trigger["parry"]:g}% (set_combat_avoidance), so no '
-            f'swing lands; the caster engages each striker once, at the same set health and avoidance, before the '
+            f'swing lands'
+            + (f', and the caster\'s auras {[aura["spell"] for aura in entry["attempt_auras"]]} are set (harness '
+               f'set_aura, a precondition fixture)' if entry.get('attempt_auras') else '')
+            + f'; '
+            + (f'the caster learns {learned(entry)} before the engage (a precondition, in every part); '
+               if learned(entry) else '')
+            + f'the caster engages each striker once, at the same set health and avoidance, before the '
             f'passive is learned and stops attacking; '
             f'the dodged and parried swings and the events up to that point are a held baseline; after the window '
             f'the caster\'s own auto attacks and the landed or fully blocked swings since the engage must be 0, or '

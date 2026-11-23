@@ -323,3 +323,61 @@ class AvoidedProcMissesTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class AvoidedProcPreconditionTest(unittest.TestCase):
+    PRECONDITION = 560576
+    CONDITION = 800209
+
+    def setUp(self):
+        from profile import for_entry
+        self.class_file = for_entry(class_file(), DAWN_KNIGHT)
+        self.entry = avoided_entry(self.class_file, DAWN_KNIGHT)
+
+    def learning(self) -> dict:
+        return {**self.entry, 'trigger': {**self.entry['trigger'], 'learn': [self.PRECONDITION]}}
+
+    def test_the_learn_list_is_learned_before_every_engage(self):
+        steps = run.validate(proc_scenario(self.class_file, self.learning())[0])['steps']
+        learns = [index for index, step in enumerate(steps)
+                  if step['action'] == 'learn' and step.get('spell') == self.PRECONDITION]
+        engages = [index for index, step in enumerate(steps) if step['action'] == 'attack']
+        passive = index_of(steps, lambda step: step['action'] == 'learn' and step.get('spell') == DAWN_KNIGHT)
+        self.assertTrue(learns)
+        self.assertLess(learns[0], min(engages))
+        self.assertLess(learns[0], passive)
+
+    def test_without_a_learn_list_no_precondition_is_learned(self):
+        steps = run.validate(proc_scenario(self.class_file, self.entry)[0])['steps']
+        self.assertFalse([step for step in steps
+                          if step['action'] == 'learn' and step.get('spell') == self.PRECONDITION])
+
+    def test_a_faulty_learn_list_is_refused(self):
+        for learn in ([0], [True], self.PRECONDITION, [self.PRECONDITION, self.PRECONDITION], [DAWN_KNIGHT]):
+            with self.subTest(learn=learn), self.assertRaises(ValueError):
+                proc_plan(self.class_file, {**self.entry, 'trigger': {**self.entry['trigger'], 'learn': learn}})
+
+    def test_a_learn_list_names_its_own_roll_and_keeps_the_plain_label(self):
+        source = {**self.class_file, 'procs': [*self.class_file['procs'], self.learning()]}
+        self.assertFalse(shares_aura(source, self.entry))
+        self.assertEqual(entry_proc_label(source, self.entry), f'{DAWN_KNIGHT} proc_rate avoided')
+        self.assertEqual(entry_proc_label(source, self.learning()),
+                         f'{DAWN_KNIGHT} proc_rate avoided learn {self.PRECONDITION}')
+
+    def test_attempt_auras_are_set_before_every_swing_interval(self):
+        entry = {**self.entry, 'attempt_auras': [{'spell': self.CONDITION, 'stacks': 1, 'source': 'seeded'}]}
+        steps = run.validate(proc_scenario(self.class_file, entry)[0])['steps']
+        avoidance = [index for index, step in enumerate(steps) if step['action'] == 'set_combat_avoidance']
+        self.assertTrue(avoidance)
+        for index in avoidance:
+            self.assertEqual(steps[index + 1]['action'], 'set_aura')
+            self.assertEqual(steps[index + 1]['spell'], self.CONDITION)
+            self.assertNotIn('target', steps[index + 1])
+
+    def test_an_attempt_aura_on_another_trigger_than_a_cast_or_an_avoided_swing_is_refused(self):
+        from procs import attempt_auras
+        entry = {**self.entry, 'trigger': {'action': 'taken_hit'},
+                 'attempt_auras': [{'spell': self.CONDITION, 'stacks': 1, 'source': 'seeded'}]}
+        with self.assertRaises(ValueError):
+            attempt_auras(entry)
