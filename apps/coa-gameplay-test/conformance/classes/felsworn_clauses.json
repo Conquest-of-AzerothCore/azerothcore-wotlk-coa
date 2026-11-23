@@ -838,7 +838,7 @@
     "labels": [],
     "kind": "claim",
     "tool_gap": {
-      "reason": "Measured on Fel Torpedo's hit 500761 (SPELL_EFFECT_THREAT 225 flat in the DBC, SpellLevel 34): threat 1209.75 on 303 health lost, slope 3.14 against 1 with the DBC's flat 259 (counted pair 20261123-211541 / -211612, labels removed from the class file after the run). Spell::EffectThreat scales the flat amount by LocalLevelScaling::PoolThreatFor (SpellEffects.cpp:4787, Unit.cpp:194-200), the ratio of the dummy's real maximum health to the health the viewer sees, so the flat part is not the DBC's 225 and threat_slope judges it as 225. A proof needs the dummy's pool factor as an input of the judge (a read of the real and the viewed maximum health), which threat_slope lacks. The nearest kind is threat_slope.",
+      "reason": "Measured on Fel Torpedo's hit 500761 (SPELL_EFFECT_THREAT 225 flat in the DBC, SpellLevel 34): threat 1209.75 on 303 health lost, slope 3.14 against 1 with the DBC's flat 259 (counted pair 20261123-211541 / -211612, labels removed from the class file after the run). Spell::EffectThreat passes the flat amount through LocalLevelScaling::PoolThreatFor (SpellEffects.cpp:4787, Unit.cpp:194-200), a ratio of the dummy's real to viewed maximum health; that this explains the 872.75 left after damage 303 and initial threat 34 (3.879 times 225) is a hypothesis not verified by a run. A proof needs the dummy's pool factor as an input of the judge, which threat_slope lacks. The nearest kind is threat_slope.",
       "attempts": [
         {
           "agent": "fw-ea5",
