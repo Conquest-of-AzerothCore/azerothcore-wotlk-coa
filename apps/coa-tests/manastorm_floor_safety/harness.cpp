@@ -312,6 +312,8 @@ struct ManastormDataStore {
 // ACTUAL_CLEAR_DEBUFFS
 // ACTUAL_CAPTURE_RECOVERY
 // ACTUAL_RESTORE_RECOVERY
+std::vector<Player*> stageLinkCaptures;
+void CaptureStageLinks(Player* player, ManastormRun&) { stageLinkCaptures.push_back(player); }
 // ACTUAL_PREPARE_MEMBER_TRANSFER
 // ACTUAL_PROTECTED_PORTAL
 // ACTUAL_LEFT_ENTRANCE
@@ -487,6 +489,7 @@ void CheckStageRepairPolicies()
     assert(PrepareStageMemberTransfer(&follower, run));
     assert(run.CompanionTransfers.at(2).size() == 1);
     assert(run.StageRecoveries.at(2).DestinationInstanceId == 3);
+    assert(stageLinkCaptures == std::vector<Player*>{&follower});
 
     Player dead;
     dead.map = &source;
