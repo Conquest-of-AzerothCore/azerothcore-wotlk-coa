@@ -228,6 +228,285 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "Attribution of the spell_crit_rating entry: the Spirit the 20% is taken of. Greatness 60235 Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 4, EffectBasePoints 299 + 1 = +300 (SPELL_ATTR2_ALLOW_LOW_LEVEL_BUFF, no level scaling); the class file reference stat 4 reads 50 without it, so 50 + 300 x 1.03 = 359 after a real cast on the caster, the 1.03 being the Human racial The Human Spirit 20598 (aura 137, MiscValue 4, EffectBasePoints 2 + 1; class file race 1)."
+    },
+    {
+      "spell": 520885,
+      "name": "Burning Legionnaire (Twin Slice cost)",
+      "kind": "cost_gate",
+      "variant": "twin_slice",
+      "label_suffix": "twin_slice",
+      "quote": "Reduces the Energy cost of Twin Slice and Sunder by $s1.",
+      "gated_spell": 547211,
+      "resource": "power",
+      "reduction": 10,
+      "target": "dummy",
+      "observe_source": "$s1 = 10 (520885 EffectBasePoints[0] -11, EffectDieSides[0] 1): Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 14 (SPELLMOD_COST), EffectSpellClassMask word 0 0x80000 (Sunder) and word 1 0x1000000 (Twin Slice 547211, SpellFamilyFlags[1] 0x1000000). Twin Slice 547211 (level 60 rank, AscensionSpellProgressionData.h:385 via 801901) ManaCost 45, PowerType 3 (Energy): 35 allowed, 34 beyond. Arms: 35 Energy without the passive (refused, SPELL_FAILED_NO_POWER 85, the control), 35 with it (through), 34 with it (refused). Reference search 2026-11-23: coa-history spell 520885: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 520885,
+      "name": "Burning Legionnaire (Sunder cost)",
+      "kind": "cost_gate",
+      "variant": "sunder",
+      "label_suffix": "sunder",
+      "quote": "Reduces the Energy cost of Twin Slice and Sunder by $s1.",
+      "gated_spell": 705121,
+      "resource": "power",
+      "reduction": 10,
+      "target": "dummy",
+      "cast_auras": [
+        {
+          "spell": 705121,
+          "auras": [
+            803468,
+            {
+              "spell": 800058,
+              "stacks": 2
+            }
+          ],
+          "reason": "Sunder 705121 needs the caster aura 803468 (At Least 2 Felfury, CasterAuraSpell in Spell.dbc) and consumes two stacks of the Felfury resource 800058 (AscensionCustomResourceData.h:535, Fixed 2); both are precondition fixtures set before every attempt, the claim is the Energy cost."
+        }
+      ],
+      "observe_source": "$s1 = 10 (520885 Effect[0] aura 107 SPELLMOD_COST, flat -10, class mask word 0 0x80000 = SpellFamilyFlags[0] of Sunder 705121). Sunder 705121 ManaCost 30, PowerType 3, RecoveryTime 8000: 20 allowed, 19 beyond (the cooldown is cleared before each attempt). Arms: 20 Energy without the passive (refused), 20 with it (through), 19 with it (refused). Reference search 2026-11-23: coa-history spell 520885: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 704361,
+      "name": "Slice & Dice (Twin Slice cost)",
+      "kind": "cost_gate",
+      "variant": "twin_slice",
+      "label_suffix": "twin_slice",
+      "quote": "and reduces the Energy cost of Twin Slice by $s2.",
+      "gated_spell": 547211,
+      "resource": "power",
+      "reduction": 5,
+      "target": "dummy",
+      "observe_source": "$s2 = 5 (704361 EffectBasePoints[1] -6, EffectDieSides[1] 1): Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 14 (SPELLMOD_COST), EffectSpellClassMask word 1 0x1000000 (Twin Slice 547211). ManaCost 45, PowerType 3: 40 allowed, 39 beyond. Arms: 40 Energy without the passive (refused, 85), 40 with it (through), 39 with it (refused). Reference search 2026-11-23: coa-history spell 704361: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 560578,
+      "name": "Glaiving (Fury Unleashed cost)",
+      "kind": "cost_gate",
+      "variant": "fury_unleashed",
+      "label_suffix": "fury_unleashed",
+      "quote": "Increases the damage dealt and reduces the Energy cost of Fury Unleashed by $s1%.",
+      "gated_spell": 555738,
+      "resource": "power",
+      "reduction": 30,
+      "target": "dummy",
+      "observe_source": "$s1 = 50 (560578 EffectBasePoints[0] 49, [1] -51): Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 (SPELLMOD_COST) -50%, EffectSpellClassMask word 1 0x4000 = SpellFamilyFlags[1] of Fury Unleashed 555738. 555738 ManaCost 60, PowerType 3, RecoveryTime 180000 (cleared before each attempt): 30 allowed, 29 beyond. Arms: 30 Energy without the passive (refused, 85), 30 with it (through), 29 with it (refused). Reference search 2026-11-23: coa-history spell 560578: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 803840,
+      "name": "Spite (Agility)",
+      "kind": "metric_delta",
+      "variant": "agility",
+      "label_suffix": "agility",
+      "quote": "Increases your Agility by $s1%",
+      "trigger_spell": 60235,
+      "cast_in_before": false,
+      "target": "caster",
+      "metric": "stat",
+      "fields": {
+        "stat": 1
+      },
+      "before_expected": 130,
+      "expected": 149,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s1 = 15 (803840 EffectBasePoints[0] 14, EffectDieSides 1): Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue 1 (Agility). Class file reference stat 1 = 130 without the passive; 130 x 1.15f = 149.5, truncated to 149 by the integer read (G-26, the engine's float truncation as for Flexible Fighter 681341). Greatness 60235 (+300 Spirit only, no Agility) is the timed cast of both phases and is not cast in the before phase, as for Nether Spirit 300477. Reference search 2026-11-23: coa-history spell 803840: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 807902,
+      "name": "Wrath of Sargeras (spell hit chance)",
+      "kind": "metric_delta",
+      "variant": "spell_hit",
+      "label_suffix": "spell_hit",
+      "quote": "and your spell hit chance by $s2%.",
+      "trigger_spell": 60235,
+      "gate_spell": 807902,
+      "target": "caster",
+      "metric": "spell_hit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 4,
+      "expected_gain": 4,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s2 = 4 (807902 EffectBasePoints[1] 3, EffectDieSides 1): Effect[1] aura 55 SPELL_AURA_MOD_SPELL_HIT_CHANCE. The caster's live spell hit chance is read before and after a real learn of 807902 (the reading before is the control): gain 4 points. Reference search 2026-11-23: coa-history spell 807902: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 705150,
+      "name": "Man'ari Teachings (critical damage)",
+      "kind": "hit_ratio",
+      "variant": "crit_damage",
+      "label_suffix": "crit_damage",
+      "quote": "Increases your critical damage dealt by $s1%.",
+      "expected": 2.0,
+      "observe_spell": 803715,
+      "learn": [
+        803715
+      ],
+      "control": {},
+      "treatment": {
+        "learn": [
+          705150
+        ]
+      },
+      "critical": true,
+      "force_crit": "melee",
+      "trials": 40,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "observe_source": "$s1 = 100 (705150 Effect[0] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, EffectBasePoints 99, MiscValue 127 all schools). Native semantics as for Pious 300943 (docs/coa/sun-cleric-completion.md:53): the aura multiplies the whole critical figure, so a critical hit reads 2.0 times the same critical hit without the passive (the same recorded choice, no new total-critical-damage multiplier invented). Carve strike 803715 forced to critical, attack power fixture 20000 in both arms. Reference search 2026-11-23: coa-history spell 705150: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 300470,
+      "name": "Dark Lord (damage taken above 75% health)",
+      "kind": "taken_hit",
+      "variant": "above75",
+      "label_suffix": "above75",
+      "judge": "damage_ratio",
+      "expected": 0.95,
+      "quote": "While above 75% health, your damage taken is reduced by $801573s1%",
+      "strike_spell": 41394,
+      "caster_health_pct": 90,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            300470
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 300470,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            300470
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 300470,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "health_loss": true,
+      "observe_source": "$s1 = 5 and $s2 = 5 (801573 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127, EffectBasePoints -6 + 1 = -5; Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127, +4 + 1 = +5; 300470 Effect[0] aura 23 triggers 801573 every 500 ms, Effect[1] aura 4 dummy; Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Light of the Naaru 41394 (1100 Holy, non-critical) strikes the caster without (control) and with the passive learned (treatment); the ratio of the health lost is judged against 0.95. The caster holds 90% of 100000 health before every strike (above the 75% threshold, 1100 damage leaves it above). The health the caster loses is read (health_loss), not the logged damage. Reference search 2026-11-23: coa-history spell 300470: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 300470,
+      "name": "Dark Lord (control: damage taken at 70% health)",
+      "kind": "taken_hit",
+      "variant": "below75",
+      "label_suffix": "below75",
+      "judge": "damage_ratio",
+      "expected": 1.0,
+      "quote": "While above 75% health, your damage taken is reduced by $801573s1%",
+      "strike_spell": 41394,
+      "caster_health_pct": 70,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            300470
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 300470,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            300470
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 300470,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "health_loss": true,
+      "observe_source": "$s1 = 5 and $s2 = 5 (801573 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127, EffectBasePoints -6 + 1 = -5; Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127, +4 + 1 = +5; 300470 Effect[0] aura 23 triggers 801573 every 500 ms, Effect[1] aura 4 dummy; Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Same strike at 70% of 100000 health (below the threshold): the treatment ratio must read 1.0, the health gate of the clause. Reference search 2026-11-23: coa-history spell 300470: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 300470,
+      "name": "Dark Lord (damage dealt above 75% health)",
+      "kind": "hit_ratio",
+      "variant": "damage_dealt",
+      "label_suffix": "damage_dealt",
+      "quote": "and damage dealt is increased by $801573s2%.",
+      "expected": 1.05,
+      "observe_spell": 803715,
+      "learn": [
+        803715
+      ],
+      "control": {},
+      "treatment": {
+        "learn": [
+          300470
+        ]
+      },
+      "critical": false,
+      "trials": 150,
+      "parts": 5,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "observe_source": "$s1 = 5 and $s2 = 5 (801573 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127, EffectBasePoints -6 + 1 = -5; Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127, +4 + 1 = +5; 300470 Effect[0] aura 23 triggers 801573 every 500 ms, Effect[1] aura 4 dummy; Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Carve strike 803715 (about 890 points a hit at attack power +20000, the Unholy Endurance entry's sizing) cast at the dummy trials times at full health (above 75%) without the passive (control) and with it learned (treatment), non-critical hits only; mean damage per hit must rise by 5 percent (band 3..7, G-19). Reference search 2026-11-23: coa-history spell 300470: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 92089,
+      "name": "Burning Commander (two-handers in each hand)",
+      "kind": "equip_grant",
+      "label_suffix": "equip",
+      "quote": "Allows you to wield a Two-Handed Axe, Mace, Polearm or Sword in each hand",
+      "pairs": [
+        {
+          "main_hand": 1196,
+          "off_hand": 1196,
+          "skill_line": 172,
+          "source": "Two-Handed Axe: Tabar 1196 (data/sql/base/db_world/item_template.sql, class 2 subclass 1, InventoryType 17, Quality 1, RequiredLevel 9)"
+        },
+        {
+          "main_hand": 1197,
+          "off_hand": 1197,
+          "skill_line": 160,
+          "source": "Two-Handed Mace: Giant Mace 1197 (class 2 subclass 5, InventoryType 17, RequiredLevel 10)"
+        },
+        {
+          "main_hand": 11864,
+          "off_hand": 11864,
+          "skill_line": 229,
+          "source": "Polearm: White Bone Spear 11864 (class 2 subclass 6, InventoryType 17, RequiredLevel 0)"
+        },
+        {
+          "main_hand": 2529,
+          "off_hand": 2529,
+          "skill_line": 55,
+          "source": "Two-Handed Sword: 2529, the Tyrant weapon set item"
+        }
+      ],
+      "observe_source": "92089 Effect[2] SPELL_EFFECT_TITAN_GRIP (155) (installed DBC, Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Control: the same four off-hand equips with 92089 unlearned are refused (the harness fails the step if one is accepted); learned, each is accepted and both hands hold their items; skill lines 172, 160, 229 and 55 are set so proficiency is not what refuses the equip. Reference search 2026-11-23: coa-history spell 92089: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) carries an older text of the same passive that adds 'based on your dodge rating, but reducing your damage dealt by -10%' where the tooltip and the DBC say attack power and carry no damage penalty (G-9: an older state, the tooltip wins)."
     }
   ],
   "player_observations": [],
