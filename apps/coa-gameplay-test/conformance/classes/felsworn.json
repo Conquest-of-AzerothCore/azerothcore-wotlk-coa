@@ -46,12 +46,31 @@
   },
   "log_queries": {},
   "alternate_weapons": [],
-  "off_hand_weapons": [],
+  "off_hand_weapons": [
+    {
+      "item": 2027,
+      "slot": 16,
+      "subclass": 7,
+      "min_damage": 17.25,
+      "max_damage": 28.75,
+      "speed_ms": 2300,
+      "inventory_type": 13,
+      "normalized_speed": 2.4,
+      "skill_line": 43
+    }
+  ],
   "known_auras": [],
   "probe_auras": [],
   "extra_spells": [],
   "disabled_foreign_effects": [],
   "foreign_aura_grants": [],
+  "per_tick_foreign_totals": [
+    {
+      "spell": 802678,
+      "effect": 0,
+      "reason": "Felstrike: Malice of Gul'dan 800214 and Fel Apprentice 92088 expand ${($d*1000/$T1)*($m1+0+$SP*.05)}, the total over its six ticks; spell_effect_value reads one tick (mentor D-23)"
+    }
+  ],
   "effect_overrides": [],
   "item_armor_subclass_effects": [],
   "unmodelled_effects": [],
@@ -100,6 +119,105 @@
         }
       },
       "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 804822,
+      "name": "Vengeance Is Mine",
+      "tooltip": "Dodging or parrying an attack now gives you a $h% chance to make your next 10 instances of damage with |cffffffffTwin Slice|r deal $807163s1% increased damage and generate 1 |cff32cd32Felfury|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "avoided",
+        "striker_entry": 36,
+        "swing_ms": 500,
+        "dodge": 100,
+        "parry": 0,
+        "strikers": 10,
+        "striker_auras": [
+          42716,
+          62531,
+          2116852
+        ]
+      },
+      "residual_target": 0.001,
+      "min_detectable": 5,
+      "min_parts": 10,
+      "trigger_text": "Dodging or parrying an attack",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 807163,
+      "events_per_proc": 1,
+      "proc_spell_source": "EffectTriggerSpell[0] of 804822; the handler casts it on the caster (AscensionFelswornEvents.cpp:157-158).",
+      "handler": "aura_ascension_felsworn_event: Check (AscensionFelswornEvents.cpp:42-47) passes an incoming dodge or parry (id 804822 accepts both) and rolls Chance(player, 804822) (AscensionFelsworn.cpp:231-239, roll_chance_f of the DBC ProcChance 10, no cooldown) once per avoided attack; Proc casts 807163 on the caster. Trigger: procs avoided trigger (ADR 0900): ten aggressive stationary strikers (creature 36) with Self Root Forever 42716, Molten 62531 and Enrage 2116852, dodge 100 and parry 0 set before every 500 ms interval, so no swing lands and every attempt is a dodge (the trial); the parry leg is not entered: the reference character has not learned Nether Disciple 560576/561343 (aura 47 MOD_PARRY_PERCENT, SetCanParry in SpellAuraEffects.cpp:4870-4884), so a parry set on it lets the swing land (guard landed failed in the first pair); the kind cannot learn that precondition (tool gap). Sized like the Sun Cleric 92137 entry: residual_target 0.001 per pair, min_detectable 5 points (band 2 points on 10%). Reference search 2026-11-23: coa-history spell 804822 and 807163 and ~/CoaServer/reference snapshots: nothing found that decides the chance or the 10 instances; the tooltip and Spell.dbc ProcChance 10 are the expectation. The Twin Slice instances and the Felfury generation of the tooltip are not read here (tool gaps).",
+      "dbc": {
+        "804822": {
+          "ProcChance": 10,
+          "ProcFlags": 4,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 681376,
+      "name": "Chaotic",
+      "tooltip": "Dealing damage now has an $h% chance to increase your damage by $572782s1% for $572782d, stacking $572782u times.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 801312
+      },
+      "residual_target": 0.001,
+      "min_detectable": 5,
+      "min_parts": 10,
+      "trigger_text": "Dealing damage",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 572782,
+      "events_per_proc": 1,
+      "proc_spell_source": "EffectTriggerSpell[0] of 681376; the handler casts it on the caster (AscensionFelswornEvents.cpp:148-149).",
+      "handler": "aura_ascension_felsworn_event: Check case 681376 (AscensionFelswornEvents.cpp:56-57) rolls Chance(player, 681376) once per outgoing damage event of a non-derived spell (periodic included); Proc casts 572782 on the caster. Trigger: a cast of Fel Fireball 801312 (Effect[0] SCHOOL_DAMAGE, one landed hit per cast); a trial is the landed hit. Reference search 2026-11-23: coa-history spell 681376 and 572782 and ~/CoaServer/reference snapshots: nothing found that decides the chance. Only the chance is entered here; the stack cap is owned by a tool group.",
+      "dbc": {
+        "681376": {
+          "ProcChance": 8,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 300490,
+      "name": "Felforged",
+      "tooltip": "Periodic damage dealt now has a $h% chance to grant you |cffffffffFelforged|r for $806104d.@s:806104:0@",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 704368
+      },
+      "residual_target": 0.001,
+      "min_detectable": 6,
+      "min_parts": 10,
+      "trigger_text": "Periodic damage dealt",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 806104,
+      "events_per_proc": 1,
+      "proc_spell_source": "EffectTriggerSpell[0] of 300490; the handler casts it on the caster (AscensionFelswornEvents.cpp:205-207).",
+      "handler": "aura_ascension_felsworn_event: Check case 300490 (AscensionFelswornEvents.cpp:86-88) returns periodic && Chance(player, 300490), one roll per periodic damage event; Proc casts 806104 on the caster. Trigger: a cast of Bane of Chaos 704368, whose Effect[0] is aura 3 periodic damage every 3000 ms; a trial is a damage tick (spell_damage_count of 704368 on the dummy, recasts spaced two ticks apart by the generator). Reference search 2026-11-23: coa-history spell 300490 and 806104 and ~/CoaServer/reference snapshots: nothing found that decides the chance.",
+      "dbc": {
+        "300490": {
+          "ProcChance": 15,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
     }
   ],
   "triggers": [
@@ -120,6 +238,25 @@
       "per_trigger": 1,
       "per_trigger_text": "causes off-hand Weapon Damage to attackers",
       "observe_source": "EffectTriggerSpell[0] of 300476 (804336). AscensionFelswornEvents.cpp:42-47 passes an incoming dodge (not a landed or parried swing) when Chance(player, 300476) succeeds (300476 ProcChance 100, so every dodge) and :223-224 casts 804336 at the attacker and 520256 on the caster. An aggressive striker (creature 36) swings at the caster, who wears Evasion 26669 (+50% dodge) refreshed before every 2000 ms attempt as a precondition fixture (the trigger action avoided, ADR 0709); every dodged (victim_state 2) or parried (victim_state 3) swing is a trial and the spell_cast_count of 804336 must match it. Reference search 2026-11-23: coa-history spell 804336: 3 damage events in 2 logs (14 to 74); 520256: 42 aura applications and 42 removals in 2 logs; nothing decides a value.",
+      "trial_attempts_reason": "An attempt is one striker swing interval; only the dodged or parried swings are trials (Evasion gives +50% dodge, the rest hit or miss), so 2.5 times the swings are scheduled to reach the trigger trials."
+    },
+    {
+      "aura": 805249,
+      "name": "Illidari Training",
+      "tooltip": "Dodging an attack now generates $521210s1 Energy.",
+      "trigger": {
+        "action": "avoided",
+        "striker_entry": 36,
+        "swing_ms": 2000
+      },
+      "trigger_text": "Dodging an attack",
+      "trial_metric": "melee_attacks_taken",
+      "trial_attempts_factor": 2.5,
+      "observe_spell": 521210,
+      "observe_metric": "spell_energize_count",
+      "per_trigger": 1,
+      "per_trigger_text": "Dodging an attack now generates Energy",
+      "observe_source": "EffectTriggerSpell[0] of 805249 (521210, Effect[0] ENERGIZE). AscensionFelswornEvents.cpp:42-47 passes an incoming dodge (id 805249 accepts dodge only, not parry) when Chance(player, 805249) succeeds (ProcChance 100, so every dodge) and :208-209 casts 521210 on the caster. An aggressive striker (creature 36) swings at the caster, who wears Evasion 26669 refreshed before every 2000 ms attempt as a precondition fixture (trigger action avoided, ADR 0709); every dodged or parried swing is a trial and the energize events of 521210 must match them. Reference search 2026-11-23: coa-history spell 805249 and 521210, ~/CoaServer/reference snapshots: nothing found that decides a value; the Energy amount is not read here (tool gap).",
       "trial_attempts_reason": "An attempt is one striker swing interval; only the dodged or parried swings are trials (Evasion gives +50% dodge, the rest hit or miss), so 2.5 times the swings are scheduled to reach the trigger trials."
     }
   ],
@@ -292,6 +429,33 @@
       "expire_ms": 500,
       "expected_ratio": 1.1,
       "observe_source": "500067 Effect[2] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue 1 (Agility), BasePoints 9 + 1 = 10 ($s3). The caster's exact Agility is read before and after a real learn of 500067 (control: the reading before): reference stat 1 = 130 x 1.10 = 143.0, ratio judged within 0.002 so +9% (141.7) and +11% (144.3) are excluded. Reference search 2026-11-23: coa-history spell 500067: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot is an older state (it names no Agility part); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 500067,
+      "name": "Fel Monstrosity (size)",
+      "kind": "metric_delta",
+      "variant": "size",
+      "label_suffix": "size",
+      "quote": "and size by $s2%.",
+      "trigger_spell": 804247,
+      "gate_spell": 500067,
+      "target": "caster",
+      "metric": "object_scale",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 1.1,
+      "tolerance": 0.001,
+      "wait_ms": 11000,
+      "expire_ms": 500,
+      "expected_ratio": 1.1,
+      "ended_read": {
+        "unlearn": [
+          500067
+        ],
+        "wait_ms": 12000,
+        "duration_ms": 11000
+      },
+      "observe_source": "500067 Effect[1] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 9999 ms, triggers 500076, whose Effect[1] aura 61 SPELL_AURA_MOD_SCALE has BasePoints 9 + 1 = 10; the tooltip's $s2 resolves to 10 (packet batch1/packets2/500067.md), so the caster's size grows by 10%: ratio 1.10. object_scale reads Object::GetObjectScale, the OBJECT_FIELD_SCALE_X update field the server sends to the client. The before reading (500067 not known) is the control of the same scenario and must read 1.0, because the engine adds 10 points of the unit scale (native + percent of 1.0) and the ratio equals 1.10 only at a baseline of 1.0; the after reading follows the learn by about 11500 ms, past the first 9999 ms trigger period; the ratio is judged within 0.001, far below the 0.01 that separates +9% or +11% and above float32 rounding of 1.1. 500076 DurationIndex 38 = SpellDuration 11000 ms (server DBC set), so the ended reading comes 12000 ms after the unlearn of 500067 and must equal the before reading: the size ends with the aura. Bless 804247 is the harmless self cast in both phases. Reference search 2026-11-23: coa-history spell 500067: 0 events in 186 logs (a passive leaves no event); expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 574153,
@@ -3527,6 +3691,1766 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "observe_source": "Fel Torpedo 500610 cast with the talent 520853 learned gives Gain(player, 1) (AscensionFelswornAbilities.cpp:272-273); the Felfury 800058 stacks on the caster are read 1500 ms after a real cast of 500610 at the dummy: 0 before the learn of 520853 (control) and 1 after. Fel Torpedo's Effect[1] TRIGGER_SPELL 802028 is the spell's own effect, shared with Chaos Rush 500028. Reference search 2026-11-23: coa-history spell 520853: 0 events in 186 logs; the bindmysoul snapshot says 'Generates 1 Felfury'."
+    },
+    {
+      "spell": 524950,
+      "name": "Black Magic (Ruin damage)",
+      "kind": "hit_ratio",
+      "variant": "ruin",
+      "label_suffix": "ruin",
+      "quote": "Increases the damage of your Bane of Chaos and Ruin by $s1%.",
+      "expected": 1.1,
+      "observe_spell": 801895,
+      "learn": [
+        801895
+      ],
+      "control": {
+        "auras": [
+          [
+            800058,
+            2
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            2
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          524950
+        ]
+      },
+      "critical": false,
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "observe_source": "$s1 = 10 (524950 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectBasePoints 9 + EffectDieSides 1, MiscValue 0 = SPELLMOD_DAMAGE, class mask word 1 = 2; Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Ruin 801895 (SpellFamilyFlags[1] 2, Effect[0] SCHOOL_DAMAGE, 30 Energy, 21 die sides) is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits only; spell power +20000 is a named precondition fixture, the same in both arms, so integer truncation is far inside the band; mean damage per hit must rise by 10 percent (band 8..12, G-19). Reference search 2026-11-23: coa-history spell 524950: 0 events in 186 logs (passive, never logged); ~/CoaServer/reference snapshots (ascension-data advancement.tsv, bindmysoul talents) list Black Magic 524950 without a value beyond the tooltip; nothing found for the value. Ruin costs 30 Energy and needs 2 Felfury (cast refused with SPELL_FAILED_NO_POWER without them, first pair 20261123-153036): both arms set 2 stacks of Felfury 800058 before every trial, a named precondition. Both arms set the aura 823764 (SPELL_AURA_MOD_TARGET_RESISTANCE -9999 on the magic schools, the harness spell-penetration fixture): the first two pairs (20261123-153036, bm2) read hits spread by partial resists (Ruin 21228 / 23893 / 26539 per hit) so the interval could not close inside one scenario."
+    },
+    {
+      "spell": 524950,
+      "name": "Black Magic (Bane of Chaos damage)",
+      "kind": "hit_ratio",
+      "variant": "bane",
+      "label_suffix": "bane",
+      "quote": "Increases the damage of your Bane of Chaos and Ruin by $s1%.",
+      "expected": 1.1,
+      "observe_spell": 706420,
+      "learn": [
+        706420
+      ],
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          524950
+        ]
+      },
+      "critical": false,
+      "trials": 24,
+      "cast_wait_ms": 3500,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "observe_source": "$s1 = 10 (524950 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectBasePoints 9 + EffectDieSides 1, MiscValue 22 = SPELLMOD_DOT, class mask word 0 = 32; Spell.dbc). Bane of Chaos 706420 (the level 60 rank: Effect[0] aura 3 periodic damage every 3000 ms, EffectBasePoints 325 + 1) (SpellFamilyFlags[0] 32, Effect[0] aura 3 periodic damage every 3000 ms) is cast at the dummy; about 326 points a tick, so integer truncation stays under 0.4 percent; one tick is read per trial, without the passive (control) and with it learned (treatment), non-critical ticks only; spell power +20000 is a named precondition fixture in both arms; mean tick damage must rise by 10 percent (band 8..12). Reference search 2026-11-23: coa-history spell 524950: 0 events in 186 logs; snapshots list Black Magic without a value beyond the tooltip; nothing found for the value. The first pair on rank 704368 (ticks of about 32) read +6.9 percent, which is the truncation of a small tick, not a defect proof (pair 20261123-153036). Both arms set the aura 823764 (SPELL_AURA_MOD_TARGET_RESISTANCE -9999 on the magic schools, the harness spell-penetration fixture): the first two pairs (20261123-153036, bm2) read hits spread by partial resists (Ruin 21228 / 23893 / 26539 per hit) so the interval could not close inside one scenario."
+    },
+    {
+      "spell": 704602,
+      "name": "Whirling Vengeance (strike when Fury Unleashed ends)",
+      "kind": "script_hit",
+      "variant": "strike",
+      "label_suffix": "strike",
+      "quote": "When Fury Unleashed ends, you strike all nearby enemies for ${$806096m1+$806096ppl1+$AP*0.5614286} Shadowflame Damage",
+      "hit_spell": 806096,
+      "hit_effect": 0,
+      "trials": 6,
+      "minimum_hits": 4,
+      "casts": [
+        [
+          555738,
+          "caster"
+        ]
+      ],
+      "caster_auras": [
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 6500,
+      "observe_source": "AscensionFelswornAuras.cpp:208-209: when 555738 ends with 704602 known the caster casts 806096; 806096 Effect[0] SCHOOL_DAMAGE EffectBasePoints 749 + 1, TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, radius index 14 (8 yd). Fury Unleashed lasts 5000 ms (SpellDuration 28). Each trial casts Fury Unleashed and waits settle_ms 6500 for its end; the tooltip formula of 806096 effect 0 read with the measured attack power gives the amount. The control arm makes the same cast without 704602 learned and must count no 806096 hit. Reference search 2026-11-23: coa-history spell 806096: 0 events in 186 logs; nothing found for the value."
+    },
+    {
+      "spell": 704602,
+      "name": "Whirling Vengeance (strike, AP contrast arm)",
+      "kind": "script_hit",
+      "variant": "strike_ap",
+      "label_suffix": "strike_ap",
+      "quote": "When Fury Unleashed ends, you strike all nearby enemies for ${$806096m1+$806096ppl1+$AP*0.5614286} Shadowflame Damage",
+      "hit_spell": 806096,
+      "hit_effect": 0,
+      "trials": 6,
+      "minimum_hits": 4,
+      "casts": [
+        [
+          555738,
+          "caster"
+        ]
+      ],
+      "caster_auras": [
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 6500,
+      "observe_source": "AscensionFelswornAuras.cpp:208-209: when 555738 ends with 704602 known the caster casts 806096; 806096 Effect[0] SCHOOL_DAMAGE EffectBasePoints 749 + 1, TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, radius index 14 (8 yd). Fury Unleashed lasts 5000 ms (SpellDuration 28). Each trial casts Fury Unleashed and waits settle_ms 6500 for its end; the tooltip formula of 806096 effect 0 read with the measured attack power gives the amount. The control arm makes the same cast without 704602 learned and must count no 806096 hit. Reference search 2026-11-23: coa-history spell 806096: 0 events in 186 logs; nothing found for the value. AP contrast arm (review fw-r2b I-1): the same entry with stat_auras 10031 (the attack-power fixture the Sun Cleric _ap entries use) set before the stats are measured, so the mean is read at a second attack power; a server that dropped the 0.5614286 x AP term or used another coefficient with the same product at the first AP cannot pass both.",
+      "stat_auras": [
+        [
+          10031,
+          1
+        ]
+      ]
+    },
+    {
+      "spell": 801892,
+      "name": "Twin Fury (Twin Slice critical strikes)",
+      "kind": "metric_delta",
+      "variant": "twin_slice",
+      "label_suffix": "twin_slice",
+      "quote": "Critically striking with Twin Slice or Annihilan Strike now generates an additional 1 Felfury.",
+      "trigger_spell": 801901,
+      "gate_spell": 801892,
+      "target": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "phase_auras": [
+        [
+          800058,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "melee",
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "before_expected": 1,
+      "expected": 3,
+      "observe_source": "The tooltip gives 'an additional 1 Felfury' per critical strike; Twin Slice 801901 states 'Generates 1 Felfury' and strikes with both weapons (808303 per hand, Effect[0] and Effect[1] TRIGGER_SPELL), so with every strike forced to crit (melee crit rating forced by the harness) the expected stacks of Felfury 800058 are 1 (own generation, the first phase, passive unknown = control arm) and 1 + 2 critical strikes x 1 = 3 with 801892 learned. The per-strike reading is the tooltip's own words; a per-cast reading would give 2: when the measured value is 2 the claim goes to status 5 as a question. Felfury is cleared before each phase (phase_auras stacks 0). The code path AscensionFelswornAbilities.cpp:358-361 gains 1 per critical Twin and Direct strike with 801892 known. Reference search 2026-11-23: coa-history spell 801892: 0 events in 186 logs (passive); spell 800058 (Felfury) logged; snapshots list Twin Fury 801892 without a value beyond the tooltip; nothing found for the value."
+    },
+    {
+      "spell": 801892,
+      "name": "Twin Fury (Annihilan Strike critical strikes)",
+      "kind": "metric_delta",
+      "variant": "annihilan",
+      "label_suffix": "annihilan",
+      "quote": "Critically striking with Twin Slice or Annihilan Strike now generates an additional 1 Felfury.",
+      "trigger_spell": 801903,
+      "gate_spell": 801892,
+      "target": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 800058
+      },
+      "phase_auras": [
+        [
+          800058,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "melee",
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "before_expected": 2,
+      "expected": 4,
+      "observe_source": "Annihilan Strike 801903 states 'Generates 2 Felfury' and strikes with both weapons (801913 main hand, 801914 off hand, Effect[0] and Effect[1] TRIGGER_SPELL_WITH_VALUE); with every strike forced to crit the expected Felfury 800058 stacks are 2 (control, passive unknown) and 2 + 2 critical strikes x 1 = 4 with 801892 learned; a per-cast reading would give 3 (see the Twin Slice entry). Reference search 2026-11-23: as the Twin Slice entry: nothing found for the value."
+    },
+    {
+      "spell": 300474,
+      "name": "Expose (applied by a Fire or Shadow direct hit)",
+      "kind": "metric_delta",
+      "variant": "applies",
+      "label_suffix": "applies",
+      "quote": "Direct Fire and Shadow spell damage dealt now applies Expose to enemies.",
+      "trigger_spell": 802060,
+      "gate_spell": 300474,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 300475,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "300474 Effect[0] aura 42 PROC_TRIGGER_SPELL of 300475, 300475 Effect[0] aura 271 MOD_DAMAGE_FROM_CASTER and Effect[1] aura 197 MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE on the enemy target (Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Sargeron Smite 802060 (Effect[0] SCHOOL_DAMAGE, SchoolMask 36 Fire and Shadow, SPELL_DAMAGE_CLASS_MAGIC, instant, Consumes 2 Felfury: 2 stacks of Felfury 800058 set before each phase as a named precondition) is cast at the dummy without 300474 (the first phase is the control arm: the Expose aura 300475 must be absent) and with it learned (the aura must be present on the dummy, cast by the caster). The class code applies it on a non-periodic Fire or Shadow magic damage event (AscensionFelswornEvents.cpp:60-62). Reference search 2026-11-23: coa-history spell 300474: 0 events in 186 logs, spell 300475: logged; snapshots list Expose 300474 without a value beyond the tooltip; nothing found for the value."
+    },
+    {
+      "spell": 300474,
+      "name": "Expose (damage taken from the Felsworn)",
+      "kind": "hit_ratio",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "Direct Fire and Shadow spell damage dealt now applies Expose to enemies.",
+      "expected": 1.1,
+      "observe_spell": 802060,
+      "learn": [
+        802060,
+        801895
+      ],
+      "control": {
+        "auras": [
+          [
+            800058,
+            4
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          801895
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            4
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          801895
+        ],
+        "learn": [
+          300474
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "observe_source": "$s1 = 10 (300475 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER, EffectBasePoints 9 + EffectDieSides 1, MiscValue 127 all schools, on the enemy target for 8000 ms). Each trial casts Ruin 801895 (a Fire and Shadow direct hit that applies Expose when 300474 is learned) at the dummy, then the observed Sargeron Smite 802060; the mean damage of the non-critical Smite hits must rise by 10 percent with 300474 learned against the same trials without it (control arm; band 8..12, G-19). Felfury 800058 x4 (Ruin and Smite each consume 2) and the spell penetration aura 823764 are named precondition fixtures; spell power +20000 is a fixture in both arms. Expose is the 8 s aura of the Ruin cast just before the Smite. Reference search 2026-11-23: as the applies entry: nothing found for the value."
+    },
+    {
+      "spell": 520240,
+      "name": "Nether Strength (Burning Hatred cooldown after Sargeron Smite, behaviour)",
+      "kind": "cost_gate",
+      "quote": "Casting Felfury spenders now reduces the cooldown of Burning Hatred, Hateforged Barrier, and Demonic Will by $/1000;520830S1 sec.",
+      "gated_spell": 805239,
+      "resource": "cooldown",
+      "reduction": 500,
+      "target": "caster",
+      "after_casts": [
+        [
+          802060,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 2000,
+      "margin_ms": 40,
+      "label_suffix": "cd_805239",
+      "cast_auras": [
+        {
+          "spell": 802060,
+          "auras": [
+            800058
+          ],
+          "stacks": 2,
+          "reason": "Sargeron Smite 802060 consumes 2 Felfury (AscensionFelswornAbilities.cpp:234-237 reduces the cooldowns on a spender cast) and is refused SPELL_FAILED_NO_POWER without them (prove_p2 refused Ruin): 800058 at 2 stacks is set on the caster before each Smite cast, a named precondition fixture; the claim measured is the cooldown cut."
+        }
+      ],
+      "observe_source": "520240 Effect[0] aura 42 PROC_TRIGGER_SPELL of 520830; 520830 effects 0-2 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -501 + EffectDieSides 1 = -500 ms (500 ms = $/1000;520830S1 sec 0.5), MiscValue 705129 / 800209 / 805239 (Spell.dbc). The class code reduces the cooldown by 500 ms of each of the three when a Felfury spender (Sargeron Smite 802060 here: instant, Consumes 2 Felfury; Ruin has a 2500 ms cast time that ends after the 1000 ms read) is cast (AscensionFelswornAbilities.cpp:234-237). Behaviour route (review fw-r2b I-2: cooldown_ms is a readback): the gated spell 805239 (Burning Hatred) is primed, Sargeron Smite is cast 2000 ms later, and the gated spell is attempted at its cooldown less 500 ms plus/minus 40 ms. A cut of 450 or 550 ms (10% off) falls inside the 40 ms margins on the wrong side, so the through and refused arms exclude both; the control arm is the talent unknown (refused at the same wait). Reference search 2026-11-23: coa-history spells 520240 and 520830: 0 events in 186 logs; nothing found for the value.",
+      "variant": "cd_805239"
+    },
+    {
+      "spell": 520240,
+      "name": "Nether Strength (Hateforged Barrier cooldown after Sargeron Smite, behaviour)",
+      "kind": "cost_gate",
+      "quote": "Casting Felfury spenders now reduces the cooldown of Burning Hatred, Hateforged Barrier, and Demonic Will by $/1000;520830S1 sec.",
+      "gated_spell": 705129,
+      "resource": "cooldown",
+      "reduction": 500,
+      "target": "caster",
+      "after_casts": [
+        [
+          802060,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 2000,
+      "margin_ms": 40,
+      "label_suffix": "cd_705129",
+      "cast_auras": [
+        {
+          "spell": 802060,
+          "auras": [
+            800058
+          ],
+          "stacks": 2,
+          "reason": "Sargeron Smite 802060 consumes 2 Felfury (AscensionFelswornAbilities.cpp:234-237 reduces the cooldowns on a spender cast) and is refused SPELL_FAILED_NO_POWER without them (prove_p2 refused Ruin): 800058 at 2 stacks is set on the caster before each Smite cast, a named precondition fixture; the claim measured is the cooldown cut."
+        }
+      ],
+      "observe_source": "520240 Effect[0] aura 42 PROC_TRIGGER_SPELL of 520830; 520830 effects 0-2 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -501 + EffectDieSides 1 = -500 ms (500 ms = $/1000;520830S1 sec 0.5), MiscValue 705129 / 800209 / 805239 (Spell.dbc). The class code reduces the cooldown by 500 ms of each of the three when a Felfury spender (Sargeron Smite 802060 here: instant, Consumes 2 Felfury; Ruin has a 2500 ms cast time that ends after the 1000 ms read) is cast (AscensionFelswornAbilities.cpp:234-237). Behaviour route (review fw-r2b I-2: cooldown_ms is a readback): the gated spell 705129 (Hateforged Barrier) is primed, Sargeron Smite is cast 2000 ms later, and the gated spell is attempted at its cooldown less 500 ms plus/minus 40 ms. A cut of 450 or 550 ms (10% off) falls inside the 40 ms margins on the wrong side, so the through and refused arms exclude both; the control arm is the talent unknown (refused at the same wait). Reference search 2026-11-23: coa-history spells 520240 and 520830: 0 events in 186 logs; nothing found for the value.",
+      "variant": "cd_705129"
+    },
+    {
+      "spell": 520240,
+      "name": "Nether Strength (Demonic Will cooldown after Sargeron Smite, behaviour)",
+      "kind": "cost_gate",
+      "quote": "Casting Felfury spenders now reduces the cooldown of Burning Hatred, Hateforged Barrier, and Demonic Will by $/1000;520830S1 sec.",
+      "gated_spell": 800209,
+      "resource": "cooldown",
+      "reduction": 500,
+      "target": "caster",
+      "after_casts": [
+        [
+          802060,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 2000,
+      "margin_ms": 40,
+      "label_suffix": "cd_800209",
+      "cast_auras": [
+        {
+          "spell": 802060,
+          "auras": [
+            800058
+          ],
+          "stacks": 2,
+          "reason": "Sargeron Smite 802060 consumes 2 Felfury (AscensionFelswornAbilities.cpp:234-237 reduces the cooldowns on a spender cast) and is refused SPELL_FAILED_NO_POWER without them (prove_p2 refused Ruin): 800058 at 2 stacks is set on the caster before each Smite cast, a named precondition fixture; the claim measured is the cooldown cut."
+        }
+      ],
+      "observe_source": "520240 Effect[0] aura 42 PROC_TRIGGER_SPELL of 520830; 520830 effects 0-2 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -501 + EffectDieSides 1 = -500 ms (500 ms = $/1000;520830S1 sec 0.5), MiscValue 705129 / 800209 / 805239 (Spell.dbc). The class code reduces the cooldown by 500 ms of each of the three when a Felfury spender (Sargeron Smite 802060 here: instant, Consumes 2 Felfury; Ruin has a 2500 ms cast time that ends after the 1000 ms read) is cast (AscensionFelswornAbilities.cpp:234-237). Behaviour route (review fw-r2b I-2: cooldown_ms is a readback): the gated spell 800209 (Demonic Will) is primed, Sargeron Smite is cast 2000 ms later, and the gated spell is attempted at its cooldown less 500 ms plus/minus 40 ms. A cut of 450 or 550 ms (10% off) falls inside the 40 ms margins on the wrong side, so the through and refused arms exclude both; the control arm is the talent unknown (refused at the same wait). Reference search 2026-11-23: coa-history spells 520240 and 520830: 0 events in 186 logs; nothing found for the value.",
+      "variant": "cd_800209"
+    },
+    {
+      "spell": 704602,
+      "name": "Whirling Vengeance (Fury Unleashed cooldown, behaviour)",
+      "kind": "cost_gate",
+      "quote": "Reduces the cooldown of Fury Unleashed by $/1000;S1 sec.",
+      "gated_spell": 555738,
+      "resource": "cooldown",
+      "reduction": 60000,
+      "target": "caster",
+      "label_suffix": "cd",
+      "observe_source": "704602 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -60001 + 1 die side = -60000 ms ($/1000;S1 = 60 sec). Fury Unleashed 555738 RecoveryTime 180000 ms, so the reduced cooldown is 120000 ms. Arms timed from a priming cast: an attempt 120500 ms later without the talent (refused), with it (goes through), and 119500 ms later with it (refused). A cut 10% off (54000 or 66000 ms) moves the end by 6000 ms, far outside the 500 ms margin. Reference search 2026-11-23: nothing found for the value beyond the tooltip.",
+      "variant": "cd"
+    },
+    {
+      "spell": 801899,
+      "name": "Legionfall (the cost reduction lasts $801902d)",
+      "kind": "last_application_expiry",
+      "label_suffix": "legionfall_duration",
+      "quote": "within $801902d",
+      "gate_spell": 801899,
+      "trigger_spell": 801903,
+      "aura": 801902,
+      "expected_ms": 15000,
+      "control_window_ms": 500,
+      "window_ms": 17000,
+      "poll_ms": 50,
+      "caster": true,
+      "feed": {
+        "every_ms": 1700
+      },
+      "observe_source": "Expected 15000 ms: Spell.dbc 801902 DurationIndex 8, SpellDuration.dbc row 8 Duration 15000 (the $801902d of the tooltip). 801902 is cast on the caster by the Legionfall handler (AscensionFelswornEvents.cpp:201-203) after a landed melee ability hit rolled Chance() on the raw ProcChance 15 (AscensionFelsworn.cpp:231-239), which no spell modifier forces, so the aura is earned for real: the cast_until_aura step (owner-approved) casts Annihilan Strike every 1700 ms until 801902 is on the caster, at most 47 casts (one roll per cast at 15% leaves 0.85^47 = 0.05% of a run without a grant, a landed strike pair only lowers it; a run at the cap is unmeasured, never a fail or a pass). The control arm casts the same loop without the talent (801899 learned after it) and must read no 801902. Before the measured arm 801902 is cancelled on the caster and read absent with its application count, the loop's casts are the only casts and stop at the first grant, so no proc of an earlier loop turn is on; Energy and the cooldown are set before each cast. After the stop, every 50 ms the game time, the 801902 application count and its presence are read on the caster; the first read is at most 100 ms after the grant (the step checks the aura on every world update) and the remaining duration is read at the stop. The aura must be gone 15000 ms (G-19 band 14250 to 15750) after the grant, with one counted application and no recast. Annihilan Strike 801903 (40 Energy, 10000 ms category cooldown, both weapons) lands two strikes (801913, 801914); its cooldown and Energy are reset before every loop cast and the Slayer pair is the class's weapon set. An encounter timeline opened before the measured feed (after a game time read) stamps every apply of 801902 on the caster in the game time base, so the aura's age at the first read after the loop is read, not derived from the expected duration (mentor D-21, review I-1): above 100 ms, without a stamp, or with a stamped apply count other than one (a refresh or a second apply is not the stamped first apply, so the last application would be unbounded) the arm is unmeasured. The timeline is process global, so the scenario runs exclusive in a batch. Reference search: coa-history spell 801899 and 801902: 0 events in 186 logs; ~/CoaServer/reference snapshots (ascension-data advancement.tsv, bindmysoul talents) list the talent without a rate or duration; nothing found for the value."
+    },
+    {
+      "spell": 800214,
+      "name": "Malice of Gul'dan (Felstrike lasts $802678d)",
+      "kind": "last_application_expiry",
+      "label_suffix": "felstrike_duration",
+      "quote": "over $d",
+      "gate_spell": 800214,
+      "trigger_spell": 801312,
+      "aura": 802678,
+      "expected_ms": 6000,
+      "control_window_ms": 500,
+      "window_ms": 8000,
+      "poll_ms": 50,
+      "caster": false,
+      "force_crit": "spell",
+      "feed": {
+        "every_ms": 2000,
+        "stop_aura": 800239
+      },
+      "observe_source": "Expected 6000 ms: Spell.dbc 802678 DurationIndex 32, SpellDuration.dbc row 32 Duration 6000 (the $d of the clause). The Malice handler (AscensionFelswornEvents.cpp:97-98, :227-229) casts Felstrike 802678 on the target and Fragment of Malice 800239 on the caster after a direct critical hit rolled Chance() on the raw ProcChance 60 (AscensionFelsworn.cpp:231-239), which no spell modifier forces. The spell crit and hit rating fixtures (no miss, no resist roll) makes every cast hit and critical, and the cast_until_aura step casts Fel Fireball every 2000 ms (a cast time of 1500 ms plus the projectile) until 800239 is on the caster, at most 9 casts (one 60% roll per cast leaves 0.4^9 = 0.03% of a run without a grant; a run at the cap is unmeasured, never a fail or a pass); both arms are fed alike and the control arm has no talent (800214 learned after it). Before the measured arm 800239 is cancelled on the caster and 802678 is read absent with its application count; the loop stops at the first 800239, so no earlier proc is on. After the stop, every 50 ms the game time, the dummy's 802678 application count and presence are read; the last application lies at most 100 ms before the first read and the aura must be gone 6000 ms (G-19 band 5700 to 6300) after it; a second proc of the same cast counts as the last application. No further cast and no auto attack follow the loop. Fel Fireball 801312 (SCHOOL_DAMAGE Fire, direct hit, 35 Energy, 1500 ms cast, projectile speed 35, no cooldown, Spell.dbc) is one direct hit per cast, so one 60% roll per cast; the Infernal weapon set (Scimitar 2027, Blackbone Wand 5239, ADR conformance/felsworn/0001) is the entry's set. Sargeron Smite 802060 cannot feed the loop: it costs 2 Felfury (AscensionCustomResourceData.h:533), which the step does not refill (18 of 18 casts refused with reason 85, NO_POWER, pair 20261123-152023). An encounter timeline opened before the measured feed (after a game time read) stamps every apply of 802678 on the dummy in the game time base, so the aura's age at the first read after the loop is read, not derived from the expected duration (mentor D-21, review I-1): above 100 ms, without a stamp, or with a stamped apply count other than one (a refresh or a second apply is not the stamped first apply, so the last application would be unbounded) the arm is unmeasured. The timeline is process global, so the scenario runs exclusive in a batch. Reference search: coa-history spell 800214: 0 events in 186 logs; 802678 Felstrike has aura events (applied 1265, dose 1309, refresh 5692, removed 1267) but the summary carries no stack count or duration; raw logs (coa-history data/logs, last application or refresh to removed per spell, source and target, re-read 2026-11-23): 802678 n=1267, main cluster 5800-6099 ms (403 in 5900-5999; shorter intervals are removals before the expiry), 800239 n=678, median 5040 ms, p10 4769, p90 5266; 800239 Fragment of Malice: applied 678, refresh 4066, removed 678, energize 5 each (4744); the live intervals corroborate 6000 and 5000 ms; nothing found for a cap.",
+      "quote_spell": 802678,
+      "variant": "felstrike"
+    },
+    {
+      "spell": 800214,
+      "name": "Malice of Gul'dan (Fragment of Malice lasts $800239d)",
+      "kind": "last_application_expiry",
+      "label_suffix": "fragment_duration",
+      "quote": "for $d.",
+      "gate_spell": 800214,
+      "trigger_spell": 801312,
+      "aura": 800239,
+      "expected_ms": 5000,
+      "control_window_ms": 500,
+      "window_ms": 7000,
+      "poll_ms": 50,
+      "caster": true,
+      "force_crit": "spell",
+      "feed": {
+        "every_ms": 2000
+      },
+      "observe_source": "Expected 5000 ms: Spell.dbc 800239 DurationIndex 28, SpellDuration.dbc row 28 Duration 5000 (the $d of the clause 'increases your critical strike chance by $s1% for $d'). The Malice handler (AscensionFelswornEvents.cpp:97-98, :227-229) casts Fragment of Malice 800239 on the caster with Felstrike after a direct critical hit rolled Chance() on the raw ProcChance 60 (AscensionFelsworn.cpp:231-239), which no spell modifier forces. The spell crit and hit rating fixtures (no miss, no resist roll) makes every cast hit and critical, and the cast_until_aura step casts Fel Fireball every 2000 ms (a cast time of 1500 ms plus the projectile) until 800239 is on the caster, at most 9 casts (one 60% roll per cast leaves 0.4^9 = 0.03% of a run without a grant; a run at the cap is unmeasured, never a fail or a pass); both arms are fed alike and the control arm has no talent (800214 learned after it). Before the measured arm 800239 is cancelled on the caster and read absent with its application count; the loop stops at the first grant. After the stop, every 50 ms the game time, the caster's 800239 application count and presence are read; the grant is at most 100 ms before the first read and the aura must be gone 5000 ms (G-19 band 4750 to 5250) after the last application. No further cast and no auto attack follow the loop. Fel Fireball 801312 (SCHOOL_DAMAGE Fire, direct hit, 35 Energy, 1500 ms cast, projectile speed 35, no cooldown, Spell.dbc) is one direct hit per cast, so one 60% roll per cast; the Infernal weapon set (Scimitar 2027, Blackbone Wand 5239, ADR conformance/felsworn/0001) is the entry's set. Sargeron Smite 802060 cannot feed the loop: it costs 2 Felfury (AscensionCustomResourceData.h:533), which the step does not refill (18 of 18 casts refused with reason 85, NO_POWER, pair 20261123-152023). An encounter timeline opened before the measured feed (after a game time read) stamps every apply of 800239 on the caster in the game time base, so the aura's age at the first read after the loop is read, not derived from the expected duration (mentor D-21, review I-1): above 100 ms, without a stamp, or with a stamped apply count other than one (a refresh or a second apply is not the stamped first apply, so the last application would be unbounded) the arm is unmeasured. The timeline is process global, so the scenario runs exclusive in a batch. Reference search: coa-history spell 800214: 0 events in 186 logs; 802678 Felstrike has aura events (applied 1265, dose 1309, refresh 5692, removed 1267) but the summary carries no stack count or duration; raw logs (coa-history data/logs, last application or refresh to removed per spell, source and target, re-read 2026-11-23): 802678 n=1267, main cluster 5800-6099 ms (403 in 5900-5999; shorter intervals are removals before the expiry), 800239 n=678, median 5040 ms, p10 4769, p90 5266; 800239 Fragment of Malice: applied 678, refresh 4066, removed 678, energize 5 each (4744); the live intervals corroborate 6000 and 5000 ms; nothing found for a cap.",
+      "quote_spell": 800239,
+      "variant": "fragment"
+    },
+    {
+      "spell": 804609,
+      "name": "Gul'dan's Gift (Skull of Gul'dan maximum Energy)",
+      "kind": "metric_delta",
+      "variant": "skull_energy",
+      "label_suffix": "skull_energy",
+      "quote": "Increases the effectiveness of your Skull of Gul'dan by $s1%,",
+      "trigger_spell": 800225,
+      "gate_spell": 804609,
+      "target": "caster",
+      "metric": "max_power",
+      "fields": {
+        "power": 3
+      },
+      "before_expected": 125,
+      "expected": 137.5,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 10500,
+      "observe_source": "$s1 = 50: 804609 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), EffectBasePoints 49 (+50%), class mask word 2 0x40 of family 20 = Skull of Gul'dan 800225. Skull Effect[1] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT (MiscValue 3, Energy), EffectBasePoints 24 (+25%, $s1 of the Skull tooltip), DurationIndex 1 = 10000 ms. Maximum Energy is 100 on the reference character (the Templar Spiritual entry reads the same 100), so the Skull alone gives 125 (control: 804609 not learned, a real Skull cast) and, +50% effective, the aura amount 25 x 1.5 = 37.5 gives 137.5, judged to 1 point for the integer amount (137 or 138): a +45% or +55% effectiveness would read 136.25 or 138.75, outside the tolerance 1 on 137.5. The first Skull ends (expire_ms 10500 > 10000 ms) before the second cast under the learned modifier, as the Necromancer Plague Protection 570046 entry does for Wards. Reference search 2026-11-23: coa-history spell 804609: 0 events in 186 logs (passive); spell 800225: SPELL_AURA_APPLIED 16 events in 4 logs (no figure); bindmysoul talents snapshot (fetched 2026-07-22): Gul'dan's Gift 804609 'Increases the effectiveness of your Skull of Gul'dan by 50%, but its cooldown is increased by 30 sec.'; nothing else found."
+    },
+    {
+      "spell": 707513,
+      "name": "Felstrider (one stack)",
+      "kind": "metric_delta",
+      "variant": "one_stack",
+      "label_suffix": "one_stack",
+      "quote": "now increases your Energy regeneration by $525042s1% for $525042d,",
+      "trigger_spell": 500610,
+      "gate_spell": 707513,
+      "target": "caster",
+      "wait_ms": 300,
+      "expire_ms": 5600,
+      "void_on_cast_failure": true,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 525042
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "observe_source": "707513 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL (EffectTriggerSpell 525042); 525042 Effect[0] aura 110 SPELL_AURA_MOD_POWER_REGEN_PERCENT, MiscValue 3 (Energy), EffectBasePoints 9 (+10, $525042s1), DurationIndex 28 = 5000 ms ($525042d), StackAmount 2 ($525042u). The passive is applied by the Felsworn Rush hook (AscensionFelswornAbilities.cpp:263-267: talent(707513, 525042) after a Rush cast, Rush = Fel Torpedo 500610 or a non-passive family-20 spell with SpellFamilyFlags[1] 0x80000). The tooltip's alternative Chaos Rush is the spell the same hook covers; Fel Torpedo 500610 is castable and logged (6 casts in 1 log). One Fel Torpedo cast leaves 1 stack of 525042 (control without the passive: 0). Reference search 2026-11-23: coa-history spell 707513: 0 events in 186 logs (passive); spell 525042 Felstrider: SPELL_AURA_APPLIED 40 events in 3 logs, SPELL_AURA_APPLIED_DOSE 14, SPELL_AURA_REFRESH 11 (positive control: it stacks and refreshes in real play, no timing used); bindmysoul talents snapshot (fetched 2026-07-22): Felstrider 707513 'Your Chaos Rush now increases your Energy regeneration by 10% for 5 seconds, stacking 2 times.', same figures; nothing else found."
+    },
+    {
+      "spell": 707513,
+      "name": "Felstrider (stack cap)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "quote": "stacking $525042u times.",
+      "trigger_spell": 500610,
+      "gate_spell": 707513,
+      "target": "caster",
+      "wait_ms": 300,
+      "expire_ms": 5600,
+      "void_on_cast_failure": true,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 525042
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "setup_casts": [
+        500610,
+        500610
+      ],
+      "setup_wait_ms": 1100,
+      "observe_source": "707513 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL (EffectTriggerSpell 525042); 525042 Effect[0] aura 110 SPELL_AURA_MOD_POWER_REGEN_PERCENT, MiscValue 3 (Energy), EffectBasePoints 9 (+10, $525042s1), DurationIndex 28 = 5000 ms ($525042d), StackAmount 2 ($525042u). The passive is applied by the Felsworn Rush hook (AscensionFelswornAbilities.cpp:263-267: talent(707513, 525042) after a Rush cast, Rush = Fel Torpedo 500610 or a non-passive family-20 spell with SpellFamilyFlags[1] 0x80000). The tooltip's alternative Chaos Rush is the spell the same hook covers; Fel Torpedo 500610 is castable and logged (6 casts in 1 log). Three real Fel Torpedo casts (two setup casts 1100 ms apart, then the timed cast; each spaced past the 1000 ms global cooldown, StartRecoveryTime 1000) stack 525042 to its StackAmount 2 and no further (control without the passive: 0), the cap read at the third cast. Reference search 2026-11-23: coa-history spell 707513: 0 events in 186 logs (passive); spell 525042 Felstrider: SPELL_AURA_APPLIED 40 events in 3 logs, SPELL_AURA_APPLIED_DOSE 14, SPELL_AURA_REFRESH 11 (positive control: it stacks and refreshes in real play, no timing used); bindmysoul talents snapshot (fetched 2026-07-22): Felstrider 707513 'Your Chaos Rush now increases your Energy regeneration by 10% for 5 seconds, stacking 2 times.', same figures; nothing else found."
+    },
+    {
+      "spell": 805244,
+      "name": "Legion March (Fel Torpedo dash 3 yd farther)",
+      "kind": "metric_delta",
+      "variant": "torpedo_range",
+      "label_suffix": "torpedo_range",
+      "quote": "Increases the range of $?s520853[Fel Torpedo][Chaos Rush] by $s2 yds",
+      "trigger_spell": 500610,
+      "target": "caster",
+      "metric": "position_x",
+      "fields": {},
+      "displacement": {},
+      "before_expected": 10,
+      "expected": 13,
+      "expected_gain": 3,
+      "tolerance": 0.3,
+      "wait_ms": 1500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "805244 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 6 (SPELLMOD_RADIUS), EffectBasePoints 2 (+3 yd, $s2), class mask word 2 0x2 of family 20 = Chaos Rush Jump 802028 (SpellFamilyFlags[2] 2), the dash Fel Torpedo 500610 triggers (Effect[1] EffectTriggerSpell 802028): 802028 Effect[0] SPELL_EFFECT_CHARGE_DEST on TARGET_DEST_CASTER_FRONT, EffectRadiusIndex 13 = 10 yd (SpellRadius.dbc). The judged readings are the caster's 2D displacement from right before each Fel Torpedo cast to 1500 ms after it (displacement, as the Witch Hunter Night Walker vault_range entry): before (control, 805244 not learned) 10 yd at the dash radius, after a real learn 3 yd more, within 0.3 yd (a tenth of the stated 3 yd). Reference search 2026-11-23: coa-history spell 805244: 0 events in 186 logs (passive); spell 500610 Fel Torpedo: SPELL_CAST_SUCCESS 6 events in 1 log (positive control that the dash is logged; no distance in the log index); bindmysoul talents snapshot (fetched 2026-07-22): Legion March 805244 'Increases the range of Chaos Rush by 3 yds.' (an older, shorter text without the Fel Torpedo or crit parts; the figure 3 yd is the same as $s2); nothing else found."
+    },
+    {
+      "spell": 300468,
+      "name": "Illidari Barrier (the shield reaches a nearby ally)",
+      "kind": "metric_delta",
+      "variant": "ally_shield",
+      "label_suffix": "ally_shield",
+      "quote": "Casting Hateforged Barrier now also creates a damage absorption shield on all nearby allies",
+      "trigger_spell": 705129,
+      "gate_spell": 300468,
+      "target": "caster",
+      "measure_actor": "ally",
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 300469,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 300,
+      "expire_ms": 5500,
+      "void_on_cast_failure": true,
+      "observe_source": "300468 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 300469, Effect[1] aura 42 EffectTriggerSpell 524635 (Illidari Exhaustion, DurationIndex 18 = 20000 ms, the server casts both only when 524635 is absent, AscensionFelswornAbilities.cpp:256-259). 300469 Effect[0] aura 69 SPELL_AURA_SCHOOL_ABSORB, MiscValue 127, EffectBasePoints 199 (+1 = 200), EffectRealPointsPerLevel 8, BaseLevel 44, DurationIndex 28 = 5000 ms ($300469d), target TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ALLY with radius index 18 = 15 yd ($300469a); the data row {300469, effect 0, ap 0.08, sp 0.2, stamina 1.0} adds 0.08 x attack power + 0.2 x max(Fire, Shadow spell power) + 1.0 x Stamina (AscensionFelswornData.h:13, AscensionFelswornContracts.cpp:326-333). A grouped ally stands at the caster's position (inside the 15 yd area). The aura 300469 cast by the caster is read on the ally before (control, 300468 not learned: 0) and after a real Hateforged Barrier cast with 300468 learned (1). The radius edge itself is a tool gap: the ally arm places no ally at a stated distance. Reference search 2026-11-23: coa-history spell 300468 and 300469: 0 events in 186 logs (passive and its absorb were never logged); bindmysoul talents snapshot (fetched 2026-07-22): Illidari Barrier 300468 'Casting Hateforged Barrier now also creates a damage absorption shield on all nearby allies within 15 yds, absorbing 328 + 100% Stamina + 20% SP + 8% AP damage for 5 seconds.', the same figures as the tooltip (328 = 200 + 8 x 16 levels, as computed here); nothing else found."
+    },
+    {
+      "spell": 300468,
+      "name": "Illidari Barrier (shield amount)",
+      "kind": "taken_hit",
+      "variant": "amount",
+      "label_suffix": "amount",
+      "judge": "absorb",
+      "quote": "absorbing ${$STA*1+$300469m1+$300469ppl1+$SP*.2+$AP*.08} damage",
+      "strike_spell": 41394,
+      "trials": 5,
+      "caster_health_pct": 100,
+      "caster_max_health": 20000,
+      "absorb_constant": 328,
+      "absorb_terms": [
+        {
+          "coefficient": 1.0,
+          "reads": [
+            {
+              "metric": "stat",
+              "stat": 2
+            }
+          ]
+        },
+        {
+          "coefficient": 0.2,
+          "reads": [
+            {
+              "metric": "spell_power",
+              "school": 2
+            }
+          ]
+        },
+        {
+          "coefficient": 0.08,
+          "reads": [
+            {
+              "metric": "attack_power"
+            }
+          ]
+        }
+      ],
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "shield",
+          "learn": [
+            300469
+          ],
+          "casts": [
+            [
+              300469,
+              "caster"
+            ]
+          ],
+          "absorb": "formula"
+        },
+        {
+          "name": "stamina",
+          "learn": [
+            300469
+          ],
+          "auras": [
+            [
+              9119,
+              1
+            ]
+          ],
+          "casts": [
+            [
+              300469,
+              "caster"
+            ]
+          ],
+          "absorb": "formula"
+        },
+        {
+          "name": "spell_power",
+          "learn": [
+            300469
+          ],
+          "auras": [
+            [
+              17628,
+              1
+            ]
+          ],
+          "casts": [
+            [
+              300469,
+              "caster"
+            ]
+          ],
+          "absorb": "formula"
+        },
+        {
+          "name": "attack_power",
+          "learn": [
+            300469
+          ],
+          "auras": [
+            [
+              31519,
+              1
+            ]
+          ],
+          "casts": [
+            [
+              300469,
+              "caster"
+            ]
+          ],
+          "absorb": "formula"
+        }
+      ],
+      "observe_source": "300468 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 300469, Effect[1] aura 42 EffectTriggerSpell 524635 (Illidari Exhaustion, DurationIndex 18 = 20000 ms, the server casts both only when 524635 is absent, AscensionFelswornAbilities.cpp:256-259). 300469 Effect[0] aura 69 SPELL_AURA_SCHOOL_ABSORB, MiscValue 127, EffectBasePoints 199 (+1 = 200), EffectRealPointsPerLevel 8, BaseLevel 44, DurationIndex 28 = 5000 ms ($300469d), target TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ALLY with radius index 18 = 15 yd ($300469a); the data row {300469, effect 0, ap 0.08, sp 0.2, stamina 1.0} adds 0.08 x attack power + 0.2 x max(Fire, Shadow spell power) + 1.0 x Stamina (AscensionFelswornData.h:13, AscensionFelswornContracts.cpp:326-333). The absorb is 200 + 8 x (60 - 44) = 328 plus the three terms, read on the caster at each arm start (Stamina stat 2, spell power of Fire, attack power) and computed in float then truncated, as the Templar Staffguard 705295 entry does. 300469 is cast directly at the caster (a precondition: the trigger path from Hateforged Barrier is the shield_duration and ally_shield entries, and Hateforged Barrier's own absorb 705129 would add a random 177-208 + Stamina term to the read). Control arm: the same strike 41394 (Holy, 1100 damage) without the shield absorbs nothing; the stamina arm adds Stamina +12 (9119, MOD_STAT Stamina BasePoints 11 + 1) and the spell_power arm spell power +60 (17628, ASCENSION_MOD_SPELL_POWER_FLAT 59 + 1), so each term is proven by its own contrast. The attack power arm adds Trueshot Aura 31519 (Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints 299 + 1 = +300) for the 0.08 term; the attack power is read at the arm start. Reference search 2026-11-23: coa-history spell 300468 and 300469: 0 events in 186 logs (passive and its absorb were never logged); bindmysoul talents snapshot (fetched 2026-07-22): Illidari Barrier 300468 'Casting Hateforged Barrier now also creates a damage absorption shield on all nearby allies within 15 yds, absorbing 328 + 100% Stamina + 20% SP + 8% AP damage for 5 seconds.', the same figures as the tooltip (328 = 200 + 8 x 16 levels, as computed here); nothing else found."
+    },
+    {
+      "spell": 804823,
+      "name": "Tyrannical Resolve (half of the damage taken is ignored)",
+      "kind": "taken_hit",
+      "variant": "half_damage",
+      "label_suffix": "half_damage",
+      "judge": "absorb",
+      "quote": "and ignore $s3% of all damage taken for $d,",
+      "strike_spell": 41394,
+      "trials": 5,
+      "caster_health_pct": 100,
+      "caster_max_health": 20000,
+      "arms": [
+        {
+          "name": "control",
+          "absorb": "none"
+        },
+        {
+          "name": "resolve",
+          "opening_casts": [
+            [
+              804823,
+              "caster"
+            ]
+          ],
+          "absorb": "share",
+          "share_pct": 50
+        }
+      ],
+      "observe_source": "804823 Tyrannical Resolve: DurationIndex 9 = 30000 ms ($d), RecoveryTime 180000, Effect[0] aura 108 ADD_PCT_MODIFIER (rewritten to a dummy, AscensionFelswornContracts.cpp:243-244), Effect[1] aura 69 SCHOOL_ABSORB MiscValue 127, whose amount the server sets to half of each damage taken, capped by the caster's maximum health less what was already absorbed (AscensionFelswornAuras.cpp:245-258, $s3 = 50: the tooltip token resolves from Effect[2] BasePoints 49). On apply the server casts the taunt 704233 (DurationIndex 35 = 4000 ms, aura 11 SPELL_AURA_MOD_TAUNT plus SPELL_EFFECT_ATTACK_ME, radius index 14) on every valid enemy within 10 yd of the caster (AscensionFelswornAuras.cpp:92-98). A passive striker casts Light of the Naaru 41394 (1100 damage, EffectBasePoints 1099 + DieSides 1) at the caster: the control arm takes the whole strike and absorbs 0, the resolve arm (a real cast of 804823 before the strike) absorbs floor(50% of the strike's damage plus the absorbed amount), judged by the share rule of the taken_hit absorb judge, as the Sun Cleric Circle of Valor entry does. Reference search 2026-11-23: coa-history spell 804823 and 704233: 0 events in 186 logs (never logged); bindmysoul talents snapshot (fetched 2026-07-22): Tyrannical Resolve 804823 'Taunt nearby enemies for 4 seconds and ignore -50% of all damage taken for 30 seconds, up to 100% of your maximum health.', the same durations and the same 50 (the sign of the snapshot text is an artefact of its own template); nothing else found."
+    },
+    {
+      "spell": 570158,
+      "name": "Scars of Suffering (scar amount)",
+      "kind": "metric_delta",
+      "variant": "scar_amount",
+      "label_suffix": "scar_amount",
+      "quote": "increasing your allies' attack power against them by ${$m1+0+$AGI*0.15}",
+      "trigger_spell": 801904,
+      "gate_spell": 570158,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 570159,
+        "effect": 0,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 19.5,
+      "tolerance": 1,
+      "wait_ms": 300,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "observe_source": "570158 Effect[0] aura 42 PROC_TRIGGER_SPELL (EffectTriggerSpell 570159), fired by a cast of Azzinoth's Assault (AscensionFelswornEvents.cpp:214: 801904, 520262 or 572585) and casting 570159 at the target (:91-92). 570159 Effect[0] aura 165 SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS on TARGET_UNIT_TARGET_ENEMY, DurationIndex 1 = 10000 ms ($570159d); its amount is 0 + 0.15 x Agility (the data row {570159, effect 0, agility 0.15}, AscensionFelswornData.h:51), the tooltip's ${$m1+0+$AGI*0.15}, 19.5 at the reference Agility 130 (class file stat 1). The amount of effect 0 of the scar aura on the dummy is read before (control: 0) and after the learn: 0.15 x 130 = 19.5, judged to 1 for the integer aura amount (19 or 20). Reference search 2026-11-23: coa-history spell 570158 and 570159: 0 events in 186 logs (never logged); bindmysoul talents snapshot (fetched 2026-07-22): Scars of Suffering 570158 'Casting Azzinoth's Assault now scars the enemy, increasing your allies' attack power against them by 15% Agility for 10 seconds.', the same 15% of Agility and 10 s; nothing else found. Azzinoth's Assault 801904 consumes 2 Felfury (the aura 800058): it is set to 6 stacks on the caster before each cast as a named precondition fixture (phase_auras), the claim's subject being the scar, not the resource.",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 803903,
+      "name": "Fel Haze (all enemy armor ignored under Blood of Mannoroth)",
+      "kind": "hit_ratio",
+      "variant": "ignores_armor",
+      "label_suffix": "ignores_armor",
+      "quote": "While active, Blood of Mannoroth now also causes you to ignore all enemy Armor.",
+      "expected": 2.00509,
+      "observe_spell": 803715,
+      "learn": [
+        803715
+      ],
+      "critical": false,
+      "trials": 150,
+      "parts": 5,
+      "control": {
+        "auras": [
+          [
+            802075,
+            1
+          ]
+        ],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            802075,
+            1
+          ]
+        ],
+        "learn": [
+          803903
+        ],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ]
+      },
+      "expected_source": "803903 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1) EffectBasePoints 99 (+100) on Blood of Mannoroth 802075 (class mask 0x200000 of family 20, SpellFamilyFlags[0] 2097152), whose Effect[0] is aura 280 SPELL_AURA_MOD_ARMOR_PENETRATION_PCT with EffectBasePoints -1 (0%): with the passive 100% of the armor is penetrated. Carve's strike 803715 (physical weapon damage) is cast at the dummy in two arms, each hit non-critical. Lesser Armor 673 (Effect[0] aura 22 SPELL_AURA_MOD_RESISTANCE) is set on the dummy with its effect 0 amount changed to 5000 in both arms (a fixture size, not a claimed value) so the dummy armor reads 5528 (528 pinned reference armor plus 5000), as the Sun Cleric Vindicator 707773 ignores_armor entry. Classic combat armor mitigation at caster level 60: damage kept = K / (armor + K), K = 85 x 60 + 400 = 5500 (Unit.cpp ClassicPlusCombat::ArmorConstant). Control arm: Blood of Mannoroth 802075 set on the caster (a precondition fixture by harness set_aura, the condition of the clause, not its subject) with 803903 not learned: the full armor applies; treatment arm: 803903 learned, the same Blood: nothing is mitigated, so the mean hit ratio is (5528 + 5500) / 5500 = 2.0051 (+100.5%); band the larger of 5% of +100% and 2 points (95% to 105%), and a server ignoring 90% of the armor (ratio 1.822) or 50% (1.50) lies outside it. The expected value comes from the DBC amount and the armor formula, never from a run. Reference search 2026-11-23: coa-history spell 803903: 0 events in 186 logs (passive, never logged); spell 802075 Blood of Mannoroth: SPELL_CAST_SUCCESS 33 events in 10 logs (a positive control that the active is logged; no armor figure); bindmysoul talents snapshot (fetched 2026-07-22): Fel Haze 803903 'While active, Blood of Mannoroth now also causes you to ignore all enemy Armor.', same wording as the tooltip; nothing else found."
+    },
+    {
+      "spell": 803905,
+      "name": "Shadow Magi (Annihilation cooldown)",
+      "kind": "cost_gate",
+      "variant": "annihilation_cd",
+      "label_suffix": "annihilation_cd",
+      "quote": "Reduces the cooldown of Annihilation by $/1000;s1 sec",
+      "gated_spell": 803904,
+      "resource": "cooldown",
+      "reduction": 15000,
+      "target": "caster",
+      "observe_source": "$/1000;s1 = 15 sec: 803905 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), EffectBasePoints -15001, class mask word 0 0x20000000 of family 20 = Annihilation 803904 (SpellFamilyFlags[0] 536870912, RecoveryTime and CategoryRecoveryTime 60000). Cooldown gate arms: 803904 refused at the reduced cooldown (45000 ms) without the talent, through with it, refused 500 ms before the reduced cooldown. Reference search 2026-11-23: coa-history spell 803905: 0 events in 186 logs (passive); spell 803904 Annihilation: see the 803904 events of the log index, no cooldown figure; bindmysoul talents snapshot (fetched 2026-07-22): Shadow Magi 803905 'Reduces the cooldown of Annihilation by -15 sec and Sunder by -4 sec.'; nothing else found."
+    },
+    {
+      "spell": 803905,
+      "name": "Shadow Magi (Sunder cooldown)",
+      "kind": "cost_gate",
+      "variant": "sunder_cd",
+      "label_suffix": "sunder_cd",
+      "quote": "and Sunder by $/1000;s2 sec.",
+      "gated_spell": 705121,
+      "resource": "cooldown",
+      "reduction": 4000,
+      "target": "dummy",
+      "cast_auras": [
+        {
+          "spell": 705121,
+          "auras": [
+            800058
+          ],
+          "reason": "Sunder consumes 2 Felfury, the aura 800058 (its description 'Consumes 2 Felfury'): without its stacks a cast is refused with NO_POWER (measured in a first run); a precondition for every cast, the claim's subject is the cooldown",
+          "stacks": 6
+        }
+      ],
+      "observe_source": "$/1000;s2 = 4 sec: 803905 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), EffectBasePoints -4001, class mask word 0 0x80000 of family 20 = Sunder 705121 (SpellFamilyFlags[0] 524288, RecoveryTime 8000). Cooldown gate arms: 705121 refused at the reduced cooldown (4000 ms) without the talent, through with it, refused 500 ms before it. Reference search 2026-11-23: coa-history spell 803905: 0 events in 186 logs (passive); bindmysoul talents snapshot (fetched 2026-07-22): Shadow Magi 803905 'Reduces the cooldown of Annihilation by -15 sec and Sunder by -4 sec.'; nothing else found. Sunder consumes 2 Felfury (the aura 800058, 'Consumes 2 Felfury' in its description) besides 30 Energy: a first pair read NO_POWER (85) because the Felfury stacks were missing, so 800058 is set to 6 stacks on the caster before each cast as a named precondition fixture (phase_auras; the claim's subject is the cooldown, not the resource)."
+    },
+    {
+      "spell": 804609,
+      "name": "Gul'dan's Gift (Skull of Gul'dan cooldown)",
+      "kind": "cost_gate",
+      "variant": "skull_cd",
+      "label_suffix": "skull_cd",
+      "quote": "but its cooldown is increased by $/1000;s2 sec.",
+      "gated_spell": 800225,
+      "resource": "cooldown",
+      "reduction": -30000,
+      "target": "caster",
+      "observe_source": "$/1000;s2 = 30 sec: 804609 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN), EffectBasePoints 29999 (+30000 ms), class mask word 2 0x40 of family 20 = Skull of Gul'dan 800225 (SpellFamilyFlags[2] 64, RecoveryTime 90000). The reduction is negative, a longer cooldown: at the base cooldown (90000 ms) the cast goes through without the talent and is refused with it. Reference search 2026-11-23: coa-history spell 804609: 0 events in 186 logs (passive); spell 800225 Skull of Gul'dan: SPELL_AURA_APPLIED 16 events in 4 logs (no cooldown figure); bindmysoul talents snapshot (fetched 2026-07-22): Gul'dan's Gift 804609 'Increases the effectiveness of your Skull of Gul'dan by 50%, but its cooldown is increased by 30 sec.'; nothing else found."
+    },
+    {
+      "spell": 525001,
+      "name": "Felbane (curse lasts 4 seconds, stamped)",
+      "kind": "last_application_expiry",
+      "variant": "curse_expiry",
+      "label_suffix": "curse_expiry",
+      "quote": "Curse an enemy, causing the next spell they cast within $d to be reflected onto them.",
+      "gate_spell": 525001,
+      "trigger_spell": 525001,
+      "aura": 525001,
+      "expected_ms": 4000,
+      "control_window_ms": 500,
+      "window_ms": 6000,
+      "poll_ms": 25,
+      "observe_source": "$d = 4000 ms: Felbane 525001 DurationIndex 35 (SpellDuration.dbc), Effect[0] aura 4 SPELL_AURA_DUMMY on TARGET_UNIT_TARGET_ENEMY. The curse aura on the dummy is polled with game-time stamps every 25 ms after a real cast; the removal bracket must lie in 4000 ms +- the G-19 band (5%), so a duration 10% off never passes; the control cast before 525001 is learned applies none. Reference search 2026-11-23: coa-history spell 525001 Felbane: SPELL_CAST_SUCCESS 10 events in 5 logs, SPELL_AURA_APPLIED 7 and SPELL_AURA_REMOVED 7 in 5 logs (no timestamps used here); bindmysoul talents snapshot (fetched 2026-07-22): Felbane 525001 'Curse an enemy, causing the next spell they cast within 4 seconds to be reflected onto them.', same figure; nothing else found."
+    },
+    {
+      "spell": 804823,
+      "name": "Tyrannical Resolve (taunt lasts 4 seconds, stamped)",
+      "kind": "last_application_expiry",
+      "variant": "taunt_expiry",
+      "label_suffix": "taunt_expiry",
+      "quote": "Taunt nearby enemies for $704233d",
+      "gate_spell": 804823,
+      "trigger_spell": 804823,
+      "aura": 704233,
+      "expected_ms": 4000,
+      "control_window_ms": 500,
+      "window_ms": 6000,
+      "poll_ms": 25,
+      "observe_source": "$704233d = 4000 ms: 704233 DurationIndex 35, Effect[0] aura 11 SPELL_AURA_MOD_TAUNT. Cast by the server on every valid enemy within 10 yd of the caster when 804823 is applied (AscensionFelswornAuras.cpp:92-98). The taunt aura on the dummy is polled with game-time stamps every 25 ms after a real cast of 804823; the removal bracket must lie in 4000 ms +- 5%. The control cast before 804823 is learned applies none. Reference search 2026-11-23: coa-history spell 804823 and 704233: 0 events in 186 logs (never logged); bindmysoul talents snapshot (fetched 2026-07-22): Tyrannical Resolve 804823 'Taunt nearby enemies for 4 seconds and ignore -50% of all damage taken for 30 seconds, up to 100% of your maximum health.', the same durations and the same 50 (the sign of the snapshot text is an artefact of its own template); nothing else found."
+    },
+    {
+      "spell": 804823,
+      "name": "Tyrannical Resolve (the effect lasts 30 seconds, stamped)",
+      "kind": "last_application_expiry",
+      "variant": "effect_expiry",
+      "label_suffix": "effect_expiry",
+      "quote": "and ignore $s3% of all damage taken for $d,",
+      "gate_spell": 804823,
+      "trigger_spell": 804823,
+      "aura": 804823,
+      "expected_ms": 30000,
+      "control_window_ms": 500,
+      "window_ms": 36000,
+      "poll_ms": 100,
+      "observe_source": "$d = 30000 ms: 804823 DurationIndex 9 (SpellDuration.dbc), the aura read on the caster (caster: true) every 100 ms with game-time stamps after a real cast; the removal bracket must lie in 30000 ms +- 5% (1500 ms). Reference search 2026-11-23: coa-history spell 804823 and 704233: 0 events in 186 logs (never logged); bindmysoul talents snapshot (fetched 2026-07-22): Tyrannical Resolve 804823 'Taunt nearby enemies for 4 seconds and ignore -50% of all damage taken for 30 seconds, up to 100% of your maximum health.', the same durations and the same 50 (the sign of the snapshot text is an artefact of its own template); nothing else found.",
+      "caster": true
+    },
+    {
+      "spell": 707513,
+      "name": "Felstrider (Energy regeneration aura lasts 5 seconds, stamped)",
+      "kind": "last_application_expiry",
+      "variant": "regen_expiry",
+      "label_suffix": "regen_expiry",
+      "quote": "now increases your Energy regeneration by $525042s1% for $525042d,",
+      "gate_spell": 707513,
+      "trigger_spell": 500610,
+      "aura": 525042,
+      "expected_ms": 5000,
+      "control_window_ms": 500,
+      "window_ms": 7000,
+      "poll_ms": 25,
+      "observe_source": "$525042d = 5000 ms: 525042 DurationIndex 28 (SpellDuration.dbc), applied on the caster by the Felsworn Rush hook after a real Fel Torpedo 500610 cast with 707513 learned (AscensionFelswornAbilities.cpp:263-267). The aura is polled on the caster every 25 ms with game-time stamps; the removal bracket must lie in 5000 ms +- 5%; the control cast before 707513 is learned applies none. Reference search 2026-11-23: coa-history spell 707513: 0 events in 186 logs (passive); spell 525042 Felstrider: SPELL_AURA_APPLIED 40 events in 3 logs, SPELL_AURA_APPLIED_DOSE 14, SPELL_AURA_REFRESH 11 (positive control: it stacks and refreshes in real play, no timing used); bindmysoul talents snapshot (fetched 2026-07-22): Felstrider 707513 'Your Chaos Rush now increases your Energy regeneration by 10% for 5 seconds, stacking 2 times.', same figures; nothing else found.",
+      "caster": true
+    },
+    {
+      "spell": 300468,
+      "name": "Illidari Barrier (shield lasts 5 seconds, stamped)",
+      "kind": "last_application_expiry",
+      "variant": "shield_expiry",
+      "label_suffix": "shield_expiry",
+      "quote": "absorbing ${$STA*1+$300469m1+$300469ppl1+$SP*.2+$AP*.08} damage for $300469d.",
+      "gate_spell": 300468,
+      "trigger_spell": 705129,
+      "aura": 300469,
+      "expected_ms": 5000,
+      "control_window_ms": 500,
+      "window_ms": 7000,
+      "poll_ms": 25,
+      "observe_source": "$300469d = 5000 ms: 300469 DurationIndex 28 (SpellDuration.dbc), applied on the caster by the Hateforged Barrier hook while 300468 is learned and 524635 is absent (AscensionFelswornAbilities.cpp:256-259). The shield aura on the caster is polled every 25 ms with game-time stamps after a real Hateforged Barrier 705129 cast; the removal bracket must lie in 5000 ms +- 5% (no damage lands, so only the duration ends it); the control cast before 300468 is learned applies none. Reference search 2026-11-23: coa-history spell 300468 and 300469: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22): Illidari Barrier 300468 '... absorbing 328 + 100% Stamina + 20% SP + 8% AP damage for 5 seconds.'; nothing else found.",
+      "caster": true
+    },
+    {
+      "spell": 572617,
+      "name": "Immolation Aura (one hit every 3 seconds)",
+      "kind": "metric_delta",
+      "variant": "tick_period",
+      "label_suffix": "tick_period",
+      "quote": "to nearby enemies every $t1 sec.",
+      "trigger_spell": 572617,
+      "target": "dummy",
+      "metric": "event_interval_median_ms",
+      "fields": {
+        "stream": "spell_damage",
+        "spell": 800208,
+        "caster": "caster",
+        "target": "dummy",
+        "since_spell": 572617
+      },
+      "before_expected": 3000,
+      "expected": 3000,
+      "tolerance": 150,
+      "wait_ms": 15500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. The median interval between the damage events of the tick 800208 on the dummy (within 5 yd of the caster) since the last cast of 572617 (since_spell) is read 15500 ms after a real cast (hits at 0, 3, 6, 9, 12 and 15 s, five intervals; 572617 has SPELL_ATTR5_EXTRA_INITIAL_PERIOD), in both phases (the same cast twice; the no-hit control is the tick_count entry), within 150 ms (5%, the G-19 band) which excludes a period 10% off (2700 or 3300). Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found.",
+      "caster_health": [
+        10000,
+        10000
+      ]
+    },
+    {
+      "spell": 572617,
+      "name": "Immolation Aura (hits only after the cast)",
+      "kind": "metric_delta",
+      "variant": "tick_count",
+      "label_suffix": "tick_count",
+      "quote": "dealing ${$m1+0+$spfi*.3+$AP*.23} Fire Damage to nearby enemies every $t1 sec.",
+      "trigger_spell": 572617,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800208,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 6,
+      "tolerance": 0.5,
+      "wait_ms": 16500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. Control: the tick 800208 has hit the dummy 0 times before the cast; 16500 ms after a real cast of 572617 it has hit 6 times: 572617 has SPELL_ATTR5_EXTRA_INITIAL_PERIOD, so the ticks land at 0, 3, 6, 9, 12 and 15 s (EffectAmplitude 3000), the next at 18 s. The caster is held at 10000 health (caster_health) so the 50 health per second cost does not end the aura. Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found.",
+      "caster_health": [
+        10000,
+        10000
+      ]
+    },
+    {
+      "spell": 572617,
+      "name": "Immolation Aura (tick at the reference attack power)",
+      "kind": "metric_delta",
+      "variant": "tick_base",
+      "label_suffix": "tick_base",
+      "quote": "dealing ${$m1+0+$spfi*.3+$AP*.23} Fire Damage to nearby enemies every $t1 sec.",
+      "trigger_spell": 572617,
+      "target": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800208,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 265.5,
+      "after_at_least": 253,
+      "after_at_most": 279,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. 572617 has SPELL_ATTR5_EXTRA_INITIAL_PERIOD, so the first tick 800208 lands at the apply, the next at 3000 ms. The dummy's spell_damage_total is read 1500 ms after a real cast: exactly one tick. The tick 800208 is DmgClass 2 (melee), whose crit chance is the caster's weapon crit (Unit.cpp:10335-10358, aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT); 64481 (Reduce Critical Strike Chance -100%, Effect[0] aura 52, EffectBasePoints -1000) is set on the caster in both phases as a precondition fixture so the tick never critically strikes, and 823764 (beeg spellpen, SPELL_AURA_MOD_TARGET_RESISTANCE -9999 on the magic schools; docs/behaviour-scenarios.md hit_ratio fixtures) is set on the caster in both phases because the dummy's level-based Fire resistance otherwise spreads a tick by partial resists (measured 241 and 207 against a 253 to 279 range in the first merged-head pair) (984954 is not used: its Effect[0] is aura 52 at +101%, which would force every tick to crit). The caster is held at 10000 health in both phases (caster_health), because 572617 costs 50 health per second (PowerType -2, ManaPerSecond 50) and the reference character's 2173 health runs out after about 42 s. Tick amount = base roll 181 + 1..26 (EffectBasePoints 181 + EffectDieSides 26: 182 to 207) + 0.30 x Fire spell power + 0.23 x attack power (the data row {572617, effect 0, ap 0.23, sp 0.3, school Fire}, AscensionFelswornData.h:55, AscensionFelswornContracts.cpp:326-333). At the reference attack power 312 and no spell power: 182 + 71.76 = 253.76 to 207 + 71.76 = 278.76, so a tick lies in [253, 279]. Control: 0 damage before the cast. Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found.",
+      "caster_health": [
+        10000,
+        10000
+      ]
+    },
+    {
+      "spell": 572617,
+      "name": "Immolation Aura (tick with +20000 spell power)",
+      "kind": "metric_delta",
+      "variant": "tick_spell_power",
+      "label_suffix": "tick_spell_power",
+      "quote": "dealing ${$m1+0+$spfi*.3+$AP*.23} Fire Damage to nearby enemies every $t1 sec.",
+      "trigger_spell": 572617,
+      "target": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800208,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 6265.5,
+      "after_at_least": 6253,
+      "after_at_most": 6279,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. 572617 has SPELL_ATTR5_EXTRA_INITIAL_PERIOD, so the first tick 800208 lands at the apply, the next at 3000 ms. The dummy's spell_damage_total is read 1500 ms after a real cast: exactly one tick. The tick 800208 is DmgClass 2 (melee), whose crit chance is the caster's weapon crit (Unit.cpp:10335-10358, aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT); 64481 (Reduce Critical Strike Chance -100%, Effect[0] aura 52, EffectBasePoints -1000) is set on the caster in both phases as a precondition fixture so the tick never critically strikes, and 823764 (beeg spellpen, SPELL_AURA_MOD_TARGET_RESISTANCE -9999 on the magic schools; docs/behaviour-scenarios.md hit_ratio fixtures) is set on the caster in both phases because the dummy's level-based Fire resistance otherwise spreads a tick by partial resists (measured 241 and 207 against a 253 to 279 range in the first merged-head pair) (984954 is not used: its Effect[0] is aura 52 at +101%, which would force every tick to crit). The caster is held at 10000 health in both phases (caster_health), because 572617 costs 50 health per second (PowerType -2, ManaPerSecond 50) and the reference character's 2173 health runs out after about 42 s. Tick amount = base roll 181 + 1..26 (EffectBasePoints 181 + EffectDieSides 26: 182 to 207) + 0.30 x Fire spell power + 0.23 x attack power (the data row {572617, effect 0, ap 0.23, sp 0.3, school Fire}, AscensionFelswornData.h:55, AscensionFelswornContracts.cpp:326-333). Spell power contrast: the caster holds +20000 spell power (the harness fixture), so the 0.30 coefficient adds 6000: a tick lies in [6253, 6279], 6000 above the tick_base range. Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found.",
+      "caster_health": [
+        10000,
+        10000
+      ]
+    },
+    {
+      "spell": 572617,
+      "name": "Immolation Aura (tick with +20000 attack power)",
+      "kind": "metric_delta",
+      "variant": "tick_attack_power",
+      "label_suffix": "tick_attack_power",
+      "quote": "dealing ${$m1+0+$spfi*.3+$AP*.23} Fire Damage to nearby enemies every $t1 sec.",
+      "trigger_spell": 572617,
+      "target": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "player_attack_power": 20000,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800208,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 4865.5,
+      "after_at_least": 4853,
+      "after_at_most": 4879,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. 572617 has SPELL_ATTR5_EXTRA_INITIAL_PERIOD, so the first tick 800208 lands at the apply, the next at 3000 ms. The dummy's spell_damage_total is read 1500 ms after a real cast: exactly one tick. The tick 800208 is DmgClass 2 (melee), whose crit chance is the caster's weapon crit (Unit.cpp:10335-10358, aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT); 64481 (Reduce Critical Strike Chance -100%, Effect[0] aura 52, EffectBasePoints -1000) is set on the caster in both phases as a precondition fixture so the tick never critically strikes, and 823764 (beeg spellpen, SPELL_AURA_MOD_TARGET_RESISTANCE -9999 on the magic schools; docs/behaviour-scenarios.md hit_ratio fixtures) is set on the caster in both phases because the dummy's level-based Fire resistance otherwise spreads a tick by partial resists (measured 241 and 207 against a 253 to 279 range in the first merged-head pair) (984954 is not used: its Effect[0] is aura 52 at +101%, which would force every tick to crit). The caster is held at 10000 health in both phases (caster_health), because 572617 costs 50 health per second (PowerType -2, ManaPerSecond 50) and the reference character's 2173 health runs out after about 42 s. Tick amount = base roll 181 + 1..26 (EffectBasePoints 181 + EffectDieSides 26: 182 to 207) + 0.30 x Fire spell power + 0.23 x attack power (the data row {572617, effect 0, ap 0.23, sp 0.3, school Fire}, AscensionFelswornData.h:55, AscensionFelswornContracts.cpp:326-333). Attack power contrast: the harness fixture adds 20000 to the reference 312, so the 0.23 coefficient gives 0.23 x 20312 = 4671.76: a tick lies in [4853, 4879], about 4600 above the tick_base range. Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found.",
+      "caster_health": [
+        10000,
+        10000
+      ]
+    },
+    {
+      "spell": 707513,
+      "name": "Felstrider (Energy regeneration at one stack)",
+      "kind": "metric_delta",
+      "variant": "regen_one_stack",
+      "label_suffix": "regen_one_stack",
+      "quote": "now increases your Energy regeneration by $525042s1% for $525042d,",
+      "trigger_spell": 500610,
+      "gate_spell": 707513,
+      "target": "caster",
+      "metric": "power",
+      "fields": {
+        "power": 3
+      },
+      "before_expected": 45,
+      "expected": 49.5,
+      "tolerance": 1,
+      "wait_ms": 4500,
+      "expire_ms": 5600,
+      "void_on_cast_failure": true,
+      "observe_source": "707513 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL (EffectTriggerSpell 525042); 525042 Effect[0] aura 110 SPELL_AURA_MOD_POWER_REGEN_PERCENT, MiscValue 3 (Energy), EffectBasePoints 9 (+10, $525042s1), DurationIndex 28 = 5000 ms ($525042d), StackAmount 2 ($525042u). The passive is applied by the Felsworn Rush hook (AscensionFelswornAbilities.cpp:263-267: talent(707513, 525042) after a Rush cast, Rush = Fel Torpedo 500610 or a non-passive family-20 spell with SpellFamilyFlags[1] 0x80000). The tooltip's alternative Chaos Rush is the spell the same hook covers; Fel Torpedo 500610 is castable and logged (6 casts in 1 log). Fel Torpedo 500610 (50 Energy, PowerType 3) is cast with exactly its cost, leaving 0 Energy; 4500 ms later (inside the 5000 ms aura) the Energy read is 45 without 707513 (stock regeneration 10 per second, as the Templar Spiritual 560833 entry) and 49.5 with it (+10%, one stack), within 1: +8% to +12% of 45 is 48.6 to 50.4, so the band of +-2 points around +10% is inside the read +-1 and a +20% regeneration (54) is outside. Reference search 2026-11-23: coa-history spell 707513: 0 events in 186 logs (passive); spell 525042 Felstrider: SPELL_AURA_APPLIED 40 events in 3 logs, SPELL_AURA_APPLIED_DOSE 14, SPELL_AURA_REFRESH 11 (positive control: it stacks and refreshes in real play, no timing used); bindmysoul talents snapshot (fetched 2026-07-22): Felstrider 707513 'Your Chaos Rush now increases your Energy regeneration by 10% for 5 seconds, stacking 2 times.', same figures; nothing else found."
+    },
+    {
+      "spell": 707513,
+      "name": "Felstrider (Energy regeneration at two stacks)",
+      "kind": "metric_delta",
+      "variant": "regen_two_stacks",
+      "label_suffix": "regen_two_stacks",
+      "quote": "stacking $525042u times.",
+      "trigger_spell": 500610,
+      "gate_spell": 707513,
+      "target": "caster",
+      "metric": "power",
+      "fields": {
+        "power": 3
+      },
+      "setup_casts": [
+        500610
+      ],
+      "setup_wait_ms": 1100,
+      "before_expected": 45,
+      "expected": 54,
+      "tolerance": 1,
+      "wait_ms": 4500,
+      "expire_ms": 5600,
+      "void_on_cast_failure": true,
+      "observe_source": "707513 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL (EffectTriggerSpell 525042); 525042 Effect[0] aura 110 SPELL_AURA_MOD_POWER_REGEN_PERCENT, MiscValue 3 (Energy), EffectBasePoints 9 (+10, $525042s1), DurationIndex 28 = 5000 ms ($525042d), StackAmount 2 ($525042u). The passive is applied by the Felsworn Rush hook (AscensionFelswornAbilities.cpp:263-267: talent(707513, 525042) after a Rush cast, Rush = Fel Torpedo 500610 or a non-passive family-20 spell with SpellFamilyFlags[1] 0x80000). The tooltip's alternative Chaos Rush is the spell the same hook covers; Fel Torpedo 500610 is castable and logged (6 casts in 1 log). Two Fel Torpedo casts (a setup cast, 1100 ms later the timed one, each with exactly its 50 Energy cost) stack 525042 twice: 4500 ms after the timed cast the Energy read is 45 without 707513 and 54 with it (+20% for two stacks of +10%), within 1. Reference search 2026-11-23: coa-history spell 707513: 0 events in 186 logs (passive); spell 525042 Felstrider: SPELL_AURA_APPLIED 40 events in 3 logs, SPELL_AURA_APPLIED_DOSE 14, SPELL_AURA_REFRESH 11 (positive control: it stacks and refreshes in real play, no timing used); bindmysoul talents snapshot (fetched 2026-07-22): Felstrider 707513 'Your Chaos Rush now increases your Energy regeneration by 10% for 5 seconds, stacking 2 times.', same figures; nothing else found."
+    },
+    {
+      "spell": 805244,
+      "name": "Legion March (Chaos Rush dash)",
+      "kind": "metric_delta",
+      "variant": "chaos_range",
+      "label_suffix": "chaos_range",
+      "quote": "Increases the range of $?s520853[Fel Torpedo][Chaos Rush] by $s2 yds",
+      "trigger_spell": 804521,
+      "target": "caster",
+      "metric": "position_x",
+      "fields": {},
+      "displacement": {},
+      "before_expected": 3,
+      "expected": 6,
+      "expected_gain": 3,
+      "tolerance": 0.3,
+      "wait_ms": 1500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "805244 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 6 (SPELLMOD_RADIUS), EffectBasePoints 2 (+3 yd, $s2), class mask word 2 0x2 of family 20. Chaos Rush 804521 (Effect[0] SPELL_EFFECT_CHARGE_DEST on TARGET_DEST_CASTER_FRONT, EffectRadiusIndex 15 = 3 yd in SpellRadius.dbc, SpellFamilyFlags[1] 0x80000, no SpellFamilyFlags[2]) does not carry that class mask (the Fel Torpedo jump 802028 does), so the data does not say the stated 3 yd more range reaches Chaos Rush itself. The entry asks the tooltip's default text (Chaos Rush, 520853 not learned): the caster's 2D displacement from right before each cast to 1500 ms after it, before (control, 805244 not learned) 3 yd by the data and 6 yd after a real learn by the tooltip, within 0.3 yd (a tenth of the stated 3 yd). A reading of 3 after the learn would be a lead, not a fix. Reference search 2026-11-23: coa-history spell 805244: 0 events in 186 logs (passive); spell 500610 Fel Torpedo: SPELL_CAST_SUCCESS 6 events in 1 log (positive control that the dash is logged; no distance in the log index); bindmysoul talents snapshot (fetched 2026-07-22): Legion March 805244 'Increases the range of Chaos Rush by 3 yds.' (an older, shorter text without the Fel Torpedo or crit parts; the figure 3 yd is the same as $s2); nothing else found."
+    },
+    {
+      "spell": 572617,
+      "name": "Immolation Aura (the aura lasts 60 seconds, held and gone)",
+      "kind": "metric_delta",
+      "variant": "duration_up_to",
+      "label_suffix": "duration_up_to",
+      "quote": "Wreathe yourself in fire for up to $d,",
+      "trigger_spell": 572617,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 572617,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 57500,
+      "expiry_wait_ms": 4900,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          57400,
+          57800
+        ],
+        "expired": [
+          62300,
+          62700
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. The aura 572617 on the caster is read absent before the cast (control: 0), present 57500 ms after a real cast and absent 4900 ms later (62400 ms), each reading stamped in game time inside its window (a duration 10% off, 54000 or 66000 ms, fails one of the two reads). The caster is held at 10000 health (caster_health): 572617 costs 50 health per second (PowerType -2, ManaPerSecond 50, SpellAuras.cpp:771-791 removes the aura once health is 50 or less), which 2173 health does not pay for 60 s. The tooltip says 'up to': the aura may end earlier (the cost line of 572617 is a health cost per second); an end before 57400 ms is a finding, not a conformant duration. Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ]
+    },
+    {
+      "spell": 520885,
+      "name": "Burning Legionnaire (Twin Slice cost)",
+      "kind": "cost_gate",
+      "variant": "twin_slice",
+      "label_suffix": "twin_slice",
+      "quote": "Reduces the Energy cost of Twin Slice and Sunder by $s1.",
+      "gated_spell": 547211,
+      "resource": "power",
+      "reduction": 10,
+      "target": "dummy",
+      "observe_source": "$s1 = 10 (520885 EffectBasePoints[0] -11, EffectDieSides[0] 1): Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 14 (SPELLMOD_COST), EffectSpellClassMask word 0 0x80000 (Sunder) and word 1 0x1000000 (Twin Slice 547211, SpellFamilyFlags[1] 0x1000000). Twin Slice 547211 (level 60 rank, AscensionSpellProgressionData.h:385 via 801901) ManaCost 45, PowerType 3 (Energy): 35 allowed, 34 beyond. Arms: 35 Energy without the passive (refused, SPELL_FAILED_NO_POWER 85, the control), 35 with it (through), 34 with it (refused). Reference search 2026-11-23: coa-history spell 520885: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 520885,
+      "name": "Burning Legionnaire (Sunder cost)",
+      "kind": "cost_gate",
+      "variant": "sunder",
+      "label_suffix": "sunder",
+      "quote": "Reduces the Energy cost of Twin Slice and Sunder by $s1.",
+      "gated_spell": 705121,
+      "resource": "power",
+      "reduction": 10,
+      "target": "dummy",
+      "cast_auras": [
+        {
+          "spell": 705121,
+          "auras": [
+            803468
+          ],
+          "reason": "Sunder 705121 needs the caster aura 803468 (At Least 2 Felfury, CasterAuraSpell in Spell.dbc); a precondition fixture set before every attempt, the claim is the Energy cost."
+        },
+        {
+          "spell": 705121,
+          "auras": [
+            800058
+          ],
+          "stacks": 2,
+          "reason": "Sunder 705121 consumes 2 of the Felfury resource 800058 (AscensionCustomResourceData.h:535, Fixed 2), so the fixture holds 2 stacks before every attempt; a precondition fixture, the claim is the Energy cost."
+        }
+      ],
+      "observe_source": "$s1 = 10 (520885 Effect[0] aura 107 SPELLMOD_COST, flat -10, class mask word 0 0x80000 = SpellFamilyFlags[0] of Sunder 705121). Sunder 705121 ManaCost 30, PowerType 3, RecoveryTime 8000: 20 allowed, 19 beyond (the cooldown is cleared before each attempt). Arms: 20 Energy without the passive (refused), 20 with it (through), 19 with it (refused). Reference search 2026-11-23: coa-history spell 520885: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 704361,
+      "name": "Slice & Dice (Twin Slice cost)",
+      "kind": "cost_gate",
+      "variant": "twin_slice",
+      "label_suffix": "twin_slice",
+      "quote": "and reduces the Energy cost of Twin Slice by $s2.",
+      "gated_spell": 547211,
+      "resource": "power",
+      "reduction": 5,
+      "target": "dummy",
+      "observe_source": "$s2 = 5 (704361 EffectBasePoints[1] -6, EffectDieSides[1] 1): Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 14 (SPELLMOD_COST), EffectSpellClassMask word 1 0x1000000 (Twin Slice 547211). ManaCost 45, PowerType 3: 40 allowed, 39 beyond. Arms: 40 Energy without the passive (refused, 85), 40 with it (through), 39 with it (refused). Reference search 2026-11-23: coa-history spell 704361: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 560578,
+      "name": "Glaiving (Fury Unleashed cost)",
+      "kind": "cost_gate",
+      "variant": "fury_unleashed",
+      "label_suffix": "fury_unleashed",
+      "quote": "Increases the damage dealt and reduces the Energy cost of Fury Unleashed by $s1%.",
+      "gated_spell": 555738,
+      "resource": "power",
+      "reduction": 30,
+      "target": "dummy",
+      "observe_source": "$s1 = 50 (560578 EffectBasePoints[0] 49, [1] -51): Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 (SPELLMOD_COST) -50%, EffectSpellClassMask word 1 0x4000 = SpellFamilyFlags[1] of Fury Unleashed 555738. 555738 ManaCost 60, PowerType 3, RecoveryTime 180000 (cleared before each attempt): 30 allowed, 29 beyond. Arms: 30 Energy without the passive (refused, 85), 30 with it (through), 29 with it (refused). Reference search 2026-11-23: coa-history spell 560578: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 803840,
+      "name": "Spite (Agility)",
+      "kind": "metric_delta",
+      "variant": "agility",
+      "label_suffix": "agility",
+      "quote": "Increases your Agility by $s1%",
+      "trigger_spell": 60235,
+      "cast_in_before": false,
+      "target": "caster",
+      "metric": "stat",
+      "fields": {
+        "stat": 1
+      },
+      "before_expected": 130,
+      "expected": 149,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s1 = 15 (803840 EffectBasePoints[0] 14, EffectDieSides 1): Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue 1 (Agility). Class file reference stat 1 = 130 without the passive; 130 x 1.15f = 149.5, truncated to 149 by the integer read (G-26, the engine's float truncation as for Flexible Fighter 681341). Greatness 60235 (+300 Spirit only, no Agility) is the timed cast of both phases and is not cast in the before phase, as for Nether Spirit 300477. Reference search 2026-11-23: coa-history spell 803840: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 807902,
+      "name": "Wrath of Sargeras (spell hit chance)",
+      "kind": "metric_delta",
+      "variant": "spell_hit",
+      "label_suffix": "spell_hit",
+      "quote": "and your spell hit chance by $s2%.",
+      "trigger_spell": 60235,
+      "gate_spell": 807902,
+      "target": "caster",
+      "metric": "spell_hit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 4,
+      "expected_gain": 4,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s2 = 4 (807902 EffectBasePoints[1] 3, EffectDieSides 1): Effect[1] aura 55 SPELL_AURA_MOD_SPELL_HIT_CHANCE. The caster's live spell hit chance is read before and after a real learn of 807902 (the reading before is the control): gain 4 points. Reference search 2026-11-23: coa-history spell 807902: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 705150,
+      "name": "Man'ari Teachings (critical damage)",
+      "kind": "hit_ratio",
+      "variant": "crit_damage",
+      "label_suffix": "crit_damage",
+      "quote": "Increases your critical damage dealt by $s1%.",
+      "expected": 2.0,
+      "observe_spell": 803715,
+      "learn": [
+        803715
+      ],
+      "control": {},
+      "treatment": {
+        "learn": [
+          705150
+        ]
+      },
+      "critical": true,
+      "force_crit": "melee",
+      "trials": 40,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "observe_source": "$s1 = 100 (705150 Effect[0] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, EffectBasePoints 99, MiscValue 127 all schools). Native semantics as for Pious 300943 (docs/coa/sun-cleric-completion.md:53) and the engine lines Unit.cpp:10656-10667 (AddPct on crit_bonus, which is 2 x damage for melee-class spells) and Unit.cpp:1745-1755: the aura multiplies the whole critical figure, so a critical hit reads 2.0 times the same critical hit without the passive (the same recorded choice, no new total-critical-damage multiplier invented). Carve strike 803715 forced to critical, attack power fixture 20000 in both arms. Reference search 2026-11-23: coa-history spell 705150: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 300470,
+      "name": "Dark Lord (damage taken at 76% health, just above 75%)",
+      "kind": "taken_hit",
+      "variant": "above75",
+      "label_suffix": "above75",
+      "judge": "damage_ratio",
+      "expected": 0.95,
+      "quote": "While above 75% health, your damage taken is reduced by $801573s1%",
+      "strike_spell": 41394,
+      "caster_health_pct": 76,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            300470
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 300470,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            300470
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 300470,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "health_loss": true,
+      "observe_source": "$s1 = 5 and $s2 = 5 (801573 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127, EffectBasePoints -6 + 1 = -5; Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127, +4 + 1 = +5; 300470 Effect[0] aura 23 triggers 801573 every 500 ms, Effect[1] aura 4 dummy; Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Light of the Naaru 41394 (1100 Holy, non-critical) strikes the caster without (control) and with the passive learned (treatment); the ratio of the health lost is judged against 0.95. The caster holds 90% of 100000 health before every strike (above the 75% threshold, 1100 damage leaves it above). The health the caster loses is read (health_loss), not the logged damage. Reference search 2026-11-23: coa-history spell 300470: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip. Edge bracket: the arms sit just inside (76% of 100000) and just outside (74%) the stated 75%, so a gate at any other threshold fails one of the two."
+    },
+    {
+      "spell": 300470,
+      "name": "Dark Lord (control: damage taken at 74% health, just below 75%)",
+      "kind": "taken_hit",
+      "variant": "below75",
+      "label_suffix": "below75",
+      "judge": "damage_ratio",
+      "expected": 1.0,
+      "quote": "While above 75% health, your damage taken is reduced by $801573s1%",
+      "strike_spell": 41394,
+      "caster_health_pct": 74,
+      "caster_max_health": 100000,
+      "trials": 20,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            300470
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 300470,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            300470
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 300470,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "health_loss": true,
+      "observe_source": "$s1 = 5 and $s2 = 5 (801573 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127, EffectBasePoints -6 + 1 = -5; Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127, +4 + 1 = +5; 300470 Effect[0] aura 23 triggers 801573 every 500 ms, Effect[1] aura 4 dummy; Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Same strike at 70% of 100000 health (below the threshold): the treatment ratio must read 1.0, the health gate of the clause. Reference search 2026-11-23: coa-history spell 300470: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip. Edge bracket: the arms sit just inside (76% of 100000) and just outside (74%) the stated 75%, so a gate at any other threshold fails one of the two."
+    },
+    {
+      "spell": 300470,
+      "name": "Dark Lord (damage dealt above 75% health)",
+      "kind": "hit_ratio",
+      "variant": "damage_dealt",
+      "label_suffix": "damage_dealt",
+      "quote": "and damage dealt is increased by $801573s2%.",
+      "expected": 1.05,
+      "observe_spell": 803715,
+      "learn": [
+        803715
+      ],
+      "control": {},
+      "treatment": {
+        "learn": [
+          300470
+        ]
+      },
+      "critical": false,
+      "trials": 150,
+      "parts": 5,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "observe_source": "$s1 = 5 and $s2 = 5 (801573 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127, EffectBasePoints -6 + 1 = -5; Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127, +4 + 1 = +5; 300470 Effect[0] aura 23 triggers 801573 every 500 ms, Effect[1] aura 4 dummy; Spell.dbc read with apps/coa-dbc/inspect_dbc.py). Carve strike 803715 (about 890 points a hit at attack power +20000, the Unholy Endurance entry's sizing) cast at the dummy trials times at full health (above 75%) without the passive (control) and with it learned (treatment), non-critical hits only; mean damage per hit must rise by 5 percent (band 3..7, G-19). Reference search 2026-11-23: coa-history spell 300470: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 92089,
+      "name": "Burning Commander (two-handers in each hand)",
+      "kind": "equip_grant",
+      "label_suffix": "equip",
+      "quote": "Allows you to wield a Two-Handed Axe, Mace, Polearm or Sword in each hand",
+      "pairs": [
+        {
+          "main_hand": 1196,
+          "off_hand": 1196,
+          "skill_line": 172,
+          "source": "Two-Handed Axe: Tabar 1196 (data/sql/base/db_world/item_template.sql, class 2 subclass 1, InventoryType 17, Quality 1, RequiredLevel 9)"
+        },
+        {
+          "main_hand": 1197,
+          "off_hand": 1197,
+          "skill_line": 160,
+          "source": "Two-Handed Mace: Giant Mace 1197 (class 2 subclass 5, InventoryType 17, RequiredLevel 10)"
+        },
+        {
+          "main_hand": 11864,
+          "off_hand": 11864,
+          "skill_line": 229,
+          "source": "Polearm: White Bone Spear 11864 (class 2 subclass 6, InventoryType 17, RequiredLevel 0)"
+        },
+        {
+          "main_hand": 2529,
+          "off_hand": 2529,
+          "skill_line": 55,
+          "source": "Two-Handed Sword: 2529, the Tyrant weapon set item"
+        }
+      ],
+      "observe_source": "92089 grants the wield through Player::CanTitanGrip (Player.cpp:14200-14218, the Burning Commander path; the DBC Effect[2] 155 is zeroed by AscensionFelswornContracts.cpp:134-137), Spell.dbc read with apps/coa-dbc/inspect_dbc.py. Control: the same four off-hand equips with 92089 unlearned are refused (the harness fails the step if one is accepted); learned, each is accepted and both hands hold their items; skill lines 172, 160, 229 and 55 are set so proficiency is not what refuses the equip. Reference search 2026-11-23: coa-history spell 92089: 0 events in 186 logs (a passive); bindmysoul snapshot (fetched 2026-07-22) carries an older text of the same passive that adds 'based on your dodge rating, but reducing your damage dealt by -10%' where the tooltip and the DBC say attack power and carry no damage penalty (G-9: an older state, the tooltip wins)."
+    },
+    {
+      "spell": 704361,
+      "name": "Slice & Dice (off-hand swing)",
+      "kind": "hit_ratio",
+      "variant": "offhand_swing",
+      "label_suffix": "offhand_swing",
+      "quote": "Increases your off-hand weapon damage by $s1%",
+      "expected": 1.25,
+      "swing_hand": 1,
+      "metric": "melee_damage_total",
+      "control": {},
+      "treatment": {
+        "learn": [
+          704361
+        ]
+      },
+      "critical": false,
+      "off_hand_item": 2027,
+      "trials": 30,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "expected_source": "$s1 = 25 (704361 Effect[0] aura 122 SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT, EffectBasePoints 24 + 1, read from Spell.dbc): the off-hand damage multiplier grows a plain off-hand white swing by 1.25, as Brooding Hatred 301251 (Witch Hunter) and Bursting Impact 705276. Applied hits: the caster auto attacks the dummy for one off-hand swing interval per trial and the plain (not critical, not glancing) off-hand hits are read, without the passive (control) and with 704361 learned (treatment). Weapons: the Slayer set (class file weapon_sets), off-hand 2027. Attack power fixture 20000 in both arms. Reference search 2026-11-23: coa-history spell 704361: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip."
+    },
+    {
+      "spell": 807902,
+      "name": "Wrath of Sargeras (Magic damage)",
+      "kind": "hit_ratio",
+      "variant": "magic_damage",
+      "label_suffix": "magic_damage",
+      "quote": "Increases your Magic damage dealt by $s1%",
+      "expected": 1.06,
+      "observe_spell": 802060,
+      "learn": [
+        802060
+      ],
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          807902
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "expected_source": "$s1 = 6 (807902 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 126 (the six magic schools), EffectBasePoints 5 + 1, read from Spell.dbc). Sargeron Smite 802060 (level 1 rank, the Smite the class code scales, AscensionFelswornContracts.cpp:143-149, school mask 36 Fire and Shadow, AP 0.19 and SP 0.6 in AscensionFelswornData.h) non-critical hits at the dummy without the passive (control) and with it learned (treatment); 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; spell power fixture 20000 in both arms. Reference search 2026-11-23: coa-history spell 807902: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip. Sargeron Smite 802060 needs the caster aura 803468 and consumes 2 of the Felfury resource 800058 (AscensionCustomResourceData.h:533); both are set on the caster before every cast, in both arms (cast_unit_auras, precondition fixtures).",
+      "cast_unit_auras": [
+        [
+          803468,
+          1
+        ],
+        [
+          800058,
+          2
+        ]
+      ]
+    },
+    {
+      "spell": 803840,
+      "name": "Spite (dodge chance)",
+      "kind": "metric_delta",
+      "variant": "dodge",
+      "label_suffix": "dodge",
+      "quote": "and dodge chance by $s2%.",
+      "trigger_spell": 60235,
+      "target": "caster",
+      "metric": "dodge_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 7.17304,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s2 = 6 (803840 EffectBasePoints[1] 5, EffectDieSides 1): Effect[1] aura 49 SPELL_AURA_MOD_DODGE_PERCENT. The caster's dodge chance (percent points, a live unit read) is read before and after a real learn of 803840 (the reading before is the control without it); Bless 804247 is the harmless self cast of both phases. Effect[0] of the same passive raises Agility by 15%, which the engine also turns into dodge (Player::UpdateStats calls UpdateDodgePercentage on an Agility change), so the expected gain is 6 + the Agility term. Agility term: dodge is the undiminished sum of base and agility parts plus auras (StatSystem.cpp UpdateDodgePercentage: nondiminishing += GetTotalAuraModifier(SPELL_AURA_MOD_DODGE_PERCENT), value = max(diminishing + nondiminishing, 0), PLAYER_DODGE_PERCENTAGE), so linear in Agility; Felsworn (class 14) uses the Rogue curve unchanged (ClassicPlusStats::Dodge returns the client curve for non-vanilla classes); PerPoint = gtChanceToMeleeCrit row 1359 0.000355 x crit_to_dodge[Rogue] 2.00/1.15 = 0.000617391, i.e. 0.0617391 dodge % per Agility (Player.cpp GetDodgeFromAgility); Agility 130 -> 149 (+19, the counted agility label) gives +1.17304; expected gain 6 + 1.17304 = 7.17304, tolerance 0.01 (float read size). Reference search 2026-11-23: coa-history spell 803840: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); expected values come from the tooltip and the DBC only.",
+      "expected_gain": 7.17304,
+      "tolerance": 0.01
+    },
+    {
+      "spell": 520253,
+      "name": "Demon Hide (rank 2) (armor of leather items with Inner Demon)",
+      "kind": "metric_delta",
+      "variant": "armor_with_inner_demon",
+      "label_suffix": "armor_with_inner_demon",
+      "quote": "While Inner Demon is active, your Armor contribution from cloth and leather items is increased by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 520253,
+      "target": "caster",
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 187,
+      "expected_gain": 187,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "shield_after_learn": {
+        "item": 236,
+        "slot": 4,
+        "rejected_before": false
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "520253 Effect[0] aura 107 rewritten to SPELL_AURA_MOD_BASE_RESISTANCE_PCT (AscensionFelswornContracts.cpp:151-156) with MiscValue SPELL_SCHOOL_MASK_NORMAL and MiscValueB 6 (1 << cloth 1 | 1 << leather 2), BasePoints 239 + 1 = 240 ($s1); the amount is 0 unless Inner Demon 804216 is on the caster (AscensionFelswornContracts.cpp:352). Player::UpdateArmor scales the armor of cloth and leather items by it (StatSystem.cpp, GetItemArmorBySubclass). The caster's armor is read before (control: 520253 not learned) and after a real learn of 520253, with Inner Demon 804216 set on the caster in both phases (a precondition fixture by harness set_aura, named as such) and the leather chest worn in both: worn armor is the ItemAddon reborn value, not the template column (Player.cpp WornArmorFor, AscensionNativeItemScaling.cpp WornArmor returns the reborn armor for every class but Hero): Cured Leather Armor 236 = 68, plus the starter leather Vile Kilt 2000007 = 6 and Vile Walkers 2000008 = 4 that stay worn (236 replaces only the chest slot); leather total 78; Player::UpdateArmor adds GetItemArmorBySubclass x (multiplier - 1) with multiplier 3.4, then the integer SetArmor: gain int(2.4 x 78) = int(187.2) = 187. Reference search 2026-11-23: coa-history spell 520253: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats 'While Inner Demon is active, your Armor contribution from cloth and leather items is increased by 240%'. The item is Cured Leather Armor 236 (acore_world.item_template of the repository's data/sql/base/db_world/item_template.sql: class 4, subclass 2 leather, InventoryType 5 chest, equip slot 4, RequiredLevel 17, template armor 77 (not the worn value), no stats), equipped by the shield_after_learn option in both phases (its slot read is the contrast of the option, named as a fixture)."
+    },
+    {
+      "spell": 520253,
+      "name": "Demon Hide (rank 2) (control: no gain without Inner Demon)",
+      "kind": "metric_delta",
+      "variant": "armor_without_inner_demon",
+      "label_suffix": "armor_without_inner_demon",
+      "quote": "While Inner Demon is active, your Armor contribution from cloth and leather items is increased by $s1%",
+      "trigger_spell": 804247,
+      "gate_spell": 520253,
+      "target": "caster",
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "shield_after_learn": {
+        "item": 236,
+        "slot": 4,
+        "rejected_before": false
+      },
+      "observe_source": "520253 Effect[0] aura 107 rewritten to SPELL_AURA_MOD_BASE_RESISTANCE_PCT (AscensionFelswornContracts.cpp:151-156) with MiscValue SPELL_SCHOOL_MASK_NORMAL and MiscValueB 6 (1 << cloth 1 | 1 << leather 2), BasePoints 239 + 1 = 240 ($s1); the amount is 0 unless Inner Demon 804216 is on the caster (AscensionFelswornContracts.cpp:352). Player::UpdateArmor scales the armor of cloth and leather items by it (StatSystem.cpp, GetItemArmorBySubclass). The same reading without Inner Demon on the caster: the learn adds 0 armor, the control that the 240% is conditional on Inner Demon (the tooltip's 'While Inner Demon is active'). Reference search 2026-11-23: coa-history spell 520253: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot repeats 'While Inner Demon is active, your Armor contribution from cloth and leather items is increased by 240%'. The item is Cured Leather Armor 236 (acore_world.item_template of the repository's data/sql/base/db_world/item_template.sql: class 4, subclass 2 leather, InventoryType 5 chest, equip slot 4, RequiredLevel 17, template armor 77 (not the worn value; worn is the reborn 68), no stats), equipped by the shield_after_learn option in both phases (its slot read is the contrast of the option, named as a fixture)."
+    },
+    {
+      "spell": 574143,
+      "name": "Chaotic (critical Carve with Inner Demon refunds Energy)",
+      "kind": "metric_delta",
+      "variant": "refund_crit",
+      "label_suffix": "refund_crit",
+      "quote": "While Inner Demon is active, direct melee ability critical strikes now refund $592521s1 Energy.",
+      "trigger_spell": 803715,
+      "gate_spell": 574143,
+      "target": "dummy",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 592521
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "expected_gain": 2,
+      "tolerance": 0.0001,
+      "cast_power": 100,
+      "disable_regeneration": true,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "574143 Effect[0] aura 42 PROC_TRIGGER_SPELL triggering 592521 (Effect[0] SPELL_EFFECT_ENERGIZE, MiscValue 3 Energy, EffectBasePoints 1 + 1 = 2, the $592521s1 of the tooltip); AscensionFelswornEvents.cpp:74 grants it on an outgoing direct critical melee hit of a spell while Inner Demon 804216 is on the caster. Carve 803715 (a direct melee ability) is cast at the dummy once per phase; the refund is read as the energize total of 592521 after the learn (the before phase is the control without 574143). Forced melee critical rating (force_crit) and Inner Demon 804216 set on the caster in both phases (a precondition fixture). Reference search 2026-11-23: coa-history spell 574143: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 574143,
+      "name": "Chaotic (control: non-critical Carve, no refund)",
+      "kind": "metric_delta",
+      "variant": "refund_noncrit",
+      "label_suffix": "refund_noncrit",
+      "quote": "While Inner Demon is active, direct melee ability critical strikes now refund $592521s1 Energy.",
+      "trigger_spell": 803715,
+      "gate_spell": 574143,
+      "target": "dummy",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 592521
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.0001,
+      "cast_power": 100,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "574143 Effect[0] aura 42 PROC_TRIGGER_SPELL triggering 592521 (Effect[0] SPELL_EFFECT_ENERGIZE, MiscValue 3 Energy, EffectBasePoints 1 + 1 = 2, the $592521s1 of the tooltip); AscensionFelswornEvents.cpp:74 grants it on an outgoing direct critical melee hit of a spell while Inner Demon 804216 is on the caster. Carve 803715 (a direct melee ability) is cast at the dummy once per phase; the refund is read as the energize total of 592521 after the learn (the before phase is the control without 574143). Control: no critical strike (Reduce Critical Strike Chance -100% 64481 set on the caster, so the one cast cannot critically strike by chance), Inner Demon on the caster: no refund. Reference search 2026-11-23: coa-history spell 574143: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 574143,
+      "name": "Chaotic (control: critical Carve without Inner Demon, no refund)",
+      "kind": "metric_delta",
+      "variant": "refund_no_inner",
+      "label_suffix": "refund_no_inner",
+      "quote": "While Inner Demon is active, direct melee ability critical strikes now refund $592521s1 Energy.",
+      "trigger_spell": 803715,
+      "gate_spell": 574143,
+      "target": "dummy",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 592521
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.0001,
+      "cast_power": 100,
+      "disable_regeneration": true,
+      "force_crit": "melee",
+      "phase_auras": [],
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "574143 Effect[0] aura 42 PROC_TRIGGER_SPELL triggering 592521 (Effect[0] SPELL_EFFECT_ENERGIZE, MiscValue 3 Energy, EffectBasePoints 1 + 1 = 2, the $592521s1 of the tooltip); AscensionFelswornEvents.cpp:74 grants it on an outgoing direct critical melee hit of a spell while Inner Demon 804216 is on the caster. Carve 803715 (a direct melee ability) is cast at the dummy once per phase; the refund is read as the energize total of 592521 after the learn (the before phase is the control without 574143). Control: forced melee critical, no Inner Demon on the caster: no refund. Reference search 2026-11-23: coa-history spell 574143: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],
@@ -3538,7 +5462,15 @@
   "dual_target_effects": [],
   "target_aura_gates": [],
   "learned_hits": [],
-  "cast_auras": [],
+  "cast_auras": [
+    {
+      "spell": 802060,
+      "auras": [
+        803468
+      ],
+      "reason": "Sargeron Smite 802060 needs the caster aura 803468 (At Least 2 Felfury, CasterAuraSpell in Spell.dbc), set at one stack before every cast of its hit scenarios. It also consumes 2 of the Felfury resource 800058, which this section cannot set at 2 stacks; the Magic damage entry of 807902 sets both through cast_unit_auras."
+    }
+  ],
   "hit_casts": [],
   "weapon_sets": {
     "Slayer": {
