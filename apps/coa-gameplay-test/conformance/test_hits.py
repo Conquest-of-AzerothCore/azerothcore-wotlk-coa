@@ -1083,10 +1083,10 @@ class HitScenarioTest(unittest.TestCase):
         measured = measured_reference(listed, hit)
         with self.assertRaises(KeyError):
             measured_hit_model(listed, hit, measured)
-        blocked = {**measured, BLOCK_VALUE_LABEL: 11}
+        blocked = {**measured, BLOCK_VALUE_LABEL: 40}
         raised = measured_hit_model(listed, hit, blocked)
         plain = measured_hit_model(self.templar, hit, measured)
-        self.assertGreater(raised.mean, plain.mean + 5)
+        self.assertGreater(raised.mean, plain.mean * 1.1)
         labels, count = hit.model['measurements'], 40000
         base = Verdict(label=hit.label, status='unmeasured', measured=None, expected=None, low=None, high=None,
                        explanation='')
