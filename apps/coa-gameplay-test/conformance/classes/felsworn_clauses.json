@@ -292,17 +292,28 @@
   {
     "spell": 300484,
     "clause": "Damage dealt by Azzinoth's Assault now reduces the enemy's armor by $300482s1% for $300482d,",
-    "labels": [
-      "300484 effect_value 300482e0 #0",
-      "300484 spell_duration 300482 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reduces the enemy's armor by $300482s1%",
+        "labels": [
+          "300484 behaviour_metric_delta armor_at_cap"
+        ]
+      },
+      {
+        "claim": "for $300482d",
+        "labels": [
+          "300484 behaviour_metric_delta duration_present",
+          "300484 behaviour_metric_delta duration_absent"
+        ]
+      }
+    ]
   },
   {
     "spell": 300484,
     "clause": "stacking $300482u times.",
     "labels": [
-      "300484 max_stacks 300482 #2"
+      "300484 behaviour_metric_delta max_stacks"
     ],
     "kind": "claim"
   },
@@ -359,7 +370,7 @@
     "spell": 500067,
     "clause": "Increases your Stamina by $s1%,",
     "labels": [
-      "500067 effect_value e0 #0"
+      "500067 behaviour_metric_delta stamina"
     ],
     "kind": "claim"
   },
@@ -367,17 +378,24 @@
     "spell": 500067,
     "clause": "your Agility by $s3%,",
     "labels": [
-      "500067 effect_value e2 #1"
+      "500067 behaviour_metric_delta agility"
     ],
     "kind": "claim"
   },
   {
     "spell": 500067,
     "clause": "and size by $s2%.",
-    "labels": [
-      "500067 effect_value e1 #2"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The size read is a harness metric object_scale (and unit_scale): both read the caster's object scale after a real learn of 500067 and the 9999 ms period of its trigger 500076, but coverage.METRIC_EVIDENCE has no evidence class for either, so conformance.py prove stops with an EvidenceError. The smallest extension is a state row for object_scale with a size/scale state promise in coverage.METRIC_EVIDENCE and STATE_PROMISES (a shared tool, not changed by this author).",
+      "attempts": [
+        {
+          "agent": "fw-b1c",
+          "report": ".agents/plans/fw-b1c/report.md (design 1: metric_delta object_scale, ratio 1.10 at 11500 ms after the learn; design 2: the same read as unit_scale; both runs executed, both rejected at coverage)"
+        }
+      ]
+    }
   },
   {
     "spell": 520693,
@@ -473,10 +491,11 @@
   {
     "spell": 520252,
     "clause": "While Inner Demon is active, your Armor contribution from cloth and leather items is increased by $s1%.",
+    "kind": "claim",
     "labels": [
-      "520252 effect_value e0 #0"
-    ],
-    "kind": "claim"
+      "520252 behaviour_metric_delta armor_with_inner_demon",
+      "520252 behaviour_metric_delta armor_without_inner_demon"
+    ]
   },
   {
     "spell": 520253,
@@ -503,8 +522,25 @@
   {
     "spell": 520592,
     "clause": "Removes the Energy cost of your Felbane and Manaburn and your Manaburn now strikes 4 additional enemies near the primary target.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Removes the Energy cost of your Felbane",
+        "labels": [
+          "520592 behaviour_metric_delta felbane_cost"
+        ]
+      },
+      {
+        "claim": "and Manaburn",
+        "labels": []
+      },
+      {
+        "claim": "your Manaburn now strikes 4 additional enemies near the primary target",
+        "labels": [
+          "520592 manaburn_targets behaviour_fixed_count"
+        ]
+      }
+    ]
   },
   {
     "spell": 520805,
@@ -855,18 +891,29 @@
     "spell": 560645,
     "clause": "Increases the damage of Azzinoth's Assault by $s2%",
     "labels": [
-      "560645 effect_value e1 #0"
+      "560645 behaviour_hit_ratio assault_damage"
     ],
     "kind": "claim"
   },
   {
     "spell": 560645,
     "clause": "and causes it to increase your melee haste by $560646s1% for $560646d.",
-    "labels": [
-      "560645 effect_value 560646e0 #1",
-      "560645 spell_duration 560646 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increase your melee haste by $560646s1%",
+        "labels": [
+          "560645 behaviour_metric_delta haste"
+        ]
+      },
+      {
+        "claim": "for $560646d",
+        "labels": [
+          "560645 behaviour_metric_delta haste_duration_present",
+          "560645 behaviour_metric_delta haste_duration_absent"
+        ]
+      }
+    ]
   },
   {
     "spell": 560822,
@@ -881,7 +928,7 @@
     "spell": 560836,
     "clause": "Increases the critical strike chance of Sargeron Smite by $s1%.",
     "labels": [
-      "560836 effect_value e0 #0"
+      "560836 behaviour_metric_delta crit_gain"
     ],
     "kind": "claim"
   },
@@ -1116,16 +1163,31 @@
   {
     "spell": 574153,
     "clause": "Increases your dodge and critical strike rating by $s1% of your Agility",
-    "labels": [
-      "574153 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your dodge and critical strike rating",
+        "labels": [
+          "574153 behaviour_metric_delta dodge"
+        ]
+      },
+      {
+        "claim": "critical strike rating by $s1% of your Agility",
+        "labels": [
+          "574153 behaviour_metric_delta crit_melee",
+          "574153 behaviour_metric_delta crit_ranged",
+          "574153 behaviour_metric_delta crit_spell"
+        ]
+      }
+    ]
   },
   {
     "spell": 574153,
     "clause": "and your hit rating by $s2% of your Agility.",
     "labels": [
-      "574153 effect_value e1 #1"
+      "574153 behaviour_metric_delta hit_melee",
+      "574153 behaviour_metric_delta hit_ranged",
+      "574153 behaviour_metric_delta hit_spell"
     ],
     "kind": "claim"
   },
@@ -1326,18 +1388,29 @@
   {
     "spell": 704607,
     "clause": "Increases your critical damage by $s2%",
+    "kind": "claim",
     "labels": [
-      "704607 effect_value e1 #0"
-    ],
-    "kind": "claim"
+      "704607 behaviour_hit_ratio crit_damage"
+    ]
   },
   {
     "spell": 704607,
     "clause": "and additionally increases your critical strike chance by $s1% while fighting Elementals.",
-    "labels": [
-      "704607 effect_value e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your critical strike chance by $s1%",
+        "labels": [
+          "704607 behaviour_hit_ratio crit_chance_elemental"
+        ]
+      },
+      {
+        "claim": "while fighting Elementals",
+        "labels": [
+          "704607 behaviour_hit_ratio crit_chance_other_type"
+        ]
+      }
+    ]
   },
   {
     "spell": 704610,
