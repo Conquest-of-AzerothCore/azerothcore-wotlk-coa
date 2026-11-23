@@ -513,7 +513,9 @@
     "labels": [
       "520693 behaviour_metric_delta consumes"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 520693,
@@ -545,7 +547,8 @@
         "labels": [
           "520693 behaviour_metric_delta inner_five",
           "520693 behaviour_metric_delta inner_four"
-        ]
+        ],
+        "evidence": "behaviour"
       }
     ]
   },
@@ -2437,7 +2440,8 @@
         "labels": [
           "707444 behaviour_metric_delta instant",
           "707444 behaviour_metric_delta consumed"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "and causes it to strike 1 additional enemy near the primary target based on how long you channeled,",
@@ -2447,7 +2451,8 @@
         "claim": "strikes additional enemies near the primary target after a full channel (nine offered, all struck)",
         "labels": [
           "707444 behaviour_metric_delta extras_full"
-        ]
+        ],
+        "evidence": "behaviour"
       }
     ],
     "tool_gap": {
@@ -2641,7 +2646,9 @@
       "800203 behaviour_metric_delta moving_cast",
       "800203 behaviour_metric_delta moving_cast_control"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 800204,
@@ -2665,7 +2672,9 @@
     "labels": [
       "800206 behaviour_metric_delta consumes"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 800206,
@@ -3098,7 +3107,9 @@
     "labels": [
       "501298 behaviour_metric_delta consumes"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 501298,
