@@ -3482,7 +3482,7 @@
     "clause": "Damage dealt by Bane of Chaos now radiates fel energy around the enemy, dealing $s1% of the damage dealt to up to $807554i nearby enemies.",
     "claims": [
       {
-        "claim": "Damage dealt by Bane of Chaos now radiates fel energy around the enemy, dealing $s1% of the damage dealt",
+        "claim": "dealing $s1% of the damage dealt",
         "labels": [
           "807461 behaviour_metric_delta nearby_ratio"
         ],
