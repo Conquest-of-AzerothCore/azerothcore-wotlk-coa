@@ -2025,18 +2025,30 @@
     "spell": 801899,
     "clause": "Melee ability damage now has a $h% chance to reset the cooldown of Annihilan Strike",
     "labels": [
-      "801899 effect_value #0"
+      "801899 proc_rate",
+      "801899 behaviour_proc_reset"
     ],
     "kind": "claim"
   },
   {
     "spell": 801899,
     "clause": "and cause your next Annihilan Strike within $801902d to cost $801902s1% reduced Energy.",
-    "labels": [
-      "801899 spell_duration 801902 #1",
-      "801899 effect_value 801902e0 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "cost $801902s1% reduced Energy",
+        "labels": [
+          "801899 behaviour_proc_reset"
+        ]
+      },
+      {
+        "claim": "within $801902d",
+        "labels": [
+          "801899 spell_duration 801902 #1",
+          "801899 behaviour_metric_delta legionfall_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 572804,
