@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Ratchet's Outlaw's Contract Board faces the road and the String of Ears stands on the ground (#13352)",
+  "contract": "#13352: the Outlaw's Contract Board (1804480, guid 1804481) was imported from a position-only capture with orientation 0, turned along the street, and the level 60 Worldforged String of Ears (guid 6975031) stood 0.33 yd into the ground beside it. rev_20261123_13352_ratchet_outlaw_board_string_of_ears.sql turns the board a quarter turn to face the road toward the Crossroads (o 1.5708) and puts the necklace on the ground at its Ascension map pin position. The board's orientation was 0 and the necklace's floor gap -0.331, so both assertions discriminate.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 1,
+    "x": -941.5,
+    "y": -3701.3,
+    "z": 7.6,
+    "o": 3.1
+  },
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "SETUP: join the world phase the board is spawned in",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the board faces the road",
+      "actor": "p",
+      "metric": "nearby_gameobject_orientation",
+      "entry": 1804480,
+      "min": 1.55,
+      "max": 1.59
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the String of Ears stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6975031,
+      "spawn_type": "gameobject",
+      "min": -0.05,
+      "max": 0.2
+    }
+  ]
+}
