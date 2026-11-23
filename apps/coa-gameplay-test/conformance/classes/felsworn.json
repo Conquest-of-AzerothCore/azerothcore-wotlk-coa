@@ -2576,6 +2576,86 @@
       ]
     },
     {
+      "spell": 500610,
+      "name": "Fel Torpedo (damage per hit)",
+      "kind": "script_hit",
+      "variant": "torpedo_hit",
+      "label_suffix": "torpedo_hit",
+      "quote": "Torpedo forward in the direction you're running and deal ${$500761m1+$500761ppl1+$AP*.35} Shadowflame Damage to enemies in your path.",
+      "hit_spell": 500761,
+      "hit_effect": 0,
+      "trials": 6,
+      "minimum_hits": 4,
+      "casts": [
+        [
+          500610,
+          "caster"
+        ]
+      ],
+      "control_casts": [],
+      "cast_power": 100,
+      "caster_auras": [
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "dummy_distance": 2,
+      "trial_position": {
+        "map": 0,
+        "x": -9617.06,
+        "y": -288.949,
+        "z": 57.3053,
+        "o": 0
+      },
+      "settle_ms": 2500,
+      "observe_source": "Fel Torpedo 500610 (the Tyrant replacement 520853 of the Chaos Rush button) Effect[1] TRIGGER_SPELL 802028 (Chaos Rush Jump, CHARGE_DEST 10 yd ahead) and Effect[2] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 250, EffectTriggerSpell 500761 (AttributesEx5 EXTRA_INITIAL_PERIOD, duration 500 ms); 500761 Effect[0] SCHOOL_DAMAGE on TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, radius index 15 (3 yd), EffectBasePoints 74 + 1, EffectDieSides 5, EffectRealPointsPerLevel 4.6, BaseLevel 34, SchoolMask 36, EffectBonusMultiplier 0 (Spell.dbc, server set /srv/coa/server-data/dbc). Expected per hit at level 60, from the tooltip and the DBC: 194-198 (74 + int(26 x 4.6) + the die 1..5) + 0.35 x AP, the sum truncated once (SpellInfo.cpp CalcValue); the 0.35 x AP term comes from the FelswornCoefficients row of 500761 (Felsworn ADR 0009, mentor D-56). The hit judge reads the tooltip model and accepts a mean inside the engine model's 99% interval as known engine rounding (ADR 0147, ADR 0006 Addendum). Both arms hold aura 823764 (SPELL_AURA_MOD_TARGET_RESISTANCE -9999 on the magic schools) so the dummy's level-based partial resists do not land, and every trial first teleports the caster back to trial_position, 2 yd behind the dummy, because each cast dashes it 10 yd forward. The caster knows 520853 in both arms; the control arm makes no cast and must count 0 hits of 500761 on the dummy. Hits per cast on one dummy, measured on the pre-fix server (fw-t4, runs 20261123-185607 and 20261123-185756): 2 in every trial (the initial tick and one 250 ms tick before the dash leaves the 3 yd radius); the tooltip says 'deal ... to enemies in your path' and states no hit count, and the 500762 Debuff Dummy that 500761 Effect[2] applies has no server handler. Before the fix (same runs): 196.17 per hit at AP 312 and 196.42 at AP 1312, flat in AP. Reference search 2026-11-23: render 3 report: Fel Torpedo shown 304 at AP 312 = 194.6 + 109.20; bindmysoul talents snapshot: 'deal 195 + 35% AP Shadowflame Damage'; 500761 and 500762 helper texts carry the same $AP*.35; coa-history spell 500761: 0 events in 186 logs, spell 500610: 6 casts in 1 log, no damage line; nothing else found."
+    },
+    {
+      "spell": 500610,
+      "name": "Fel Torpedo (damage per hit, AP contrast arm)",
+      "kind": "script_hit",
+      "variant": "torpedo_hit_ap",
+      "label_suffix": "torpedo_hit_ap",
+      "quote": "Torpedo forward in the direction you're running and deal ${$500761m1+$500761ppl1+$AP*.35} Shadowflame Damage to enemies in your path.",
+      "hit_spell": 500761,
+      "hit_effect": 0,
+      "trials": 6,
+      "minimum_hits": 4,
+      "casts": [
+        [
+          500610,
+          "caster"
+        ]
+      ],
+      "control_casts": [],
+      "cast_power": 100,
+      "caster_auras": [
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "dummy_distance": 2,
+      "trial_position": {
+        "map": 0,
+        "x": -9617.06,
+        "y": -288.949,
+        "z": 57.3053,
+        "o": 0
+      },
+      "settle_ms": 2500,
+      "observe_source": "Fel Torpedo 500610 (the Tyrant replacement 520853 of the Chaos Rush button) Effect[1] TRIGGER_SPELL 802028 (Chaos Rush Jump, CHARGE_DEST 10 yd ahead) and Effect[2] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 250, EffectTriggerSpell 500761 (AttributesEx5 EXTRA_INITIAL_PERIOD, duration 500 ms); 500761 Effect[0] SCHOOL_DAMAGE on TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, radius index 15 (3 yd), EffectBasePoints 74 + 1, EffectDieSides 5, EffectRealPointsPerLevel 4.6, BaseLevel 34, SchoolMask 36, EffectBonusMultiplier 0 (Spell.dbc, server set /srv/coa/server-data/dbc). Expected per hit at level 60, from the tooltip and the DBC: 194-198 (74 + int(26 x 4.6) + the die 1..5) + 0.35 x AP, the sum truncated once (SpellInfo.cpp CalcValue); the 0.35 x AP term comes from the FelswornCoefficients row of 500761 (Felsworn ADR 0009, mentor D-56). The hit judge reads the tooltip model and accepts a mean inside the engine model's 99% interval as known engine rounding (ADR 0147, ADR 0006 Addendum). Both arms hold aura 823764 (SPELL_AURA_MOD_TARGET_RESISTANCE -9999 on the magic schools) so the dummy's level-based partial resists do not land, and every trial first teleports the caster back to trial_position, 2 yd behind the dummy, because each cast dashes it 10 yd forward. The caster knows 520853 in both arms; the control arm makes no cast and must count 0 hits of 500761 on the dummy. Hits per cast on one dummy, measured on the pre-fix server (fw-t4, runs 20261123-185607 and 20261123-185756): 2 in every trial (the initial tick and one 250 ms tick before the dash leaves the 3 yd radius); the tooltip says 'deal ... to enemies in your path' and states no hit count, and the 500762 Debuff Dummy that 500761 Effect[2] applies has no server handler. Before the fix (same runs): 196.17 per hit at AP 312 and 196.42 at AP 1312, flat in AP. Reference search 2026-11-23: render 3 report: Fel Torpedo shown 304 at AP 312 = 194.6 + 109.20; bindmysoul talents snapshot: 'deal 195 + 35% AP Shadowflame Damage'; 500761 and 500762 helper texts carry the same $AP*.35; coa-history spell 500761: 0 events in 186 logs, spell 500610: 6 casts in 1 log, no damage line; nothing else found. AP contrast arm: the same entry with stat_auras 10031 (+1000 attack power, the fixture the Whirling Vengeance strike_ap entry uses) set before the stats are measured, so the mean is read at a second attack power and must move by 0.35 x 1000 = 350 per hit; a server that dropped the AP term or used another coefficient with the same product at the first AP cannot pass both.",
+      "stat_auras": [
+        [
+          10031,
+          1
+        ]
+      ]
+    },
+    {
       "spell": 801892,
       "name": "Twin Fury (Twin Slice critical strikes)",
       "kind": "metric_delta",

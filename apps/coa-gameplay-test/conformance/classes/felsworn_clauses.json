@@ -717,7 +717,9 @@
     "spell": 520853,
     "clause": "Torpedo forward in the direction you're running and deal ${$500761m1+$500761ppl1+$AP*.35} Shadowflame Damage to enemies in your path.",
     "labels": [
-      "520853 effect_value 500761e0 #0"
+      "520853 effect_value 500761e0 #0",
+      "500610 script_hit 500761 torpedo_hit",
+      "500610 script_hit 500761 torpedo_hit_ap"
     ],
     "kind": "claim"
   },
