@@ -116,6 +116,7 @@
 #include "Opcodes.h"
 #include "Pet.h"
 #include "Player.h"
+#include "PrismaticSetting.h"
 #include "QuestDef.h"
 #include "Random.h"
 #include "Realm.h"
@@ -4253,6 +4254,9 @@ public:
       player->GetSession()->SetAscensionPatchStreamGuid(guid);
       _fallbackTimers.erase(guid);
     }
+
+    if (std::optional<SpellPatchRow> const row = ClientSpellRow(PrismaticSetting::Spell))
+      SendSpellRow(player, *row);
 
     for (QuestSuperTrackPatch const &patch : rows.QuestSuperTracks)
       SendQuestSuperTrackRow(player, QuestSuperTrackRowFor(patch, player->getRaceMask()));
