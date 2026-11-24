@@ -9,7 +9,7 @@ from test_behaviours import FakeRun, base_verdict
 
 def order_entry(**changes) -> dict:
     return {'spell': 300235, 'name': 'Death Commander (less damage per further target)', 'kind': 'metric_delta',
-            'label_suffix': 'order', 'quote': 'dealing less damage with each target struck', 'expected': 1,
+            'label_suffix': 'order', 'quote': "to increase your and your Undead minion's haste", 'expected': 1,
             'before_expected': 0, 'trigger_spell': 500237, 'target': 'dummy', 'metric': 'spell_damage_count',
             'fields': {'spell': 500237, 'target': 'dummy'}, 'area_dummies': [4.0, 5.0],
             'target_order': {'spell': 500237, 'events': 1, 'centre': 'dummy', 'casts': 2}, **changes}

@@ -9,7 +9,7 @@ from test_behaviours import FakeRun, base_verdict
 
 def lengths_entry(**changes) -> dict:
     return {'spell': 300235, 'name': 'Death Commander (end damage by channel length)', 'kind': 'metric_delta',
-            'label_suffix': 'lengths', 'quote': 'dealing increased damage based on how long you channel',
+            'label_suffix': 'lengths', 'quote': "to increase your and your Undead minion's haste",
             'expected': 2, 'before_expected': 0, 'trigger_spell': 500237, 'target': 'dummy',
             'metric': 'spell_damage_count', 'fields': {'spell': 500237, 'target': 'dummy'}, 'wait_ms': 3000,
             'channel_lengths': {'spell': 500237, 'events': 2, 'cancel_ms': [600, 1500], 'repeats': 2}, **changes}
