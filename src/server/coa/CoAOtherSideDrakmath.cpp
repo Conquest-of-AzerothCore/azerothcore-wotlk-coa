@@ -460,7 +460,7 @@ private:
             }
             bool touched = false;
             for (Player* player : players)
-                if (orb->GetExactDist2d(player) <= OrbTouch)
+                if (player->IsAlive() && player->InSamePhase(orb) && orb->GetExactDist2d(player) <= OrbTouch)
                     touched = true;
             if (touched)
             {
