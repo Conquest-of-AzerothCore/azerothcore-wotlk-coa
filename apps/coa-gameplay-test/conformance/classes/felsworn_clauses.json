@@ -300,7 +300,7 @@
       }
     ],
     "kind": "claim",
-    "reason": " Superseded detail (review fw-rbab2 I-2): the duration claim now rests on the stamped expiry reads of ADR 1273 (held/gone measured from the last dodge stamp), counted pair fw-bab2 prove1 on build 1544a8df; the reads 9000/11000 after the relocation and build 2d78de5092 cited above are no longer the proof."
+    "reason": "Owner ruling Felsworn O-40 (2026-11-24, Felsworn ADR 0032): the strike 804336 hits with the off hand; the class contracts add SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON to it (mentor D-113). '300476 script_hit 804336 offhand_strike' read 29.75 and 29.45 (expected 29.75; before: 59.6 and 60.2 on the main hand, pair fw-bk3) in the fw-f6 counted pair .cache/verify-all/20261124-094701 / -094822 (build 064daf6610d8, server commit d92a32b1dcf4); 5 focused reruns 20261124-094931 to -095147 all ok (29.45 to 30.175), with every 300476 entry ok, '300476 trigger_count' included. No off-hand weapon and off-hand disarm are code reading only, untested (ADR 0032). No dodge-driven entry reads 804336's damage, so 17.1 is its only damage proof. Superseded detail (review fw-rbab2 I-2): the duration claim now rests on the stamped expiry reads of ADR 1273 (held/gone measured from the last dodge stamp), counted pair fw-bab2 prove1 on build 1544a8df; the reads 9000/11000 after the relocation and build 2d78de5092 cited above are no longer the proof."
   },
   {
     "spell": 300476,
