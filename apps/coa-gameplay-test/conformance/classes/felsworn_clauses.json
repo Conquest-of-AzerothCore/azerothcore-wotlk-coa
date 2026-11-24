@@ -2826,7 +2826,7 @@
     "clause": "up to a maximum of 10 enemies, dealing less damage with each target struck.",
     "kind": "claim",
     "tool_gap": {
-      "reason": "The cap claim is judged by extras_cap (area_dummies admits 11 dummies since fw-l2). The claim 'dealing less damage with each target struck.' needs a per-target damage order of one Fel Fireball cast: no kind or metric_delta option reads the damage of each target of one cast in hit order, and ratio_to_metric refuses a summed reading. Earlier attempt (fw-ea5): fixed_count cap arm refused for the cap. The nearest kind is fixed_count.",
+      "reason": "The cap claim is judged by extras_cap (area_dummies admits 11 dummies since fw-l2). The claim 'dealing less damage with each target struck.' needed a per-target damage order of one Fel Fireball cast, which no kind or metric_delta option read (ratio_to_metric refuses a summed reading; earlier attempt fw-ea5: fixed_count cap arm refused for the cap). Closed by fw-bdir (ADR 1276): the metric_delta option target_order reads each target's plain damage and position per cast; the claim's remaining question was the server floor (owner question N-12), not a tool gap.",
       "attempts": [
         {
           "agent": "fw-ea5",
@@ -2834,7 +2834,7 @@
         }
       ]
     },
-    "reason": "Split by claim (fw-l2b, review fw-rl2 I-1): 'up to a maximum of 10 enemies' is judged by extras_cap (primary + 10 additional enemies struck of 11 offered, ok in both runs of prove3 20261123-230759 / -230830). 'dealing less damage with each target struck.' stays unlabelled: no judge compares the damage of one cast across its targets (ratio_to_metric refuses a summed reading); the code factor is max(0.2, 1 - 0.1 x index), AscensionFelswornAbilities.cpp:208-218.",
+    "reason": "Split by claim (fw-l2b, review fw-rl2 I-1): 'up to a maximum of 10 enemies' is judged by extras_cap (primary + 10 additional enemies struck of 11 offered, ok in both runs of prove3 20261123-230759 / -230830). Until fw-bdir, 'dealing less damage with each target struck.' stayed unlabelled: no judge compares the damage of one cast across its targets (ratio_to_metric refuses a summed reading); the code factor is max(0.2, 1 - 0.1 x index), AscensionFelswornAbilities.cpp:228-238. fw-bdir (mentor D-100 (5), D-101): the 9-target proof is '707444 behaviour_metric_delta target_order' (Fel Fireball on the primary and 8 dummies, 16 casts, mean plain damage strictly falling along the measured distance from the primary, ADR 1276); the claim stayed unlabelled, status 5 on owner question N-12: the server factor reaches 0.2 at the 9th target and its floor binds from the 10th target struck (AscensionFelswornAbilities.cpp:238), which the tooltip does not state, and 'up to a maximum of 10 enemies' allows 11 targets. Owner ruling Felsworn O-37 (2026-11-24, Felsworn ADR 0031): keep the 20% floor, no server change; the claim is labelled with the 9-target proof '707444 behaviour_metric_delta target_order' and counts by the ruling, targets 9 to 11 conformant by it (fw-bdir2).",
     "claims": [
       {
         "claim": "up to a maximum of 10 enemies",
@@ -2844,7 +2844,9 @@
       },
       {
         "claim": "dealing less damage with each target struck.",
-        "labels": []
+        "labels": [
+          "707444 behaviour_metric_delta target_order"
+        ]
       }
     ]
   },
@@ -3101,17 +3103,31 @@
   {
     "spell": 800206,
     "clause": "Upon ending the channel, slash in front of you, dealing increased Weapon Damage with both weapons based on how long you channel, dealing less damage with each target struck.",
-    "labels": [],
     "kind": "claim",
+    "claims": [
+      {
+        "claim": "Upon ending the channel, slash in front of you, dealing increased Weapon Damage with both weapons based on how long you channel,",
+        "labels": [
+          "800206 behaviour_metric_delta channel_lengths"
+        ]
+      },
+      {
+        "claim": "dealing less damage with each target struck.",
+        "labels": [
+          "800206 behaviour_metric_delta target_order"
+        ]
+      }
+    ],
     "tool_gap": {
-      "reason": "The tooltip gives no figure for the end slash: it states a direction only (more Weapon Damage with a longer channel, less with each target struck). The check needs the damage of the end slash 803715 at two channel lengths (a channel ended at a set time, see the 707444 gap) and a direction judge across them; power_term_direction judges attack power only and no existing kind compares a spell's damage across channel lengths. The nearest is hit_ratio with a stated bonus, which the tooltip does not give.",
+      "reason": "The tooltip gives no figure for the end slash: it states a direction only (more Weapon Damage with a longer channel, less with each target struck). No existing kind compared a spell's damage across channel lengths or across the targets of one cast (fw-ea5); power_term_direction judges attack power only and hit_ratio needs a stated bonus. Closed by fw-bdir (ADR 1276): the metric_delta options channel_lengths (the end slash 803715 after channels ended at set times) and target_order (per-target damage order) carry the two directions.",
       "attempts": [
         {
           "agent": "fw-ea5",
           "report": ".agents/plans/fw-ea5/report.md"
         }
       ]
-    }
+    },
+    "reason": "fw-bdir (mentor D-100, D-101, ADR 1276): 'Upon ending the channel, slash in front of you, dealing increased Weapon Damage with both weapons based on how long you channel' is judged by channel_lengths (the end slash 803715 lands twice, one per weapon, after a full channel and after the channel is ended at 650 and 1400 ms; the mean plain damage over 5 casts per length rises strictly with the length); 'dealing less damage with each target struck' by target_order (9 targets in front, 8 full channels, mean plain damage strictly falling along the measured distance from the caster). The server's 0.2 floor binds from the 10th target struck (AscensionFelswornAuras.cpp:237; no target cap, the loop stops at 25, AscensionFelswornAuras.cpp:248), outside the 9 judged targets; owner ruling Felsworn O-37 (2026-11-24, question N-12, Felsworn ADR 0031) keeps the floor. The channel_lengths judge reads the channel aura after each cancel (void if still up) and requires a rise without overlap (review fw-rbdir I-1, mentor D-106)."
   },
   {
     "spell": 800206,
