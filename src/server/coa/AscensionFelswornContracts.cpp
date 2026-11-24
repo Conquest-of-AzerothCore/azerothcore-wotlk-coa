@@ -534,6 +534,8 @@ class felsworn_scaling : public UnitScript
             value += player->GetMaxHealth() * .10f;
         if ((info->Id == 520252 || info->Id == 520253) && !Inner(player))
             value = 0;
+        if (info->Id == 804825 && index == EFFECT_0)
+            AddPct(value, State(player).resolvePct);
         value = std::clamp(value, float(INT32_MIN / 2), float(INT32_MAX / 2));
     }
     static float DamageFactor(Unit* target, Unit* attacker, uint32 school, SpellInfo const* info)
