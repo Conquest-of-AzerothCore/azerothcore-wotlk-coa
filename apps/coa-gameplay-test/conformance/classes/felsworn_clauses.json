@@ -373,7 +373,8 @@
     "spell": 300483,
     "clause": "Damage dealt by Felstrikes now extends the duration of Cripple on the target by $/1000;560643s1 sec",
     "labels": [
-      "300483 effect_value 560643e0 #0"
+      "300483 behaviour_metric_delta held",
+      "300483 behaviour_metric_delta gone"
     ],
     "kind": "claim"
   },
@@ -461,8 +462,10 @@
     "spell": 300490,
     "clause": "Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.",
     "labels": [
-      "300490 effect_value 806104e0 #2",
-      "300490 spell_duration 806104 #3"
+      "300490 behaviour_metric_delta cast_landed",
+      "300490 behaviour_metric_delta cast_early",
+      "300490 behaviour_metric_delta fourth_cast",
+      "300490 behaviour_metric_delta felforged_duration"
     ],
     "kind": "claim"
   },
@@ -1438,7 +1441,8 @@
     "spell": 561201,
     "clause": "for $/1000;s1 sec.",
     "labels": [
-      "561201 effect_value e0 #2"
+      "561201 behaviour_metric_delta held",
+      "561201 behaviour_metric_delta gone"
     ],
     "kind": "claim"
   },
