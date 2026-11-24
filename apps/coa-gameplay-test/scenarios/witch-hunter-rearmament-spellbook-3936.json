@@ -7,9 +7,11 @@
     "SkillLine 59 is Houndmaster; 58 is Boltslinger. The original SkillLineAbility row 89485 incorrectly uses 58.",
     "The client's On934 handler replaces a 14-word SkillLineAbility row and refreshes the spellbook mapping.",
     "Login and relog must send row 89485 with category 59 and preserve its other fields.",
+    "With CoA.UnlockAllVanity = 0 the row arrives three times before the relog: with the initial spellbook, when the talent teaches Rearmament and in the 5 s fallback stream.",
     "Tormentor 800162, row 86256, is a Boltslinger ability and must not receive a category patch.",
     "This checks native talent acquisition and socketless packet construction, not rendered client UI."
   ],
+  "vanity_ownership": { "unlock_all": false },
   "timeout_ms": 60000,
   "players": [
     {"id": "hunter", "race": 1, "class": 15, "level": 60}
@@ -41,8 +43,8 @@
       "metric": "knows_spell", "spell": 805738, "equals": 1, "within_ms": 3000
     },
     {
-      "action": "assert", "label": "Login sends Rearmament's spellbook row once", "actor": "hunter",
-      "metric": "server_packets", "opcode": 2356, "row": 89485, "equals": 1, "within_ms": 15000
+      "action": "assert", "label": "Login sends Rearmament's spellbook row with the spellbook, on learning it and in the stream", "actor": "hunter",
+      "metric": "server_packets", "opcode": 2356, "row": 89485, "equals": 3, "within_ms": 15000
     },
     {
       "action": "assert", "label": "Rearmament belongs to Houndmaster", "actor": "hunter",
@@ -83,7 +85,7 @@
     },
     {
       "action": "assert", "label": "Relog sends the category correction again", "actor": "hunter",
-      "metric": "server_packets", "opcode": 2356, "row": 89485, "equals": 2, "within_ms": 15000
+      "metric": "server_packets", "opcode": 2356, "row": 89485, "min": 4, "within_ms": 15000
     },
     {
       "action": "assert", "label": "Rearmament remains in Houndmaster after relog", "actor": "hunter",

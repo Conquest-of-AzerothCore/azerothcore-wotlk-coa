@@ -463,7 +463,8 @@
       "metric": "server_packets",
       "opcode": 1726,
       "row": 8786,
-      "equals": 1
+      "equals": 1,
+      "within_ms": 6000
     },
     {
       "action": "assert",
