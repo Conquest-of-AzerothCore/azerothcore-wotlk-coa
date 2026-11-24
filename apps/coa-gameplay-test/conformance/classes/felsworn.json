@@ -535,8 +535,8 @@
       ],
       "proc_spell": 520262,
       "events_per_proc": 1,
-      "proc_spell_source": "Casts of 520262 beyond the completed Azzinoth's Assault casts: EffectTriggerSpell[0] of 704610; each Assault itself casts 520262 once (EffectTriggerSpell[0] of 801904), the handler casts the additional one (AscensionFelswornEvents.cpp:176-177). Reference search 2026-11-24: coa-history spell 704610: 0 events in 186 logs. Live logs (atc/report.md:7-10, :36): 520262 follows 124 of 148 Assault casts (0.84 per cast) because it is the Assault's own main-hand strike (EffectTriggerSpell of 801904), not the talent's extra hit; no evidence of the 30% proc in the logs. Nothing found that states a rate per hit or per cast.",
-      "handler": "aura_ascension_felsworn_event: Check case 704610 (AscensionFelswornEvents.cpp:69-71) passes a damage event of 801904, 520262 or 572585 and rolls Chance(player, 704610); Proc (AscensionFelswornEvents.cpp:176-177) casts 520262 at the target. Baseline arm: the same casts before 704610 is learned must read no extra hit. Reference search 2026-11-23: see trigger_spells_source.",
+      "proc_spell_source": "Casts of 520262 beyond the completed Azzinoth's Assault casts: EffectTriggerSpell[0] of 704610; each Assault itself casts 520262 once (EffectTriggerSpell[0] of 801904), the handler casts the additional one (AscensionFelswornEvents.cpp:176-177). Owner ruling O-31 (2026-11-24): one 30% roll per Assault, not per hit. Reference search 2026-11-24: coa-history spell 704610: 0 events in 186 logs. Live logs (atc/report.md:7-10, :36): 520262 follows 124 of 148 Assault casts (0.84 per cast) because it is the Assault's own main-hand strike, not the talent's extra hit; no evidence of the 30% proc in the logs.",
+      "handler": "aura_ascension_felsworn_event (Felsworn ADR 0024, owner ruling O-31): OnSpellBeforeEffects arms one roll for each cast of Azzinoth's Assault 801904 (AscensionFelswornAbilities.cpp, State(player).assaultRoll); Check case 704610 (AscensionFelswornEvents.cpp:69-71) takes it on the first landed damage event of 520262 or 572585 of that Assault and rolls Chance(player, 704610) once; Proc (AscensionFelswornEvents.cpp:176-177) casts 520262 at the target, and that extra hit does not roll (event guard, :40). Trial: one completed Assault cast (trial_casts). Baseline arm: the same casts before 704610 is learned must read no extra hit.",
       "dbc": {
         "704610": {
           "ProcChance": 30,
@@ -549,13 +549,7 @@
       "residual_target": 0.001,
       "min_detectable": 6,
       "events_exclude_trigger_casts": true,
-      "trigger_spells": [
-        801904,
-        520262,
-        572585
-      ],
-      "trigger_lands_no_hit": "AscensionFelswornEvents.cpp:69-71: case 704610: return info && (Named(info, 801904) || info->Id == 520262 || info->Id == 572585) && !periodic && Chance(player, id): the handler rolls once per landed non-periodic damage event of the strikes 520262 (main hand) and 572585 (off hand), never per cast of 801904. The extra 520262 hit it casts (:176-177) does not roll again: the Proc sets State(player).event (:126-127, reset at :278) and Check returns false while it is set (:40).",
-      "trigger_spells_source": "Azzinoth's Assault 801904 (Effect[0] and Effect[1] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE, EffectTriggerSpell 520262 main hand and 572585 off hand) has no damage of its own; the two strikes are the landed hits and each rolls the chance once; the additional 520262 hit does not roll (event guard, see trigger_lands_no_hit). A trial is one landed hit of 520262 or 572585 on the dummy, additional hits included, so the measured rate per landed hit is 0.3/1.3 = 0.231 for 0.3 per base strike. Reference search 2026-11-24: coa-history spell 704610: 0 events in 186 logs. Live logs (atc/report.md:7-10, :36): 520262 follows 124 of 148 Assault casts (0.84 per cast) because it is the Assault's own main-hand strike (EffectTriggerSpell of 801904), not the talent's extra hit; no evidence of the 30% proc in the logs."
+      "trial_casts": true
     }
   ],
   "triggers": [
@@ -13484,6 +13478,243 @@
       "observe_source": "Diagnostic companion of extend on the same cast: the casts of the extension spell 803089 (Double Trigger, Effect[0] ASCENSION_MODIFY_AURA_DURATION +3000 ms) by the caster, read 500 ms after one real Assault at the dummy with Inner Demon active (fixture as extend): 0 before (no cast) and 1 after, one 3 s extension per cast of Assault. The first pair read a duration gain of 28009 ms for the extend entry (alert); this entry counts the extensions. Reference search 2026-11-23: coa-history spell 803475: 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     },
     {
+      "spell": 803475,
+      "kind": "metric_delta",
+      "name": "Azzinoth's Assault (Inner Demon extension at the reference attack power)",
+      "variant": "extend",
+      "label_suffix": "extend",
+      "quote": "$?s804216[ Inner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
+      "trigger_spell": 803475,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "before_expected": 9000,
+      "expected": 11900,
+      "expected_gain": 2900,
+      "tolerance": 250,
+      "wait_ms": 100,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "observe_source": "Felsworn ADR 0023 (owner ruling O-30): every Azzinoth's Assault under Inner Demon extends Inner Demon 804216 by $/1000;803089s1 = 3 sec flat (803089 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 2999 + 1 = 3000 ms), with no attack power term (the 803089 coefficient row 0.4 x AP was removed from AscensionFelswornData.h). 803475 casts 803089 on the caster for its hit while Inner Demon is active (AscensionFelswornAbilities.cpp:356-357). Fixtures in each phase, in this order: Felfury 800058 x2 (the Assault's cost), then Inner Demon 804216 by harness set_aura, then 803468: Inner Demon starts at 5000 ms x max(1, Felfury) = 10000 ms (AscensionFelswornAbilities.cpp:72-73) whatever the Felfury left by an earlier phase (fw-f2 diagnostic: 9991 then 9979 ms right after the fixtures). The before reading is the remaining duration right after the fixtures, before the cast (cast_in_before false: the cast is the contrast, as Crusader's Presence 562302 mounted_speed); the after reading is the remaining duration 100 ms after one real Assault at the dummy. Expected gain 3000 - the 100 ms wait = 2900, tolerance 250 (excludes a value 10% off 3000 and the step latency of about 12 ms per harness step, fw-f2 diagnostic: 9979 before, 12867 read 112 ms after the cast). Control arms: extend_absent (no Inner Demon, nothing extended) and extend_casts (one 803089 per Assault). Reference search 2026-11-23 (fix-250/note.md section 5): nothing decides the value beyond the tooltip and Spell.dbc; the owner ruled O-30 on 2026-11-24."
+    },
+    {
+      "spell": 803475,
+      "kind": "metric_delta",
+      "name": "Azzinoth's Assault (Inner Demon extension at +20000 attack power: no attack power term)",
+      "variant": "extend_ap",
+      "label_suffix": "extend_ap",
+      "quote": "$?s804216[ Inner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
+      "trigger_spell": 803475,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "before_expected": 9000,
+      "expected": 11900,
+      "expected_gain": 2900,
+      "tolerance": 250,
+      "wait_ms": 100,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "observe_source": "Felsworn ADR 0023 (owner ruling O-30): every Azzinoth's Assault under Inner Demon extends Inner Demon 804216 by $/1000;803089s1 = 3 sec flat (803089 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 2999 + 1 = 3000 ms), with no attack power term (the 803089 coefficient row 0.4 x AP was removed from AscensionFelswornData.h). 803475 casts 803089 on the caster for its hit while Inner Demon is active (AscensionFelswornAbilities.cpp:356-357). Fixtures in each phase, in this order: Felfury 800058 x2 (the Assault's cost), then Inner Demon 804216 by harness set_aura, then 803468: Inner Demon starts at 5000 ms x max(1, Felfury) = 10000 ms (AscensionFelswornAbilities.cpp:72-73) whatever the Felfury left by an earlier phase (fw-f2 diagnostic: 9991 then 9979 ms right after the fixtures). The before reading is the remaining duration right after the fixtures, before the cast (cast_in_before false: the cast is the contrast, as Crusader's Presence 562302 mounted_speed); the after reading is the remaining duration 100 ms after one real Assault at the dummy. Expected gain 3000 - the 100 ms wait = 2900, tolerance 250 (excludes a value 10% off 3000 and the step latency of about 12 ms per harness step, fw-f2 diagnostic: 9979 before, 12867 read 112 ms after the cast). Control arms: extend_absent (no Inner Demon, nothing extended) and extend_casts (one 803089 per Assault). Reference search 2026-11-23 (fix-250/note.md section 5): nothing decides the value beyond the tooltip and Spell.dbc; the owner ruled O-30 on 2026-11-24. Contrast arm at +20000 attack power (player_attack_power): the removed row would give 3000 + int(0.4 x 20312) = 11124 ms, a gain near 11024.",
+      "player_attack_power": 20000
+    },
+    {
+      "spell": 803475,
+      "kind": "metric_delta",
+      "quote": "$?s804216[ Inner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
+      "trigger_spell": 803475,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "before_expected": 1,
+      "tolerance": 0,
+      "expire_ms": 14000,
+      "void_on_cast_failure": true,
+      "name": "Azzinoth's Assault (Inner Demon present 12835 ms after one Assault: 10000 + 3000 ms)",
+      "variant": "extend_held",
+      "label_suffix": "extend_held",
+      "expected": 1,
+      "wait_ms": 12835,
+      "game_time": {
+        "after": [
+          12825,
+          12860
+        ]
+      },
+      "observe_source": "Felsworn ADR 0023 (owner ruling O-30): every Azzinoth's Assault under Inner Demon extends Inner Demon 804216 by $/1000;803089s1 = 3 sec flat (803089 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 2999 + 1 = 3000 ms), with no attack power term. 803475 casts 803089 on the caster for its hit while Inner Demon is active (AscensionFelswornAbilities.cpp:356-357). Fixtures in each phase, in this order: Felfury 800058 x2 (the Assault's cost), then Inner Demon 804216 by harness set_aura, then 803468: Inner Demon starts at 5000 ms x max(1, Felfury) = 10000 ms (AscensionFelswornAbilities.cpp:72-73; fw-f2 diagnostic and pair prove-4: 9994 ms read right after the fixtures), so it ends 13000 ms after the fixtures with one extension and 10000 ms without. The before reading is the presence right after the fixtures, before the cast (cast_in_before false: the cast is the contrast). The after reading, in game time after the cast: present at 12835 ms (window 12825 to 12860) and absent at 13145 ms (window 13135 to 13165), so the extension lies between about 2835 and 3165 ms against the stated 3000 ms, excluding a value 10% off and the 10000 ms end without extension. Companion arms on the same fixtures: extend and extend_ap (the remaining duration, gain 2885 against 2900), extend_absent (no Inner Demon) and extend_casts (one 803089 per Assault). Reference search 2026-11-23 (fix-250/note.md section 5): nothing decides the value beyond the tooltip and Spell.dbc; the owner ruled O-30 on 2026-11-24."
+    },
+    {
+      "spell": 803475,
+      "kind": "metric_delta",
+      "quote": "$?s804216[ Inner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
+      "trigger_spell": 803475,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "before_expected": 1,
+      "tolerance": 0,
+      "expire_ms": 14000,
+      "void_on_cast_failure": true,
+      "name": "Azzinoth's Assault (Inner Demon absent 13145 ms after one Assault: 10000 + 3000 ms)",
+      "variant": "extend_gone",
+      "label_suffix": "extend_gone",
+      "expected": 0,
+      "wait_ms": 13145,
+      "game_time": {
+        "after": [
+          13135,
+          13165
+        ]
+      },
+      "observe_source": "Felsworn ADR 0023 (owner ruling O-30): every Azzinoth's Assault under Inner Demon extends Inner Demon 804216 by $/1000;803089s1 = 3 sec flat (803089 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 2999 + 1 = 3000 ms), with no attack power term. 803475 casts 803089 on the caster for its hit while Inner Demon is active (AscensionFelswornAbilities.cpp:356-357). Fixtures in each phase, in this order: Felfury 800058 x2 (the Assault's cost), then Inner Demon 804216 by harness set_aura, then 803468: Inner Demon starts at 5000 ms x max(1, Felfury) = 10000 ms (AscensionFelswornAbilities.cpp:72-73; fw-f2 diagnostic and pair prove-4: 9994 ms read right after the fixtures), so it ends 13000 ms after the fixtures with one extension and 10000 ms without. The before reading is the presence right after the fixtures, before the cast (cast_in_before false: the cast is the contrast). The after reading, in game time after the cast: present at 12835 ms (window 12825 to 12860) and absent at 13145 ms (window 13135 to 13165), so the extension lies between about 2835 and 3165 ms against the stated 3000 ms, excluding a value 10% off and the 10000 ms end without extension. Companion arms on the same fixtures: extend and extend_ap (the remaining duration, gain 2885 against 2900), extend_absent (no Inner Demon) and extend_casts (one 803089 per Assault). Reference search 2026-11-23 (fix-250/note.md section 5): nothing decides the value beyond the tooltip and Spell.dbc; the owner ruled O-30 on 2026-11-24."
+    },
+    {
+      "spell": 803475,
+      "kind": "metric_delta",
+      "quote": "$?s804216[ Inner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
+      "trigger_spell": 803475,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "before_expected": 1,
+      "tolerance": 0,
+      "expire_ms": 14000,
+      "void_on_cast_failure": true,
+      "name": "Azzinoth's Assault (Inner Demon absent 13145 ms after one Assault at +20000 attack power)",
+      "variant": "extend_ap_gone",
+      "label_suffix": "extend_ap_gone",
+      "expected": 0,
+      "wait_ms": 13145,
+      "game_time": {
+        "after": [
+          13135,
+          13165
+        ]
+      },
+      "observe_source": "Felsworn ADR 0023 (owner ruling O-30): every Azzinoth's Assault under Inner Demon extends Inner Demon 804216 by $/1000;803089s1 = 3 sec flat (803089 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 2999 + 1 = 3000 ms), with no attack power term. 803475 casts 803089 on the caster for its hit while Inner Demon is active (AscensionFelswornAbilities.cpp:356-357). Fixtures in each phase, in this order: Felfury 800058 x2 (the Assault's cost), then Inner Demon 804216 by harness set_aura, then 803468: Inner Demon starts at 5000 ms x max(1, Felfury) = 10000 ms (AscensionFelswornAbilities.cpp:72-73; fw-f2 diagnostic and pair prove-4: 9994 ms read right after the fixtures), so it ends 13000 ms after the fixtures with one extension and 10000 ms without. The before reading is the presence right after the fixtures, before the cast (cast_in_before false: the cast is the contrast). The after reading, in game time after the cast: present at 12835 ms (window 12825 to 12860) and absent at 13145 ms (window 13135 to 13165), so the extension lies between about 2835 and 3165 ms against the stated 3000 ms, excluding a value 10% off and the 10000 ms end without extension. Companion arms on the same fixtures: extend and extend_ap (the remaining duration, gain 2885 against 2900), extend_absent (no Inner Demon) and extend_casts (one 803089 per Assault). Reference search 2026-11-23 (fix-250/note.md section 5): nothing decides the value beyond the tooltip and Spell.dbc; the owner ruled O-30 on 2026-11-24. At +20000 attack power (player_attack_power) the removed row would end Inner Demon near 21124 ms, present at this read.",
+      "player_attack_power": 20000
+    },
+    {
       "spell": 524947,
       "kind": "metric_delta",
       "gate_spell": 524947,
@@ -15305,7 +15536,7 @@
         "target": "dummy"
       },
       "before_expected": 0,
-      "expected": 2851.2,
+      "expected": 475.2,
       "tolerance": 0,
       "wait_ms": 9000,
       "expire_ms": 500,
@@ -15348,7 +15579,7 @@
           "caster"
         ]
       ],
-      "name": "Felwrath (Inner Demon: damage of three stacks, uncounted, N-7)",
+      "name": "Felwrath (Inner Demon: damage of three stacks)",
       "variant": "inner_total_three",
       "label_suffix": "inner_total_three",
       "setup_casts": [
@@ -15356,9 +15587,9 @@
         520693
       ],
       "setup_wait_ms": 2100,
-      "after_at_least": 2708,
-      "after_at_most": 2994,
-      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): StackAmount 3 ($520832u; lab render \"stacking 3 times\"), DurationIndex 32 = 6000 ms. Felwrath 520693 CastingTimeIndex 5 = 2000 ms. Each real Felwrath cast strikes five enemies (the dummy at 3 yd and four area dummies at 4 to 7 yd, all within the 8 yd radius index 14 around the dummy) under Inner Demon 804216 and casts 520832 once on every struck enemy (AscensionFelswornAbilities.cpp:363-374); Effects[0] and [2] of 520832 target the struck enemy only (AscensionFelswornContracts.cpp:300-305, Felsworn ADR 0020), so the dummy takes exactly one application per Felwrath cast and the aura stacks (Unit.cpp:5441-5466). Setup casts are 2100 ms apart (the 2000 ms cast lands before the next starts). Felfury 800058 x6, Demonic 803468, Inner Demon 804216 and 823764 (no resist) are precondition fixtures, as on the inner_five entry. Control: the phase that casts nothing reads 0. Damage of the stacks as applied damage (uncounted while owner question N-7 is open). Effect[0] ticks every 1000 ms for 8 + 2.0 x 50 = 108 per stack (the periodic amount is multiplied by the stacks, SpellAuraEffects.cpp:659), x 1.1 under 804216; Effect[1] is SPELL_EFFECT_DUMMY and deals nothing. A reapplied periodic damage aura keeps its tick timer (SpellAuraEffects.cpp:748-751) and restarts its 6000 ms. Applications at 0, 2100 and 4200 ms: ticks at 1000 and 2000 ms at 1 stack, 3000 and 4000 at 2, 5000 to 10000 at 3 (the aura ends at 10200): 2 + 4 + 18 = 24 stack-ticks, 4 times the 6 of one stack (the inner_total entry). Reading (a) per tick, the server as is: 24 x 118.8 = 2851.2, band 5% (2708 to 2994). Reading (b) total over $d: 24 x 18 x 1.1 = 475.2. Spell crit removed (984954). Reference search 2026-11-24: nothing beyond the tooltip and Spell.dbc decides the stack count (B8 review M3)."
+      "after_at_least": 451,
+      "after_at_most": 499,
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): StackAmount 3 ($520832u; lab render \"stacking 3 times\"), DurationIndex 32 = 6000 ms. Felwrath 520693 CastingTimeIndex 5 = 2000 ms. Each real Felwrath cast strikes five enemies (the dummy at 3 yd and four area dummies at 4 to 7 yd, all within the 8 yd radius index 14 around the dummy) under Inner Demon 804216 and casts 520832 once on every struck enemy (AscensionFelswornAbilities.cpp:363-374); Effects[0] and [2] of 520832 target the struck enemy only (AscensionFelswornContracts.cpp:300-305, Felsworn ADR 0020), so the dummy takes exactly one application per Felwrath cast and the aura stacks (Unit.cpp:5441-5466). Setup casts are 2100 ms apart (the 2000 ms cast lands before the next starts). Felfury 800058 x6, Demonic 803468, Inner Demon 804216 and 823764 (no resist) are precondition fixtures, as on the inner_five entry. Control: the phase that casts nothing reads 0. Damage of the stacks as applied damage. Felsworn ADR 0020, amendment O-34: the 108 (8 + 2.0 x 50) per stack is the total over 6000 ms, spread over the 6 ticks of Effect[0] (1000 ms): 18 per tick per stack (the periodic amount is multiplied by the stacks, SpellAuraEffects.cpp:659), x 1.1 under 804216; Effect[1] is SPELL_EFFECT_DUMMY and deals nothing. A reapplied periodic damage aura keeps its tick timer (SpellAuraEffects.cpp:748-751) and restarts its 6000 ms. Applications at 0, 2100 and 4200 ms: ticks at 1000 and 2000 ms at 1 stack, 3000 and 4000 at 2, 5000 to 10000 at 3 (the aura ends at 10200): 2 + 4 + 18 = 24 stack-ticks, 4 times the 6 of one stack (the inner_total entry). Expected 24 x 18 x 1.1 = 475.2, band 5% (451 to 499); the per-tick reading the owner ruled out (O-34) would give 24 x 118.8 = 2851.2. Spell crit removed (984954). Reference search 2026-11-24: nothing beyond the tooltip and Spell.dbc decides the stack count (B8 review M3)."
     },
     {
       "spell": 800206,
@@ -22479,7 +22710,7 @@
       "after_at_least": 113,
       "after_at_most": 125,
       "wait_ms": 9000,
-      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): DurationIndex 32 = 6000 ms ($520832d); two periodic damage effects. Effect[0] aura 3, EffectAmplitude 1000, BasePoints 7 + DieSides 1 = 8, RealPointsPerLevel 2.0 x (60 - BaseLevel 10) = 100: 108 per tick, 6 ticks. Effect[1] aura 3, EffectAmplitude 2000, 6 + 1.2 x 50 = 66 per tick, 3 ticks. The tooltip states ONE total for the whole duration: ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d = 8 + 100 = 108 (+ 0.1 x spell power). The entry reads the summed applied damage of both effects (every event of spell 520832 on the dummy, 1 stack from one cast of five struck enemies) from the cast to 1000 ms after the last tick: 2000 ms cast + 6000 ms + margin = 9000 ms. Expected is the tooltip total, never a per-tick figure. Data sum for the reader (not an expected value): 6 x 108 + 3 x 66 = 846 at spell power 0. Setup as the inner_five entry: 4 extra dummies at 4 to 7 yd (five enemies struck), spell crit and resist removed (984954, 823764). Reference search 2026-11-24: coa-history spell 520832: 11712 SPELL_PERIODIC_DAMAGE events in 10 logs (min 4, max 3295, mean 524), no crit; the loggers' spell power, level and stacks are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc. Inner Demon 804216 by harness set_aura as the clause's own condition, named: its Effect[1] aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 127, BasePoints 9 + 1 = 10 ($s2 of 804216) multiplies the damage by 1.1, so the expected total is the tooltip total x 1.1. Total 108 x 1.1 = 118.8, band 5% (113 to 125)."
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): DurationIndex 32 = 6000 ms ($520832d); one periodic damage effect. Effect[0] aura 3, EffectAmplitude 1000, BasePoints 7 + DieSides 1 = 8, RealPointsPerLevel 2.0 x (60 - BaseLevel 10) = 100: 108, spread over its 6 ticks (Felsworn ADR 0020, amendment O-34: 18 per tick). Effect[1] is SPELL_EFFECT_DUMMY (3) and deals nothing. The tooltip states ONE total for the whole duration: ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d = 8 + 100 = 108 (+ 0.1 x spell power). The entry reads the summed applied damage of both effects (every event of spell 520832 on the dummy, 1 stack from one cast of five struck enemies) from the cast to 1000 ms after the last tick: 2000 ms cast + 6000 ms + margin = 9000 ms. Expected is the tooltip total, never a per-tick figure. Setup as the inner_five entry: 4 extra dummies at 4 to 7 yd (five enemies struck), spell crit and resist removed (984954, 823764). Reference search 2026-11-24: coa-history spell 520832: 11712 SPELL_PERIODIC_DAMAGE events in 10 logs (min 4, max 3295, mean 524), no crit; the loggers' spell power, level and stacks are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc. Inner Demon 804216 by harness set_aura as the clause's own condition, named: its Effect[1] aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 127, BasePoints 9 + 1 = 10 ($s2 of 804216) multiplies the damage by 1.1, so the expected total is the tooltip total x 1.1. Total 108 x 1.1 = 118.8, band 5% (113 to 125)."
     },
     {
       "kind": "metric_delta",
@@ -22546,7 +22777,7 @@
         "amount": 10000,
         "hit_arm": true
       },
-      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): DurationIndex 32 = 6000 ms ($520832d); two periodic damage effects. Effect[0] aura 3, EffectAmplitude 1000, BasePoints 7 + DieSides 1 = 8, RealPointsPerLevel 2.0 x (60 - BaseLevel 10) = 100: 108 per tick, 6 ticks. Effect[1] aura 3, EffectAmplitude 2000, 6 + 1.2 x 50 = 66 per tick, 3 ticks. The tooltip states ONE total for the whole duration: ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d = 8 + 100 = 108 (+ 0.1 x spell power). The entry reads the summed applied damage of both effects (every event of spell 520832 on the dummy, 1 stack from one cast of five struck enemies) from the cast to 1000 ms after the last tick: 2000 ms cast + 6000 ms + margin = 9000 ms. Expected is the tooltip total, never a per-tick figure. Data sum for the reader (not an expected value): 6 x 108 + 3 x 66 = 846 at spell power 0. Setup as the inner_five entry: 4 extra dummies at 4 to 7 yd (five enemies struck), spell crit and resist removed (984954, 823764). Reference search 2026-11-24: coa-history spell 520832: 11712 SPELL_PERIODIC_DAMAGE events in 10 logs (min 4, max 3295, mean 524), no crit; the loggers' spell power, level and stacks are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc. Inner Demon 804216 by harness set_aura as the clause's own condition, named: its Effect[1] aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 127, BasePoints 9 + 1 = 10 ($s2 of 804216) multiplies the damage by 1.1, so the expected total is the tooltip total x 1.1. The tooltip's SP term is $SP*.1 inside the one total: (108 + 0.1 x 10000) x 1.1 = 1218.8, band 5% (1158 to 1280). Contrast arm of inner_total (+10000 spell power)."
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): DurationIndex 32 = 6000 ms ($520832d); one periodic damage effect. Effect[0] aura 3, EffectAmplitude 1000, BasePoints 7 + DieSides 1 = 8, RealPointsPerLevel 2.0 x (60 - BaseLevel 10) = 100: 108, spread over its 6 ticks (Felsworn ADR 0020, amendment O-34: 18 per tick). Effect[1] is SPELL_EFFECT_DUMMY (3) and deals nothing. The tooltip states ONE total for the whole duration: ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d = 8 + 100 = 108 (+ 0.1 x spell power). The entry reads the summed applied damage of both effects (every event of spell 520832 on the dummy, 1 stack from one cast of five struck enemies) from the cast to 1000 ms after the last tick: 2000 ms cast + 6000 ms + margin = 9000 ms. Expected is the tooltip total, never a per-tick figure. Setup as the inner_five entry: 4 extra dummies at 4 to 7 yd (five enemies struck), spell crit and resist removed (984954, 823764). Reference search 2026-11-24: coa-history spell 520832: 11712 SPELL_PERIODIC_DAMAGE events in 10 logs (min 4, max 3295, mean 524), no crit; the loggers' spell power, level and stacks are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc. Inner Demon 804216 by harness set_aura as the clause's own condition, named: its Effect[1] aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 127, BasePoints 9 + 1 = 10 ($s2 of 804216) multiplies the damage by 1.1, so the expected total is the tooltip total x 1.1. The tooltip's SP term is $SP*.1 inside the one total: (108 + 0.1 x 10000) x 1.1 = 1218.8, band 5% (1158 to 1280). Contrast arm of inner_total (+10000 spell power)."
     },
     {
       "kind": "metric_delta",
@@ -22603,7 +22834,7 @@
       "after_at_least": 0,
       "after_at_most": 0,
       "wait_ms": 9000,
-      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): DurationIndex 32 = 6000 ms ($520832d); two periodic damage effects. Effect[0] aura 3, EffectAmplitude 1000, BasePoints 7 + DieSides 1 = 8, RealPointsPerLevel 2.0 x (60 - BaseLevel 10) = 100: 108 per tick, 6 ticks. Effect[1] aura 3, EffectAmplitude 2000, 6 + 1.2 x 50 = 66 per tick, 3 ticks. The tooltip states ONE total for the whole duration: ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d = 8 + 100 = 108 (+ 0.1 x spell power). The entry reads the summed applied damage of both effects (every event of spell 520832 on the dummy, 1 stack from one cast of five struck enemies) from the cast to 1000 ms after the last tick: 2000 ms cast + 6000 ms + margin = 9000 ms. Expected is the tooltip total, never a per-tick figure. Data sum for the reader (not an expected value): 6 x 108 + 3 x 66 = 846 at spell power 0. Setup as the inner_five entry: 4 extra dummies at 4 to 7 yd (five enemies struck), spell crit and resist removed (984954, 823764). Reference search 2026-11-24: coa-history spell 520832: 11712 SPELL_PERIODIC_DAMAGE events in 10 logs (min 4, max 3295, mean 524), no crit; the loggers' spell power, level and stacks are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc. Control arm: the same cast without the Inner Demon aura 804216 on the caster, five enemies struck: the clause's own condition is absent, so no 520832 damage is expected (0); a 0 here with the aura present in inner_total shows the damage read is the clause's effect, not the cast's.",
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): DurationIndex 32 = 6000 ms ($520832d); one periodic damage effect. Effect[0] aura 3, EffectAmplitude 1000, BasePoints 7 + DieSides 1 = 8, RealPointsPerLevel 2.0 x (60 - BaseLevel 10) = 100: 108, spread over its 6 ticks (Felsworn ADR 0020, amendment O-34: 18 per tick). Effect[1] is SPELL_EFFECT_DUMMY (3) and deals nothing. The tooltip states ONE total for the whole duration: ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d = 8 + 100 = 108 (+ 0.1 x spell power). The entry reads the summed applied damage of both effects (every event of spell 520832 on the dummy, 1 stack from one cast of five struck enemies) from the cast to 1000 ms after the last tick: 2000 ms cast + 6000 ms + margin = 9000 ms. Expected is the tooltip total, never a per-tick figure. Setup as the inner_five entry: 4 extra dummies at 4 to 7 yd (five enemies struck), spell crit and resist removed (984954, 823764). Reference search 2026-11-24: coa-history spell 520832: 11712 SPELL_PERIODIC_DAMAGE events in 10 logs (min 4, max 3295, mean 524), no crit; the loggers' spell power, level and stacks are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc. Control arm: the same cast without the Inner Demon aura 804216 on the caster, five enemies struck: the clause's own condition is absent, so no 520832 damage is expected (0); a 0 here with the aura present in inner_total shows the damage read is the clause's effect, not the cast's.",
       "tolerance": 0
     },
     {

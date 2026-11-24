@@ -2226,11 +2226,10 @@
     "spell": 704610,
     "clause": "Azzinoth's Assault now has a $h% chance to hit an additional time with your main-hand Weapon.",
     "labels": [
-      "704610 effect_value #0",
       "704610 proc_rate"
     ],
     "kind": "claim",
-    "reason": "AWAITING OWNER (status 5). Tooltip: \"Azzinoth's Assault now has a $h% chance to hit an additional time with your main-hand Weapon.\" ($h = 30, ProcChance of 704610). Measured (counted pair prove-final, proc 704610): 0.2297 (12474/54306) and 0.2317 (12613/54445) additional hits per landed hit of 520262 or 572585 (the extra hits are trials too); 0 events in 40 baseline trials. 0.23 = 0.3/1.3: the handler rolls 0.3 per base strike and the extra hit does not roll (event guard, AscensionFelswornEvents.cpp:40 and :126-127), so the server gives about 0.60 additional hits per Assault (two strikes x 0.3, derived, not read), against the tooltip's 0.30 per Assault. Live logs (atc/report.md:7-10, :36): 520262 follows 124 of 148 casts because it is the Assault's own main-hand strike, not the talent's extra hit; they give no evidence of the 30% proc and no rate for it. Options: (a) one 30% roll per Assault (tooltip, 0.30 per cast); (b) keep 30% per strike as served (0.60 per cast, tooltip corrected). No server change made."
+    "reason": "Owner ruling O-31 (2026-11-24): one 30% roll per Azzinoth's Assault, not per hit (Felsworn ADR 0024). Status 1, counted pair fw-f2 prove-2 (build 35135215000b): 0.2986 (6246 extra hits in 20916 Assault casts) and 0.3019 (6315/20916), Wilson 99.95% intervals inside the band [0.28, 0.32]; baseline arm before the learn: no extra hit. Five more runs (fw-f2 rerun-5, build 374cb1e7dac2): 0.2968, 0.3002, 0.3028, 0.2950, 0.3008, all ok. Before the fix (prove-final): 0.2297 and 0.2317 per landed strike, about 0.60 per Assault."
   },
   {
     "spell": 704611,
@@ -3692,7 +3691,7 @@
     "spell": 803475,
     "clause": "$?s804216[\r\n\r\nInner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
     "kind": "claim",
-    "reason": "Cast part only: the extension spell 803089 is cast once per Assault with Inner Demon (extend_casts 0 -> 1) and not without it (extend_absent). The value part, 'by $/1000;803089s1 sec' (3 s, 803089 Effect[0] 2999 + 1), is not counted. The earlier +28009 ms reading was an incorrect test (fixture order, fix-250/note.md). Second design (fw-l3, pairs prove-a6/prove-a7): Inner Demon set first (5000 ms), Assault cast at the dummy, aura held at age 7700 ms and gone at 8200 ms (extension 3000 + 124 ms from the 0.4 x AP term: end at 8124 ms whatever the cast time), read as presence 1 then 0 in both runs; the age of the aura is bracketed by apply_stamp, which reads 'first missing' because the aura comes from the harness set_aura before the encounter timeline opens, so the 10% bounds (7750 held, 8250 gone) are not proven. Needs the apply stamp of a set_aura fixture or a real Inner Demon cast placed after the timeline start (tool change, not taken by an entries batch). The server value adds 0.4 x AP (owner question N-3). Reference search 2026-11-23: nothing found for the value.",
+    "reason": "Owner ruling O-30 (2026-11-24): the extension is $/1000;803089s1 = 3 sec flat, no attack power term (Felsworn ADR 0023). Cast part: the extension spell 803089 is cast once per Assault with Inner Demon (extend_casts 0 -> 1) and not without it (extend_absent). Value part, status 1, counted pair fw-f2 prove-5 (build 935450e6b11e, commit 7d97c900af), both runs identical: Inner Demon (10000 ms at the fixtures) present 12844 ms and absent 13154 ms after one Assault (extend_held, extend_gone), absent at 13154 ms at +20000 attack power too (extend_ap_gone, where the removed 0.4 x AP row would hold it to about 21124 ms); remaining duration 9994 ms before and 12879 ms 100 ms after, a gain of 2885 against 2900 at both attack powers (extend, extend_ap). Five more runs (fw-f2 rerun-5, build 374cb1e7dac2): extend and extend_ap 2885 in each. The earlier +28009 ms reading was an incorrect test (fixture order, fix-250/note.md).",
     "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
     "claims": [
       {
@@ -3705,7 +3704,14 @@
       },
       {
         "claim": "by $/1000;803089s1 sec",
-        "labels": []
+        "labels": [
+          "803475 behaviour_metric_delta extend",
+          "803475 behaviour_metric_delta extend_ap",
+          "803475 behaviour_metric_delta extend_held",
+          "803475 behaviour_metric_delta extend_gone",
+          "803475 behaviour_metric_delta extend_ap_gone"
+        ],
+        "evidence": "behaviour"
       }
     ]
   },
