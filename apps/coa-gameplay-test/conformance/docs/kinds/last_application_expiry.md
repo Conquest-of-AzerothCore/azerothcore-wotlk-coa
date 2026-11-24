@@ -62,6 +62,13 @@ apply), or the remaining duration is not above 0 (mentor D-21, Felsworn ADR 0004
 proven. A failing bracket still alerts. The timeline is process global, so a fed scenario runs exclusive in a batch.
 `feed` excludes `repeat`, `forced_roll` and `no_refresh`.
 
+`same_stamp_applies: true` (with `feed` only; ADR 1289, provisional, mentor D-116 and D-117) accepts a stamped apply
+count of two or more when the run's recorded timeline (`result.json` `timeline`, read into the run by `compare`) holds
+exactly that many `aura_applied` events of `aura` on the holder and they all share one `at_ms`: the age is then taken
+from that shared stamp and the explanation says so. Applies at different game times, a recorded count that differs
+from the stamped one, or no recorded timeline keep the arm `unmeasured`. It adds no step; one apply is judged as
+without it. Felsworn: Legionfall 801899, whose Annihilan Strike lands two strikes that each roll the grant.
+
 `force_crit` (`melee`, `spell` or `ranged`) sets the matching crit and hit rating fixtures for both arms, so every
 cast lands and is critical. `quote_spell` takes the
 quote from the tooltip of a spell the entry's own tooltip embeds (`@s:N:`), as the window variant of `aura_fed_effect`
