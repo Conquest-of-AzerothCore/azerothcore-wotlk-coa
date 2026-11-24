@@ -650,7 +650,9 @@ void BossAI::_Reset()
         return;
 
     me->SetCombatPulseDelay(0);
-    me->ResetLootMode();
+    // Private stages can disable corpse loot while keeping kill credit and XP enabled.
+    if (me->GetLootMode() || !me->GetMap()->IsScriptedPrivateInstance())
+        me->ResetLootMode();
     events.Reset();
     scheduler.CancelAll();
     me->m_Events.KillAllEvents(false);
