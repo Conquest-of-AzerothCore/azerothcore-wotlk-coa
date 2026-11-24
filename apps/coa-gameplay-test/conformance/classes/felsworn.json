@@ -7341,6 +7341,12 @@
       "expire_ms": 500,
       "phase_auras": [
         [
+          800058,
+          4,
+          "caster",
+          "caster"
+        ],
+        [
           804216,
           0,
           "caster",
@@ -7354,7 +7360,7 @@
         ]
       ],
       "expected": 0.5,
-      "observe_source": "807426 Effect[0] aura 354, BasePoints 49 + 1 = 50 ($807426s1); the Felsworn refresh applies 807426 while Inner Demon 804216 and 805236 are both on the caster (AscensionFelsworn.cpp:274). The event script (AscensionFelswornEvents.cpp: Check case 807426 returns Inner(player) && autoAttack && crit, :111-112; Proc case 807426 calls Copy(player, player, 560839, damage / 2), :262-263) heals the caster with 560839 (SPELL_EFFECT_HEAL). The caster auto-attacks the dummy for 3 swing intervals (8400 ms of the generated 2800 ms reference interval, inside the 10000 ms Inner Demon duration of the Felsworn contract, AscensionFelswornContracts.cpp:81-85) in each phase, every swing forced critical (force_crit melee); Inner Demon is the clause's condition, removed and set again as phase auras right before each phase's attack (the harness set_aura keeps the running duration of an aura already present, as the crit_inner entry notes). The ratio divides the increase of the caster's 560839 heal total over the after phase by the increase of its critical swing damage (melee_damage_total critical) over it; the before phase (805236 not learned) reads 0 heal. 805236 is learned for real between the phases (mentor D-67). Reference search 2026-11-24: bindmysoul talents 805236 text 'you now heal equal to 50% of all damage dealt by critical strikes with auto attacks' (same value); coa-history spells 807426 and 560839: 0 events in 186 logs (positive control 801904 Azzinoth's Assault: 21 casts); expected values come from the tooltip and the server DBC set."
+      "observe_source": "807426 Effect[0] aura 354, BasePoints 49 + 1 = 50 ($807426s1); the Felsworn refresh applies 807426 while Inner Demon 804216 and 805236 are both on the caster (AscensionFelsworn.cpp:274). The event script (AscensionFelswornEvents.cpp: Check case 807426 returns Inner(player) && autoAttack && crit, :111-112; Proc case 807426 calls Copy(player, player, 560839, damage / 2), :262-263) heals the caster with 560839 (SPELL_EFFECT_HEAL). The caster auto-attacks the dummy for 3 swing intervals (8400 ms of the generated 2800 ms reference interval, the Felsworn contract gives Inner Demon DurationIndex 1, AscensionFelswornContracts.cpp:81-85, and the script sets its duration) in each phase, every swing forced critical (force_crit melee); Inner Demon is the clause's condition, removed and set again as phase auras after Felfury 800058 set to 4 stacks, 500 ms before each phase's attack. Inner Demon lasts 5000 ms x max(1, Felfury stacks) (AscensionFelswornAbilities.cpp:81-85): without Felfury it ended inside the window (the first pair read 0.379 and 0.373; a diagnostic run read Inner Demon present at the attack and gone at the stop, 4 heals for 14 critical swings, each heal about half its swing), so 4 stacks give it 20000 ms, past the 500 + 8400 ms phase; 807426 was read present at the attack after the 500 ms wait (the harness set_aura keeps the running duration of an aura already present, as the crit_inner entry notes). The ratio divides the increase of the caster's 560839 heal total over the after phase by the increase of its critical swing damage (melee_damage_total critical) over it; the before phase (805236 not learned) reads 0 heal. 805236 is learned for real between the phases (mentor D-67). Reference search 2026-11-24: bindmysoul talents 805236 text 'you now heal equal to 50% of all damage dealt by critical strikes with auto attacks' (same value); coa-history spells 807426 and 560839: 0 events in 186 logs (positive control 801904 Azzinoth's Assault: 21 casts); expected values come from the tooltip and the server DBC set."
     },
     {
       "spell": 805236,
@@ -7386,7 +7392,15 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "expected": 0,
-      "observe_source": "Contrast arm of crit_swing_heal for the condition 'While Inner Demon is active': the same layout with no Inner Demon 804216 on the caster in either phase; the after ratio must stay 0. 807426 Effect[0] aura 354, BasePoints 49 + 1 = 50 ($807426s1); the Felsworn refresh applies 807426 while Inner Demon 804216 and 805236 are both on the caster (AscensionFelsworn.cpp:274). The event script (AscensionFelswornEvents.cpp: Check case 807426 returns Inner(player) && autoAttack && crit, :111-112; Proc case 807426 calls Copy(player, player, 560839, damage / 2), :262-263) heals the caster with 560839 (SPELL_EFFECT_HEAL). The caster auto-attacks the dummy for 3 swing intervals (8400 ms of the generated 2800 ms reference interval, inside the 10000 ms Inner Demon duration of the Felsworn contract, AscensionFelswornContracts.cpp:81-85) in each phase, every swing forced critical (force_crit melee); Inner Demon is the clause's condition, set as a phase aura right before each phase's attack. The ratio divides the increase of the caster's 560839 heal total over the after phase by the increase of its critical swing damage (melee_damage_total critical) over it; the before phase (805236 not learned) reads 0 heal. 805236 is learned for real between the phases (mentor D-67). Reference search 2026-11-24: bindmysoul talents 805236 text 'you now heal equal to 50% of all damage dealt by critical strikes with auto attacks' (same value); coa-history spells 807426 and 560839: 0 events in 186 logs (positive control 801904 Azzinoth's Assault: 21 casts); expected values come from the tooltip and the server DBC set."
+      "observe_source": "Contrast arm of crit_swing_heal for the condition 'While Inner Demon is active': the same layout with no Inner Demon 804216 on the caster in either phase (Felfury 800058 set to 4 stacks in both, as in the treatment); the after ratio must stay 0. 807426 Effect[0] aura 354, BasePoints 49 + 1 = 50 ($807426s1); the Felsworn refresh applies 807426 while Inner Demon 804216 and 805236 are both on the caster (AscensionFelsworn.cpp:274). The event script (AscensionFelswornEvents.cpp: Check case 807426 returns Inner(player) && autoAttack && crit, :111-112; Proc case 807426 calls Copy(player, player, 560839, damage / 2), :262-263) heals the caster with 560839 (SPELL_EFFECT_HEAL). The caster auto-attacks the dummy for 3 swing intervals (8400 ms of the generated 2800 ms reference interval, the Felsworn contract gives Inner Demon DurationIndex 1, AscensionFelswornContracts.cpp:81-85, and the script sets its duration) in each phase, every swing forced critical (force_crit melee); Inner Demon is the clause's condition; this arm never sets it, and Felfury 800058 is set to 4 stacks 500 ms before each phase's attack. The ratio divides the increase of the caster's 560839 heal total over the after phase by the increase of its critical swing damage (melee_damage_total critical) over it; the before phase (805236 not learned) reads 0 heal. 805236 is learned for real between the phases (mentor D-67). Reference search 2026-11-24: bindmysoul talents 805236 text 'you now heal equal to 50% of all damage dealt by critical strikes with auto attacks' (same value); coa-history spells 807426 and 560839: 0 events in 186 logs (positive control 801904 Azzinoth's Assault: 21 casts); expected values come from the tooltip and the server DBC set.",
+      "phase_auras": [
+        [
+          800058,
+          4,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 805235,

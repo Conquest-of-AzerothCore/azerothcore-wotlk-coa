@@ -2117,10 +2117,11 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             setup_steps = [gate_learn_step] + [step for setup_spell in spec.setup_casts
                                                for step in attack_setup_cast_steps(records, setup_spell,
                                                                                    spec.setup_wait_ms)]
-        swings = [phase_aura_step(aura) for aura in spec.phase_auras] + swings
         if spec.phase_auras:
+            swings = ([phase_aura_step(aura) for aura in spec.phase_auras]
+                      + [{'action': 'wait', 'label': 'let the phase auras settle', 'ms': spec.wait_ms}] + swings)
             contract += (f' Each phase sets the auras {[list(aura) for aura in spec.phase_auras]} (spell, stacks, on, '
-                         f'by) right before it starts attacking.')
+                         f'by) and waits {spec.wait_ms} ms before it starts attacking.')
         steps = (base_steps(class_file) + setup_steps + swings
                  + [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields)] + gate_steps
                  + [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}]

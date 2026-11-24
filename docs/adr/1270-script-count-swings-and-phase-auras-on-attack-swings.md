@@ -24,7 +24,7 @@ of the swings could not be measured with its condition held.
 - Infer consumption from the caster's 5% health cost per attack — measures one clause through another; not taken.
 - A `script_count` sub-key `swings`: swing after each real cast for a window shorter than the count, then judge the
   count plus the landed attacks since the cast against the stated count, with per-reading consumption conditions.
-- For 805236: let `attack_swings` take `phase_auras`, set right before each phase's attack.
+- For 805236: let `attack_swings` take `phase_auras`, set before each phase's attack.
 
 ## Decision
 
@@ -36,7 +36,8 @@ count (mentor D-95 condition 1). The window must stay below every counted readin
 most), so the aura cannot end inside it. Missed or avoided swings and the aura's end at the last count stay untested
 (D-95 conditions 2 and 3): seven attacks of the 2300 ms reference main hand do not fit in the 12000 ms duration.
 
-`attack_swings` takes `phase_auras`, set right before each phase's attack; `after_auras` stay refused.
+`attack_swings` takes `phase_auras`, set at the start of each phase and followed by a `wait_ms` wait before the
+attack, so what the aura's scripts apply is in place for the first swing; `after_auras` stay refused.
 
 ## Consequences
 

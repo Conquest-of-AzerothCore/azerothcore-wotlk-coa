@@ -42,13 +42,15 @@ class AttackSwingPhaseAuraTests(unittest.TestCase):
         attacks = [index for index, step in enumerate(steps) if step['action'] == 'attack']
         self.assertEqual(len(attacks), 2)
         for index in attacks:
-            self.assertEqual(steps[index - 1], {'action': 'set_aura', 'actor': 'caster', 'spell': 804216,
-                                                'stacks': 1})
+            self.assertEqual(steps[index - 2:index], [
+                {'action': 'set_aura', 'actor': 'caster', 'spell': 804216, 'stacks': 1},
+                {'action': 'wait', 'label': 'let the phase auras settle', 'ms': 500}])
         labels = [step.get('label') for step in steps]
         gate = steps.index({'action': 'learn', 'actor': 'caster', 'spell': 805236})
         self.assertLess(labels.index(expectation.model['before_label']), gate)
         self.assertLess(gate, attacks[1])
-        self.assertIn('sets the auras [[804216, 1, \'caster\', \'caster\']]', scenario['contract'])
+        self.assertIn("sets the auras [[804216, 1, 'caster', 'caster']] (spell, stacks, on, by) and waits 500 ms",
+                      scenario['contract'])
 
     def test_without_phase_auras_the_swing_scenario_is_unchanged(self):
         plain, _ = generated(folly(phase_auras=[]))
