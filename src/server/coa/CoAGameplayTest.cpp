@@ -3635,6 +3635,8 @@ private:
             Require(unit->IsPlayer(), "Free-for-all PvP state needs a player");
             return unit->IsFFAPvP();
         }
+        if (metric == "pvp_flagged")
+            return unit->IsPvP();
         if (metric == "creature_type")
             return unit->GetCreatureType();
         if (metric == "display_id")
