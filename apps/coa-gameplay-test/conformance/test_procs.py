@@ -2133,5 +2133,121 @@ class AuraStackCompareTest(unittest.TestCase):
         self.assertIn('baseline arm of the aura stack events', verdict.explanation)
 
 
+
+TAKEN_STACK_BASELINE = {**BASELINE_LABELS, 'attempts': 20, 'stack_events': {
+    'aura': 800058, 'set': 0, 'per_cast': 0, 'cap': 6, 'completed': BASELINE_LABELS['trials'],
+    'reads': [f'92111 proc baseline stacks {attempt}' for attempt in range(1, 21)]
+    + ['92111 proc baseline stacks after the drain']}}
+
+
+class TakenHitStackEventsTest(unittest.TestCase):
+    TUNDRA_WARRIORS = 92122
+    STRIKER_SPELL = 41394
+    STACK = 800058
+    CONDITION = 800209
+
+    def entry(self, **changes) -> dict:
+        from profile import load_fixture_class_file
+        entry = next(entry for entry in load_fixture_class_file(23)['procs'] if entry['aura'] == self.TUNDRA_WARRIORS)
+        entry = {**entry, 'trigger': {'action': 'taken_hit', 'spell': self.STRIKER_SPELL, 'striker_entry': 36},
+                 'baseline': True, 'event_metric': 'aura_stacks', 'stack_aura': self.STACK, 'stack_set': 0,
+                 'stack_per_cast': 0, 'stack_cap': 6, 'events_per_proc': 1, 'proc_spell': self.STACK,
+                 'attempt_auras': [{'spell': self.STACK, 'stacks': 0, 'source': 'seeded'},
+                                   {'spell': self.CONDITION, 'stacks': 1, 'source': 'seeded'}], **changes}
+        return {key: value for key, value in entry.items() if value is not None}
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+    def test_the_stacks_are_reset_before_and_read_after_every_strike_in_both_arms(self):
+        from profile import load_fixture_class_file
+        scenario, [expectation] = proc_scenario(load_fixture_class_file(23), self.entry())
+        steps = run.validate(scenario)['steps']
+        strikes = [index for index, step in enumerate(steps)
+                   if step['action'] == 'cast' and step['actor'] == 'striker']
+        reads = {index for index, step in enumerate(steps)
+                 if step.get('metric') == 'aura_stacks' and step.get('spell') == self.STACK}
+        self.assertTrue(strikes)
+        for strike in strikes:
+            self.assertEqual([(steps[strike - offset]['spell'], steps[strike - offset]['stacks'])
+                              for offset in (2, 1)], [(self.STACK, 0), (self.CONDITION, 1)])
+            self.assertEqual(steps[strike + 1]['action'], 'wait')
+            self.assertIn(strike + 2, reads)
+        learn = next(index for index, step in enumerate(steps)
+                     if step['action'] == 'learn' and step.get('spell') == self.TUNDRA_WARRIORS)
+        self.assertEqual(len([strike for strike in strikes if strike < learn]), expectation.model['baseline']['attempts'])
+        model = expectation.model
+        self.assertEqual((model['stack_events']['cap'], model['stack_events']['per_cast']), (6, 0))
+        self.assertEqual(len(model['event_labels']), model['part_attempts'] + 1)
+        self.assertEqual(model['baseline']['stack_events']['completed'], model['baseline']['trials'])
+        self.assertIn('after each strike interval', expectation.rule)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+    def test_a_taken_hit_stack_entry_needs_no_per_strike_change_and_a_cap(self):
+        from profile import load_fixture_class_file
+        for change in ({'stack_per_cast': 1}, {'stack_cap': None}, {'stack_cap': 0}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                proc_plan(load_fixture_class_file(23), self.entry(**change))
+
+    def test_attempt_auras_on_a_taken_hit_trigger_need_stack_events(self):
+        from procs import attempt_auras
+        self.assertEqual([step['spell'] for step in attempt_auras(self.entry())], [self.STACK, self.CONDITION])
+        with self.assertRaises(ValueError):
+            attempt_auras(self.entry(event_metric='spell_cast_count'))
+
+
+class TakenHitStackCompareTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def verdict(self, gained: int, baseline_gained: int = 0, peak: str = '1'):
+        expectation = proc_expectation()
+        model = {**expectation.model, 'trigger': {'action': 'taken_hit', 'spell': 41394, 'striker_entry': 36},
+                 'part_attempts': 2000, 'event_labels': STACK_READS, 'baseline': TAKEN_STACK_BASELINE,
+                 'stack_events': {'aura': 800058, 'set': 0, 'per_cast': 0, 'cap': 6,
+                                  'completed': LABELS['attempts']}}
+        expectation = replace(expectation, model=model)
+        steps = [assert_step(LABELS['aura'], '1'), assert_step(LABELS['trials'], '2020'),
+                 assert_step(LABELS['attempts'], '2020')]
+        steps += [assert_step(label, peak if index == 0 else '1' if index < gained else '0')
+                  for index, label in enumerate(STACK_READS[:-1])]
+        steps.append(assert_step(STACK_READS[-1], '0'))
+        stack = TAKEN_STACK_BASELINE['stack_events']
+        steps.append(assert_step(TAKEN_STACK_BASELINE['trials'], '20'))
+        steps += [assert_step(label, '1' if index < baseline_gained else '0')
+                  for index, label in enumerate(stack['reads'])]
+        self.workspace.scenario(PROC_KEY, 'proc', [expectation], steps=steps)
+        manifest, results = self.workspace.manifest()
+        from compare import compare
+        [verdict] = [verdict for verdict in compare(manifest, results, tooltips=chance_reader())
+                     if verdict.check == PROC_CHECK]
+        return verdict
+
+    def test_stacks_gained_after_the_strikes_are_the_events(self):
+        verdict = self.verdict(400)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 400 / 2000)
+
+    def test_a_seeded_server_that_procs_more_often_alerts(self):
+        self.assertEqual(self.verdict(600).status, 'alert')
+
+    def test_a_seeded_server_that_procs_less_often_alerts(self):
+        self.assertEqual(self.verdict(200).status, 'alert')
+
+    def test_a_stack_gained_in_the_baseline_arm_alerts(self):
+        verdict = self.verdict(400, baseline_gained=1)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('baseline trials without the passive', verdict.explanation)
+
+    def test_a_read_at_the_cap_leaves_the_part_uncounted(self):
+        from proc_stacks import capped
+        model = {'event_labels': STACK_READS, 'baseline': TAKEN_STACK_BASELINE,
+                 'stack_events': {'aura': 800058, 'set': 0, 'per_cast': 0, 'cap': 6, 'completed': LABELS['attempts']}}
+        self.assertEqual(capped(model, {STACK_READS[0]: 6.0}), [STACK_READS[0]])
+        self.assertEqual(capped(model, {STACK_READS[0]: 5.0}), [])
+        self.assertNotIn(self.verdict(400, peak='6').status, ('ok', 'alert'))
+
+
 if __name__ == '__main__':
     unittest.main()

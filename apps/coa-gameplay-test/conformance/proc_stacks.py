@@ -7,6 +7,8 @@ STACK_SET = 'stack_set'
 STACK_PER_CAST = 'stack_per_cast'
 STACK_CAP = 'stack_cap'
 AVOIDED = 'avoided'
+TAKEN_HIT = 'taken_hit'
+CAPPED_TRIGGERS = (AVOIDED, TAKEN_HIT)
 CAST_COUNT = 'spell_cast_count'
 REFUSED_FIELDS = ('streams', 'extra_event_terms', 'event_actor', 'trial_readings', 'most_procs_per_trigger',
                   'trigger_spells', 'events_baseline_per_attempt')
@@ -21,13 +23,13 @@ def counts_stacks(entry: dict) -> bool:
         return False
     aura, where = entry['aura'], f'Proc {entry["aura"]} counts {AURA_STACKS} events'
     stack, held, per_cast = entry.get(STACK_AURA), entry.get(STACK_SET), entry.get(STACK_PER_CAST)
-    if entry['trigger']['action'] not in ('cast', AVOIDED):
-        raise ValueError(f'{where}, which needs a cast or an avoided trigger')
-    if avoided(entry) and (per_cast != 0 or not whole(entry.get(STACK_CAP)) or entry[STACK_CAP] <= held):
-        raise ValueError(f'{where} on an avoided trigger with a {STACK_PER_CAST} of 0 and a whole {STACK_CAP} above '
-                         f'the {STACK_SET}')
-    if not avoided(entry) and STACK_CAP in entry:
-        raise ValueError(f'{where}: {STACK_CAP} is read on an avoided trigger only')
+    if entry['trigger']['action'] not in ('cast', *CAPPED_TRIGGERS):
+        raise ValueError(f'{where}, which needs a cast, an avoided or a taken_hit trigger')
+    if capped_trigger(entry) and (per_cast != 0 or not whole(entry.get(STACK_CAP)) or entry[STACK_CAP] <= held):
+        raise ValueError(f'{where} on an {entry["trigger"]["action"]} trigger with a {STACK_PER_CAST} of 0 and a '
+                         f'whole {STACK_CAP} above the {STACK_SET}')
+    if not capped_trigger(entry) and STACK_CAP in entry:
+        raise ValueError(f'{where}: {STACK_CAP} is read on an avoided or a taken_hit trigger only')
     if not (whole(stack) and stack > 0 and whole(held) and held >= 0 and whole(per_cast) and held + per_cast >= 0):
         raise ValueError(f'{where} with a positive {STACK_AURA}, a {STACK_SET} of at least 0 and a whole '
                          f'{STACK_PER_CAST} that leaves at least 0 stacks')
@@ -49,6 +51,14 @@ def counts_stacks(entry: dict) -> bool:
 
 def avoided(entry: dict) -> bool:
     return entry['trigger']['action'] == AVOIDED
+
+
+def taken_hit(entry: dict) -> bool:
+    return entry['trigger']['action'] == TAKEN_HIT
+
+
+def capped_trigger(entry: dict) -> bool:
+    return entry['trigger']['action'] in CAPPED_TRIGGERS
 
 
 def avoided_attempt_steps(entry: dict, attempts: int, swing_ms: int, baseline: bool = False) -> list[dict]:
@@ -85,7 +95,7 @@ def baseline_casts_step(entry: dict) -> dict:
 
 def stack_model(entry: dict, attempts_label: str) -> dict:
     return {'aura': entry[STACK_AURA], 'set': entry[STACK_SET], 'per_cast': entry[STACK_PER_CAST],
-            'completed': attempts_label, **({'cap': entry[STACK_CAP]} if avoided(entry) else {})}
+            'completed': attempts_label, **({'cap': entry[STACK_CAP]} if capped_trigger(entry) else {})}
 
 
 def baseline_model(entry: dict, attempts: int, completed: str | None = None) -> dict:
@@ -103,6 +113,13 @@ def rule(entry: dict, baseline_attempts: int) -> str:
                 f'counted, reset to {held} before it and read after it; a read at the {entry[STACK_CAP]}-stack cap '
                 f'voids the part, since a capped gain is not read; the baseline swing intervals before the passive is '
                 f'learned read the same way and must give no event')
+    if taken_hit(entry):
+        return (f'; events: the stacks of aura {stack} on the caster read after each strike interval, from {held} set '
+                f'before the strike as a precondition fixture, not the subject; events = the sum of the reads - {held} '
+                f'x the intervals, {entry["events_per_proc"]} per proc; the drain is one more interval without a '
+                f'strike, reset to {held} before it and read after it; a read at the {entry[STACK_CAP]}-stack cap '
+                f'voids the part, since a capped gain is not read; the {baseline_attempts} baseline strikes before the '
+                f'passive is learned read the same way and must give no event')
     return (f'; events: the stacks of aura {stack} on the caster read after each cast, from {held} set before the cast '
             f'as a precondition fixture, not the subject; a completed cast without a proc changes them by '
             f'{per_cast:+d}; events = the sum of the reads - {held} x the attempts - ({per_cast:+d}) x the completed '

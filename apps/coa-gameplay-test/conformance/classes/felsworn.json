@@ -550,6 +550,44 @@
       "min_detectable": 6,
       "events_exclude_trigger_casts": true,
       "trial_casts": true
+    },
+    {
+      "aura": 805245,
+      "name": "Demonic Fortitude (damage taken)",
+      "tooltip": "While Demonic Will or Hateforged Barrier are active, all damage taken or avoided now has a $h% chance to generate 1 |cff32cd32Felfury|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "taken_hit",
+        "spell": 41394,
+        "striker_entry": 36
+      },
+      "residual_target": 0.001,
+      "min_detectable": 5,
+      "min_parts": 10,
+      "trigger_text": "all damage taken",
+      "event_metric": "aura_stacks",
+      "stack_aura": 800058,
+      "stack_set": 0,
+      "stack_per_cast": 0,
+      "stack_cap": 6,
+      "events_per_proc": 1,
+      "proc_spell": 800058,
+      "proc_spell_source": "Proc of 805245 calls Gain(player, 1) (AscensionFelswornEvents.cpp:173-175), which adds one stack of aura 800058 (AscensionFelsworn.cpp:223-233); no spell is cast.",
+      "attempt_auras": [
+        {
+          "spell": 800058,
+          "stacks": 0,
+          "source": "Felfury 800058 set to 0 before every strike: the stack read after the strike interval counts the Gain(player, 1) events (aura_stacks events, ADR 1254, on the taken_hit trigger)."
+        },
+        {
+          "spell": 800209,
+          "stacks": 1,
+          "source": "Demonic Will 800209 held before every strike: the clause's condition (AscensionFelswornEvents.cpp:44-46, HasAura(800209)), not its subject. A real cast would gain 1 Felfury itself (ResourceGainRules, AscensionCustomResourceData.h) and mix that gain into the events, so the aura is set, as on the avoided leg (controller go, 2026-11-23)."
+        }
+      ],
+      "handler": "aura_ascension_felsworn_event: Check (AscensionFelswornEvents.cpp:43-48) passes damage taken (damage > 0), a dodge or a parry on the caster (id 805245) while Demonic Will 800209 or Hateforged Barrier 705129 is held, and rolls Chance(player, 805245) (Spell.dbc ProcChance 20, no cooldown, AscensionFelsworn.cpp:235-244); Proc gains 1 Felfury 800058. spell_proc 805245 ProcFlags 1048575, SpellPhaseMask 2 (rev_20260909_05_felsworn_completion.sql:36). Trigger: a stationary striker (creature 36) casts Light of the Naaru 41394 (Holy, magic, 1100 damage) at the caster, which is set to full health before every strike; each landed hit is one trial (damage taken leg). The avoided leg stays a tool gap. Hateforged Barrier 705129 as the condition is not read."
     }
   ],
   "triggers": [
@@ -26161,6 +26199,80 @@
         "repeats": 5
       },
       "observe_source": "Carve 800206 Description (server DBC set): 'Upon ending the channel, slash in front of you, dealing increased Weapon Damage with both weapons based on how long you channel'. Direction only (no figure). The plain judge counts the end slash 803715 on the dummy after a full channel (DurationIndex 66, 2500 ms; 3000 ms wait): 2 events, one per weapon (before: no cast, 0). channel_lengths (mentor D-100 (3)) ends the channel by the native cancel (cancel_aura, CMSG_CANCEL_AURA, which interrupts the running channel) 650 ms and 1400 ms after the cast, between the 250 ms channel ticks, and keeps the full channel: three lengths, 5 casts each; each cast must land the slash twice, and the damage without critical, resisted or blocked hits must rise with the length without overlap: every kept damage of a length below every kept damage of the next (mentor D-106). Sizing: the first run read 170 to 186 at 650 ms, 360 to 407 at 1400 ms and 700 to 760 for the full channel, ranges that do not overlap; if the slash ignored the channel length, the 15 exchangeable reads would fall in three ordered blocks with probability 5!^3/15! = 1.3e-6 per run; no critical hit in 30 reads. The judge reads the channel aura 800206 on the caster right after each cancel and voids a cast whose channel is still up (review fw-rbdir I-1, mentor D-100); a full channel ends by expiry, unread. Felfury 800058 x6 and 803468 are precondition fixtures. Reference search 2026-11-24: coa-history spell 803715 (Carve end slash): 1086 SPELL_DAMAGE events by players in 5 logs (188 crits, 37 to 1630), no channel length or target rank in the log lines; spell 801312: 0 events (live Fel Fireball logs under 501286-501288 carry no Hellfire Carver marker); bindmysoul snapshot and earlier searches (fw-ea5) found nothing beyond the tooltips."
+    },
+    {
+      "spell": 806235,
+      "kind": "hit_ratio",
+      "variant": "felshock_hit_landed",
+      "label_suffix": "felshock_hit_landed",
+      "name": "Hellfire Command (Felshock 572792: +3% chance to be hit by spells, pooled)",
+      "quote": "and cause enemies struck to have a $572792s1% increased chance to be hit by spells",
+      "expected": 1.0,
+      "observe_spell": 802060,
+      "warmup": [
+        802060
+      ],
+      "control": {
+        "auras": [
+          [
+            804216,
+            1
+          ],
+          [
+            800058,
+            2
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            804216,
+            1
+          ],
+          [
+            800058,
+            2
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          806235
+        ]
+      },
+      "rate": "landed",
+      "expected_points": 3,
+      "trials": 200,
+      "parts": 48,
+      "streams": 8,
+      "cast_power": 100,
+      "force_crit": "spell",
+      "fixture": {
+        "spell_hit_rating": 0
+      },
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Sargeron Smite 802060 (EffectImplicitTargetA[0] 6, no radius, no chain target) is cast at the stream's own dummy by id; Felshock 572792 is cast by 806235 on the struck enemy only (Cast(player, target, 572792), AscensionFelswornEvents.cpp:166-168), so each stream's mark sits on its own dummy, and the streams are never grouped"
+      },
+      "observe_source": "$572792s1 = 3: Felshock 572792 Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, BasePoints 2 + DieSides 1, MiscValue 126 (every school but Physical), duration 12 s; Unit::MagicSpellHitResult adds the victim's aura 186 total for the spell's school mask to every attacker's hit chance (Unit.cpp:4010-4011). 572792 is applied by a real Sargeron Smite cast: 806235 (learned in the treatment arm only) casts 572792 on the enemy struck by a non-periodic critical hit of a Felfury spender (AscensionFelswornEvents.cpp:66-67 and :166-168); Sargeron Smite 802060 is a spender (AscensionFelsworn.cpp:56-60), instant, magic (DmgClass 1), SchoolMask 36 (Fire and Shadow, inside mask 126), and its hits are forced critical (spell crit rating fixture). The warmup Smite and every landed Smite put the mark on the stream's dummy, renewed every trial (1.6 s apart, against a 12 s duration), so every observed Smite after the warmup rolls against a marked dummy; the control arm, 806235 not learned, leaves no mark (mentor D-106: the real route, a no-Felshock control). Observed: the share of Smite casts that land (damage hits over SPELL_GO), with the reference character's spell hit rating removed (fixture spell_hit_rating 0) and partial resists removed by 823764 in both arms; a same-level dummy gives 96% (Unit::MagicSpellHitResult, levelDiff 0) against 99% with the mark: expected +3 points, judged by the unchanged rate judge (2-point band, half-width at most 1 point). Inner Demon 804216 and Felfury 800058 x2 are precondition fixtures set before every trial in both arms, as the 806235 mark entries (the spender's cost). Sized: 9600 trials per arm (48 parts x 200, 8 streams), about 1.26 times the Staff of the Coven 807905 sizing (96% vs 100%) for the larger variance at 96% vs 99%."
+    },
+    {
+      "spell": 500610,
+      "name": "Fel Torpedo (threat per damage above a control hit)",
+      "kind": "threat_above_control",
+      "label_suffix": "threat_above_control",
+      "quote": "Generates a large amount of threat.",
+      "hit_spell": 500761,
+      "control_spell": 803715,
+      "samples": 5,
+      "observe_source": "Mentor D-106 (2026-11-24): the tooltip gives no figure, so the claim is judged as a direction only: Fel Torpedo's threat per point of damage strictly above the Carve control's, with non-overlapping samples. Hit 500761 (Fel Torpedo's damage, Spell.dbc Effect[1] 63 SPELL_EFFECT_THREAT 225, SpellLevel 34; area of 3 yd around the caster, EffectImplicitTargetA 22 / B 15, EffectRadiusIndex 15) against Carve's strike 803715 (no threat effect, no spell_threat row, a cone of 8 yd, EffectRadiusIndex 195 and 14), five casts each at fresh dummies 10 yd apart (the caster 3 yd behind each, the next dummy 13 yd ahead and the previous 7 yd behind, outside both areas). Observed and not asserted: 500761 has a spell_threat row (flatMod 0, pctMod 3.25, rev_20261026_20_coa_tank_ability_threat.sql:57) and fw-ea5 read threat 1209.75 on 303 health lost (counted pair 20261123-211541 / -211612), which is 303 x 3.25 + 225; the 3.25 is our own SQL value, not an expectation (mentor D-106). Reference search 2026-11-23 (fw-ea5): coa-history spell 500761 and 500610: 0 events in 186 logs under those ids; the bindmysoul snapshot has no value beyond the tooltip."
     }
   ],
   "player_observations": [],
