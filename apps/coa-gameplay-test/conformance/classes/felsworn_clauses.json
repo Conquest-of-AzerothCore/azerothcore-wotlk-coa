@@ -1124,7 +1124,7 @@
   },
   {
     "spell": 560542,
-    "clause": "Emanate a powerful aura, granting $s1% increased melee and ranged haste to party and raid members within $a1 yds.",
+    "clause": "Emanate a powerful aura, granting $s1% increased melee",
     "labels": [
       "560542 behaviour_party_stat_ratio melee_haste"
     ],
@@ -1156,7 +1156,7 @@
   },
   {
     "spell": 560549,
-    "clause": "Grant $s1% increased melee and ranged haste to party and raid members within $a1 yds.",
+    "clause": "Grant $s1% increased melee",
     "labels": [
       "560549 behaviour_party_stat_ratio melee_haste"
     ],
@@ -2091,10 +2091,10 @@
     "spell": 704613,
     "clause": "Increases the amount of beneficial magic effects stolen by your Consume Magic by $s1.",
     "labels": [
-      "704613 behaviour_metric_delta stolen",
-      "704613 behaviour_metric_delta stolen_effects"
+      "704613 behaviour_metric_delta stolen"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "HELD '704613 behaviour_metric_delta stolen_effects' (review fw-rvb5 I-2): only 2 buffs on the dummy, so the read saturates at the expected 2 and an over-steal would pass; needs a third Magic buff and a rerun."
   },
   {
     "spell": 705102,
@@ -4317,7 +4317,16 @@
           "806235 behaviour_metric_delta mark_gone"
         ]
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "The increased chance to be hit by spells on the struck enemy has no victim-side hit read; a statistical design needs about 2000 casts per arm (fw-vb5 report) and was not run; the effect_value label is data only. Review fw-rvb5 minor: tool gap, not status 3.",
+      "attempts": [
+        {
+          "agent": "fw-vb5",
+          "report": ".agents/plans/fw-vb5/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 807430,
