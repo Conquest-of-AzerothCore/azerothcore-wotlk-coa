@@ -137,6 +137,8 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[2].Effect = 0;
     if (id == 800209)
         info->Effects[EFFECT_2].MiscValue = SPELL_SCHOOL_MASK_NORMAL;
+    if (id >= 707523 && id <= 707527)
+        info->Effects[EFFECT_1].MiscValue = SPELL_SCHOOL_MASK_NORMAL;
     if (id == BurningCommander)
     {
         periodic(1, 3000);
@@ -296,10 +298,11 @@ void ApplyContracts(SpellInfo* info)
     if (id == 560284)
         info->Effects[2].Effect = 0;
     if (id == 520832)
-    {
-        info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
-        info->Effects[0].TargetB = SpellImplicitTargetInfo();
-    }
+        for (uint8 i : { EFFECT_0, EFFECT_2 })
+        {
+            info->Effects[i].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+            info->Effects[i].TargetB = SpellImplicitTargetInfo();
+        }
     if (id == 555742)
         info->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
     if (id == 805235 || id == 807590)
