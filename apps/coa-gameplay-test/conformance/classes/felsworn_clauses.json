@@ -1090,7 +1090,7 @@
         ]
       }
     ],
-    "reason": "Owner ruling O-33 (Felsworn ADR 0027): 555739 now carries 806095's 200%. '555738 behaviour_metric_delta hit_ap' read 14090 and 14094 (band 13992 to 14107; before: 10580 and 10570 at 150%) in the fw-f3 counted pair .cache/verify-all/20261124-062216 / -062313 (build 4a226aa8cc33, server commit 2fb6e708e05c); 5 focused reruns 20261124-062930 to -063324 all ok.",
+    "reason": "Owner ruling O-33 (Felsworn ADR 0027): 555739 now carries 806095's 200%. '555738 behaviour_metric_delta hit_ap' read 14090 and 14094 (band 13992 to 14107; before: 10580 and 10570 at 150%) in the fw-f3 counted pair .cache/verify-all/20261124-062216 / -062313 (build 4a226aa8cc33, server commit 2fb6e708e05c); 5 focused reruns 20261124-062930 to -063324 all ok. 'with both weapons' (Felsworn ADR 0029, review fw-rf3 I-2): the server now casts the off-hand hit 806097 after each 555739 cast when a usable off-hand weapon is held, at 806095's 200%; '555738 behaviour_metric_delta hit_oh' read 7012 and 7016 (band 6994 to 7024, the off-hand path; before: no 806097 cast) and its control '555738 behaviour_metric_delta hit_oh_none' (off hand disarmed by 47974) read 0 and 0 in the fw-f3b counted pair .cache/verify-all/20261124-070350 / -070436 (build 6baa2739e5d6, server commit 684e6398ef5e); 5 focused reruns 20261124-070807 to -071129 all ok (hit_oh 7000 to 7020). Archived live: 46 events of 806097 against 48 of 555739 in the same 2 logs, one off-hand hit after each main-hand hit.",
     "tool_gap": {
       "reason": "hit_period (the cast_period judge) needs a first read of none before the first tick; this periodic effect ticks at the cast instant (6 hits of 808303 in the window with 1 already at the first read, 5 of 555739 with 1 at the first read, both runs of prove-a2, window starting 1 ms after the cast, poll 10 ms), so the verdict is an alert on 'at least 3 casts after a read of none', not on the period. Needs tool group B: a period judge that accepts an immediate first tick (stamps from the second hit on).",
       "attempts": [
@@ -4292,7 +4292,7 @@
       "804823 behaviour_taken_hit end_leech"
     ],
     "kind": "claim",
-    "reason": "Owner ruling O-32 (Felsworn ADR 0028): the end casts Felfire Blast 804825. '804823 behaviour_taken_hit end_leech' read one blast per trial, no 807347, heal equal to damage, 62-63 at one hit, 64-65 at three, 67-68 at five, in both runs of the fw-f3 counted pair .cache/verify-all/20261124-062629 / -062700 (same build) (before: 807347 for 200 and 600); 5 focused reruns 20261124-062930 to -063324 all ok."
+    "reason": "Owner ruling O-32 (Felsworn ADR 0028): the end casts Felfire Blast 804825. '804823 behaviour_taken_hit end_leech' read one blast per trial, no 807347, heal equal to damage, 62-63 at one hit, 64-65 at three, 67-68 at five, in both runs of the fw-f3 counted pair .cache/verify-all/20261124-062629 / -062700 (same build) (before: 807347 for 200 and 600); 5 focused reruns 20261124-062930 to -063324 all ok. Amounts judged since review fw-rf3 I-1 and M-3 (ADR 0028 amendment): per-arm bands of the 804825 damage from its data (zero 61-62, one 62-63, three 64-65, five 67-68) and a zero-hit arm; the fw-f3b counted pair .cache/verify-all/20261124-070350 / -070436 (build 6baa2739e5d6, server commit 684e6398ef5e) read zero 61 / 61, one 62-63 / 62-63, three 64-65 / 65, five 68 / 67-68, heal equal, one blast and no 807347 per trial; 5 focused reruns 20261124-070807 to -071129 all ok."
   },
   {
     "spell": 805235,
