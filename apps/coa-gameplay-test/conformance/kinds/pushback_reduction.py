@@ -39,6 +39,7 @@ class PushbackReductionSpec:
     label_suffix: str = ''
     reducer_learn: bool = False
     repeats: int = 1
+    caster_auras: tuple[tuple[int, int], ...] = ()
 
 
 def pushback_phases(spec: PushbackReductionSpec) -> tuple[str, ...]:
@@ -71,6 +72,10 @@ def pushback_reduction_scenario(class_file: dict, spec: PushbackReductionSpec) -
     facts = facts_of(records, spec.cast_spell)
     windows = dict(zip(phases, spec.windows))
     polls = {}
+    if any(stacks < 1 for _, stacks in spec.caster_auras):
+        raise ValueError(f'{spec.spell} pushback_reduction holds its caster_auras at one stack or more')
+    condition_steps = [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': count}
+                       for aura, stacks in spec.caster_auras for count in (0, stacks)]
 
     def phase(kind: str, sample: int = 0) -> list[dict]:
         name = f'{kind} {sample}' if sample else kind
@@ -78,7 +83,7 @@ def pushback_reduction_scenario(class_file: dict, spec: PushbackReductionSpec) -
         steps = [{'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': spec.cast_power},
                  {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.cast_spell},
                  {'action': 'set_health', 'actor': CASTER, 'value': PUSHBACK_CASTER_HEALTH,
-                  'maximum': PUSHBACK_CASTER_HEALTH},
+                  'maximum': PUSHBACK_CASTER_HEALTH}] + condition_steps + [
                  measurement(pushback_mark(spec, name, 'start'), CASTER, 'game_time_ms'),
                  {'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': TARGET}]
         waited = 0
@@ -139,6 +144,11 @@ def pushback_reduction_scenario(class_file: dict, spec: PushbackReductionSpec) -
              'band': bonus_band(spec.expected_pct),
              'phases': ({name: pushback_phase_model(spec, name, name, polls) for name in phases}
                         if spec.repeats == 1 else {})}
+    if spec.caster_auras:
+        held = ', '.join(f'{aura} at {stacks}' for aura, stacks in spec.caster_auras)
+        scenario['contract'] += (f' Condition auras on the caster, the same in every phase: right before each cast '
+                                 f'they are removed and set again (harness set_aura), {held}, so each cast starts '
+                                 f'under a fresh application.')
     if spec.repeats > 1:
         model['samples'] = {kind: [pushback_phase_model(spec, kind, f'{kind} {sample}', polls)
                                    for sample in range(1, spec.repeats + 1)] for kind in phases}
@@ -163,7 +173,8 @@ def pushback_reduction_spec(entry: dict) -> PushbackReductionSpec:
                                  int(entry['strike_at_ms']),
                                  tuple((int(low), int(high)) for low, high in entry['windows']),
                                  float(entry['expected_pct']), entry.get('label_suffix', ''),
-                                 bool(entry.get('reducer_learn', False)), int(entry.get('repeats', 1)))
+                                 bool(entry.get('reducer_learn', False)), int(entry.get('repeats', 1)),
+                                 tuple((int(spell), int(stacks)) for spell, stacks in entry.get('caster_auras', ())))
 
 
 def pushback_end_bracket(run: Run, phase: dict) -> tuple[float, float] | str:

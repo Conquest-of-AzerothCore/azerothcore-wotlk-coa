@@ -4223,6 +4223,7 @@ class CostGateSpec:
     priming_reads: tuple[tuple[int, int], ...] = ()
     area_dummies: tuple[float, ...] = ()
     priming_arm_states: tuple[tuple[int, str, int], ...] = ()
+    relocate_before_attempt: float | None = None
 
 
 @dataclass(frozen=True)
@@ -4442,6 +4443,8 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
 
     def attempt(label: str, power: list[dict]) -> list[dict]:
         return (approach + power + required_aura_steps(facts) + cost_gate_aura_steps(spec, spec.gated_spell)
+                + ([] if spec.relocate_before_attempt is None
+                   else [{'action': 'relocate', 'actor': CASTER, 'dx': spec.relocate_before_attempt}])
                 + [{'action': 'cast', 'actor': CASTER, 'spell': spec.gated_spell, 'target': spec.target},
                    {'action': 'wait', 'ms': CAST_GATE_WAIT_MS},
                    measurement(label, CASTER, 'cast_failure', spell=spec.gated_spell)])
@@ -4655,6 +4658,11 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
     if spec.shield_after_learn is not None:
         scenario['contract'] += (f' The shield item {spec.shield_after_learn["item"]} is added and equipped after '
                                  f'{list(spec.learn)} are learned, in every arm.')
+    if spec.relocate_before_attempt is not None:
+        scenario['contract'] += (f' Right before each judged attempt of {spec.gated_spell} the caster is moved '
+                                 f'{spec.relocate_before_attempt:g} yd along x from where it stands, facing unchanged '
+                                 f'(the dummy stands on +x), so a dash among the earlier casts does not leave the '
+                                 f'dummy behind it or out of range.')
     if spec.target_entry is not None:
         scenario['creatures'][0]['entry'] = spec.target_entry
         scenario['contract'] += f' The dummy is creature entry {spec.target_entry}.'
@@ -4689,7 +4697,19 @@ def cost_gate_spec(entry: dict) -> CostGateSpec:
                         tuple((int(aura), int(stacks)) for aura, stacks in entry.get('strike_victim_auras', ())),
                         entry.get('caster_health_pct'), bool(entry.get('refused_with', False)),
                         cost_gate_extra_reads(entry), entry.get('only_arm'), cost_gate_priming_reads(entry),
-                        cost_gate_area_dummies(entry), cost_gate_priming_arm_states(entry))
+                        cost_gate_area_dummies(entry), cost_gate_priming_arm_states(entry),
+                        cost_gate_relocate_before_attempt(entry))
+
+
+def cost_gate_relocate_before_attempt(entry: dict) -> float | None:
+    raw = entry.get('relocate_before_attempt')
+    if raw is None:
+        return None
+    if not isinstance(raw, dict) or set(raw) != {'dx'} or isinstance(raw['dx'], bool) \
+            or not isinstance(raw['dx'], (int, float)) or not 0 < abs(raw['dx']) <= RELOCATE_STEP_LIMIT_YD:
+        raise ValueError(f'{entry["spell"]} cost_gate relocate_before_attempt is {{"dx": yards}}, nonzero and at most '
+                         f'{RELOCATE_STEP_LIMIT_YD:g} yd (one relocate step), not {raw!r}')
+    return float(raw['dx'])
 
 
 def cost_gate_area_dummies(entry: dict) -> tuple[float, ...]:

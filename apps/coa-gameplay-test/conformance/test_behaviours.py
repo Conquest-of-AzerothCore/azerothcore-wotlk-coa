@@ -13452,6 +13452,7 @@ class MetricDeltaOwnCastContrastTests(unittest.TestCase):
 
 from test_periodic_dispel_party import PartyPulseTests  # noqa: E402,F401
 from test_fixed_count_swing import FixedCountSwingTests  # noqa: E402,F401
+from test_cost_gate_relocate import CostGateRelocateBeforeAttemptTests  # noqa: E402,F401
 
 
 UNBROKEN = 707407
