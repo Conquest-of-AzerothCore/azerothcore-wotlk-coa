@@ -5,6 +5,7 @@ from unittest import mock
 from behaviours import behaviour_scenario, metric_delta_spec
 from compare import judge_behaviour
 from metric_delta_options import script_count
+from procs import swing_interval
 from profile import DBC_DIR, load_fixture_class_file
 import run
 from test_behaviours import FakeRun, base_verdict
@@ -209,7 +210,7 @@ class ScriptCountSwingTests(unittest.TestCase):
             self.assertEqual(scenario['steps'][labels.index(label) - 1]['ms'], 500)
             self.assertEqual(scenario['steps'][start - 1]['action'], 'cast')
         waits = [step['ms'] for step in scenario['steps'] if step.get('label') == script_count.SWING_WAIT_LABEL]
-        self.assertEqual(waits, [4600, 4600])
+        self.assertEqual(waits, [2 * swing_interval(load_fixture_class_file(19))] * 2)
         self.assertEqual([creature['id'] for creature in scenario['creatures']], ['dummy'])
         self.assertEqual(expectation.model['script_count']['swings'],
                          {'count': 2, 'readings': [expectation.model['before_label'],
