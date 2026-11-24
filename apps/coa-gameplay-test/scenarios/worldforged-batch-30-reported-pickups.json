@@ -1,0 +1,266 @@
+{
+  "schema": 1,
+  "name": "Worldforged pickups reported in quests-world batch 30 stand at their corrected spots (#11717, #11529, #11581, #11692, #11563, #11551, #11728)",
+  "contract": "Merged PRs already moved or hid these reported pickups: #11703 (Scorched Equipment Cache 6942080), #11594 (Silt Covered Ring 6942183, Crimson Dragonscale 6940273, Bloodied Axe duplicate 6960003 hidden), #10519 (Sorrow of the Kodo 6942215) and #11891 (Defias Turncoat's Jerkin 6975032 hidden). Each visible pickup stands at its corrected spot and, except the Crimson Dragonscale, which keeps the realm's height, rests on the ground. The Durotar Peon's Sack 6941380 (#11563) is present and grounded. The hidden spawns do not appear.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 578.082,
+    "y": -4113.61,
+    "z": 19.22,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#11717: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95633,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "#11717: Scorched Equipment Cache stands inside the building at its #11703 spot",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": 578.082,
+      "y": -4113.61,
+      "z": 18.2154,
+      "max": 0.3,
+      "guid": 6942080,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "#11717: the pickup rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.3,
+      "max": 0.3,
+      "guid": 6942080,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": 1439.61,
+      "y": -4735.63,
+      "z": -15.69,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#11529: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95645,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "#11529: Skull Rock ring stands on the cave floor at its #11594 editor spot",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": 1439.61,
+      "y": -4735.63,
+      "z": -16.6884,
+      "max": 0.3,
+      "guid": 6942183,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "#11529: the pickup rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.3,
+      "max": 0.5,
+      "guid": 6942183,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -4057.33,
+      "y": -3456.09,
+      "z": 285.64,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#11581: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 254233,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "#11581: Crimson Dragonscale stands at its #11594 editor spot (realm height, ground check exempt)",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -4057.33,
+      "y": -3456.09,
+      "z": 284.64,
+      "max": 0.3,
+      "guid": 6940273,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": -1437.6,
+      "y": 1978.3,
+      "z": 87.44,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#11692: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 254275,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "#11692: Sorrow of the Kodo stands on the Desolace ground (#10519)",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -1437.6,
+      "y": 1978.3,
+      "z": 86.438,
+      "max": 0.3,
+      "guid": 6942215,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "#11692: the pickup rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.3,
+      "max": 0.3,
+      "guid": 6942215,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": -440.3,
+      "y": -4368.0,
+      "z": 61.04,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#11563: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 90293,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "#11563: the Durotar Peon's Sack is present on the ground",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -440.3,
+      "y": -4368.0,
+      "z": 60.04,
+      "max": 0.3,
+      "guid": 6941380,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "#11563: the pickup rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.3,
+      "max": 0.5,
+      "guid": 6941380,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -9994.84,
+      "y": -835.92,
+      "z": 23.6,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#11551: the misplaced Bloodied Axe duplicate is hidden (#11594)",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 93008,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -9854.7,
+      "y": 1295.5,
+      "z": 42.89,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#11728: the Defias Turncoat's Jerkin container is hidden (#11891)",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 1345037,
+      "equals": 0
+    }
+  ]
+}
