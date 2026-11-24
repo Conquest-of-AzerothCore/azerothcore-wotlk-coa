@@ -2539,7 +2539,7 @@
       "705135 cost_gate 800204 cd beyond"
     ],
     "kind": "claim",
-    "reason": "cost_gate on Felhoof Charge 800204 after a real Chaos Rush 500028, one scenario per arm (only_arm), the caster moved 20 yd back along x before each judged attempt (relocate_before_attempt, ADR 1278, provisional): refused 67 at 18100 ms without the talent, through (0) at 18100 ms with it, refused 67 at 17900 ms with it, both runs; counted pair fw-bk1 pair1 2026-11-24 (verify_all 20261124-085058 / -085304, server de423e7d99, worldserver 457f9186a3e7), 0 flips. The 2000 ms cut ($/1000;680318s1 = 2 sec) lies within the 100 ms margin; a 10% error moves the end by 200 ms."
+    "reason": "cost_gate on Felhoof Charge 800204 after a real Chaos Rush 500028, one scenario per arm (only_arm), the caster moved 20 yd back along x before each judged attempt (relocate_before_attempt, ADR 1278, provisional): refused 67 at 18100 ms without the talent, through (0) at 18100 ms with it, refused 67 at 17900 ms with it, both runs; counted pair fw-bk1 pair1 2026-11-24 (verify_all 20261124-085058 / -085304, server de423e7d99, worldserver 457f9186a3e7), 0 flips. The 2000 ms cut ($/1000;680318s1 = 2 sec) lies within the 100 ms margin; a 10% error moves the end by 200 ms. The effect_value data label comes from the class-end pair fw-pair3 (build 4444770a797e, head 97dc698223), not from this pair's worldserver; the behaviour labels come from this pair only."
   },
   {
     "spell": 705137,
@@ -4002,10 +4002,11 @@
     "clause": "In addition, reduces spell pushback suffered from damaging attacks by $s2% while Inner Demon is active.",
     "labels": [
       "803645 effect_value e1 #1",
-      "803645 behaviour_metric_delta pushback_inner_demon"
+      "803645 behaviour_metric_delta pushback_inner_demon",
+      "803645 behaviour_metric_delta pushback_no_inner_demon"
     ],
     "kind": "claim",
-    "reason": "pushback_reduction (Lich Essence layout, ADR 0543/0546) with Inner Demon 804216 as a CONDITION aura held in every phase (caster_auras, ADR 1278, provisional: removed and set again right before each cast); contrast = the learn of 803645. Fel Fireball 801312, struck by Light of the Naaru 41394 about 712 ms into the hit casts, 10 casts of each kind: mean ends unhit 1504, hit 1999, reduced unhit 1504, reduced 1749 ms, pushback falls by 50.51% (99% interval 50.51 to 50.51), inside the G-19 band 47.5..52.5 around $s2 = 50, both runs; counted pair fw-bk1 pair1 2026-11-24 (verify_all 20261124-085058 / -085304, server de423e7d99, worldserver 457f9186a3e7), 0 flips."
+    "reason": "pushback_reduction (Lich Essence layout, ADR 0543/0546), contrast = the learn of 803645, Fel Fireball 801312 struck by Light of the Naaru 41394 about 712 ms into the hit casts, 10 casts of each kind. Condition true: Inner Demon 804216 held in every phase (caster_auras, ADR 1278, provisional: removed and set again right before each cast): mean ends unhit 1504, hit 1999, reduced unhit 1504, reduced 1749 ms, pushback falls by 50.48% (99% interval 50.41 to 50.54) and 50.32% (50.09 to 50.56), inside the G-19 band 47.5..52.5 around $s2 = 50. Condition false (arm pushback_no_inner_demon, review fw-rbk1 I-1): 803645 learned, Inner Demon never cast or set, expected 0 (band -2..2): reduced ends 1999.11 and 1998.33 ms, pushback falls by -0.02% (-0.08 to 0.04) and 0.58% (0.01 to 1.14), so an unconditional reduction (about 50%) would alert. Counted pair fw-bk1b pair1 2026-11-24 (verify_all 20261124-092223 / -092259, server 13601a0695, worldserver 7c80971e293e), both labels ok in both runs, 0 flips. The effect_value data label comes from the class-end pair fw-pair3 (build 4444770a797e, head 97dc698223), not from this pair's worldserver; the behaviour labels come from this pair only."
   },
   {
     "spell": 803840,
@@ -4109,7 +4110,7 @@
       "804219 behaviour_metric_delta keep_rate"
     ],
     "kind": "claim",
-    "reason": "aura_keep_rate with aura_stacks 2 (ADR 1278, provisional): Felfury 800058 set at 2 stacks before every Ruin 501298, 804219 learned; run 1 4758 of 18750 casts kept it (25.38%, Wilson 99% [24.57, 26.20]), run 2 4726 (25.21%, [24.40, 26.03]), inside the G-19 band 23..27% of $s1 = 25; control Twin Slice 801901 kept it in 600 of 600 casts each run; 0 failed casts. Sizing: 150 parts of 125 casts (band_trials_needed 12443), residual 1.8e-4 per run; counted pair fw-bk1 pair1 2026-11-24 (verify_all 20261124-085058 / -085304, server de423e7d99, worldserver 457f9186a3e7), 0 flips. The roll is roll_chance_i(25) of the resource cost table (AscensionCompat.cpp:3474-3479), a script constant no spell modifier reaches."
+    "reason": "aura_keep_rate with aura_stacks 2 (ADR 1278, provisional): Felfury 800058 set at 2 stacks before every Ruin 501298, 804219 learned; run 1 4758 of 18750 casts kept it (25.38%, Wilson 99% [24.57, 26.20]), run 2 4726 (25.21%, [24.40, 26.03]), inside the G-19 band 23..27% of $s1 = 25; control Twin Slice 801901 kept it in 600 of 600 casts each run; 0 failed casts. Sizing: 150 parts of 125 casts (band_trials_needed 12443), residual 1.8e-4 per run; counted pair fw-bk1 pair1 2026-11-24 (verify_all 20261124-085058 / -085304, server de423e7d99, worldserver 457f9186a3e7), 0 flips. The roll is roll_chance_i(25) of the resource cost table (AscensionCompat.cpp:3474-3479), a script constant no spell modifier reaches. The effect_value data label comes from the class-end pair fw-pair3 (build 4444770a797e, head 97dc698223), not from this pair's worldserver; the behaviour labels come from this pair only. Limitation: with aura_stacks 2 the read is presence only (metric aura), so a Ruin that consumed 1 of the 2 Felfury stacks would read as kept; reading the stack count is recorded as a tool idea (controller no-go for now, review fw-rbk1 I-3); the server's preserve path consumes nothing (AscensionCompat.cpp:3474-3480, code reading)."
   },
   {
     "spell": 804609,
