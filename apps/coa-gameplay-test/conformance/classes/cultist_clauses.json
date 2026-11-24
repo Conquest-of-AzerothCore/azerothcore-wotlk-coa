@@ -473,21 +473,27 @@
   {
     "spell": 300308,
     "clause": "Periodic or channeled damage dealt now generates 2 Insanity,",
-    "labels": [],
+    "labels": [
+      "300308 behaviour_metric_delta insanity_periodic",
+      "300308 behaviour_metric_delta insanity_channeled"
+    ],
     "kind": "claim"
   },
   {
     "spell": 300308,
     "clause": "reduces the cooldown of your Obliteration Beam by $/1000;300605s2 sec,",
     "labels": [
-      "300308 effect_value 300605e1 #0"
+      "300308 behaviour_metric_delta cd_cut_early",
+      "300308 behaviour_metric_delta cd_cut_late"
     ],
     "kind": "claim"
   },
   {
     "spell": 300308,
     "clause": "and grants 1 stack of Abyssal Destruction.",
-    "labels": [],
+    "labels": [
+      "300308 behaviour_metric_delta grants_stack"
+    ],
     "kind": "claim"
   },
   {
@@ -502,7 +508,7 @@
     "spell": 300308,
     "clause": "stacking $u times,",
     "labels": [
-      "300308 max_stacks 300605 #2"
+      "300308 behaviour_metric_delta stacks_cap"
     ],
     "kind": "claim"
   },
@@ -510,7 +516,8 @@
     "spell": 300308,
     "clause": "for $d.",
     "labels": [
-      "300308 spell_duration 300605 #3"
+      "300308 behaviour_metric_delta duration",
+      "300308 behaviour_metric_delta duration_contrast"
     ],
     "kind": "claim"
   },
@@ -2584,13 +2591,15 @@
       {
         "claim": "increases the damage the enemy takes from you by $706908s1%",
         "labels": [
-          "704527 effect_value 706908e0 #0"
+          "704527 behaviour_metric_delta damage_1stack",
+          "704527 behaviour_metric_delta damage_10stacks"
         ]
       },
       {
         "claim": "for $706908d",
         "labels": [
-          "704527 spell_duration 706908 #1"
+          "704527 behaviour_metric_delta duration",
+          "704527 behaviour_metric_delta duration_contrast"
         ]
       }
     ]
@@ -2599,7 +2608,8 @@
     "spell": 704527,
     "clause": "stacking $706908u times.",
     "labels": [
-      "704527 max_stacks 706908 #2"
+      "704527 behaviour_metric_delta stacks_mid",
+      "704527 behaviour_metric_delta stacks_cap"
     ],
     "kind": "claim"
   },

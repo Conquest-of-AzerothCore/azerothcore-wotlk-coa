@@ -3990,6 +3990,1032 @@
       },
       "void_on_cast_failure": true,
       "observe_source": "Expiry bound for Yawning Decay 706910 DurationIndex 27 = 3000 ms ($706910d, SpellDuration.dbc). Identical to dot_held with wait_ms 5750: apply_stamp brackets the aura age from 706910's actual apply inside [3010, 3290] ms (< 1.1 * 3000 = 3300 ms) and reads 706910 absent (0). Paired with dot_held. Reference search 2026-11-24: coa-history 706910: 0 events; coabuildhub spells_master_index.json 706909 matches verbatim ('over 3 seconds')."
+    },
+    {
+      "spell": 704527,
+      "name": "Unrelenting Void (1 periodic tick adds 1 stack = +2% damage taken from caster)",
+      "kind": "metric_delta",
+      "variant": "damage_1stack",
+      "label_suffix": "damage_1stack",
+      "quote": "Periodic or channeled damage now increases the damage the enemy takes from you by $706908s1% for $706908d,",
+      "trigger_spell": 806897,
+      "gate_spell": 704527,
+      "target": "dummy",
+      "cast_power": 2000,
+      "player_spell_power": 20000,
+      "setup_casts": [
+        502220
+      ],
+      "setup_wait_ms": 3500,
+      "phase_auras": [
+        [
+          502220,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          706908,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805573,
+        "target": "dummy"
+      },
+      "before_expected": 15358,
+      "expected": 31023,
+      "tolerance": 5,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 706908
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "1 periodic tick of Darkwither 502220 (3000 ms amplitude, setup_wait_ms 3500) applies 1 stack of 706908 when 704527 is learned (0 before)"
+          }
+        ]
+      },
+      "observe_source": "Unrelenting Void 704527 (AscensionCultistEvents.cpp:83,228) applies 706908 on periodic/channeled damage; 706908 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER BasePoints 1 + DieSides 1 = +2% ($706908s1, MiscValue 127 all schools; Spell.dbc). One Darkwither 502220 periodic tick applies 1 stack of 706908 (confirmed 0 -> 1 by ally_arm), then deterministic Obliteration Beam 806897 (+20000 SP, 823764 no resist, 16255 amount -100 no crit, expire_ms 2000 clears 1500 ms GCD) hits for 15358 in control and 15358 * 1.02 = 15665 in treatment (cumulative 31023 +- 5; excludes 0% = 30716 and double 4% = 31330). Paired with damage_10stacks. Reference search 2026-11-24: coa-history 706908: 702 applies / 2618 doses in 5 logs; coabuildhub spells_master_index.json 704527 matches verbatim."
+    },
+    {
+      "spell": 704527,
+      "name": "Unrelenting Void (10 channeled ticks build 10 stacks = +20% damage taken from caster)",
+      "kind": "metric_delta",
+      "variant": "damage_10stacks",
+      "label_suffix": "damage_10stacks",
+      "quote": "Periodic or channeled damage now increases the damage the enemy takes from you by $706908s1% for $706908d,",
+      "trigger_spell": 806897,
+      "gate_spell": 704527,
+      "target": "dummy",
+      "cast_power": 2000,
+      "player_spell_power": 20000,
+      "setup_casts": [
+        800432
+      ],
+      "setup_wait_ms": 5500,
+      "phase_auras": [
+        [
+          706908,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805573,
+        "target": "dummy"
+      },
+      "before_expected": 15358,
+      "expected": 33787,
+      "tolerance": 10,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 706908
+            },
+            "before_expected": 0,
+            "expected": 10,
+            "tolerance": 0,
+            "source": "10 channeled ticks of Psychic Suppression 800432 (5000 ms / 500 ms) apply 10 stacks of 706908 when 704527 is learned (0 before)"
+          }
+        ]
+      },
+      "observe_source": "Channeled + 10-stack damage arm for Unrelenting Void 704527: one full Psychic Suppression 800432 channel (5000 ms / 500 ms = 10 ticks; setup_wait_ms 5500 lets channel and temporary 803746 expire; expire_ms 2000 clears 806897 1500 ms GCD; void_on_cast_failure omitted because 800432 internal sub-auras 802789/803746 emit SPELL_FAILED_DONT_REPORT on stun-immune dummy while ally_arm proves 10 stacks landed) builds 10 stacks of 706908 (+20% damage taken from caster). Deterministic Obliteration Beam 806897 (+20000 SP, 823764 no resist, 16255 -100 no crit) hits for 15358 in control and 18429 in treatment (cumulative 33787 +- 10; excludes 0%, 9 stacks 33480, 11 stacks 34095, double 36859). Reference search 2026-11-24: coa-history 706908: 702 applies / 2618 doses in 5 logs; coabuildhub spells_master_index.json 704527 matches verbatim."
+    },
+    {
+      "spell": 704527,
+      "name": "Unrelenting Void (5 periodic ticks build 5 stacks below cap)",
+      "kind": "metric_delta",
+      "variant": "stacks_mid",
+      "label_suffix": "stacks_mid",
+      "quote": "stacking $706908u times.",
+      "trigger_spell": 502220,
+      "gate_spell": 704527,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          502220,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          706908,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706908
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 15500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Intermediate stacking proof for Unrelenting Void 704527 ($706908u = 10): one full Darkwither 502220 (15000 ms, 3000 ms amplitude -> 5 periodic ticks, 823764 no full resist) builds 5 stacks of 706908 (0 before learn -> 5 after learn). Paired with stacks_cap. Reference search 2026-11-24: coa-history 706908: 2618 doses in 5 logs; coabuildhub spells_master_index.json 704527 matches verbatim."
+    },
+    {
+      "spell": 704527,
+      "name": "Unrelenting Void (15 periodic ticks cap 706908 at 10 stacks)",
+      "kind": "metric_delta",
+      "variant": "stacks_cap",
+      "label_suffix": "stacks_cap",
+      "quote": "stacking $706908u times.",
+      "trigger_spell": 502220,
+      "gate_spell": 704527,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "setup_casts": [
+        502220,
+        502220
+      ],
+      "setup_wait_ms": 15500,
+      "phase_auras": [
+        [
+          502220,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          706908,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706908
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "wait_ms": 15500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Stack cap proof for Unrelenting Void 704527 (706908 StackAmount 10 = $706908u, Spell.dbc): three Darkwither 502220 casts (15 periodic ticks, 0 cooldown, 30 Insanity < 100, 823764 no resist) cap 706908 at exactly 10 stacks (0 before learn -> 10 after learn). Paired with stacks_mid (5 stacks). Reference search 2026-11-24: coa-history 706908: 2618 doses in 5 logs; coabuildhub spells_master_index.json 704527 matches verbatim."
+    },
+    {
+      "spell": 704527,
+      "name": "Unrelenting Void (706908 lasts 10000 ms after last tick)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Periodic or channeled damage now increases the damage the enemy takes from you by $706908s1% for $706908d,",
+      "trigger_spell": 800432,
+      "gate_spell": 704527,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          706908,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 706908
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14300,
+      "expiry_wait_ms": 1400,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          14100,
+          14650
+        ],
+        "expired": [
+          15500,
+          15950
+        ]
+      },
+      "observe_source": "Duration proof for Unrelenting Void 706908 (DurationIndex 1 = 10000 ms, $706908d, SpellDuration.dbc). One Psychic Suppression 800432 channel (5000 ms, last tick at 5000 ms) refreshes 706908 at 5000 ms so it expires at 15000 ms. Reads 0 before cast, 1 at 14300 ms (9100..9650 ms after final tick, > 0.9 * 10000) and 0 at 15700 ms (10500..10950 ms after final tick, < 1.1 * 10000). Paired with duration_contrast. Reference search 2026-11-24: coa-history 706908: 702 applies / 702 removes in 5 logs; coabuildhub spells_master_index.json 704527 matches verbatim."
+    },
+    {
+      "spell": 704527,
+      "name": "Unrelenting Void (706908 unlearned vs learned at 14300 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_contrast",
+      "label_suffix": "duration_contrast",
+      "quote": "Periodic or channeled damage now increases the damage the enemy takes from you by $706908s1% for $706908d,",
+      "trigger_spell": 800432,
+      "gate_spell": 704527,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          706908,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 706908
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14300,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          14100,
+          14650
+        ]
+      },
+      "observe_source": "Learned contrast for Unrelenting Void 706908 duration (DurationIndex 1 = 10000 ms): Psychic Suppression 800432 channel before (unlearned control: 0) and after learning 704527 (1 at 14300 ms). Paired with duration. Reference search 2026-11-24: coa-history 706908: 702 applies / 702 removes in 5 logs; coabuildhub spells_master_index.json 704527 matches verbatim."
+    },
+    {
+      "spell": 300308,
+      "name": "Abyssal Destruction (periodic damage generates 2 Insanity per tick)",
+      "kind": "metric_delta",
+      "variant": "insanity_periodic",
+      "label_suffix": "insanity_periodic",
+      "quote": "Periodic or channeled damage dealt now generates 2 Insanity,",
+      "trigger_spell": 502220,
+      "gate_spell": 300308,
+      "target": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          502220,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          300605,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 10,
+      "expected": 20,
+      "wait_ms": 15500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Abyssal Destruction 300308 (AscensionCultistEvents.cpp:83,166-169): Resource(player, Insanity, 2) on periodic or channeled damage. Darkwither 502220 generates 10 Insanity on cast (AscensionCustomResourceData.h:282) and delivers 5 periodic Shadow ticks (15000 ms / 3000 ms, 823764 no resist): Insanity 500706 reads 10 before learn (control) and 10 + 5*2 = 20 after learn (excludes 0 gain = 10 and double gain = 30). Paired with insanity_channeled. Reference search 2026-11-24: coa-history 300605: 317 applies / 1219 doses in 4 logs; coabuildhub spells_master_index.json 300308 is older state without Insanity clause, server Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 300308,
+      "name": "Abyssal Destruction (channeled damage generates 2 Insanity per tick)",
+      "kind": "metric_delta",
+      "variant": "insanity_channeled",
+      "label_suffix": "insanity_channeled",
+      "quote": "Periodic or channeled damage dealt now generates 2 Insanity,",
+      "trigger_spell": 800432,
+      "gate_spell": 300308,
+      "target": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          300605,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 20,
+      "expected": 40,
+      "wait_ms": 5500,
+      "expire_ms": 500,
+      "observe_source": "Channeled arm for Abyssal Destruction 300308 Insanity generation (+2 per tick): Psychic Suppression 800432 starts at 20 Insanity (precondition fixture + 680601 CasterAuraSpell, 823764 no resist) and delivers 10 channeled ticks (5000 ms / 500 ms): Insanity 500706 reads 20 before learn (control) and 20 + 10*2 = 40 after learn (excludes 0 gain = 20 and double gain = 60). Paired with insanity_periodic. Reference search 2026-11-24: coa-history 300605: 317 applies / 1219 doses in 4 logs; server Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 300308,
+      "name": "Abyssal Destruction (Obliteration Beam cooldown still refused 900 ms before reduced end)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_early",
+      "label_suffix": "cd_cut_early",
+      "quote": "reduces the cooldown of your Obliteration Beam by $/1000;300605s2 sec,",
+      "trigger_spell": 800432,
+      "gate_spell": 300308,
+      "target": "dummy",
+      "cast_power": 2000,
+      "setup_casts": [
+        806897
+      ],
+      "setup_wait_ms": 1600,
+      "after_trigger_casts": [
+        {
+          "spell": 806897,
+          "target": "dummy",
+          "delay_ms": 7500,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "phase_auras": [
+        [
+          300605,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 806897
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "wait_ms": 1000,
+      "expire_ms": 2000,
+      "observe_source": "Lower-bound cooldown-cut bracket for Abyssal Destruction 300308 (300605 Effect[1] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN BasePoints -1001 + DieSides 1 = -1000 ms on 805572 chain; Obliteration Beam 806897 CategoryRecoveryTime 20000 ms). Setup casts 806897 at t=0, setup_wait_ms 1600 clears GCD, then Psychic Suppression 800432 delivers 10 channeled ticks (-10000 ms total cut -> 806897 ready at t=10000 ms = 8400 ms after 800432). Attempting 806897 at delay_ms 7500 (t=9100 ms, 900 ms before 10000 ms) is refused in both phases (spell_cast_count 1 before, 2 after), excluding a cut >= 1100 ms/tick (10% over) or full cooldown reset. Paired with cd_cut_late. Reference search 2026-11-24: coa-history 300605: 317 applies / 1219 doses in 4 logs; coabuildhub spells_master_index.json 300308 matches ('-1 sec')."
+    },
+    {
+      "spell": 300308,
+      "name": "Abyssal Destruction (Obliteration Beam cooldown ready 800 ms after reduced end)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_late",
+      "label_suffix": "cd_cut_late",
+      "quote": "reduces the cooldown of your Obliteration Beam by $/1000;300605s2 sec,",
+      "trigger_spell": 800432,
+      "gate_spell": 300308,
+      "target": "dummy",
+      "cast_power": 2000,
+      "setup_casts": [
+        806897
+      ],
+      "setup_wait_ms": 1600,
+      "after_trigger_casts": [
+        {
+          "spell": 806897,
+          "target": "dummy",
+          "delay_ms": 9200,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "phase_auras": [
+        [
+          300605,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 806897
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "wait_ms": 1000,
+      "expire_ms": 2000,
+      "observe_source": "Upper-bound cooldown-cut bracket for Abyssal Destruction 300308 (-1000 ms/tick x 10 ticks = -10000 ms off Obliteration Beam 806897 20000 ms cooldown -> ready at t=10000 ms). Attempting 806897 at delay_ms 9200 after 800432 (t=10800 ms, 800 ms past reduced end, well short of 20000 ms base CD) is refused in unlearned control (1) and succeeds in treatment (1 + 2 = 3), excluding no cut and <= 900 ms/tick (10% under). Paired with cd_cut_early. Reference search 2026-11-24: coa-history 300605: 317 applies / 1219 doses in 4 logs; coabuildhub spells_master_index.json 300308 matches ('-1 sec')."
+    },
+    {
+      "spell": 300308,
+      "name": "Abyssal Destruction (grants 1 stack of 300605 per periodic tick)",
+      "kind": "metric_delta",
+      "variant": "grants_stack",
+      "label_suffix": "grants_stack",
+      "quote": "and grants 1 stack of Abyssal Destruction.",
+      "trigger_spell": 502220,
+      "gate_spell": 300308,
+      "target": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          502220,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          300605,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 300605
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 15500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 502220,
+              "target": "dummy"
+            },
+            "before_expected": 5,
+            "expected": 10,
+            "tolerance": 0,
+            "source": "Darkwither 502220 delivers exactly 5 periodic ticks per phase (5 before, 10 cumulative after), proving 5 stacks of 300605 = 1 stack per periodic tick"
+          }
+        ]
+      },
+      "observe_source": "Abyssal Destruction 300308 (AscensionCultistEvents.cpp:83,166-169) casts 300605 once per periodic/channeled tick. One Darkwither 502220 (5 ticks confirmed 5 -> 10 by ally_arm, 823764 no resist) reads 300605 stacks 0 (unlearned control) -> 5 (1 stack per tick; excludes 0 and 10). Reference search 2026-11-24: coa-history 300605: 317 applies / 1219 doses in 4 logs; coabuildhub spells_master_index.json 300308 matches verbatim."
+    },
+    {
+      "spell": 300308,
+      "name": "Abyssal Destruction (1 stack increases Obliteration Beam damage by 5%)",
+      "kind": "metric_delta",
+      "variant": "oblit_damage_1stack",
+      "label_suffix": "oblit_damage_1stack",
+      "quote": "and grants 1 stack of Abyssal Destruction.@s:300605:0@",
+      "trigger_spell": 806897,
+      "gate_spell": 300308,
+      "target": "dummy",
+      "cast_power": 2000,
+      "player_spell_power": 20000,
+      "setup_casts": [
+        502220
+      ],
+      "setup_wait_ms": 3500,
+      "phase_auras": [
+        [
+          502220,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          300605,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805573,
+        "target": "dummy"
+      },
+      "before_expected": 15358,
+      "expected": 31484,
+      "tolerance": 10,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "void_on_cast_failure": true,
+      "observe_source": "Abyssal Destruction 300605 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER BasePoints 4 + DieSides 1 = +5% ($s1) on EffectSpellClassMask[0] 131072 (matches Obliteration Beam damage spell 805573 SpellFamilyFlags[0] 131072; Spell.dbc). One Darkwither 502220 tick (setup_wait_ms 3500) grants 1 stack of 300605 (+5%), then deterministic Obliteration Beam 806897 (+20000 SP, 823764 no resist, 16255 -100 no crit, Insanity 10+2+10=22 < 60, expire_ms 2000 clears GCD) hits for 15358 in control and 15358 * 1.05 = 16126 in treatment (cumulative 31484 +- 10; excludes 0% = 30716 and double 10% = 32252). Paired with oblit_damage_10stacks and oblit_consumes. Reference search 2026-11-24: coa-history 300605: 317 applies / 1219 doses; coabuildhub spells_master_index.json 300308 matches ('by 5%')."
+    },
+    {
+      "spell": 300308,
+      "name": "Abyssal Destruction (10 stacks increase Obliteration Beam damage by 50%)",
+      "kind": "metric_delta",
+      "variant": "oblit_damage_10stacks",
+      "label_suffix": "oblit_damage_10stacks",
+      "quote": "and grants 1 stack of Abyssal Destruction.@s:300605:0@",
+      "trigger_spell": 806897,
+      "gate_spell": 300308,
+      "target": "dummy",
+      "cast_power": 2000,
+      "player_spell_power": 20000,
+      "setup_casts": [
+        800432
+      ],
+      "setup_wait_ms": 5500,
+      "phase_auras": [
+        [
+          300605,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805573,
+        "target": "dummy"
+      },
+      "before_expected": 15358,
+      "expected": 38395,
+      "tolerance": 15,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "observe_source": "10-stack damage arm for Abyssal Destruction 300605 (+5% x 10 = +50% on 805573): one Psychic Suppression 800432 channel (10 ticks -> 10 stacks 300605, Insanity 20+20+10=50 < 60, setup_wait_ms 5500 lets temporary 803746 expire, expire_ms 2000 clears GCD) boosts Obliteration Beam 806897 (+20000 SP, 823764 no resist, 16255 -100 no crit) from 15358 to 23037 (cumulative 38395 +- 15; excludes 0%, 9 stacks 37627, 11 stacks 39163, double 46074). Reference search 2026-11-24: coa-history 300605: 317 applies / 1219 doses; coabuildhub spells_master_index.json 300308 matches."
+    },
+    {
+      "spell": 300308,
+      "name": "Abyssal Destruction (casting Obliteration Beam consumes 300605)",
+      "kind": "metric_delta",
+      "variant": "oblit_consumes",
+      "label_suffix": "oblit_consumes",
+      "quote": "and grants 1 stack of Abyssal Destruction.@s:300605:0@",
+      "trigger_spell": 806897,
+      "gate_spell": 300308,
+      "target": "dummy",
+      "cast_power": 2000,
+      "setup_casts": [
+        502220
+      ],
+      "setup_wait_ms": 3500,
+      "phase_auras": [
+        [
+          502220,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          300605,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 300605
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "void_on_cast_failure": true,
+      "observe_source": "Consumption check for Abyssal Destruction 300605 ('your next Obliteration Beam'): after 1 Darkwither 502220 tick grants 1 stack of 300605 (setup_wait_ms 3500), casting Obliteration Beam 806897 should consume 300605 (reading 0 at 500 ms, before Darkwither's 2nd tick at 6000 ms). Reference search 2026-11-24: coa-history 300605: 317 applies / 316 removes; coabuildhub spells_master_index.json 300308 matches ('your next Obliteration Beam')."
+    },
+    {
+      "spell": 300308,
+      "name": "Abyssal Destruction (15 periodic ticks cap 300605 at 10 stacks)",
+      "kind": "metric_delta",
+      "variant": "stacks_cap",
+      "label_suffix": "stacks_cap",
+      "quote": "and grants 1 stack of Abyssal Destruction.@s:300605:0@",
+      "trigger_spell": 502220,
+      "gate_spell": 300308,
+      "target": "dummy",
+      "cast_power": 2000,
+      "setup_casts": [
+        502220,
+        502220
+      ],
+      "setup_wait_ms": 15500,
+      "phase_auras": [
+        [
+          502220,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          300605,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 300605
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "wait_ms": 15500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Stack cap proof for Abyssal Destruction 300605 (StackAmount 10 = $u, Spell.dbc): three Darkwither 502220 casts (15 periodic ticks, 823764 no resist; 30+30=60 Insanity < 100) cap 300605 at exactly 10 stacks (0 before learn -> 10 after learn). Paired with grants_stack (5 stacks). Reference search 2026-11-24: coa-history 300605: 1219 doses in 4 logs; coabuildhub spells_master_index.json 300308 matches ('stacking 10 times')."
+    },
+    {
+      "spell": 300308,
+      "name": "Abyssal Destruction (300605 lasts 15000 ms after last tick)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "and grants 1 stack of Abyssal Destruction.@s:300605:0@",
+      "trigger_spell": 800432,
+      "gate_spell": 300308,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          300605,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 300605
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 19200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          19000,
+          19550
+        ],
+        "expired": [
+          20600,
+          21250
+        ]
+      },
+      "observe_source": "Duration proof for Abyssal Destruction 300605 (DurationIndex 8 = 15000 ms, $d, SpellDuration.dbc). One Psychic Suppression 800432 channel (5000 ms, last tick at 5000 ms) refreshes 300605 at 5000 ms so it expires at 20000 ms. Reads 0 before cast, 1 at 19200 ms (14000..14550 ms after final tick, > 0.9 * 15000 = 13500) and 0 at 20800 ms (15600..16250 ms after final tick, < 1.1 * 15000 = 16500). Paired with duration_contrast. Reference search 2026-11-24: coa-history 300605: 317 applies / 316 removes; coabuildhub spells_master_index.json 300308 matches ('for 15 sec')."
+    },
+    {
+      "spell": 300308,
+      "name": "Abyssal Destruction (300605 unlearned vs learned at 19200 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_contrast",
+      "label_suffix": "duration_contrast",
+      "quote": "and grants 1 stack of Abyssal Destruction.@s:300605:0@",
+      "trigger_spell": 800432,
+      "gate_spell": 300308,
+      "target": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          300605,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 300605
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 19200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          19000,
+          19550
+        ]
+      },
+      "observe_source": "Learned contrast for Abyssal Destruction 300605 duration (15000 ms): Psychic Suppression 800432 channel before (unlearned control: 0) and after learning 300308 (1 at 19200 ms). Paired with duration. Reference search 2026-11-24: coa-history 300605: 317 applies / 316 removes; coabuildhub spells_master_index.json 300308 matches."
     }
   ],
   "player_observations": [],
