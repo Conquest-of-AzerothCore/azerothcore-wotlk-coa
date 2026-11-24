@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Stratholme: Cannon Master Willey's riflemen appear halfway back the hallway (#10635)",
-  "contract": "#10635: the CoA kit for Cannon Master Willey (10997) made him jump onto a guessed platform every 40-45 s and summon his three Crimson Riflemen (9780720) at random points within 6 yd of himself, so they spawned right next to him. Expected (project owner, placed in game): Willey stays where he fights, and the riflemen appear halfway back the hallway, one at 3552.97, -2953.17, 125.00 and the other two 3 yd to its left and right, on the same 40-45 s timer, and they vanish at once when Willey dies or the fight resets.",
+  "contract": "#10635: the CoA kit for Cannon Master Willey (10997) made him jump onto a guessed platform every 40-45 s and summon his three Crimson Riflemen (9780720) at random points within 6 yd of himself, so they spawned right next to him. Expected (project owner, placed in game): Willey stays where he fights, and the riflemen appear halfway back the hallway, one at 3553.79, -2951.54, 125.00 facing 0.61 and the other two 3 yd to its left and right and 1 yd further forward, on the same 40-45 s timer, and they vanish at once when Willey dies or the fight resets.",
   "timeout_ms": 60000,
   "location": {
     "map": 0,
@@ -33,8 +33,8 @@
       "label": "p stands where the middle rifleman belongs, halfway back the hallway",
       "actor": "p",
       "map": 329,
-      "x": 3552.972,
-      "y": -2953.171,
+      "x": 3553.792,
+      "y": -2951.535,
       "z": 125.001,
       "ignore_access": true
     },
