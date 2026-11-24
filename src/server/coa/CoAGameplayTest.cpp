@@ -7475,6 +7475,14 @@ private:
                 if (race)
                     Require(*race > 0 && *race <= 255 && sObjectMgr->GetPlayerInfo(uint8(*race), player->getClass()),
                         "Relog race needs an available race/class combination");
+                if (step.get<bool>("logout_repop", false) && player->GetDeathTimer())
+                {
+                    player->GetThreatMgr().RemoveMeFromThreatLists();
+                    player->BuildPlayerRepop();
+                    player->RepopAtGraveyard();
+                    while (player->IsBeingTeleportedFar())
+                        actor.session->HandleMoveWorldportAck();
+                }
                 CharacterDatabaseTransaction transaction = CharacterDatabase.BeginTransaction();
                 player->SaveToDB(transaction, false, true);
                 if (race)
