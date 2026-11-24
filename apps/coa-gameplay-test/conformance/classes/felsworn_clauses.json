@@ -28,12 +28,11 @@
       {
         "claim": "to up to $800598i nearby enemies",
         "labels": [
-          "92087 effect_value #0",
           "92087 behaviour_metric_delta count"
         ]
       }
     ],
-    "reason": "Claim 1 same-arm strike read (fw-vb9): the noncrit arm sums the damage events of the Twin Slice strike 808303 and of 800598 on the dummy, so the learned no-crit arm shows the strike landed (1 before, 2 after) while 800598 never fires; trigger arm reads casts of 800598 under forced crit."
+    "reason": "Claim 1 same-arm strike read (fw-vb9): the noncrit arm sums the damage events of the Twin Slice strike 808303 and of 800598 on the dummy, so the learned no-crit arm shows the strike landed (1 before, 2 after) while 800598 never fires; trigger arm reads casts of 800598 under forced crit. Claim 3 'to up to $800598i nearby enemies' is judged by count (damage events of 800598 over seven enemies, 5 targets x 2 strikes = 10 expected, MaxAffectedTargets 5); the unmodelled readback effect_value #0 never counted and is dropped (precedent 259.0)."
   },
   {
     "spell": 92088,
@@ -698,7 +697,8 @@
       "520249 behaviour_metric_delta crit_demon",
       "520249 behaviour_metric_delta crit_other_type"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "promise_of": "Increases your critical strike chance by $s1%"
   },
   {
     "spell": 520251,
@@ -822,11 +822,11 @@
     "spell": 520817,
     "clause": "Your Twin Slice and Felrend now have a $h% chance to generate 1 additional Felfury.",
     "labels": [
-      "520817 effect_value #0",
       "520817 proc_rate 800058 801901",
       "520817 proc_rate 800058 563268"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The unmodelled readback effect_value #0 never counted and is dropped; the two proc_rate labels judge the chance (precedent 172.0)."
   },
   {
     "spell": 520831,
@@ -1339,10 +1339,10 @@
     "spell": 560639,
     "clause": "Your periodic damage now has a $h% chance to generate 1 Felfury.",
     "labels": [
-      "560639 effect_value #0",
       "560639 proc_rate"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The unmodelled readback effect_value #0 never counted and is dropped; proc_rate judges the chance (precedent 172.0)."
   },
   {
     "spell": 560641,
@@ -1907,11 +1907,11 @@
     "spell": 685321,
     "clause": "Twin Slice now deals an additional ${$m2+0+$AP*0.3} Physical damage",
     "labels": [
-      "685321 effect_value #0",
       "685321 behaviour_metric_delta damage",
       "685321 behaviour_metric_delta damage_ap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The unmodelled readback effect_value #0 never counted and is dropped; damage and damage_ap judge the claim."
   },
   {
     "spell": 685321,
@@ -1995,7 +1995,6 @@
       {
         "claim": "dealing $o1 Chaos damage",
         "labels": [
-          "706420 effect_value #3",
           "706420 behaviour_metric_delta total",
           "706420 behaviour_metric_delta ticks"
         ]
@@ -2009,7 +2008,8 @@
         ]
       }
     ],
-    "labels": []
+    "labels": [],
+    "reason": "The unreadable readback effect_value #3 never counted and is dropped; total and ticks judge 'dealing $o1 Chaos damage' (precedent 259.0)."
   },
   {
     "spell": 706420,
@@ -2910,7 +2910,7 @@
     "spell": 800203,
     "clause": "Interrupt a spell from being cast, preventing the target from casting spells of that school for $d and draining mana from the target based on your Spirit.",
     "kind": "claim",
-    "reason": "Split by claim (fw-l2b, review fw-rl2 I-2): 'Interrupt a spell from being cast' is judged by interrupt and 'preventing the target from casting spells of that school for $d' by lockout_held / lockout_free (3000 ms window, DurationIndex 27) and aura_duration_ms #0, ok in both runs of prove2 20261123-225953 / -230029. 'and draining mana from the target based on your Spirit.' stays unlabelled: an entry on Scarlet Magi 1832 channelling Evocation read an unset control mana (5206 / 5340), so it was removed (e2ff868f34); a drain read needs the target's mana set right before the cast lands.",
+    "reason": "Split by claim (fw-l2b, review fw-rl2 I-2): 'Interrupt a spell from being cast' is judged by interrupt and 'preventing the target from casting spells of that school for $d' by lockout_held / lockout_free (3000 ms window, DurationIndex 27) and aura_duration_ms #0, ok in both runs of prove2 20261123-225953 / -230029. 'and draining mana from the target based on your Spirit.' stays unlabelled: an entry on Scarlet Magi 1832 channelling Evocation read an unset control mana (5206 / 5340), so it was removed (e2ff868f34); a drain read needs the target's mana set right before the cast lands. The unmodelled readback aura_duration_ms #0 never counted and is dropped; lockout_held and lockout_free judge the lockout duration.",
     "claims": [
       {
         "claim": "Interrupt a spell from being cast",
@@ -2921,7 +2921,6 @@
       {
         "claim": "preventing the target from casting spells of that school for $d",
         "labels": [
-          "800203 aura_duration_ms #0",
           "800203 behaviour_metric_delta lockout_held",
           "800203 behaviour_metric_delta lockout_free"
         ]
@@ -4826,7 +4825,7 @@
     "clause": "30 Energy, plus 30 per sec",
     "labels": [],
     "kind": "claim",
-    "reason": "Cost line of the spell card, not the Description (lab render render2/answers/spell-800355.json: '30 Energy, plus 30 per sec'; Spell.dbc ManaCost 30, ManaPerSecond 30). Owner ruling O-24: the cost is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted (Felsworn ADR 0014). Counted on exact Energy reads with regeneration off (disable_regeneration) from a pool set to 100: 70 at 100 ms (up front), 40 at 1450-1900 ms (after one drain) and 10 after the second, each excluding a cost or drain of 27 or 33; the reading before the cast is the control (100). The drain claim reads the Energy the real channel spends over measured intervals. No other ledger row represents a cost line (grep of every class ledger), so this row is new at the end of the ledger.",
+    "reason": "Cost line of the spell card, not the Description (lab render render2/answers/spell-800355.json: '30 Energy, plus 30 per sec'; Spell.dbc ManaCost 30, ManaPerSecond 30). Owner ruling O-24: the cost is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted (Felsworn ADR 0014). Counted on exact Energy reads with regeneration off (disable_regeneration) from a pool set to 100: 70 at 100 ms (up front), 40 at 1450-1900 ms (after one drain) and 10 after the second, each excluding a cost or drain of 27 or 33; the reading before the cast is the control (100). The drain claim reads the Energy the real channel spends over measured intervals. No other ledger row represents a cost line (grep of every class ledger), so this row is new at the end of the ledger. Status 2 by owner ruling O-24 (mentor D-90, 2026-11-24): the cost line is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted; the exact Energy reads above are the evidence, not a behaviour verdict (same shape as 281.0).",
     "claims": [
       {
         "claim": "30 Energy",
