@@ -1,22 +1,24 @@
-# Ally arm (`metric_delta` `ally_arm`, ADR 1186, ADR 1199, ADR 1214, ADR 1215, ADR 1244)
+# Ally arm (`metric_delta` `ally_arm`, ADR 1186, ADR 1199, ADR 1214, ADR 1215, ADR 1244, ADR 1281)
 
 `ally_arm` is an object of these keys, at least one:
 
-- `allies`: 1 to 7 (default 1). Grouped ally players `ally`, `ally2` .. `ally7` (the class's player fixture,
+- `allies`: 1 to 9 (default 1). Grouped ally players `ally`, `ally2` .. `ally9` (the class's player fixture,
   regeneration off with `disable_regeneration`), grouped right after the base steps. `measure_actor`, `target` and
   `fields.target` may name them. The harness `group` step converts a full party to a raid
   (`CoAGameplayTest.cpp` `action == "group"`), and a raid member joins the first subgroup with fewer than five
   (`Group::AddMember`): from `ally5` on, the allies stand in raid subgroup 2, outside the caster's party (code
   reading only), where a party-scoped spell (`TARGET_CHECK_PARTY`, `IsInPartyWith`, `GetPartyMembers`) reads 0.
-  Seven allies and the caster fill the scenario schema 1 cap of 8 players (`run.py` `MAX_PLAYERS`), so a scenario
-  that adds another player, such as an enemy player, is refused at validation.
+  Up to seven allies and the caster keep scenario schema 1 (cap 8 players, `run.py` `MAX_PLAYERS`); eight or nine
+  allies switch the scenario to schema 2 (cap 25, `CoAGameplayTest.cpp` `MaximumPlayers`) and the contract says so
+  (ADR 1281), so an entry of seven allies or fewer generates as before. With schema 1, a scenario that adds another
+  player to seven allies, such as an enemy player, is refused at validation.
 - `ally_class` (ADR 1209): a CoA class, 12 to 32, needing at least one ally. The allies are created with that class
   instead of the class under test (the scenario schema's per-player `class`, created by the existing character
   creation), for a spell that lands only on a power type the class under test lacks. The entry states the power type it
   needs with a precondition arm on the state metric `active_power` (`fields.power`), read on the ally, so a wrong class
   voids the trial.
 - `reach_source`: text, required on the option when the main reading's `measure_actor` or `fields.target`, or the
-  trigger's cast `target`, is `ally5`, `ally6` or `ally7`, and refused otherwise. It cites the code or data line that
+  trigger's cast `target`, is `ally5` to `ally9`, and refused otherwise. It cites the code or data line that
   makes the spell reach raid subgroup 2 (for example a script filter by `IsInRaidWith`, or a DBC implicit target checked
   by `TARGET_CHECK_ALLY`), never a run's reading. The contract states it. On each use, the reviewer opens the cited
   lines and checks that the spell's whole target selection (DBC implicit targets and every script filter) reaches the
@@ -73,15 +75,15 @@
   one (a ratio-only arm gives its count, another arm its delta): the low end of the band widens by that count over the
   denominator, one unit per event, the high end does not move; `tolerance` must stay below 10% of `expected`, and a
   widened low end at or below 90% of `expected` makes the ratio unmeasured, never ok (ADR 1198).
-- `allies: 0` (from 0 to 7, default 1) adds no ally player and no group step, for arms on the caster or the dummy
+- `allies: 0` (from 0 to 9, default 1) adds no ally player and no group step, for arms on the caster or the dummy
   only; it needs arms and refuses `ally_health` and `ally_casts`.
 - `arms`: a list of `{actors, metric, fields?, before_expected, expected, tolerance, source, reach_source?,
   precondition?}`. Each
   arm reads `metric` on every unit of `actors` (the caster, the allies, the dummy when the scenario has it) with the
   arm's `fields`, right after the main before and after readings, and judges the sums:
   `|sum - expected| <= tolerance`. Every value is a finite number stated with its `source`; no default tolerance. The
-  metric needs a `METRIC_EVIDENCE` row that is not a readback. An arm whose `actors` or `fields.target` name `ally5`,
-  `ally6` or `ally7` states its own `reach_source`, as the option's main reading does, with the same review duty; on
+  metric needs a `METRIC_EVIDENCE` row that is not a readback. An arm whose `actors` or `fields.target` name `ally5`
+  to `ally9` states its own `reach_source`, as the option's main reading does, with the same review duty; on
   any other arm it is refused. A ratio reads two arms, so a ratio over such an arm rests on that arm's
   `reach_source`.
 - A ratio-only arm `{actors, metric, count_metric, fields?, source, reach_source?}` omits `before_expected`,

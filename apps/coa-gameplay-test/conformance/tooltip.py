@@ -48,6 +48,7 @@ PERIOD_PROBE_FACTOR = 2
 PERIODIC_TOTAL_LETTERS = 'oO'
 PERIODIC_AT_APPLY_ATTRIBUTE_EX5 = 0x200
 DEFAULT_PERIOD_MS = 5000
+DESCRIPTION = 'Description[enUS]'
 
 COLOR_CODE = re.compile(r'\|[cC][0-9a-fA-F]{8}|\|[rR]')
 EXTENSION_MARKUP = re.compile(r'@+[^@]*@?')
@@ -848,9 +849,14 @@ def conditional_bounds(text: str, start: int) -> tuple[int, int, int, int, int, 
 
 
 def period_reading(records: Records, spell_id: int, caster: CasterStats, shown: Displayed, effect: int,
-                   period_spell: int | None = None) -> str:
+                   period_spell: int | None = None, ordinal: int | None = None) -> str:
     def reread(duration_factor: int, amplitude_factor: int) -> float:
         scaled = ScaledPeriod(records.dbc, period_spell or spell_id, effect, duration_factor, amplitude_factor)
+        if ordinal is not None:
+            values = Tooltip(scaled, spell_id, caster).read(records.field('Spell', spell_id, DESCRIPTION)).values
+            if ordinal >= len(values) or values[ordinal].text != shown.text:
+                raise Unreadable(f'{shown.text} is unreadable with a scaled duration or period')
+            return values[ordinal].value
         values = Tooltip(scaled, spell_id, caster).read(shown.text).values
         if len(values) != 1:
             raise Unreadable(f'{shown.text} is unreadable with a scaled duration or period')

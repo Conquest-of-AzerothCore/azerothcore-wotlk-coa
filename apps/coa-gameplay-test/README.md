@@ -776,6 +776,8 @@ blocked: false` selects plain hits.
 `melee_attacks_taken` counts the melee combat packets whose victim is the player actor, optionally only those from
 the `target` attacker. `victim_state` (0 to 8, the packet's `VictimState`: 0 missed, 1 hit, 2 dodged, 3 parried,
 5 blocked, 6 evaded, 7 immune, 8 deflected) keeps only the packets with that outcome.
+`melee_attack_taken_last_ms` reads the game time in milliseconds at which the player actor last received such a
+packet, optionally only one with the given `victim_state`; it is missing before the first one (ADR 1273).
 `melee_missed_taken` counts the same packets that carry `HITINFO_MISS` (a miss reaches the client with victim state
 0), optionally only those from the `target` attacker.
 `pet_melee_swings`, `pet_melee_crits`, `pet_melee_glancing`, `pet_melee_plain_count`, `pet_melee_plain_damage`
@@ -835,6 +837,11 @@ penetration modifiers. It applies no damage.
 periodic healing logs, counting positive heals, summing healing including overhealing, or summing effective
 healing. They accept the same caster/critical filters; `target_pet: true` selects the current pet of a player
 `target`. Absorbed healing is excluded. These metrics avoid confusing normal regeneration with spell healing.
+`spell_heal_absorb_total` sums the absorbed amount that native direct and periodic healing logs of `spell` report
+(the third field of `SMSG_SPELLHEALLOG` and of a periodic heal `SMSG_PERIODICAURALOG`), including a heal that a
+heal absorb (aura 301) took whole and that the other healing metrics therefore do not see. Unlike
+`spell_absorb_total` it reads periodic logs too. It takes the `caster` (a unit id, the player by default), `target`
+and `critical` filters, and refuses `pet`, `caster_entry` and `target_pet` (ADR 1286).
 The result's optional `cast_failures` array records native `SMSG_CAST_FAILED` spell IDs, cast counters and
 numeric `SpellCastResult` reasons. These diagnose a rejected submission; effect assertions still establish success.
 `distance` requires `target` and measures the native two-dimensional distance, in yards, between the actor and

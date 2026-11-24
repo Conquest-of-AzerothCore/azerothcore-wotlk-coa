@@ -12,7 +12,25 @@ def sizable_labels(entries: Sequence[dict]) -> list[str]:
     return [hit_ratio_entry_label(entry) for entry in entries if entry.get('kind') == 'hit_ratio']
 
 
-def pilot_record(label: str, verdict: Verdict | None, pilot_trials: int) -> tuple[int | None, dict]:
+MIN_TRIALS = 'min_trials'
+
+
+def trial_floors(entries: Sequence[dict]) -> dict[str, int]:
+    floors = {}
+    for entry in entries:
+        if entry.get('kind') != 'hit_ratio' or MIN_TRIALS not in entry:
+            continue
+        floor, trials = entry[MIN_TRIALS], entry.get('trials')
+        if isinstance(floor, bool) or not isinstance(floor, int) or floor < HIT_RATIO_PILOT_TRIALS \
+                or not isinstance(trials, int) or trials < floor:
+            raise ValueError(f'{entry["spell"]} hit_ratio {MIN_TRIALS} {floor!r} is a whole number of trials per arm '
+                             f'from {HIT_RATIO_PILOT_TRIALS}, with the entry trials at least that floor')
+        floors[hit_ratio_entry_label(entry)] = floor
+    return floors
+
+
+def pilot_record(label: str, verdict: Verdict | None, pilot_trials: int,
+                 floor: int | None = None) -> tuple[int | None, dict]:
     if verdict is None:
         return None, {'label': label, 'pilot_status': None, 'trials': None,
                       'reason': 'the pilot run holds no verdict for this label; generated sizing kept'}
@@ -21,15 +39,16 @@ def pilot_record(label: str, verdict: Verdict | None, pilot_trials: int) -> tupl
     if sized is None:
         return None, {'label': label, 'pilot_status': verdict.status, 'trials': None,
                       'reason': f'the pilot reads no interval ({verdict.explanation}); generated sizing kept'}
-    trials = max(pilot_trials, int(sized))
+    trials = max(pilot_trials, int(sized), floor or 0)
     capped = limit is not None and trials > int(limit)
     trials = int(limit) if capped else trials
     return trials, {'label': label, 'pilot_status': verdict.status, 'sized': int(sized), 'trial_limit': limit,
-                    'capped': capped, 'trials': trials}
+                    'capped': capped, 'trials': trials, **({MIN_TRIALS: floor} if floor else {})}
 
 
 def hit_ratio_pilot(labels: Sequence[str], pilot_make: MakeSized, sized_make: MakeSized,
-                    pilot_trials: int = HIT_RATIO_PILOT_TRIALS) -> Pilot | None:
+                    pilot_trials: int = HIT_RATIO_PILOT_TRIALS,
+                    floors: Mapping[str, int] | None = None) -> Pilot | None:
     if not labels:
         return None
 
@@ -40,7 +59,7 @@ def hit_ratio_pilot(labels: Sequence[str], pilot_make: MakeSized, sized_make: Ma
         by_label = {verdict.label: verdict for verdict in verdicts if verdict.check == BEHAVIOUR_HIT_RATIO}
         trials, records = {}, []
         for label in labels:
-            sized, record = pilot_record(label, by_label.get(label), pilot_trials)
+            sized, record = pilot_record(label, by_label.get(label), pilot_trials, (floors or {}).get(label))
             records.append(record)
             if sized is not None:
                 trials[label] = sized

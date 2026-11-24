@@ -16,8 +16,9 @@ from values import (ALLY, AURA_STATE_FROZEN, AURA_STATE_HEALTHLESS_20_PERCENT, A
                     CALC_AMOUNT_HOOKS_METRIC, CHECKS, FIXTURE_MAX_HEALTH, GCD_WAIT_MS, GENERIC, TARGET, UNMEASURABLE, UNREADABLE, Expectation, Unmodelled,
                     calc_amount_hooks_label, conditional_extra_values, effect_modifier_label,
                     disabled_foreign_effects, facts_of, fixture_health_step, foreign_aura_grants, foreign_effect,
-                    foreign_radius, periodic_reason, required_target_health_steps, sample_labels, value_scenario,
-                    REMOVED_RADIUS, RankFacts, first_aura_effect)
+                    foreign_radius, pay_power_steps, periodic_reason, required_target_health_steps, sample_labels,
+                    value_scenario, HEALTH_POWER, OVER_TICKS_REASON, PER_TICK_FOREIGN_TOTALS, per_tick_ticks,
+                    structure_stats, REMOVED_RADIUS, RankFacts, first_aura_effect)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -58,6 +59,10 @@ OATH_CHAIN = 704576
 SPELL_POWER_SCHOOLS = 6
 STAT_COUNT = 5
 SETTLE_MS = 5000
+MALICE_OF_GULDAN = 800214
+FELSTRIKE = 802678
+FELSTRIKE_LABEL = '800214 effect_value 802678e0 #1'
+FELSTRIKE_TOTAL = '${($d*1000/$T1)*($802678m1+$802678ppl1+$SP*.05)}'
 LIBERTY = 705266
 SCOURGEBANE_STRIKE = 801832
 IRON_PENANCE = 523712
@@ -695,6 +700,65 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         self.assertIn('500694 effect_value 803153e0 #0', [item.label for item in expectations])
         self.assertNotIn('500694 effect_value 803153e0 #0', [item['label'] for item in periodic_totals])
 
+    def malice_of_guldan(self, class_file):
+        spell = ClassSpell(MALICE_OF_GULDAN, str(MALICE_OF_GULDAN), (MALICE_OF_GULDAN,), MALICE_OF_GULDAN, 1, False)
+        return value_scenario(class_file, spell, MALICE_OF_GULDAN)
+
+    def test_an_expanded_foreign_total_is_probed_in_its_expansion(self):
+        records = Records(DataSet(DBC_DIR))
+        caster = structure_stats(self.class_file)
+        values = read_tooltip(DataSet(DBC_DIR), MALICE_OF_GULDAN, caster).values
+        ordinal = next(index for index, shown in enumerate(values) if shown.text == FELSTRIKE_TOTAL)
+        shown = values[ordinal]
+        self.assertTrue(periodic_reason(records, MALICE_OF_GULDAN, caster, shown, (FELSTRIKE, 0),
+                                        ordinal).startswith(OVER_TICKS_REASON))
+        self.assertIn('unreadable with a scaled duration or period',
+                      periodic_reason(records, MALICE_OF_GULDAN, caster, shown, (FELSTRIKE, 0)))
+
+    def test_an_unlisted_expanded_foreign_total_is_left_to_the_hit_scenario(self):
+        scenario, expectations, periodic_totals = self.malice_of_guldan(self.class_file)
+        self.assertNotIn(FELSTRIKE_LABEL, [item.label for item in expectations])
+        self.assertIn({'label': FELSTRIKE_LABEL, 'effect': 0, 'effect_spell': FELSTRIKE}, periodic_totals)
+        self.assertFalse(self.steps_of(scenario, FELSTRIKE_LABEL))
+
+    def test_a_listed_foreign_total_keeps_its_effect_value_read_judged_per_tick(self):
+        listed = {**self.class_file, PER_TICK_FOREIGN_TOTALS: [{'spell': FELSTRIKE, 'effect': 0, 'reason': 'x'}]}
+        scenario, expectations, periodic_totals = self.malice_of_guldan(listed)
+        run.validate(scenario)
+        item, = [item for item in expectations if item.label == FELSTRIKE_LABEL]
+        self.assertEqual((item.check, item.displayed, item.model),
+                         ('effect_value', FELSTRIKE_TOTAL, {'effect_spell': FELSTRIKE, 'effect': 0, 'ticks': 6}))
+        self.assertTrue(item.rule.startswith('read flat per tick'))
+        self.assertNotIn(FELSTRIKE_LABEL, [entry['label'] for entry in periodic_totals])
+        step, = [step for step in self.steps_of(scenario, FELSTRIKE_LABEL) if step['metric'] == 'spell_effect_value']
+        self.assertEqual((step['spell'], step['effect']), (FELSTRIKE, 0))
+
+    def test_a_foreign_ticking_token_with_an_unreadable_probe_is_unmeasurable(self):
+        reason = 'periodic token read mixed with a scaled duration or period'
+        original = periodic_reason
+
+        def probe(records, rank_id, caster, shown, token=None, ordinal=None):
+            if token == (FELSTRIKE, 0):
+                return reason
+            return original(records, rank_id, caster, shown, token, ordinal)
+
+        with mock.patch('values.periodic_reason', side_effect=probe):
+            scenario, expectations, periodic_totals = self.malice_of_guldan(self.class_file)
+        item, = [item for item in expectations if item.label == FELSTRIKE_LABEL]
+        self.assertEqual(item.rule, UNMEASURABLE + reason)
+        self.assertNotIn(FELSTRIKE_LABEL, [entry['label'] for entry in periodic_totals])
+        self.assertFalse(self.steps_of(scenario, FELSTRIKE_LABEL))
+
+    def test_a_listed_foreign_effect_read_per_tick_is_refused(self):
+        listed = {**self.class_file, PER_TICK_FOREIGN_TOTALS: [{'spell': 803153, 'effect': 0, 'reason': 'x'}]}
+        spell = ClassSpell(500694, '500694', (500694,), 500694, 1, False)
+        with self.assertRaisesRegex(ValueError, 'is no total over its ticks'):
+            value_scenario(listed, spell, 500694)
+
+    def test_a_listed_rolled_effect_is_refused(self):
+        with self.assertRaisesRegex(ValueError, 'whose points roll'):
+            per_tick_ticks(Records(DataSet(DBC_DIR)), VINDICATION_RANK_2, 0)
+
     def test_trailing_digit_on_a_proc_count_token_is_unmeasurable_not_unreadable(self):
         scenario, expectations = self.build(LIGHTKEEPER, LIGHTKEEPER)
         run.validate(scenario)
@@ -832,6 +896,61 @@ class FixtureHealthStepTest(unittest.TestCase):
 
     def test_the_actor_is_used_verbatim(self):
         self.assertEqual(fixture_health_step(CASTER, 100)['actor'], CASTER)
+
+
+IMMOLATION_AURA = 800207
+IMMOLATION_AURA_HEALTH_COST = 10
+
+
+def raw_power_steps(power_type, cost, actor=CASTER):
+    return [{'action': 'set_power', 'actor': actor, 'power': power_type, 'value': cost}]
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HealthPowerCostTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.records = Records(DataSet(DBC_DIR))
+        cls.class_file = load_fixture_class_file(TEMPLAR_CLASS_ID)
+        cls.spells = {spell.spell_id: spell for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER)}
+
+    def health_paid_scenario(self, pay=pay_power_steps):
+        def health_paid(records, rank_id):
+            facts = facts_of(records, rank_id)
+            return replace(facts, power_type=HEALTH_POWER) if rank_id == ARGENT_BLADE_RANK_2 else facts
+
+        with mock.patch('values.facts_of', health_paid), mock.patch('values.pay_power_steps', pay):
+            scenario, _, _ = value_scenario(self.class_file, self.spells[ARGENT_BLADE], ARGENT_BLADE_RANK_2)
+        return scenario
+
+    def test_immolation_aura_is_paid_from_health_after_a_health_check(self):
+        facts = facts_of(self.records, IMMOLATION_AURA)
+        self.assertEqual((facts.power_type, facts.mana_cost), (HEALTH_POWER, IMMOLATION_AURA_HEALTH_COST))
+        self.assertEqual(pay_power_steps(facts.power_type, facts.mana_cost),
+                         [{'action': 'assert', 'label': 'SETUP: caster health pays the 10 health cost',
+                           'actor': CASTER, 'metric': 'health', 'min': IMMOLATION_AURA_HEALTH_COST + 1}])
+
+    def test_other_power_types_keep_their_set_power_step(self):
+        self.assertEqual(pay_power_steps(ENERGY, ARGENT_BLADE_RANK_2_ENERGY_COST, 'ally'),
+                         raw_power_steps(ENERGY, ARGENT_BLADE_RANK_2_ENERGY_COST, 'ally'))
+        self.assertEqual(list(pay_power_steps(ENERGY, ARGENT_BLADE_RANK_2_ENERGY_COST)[0]),
+                         ['action', 'actor', 'power', 'value'])
+
+    def test_a_health_paid_value_scenario_checks_the_health_before_the_cast_and_passes_the_validator(self):
+        scenario = self.health_paid_scenario()
+        run.validate(scenario)
+        steps = scenario['steps']
+        self.assertEqual([step for step in steps if step['action'] == 'set_power'], [])
+        checks = [step for step in steps if step.get('metric') == 'health']
+        self.assertEqual([(step['action'], step['actor'], step['min']) for step in checks],
+                         [('assert', CASTER, ARGENT_BLADE_RANK_2_ENERGY_COST + 1)])
+        cast = next(index for index, step in enumerate(steps) if step['action'] == 'cast')
+        self.assertLess(steps.index(checks[0]), cast)
+
+    def test_mutant_writing_the_health_power_type_is_refused_by_the_validator(self):
+        scenario = self.health_paid_scenario(raw_power_steps)
+        with self.assertRaisesRegex(ValueError, 'value is too large'):
+            run.validate(scenario)
 
 
 DECIMATE = 804194

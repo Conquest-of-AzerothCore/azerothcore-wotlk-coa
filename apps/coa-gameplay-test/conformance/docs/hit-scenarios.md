@@ -66,7 +66,9 @@ read this way: an aura the server makes periodic (`AuraEffect::CalculatePeriodic
 amplitude 1500) keeps its `$/1000;s1` as an `effect_value` in ms. A token of another spell (`${($500564d*1000/$500564T1)*(...)}` in
 Feast of Talons 500056) is classed by that spell's effect (ADR 0676): a `total` over its ticks goes to
 `periodic_totals` under its foreign label (`500056 effect_value 500564e0 #0`, with `effect_spell`), never to a
-one-tick `spell_effect_value` read; a `tick` or `mixed` foreign token keeps its read.
+one-tick `spell_effect_value` read; a `tick` foreign token keeps its read, a `mixed` or unreadable one is
+`unmeasurable` (ADR 1248), and a total that the class file lists in `per_tick_foreign_totals` keeps its read,
+judged per tick ([value-scenarios.md](value-scenarios.md)).
 
 `hits_per_cast` clearing the combined event count (above) proves a `heal` kind's events landed somewhere, but not on
 whom: two heals both landing on the ally would still clear `minimum_hits` for Temple Guardian. A class file's

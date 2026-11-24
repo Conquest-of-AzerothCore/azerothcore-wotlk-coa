@@ -328,12 +328,17 @@ class SpellClampSpec:
     aura_effect: int = 0
     attacker_entry: int = DUMMY_ENTRY
     label_suffix: str = 'spell_hit_taken'
+    casts: int | None = None
 
 
 def spell_clamp_spec(entry: dict) -> SpellClampSpec:
     spec = SpellClampSpec(int(entry['spell']), entry['name'], entry['quote'], int(entry['attacker_spell']),
                           float(entry['expected']), int(entry.get('aura_effect', 0)),
-                          int(entry.get('attacker_entry', DUMMY_ENTRY)), entry.get('label_suffix', 'spell_hit_taken'))
+                          int(entry.get('attacker_entry', DUMMY_ENTRY)), entry.get('label_suffix', 'spell_hit_taken'),
+                          entry.get('casts'))
+    if spec.casts is not None and (type(spec.casts) is not int or spec.casts < spell_clamp_casts()):
+        raise ValueError(f'{spec.spell} attacker_miss_share {SPELL_VARIANT} casts {spec.casts!r} per arm: a whole '
+                         f'count of at least {spell_clamp_casts()}, the smallest for the residual')
     if spec.expected <= 0 or spec.expected != int(spec.expected):
         raise ValueError(f'{spec.spell} attacker_miss_share {SPELL_VARIANT} states a whole, positive reduction of the '
                          f'attackers\' spell hit chance, not {spec.expected:g}')
@@ -398,7 +403,7 @@ def spell_clamp_scenario(class_file: dict, spec: SpellClampSpec) -> tuple[dict, 
         raise ValueError(f'{spec.spell} attacker_miss_share states {spec.expected:g} points but effect '
                          f'{spec.aura_effect} lowers the attackers\' spell hit chance by {points} points')
     entry = behaviour_entry(records, spec.spell, spec.name, KIND, spec.quote, float(points))
-    casts = spell_clamp_casts()
+    casts = spell_clamp_casts() if spec.casts is None else spec.casts
     health = {'action': 'set_health', 'actor': CASTER, 'value': TAKEN_OUTCOME_HEALTH, 'maximum': TAKEN_OUTCOME_HEALTH}
     aura_labels = {phase: f'{spell_clamp_label(spec)} {phase} aura' for phase in ('control', 'treatment')}
     steps = [health, measurement(aura_labels['control'], CASTER, 'aura', spell=spec.spell)]

@@ -1087,6 +1087,7 @@ struct SpellHealEvent
     uint32 spell = 0;
     uint32 heal = 0;
     uint32 overheal = 0;
+    uint32 absorb = 0;
     bool critical = false;
     uint32 casterEntry = 0;
     uint64 atMs = 0;
@@ -1185,6 +1186,8 @@ struct Actor
     std::map<ObjectGuid, uint32> meleeAttacksTakenFrom;
     std::map<std::pair<ObjectGuid, uint8>, uint32> meleeVictimStatesTakenFrom;
     std::map<ObjectGuid, uint32> meleeMissesTakenFrom;
+    std::map<uint8, uint64> meleeLastTakenMsByVictimState;
+    std::optional<uint64> meleeLastTakenMs;
     std::map<ObjectGuid, MeleeOutcomes> meleeOutcomesByAttacker;
     std::array<uint32, 2> meleeDamageByHand{};
     std::array<uint64, 2> meleeDamageTotalByHand{};
@@ -1198,6 +1201,7 @@ struct Actor
     std::vector<SpellDamageEvent> spellDamage;
     std::vector<SpellLogEvent> spellLogs;
     std::vector<SpellHealEvent> spellHeals;
+    std::vector<SpellHealEvent> spellHealLogs;
     std::vector<SpellEnergizeEvent> spellEnergizes;
     Tree castFailures;
     std::map<uint32, uint8> castFailureReason;
@@ -1395,18 +1399,19 @@ void ObserveSpellHealing(Actor& actor, WorldPacket const& packet, Player* player
         if (aura != SPELL_AURA_PERIODIC_HEAL && aura != SPELL_AURA_OBS_MOD_HEALTH)
             return;
     }
-    response >> event.heal >> event.overheal;
-    response.read_skip<uint32>();
+    response >> event.heal >> event.overheal >> event.absorb;
     uint8 critical;
     response >> critical;
     event.critical = critical != 0;
     Require(event.overheal <= event.heal, "Native overhealing exceeds healing");
-    if (event.heal)
+    if (event.heal || event.absorb)
     {
         event.casterEntry = ResolveLiveEntry(player, event.caster);
         event.atMs = GameNowMs();
-        actor.spellHeals.push_back(event);
+        actor.spellHealLogs.push_back(event);
     }
+    if (event.heal)
+        actor.spellHeals.push_back(event);
 }
 
 void ObserveSpellEnergize(Actor& actor, WorldPacket const& packet)
@@ -1501,6 +1506,7 @@ void ObserveExtensionPacket(Actor& actor, WorldPacket const& packet)
         packet.GetOpcode() != SMSG_MIRRORIMAGE_DATA && packet.GetOpcode() != SMSG_TRIGGER_MOVIE &&
         packet.GetOpcode() != SMSG_ATTACKSTOP && packet.GetOpcode() != SMSG_GOSSIP_COMPLETE &&
         packet.GetOpcode() != SMSG_SPELLDAMAGESHIELD && packet.GetOpcode() != SMSG_PLAY_SPELL_VISUAL &&
+        packet.GetOpcode() != SMSG_MOVE_FEATHER_FALL && packet.GetOpcode() != SMSG_MOVE_NORMAL_FALL &&
         packet.GetOpcode() != SMSG_INVENTORY_CHANGE_FAILURE)
         return;
 
@@ -1809,6 +1815,8 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         {
             ++actor.meleeAttacksTakenFrom[attacker];
             ++actor.meleeVictimStatesTakenFrom[{ attacker, victimState }];
+            actor.meleeLastTakenMsByVictimState[victimState] = GameNowMs();
+            actor.meleeLastTakenMs = GameNowMs();
             if (hitInfo & HITINFO_MISS)
                 ++actor.meleeMissesTakenFrom[attacker];
         }
@@ -5233,6 +5241,18 @@ private:
                 total += count;
             return total;
         }
+        if (metric == "melee_attack_taken_last_ms")
+        {
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            double const missing = std::numeric_limits<double>::quiet_NaN();
+            if (auto state = step.get_optional<uint32>("victim_state"))
+            {
+                Require(*state <= VICTIMSTATE_DEFLECTS, "Unknown melee victim state");
+                auto const found = actor.meleeLastTakenMsByVictimState.find(uint8(*state));
+                return found == actor.meleeLastTakenMsByVictimState.end() ? missing : double(found->second);
+            }
+            return actor.meleeLastTakenMs ? double(*actor.meleeLastTakenMs) : missing;
+        }
         if (metric == "melee_attacks_taken")
         {
             Actor const& actor = _actors.at(step.get<std::string>("actor"));
@@ -5401,6 +5421,23 @@ private:
                     else
                         value += uint64(event.damage) + event.resist;
                 }
+            return double(value);
+        }
+        if (metric == "spell_heal_absorb_total")
+        {
+            Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell in metric");
+            ObjectGuid caster = player->GetGUID();
+            if (auto id = step.get_optional<std::string>("caster"))
+                caster = GetUnit(*id)->GetGUID();
+            ObjectGuid target;
+            if (auto id = step.get_optional<std::string>("target"))
+                target = GetUnit(*id)->GetGUID();
+            auto critical = step.get_optional<bool>("critical");
+            uint64 value = 0;
+            for (SpellHealEvent const& event : _actors.at(step.get<std::string>("actor")).spellHealLogs)
+                if (event.caster == caster && event.spell == spell && (!target || event.target == target) &&
+                    (!critical || event.critical == *critical))
+                    value += event.absorb;
             return double(value);
         }
         if (metric == "owned_creature_avoided_count")
@@ -7992,7 +8029,7 @@ private:
             float const height = step.get<float>("height");
             Require(height > 0.0f, "Fall needs a positive height");
             Require(player->IsAlive() && !player->IsGameMaster() && !player->GetCommandStatus(CHEAT_GOD) &&
-                !player->HasHoverAura() && !player->HasFeatherFallAura() && !player->HasFlyAura() &&
+                !player->HasHoverAura() && !player->HasFlyAura() &&
                 !player->IsInFlight() && !player->IsInWater() &&
                 !player->IsImmunedToDamageOrSchool(SPELL_SCHOOL_MASK_NORMAL),
                 "Fall needs a living player that a landing can hurt");

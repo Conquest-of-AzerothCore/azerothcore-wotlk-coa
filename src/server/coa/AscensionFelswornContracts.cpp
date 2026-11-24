@@ -9,6 +9,8 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include <algorithm>
+#include <cstdlib>
+#include <utility>
 
 namespace AscensionFelsworn
 {
@@ -26,6 +28,9 @@ void ApplyContracts(SpellInfo* info)
     uint32 id = info->Id;
     if (id == MannorothFelfury)
         info->Effects[EFFECT_0].MiscValue = 6;
+    if (id == BloodOfMannoroth &&
+        info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_MOD_ARMOR_PENETRATION_PCT)
+        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT;
     if (id == 300466)
     {
         info->Effects[EFFECT_0].SpellClassMask = flag96(128, 0, 2097152);
@@ -99,7 +104,6 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[1].ApplyAuraName = SPELL_AURA_OVERRIDE_CLASS_SCRIPTS;
         info->Effects[1].MiscValue = ASCENSION_CREATURE_GLOBAL_CRIT;
         info->Effects[1].MiscValueB = 4;
-        info->Effects[1].BasePoints = id == 705109 ? 2 : 4;
     }
     if (id == 92087)
         info->Effects[1].MiscValue = ASCENSION_STATE_MASKED_GUARANTEED_CRIT;
@@ -131,6 +135,10 @@ void ApplyContracts(SpellInfo* info)
         dummy(0);
     if (id == 800203)
         info->Effects[2].Effect = 0;
+    if (id == 800209)
+        info->Effects[EFFECT_2].MiscValue = SPELL_SCHOOL_MASK_NORMAL;
+    if (id >= 707523 && id <= 707527)
+        info->Effects[EFFECT_1].MiscValue = SPELL_SCHOOL_MASK_NORMAL;
     if (id == BurningCommander)
     {
         periodic(1, 3000);
@@ -174,6 +182,15 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].RadiusEntry = nullptr;
         info->Effects[1].RadiusEntry = nullptr;
     }
+    if (id == 805241)
+        info->Effects[0].RealPointsPerLevel = 0;
+    if (id == 570159)
+    {
+        info->Effects[0].BasePoints = -1;
+        info->Effects[0].RealPointsPerLevel = 0;
+    }
+    if (id == 804336)
+        info->AttributesEx3 |= SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON;
     if (id == 800598)
     {
         info->AttributesEx3 |= SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON;
@@ -185,8 +202,7 @@ void ApplyContracts(SpellInfo* info)
         periodic(0, 500);
         info->DurationEntry = sSpellDurationStore.LookupEntry(27);
         info->Effects[1].Effect = 0;
-        info->Effects[2].ApplyAuraName = SPELL_AURA_MECHANIC_IMMUNITY_MASK;
-        info->Effects[2].MiscValue = IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
+        info->Effects[2].ApplyAuraName = SPELL_AURA_DUMMY;
     }
     if (id == 803904)
         dummy(0);
@@ -210,8 +226,18 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].SpellClassMask = flag96(1048576, 16777216, 0);
     if (id == 806128)
         info->Effects[0].SpellClassMask = flag96(0, 524288, 2);
+    if (id == 705123 || id == 707846 || id == 706266 || id == 707844)
+        dummy(2);
     if (id == 801902)
         info->Effects[0].MiscValue = SPELLMOD_COST;
+    if (id == 555739 || id == 806097)
+        if (SpellEntry const* stated = sSpellStore.LookupEntry(806095))
+            info->Effects[EFFECT_0].BasePoints = stated->EffectBasePoints[EFFECT_0];
+    if (id == 560578)
+    {
+        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
+        info->Effects[EFFECT_0].MiscValue = SPELLMOD_DAMAGE;
+    }
     if (id == 807424)
     {
         info->Effects[2].MiscValue = SPELLMOD_CASTING_TIME;
@@ -259,10 +285,12 @@ void ApplyContracts(SpellInfo* info)
         info->ProcCharges = 0;
     if (id == 707901)
         dummy(0);
+    if (Named(info, 801895))
+        info->AscensionIgnoreAbsorb = true;
     if (Named(info, 704368))
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             if (info->Effects[i].TriggerSpell == 803717)
-                periodic(i, 2000);
+                periodic(i, info->Effects[i].Amplitude);
     if (id >= 552210 && id <= 552213)
     {
         periodic(0, 2000);
@@ -282,10 +310,11 @@ void ApplyContracts(SpellInfo* info)
     if (id == 560284)
         info->Effects[2].Effect = 0;
     if (id == 520832)
-    {
-        info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
-        info->Effects[0].TargetB = SpellImplicitTargetInfo();
-    }
+        for (uint8 i : { EFFECT_0, EFFECT_2 })
+        {
+            info->Effects[i].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+            info->Effects[i].TargetB = SpellImplicitTargetInfo();
+        }
     if (id == 555742)
         info->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
     if (id == 805235 || id == 807590)
@@ -302,11 +331,164 @@ void ApplyContracts(SpellInfo* info)
 
 namespace
 {
+float AttackPowerCoefficient(uint32 spell, uint8 effect)
+{
+    float coefficient = 0.0f;
+    for (auto const& row : FelswornCoefficients)
+        if (row.spell == spell && row.effect == effect)
+            coefficient += row.ap;
+    return coefficient;
+}
+int32 VictimAttackPower(Unit const* victim, uint32 spell, uint8 effect)
+{
+    float const coefficient = AttackPowerCoefficient(spell, effect);
+    if (coefficient <= 0.0f)
+        return 0;
+    return int32(coefficient * victim->GetTotalAuraModifier(SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS));
+}
+template <typename Bonus>
+int32 Share(Bonus bonus, int32 amount)
+{
+    if (!amount)
+        return 0;
+    uint32 const size = uint32(std::abs(amount));
+    int32 const share = std::max(0, int32(bonus(2 * size)) - int32(bonus(size)));
+    return amount < 0 ? -share : share;
+}
+WeaponAttackType SpellAttackType(SpellInfo const* info)
+{
+    switch (info->DmgClass)
+    {
+        case SPELL_DAMAGE_CLASS_MELEE:
+            return info->HasAttribute(SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON) ? OFF_ATTACK : BASE_ATTACK;
+        case SPELL_DAMAGE_CLASS_RANGED:
+            return info->IsRangedWeaponSpell() ? RANGED_ATTACK : BASE_ATTACK;
+        default:
+            return info->HasAttribute(SPELL_ATTR2_AUTO_REPEAT) ? RANGED_ATTACK : BASE_ATTACK;
+    }
+}
+UnitMods WeaponDamageMod(WeaponAttackType attack)
+{
+    switch (attack)
+    {
+        case OFF_ATTACK:
+            return UNIT_MOD_DAMAGE_OFFHAND;
+        case RANGED_ATTACK:
+            return UNIT_MOD_DAMAGE_RANGED;
+        default:
+            return UNIT_MOD_DAMAGE_MAINHAND;
+    }
+}
+std::pair<int32, int32> DirectShares(Unit* caster, Unit* target, SpellInfo const* info, uint8 effect, int32 raw)
+{
+    SpellSchoolMask const school = info->GetSchoolMask();
+    if (info->Effects[effect].Effect == SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
+    {
+        WeaponAttackType const attack = SpellAttackType(info);
+        if (school & SPELL_SCHOOL_MASK_NORMAL)
+            raw = int32(raw * caster->GetPctModifierValue(WeaponDamageMod(attack), TOTAL_PCT));
+        int32 const done = Share([&](uint32 amount)
+            { return caster->MeleeDamageBonusDone(target, amount, attack, info, school); }, raw);
+        int32 const taken = Share([&](uint32 amount)
+            { return target->MeleeDamageBonusTaken(caster, amount, attack, info, school); }, done);
+        return {done, taken};
+    }
+    int32 const done = Share([&](uint32 amount)
+        { return caster->SpellDamageBonusDone(target, info, amount, SPELL_DIRECT_DAMAGE, effect); }, raw);
+    int32 const taken = Share([&](uint32 amount)
+        { return target->SpellDamageBonusTaken(caster, info, amount, SPELL_DIRECT_DAMAGE); }, done);
+    return {done, taken};
+}
+int32 AreaShare(Spell* spell, Unit* target, uint8 effect, int32 taken)
+{
+    SpellInfo const* info = spell->GetSpellInfo();
+    SpellEffectInfo const& data = info->Effects[effect];
+    if (!taken || !(data.IsAreaAuraEffect() || data.IsTargetingArea() ||
+                    (data.ChainTarget > 1 && info->DmgClass != SPELL_DAMAGE_CLASS_MAGIC)))
+        return taken;
+    Unit* caster = spell->GetCaster();
+    bool const npcCaster = !caster->IsControlledByPlayer() || info->HasAttribute(SPELL_ATTR7_TREAT_AS_NPC_AOE);
+    taken = target->CalculateAOEDamageReduction(taken, info->SchoolMask, npcCaster);
+    int32 const targets = int32(spell->GetUniqueTargetInfo()->size());
+    if (caster->IsPlayer() && targets > 10)
+        taken = taken * 10 / targets;
+    return taken;
+}
+int32 TriggeringAuraAttackPower(Spell* spell, Unit* target)
+{
+    SpellInfo const* aura = spell->GetTriggeredByAuraSpellInfo();
+    if (!aura)
+        return 0;
+    for (uint8 i = EFFECT_0; i < MAX_SPELL_EFFECTS; ++i)
+        if (aura->Effects[i].ApplyAuraName == SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE &&
+            aura->Effects[i].TriggerSpell == spell->GetSpellInfo()->Id)
+            return VictimAttackPower(target, aura->Id, i);
+    return 0;
+}
+int32 LeechAttackPower(Unit* target, Unit* attacker, SpellInfo const* info)
+{
+    int32 share = 0;
+    for (uint8 i = EFFECT_0; i < MAX_SPELL_EFFECTS; ++i)
+        if (info->Effects[i].Effect == SPELL_EFFECT_HEALTH_LEECH)
+            if (int32 const raw = VictimAttackPower(target, info->Id, i))
+                share += DirectShares(attacker, target, info, i, raw).second;
+    return share;
+}
+int32 AreaPeriodicAttackPower(Unit const* target, SpellInfo const* info)
+{
+    for (uint8 i = EFFECT_0; i < MAX_SPELL_EFFECTS; ++i)
+        if (info->Effects[i].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
+            info->Effects[i].ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE)
+            return VictimAttackPower(target, info->Id, i);
+    return 0;
+}
+}
+
+void AscensionFelsworn::AddVictimAttackPower(Spell* spell, Unit* target, TargetInfo& hit)
+{
+    Unit* caster = spell->GetCaster();
+    SpellInfo const* info = spell->GetSpellInfo();
+    if (!Owner(caster) || !target || target == caster || hit.damage <= 0 || hit.missCondition != SPELL_MISS_NONE)
+        return;
+    for (uint8 i = EFFECT_0; i < MAX_SPELL_EFFECTS; ++i)
+    {
+        uint32 const effect = info->Effects[i].Effect;
+        if (!(hit.effectMask & (1 << i)) ||
+            (effect != SPELL_EFFECT_SCHOOL_DAMAGE && effect != SPELL_EFFECT_NORMALIZED_WEAPON_DMG))
+            continue;
+        int32 raw = VictimAttackPower(target, info->Id, i);
+        if (!raw && i == EFFECT_0)
+            raw = TriggeringAuraAttackPower(spell, target);
+        if (!raw)
+            continue;
+        auto const [done, taken] = DirectShares(caster, target, info, i, raw);
+        hit.damageBeforeTakenMods = std::max(0, hit.damageBeforeTakenMods + done);
+        hit.damage = std::max(0, hit.damage + AreaShare(spell, target, i, taken));
+    }
+}
+
+namespace
+{
 using namespace AscensionFelsworn;
 float Shadowflame(Player* player)
 {
     return float(std::max(player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE),
                           player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW)));
+}
+constexpr uint32 BANE_OF_CHAOS_RANK_7 = 706420;
+void GrantBaneOfChaosPeriodicCrit(Unit* target, Aura* aura)
+{
+    if (aura->GetId() != BANE_OF_CHAOS_RANK_7)
+        return;
+    Unit* caster = aura->GetCaster();
+    AuraEffect* effect = aura->GetEffect(EFFECT_0);
+    if (!caster || !effect || effect->GetAuraType() != SPELL_AURA_PERIODIC_DAMAGE)
+        return;
+    SpellInfo const* info = aura->GetSpellInfo();
+    float chance = caster->SpellDoneCritChance(nullptr, info, info->GetSchoolMask(), BASE_ATTACK, true);
+    if (chance > 0.0f)
+        chance = target->SpellTakenCritChance(caster, info, info->GetSchoolMask(), chance, BASE_ATTACK, true);
+    effect->SetCritChance(std::max(0.0f, chance));
 }
 class felsworn_scaling : public UnitScript
 {
@@ -315,8 +497,13 @@ class felsworn_scaling : public UnitScript
         : UnitScript("felsworn_scaling", true,
                      {UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE, UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN,
                       UNITHOOK_MODIFY_MELEE_DAMAGE, UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK,
-                      UNITHOOK_ON_BEFORE_ROLL_MELEE_OUTCOME_AGAINST})
+                      UNITHOOK_ON_BEFORE_ROLL_MELEE_OUTCOME_AGAINST, UNITHOOK_ON_AURA_APPLY})
     {
+    }
+    void OnAuraApply(Unit* unit, Aura* aura) override
+    {
+        if (unit && aura)
+            GrantBaneOfChaosPeriodicCrit(unit, aura);
     }
     void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* info, uint8 index, float& value) override
     {
@@ -331,6 +518,8 @@ class felsworn_scaling : public UnitScript
                 value += row.ap * player->GetTotalAttackPowerValue(BASE_ATTACK) + row.sp * std::max(0.0f, sp) +
                          row.stamina * player->GetStat(STAT_STAMINA) + row.agility * player->GetStat(STAT_AGILITY);
             }
+        if (info->Id == 520832 && index == 0 && info->Effects[EFFECT_0].Amplitude > 0)
+            value /= float(std::max(1, info->GetMaxDuration() / int32(info->Effects[EFFECT_0].Amplitude)));
         if (Named(info, 801895) && index == 0)
         {
             float fire = float(std::max(0, player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE)));
@@ -351,6 +540,8 @@ class felsworn_scaling : public UnitScript
             value += player->GetMaxHealth() * .10f;
         if ((info->Id == 520252 || info->Id == 520253) && !Inner(player))
             value = 0;
+        if (info->Id == 804825 && index == EFFECT_0)
+            AddPct(value, State(player).resolvePct);
         value = std::clamp(value, float(INT32_MIN / 2), float(INT32_MAX / 2));
     }
     static float DamageFactor(Unit* target, Unit* attacker, uint32 school, SpellInfo const* info)
@@ -376,6 +567,8 @@ class felsworn_scaling : public UnitScript
     }
     void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* info) override
     {
+        if (info && target && target != attacker && Owner(attacker))
+            damage = std::max(0, damage + LeechAttackPower(target, attacker, info));
         if (info && !info->HasAttribute(SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS))
             damage = int32(damage * DamageFactor(target, attacker, info->SchoolMask, info));
     }
@@ -385,6 +578,8 @@ class felsworn_scaling : public UnitScript
     }
     void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const* info) override
     {
+        if (info && target && target != attacker && Owner(attacker))
+            damage = uint32(std::max(0, int32(damage) + AreaPeriodicAttackPower(target, info)));
         if (info && !info->HasAttribute(SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS))
             damage = uint32(damage * DamageFactor(target, attacker, info->SchoolMask, info));
     }
