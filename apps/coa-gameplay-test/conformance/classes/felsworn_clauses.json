@@ -4337,7 +4337,9 @@
     "clause": "and you now heal equal to $807426s1% of all damage dealt by critical strikes with auto attacks.",
     "labels": [
       "805236 behaviour_metric_delta crit_swing_heal",
-      "805236 behaviour_metric_delta crit_swing_heal_no_inner_demon"
+      "805236 behaviour_metric_delta crit_swing_heal_no_inner_demon",
+      "805236 behaviour_metric_delta crit_swing_heal_non_crit",
+      "805236 behaviour_metric_delta crit_suppressed"
     ],
     "kind": "claim",
     "reason": "The value label 805236 effect_value 807426e0 #1 (not_measured in the pair of record) is replaced by the crit_swing_heal ratio: the caster's 560839 heal over its critical auto attack damage with Inner Demon 804216 held (condition fixture, phase auras) and 805236 learned for real (0.5 expected, 0 before the learn), and the contrast arm without Inner Demon (0)."

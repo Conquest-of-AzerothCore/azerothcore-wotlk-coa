@@ -7397,6 +7397,117 @@
       ]
     },
     {
+      "spell": 805236,
+      "name": "Grommash's Folly (control: no auto attack heal on non-critical swings with Inner Demon)",
+      "variant": "crit_swing_heal_non_crit",
+      "label_suffix": "crit_swing_heal_non_crit",
+      "kind": "metric_delta",
+      "quote": "and you now heal equal to $807426s1% of all damage dealt by critical strikes with auto attacks.",
+      "trigger_spell": 805236,
+      "gate_spell": 805236,
+      "target": "dummy",
+      "attack_swings": 3,
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 560839,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {
+          "critical": false
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          4,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 0,
+      "observe_source": "Contrast arm of crit_swing_heal for the qualifier 'critical strikes': the same layout with Inner Demon held, but no swing can crit, so the after ratio (the increase of the caster's 560839 heal total over the increase of its non-critical swing damage, melee_damage_total critical false) must stay 0; a server that healed on every auto attack reads 0.5. Reduce Critical Strike Chance -100% 64481 (Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT, BasePoints -1000, EquippedItemClass -1, server DBC set) is set on the caster in both phases as a precondition fixture (guide 3.4), with Felfury 800058 at 4 stacks and Inner Demon 804216 held as in crit_swing_heal; no force_crit. 805236 is learned for real between the phases (mentor D-67); each phase auto-attacks the dummy for 3 swing intervals. Its sibling crit_suppressed reads the critical swing damage share at 0, so the arm is not void. Code: Check case 807426 returns Inner(player) && autoAttack && crit (AscensionFelswornEvents.cpp:112-113); Proc case 807426 calls Copy(player, player, 560839, damage / 2) (:263-264). Reference search: as crit_swing_heal (bindmysoul talents 805236 text 'critical strikes with auto attacks'; coa-history 807426 and 560839: 0 events in 186 logs); expected values come from the tooltip and the server DBC set."
+    },
+    {
+      "spell": 805236,
+      "name": "Grommash's Folly (fixture check: no critical swing under 64481 with Inner Demon)",
+      "variant": "crit_suppressed",
+      "label_suffix": "crit_suppressed",
+      "kind": "metric_delta",
+      "quote": "and you now heal equal to $807426s1% of all damage dealt by critical strikes with auto attacks.",
+      "trigger_spell": 805236,
+      "gate_spell": 805236,
+      "target": "dummy",
+      "attack_swings": 3,
+      "measure_actor": "caster",
+      "metric": "melee_damage_total",
+      "fields": {
+        "critical": true
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {},
+        "increments": true
+      },
+      "before_expected": 0,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          4,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 0,
+      "observe_source": "Fixture check of crit_swing_heal_non_crit: in the same layout the caster's critical swing damage (melee_damage_total critical true) over its whole swing damage stays 0 in both phases, so every counted swing of the non-critical arm is non-critical. Reduce Critical Strike Chance -100% 64481 (Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT, BasePoints -1000, EquippedItemClass -1, server DBC set) is set on the caster in both phases as a precondition fixture (guide 3.4), with Felfury 800058 at 4 stacks and Inner Demon 804216 held as in crit_swing_heal; no force_crit. 805236 is learned for real between the phases (mentor D-67); each phase auto-attacks the dummy for 3 swing intervals. Code reading only: Unit::RollMeleeOutcomeAgainst rolls a crit only for a positive chance (Unit.cpp:3539); the reading, not that line, is the proof."
+    },
+    {
       "spell": 805235,
       "kind": "metric_delta",
       "trigger_spell": 805235,
