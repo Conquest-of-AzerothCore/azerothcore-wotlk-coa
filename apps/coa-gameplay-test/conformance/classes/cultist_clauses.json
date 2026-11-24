@@ -33,11 +33,21 @@
   {
     "spell": 92130,
     "clause": "and reduces your mana costs by $s3% for $d.",
-    "labels": [
-      "92130 effect_value 706725e2 #2",
-      "92130 spell_duration 706725 #3"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and reduces your mana costs by $s3%",
+        "labels": [
+          "92130 effect_value 706725e2 #2"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "92130 spell_duration 706725 #3"
+        ]
+      }
+    ]
   },
   {
     "spell": 92131,
@@ -173,11 +183,21 @@
   {
     "spell": 300275,
     "clause": "Damage dealt by Blade of the Empire increases your melee haste by $300274s1% for $300274d,",
-    "labels": [
-      "300275 effect_value 300274e0 #0",
-      "300275 spell_duration 300274 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Damage dealt by Blade of the Empire increases your melee haste by $300274s1%",
+        "labels": [
+          "300275 effect_value 300274e0 #0"
+        ]
+      },
+      {
+        "claim": "for $300274d",
+        "labels": [
+          "300275 spell_duration 300274 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 300275,
@@ -275,11 +295,21 @@
   {
     "spell": 300291,
     "clause": "Casting Herald of the Depths now increases the absorption of your next Void Shield within $301259d by $301259s1%.",
-    "labels": [
-      "300291 spell_duration 301259 #0",
-      "300291 effect_value 301259e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "within $301259d",
+        "labels": [
+          "300291 spell_duration 301259 #0"
+        ]
+      },
+      {
+        "claim": "increases the absorption of your next Void Shield ... by $301259s1%",
+        "labels": [
+          "300291 effect_value 301259e0 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 300296,
@@ -290,11 +320,21 @@
   {
     "spell": 300296,
     "clause": "Increases your haste by $s1% for $d.",
-    "labels": [
-      "300296 effect_value 803340e0 #0",
-      "300296 spell_duration 803340 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your haste by $s1%",
+        "labels": [
+          "300296 effect_value 803340e0 #0"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "300296 spell_duration 803340 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 300298,
@@ -323,20 +363,40 @@
   {
     "spell": 300300,
     "clause": "Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1% for $560943d.",
-    "labels": [
-      "300300 effect_value 560943e0 #1",
-      "300300 spell_duration 560943 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1%",
+        "labels": [
+          "300300 effect_value 560943e0 #1"
+        ]
+      },
+      {
+        "claim": "for $560943d",
+        "labels": [
+          "300300 spell_duration 560943 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 300300,
     "clause": "If this effect is dispelled, your critical strike chance is increased by $560947s1% for $560947d.",
-    "labels": [
-      "300300 effect_value 560947e0 #3",
-      "300300 spell_duration 560947 #4"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "your critical strike chance is increased by $560947s1%",
+        "labels": [
+          "300300 effect_value 560947e0 #3"
+        ]
+      },
+      {
+        "claim": "for $560947d",
+        "labels": [
+          "300300 spell_duration 560947 #4"
+        ]
+      }
+    ]
   },
   {
     "spell": 300302,
@@ -389,11 +449,25 @@
   {
     "spell": 300307,
     "clause": "Reaching 60 Insanity increases your damage dealt by $573285s1% for $573285d.",
-    "labels": [
-      "300307 effect_value 573285e0 #0",
-      "300307 spell_duration 573285 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your damage dealt by $573285s1%",
+        "labels": [
+          "300307 effect_value 573285e0 #0"
+        ]
+      },
+      {
+        "claim": "for $573285d",
+        "labels": [
+          "300307 spell_duration 573285 #1"
+        ]
+      },
+      {
+        "claim": "Reaching 60 Insanity",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 300308,
@@ -560,10 +634,19 @@
   {
     "spell": 301183,
     "clause": "Every 3rd melee ability you cast now causes your next Eldritch Mending to become instant cast and cost $301186s2% less mana.",
-    "labels": [
-      "301183 effect_value 301186e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "cost $301186s2% less mana",
+        "labels": [
+          "301183 effect_value 301186e1 #0"
+        ]
+      },
+      {
+        "claim": "Every 3rd melee ability",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 301200,
@@ -603,10 +686,19 @@
   {
     "spell": 301255,
     "clause": "Your Darkwither can now critically strike and your spell hit rating is increased by $s2% of your Intellect.",
-    "labels": [
-      "301255 effect_value e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "your spell hit rating is increased by $s2% of your Intellect.",
+        "labels": [
+          "301255 effect_value e1 #0"
+        ]
+      },
+      {
+        "claim": "Your Darkwither can now critically strike",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 301258,
@@ -641,11 +733,21 @@
   {
     "spell": 301262,
     "clause": "Lasts for $d or $n attacks.",
-    "labels": [
-      "301262 spell_duration 600327 #2",
-      "301262 effect_value #3"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Lasts for $d",
+        "labels": [
+          "301262 spell_duration 600327 #2"
+        ]
+      },
+      {
+        "claim": "$n attacks",
+        "labels": [
+          "301262 effect_value #3"
+        ]
+      }
+    ]
   },
   {
     "spell": 301315,
@@ -754,11 +856,21 @@
   {
     "spell": 500704,
     "clause": "Teleport an enemy to your position and slow their movement speed by $804533s1% for $804533d.",
-    "labels": [
-      "500704 effect_value 804533e0 #0",
-      "500704 spell_duration 804533 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "slow their movement speed by $804533s1%",
+        "labels": [
+          "500704 effect_value 804533e0 #0"
+        ]
+      },
+      {
+        "claim": "for $804533d",
+        "labels": [
+          "500704 spell_duration 804533 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 500712,
@@ -769,12 +881,27 @@
   {
     "spell": 500712,
     "clause": "Curse an enemy, dealing ${$m1+0+$sp*1.5} Shadow damage instantly plus an additional ${$354191m1+$354191ppl1+$sps*1} Shadow damage after $d.",
-    "labels": [
-      "500712 effect_value e0 #0",
-      "500712 effect_value 354191e0 #1",
-      "500712 aura_duration_ms #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$sp*1.5} Shadow damage instantly",
+        "labels": [
+          "500712 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "plus an additional ${$354191m1+$354191ppl1+$sps*1} Shadow damage",
+        "labels": [
+          "500712 effect_value 354191e0 #1"
+        ]
+      },
+      {
+        "claim": "after $d",
+        "labels": [
+          "500712 aura_duration_ms #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 502241,
@@ -809,11 +936,21 @@
   {
     "spell": 502241,
     "clause": "repeating every $804153t1 sec for $804153D.",
-    "labels": [
-      "502241 aura_amplitude_ms #3",
-      "502241 spell_duration 804153 #4"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "every $804153t1 sec",
+        "labels": [
+          "502241 aura_amplitude_ms #3"
+        ]
+      },
+      {
+        "claim": "for $804153D",
+        "labels": [
+          "502241 spell_duration 804153 #4"
+        ]
+      }
+    ]
   },
   {
     "spell": 502241,
@@ -824,12 +961,22 @@
   {
     "spell": 578115,
     "clause": "Shields an ally, absorbing ${$m1+$SP*2} damage for $d and applying Wracked Mind.",
-    "labels": [
-      "578115 effect_value e0 #0",
-      "578115 aura_amount e0 #0",
-      "578115 aura_duration_ms #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "absorbing ${$m1+$SP*2} damage",
+        "labels": [
+          "578115 effect_value e0 #0",
+          "578115 aura_amount e0 #0"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "578115 aura_duration_ms #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 578115,
@@ -913,12 +1060,22 @@
   {
     "spell": 500751,
     "clause": "transfering $s3% of all damage taken by them to you and causing $300295s1% of all damage you deal to be converted into healing for them.",
-    "labels": [
-      "500751 effect_value e2 #1",
-      "500751 aura_amount e2 #1",
-      "500751 effect_value 300295e0 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "transfering $s3% of all damage taken by them to you",
+        "labels": [
+          "500751 effect_value e2 #1",
+          "500751 aura_amount e2 #1"
+        ]
+      },
+      {
+        "claim": "causing $300295s1% of all damage you deal to be converted into healing for them",
+        "labels": [
+          "500751 effect_value 300295e0 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 500751,
@@ -977,11 +1134,21 @@
   {
     "spell": 520345,
     "clause": "every $t1 sec for $d.",
-    "labels": [
-      "520345 aura_amplitude_ms #1",
-      "520345 aura_duration_ms #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "every $t1 sec",
+        "labels": [
+          "520345 aura_amplitude_ms #1"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "520345 aura_duration_ms #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 520345,
@@ -1027,11 +1194,21 @@
   {
     "spell": 520388,
     "clause": "Lasts for $d or $n instances of damage or healing.",
-    "labels": [
-      "520388 aura_duration_ms #2",
-      "520388 effect_value #3"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Lasts for $d",
+        "labels": [
+          "520388 aura_duration_ms #2"
+        ]
+      },
+      {
+        "claim": "$n instances of damage or healing",
+        "labels": [
+          "520388 effect_value #3"
+        ]
+      }
+    ]
   },
   {
     "spell": 520388,
@@ -1082,11 +1259,21 @@
   {
     "spell": 572141,
     "clause": "Hurl a cursed shield, dealing ${$m1+$AP*0.09+$SP*0.23} Shadow damage to up to $x1 enemies,",
-    "labels": [
-      "572141 effect_value e0 #0",
-      "572141 effect_value #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$m1+$AP*0.09+$SP*0.23} Shadow damage",
+        "labels": [
+          "572141 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "to up to $x1 enemies",
+        "labels": [
+          "572141 effect_value #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 572141,
@@ -1159,11 +1346,21 @@
   {
     "spell": 524887,
     "clause": "Damage dealt by Blade of the Empire now heals the lowest health ally for $s1% of the damage dealt plus ${($500748m1+$500748ppl1+$BH*0.4+$AP*.1)*0.5}.",
-    "labels": [
-      "524887 effect_value e0 #0",
-      "524887 effect_value #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "heals the lowest health ally for $s1% of the damage dealt",
+        "labels": [
+          "524887 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "plus ${($500748m1+$500748ppl1+$BH*0.4+$AP*.1)*0.5}",
+        "labels": [
+          "524887 effect_value #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 525019,
@@ -1180,20 +1377,40 @@
   {
     "spell": 525049,
     "clause": "Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1% for $560943d.",
-    "labels": [
-      "525049 effect_value 560943e0 #0",
-      "525049 spell_duration 560943 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1%",
+        "labels": [
+          "525049 effect_value 560943e0 #0"
+        ]
+      },
+      {
+        "claim": "for $560943d",
+        "labels": [
+          "525049 spell_duration 560943 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 525049,
     "clause": "If this effect is dispelled, your critical strike chance is increased by $560947s1% for $560947d.",
-    "labels": [
-      "525049 effect_value 560947e0 #2",
-      "525049 spell_duration 560947 #3"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "your critical strike chance is increased by $560947s1%",
+        "labels": [
+          "525049 effect_value 560947e0 #2"
+        ]
+      },
+      {
+        "claim": "for $560947d",
+        "labels": [
+          "525049 spell_duration 560947 #3"
+        ]
+      }
+    ]
   },
   {
     "spell": 525060,
@@ -1230,11 +1447,21 @@
   {
     "spell": 525078,
     "clause": "Damage dealt by Blade of the Empire now heals the lowest health ally for $s1% of the damage dealt plus ${($500748m1+$500748ppl1+$BH*0.4+$AP*.1)*0.5}.",
-    "labels": [
-      "525078 effect_value e0 #0",
-      "525078 effect_value #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "heals the lowest health ally for $s1% of the damage dealt",
+        "labels": [
+          "525078 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "plus ${($500748m1+$500748ppl1+$BH*0.4+$AP*.1)*0.5}",
+        "labels": [
+          "525078 effect_value #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 525307,
@@ -1313,10 +1540,19 @@
   {
     "spell": 560109,
     "clause": "Corrupt the mind of an enemy and spread madness, fearing them in place for $d (8 sec vs players),",
-    "labels": [
-      "560109 aura_duration_ms #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "for $d",
+        "labels": [
+          "560109 aura_duration_ms #0"
+        ]
+      },
+      {
+        "claim": "8 sec vs players",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 560109,
@@ -1333,10 +1569,19 @@
   {
     "spell": 560301,
     "clause": "Create 3 copies of yourself that run in a random direction for $706932d and may briefly trick enemies into ignoring you.",
-    "labels": [
-      "560301 spell_duration 706932 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "for $706932d",
+        "labels": [
+          "560301 spell_duration 706932 #0"
+        ]
+      },
+      {
+        "claim": "Create 3 copies of yourself",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 560301,
@@ -1522,12 +1767,27 @@
   {
     "spell": 572103,
     "clause": "Target an enemy and summon a Tentacle of N'Zoth on the ground near them that will silence them and deal ${$806596m2+$806596ppl2+$SP*.75} Shadow damage every $806596t2 sec for $806596d.",
-    "labels": [
-      "572103 effect_value 806596e1 #0",
-      "572103 aura_amplitude_ms #1",
-      "572103 spell_duration 806596 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "deal ${$806596m2+$806596ppl2+$SP*.75} Shadow damage",
+        "labels": [
+          "572103 effect_value 806596e1 #0"
+        ]
+      },
+      {
+        "claim": "every $806596t2 sec",
+        "labels": [
+          "572103 aura_amplitude_ms #1"
+        ]
+      },
+      {
+        "claim": "for $806596d",
+        "labels": [
+          "572103 spell_duration 806596 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 572103,
@@ -1558,12 +1818,22 @@
   {
     "spell": 573028,
     "clause": "Hinder an enemies momentum with void chains, slowing their movement speed by $s1% for $d.",
-    "labels": [
-      "573028 effect_value e0 #0",
-      "573028 aura_amount e0 #0",
-      "573028 aura_duration_ms #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "slowing their movement speed by $s1%",
+        "labels": [
+          "573028 effect_value e0 #0",
+          "573028 aura_amount e0 #0"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "573028 aura_duration_ms #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 574147,
@@ -1595,11 +1865,21 @@
   {
     "spell": 574318,
     "clause": "and increases your Shadow Damage dealt by $s1% for $d.",
-    "labels": [
-      "574318 effect_value 300277e0 #1",
-      "574318 spell_duration 300277 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and increases your Shadow Damage dealt by $s1%",
+        "labels": [
+          "574318 effect_value 300277e0 #1"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "574318 spell_duration 300277 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 582307,
@@ -1729,11 +2009,21 @@
   {
     "spell": 680508,
     "clause": "and Hammer of Twilight now increases the target's spell damage taken by $572046s1% for $572046d.",
-    "labels": [
-      "680508 effect_value 572046e0 #1",
-      "680508 spell_duration 572046 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases the target's spell damage taken by $572046s1%",
+        "labels": [
+          "680508 effect_value 572046e0 #1"
+        ]
+      },
+      {
+        "claim": "for $572046d",
+        "labels": [
+          "680508 spell_duration 572046 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 680555,
@@ -1775,18 +2065,36 @@
   {
     "spell": 680558,
     "clause": "plus an additional $680608s1% while above 40 Insanity.",
-    "labels": [
-      "680558 effect_value 680608e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "plus an additional $680608s1%",
+        "labels": [
+          "680558 effect_value 680608e0 #1"
+        ]
+      },
+      {
+        "claim": "while above 40 Insanity",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 680569,
     "clause": "Increases your attack power by 2 for every ${($m1*$m2)*2} armor value you have.",
-    "labels": [
-      "680569 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "for every ${($m1*$m2)*2} armor value you have",
+        "labels": [
+          "680569 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "Increases your attack power by 2",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 680570,
@@ -1799,11 +2107,21 @@
   {
     "spell": 680570,
     "clause": "and casting Abyssal Ward now increases your chance to critically block by $680571s1% for $680571d.",
-    "labels": [
-      "680570 effect_value 680571e0 #1",
-      "680570 spell_duration 680571 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your chance to critically block by $680571s1%",
+        "labels": [
+          "680570 effect_value 680571e0 #1"
+        ]
+      },
+      {
+        "claim": "for $680571d",
+        "labels": [
+          "680570 spell_duration 680571 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 680574,
@@ -1967,11 +2285,21 @@
   {
     "spell": 681088,
     "clause": "Absorbing damage grants you $s2% of the absorbed value as attack power for $681067d.",
-    "labels": [
-      "681088 effect_value e1 #1",
-      "681088 spell_duration 681067 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Absorbing damage grants you $s2% of the absorbed value as attack power",
+        "labels": [
+          "681088 effect_value e1 #1"
+        ]
+      },
+      {
+        "claim": "for $681067d",
+        "labels": [
+          "681088 spell_duration 681067 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 681102,
@@ -1984,11 +2312,20 @@
   {
     "spell": 681104,
     "clause": "Tap into your inner voidborne rage, increasing your damage dealt and critical strike chance by $s1%,",
-    "labels": [
-      "681104 effect_value e0 #0",
-      "681104 aura_amount e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing your damage dealt by $s1%",
+        "labels": [
+          "681104 effect_value e0 #0",
+          "681104 aura_amount e0 #0"
+        ]
+      },
+      {
+        "claim": "and critical strike chance by $s1%",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 681104,
@@ -2001,10 +2338,19 @@
   {
     "spell": 681104,
     "clause": "Generates 1 Insanity every $T3 sec.",
-    "labels": [
-      "681104 aura_amplitude_ms #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "every $T3 sec",
+        "labels": [
+          "681104 aura_amplitude_ms #2"
+        ]
+      },
+      {
+        "claim": "Generates 1 Insanity",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 681106,
@@ -2074,12 +2420,27 @@
   {
     "spell": 681474,
     "clause": "Send out a wave of force, dealing ${$m1+0+$SP*0.76255+$AP*.125} Shadow damage to enemies in front of you and reducing their movement speed by $s2% for $d.",
-    "labels": [
-      "681474 effect_value 680576e0 #0",
-      "681474 effect_value 680576e1 #1",
-      "681474 spell_duration 680576 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$SP*0.76255+$AP*.125} Shadow damage",
+        "labels": [
+          "681474 effect_value 680576e0 #0"
+        ]
+      },
+      {
+        "claim": "reducing their movement speed by $s2%",
+        "labels": [
+          "681474 effect_value 680576e1 #1"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "681474 spell_duration 680576 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 704434,
@@ -2123,11 +2484,21 @@
   {
     "spell": 704527,
     "clause": "Periodic or channeled damage now increases the damage the enemy takes from you by $706908s1% for $706908d,",
-    "labels": [
-      "704527 effect_value 706908e0 #0",
-      "704527 spell_duration 706908 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases the damage the enemy takes from you by $706908s1%",
+        "labels": [
+          "704527 effect_value 706908e0 #0"
+        ]
+      },
+      {
+        "claim": "for $706908d",
+        "labels": [
+          "704527 spell_duration 706908 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 704527,
@@ -2230,11 +2601,21 @@
   {
     "spell": 704889,
     "clause": "Damage dealt by Twilight Shieldtoss shields you for $s1% of the damage dealt for $850002d.",
-    "labels": [
-      "704889 effect_value e0 #0",
-      "704889 spell_duration 850002 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "shields you for $s1% of the damage dealt",
+        "labels": [
+          "704889 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "for $850002d",
+        "labels": [
+          "704889 spell_duration 850002 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 704889,
@@ -2326,12 +2707,27 @@
   {
     "spell": 706182,
     "clause": "Coalesce a Black Ward reducing your damage taken by ${-($u*$m2)}% for $d or $u attacks.",
-    "labels": [
-      "706182 effect_value 804711e1 #0",
-      "706182 spell_duration 804711 #1",
-      "706182 max_stacks 804711 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reducing your damage taken by ${-($u*$m2)}%",
+        "labels": [
+          "706182 effect_value 804711e1 #0"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "706182 spell_duration 804711 #1"
+        ]
+      },
+      {
+        "claim": "$u attacks",
+        "labels": [
+          "706182 max_stacks 804711 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 706182,
@@ -2412,10 +2808,23 @@
   {
     "spell": 706909,
     "clause": "Every 3rd Horrorbolt cast causes your next successful Horrorbolt to deal an additional 50% of the initial damage to the target over $706910d.",
-    "labels": [
-      "706909 spell_duration 706910 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "over $706910d",
+        "labels": [
+          "706909 spell_duration 706910 #0"
+        ]
+      },
+      {
+        "claim": "Every 3rd Horrorbolt cast",
+        "labels": []
+      },
+      {
+        "claim": "deal an additional 50% of the initial damage",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 706911,
@@ -2452,11 +2861,21 @@
   {
     "spell": 706917,
     "clause": "and causes you to regenerate mana equal to $504829s1% of your missing mana every $t1 sec.",
-    "labels": [
-      "706917 effect_value 504829e0 #1",
-      "706917 aura_amplitude_ms #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "regenerate mana equal to $504829s1% of your missing mana",
+        "labels": [
+          "706917 effect_value 504829e0 #1"
+        ]
+      },
+      {
+        "claim": "every $t1 sec",
+        "labels": [
+          "706917 aura_amplitude_ms #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 706921,
@@ -2611,20 +3030,40 @@
   {
     "spell": 502273,
     "clause": "Chant a forbidden ritual that places a shield on all nearby party and raid members that absorbs ${$m1+0+$BH*.5} damage for $d.",
-    "labels": [
-      "502273 aura_duration_ms #0",
-      "502273 effect_value #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "for $d",
+        "labels": [
+          "502273 aura_duration_ms #0"
+        ]
+      },
+      {
+        "claim": "absorbs ${$m1+0+$BH*.5} damage",
+        "labels": [
+          "502273 effect_value #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 800402,
     "clause": "Devour dark magic on an ally, dispelling $m1 curse effects from them and healing you for ${$m2+0+$SP*.65}.",
-    "labels": [
-      "800402 effect_value e0 #0",
-      "800402 effect_value e1 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dispelling $m1 curse effects",
+        "labels": [
+          "800402 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "healing you for ${$m2+0+$SP*.65}",
+        "labels": [
+          "800402 effect_value e1 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 800430,
@@ -2643,13 +3082,28 @@
   {
     "spell": 800432,
     "clause": "Stun an enemy, dealing ${$m1+0+$sps*.55+$AP*.1} Shadow damage every $t1 sec for $802789d.",
-    "labels": [
-      "800432 effect_value e0 #0",
-      "800432 aura_amount e0 #0",
-      "800432 aura_amplitude_ms #1",
-      "800432 spell_duration 802789 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$sps*.55+$AP*.1} Shadow damage",
+        "labels": [
+          "800432 effect_value e0 #0",
+          "800432 aura_amount e0 #0"
+        ]
+      },
+      {
+        "claim": "every $t1 sec",
+        "labels": [
+          "800432 aura_amplitude_ms #1"
+        ]
+      },
+      {
+        "claim": "for $802789d",
+        "labels": [
+          "800432 spell_duration 802789 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 800432,
@@ -2668,11 +3122,21 @@
   {
     "spell": 502220,
     "clause": "Wither an enemy, dealing $o1 Shadow damage over $d.",
-    "labels": [
-      "502220 effect_value #0",
-      "502220 aura_duration_ms #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing $o1 Shadow damage",
+        "labels": [
+          "502220 effect_value #0"
+        ]
+      },
+      {
+        "claim": "over $d",
+        "labels": [
+          "502220 aura_duration_ms #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 502220,
@@ -2693,11 +3157,21 @@
   {
     "spell": 800463,
     "clause": "Avoiding or absorbing an attack now has a $h% chance to make your next Blade of the Empire deal $502133s2% more damage and hit an additional nearby enemy and cost no mana.",
-    "labels": [
-      "800463 effect_value #0",
-      "800463 effect_value 502133e1 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "$h% chance",
+        "labels": [
+          "800463 effect_value #0"
+        ]
+      },
+      {
+        "claim": "deal $502133s2% more damage",
+        "labels": [
+          "800463 effect_value 502133e1 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 801539,
@@ -2733,11 +3207,21 @@
   {
     "spell": 802043,
     "clause": "Avoiding an attack now increases your critical strike and dodge chance by $572613s1% for $572613d,",
-    "labels": [
-      "802043 effect_value 572613e0 #0",
-      "802043 spell_duration 572613 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your critical strike and dodge chance by $572613s1%",
+        "labels": [
+          "802043 effect_value 572613e0 #0"
+        ]
+      },
+      {
+        "claim": "for $572613d",
+        "labels": [
+          "802043 spell_duration 572613 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 802043,
@@ -2806,11 +3290,21 @@
   {
     "spell": 803398,
     "clause": "Channel upon an enemy, chaining to nearby enemies, dealing ${($d*1000/$t1)*($m1+0+$sps*0.44)} Shadow damage over $d, dealing less damage with each enemy struck.",
-    "labels": [
-      "803398 effect_value #0",
-      "803398 aura_duration_ms #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${($d*1000/$t1)*($m1+0+$sps*0.44)} Shadow damage",
+        "labels": [
+          "803398 effect_value #0"
+        ]
+      },
+      {
+        "claim": "over $d",
+        "labels": [
+          "803398 aura_duration_ms #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 802728,
@@ -2886,13 +3380,28 @@
   {
     "spell": 804670,
     "clause": "Coalesce an Abyssal Ward reducing your damage taken by ${-($u*$m2)}% for $d or $u attacks.",
-    "labels": [
-      "804670 effect_value e1 #0",
-      "804670 aura_amount e1 #0",
-      "804670 aura_duration_ms #1",
-      "804670 max_stacks 804670 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reducing your damage taken by ${-($u*$m2)}%",
+        "labels": [
+          "804670 effect_value e1 #0",
+          "804670 aura_amount e1 #0"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "804670 aura_duration_ms #1"
+        ]
+      },
+      {
+        "claim": "$u attacks",
+        "labels": [
+          "804670 max_stacks 804670 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 804670,
@@ -2912,20 +3421,40 @@
   {
     "spell": 805110,
     "clause": "All direct damage dealt now has a $h% chance to unleash a Black Prayer on all enemies near the target for $806039d.",
-    "labels": [
-      "805110 effect_value #0",
-      "805110 spell_duration 806039 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "$h% chance",
+        "labels": [
+          "805110 effect_value #0"
+        ]
+      },
+      {
+        "claim": "for $806039d",
+        "labels": [
+          "805110 spell_duration 806039 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 805110,
     "clause": "Deals ${$m1*$<scalingbp>+$sps*.12+$AP*.005} Shadow Damage every $t1 sec",
-    "labels": [
-      "805110 effect_value 806039e0 #2",
-      "805110 aura_amplitude_ms #3"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Deals ${$m1*$<scalingbp>+$sps*.12+$AP*.005} Shadow Damage",
+        "labels": [
+          "805110 effect_value 806039e0 #2"
+        ]
+      },
+      {
+        "claim": "every $t1 sec",
+        "labels": [
+          "805110 aura_amplitude_ms #3"
+        ]
+      }
+    ]
   },
   {
     "spell": 805110,
@@ -2971,12 +3500,22 @@
   {
     "spell": 805115,
     "clause": "and reduces their mana costs by $s2% for $d.",
-    "labels": [
-      "805115 effect_value e1 #1",
-      "805115 aura_amount e1 #1",
-      "805115 aura_duration_ms #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and reduces their mana costs by $s2%",
+        "labels": [
+          "805115 effect_value e1 #1",
+          "805115 aura_amount e1 #1"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "805115 aura_duration_ms #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 805117,
@@ -3091,11 +3630,21 @@
   {
     "spell": 578263,
     "clause": "Strike an enemy quickly for $s2% Weapon Damage plus ${$m1+0} Shadow damage,",
-    "labels": [
-      "578263 effect_value e1 #0",
-      "578263 effect_value e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "$s2% Weapon Damage",
+        "labels": [
+          "578263 effect_value e1 #0"
+        ]
+      },
+      {
+        "claim": "${$m1+0} Shadow damage",
+        "labels": [
+          "578263 effect_value e0 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 578263,
@@ -3139,11 +3688,21 @@
   {
     "spell": 806250,
     "clause": "and reduces their periodic healing received by $807216s2% for $807216d while inside.",
-    "labels": [
-      "806250 effect_value 807216e1 #3",
-      "806250 spell_duration 807216 #4"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reduces their periodic healing received by $807216s2%",
+        "labels": [
+          "806250 effect_value 807216e1 #3"
+        ]
+      },
+      {
+        "claim": "for $807216d",
+        "labels": [
+          "806250 spell_duration 807216 #4"
+        ]
+      }
+    ]
   },
   {
     "spell": 806264,
@@ -3167,13 +3726,33 @@
   {
     "spell": 806382,
     "clause": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d.",
-    "labels": [
-      "806382 effect_radius 807219e0 #0",
-      "806382 aura_amplitude_ms #1",
-      "806382 spell_duration 807219 #2",
-      "806382 effect_value #3"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "within $807219a1 yds",
+        "labels": [
+          "806382 effect_radius 807219e0 #0"
+        ]
+      },
+      {
+        "claim": "every $807124T2 sec",
+        "labels": [
+          "806382 aura_amplitude_ms #1"
+        ]
+      },
+      {
+        "claim": "for $807219d",
+        "labels": [
+          "806382 spell_duration 807219 #2"
+        ]
+      },
+      {
+        "claim": "for ${$807219m1+$807219ppl1+$bh*.2}",
+        "labels": [
+          "806382 effect_value #3"
+        ]
+      }
+    ]
   },
   {
     "spell": 806384,
@@ -3216,11 +3795,21 @@
   {
     "spell": 807307,
     "clause": "Melee ability damage now reduces the duration of Wracked Mind by $/1000;807308s1 sec on all allies within $807308a1 yds.",
-    "labels": [
-      "807307 effect_value 807308e0 #0",
-      "807307 effect_radius 807308e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reduces the duration of Wracked Mind by $/1000;807308s1 sec",
+        "labels": [
+          "807307 effect_value 807308e0 #0"
+        ]
+      },
+      {
+        "claim": "within $807308a1 yds",
+        "labels": [
+          "807307 effect_radius 807308e0 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 807512,
