@@ -378,11 +378,22 @@
   {
     "spell": 300483,
     "clause": "and grants you $300481s1% increased spell critical damage for $300481d,",
-    "labels": [
-      "300483 behaviour_metric_delta crit_damage",
-      "300483 behaviour_metric_delta crit_damage_duration"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "grants you $300481s1% increased spell critical damage",
+        "labels": [
+          "300483 behaviour_hit_ratio crit_damage_hit",
+          "300483 behaviour_metric_delta crit_damage"
+        ]
+      },
+      {
+        "claim": "for $300481d",
+        "labels": [
+          "300483 behaviour_metric_delta crit_damage_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 300483,
@@ -432,7 +443,8 @@
     "spell": 300489,
     "clause": "Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.",
     "labels": [
-      "300489 behaviour_hit_ratio crit_energy"
+      "300489 behaviour_hit_ratio crit_energy",
+      "300489 behaviour_hit_ratio crit_energy_half"
     ],
     "kind": "claim"
   },
@@ -1427,7 +1439,20 @@
       "561201 effect_value 801895e1 #0"
     ],
     "kind": "claim",
-    "reason": "fw-vb2 (2026-11-23): the absorb is Ruin's Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target (TargetA 6, DBC), so a heal that it absorbs needs a heal landing on a hostile unit. No route found: (1) a grouped ally or the caster cannot heal a hostile dummy (assist rules); (2) the dummy's own heal (target_casts) is read only through the dummy's health, which also carries Ruin's random damage (die 21 x spell power term), so the 99 absorbed cannot be separated inside the 5% band, and every dummy-castable heal in Spell.dbc (439-441, 2024, 4042, 8812, 9163, 10577, 11642, 12039, 14053, 15586) carries a die. The value read stays data; part uncounted, needs a gross-minus-effective heal read on a unit."
+    "reason": "fw-vb2b (2026-11-24): the absorb is Ruin 801895 Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target (TargetA 6, DBC), so the amount it takes is read from a heal landing on that hostile unit, which the dummy's own heal (target_casts) provides. The earlier reason (fw-vb2: no route, because the dummy's health also carries Ruin's random damage) is withdrawn: the server's heal log carries the absorbed amount (Unit::SendHealSpellLog writes healInfo.GetAbsorb(), src/server/game/Entities/Unit/Unit.cpp:9296, 'Absorb amount'), and the harness reads the heal and the overheal of that packet then skips the absorb field (ObserveSpellHealing, response.read_skip<uint32>(), src/server/coa/CoAGameplayTest.cpp:1388). The value read stays data; part uncounted until the harness records the field.",
+    "tool_gap": {
+      "reason": "A recording extension, inside G-39 without a note: add an absorb field to SpellHealEvent (CoAGameplayTest.cpp:1388 reads it instead of skipping it) and a heal-absorb metric over it, with a seeded test and a mutant. The dummy's own heal then gives min(heal, absorb value) exactly, whatever the heal's die or Ruin's damage, because the read is taken from the heal packet and not from the dummy's health. Design 1 (fw-vb2): a health read around the dummy's own heal, rejected because Ruin's die cannot be separated from it. Design 2 (this agent): the recording extension above, identified and not built, because the harness is outside this author's scope.",
+      "attempts": [
+        {
+          "agent": "fw-vb2",
+          "report": ".agents/plans/fw-vb2/report.md"
+        },
+        {
+          "agent": "fw-vb2b",
+          "report": ".agents/plans/fw-vb2b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 561201,
@@ -1436,7 +1461,20 @@
       "561201 effect_value 501297e1 #1"
     ],
     "kind": "claim",
-    "reason": "fw-vb2 (2026-11-23): the absorb is Ruin rank 7 501297 Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target (TargetA 6, DBC), so a heal that it absorbs needs a heal landing on a hostile unit. No route found: (1) a grouped ally or the caster cannot heal a hostile dummy (assist rules); (2) the dummy's own heal (target_casts) is read only through the dummy's health, which also carries Ruin's random damage (die 21 x spell power term), so the 99 absorbed cannot be separated inside the 5% band, and every dummy-castable heal in Spell.dbc (439-441, 2024, 4042, 8812, 9163, 10577, 11642, 12039, 14053, 15586) carries a die. The value read stays data; part uncounted, needs a gross-minus-effective heal read on a unit."
+    "reason": "fw-vb2b (2026-11-24): the absorb is Ruin rank 7 501297 Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target (TargetA 6, DBC), so the amount it takes is read from a heal landing on that hostile unit, which the dummy's own heal (target_casts) provides. The earlier reason (fw-vb2: no route, because the dummy's health also carries Ruin's random damage) is withdrawn: the server's heal log carries the absorbed amount (Unit::SendHealSpellLog writes healInfo.GetAbsorb(), src/server/game/Entities/Unit/Unit.cpp:9296, 'Absorb amount'), and the harness reads the heal and the overheal of that packet then skips the absorb field (ObserveSpellHealing, response.read_skip<uint32>(), src/server/coa/CoAGameplayTest.cpp:1388). The value read stays data; part uncounted until the harness records the field.",
+    "tool_gap": {
+      "reason": "A recording extension, inside G-39 without a note: add an absorb field to SpellHealEvent (CoAGameplayTest.cpp:1388 reads it instead of skipping it) and a heal-absorb metric over it, with a seeded test and a mutant. The dummy's own heal then gives min(heal, absorb value) exactly, whatever the heal's die or Ruin's damage, because the read is taken from the heal packet and not from the dummy's health. Design 1 (fw-vb2): a health read around the dummy's own heal, rejected because Ruin's die cannot be separated from it. Design 2 (this agent): the recording extension above, identified and not built, because the harness is outside this author's scope.",
+      "attempts": [
+        {
+          "agent": "fw-vb2",
+          "report": ".agents/plans/fw-vb2/report.md"
+        },
+        {
+          "agent": "fw-vb2b",
+          "report": ".agents/plans/fw-vb2b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 561201,
@@ -2148,7 +2186,20 @@
       "704612 behaviour_metric_delta pact_resist_hunter"
     ],
     "kind": "claim",
-    "reason": "fw-vb2 (2026-11-23): Pact Hunter +50% on Vengeful Pact's Shadow resistance reads 65 then 97 (97.5 truncated, inside the 5% band), but the audit counts a resistance read as data because the claim carries no 'resistance' promise word. A second design (Vengeful Pact's damage shield hit after a real Damage 100 (TEST) 2653 cast by the dummy at the holder) read no shield hit. Demonfire Pact's +3 crit chance reads +4 with Pact Hunter (4.5 truncated). Status 3 candidate: needs a second design."
+    "reason": "fw-vb2 (2026-11-23): Pact Hunter +50% on Vengeful Pact's Shadow resistance reads 65 then 97 (97.5 truncated, inside the 5% band), a live stat read after a real cast with its control entry, but the audit counts a resistance read as data because the claim carries no 'resistance' promise word. A damage shield hit after a real Damage 100 (TEST) 2653 cast by the dummy at the holder read no shield hit. Demonfire Pact's +3 crit chance reads +4 with Pact Hunter (4.5 truncated). fw-vb2b (2026-11-24): not status 3. The effectiveness_of route (ADR 0268, coverage.py subject_claims) was examined as the second design: it extends the claim only when the named spell's ledger clauses state exactly one value, and Vengeful Pact 803885 (Description: 'increases nearby allies' Shadow Resistance by ${$m1+0} and causes them to deal $s2 Shadow damage') states two values (resistance 65, shield damage 50) and has no Felsworn ledger row, while the claim says 'your Pacts' in the plural. The route does not apply to this clause; the resistance read stays data.",
+    "tool_gap": {
+      "reason": "The clause 'effectiveness of your Pacts' has no counting route: the resistance read (65 to 97) is a stat read the audit counts as data, the damage shield read of the same Pact observed no hit (design 1), and the effectiveness_of route (design 2) needs one stated value on a single named spell, which Vengeful Pact 803885 (two values) and the plural 'Pacts' do not give. A route needs either a mentor reading of effectiveness_of for a two-value Pact or a harness read that makes the Pact's damage shield strike a real attacker (the shield hit read no event after a real 2653 cast by the dummy at the holder).",
+      "attempts": [
+        {
+          "agent": "fw-vb2",
+          "report": ".agents/plans/fw-vb2/report.md"
+        },
+        {
+          "agent": "fw-vb2b",
+          "report": ".agents/plans/fw-vb2b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 704613,

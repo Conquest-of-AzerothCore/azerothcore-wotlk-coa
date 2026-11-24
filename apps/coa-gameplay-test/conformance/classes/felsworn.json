@@ -12978,13 +12978,21 @@
       "expected": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "Bane of Fire 707901 (SpellFamilyFlags[0] 32, the Bane family mask of Bane of Chaos 706420) is cast at the dummy in both phases. The before phase casts no second Bane: Bane of Fire is on the dummy (the control, read 1). The after phase casts Bane of Chaos at the same dummy 1700 ms later: Bane of Fire is gone (read 0), so a second Bane replaces the first. Reference search 2026-11-23: coa-history spell 706420: 324 casts, 206 aura applied and 206 removed in 2 logs (113 refreshes), no figure for the exclusivity; nothing else found. Precondition (after_setup_stacks, ADR 1257): Bane of Fire 707901 is read on the dummy at exactly 1 stack right after its setup cast in each phase, before the before reading and before the Bane of Chaos cast; a run where it did not land is void, not judged (the run-1 flip read 0 before the learn). No roll decides the judged reading: the removal is the aura apply handler AscensionFelswornAuras.cpp:48-58, which removes every other Bane of the same caster on the target when a Bane (AscensionFelsworn.cpp:114-117) applies, with no chance; the caster's spell hit rating 10000 (class file ratings) lifts HitChance to the 10000 clamp of Unit::MagicSpellHitResult (Unit.cpp:4039-4053), so the miss roll threshold is 0.",
+      "observe_source": "Bane of Fire 707901 (SpellFamilyFlags[0] 32, the Bane family mask of Bane of Chaos 706420) is cast at the dummy in both phases. The before phase casts no second Bane: Bane of Fire is on the dummy (the control, read 1). The after phase casts Bane of Chaos at the same dummy 1700 ms later: Bane of Fire is gone (read 0), so a second Bane replaces the first. Reference search 2026-11-23: coa-history spell 706420: 324 casts, 206 aura applied and 206 removed in 2 logs (113 refreshes), no figure for the exclusivity; nothing else found. Precondition (after_setup_stacks, ADR 1257): Bane of Fire 707901 is read on the dummy at exactly 1 stack right after its setup cast in each phase, before the before reading and before the Bane of Chaos cast; a run where it did not land is void, not judged (the run-1 flip read 0 before the learn). No roll decides the judged reading: the removal is the aura apply handler AscensionFelswornAuras.cpp:48-58, which removes every other Bane of the same caster on the target when a Bane (AscensionFelsworn.cpp:114-117) applies, with no chance; the caster's spell hit rating 10000 (class file ratings) lifts HitChance to the 10000 clamp of Unit::MagicSpellHitResult (Unit.cpp:4039-4053), so the miss roll threshold is 0. Run evidence (fw-vb2b, 2026-11-24): in the archived failing run (stamp 20261124-000202) the first Bane of Fire cast of the scenario (step 33) was submitted without a cast failure (the result has no cast_failures) and 707901 read 0 on the dummy 1700 ms later, while the identical second cast (step 44) read 1: the cast was accepted and the aura did not land, which is a spell miss or resist, not a refused cast. Bane of Fire is DmgClass 1, school 4, and the dummy's fire resistance can make it a binary resist; spell penetration 823764 (aura 123, MiscValue 126, -9999) is therefore a named precondition fixture in both phases, as in the sibling entries. This is a hypothesis tested by the focused reruns, not a proven cause.",
       "after_setup_stacks": [
         {
           "spell": 707901,
           "actor": "dummy",
           "stacks": 1
         }
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
       ]
     },
     {
@@ -16091,6 +16099,52 @@
       "observe_source": "Archimonde's Wrath 300489 Description: 'Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.' Effect[1] BasePoints 0 + 1 = 1 ($s2 = 1). With 100 Energy at the time of casting the stated bonus is 10 x 1 = 10 critical strike points on Ruin 801895, a Felfury spender (it consumes 2 Felfury). Behaviour read: critical over all hits of the observed Ruin, control arm (300489 not learned) against treatment arm (300489 learned), the difference of the two rates judged in percent points inside the G-19 band of the stated 10 (2 points), pooled over parts of 300 casts per arm (ADR 0195); Energy is set to 100 before every cast; Felfury x2 and spell penetration 823764 are named precondition fixtures. Reference search 2026-11-23: coa-history spell 300489: 0 events in 186 logs (a passive leaves no event); nothing found beyond the tooltip and Spell.dbc. "
     },
     {
+      "spell": 300489,
+      "name": "Archimonde's Wrath (Ruin critical strike share rises by 5 points at 50 Energy)",
+      "kind": "hit_ratio",
+      "variant": "crit_energy_half",
+      "label_suffix": "crit_energy_half",
+      "quote": "Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.",
+      "expected": 1.05,
+      "observe_spell": 801895,
+      "learn": [
+        801895
+      ],
+      "control": {
+        "auras": [
+          [
+            800058,
+            2
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            2
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          300489
+        ]
+      },
+      "rate": "critical",
+      "expected_points": 5,
+      "trials": 60,
+      "parts": 140,
+      "cast_power": 50,
+      "observe_source": "The 'for every 10 points of Energy' scaling arm of the crit_energy entry: Energy is set to 50 before every cast, so the stated bonus is 5 x 1 = 5 critical strike points ($s2 = 1, Effect[1] BasePoints 0 + 1), judged inside the G-19 band of 2 points (3 to 7), which excludes the flat +10 that a script ignoring the Energy would give. Same Ruin 801895 reads, control arm (300489 not learned) against treatment arm (300489 learned), Felfury x2 and spell penetration 823764 as named precondition fixtures. Reference search 2026-11-23: coa-history spell 300489: 0 events in 186 logs (a passive leaves no event); nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
       "spell": 802058,
       "name": "Reckoning (a Fel Fireball hit raises the damage dealt by 4%)",
       "kind": "hit_ratio",
@@ -16224,6 +16278,47 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "Chaotic Intuition 300483 Description: 'Damage dealt by Felstrikes now extends the duration of Cripple on the target by ... and grants you $300481s1% increased spell critical damage for $300481d, stacking $300481u times.' 300481 Effect[0] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, MiscValue 126 (magic schools), BasePoints 0 + 1 = 1 ($s1 = 1% per stack), StackAmount 10, DurationIndex 32 = 6000 ms ($d). Behaviour read: the caster's critical damage of Sargeron Smite 802060 on the dummy (spell_critical_damage, the engine's own Unit::SpellCriticalDamageBonus use-time read, 1500 = the standard 1.5 critical multiplier) is read before (Chaotic Intuition known, no Felstrike cast: the control) and after a real Felstrike 802678 cast whose ticks gave the buff. The stack count is a precondition read (after_setup_stacks: exactly 2 stacks of 300481 on the caster after the setup cast), not a claim: 2 stacks at 1% = +2% of 1500 = 1530 (gain 30, tolerance 0.5). Aura 64481 (no critical hits) and 823764 (spell penetration) are named precondition fixtures. Reference search 2026-11-23: coa-history spells 300483 and 300481: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 300483,
+      "name": "Chaotic Intuition (three stacks raise a forced spell critical hit by 3%)",
+      "kind": "hit_ratio",
+      "variant": "crit_damage_hit",
+      "label_suffix": "crit_damage_hit",
+      "quote": "and grants you $300481s1% increased spell critical damage for $300481d,",
+      "observe_spell": 801312,
+      "learn": [
+        801312
+      ],
+      "cast_wait_ms": 2500,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            300481,
+            3
+          ]
+        ]
+      },
+      "expected": 1.03,
+      "critical": true,
+      "force_crit": "spell",
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "observe_source": "300481 Effect[0] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, MiscValue 126 (the schools of magic), EffectBasePoints 0 with DieSides 1 = 1 ($300481s1), StackAmount 10, DurationIndex 32 = 6000 ms (Spell.dbc, apps/coa-dbc/inspect_dbc.py). The data entry crit_damage reads Unit::SpellCriticalDamageBonus without a hit (1500 before, 1530 after two stacks); this entry applies the aura to real forced spell critical hits: Fel Fireball 801312 is cast at the dummy trials times with the spell critical rating forced (force_crit spell), critical hits only, in a control arm without 300481 and a treatment arm with 3 stacks of it, which is the cap of 300483 (max_stacks 300481 #3). Expected ratio 1.03 = 3 stacks of 1% on the whole critical total, the reading of the Elemental Bane and You Cheat, Gul'dan entries (AddPct on the critical bonus). The stacks are set by harness set_aura as a named precondition of the read; their grant by real Felstrikes is proven by the max_stacks and crit_damage_duration labels of this spell, not here. Spell power +20000 and spell penetration 823764 (aura 123, MiscValue 126, -9999: removes partial resists of the dummy) are named precondition fixtures in both arms. Reference search 2026-11-23: coa-history spells 300483 and 300481: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
     },
     {
       "spell": 300474,
