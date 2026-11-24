@@ -2551,15 +2551,7 @@
       "705135 cost_gate 800204 cd beyond"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "Casting Chaos Rush dashes the caster 10 yd forward (Chaos Rush Jump 802028, CHARGE_DEST on the caster's front, EffectRadiusIndex 13), past a dummy placed at DUMMY_DISTANCE, and cost_gate has no step that moves or faces the caster again before the attempt of Felhoof Charge 800204 (a charge that needs its target in front). Design 1 (cost_gate after_casts, one scenario for the three arms): the without arm read 67 (not ready) and the with and beyond arms read 134 and 97 (SPELL_FAILED_UNIT_NOT_INFRONT, SPELL_FAILED_OUT_OF_RANGE: the position the previous arm's dash left). Design 2 (cost_gate only_arm, one scenario per arm, Sun Cleric 805581 precedent, counted-pair run vb6-prove3): without 67 and beyond 67 as expected, with 134 instead of 0 (the attempt 18100 ms after the priming cast, 2000 - 100 ms of the 20000 ms category recovery, is no longer refused as not ready but fails its facing); the order of those two checks in Spell::CheckCast was not read, so the 134 is a lead, not a proof. Route: a cost_gate option that re-places the caster before the attempt (a shared behaviours.py change) or a dash-free source of the 680318 cut; not a final status.",
-      "attempts": [
-        {
-          "agent": "fw-vb6",
-          "report": ".agents/plans/fw-vb6/report.md"
-        }
-      ]
-    }
+    "reason": "cost_gate on Felhoof Charge 800204 after a real Chaos Rush 500028, one scenario per arm (only_arm), the caster moved 20 yd back along x before each judged attempt (relocate_before_attempt, ADR 1278, provisional): refused 67 at 18100 ms without the talent, through (0) at 18100 ms with it, refused 67 at 17900 ms with it, both runs; counted pair fw-bk1 pair1 2026-11-24 (verify_all 20261124-085058 / -085304, server de423e7d99, worldserver 457f9186a3e7), 0 flips. The 2000 ms cut ($/1000;680318s1 = 2 sec) lies within the 100 ms margin; a 10% error moves the end by 200 ms."
   },
   {
     "spell": 705137,
@@ -4004,20 +3996,7 @@
       "803645 behaviour_metric_delta pushback_inner_demon"
     ],
     "kind": "claim",
-    "reason": "Tool gap, uncounted (see tool_gap); the data label is the only label.",
-    "tool_gap": {
-      "reason": "Tool gap, uncounted (fw-vb4b, review I-3; guide G-25: a tool gap is not a final status): A route needs pushback_reduction with a caster-aura fixture (Inner Demon 804216 held on the caster during the three casts) or a metric_delta cast_pushback_ms with a control strike. Two designs were written, none was run, so G-24 is not met: Design 1: pushback_reduction (the unhit / hit / reduced casts of Dawnsear-like spells read in game time): its spec has no fixture for a condition on the caster, the reducer is learned or cast and Inner Demon 804216 cannot be held during the three casts, so the reduced arm would read the unconditional case (the talent is also not learned by the kind unless it is the reducer). Design 2: metric_delta cast_pushback_ms with after_trigger_strike and Inner Demon as a phase aura: the strike lands in the treatment phase only, so the control phase has no strike and the 50% would have to be judged against the engine base pushback of 500 ms, which no tooltip or DBC value states (the Necromancer 802988 finding). The nearest option and the extension: pushback_reduction with a caster-aura fixture, an extension. Reference search 2026-11-24: nothing found beyond the tooltip and the DBC (coa-history spell 803645: a passive leaves no event).",
-      "attempts": [
-        {
-          "agent": "fw-vb4",
-          "report": ".agents/plans/fw-vb4/report.md"
-        },
-        {
-          "agent": "fw-vb4b",
-          "report": ".agents/plans/fw-vb4b/report.md"
-        }
-      ]
-    }
+    "reason": "pushback_reduction (Lich Essence layout, ADR 0543/0546) with Inner Demon 804216 as a CONDITION aura held in every phase (caster_auras, ADR 1278, provisional: removed and set again right before each cast); contrast = the learn of 803645. Fel Fireball 801312, struck by Light of the Naaru 41394 about 712 ms into the hit casts, 10 casts of each kind: mean ends unhit 1504, hit 1999, reduced unhit 1504, reduced 1749 ms, pushback falls by 50.51% (99% interval 50.51 to 50.51), inside the G-19 band 47.5..52.5 around $s2 = 50, both runs; counted pair fw-bk1 pair1 2026-11-24 (verify_all 20261124-085058 / -085304, server de423e7d99, worldserver 457f9186a3e7), 0 flips."
   },
   {
     "spell": 803840,
@@ -4121,15 +4100,7 @@
       "804219 behaviour_metric_delta keep_rate"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The 25% chance not to consume Felfury needs a keep-rate read on Ruin: Ruin consumes 2 Felfury and needs At Least 2 Felfury 803468, but the aura_keep_rate kind sets the consumed aura to 1 stack and applies no other fixture in the treatment arm. Design 1 (aura_keep_rate, Witch Hunter Lightbringer 680538 shape, Ruin 501298, control Twin Slice 801901, 20 treatment casts) measured 20 of 20 casts refused SPELL_FAILED_NO_POWER (85): no trial. No server mutant reaches the roll (a script constant), and flat_chance_rate reads no aura or stack event. The route is an aura_keep_rate extension (an aura_stacks option and treatment_auras); the band then needs 12443 casts and 15000 or more for a residual under 0.1% per pair (about 16 parts of 1000 casts at 2.5 s). Not a final status.",
-      "attempts": [
-        {
-          "agent": "fw-vb6",
-          "report": ".agents/plans/fw-vb6/report.md"
-        }
-      ]
-    }
+    "reason": "aura_keep_rate with aura_stacks 2 (ADR 1278, provisional): Felfury 800058 set at 2 stacks before every Ruin 501298, 804219 learned; run 1 4758 of 18750 casts kept it (25.38%, Wilson 99% [24.57, 26.20]), run 2 4726 (25.21%, [24.40, 26.03]), inside the G-19 band 23..27% of $s1 = 25; control Twin Slice 801901 kept it in 600 of 600 casts each run; 0 failed casts. Sizing: 150 parts of 125 casts (band_trials_needed 12443), residual 1.8e-4 per run; counted pair fw-bk1 pair1 2026-11-24 (verify_all 20261124-085058 / -085304, server de423e7d99, worldserver 457f9186a3e7), 0 flips. The roll is roll_chance_i(25) of the resource cost table (AscensionCompat.cpp:3474-3479), a script constant no spell modifier reaches."
   },
   {
     "spell": 804609,
