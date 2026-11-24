@@ -784,6 +784,90 @@
       "expire_ms": 1600,
       "void_on_cast_failure": true,
       "observe_source": "$s2 = 25 (582836 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 SPELLMOD_COST, EffectBasePoints -26 + EffectDieSides 1 = -25%, EffectSpellClassMask[4] 1048576, SpellFamilyName 31; Spell.dbc). Blade of the Empire 502122 (level 60 rank, ManaCostPercentage 12, GCD 1500 ms, 3 charges) costs CalculatePct(1512 BaseMana, 12) = 181 mana (SpellInfo.cpp:3216); -25% via ApplySpellMod SPELLMOD_COST saves 45.25 mana (181 -> 135 or 136, saving 45 or 46). Sets caster mana to 2000 (<= 2297 MaxMana) with regeneration off before each cast of 502122 (1600 ms expire_ms clears GCD between phases) and reads remaining mana after the cast before (control: 582836 not learned) and after a real learn of 582836: expected gain 45.25 +- 1.0 mana. Reference search 2026-11-24: coa-history spell 582836: 0 events in 186 logs (passive; positive control 502122: 8145 casts in 14 logs); coabuildhub spells_master_index.json entry 582836 matches ('reduces its mana cost by -25%')."
+    },
+    {
+      "spell": 681389,
+      "name": "Residual Energy (Shadow of the Void 300277 unlearned vs learned at 15200 ms)",
+      "kind": "metric_delta",
+      "variant": "contrast",
+      "label_suffix": "contrast",
+      "quote": "Doubles the duration of Shadow of the Void.",
+      "trigger_spell": 502122,
+      "learn": [
+        574318
+      ],
+      "target": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          41,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 300277
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 15200,
+      "expire_ms": 1600,
+      "game_time": {
+        "after": [
+          15100,
+          15500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Residual Energy 681389 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 1 SPELLMOD_DURATION, EffectBasePoints 7999 + EffectDieSides 1 = +8000 ms on EffectSpellClassMask[0] 256 (SpellFamilyName 31; Spell.dbc). Shadow of the Void buff 300277 has SpellFamilyFlags[0] 256 and DurationIndex 31 = 8000 ms (SpellDuration.dbc), so doubled duration = 16000 ms. With 574318 learned and Insanity 500706 at 41 stacks (precondition fixture), casts Blade of the Empire 502122 (Attributes 0x40010, no auto-attack follow-up) before and after a real learn of 681389 and reads aura 300277 on the caster at 15200 ms (game_time [15100, 15500], > 0.9 * 16000 = 14400 ms): control without 681389 has expired (0), treatment with 681389 is present (1). Paired with 681389 duration (present at 15200 ms, expired at 16800 ms) and 574318 duration (8000 ms base). Reference search 2026-11-24: coa-history spell 681389: 0 events in 186 logs (passive; positive control 502122: 8145 casts in 14 logs); coabuildhub spells_master_index.json entry 681389 matches verbatim ('Doubles the duration of Shadow of the Void.')."
+    },
+    {
+      "spell": 681389,
+      "name": "Residual Energy (Shadow of the Void 300277 lasts 16000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Doubles the duration of Shadow of the Void.",
+      "trigger_spell": 502122,
+      "learn": [
+        574318
+      ],
+      "target": "dummy",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "phase_auras": [
+        [
+          500706,
+          41,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 300277
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 15200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          15100,
+          15500
+        ],
+        "expired": [
+          16700,
+          17150
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Expected 16000 ms: 300277 DurationIndex 31 = 8000 ms + 681389 Effect[0] SPELLMOD_DURATION +8000 ms = 16000 ms (Spell.dbc, SpellDuration.dbc). With 574318 and 681389 learned (gate_timing start) and Insanity 500706 at 41 stacks (precondition fixture), reads 300277 absent before any cast (0), then casts Blade of the Empire 502122 once and reads aura 300277 on the caster present (1) at 15200 ms (game_time [15100, 15500], above 14400 = 0.9 * 16000) and gone (0) at 16800 ms (game_time [16700, 17150], below 17600 = 1.1 * 16000), excluding durations 10% off on both sides. Paired with 681389 contrast (unlearned control 0 vs learned 1 at 15200 ms). Reference search 2026-11-24: coa-history spell 681389: 0 events in 186 logs (passive; positive control 502122: 8145 casts in 14 logs); coabuildhub spells_master_index.json entry 681389 matches verbatim."
     }
   ],
   "player_observations": [],

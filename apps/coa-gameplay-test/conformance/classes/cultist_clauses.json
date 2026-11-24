@@ -2422,7 +2422,10 @@
   {
     "spell": 681389,
     "clause": "Doubles the duration of Shadow of the Void.",
-    "labels": [],
+    "labels": [
+      "681389 behaviour_metric_delta contrast",
+      "681389 behaviour_metric_delta duration"
+    ],
     "kind": "claim"
   },
   {
