@@ -46,6 +46,7 @@ text changes.
 - Hateforged Barrier's absorb rises once, by aura 317.
 - Readers of the four spells: the conformance entries 705123/707846 `fel_fireball_damage` and 706266/707844
   `barrier_absorb` (now with the spell penetration fixture 823764 on the Fel Fireball arms), and the gameplay
-  scenarios `felsworn-outland-slaver.json` (new Effect[2] reads on Fel Fireball and Twin Slice) and
+  scenarios `felsworn-outland-slaver.json` (a new Effect[2] read on Fel Fireball; Twin Slice is not asserted, since
+  no tooltip or ruling states its bonus: review fw-rf1 I-4) and
   `felsworn-armaments-of-the-legion.json` (no `SPELLMOD_EFFECT1` modifier on Hateforged Barrier). No other class
   lists these spells (class map `shared_with` empty).

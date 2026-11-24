@@ -2,7 +2,7 @@ import unittest
 
 from behaviours import STRIKER, behaviour_scenario
 from kinds.debuff_resist_rate import (CASTER_HEALTH, boosted, debuff_resist_rate_spec, debuff_resist_rate_verdict,
-                                      read_label)
+                                      primed_share, read_label)
 from profile import CASTER, DBC_DIR, load_class_file
 import run
 from test_behaviours import FakeRun, base_verdict
@@ -15,9 +15,9 @@ RATE_ENTRY = {
 LOCKOUT_ENTRY = {
     'spell': 804613, 'kind': 'debuff_resist_rate', 'variant': 'lockout', 'label_suffix': 'resist_lockout',
     'name': 'Doomstride', 'quote': 'Can only occur once every 10 sec.', 'mode': 'lockout', 'strike_spell': 702,
-    'base_chance_pct': 34, 'striker_level': 54, 'clear_auras': [706818], 'lockout_aura': 706818,
-    'lockout_ms': 10000, 'locked_gap_ms': 300, 'locked_trials': 388, 'expiry_trials': 12,
-    'expiry_margin_ms': 500, 'parts': 4}
+    'base_chance_pct': 20, 'striker_level': 56, 'clear_auras': [706818], 'lockout_aura': 706818,
+    'lockout_ms': 10000, 'locked_gap_ms': 300, 'locked_trials': 460, 'expiry_trials': 10,
+    'expiry_margin_ms': 500, 'parts': 10}
 
 
 def scenario_of(entry: dict):
@@ -40,10 +40,11 @@ def rate_runs(model: dict, rates: dict) -> list[FakeRun]:
     return runs
 
 
-def locked_runs(model: dict, primed_rate: float, unprimed_rate: float, parts: int = 4) -> list[FakeRun]:
+def locked_runs(model: dict, primed_rate: float, unprimed_rate: float, share: float = primed_share(0.20),
+                parts: int = 10) -> list[FakeRun]:
     runs = []
     trials = model['trials']['locked']
-    primed = round(trials * 0.2244)
+    primed = round(trials * share)
     for _ in range(parts):
         values = {}
         for trial in range(1, trials + 1):
@@ -97,7 +98,17 @@ class DebuffResistRateTests(unittest.TestCase):
     def test_the_trials_are_sized_for_the_stated_residual(self):
         _, expectations = scenario_of(RATE_ENTRY)
         model = expectations[0].model
-        self.assertEqual(model['minimum'], {'control': 3310, 'treatment': 6220, 'low_health': 3310})
+        self.assertEqual(model['minimum'], {'control': 3860, 'treatment': 7270, 'low_health': 3860})
+        self.assertIn('1.7e-04 per run, 1.0e-03 for the 3 arms over a pair of 2 runs',
+                      scenario_of(RATE_ENTRY)[0]['contract'])
+
+    def test_the_lockout_states_its_pair_residual(self):
+        scenario, expectations = scenario_of(LOCKOUT_ENTRY)
+        self.assertEqual(expectations[0].model['minimum'], {'primed': 642, 'unprimed': 642})
+        self.assertAlmostEqual(expectations[0].model['hold_z'], 3.93, places=2)
+        self.assertIn('at most 6.4e-04 per pair of 2 runs', scenario['contract'])
+        with self.assertRaises(ValueError):
+            scenario_of({**LOCKOUT_ENTRY, 'locked_trials': 430})
 
     def test_the_second_stock_roll_passes_and_the_mutants_alert(self):
         conformant = {'control': 0.04, 'treatment': boosted(0.04), 'low_health': 0.04}
@@ -121,16 +132,26 @@ class DebuffResistRateTests(unittest.TestCase):
         scenario, expectations = scenario_of(LOCKOUT_ENTRY)
         run.validate(scenario)
         striker = next(creature for creature in scenario['creatures'] if creature['id'] == STRIKER)
-        self.assertEqual(striker['level'], 54)
+        self.assertEqual(striker['level'], 56)
         locked = expectations[0]
         model = locked.model
 
-        def status(primed, unprimed):
-            return debuff_resist_rate_verdict(base_verdict(locked), locked_runs(model, primed, unprimed),
+        def status(primed, unprimed, share=primed_share(0.20)):
+            return debuff_resist_rate_verdict(base_verdict(locked), locked_runs(model, primed, unprimed, share),
                                               model).status
-        self.assertEqual(status(0.34, boosted(0.34)), 'ok')
-        self.assertEqual(status(boosted(0.34), boosted(0.34)), 'alert')
-        self.assertEqual(status(0.34, 0.34), 'alert')
+        self.assertEqual(status(0.20, boosted(0.20)), 'ok')
+        self.assertEqual(status(boosted(0.20), boosted(0.20)), 'alert')
+        self.assertEqual(status(0.20, 0.20), 'alert')
+
+    def test_a_lockout_started_by_any_landing_alerts_on_the_primed_share(self):
+        _, expectations = scenario_of(LOCKOUT_ENTRY)
+        locked = expectations[0]
+        model = locked.model
+        landed = (1 - 0.20) ** 2
+        verdict = debuff_resist_rate_verdict(base_verdict(locked),
+                                             locked_runs(model, 0.20, boosted(0.20), share=landed), model)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('excludes (1 - p) p = 0.1600', verdict.explanation)
 
     def test_the_lockout_aura_holds_inside_and_ends_after(self):
         _, expectations = scenario_of(LOCKOUT_ENTRY)
