@@ -1067,7 +1067,7 @@
       {
         "claim": "every $t1 sec",
         "labels": [
-          "555738 aura_amplitude_ms #3"
+          "555738 behaviour_metric_delta strike_period"
         ]
       }
     ]
@@ -1546,7 +1546,10 @@
     "spell": 561216,
     "clause": "Move quickly from enemy to enemy, attacking them every $t1 sec with both weapons until 6 assaults are made,",
     "labels": [
-      "561216 aura_amplitude_ms #0"
+      "561216 behaviour_metric_delta assault_period",
+      "561216 behaviour_metric_delta assaults_sum",
+      "561216 behaviour_metric_delta assaults_first",
+      "561216 behaviour_metric_delta assaults_off_hand"
     ],
     "kind": "claim"
   },
@@ -4599,10 +4602,13 @@
       },
       {
         "claim": "now dashes an additional 20 yds.",
-        "labels": []
+        "labels": [
+          "806109 behaviour_metric_delta dash_range",
+          "806109 behaviour_metric_delta dash_range_torpedo"
+        ]
       }
     ],
-    "reason": "Split (review fw-rvb8 I1): the held/gone reads prove the window 'within $806128d'; the 20 yd extra dash is not measured (uncounted)."
+    "reason": "Split (review fw-rvb8 I1): the held/gone reads prove the window 'within $806128d'; the 20 yd extra dash is read by dash_range (Chaos Rush 500423) and dash_range_torpedo (Fel Torpedo 500610) with 806128 applied by harness set_aura as a named precondition."
   },
   {
     "spell": 806111,
