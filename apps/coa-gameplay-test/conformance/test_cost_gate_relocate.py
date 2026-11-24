@@ -1,7 +1,11 @@
+from pathlib import Path
+import sys
 import unittest
 
 from behaviours import behaviour_scenario
 from profile import CASTER, DBC_DIR, load_fixture_class_file
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
 
 
@@ -20,8 +24,8 @@ def attempts(steps: list[dict], spell: int) -> list[int]:
 class CostGateRelocateBeforeAttemptTests(unittest.TestCase):
     def test_the_caster_moves_right_before_each_judged_attempt_only(self):
         scenario, _ = behaviour_scenario(load_fixture_class_file(19),
-                                         libram_entry(relocate_before_attempt={'dx': -22}))
-        run.validate(scenario)
+                                         libram_entry(relocate_before_attempt={'dx': -18}))
+        run.validate(scenario, run.SIMULATED_CLOCK)
         steps = scenario['steps']
         gated = libram_entry()['gated_spell']
         reads = attempts(steps, gated)
@@ -29,14 +33,14 @@ class CostGateRelocateBeforeAttemptTests(unittest.TestCase):
         for read in reads:
             cast = max(index for index in range(read) if steps[index]['action'] == 'cast'
                        and steps[index]['spell'] == gated)
-            self.assertEqual(steps[cast - 1], {'action': 'relocate', 'actor': CASTER, 'dx': -22.0})
+            self.assertEqual(steps[cast - 1], {'action': 'relocate', 'actor': CASTER, 'dx': -18.0})
         self.assertEqual(sum(step['action'] == 'relocate' for step in steps), len(reads))
-        self.assertIn('moved -22 yd along x', scenario['contract'])
+        self.assertIn('moved -18 yd along x', scenario['contract'])
 
     def test_without_the_option_nothing_moves_and_the_readings_match(self):
         plain, plain_expectations = behaviour_scenario(load_fixture_class_file(19), libram_entry())
         moved, moved_expectations = behaviour_scenario(load_fixture_class_file(19),
-                                                       libram_entry(relocate_before_attempt={'dx': -22}))
+                                                       libram_entry(relocate_before_attempt={'dx': -18}))
         self.assertFalse(any(step['action'] == 'relocate' for step in plain['steps']))
         self.assertNotIn('along x', plain['contract'])
         self.assertEqual(plain_expectations, moved_expectations)
