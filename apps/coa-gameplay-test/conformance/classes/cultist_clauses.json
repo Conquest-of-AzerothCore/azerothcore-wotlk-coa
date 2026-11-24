@@ -1,0 +1,3258 @@
+[
+  {
+    "spell": 92129,
+    "clause": "Level 10 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 92129,
+    "clause": "Your Gaze of C'Thun now gains an additional ${$m1+0} base damage and healing.",
+    "labels": [
+      "92129 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92130,
+    "clause": "Damage dealt has a $805606h% chance to grant you Corrupting Whispers.",
+    "labels": [
+      "92130 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92130,
+    "clause": "Increases your Magic Damage dealt by $s1%",
+    "labels": [
+      "92130 effect_value 706725e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92130,
+    "clause": "and reduces your mana costs by $s3% for $d.",
+    "labels": [
+      "92130 effect_value 706725e2 #2",
+      "92130 spell_duration 706725 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92131,
+    "clause": "Level 10 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 92131,
+    "clause": "Reaching 100 Insanity no longer causes Total Madness.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 92131,
+    "clause": "Teaches you Herald of the Depths.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 92131,
+    "clause": "Transform into a Herald of the Depths for $d,",
+    "labels": [
+      "92131 spell_duration 520326 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92131,
+    "clause": "increasing damage and healing done by $s3%",
+    "labels": [
+      "92131 effect_value 520326e2 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92131,
+    "clause": "and the base duration of absorption and healing over time effects by $s2%.",
+    "labels": [
+      "92131 effect_value 520326e1 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92131,
+    "clause": "At the end of the duration, your Insanity is reduced to 0.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 255275,
+    "clause": "Channel for $d,",
+    "labels": [
+      "255275 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 255275,
+    "clause": "heralding the end of the world on all nearby enemies, instantly removing all beneficial magic effects from them and reducing your damage taken and their haste and movement speed by $255276s1% while channeling.",
+    "labels": [
+      "255275 effect_value 255276e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 255275,
+    "clause": "While channeling, nearby enemies will also be struck with Apocalyptic Skies.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 255275,
+    "clause": "At the end of the duration you unleash a terrifying scream, applying Corrupt Mind on nearby enemies.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 300264,
+    "clause": "While Black Blood is active on an ally, healing done to them by your Gaze of C'Thun has a $s1% increased chance to critically strike.",
+    "labels": [
+      "300264 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300265,
+    "clause": "Your Devour Magic now affects $s1 nearby allies.",
+    "labels": [
+      "300265 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300268,
+    "clause": "Increases your parry chance by $s1%",
+    "labels": [
+      "300268 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300268,
+    "clause": "and dodge chance by $s2%.",
+    "labels": [
+      "300268 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300270,
+    "clause": "While above 60 Insanity,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 300270,
+    "clause": "you gain $681256s1% reduced damage taken.",
+    "labels": [
+      "300270 effect_value 681256e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300272,
+    "clause": "Increases the chance to trigger Presences by $s1%.",
+    "labels": [
+      "300272 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300275,
+    "clause": "Damage dealt by Blade of the Empire increases your melee haste by $300274s1% for $300274d,",
+    "labels": [
+      "300275 effect_value 300274e0 #0",
+      "300275 spell_duration 300274 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300275,
+    "clause": "stacking $300274u times.",
+    "labels": [
+      "300275 max_stacks 300274 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300278,
+    "clause": "Avoiding an attack now has a $h% chance to refresh a charge of Blade of the Empire.",
+    "labels": [
+      "300278 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300280,
+    "clause": "Your melee critical strikes reduce the cooldown of Rift and Gaze of C'Thun by $/1000;505168s1 sec.",
+    "labels": [
+      "300280 effect_value 505168e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300284,
+    "clause": "Increases the bonus healing power scaling of Eldritch Mending and Eldritch Shock by $s1%.",
+    "labels": [
+      "300284 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300286,
+    "clause": "Level 30 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 300286,
+    "clause": "Direct healing done now applies Void-Touched.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 300286,
+    "clause": "Marks the ally for $d,",
+    "labels": [
+      "300286 spell_duration 301982 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300286,
+    "clause": "stacking $301982u times.",
+    "labels": [
+      "300286 max_stacks 301982 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300286,
+    "clause": "When you cast Gaze of C'Thun, all stacks are consumed to heal all allies affected by Void-Touched for ${$301983m1+$301983ppl1+$BH*0.35}, increased based on how many stacks were on them.",
+    "labels": [
+      "300286 effect_value #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300287,
+    "clause": "While Herald of the Depths is active, you now take $s2% less damage",
+    "labels": [
+      "300287 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300287,
+    "clause": "and have a $s1% increased chance to resist dispel effects.",
+    "labels": [
+      "300287 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300290,
+    "clause": "While Herald of the Depths is active, your movement speed cannot be reduced below $s2% of normal value.",
+    "labels": [
+      "300290 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300291,
+    "clause": "Casting Herald of the Depths now increases the absorption of your next Void Shield within $301259d by $301259s1%.",
+    "labels": [
+      "300291 spell_duration 301259 #0",
+      "300291 effect_value 301259e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300296,
+    "clause": "Casting Gaze of C'thun now always triggers your Presence of C'Thun while it is active.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 300296,
+    "clause": "Increases your haste by $s1% for $d.",
+    "labels": [
+      "300296 effect_value 803340e0 #0",
+      "300296 spell_duration 803340 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300298,
+    "clause": "Casting Gaze of C'Thun now reduces the cooldown of Psychic Suppression by $/1000;300297s2 sec",
+    "labels": [
+      "300298 effect_value 300297e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300298,
+    "clause": "and Grasp of Zek'voz by $/1000;300297s1 sec.",
+    "labels": [
+      "300298 effect_value 300297e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300300,
+    "clause": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot.",
+    "labels": [
+      "300300 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300300,
+    "clause": "Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1% for $560943d.",
+    "labels": [
+      "300300 effect_value 560943e0 #1",
+      "300300 spell_duration 560943 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300300,
+    "clause": "If this effect is dispelled, your critical strike chance is increased by $560947s1% for $560947d.",
+    "labels": [
+      "300300 effect_value 560947e0 #3",
+      "300300 spell_duration 560947 #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300302,
+    "clause": "Increases the range of your Corruption spells by $s1 yds",
+    "labels": [
+      "300302 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300302,
+    "clause": "and their chance to critically strike by $s2%.",
+    "labels": [
+      "300302 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300304,
+    "clause": "Increases the spell damage bonus of Horrorbolt and Eldritch Shock by $s2%",
+    "labels": [
+      "300304 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300304,
+    "clause": "and Wrath of the Empire by $s1%.",
+    "labels": [
+      "300304 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300305,
+    "clause": "Increases the critical strike chance of Wrath of the Black Empire by $s1%.",
+    "labels": [
+      "300305 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300306,
+    "clause": "Increases the duration of Darkwither by $/1000;s1 sec.",
+    "labels": [
+      "300306 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300307,
+    "clause": "Reaching 60 Insanity increases your damage dealt by $573285s1% for $573285d.",
+    "labels": [
+      "300307 effect_value 573285e0 #0",
+      "300307 spell_duration 573285 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300308,
+    "clause": "Periodic or channeled damage dealt now generates 2 Insanity,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 300308,
+    "clause": "reduces the cooldown of your Obliteration Beam by $/1000;300605s2 sec,",
+    "labels": [
+      "300308 effect_value 300605e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300308,
+    "clause": "and grants 1 stack of Abyssal Destruction.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 300308,
+    "clause": "Increases the damage dealt of your next Obliteration Beam by $s1%,",
+    "labels": [
+      "300308 effect_value 300605e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300308,
+    "clause": "stacking $u times,",
+    "labels": [
+      "300308 max_stacks 300605 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300308,
+    "clause": "for $d.",
+    "labels": [
+      "300308 spell_duration 300605 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300309,
+    "clause": "Reduces the cast time of Horrorbolt and Wrath of the Black Empire by 0.3 sec.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 300313,
+    "clause": "Level 40 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 300313,
+    "clause": "Grants all periodic damage and damage dealt a $h% chance to reset the cooldown of Gaze of C'Thun",
+    "labels": [
+      "300313 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300313,
+    "clause": "and generate 5 Insanity.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 300753,
+    "clause": "While Herald of the Depths is active, your Forbidden Ritual will cooldown faster.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 301008,
+    "clause": "Increases the duration of Psychic Suppression by $/1000;s1 sec",
+    "labels": [
+      "301008 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301008,
+    "clause": "and Eldritch Devastation by $/1000;s2 sec.",
+    "labels": [
+      "301008 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301010,
+    "clause": "Your Devour Magic is now instant cast.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 301068,
+    "clause": "Casting Wrath of the Black Empire now causes your subsequent Wraths of the Black Empire, within $301067d,",
+    "labels": [
+      "301068 spell_duration 301067 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301068,
+    "clause": "to deal $301067s2% more damage each and unleash Apocalyptic Skies upon the enemy.",
+    "labels": [
+      "301068 effect_value 301067e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301068,
+    "clause": "Spawns a void portal that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam before disappearing.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 301180,
+    "clause": "Level 30 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 301180,
+    "clause": "Critical strikes with Hammer of Twilight now refund 10 Insanity.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 301181,
+    "clause": "While above 60 Insanity,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 301181,
+    "clause": "you gain $572859s1% increased haste.",
+    "labels": [
+      "301181 effect_value 572859e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301182,
+    "clause": "While above 80 Insanity,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 301182,
+    "clause": "your Void Shield has $572758s2% increased value.",
+    "labels": [
+      "301182 effect_value 572758e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301183,
+    "clause": "Every 3rd melee ability you cast now causes your next Eldritch Mending to become instant cast and cost $301186s2% less mana.",
+    "labels": [
+      "301183 effect_value 301186e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301200,
+    "clause": "Casting Wrath of the Black Empire now spawns a void portal that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam before disappearing.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 301209,
+    "clause": "Healing done by Abyssal Covenant now heals 2 of the lowest health nearby allies and healing done by Black Blood can now critically strike.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 301209,
+    "clause": "@ext:Healing done in this way can affect the original target.:ext@",
+    "labels": [
+      "301209 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301241,
+    "clause": "Reduces the duration of curse effects on you by $s1%.",
+    "labels": [
+      "301241 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301255,
+    "clause": "Level 50 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 301255,
+    "clause": "Your Darkwither can now critically strike and your spell hit rating is increased by $s2% of your Intellect.",
+    "labels": [
+      "301255 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301258,
+    "clause": "While Herald of the Depths is active, the critical strike chance of Blade of the Empire is increased by $s1%.",
+    "labels": [
+      "301258 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301262,
+    "clause": "Melee critical strikes now apply Saronite Blessing to you.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 301262,
+    "clause": "Your melee attack speed is increased by $s2%",
+    "labels": [
+      "301262 effect_value 600327e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301262,
+    "clause": "and your melee auto attacks heal the lowest health ally for an additional $s1% of the damage dealt.",
+    "labels": [
+      "301262 effect_value 600327e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301262,
+    "clause": "Lasts for $d or $n attacks.",
+    "labels": [
+      "301262 spell_duration 600327 #2",
+      "301262 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301315,
+    "clause": "Increases the damage of Darkwither by $s1%",
+    "labels": [
+      "301315 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301315,
+    "clause": "and Eldritch Shock by $s2%.",
+    "labels": [
+      "301315 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301317,
+    "clause": "Your Darkwither's healing reduction now stacks $s1 additional times",
+    "labels": [
+      "301317 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301317,
+    "clause": "and its tick rate is increased by $s2%.",
+    "labels": [
+      "301317 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301347,
+    "clause": "Increases the range of your Corruption spells by $s1 yds",
+    "labels": [
+      "301347 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301347,
+    "clause": "and their chance to critically strike by $s2%.",
+    "labels": [
+      "301347 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301348,
+    "clause": "Increases your parry chance by $s1%",
+    "labels": [
+      "301348 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301348,
+    "clause": "and dodge chance by $s2%.",
+    "labels": [
+      "301348 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301984,
+    "clause": "Increases your attack power and your maximum mana by $s1%.",
+    "labels": [
+      "301984 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 302015,
+    "clause": "Casting Gaze of C'thun now has a $h% chance to cause your Tentacles to blast the enemy with eldritch energy,",
+    "labels": [
+      "302015 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 302015,
+    "clause": "dealing ${$573311m1+$573311ppl1+$sps*0.225+$AP*0.1} Shadow damage.",
+    "labels": [
+      "302015 effect_value 573311e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 302072,
+    "clause": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+    "labels": [
+      "302072 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 302919,
+    "clause": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+    "labels": [
+      "302919 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500704,
+    "clause": "Teleport an enemy to your position and slow their movement speed by $804533s1% for $804533d.",
+    "labels": [
+      "500704 effect_value 804533e0 #0",
+      "500704 spell_duration 804533 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500712,
+    "clause": "Generates 20 Insanity",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 500712,
+    "clause": "Curse an enemy, dealing ${$m1+0+$sp*1.5} Shadow damage instantly plus an additional ${$354191m1+$354191ppl1+$sps*1} Shadow damage after $d.",
+    "labels": [
+      "500712 effect_value e0 #0",
+      "500712 effect_value 354191e0 #1",
+      "500712 aura_duration_ms #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502241,
+    "clause": "Generates 10 Insanity",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 502241,
+    "clause": "Smash an enemy with eldritch force, dealing ${$m1+0+$AP*0.1+$SP*.52} Shadow damage",
+    "labels": [
+      "502241 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502241,
+    "clause": "and applying Black Blood to $804113i nearby allies,",
+    "labels": [
+      "502241 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502241,
+    "clause": "healing them for ${$m2+0+$AP*0.1},",
+    "labels": [
+      "502241 effect_value e1 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502241,
+    "clause": "repeating every $804153t1 sec for $804153D.",
+    "labels": [
+      "502241 aura_amplitude_ms #3",
+      "502241 spell_duration 804153 #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502241,
+    "clause": "Usable while moving.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 578115,
+    "clause": "Shields an ally, absorbing ${$m1+$SP*2} damage for $d and applying Wracked Mind.",
+    "labels": [
+      "578115 effect_value e0 #0",
+      "578115 aura_amount e0 #0",
+      "578115 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 578115,
+    "clause": "Cannot be affected by Void Shield.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 578115,
+    "clause": "Lasts for $d.",
+    "labels": [
+      "578115 spell_duration 805801 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500719,
+    "clause": "Reduces the cooldown of Obliteration Beam by $s2% and it now applies Madness to all targets struck.",
+    "labels": [
+      "500719 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500719,
+    "clause": "Your Gaze of C'thun$?s805606[ or Obliteration Beam][] causes $s1% increased damage,",
+    "labels": [
+      "500719 effect_value 804369e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500719,
+    "clause": "stacks up to $u times.",
+    "labels": [
+      "500719 max_stacks 804369 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 570249,
+    "clause": "3 Charges,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 570249,
+    "clause": "30 sec recharge",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 570249,
+    "clause": "Infuse an ally with dark energy, healing them for $s1 the next time they take damage.",
+    "labels": [
+      "570249 effect_value e0 #0",
+      "570249 aura_amount e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 570249,
+    "clause": "When the heal occurs, Dark Infusion is consumed and expands to the two lowest-health nearby party or raid members.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 570249,
+    "clause": "Each secondary infusion heals when triggered, then expands to three nearby allies.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 500751,
+    "clause": "Link yourself to an ally for $d,",
+    "labels": [
+      "500751 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500751,
+    "clause": "transfering $s3% of all damage taken by them to you and causing $300295s1% of all damage you deal to be converted into healing for them.",
+    "labels": [
+      "500751 effect_value e2 #1",
+      "500751 aura_amount e2 #1",
+      "500751 effect_value 300295e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500751,
+    "clause": "Can only be applied to 1 ally at a time.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 500767,
+    "clause": "Reduces the cooldown of Obliteration Beam by $s2% and it now applies Madness to all targets struck.",
+    "labels": [
+      "500767 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500767,
+    "clause": "Your Gaze of C'thun$?s805606[ or Obliteration Beam][] causes $s1% increased damage,",
+    "labels": [
+      "500767 effect_value 804369e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500767,
+    "clause": "stacks up to $u times.",
+    "labels": [
+      "500767 max_stacks 804369 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504642,
+    "clause": "Melee critical strikes now refresh a charge of Blade of the Empire and restore $505172s2% of your base mana.",
+    "labels": [
+      "504642 effect_value 505172e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520345,
+    "clause": "Channel a shield of void energies upon an ally, causing both you and them to absorb ${$520346m1+$520346ppl1+$bh*1+$AP*.25} damage,",
+    "labels": [
+      "520345 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520345,
+    "clause": "stacking $520346u times,",
+    "labels": [
+      "520345 max_stacks 520346 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520345,
+    "clause": "every $t1 sec for $d.",
+    "labels": [
+      "520345 aura_amplitude_ms #1",
+      "520345 aura_duration_ms #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520345,
+    "clause": "At the end of the duration, if the shield holds, you teleport to them.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 520345,
+    "clause": "While channeling you are immune to stuns and silences.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 520345,
+    "clause": "Not usable on yourself.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 520388,
+    "clause": "Behold a vision of doom, causing direct damage or healing done to apply Vision of Doom to nearby targets for $520450d.",
+    "labels": [
+      "520388 spell_duration 520450 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520388,
+    "clause": "Can only occur once every 3 sec.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 520388,
+    "clause": "At the end of the duration, they are damaged or healed for $s1% of the damage or healing that doomed them.",
+    "labels": [
+      "520388 effect_value e0 #1",
+      "520388 aura_amount e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520388,
+    "clause": "Lasts for $d or $n instances of damage or healing.",
+    "labels": [
+      "520388 aura_duration_ms #2",
+      "520388 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520388,
+    "clause": "Doomed enemies are unable to be healed and the damage or healing done by this effect can critically strike.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 520405,
+    "clause": "Damage dealt by your Tentacles reduces the cooldown of Eldritch Obelisk by $/1000;520872s1 sec.",
+    "labels": [
+      "520405 effect_value 520872e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520405,
+    "clause": "In addition, increases the effectiveness of Eldritch Obelisk by $s1%.",
+    "labels": [
+      "520405 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520682,
+    "clause": "Your Dark Veil now performs its effect $s1% faster.",
+    "labels": [
+      "520682 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520810,
+    "clause": "Reduces the cooldown of Dark Veil by $/1000;s1 sec.",
+    "labels": [
+      "520810 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 524804,
+    "clause": "Reduces the cooldown of Empire's Grasp by $/1000;s1 sec.",
+    "labels": [
+      "524804 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572141,
+    "clause": "Hurl a cursed shield, dealing ${$m1+$AP*0.09+$SP*0.23} Shadow damage to up to $x1 enemies,",
+    "labels": [
+      "572141 effect_value e0 #0",
+      "572141 effect_value #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572141,
+    "clause": "reduced by ${($f1-1)*100* -1}% with each jump.",
+    "labels": [
+      "572141 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572141,
+    "clause": "Damage increased by $500706s1% for each stack of Insanity.",
+    "labels": [
+      "572141 effect_value 500706e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 524877,
+    "clause": "Every 1 sec while Hand of Yogg-Saron is active,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 524877,
+    "clause": "you now trigger a Horrific Revelation on the target and generate 5 Insanity.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 524877,
+    "clause": "Heals a friendly target for ${$m1+0+$SP*0.678496},",
+    "labels": [
+      "524877 effect_value 704473e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 524877,
+    "clause": "scaling with Insanity, and increases their critical strike chance by $s2%,",
+    "labels": [
+      "524877 effect_value 704473e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 524877,
+    "clause": "stacking $u times,",
+    "labels": [
+      "524877 max_stacks 704473 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 524877,
+    "clause": "for $d.",
+    "labels": [
+      "524877 spell_duration 704473 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 524879,
+    "clause": "Satiate now also regenerates an additional $s1% mana per tick and no longer increases damage taken during the channel.",
+    "labels": [
+      "524879 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 524887,
+    "clause": "Damage dealt by Blade of the Empire now heals the lowest health ally for $s1% of the damage dealt plus ${($500748m1+$500748ppl1+$BH*0.4+$AP*.1)*0.5}.",
+    "labels": [
+      "524887 effect_value e0 #0",
+      "524887 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 525019,
+    "clause": "Removes the cast time of your Corrupt Mind.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 525049,
+    "clause": "Your Corrupt Mind now also applies Mind Rot to nearby enemies.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 525049,
+    "clause": "Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1% for $560943d.",
+    "labels": [
+      "525049 effect_value 560943e0 #0",
+      "525049 spell_duration 560943 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 525049,
+    "clause": "If this effect is dispelled, your critical strike chance is increased by $560947s1% for $560947d.",
+    "labels": [
+      "525049 effect_value 560947e0 #2",
+      "525049 spell_duration 560947 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 525060,
+    "clause": "Increases the chance for Void Shield to resist dispel effects on allies by $s2%",
+    "labels": [
+      "525060 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 525060,
+    "clause": "and it now also reflects $s1% of the damage absorbed.",
+    "labels": [
+      "525060 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 525065,
+    "clause": "Create a warped sigil that bends hostile force away from you, deflecting all spells and abilities for $d, but making you unable to attack or cast spells.",
+    "labels": [
+      "525065 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 525065,
+    "clause": "Casters whose magic is deflected are silenced for $525066d.",
+    "labels": [
+      "525065 spell_duration 525066 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 525078,
+    "clause": "Damage dealt by Blade of the Empire now heals the lowest health ally for $s1% of the damage dealt plus ${($500748m1+$500748ppl1+$BH*0.4+$AP*.1)*0.5}.",
+    "labels": [
+      "525078 effect_value e0 #0",
+      "525078 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 525307,
+    "clause": "You now heal the lowest health ally affected by Black Blood for $s1% of your auto attack damage.",
+    "labels": [
+      "525307 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 527268,
+    "clause": "While above 60 Insanity,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 527268,
+    "clause": "your Netherstrike, Gaze of C'Thun, and Eldritch Shock now gain $573272s1% increased critical strike chance.",
+    "labels": [
+      "527268 effect_value 573272e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560002,
+    "clause": "Reduces damage taken by party and raid members by $s1%.",
+    "labels": [
+      "560002 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560002,
+    "clause": "Does not stack with similar effects.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560002,
+    "clause": "In addition, increases all of your resistances by ${$floor($m2)}, scaling with level.",
+    "labels": [
+      "560002 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560080,
+    "clause": "Increases the amount of mana and now health per point of Intellect by $s1%.",
+    "labels": [
+      "560080 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560091,
+    "clause": "Increases your Armor contribution from your shield by $s1%",
+    "labels": [
+      "560091 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560091,
+    "clause": "and gives you a $h% chance on Shadow Damage dealt to reset the cooldown of Twilight Shieldtoss.",
+    "labels": [
+      "560091 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560109,
+    "clause": "Generates 10 Insanity",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560109,
+    "clause": "Corrupt the mind of an enemy and spread madness, fearing them in place for $d (8 sec vs players),",
+    "labels": [
+      "560109 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560109,
+    "clause": "bouncing to up to 2 nearby enemies$?s525049[ and applying Mind Rot to them][].",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560109,
+    "clause": "Damage dealt may end this effect.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560301,
+    "clause": "Create 3 copies of yourself that run in a random direction for $706932d and may briefly trick enemies into ignoring you.",
+    "labels": [
+      "560301 spell_duration 706932 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560301,
+    "clause": "Significantly reduces your threat and removes all movement impairing effects from you.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560320,
+    "clause": "Melee attacks now have a $h% chance to reset the cooldown of your Netherstrike,",
+    "labels": [
+      "560320 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560320,
+    "clause": "allowing the next use regardless of the target's health for $561288d.",
+    "labels": [
+      "560320 spell_duration 561288 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560321,
+    "clause": "Create an Eldritch Obelisk beneath you for $560322d,",
+    "labels": [
+      "560321 spell_duration 560322 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560321,
+    "clause": "increasing the damage of your Tentacles by $560322s1%",
+    "labels": [
+      "560321 effect_value 560322e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560321,
+    "clause": "and the movement speed of allies by $560322s3% while near it.",
+    "labels": [
+      "560321 effect_value 560322e2 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560502,
+    "clause": "While above 60 Insanity,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560502,
+    "clause": "the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by $630891s1%.",
+    "labels": [
+      "560502 effect_value 630891e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560526,
+    "clause": "Increases the spell haste of all party and raid members by $s1%.",
+    "labels": [
+      "560526 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560526,
+    "clause": "Does not stack with similar effects.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560526,
+    "clause": "In addition, your Shadow damage is increased by $s2%.",
+    "labels": [
+      "560526 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560715,
+    "clause": "Taking damage while below 35% health now summons 3 Manifestations of Y'shaarj for 10 sec,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560715,
+    "clause": "which will attack enemies and heal you for 5% of your base health.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560715,
+    "clause": "Can ony occur once every 2 minutes.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560977,
+    "clause": "Removes the cooldown of Eldritch Shock and guarantees it to critically strike when used with at least 60 Insanity.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560977,
+    "clause": "Eldritch Shock can now be cast while channeling.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 561035,
+    "clause": "Increases the duration of Presence of N'Zoth and Presence of Y'Shaarj by $s1%.",
+    "labels": [
+      "561035 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561335,
+    "clause": "Increases the amount of mana and now health per point of Intellect by $s1%.",
+    "labels": [
+      "561335 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561336,
+    "clause": "Increases your Armor contribution from your shield by $s1%",
+    "labels": [
+      "561336 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561336,
+    "clause": "and gives you a $h% chance on Shadow Damage dealt to reset the cooldown of Twilight Shieldtoss.",
+    "labels": [
+      "561336 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 563123,
+    "clause": "Level 20 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 563123,
+    "clause": "Increases your critical damage dealt by $s1%",
+    "labels": [
+      "563123 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 563123,
+    "clause": "and your spell power by $s2% of your Intellect.",
+    "labels": [
+      "563123 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572064,
+    "clause": "Void Shield now applies to an additional nearby ally but its duration is reduced by $s3%.",
+    "labels": [
+      "572064 effect_value e2 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572064,
+    "clause": "Killing an opponent that yields experience or honor removes Wracked Mind from you.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 572103,
+    "clause": "Target an enemy and summon a Tentacle of N'Zoth on the ground near them that will silence them and deal ${$806596m2+$806596ppl2+$SP*.75} Shadow damage every $806596t2 sec for $806596d.",
+    "labels": [
+      "572103 effect_value 806596e1 #0",
+      "572103 aura_amplitude_ms #1",
+      "572103 spell_duration 806596 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572103,
+    "clause": "If your target runs out of range, the tentacle will seek a new target.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 572103,
+    "clause": "The tentacle gains health based on your Stamina.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 572103,
+    "clause": "If the tentacle dies, the silence effect will end.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 572103,
+    "clause": "@ext:You may only have 1 Old God Tentacle active at a time.:ext@",
+    "labels": [
+      "572103 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 573028,
+    "clause": "Hinder an enemies momentum with void chains, slowing their movement speed by $s1% for $d.",
+    "labels": [
+      "573028 effect_value e0 #0",
+      "573028 aura_amount e0 #0",
+      "573028 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 574147,
+    "clause": "Your healing power is increased based on your main-hand weapon damage.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 574318,
+    "clause": "Level 20 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 574318,
+    "clause": "While above 40 Insanity, melee attacks and abilities trigger Shadow of the Void.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 574318,
+    "clause": "Restores $s2% of your maximum mana",
+    "labels": [
+      "574318 effect_value 300277e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 574318,
+    "clause": "and increases your Shadow Damage dealt by $s1% for $d.",
+    "labels": [
+      "574318 effect_value 300277e0 #1",
+      "574318 spell_duration 300277 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582307,
+    "clause": "Each point of Insanity now reduces mana costs of your instant cast spells and abilities by $s1%.",
+    "labels": [
+      "582307 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582308,
+    "clause": "Increases the effectiveness of your damage absorption effects by $s1%.",
+    "labels": [
+      "582308 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582589,
+    "clause": "Reduces the cooldown of Hallucination by $/1000;s1 sec",
+    "labels": [
+      "582589 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582589,
+    "clause": "and reduces its mana cost by $s2%.",
+    "labels": [
+      "582589 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582591,
+    "clause": "Become one with the void, preventing you from dying for $d,",
+    "labels": [
+      "582591 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582591,
+    "clause": "or until you take damage equal to a maximum of 100% of your total health.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 582591,
+    "clause": "When the effect ends you instantly regenerate health equal to $s1% of the damage taken while active.",
+    "labels": [
+      "582591 effect_value e0 #1",
+      "582591 aura_amount e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582836,
+    "clause": "Increases the critical strike chance of Blade of the Empire by $s1%",
+    "labels": [
+      "582836 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582836,
+    "clause": "and reduces its mana cost by $s2%.",
+    "labels": [
+      "582836 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582856,
+    "clause": "Increases the critical strike chance of Blade of the Empire by $s1%",
+    "labels": [
+      "582856 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582856,
+    "clause": "and reduces its mana cost by $s2%.",
+    "labels": [
+      "582856 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680377,
+    "clause": "Your Rift now guarantees your next Hammer of Twilight to critically strike.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 680487,
+    "clause": "Reduces the cooldown of your Voidborne by $/1000;s1 sec",
+    "labels": [
+      "680487 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680487,
+    "clause": "and increases its duration by $/1000;s2 sec.",
+    "labels": [
+      "680487 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680500,
+    "clause": "Increases the critical damage of your Hammer of Twilight and Eldritch Shock by $s2%.",
+    "labels": [
+      "680500 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680508,
+    "clause": "Increases your Magic damage dealt by $s1%",
+    "labels": [
+      "680508 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680508,
+    "clause": "and Hammer of Twilight now increases the target's spell damage taken by $572046s1% for $572046d.",
+    "labels": [
+      "680508 effect_value 572046e0 #1",
+      "680508 spell_duration 572046 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680555,
+    "clause": "Increases your block value by $s1%.",
+    "labels": [
+      "680555 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680555,
+    "clause": "While above 60 Insanity, the value of this effect is doubled.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 680557,
+    "clause": "Level 40 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 680557,
+    "clause": "Dreadnought now sheds your mortal form, transforming you into a void monstrosity, reducing your damage taken by $680556s3%",
+    "labels": [
+      "680557 effect_value 680556e2 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680558,
+    "clause": "Increases your block chance by $s2%,",
+    "labels": [
+      "680558 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680558,
+    "clause": "plus an additional $680608s1% while above 40 Insanity.",
+    "labels": [
+      "680558 effect_value 680608e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680569,
+    "clause": "Increases your attack power by 2 for every ${($m1*$m2)*2} armor value you have.",
+    "labels": [
+      "680569 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680570,
+    "clause": "Increases your chance to block by $s2%",
+    "labels": [
+      "680570 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680570,
+    "clause": "and casting Abyssal Ward now increases your chance to critically block by $680571s1% for $680571d.",
+    "labels": [
+      "680570 effect_value 680571e0 #1",
+      "680570 spell_duration 680571 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680574,
+    "clause": "Your successful blocks now have a $s2% chance to critically block for twice the normal amount.",
+    "labels": [
+      "680574 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680574,
+    "clause": "This effect is doubled while above 60 Insanity.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 680575,
+    "clause": "While Dreadnought is active, your Twilight Shieldtoss has a $/1000;s1 sec reduced cooldown.",
+    "labels": [
+      "680575 effect_value e0 #0"
+    ],
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261007_58_void_augmentation_tooltip.sql",
+      "commit": "1e3bf86d71",
+      "pr": "#6807",
+      "basis": "align_to_server",
+      "ruling": null,
+      "spell": 680575,
+      "dbc_differs": "no field differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 680575,
+    "clause": "In addition, your Eldritch Shock now strikes 2 additional enemies near the primary target.",
+    "labels": [],
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261007_58_void_augmentation_tooltip.sql",
+      "commit": "1e3bf86d71",
+      "pr": "#6807",
+      "basis": "align_to_server",
+      "ruling": null,
+      "spell": 680575,
+      "dbc_differs": "no field differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 680579,
+    "clause": "Increases your critical strike rating based on your parry and dodge rating.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 680579,
+    "clause": "In addition, critical strikes now reduce the cooldown of Dreadfall and Dreadnought by $/1000;681475s1 sec.",
+    "labels": [
+      "680579 effect_value 681475e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680581,
+    "clause": "Dealing damage with Twilight Shieldtoss now heals you for $680581s1% of the damage dealt.",
+    "labels": [
+      "680581 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680600,
+    "clause": "Increases the damage of Hammer of Twilight and Entropic Slam by $s1% and they now generates a large amount of threat.",
+    "labels": [
+      "680600 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680607,
+    "clause": "Your Twilight Shieldtoss now hits an additional enemy for every 20 Insanity you have.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 680609,
+    "clause": "Damage dealt by Blade of the Empire and Entropic Slam is now increased based on your defense rating.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 680750,
+    "clause": "Level 10 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 680750,
+    "clause": "Reaching 100 Insanity no longer causes Total Madness.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 680750,
+    "clause": "Teaches you Dreadnought.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 680750,
+    "clause": "Absorbs ${$m2+0+$STA*3+$INT*3} damage, scaling with Intellect and Stamina.",
+    "labels": [
+      "680750 effect_value 567524e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680750,
+    "clause": "Protects movement speed from going below $567525s2% of normal speed.",
+    "labels": [
+      "680750 effect_value 567525e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680750,
+    "clause": "Lasts $d.",
+    "labels": [
+      "680750 spell_duration 567524 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680750,
+    "clause": "Depletes all Insanity upon expiration.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 681087,
+    "clause": "Damage dealt by Twilight Shieldtoss now generates 3 Insanity.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 681088,
+    "clause": "Increases the base amount that Void Shield absorbs by $s1%",
+    "labels": [
+      "681088 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681088,
+    "clause": "and causes your Dreadnought ability to ignore 25% of all damage taken.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 681088,
+    "clause": "Absorbing damage grants you $s2% of the absorbed value as attack power for $681067d.",
+    "labels": [
+      "681088 effect_value e1 #1",
+      "681088 spell_duration 681067 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681102,
+    "clause": "Increases the Shadow damage increased through Shadow of the Void by $s1%.",
+    "labels": [
+      "681102 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681104,
+    "clause": "Tap into your inner voidborne rage, increasing your damage dealt and critical strike chance by $s1%,",
+    "labels": [
+      "681104 effect_value e0 #0",
+      "681104 aura_amount e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681104,
+    "clause": "and granting you immunity to stun effects for $d.",
+    "labels": [
+      "681104 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681104,
+    "clause": "Generates 1 Insanity every $T3 sec.",
+    "labels": [
+      "681104 aura_amplitude_ms #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681106,
+    "clause": "Each stack of Insanity increases the critical damage of your Netherstrike by $s1%.",
+    "labels": [
+      "681106 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681107,
+    "clause": "Level 50 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 681107,
+    "clause": "Increases your attack power by $s1% of your Intellect.",
+    "labels": [
+      "681107 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681326,
+    "clause": "While Shadow of the Void is active, you now take $s1% reduced damage.",
+    "labels": [
+      "681326 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681389,
+    "clause": "Doubles the duration of Shadow of the Void.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 681425,
+    "clause": "Critical strikes with abilities now summon a Manifestation of Y'shaarj for $680573d,",
+    "labels": [
+      "681425 spell_duration 680573 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681425,
+    "clause": "which will attack enemies and heal you for $681275s1% of your base health.",
+    "labels": [
+      "681425 effect_value 681275e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681474,
+    "clause": "Every 5th critical strike with abilities now transforms your next Gaze of C'Thun into Eldritch Force.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 681474,
+    "clause": "Generates 30 Insanity",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 681474,
+    "clause": "Send out a wave of force, dealing ${$m1+0+$SP*0.76255+$AP*.125} Shadow damage to enemies in front of you and reducing their movement speed by $s2% for $d.",
+    "labels": [
+      "681474 effect_value 680576e0 #0",
+      "681474 effect_value 680576e1 #1",
+      "681474 spell_duration 680576 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704434,
+    "clause": "Reduces all damage taken by party and raid members by $s1%.",
+    "labels": [
+      "704434 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704434,
+    "clause": "In addition, your Holy damage taken is reduced by $s2%.",
+    "labels": [
+      "704434 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704476,
+    "clause": "Tether yourself to an ally for $d,",
+    "labels": [
+      "704476 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704476,
+    "clause": "increasing all damage they deal and reducing all damage they take by $s3%.",
+    "labels": [
+      "704476 effect_value e2 #1",
+      "704476 aura_amount e2 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704476,
+    "clause": "$?s524877[\n\nEvery $t1 sec while active, you trigger a Horrific Revelation on the target and generate 5 Insanity.][]",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 704527,
+    "clause": "Periodic or channeled damage now increases the damage the enemy takes from you by $706908s1% for $706908d,",
+    "labels": [
+      "704527 effect_value 706908e0 #0",
+      "704527 spell_duration 706908 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704527,
+    "clause": "stacking $706908u times.",
+    "labels": [
+      "704527 max_stacks 706908 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704869,
+    "clause": "Your Hammer of Twilight, Entropic Slam, and Gaze of C'Thun now refreshes a charge of Blade of the Empire.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 704871,
+    "clause": "Your auto attacks now deal an additional $s1% of the damage dealt as Shadow damage.",
+    "labels": [
+      "704871 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704878,
+    "clause": "Increases the duration of your Tentacles by $s1%.",
+    "labels": [
+      "704878 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704879,
+    "clause": "Increases the duration of your Tentacles by $s1%.",
+    "labels": [
+      "704879 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704880,
+    "clause": "Damage dealt by Eldritch Shock now increases the amount healed by your next Eldritch Shock by 100%.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 704880,
+    "clause": "Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 704881,
+    "clause": "Increases the duration of Embrace the Void by $/1000;s3 sec",
+    "labels": [
+      "704881 effect_value e2 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704881,
+    "clause": "and it now heals you for an additional $s1% of the damage taken while active",
+    "labels": [
+      "704881 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704881,
+    "clause": "and its cooldown is reduced by $/1000;s2 sec.",
+    "labels": [
+      "704881 effect_value e1 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704884,
+    "clause": "$s1% of all healing done to allies through Abyssal Covenant is now replicated to you.",
+    "labels": [
+      "704884 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704885,
+    "clause": "Increases the movement speed slowed by Grasp of Zek'voz by $s1%.",
+    "labels": [
+      "704885 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704887,
+    "clause": "Increases all primary attributes by $s1%.",
+    "labels": [
+      "704887 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704889,
+    "clause": "Damage dealt by Twilight Shieldtoss shields you for $s1% of the damage dealt for $850002d.",
+    "labels": [
+      "704889 effect_value e0 #0",
+      "704889 spell_duration 850002 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704889,
+    "clause": "Additional shields add to the remaining absorb amount and refresh its duration.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 704895,
+    "clause": "Reduces the mana cost of Void Shield by $s1%.",
+    "labels": [
+      "704895 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704897,
+    "clause": "Allies affected by Abyssal Covenant now also take $s1% increased healing from you.",
+    "labels": [
+      "704897 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706177,
+    "clause": "Increases the effectiveness of Sermon of Dread by $s1%.",
+    "labels": [
+      "706177 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706179,
+    "clause": "Reduces spell pushback suffered from damaging attacks by $s1%",
+    "labels": [
+      "706179 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706179,
+    "clause": "and increases mana generated by Sanity Tap by $s2%.",
+    "labels": [
+      "706179 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706181,
+    "clause": "Increases the effectiveness of your damage absorption effects by $s1%.",
+    "labels": [
+      "706181 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706182,
+    "clause": "Level 30 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 706182,
+    "clause": "Avoiding an attack now generates $520773q2 Insanity.",
+    "labels": [
+      "706182 effect_value #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706182,
+    "clause": "In addition, transforms Abyssal Ward into Black Ward, granting it an additional charge and reducing its cooldown by 30 sec.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 706182,
+    "clause": "2 Charges,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 706182,
+    "clause": "60 sec recharge",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 706182,
+    "clause": "Coalesce a Black Ward reducing your damage taken by ${-($u*$m2)}% for $d or $u attacks.",
+    "labels": [
+      "706182 effect_value 804711e1 #0",
+      "706182 spell_duration 804711 #1",
+      "706182 max_stacks 804711 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706182,
+    "clause": "For the duration, each attack received will decrease the value by $s2%.",
+    "labels": [
+      "706182 effect_value 804711e1 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706182,
+    "clause": "Usable while stunned.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 706182,
+    "clause": "Scales with modifiers to Abyssal Ward.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 706187,
+    "clause": "Allies affected by your Black Blood are now healed for $s1% of the damage dealt by your Tentacles.",
+    "labels": [
+      "706187 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706188,
+    "clause": "Healing an ally with Gaze of C'Thun now additionally reveals nearby stealthed enemies for $807344d.",
+    "labels": [
+      "706188 spell_duration 807344 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706189,
+    "clause": "Increases your Shadow damage dealt by $s1%",
+    "labels": [
+      "706189 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706189,
+    "clause": "and healing done by $s2%.",
+    "labels": [
+      "706189 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706190,
+    "clause": "Increases your maximum mana, your movement speed, and mounted movement speed by $s1%.",
+    "labels": [
+      "706190 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706245,
+    "clause": "Grants your Horrorbolt and Wrath of the Black Empire a $h% chance to reset the cooldown of Gaze of C'thun.",
+    "labels": [
+      "706245 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706722,
+    "clause": "Increases the damage of Wrath of the Black Empire by $s1%.",
+    "labels": [
+      "706722 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706909,
+    "clause": "Every 3rd Horrorbolt cast causes your next successful Horrorbolt to deal an additional 50% of the initial damage to the target over $706910d.",
+    "labels": [
+      "706909 spell_duration 706910 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706911,
+    "clause": "Damage dealt by Gaze of C'Thun now has a $h% to chance to spawn a void portal that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam before disappearing.",
+    "labels": [
+      "706911 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706915,
+    "clause": "Increases your chance to hit by $s1%",
+    "labels": [
+      "706915 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706915,
+    "clause": "and reduces threat generated by Shadow damage spells by $s2%.",
+    "labels": [
+      "706915 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706917,
+    "clause": "Increases your spell haste by $s2%",
+    "labels": [
+      "706917 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706917,
+    "clause": "and causes you to regenerate mana equal to $504829s1% of your missing mana every $t1 sec.",
+    "labels": [
+      "706917 effect_value 504829e0 #1",
+      "706917 aura_amplitude_ms #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706921,
+    "clause": "Increases the damage bonus provided by your Corrupting Whispers by $s1%.",
+    "labels": [
+      "706921 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706926,
+    "clause": "You now heal the lowest health ally affected by Black Blood for $s1% of your auto attack damage.",
+    "labels": [
+      "706926 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706928,
+    "clause": "Increases the effectiveness of your Whispers by $s1%.",
+    "labels": [
+      "706928 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707429,
+    "clause": "Your Mass Nightmare now triggers a 60 sec reduced cooldown when used at or above 80 Insanity.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 707604,
+    "clause": "Your Gaze of C'Thun now strikes 1 additional nearby enemy.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 707640,
+    "clause": "Blade of the Empire now has a $h% chance to cause your next auto attack to hit twice.",
+    "labels": [
+      "707640 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707747,
+    "clause": "Removes the cooldown of Grasp of Zek'voz, but increases its mana cost by $s2%.",
+    "labels": [
+      "707747 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707748,
+    "clause": "Your Gaze of C'Thun now strikes $s1 additional nearby enemies.",
+    "labels": [
+      "707748 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707749,
+    "clause": "Your auto attacks now deal an additional $s1% of the damage dealt as Shadow damage.",
+    "labels": [
+      "707749 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707753,
+    "clause": "While above 40 Insanity,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 707753,
+    "clause": "your chance to trigger Dark Revelation is now increased by $s1%.",
+    "labels": [
+      "707753 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707781,
+    "clause": "Increases all primary attributes by $s1%.",
+    "labels": [
+      "707781 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707783,
+    "clause": "Reduces spell pushback suffered from damaging attacks by $s1%",
+    "labels": [
+      "707783 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707783,
+    "clause": "and increases mana generated by Sanity Tap by $s2%.",
+    "labels": [
+      "707783 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707784,
+    "clause": "Increases your chance to hit by $s1%",
+    "labels": [
+      "707784 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707784,
+    "clause": "and reduces threat generated by Shadow damage spells by $s2%.",
+    "labels": [
+      "707784 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707785,
+    "clause": "Your auto attacks now deal an additional $s1% of the damage dealt as Shadow damage.",
+    "labels": [
+      "707785 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 712470,
+    "clause": "Increases all primary attributes by $s1%.",
+    "labels": [
+      "712470 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 712471,
+    "clause": "Reduces the cast time of Forbidden Ritual by 1 sec",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 712471,
+    "clause": "and allows Black Blood to stack up to 2 times.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 502273,
+    "clause": "Chant a forbidden ritual that places a shield on all nearby party and raid members that absorbs ${$m1+0+$BH*.5} damage for $d.",
+    "labels": [
+      "502273 aura_duration_ms #0",
+      "502273 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800402,
+    "clause": "Devour dark magic on an ally, dispelling $m1 curse effects from them and healing you for ${$m2+0+$SP*.65}.",
+    "labels": [
+      "800402 effect_value e0 #0",
+      "800402 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800430,
+    "clause": "Create a void zone for $d at target location that slows enemies' movement speed while inside.",
+    "labels": [
+      "800430 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800430,
+    "clause": "The slow increases in intensity based on how close to the middle of the zone the enemy is.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 800432,
+    "clause": "Stun an enemy, dealing ${$m1+0+$sps*.55+$AP*.1} Shadow damage every $t1 sec for $802789d.",
+    "labels": [
+      "800432 effect_value e0 #0",
+      "800432 aura_amount e0 #0",
+      "800432 aura_amplitude_ms #1",
+      "800432 spell_duration 802789 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800432,
+    "clause": "The target takes $803746s1% more spell damage from all sources while you are channeling this spell.",
+    "labels": [
+      "800432 effect_value 803746e0 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502220,
+    "clause": "Generates 10 Insanity",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 502220,
+    "clause": "Wither an enemy, dealing $o1 Shadow damage over $d.",
+    "labels": [
+      "502220 effect_value #0",
+      "502220 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502220,
+    "clause": "Each instance of damage reduces their periodic healing taken by $706913s1%,",
+    "labels": [
+      "502220 effect_value 706913e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502220,
+    "clause": "stacking up to $?s301317[8][$706913u] times.",
+    "labels": [
+      "502220 max_stacks 706913 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800463,
+    "clause": "Avoiding or absorbing an attack now has a $h% chance to make your next Blade of the Empire deal $502133s2% more damage and hit an additional nearby enemy and cost no mana.",
+    "labels": [
+      "800463 effect_value #0",
+      "800463 effect_value 502133e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801539,
+    "clause": "Increases the critical damage of Netherstrike by $s1%.",
+    "labels": [
+      "801539 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801968,
+    "clause": "Level 50 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 801968,
+    "clause": "Increases your maximum health by $s2%",
+    "labels": [
+      "801968 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801968,
+    "clause": "and while transformed into a void monstrosity your damage dealt is now also increased by $s1%.",
+    "labels": [
+      "801968 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802043,
+    "clause": "Avoiding an attack now increases your critical strike and dodge chance by $572613s1% for $572613d,",
+    "labels": [
+      "802043 effect_value 572613e0 #0",
+      "802043 spell_duration 572613 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802043,
+    "clause": "stacking up to $572613u times.",
+    "labels": [
+      "802043 max_stacks 572613 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802044,
+    "clause": "Summon a Tentacle of Y'shaarj near you for $d.",
+    "labels": [
+      "802044 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802044,
+    "clause": "When summoned and whenever Gaze of C'thun is used, it slams the ground dealing Physical damage, scaling with Stamina, to all enemies in a $802046a yd frontal cone.",
+    "labels": [
+      "802044 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802044,
+    "clause": "@ext:You may only have 1 Old God Tentacle active at a time.:ext@",
+    "labels": [
+      "802044 effect_value #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802047,
+    "clause": "Increases the Weapon Damage dealt by Hammer of Twilight and Entropic Slam by $s1%.",
+    "labels": [
+      "802047 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802048,
+    "clause": "Increases the damage of your Tentacles by $s1%.",
+    "labels": [
+      "802048 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802049,
+    "clause": "Invoke the Old Gods for $d,",
+    "labels": [
+      "802049 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802049,
+    "clause": "removing the cast time of your next $n Eldritch Mendings or Malevolences and causing them to critically strike.",
+    "labels": [
+      "802049 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803398,
+    "clause": "Channel upon an enemy, chaining to nearby enemies, dealing ${($d*1000/$t1)*($m1+0+$sps*0.44)} Shadow damage over $d, dealing less damage with each enemy struck.",
+    "labels": [
+      "803398 effect_value #0",
+      "803398 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802728,
+    "clause": "Increases the critical strike chance and critical damage of your Tentacles by $s1%.",
+    "labels": [
+      "802728 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803236,
+    "clause": "Increases the damage dealt by your Twilight Shieldtoss by $s1% but it to no longer bounces.",
+    "labels": [
+      "803236 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803283,
+    "clause": "Increases the chance to trigger your Presences by $s1%",
+    "labels": [
+      "803283 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803283,
+    "clause": "and reduces their mana costs by $s2%.",
+    "labels": [
+      "803283 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804056,
+    "clause": "Unleash a wave of maddening resonance, interrupting the current spell cast of all enemies around you and preventing any spell in that school from being cast for $d.",
+    "labels": [
+      "804056 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804286,
+    "clause": "Level 20 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 804286,
+    "clause": "Increases your spell damage by $s1% of your Strength",
+    "labels": [
+      "804286 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804286,
+    "clause": "and Intellect and your hit rating by $s2% of your Intellect.",
+    "labels": [
+      "804286 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804633,
+    "clause": "Increases your chance to resist dispel effects by $s1%.",
+    "labels": [
+      "804633 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804670,
+    "clause": "Coalesce an Abyssal Ward reducing your damage taken by ${-($u*$m2)}% for $d or $u attacks.",
+    "labels": [
+      "804670 effect_value e1 #0",
+      "804670 aura_amount e1 #0",
+      "804670 aura_duration_ms #1",
+      "804670 max_stacks 804670 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804670,
+    "clause": "For the duration, each attack received will decrease the value by $s2%.",
+    "labels": [
+      "804670 effect_value e1 #3",
+      "804670 aura_amount e1 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804670,
+    "clause": "Usable while stunned.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 805110,
+    "clause": "All direct damage dealt now has a $h% chance to unleash a Black Prayer on all enemies near the target for $806039d.",
+    "labels": [
+      "805110 effect_value #0",
+      "805110 spell_duration 806039 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805110,
+    "clause": "Deals ${$m1*$<scalingbp>+$sps*.12+$AP*.005} Shadow Damage every $t1 sec",
+    "labels": [
+      "805110 effect_value 806039e0 #2",
+      "805110 aura_amplitude_ms #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805110,
+    "clause": "and reduces attack speed by $520418s1%.",
+    "labels": [
+      "805110 effect_value 520418e0 #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805114,
+    "clause": "Spread nightmares of the black empire to up to $i nearby enemies,",
+    "labels": [
+      "805114 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805114,
+    "clause": "horrifying them for $d",
+    "labels": [
+      "805114 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805114,
+    "clause": "and interrupting non-player spellcasting for $32747d.",
+    "labels": [
+      "805114 spell_duration 32747 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805115,
+    "clause": "Increases the range of Blade of the Empire, Netherstrike, and Hammer of Twilight by $s1 yds",
+    "labels": [
+      "805115 effect_value e0 #0",
+      "805115 aura_amount e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805115,
+    "clause": "and reduces their mana costs by $s2% for $d.",
+    "labels": [
+      "805115 effect_value e1 #1",
+      "805115 aura_amount e1 #1",
+      "805115 aura_duration_ms #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805117,
+    "clause": "Your Shadow of the Void now also increases your critical damage dealt by $s1%.",
+    "labels": [
+      "805117 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805121,
+    "clause": "Level 40 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 805121,
+    "clause": "Increases your Shadow spell damage by $s3% of your Strength",
+    "labels": [
+      "805121 effect_value e2 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805121,
+    "clause": "and your spell hit chance by $s1% of your Strength.",
+    "labels": [
+      "805121 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805126,
+    "clause": "Your Abyssal Ward now stacks $s1 additional times.",
+    "labels": [
+      "805126 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806897,
+    "clause": "Generates 10 Insanity",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 806897,
+    "clause": "Unleash a beam of eldritch energy, dealing ${$m1+0+$sps*.65} Shadow damage to an enemy and all nearby enemies.",
+    "labels": [
+      "806897 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806897,
+    "clause": "While above 60 Insanity,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 806897,
+    "clause": "deals $573315s2% more damage.",
+    "labels": [
+      "806897 effect_value 573315e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805607,
+    "clause": "Level 20 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 805607,
+    "clause": "Increases the healing done by Eldritch Mending by $s3%",
+    "labels": [
+      "805607 effect_value e2 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805607,
+    "clause": "and Gaze of C'Thun by $807701s1%.",
+    "labels": [
+      "805607 effect_value 807701e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805607,
+    "clause": "In addition, you are now unable to miss your attacks and you cannot be parried or dodged.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 806175,
+    "clause": "Raise your shield and charge towards an enemy, dealing ${$AP*0.5} Shadow damage to enemies you pass through, generating additional threat.",
+    "labels": [
+      "806175 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 578263,
+    "clause": "Generates 20 Insanity",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 578263,
+    "clause": "Strike an enemy quickly for $s2% Weapon Damage plus ${$m1+0} Shadow damage,",
+    "labels": [
+      "578263 effect_value e1 #0",
+      "578263 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 578263,
+    "clause": "purging $s3 beneficial magic effect from them.",
+    "labels": [
+      "578263 effect_value e2 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 578263,
+    "clause": "Only usable on enemies below 35% health.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 806250,
+    "clause": "Apply a dark boon to yourself for $d,",
+    "labels": [
+      "806250 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806250,
+    "clause": "causing your next Hammer of Twilight to deal an additional $s1% of its damage dealt as Shadow damage.",
+    "labels": [
+      "806250 effect_value e0 #1",
+      "806250 aura_amount e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806250,
+    "clause": "Creates a rift that absorbs the next ${$807854m1+$807854ppl1+$AP*1.5} healing taken by enemies that step inside",
+    "labels": [
+      "806250 effect_value 807854e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806250,
+    "clause": "and reduces their periodic healing received by $807216s2% for $807216d while inside.",
+    "labels": [
+      "806250 effect_value 807216e1 #3",
+      "806250 spell_duration 807216 #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806264,
+    "clause": "Level 50 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 806264,
+    "clause": "Increases your attack power by an amount equal to 2.5 times your spell critical strike rating.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 806266,
+    "clause": "Your Eldritch Eye now affects 1 additional cast.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 806382,
+    "clause": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d.",
+    "labels": [
+      "806382 effect_radius 807219e0 #0",
+      "806382 aura_amplitude_ms #1",
+      "806382 spell_duration 807219 #2",
+      "806382 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806384,
+    "clause": "Increases the damage converted into healing through Abyssal Covenant by $s1%.",
+    "labels": [
+      "806384 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806768,
+    "clause": "Your Shadow of the Void now stacks $s1 additional time.",
+    "labels": [
+      "806768 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807128,
+    "clause": "While Herald of the Depths is active, you now transform into a Faceless Monstrosity, increasing your critical healing and critical strike chance by $806769s2%,",
+    "labels": [
+      "807128 effect_value 806769e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807128,
+    "clause": "but reducing its duration by $/1000;806769s1 sec.",
+    "labels": [
+      "807128 effect_value 806769e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807128,
+    "clause": "In addition, while active you are now immune to fear, horrify, and polymorph effects.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 807307,
+    "clause": "Melee ability damage now reduces the duration of Wracked Mind by $/1000;807308s1 sec on all allies within $807308a1 yds.",
+    "labels": [
+      "807307 effect_value 807308e0 #0",
+      "807307 effect_radius 807308e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807512,
+    "clause": "Level 30 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 807512,
+    "clause": "Your Gaze of C'Thun now generates 10 Insanity.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 807877,
+    "clause": "Casting Satiate now refreshes the duration of Black Blood on all allies within $807878a1 yds.",
+    "labels": [
+      "807877 effect_radius 807878e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807877,
+    "clause": "Dark Infusion bounces one additional time after its third infusion, expanding to the three lowest-health nearby party or raid members.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 807879,
+    "clause": "Your Eldritch Eye now affects 2 additional casts.",
+    "labels": [],
+    "kind": "claim"
+  }
+]
