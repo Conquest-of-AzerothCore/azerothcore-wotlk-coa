@@ -1945,7 +1945,7 @@
       "trigger_spell": 502122,
       "gate_spell": 805607,
       "target": "dummy",
-      "attack_swings": 80,
+      "attack_swings": 72,
       "player_ratings": {
         "melee_hit_rating": 0,
         "expertise_rating": 0
@@ -1955,7 +1955,7 @@
         "hand": 0
       },
       "before_expected": 0,
-      "expected": 80,
+      "expected": 72,
       "same_arm_ratio": {
         "metric": "melee_attack_count",
         "fields": {
@@ -1968,7 +1968,7 @@
       },
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "805607 Effect[0] aura 333 (+100% hit chance) and Effect[1] aura 240 (+100 expertise = -25% target dodge and parry; Spell.dbc). With player_ratings melee_hit_rating 0 and expertise_rating 0 against a level 60 dummy from the front, base avoidance is 5% miss + 5% dodge + 5% parry = 15% (control phase before learning 805607). After learning 805607, 80 main-hand auto-attack swings must land 100% of attacks (melee_damage_count / melee_attack_count = 1.0, tolerance 0, least 70): even if a single 5% avoidance leg remained unmitigated, the probability of zero avoids across a counted pair (160 swings) is 0.95^160 = 0.00027 (0.027% <= 0.1% per pair). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 805607 matches installed Spell.dbc verbatim."
+      "observe_source": "805607 Effect[0] aura 333 (+100% hit chance) and Effect[1] aura 240 (+100 expertise = -25% target dodge and parry; Spell.dbc). With player_ratings melee_hit_rating 0 and expertise_rating 0 against a level 60 dummy from the front, base avoidance is 5% miss + 5% dodge + 5% parry = 15% (control phase before learning 805607). After learning 805607, 72 main-hand auto-attack swings must land 100% of attacks (melee_damage_count / melee_attack_count = 1.0, tolerance 0, least 70): even if a single 5% avoidance leg remained unmitigated, the probability of zero avoids across a counted pair (>= 140 swings) is <= 0.95^140 = 0.00076 (0.076% <= 0.1% per pair). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 805607 matches installed Spell.dbc verbatim."
     },
     {
       "spell": 802049,
