@@ -14,10 +14,7 @@
     "claims": [
       {
         "claim": "Critical strikes with melee abilities now trigger Dancing Blades",
-        "labels": [
-          "92087 behaviour_metric_delta trigger",
-          "92087 behaviour_metric_delta noncrit"
-        ]
+        "labels": []
       },
       {
         "claim": "dealing off-hand Weapon Damage",
@@ -32,7 +29,8 @@
           "92087 behaviour_metric_delta count"
         ]
       }
-    ]
+    ],
+    "reason": "HELD claim 1 (review fw-rl3b I-1): the noncrit arm (learned, 0 crits) has no read showing the Twin Slice strikes landed, so 0 triggers could mean no strike; needs a same-arm strike damage or hit-count read before 'Critical strikes ... trigger' counts."
   },
   {
     "spell": 92088,
