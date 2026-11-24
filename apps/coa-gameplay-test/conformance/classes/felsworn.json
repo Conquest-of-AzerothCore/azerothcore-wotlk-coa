@@ -5080,6 +5080,69 @@
       "variant": "fragment"
     },
     {
+      "spell": 800214,
+      "kind": "hit_ratio",
+      "name": "Malice of Gul'dan (critical Bane of Chaos ticks never trigger Felstrike)",
+      "variant": "periodic_crit_no_felstrike",
+      "label_suffix": "periodic_crit_no_felstrike",
+      "quote": "Direct critical strikes",
+      "observe_spell": 706420,
+      "cast_wait_ms": 9500,
+      "cast_power": 100,
+      "void_on_cast_failure": true,
+      "expected": 1.0,
+      "rate": "proc",
+      "rate_spell": 802678,
+      "expected_points": 0,
+      "control": {
+        "auras": [
+          [
+            560533,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            560533,
+            1,
+            -100
+          ]
+        ],
+        "learn": [
+          800214
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            560533,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            560533,
+            1,
+            100
+          ]
+        ],
+        "learn": [
+          800214
+        ]
+      },
+      "trials": 20,
+      "parts": 2,
+      "expected_source": "Malice of Gul'dan 800214 rolls on crit && !periodic (AscensionFelswornEvents.cpp:97-98), ProcChance 60, and casts Felstrike 802678 (aura 3, 1000 ms ticks) on the target. Both arms learn 800214; Bane of Chaos 706420 ticks are critical at a 0 chance (control, Fel Infusion 560533 Effect[1] amount -100, clamped at 0) and at a 100 chance (treatment, amount 100; the periodic_crit_forced entry of 706420 reads every such tick critical). Read: Felstrike damage events on the dummy per Bane tick: 0 in both arms, 0 points apart, over 120 critical ticks per run (2 parts of 20 trials, 3 ticks each; each trial removes Bane of Chaos). A periodic critical strike that triggered Malice at 60% would give about 0.6 x 6 Felstrike ticks per Bane tick. The direct-crit arm of the same rule is the 800214 proc entries (critical Fel Fireball 801312 hits trigger Felstrike 802678 and Fragment 800239), run in the same pair. Mentor D-82."
+    },
+    {
       "spell": 804609,
       "name": "Gul'dan's Gift (Skull of Gul'dan maximum Energy)",
       "kind": "metric_delta",
@@ -19674,6 +19737,171 @@
       }
     },
     {
+      "spell": 706420,
+      "kind": "hit_ratio",
+      "quote": "@ext:Periodic damage dealt by this effect can critically strike.:ext@",
+      "observe_spell": 706420,
+      "cast_wait_ms": 9500,
+      "cast_power": 100,
+      "void_on_cast_failure": true,
+      "name": "Bane of Chaos (every tick critical at a 100% chance)",
+      "variant": "periodic_crit_forced",
+      "label_suffix": "periodic_crit_forced",
+      "expected": 1.0,
+      "rate": "critical",
+      "expected_points": 100,
+      "control": {
+        "auras": [
+          [
+            560533,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            560533,
+            1,
+            -100
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            560533,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            560533,
+            1,
+            100
+          ]
+        ]
+      },
+      "trials": 20,
+      "expected_source": "Measured in the exploratory run .cache/verify-all/20261124-005712: at amount 0 the control arm read 1 critical tick of 42 and a mean tick of 337.98 against 326.5 without crits, so the reference character holds a small Chaos crit chance of its own (source not traced; the family-20 SPELLMOD_CRITICAL_CHANCE auras whose class mask covers 706420 are Felwrath 500033, Wrath of Sargeras 529290 and Deadly Magic 560640). Bane of Chaos 706420 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 3000, DurationIndex 86 = 21000 ms: each trial casts it and waits 9500 ms (about 3 ticks); the next cast refreshes the aura, and the refresh sets the tick crit chance again from the arm's fixture (Unit.cpp OnAuraApply on refresh). SchoolMask 127 holds Physical, so the stock spell crit chance (Unit::SpellDoneCritChance, DmgClass 1) has a base of 0 and the caster's spell crit rating does not reach it; SPELL_AURA_ASCENSION_MOD_CRIT_CHANCE does. Fel Infusion 560533 Effect[1] is aura 350 with MiscValue 127: its amount is the fixture that sets the chance, in both arms. Caster aura 823764 (the dummy's Chaos resistance removed) in both arms. Control arm amount -100: the chance clamped at 0, no tick critical; treatment arm amount 100: chance at least 100, every tick critical: 100 points apart. Before the fix no tick was critical at any chance (stock CalcPeriodicCritChance needs aura 286): 0 points, an alert. Reference search 2026-11-24: coa-history spell 706420: SPELL_PERIODIC_DAMAGE 1563 events, 682 critical, 2 logs (live ticks crit; the share is not a target rate); Necromancer ADR 0012 (Flesh to Worms) is the precedent; Felsworn ADR 0022 (mentor D-82)."
+    },
+    {
+      "spell": 706420,
+      "kind": "hit_ratio",
+      "quote": "@ext:Periodic damage dealt by this effect can critically strike.:ext@",
+      "observe_spell": 706420,
+      "cast_wait_ms": 9500,
+      "cast_power": 100,
+      "void_on_cast_failure": true,
+      "name": "Bane of Chaos (the normal roll: a 90% chance, neither 0 nor 100)",
+      "variant": "periodic_crit_normal",
+      "label_suffix": "periodic_crit_normal",
+      "expected": 1.0,
+      "rate": "critical",
+      "expected_points": 90,
+      "control": {
+        "auras": [
+          [
+            560533,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            560533,
+            1,
+            0
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            560533,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            560533,
+            1,
+            90
+          ]
+        ]
+      },
+      "trials": 24,
+      "parts": 48,
+      "expected_source": "Measured in the exploratory run .cache/verify-all/20261124-005712: at amount 0 the control arm read 1 critical tick of 42 and a mean tick of 337.98 against 326.5 without crits, so the reference character holds a small Chaos crit chance of its own (source not traced; the family-20 SPELLMOD_CRITICAL_CHANCE auras whose class mask covers 706420 are Felwrath 500033, Wrath of Sargeras 529290 and Deadly Magic 560640). Bane of Chaos 706420 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 3000, DurationIndex 86 = 21000 ms: each trial casts it and waits 9500 ms (about 3 ticks); the next cast refreshes the aura, and the refresh sets the tick crit chance again from the arm's fixture (Unit.cpp OnAuraApply on refresh). SchoolMask 127 holds Physical, so the stock spell crit chance (Unit::SpellDoneCritChance, DmgClass 1) has a base of 0 and the caster's spell crit rating does not reach it; SPELL_AURA_ASCENSION_MOD_CRIT_CHANCE does. Fel Infusion 560533 Effect[1] is aura 350 with MiscValue 127: its amount is the fixture that sets the chance, in both arms. Caster aura 823764 (the dummy's Chaos resistance removed) in both arms. Control arm amount 0 (the character's own chance c); treatment arm amount 90 (c + 90, below 100 while c stays below 10): each tick rolls at the stock chance, 90 points apart. A tick forced critical reads 100 and no critical tick reads 0: both lie outside the 4.5-point band. Sized at 48 parts of 24 trials per arm (24 is the scenario limit), about 73 ticks per arm and part: the verdict's 99% half-width comes from the between-part variance of the per-part rate differences, t over the parts. The pair 20261124 at 24 parts read half-widths 2.078 and 1.710 (between-part sd 3.32 points), so 24 parts left about 9% per run not judged against the 2.25 limit. The per-tick binomial sd of one part's difference is 100 x sqrt((0.942 x 0.058 + 0.047 x 0.953) / 73) = 3.69 points; at 48 parts the expected half-width is 1.43 (under the 1.8 sizing target, 0.8 of the limit) and the residual chance of a half-width above 2.25 is 7.7e-8 per run, 1.6e-7 per pair (chi-square on 47 degrees of freedom; 1.0e-11 per run at the observed 3.32). Reference search 2026-11-24: coa-history spell 706420: SPELL_PERIODIC_DAMAGE 1563 events, 682 critical, 2 logs (live ticks crit; the share is not a target rate); Necromancer ADR 0012 (Flesh to Worms) is the precedent; Felsworn ADR 0022 (mentor D-82)."
+    },
+    {
+      "spell": 706420,
+      "kind": "hit_ratio",
+      "quote": "@ext:Periodic damage dealt by this effect can critically strike.:ext@",
+      "observe_spell": 706420,
+      "cast_wait_ms": 9500,
+      "cast_power": 100,
+      "void_on_cast_failure": true,
+      "name": "Bane of Chaos (a critical tick deals the stock spell critical bonus)",
+      "variant": "periodic_crit_damage",
+      "label_suffix": "periodic_crit_damage",
+      "expected": 1.5,
+      "control": {
+        "auras": [
+          [
+            560533,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            560533,
+            1,
+            -100
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            560533,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            560533,
+            1,
+            100
+          ]
+        ]
+      },
+      "trials": 20,
+      "expected_source": "Measured in the exploratory run .cache/verify-all/20261124-005712: at amount 0 the control arm read 1 critical tick of 42 and a mean tick of 337.98 against 326.5 without crits, so the reference character holds a small Chaos crit chance of its own (source not traced; the family-20 SPELLMOD_CRITICAL_CHANCE auras whose class mask covers 706420 are Felwrath 500033, Wrath of Sargeras 529290 and Deadly Magic 560640). Bane of Chaos 706420 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 3000, DurationIndex 86 = 21000 ms: each trial casts it, waits 9500 ms (3 ticks, at 3000, 6000 and 9000 ms) and removes the aura (clear_observed), so no tick of one arm lands in the other. SchoolMask 127 holds Physical, so the stock spell crit chance (Unit::SpellDoneCritChance, DmgClass 1) has a base of 0 and the caster's spell crit rating does not reach it; SPELL_AURA_ASCENSION_MOD_CRIT_CHANCE does. Fel Infusion 560533 Effect[1] is aura 350 with MiscValue 127: its amount is the fixture that sets the chance, in both arms. Caster aura 823764 (the dummy's Chaos resistance removed) in both arms. Control arm amount -100: the chance clamped at 0, no tick critical, 326 or 327 per tick (EffectBasePoints 325, DieSides 2, RealPointsPerLevel x 0 at level 60, no spell power: the total entry); treatment arm amount 100: every tick critical. The tick path applies Unit::SpellCriticalDamageBonus, DmgClass 1 (MAGIC): damage + damage / 2, 489 or 490; no crit damage aura on the reference character: mean ratio 1.5. Reference search 2026-11-24: coa-history spell 706420: SPELL_PERIODIC_DAMAGE 1563 events, 682 critical, 2 logs (live ticks crit; the share is not a target rate); Necromancer ADR 0012 (Flesh to Worms) is the precedent; Felsworn ADR 0022 (mentor D-82).",
+      "clear_observed": true
+    },
+    {
       "spell": 685321,
       "name": "Doomscarring (damage)",
       "kind": "metric_delta",
@@ -23275,40 +23503,6 @@
       "trials": 10,
       "caster_max_health": 100000,
       "observe_source": "707527 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, BasePoints -11 + 1 = -10 ($s2), DBC MiscValue 0 (no school; rank 1 705129 carries 1) set to 1 (Physical) by the Felsworn contract (mentor decision D-81, Felsworn ADR 0019); Effect[0] aura 69 SPELL_AURA_SCHOOL_ABSORB, MiscValue 127, $m1 = 751 + 1..32 plus Stamina x 1 ($m1+0+$STA*1), stated separately. Kind taken_total_ratio (ADR 1266, provisional): each strike is read as damage plus resisted plus absorbed from the spell logs the caster receives, so the reduction is judged before the absorb: Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) without the barrier (control) and with it cast before each strike (treatment, the total must be 90% of the control total within the integer rounding, part of it absorbed); Light of the Naaru 41394 (1100 Holy, larger than the barrier) without and with it (equal totals, the absorbed amount within 752..783 plus the Stamina read at the arm start); and Void Zone after the barrier is broken by Light of the Naaru (the aura read absent, equal to the control: the reduction ends with the barrier). Reference search 2026-11-24: coa-history spell 707527: SPELL_CAST_SUCCESS 303 and SPELL_AURA_APPLIED 274 events by players in 7 logs, no value; expected values come from the tooltip and the DBC only."
-    },
-    {
-      "spell": 706420,
-      "kind": "metric_delta",
-      "trigger_spell": 706420,
-      "target": "dummy",
-      "cast_power": 100,
-      "cast_in_before": false,
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "before_expected": 0,
-      "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "force_crit": "spell",
-      "wait_ms": 22500,
-      "quote": "@ext:Periodic damage dealt by this effect can critically strike.:ext@",
-      "metric": "spell_damage_count",
-      "name": "Bane of Chaos (periodic critical strikes)",
-      "variant": "periodic_crit",
-      "label_suffix": "periodic_crit",
-      "fields": {
-        "spell": 706420,
-        "target": "dummy",
-        "critical": true
-      },
-      "expected": 7,
-      "tolerance": 0.5,
-      "observe_source": "Bane of Chaos 706420 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 3000, DurationIndex 86 = 21000 ms: 7 ticks (the ticks entry reads 7). The sentence is in the 706420 Description (@ext). The caster's spell crit rating is forced (force_crit spell, the Necromancer 501861 periodic_crit shape, ADR necromancer/0012), the dummy's Chaos resistance removed (823764, precondition fixture, set_aura); the crit-removal fixture 984954 of the total entry is not set. Reference search 2026-11-24: Necromancer 501861 'Periodic damage dealt by this can critically strike' (status 1 after FN-c4-1, 12 of 12 critical ticks; pre-fix 0 of 12) is the precedent; coa-history spell 706420 (run 2026-11-24, read-only): SPELL_PERIODIC_DAMAGE 1563 events, 682 critical, 2 logs, so the live periodic damage of Bane of Chaos crits (43.6 percent of its ticks); nothing else found beyond the tooltip and Spell.dbc. Read: critical Bane of Chaos ticks on the dummy 22500 ms after a real cast under the forced spell crit: 7 (every tick); no cast before (control, 0)."
     },
     {
       "spell": 706420,

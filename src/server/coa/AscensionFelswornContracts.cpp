@@ -463,6 +463,21 @@ float Shadowflame(Player* player)
     return float(std::max(player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE),
                           player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW)));
 }
+constexpr uint32 BANE_OF_CHAOS_RANK_7 = 706420;
+void GrantBaneOfChaosPeriodicCrit(Unit* target, Aura* aura)
+{
+    if (aura->GetId() != BANE_OF_CHAOS_RANK_7)
+        return;
+    Unit* caster = aura->GetCaster();
+    AuraEffect* effect = aura->GetEffect(EFFECT_0);
+    if (!caster || !effect || effect->GetAuraType() != SPELL_AURA_PERIODIC_DAMAGE)
+        return;
+    SpellInfo const* info = aura->GetSpellInfo();
+    float chance = caster->SpellDoneCritChance(nullptr, info, info->GetSchoolMask(), BASE_ATTACK, true);
+    if (chance > 0.0f)
+        chance = target->SpellTakenCritChance(caster, info, info->GetSchoolMask(), chance, BASE_ATTACK, true);
+    effect->SetCritChance(std::max(0.0f, chance));
+}
 class felsworn_scaling : public UnitScript
 {
   public:
@@ -470,8 +485,13 @@ class felsworn_scaling : public UnitScript
         : UnitScript("felsworn_scaling", true,
                      {UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE, UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN,
                       UNITHOOK_MODIFY_MELEE_DAMAGE, UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK,
-                      UNITHOOK_ON_BEFORE_ROLL_MELEE_OUTCOME_AGAINST})
+                      UNITHOOK_ON_BEFORE_ROLL_MELEE_OUTCOME_AGAINST, UNITHOOK_ON_AURA_APPLY})
     {
+    }
+    void OnAuraApply(Unit* unit, Aura* aura) override
+    {
+        if (unit && aura)
+            GrantBaneOfChaosPeriodicCrit(unit, aura);
     }
     void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* info, uint8 index, float& value) override
     {
