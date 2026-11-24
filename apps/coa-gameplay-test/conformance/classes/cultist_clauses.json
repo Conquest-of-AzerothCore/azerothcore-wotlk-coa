@@ -646,12 +646,22 @@
       {
         "claim": "cost $301186s2% less mana",
         "labels": [
-          "301183 effect_value 301186e1 #0"
+          "301183 behaviour_metric_delta mana_cost"
         ]
       },
       {
         "claim": "Every 3rd melee ability",
-        "labels": []
+        "labels": [
+          "301183 behaviour_metric_delta two_casts",
+          "301183 behaviour_metric_delta third_cast"
+        ]
+      },
+      {
+        "claim": "become instant cast",
+        "labels": [
+          "301183 behaviour_metric_delta instant",
+          "301183 behaviour_metric_delta consumed"
+        ]
       }
     ]
   },
@@ -2902,16 +2912,22 @@
       {
         "claim": "over $706910d",
         "labels": [
-          "706909 spell_duration 706910 #0"
+          "706909 behaviour_metric_delta dot_held",
+          "706909 behaviour_metric_delta dot_gone"
         ]
       },
       {
         "claim": "Every 3rd Horrorbolt cast",
-        "labels": []
+        "labels": [
+          "706909 behaviour_metric_delta third_cast_ready",
+          "706909 behaviour_metric_delta fourth_cast_triggers"
+        ]
       },
       {
         "claim": "deal an additional 50% of the initial damage",
-        "labels": []
+        "labels": [
+          "706909 behaviour_metric_delta bonus_damage_ratio"
+        ]
       }
     ]
   },

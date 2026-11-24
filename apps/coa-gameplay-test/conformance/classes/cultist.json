@@ -3315,6 +3315,681 @@
         }
       ],
       "observe_source": "704434 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 2 (Holy), BasePoints -11 + 1 = -10 ($s2 = 10; Spell.dbc). On a Holy strike (Light of the Naaru 41394, 1100 Holy), Effect[0] (-3% all) and Effect[1] (-10% Holy) both apply multiplicatively: 0.97 * 0.90 = 0.873 (control without 704434 vs treatment with real learn). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 704434 matches."
+    },
+    {
+      "spell": 301183,
+      "name": "Malevolent Power (2 melee abilities build 2 stacks, no buff yet)",
+      "kind": "metric_delta",
+      "variant": "two_casts",
+      "label_suffix": "two_casts",
+      "quote": "Every 3rd melee ability you cast now causes your next Eldritch Mending to become instant cast and cost $301186s2% less mana.",
+      "trigger_spell": 502241,
+      "gate_spell": 301183,
+      "target": "dummy",
+      "cast_power": 2000,
+      "setup_casts": [
+        502241
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2000,
+      "phase_auras": [
+        [
+          301980,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          301186,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 301980
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 301186
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "301183 tooltip ('Every 3rd melee ability'): after 2 Malevolence 502241 casts, Malevolent Power buff 301186 must still be absent (0)"
+          }
+        ]
+      },
+      "observe_source": "Malevolent Power 301183 (passive, Spell.dbc Effect[0] aura 42 EffectTriggerSpell 301980): AscensionCultistAbilities.cpp:156-164 casts counter 301980 (StackAmount 3) on each DmgClass==MELEE cast and replaces 3 stacks with 301186. Two real casts of Malevolence 502241 (DmgClass 2 melee, 1500 ms cast, 9% base mana = 136) read 301980 stacks 0 -> 2 and 301186 aura 0 -> 0 (paired with third_cast proving the 3rd cast consumes 301980 and grants 301186). Reference search 2026-11-24: coa-history 301183: 0 events (passive), 301980: 187 applies / 182 doses in 27 logs, 301186: 174 applies in 26 logs; coabuildhub spells_master_index.json 301183 matches verbatim."
+    },
+    {
+      "spell": 301183,
+      "name": "Malevolent Power (3rd melee ability grants 301186 and consumes counter)",
+      "kind": "metric_delta",
+      "variant": "third_cast",
+      "label_suffix": "third_cast",
+      "quote": "Every 3rd melee ability you cast now causes your next Eldritch Mending to become instant cast and cost $301186s2% less mana.",
+      "trigger_spell": 502241,
+      "gate_spell": 301183,
+      "target": "dummy",
+      "cast_power": 2000,
+      "setup_casts": [
+        502241,
+        502241
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2000,
+      "phase_auras": [
+        [
+          301980,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          301186,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 301186
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 301980
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "301186 Effect[2] SPELL_EFFECT_REMOVE_AURA 301980 / AscensionCultistAbilities.cpp:159-162: 3rd melee cast removes 301980 counter and grants 301186"
+          }
+        ]
+      },
+      "observe_source": "Malevolent Power 301183 (AscensionCultistAbilities.cpp:156-164): three real Malevolence 502241 casts (DmgClass 2 melee, 1500 ms cast) read Malevolent Power 301186 0 (before learn) -> 1 (after learn) with counter 301980 consumed (0 -> 0). Paired with two_casts proving 2 casts do not grant 301186. Reference search 2026-11-24: coa-history 301186: 174 applies in 26 logs; coabuildhub spells_master_index.json 301183 matches verbatim."
+    },
+    {
+      "spell": 301183,
+      "name": "Malevolent Power (next Eldritch Mending is instant cast)",
+      "kind": "metric_delta",
+      "variant": "instant",
+      "label_suffix": "instant",
+      "quote": "Every 3rd melee ability you cast now causes your next Eldritch Mending to become instant cast and cost $301186s2% less mana.",
+      "trigger_spell": 502241,
+      "gate_spell": 301183,
+      "target": "dummy",
+      "learn": [
+        574325
+      ],
+      "cast_power": 2000,
+      "setup_casts": [
+        502241,
+        502241
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2000,
+      "phase_auras": [
+        [
+          301980,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          301186,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 574325
+      },
+      "before_expected": 2000,
+      "expected": 0,
+      "expected_gain": -2000,
+      "tolerance": 1,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "use_time_contrast": [
+        "instant",
+        "consumed"
+      ],
+      "void_on_cast_failure": true,
+      "observe_source": "Malevolent Power 301186 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 10 (SPELLMOD_CASTING_TIME) BasePoints -101 + DieSides 1 = -100% on EffectSpellClassMask[1] 4096 (matches Eldritch Mending 574325 SpellFamilyFlags[1] 4096, CastingTimeIndex 5 = 2000 ms; Spell.dbc). Three real Malevolence 502241 casts grant 301186 after learning 301183; Eldritch Mending 574325 cast time drops 2000 -> 0 ms (gain -2000). Paired with consumed (use_time_contrast). Reference search 2026-11-24: coa-history 301186: 174 applies in 26 logs; coabuildhub spells_master_index.json 301183 matches verbatim."
+    },
+    {
+      "spell": 301183,
+      "name": "Malevolent Power (casting Eldritch Mending consumes instant-cast buff)",
+      "kind": "metric_delta",
+      "variant": "consumed",
+      "label_suffix": "consumed",
+      "quote": "Every 3rd melee ability you cast now causes your next Eldritch Mending to become instant cast and cost $301186s2% less mana.",
+      "trigger_spell": 574325,
+      "gate_spell": 301183,
+      "target": "caster",
+      "cast_power": 2000,
+      "setup_casts": [
+        502241,
+        502241,
+        502241
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2000,
+      "phase_auras": [
+        [
+          301980,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          301186,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_time_ms",
+      "fields": {
+        "spell": 574325
+      },
+      "before_expected": 2000,
+      "expected": 2000,
+      "expected_gain": 0,
+      "tolerance": 1,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "use_time_contrast": [
+        "instant",
+        "consumed"
+      ],
+      "void_on_cast_failure": true,
+      "observe_source": "Consumption arm for Malevolent Power 301183 ('your next Eldritch Mending'): AscensionCultistAbilities.cpp:19,25,34-40 removes 301186 in Finish() after Eldritch Mending 574325 completes. After 3 Malevolence 502241 setup casts and 1 Eldritch Mending 574325 cast (wait_ms 2500 > 2000 ms base cast time), Eldritch Mending 574325 cast time reads 2000 ms again in both phases (gain 0). Paired with instant (use_time_contrast). Reference search 2026-11-24: coa-history 301186: 174 applies / 166 removes in 26 logs; coabuildhub spells_master_index.json 301183 matches verbatim.",
+      "select_dummy": true
+    },
+    {
+      "spell": 301183,
+      "name": "Malevolent Power (next Eldritch Mending costs 20% less mana)",
+      "kind": "metric_delta",
+      "variant": "mana_cost",
+      "label_suffix": "mana_cost",
+      "quote": "Every 3rd melee ability you cast now causes your next Eldritch Mending to become instant cast and cost $301186s2% less mana.",
+      "trigger_spell": 574325,
+      "gate_spell": 301183,
+      "target": "caster",
+      "disable_regeneration": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        502241,
+        502241,
+        502241
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2000,
+      "phase_auras": [
+        [
+          301980,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          301186,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1290,
+      "expected": 1350.4,
+      "tolerance": 1.0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Malevolent Power 301186 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) BasePoints -21 + DieSides 1 = -20% ($301186s2 = 20) on EffectSpellClassMask[4] 4096 (matches Eldritch Mending 574325 SpellFamilyFlags[1] 4096, ManaCostPercentage 20% of 1512 BaseMana = 302 mana; Spell.dbc). With regeneration off and mana set to 2000 before setup, 3 Malevolence 502241 setup casts spend 3 * 136 = 408 mana (leaving 1592), then Eldritch Mending 574325 spends 302 mana without 301183 (remaining 1290) vs 241.6 mana with 301186 (-20%, saving 60.4 +- 1.0 mana -> remaining 1350.4). Band [59.4, 61.4] excludes 0 (no reduction) and 120.8 (applied twice). Reference search 2026-11-24: coa-history 301186: 174 applies in 26 logs; coabuildhub spells_master_index.json 301183 matches verbatim.",
+      "select_dummy": true
+    },
+    {
+      "spell": 706909,
+      "name": "Yawning Decay (3rd Horrorbolt builds 3 stacks of 712291 without applying 706910 yet)",
+      "kind": "metric_delta",
+      "variant": "third_cast_ready",
+      "label_suffix": "third_cast_ready",
+      "quote": "Every 3rd Horrorbolt cast causes your next successful Horrorbolt to deal an additional 50% of the initial damage to the target over $706910d.",
+      "trigger_spell": 800416,
+      "gate_spell": 706909,
+      "target": "dummy",
+      "cast_power": 2000,
+      "setup_casts": [
+        800416,
+        800416
+      ],
+      "setup_wait_ms": 2000,
+      "phase_auras": [
+        [
+          712291,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          706910,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 712291
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 706910,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "706909 tooltip ('Every 3rd Horrorbolt cast causes your next successful Horrorbolt'): 3rd Horrorbolt prepares 3 stacks of 712291 without triggering 706910 yet"
+          }
+        ]
+      },
+      "observe_source": "Yawning Decay 706909 (passive, Spell.dbc Effect[0] aura 42 EffectTriggerSpell 712291, StackAmount 3): AscensionCultistAbilities.cpp:86-87,176-177,257-261 grants 1 stack of 712291 per Horrorbolt cast up to 3, and only the next successful Horrorbolt at 3 stacks triggers 706910 and removes 712291. Three real casts of Horrorbolt 800416 (1500 ms cast, 25 yd/s at 3 yd -> ~1620 ms hit; wait 2000 ms; 823764 prevents full resist, precondition fixture) read 712291 stacks 0 -> 3 and 706910 ticks 0 -> 0. Paired with fourth_cast_triggers. Reference search 2026-11-24: coa-history 706909/706910/712291: 0 events in 186 logs; coabuildhub spells_master_index.json 706909 matches verbatim."
+    },
+    {
+      "spell": 706909,
+      "name": "Yawning Decay (4th Horrorbolt triggers 706910 DoT and consumes 712291)",
+      "kind": "metric_delta",
+      "variant": "fourth_cast_triggers",
+      "label_suffix": "fourth_cast_triggers",
+      "quote": "Every 3rd Horrorbolt cast causes your next successful Horrorbolt to deal an additional 50% of the initial damage to the target over $706910d.",
+      "trigger_spell": 502182,
+      "gate_spell": 706909,
+      "target": "dummy",
+      "cast_power": 2000,
+      "setup_casts": [
+        800416,
+        800416,
+        800416
+      ],
+      "setup_wait_ms": 2000,
+      "phase_auras": [
+        [
+          712291,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          706910,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 706910,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 6200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 712291
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "AscensionCultistAbilities.cpp:257-261: 4th Horrorbolt hit triggers 706910 and removes 712291"
+          }
+        ]
+      },
+      "observe_source": "Yawning Decay 706909 (AscensionCultistAbilities.cpp:86-87,176-177,257-261): after 3 Horrorbolt 800416 setup casts build 3 stacks of 712291, the 4th Horrorbolt (502182, 2500 ms cast + ~120 ms flight) triggers 706910 (DurationIndex 27 = 3000 ms, EffectAmplitude 1000 ms -> 3 ticks) and removes 712291. Wait 6200 ms (> 2620 + 3000 ms) reads 706910 ticks 0 (unlearned control) -> 3 (learned) and 712291 stacks 0 -> 0. Paired with third_cast_ready. Reference search 2026-11-24: coa-history 706909/706910/712291: 0 events in 186 logs; coabuildhub spells_master_index.json 706909 matches verbatim."
+    },
+    {
+      "spell": 706909,
+      "name": "Yawning Decay (706910 deals 50% of the 4th Horrorbolt initial hit)",
+      "kind": "metric_delta",
+      "variant": "bonus_damage_ratio",
+      "label_suffix": "bonus_damage_ratio",
+      "quote": "Every 3rd Horrorbolt cast causes your next successful Horrorbolt to deal an additional 50% of the initial damage to the target over $706910d.",
+      "trigger_spell": 502182,
+      "gate_spell": 706909,
+      "target": "dummy",
+      "cast_power": 2000,
+      "player_spell_power": 20000,
+      "setup_casts": [
+        800416,
+        800416,
+        800416
+      ],
+      "setup_wait_ms": 2000,
+      "phase_auras": [
+        [
+          712291,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          706910,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 706910,
+        "target": "dummy"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 502182,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.5,
+      "tolerance": 0.025,
+      "wait_ms": 6200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Yawning Decay 706909 tooltip ('deal an additional 50% of the initial damage to the target over $706910d'): AscensionCultistAbilities.cpp:257-261 calls Accumulate(player, target, 706910, damage / 2); 706910 is in CultistCopies (CANT_CRIT, IGNORE_CASTER_MODIFIERS, IGNORE_DAMAGE_TAKEN_MODIFIERS, AscensionInheritsResolvedAmount) and splits damage / 2 across 3 ticks of 1000 ms (AscensionCultistAuras.cpp:248-259). Three rank-1 Horrorbolt 800416 setup casts build 3 stacks of 712291 without contributing to 502182 damage, then rank-10 Horrorbolt 502182 lands as the 4th cast (+20000 SP, 823764 no partial resist, 16255 amount -100 no crit, precondition fixtures). ratio_to_metric (increments: true) divides 706910 total damage by 502182 hit damage: 0 before learn (control), 0.50 +- 0.025 (G-19 band [47.5%, 52.5%], excludes 0% and 100%) after learn. Reference search 2026-11-24: coa-history 706909/706910: 0 events; coabuildhub spells_master_index.json 706909 matches verbatim."
+    },
+    {
+      "spell": 706909,
+      "name": "Yawning Decay (706910 DoT still on dummy short of 3000 ms)",
+      "kind": "metric_delta",
+      "variant": "dot_held",
+      "label_suffix": "dot_held",
+      "quote": "Every 3rd Horrorbolt cast causes your next successful Horrorbolt to deal an additional 50% of the initial damage to the target over $706910d.",
+      "trigger_spell": 502182,
+      "gate_spell": 706909,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "setup_casts": [
+        800416,
+        800416,
+        800416
+      ],
+      "setup_wait_ms": 2000,
+      "phase_auras": [
+        [
+          712291,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          706910,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 706910
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 5450,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5250,
+          5750
+        ]
+      },
+      "apply_stamp": {
+        "aura": 706910,
+        "window": [
+          2710,
+          2990
+        ],
+        "applied": "after_trigger",
+        "anchor": 33143,
+        "source": "706910 DurationIndex 27 = 3000 ms (SpellDuration.dbc); the aura is still on the dummy; a bracket between 2710 and 2990 ms after the apply proves it outlives 2700 ms (excludes 10% short) and stays below 3000 ms"
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Yawning Decay 706910 DurationIndex 27 = 3000 ms ($706910d, SpellDuration.dbc). After 3 rank-1 Horrorbolt 800416 setup casts, rank-10 Horrorbolt 502182 (2500 ms cast + ~120 ms flight at 3 yd, Speed 25) applies 706910 at ~2620 ms after cast command. apply_stamp (applied: after_trigger, anchor: 33143 Blessed Resilience on dummy, precondition fixture) brackets the aura age from 706910's actual apply inside [2710, 2990] ms (> 0.9 * 3000 = 2700 ms): control (unlearned) reads 0, treatment reads 1. Paired with dot_gone. Reference search 2026-11-24: coa-history 706910: 0 events; coabuildhub spells_master_index.json 706909 matches verbatim ('over 3 seconds')."
+    },
+    {
+      "spell": 706909,
+      "name": "Yawning Decay (706910 DoT gone past 3000 ms)",
+      "kind": "metric_delta",
+      "variant": "dot_gone",
+      "label_suffix": "dot_gone",
+      "quote": "Every 3rd Horrorbolt cast causes your next successful Horrorbolt to deal an additional 50% of the initial damage to the target over $706910d.",
+      "trigger_spell": 502182,
+      "gate_spell": 706909,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "setup_casts": [
+        800416,
+        800416,
+        800416
+      ],
+      "setup_wait_ms": 2000,
+      "phase_auras": [
+        [
+          712291,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          706910,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 706910
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 5750,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5550,
+          6050
+        ]
+      },
+      "apply_stamp": {
+        "aura": 706910,
+        "window": [
+          3010,
+          3290
+        ],
+        "applied": "after_trigger",
+        "anchor": 33143,
+        "source": "706910 DurationIndex 27 = 3000 ms (SpellDuration.dbc); the aura is gone from the dummy; a bracket between 3010 and 3290 ms after the apply proves it ends by 3290 ms (excludes 10% long, 3300 ms) and lies past 3000 ms"
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Expiry bound for Yawning Decay 706910 DurationIndex 27 = 3000 ms ($706910d, SpellDuration.dbc). Identical to dot_held with wait_ms 5750: apply_stamp brackets the aura age from 706910's actual apply inside [3010, 3290] ms (< 1.1 * 3000 = 3300 ms) and reads 706910 absent (0). Paired with dot_held. Reference search 2026-11-24: coa-history 706910: 0 events; coabuildhub spells_master_index.json 706909 matches verbatim ('over 3 seconds')."
     }
   ],
   "player_observations": [],
