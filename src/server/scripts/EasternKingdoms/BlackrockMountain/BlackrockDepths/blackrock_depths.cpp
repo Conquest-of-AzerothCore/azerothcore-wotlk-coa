@@ -21,6 +21,7 @@
 #include "GameObjectAI.h"
 #include "GameObjectScript.h"
 #include "GameTime.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
@@ -140,12 +141,27 @@ class at_ring_of_law : public AreaTriggerScript
 public:
     at_ring_of_law() : AreaTriggerScript("at_ring_of_law") { }
 
+    static bool EncounterDone(Player* player, InstanceScript* instance, uint32 creditEntry)
+    {
+        Map* map = player->GetMap();
+        DungeonEncounterList const* encounters = sObjectMgr->GetDungeonEncounterList(map->GetId(), map->GetDifficulty());
+        if (!encounters)
+            return true;
+        for (DungeonEncounter const* encounter : *encounters)
+            if (encounter->creditType == ENCOUNTER_CREDIT_KILL_CREATURE && encounter->creditEntry == creditEntry)
+                return instance->GetCompletedEncounterMask() & (1u << encounter->dbcEntry->encounterIndex);
+        return true;
+    }
+
     bool OnTrigger(Player* player, AreaTrigger const* /*at*/) override
     {
         if (InstanceScript* instance = player->GetInstanceScript())
         {
             time_t now = GameTime::GetGameTime().count();
             if (instance->GetData(TYPE_RING_OF_LAW) == IN_PROGRESS || instance->GetData(TYPE_RING_OF_LAW) == DONE)
+                return false;
+
+            if (!EncounterDone(player, instance, NPC_HIGH_INTERROGATOR_GERSTAHN) || !EncounterDone(player, instance, NPC_LORD_ROCCOR))
                 return false;
 
             if (now - instance->GetData(DATA_TIME_RING_FAIL) < 2 * 60) // in case of wipe, so people can rez.
