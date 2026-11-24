@@ -3163,6 +3163,7 @@
       },
       {
         "claim": "you can channel while moving",
+        "state_promise": "casting",
         "labels": [
           "800206 behaviour_metric_delta moving_channel_state",
           "800206 behaviour_metric_delta moving_channel_whirlwind_moved",
@@ -3170,7 +3171,7 @@
         ]
       }
     ],
-    "reason": "fw-vb9. Dodge: three Speed Slash strikes with dodge 100% are all avoided during Carve (0 landed) while the same strikes land 3 of 3 during Sargeras Embrace 800355, a channel without the exemption (control). Moving: cast_remaining_ms 685 after two harness relocations; the uncast phase reads 0; the harness relocation cuts a channel that carries the move flag (Witch Hunter Witchbane moving_channel_witchbane_moved, same step). Parry: not proven, the striker fixture does not put the strike in the parry arc (two designs not yet tried; strikes at dx 0 landed with parry 100% and dx 10 gave 0 landed in the control too). fw-fa1 2026-11-24: parry fixed by Parry Dance 560651 as a precondition (Player::CanParry); moving read by the STATE metric casting with Whirlwind 13736 moved/still controls. The move half reads the STATE metric casting (1 for Carve after two relocations, 0 for Whirlwind 13736 moved, 1 not moved; ok in both runs of prove-a5b) but the audit classes it data: the promise words of casting (coverage.py) carry no 'channel', so the claim 'you can channel while moving' stays uncounted pending tool group B (add channel to the casting promise)."
+    "reason": "fw-vb9. Dodge: three Speed Slash strikes with dodge 100% are all avoided during Carve (0 landed) while the same strikes land 3 of 3 during Sargeras Embrace 800355, a channel without the exemption (control). Moving: cast_remaining_ms 685 after two harness relocations; the uncast phase reads 0; the harness relocation cuts a channel that carries the move flag (Witch Hunter Witchbane moving_channel_witchbane_moved, same step). Parry: not proven, the striker fixture does not put the strike in the parry arc (two designs not yet tried; strikes at dx 0 landed with parry 100% and dx 10 gave 0 landed in the control too). fw-fa1 2026-11-24: parry fixed by Parry Dance 560651 as a precondition (Player::CanParry); moving read by the STATE metric casting with Whirlwind 13736 moved/still controls. The move half reads the STATE metric casting (1 for Carve after two relocations, 0 for Whirlwind 13736 moved, 1 not moved; ok in both runs of prove-a5b) but the audit classes it data: the promise words of casting (coverage.py) carry no 'channel', so the claim 'you can channel while moving' stays uncounted pending tool group B (add channel to the casting promise). fw-bk4 2026-11-24 (mentor Felsworn D-109, ADR 1283): the claim 'you can channel while moving' carries state_promise casting, so its casting STATE reads are promised by the claim's own word 'channel'; no global promise word changed."
   },
   {
     "spell": 572617,

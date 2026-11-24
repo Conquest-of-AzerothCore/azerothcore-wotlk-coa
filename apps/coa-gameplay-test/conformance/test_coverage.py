@@ -432,6 +432,39 @@ class EvidenceStatusTest(unittest.TestCase):
             with self.subTest(case=case), self.assertRaises(EvidenceError):
                 clause_coverage(clauses, [], BUILD)
 
+    def channel_claims(self, words='you can channel while moving', **promise):
+        return {'spell': 1, 'clause': f'@ext:Can dodge while channeling and {words}.:ext@', 'kind': 'claim',
+                'claims': [{'claim': 'Can dodge while channeling', 'labels': ['1 behaviour_metric_delta dodge']},
+                           {'claim': words, 'labels': ['1 behaviour_metric_delta moving'], **promise}]}
+
+    def channel_verdicts(self):
+        return [judged('1 behaviour_metric_delta dodge', BEHAVIOUR_METRIC_DELTA, 'casting', contrast=LEARNED_CONTRAST),
+                judged('1 behaviour_metric_delta moving', BEHAVIOUR_METRIC_DELTA, 'casting',
+                       contrast=LEARNED_CONTRAST)]
+
+    def test_a_claim_scoped_channel_promise_lets_a_casting_state_prove_its_own_claim(self):
+        plain = clause_coverage([self.channel_claims()], self.channel_verdicts(), BUILD)
+        self.assertEqual(plain.claim_evidence, [[DATA, DATA]])
+        promised = clause_coverage([self.channel_claims(state_promise='casting')], self.channel_verdicts(), BUILD)
+        self.assertEqual(promised.claim_evidence, [[DATA, BEHAVIOUR]])
+
+    def test_a_claim_scoped_promise_reaches_only_the_casting_metric(self):
+        verdicts = [judged('1 behaviour_metric_delta dodge', BEHAVIOUR_METRIC_DELTA, 'dodge_chance',
+                           contrast=LEARNED_CONTRAST),
+                    judged('1 behaviour_metric_delta moving', BEHAVIOUR_METRIC_DELTA, 'moving',
+                           contrast=LEARNED_CONTRAST)]
+        promised = clause_coverage([self.channel_claims('you can channel while still', state_promise='casting')],
+                                   verdicts, BUILD)
+        self.assertEqual(promised.claim_evidence, [[BEHAVIOUR, DATA]])
+
+    def test_malformed_claim_scoped_promises_are_refused(self):
+        cases = {"do not say 'channel": self.channel_claims('you can cast while moving', state_promise='casting'),
+                 'only': self.channel_claims(state_promise='moving'),
+                 'belongs to a declared claim': {**self.channel_claims(), 'state_promise': 'casting'}}
+        for message, clause in cases.items():
+            with self.subTest(message=message), self.assertRaisesRegex(EvidenceError, message):
+                clause_coverage([clause], self.channel_verdicts(), BUILD)
+
     def test_a_displacement_from_a_point_is_a_state_that_a_range_or_leap_promises(self):
         verdicts = [judged('1 behaviour_metric_delta vault', BEHAVIOUR_METRIC_DELTA, 'point_distance_2d',
                            contrast=LEARNED_CONTRAST)]

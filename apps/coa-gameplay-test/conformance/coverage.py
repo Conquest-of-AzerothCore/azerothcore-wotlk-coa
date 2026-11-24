@@ -175,12 +175,15 @@ def resolved_labels(label: str, statuses: dict[str, str]) -> list[str]:
 
 DECLARED_CLAIMS = 'claims'
 CLAIM_WORDS = 'claim'
+CLAIM_STATE_PROMISE = 'state_promise'
+CLAIM_STATE_PROMISES = {'casting': r'channel\w*'}
 MIN_DECLARED_CLAIMS = 2
 
 
 def clause_claims(clause: dict) -> list[dict]:
     if DECLARED_CLAIMS in clause:
-        return [{CLAIM_WORDS: claim[CLAIM_WORDS], 'labels': list(claim.get('labels') or [])}
+        return [{CLAIM_WORDS: claim[CLAIM_WORDS], 'labels': list(claim.get('labels') or []),
+                 **({CLAIM_STATE_PROMISE: claim[CLAIM_STATE_PROMISE]} if CLAIM_STATE_PROMISE in claim else {})}
                 for claim in clause[DECLARED_CLAIMS]]
     words = clause.get(CLAIM_WORDS, clause.get('clause', ''))
     return [{CLAIM_WORDS: words, 'labels': list(clause.get('labels') or [])}]
@@ -243,6 +246,32 @@ def require_promise_sources(clauses: list[dict]):
 
 def promise_words(clause: dict) -> str:
     return clause.get(PROMISE_OF, '')
+
+
+def require_claim_state_promises(clauses: list[dict]):
+    for clause in clauses:
+        where = f"spell {clause.get('spell')}: {clause.get('clause')!r}"
+        if CLAIM_STATE_PROMISE in clause:
+            raise EvidenceError(f'{where} names a {CLAIM_STATE_PROMISE} on the clause; it belongs to a declared claim')
+        for claim in clause.get(DECLARED_CLAIMS) or []:
+            if CLAIM_STATE_PROMISE not in claim:
+                continue
+            metric = claim[CLAIM_STATE_PROMISE]
+            if metric not in CLAIM_STATE_PROMISES:
+                raise EvidenceError(f'{where} claim {claim.get(CLAIM_WORDS)!r} names the {CLAIM_STATE_PROMISE} '
+                                    f'{metric!r}; only {sorted(CLAIM_STATE_PROMISES)} take a claim-scoped promise')
+            if re.search(rf'\b(?:{CLAIM_STATE_PROMISES[metric]})\b', claim.get(CLAIM_WORDS, ''),
+                         re.IGNORECASE) is None:
+                raise EvidenceError(f'{where} claim {claim.get(CLAIM_WORDS)!r} names the {CLAIM_STATE_PROMISE} '
+                                    f'{metric!r} but its own words do not say {CLAIM_STATE_PROMISES[metric]!r}')
+
+
+def claim_state_promises(claim: dict) -> dict[str, str] | None:
+    metric = claim.get(CLAIM_STATE_PROMISE)
+    if metric is None:
+        return None
+    promises = state_promises()
+    return {**promises, metric: f'{promises[metric]}|{CLAIM_STATE_PROMISES[metric]}'}
 
 
 def subject_claims(clause: dict, clauses: list[dict]) -> list[dict]:
@@ -699,7 +728,7 @@ NO_STACK_WORDS = r'do(?:es)? not stack'
 CONDITION_WORDS = r'while|whenever|as long as'
 
 
-def promised_state(verdict: Verdict, clause: str, promise: str = '') -> bool:
+def promised_state(verdict: Verdict, clause: str, promise: str = '', promises: dict[str, str] | None = None) -> bool:
     detail = verdict.detail or {}
     if verdict.check == BEHAVIOUR_GROUP_STACK_CAP:
         return (detail.get(STACKED_SAME) is True
@@ -711,7 +740,7 @@ def promised_state(verdict: Verdict, clause: str, promise: str = '') -> bool:
         return True
     if verdict.check == BEHAVIOUR_METRIC_DELTA and detail.get(CONTRAST) not in (LEARNED_CONTRAST, OWN_CAST_CONTRAST):
         return False
-    words = state_promises().get(detail[PASSIVE_METRIC])
+    words = (state_promises() if promises is None else promises).get(detail[PASSIVE_METRIC])
     return words is not None and re.search(rf'\b(?:{words})\b', f'{clause} {promise}', re.IGNORECASE) is not None
 
 
@@ -770,7 +799,7 @@ def judged_sentence(clause: str, sentence: str) -> str:
 def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict],
                      seen: frozenset[str] = frozenset(), promoted: frozenset[str] = frozenset(),
                      row: str = '', promise: str = '', partners: tuple[Verdict, ...] = (),
-                     sentence: str | None = None) -> str:
+                     sentence: str | None = None, promises: dict[str, str] | None = None) -> str:
     if verdict.status not in CONFORMANT:
         return UNPROVEN
     kind = evidence_classes()[verdict.check]
@@ -791,13 +820,13 @@ def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict]
     judged = judged_sentence(clause, row if sentence is None else sentence)
     gate = use_time_partners_hold if opted_use_time(verdict) else partners_hold
     if required is not None and detail.get(CONTRAST) == required and gate(verdict, judged, partners):
-        words = state_promises().get(detail[PASSIVE_METRIC])
+        words = (state_promises() if promises is None else promises).get(detail[PASSIVE_METRIC])
         if words is None or re.search(rf'\b(?:{words})\b', f'{clause} {row} {promise}', re.IGNORECASE) is not None:
             return BEHAVIOUR
     words = EVENT_PROMISES.get((verdict.detail or {}).get(PASSIVE_METRIC))
     if words is not None and re.search(rf'\b(?:{words})\b', clause, re.IGNORECASE) is None:
         return DATA
-    if observed == EVENT or (observed == STATE and promised_state(verdict, clause, promise)):
+    if observed == EVENT or (observed == STATE and promised_state(verdict, clause, promise, promises)):
         return BEHAVIOUR
     return DATA
 
@@ -841,7 +870,7 @@ def claim_evidence(claim: dict, by_label: dict[str, Verdict], statuses: dict[str
         return UNPROVEN
     partners = tuple(matched) if row_labels is None else row_verdicts(row_labels, by_label, statuses)
     found = {verdict_evidence(verdict, claim[CLAIM_WORDS], by_label, promoted=promoted, row=row, promise=promise,
-                              partners=partners, sentence=sentence)
+                              partners=partners, sentence=sentence, promises=claim_state_promises(claim))
              for verdict in matched}
     return BEHAVIOUR if BEHAVIOUR in found else DATA
 
@@ -893,6 +922,7 @@ def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | N
     require_no_routes(clauses)
     require_effectiveness_subjects(clauses)
     require_promise_sources(clauses)
+    require_claim_state_promises(clauses)
     require_text_sources(clauses, frozenset(streamed_texts()) if streamed is None else streamed)
     by_label = {verdict.label: verdict for verdict in verdicts}
     statuses = {verdict.label: verdict.status for verdict in verdicts}
