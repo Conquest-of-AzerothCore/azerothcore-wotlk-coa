@@ -476,11 +476,7 @@
       },
       {
         "claim": "have a $s1% reduced cast time",
-        "labels": [
-          "300490 behaviour_metric_delta cast_landed",
-          "300490 behaviour_metric_delta cast_early",
-          "300490 behaviour_metric_delta cast_control"
-        ]
+        "labels": []
       },
       {
         "claim": "for $d",
@@ -488,7 +484,8 @@
           "300490 behaviour_metric_delta felforged_duration"
         ]
       }
-    ]
+    ],
+    "reason": "HELD 'have a $s1% reduced cast time' (review fw-rvb7b I-3a, mentor D-67): the cast-time reads put 806104 by set_aura; no attempt record of a real-feed cast-time route and no arm reading 806104's amount after the real feed."
   },
   {
     "spell": 301287,
