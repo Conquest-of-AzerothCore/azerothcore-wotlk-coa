@@ -294,19 +294,11 @@
       {
         "claim": "$804336s2% off-hand Weapon Damage (40%)",
         "labels": [
-          "300476 effect_value 804336e1 #0"
+          "300476 effect_value 804336e1 #0",
+          "300476 script_hit 804336 offhand_strike"
         ]
       }
     ],
-    "tool_gap": {
-      "reason": "The 40% of off-hand Weapon Damage of the strike 804336 (Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG and Effect[1] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE 40) is a script-cast hit read against its tooltip value: script_hit weapon_only models a hit spell whose only damage effect is one weapon percent effect, and 804336 has a normalized weapon effect as well. The nearest kind is script_hit with weapon_only and caster_avoidance.",
-      "attempts": [
-        {
-          "agent": "fw-b1d",
-          "report": ".agents/plans/fw-b1d/report.md"
-        }
-      ]
-    },
     "kind": "claim",
     "reason": " Superseded detail (review fw-rbab2 I-2): the duration claim now rests on the stamped expiry reads of ADR 1273 (held/gone measured from the last dodge stamp), counted pair fw-bab2 prove1 on build 1544a8df; the reads 9000/11000 after the relocation and build 2d78de5092 cited above are no longer the proof."
   },
@@ -3374,7 +3366,8 @@
     "claims": [
       {
         "claim": "and it now affects all allies",
-        "labels": []
+        "labels": [],
+        "evidence": "behaviour"
       },
       {
         "claim": "its radius is increased by $s2 yds.",
@@ -3385,15 +3378,7 @@
       }
     ],
     "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
-    "tool_gap": {
-      "reason": "'and it now affects all allies' needs more allies than Infernal Whipcrack 805243's 8-target cap (MaxAffectedTargets 8, $i). With 800220 the class script adds every friendly unit within the radius (AscensionFelswornAbilities.cpp:149-154), but 805243 carries SPELL_ATTR3_ONLY_ON_PLAYER (AttributesEx3 256, Spell.dbc), so friendly creatures are refused targets: a friendly-creature arm (fw-l2, ten creatures of entry 631, faction 35) read the aura on none of them in both runs of prove3 (20261123-230759 / -230830), an incorrect fixture and not a defect. The arm needs at least nine ally players beside the caster (scenario schema 2, run.py MAX_PLAYERS 25), while metric_delta ally_arm offers 1 to 7 allies on schema 1 (ally_arm.py ALLY_IDS); the read would sum the aura over the caster and the allies: 8 of 10 without 800220 (the stock cap) and 10 with it. That ally_arm extension is a tool change not built in this round.",
-      "attempts": [
-        {
-          "agent": "fw-l2",
-          "report": ".agents/plans/fw-l2/report.md"
-        }
-      ]
-    }
+    "reason": " whipcrack_all HELD (review fw-rbk3 I-1): with 800220 the +15 SPELLMOD_RADIUS also widens Effect[2] to 30 yd, so a script-less server reads 10 as the union of two cap-8 picks (about 0.39 per pair); needs a redesign (allies beyond the widened Effect[2] edge after the learn, or enough after-casts) before it counts."
   },
   {
     "spell": 800225,
@@ -3972,23 +3957,11 @@
     "spell": 803645,
     "clause": "Increases your spell penetration by ${-($m1+0)}, scaling with your level.",
     "labels": [
-      "803645 effect_value e0 #0"
+      "803645 behaviour_metric_delta spell_pen",
+      "803645 behaviour_metric_delta spell_pen_level40"
     ],
     "kind": "claim",
-    "reason": "Tool gap, uncounted (see tool_gap); the data label is the only label.",
-    "tool_gap": {
-      "reason": "Tool gap, uncounted (fw-vb4b, review I-3; guide G-25: a tool gap is not a final status): A route needs a ratio-or-equality judge between two arms (a Shadow-resistance fixture aura on the dummy, lowered in the control phase against the learned phase, with the engine formula of the resist chance). Two designs were written, none was run, so G-24 is not met: Design 1: metric_delta spell_resist_chance (Unit::GetEffectiveResistChance, the engine use-time function that adds the aura and clamps the victim resistance at 0) before and after a real learn: it needs a dummy with a positive Shadow resistance and an expected chance, which is an engine formula of that resistance, not a tooltip or DBC value; with the stock dummy at 0 resistance the read cannot move. Design 2: an equality of two reads, a MOD_RESISTANCE fixture aura on the dummy lowered by 60 in the control phase against the learned phase (before_auras, after_auras and phase_aura_amounts allow it): the expected gain is 0, which cannot be told from its control (Vampiric Tonic 802276, status 3 by ruling D-360) and no entry states a non-zero control gain without the engine formula. The nearest option and the extension: metric_delta with phase_aura_amounts; a ratio-or-equality judge between two arms is the extension. The scaling \"with your level\" is the data label. Reference search 2026-11-24: nothing found beyond the tooltip and the DBC (coa-history spell 803645: a passive leaves no event).",
-      "attempts": [
-        {
-          "agent": "fw-vb4",
-          "report": ".agents/plans/fw-vb4/report.md"
-        },
-        {
-          "agent": "fw-vb4b",
-          "report": ".agents/plans/fw-vb4b/report.md"
-        }
-      ]
-    }
+    "reason": "The penetration is read by the shifted-control judge (ADR 1281, Felsworn D-108 (2026-11-24)) at caster levels 60 and 40: the resist chance with 803645 learned equals the unlearned chance at a resistance lowered by -(803645 Effect[0]) at that level (60, 40). spell_resist_chance is a readback, behaviour in the learned contrast with the penetration words (Felsworn D-110 (2026-11-24)): it proves the caster's penetration as the engine applies it to the resist chance (Unit::GetEffectiveResistChance), not observed resists. The effect_value label stays the data label. Data label '803645 effect_value e0 #0' dropped (mentor D-112): its audit read is ambiguous_tooltip because the tooltip value has two readings at level 60: the client shows 60 ($m1 = -21 + (60-20) x (-1) + 1 = -60, shown negated; a base-only reading would show 20), and the server's CalcValue gives -60 on MOD_TARGET_RESISTANCE, i.e. 60 penetration (sign only differs). The shifted-control entries settle the value at level 60: the learned arm equals the control shifted by 60 in both runs (excludes 20 and 0); review fw-rbk3."
   },
   {
     "spell": 803645,

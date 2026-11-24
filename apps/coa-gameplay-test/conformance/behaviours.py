@@ -8286,6 +8286,7 @@ SCRIPT_HIT_STACKS_WITHIN_MS = 9000
 SCRIPT_HIT_POSITION_TOLERANCE_YD = 0.5
 SCRIPT_HIT_POSITION_WITHIN_MS = 2000
 SCRIPT_HIT_RECEIVERS = (TARGET, STRIKER, CASTER)
+SCRIPT_HIT_STATED_HANDS = frozenset({'off'})
 
 
 @dataclass(frozen=True)
@@ -8333,6 +8334,7 @@ class ScriptHitSpec:
     stacks_read_before_removal: tuple[int, int] | None = None
     trial_position: tuple[int, float, float, float, float] | None = None
     level_points: bool = False
+    hand: str | None = None
 
 
 def script_hit_label(spec: ScriptHitSpec) -> str:
@@ -8371,6 +8373,9 @@ def script_hit_validate(spec: ScriptHitSpec):
         raise ValueError(f'{spec.spell} script_hit effective_school is a part of normalized_value')
     if spec.normalized_percent and not spec.weapon_only:
         raise ValueError(f'{spec.spell} script_hit normalized_percent is a part of weapon_only')
+    if spec.hand is not None and (spec.hand not in SCRIPT_HIT_STATED_HANDS or not spec.normalized_percent):
+        raise ValueError(f'{spec.spell} script_hit hand is one of {sorted(SCRIPT_HIT_STATED_HANDS)}, the hand the '
+                         f'tooltip states, for a normalized_percent hit only, not {spec.hand!r}')
     if spec.strikes_per_cast is not None and (type(spec.strikes_per_cast) is not int or spec.strikes_per_cast < 1
                                              or not spec.caster_entry or not spec.casts or spec.strike_spell):
         raise ValueError(f'{spec.spell} script_hit counts strikes per cast as a positive integer, for a minion '
@@ -8521,7 +8526,8 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
                                            (*spec.model_auras, *spec.minion_model_auras), spec.unresisted,
                                            spec.hit_effect, spec.weapon_only, spec.normalized_value,
                                            spec.effective_school, spec.normalized_percent, spec.value_rolls,
-                                           spec.level_points, () if spec.caster_entry else spec.model_auras)
+                                           spec.level_points, () if spec.caster_entry else spec.model_auras,
+                                           hand=spec.hand)
     except Unmodelled as error:
         raise NotModelled(f'{spec.spell} script_hit {spec.hit_spell}: {error.reason}') from error
     label = script_hit_label(spec)
@@ -8671,6 +8677,8 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
         record['effective_school'] = True
     if spec.normalized_percent:
         record['normalized_percent'] = True
+    if spec.hand is not None:
+        record['hand'] = spec.hand
     if spec.value_rolls:
         record['value_rolls'] = True
     if spec.level_points:
@@ -8716,7 +8724,7 @@ def script_hit_spec(entry: dict) -> ScriptHitSpec:
                          None if 'stacks_read_before_removal' not in entry
                          else tuple(int(value) for value in entry['stacks_read_before_removal']),
                          script_hit_trial_position(entry),
-                         entry.get('level_points', False) is True)
+                         entry.get('level_points', False) is True, entry.get('hand'))
 
 
 def script_hit_trial_position(entry: dict) -> tuple[int, float, float, float, float] | None:

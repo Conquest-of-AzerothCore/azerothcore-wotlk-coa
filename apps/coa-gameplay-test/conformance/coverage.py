@@ -535,6 +535,7 @@ CONTRAST_PROOF = {
     'spell_taken_crit_chance': LEARNED_CONTRAST,
     'ranged_taken_crit_chance': LEARNED_CONTRAST,
     'critical_block_chance': LEARNED_CONTRAST,
+    'spell_resist_chance': LEARNED_CONTRAST,
 }
 PARTNERED_CONTRASTS = frozenset({'spell_done_crit_chance_scripted', 'critical_block_chance'})
 PLAIN_CRIT_NAME = r"[A-Z][\w'’]*(?: [A-Z][\w'’]*)*"

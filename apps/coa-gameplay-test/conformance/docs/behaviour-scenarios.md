@@ -1640,6 +1640,14 @@ truncated per bound, times the tooltip percent and truncated, then the modifiers
 hand) is unmodelled. Vengeful Intent 705534's strike back 520265, 75% ($520265s1). On the default one-hander (item 2027) the
 normalized speed 2.4 and the actual speed 2.3 are close, so a pair does not separate the two speed terms (review14 M-1);
 the 75% is what the pair excludes 70% and 80% against.
+The same option (ADR 1281) also models the engine's other order, one SPELL_EFFECT_NORMALIZED_WEAPON_DMG with a flat
+part (one die side, no points per level) followed by one SPELL_EFFECT_WEAPON_PERCENT_DAMAGE: the flat part times the
+hand's factor, truncated, is added to the roll before the percent applies (`SpellEffects.cpp:4732-4747`), so
+int((roll + flat) x percent / 100). `hand: "off"` (only with `normalized_percent`) states the hand the tooltip names,
+in place of the DBC's hand, for that order only: the off-hand weapon of the entry's set, with the off-hand factor 0.5
+(`UNIT_MOD_DAMAGE_OFFHAND` `TOTAL_PCT`, `Unit.cpp:519`) on the roll and on the flat part. The expectation follows the
+tooltip; a server that strikes with the other hand reads about twice the hit and alerts. Without `hand` the DBC hand
+applies (`profile.attack_hand`). Betrayer 300476's strike back 804336, "$804336s2% off-hand Weapon Damage".
 
 ### Taken-outcome scenarios (`behaviour_taken_outcome`, `kind: "taken_outcome"`)
 
@@ -2331,6 +2339,8 @@ Options with a module:
   after every feed cast, a trial without cap + 1 applications inside the duration void (ADR 1249, provisional)
 - [`after_gate_cast`](metric_delta_options/after_gate_cast.md): a real cast of the gate at the caster at the start of
   the after phase instead of an aura fixture, its aura read after it (ADR 1251, provisional)
+- [`shifted_control`](metric_delta_options/shifted_control.md): a resist chance with the gate learned judged equal to
+  the control at a resistance lowered by the gate's DBC points (ADR 1281, provisional)
 - [`corpse`](metric_delta_options/corpse.md): a creature corpse a real setup cast kills in the treatment phase (ADR
   0493)
 - [`player_spell_power`](metric_delta_options/player_spell_power.md): the caster's spell-power fixture (ADR 0364)

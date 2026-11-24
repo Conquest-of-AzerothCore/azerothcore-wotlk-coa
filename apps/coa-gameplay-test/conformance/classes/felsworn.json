@@ -26445,6 +26445,339 @@
       "observe_source": "705135 Effect[0] aura 42 PROC_TRIGGER_SPELL of 680318; 680318 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -2001 + 1 = -2000 ms ($/1000;680318s1 = 2 sec), MiscValue 800204 = Felhoof Charge (CategoryRecoveryTime 20000 ms, range 0-20 yd) (server DBC set). Felhoof Charge is cast first (priming, it carries the caster to the dummy), then Chaos Rush 500028 is cast for real at the dummy 500 ms later; its Chaos Rush Jump 802028 (CHARGE_DEST, caster's front, EffectRadiusIndex 13) carries the caster about 10 yd forward past the dummy. Right before the judged attempt the caster is moved 20 yd back along x (relocate_before_attempt, ADR 1278, one harness relocate step), facing unchanged, so the dummy is in front and about 10 to 15 yd away, inside the 20 yd range. One scenario per arm (only_arm, Sun Cleric 805581 precedent). The attempt 17900 ms after the priming cast (2000 - 100 ms before the reduced end 18000) is refused and 18100 ms after it goes through; without the talent the 18100 ms attempt is refused. A cut 10% off (1800 or 2200 ms) moves the end by 200 ms, outside the 100 ms margin. Reference search 2026-11-24 (fw-vb6, fw-vb4b): coa-history spell 705135: 0 events in 186 logs (a passive leaves no event); bindmysoul snapshot: tooltip words only; nothing else found.",
       "variant": "cd_beyond",
       "only_arm": "beyond"
+    },
+    {
+      "spell": 800220,
+      "name": "Taskmaster's Army (Infernal Whipcrack enrages all ten raid players, 8 or 9 without it)",
+      "kind": "metric_delta",
+      "variant": "whipcrack_all",
+      "label_suffix": "whipcrack_all",
+      "quote": "and it now affects all allies",
+      "trigger_spell": 805243,
+      "gate_spell": 800220,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 805243
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "cast_power": 100,
+      "wait_ms": 500,
+      "expire_ms": 10600,
+      "ally_arm": {
+        "allies": 9,
+        "arms": [
+          {
+            "actors": [
+              "caster",
+              "ally",
+              "ally2",
+              "ally3",
+              "ally4",
+              "ally5",
+              "ally6",
+              "ally7",
+              "ally8",
+              "ally9"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 805243
+            },
+            "before_expected": 8.5,
+            "expected": 10,
+            "tolerance": 0.5,
+            "source": "the number of the ten raid players holding 805243 after a real cast. Without 800220 the cap $i = MaxAffectedTargets 8 (Spell.dbc) keeps 8 random units of the ten for Effects[0-1] (RandomResize, Spell.cpp:1414-1420); Effect[2] has radius index 18 (15 yd) against 9 (20 yd), so the engine selects it apart (Spell.cpp:1003-1004 groups effects only at an equal radius) and, with every ally beyond its edge, it reaches the caster alone: the count is 8 when the caster is among the 8 and 9 when it is not, both the cap of 8; 8.5 +- 0.5 excludes 10 (no cap) and 7 (a cap of 7). With 800220 every friendly unit within the radius is added: 10, and +- 0.5 on an integer count is exactly 10",
+            "reach_source": "805243 TargetB 56 TARGET_UNIT_CASTER_AREA_RAID: the TARGET_CHECK_RAID filter keeps every unit IsInRaidWith the caster (Spell.cpp:9385-9395), raid subgroup 2 included; with 800220 known AscensionFelswornAbilities.cpp:162-167 adds every friendly unit within the radius"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 20.0,
+            "expected": 20.0,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond the Effect[2] edge 15 + 2.66 (party area leeway while moving, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9463-9464) = 19.16 yd and inside the Effects[0-1] edge 20 + 1.5 = 21.5 yd without the leeway"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 20.0,
+            "expected": 20.0,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally2 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond the Effect[2] edge 15 + 2.66 (party area leeway while moving, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9463-9464) = 19.16 yd and inside the Effects[0-1] edge 20 + 1.5 = 21.5 yd without the leeway"
+          },
+          {
+            "actors": [
+              "ally3"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 20.0,
+            "expected": 20.0,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally3 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond the Effect[2] edge 15 + 2.66 (party area leeway while moving, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9463-9464) = 19.16 yd and inside the Effects[0-1] edge 20 + 1.5 = 21.5 yd without the leeway"
+          },
+          {
+            "actors": [
+              "ally4"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 20.0,
+            "expected": 20.0,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally4 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond the Effect[2] edge 15 + 2.66 (party area leeway while moving, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9463-9464) = 19.16 yd and inside the Effects[0-1] edge 20 + 1.5 = 21.5 yd without the leeway"
+          },
+          {
+            "actors": [
+              "ally5"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 20.0,
+            "expected": 20.0,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally5 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond the Effect[2] edge 15 + 2.66 (party area leeway while moving, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9463-9464) = 19.16 yd and inside the Effects[0-1] edge 20 + 1.5 = 21.5 yd without the leeway",
+            "reach_source": "805243 TargetB 56 TARGET_UNIT_CASTER_AREA_RAID: the TARGET_CHECK_RAID filter keeps every unit IsInRaidWith the caster (Spell.cpp:9385-9395), raid subgroup 2 included; with 800220 known AscensionFelswornAbilities.cpp:162-167 adds every friendly unit within the radius"
+          },
+          {
+            "actors": [
+              "ally6"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 20.0,
+            "expected": 20.0,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally6 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond the Effect[2] edge 15 + 2.66 (party area leeway while moving, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9463-9464) = 19.16 yd and inside the Effects[0-1] edge 20 + 1.5 = 21.5 yd without the leeway",
+            "reach_source": "805243 TargetB 56 TARGET_UNIT_CASTER_AREA_RAID: the TARGET_CHECK_RAID filter keeps every unit IsInRaidWith the caster (Spell.cpp:9385-9395), raid subgroup 2 included; with 800220 known AscensionFelswornAbilities.cpp:162-167 adds every friendly unit within the radius"
+          },
+          {
+            "actors": [
+              "ally7"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 20.0,
+            "expected": 20.0,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally7 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond the Effect[2] edge 15 + 2.66 (party area leeway while moving, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9463-9464) = 19.16 yd and inside the Effects[0-1] edge 20 + 1.5 = 21.5 yd without the leeway",
+            "reach_source": "805243 TargetB 56 TARGET_UNIT_CASTER_AREA_RAID: the TARGET_CHECK_RAID filter keeps every unit IsInRaidWith the caster (Spell.cpp:9385-9395), raid subgroup 2 included; with 800220 known AscensionFelswornAbilities.cpp:162-167 adds every friendly unit within the radius"
+          },
+          {
+            "actors": [
+              "ally8"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 20.0,
+            "expected": 20.0,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally8 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond the Effect[2] edge 15 + 2.66 (party area leeway while moving, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9463-9464) = 19.16 yd and inside the Effects[0-1] edge 20 + 1.5 = 21.5 yd without the leeway",
+            "reach_source": "805243 TargetB 56 TARGET_UNIT_CASTER_AREA_RAID: the TARGET_CHECK_RAID filter keeps every unit IsInRaidWith the caster (Spell.cpp:9385-9395), raid subgroup 2 included; with 800220 known AscensionFelswornAbilities.cpp:162-167 adds every friendly unit within the radius"
+          },
+          {
+            "actors": [
+              "ally9"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 20.0,
+            "expected": 20.0,
+            "tolerance": 0.25,
+            "source": "ally_offsets moves ally9 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond the Effect[2] edge 15 + 2.66 (party area leeway while moving, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9463-9464) = 19.16 yd and inside the Effects[0-1] edge 20 + 1.5 = 21.5 yd without the leeway",
+            "reach_source": "805243 TargetB 56 TARGET_UNIT_CASTER_AREA_RAID: the TARGET_CHECK_RAID filter keeps every unit IsInRaidWith the caster (Spell.cpp:9385-9395), raid subgroup 2 included; with 800220 known AscensionFelswornAbilities.cpp:162-167 adds every friendly unit within the radius"
+          },
+          {
+            "actors": [
+              "ally",
+              "ally2",
+              "ally3",
+              "ally4",
+              "ally5",
+              "ally6",
+              "ally7",
+              "ally8",
+              "ally9"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 13.5,
+            "expected": 13.5,
+            "tolerance": 0.09,
+            "precondition": true,
+            "source": "the nine allies' combat reach, the object size term of both edges (GetObjectSize = UNIT_FIELD_COMBATREACH, Object.cpp:2898-2901): 1.5 each for the class file player (Player.h:1110); a sum off 13.5 voids the trial (mentor D-169), it is not judged",
+            "reach_source": "805243 TargetB 56 TARGET_UNIT_CASTER_AREA_RAID: the TARGET_CHECK_RAID filter keeps every unit IsInRaidWith the caster (Spell.cpp:9385-9395), raid subgroup 2 included; with 800220 known AscensionFelswornAbilities.cpp:162-167 adds every friendly unit within the radius"
+          }
+        ]
+      },
+      "ally_offsets": {
+        "ally": 20.0,
+        "ally2": 20.0,
+        "ally3": 20.0,
+        "ally4": 20.0,
+        "ally5": 20.0,
+        "ally6": 20.0,
+        "ally7": 20.0,
+        "ally8": 20.0,
+        "ally9": 20.0
+      },
+      "observe_source": "805243 Infernal Whipcrack (server DBC): 'Enrage $?s800220[all][up to $i] allies within $a yds', MaxAffectedTargets 8 ($i), Effects[0-1] TargetB 56 TARGET_UNIT_CASTER_AREA_RAID radius index 9 (20 yd), Effect[2] the same target with radius index 18 (15 yd, SpellRadius.dbc), AttributesEx3 SPELL_ATTR3_ONLY_ON_PLAYER, so the allies are players: the caster and nine grouped players (a raid of ten, scenario schema 2), every ally 20.0 yd from the caster. Infernal Whipcrack is cast for real in both phases (cooldown reset before each cast; 10600 ms between phases let the 10000 ms aura expire); 800220 is learned between them. The radius-index split: the engine groups effects into one target selection only when their radius is equal (Spell.cpp:1003-1004), so Effect[2] is selected apart with its own cap; the allies stand beyond its 15 yd edge, so it reaches the caster alone, and the caster holds the aura in both phases (main reading 1 and 1). The count over the ten players is 8 or 9 without 800220 (8 when the caster is one of the 8 Effects[0-1] targets, 9 when Effect[2] adds it outside them): both mean the cap of 8. With 800220 AscensionFelswornAbilities.cpp:162-167 adds every friendly unit within Effects[0]'s radius (35 yd with 800220's +15) with all three effects: 10. Reference search 2026-11-24: coa-history spell 805243: 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 300476,
+      "name": "Betrayer (off-hand Weapon Damage of the strike back)",
+      "kind": "script_hit",
+      "variant": "offhand_strike",
+      "label_suffix": "offhand_strike",
+      "quote": "Dodging attacks causes $804336s2% off-hand Weapon Damage to attackers",
+      "hit_spell": 804336,
+      "weapon_only": true,
+      "normalized_percent": true,
+      "hand": "off",
+      "casts": [
+        [
+          804336,
+          "dummy"
+        ]
+      ],
+      "control_casts": [],
+      "trials": 40,
+      "minimum_hits": 15,
+      "settle_ms": 1000,
+      "observe_source": "Betrayer strike 804336 (server DBC set): Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG (121), EffectBasePoints 0 + 1 die side = 1 flat, no points per level; Effect[1] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE (31), EffectBasePoints 39 + 1 = 40% ($804336s2); DmgClass 2 melee, Physical (SchoolMask 1), no school damage effect, AttributesEx3 0. Engine sequence (SpellEffects.cpp:4665-4747): the flat part times the hand's TOTAL_PCT is added to the normalized weapon roll at effect 0, then the 40% is applied at effect 1 (ApplyPct, truncated), then the melee bonuses and armor. The tooltip states the hand: 'off-hand Weapon Damage', so the expectation reads the off-hand weapon of the entry's set with the off-hand factor 0.5 (UNIT_MOD_DAMAGE_OFFHAND TOTAL_PCT, Unit.cpp:519) on the roll and on the flat part (int(1 x 0.5) = 0): 40% x 0.5 x (roll + AP/14 x the normalized speed). Code reading only: the spell has no SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON, so Spell.cpp:597-603 sets BASE_ATTACK, and AscensionFelswornEvents.cpp:227 casts it with no hand set; a main-hand strike would read about twice the expectation and alert. The strike is cast directly at the dummy (control_casts []: the control arm casts nothing and must count 0 hits), the hit_spell precedent of Vengeful Intent 705534. spell_weapon_sets maps 804336 to the Tyrant set of 300476 (item 2529 in both hands), so the judge arms the same set as the generated scenario: the judge arms the hit spell's set, the scenario the entry spell's. Reference search 2026-11-24: coa-history spell 804336: 3 damage events in 2 logs (14 to 74), too few and with unknown gear to decide a value."
+    },
+    {
+      "spell": 803645,
+      "name": "Unphased (spell penetration, level 60)",
+      "kind": "metric_delta",
+      "variant": "spell_pen",
+      "label_suffix": "spell_pen",
+      "quote": "Increases your spell penetration by ${-($m1+0)}, scaling with your level.",
+      "trigger_spell": 804247,
+      "gate_spell": 803645,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "metric": "resistance",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 150,
+      "expected": 150,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          976,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          976,
+          0,
+          150
+        ]
+      ],
+      "evidence_metric": "spell_resist_chance",
+      "shifted_control": {
+        "aura": [
+          976,
+          0
+        ],
+        "amount": 150,
+        "shift": 60,
+        "shift_spell": [
+          803645,
+          0
+        ],
+        "school": 5,
+        "tolerance_share": 0.05,
+        "discrimination_share": 0.5,
+        "source": "the shift is -(803645 Effect[0]) at the caster level; equality within 5% of the control span separates a penetration 10% off the shift (54 or 66 at level 60) under a resist chance linear in resistance, and at least half the span below the control excludes no penetration and any penetration of half the shift or less"
+      },
+      "observe_source": "Unphased 803645 Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, MiscValue 124 (Fire, Nature, Frost, Shadow, Arcane), EffectBasePoints -21, EffectDieSides 1, EffectRealPointsPerLevel -1.0, BaseLevel 20, SpellLevel 20, MaxLevel 0 (server DBC). SpellEffectInfo::CalcValue (SpellInfo.cpp:479-506): -21 + (L - 20) x -1 + 1 = -L, so -60 at level 60 and -40 at level 40; the tool derives it from these fields and refuses a stated shift that differs. Unit::GetEffectiveResistChance (Unit.cpp:2589-2603) adds the caster's MOD_TARGET_RESISTANCE total to the victim's resistance before the floor at 0, so a learned 803645 must read the resist chance of a resistance lowered by L. Fixture: Shadow Protection 976 (Effect[0] aura 143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE, MiscValue 32 Shadow) on the dummy at 150 by set_aura amount, read in every arm (150, 150 - L, 150). Bless 804247 is the harmless self cast in both phases. Evidence: spell_resist_chance is a readback (the in-process GetEffectiveResistChance probe, no hit, CoAGameplayTest.cpp:5176-5181), behaviour only in the learned contrast with the penetration words (Felsworn D-110 (2026-11-24)): it proves the caster's penetration as the engine applies it to the resist chance, not observed resists. Reference search 2026-11-24: coa-history spell 803645: a passive leaves no event; nothing found beyond the tooltip and the DBC."
+    },
+    {
+      "spell": 803645,
+      "name": "Unphased (spell penetration, level 40)",
+      "kind": "metric_delta",
+      "variant": "spell_pen_level40",
+      "label_suffix": "spell_pen_level40",
+      "quote": "Increases your spell penetration by ${-($m1+0)}, scaling with your level.",
+      "trigger_spell": 804247,
+      "gate_spell": 803645,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "metric": "resistance",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 150,
+      "expected": 150,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          976,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          976,
+          0,
+          150
+        ]
+      ],
+      "evidence_metric": "spell_resist_chance",
+      "shifted_control": {
+        "aura": [
+          976,
+          0
+        ],
+        "amount": 150,
+        "shift": 40,
+        "shift_spell": [
+          803645,
+          0
+        ],
+        "school": 5,
+        "tolerance_share": 0.05,
+        "discrimination_share": 0.5,
+        "source": "the shift is -(803645 Effect[0]) at the caster level; equality within 5% of the control span separates a penetration 10% off the shift (54 or 66 at level 60) under a resist chance linear in resistance, and at least half the span below the control excludes no penetration and any penetration of half the shift or less",
+        "caster_level": 40
+      },
+      "observe_source": "Unphased 803645 Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, MiscValue 124 (Fire, Nature, Frost, Shadow, Arcane), EffectBasePoints -21, EffectDieSides 1, EffectRealPointsPerLevel -1.0, BaseLevel 20, SpellLevel 20, MaxLevel 0 (server DBC). SpellEffectInfo::CalcValue (SpellInfo.cpp:479-506): -21 + (L - 20) x -1 + 1 = -L, so -60 at level 60 and -40 at level 40; the tool derives it from these fields and refuses a stated shift that differs. Unit::GetEffectiveResistChance (Unit.cpp:2589-2603) adds the caster's MOD_TARGET_RESISTANCE total to the victim's resistance before the floor at 0, so a learned 803645 must read the resist chance of a resistance lowered by L. Fixture: Shadow Protection 976 (Effect[0] aura 143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE, MiscValue 32 Shadow) on the dummy at 150 by set_aura amount, read in every arm (150, 150 - L, 150). Bless 804247 is the harmless self cast in both phases. Evidence: spell_resist_chance is a readback (the in-process GetEffectiveResistChance probe, no hit, CoAGameplayTest.cpp:5176-5181), behaviour only in the learned contrast with the penetration words (Felsworn D-110 (2026-11-24)): it proves the caster's penetration as the engine applies it to the resist chance, not observed resists. Reference search 2026-11-24: coa-history spell 803645: a passive leaves no event; nothing found beyond the tooltip and the DBC. Level arm: the caster is set to level 40 before the control, so the shift is 40; with the level 60 entry it shows the penetration follows the level."
     }
   ],
   "player_observations": [],
@@ -26711,6 +27044,7 @@
     "803903": "Slayer",
     "803905": "Infernal",
     "804219": "Infernal",
+    "804336": "Tyrant",
     "804610": "Slayer",
     "804611": "Slayer",
     "804822": "Tyrant",
