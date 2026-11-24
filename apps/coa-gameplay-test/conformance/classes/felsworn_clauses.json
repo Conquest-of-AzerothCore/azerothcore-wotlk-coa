@@ -498,11 +498,6 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.",
-        "labels": [],
-        "reason": "The words repeat the whole clause and overlap 'Your next 3 Fel Fireballs', which felforged_fed charges judges on a real feed (ADR 1272); the clause is judged by the three exact-word claims below (D-22, review I-1; review fw-rbaf M-1)."
-      },
-      {
         "claim": "Your next 3 Fel Fireballs",
         "labels": [
           "300490 behaviour_metric_delta felforged_fed charges"
@@ -1222,16 +1217,9 @@
   },
   {
     "spell": 560542,
-    "clause": "Emanate a powerful aura, granting $s1% increased melee",
+    "clause": "Emanate a powerful aura, granting $s1% increased melee and ranged haste to party and raid members within $a1 yds.",
     "labels": [
-      "560542 behaviour_party_stat_ratio melee_haste"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 560542,
-    "clause": "and ranged haste to party and raid members within $a1 yds.",
-    "labels": [
+      "560542 behaviour_party_stat_ratio melee_haste",
       "560542 behaviour_party_stat_ratio ranged_haste"
     ],
     "kind": "claim"
@@ -1256,16 +1244,9 @@
   },
   {
     "spell": 560549,
-    "clause": "Grant $s1% increased melee",
+    "clause": "Grant $s1% increased melee and ranged haste to party and raid members within $a1 yds.",
     "labels": [
-      "560549 behaviour_party_stat_ratio melee_haste"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 560549,
-    "clause": "and ranged haste to party and raid members within $a1 yds.",
-    "labels": [
+      "560549 behaviour_party_stat_ratio melee_haste",
       "560549 behaviour_party_stat_ratio ranged_haste"
     ],
     "kind": "claim"
@@ -1484,11 +1465,6 @@
           "560840 behaviour_metric_delta second_ruin",
           "560840 behaviour_metric_delta third_mixed"
         ]
-      },
-      {
-        "claim": "for $572163d (duration pending: a summon timed from its third cast, not entered)",
-        "labels": [],
-        "reason": "Superseded by the exact-words claim 'for $572163d' below (D-22, review M-1); its labels moved there."
       },
       {
         "claim": "for $572163d",
@@ -4487,7 +4463,6 @@
     "spell": 805245,
     "clause": "While Demonic Will or Hateforged Barrier are active, all damage taken or avoided now has a $h% chance to generate 1 Felfury.",
     "labels": [
-      "805245 effect_value #0",
       "805245 proc_rate"
     ],
     "kind": "claim",
@@ -4511,7 +4486,8 @@
           "report": ".agents/plans/fw-bk2/report.md"
         }
       ]
-    }
+    },
+    "reason": "Data label '805245 effect_value #0' dropped (mentor D-115, as D-112): it stands for the $h chance token, which the generator marks unmeasurable (a chance_pct token with no out-of-combat metric) and unmodelled in both runs of fw-pair4; the chance itself is measured by the trial-based 805245 proc_rate verdict, so the label proves no claim of the clause. The damage-taken leg is counted (taken_hit, ADR 1279); the avoided leg is the tool gap below."
   },
   {
     "spell": 805246,
@@ -4803,14 +4779,9 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "Casting Felfury spenders now increases your Energy regeneration",
+        "claim": "Casting Felfury spenders now increases your Energy regeneration by $521234s1%",
         "labels": [
-          "807431 behaviour_metric_delta stack_one"
-        ]
-      },
-      {
-        "claim": "by $521234s1%",
-        "labels": [
+          "807431 behaviour_metric_delta stack_one",
           "807431 behaviour_metric_delta regen_energy"
         ]
       },
