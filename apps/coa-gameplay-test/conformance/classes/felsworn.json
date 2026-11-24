@@ -18143,7 +18143,8 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Tooltip 92088: 'unleash a Felstrike on your target'; Felstrike 802678 'over $d', DurationIndex 32 = 6000 ms (SpellDuration.dbc). One real Fel Fireball 801312 (CastTime 1500 ms, CastingTimes.dbc 16) with Inner Demon 804216 set as a named precondition fixture; the stacks of 802678 on the dummy are read at game time 7120 ms after the cast start (cast time 1500 ms): read at least 5520 ms after the application when held (excludes a duration 10% short), at most 6480 ms when gone (excludes 10% long); the gate unlearned before the learn is the control. Reference search 2026-11-24: coa-history spell 802678: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+      "observe_source": "Tooltip 92088: 'unleash a Felstrike on your target'; Felstrike 802678 'over $d', DurationIndex 32 = 6000 ms (SpellDuration.dbc). One real Fel Fireball 801312 (CastTime 1500 ms, CastingTimes.dbc 16) with Inner Demon 804216 set as a named precondition fixture; the stacks of 802678 on the dummy are read at game time 7120 ms after the cast start (cast time 1500 ms): read at least 5520 ms after the application when held (excludes a duration 10% short), at most 6480 ms when gone (excludes 10% long); the gate unlearned before the learn is the control. Reference search 2026-11-24: coa-history spell 802678: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc.",
+      "quote_spell": 802678
     },
     {
       "spell": 92088,
@@ -18181,7 +18182,8 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Tooltip 92088: 'unleash a Felstrike on your target'; Felstrike 802678 'over $d', DurationIndex 32 = 6000 ms (SpellDuration.dbc). One real Fel Fireball 801312 (CastTime 1500 ms, CastingTimes.dbc 16) with Inner Demon 804216 set as a named precondition fixture; the stacks of 802678 on the dummy are read at game time 7880 ms after the cast start (cast time 1500 ms): read at least 5520 ms after the application when held (excludes a duration 10% short), at most 6480 ms when gone (excludes 10% long); the gate unlearned before the learn is the control. Reference search 2026-11-24: coa-history spell 802678: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+      "observe_source": "Tooltip 92088: 'unleash a Felstrike on your target'; Felstrike 802678 'over $d', DurationIndex 32 = 6000 ms (SpellDuration.dbc). One real Fel Fireball 801312 (CastTime 1500 ms, CastingTimes.dbc 16) with Inner Demon 804216 set as a named precondition fixture; the stacks of 802678 on the dummy are read at game time 7880 ms after the cast start (cast time 1500 ms): read at least 5520 ms after the application when held (excludes a duration 10% short), at most 6480 ms when gone (excludes 10% long); the gate unlearned before the learn is the control. Reference search 2026-11-24: coa-history spell 802678: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc.",
+      "quote_spell": 802678
     },
     {
       "spell": 300474,
@@ -18189,7 +18191,7 @@
       "kind": "metric_delta",
       "variant": "held",
       "label_suffix": "held",
-      "quote": "for $d.",
+      "quote": "for $d",
       "trigger_spell": 802060,
       "gate_spell": 300474,
       "target": "dummy",
@@ -18219,7 +18221,8 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Tooltip 300475: '... for $d', DurationIndex 31 = 8000 ms. One real instant Sargeron Smite 802060 (Fire and Shadow direct hit) with 2 Felfury as a precondition; the aura read on the dummy 7460 ms after the cast: held window reads at least 7360 ms (excludes 10% short), gone window at most 8640 ms (excludes 10% long). The learned-gate read before the learn is the control. Reference search 2026-11-24: coa-history spell 300475: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+      "observe_source": "Tooltip 300475: '... for $d', DurationIndex 31 = 8000 ms. One real instant Sargeron Smite 802060 (Fire and Shadow direct hit) with 2 Felfury as a precondition; the aura read on the dummy 7460 ms after the cast: held window reads at least 7360 ms (excludes 10% short), gone window at most 8640 ms (excludes 10% long). The learned-gate read before the learn is the control. Reference search 2026-11-24: coa-history spell 300475: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc.",
+      "quote_spell": 300475
     },
     {
       "spell": 300474,
@@ -18227,7 +18230,7 @@
       "kind": "metric_delta",
       "variant": "gone",
       "label_suffix": "gone",
-      "quote": "for $d.",
+      "quote": "for $d",
       "trigger_spell": 802060,
       "gate_spell": 300474,
       "target": "dummy",
@@ -18257,7 +18260,8 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Tooltip 300475: '... for $d', DurationIndex 31 = 8000 ms. One real instant Sargeron Smite 802060 (Fire and Shadow direct hit) with 2 Felfury as a precondition; the aura read on the dummy 8540 ms after the cast: held window reads at least 7360 ms (excludes 10% short), gone window at most 8640 ms (excludes 10% long). The learned-gate read before the learn is the control. Reference search 2026-11-24: coa-history spell 300475: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+      "observe_source": "Tooltip 300475: '... for $d', DurationIndex 31 = 8000 ms. One real instant Sargeron Smite 802060 (Fire and Shadow direct hit) with 2 Felfury as a precondition; the aura read on the dummy 8540 ms after the cast: held window reads at least 7360 ms (excludes 10% short), gone window at most 8640 ms (excludes 10% long). The learned-gate read before the learn is the control. Reference search 2026-11-24: coa-history spell 300475: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc.",
+      "quote_spell": 300475
     },
     {
       "spell": 520693,
