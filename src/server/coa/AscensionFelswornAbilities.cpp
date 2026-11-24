@@ -251,6 +251,8 @@ class felsworn_casts : public AllSpellScript
                     aura->SetStackAmount(std::max<uint64>(1, count));
                 }
         Player* player = Owner(caster);
+        if (player && info->Id == 555739 && player->GetWeaponForAttack(OFF_ATTACK, true))
+            Cast(player, player, 806097);
         if (!player || info->SpellFamilyName != 20 || Triggered(spell))
             return;
         auto talent = [player](uint32 passive, uint32 child) {

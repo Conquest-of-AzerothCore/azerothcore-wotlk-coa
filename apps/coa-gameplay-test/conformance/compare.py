@@ -5475,6 +5475,8 @@ def taken_counts_arm(run: Run, arm: dict, model: dict) -> tuple[list[dict] | str
         judged.append(delta)
         wrong = [f'{name} {delta[name]:g} (must be {count})' for name, count in arm['counts'].items()
                  if delta[name] != count]
+        wrong += [f'{name} {delta[name]:g} (must be {low:g} to {high:g})'
+                  for name, (low, high) in arm.get('bands', {}).items() if not low <= delta[name] <= high]
         wrong += [f'{a} {delta[a]:g} against {b} {delta[b]:g} (must be equal)' for a, b in model['equal']
                   if delta[a] != delta[b]]
         if wrong:
@@ -5506,7 +5508,8 @@ def behaviour_taken_counts_verdict(base: Verdict, run: Run, model: dict) -> Verd
     status = 'alert' if faults else 'unmeasured' if short else 'ok'
     reason = '; '.join(faults[:6]) if faults else '; '.join(short) if short else 'every judged trial matches'
     return replace(base, status=status, measured=float(len(faults)), expected=0.0, low=0.0, high=0.0,
-                   explanation=f'{"; ".join(summaries)}; {reason}; each count, rise and equality is compared exactly')
+                   explanation=f'{"; ".join(summaries)}; {reason}; each count, band, rise and equality is compared '
+                               f'exactly')
 
 
 def behaviour_taken_hit_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
