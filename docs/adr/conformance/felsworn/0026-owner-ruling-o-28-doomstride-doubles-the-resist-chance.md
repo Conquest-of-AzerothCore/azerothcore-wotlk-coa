@@ -37,9 +37,10 @@ ruling. No shared file, DBC, SQL or client text changes.
   against 30% at p = 15%. The shortfall is p^2 and grows with p.
 - The conformance proof uses the new kind `debuff_resist_rate` (shared ADR 1268, provisional): a same-level striker
   (p = 0.04) with Curse of Weakness 702 and Slow 31589, the talent learned for real between a control arm and the
-  full-health and 90% health arms; and a level 54 striker (p = 0.34) for the 10 s lockout. The `taken_hit` entries
-  `resist_next` and `resist_icd` are replaced: `resist_next` set 804613 by `set_aura` and read only the Curse leg,
-  and `resist_icd` relied on the guaranteed resist (with p = 0 the passive can never resist).
+  full-health and 90% health arms; and a level 56 striker (p = 0.20: an open-world creature is shown to a level 60
+  character at least at level 56) for the 10 s lockout. The `taken_hit` entries `resist_next` and `resist_icd` are
+  replaced: `resist_next` set 804613 by `set_aura` and read only the Curse leg, and `resist_icd` relied on the
+  guaranteed resist (with p = 0 the passive can never resist).
 - Readers of 804613, 807962 and 706818: `ResistDebuff`, the Felsworn refresh (807962 toggle), the contract of 706818
   and 807962, the conformance entries above and `felsworn-idle-doomstride-item-procs.json` (807962 recasts only).
   No other class lists them.
