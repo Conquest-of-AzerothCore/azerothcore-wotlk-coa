@@ -103,18 +103,6 @@
       {
         "claim": "grants you additional Armor and magic resistance based on your attack power",
         "labels": []
-      },
-      {
-        "claim": "magic resistance (Holy to Arcane) rises with learning the passive at +3000 attack power",
-        "labels": [
-          "92089 behaviour_metric_delta resist_holy_ap3000",
-          "92089 behaviour_metric_delta resist_fire_ap3000",
-          "92089 behaviour_metric_delta resist_nature_ap3000",
-          "92089 behaviour_metric_delta resist_frost_ap3000",
-          "92089 behaviour_metric_delta resist_shadow_ap3000",
-          "92089 behaviour_metric_delta resist_arcane_ap3000"
-        ],
-        "evidence": "behaviour"
       }
     ],
     "tool_gap": {
@@ -126,7 +114,8 @@
         }
       ]
     },
-    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "reason": "Claim 4.1 not final (review fw-rfa3 I-1, mentor D-90 method): the six magic-resistance directions are proven (entries resist_holy..arcane_ap3000, learned passive at +3000 attack power, ok in both runs of the fw-fa3 pair) but the Armor direction (Armor reads 270 with an unasserted baseline) and the strictly larger delta at a higher attack power are tool gaps (metric_delta direction-only gain above a floor + attack power ordering, group B). The coefficient is unasserted."
   },
   {
     "spell": 300465,
