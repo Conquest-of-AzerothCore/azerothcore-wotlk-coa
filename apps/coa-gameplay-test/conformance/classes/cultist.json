@@ -1212,6 +1212,432 @@
       "target": "caster",
       "margin_ms": 500,
       "observe_source": "680487 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -90001 + EffectDieSides[0] 1 = -90000 ms ($/1000;s1 = 90 s), EffectSpellClassMask[2] 2147483648 = SpellFamilyFlags[2] 2147483648 of Voidborne 681104 (RecoveryTime 180000 ms, CategoryRecoveryTime 180000 ms, PowerType -2 health cost 10% + ManaPerSecond 80; Spell.dbc). Split via only_arm (without/with/beyond) so each arm starts at full health (cost_gate disables regeneration and two sequential Voidborne casts drain >2800 HP, triggering Spell.cpp:7423 SPELL_FAILED_CASTER_AURASTATE 22). Arms timed from priming cast: 90500 ms without 680487 (refused, 67), 90500 ms with 680487 (through, 0), 89500 ms with 680487 (refused, 67): reduced cooldown lies in [89500, 90500] ms, excluding 10% off the 90 s cut on both sides. Reference search 2026-11-24: coa-history spell 680487: 0 events; coabuildhub spells_master_index.json entry 680487 matches installed Spell.dbc."
+    },
+    {
+      "spell": 681102,
+      "name": "Void Rage (Shadow of the Void +5% Shadow damage)",
+      "kind": "hit_ratio",
+      "variant": "shadow_damage",
+      "label_suffix": "shadow_damage",
+      "quote": "Increases the Shadow damage increased through Shadow of the Void by $s1%.",
+      "expected": 1.0454545,
+      "band_points": 1.818,
+      "observe_spell": 502182,
+      "learn": [
+        502182,
+        502241,
+        574318
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            500706,
+            41
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 502241,
+            "target": "dummy",
+            "power": 2000
+          }
+        ]
+      },
+      "treatment": {
+        "learn": [
+          681102
+        ],
+        "auras": [
+          [
+            500706,
+            41
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 502241,
+            "target": "dummy",
+            "power": 2000
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "681102 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 3 (SPELLMOD_EFFECT1), EffectBasePoints[0] 4 + EffectDieSides[0] 1 = +5% ($s1 = 5), routed to Shadow of the Void 300277 at SpellInfo.cpp:1623 (300277 Effect[0] aura 79 +10% Shadow damage -> +15%; Spell.dbc). Both arms learn 574318, set Insanity 500706 to 41 stacks and beeg spellpen 823764 (precondition fixtures), and cast Malevolence 502241 at the dummy before each Horrorbolt 502182 (at +20000 SP, non-critical hits) to trigger 300277 for real; treatment learns 681102. Ratio 1.15 / 1.10 = 1.0454545 (+4.545%), band_points 1.818 maps the G-19 [3%, 7%] band of the stated +5% over the 1.10 baseline. Reference search 2026-11-24: coa-history spell 681102: 0 events (passive; positive control 300277: 211 aura applied in 12 logs); coabuildhub spells_master_index.json entry 681102 matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 805117,
+      "name": "Nutcase (Shadow of the Void +10% critical damage)",
+      "kind": "hit_ratio",
+      "variant": "crit_damage",
+      "label_suffix": "crit_damage",
+      "quote": "Your Shadow of the Void now also increases your critical damage dealt by $s1%.",
+      "expected": 1.1,
+      "observe_spell": 502182,
+      "learn": [
+        502182,
+        502241,
+        574318
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "force_crit": "spell",
+      "control": {
+        "auras": [
+          [
+            500706,
+            41
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 502241,
+            "target": "dummy",
+            "power": 2000
+          }
+        ]
+      },
+      "treatment": {
+        "learn": [
+          805117
+        ],
+        "auras": [
+          [
+            500706,
+            41
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 502241,
+            "target": "dummy",
+            "power": 2000
+          }
+        ]
+      },
+      "critical": true,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "805117 Effect[0] aura 107 bp 9 + die 1 = +10% ($s1 = 10; Spell.dbc). AscensionCultistContracts.cpp:117 and AscensionCultistAuras.cpp:132 set 300277 Effect[2] SPELL_AURA_MOD_CRIT_DAMAGE_BONUS (all schools) to Amount(805117) = +10 when 805117 is held (0 otherwise). Unit::SpellCriticalDamageBonus (Unit.cpp:10686-10701) multiplies total critical damage (1.5x) by 1 + crit_mod/100 = 1.10 (1.65x / 1.50x = 1.10). Both arms trigger 300277 for real via Malevolence 502241 with 574318 and 500706=41 (precondition fixtures) and observe forced-crit Horrorbolt 502182 at +20000 SP with 823764; treatment learns 805117. Reference search 2026-11-24: coa-history spell 805117: 0 events; coabuildhub spells_master_index.json entry 805117 matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 681326,
+      "name": "Glory to N'Zoth (-15% damage taken under Shadow of the Void)",
+      "kind": "taken_hit",
+      "variant": "damage_taken",
+      "label_suffix": "damage_taken",
+      "judge": "damage_ratio",
+      "health_loss": true,
+      "expected": 0.85,
+      "quote": "While Shadow of the Void is active, you now take $s1% reduced damage.",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "cast_power": 2000,
+      "learn": [
+        574318,
+        502241
+      ],
+      "trials": 8,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            681326
+          ],
+          "auras": [
+            [
+              500706,
+              41
+            ]
+          ],
+          "opening_casts": [
+            [
+              502241,
+              "dummy"
+            ]
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 300277,
+              "equals": 1
+            }
+          ],
+          "opening_settle_ms": 500
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            681326
+          ],
+          "auras": [
+            [
+              500706,
+              41
+            ]
+          ],
+          "opening_casts": [
+            [
+              502241,
+              "dummy"
+            ]
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 300277,
+              "equals": 1
+            }
+          ],
+          "opening_settle_ms": 500
+        }
+      ],
+      "observe_source": "681326 Effect[0] bp -16 + die 1 = -15% ($s1 = 15; Spell.dbc). AscensionCultistContracts.cpp:343-344 (cultist_scaling::OnDamage, called in Unit::DealDamage after the spell damage log is built) multiplies incoming damage by 1 + (-15)/100 = 0.85 while Shadow of the Void 300277 is active. health_loss: true measures actual health lost from Void Zone 92559 (1000 Physical, DmgClass 0: zero miss, zero crit, zero partial resist) across 8 trials per arm (settle 100 ms, total 4.8 s < 8 s duration of 300277) from 100000 HP: both arms trigger 300277 for real via opening Malevolence 502241 at dummy with 574318 and Insanity 500706=41 (precondition fixture), verified present by arm checks; control unlearns 681326, treatment learns 681326 (ratio 0.85). Reference search 2026-11-24: coa-history spell 681326: 0 events; coabuildhub spells_master_index.json entry 681326 matches installed Spell.dbc.",
+      "settle_ms": 100
+    },
+    {
+      "spell": 806768,
+      "name": "Book of N'Zoth (Shadow of the Void max stacks 1 -> 2)",
+      "kind": "metric_delta",
+      "variant": "stacks",
+      "label_suffix": "stacks",
+      "quote": "Your Shadow of the Void now stacks $s1 additional time.",
+      "trigger_spell": 502241,
+      "gate_spell": 806768,
+      "learn": [
+        574318
+      ],
+      "target": "dummy",
+      "setup_casts": [
+        502241,
+        502241
+      ],
+      "setup_wait_ms": 2000,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          41,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 300277
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "wait_ms": 500,
+      "expire_ms": 9000,
+      "void_on_cast_failure": true,
+      "observe_source": "806768 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 31 (SPELLMOD_STACK_AMOUNT), EffectBasePoints[0] 0 + EffectDieSides[0] 1 = +1 ($s1 = 1), routed to Shadow of the Void 300277 at SpellInfo.cpp:1623 (300277 StackAmount 1 -> 2, Duration 8000 ms; Spell.dbc). With 574318 learned and Insanity 500706 at 41 stacks (precondition fixture), casts Malevolence 502241 (1500 ms cast, no cooldown) 3 times (2 setup casts 2000 ms apart + 1 trigger cast, total 4500 ms < 8000 ms duration) in both phases (9000 ms between phases lets 300277 expire): aura_stacks of 300277 reads 1 before learning 806768 (control) and 2 after learning 806768 (does not exceed 2 on the 3rd trigger). Reference search 2026-11-24: coa-history spell 806768: 0 events; coabuildhub spells_master_index.json entry 806768 matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 681104,
+      "name": "Voidborne (+25% damage dealt)",
+      "kind": "metric_delta",
+      "variant": "damage_dealt",
+      "label_suffix": "damage_dealt",
+      "quote": "increasing your damage dealt and critical strike chance by $s1%,",
+      "trigger_spell": 502182,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        681104
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 500,
+      "gate_timing": "start",
+      "cast_power": 2000,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 502182,
+        "target": "dummy"
+      },
+      "before_expected": 10000,
+      "expected": 22500,
+      "expected_ratio": 2.25,
+      "tolerance": 0.01,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "681104 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, EffectMiscValue[0] 127 (all schools), EffectBasePoints[0] 24 + EffectDieSides[0] 1 = +25% ($s1 = 25), DurationIndex 8 (15000 ms; Spell.dbc). Casts Horrorbolt 502182 (2500 ms cast + 120 ms travel, 3000 ms wait) at dummy with +20000 SP, 823764 (no partial resist) and 16255 amount -100 (no crit; precondition fixtures) before casting 681104 (control, single hit D ~ 16690) and right after a real cast of 681104 (setup_only_after: second hit 1.25 * D, cumulative spell_damage_total = 2.25 * D): ratio after / before = 2.25 within 0.01 (equivalent to +24%..+26% bonus, tighter than the G-19 +23%..+27% band; single Voidborne cast avoids ManaPerSecond 80 health-drain death). Reference search 2026-11-24: coa-history spell 681104: 10 casts; coabuildhub spells_master_index.json entry 681104 matches installed Spell.dbc for +25% damage."
+    },
+    {
+      "spell": 681104,
+      "name": "Voidborne (+25% critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "crit_chance",
+      "label_suffix": "crit_chance",
+      "quote": "increasing your damage dealt and critical strike chance by $s1%,",
+      "trigger_spell": 681104,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "spell_crit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 25,
+      "expected_gain": 25,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "681104 Effect[1] aura 290 SPELL_AURA_MOD_CRIT_PCT, EffectBasePoints[1] 24 + EffectDieSides[1] 1 = +25% ($s1 = 25; Spell.dbc). Reads live spell_crit_chance on caster before casting 681104 (control, uncast) and 500 ms after one real cast of 681104: expected gain +25.0 points within 0.01. Reference search 2026-11-24: coa-history spell 681104: 10 casts; coabuildhub spells_master_index.json entry 681104 matches installed Spell.dbc."
+    },
+    {
+      "spell": 681104,
+      "name": "Voidborne (stun immunity)",
+      "kind": "immunity",
+      "variant": "stun",
+      "target": "caster",
+      "quote": "and granting you immunity to stun effects for $d.",
+      "effects": [
+        {
+          "spell": 56,
+          "words": "stun"
+        }
+      ],
+      "observe_source": "AscensionCultistAuras.cpp:102-103,191-192 grants Immunity(player, 681104, {MECHANIC_STUN}, true) on Voidborne 681104 apply and clears it on remove (DurationIndex 8 = 15000 ms; Spell.dbc). Fixture: Stun 56 (single aura effect SPELL_AURA_MOD_STUN, MECHANIC_STUN 12, used across Felsworn immunity checks): present when set before 681104, blocked on 3 dummy casts while 681104 is active, and lands after 681104 expires (control). Reference search 2026-11-24: coa-history spell 681104: 10 casts; coabuildhub spells_master_index.json entry 681104 matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 681104,
+      "name": "Voidborne (15 sec duration)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "and granting you immunity to stun effects for $d.",
+      "trigger_spell": 681104,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 681104
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          14000,
+          14500
+        ],
+        "expired": [
+          15500,
+          16100
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "681104 DurationIndex 8 = 15000 ms ($d = 15 sec, SpellDuration.dbc). Reads aura 681104 absent before cast (control = 0), present (1) at 14200 ms (game_time [14000, 14500], strictly above 13500 = 0.9 * 15000), and gone (0) at 15800 ms (game_time [15500, 16100], strictly below 16500 = 1.1 * 15000), excluding durations 10% off on both sides. Reference search 2026-11-24: coa-history spell 681104: 10 casts; coabuildhub spells_master_index.json entry 681104 matches installed Spell.dbc ('for 15 seconds')."
+    },
+    {
+      "spell": 681104,
+      "name": "Voidborne (generates 1 Insanity on first tick)",
+      "kind": "metric_delta",
+      "variant": "insanity_tick1",
+      "label_suffix": "insanity_tick1",
+      "quote": "Generates 1 Insanity",
+      "trigger_spell": 681104,
+      "cast_in_before": false,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 750,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          600,
+          900
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "681104 Effect[2] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 500 ms ($T3 = 0.5 sec), EffectTriggerSpell 681103 (+1 Insanity Stack: Effect[0] 175 SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS, MiscValue 1, TriggerSpell 500706; AttributesEx5 0 = no initial tick; Spell.dbc). Reads aura_stacks of Insanity 500706 before casting 681104 (control = 0) and at 750 ms (game_time [600, 900], after 1st tick at 500 ms and before 2nd tick at 1000 ms): must equal 1. Reference search 2026-11-24: coabuildhub spells_master_index.json entry 681104 is an older patch state ('every 1 sec'); installed Spell.dbc EffectAmplitude 500 ms governs (G-9)."
+    },
+    {
+      "spell": 681104,
+      "name": "Voidborne (every 0.5 sec Insanity period)",
+      "kind": "metric_delta",
+      "variant": "insanity_period",
+      "label_suffix": "insanity_period",
+      "quote": "every $T3 sec.",
+      "trigger_spell": 681104,
+      "cast_in_before": false,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "wait_ms": 5250,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5100,
+          5400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "681104 Effect[2] EffectAmplitude 500 ms ($T3 = 0.5 sec; Spell.dbc), generating 1 stack of Insanity 500706 per tick via 681103 (confirmed 1 stack/tick by insanity_tick1). Reads aura_stacks of 500706 before casting 681104 (control = 0) and at 5250 ms (game_time [5100, 5400]): exactly 10 ticks fire at 500 ms period, whereas a period 10% faster (450 ms) fires >= 11 ticks by 5100 ms and a period 10% slower (550 ms) fires <= 9 ticks by 5400 ms, excluding 10% off 500 ms on both sides. Reference search 2026-11-24: coabuildhub spells_master_index.json entry 681104 is an older patch state ('every 1 sec'); installed Spell.dbc EffectAmplitude 500 ms governs (G-9)."
     }
   ],
   "player_observations": [],

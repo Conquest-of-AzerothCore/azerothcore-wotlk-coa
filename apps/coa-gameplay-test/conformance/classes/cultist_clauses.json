@@ -2358,7 +2358,7 @@
     "spell": 681102,
     "clause": "Increases the Shadow damage increased through Shadow of the Void by $s1%.",
     "labels": [
-      "681102 effect_value e0 #0"
+      "681102 behaviour_hit_ratio shadow_damage"
     ],
     "kind": "claim"
   },
@@ -2370,13 +2370,14 @@
       {
         "claim": "increasing your damage dealt by $s1%",
         "labels": [
-          "681104 effect_value e0 #0",
-          "681104 aura_amount e0 #0"
+          "681104 behaviour_metric_delta damage_dealt"
         ]
       },
       {
         "claim": "and critical strike chance by $s1%",
-        "labels": []
+        "labels": [
+          "681104 behaviour_metric_delta crit_chance"
+        ]
       }
     ]
   },
@@ -2384,7 +2385,13 @@
     "spell": 681104,
     "clause": "and granting you immunity to stun effects for $d.",
     "labels": [
-      "681104 aura_duration_ms #1"
+      "681104 immunity stun 681104 cast",
+      "681104 immunity stun 681104 applied",
+      "681104 immunity stun 56 without",
+      "681104 immunity stun 56 with",
+      "681104 immunity stun 56 control",
+      "681104 immunity stun 681104 expired",
+      "681104 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -2396,12 +2403,14 @@
       {
         "claim": "every $T3 sec",
         "labels": [
-          "681104 aura_amplitude_ms #2"
+          "681104 behaviour_metric_delta insanity_period"
         ]
       },
       {
         "claim": "Generates 1 Insanity",
-        "labels": []
+        "labels": [
+          "681104 behaviour_metric_delta insanity_tick1"
+        ]
       }
     ]
   },
@@ -3625,7 +3634,7 @@
     "spell": 805117,
     "clause": "Your Shadow of the Void now also increases your critical damage dealt by $s1%.",
     "labels": [
-      "805117 effect_value e0 #0"
+      "805117 behaviour_hit_ratio crit_damage"
     ],
     "kind": "claim"
   },
@@ -3870,7 +3879,7 @@
     "spell": 806768,
     "clause": "Your Shadow of the Void now stacks $s1 additional time.",
     "labels": [
-      "806768 effect_value e0 #0"
+      "806768 behaviour_metric_delta stacks"
     ],
     "kind": "claim"
   },
