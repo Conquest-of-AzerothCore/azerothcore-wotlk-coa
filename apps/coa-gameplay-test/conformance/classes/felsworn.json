@@ -18106,6 +18106,519 @@
       },
       "observe_source": "Heal leg of 705124 (Spell.dbc Effect[0] SPELL_EFFECT_HEALTH_LEECH, EffectValueMultiplier 1.0): the caster's heal total of 705124 over the 705124 damage total of the same window (same_arm_ratio) is 1.0 within 0.02; 0 before the learn (control). The damage share of the same leech is the carve entry (0.20 of the strike). Reference search 2026-11-24: nothing found that decides a value; expected values come from the tooltip and the DBC.",
       "player_attack_power": 20000
+    },
+    {
+      "spell": 800206,
+      "name": "Carve (channel present at 2400 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_held",
+      "quote": "Charge up a powerful attack over $d.",
+      "trigger_spell": 800206,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 800206
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 2400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          2350,
+          2450
+        ]
+      },
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Carve 800206 DurationIndex 66 = 2500 ms (Spell.dbc, SpellDuration.dbc row 66; the $d of the clause), Effect[0] aura 23 PERIODIC_TRIGGER_SPELL on the caster (TargetA 1). The self aura 800206 is read on the caster 2400 ms of game time after a real cast; the pair 2400 present / 2600 gone brackets 2500 and excludes a duration 10% off (2250 or 2750). Felfury 800058 x6 and 803468 are precondition fixtures (harness set_aura); a refused cast voids the trial; the control phase makes no cast (0). Reference search 2026-11-24: coa-history spell 800206: SPELL_CAST_SUCCESS 200 events by players in 5 logs, no duration figure (a channel can end early); bindmysoul snapshot has nothing beyond the tooltip; nothing else found.",
+      "label_suffix": "duration_held"
+    },
+    {
+      "spell": 800206,
+      "name": "Carve (channel gone at 2600 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_gone",
+      "quote": "Charge up a powerful attack over $d.",
+      "trigger_spell": 800206,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 800206
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          2550,
+          2650
+        ]
+      },
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Carve 800206 DurationIndex 66 = 2500 ms (Spell.dbc, SpellDuration.dbc row 66; the $d of the clause), Effect[0] aura 23 PERIODIC_TRIGGER_SPELL on the caster (TargetA 1). The self aura 800206 is read on the caster 2600 ms of game time after a real cast; the pair 2400 present / 2600 gone brackets 2500 and excludes a duration 10% off (2250 or 2750). Felfury 800058 x6 and 803468 are precondition fixtures (harness set_aura); a refused cast voids the trial; the control phase makes no cast (0). Reference search 2026-11-24: coa-history spell 800206: SPELL_CAST_SUCCESS 200 events by players in 5 logs, no duration figure (a channel can end early); bindmysoul snapshot has nothing beyond the tooltip; nothing else found.",
+      "label_suffix": "duration_gone"
+    },
+    {
+      "spell": 501298,
+      "name": "Ruin (Inner Demon DoT present at 5500 ms)",
+      "kind": "metric_delta",
+      "variant": "inner_dot_held",
+      "quote": "Inner Demon: Deals an additional 30% of the damage dealt over $805748d.",
+      "trigger_spell": 501298,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 805748,
+        "caster": "caster"
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 5500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5450,
+          5550
+        ]
+      },
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "805748 DurationIndex 27 = 3000 ms (SpellDuration.dbc row 27; the $805748d of the clause), Effect[0] aura 3 PERIODIC_DAMAGE every 1000 ms. The DoT is copied onto the target by the Ruin hit while Inner Demon 804216 is up (AscensionFelswornAbilities.cpp:361-362, 30% of the damage). It starts when the 2500 ms cast (CastingTimeIndex 19) lands, so the reads at 5500 and 5750 ms after the cast start are 3000 ms minus the travel after the cast, and 3250 ms; present at 5500 excludes 2700 ms, gone at 5750 excludes 3300 ms for an application within 200 ms after the cast. Felfury and Inner Demon are precondition fixtures; the control phase makes no cast (0). Reference search 2026-11-24: coa-history spell 805748 and 501298; bindmysoul: nothing beyond the tooltip.",
+      "label_suffix": "inner_dot_held"
+    },
+    {
+      "spell": 501298,
+      "name": "Ruin (Inner Demon DoT gone at 5750 ms)",
+      "kind": "metric_delta",
+      "variant": "inner_dot_gone",
+      "quote": "Inner Demon: Deals an additional 30% of the damage dealt over $805748d.",
+      "trigger_spell": 501298,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 805748,
+        "caster": "caster"
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 5750,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5700,
+          5800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "805748 DurationIndex 27 = 3000 ms (SpellDuration.dbc row 27; the $805748d of the clause), Effect[0] aura 3 PERIODIC_DAMAGE every 1000 ms. The DoT is copied onto the target by the Ruin hit while Inner Demon 804216 is up (AscensionFelswornAbilities.cpp:361-362, 30% of the damage). It starts when the 2500 ms cast (CastingTimeIndex 19) lands, so the reads at 5500 and 5750 ms after the cast start are 3000 ms minus the travel after the cast, and 3250 ms; present at 5500 excludes 2700 ms, gone at 5750 excludes 3300 ms for an application within 200 ms after the cast. Felfury and Inner Demon are precondition fixtures; the control phase makes no cast (0). Reference search 2026-11-24: coa-history spell 805748 and 501298; bindmysoul: nothing beyond the tooltip.",
+      "label_suffix": "inner_dot_gone"
+    },
+    {
+      "spell": 806109,
+      "name": "Illidan's Guile (dash aura 806128 present at 12700 ms)",
+      "kind": "metric_delta",
+      "variant": "dash_held",
+      "quote": "At the end of the duration, your next $?s520853[Fel Torpedo][Chaos Rush] within $806128d now dashes an additional 20 yds.",
+      "trigger_spell": 806109,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 806128
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 12700,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          12650,
+          12750
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "806109 DurationIndex 31 = 8000 ms; 806128 DurationIndex 28 = 5000 ms (SpellDuration.dbc row 28; the $806128d of the clause). The aura 806128 is read on the caster 12700 ms of game time after the cast of 806109: it starts at the end of the 8000 ms, so it is read at an age of about 4700 ms (present, excludes 4500) and 5300 ms (gone, excludes 5500). The control phase makes no cast (0). Reference search 2026-11-24: coa-history spell 806109 casts end early in the logged runs (the logs give no 8000 ms expiry), spell 806128 nothing found.",
+      "label_suffix": "dash_held"
+    },
+    {
+      "spell": 806109,
+      "name": "Illidan's Guile (dash aura 806128 gone at 13300 ms)",
+      "kind": "metric_delta",
+      "variant": "dash_gone",
+      "quote": "At the end of the duration, your next $?s520853[Fel Torpedo][Chaos Rush] within $806128d now dashes an additional 20 yds.",
+      "trigger_spell": 806109,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 806128
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 13300,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          13250,
+          13350
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "806109 DurationIndex 31 = 8000 ms; 806128 DurationIndex 28 = 5000 ms (SpellDuration.dbc row 28; the $806128d of the clause). The aura 806128 is read on the caster 13300 ms of game time after the cast of 806109: it starts at the end of the 8000 ms, so it is read at an age of about 4700 ms (present, excludes 4500) and 5300 ms (gone, excludes 5500). The control phase makes no cast (0). Reference search 2026-11-24: coa-history spell 806109 casts end early in the logged runs (the logs give no 8000 ms expiry), spell 806128 nothing found.",
+      "label_suffix": "dash_gone"
+    },
+    {
+      "spell": 555738,
+      "name": "Fury Unleashed (a strike every 1 sec on the dummy)",
+      "kind": "hit_period",
+      "variant": "tick_period",
+      "quote": "and dealing $806095s1% Weapon Damage every $t1 sec with both weapons to all nearby enemies.",
+      "trigger_spell": 555738,
+      "hit_spell": 555739,
+      "expected_ms": 1000,
+      "window": [
+        1300,
+        4700
+      ],
+      "fixtures": [],
+      "poll_ms": 25,
+      "observe_source": "555738 Effect[0] aura 23 PERIODIC_TRIGGER_SPELL, EffectAmplitude 1000 ($t1 = 1 sec), EffectTriggerSpell 555739 (Effect[0] WEAPON_PERCENT_DAMAGE on enemies within its radius), DurationIndex 28 = 5000 ms. One real cast at the dummy; the 555739 hits on the dummy are polled in game time over 1300-4700 ms after the cast and (last - first) / (hits - 1) is judged against 1000 ms in the G-19 band. Reference search 2026-11-24: coa-history spell 555738: 0 events in 186 logs; bindmysoul snapshot: nothing beyond the tooltip.",
+      "label_suffix": "tick_period"
+    },
+    {
+      "spell": 561216,
+      "name": "Fury of the Illidari (a strike every 0.5 sec on the dummy)",
+      "kind": "hit_period",
+      "variant": "strike_period",
+      "quote": "Move quickly from enemy to enemy, attacking them every $t1 sec with both weapons until 6 assaults are made,",
+      "trigger_spell": 561216,
+      "hit_spell": 808303,
+      "expected_ms": 500,
+      "window": [
+        300,
+        2800
+      ],
+      "fixtures": [
+        [
+          804216,
+          "caster"
+        ]
+      ],
+      "poll_ms": 10,
+      "observe_source": "561216 Effect[0] aura 226 PERIODIC_DUMMY, EffectAmplitude 500 ($t1 = 0.5 sec), 6 assaults; the strike spell is Twin Slice 808303 (proven by the felfury entry of 561216, same_arm_ratio on spell_cast_count 808303). With one enemy near the caster every strike lands on the dummy. Inner Demon 804216 (CasterAuraSpell of 561216) is a precondition fixture. (last - first) / (hits - 1) is judged against 500 ms in the G-19 band. Reference search 2026-11-24: coa-history spell 561216: 0 events in 186 logs; bindmysoul: nothing beyond the tooltip.",
+      "label_suffix": "strike_period"
+    },
+    {
+      "spell": 300483,
+      "name": "Chaotic Intuition (stacks cap at 10)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "quote": "stacking $300481u times.",
+      "trigger_spell": 802678,
+      "gate_spell": 300483,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 300481
+      },
+      "phase_auras": [
+        [
+          300481,
+          9,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 9,
+      "expected": 10,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "300481 StackAmount 10 ($u), DurationIndex 32 = 6000 ms. AscensionFelswornEvents.cpp:82-83,192-199: every damage event of Felstrike 802678 (periodic ticks included) casts 300481 on the caster while 300483 is known. Felstrike 802678 (Effect[0] PERIODIC_DAMAGE every 1000 ms) is cast at the dummy; 9 stacks are a precondition fixture (harness set_aura); at 3500 ms three ticks have landed, so a stack count of exactly 10 (not 11 or 12) is the cap. Control: 300483 unlearned, the same cast, 9 stays. Reference search 2026-11-24: nothing found that decides the cap beyond the tooltip.",
+      "label_suffix": "stack_cap"
+    },
+    {
+      "spell": 520693,
+      "name": "Felwrath (Inner Demon stacks cap at 3)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "quote": "stacking $520832u times.",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 520832
+      },
+      "before_expected": 2,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ],
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          520832,
+          2,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "observe_source": "520832 StackAmount 3 ($u), DurationIndex 32 = 6000 ms. Two real Felwrath casts (the trigger and one setup cast 1800 ms apart) each strike five enemies with Inner Demon (AscensionFelswornAbilities.cpp:361-373) and add a stack of 520832 on the dummy; 2 stacks are a precondition fixture (harness set_aura), so the second real cast would make 4 without a cap and reads 3. Felfury x6 (two casts cost 4), 803468, 804216 and 823764 are fixtures as in inner_five. The control phase makes no cast and reads the fixture (2). Reference search 2026-11-24: nothing found beyond the tooltip.",
+      "setup_casts": [
+        520693
+      ],
+      "setup_wait_ms": 1800
+    },
+    {
+      "spell": 681376,
+      "name": "Chaotic (stacks cap at 3)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "quote": "stacking $572782u times.",
+      "trigger_spell": 555738,
+      "gate_spell": 681376,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 572782
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "cast_power": 100,
+      "setup_casts": [
+        555738,
+        555738,
+        555738
+      ],
+      "setup_wait_ms": 5100,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        4.5,
+        5.5,
+        6.5
+      ],
+      "void_on_cast_failure": true,
+      "stack_feed": {
+        "aura": 572782,
+        "cap": 3,
+        "window_ms": 8000,
+        "trials": 4,
+        "source": "572782 StackAmount 3, DurationIndex 31 = 8000 ms"
+      },
+      "observe_source": "572782 StackAmount 3 ($u), DurationIndex 31 = 8000 ms. Chaotic 681376 (AscensionFelswornEvents.cpp:56-57,148-149) rolls Chance() on the raw ProcChance 8 once per outgoing non-derived damage event and casts 572782 on the caster; no spell modifier forces it, so the stacks are earned: four real casts of Fury Unleashed 555738 (a 5000 ms aura striking every 1000 ms up to 8 enemies, 8 dummies within its radius, 40 events a cast, 160 in all, 5100 ms apart) feed 4 trials (stack_feed); a trial is valid with at least 4 counted applications and a span below 8000 ms, and passes at exactly 3 stacks. Residual per pair: P(fewer than 4 applications in 160 events) is below 1e-5 and the void rate sizes the rest as v^4. Reference search 2026-11-24: coa-history spell 572782 and 681376: nothing found that decides the cap.",
+      "label_suffix": "stack_cap"
+    },
+    {
+      "spell": 704370,
+      "name": "Curse of Argus (stacks cap at 20)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "quote": "stacking $707511u times.",
+      "trigger_spell": 704368,
+      "gate_spell": 704370,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 707511,
+        "caster": "caster"
+      },
+      "phase_auras": [
+        [
+          707511,
+          19,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "before_expected": 19,
+      "expected": 20,
+      "tolerance": 0,
+      "wait_ms": 6700,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "707511 StackAmount 20 ($u), DurationIndex 32 = 6000 ms. Each damage event of Bane of Chaos 704368 (Effect[0] PERIODIC_DAMAGE every 3000 ms) adds a stack while 704370 is known (AscensionFelswornEvents.cpp:90-91). 19 stacks are a precondition fixture (harness set_aura, caster = the caster); a real Bane cast lands two events (3000 and 6000 ms), so 21 without a cap and 20 with it, read at 6700 ms. Control: the passive unknown, no cast, the fixture reads 19. Reference search 2026-11-24: nothing found beyond the tooltip.",
+      "label_suffix": "stack_cap"
+    },
+    {
+      "spell": 807431,
+      "name": "Abyssal Conditioning (stacks cap at 4)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "quote": "stacking up to $521234u times.",
+      "trigger_spell": 803475,
+      "gate_spell": 807431,
+      "target": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 521234
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          521234,
+          3,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "setup_casts": [
+        803475
+      ],
+      "setup_wait_ms": 1100,
+      "before_expected": 3,
+      "expected": 4,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "521234 StackAmount 4 ($u), DurationIndex 1 = 10000 ms. Each Felfury spender cast (Azzinoth's Assault 803475) casts 521234 on the caster while 807431 is known (AscensionFelswornAbilities.cpp:236,253). 3 stacks are a precondition fixture (harness set_aura); two real casts 1100 ms apart would make 5 without a cap and read 4. Felfury x6 (two casts cost 4) and 803468 are fixtures. Control: the same casts with the passive unknown, the fixture reads 3. Reference search 2026-11-24: nothing found beyond the tooltip.",
+      "label_suffix": "stack_cap"
     }
   ],
   "player_observations": [],
