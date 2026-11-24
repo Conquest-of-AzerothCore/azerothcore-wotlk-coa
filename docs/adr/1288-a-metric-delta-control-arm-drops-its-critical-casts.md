@@ -17,8 +17,10 @@ damage event is critical and judges the others, with a stated minimum of non-cri
 unmeasured. The entry is sized so the residual unmeasured probability is under 0.1%.
 
 Options considered: voiding the whole arm when its single cast crits (refused by D-116: it only turns the flip from
-an alert into an unmeasured one); a crit-suppressing fixture (none exists for players: `SpellDoneCritChance` is -100
-only for non-player casters, and the rating fixtures are bounded at 0); a rate-based correction (refused: the drop
+an alert into an unmeasured one); a crit-suppressing fixture (fixture 984954, Effect[1] aura 57 at -1000% spell crit,
+reaches the player spell crit field (StatSystem.cpp:1013, Unit.cpp:10338-10340) and entries 520246 and 806111 already
+use it; it was a simpler route, missed when this option was designed, and stays a valid alternative for other entries);
+a rate-based correction (refused: the drop
 must rest on the recorded event); repeated treatment casts with a per-cast critical read (chosen).
 
 ## Decision
