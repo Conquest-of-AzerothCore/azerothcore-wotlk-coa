@@ -356,7 +356,8 @@
     "spell": 300300,
     "clause": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot.",
     "labels": [
-      "300300 effect_value #0"
+      "300300 behaviour_metric_delta periodic",
+      "300300 behaviour_metric_delta channeled"
     ],
     "kind": "claim"
   },
