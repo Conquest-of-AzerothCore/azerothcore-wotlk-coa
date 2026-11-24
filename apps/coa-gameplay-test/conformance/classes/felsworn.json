@@ -11292,10 +11292,23 @@
       "learn": [
         801312
       ],
-      "control": {},
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
       "treatment": {
         "learn": [
           705123
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
         ]
       },
       "critical": false,
@@ -11303,7 +11316,7 @@
       "fixture": {
         "spell_power": 20000
       },
-      "observe_source": "$s2 = 10 (705123 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 9 + 1, MiscValue 0 = SPELLMOD_DAMAGE; Effect[2] is the same percent on SPELLMOD_ALL_EFFECTS). Fel Fireball 801312 (Effect[0] SCHOOL_DAMAGE, cast time 1500 ms) is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits only; the named precondition fixture spell_power +20000 is the same in both arms, so integer truncation is far inside the band; the mean damage per hit must rise by 10 percent (band 8..12, G-19). Reference search 2026-11-23: coa-history spell 705123: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: text says +15% where the DBC tooltip and Effect[1] say 10% (an older state, the tooltip prevails, G-9); expected values come from the tooltip and the DBC only.",
+      "observe_source": "$s2 = 10 (705123 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 9 + 1, MiscValue 0 = SPELLMOD_DAMAGE; Effect[2] is the same percent on SPELLMOD_ALL_EFFECTS). O-27 (owner): one bonus only. Effect[2] (aura 108 SPELLMOD_ALL_EFFECTS, same percent) named Fel Fireball (word 1 bit 0) beside Twin Slice (bit 24); the Felsworn contract drops the Fel Fireball bit of Effect[2] (AscensionFelswornContracts.cpp, Felsworn ADR 0025), so Fel Fireball keeps only Effect[1] as Felrend does. The spell penetration fixture 823764 (aura 123, MiscValue 126, -9999) is set on the caster in both arms: it removes the partial resists of the dummy's monster linear resistance, the variance of the 47-trial reads (+21.53 / +16.48 at rank 1 before the fix, merged/fw-b3g3/proveC). Fel Fireball 801312 (Effect[0] SCHOOL_DAMAGE, cast time 1500 ms) is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits only; the named precondition fixture spell_power +20000 is the same in both arms, so integer truncation is far inside the band; the mean damage per hit must rise by 10 percent (band 8..12, G-19). Reference search 2026-11-23: coa-history spell 705123: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: text says +15% where the DBC tooltip and Effect[1] say 10% (an older state, the tooltip prevails, G-9); expected values come from the tooltip and the DBC only.",
       "cast_wait_ms": 2500
     },
     {
@@ -11343,10 +11356,23 @@
       "learn": [
         801312
       ],
-      "control": {},
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
       "treatment": {
         "learn": [
           707846
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
         ]
       },
       "critical": false,
@@ -11354,7 +11380,7 @@
       "fixture": {
         "spell_power": 20000
       },
-      "observe_source": "$s2 = 20 (707846 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 19 + 1, MiscValue 0 = SPELLMOD_DAMAGE; Effect[2] is the same percent on SPELLMOD_ALL_EFFECTS). Fel Fireball 801312 (Effect[0] SCHOOL_DAMAGE, cast time 1500 ms) is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits only; the named precondition fixture spell_power +20000 is the same in both arms, so integer truncation is far inside the band; the mean damage per hit must rise by 20 percent (band 18..22, G-19). Reference search 2026-11-23: coa-history spell 707846: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: not listed (the snapshot lists 705123 only); expected values come from the tooltip and the DBC only.",
+      "observe_source": "$s2 = 20 (707846 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 19 + 1, MiscValue 0 = SPELLMOD_DAMAGE; Effect[2] is the same percent on SPELLMOD_ALL_EFFECTS). O-27 (owner): one bonus only. Effect[2] (aura 108 SPELLMOD_ALL_EFFECTS, same percent) named Fel Fireball (word 1 bit 0) beside Twin Slice (bit 24); the Felsworn contract drops the Fel Fireball bit of Effect[2] (AscensionFelswornContracts.cpp, Felsworn ADR 0025), so Fel Fireball keeps only Effect[1] as Felrend does. The spell penetration fixture 823764 (aura 123, MiscValue 126, -9999) is set on the caster in both arms: it removes the partial resists of the dummy's monster linear resistance, the variance of the 47-trial reads (+21.53 / +16.48 at rank 1 before the fix, merged/fw-b3g3/proveC). Fel Fireball 801312 (Effect[0] SCHOOL_DAMAGE, cast time 1500 ms) is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits only; the named precondition fixture spell_power +20000 is the same in both arms, so integer truncation is far inside the band; the mean damage per hit must rise by 20 percent (band 18..22, G-19). Reference search 2026-11-23: coa-history spell 707846: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: not listed (the snapshot lists 705123 only); expected values come from the tooltip and the DBC only.",
       "cast_wait_ms": 2500
     },
     {
@@ -12419,7 +12445,7 @@
       "tolerance": 16.5,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "706266 Effect[1] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT BasePoints 9 + 1 = 10 ($s2), and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 9 + 1 = 10, both aimed at Hateforged Barrier. The absorb amount of Hateforged Barrier 707527 (831 at the reference Stamina) is read 500 ms after a real cast, before the learn (control) and after it: ratio 1.10 within 0.02 (the larger of 5% of the bonus and 2 points, G-19), so a doubled bonus (1.21) is excluded. Reference search 2026-11-23: coa-history spell 706266: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: text 'increases the absorption value of Hateforged Barrier by 10%' (705129-era state for the first rank); expected values come from the tooltip and the DBC only. The absorb is rolled per cast (EffectDieSides 32: 752..783 plus Stamina 79, 831..862), so the control reading is judged in 830..863 and the treatment reading in [914.1, 948.2] (831..862 times 1.10); a doubled bonus would read 1006..1043.",
+      "observe_source": "706266 Effect[1] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT BasePoints 9 + 1 = 10 ($s2), and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 9 + 1 = 10, both aimed at Hateforged Barrier. O-27 (owner): one bonus only; the Felsworn contract turns Effect[2] into a dummy (AscensionFelswornContracts.cpp, Felsworn ADR 0025) and keeps aura 317, which scales the completed absorb (SpellAuraEffects.cpp); before the fix the reads were 1016 / 1029 (rank 1) and 1233 / 1207 (rank 2), 1.21x and 1.44x (merged/fw-b3g3/proveF2). The absorb amount of Hateforged Barrier 707527 (831 at the reference Stamina) is read 500 ms after a real cast, before the learn (control) and after it: ratio 1.10 within 0.02 (the larger of 5% of the bonus and 2 points, G-19), so a doubled bonus (1.21) is excluded. Reference search 2026-11-23: coa-history spell 706266: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: text 'increases the absorption value of Hateforged Barrier by 10%' (705129-era state for the first rank); expected values come from the tooltip and the DBC only. The absorb is rolled per cast (EffectDieSides 32: 752..783 plus Stamina 79, 831..862), so the control reading is judged in 830..863 and the treatment reading in [914.1, 948.2] (831..862 times 1.10); a doubled bonus would read 1006..1043.",
       "after_at_least": 914.1,
       "after_at_most": 948.2
     },
@@ -12444,7 +12470,7 @@
       "tolerance": 16.5,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "707844 Effect[1] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT BasePoints 19 + 1 = 20 ($s2), and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 19 + 1 = 20, both aimed at Hateforged Barrier. The absorb amount of Hateforged Barrier 707527 (831 at the reference Stamina) is read 500 ms after a real cast, before the learn (control) and after it: ratio 1.20 within 0.02 (the larger of 5% of the bonus and 2 points, G-19), so a doubled bonus (1.44) is excluded. Reference search 2026-11-23: coa-history spell 707844: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: not listed; expected values come from the tooltip and the DBC only. The absorb is rolled per cast (EffectDieSides 32: 752..783 plus Stamina 79, 831..862), so the control reading is judged in 830..863 and the treatment reading in [997.2, 1034.4] (831..862 times 1.20); a doubled bonus would read 1197..1241.",
+      "observe_source": "707844 Effect[1] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT BasePoints 19 + 1 = 20 ($s2), and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 19 + 1 = 20, both aimed at Hateforged Barrier. O-27 (owner): one bonus only; the Felsworn contract turns Effect[2] into a dummy (AscensionFelswornContracts.cpp, Felsworn ADR 0025) and keeps aura 317, which scales the completed absorb (SpellAuraEffects.cpp); before the fix the reads were 1016 / 1029 (rank 1) and 1233 / 1207 (rank 2), 1.21x and 1.44x (merged/fw-b3g3/proveF2). The absorb amount of Hateforged Barrier 707527 (831 at the reference Stamina) is read 500 ms after a real cast, before the learn (control) and after it: ratio 1.20 within 0.02 (the larger of 5% of the bonus and 2 points, G-19), so a doubled bonus (1.44) is excluded. Reference search 2026-11-23: coa-history spell 707844: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: not listed; expected values come from the tooltip and the DBC only. The absorb is rolled per cast (EffectDieSides 32: 752..783 plus Stamina 79, 831..862), so the control reading is judged in 830..863 and the treatment reading in [997.2, 1034.4] (831..862 times 1.20); a doubled bonus would read 1197..1241.",
       "after_at_least": 997.2,
       "after_at_most": 1034.4
     },

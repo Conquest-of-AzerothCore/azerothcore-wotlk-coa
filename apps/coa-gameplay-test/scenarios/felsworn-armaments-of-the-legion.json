@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Armaments of the Legion raises Hateforged Barrier's base absorb value (#1351)",
-  "contract": "Armaments of the Legion raises Hateforged Barrier's (705129) base absorb value by 10% (rank 1, 706266; EffectBasePoints 9, DieSides 1, so SpellEffectInfo::CalcValue resolves 10), via a native SPELLMOD_EFFECT1 (op3) percent SpellMod matching Hateforged Barrier's family20 classMask1 bit26 flag, before a separate aura317 shield multiplier and a defensive spell-hit-chance-taken aura further scale the cast shield.",
+  "name": "Armaments of the Legion raises Hateforged Barrier's absorb once, through aura 317 (#1351)",
+  "contract": "Armaments of the Legion (rank 1, 706266) states one 10% bonus to Hateforged Barrier's (705129) absorption. The DBC gives it twice: Effect[1] aura 317 (SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT, scales the completed absorb) and Effect[2] a SPELLMOD_EFFECT1 (op3) 10% percent SpellMod on the family20 classMask bit26 flag, which read 1.21x. Owner ruling O-27 keeps one bonus; the Felsworn contract turns Effect[2] into a dummy (Felsworn ADR 0025), so rank 1 adds no op3 SpellMod and the 10% comes from aura 317 alone (the absorbed amount itself is judged by the conformance entry 706266 barrier_absorb).",
   "timeout_ms": 90000,
   "players": [
     {
@@ -40,14 +40,13 @@
     },
     {
       "action": "assert",
-      "label": "Rank 1 raises Hateforged Barrier's base effect value by 10%",
+      "label": "Rank 1 adds no SPELLMOD_EFFECT1 modifier to Hateforged Barrier (owner ruling O-27: the 10% is aura 317 alone)",
       "actor": "rank_one",
       "metric": "spell_modifier",
       "spell": 705129,
       "op": 3,
       "base": 1000,
-      "min": 1099,
-      "max": 1101
+      "equals": 1000
     }
   ]
 }
