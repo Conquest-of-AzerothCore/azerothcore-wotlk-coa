@@ -19,6 +19,19 @@ TEST(CoAPetBattlesEngine, LuaNumberMatchesLuaToString)
     EXPECT_EQ(LuaNumber(233.75), "233.75");
 }
 
+TEST(CoAPetBattlesEngine, SeededRollsArePortable)
+{
+    SeededRng rng(4127);
+    std::vector<int32_t> rolls;
+    for (int i = 0; i < 5; ++i)
+        rolls.push_back(rng.Roll(1, 100));
+    EXPECT_EQ(rolls, (std::vector<int32_t> { 47, 82, 99, 57, 5 }));
+    EXPECT_EQ(rng.Roll(-5, 5), -4);
+    EXPECT_EQ(rng.Roll(0, 2147483647), 1712635934);
+    EXPECT_EQ(rng.Roll(-2147483647 - 1, 2147483647), -1742477470);
+    EXPECT_EQ(rng.Roll(7, 7), 7);
+}
+
 TEST(CoAPetBattlesEngine, EventCanonicalSortsFields)
 {
     Event event { "dmg", {} };

@@ -140,7 +140,8 @@ namespace CoAPetBattles::Engine
 
     bool Ready(Pet const& pet, int32_t slot)
     {
-        return pet.Ability(slot) != nullptr && pet.cd[static_cast<size_t>(slot) - 1] == 0;
+        PetAbility const* ability = pet.Ability(slot);
+        return ability && !ability->turns.empty() && pet.cd[static_cast<size_t>(slot) - 1] == 0;
     }
 
     std::string AuraName(Catalog const& catalog, uint32_t id)
@@ -370,7 +371,7 @@ namespace CoAPetBattles::Engine
         if (name != AuraName(catalog, entry.aid) && entry.src)
             ForAbilities(*entry.src, [&](PetAbility const& ability)
             {
-                if (ability.name == name)
+                if (ability.name == name && !ability.text.empty())
                 {
                     tip = Describe(catalog, { ability.text, &ability.turns, ability.family, std::nullopt },
                         entry.power);

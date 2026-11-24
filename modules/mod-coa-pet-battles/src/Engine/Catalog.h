@@ -5,6 +5,7 @@
 #include <array>
 #include <cstdint>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -72,6 +73,7 @@ namespace CoAPetBattles::Engine
         SpeciesDef const* Species(uint32_t entry) const;
         std::array<double, 2> const* Xp(double level) const;
         std::vector<uint32_t> SpeciesIds() const;
+        bool KitMissing(uint32_t entry) const { return _withoutKit.count(entry) != 0; }
 
     private:
         Settings _settings;
@@ -81,6 +83,7 @@ namespace CoAPetBattles::Engine
         std::map<uint32_t, SpeciesDef> _species;
         std::map<uint32_t, std::array<double, 2>> _xp;
         std::vector<Presentation> _presentations;
+        std::set<uint32_t> _withoutKit;
     };
 }
 

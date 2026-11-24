@@ -69,6 +69,15 @@ class FixtureFormatTest(unittest.TestCase):
         report['branches'].pop('swap39')
         self.assertTrue(any('swap39' in failure for failure in fixture_format.coverage_failures(report)))
 
+    def test_library_branches_are_required_even_when_unreachable(self):
+        for name in fixture_format.LIBRARY_BRANCHES:
+            report = full_report()
+            report['reachable_branches'].remove(name)
+            self.assertEqual(fixture_format.coverage_failures(report), [])
+            report['branches'][name] = 2
+            self.assertTrue(any(f'library branch {name}' in failure
+                                for failure in fixture_format.coverage_failures(report)))
+
 
 if __name__ == '__main__':
     unittest.main()

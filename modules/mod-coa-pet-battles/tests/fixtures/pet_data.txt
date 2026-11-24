@@ -2404,6 +2404,8 @@ coa_pet_ability	179	Conflagrate	6	4	[StandardAccuracy(1,1)] |cffffffffHit Chance
 coa_pet_ability	185	Reckless Strike	-1	0	Your damage taken has been increased by [abs(abilityStateMod( 24, 185 ))]%.	0
 coa_pet_ability	186	Reckless Strike	2	1	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1, 1)] [School()] damage, but increases the damage you take for [duration(1,3)] round by [abs(abilityStateMod(24, 185 ))]%.	0
 coa_pet_ability	187	Accuracy	-1	0	Hit chance increased by [abs(abilityStateMod(41,187))]%.	0
+coa_pet_ability	189	Cyclone	2	0	Deals [StandardDamage(1,1)] [School()] damage to your team each round.  [StandardAccuracy(1,1)] |cffffffffHit Chance|r	0
+coa_pet_ability	190	Cyclone	2	5	Creates a cyclone which has a [accuracy(1,1,189)]% chance to deal [StandardDamage(1,1,189)] [School()] damage to the enemy team each round.  Lasts [duration(1,1)] rounds.	0
 coa_pet_ability	197	Adrenal Glands	5	0	Increases your critical strike chance by [abs(abilityStateMod(40, 841))]% for [duration(1,1)] |4round:rounds.	197
 coa_pet_ability	202	Thrash	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Wildly flails at the enemy 1-2 times, dealing [StandardDamage(1,1)] [School()] damage per hit.  Hits an additional time if the user attacks first.	0
 coa_pet_ability	205	Blizzard	6	0	Elemental abilities deal [abs(abilityStateMod(87,205))]% additional damage.  All pets are considered |cFF0070DDChilled|r.	0
@@ -2438,6 +2440,8 @@ coa_pet_ability	257	Darkness	-1	0	Healing received reduced by [abs(abilityStateM
 coa_pet_ability	258	Starfall	1	4	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage to all enemy pets, restores [SimpleDamage(1,4)] health to all allies and turns the weather into Moonlight for [duration(1,7)] |4round:rounds.  During Moonlight, all pets receive 25% additional healing and Magic abilities deal 10% additional damage.	258
 coa_pet_ability	262	Crystal Overload	6	0	Damage increased by 100%. Your next attack will deal [FormatDamage(SimpleDamage(1,1)*2)] [School()] damage to you.	262
 coa_pet_ability	263	Crystal Overload	6	1	Your next attack made within [duration(1,1)] |4round:rounds; deals double damage, but deals [FormatDamage(SimpleDamage(1,1,262)+SimpleDamage(1,1,262))] [School()] damage to you.	263
+coa_pet_ability	267	Photosynthesis	-1	0	Restores [StandardDamage(1,1,267)] health per round.  Twice as effective in Sunny weather.	0
+coa_pet_ability	268	Photosynthesis	6	0	Restores [StandardDamage(1,1,267)] healing every round. Lasts [duration(1,1)] |4round:rounds;.  Twice as effective in sunny weather.	0
 coa_pet_ability	270	Glowing Toxin	2	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [points(1,1,271)]% of the target's max health as damage every round.  Lasts [duration(1,1)] |4round:rounds.	270
 coa_pet_ability	271	Glowing Toxin	2	0	Deals [points(1,1)]% of maximum health as damage every round.	271
 coa_pet_ability	273	Wish	5	5	Next round, your active pet will be healed for 50% of its maximum health.	0
@@ -2918,6 +2922,8 @@ coa_pet_ability	2067	Pinch	8	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  P
 coa_pet_ability	2068	Face Bite	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Leap to the target's face, instantly dealing [StandardDamage(1,1)] [School()] damage and increases your speed by [abs(abilityStateMod( 25, 544 ))]% for [duration(1,2)] round.	0
 coa_pet_ability	2083	Mummy Wrap	-1	0	You will block the next attack that strikes you. Speed reduced by [abs(abilityStateMod(25,505))]%.	2083
 coa_pet_ability	2084	Mummy Wrap	3	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Deals [StandardDamage(1,1)] [School()] damage and increases your chance to block an attack by 100%.  Lasts [duration(1,2)] |4round:rounds;.	2084
+coa_pet_ability	2102	Void Cyclone	5	5	Creates a cyclone which has a [accuracy(1,1,2103)]% chance to deal [StandardDamage(1,1,2103)] [School()] damage to the enemy team each round.  Lasts [duration(1,1)] rounds.	0
+coa_pet_ability	2103	Void Cyclone	5	0	Deals [StandardDamage(1,1)] [School()] damage to your team each round.  [StandardAccuracy(1,1)] |cffffffffHit Chance|r	0
 coa_pet_ability	2112	Toxic Wound	7	0	Harmful damage over time effects deal [abs(abilityStateMod(202,2112))*AttackBonus()] more damage each time they deal damage.	0
 coa_pet_ability	2113	Toxic Bite	7	0	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  Instantly deals [StandardDamage(1,1)] [School()] damage and causes harmful damage over time effects to deal [abs(abilityStateMod(202,2112))*AttackBonus()] more damage each time they deal damage for [duration(1,2)] |4round:rounds.	0
 coa_pet_ability	2205	Howl	7	3	[StandardAccuracy(1,1)] |cffffffffHit Chance|r  A distant howl frightens the target, increasing the damage they take on the next attack by 100%, lasts [duration(1,1)] rounds.	2205
@@ -4272,6 +4278,8 @@ coa_pet_ability_turn	179	1	0	255
 coa_pet_ability_turn	185	1	0	255
 coa_pet_ability_turn	186	1	0	255
 coa_pet_ability_turn	187	1	0	255
+coa_pet_ability_turn	189	1	0	255
+coa_pet_ability_turn	190	1	0	255
 coa_pet_ability_turn	197	1	0	255
 coa_pet_ability_turn	202	1	0	255
 coa_pet_ability_turn	205	1	0	255
@@ -4307,6 +4315,8 @@ coa_pet_ability_turn	256	1	0	255
 coa_pet_ability_turn	258	1	0	255
 coa_pet_ability_turn	262	1	1	2
 coa_pet_ability_turn	263	1	0	255
+coa_pet_ability_turn	267	1	0	255
+coa_pet_ability_turn	268	1	0	255
 coa_pet_ability_turn	270	1	0	255
 coa_pet_ability_turn	271	1	0	255
 coa_pet_ability_turn	273	1	0	255
@@ -4868,6 +4878,8 @@ coa_pet_ability_turn	2067	1	0	255
 coa_pet_ability_turn	2068	1	0	255
 coa_pet_ability_turn	2083	1	0	255
 coa_pet_ability_turn	2084	1	0	255
+coa_pet_ability_turn	2102	1	0	255
+coa_pet_ability_turn	2103	1	0	255
 coa_pet_ability_turn	2112	1	0	255
 coa_pet_ability_turn	2113	1	0	255
 coa_pet_ability_turn	2205	1	0	255
@@ -6496,6 +6508,10 @@ coa_pet_ability_effect	179	1	3	29	0	10	100	0	34	0	0
 coa_pet_ability_effect	186	1	1	222	0	25	100	40	0	0	0
 coa_pet_ability_effect	186	1	2	158	0	0	0	0	0	0	0
 coa_pet_ability_effect	186	1	3	26	185	0	100	1	0	0	0
+coa_pet_ability_effect	189	1	1	222	0	6	35	50	0	0	0
+coa_pet_ability_effect	189	1	2	222	0	6	35	50	0	0	0
+coa_pet_ability_effect	189	1	3	222	0	6	35	50	0	0	0
+coa_pet_ability_effect	190	1	1	50	189	0	100	5	0	0	0
 coa_pet_ability_effect	197	1	1	26	841	0	100	5	0	0	0
 coa_pet_ability_effect	202	1	1	24	0	10	100	0	0	0	0
 coa_pet_ability_effect	202	1	2	158	0	0	0	0	0	0	0
@@ -6558,6 +6574,9 @@ coa_pet_ability_effect	258	1	7	80	596	0	200	9	0	0	0
 coa_pet_ability_effect	262	1	1	24	0	5	100	0	0	0	0
 coa_pet_ability_effect	262	1	2	49	262	100	0	0	0	0	0
 coa_pet_ability_effect	263	1	1	26	262	0	100	2	0	0	0
+coa_pet_ability_effect	267	1	1	23	0	6	100	0	0	0	0
+coa_pet_ability_effect	267	1	2	171	0	6	100	61	61	0	0
+coa_pet_ability_effect	268	1	1	63	267	0	100	5	0	0	0
 coa_pet_ability_effect	270	1	1	50	271	0	100	4	0	0	0
 coa_pet_ability_effect	271	1	1	62	0	6	100	0	0	0	0
 coa_pet_ability_effect	273	1	1	63	274	0	100	1	0	0	0
@@ -7502,6 +7521,10 @@ coa_pet_ability_effect	2068	1	1	24	0	15	100	0	0	0	0
 coa_pet_ability_effect	2068	1	2	26	544	0	100	1	0	0	0
 coa_pet_ability_effect	2084	1	1	24	0	10	100	0	0	0	0
 coa_pet_ability_effect	2084	1	2	26	2083	0	100	1	0	0	0
+coa_pet_ability_effect	2102	1	1	50	2103	0	100	5	0	0	0
+coa_pet_ability_effect	2103	1	1	222	0	6	35	50	0	0	0
+coa_pet_ability_effect	2103	1	2	222	0	6	35	50	0	0	0
+coa_pet_ability_effect	2103	1	3	222	0	6	35	50	0	0	0
 coa_pet_ability_effect	2113	1	1	24	0	10	100	0	0	0	0
 coa_pet_ability_effect	2113	1	2	50	2112	0	100	5	1	0	0
 coa_pet_ability_effect	2205	1	1	50	1725	0	100	2	0	0	0
@@ -10782,6 +10805,7 @@ coa_pet_aura_state	174	Mechanic_IsStunned	1
 coa_pet_aura_state	174	turnLock	1
 coa_pet_aura_state	185	Mod_DamageTakenPercent	25
 coa_pet_aura_state	187	Stat_Accuracy	25
+coa_pet_aura_state	189	Mechanic_IsObject	1
 coa_pet_aura_state	205	Mechanic_IsChilled	1
 coa_pet_aura_state	205	Mod_PetTypeDamageDealtPercent	25
 coa_pet_aura_state	205	Mod_PetType_ID	7
@@ -10955,6 +10979,7 @@ coa_pet_aura_state	2066	turnLock	1
 coa_pet_aura_state	2083	Mod_SpeedPercent	-100
 coa_pet_aura_state	2083	Special_BlockedAttackCount	1
 coa_pet_aura_state	2083	swapOutLock	1
+coa_pet_aura_state	2103	Mechanic_IsObject	1
 coa_pet_aura_state	2112	Add_PeriodicDamageTaken	7
 coa_pet_aura_state	2238	Add_FlatDamageTaken	8
 coa_pet_aura_state	2339	Mechanic_IsFlying	1

@@ -1,8 +1,11 @@
 #ifndef COA_PET_BATTLE_ENGINE_SIM_H
 #define COA_PET_BATTLE_ENGINE_SIM_H
 
+#include "Battle.h"
 #include "Catalog.h"
 #include <cstdint>
+#include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -16,6 +19,7 @@ namespace CoAPetBattles::Engine
         std::string error;
     };
 
+    std::optional<std::string> SimLine(Battle const& battle, Event const& event, std::map<Side, std::string>& used);
     SimResult RunSim(Catalog const& catalog, uint32_t speciesA, uint32_t speciesB, int32_t level, uint32_t seed);
 }
 

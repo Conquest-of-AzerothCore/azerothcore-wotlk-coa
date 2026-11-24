@@ -1,7 +1,11 @@
+#include "Engine/Battle.h"
+#include "Engine/Pet.h"
 #include "Engine/Sim.h"
 #include "FixtureReader.h"
 #include <gtest/gtest.h>
 #include <algorithm>
+#include <cctype>
+#include <map>
 #include <random>
 
 using namespace CoAPetBattles;
@@ -90,4 +94,50 @@ TEST(CoAPetBattlesSim, SimArgumentsAreValidated)
     SimResult const noKit = RunSim(withoutKit, bare, b, 25, 1);
     EXPECT_EQ(noKit.error, "pet species " + std::to_string(bare) + " has no abilities");
     EXPECT_TRUE(noKit.lines.empty());
+
+    DataSet kitless = Fixtures::LoadData();
+    kitless.kits.erase(kitless.species.at(bare).kit);
+    Catalog const missingKit(kitless, Settings());
+    EXPECT_EQ(RunSim(missingKit, bare, b, 25, 1).error, "pet species " + std::to_string(bare) + " has no kit");
+    EXPECT_EQ(RunSim(missingKit, 4000000000u, b, 25, 1).error, "unknown pet species 4000000000");
+}
+
+TEST(CoAPetBattlesSim, SimNamesPermanentAurasAndWallCharges)
+{
+    auto const [a, b] = TwoSpecies();
+    SeededRng rng(1);
+    Pet mine = NewPet(SimCatalog(), a, 25, std::nullopt, rng, 4, std::nullopt);
+    Pet theirs = NewPet(SimCatalog(), b, 25, std::nullopt, rng, 4, std::nullopt);
+    Aura perm;
+    perm.id = 900;
+    perm.left = 99;
+    perm.perm = true;
+    mine.auras.push_back(perm);
+    Battle battle(SimCatalog(), { mine }, { theirs }, rng);
+    battle.wall = Wall { 326, 2, Side::E };
+    auto buff = [](std::string const& side, std::string const& what, double turns)
+    {
+        Event event { "buff", {} };
+        event.fields["side"] = side;
+        event.fields["idx"] = 1.0;
+        event.fields["what"] = what;
+        event.fields["turns"] = turns;
+        return event;
+    };
+    auto lower = [](std::string text)
+    {
+        std::transform(text.begin(), text.end(), text.begin(), [](unsigned char c) { return std::tolower(c); });
+        return text;
+    };
+    std::string const permName = lower(AuraName(SimCatalog(), 900));
+    std::string const wallName = lower(AuraName(SimCatalog(), 326));
+    ASSERT_NE(permName, wallName);
+    std::map<Side, std::string> used;
+    EXPECT_EQ(SimLine(battle, buff("P", permName, 99), used),
+        battle.Current(Side::P).name + ": " + permName + " (permanent)");
+    EXPECT_EQ(SimLine(battle, buff("E", wallName, 2), used),
+        battle.Current(Side::E).name + ": " + wallName + " (2 charges)");
+    EXPECT_EQ(SimLine(battle, buff("E", "howl", 3), used), battle.Current(Side::E).name + ": howl (3 rounds)");
+    EXPECT_EQ(SimLine(battle, buff("P", wallName, 2), used),
+        battle.Current(Side::P).name + ": " + wallName + " (2 rounds)");
 }

@@ -18,7 +18,10 @@ TEAM_HANDLERS = ('FX03', 'FX15', 'FX20', 'FX22', 'FX39', 'FX145')
 TIP_POWER = 260
 MAX_TARGET_BATTLES = 40
 EXTRA_POOL = 40
-LIBRARY_ABILITIES = (277, 522, 325, 1344, 1073, 795, 1104, 385)
+LIBRARY_ABILITIES = (277, 522, 325, 1344, 1073, 795, 1104, 385, 190, 2102, 268, 403)
+LIBRARY_BRANCHES = (('teamaura', 190, None), ('teamaura', 2102, None), ('photosynthesis', 268, (403, 9)))
+LIBRARY_ATTEMPTS = 40
+LIBRARY_BATTLES = 2
 HARD_CODED_AURAS = (1124, 831)
 
 
@@ -135,7 +138,14 @@ class Tracer:
                     for tip in seq(plain(self.lua_type, self.M.kitTips(member['entry'], pet.power))):
                         lines.append(['KITTIPX' if tip['fallback'] else 'KITTIP', side, index, int(tip['slot']),
                                       int(tip['opt']), tip['text']])
+                for slot, ability in member.get('library', ()):
+                    pet.abil[slot] = self.M.libraryAbility(ability)
+                    lines.append(['LIB', side, index, slot, ability])
         battle = self.C.NewBattle(self.lua.table_from(pets['P']), self.lua.table_from(pets['E']), self.roll)
+        if team.get('weather'):
+            weather, left = team['weather']
+            self.M.setWeather(battle, weather, left)
+            lines.append(['WEATHER', weather, left])
         status = 'turn'
         for _ in range(ROUND_LIMIT):
             command = self.choose(battle, status, target)
@@ -225,6 +235,20 @@ def branch_plans(tracer, species, rng):
     return sorted(candidates), plans
 
 
+def library_plans(pool, rng):
+    plans = []
+    for name, ability, weather in LIBRARY_BRANCHES:
+        for _ in range(LIBRARY_ATTEMPTS):
+            holder = {'entry': rng.choice(pool), 'level': 25, 'library': [(1, ability)]}
+            if weather:
+                holder['hp'] = 400
+            team = team_of(holder, pool, rng)
+            if weather:
+                team['weather'] = weather
+            plans.append((ability, name, team, (1, 1)))
+    return plans
+
+
 def random_plans(pool, rng, battles):
     plans = []
     for _ in range(battles):
@@ -287,6 +311,7 @@ def main():
     parser.add_argument('--seed', type=int, required=True)
     parser.add_argument('--battles', type=int, required=True)
     parser.add_argument('--max-bytes', type=int, required=True)
+    parser.add_argument('--random-bytes', type=int, required=True)
     args = parser.parse_args()
     tracer = Tracer(args.upstream, args.seed)
     rng = random.Random(args.seed + 2)
@@ -304,7 +329,7 @@ def main():
                            for key in after['branches']}
         if wanted and gained.get(wanted, 0) == 0 and gained_branches.get(wanted, 0) == 0:
             return False
-        if not wanted and size + len(text.encode('utf-8')) > args.max_bytes * 0.55:
+        if not wanted and size + len(text.encode('utf-8')) > args.random_bytes:
             return None
         traces.append(text)
         size += len(text.encode('utf-8'))
@@ -331,6 +356,11 @@ def main():
     for team in random_plans(pool, rng, args.battles):
         if run(team) is None:
             break
+    library_battles = {}
+    for ability, name, team, target in library_plans(sorted(used), rng):
+        if library_battles.get(ability, 0) < LIBRARY_BATTLES and run(team, target, name):
+            library_battles[ability] = library_battles.get(ability, 0) + 1
+    report['library_battles'] = {str(ability): count for ability, count in sorted(library_battles.items())}
     data = data_rows(args.export, used)
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)

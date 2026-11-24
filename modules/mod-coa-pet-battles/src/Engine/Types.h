@@ -59,32 +59,46 @@ namespace CoAPetBattles::Engine
 
         AuraTable() : _list(std::make_shared<List>()) { }
         AuraTable(std::initializer_list<Aura> auras) : _list(std::make_shared<List>(auras)) { }
-        AuraTable(AuraTable const& other) : _list(std::make_shared<List>(*other._list)) { }
+        AuraTable(AuraTable const& other) : _list(std::make_shared<List>(other.Get())) { }
+        AuraTable(AuraTable&& other) noexcept : _list(std::move(other._list)) { }
         AuraTable& operator=(AuraTable const& other)
         {
-            _list = std::make_shared<List>(*other._list);
+            if (this != &other)
+                _list = std::make_shared<List>(other.Get());
+            return *this;
+        }
+        AuraTable& operator=(AuraTable&& other) noexcept
+        {
+            _list = std::move(other._list);
             return *this;
         }
 
-        std::shared_ptr<List> Share() const { return _list; }
+        std::shared_ptr<List> Share() const { Get(); return _list; }
         void Replace() { _list = std::make_shared<List>(); }
 
-        List::iterator begin() { return _list->begin(); }
-        List::iterator end() { return _list->end(); }
-        List::const_iterator begin() const { return _list->begin(); }
-        List::const_iterator end() const { return _list->end(); }
-        size_t size() const { return _list->size(); }
-        bool empty() const { return _list->empty(); }
-        Aura& operator[](size_t index) { return (*_list)[index]; }
-        Aura const& operator[](size_t index) const { return (*_list)[index]; }
-        Aura& front() { return _list->front(); }
-        void push_back(Aura const& aura) { _list->push_back(aura); }
-        List::iterator erase(List::iterator first, List::iterator last) { return _list->erase(first, last); }
-        List::iterator erase(List::iterator position) { return _list->erase(position); }
-        void clear() { _list->clear(); }
+        List::iterator begin() { return Get().begin(); }
+        List::iterator end() { return Get().end(); }
+        List::const_iterator begin() const { return Get().begin(); }
+        List::const_iterator end() const { return Get().end(); }
+        size_t size() const { return Get().size(); }
+        bool empty() const { return Get().empty(); }
+        Aura& operator[](size_t index) { return Get()[index]; }
+        Aura const& operator[](size_t index) const { return Get()[index]; }
+        Aura& front() { return Get().front(); }
+        void push_back(Aura const& aura) { Get().push_back(aura); }
+        List::iterator erase(List::iterator first, List::iterator last) { return Get().erase(first, last); }
+        List::iterator erase(List::iterator position) { return Get().erase(position); }
+        void clear() { Get().clear(); }
 
     private:
-        std::shared_ptr<List> _list;
+        List& Get() const
+        {
+            if (!_list)
+                _list = std::make_shared<List>();
+            return *_list;
+        }
+
+        mutable std::shared_ptr<List> _list;
     };
 
     struct Channel

@@ -20,8 +20,8 @@ with each pet's own numbers, round resolution with all 42 retail effect handlers
 passives, forced swaps, the trap and the enemy AI. It uses only the standard library and the loaded data, and draws
 every random number through one interface in upstream's order.
 
-It is proven against upstream by replay. `tools/pet_data/trace_upstream.py` ran 107 seeded battles (1v1 and 3v3,
-levels 1–25, 1,169 rounds) through upstream's own Lua and recorded every roll, command, event and pet state in
+It is proven against upstream by replay. `tools/pet_data/trace_upstream.py` ran 113 seeded battles (1v1 and 3v3,
+levels 1–25, 1,317 rounds) through upstream's own Lua and recorded every roll, command, event and pet state in
 `tests/fixtures/`. The unit tests replay each battle through the C++ engine and require identical events, statuses,
 pet state and rolls. What the recorded battles cover, measured inside upstream's Lua:
 
@@ -32,10 +32,11 @@ pet state and rolls. What the recorded battles cover, measured inside upstream's
 - the tooltip of every kit option of every recorded species matches, and across all 20,568 kit tooltips of the
   3,428 species none reaches upstream's order-dependent fallback.
 
-Effects only the unreferenced retail library can reach are not in the recordings and have their own tests on the
-real abilities: Life Exchange, Nevermore and its ability lockout, Beaver Dam's wall, Refuge, Spiny Carapace, Dark
-Rebirth, Reflective Shield and the XE-321 Boombot bomb. Two such branches have no test: team-wide damage auras and
-Photosynthesis's weather bonus.
+Effects only the unreferenced retail library can reach have their own tests on the real abilities: Life Exchange,
+Nevermore and its ability lockout, Beaver Dam's wall, Refuge, Spiny Carapace, Dark Rebirth, Reflective Shield and
+the XE-321 Boombot bomb. Two library branches are recorded from upstream like the rest: six battles give a pet
+Cyclone (190), Void Cyclone (2102) or Photosynthesis (268, in Sunny Day weather) in place of its first ability
+(`LIB` and `WEATHER` lines), covering team-wide damage auras and Photosynthesis's weather bonus.
 
 ## Trying it: `.petbattle sim`
 
@@ -47,14 +48,14 @@ GMs can run a whole battle between two pet species and read it in chat:
 
 Species are creature entries from `coa_pet_species`. Both pets are rare at the given level (default 25), the
 upstream AI plays both sides, and the battle stops after 50 rounds. The seed is printed so the same battle can be
-replayed.
+replayed, on any server build: the sim draws its numbers from MT19937 without a standard-library distribution.
 
 ```
 [Pet sim] <pet A> (<level> rare) vs <pet B> (<level> rare), seed <seed>
 R<round> <pet>: <ability> -> <target> <damage> (<health>/<max health>)
 R<round> <pet> heals <amount> (<health>/<max health>)
 R<round> <target> dodges <ability>
-R<round> <pet>: <aura> (<rounds> rounds)
+R<round> <pet>: <aura> (<rounds> rounds | permanent | <charges> charges)
 R<round> <pet> faints.
 <pet> wins.
 ```
@@ -123,3 +124,15 @@ would undo those changes, so treat a re-import as a deliberate replacement.
 
 A stand-in whose species is removed later keeps its `creature_template` row (that table is never deleted from), but
 loses its model rows on the next import; retire it with an explicit update rather than leaving the entry behind.
+
+## Re-recording the replay fixtures
+
+`tests/fixtures/` was recorded from the same export and upstream commit. The run is deterministic and refuses to
+finish unless every handler and branch reaches its minimum count:
+
+```sh
+PYTHONPATH=/tmp/lupa-lib python3 -B modules/mod-coa-pet-battles/tools/pet_data/trace_upstream.py \
+  --upstream <azerothcore-linux-server checkout> --export /tmp/export.json \
+  --out-dir modules/mod-coa-pet-battles/tests/fixtures --seed 20261123 --battles 400 \
+  --max-bytes 3300000 --random-bytes 1650000
+```

@@ -15,6 +15,8 @@ namespace
     constexpr uint32_t StunAura = 900010;
     constexpr uint32_t DodgeAura = 900011;
     constexpr uint32_t StormAura = 900020;
+    constexpr uint32_t MarkerAura = 900030;
+    constexpr uint32_t DoubleLock = 900031;
 
     class ConstantRng : public Rng
     {
@@ -61,6 +63,9 @@ namespace
             AddAbility(d, StunAura, "Stunned", 7, {});
             AddAbility(d, DodgeAura, "Dodge", 7, {});
             AddAbility(d, StormAura, "Storm", 7, {});
+            AddAbility(d, MarkerAura, "Marker", 7, {});
+            AddAbility(d, DoubleLock, "Double Lock", 7, { { Effect(129, { 3, 0, 0, 0, 0, 0 }),
+                Effect(129, { 5, 0, 0, 0, 0, 0 }) } });
             d.auraStates.push_back({ StunAura, "Mechanic_IsStunned", 1 });
             d.auraStates.push_back({ DodgeAura, "Stat_Dodge", 50 });
             d.auraStates.push_back({ StormAura, "Mod_PetTypeDamageDealtPercent", 25 });
@@ -354,6 +359,35 @@ TEST(CoAPetBattlesMechanics, NevermoreLocksTheNextAbility)
     ASSERT_NE(pass, nullptr);
     EXPECT_TRUE(pass->Flag("pass"));
     EXPECT_EQ(battle.Current(Side::E).cd[0], lockout - 1);
+}
+
+TEST(CoAPetBattlesMechanics, TwoLockoutsInOneAuraRemoveOnlyThatAura)
+{
+    ConstantRng rng(100);
+    Pet locked = MakePet(Strike, "Critter");
+    locked.auras.push_back(AuraOf(MarkerAura, 5));
+    Aura lock = AuraOf(DoubleLock, 5);
+    lock.on = 9;
+    locked.auras.push_back(lock);
+    Battle battle(MechanicCatalog(), { MakePet(Strike, "Beast") }, { locked }, rng);
+    Round(battle, "A1", "A1");
+    EXPECT_FALSE(HasAura(battle.Current(Side::E), DoubleLock));
+    EXPECT_TRUE(HasAura(battle.Current(Side::E), MarkerAura));
+    EXPECT_EQ(battle.Current(Side::E).cd[0], 5);
+}
+
+TEST(CoAPetBattlesMechanics, AbilityWithoutTurnsPassesInsteadOfActing)
+{
+    ConstantRng rng(100);
+    Battle battle(MechanicCatalog(), { MakePet(MarkerAura, "Beast") }, { MakePet(Strike, "Critter") }, rng);
+    EXPECT_FALSE(Ready(battle.Current(Side::P), 1));
+    std::string const command = AI(battle, Side::P);
+    RoundResult const result = Round(battle, command, "A1");
+    Event const* pass = First(result.events, "stunned");
+    ASSERT_NE(pass, nullptr);
+    EXPECT_EQ(pass->Text("side"), "P");
+    EXPECT_TRUE(pass->Flag("pass"));
+    EXPECT_EQ(Count(result.events, "act"), 1u);
 }
 
 TEST(CoAPetBattlesMechanics, DarkRebirthRevivesAtFullHealth)

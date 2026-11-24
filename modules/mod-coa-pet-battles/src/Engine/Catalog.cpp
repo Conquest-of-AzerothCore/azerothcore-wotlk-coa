@@ -56,7 +56,10 @@ namespace CoAPetBattles::Engine
         {
             auto const kit = data.kits.find(species.kit);
             if (kit == data.kits.end())
+            {
+                _withoutKit.insert(entry);
                 continue;
+            }
             SpeciesDef def { entry, species.name, species.icon,
                 FamilyAt(static_cast<double>(kit->second.family) + 1).value_or("Magic"),
                 static_cast<double>(kit->second.power), static_cast<double>(kit->second.speed),

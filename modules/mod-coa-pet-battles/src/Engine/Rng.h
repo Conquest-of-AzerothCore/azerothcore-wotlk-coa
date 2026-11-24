@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <random>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace CoAPetBattles::Engine

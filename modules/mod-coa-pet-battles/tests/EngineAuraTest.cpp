@@ -1,5 +1,7 @@
 #include "Engine/Battle.h"
+#include "Engine/Describe.h"
 #include <gtest/gtest.h>
+#include <type_traits>
 
 using namespace CoAPetBattles;
 using namespace CoAPetBattles::Engine;
@@ -14,6 +16,9 @@ namespace
         data.abilities[12] = { 12, "Pumped", 8, 0, "", 0 };
         data.abilities[13] = { 13, "Speed Server Only", 0, 0, "", 0 };
         data.abilities[20] = { 20, "Blizzard", 6, 0, "", 0 };
+        data.abilities[30] = { 30, "Rally", 7, 0, "", 0 };
+        data.turns = { { 30, 1, 0, 255 } };
+        data.effects = { { 30, 1, 1, 26, 10, { 0, 100, 2, 0, 0, 0 } } };
         data.auraStates = {
             { 10, "Mod_DamageDealtPercent", 25 },
             { 11, "Mechanic_IsPoisoned", 1 },
@@ -107,4 +112,48 @@ TEST(CoAPetBattlesEngine, StatusStringFormatsAurasLikeUpstream)
         "Pumped~Spell_Holy_PowerWordShield~0~1~0");
     EXPECT_EQ(TagText(AuraCatalog(), pet), "Howl  Poison x2  Pumped");
     EXPECT_EQ(Speed(nullptr, pet), 105);
+}
+
+TEST(CoAPetBattlesEngine, FlavoredAuraWithoutTextFallsBackToTheAuraTip)
+{
+    Pet caster = MakePet("Beast");
+    PetAbility flavored;
+    flavored.id = 30;
+    flavored.name = "Battle Cry";
+    caster.abil[0] = flavored;
+    StatusEntry entry;
+    entry.aid = 10;
+    entry.power = 100;
+    entry.src = &caster;
+    std::string const expected = AuraTip(AuraCatalog(), 10, 100);
+    ASSERT_FALSE(expected.empty());
+    EXPECT_EQ(StatusTip(AuraCatalog(), entry), expected);
+    caster.abil[0]->text = "Rallies the team.";
+    EXPECT_EQ(StatusTip(AuraCatalog(), entry), "Rallies the team.");
+}
+
+TEST(CoAPetBattlesEngine, MovingAurasKeepsTheirList)
+{
+    static_assert(std::is_nothrow_move_constructible_v<AuraTable>);
+    static_assert(std::is_nothrow_move_assignable_v<AuraTable>);
+    AuraTable source { MakeAura(10, 2), MakeAura(11, 1) };
+    auto const list = source.Share();
+    AuraTable moved(std::move(source));
+    EXPECT_EQ(moved.Share(), list);
+    EXPECT_EQ(moved.size(), 2u);
+    EXPECT_TRUE(source.empty());
+    source.push_back(MakeAura(12, 3));
+    EXPECT_EQ(source.size(), 1u);
+    EXPECT_EQ(moved.size(), 2u);
+
+    AuraTable assigned;
+    assigned = std::move(moved);
+    EXPECT_EQ(assigned.Share(), list);
+    EXPECT_TRUE(moved.empty());
+
+    Pet pet = MakePet("Beast");
+    pet.auras = assigned;
+    auto const petList = pet.auras.Share();
+    Pet movedPet(std::move(pet));
+    EXPECT_EQ(movedPet.auras.Share(), petList);
 }

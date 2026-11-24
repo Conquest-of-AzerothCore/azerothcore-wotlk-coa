@@ -139,9 +139,7 @@ namespace CoAPetBattles
     {
         double ReadDecimal(std::string const& key, double fallback)
         {
-            std::string const text = sConfigMgr->GetOption<std::string>(key, "");
-            if (text.empty())
-                return fallback;
+            std::string const text = sConfigMgr->GetOption<std::string>(key, DecimalText(fallback));
             if (std::optional<double> value = ParseDecimal(text))
                 return *value;
             LOG_ERROR("server.loading", "{} '{}' is not a decimal number; using {}", key, text, fallback);

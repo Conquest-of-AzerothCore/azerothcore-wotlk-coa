@@ -169,3 +169,42 @@ TEST(CoAPetBattles, DecimalsParseLikeLua)
     EXPECT_FALSE(ParseDecimal("nan").has_value());
     EXPECT_FALSE(ParseDecimal("inf").has_value());
 }
+
+TEST(CoAPetBattles, DecimalDefaultsPrintAsTheConfigValue)
+{
+    EXPECT_EQ(DecimalText(0.35), "0.35");
+    EXPECT_EQ(DecimalText(0.2), "0.2");
+    EXPECT_EQ(DecimalText(1), "1");
+    EXPECT_EQ(*ParseDecimal(DecimalText(Settings().captureHealth)), Settings().captureHealth);
+    EXPECT_EQ(*ParseDecimal(DecimalText(Settings().xpStep)), Settings().xpStep);
+}
+
+TEST(CoAPetBattles, KitAbilitiesNeedATurn)
+{
+    DataSet data = MakeValidData();
+    data.turns.erase(std::remove_if(data.turns.begin(), data.turns.end(),
+        [](AbilityTurn const& turn) { return turn.ability == 2; }), data.turns.end());
+    data.effects.erase(std::remove_if(data.effects.begin(), data.effects.end(),
+        [](AbilityEffect const& effect) { return effect.ability == 2; }), data.effects.end());
+    Report const report = Validate(data, AnyTemplate);
+    EXPECT_TRUE(Contains(report.errors, "ability 2 has no turns")) << report.errors.size();
+}
+
+TEST(CoAPetBattles, AuraOnlyAbilitiesNeedNoTurn)
+{
+    DataSet data = MakeValidData();
+    data.abilities[4] = { 4, "Stunned", 7, 0, "", 0 };
+    data.effects.push_back({ 1, 1, 2, 26, 4, { 0, 100, 1, 0, 0, 0 } });
+    EXPECT_TRUE(Validate(data, AnyTemplate).errors.empty());
+}
+
+TEST(CoAPetBattles, KitFamilyMustBeKnown)
+{
+    DataSet data = MakeValidData();
+    data.kits[200].family = 10;
+    EXPECT_TRUE(Contains(Validate(data, AnyTemplate).errors, "kit 200: family 10 unknown"));
+    data.kits[200].family = 255;
+    EXPECT_TRUE(Contains(Validate(data, AnyTemplate).errors, "kit 200: family 255 unknown"));
+    data.kits[200].family = 9;
+    EXPECT_TRUE(Validate(data, AnyTemplate).errors.empty());
+}

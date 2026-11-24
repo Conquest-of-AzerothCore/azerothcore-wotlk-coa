@@ -24,50 +24,71 @@ namespace CoAPetBattles::Engine
             return battle.At(SideOf(event, side), static_cast<int32_t>(event.Number(index))).name;
         }
 
-        std::optional<std::string> Line(Battle const& battle, Event const& event, std::map<Side, std::string>& used)
+        std::string Lower(std::string text)
         {
-            std::string const& kind = event.kind;
-            if (kind == "act")
-            {
-                used[SideOf(event, "side")] = event.Text("name");
-                if (!event.Flag("dmg"))
-                    return NameOf(battle, event, "side", "idx") + " uses " + event.Text("name");
-                return std::nullopt;
-            }
-            if (kind == "dmg")
-            {
-                std::string const& target = NameOf(battle, event, "tside", "tidx");
-                if (event.Flag("recoil"))
-                    return target + " hurts itself for " + LuaNumber(event.Number("dmg")) + " " + Health(event);
-                if (event.Flag("reflect"))
-                    return target + " takes " + LuaNumber(event.Number("dmg")) + " reflected damage " + Health(event);
-                std::string const ability = used.count(SideOf(event, "side")) ? used[SideOf(event, "side")] : "attack";
-                return NameOf(battle, event, "side", "idx") + ": " + ability + " -> " + target + " " +
-                    LuaNumber(event.Number("dmg")) + " " + Health(event) + (event.Flag("crit") ? " critical" : "");
-            }
-            if (kind == "dot")
-                return NameOf(battle, event, "side", "idx") + " takes " + LuaNumber(event.Number("dmg")) +
-                    " over time " + Health(event);
-            if (kind == "heal")
-                return NameOf(battle, event, "side", "idx") + " heals " + LuaNumber(event.Number("amt")) + " " +
-                    Health(event);
-            if (kind == "dodge")
-            {
-                Side const from = SideOf(event, "from");
-                return NameOf(battle, event, "side", "idx") + " dodges " +
-                    (used.count(from) ? used[from] : std::string("the attack"));
-            }
-            if (kind == "buff" || kind == "debuff")
-                return NameOf(battle, event, "side", "idx") + ": " + event.Text("what") + " (" +
-                    LuaNumber(event.Number("turns")) + " rounds)";
-            if (kind == "weather")
-                return event.Text("name").empty() ? std::string("weather ends") : "weather: " + event.Text("name");
-            if (kind == "stunned")
-                return NameOf(battle, event, "side", "idx") + LockText(event);
-            if (kind == "faint")
-                return NameOf(battle, event, "side", "idx") + " faints.";
+            for (char& c : text)
+                if (c >= 'A' && c <= 'Z')
+                    c = static_cast<char>(c - 'A' + 'a');
+            return text;
+        }
+
+        std::string Duration(Battle const& battle, Event const& event)
+        {
+            Side const side = SideOf(event, "side");
+            std::string const& what = event.Text("what");
+            if (battle.wall && battle.wall->owner == side && Lower(AuraName(*battle.catalog, battle.wall->id)) == what)
+                return LuaNumber(event.Number("turns")) + " charges";
+            for (Aura const& aura : battle.At(side, static_cast<int32_t>(event.Number("idx"))).auras)
+                if (aura.perm && (Lower(AuraName(*battle.catalog, aura.id)) == what ||
+                    Lower(AuraNameFor(*battle.catalog, aura.id, aura.src)) == what))
+                    return "permanent";
+            return LuaNumber(event.Number("turns")) + " rounds";
+        }
+    }
+
+    std::optional<std::string> SimLine(Battle const& battle, Event const& event, std::map<Side, std::string>& used)
+    {
+        std::string const& kind = event.kind;
+        if (kind == "act")
+        {
+            used[SideOf(event, "side")] = event.Text("name");
+            if (!event.Flag("dmg"))
+                return NameOf(battle, event, "side", "idx") + " uses " + event.Text("name");
             return std::nullopt;
         }
+        if (kind == "dmg")
+        {
+            std::string const& target = NameOf(battle, event, "tside", "tidx");
+            if (event.Flag("recoil"))
+                return target + " hurts itself for " + LuaNumber(event.Number("dmg")) + " " + Health(event);
+            if (event.Flag("reflect"))
+                return target + " takes " + LuaNumber(event.Number("dmg")) + " reflected damage " + Health(event);
+            std::string const ability = used.count(SideOf(event, "side")) ? used[SideOf(event, "side")] : "attack";
+            return NameOf(battle, event, "side", "idx") + ": " + ability + " -> " + target + " " +
+                LuaNumber(event.Number("dmg")) + " " + Health(event) + (event.Flag("crit") ? " critical" : "");
+        }
+        if (kind == "dot")
+            return NameOf(battle, event, "side", "idx") + " takes " + LuaNumber(event.Number("dmg")) +
+                " over time " + Health(event);
+        if (kind == "heal")
+            return NameOf(battle, event, "side", "idx") + " heals " + LuaNumber(event.Number("amt")) + " " +
+                Health(event);
+        if (kind == "dodge")
+        {
+            Side const from = SideOf(event, "from");
+            return NameOf(battle, event, "side", "idx") + " dodges " +
+                (used.count(from) ? used[from] : std::string("the attack"));
+        }
+        if (kind == "buff" || kind == "debuff")
+            return NameOf(battle, event, "side", "idx") + ": " + event.Text("what") + " (" +
+                Duration(battle, event) + ")";
+        if (kind == "weather")
+            return event.Text("name").empty() ? std::string("weather ends") : "weather: " + event.Text("name");
+        if (kind == "stunned")
+            return NameOf(battle, event, "side", "idx") + LockText(event);
+        if (kind == "faint")
+            return NameOf(battle, event, "side", "idx") + " faints.";
+        return std::nullopt;
     }
 
     SimResult RunSim(Catalog const& catalog, uint32_t speciesA, uint32_t speciesB, int32_t level, uint32_t seed)
@@ -79,7 +100,8 @@ namespace CoAPetBattles::Engine
             SpeciesDef const* def = catalog.Species(species);
             if (!def)
             {
-                result.error = "unknown pet species " + std::to_string(species);
+                result.error = catalog.KitMissing(species) ? "pet species " + std::to_string(species) + " has no kit" :
+                    "unknown pet species " + std::to_string(species);
                 return result;
             }
             if (def->kit.empty())
@@ -107,7 +129,7 @@ namespace CoAPetBattles::Engine
             RoundResult const outcome = Round(battle, commandP, commandE);
             std::map<Side, std::string> used;
             for (Event const& event : outcome.events)
-                if (std::optional<std::string> line = Line(battle, event, used))
+                if (std::optional<std::string> line = SimLine(battle, event, used))
                     result.lines.push_back("R" + std::to_string(round) + " " + *line);
             if (outcome.status == "win")
             {

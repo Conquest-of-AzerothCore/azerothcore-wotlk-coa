@@ -6,8 +6,14 @@ namespace CoAPetBattles::Engine
     {
         if (hi <= lo)
             return lo;
-        std::uniform_int_distribution<int32_t> distribution(lo, hi);
-        return distribution(_engine);
+        uint64_t const span = static_cast<uint64_t>(static_cast<int64_t>(hi) - static_cast<int64_t>(lo)) + 1;
+        uint64_t const draws = uint64_t(1) << 32;
+        uint64_t const limit = draws - draws % span;
+        uint64_t value = 0;
+        do
+            value = _engine();
+        while (value >= limit);
+        return static_cast<int32_t>(static_cast<int64_t>(lo) + static_cast<int64_t>(value % span));
     }
 
     int32_t ReplayRng::Roll(int32_t lo, int32_t hi)

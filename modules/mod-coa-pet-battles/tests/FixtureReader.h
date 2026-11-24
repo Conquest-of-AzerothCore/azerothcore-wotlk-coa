@@ -6,6 +6,7 @@
 #include <array>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace CoAPetBattles::Fixtures
@@ -20,6 +21,7 @@ namespace CoAPetBattles::Fixtures
         std::optional<std::array<int32_t, 3>> picks;
         std::optional<double> hp;
         std::vector<std::string> built;
+        std::vector<std::pair<int32_t, uint32_t>> library;
     };
 
     struct TraceTip
@@ -58,6 +60,7 @@ namespace CoAPetBattles::Fixtures
         std::vector<TraceTip> tips;
         std::vector<TraceKitTip> kitTips;
         std::vector<TraceRound> rounds;
+        std::optional<std::pair<uint32_t, double>> weather;
     };
 
     std::string DecodeField(std::string const& text);

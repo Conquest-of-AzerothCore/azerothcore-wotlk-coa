@@ -245,6 +245,23 @@ function M.kitSlots(entry)
     return rows
 end
 
+function M.libraryAbility(aid)
+    local a = assert(R.abilities[aid], "library ability " .. tostring(aid) .. " missing")
+    local main, procs = {}, {}
+    for _, t in ipairs(a.turns) do if t.event == 255 then main[#main + 1] = t else procs[#procs + 1] = t end end
+    if #main == 0 then main, procs = a.turns, {} end
+    local priority = (a.text or ""):find("always goes first") ~= nil
+    for _, t in ipairs(procs) do
+        for _, f in ipairs(t.fx) do if f.prop == 79 or f.prop == 145 or f.prop == 107 then priority = true end end
+    end
+    return { id = aid, name = a.name, retailName = a.name, icon = "", tip = "", text = a.text, family = a.family,
+        cd = a.cd, turns = main, procs = procs, priority = priority }
+end
+
+function M.setWeather(b, id, left)
+    b.weather = { id = id, left = left }
+end
+
 function M.kitProps(entry)
     local found = {}
     local function scan(ab)

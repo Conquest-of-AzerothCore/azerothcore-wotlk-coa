@@ -200,6 +200,7 @@ namespace CoAPetBattles
     Report Validate(DataSet const& data, std::function<bool(uint32_t)> const& creatureTemplateExists);
     std::optional<std::array<uint32_t, 4>> ParseQualityWeights(std::string const& text);
     std::optional<double> ParseDecimal(std::string const& text);
+    std::string DecimalText(double value);
 }
 
 #endif

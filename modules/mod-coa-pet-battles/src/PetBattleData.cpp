@@ -1,4 +1,5 @@
 #include "PetBattleData.h"
+#include "Engine/Rules.h"
 #include <charconv>
 #include <cmath>
 #include <cstdlib>
@@ -30,6 +31,10 @@ namespace CoAPetBattles
             for (auto const& [entry, species] : data.species)
                 if (!data.kits.count(species.kit))
                     report.errors.push_back(Text({ "species ", Id(entry), ": kit ", Id(species.kit), " missing" }));
+
+            for (auto const& [id, kit] : data.kits)
+                if (!Engine::FamilyAt(static_cast<double>(kit.family) + 1))
+                    report.errors.push_back(Text({ "kit ", Id(id), ": family ", Id(kit.family), " unknown" }));
 
             for (KitAbility const& row : data.kitAbilities)
             {
@@ -64,6 +69,18 @@ namespace CoAPetBattles
                 if (effect.aura && !data.abilities.count(effect.aura))
                     report.warnings.push_back(Text({ name, ": aura ", Id(effect.aura), " is not an ability" }));
             }
+
+            std::set<uint32_t> usable;
+            for (KitAbility const& row : data.kitAbilities)
+                usable.insert(row.ability);
+            for (Presentation const& row : data.presentations)
+                usable.insert(row.ability);
+            std::set<uint32_t> withTurns;
+            for (AbilityTurn const& turn : data.turns)
+                withTurns.insert(turn.ability);
+            for (uint32_t ability : usable)
+                if (data.abilities.count(ability) && !withTurns.count(ability))
+                    report.errors.push_back(Text({ "ability ", Id(ability), " has no turns" }));
         }
 
         void CheckPresentations(DataSet const& data, Report& report)
@@ -178,5 +195,12 @@ namespace CoAPetBattles
         if (end != text.c_str() + text.size() || !std::isfinite(value))
             return std::nullopt;
         return value;
+    }
+
+    std::string DecimalText(double value)
+    {
+        std::array<char, 32> buffer {};
+        auto const [end, error] = std::to_chars(buffer.data(), buffer.data() + buffer.size(), value);
+        return error == std::errc() ? std::string(buffer.data(), end) : std::to_string(value);
     }
 }

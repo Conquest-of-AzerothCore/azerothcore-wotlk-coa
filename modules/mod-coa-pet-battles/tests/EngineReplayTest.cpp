@@ -4,6 +4,7 @@
 #include "FixtureReader.h"
 #include <gtest/gtest.h>
 #include <algorithm>
+#include <map>
 #include <sstream>
 
 using namespace CoAPetBattles;
@@ -31,6 +32,36 @@ namespace
         return { SideName(side), LuaNumber(index), LuaNumber(pet.hp), LuaNumber(pet.max), LuaNumber(pet.power),
             LuaNumber(Speed(nullptr, pet)), LuaNumber(pet.cd[0]) + "," + LuaNumber(pet.cd[1]) + "," +
             LuaNumber(pet.cd[2]), auraText, StatusString(ReplayCatalog(), pet) };
+    }
+
+    bool ContainsText(std::string const& text, std::string const& part)
+    {
+        return text.find(part) != std::string::npos;
+    }
+
+    PetAbility LibraryAbility(uint32_t id)
+    {
+        AbilityDef const& def = *ReplayCatalog().Ability(id);
+        PetAbility ability;
+        ability.id = id;
+        ability.name = def.name;
+        ability.retailName = def.name;
+        ability.text = def.text;
+        ability.family = def.family;
+        ability.cooldown = def.cooldown;
+        for (Turn const& turn : def.turns)
+            (turn.event == 255 ? ability.turns : ability.procs).push_back(turn);
+        if (ability.turns.empty())
+        {
+            ability.turns = def.turns;
+            ability.procs.clear();
+        }
+        ability.priority = ContainsText(def.text, "always goes first");
+        for (Turn const& turn : ability.procs)
+            for (Fx const& fx : turn.fx)
+                if (fx.prop == 79 || fx.prop == 145 || fx.prop == 107)
+                    ability.priority = true;
+        return ability;
     }
 
     std::string Join(std::vector<std::string> const& fields)
@@ -71,9 +102,18 @@ namespace
             double const quality = RollQuality(ReplayCatalog(), rng);
             Pet pet = NewPet(ReplayCatalog(), recorded.species, recorded.level, recorded.picks, rng, quality,
                 recorded.hp);
+            for (auto const& [slot, ability] : recorded.library)
+                pet.abil[static_cast<size_t>(slot) - 1] = LibraryAbility(ability);
             (recorded.side == "P" ? mine : theirs).push_back(std::move(pet));
         }
+        if (!rng.Divergence().empty())
+        {
+            outcome.failure = "battle " + std::to_string(trace.id) + " pets: " + rng.Divergence();
+            return outcome;
+        }
         Battle battle(ReplayCatalog(), std::move(mine), std::move(theirs), rng);
+        if (trace.weather)
+            battle.weather = Weather { trace.weather->first, trace.weather->second };
         for (size_t r = 0; r < trace.rounds.size(); ++r)
         {
             Fixtures::TraceRound const& round = trace.rounds[r];
@@ -90,6 +130,11 @@ namespace
                 return outcome;
             }
             RoundResult const result = Round(battle, round.commandP, enemy);
+            if (!rng.Divergence().empty())
+            {
+                outcome.failure = where + ": " + rng.Divergence();
+                return outcome;
+            }
             std::vector<std::string> events;
             for (Event const& event : result.events)
                 events.push_back(event.Canonical());
@@ -114,11 +159,6 @@ namespace
             if (std::string diff = FirstDifference(expectedStates, actualStates); !diff.empty())
             {
                 outcome.failure = where + " state: " + diff;
-                return outcome;
-            }
-            if (!rng.Divergence().empty())
-            {
-                outcome.failure = where + ": " + rng.Divergence();
                 return outcome;
             }
             ++outcome.rounds;
@@ -151,6 +191,52 @@ TEST(CoAPetBattlesEngine, EveryRecordedBattleReplays)
     }
     EXPECT_EQ(failed, 0u) << failed << " of " << battles.size() << " battles differ; first: " << firstFailure;
     EXPECT_GT(rounds, 0u);
+}
+
+TEST(CoAPetBattlesEngine, LibraryOnlyBranchesReplay)
+{
+    std::map<uint32_t, size_t> battlesWith;
+    size_t weathered = 0;
+    for (Fixtures::TraceBattle const& trace : Fixtures::LoadTraces())
+    {
+        bool library = false;
+        for (Fixtures::TracePet const& pet : trace.pets)
+            for (auto const& [slot, ability] : pet.library)
+            {
+                ++battlesWith[ability];
+                library = true;
+            }
+        if (!library)
+            continue;
+        weathered += trace.weather ? 1 : 0;
+        ReplayOutcome const outcome = Replay(trace);
+        EXPECT_TRUE(outcome.failure.empty()) << outcome.failure;
+        EXPECT_GT(outcome.rounds, 0u) << "battle " << trace.id;
+    }
+    EXPECT_GE(battlesWith[190], 2u);
+    EXPECT_GE(battlesWith[2102], 2u);
+    EXPECT_GE(battlesWith[268], 2u);
+    EXPECT_GE(weathered, 2u);
+}
+
+TEST(CoAPetBattlesEngine, WrongRollRangeIsReportedAsDivergence)
+{
+    Fixtures::TraceBattle trace = Fixtures::LoadTraces().front();
+    ReplayRng building(trace.rolls);
+    for (Fixtures::TracePet const& recorded : trace.pets)
+        NewPet(ReplayCatalog(), recorded.species, recorded.level, recorded.picks, building,
+            RollQuality(ReplayCatalog(), building), recorded.hp);
+    size_t const firstRoundRoll = building.Used();
+    ASSERT_LT(firstRoundRoll, trace.rolls.size());
+
+    Fixtures::TraceBattle duringPets = trace;
+    duringPets.rolls[0].hi += 1;
+    EXPECT_NE(Replay(duringPets).failure.find("roll 0: recorded"), std::string::npos) << Replay(duringPets).failure;
+
+    Fixtures::TraceBattle duringRound = trace;
+    duringRound.rolls[firstRoundRoll].hi += 1;
+    std::string const failure = Replay(duringRound).failure;
+    EXPECT_NE(failure.find("roll " + std::to_string(firstRoundRoll) + ": recorded"), std::string::npos) << failure;
 }
 
 TEST(CoAPetBattlesEngine, InvalidCommandsMatchUpstream)

@@ -141,14 +141,22 @@ namespace CoAPetBattles::Fixtures
             }
             std::vector<std::string> const f = SplitLine(line);
             if (tag == "BATTLE")
-                battles.push_back({ I(f[1]), {}, {}, {}, {}, {} });
+                battles.push_back({ I(f[1]), {}, {}, {}, {}, {}, std::nullopt });
             else if (tag == "KITTIP" || tag == "KITTIPX")
                 battles.back().kitTips.push_back({ f[1], I(f[2]), I(f[3]), I(f[4]), f[5], tag == "KITTIPX" });
             else if (tag == "ROLL")
                 battles.back().rolls.push_back({ I(f[1]), I(f[2]), I(f[3]) });
             else if (tag == "PET")
                 battles.back().pets.push_back({ f[1], I(f[2]), U(f[3]), I(f[4]), I(f[5]), Picks(f[6]),
-                    f[7] == "nil" ? std::nullopt : std::optional<double>(D(f[7])), {} });
+                    f[7] == "nil" ? std::nullopt : std::optional<double>(D(f[7])), {}, {} });
+            else if (tag == "LIB")
+            {
+                for (TracePet& pet : battles.back().pets)
+                    if (pet.side == f[1] && pet.index == I(f[2]))
+                        pet.library.emplace_back(I(f[3]), U(f[4]));
+            }
+            else if (tag == "WEATHER")
+                battles.back().weather = std::make_pair(U(f[1]), D(f[2]));
             else if (tag == "BUILT")
                 battles.back().pets.back().built.assign(f.begin() + 3, f.end());
             else if (tag == "TIP" || tag == "TIPX")
