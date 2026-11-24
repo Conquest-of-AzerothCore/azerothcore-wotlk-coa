@@ -18109,21 +18109,40 @@
           1,
           "dummy",
           "dummy"
+        ],
+        [
+          1459,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          1459,
+          1,
+          "dummy",
+          "dummy"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
-      "metric": "aura",
+      "metric": "carried_aura_count",
       "fields": {
-        "spell": 1243
-      },
-      "fields_sum": {
-        "spell": 1126
+        "spells": [
+          1243,
+          1126,
+          1459
+        ]
       },
       "before_expected": 1,
       "expected": 2,
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "Consume Magic 800353 Description: 'Steal $s1 beneficial magic effect' (Effect[0] aura/effect 126 STEAL_BENEFICIAL_BUFF, BasePoints 0 + DieSides 1 = 1 stolen) and 704613 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), + 1 ($s1) on Consume Magic (SpellFamilyFlags[2] 8192): the cast steals 1 effect without the talent, 2 with it. Two stock beneficial Magic buffs (Dispel 1 in Spell.dbc), Power Word: Fortitude 1243 and Mark of the Wild 1126, are set on the dummy (precondition fixtures, by the dummy) and removed from the caster at the start of both phases; a real Consume Magic cast at the dummy follows, 500 ms later the number of the two auras held by the caster is read: 1 before the learn (control), 2 after. No aura is placed on the caster by the harness. Reference search 2026-11-24: coa-history spell 704613: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots (bindmysoul, ascension-data advancement.tsv and coabuildhub index) list the talent name only, no values; expected values come from the tooltip and the DBC only."
+      "observe_source": "Consume Magic 800353 Description: 'Steal $s1 beneficial magic effect' (Effect[0] aura/effect 126 STEAL_BENEFICIAL_BUFF, BasePoints 0 + DieSides 1 = 1 stolen) and 704613 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), + 1 ($s1) on Consume Magic (SpellFamilyFlags[2] 8192): the cast steals 1 effect without the talent, 2 with it. Three stock beneficial Magic buffs (Dispel 1 in Spell.dbc), Power Word: Fortitude 1243, Mark of the Wild 1126 and Arcane Intellect 1459, are set on the dummy (precondition fixtures, by the dummy) and removed from the caster at the start of both phases; a real Consume Magic cast at the dummy follows, 500 ms later carried_aura_count of the three auras on the caster is read: 1 before the learn (control), 2 after; a third stolen aura (an over-steal) reads 3. No aura is placed on the caster by the harness. Reference search 2026-11-24: coa-history spell 704613: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots (bindmysoul, ascension-data advancement.tsv and coabuildhub index) list the talent name only, no values; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 705145,
@@ -18910,17 +18929,22 @@
       "target": "dummy",
       "measure_actor": "caster",
       "cast_power": 100,
-      "metric": "spell_cast_count",
+      "metric": "spell_damage_count",
       "fields": {
-        "spell": 800598
+        "spell": 808303,
+        "target": "dummy"
       },
-      "before_expected": 0,
-      "expected": 0,
+      "fields_sum": {
+        "spell": 800598,
+        "target": "dummy"
+      },
+      "before_expected": 1,
+      "expected": 2,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "after_at_least": 0,
-      "observe_source": "Dancing Blades 92087: the passive triggers on a critical melee ability only (AscensionFelswornEvents.cpp:52-53 case 92087 returns melee && crit && !periodic). Control of the condition: the same Twin Slice 801901 cast with 92087 learned in the after phase and Reduce Critical Strike Chance 64481 (Effect[0] MOD_WEAPON_CRIT_PERCENT -1000, a precondition fixture) on the caster in both phases, no forced critical: no strike is critical, so 800598 is cast 0 times; a server triggering on every melee hit reads 2. Without 92087 (before phase) it also reads 0. Reference search 2026-11-24: nothing found that decides a value.",
-      "after_at_most": 0,
+      "after_at_least": 2,
+      "observe_source": "Dancing Blades 92087: the passive triggers on a critical melee ability only (AscensionFelswornEvents.cpp:52-53 case 92087 returns melee && crit && !periodic). Control of the condition: the same Twin Slice 801901 cast with 92087 learned in the after phase and Reduce Critical Strike Chance 64481 (Effect[0] MOD_WEAPON_CRIT_PERCENT -1000, a precondition fixture) on the caster in both phases, no forced critical: no strike is critical, so 800598 lands 0 times. Same-arm strike read (review fw-rl3b I-1): each judged reading is the sum of the applied damage events of the Twin Slice strike 808303 (Effect[0] 121 weapon damage, EffectTriggerSpell[0] of 801901) and of 800598 on the dummy, the reading is cumulative over the scenario: the before phase (92087 not learned, strikes landed, no trigger) reads 1 and the after phase adds one landed strike with no trigger, so exactly 2; a strike that did not land reads 1, and a server triggering on every melee hit reads 3 or more. Without 92087 (before phase) it also reads 0. Reference search 2026-11-24: nothing found that decides a value.",
+      "after_at_most": 2,
       "phase_auras": [
         [
           64481,
@@ -19053,6 +19077,818 @@
       },
       "observe_source": "Heal leg of 705124 (Spell.dbc Effect[0] SPELL_EFFECT_HEALTH_LEECH, EffectValueMultiplier 1.0): the caster's heal total of 705124 over the 705124 damage total of the same window (same_arm_ratio) is 1.0 within 0.02; 0 before the learn (control). The damage share of the same leech is the carve entry (0.20 of the strike). Reference search 2026-11-24: nothing found that decides a value; expected values come from the tooltip and the DBC.",
       "player_attack_power": 20000
+    },
+    {
+      "spell": 92088,
+      "name": "Fel Apprentice (Felstrike on the target) (held, present 5620 ms after its application)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "unleash a Felstrike on your target",
+      "trigger_spell": 801312,
+      "gate_spell": 92088,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 802678
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7120,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7070,
+          7270
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 92088: 'unleash a Felstrike on your target'; Felstrike 802678 'over $d', DurationIndex 32 = 6000 ms (SpellDuration.dbc). One real Fel Fireball 801312 (CastTime 1500 ms, CastingTimes.dbc 16) with Inner Demon 804216 set as a named precondition fixture; the stacks of 802678 on the dummy are read at game time 7120 ms after the cast start (cast time 1500 ms): read at least 5520 ms after the application when held (excludes a duration 10% short), at most 6480 ms when gone (excludes 10% long); the gate unlearned before the learn is the control. Reference search 2026-11-24: coa-history spell 802678: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 92088,
+      "name": "Fel Apprentice (Felstrike on the target) (gone, gone 6380 ms after its application)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "unleash a Felstrike on your target",
+      "trigger_spell": 801312,
+      "gate_spell": 92088,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 802678
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 7880,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7830,
+          8030
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 92088: 'unleash a Felstrike on your target'; Felstrike 802678 'over $d', DurationIndex 32 = 6000 ms (SpellDuration.dbc). One real Fel Fireball 801312 (CastTime 1500 ms, CastingTimes.dbc 16) with Inner Demon 804216 set as a named precondition fixture; the stacks of 802678 on the dummy are read at game time 7880 ms after the cast start (cast time 1500 ms): read at least 5520 ms after the application when held (excludes a duration 10% short), at most 6480 ms when gone (excludes 10% long); the gate unlearned before the learn is the control. Reference search 2026-11-24: coa-history spell 802678: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 300474,
+      "name": "Expose (aura on the target) (held, present 7460 ms after its application)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "applies Expose to enemies",
+      "trigger_spell": 802060,
+      "gate_spell": 300474,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 300475,
+        "caster": "caster"
+      },
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7460,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7410,
+          7610
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 300475: '... for $d', DurationIndex 31 = 8000 ms. One real instant Sargeron Smite 802060 (Fire and Shadow direct hit) with 2 Felfury as a precondition; the aura read on the dummy 7460 ms after the cast: held window reads at least 7360 ms (excludes 10% short), gone window at most 8640 ms (excludes 10% long). The learned-gate read before the learn is the control. Reference search 2026-11-24: coa-history spell 300475: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 300474,
+      "name": "Expose (aura on the target) (gone, gone 8540 ms after its application)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "applies Expose to enemies",
+      "trigger_spell": 802060,
+      "gate_spell": 300474,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 300475,
+        "caster": "caster"
+      },
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 8540,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          8490,
+          8690
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 300475: '... for $d', DurationIndex 31 = 8000 ms. One real instant Sargeron Smite 802060 (Fire and Shadow direct hit) with 2 Felfury as a precondition; the aura read on the dummy 8540 ms after the cast: held window reads at least 7360 ms (excludes 10% short), gone window at most 8640 ms (excludes 10% long). The learned-gate read before the learn is the control. Reference search 2026-11-24: coa-history spell 300475: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 520693,
+      "name": "Felwrath (Inner Demon DoT) (held, present 5620 ms after its application)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "over $520832d",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 520832
+      },
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ],
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7620,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7570,
+          7770
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 520693: 'over $520832d'; 520832 DurationIndex 32 = 6000 ms. One real Felwrath 520693 (CastTime 2000 ms) on five dummies (Inner Demon, preconditions as the inner_five entry); the DoT stacks on the primary dummy at game time 7620 ms: held reads at least 5520 ms after the application, gone at most 6480 ms. The inner_four control entry shows the DoT is absent with four enemies. Reference search 2026-11-24: coa-history spell 520832: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 520693,
+      "name": "Felwrath (Inner Demon DoT) (gone, gone 6380 ms after its application)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "over $520832d",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 520832
+      },
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ],
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 8380,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          8330,
+          8530
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 520693: 'over $520832d'; 520832 DurationIndex 32 = 6000 ms. One real Felwrath 520693 (CastTime 2000 ms) on five dummies (Inner Demon, preconditions as the inner_five entry); the DoT stacks on the primary dummy at game time 8380 ms: held reads at least 5520 ms after the application, gone at most 6480 ms. The inner_four control entry shows the DoT is absent with four enemies. Reference search 2026-11-24: coa-history spell 520832: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 685321,
+      "name": "Doomscarring (scar on the target) (held, present 11140 ms after its application)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "scars enemies for $563271d",
+      "trigger_spell": 801901,
+      "gate_spell": 685321,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 563271,
+        "caster": "caster"
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 11140,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          11090,
+          11290
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 685321: 'scars enemies for $563271d'; 563271 DurationIndex 29 = 12000 ms. One real instant Twin Slice 801901; the aura on the dummy at game time 11140 ms: held at least 11040 ms, gone at most 12960 ms after the application; the read before the learn is the control. Reference search 2026-11-24: coa-history spell 563271: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 685321,
+      "name": "Doomscarring (scar on the target) (gone, gone 12860 ms after its application)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "scars enemies for $563271d",
+      "trigger_spell": 801901,
+      "gate_spell": 685321,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 563271,
+        "caster": "caster"
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 12860,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          12810,
+          13010
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 685321: 'scars enemies for $563271d'; 563271 DurationIndex 29 = 12000 ms. One real instant Twin Slice 801901; the aura on the dummy at game time 12860 ms: held at least 11040 ms, gone at most 12960 ms after the application; the read before the learn is the control. Reference search 2026-11-24: coa-history spell 563271: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 560840,
+      "name": "Infernal Ruin (Infernal lifetime) (held, present 13900 ms after its application)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "for $572163d",
+      "trigger_spell": 801895,
+      "gate_spell": 560840,
+      "setup_casts": [
+        801895,
+        801895
+      ],
+      "setup_wait_ms": 3000,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 51320
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 16400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          16350,
+          16550
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 560840: 'spawns an Infernal to fight by your side for $572163d'; 572163 DurationIndex 8 = 15000 ms, summon entry 51320 (Effect[0] SUMMON misc 51320). The third real Ruin 801895 (CastTime 2500 ms) summons it: the owned Infernal count at game time 16400 ms after the third cast's start (held at least 13800 ms after the summon, gone at most 16200 ms). Reference search 2026-11-24: coa-history spell 572163: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 560840,
+      "name": "Infernal Ruin (Infernal lifetime) (gone, gone 16100 ms after its application)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "for $572163d",
+      "trigger_spell": 801895,
+      "gate_spell": 560840,
+      "setup_casts": [
+        801895,
+        801895
+      ],
+      "setup_wait_ms": 3000,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 51320
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 18600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          18550,
+          18750
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 560840: 'spawns an Infernal to fight by your side for $572163d'; 572163 DurationIndex 8 = 15000 ms, summon entry 51320 (Effect[0] SUMMON misc 51320). The third real Ruin 801895 (CastTime 2500 ms) summons it: the owned Infernal count at game time 18600 ms after the third cast's start (held at least 13800 ms after the summon, gone at most 16200 ms). Reference search 2026-11-24: coa-history spell 572163: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 300490,
+      "name": "Felforged (the grant lasts $806104d)",
+      "kind": "last_application_expiry",
+      "label_suffix": "felforged_duration",
+      "quote": "for $806104d",
+      "gate_spell": 300490,
+      "trigger_spell": 704368,
+      "aura": 806104,
+      "expected_ms": 8000,
+      "control_window_ms": 500,
+      "window_ms": 10000,
+      "poll_ms": 50,
+      "caster": true,
+      "feed": {
+        "every_ms": 3200
+      },
+      "observe_source": "Expected 8000 ms: Spell.dbc 806104 DurationIndex 31, SpellDuration.dbc 31 = 8000 ms (the $806104d of the clause). 806104 is cast on the caster by the 300490 handler (AscensionFelswornEvents.cpp:205-207) after a periodic damage tick rolled Chance() on the raw ProcChance 15 (AscensionFelsworn.cpp:231-239), which no spell modifier forces, so the aura is earned for real: Bane of Chaos 704368 (periodic damage every 3000 ms) is recast every 3200 ms until 806104 is on the caster (feed, Felsworn ADR 0003), at most 47 casts (0.05% residual failure per arm, ceil(ln 0.0005 / ln 0.85)); the control arm runs the same loop with 300490 unlearned and alerts on any application. The expiry is bracketed in game time from the last application and must lie within 5% of 8000 ms (excludes a duration 10% off on both sides). Reference search 2026-11-24: coa-history spell 806104: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 681376,
+      "name": "Chaotic (the buff lasts $572782d)",
+      "kind": "last_application_expiry",
+      "label_suffix": "chaotic_duration",
+      "quote": "for $572782d",
+      "gate_spell": 681376,
+      "trigger_spell": 801312,
+      "aura": 572782,
+      "expected_ms": 8000,
+      "control_window_ms": 500,
+      "window_ms": 10000,
+      "poll_ms": 50,
+      "caster": true,
+      "feed": {
+        "every_ms": 2000
+      },
+      "force_crit": "spell",
+      "observe_source": "Expected 8000 ms: Spell.dbc 572782 DurationIndex 31, SpellDuration.dbc 31 = 8000 ms (the $572782d of the clause). 572782 is cast on the caster by the 681376 handler (AscensionFelswornEvents.cpp:148-149) after an outgoing damage event rolled Chance() on the raw ProcChance 8 (AscensionFelsworn.cpp:231-239), which no spell modifier forces, so the aura is earned for real: Fel Fireball 801312 is cast every 2000 ms with spell hit and crit forced until 572782 is on the caster (feed), at most 92 casts (0.05% residual failure per arm, ceil(ln 0.0005 / ln 0.92)); the control arm runs the same loop with 681376 unlearned and alerts on any application. The expiry is bracketed in game time from the last application within 5% of 8000 ms. Reference search 2026-11-24: coa-history spell 572782: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 561201,
+      "name": "Oppressive Ruin (absorb on the target) (held, present 7460 ms after its application)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "for $/1000;s1 sec",
+      "trigger_spell": 801895,
+      "gate_spell": 561201,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 801895,
+        "caster": "caster"
+      },
+      "cast_in_before": true,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9960,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9910,
+          10110
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 561201: 'absorbs the next ... healing on the target ... for $/1000;s1 sec'; 561201 Effect[0] aura 107 ADD_FLAT_MODIFIER misc 1 (SPELLMOD_DURATION), BasePoints 7999 + 1 die side = 8000 ms = 8 sec on the Ruin 801895 absorb aura (Effect[1] aura 301, DurationIndex 0 in Ruin itself). One real Ruin 801895 (CastTime 2500 ms); the aura read on the dummy at game time 9960 ms: held at least 7360 ms after the cast ends, gone at most 8640 ms. In the held entry the same cast before the learn is the control (the aura must read absent). Reference search 2026-11-24: coa-history spell 801895: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 561201,
+      "name": "Oppressive Ruin (absorb on the target) (gone, gone 8540 ms after its application)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "for $/1000;s1 sec",
+      "trigger_spell": 801895,
+      "gate_spell": 561201,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 801895,
+        "caster": "caster"
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 11040,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          10990,
+          11190
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 561201: 'absorbs the next ... healing on the target ... for $/1000;s1 sec'; 561201 Effect[0] aura 107 ADD_FLAT_MODIFIER misc 1 (SPELLMOD_DURATION), BasePoints 7999 + 1 die side = 8000 ms = 8 sec on the Ruin 801895 absorb aura (Effect[1] aura 301, DurationIndex 0 in Ruin itself). One real Ruin 801895 (CastTime 2500 ms); the aura read on the dummy at game time 11040 ms: held at least 7360 ms after the cast ends, gone at most 8640 ms. In the held entry the same cast before the learn is the control (the aura must read absent). Reference search 2026-11-24: coa-history spell 801895: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 300483,
+      "name": "Chaotic Intuition (Cripple still on 17500 ms after its cast)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "extends the duration of Cripple on the target",
+      "trigger_spell": 801312,
+      "gate_spell": 300483,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 704371,
+        "caster": "caster"
+      },
+      "cast_in_before": true,
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 15700,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          15650,
+          15850
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 300483: 'Damage dealt by Felstrikes now extends the duration of Cripple on the target by $/1000;560643s1 sec' (560643 Effect[0] BasePoints 999 + 1 die side = 1000 ms = 1 sec). Cripple 704371 lasts 12000 ms (DurationIndex 29) and Felstrike 802678 ticks every 1000 ms for 6000 ms (Effect[0] amplitude 1000, DurationIndex 32): six ticks while Cripple is up extend it to 12000 + 6 x 1000 = 18000 ms, that is 1000 ms per Felstrike damage. Nothing is set by fixture except Inner Demon 804216 (the named precondition of Fel Apprentice 92088, learned in every arm): Cripple is cast for real, 1800 ms later a real Fel Fireball 801312 unleashes the real Felstrike. Cripple's age at the read is the setup wait (1800 ms, stamped by the cast) plus the wait after the trigger stamp: 17500 ms, at least 17450 over the game-time window, above 17400 = 12000 + 6 x 900 (an extension of 0.9 sec per hit, 10% short, would already be gone); the control read before the learn of 300483 (same casts) must show Cripple already gone at 12000 ms. Reference search 2026-11-24: coa-history spell 704371: aura applied and refreshed events exist in the logs but no duration in the aggregates; nothing found beyond the tooltip and Spell.dbc.",
+      "setup_casts": [
+        704371
+      ],
+      "setup_wait_ms": 1800,
+      "learn": [
+        92088
+      ]
+    },
+    {
+      "spell": 300483,
+      "name": "Chaotic Intuition (Cripple gone 18500 ms after its cast)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "extends the duration of Cripple on the target",
+      "trigger_spell": 801312,
+      "gate_spell": 300483,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 704371,
+        "caster": "caster"
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 16700,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          16650,
+          16800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 300483: 'Damage dealt by Felstrikes now extends the duration of Cripple on the target by $/1000;560643s1 sec' (560643 Effect[0] BasePoints 999 + 1 die side = 1000 ms = 1 sec). Cripple 704371 lasts 12000 ms (DurationIndex 29) and Felstrike 802678 ticks every 1000 ms for 6000 ms (Effect[0] amplitude 1000, DurationIndex 32): six ticks while Cripple is up extend it to 12000 + 6 x 1000 = 18000 ms, that is 1000 ms per Felstrike damage. Nothing is set by fixture except Inner Demon 804216 (the named precondition of Fel Apprentice 92088, learned in every arm): Cripple is cast for real, 1800 ms later a real Fel Fireball 801312 unleashes the real Felstrike. Cripple's age at the read is the setup wait (1800 ms, stamped by the cast) plus the wait after the trigger stamp: 18500 ms, at most 18600 over the game-time window, = 12000 + 6 x 1100 (an extension of 1.1 sec per hit, 10% long, would still be on). Reference search 2026-11-24: coa-history spell 704371: aura applied and refreshed events exist in the logs but no duration in the aggregates; nothing found beyond the tooltip and Spell.dbc.",
+      "setup_casts": [
+        704371
+      ],
+      "setup_wait_ms": 1800,
+      "learn": [
+        92088
+      ]
+    },
+    {
+      "kind": "metric_delta",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801312
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "after_auras": [
+        [
+          806104,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "quote": "grant you Felforged",
+      "spell": 300490,
+      "name": "Felforged (a Fel Fireball completes at the reduced cast time)",
+      "variant": "cast_landed",
+      "label_suffix": "cast_landed",
+      "expected": 1,
+      "wait_ms": 1060,
+      "game_time": {
+        "after": [
+          1040,
+          1080
+        ]
+      },
+      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster, after the learn-free control read): the subject here is the cast time, not the grant (the grant and its 8000 ms are timed for real by felforged_duration). Completed casts of 801312 (spell_cast_count) read at most 1080 ms after the cast start: 1 with Felforged (a cast time of at most 1080 ms is a reduction of at least 28%, which excludes the 27.9% of a -31% off by 10%), 0 without it (the control read before the fixture, a 1500 ms cast not yet completed). Reference search 2026-11-24: nothing found beyond the tooltip and Spell.dbc.",
+      "cast_in_before": false
+    },
+    {
+      "kind": "metric_delta",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801312
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "after_auras": [
+        [
+          806104,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "quote": "grant you Felforged",
+      "spell": 300490,
+      "name": "Felforged (not faster than the stated reduction)",
+      "variant": "cast_early",
+      "label_suffix": "cast_early",
+      "cast_in_before": false,
+      "expected": 0,
+      "wait_ms": 990,
+      "game_time": {
+        "after": [
+          990,
+          1030
+        ]
+      },
+      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster, after the learn-free control read): the subject here is the cast time, not the grant (the grant and its 8000 ms are timed for real by felforged_duration). The same cast read between 990 and 1030 ms after its start must not be completed (a cast time above 990 ms is a reduction below 34%): that excludes a reduction of 34.1% (-31% off by 10%); with cast_landed this brackets the stated 31% inside 28%..34%. Reference search 2026-11-24: nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "kind": "metric_delta",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801312
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "after_auras": [
+        [
+          806104,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "quote": "grant you Felforged",
+      "spell": 300490,
+      "name": "Felforged (only the next 3 Fel Fireballs)",
+      "variant": "fourth_cast",
+      "label_suffix": "fourth_cast",
+      "setup_casts": [
+        801312,
+        801312,
+        801312
+      ],
+      "setup_wait_ms": 1800,
+      "expected": 4,
+      "wait_ms": 1090,
+      "game_time": {
+        "after": [
+          1040,
+          1190
+        ]
+      },
+      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster, after the learn-free control read): the subject here is the cast time, not the grant (the grant and its 8000 ms are timed for real by felforged_duration). The cast count is cumulative over both phases: the before phase's one control cast (no aura) completes during the expire wait (1), then three real Fel Fireballs are cast with the aura (1800 ms apart, so they complete) for 3 more, then the 4th: 4 in total when the 4th keeps its 1500 ms cast time and is not yet completed at 1090 ms (the aura used up by three casts), 5 when the 4th is still reduced. Reference search 2026-11-24: nothing found beyond the tooltip and Spell.dbc (806104 has ProcCharges 0).",
+      "cast_in_before": false,
+      "setup_only_after": true
+    },
+    {
+      "kind": "metric_delta",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801312
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "quote": "grant you Felforged",
+      "spell": 300490,
+      "name": "Felforged (control: the same cast without Felforged is not completed)",
+      "variant": "cast_control",
+      "label_suffix": "cast_control",
+      "expected": 0,
+      "wait_ms": 1090,
+      "game_time": {
+        "after": [
+          1040,
+          1190
+        ]
+      },
+      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster, after the learn-free control read): the subject here is the cast time, not the grant (the grant and its 8000 ms are timed for real by felforged_duration). Control arm: the same Fel Fireball without the aura (no after_auras) read 1090 ms after its start must not be completed (cast time 1500 ms): 0.",
+      "cast_in_before": false
     },
     {
       "spell": 805243,
@@ -19852,108 +20688,6 @@
         ]
       ],
       "observe_source": "578317 DurationIndex 31 gives 8000 ms ($578317d, SpellDuration.dbc); the channel of 800206 lasts 2500 ms (DurationIndex 66) and the aura is cast when it ends. The aura is gone 11100 ms after the cast, 8600 ms after the channel end (1.075 of 8000, excludes a duration 10% long, 8800 ms); the before read, absent, is the control. Fixtures as the haste entry. Reference search as the haste entry."
-    },
-    {
-      "spell": 707527,
-      "name": "Hateforged Barrier (Physical damage taken)",
-      "kind": "taken_hit",
-      "variant": "physical_taken",
-      "label_suffix": "physical_taken",
-      "judge": "damage_ratio",
-      "expected": 0.8792,
-      "quote": "While the barrier holds, you take $s2% reduced Physical Damage.",
-      "strike_spell": 92559,
-      "caster_health_pct": 100,
-      "caster_max_health": 100000,
-      "trials": 4,
-      "strikes": 40,
-      "settle_ms": 50,
-      "arms": [
-        {
-          "name": "control",
-          "checks": [
-            {
-              "metric": "aura",
-              "spell": 707527,
-              "equals": 0
-            }
-          ]
-        },
-        {
-          "name": "treatment",
-          "opening_casts": [
-            [
-              707527,
-              "caster"
-            ]
-          ],
-          "checks": [
-            {
-              "metric": "aura",
-              "spell": 707527,
-              "equals": 1
-            }
-          ],
-          "casts": [
-            [
-              707527,
-              "caster"
-            ]
-          ]
-        }
-      ],
-      "observe_source": "707527 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, BasePoints -11 + 1 = -10 ($s2); Effect[0] is the absorb aura 69 (752 + Stamina x 1, Stamina 79 of the reference stats = 831). Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) strikes the caster 40 times per trial in each arm, 4 trials, the barrier recast before each treatment trial. The logged damage is taken after the absorb, so the expected mean per strike is (40 x 1000 x 0.90 - 831) / (40 x 1000) = 0.8792, against 0.9792 if the 10% were not applied: the 831 of the first strike is the same absorb in either case, and 40 strikes make its weight 2 points of the ratio, small beside the 10 points of the claim. Control arm: no barrier, 1000 per strike. Reference search 2026-11-24: coa-history spell 707527: SPELL_CAST_SUCCESS 303 and SPELL_AURA_APPLIED 274 events by players in 7 logs, no value; ~/CoaServer/reference bindmysoul talents snapshot: Hateforged Barrier 705129 text differs (a regeneration clause, an older state); expected values come from the tooltip and the DBC only. The control for this entry is the rank 1 entry 705129 below, whose Effect[1] carries MiscValue 1. Lead, not a proof (fw-vb4b, review I-2): the strike that breaks the barrier also removes the 10%, so the mean per strike cannot tell 10% from none (-2.43% against -2.18% on the logged 954 per strike); the entry alerts against the stated ratio and the part stays uncounted."
-    },
-    {
-      "spell": 705129,
-      "name": "Hateforged Barrier rank 1 (Physical damage taken, control of rank 707527)",
-      "kind": "taken_hit",
-      "variant": "physical_taken",
-      "label_suffix": "physical_taken",
-      "judge": "damage_ratio",
-      "expected": 0.8902,
-      "quote": "While the barrier holds, you take $s2% reduced Physical Damage.",
-      "strike_spell": 92559,
-      "caster_health_pct": 100,
-      "caster_max_health": 100000,
-      "trials": 4,
-      "strikes": 40,
-      "settle_ms": 50,
-      "arms": [
-        {
-          "name": "control",
-          "checks": [
-            {
-              "metric": "aura",
-              "spell": 705129,
-              "equals": 0
-            }
-          ]
-        },
-        {
-          "name": "treatment",
-          "opening_casts": [
-            [
-              705129,
-              "caster"
-            ]
-          ],
-          "checks": [
-            {
-              "metric": "aura",
-              "spell": 705129,
-              "equals": 1
-            }
-          ],
-          "casts": [
-            [
-              705129,
-              "caster"
-            ]
-          ]
-        }
-      ],
-      "observe_source": "705129 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 1 (Physical), BasePoints -11 + 1 = -10 ($s2); Effect[0] aura 69 absorbs 176 + 1..32 + 2.45 per level (60 x 2.45 = 147) + Stamina 79 x 1, about 419. Same design as the 707527 entry (Void Zone 92559, 40 strikes, 4 trials, barrier recast per trial): expected mean (40 x 0.90 x 954 - 419) / (40 x 954) = 0.8902, 0.9803 if the 10% were not applied; the 2-point band holds any absorb of this rank. Control entry: rank 1 carries MiscValue 1 in the DBC where ranks 2 to 6 (707523 to 707527) carry MiscValue 0. Reference search 2026-11-24: coa-history spell 707527: SPELL_CAST_SUCCESS 303 events by players in 7 logs, no value; expected values come from the tooltip and the DBC only. Lead, not a proof (fw-vb4b, review I-2): the strike that breaks the barrier also removes the 10%, so the mean per strike cannot tell 10% from none (-2.43% against -2.18% on the logged 954 per strike); the entry alerts against the stated ratio and the part stays uncounted."
     },
     {
       "kind": "metric_delta",
@@ -21021,6 +21755,692 @@
       "void_on_cast_failure": true,
       "observe_source": "803475 Effect[0] trigger spell 520262 (the main-hand strike), BasePoints 157 + DieSides 1 = 158 ($m1); the tooltip adds attack power x 0.145. Main-hand hit 520262 (Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG) with the reference Slayer set (item 2027, damage 17.25 to 28.75, normalized speed 2.4): weapon roll plus attack power / 14 x 2.4 plus 158 plus 0.145 x attack power. Felfury 800058 x6 and At Least 2 Felfury 803468 (Azzinoth's Assault needs 803468 and consumes 2 Felfury), Reg's Armor Pen 985345 (100% armor penetration) and Reg's Hit rating 984948 (no miss) by harness set_aura as named preconditions in both phases; forced melee crit so the hit is read as a critical, twice the hit. Contrast arm of the attack power term: +20000 attack power (player_attack_power), attack power 20312: 2 x (17.25 + 3482.29 + 158 + 2945.24) to 2 x (28.75 + 3482.29 + 158 + 2945.24) = 13205.6 to 13228.6; without the 0.145 term the same hit is 7.4 to 7.5 thousand lower. Reference search 2026-11-24: coa-history spells 520262 (main-hand strike of Azzinoth's Assault) and 572585 (off hand): 124 and 115 SPELL_DAMAGE events by players in 6 logs (means 148 and 100; 42 and 32 crits); gear and attack power of the loggers unknown, so no figure decides; spell 803475 itself: 0 events; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 2 points under the minimum roll because each integer truncation of the weapon damage before the crit multiplier loses under 1 point, times that factor (2). Off-hand strike: the engine halves the off-hand base damage (Unit.cpp:518 'implement 50% base damage from offhand', UNIT_MOD_DAMAGE_OFFHAND TOTAL_PCT 0.5, and the same factor on the fixed and spell bonus of a physical weapon spell, SpellEffects.cpp:4692-4709), the off hand is the same Slayer item 2027, so the expected value is half of the main-hand figure. Off-hand strike 572585 at attack power 20312: expected 0.5 x 13216.59 = 6608.30. Band 5% of the expected value: the halving is an engine rule applied to the weapon roll, the flat and the attack power term together, and a tighter band would claim a rounding order the code does not state; 5% still excludes the unhalved strike (559.45 / 13216.59), the weapon part alone halved (about 483 / 9712) and a missing flat or attack power term.",
       "player_attack_power": 20000
+    },
+    {
+      "spell": 800206,
+      "name": "Carve (channel present at 2400 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_held",
+      "quote": "Charge up a powerful attack over $d.",
+      "trigger_spell": 800206,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 800206
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 2400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          2350,
+          2450
+        ]
+      },
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Carve 800206 DurationIndex 66 = 2500 ms (Spell.dbc, SpellDuration.dbc row 66; the $d of the clause), Effect[0] aura 23 PERIODIC_TRIGGER_SPELL on the caster (TargetA 1). The self aura 800206 is read on the caster 2400 ms of game time after a real cast; the pair 2400 present / 2600 gone brackets 2500 and excludes a duration 10% off (2250 or 2750). Felfury 800058 x6 and 803468 are precondition fixtures (harness set_aura); a refused cast voids the trial; the control phase makes no cast (0). Reference search 2026-11-24: coa-history spell 800206: SPELL_CAST_SUCCESS 200 events by players in 5 logs, no duration figure (a channel can end early); bindmysoul snapshot has nothing beyond the tooltip; nothing else found.",
+      "label_suffix": "duration_held"
+    },
+    {
+      "spell": 800206,
+      "name": "Carve (channel gone at 2600 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_gone",
+      "quote": "Charge up a powerful attack over $d.",
+      "trigger_spell": 800206,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 800206
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          2550,
+          2650
+        ]
+      },
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Carve 800206 DurationIndex 66 = 2500 ms (Spell.dbc, SpellDuration.dbc row 66; the $d of the clause), Effect[0] aura 23 PERIODIC_TRIGGER_SPELL on the caster (TargetA 1). The self aura 800206 is read on the caster 2600 ms of game time after a real cast; the pair 2400 present / 2600 gone brackets 2500 and excludes a duration 10% off (2250 or 2750). Felfury 800058 x6 and 803468 are precondition fixtures (harness set_aura); a refused cast voids the trial; the control phase makes no cast (0). Reference search 2026-11-24: coa-history spell 800206: SPELL_CAST_SUCCESS 200 events by players in 5 logs, no duration figure (a channel can end early); bindmysoul snapshot has nothing beyond the tooltip; nothing else found.",
+      "label_suffix": "duration_gone"
+    },
+    {
+      "spell": 806109,
+      "name": "Illidan's Guile (dash aura 806128 present at 12700 ms)",
+      "kind": "metric_delta",
+      "variant": "dash_held",
+      "quote": "At the end of the duration, your next $?s520853[Fel Torpedo][Chaos Rush] within $806128d now dashes an additional 20 yds.",
+      "trigger_spell": 806109,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 806128
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 12700,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          12650,
+          12750
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "806109 DurationIndex 31 = 8000 ms; 806128 DurationIndex 28 = 5000 ms (SpellDuration.dbc row 28; the $806128d of the clause). The aura 806128 is read on the caster 12700 ms of game time after the cast of 806109: it starts at the end of the 8000 ms, so it is read at an age of about 4700 ms (present, excludes 4500) and 5300 ms (gone, excludes 5500). The control phase makes no cast (0). Reference search 2026-11-24: coa-history spell 806109 casts end early in the logged runs (the logs give no 8000 ms expiry), spell 806128 nothing found.",
+      "label_suffix": "dash_held"
+    },
+    {
+      "spell": 806109,
+      "name": "Illidan's Guile (dash aura 806128 gone at 13300 ms)",
+      "kind": "metric_delta",
+      "variant": "dash_gone",
+      "quote": "At the end of the duration, your next $?s520853[Fel Torpedo][Chaos Rush] within $806128d now dashes an additional 20 yds.",
+      "trigger_spell": 806109,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 806128
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 13300,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          13250,
+          13350
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "806109 DurationIndex 31 = 8000 ms; 806128 DurationIndex 28 = 5000 ms (SpellDuration.dbc row 28; the $806128d of the clause). The aura 806128 is read on the caster 13300 ms of game time after the cast of 806109: it starts at the end of the 8000 ms, so it is read at an age of about 4700 ms (present, excludes 4500) and 5300 ms (gone, excludes 5500). The control phase makes no cast (0). Reference search 2026-11-24: coa-history spell 806109 casts end early in the logged runs (the logs give no 8000 ms expiry), spell 806128 nothing found.",
+      "label_suffix": "dash_gone"
+    },
+    {
+      "spell": 300483,
+      "name": "Chaotic Intuition (stacks cap at 10)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "quote": "stacking $300481u times.",
+      "trigger_spell": 802678,
+      "gate_spell": 300483,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 300481
+      },
+      "phase_auras": [
+        [
+          300481,
+          9,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 9,
+      "expected": 10,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "300481 StackAmount 10 ($u), DurationIndex 32 = 6000 ms. AscensionFelswornEvents.cpp:82-83,192-199: every damage event of Felstrike 802678 (periodic ticks included) casts 300481 on the caster while 300483 is known. Felstrike 802678 (Effect[0] PERIODIC_DAMAGE every 1000 ms) is cast at the dummy; 9 stacks are a precondition fixture (harness set_aura); at 3500 ms three ticks have landed, so a stack count of exactly 10 (not 11 or 12) is the cap. Control: 300483 unlearned, the same cast, 9 stays. Reference search 2026-11-24: nothing found that decides the cap beyond the tooltip.",
+      "label_suffix": "stack_cap"
+    },
+    {
+      "spell": 681376,
+      "name": "Chaotic (stacks cap at 3)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "quote": "stacking $572782u times.",
+      "trigger_spell": 555738,
+      "gate_spell": 681376,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 572782
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "cast_power": 100,
+      "setup_casts": [
+        555738,
+        555738,
+        555738
+      ],
+      "setup_wait_ms": 3000,
+      "wait_ms": 500,
+      "expire_ms": 14000,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        4.5,
+        5.5,
+        6.5
+      ],
+      "void_on_cast_failure": true,
+      "stack_feed": {
+        "aura": 572782,
+        "cap": 3,
+        "window_ms": 13000,
+        "trials": 2,
+        "source": "572782 StackAmount 3, DurationIndex 31 = 8000 ms; window_ms is 13000 because four Fury Unleashed casts leave 5000 ms of strikes and 8000 ms of aura behind the last one, so the next trial opens 14000 ms after the previous read; the polls are 3000 ms apart, the consecutive applications read at most 6000 ms apart"
+      },
+      "observe_source": "572782 StackAmount 3 ($u), DurationIndex 31 = 8000 ms. Chaotic 681376 (AscensionFelswornEvents.cpp:56-57,148-149) rolls Chance() on the raw ProcChance 8 once per outgoing non-derived damage event and casts 572782 on the caster; no spell modifier forces it, so the stacks are earned: four real casts of Fury Unleashed 555738 3000 ms apart (a 5000 ms aura striking every 1000 ms up to 8 enemies, 8 dummies within its radius, 40 events a cast, 120 in all) feed 2 trials (stack_feed); a trial is valid with at least 4 counted applications and a span below 13000 ms (see stack_feed source), and passes at exactly 3 stacks. Residual per pair: P(fewer than 4 applications in about 110 events) is about 1.5% per trial, voided, never a fail; the pair's residual is v^2 (about 2e-4) and the void rate sizes the rest as v^4. Reference search 2026-11-24: coa-history spell 572782 and 681376: nothing found that decides the cap.",
+      "label_suffix": "stack_cap"
+    },
+    {
+      "spell": 704370,
+      "name": "Curse of Argus (stacks cap at 20)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "quote": "stacking $707511u times.",
+      "trigger_spell": 704368,
+      "gate_spell": 704370,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 707511,
+        "caster": "caster"
+      },
+      "phase_auras": [
+        [
+          707511,
+          19,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "before_expected": 19,
+      "expected": 20,
+      "tolerance": 0,
+      "wait_ms": 6700,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "707511 StackAmount 20 ($u), DurationIndex 32 = 6000 ms. Each damage event of Bane of Chaos 704368 (Effect[0] PERIODIC_DAMAGE every 3000 ms) adds a stack while 704370 is known (AscensionFelswornEvents.cpp:90-91). 19 stacks are a precondition fixture (harness set_aura, caster = the caster); a real Bane cast lands two events (3000 and 6000 ms), so 21 without a cap and 20 with it, read at 6700 ms. Control: the passive unknown, no cast, the fixture reads 19. Reference search 2026-11-24: nothing found beyond the tooltip.",
+      "label_suffix": "stack_cap"
+    },
+    {
+      "spell": 807431,
+      "name": "Abyssal Conditioning (stacks cap at 4)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "quote": "stacking up to $521234u times.",
+      "trigger_spell": 803475,
+      "gate_spell": 807431,
+      "target": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 521234
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          521234,
+          3,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "setup_casts": [
+        803475
+      ],
+      "setup_wait_ms": 1100,
+      "before_expected": 3,
+      "expected": 4,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "521234 StackAmount 4 ($u), DurationIndex 1 = 10000 ms. Each Felfury spender cast (Azzinoth's Assault 803475) casts 521234 on the caster while 807431 is known (AscensionFelswornAbilities.cpp:236,253). 3 stacks are a precondition fixture (harness set_aura); two real casts 1100 ms apart would make 5 without a cap and read 4. Felfury x6 (two casts cost 4) and 803468 are fixtures. Control: the same casts with the passive unknown, the fixture reads 3. Reference search 2026-11-24: nothing found beyond the tooltip.",
+      "label_suffix": "stack_cap"
+    },
+    {
+      "spell": 707527,
+      "name": "Hateforged Barrier (Physical damage taken while it holds)",
+      "kind": "taken_total_ratio",
+      "label_suffix": "physical_taken",
+      "quote": "While the barrier holds, you take $s2% reduced Physical Damage.",
+      "strike_spell": 92559,
+      "magic_spell": 41394,
+      "reduction_effect": 1,
+      "absorb_effect": 0,
+      "stamina_coefficient": 1,
+      "trials": 10,
+      "caster_max_health": 100000,
+      "observe_source": "707527 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, BasePoints -11 + 1 = -10 ($s2), DBC MiscValue 0 (no school; rank 1 705129 carries 1) set to 1 (Physical) by the Felsworn contract (mentor decision D-81, Felsworn ADR 0019); Effect[0] aura 69 SPELL_AURA_SCHOOL_ABSORB, MiscValue 127, $m1 = 751 + 1..32 plus Stamina x 1 ($m1+0+$STA*1), stated separately. Kind taken_total_ratio (ADR 1266, provisional): each strike is read as damage plus resisted plus absorbed from the spell logs the caster receives, so the reduction is judged before the absorb: Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) without the barrier (control) and with it cast before each strike (treatment, the total must be 90% of the control total within the integer rounding, part of it absorbed); Light of the Naaru 41394 (1100 Holy, larger than the barrier) without and with it (equal totals, the absorbed amount within 752..783 plus the Stamina read at the arm start); and Void Zone after the barrier is broken by Light of the Naaru (the aura read absent, equal to the control: the reduction ends with the barrier). Reference search 2026-11-24: coa-history spell 707527: SPELL_CAST_SUCCESS 303 and SPELL_AURA_APPLIED 274 events by players in 7 logs, no value; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "force_crit": "spell",
+      "wait_ms": 22500,
+      "quote": "@ext:Periodic damage dealt by this effect can critically strike.:ext@",
+      "metric": "spell_damage_count",
+      "name": "Bane of Chaos (periodic critical strikes)",
+      "variant": "periodic_crit",
+      "label_suffix": "periodic_crit",
+      "fields": {
+        "spell": 706420,
+        "target": "dummy",
+        "critical": true
+      },
+      "expected": 7,
+      "tolerance": 0.5,
+      "observe_source": "Bane of Chaos 706420 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 3000, DurationIndex 86 = 21000 ms: 7 ticks (the ticks entry reads 7). The sentence is in the 706420 Description (@ext). The caster's spell crit rating is forced (force_crit spell, the Necromancer 501861 periodic_crit shape, ADR necromancer/0012), the dummy's Chaos resistance removed (823764, precondition fixture, set_aura); the crit-removal fixture 984954 of the total entry is not set. Reference search 2026-11-24: Necromancer 501861 'Periodic damage dealt by this can critically strike' (status 1 after FN-c4-1, 12 of 12 critical ticks; pre-fix 0 of 12) is the precedent; coa-history spell 706420 (run 2026-11-24, read-only): SPELL_PERIODIC_DAMAGE 1563 events, 682 critical, 2 logs, so the live periodic damage of Bane of Chaos crits (43.6 percent of its ticks); nothing else found beyond the tooltip and Spell.dbc. Read: critical Bane of Chaos ticks on the dummy 22500 ms after a real cast under the forced spell crit: 7 (every tick); no cast before (control, 0)."
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "force_crit": "spell",
+      "wait_ms": 22500,
+      "quote": "@ext:Periodic damage dealt by this effect can critically strike.:ext@",
+      "metric": "spell_damage_count",
+      "name": "Bane of Chaos (ticks under forced crit)",
+      "variant": "periodic_ticks",
+      "label_suffix": "periodic_ticks",
+      "fields": {
+        "spell": 706420,
+        "target": "dummy"
+      },
+      "expected": 7,
+      "tolerance": 0.5,
+      "observe_source": "Bane of Chaos 706420 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 3000, DurationIndex 86 = 21000 ms: 7 ticks (the ticks entry reads 7). The sentence is in the 706420 Description (@ext). The caster's spell crit rating is forced (force_crit spell, the Necromancer 501861 periodic_crit shape, ADR necromancer/0012), the dummy's Chaos resistance removed (823764, precondition fixture, set_aura); the crit-removal fixture 984954 of the total entry is not set. Reference search 2026-11-24: Necromancer 501861 'Periodic damage dealt by this can critically strike' (status 1 after FN-c4-1, 12 of 12 critical ticks; pre-fix 0 of 12) is the precedent; coa-history spell 706420 (run 2026-11-24, read-only): SPELL_PERIODIC_DAMAGE 1563 events, 682 critical, 2 logs, so the live periodic damage of Bane of Chaos crits (43.6 percent of its ticks); nothing else found beyond the tooltip and Spell.dbc. Companion of periodic_crit: every 706420 tick on the dummy, critical or not, under the same forcing: 7, so periodic_crit's 7 critical ticks are all of them; no cast before (0)."
+    },
+    {
+      "spell": 706420,
+      "name": "Bane of Chaos (direct spell crit under the same forcing)",
+      "kind": "metric_delta",
+      "variant": "direct_crit_control",
+      "label_suffix": "direct_crit_control",
+      "quote": "@ext:Periodic damage dealt by this effect can critically strike.:ext@",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 100,
+      "force_crit": "spell",
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "wait_ms": 2800,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 801312,
+        "target": "dummy",
+        "critical": true
+      },
+      "observe_source": "Forcing check for periodic_crit: under the same forced spell crit rating a direct Felsworn spell, Fel Fireball 801312, lands one critical hit on the dummy (no cast before: 0)."
+    },
+    {
+      "spell": 561216,
+      "kind": "metric_delta",
+      "quote": "@ext:Requires a nearby enemy to cast.:ext@",
+      "trigger_spell": 561216,
+      "gate_spell": 561216,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 561216
+      },
+      "before_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Fury of the Illidari (refused with no enemy nearby)",
+      "variant": "no_enemy",
+      "label_suffix": "no_enemy",
+      "relocate_before_trigger": {
+        "dx": -20
+      },
+      "expected": 12,
+      "observe_source": "Fury of the Illidari 561216 Description: 'Requires a nearby enemy to cast.' (@ext). Spell.dbc carries no target requirement for it (Effect[0] and Effect[2] TargetA 1 self), the server refuses a cast with no valid, visible attack target within 15 yd in line of sight with SPELL_FAILED_BAD_TARGETS (12, SharedDefines.h:1062; AscensionFelswornAbilities.cpp:90-97). The cast_failure of 561216 is read 500 ms after one real cast: 0 before the learn (no cast, control) and, after it, the refusal code with the caster moved away, 0 with the dummy beside it. Reference search 2026-11-24: coa-history spell 561216: see the felfury entry; nothing found that decides a distance; the tooltip gives no distance, so only 'no enemy at all' against 'an enemy beside the caster' is claimed. Arm: the caster is moved 20 yd away from the only dummy (the step takes at most 20 yd; the dummy stands on +x, so it is then more than 15 yd away) right before the cast (relocate_before_trigger), so no enemy is within 15 yd; expected the refusal 12."
+    },
+    {
+      "spell": 561216,
+      "kind": "metric_delta",
+      "quote": "@ext:Requires a nearby enemy to cast.:ext@",
+      "trigger_spell": 561216,
+      "gate_spell": 561216,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 561216
+      },
+      "before_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Fury of the Illidari (control: cast with an enemy beside the caster)",
+      "variant": "enemy_near",
+      "label_suffix": "enemy_near",
+      "expected": 0,
+      "observe_source": "Fury of the Illidari 561216 Description: 'Requires a nearby enemy to cast.' (@ext). Spell.dbc carries no target requirement for it (Effect[0] and Effect[2] TargetA 1 self), the server refuses a cast with no valid, visible attack target within 15 yd in line of sight with SPELL_FAILED_BAD_TARGETS (12, SharedDefines.h:1062; AscensionFelswornAbilities.cpp:90-97). The cast_failure of 561216 is read 500 ms after one real cast: 0 before the learn (no cast, control) and, after it, the refusal code with the caster moved away, 0 with the dummy beside it. Reference search 2026-11-24: coa-history spell 561216: see the felfury entry; nothing found that decides a distance; the tooltip gives no distance, so only 'no enemy at all' against 'an enemy beside the caster' is claimed. Control arm of no_enemy: the same cast with the dummy beside the caster (not moved): accepted, cast_failure 0."
+    },
+    {
+      "spell": 300468,
+      "name": "Illidari Barrier (the absorb follows Stamina)",
+      "kind": "taken_hit",
+      "variant": "stamina",
+      "label_suffix": "stamina",
+      "judge": "absorb",
+      "quote": "@ext:Absorption shield scales with Stamina.:ext@",
+      "strike_spell": 41394,
+      "trials": 5,
+      "caster_health_pct": 100,
+      "caster_max_health": 20000,
+      "absorb_constant": 328,
+      "absorb_terms": [
+        {
+          "coefficient": 1.0,
+          "reads": [
+            {
+              "metric": "stat",
+              "stat": 2
+            }
+          ]
+        },
+        {
+          "coefficient": 0.2,
+          "reads": [
+            {
+              "metric": "spell_power",
+              "school": 2
+            }
+          ]
+        },
+        {
+          "coefficient": 0.08,
+          "reads": [
+            {
+              "metric": "attack_power"
+            }
+          ]
+        }
+      ],
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "shield",
+          "learn": [
+            300469
+          ],
+          "casts": [
+            [
+              300469,
+              "caster"
+            ]
+          ],
+          "absorb": "formula"
+        },
+        {
+          "name": "stamina",
+          "learn": [
+            300469
+          ],
+          "auras": [
+            [
+              9119,
+              1
+            ]
+          ],
+          "casts": [
+            [
+              300469,
+              "caster"
+            ]
+          ],
+          "absorb": "formula"
+        }
+      ],
+      "observe_source": "Companion of amount for the sentence 'Absorption shield scales with Stamina.' (@ext; the tooltip of 300468 gives the term $STA*1). Arms: no shield (control), the shield of 300469 cast at the caster (Stamina as is) and the same shield after Stamina +12 (9119, MOD_STAT Stamina BasePoints 11 + 1, a precondition fixture of the stamina arm; the claim's subject is the shield). Each arm's absorb is judged against the formula with the Stamina read on the caster at the arm start, so the stamina arm's absorb exceeds the shield arm's by the Stamina gained times the tooltip coefficient 1.0. Reference search 2026-11-24: coa-history spell 300468 and 300469; nothing found beyond the tooltip, Spell.dbc and the amount entry; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 800206,
+      "name": "Carve (dodge while channeling)",
+      "kind": "metric_delta",
+      "variant": "channel_dodge",
+      "label_suffix": "channel_dodge",
+      "quote": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
+      "trigger_spell": 800206,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "before_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "strike": {
+        "spell": 2118233,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 3,
+        "wait_ms": 200,
+        "after_trigger_ms": 800
+      },
+      "caster_avoidance": {
+        "dodge": 100
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 2118233,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "expected": 0,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Carve 800206 Description (@ext): 'Can dodge and parry while channeling and you can channel while moving.' The engine zeroes a melee swing's dodge and parry while the victim casts or channels (Unit::RollMeleeOutcomeAgainst, Unit.cpp:3395-3397, 3429-3431) unless Unit::CanDefendDuringChannel allows it (Unit.cpp:5120-5133, a Demon Hunter channelling 800206). A passive striker (creature 36) casts Speed Slash 2118233 (melee, cannot miss, SPELL_ATTR7_NO_ATTACK_MISS) at the caster three times 800 ms into the channel, 200 ms apart, with the caster's dodge or parry set to 100% right before (harness set_combat_avoidance, a named precondition fixture); the damage events of 2118233 on the caster are counted. Carve: every strike is dodged or parried, 0 events. Control of this arm: the _control entry with Sargeras Embrace 800355 reads 3 landed strikes under the same fixture. Felfury x6 and 803468 are set on the caster for Carve (precondition fixtures, as the consumes entry). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 channel_dodge / channel_parry (taken_outcome) is the precedent shape; coa-history spell 800206: casts exist, no avoidance figure decides; nothing else found beyond the tooltip, Spell.dbc and the engine code. "
+    },
+    {
+      "spell": 800206,
+      "name": "Sargeras Embrace (control: a channel without the exemption does not dodge)",
+      "kind": "metric_delta",
+      "variant": "channel_dodge_control",
+      "label_suffix": "channel_dodge_control",
+      "quote": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "before_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "strike": {
+        "spell": 2118233,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 3,
+        "wait_ms": 200,
+        "after_trigger_ms": 800
+      },
+      "caster_avoidance": {
+        "dodge": 100
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 2118233,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "expected": 3,
+      "observe_source": "Carve 800206 Description (@ext): 'Can dodge and parry while channeling and you can channel while moving.' The engine zeroes a melee swing's dodge and parry while the victim casts or channels (Unit::RollMeleeOutcomeAgainst, Unit.cpp:3395-3397, 3429-3431) unless Unit::CanDefendDuringChannel allows it (Unit.cpp:5120-5133, a Demon Hunter channelling 800206). A passive striker (creature 36) casts Speed Slash 2118233 (melee, cannot miss, SPELL_ATTR7_NO_ATTACK_MISS) at the caster three times 800 ms into the channel, 200 ms apart, with the caster's dodge or parry set to 100% right before (harness set_combat_avoidance, a named precondition fixture); the damage events of 2118233 on the caster are counted. Carve: every strike is dodged or parried, 0 events. Control: Sargeras Embrace 800355, a Felsworn channel (ChannelInterruptFlags 0, no exemption), the same strikes land: 3 events, so the 0 of Carve is the exemption and not a failed strike. Felfury x6 and 803468 are set on the caster for Carve (precondition fixtures, as the consumes entry). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 channel_dodge / channel_parry (taken_outcome) is the precedent shape; coa-history spell 800206: casts exist, no avoidance figure decides; nothing else found beyond the tooltip, Spell.dbc and the engine code. "
+    },
+    {
+      "spell": 800206,
+      "kind": "metric_delta",
+      "quote": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "before_expected": 0,
+      "relocate_during_wait": {
+        "every_ms": 500,
+        "count": 2,
+        "dy": 1.5
+      },
+      "metric": "cast_remaining_ms",
+      "name": "Carve (the channel continues while the caster moves)",
+      "variant": "moving_channel",
+      "label_suffix": "moving_channel",
+      "trigger_spell": 800206,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "fields": {
+        "spell": 800206
+      },
+      "expected": 1,
+      "after_at_least": 300,
+      "observe_source": "Carve 800206 is a channel (DurationIndex 66 = 2500 ms) whose ChannelInterruptFlags 4733956 (0x483C04) carry no movement bit in Spell.dbc, and the server adds none. The caster is moved by the harness relocate step (the native position update of a client movement packet, which interrupts a channel carrying AURA_INTERRUPT_FLAG_MOVE) 1.5 yd along y and back at 500 and 1000 ms; cast_remaining_ms of the caster's own cast is read 800 ms after the last move (about 1800 ms after the cast), the channel must still run (at least 300 of the 2500 ms). Before (control): no cast, 0. Felfury x6 and 803468 are set as precondition fixtures. Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 moving_channel (the precedent shape); nothing else found beyond the tooltip and Spell.dbc. "
     }
   ],
   "player_observations": [],

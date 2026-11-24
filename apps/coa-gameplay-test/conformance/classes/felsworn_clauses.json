@@ -14,7 +14,10 @@
     "claims": [
       {
         "claim": "Critical strikes with melee abilities now trigger Dancing Blades",
-        "labels": []
+        "labels": [
+          "92087 behaviour_metric_delta trigger",
+          "92087 behaviour_metric_delta noncrit"
+        ]
       },
       {
         "claim": "dealing off-hand Weapon Damage",
@@ -30,7 +33,7 @@
         ]
       }
     ],
-    "reason": "HELD claim 1 (review fw-rl3b I-1): the noncrit arm (learned, 0 crits) has no read showing the Twin Slice strikes landed, so 0 triggers could mean no strike; needs a same-arm strike damage or hit-count read before 'Critical strikes ... trigger' counts."
+    "reason": "Claim 1 same-arm strike read (fw-vb9): the noncrit arm sums the damage events of the Twin Slice strike 808303 and of 800598 on the dummy, so the learned no-crit arm shows the strike landed (1 before, 2 after) while 800598 never fires; trigger arm reads casts of 800598 under forced crit."
   },
   {
     "spell": 92088,
@@ -63,7 +66,8 @@
       {
         "claim": "over $d",
         "labels": [
-          "92088 spell_duration 802678 #1"
+          "92088 behaviour_metric_delta held",
+          "92088 behaviour_metric_delta gone"
         ]
       }
     ],
@@ -195,9 +199,10 @@
     "spell": 300468,
     "clause": "@ext:Absorption shield scales with Stamina.:ext@",
     "labels": [
-      "300468 effect_value #3"
+      "300468 behaviour_taken_hit stamina"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fw-vb9: absorb 431 without and 443 with Stamina +12 (9119), each judged exactly against the formula with the Stamina read at the arm start (coefficient 1.0 of the tooltip); control arm without the shield absorbs 0."
   },
   {
     "spell": 300470,
@@ -259,7 +264,8 @@
       {
         "claim": "for $d",
         "labels": [
-          "300474 spell_duration 300475 #2"
+          "300474 behaviour_metric_delta held",
+          "300474 behaviour_metric_delta gone"
         ]
       }
     ]
@@ -371,7 +377,8 @@
     "spell": 300483,
     "clause": "Damage dealt by Felstrikes now extends the duration of Cripple on the target by $/1000;560643s1 sec",
     "labels": [
-      "300483 effect_value 560643e0 #0"
+      "300483 behaviour_metric_delta held",
+      "300483 behaviour_metric_delta gone"
     ],
     "kind": "claim"
   },
@@ -400,7 +407,7 @@
     "spell": 300483,
     "clause": "stacking $300481u times.",
     "labels": [
-      "300483 max_stacks 300481 #3"
+      "300483 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -464,7 +471,7 @@
       {
         "claim": "grant you Felforged for $806104d",
         "labels": [
-          "300490 spell_duration 806104 #1"
+          "300490 behaviour_metric_delta felforged_duration"
         ]
       }
     ]
@@ -472,11 +479,31 @@
   {
     "spell": 300490,
     "clause": "Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.",
-    "labels": [
-      "300490 effect_value 806104e0 #2",
-      "300490 spell_duration 806104 #3"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.",
+        "labels": [],
+        "reason": "The words repeat the whole clause and overlap 'Your next 3 Fel Fireballs', which alerts (fourth_cast); the clause is judged by the three exact-word claims below (D-22, review I-1)."
+      },
+      {
+        "claim": "Your next 3 Fel Fireballs",
+        "labels": [
+          "300490 behaviour_metric_delta fourth_cast"
+        ]
+      },
+      {
+        "claim": "have a $s1% reduced cast time",
+        "labels": []
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "300490 behaviour_metric_delta felforged_duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "HELD 'have a $s1% reduced cast time' (review fw-rvb7b I-3a, mentor D-67): the cast-time reads put 806104 by set_aura; no attempt record of a real-feed cast-time route and no arm reading 806104's amount after the real feed."
   },
   {
     "spell": 301287,
@@ -563,7 +590,8 @@
       {
         "claim": "over $520832d",
         "labels": [
-          "520693 spell_duration 520832 #2"
+          "520693 behaviour_metric_delta held",
+          "520693 behaviour_metric_delta gone"
         ]
       },
       {
@@ -1428,8 +1456,14 @@
       },
       {
         "claim": "for $572163d (duration pending: a summon timed from its third cast, not entered)",
+        "labels": [],
+        "reason": "Superseded by the exact-words claim 'for $572163d' below (D-22, review M-1); its labels moved there."
+      },
+      {
+        "claim": "for $572163d",
         "labels": [
-          "560840 spell_duration 572163 #0"
+          "560840 behaviour_metric_delta held",
+          "560840 behaviour_metric_delta gone"
         ]
       }
     ]
@@ -1482,7 +1516,8 @@
     "spell": 561201,
     "clause": "for $/1000;s1 sec.",
     "labels": [
-      "561201 effect_value e0 #2"
+      "561201 behaviour_metric_delta held",
+      "561201 behaviour_metric_delta gone"
     ],
     "kind": "claim"
   },
@@ -1589,9 +1624,11 @@
     "spell": 561216,
     "clause": "@ext:Requires a nearby enemy to cast.:ext@",
     "labels": [
-      "561216 effect_value #1"
+      "561216 behaviour_metric_delta no_enemy",
+      "561216 behaviour_metric_delta enemy_near"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fw-vb9: cast_failure 12 (SPELL_FAILED_BAD_TARGETS) with the caster 20 yd from the only dummy, 0 with the dummy beside it. The tooltip gives no distance, so only no enemy at all against an enemy beside the caster is claimed."
   },
   {
     "spell": 561343,
@@ -1848,7 +1885,7 @@
       {
         "claim": "for $572782d",
         "labels": [
-          "681376 spell_duration 572782 #2"
+          "681376 behaviour_metric_delta chaotic_duration"
         ]
       }
     ]
@@ -1857,7 +1894,7 @@
     "spell": 681376,
     "clause": "stacking $572782u times.",
     "labels": [
-      "681376 max_stacks 572782 #3"
+      "681376 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -1875,7 +1912,8 @@
     "spell": 685321,
     "clause": "and scars enemies for $563271d,",
     "labels": [
-      "685321 spell_duration 563271 #1"
+      "685321 behaviour_metric_delta held",
+      "685321 behaviour_metric_delta gone"
     ],
     "kind": "claim"
   },
@@ -1994,7 +2032,8 @@
     "labels": [
       "706420 effect_value #4"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "DEFECT LEAD (fw-vb9, not counted): under forced spell crit 706420 lands 7 of 7 ticks and 0 critical (periodic_crit, 0 of 7 in both runs; periodic_ticks 7; direct_crit_control: Fel Fireball 801312 lands 1 critical). Same shape as Necromancer 501861 before FN-c4-1 (ADR necromancer/0012). Live reference (coa-history spell 706420, 2026-11-24): SPELL_PERIODIC_DAMAGE 1563 events, 682 critical, 2 logs, so live periodic ticks crit. Fix note in .agents/plans/fw-vb9b/report.md. Labels stay on the data read until the fix."
   },
   {
     "spell": 704370,
@@ -2024,7 +2063,7 @@
     "spell": 704370,
     "clause": "stacking $707511u times.",
     "labels": [
-      "704370 max_stacks 707511 #2"
+      "704370 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -2207,10 +2246,10 @@
     "spell": 704613,
     "clause": "Increases the amount of beneficial magic effects stolen by your Consume Magic by $s1.",
     "labels": [
-      "704613 behaviour_metric_delta stolen"
+      "704613 behaviour_metric_delta stolen_effects"
     ],
     "kind": "claim",
-    "reason": "HELD '704613 behaviour_metric_delta stolen_effects' (review fw-rvb5 I-2): only 2 buffs on the dummy, so the read saturates at the expected 2 and an over-steal would pass; needs a third Magic buff and a rerun."
+    "reason": "Third Magic buff added (Arcane Intellect 1459, fw-vb9): carried_aura_count of the three buffs on the caster reads 1 before the learn and 2 after, so an over-steal (3) fails; spellpen 823764 on the caster as precondition fixture. The audit classes carried_aura_count as data (coverage.py state metric, promise word 'empower'), so this read does not count: the clause stays uncounted until a behaviour read exists on an existing kind. The data read 'stolen' is dropped from the labels."
   },
   {
     "spell": 705102,
@@ -2381,10 +2420,11 @@
     "spell": 707527,
     "clause": "While the barrier holds, you take $s2% reduced Physical Damage.",
     "labels": [
-      "707527 behaviour_hit_ratio physical_taken"
+      "707527 behaviour_hit_ratio physical_taken",
+      "707527 behaviour_hit_ratio magic_taken",
+      "707527 behaviour_hit_ratio physical_after_break"
     ],
-    "kind": "claim",
-    "reason": "Alert, defect lead, uncounted (fw-vb4b, review I-2); no server change, no status 3. Full tooltip (server DBC /srv/coa/server-data/dbc, Spell 707527): \"Manifest a barrier of pure hatred, absorbing ${$m1+0+$STA*1} damage, scaling with your Stamina, for $d. While the barrier holds, you take $s2% reduced Physical Damage.\" ($s2 = 10). Data: 707527 Effect[1] EffectApplyAuraName 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, EffectBasePoints -11, EffectMiscValue 0 (also 707523 to 707526); rank 1 705129 has Effect[1] aura 87, EffectBasePoints -11, EffectMiscValue 1. Code: src/server/game/Entities/Unit/Unit.cpp:10114-10118 (spell damage) and :11724-11728 (melee) multiply an aura 87 effect only when (effect->GetMiscValue() & school mask) is non-zero, so MiscValue 0 never applies the 10%; no correction for 707523 to 707527 in src/server/coa or the pending SQL, while AscensionFelswornContracts.cpp:138-139 sets Effects[EFFECT_2].MiscValue = SPELL_SCHOOL_MASK_NORMAL for 800209 only. Measurement: taken_hit damage_ratio (Void Zone 92559 x40, 954 logged per hit, barrier recast per trial) reads the per-hit mean 931.5 to 932.5 (-2.26% to -2.36%) against -12.08% expected, and rank 1 705129 -1.03% against -10.98%; both alert because the strike that breaks the barrier removes the absorb and the 10% together (with the reduction (27.6 + 39 x 954)/40 = 930.8, without it (123 + 39 x 954)/40 = 933.2, -2.43% against -2.18%, inside the spread): the run cannot tell 10% from none, so it is a lead, not a proof of the defect. Pairs 20261123-233905 / -234132 and -234412 / -234445. Reference search 2026-11-24: coa-history spell 707527: events by players in 7 logs, no value; nothing else found. Fix note: .agents/plans/fw-vb4b/report.md section \"Lead 177.0\" (intended change, if the mentor confirms: a contract line MiscValue = SPELL_SCHOOL_MASK_NORMAL on Effects[1] of 707523 to 707527, own ADR, regression with a strike smaller than the barrier)."
+    "kind": "claim"
   },
   {
     "spell": 705131,
@@ -2647,11 +2687,19 @@
       }
     ],
     "tool_gap": {
-      "reason": "'strike 1 additional enemy ... based on how long you channeled' needs the channel ended at a set time, so that the extra targets of a short and of a full channel can be compared. No metric_delta option ends a channel: hold_power_during_wait and relocate_during_wait only keep or move the caster, Carve 800206 carries no movement channel interrupt (it can channel while moving), and the harness action cancel_aura is not wired into any metric_delta option (needs a new option, tool group). The full channel is read by extras_full (nine offered, all struck); the growth with the length is not. The nearest kind is metric_delta with area_dummies and area_sum.",
+      "reason": "'strike 1 additional enemy ... based on how long you channeled' needs the channel ended at a set time, so that the extra targets of a short and of a full channel can be compared. No metric_delta option ends a channel: hold_power_during_wait and relocate_during_wait only keep or move the caster, Carve 800206 carries no movement channel interrupt (it can channel while moving), and the harness action cancel_aura is not wired into any metric_delta option (needs a new option, tool group). The full channel is read by extras_full (nine offered, all struck); the growth with the length is not. The nearest kind is metric_delta with area_dummies and area_sum. fw-vb9 (195.1, 2026-11-24): the L2 fixture covers the full channel only; no metric_delta option ends the channel at a set time (cancel_aura is wired only in clear_trigger_after_ms for a periodic hit count), relocation does not cut it (Carve carries no movement channel interrupt, moving_channel read 685 ms remaining after two moves). Attempt 2 (fw-vb9b, 2026-11-24, prove .cache/conformance/vb9b-p2, no flip over 2 runs): after_trigger_casts with Carve 800206 as trigger and a Fel Fireball 801312 cast 1100 ms later (in_before, learn 801312; first run read 0 because 801312 was not learned, spell_active false). The cast does interrupt the channel and the extras follow the ticks reached: control (no 707444) 1 hit, treatment 6 hits (primary + 5 extras) in both runs. The design cannot be counted: the expected number of ticks reached at 1100 ms is not derivable from the DBC alone (tick period 250 ms gives 4, the run gave 5, the tick offset of the harness cast is unknown), and an expected taken from the run is forbidden; a second arm at another delay would need an option comparing two delays inside one entry. The entry was removed so that no standing alert is left; its definition is in .agents/plans/fw-vb9b/extras_interrupted.entry.json.",
       "attempts": [
         {
           "agent": "fw-ea5",
           "report": ".agents/plans/fw-ea5/report.md"
+        },
+        {
+          "agent": "fw-vb9",
+          "report": ".agents/plans/fw-vb9/report.md"
+        },
+        {
+          "agent": "fw-vb9b",
+          "report": ".agents/plans/fw-vb9b/report.md"
         }
       ]
     },
@@ -2912,7 +2960,8 @@
     "spell": 800206,
     "clause": "Charge up a powerful attack over $d.",
     "labels": [
-      "800206 aura_duration_ms #0"
+      "800206 behaviour_metric_delta duration_held",
+      "800206 behaviour_metric_delta duration_gone"
     ],
     "kind": "claim"
   },
@@ -2946,10 +2995,28 @@
   {
     "spell": 800206,
     "clause": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
-    "labels": [
-      "800206 effect_value #3"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Can dodge",
+        "labels": [
+          "800206 behaviour_metric_delta channel_dodge",
+          "800206 behaviour_metric_delta channel_dodge_control"
+        ]
+      },
+      {
+        "claim": "and parry while channeling",
+        "labels": []
+      },
+      {
+        "claim": "you can channel while moving",
+        "labels": [
+          "800206 behaviour_metric_delta moving_channel"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "fw-vb9. Dodge: three Speed Slash strikes with dodge 100% are all avoided during Carve (0 landed) while the same strikes land 3 of 3 during Sargeras Embrace 800355, a channel without the exemption (control). Moving: cast_remaining_ms 685 after two harness relocations; the uncast phase reads 0; the harness relocation cuts a channel that carries the move flag (Witch Hunter Witchbane moving_channel_witchbane_moved, same step). Parry: not proven, the striker fixture does not put the strike in the parry arc (two designs not yet tried; strikes at dx 0 landed with parry 100% and dx 10 gave 0 landed in the control too)."
   },
   {
     "spell": 572617,
@@ -4490,10 +4557,22 @@
   {
     "spell": 806109,
     "clause": "At the end of the duration, your next $?s520853[Fel Torpedo][Chaos Rush] within $806128d now dashes an additional 20 yds.",
-    "labels": [
-      "806109 spell_duration 806128 #1"
+    "labels": null,
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "within $806128d",
+        "labels": [
+          "806109 behaviour_metric_delta dash_held",
+          "806109 behaviour_metric_delta dash_gone"
+        ]
+      },
+      {
+        "claim": "now dashes an additional 20 yds.",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Split (review fw-rvb8 I1): the held/gone reads prove the window 'within $806128d'; the 20 yd extra dash is not measured (uncounted)."
   },
   {
     "spell": 806111,
@@ -4608,7 +4687,7 @@
     "spell": 807431,
     "clause": "stacking up to $521234u times.",
     "labels": [
-      "807431 max_stacks 521234 #2"
+      "807431 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
