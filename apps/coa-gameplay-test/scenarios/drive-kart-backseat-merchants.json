@@ -3,10 +3,9 @@
   "name": "D.R.I.V.E Karts carry Backseat Beauty and Backseat Babe",
   "contract": [
     "The PUR-PL3 D.R.I.V.E Kart 908072 summons kart 110517, which uses two-passenger vehicle 8223.",
-    "Login streams the vehicle with SMSG_PATCH_VEHICLE 0x97A and its seats 9996/9997 with",
-    "SMSG_PATCH_VEHICLE_SEAT 0x97B; the seats use attachments 14 and 15, the kart's passenger points.",
+    "The client data carries the vehicle and its seats 9996/9997 (attachments 14 and 15, the kart's passenger points), which the harness does not observe.",
     "Mounting seats Backseat Beauty 110522 (bank) and Backseat Babe 110523 (vendor and repair) on the",
-    "kart; dismounting removes both. Socketless sessions establish the packets and the server-side",
+    "kart; dismounting removes both. Socketless sessions establish the server-side",
     "passengers, not the client's rendering of the seats."
   ],
   "timeout_ms": 60000,
@@ -21,18 +20,6 @@
     {"id": "rider", "race": 1, "class": 1, "level": 60}
   ],
   "steps": [
-    {
-      "action": "client_packet",
-      "actor": "rider",
-      "opcode": 1377
-    },
-    {"action": "assert", "actor": "rider", "metric": "server_packets", "opcode": 2426, "row": 8223, "equals": 1, "within_ms": 10000},
-    {"action": "assert", "actor": "rider", "metric": "server_packet_u32", "opcode": 2426, "row": 8223, "index": 7, "equals": 9996},
-    {"action": "assert", "actor": "rider", "metric": "server_packet_u32", "opcode": 2426, "row": 8223, "index": 8, "equals": 9997},
-    {"action": "assert", "actor": "rider", "metric": "server_packets", "opcode": 2427, "row": 9996, "equals": 1},
-    {"action": "assert", "actor": "rider", "metric": "server_packet_u32", "opcode": 2427, "row": 9996, "index": 2, "equals": 14},
-    {"action": "assert", "actor": "rider", "metric": "server_packets", "opcode": 2427, "row": 9997, "equals": 1},
-    {"action": "assert", "actor": "rider", "metric": "server_packet_u32", "opcode": 2427, "row": 9997, "index": 2, "equals": 15},
     {"action": "set_skill", "actor": "rider", "skill": 762, "value": 150, "maximum": 150},
     {
       "action": "learn",

@@ -1,0 +1,247 @@
+{
+  "schema": 1,
+  "name": "Meilosh sells the Timbermaw Hold reputation rewards",
+  "contract": [
+    "Meilosh <Timbermaw Hold Quartermaster> 11557 sold only Ancient Stick of the Timbermaw Hold reputation",
+    "rewards (#9477). His shop lists the 20 Ascension rewards that require Timbermaw Hold (BisBeard labels in the",
+    "db.exil.es export, 2026-09-13, and the captured WDB itemcache) and Formula: Enchant Cloak - Lesser Spell",
+    "Penetration 46520 at its item_template price of 100 gold; a vendor_price of -1 means the item is not on the",
+    "shelves."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "meilosh",
+      "owner": "p",
+      "entry": 11557,
+      "faction": 35,
+      "level": 60,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask Meilosh for his wares",
+      "actor": "p",
+      "opcode": 414,
+      "fields": [
+        {
+          "actor_guid": "meilosh"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: his shop opens",
+      "actor": "p",
+      "metric": "vendor_list_packets",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Ancient Stick 355107 is still on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 355107,
+      "equals": 10000000
+    },
+    {
+      "action": "assert",
+      "label": "Formula: Enchant Cloak - Lesser Spell Penetration 46520 for 100 gold",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 46520,
+      "equals": 1000000
+    },
+    {
+      "action": "assert",
+      "label": "Timbermaw Root 1519894 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1519894,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Handcrafted Beast Cleaver 856010 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 856010,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Resounding Earth Hood 856012 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 856012,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Hunting Hatchet 856013 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 856013,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Enchanted Pawpads 856014 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 856014,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Razorfang Battle Harness 856017 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 856017,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Greatfather's Linked Headdress 856026 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 856026,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Timbermaw Fur Cloak 1519802 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1519802,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Ring of Mending 1519893 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1519893,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Timbermaw Talisman 1519895 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1519895,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Ursine Woodstaff 856009 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 856009,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Combed Furline Handwraps 856011 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 856011,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Greatfather's Rending Claw 856018 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 856018,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Timbermaw Rootcleaver 856022 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 856022,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Talisman of the Furbolg Warder 856029 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 856029,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Timbermaw Tracker's Belt 1519801 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1519801,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Fur Lined Leggings 1519803 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1519803,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Timbermaw Spellblade 1519890 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1519890,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Timbermaw Shanker 1519891 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1519891,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "The \"Prized\" Possesion 1519892 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1519892,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Defender of the Timbermaw 21326 stays a quest reward",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 21326,
+      "equals": -1
+    }
+  ]
+}

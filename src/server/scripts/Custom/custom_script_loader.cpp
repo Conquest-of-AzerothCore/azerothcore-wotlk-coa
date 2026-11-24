@@ -26,6 +26,7 @@ void AddSC_wisdomball_khadgar_voice();
 void AddSC_wisdomball_leash();
 void AddSC_wisdomball_escort_wait();
 void AddSC_wisdomball_memory_blizzard();
+void AddSC_wisdomball_normal_difficulty();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -41,4 +42,5 @@ void AddCustomScripts()
     AddSC_wisdomball_leash();
     AddSC_wisdomball_escort_wait();
     AddSC_wisdomball_memory_blizzard();
+    AddSC_wisdomball_normal_difficulty();
 }

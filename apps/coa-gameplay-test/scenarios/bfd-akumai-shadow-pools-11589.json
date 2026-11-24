@@ -1,0 +1,229 @@
+{
+  "schema": 1,
+  "name": "Blackfathom Deeps: Aku'mai drops Shadow Pools under three players every 25 s on Heroic and Mythic (#11589)",
+  "contract": "#11589: On Ascension Aku'mai (4829) left pulsing shadow pools, three at a time with about a 10 yd radius (tester screenshots). He now summons a Shadow Pool (Heroic 9604829, Mythic 9504829, an invisible trigger that casts Ascension's Summon Nightmare Rift (2102728, Aku'mai's kit, rift visual 252514) every 6 s) under three random players 10-12 s into the fight and every 25 s; each lasts 20 s and casts Consumption (64208, 900-1100 Shadow, 5 yd; the rift visual is 4 yd in Spell.dbc, 10 yd reached too far in game) every second, scaled by coa_dungeon_creature_damage to about 400 on Heroic and 520 on Mythic (tester estimate for Mythic, Heroic = Mythic / 1.3). Normal has no pools.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "dps2",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "tank",
+      "value": 2
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "dps1",
+      "value": 2
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "dps2",
+      "value": 2
+    },
+    {
+      "action": "group",
+      "actor": "tank",
+      "target": "dps1"
+    },
+    {
+      "action": "group",
+      "actor": "tank",
+      "target": "dps2"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 48,
+      "x": -832.8,
+      "y": -424.3,
+      "z": -33.9
+    },
+    {
+      "action": "teleport",
+      "actor": "dps1",
+      "map": 48,
+      "x": -826.8,
+      "y": -424.3,
+      "z": -33.9
+    },
+    {
+      "action": "teleport",
+      "actor": "dps2",
+      "map": 48,
+      "x": -838.8,
+      "y": -424.3,
+      "z": -33.9
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Blackfathom Deeps on Mythic",
+      "actor": "tank",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 4829,
+      "as": "akumai",
+      "distance": 3
+    },
+    {
+      "action": "attack",
+      "actor": "tank",
+      "target": "akumai"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Aku'mai fights",
+      "actor": "akumai",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 9000
+    },
+    {
+      "action": "assert",
+      "label": "no pools 9 s after combat starts",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 9504829,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 10-12 s in, a Shadow Pool spawns under each of the three players",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 9504829,
+      "equals": 3,
+      "within_ms": 3025
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 9504829,
+      "as": "pool",
+      "distance": 30
+    },
+    {
+      "action": "assert",
+      "label": "The Mythic pool's Consumption (64208, 900-1100) deals 52%: about 520 per second",
+      "actor": "tank",
+      "metric": "script_spell_damage_taken",
+      "target": "pool",
+      "spell": 64208,
+      "equals": 520
+    },
+    {
+      "action": "assert",
+      "label": "its Consumption reaches 5 yards, the size of the rift visual",
+      "actor": "tank",
+      "metric": "spell_effect_radius",
+      "spell": 64208,
+      "effect": 0,
+      "equals": 5
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 48,
+      "x": -832.8,
+      "y": -424.3,
+      "z": -33.9
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "summon",
+      "actor": "heroic",
+      "entry": 9604829,
+      "as": "hpool",
+      "distance": 30
+    },
+    {
+      "action": "assert",
+      "label": "The Heroic pool deals 40%: about 400 per second",
+      "actor": "heroic",
+      "metric": "script_spell_damage_taken",
+      "target": "hpool",
+      "spell": 64208,
+      "equals": 400
+    }
+  ]
+}

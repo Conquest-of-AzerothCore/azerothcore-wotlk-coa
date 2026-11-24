@@ -5,7 +5,7 @@
     "The live Worldforged upgrade ladder (user, 2026-11-04): below Zul'Gurub 60, Zul'Gurub 64, Molten Core 67 and 70,",
     "Onyxia 73, Blackwing Lair 77, Ahn'Qiraj 81, Naxxramas 88; the item level 67 Zul'Gurub upgrades opened with Molten",
     "Core. Decayed Breeches 1389233 (blue dungeon variant, item level 60) upgrades to 1379719 (item level 64, key 1569,",
-    "5000 Runes of Ascension). Flesh Flayer Hook 278843 upgrades to 1378062 (item level 67, key 4) and Junglewood",
+    "39450 Runes of Ascension). Flesh Flayer Hook 278843 upgrades to 1378062 (item level 67, key 4) and Junglewood",
     "Recurve 1389875 to 1379880 (item level 67, key 2). The recurve climbs on through 1381880 (70), 1393880 (73, key",
     "1393880), 1383880 (77, key 1383880), 1385880 (81, key 1385880) and 1387880 (88, key 1387880). Before Hakkar the",
     "item level 64 rank names Hakkar and the 67 rank Ragnaros. After Hakkar only the 64 rank is sold; the 67 ranks",
@@ -29,7 +29,7 @@
     {"action": "add_item", "actor": "hero", "item": 1393880},
     {"action": "add_item", "actor": "hero", "item": 1383880},
     {"action": "add_item", "actor": "hero", "item": 1385880},
-    {"action": "add_item", "actor": "hero", "item": 375250, "count": 20000},
+    {"action": "add_item", "actor": "hero", "item": 375250, "count": 250000},
 
     {"action": "client_packet", "label": "Upgrade the Decayed Breeches to item level 64 before Hakkar", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1569}, {"u32": 1}]},
     {"action": "wait", "ms": 500},
@@ -40,18 +40,18 @@
     {"action": "wait", "ms": 500},
     {"action": "assert", "label": "DISCRIMINATING: the item level 67 rank waits for Ragnaros", "actor": "hero", "metric": "server_packet_contains", "opcode": 1724, "text": "Defeat Ragnaros", "equals": 1},
     {"action": "assert", "label": "and is not handed out", "actor": "hero", "metric": "item_count", "item": 1378062, "equals": 0},
-    {"action": "assert", "label": "and no runes are taken", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 20000},
+    {"action": "assert", "label": "and no runes are taken", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 250000},
 
     {"action": "learn", "label": "Death Touch Copy kills outright", "actor": "hero", "spell": 24080},
     {"action": "cast", "actor": "hero", "spell": 24080, "target": "hakkar"},
     {"action": "assert", "label": "Hakkar falls", "actor": "hakkar", "metric": "alive", "equals": 0, "within_ms": 45000},
-    {"action": "assert", "label": "and pays his 2500 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 22500},
+    {"action": "assert", "label": "and pays his 2500 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 252500},
 
     {"action": "client_packet", "label": "Upgrade the Decayed Breeches after Hakkar", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1569}, {"u32": 1}]},
     {"action": "wait", "ms": 500},
     {"action": "assert", "label": "The item level 64 breeches are sold", "actor": "hero", "metric": "item_count", "item": 1379719, "equals": 1},
     {"action": "assert", "label": "in place of the dungeon variant", "actor": "hero", "metric": "item_count", "item": 1389233, "equals": 0},
-    {"action": "assert", "label": "for 5000 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 17500},
+    {"action": "assert", "label": "for 39450 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 213050},
 
     {"action": "client_packet", "label": "Upgrade the Flesh Flayer Hook after Hakkar", "actor": "hero", "opcode": 1723, "fields": [{"u32": 4}, {"u32": 1}]},
     {"action": "wait", "ms": 500},
@@ -82,6 +82,6 @@
     {"action": "wait", "ms": 500},
     {"action": "assert", "label": "DISCRIMINATING: item level 88 waits for Kel'Thuzad", "actor": "hero", "metric": "server_packet_contains", "opcode": 1724, "text": "Defeat Kel'Thuzad", "equals": 1},
     {"action": "assert", "label": "and is not handed out", "actor": "hero", "metric": "item_count", "item": 1387880, "equals": 0},
-    {"action": "assert", "label": "and no runes are taken", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 17500}
+    {"action": "assert", "label": "and no runes are taken", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 213050}
   ]
 }

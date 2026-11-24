@@ -1,0 +1,2123 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Serpent Lord's Ritual leaves Serpent Lord's Amulet usable (#11807)",
+  "contract": [
+    "Serpent Lord's Ritual 706018 gives the player's own direct heals a 5% chance (DBC ProcChance, rolled in",
+    "Chance()) to cast Serpent Lord's Amulet 800914 for 5 sec. That triggered cast has no server cooldown, but its",
+    "SMSG_SPELL_GO makes the client start the Amulet's 90 sec RecoveryTime, so the button showed a cooldown the",
+    "server does not have. Expected: after the Ritual's cast the client shows the Amulet ready.",
+    "The 5% roll cannot be forced from a scenario, so the player is set to 1 health and casts Heal 1000",
+    "(TEST) 49 on itself 200 times: P(no proc) = 0.95^200 = 3.5e-5. spell_go_count proves the client received the cast."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "label": "Serpent Lord's Ritual",
+      "actor": "v",
+      "spell": 706018
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Ritual passive is active",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 706018,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Serpent Lord's Amulet, so the client keeps it in its spellbook",
+      "actor": "v",
+      "spell": 800914
+    },
+    {
+      "action": "learn",
+      "label": "Heal 1000 (TEST): instant, free, no global cooldown",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 49
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Ritual cast Serpent Lord's Amulet",
+      "actor": "v",
+      "metric": "spell_cast_count",
+      "spell": 800914,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the client saw the Amulet's SMSG_SPELL_GO, which starts its 90 sec cooldown",
+      "actor": "v",
+      "metric": "spell_go_count",
+      "spell": 800914,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The server keeps Serpent Lord's Amulet off cooldown",
+      "actor": "v",
+      "metric": "cooldown_ms",
+      "spell": 800914,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "#11807: the client does not show Serpent Lord's Amulet cooling down",
+      "actor": "v",
+      "metric": "client_cooldown_ready",
+      "spell": 800914,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The client observed an Amulet cooldown clear",
+      "actor": "v",
+      "metric": "client_cooldown_clears",
+      "spell": 800914,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "v",
+      "metric": "spell_go_count",
+      "spell": 800914,
+      "save_as": "amulet_go_count"
+    },
+    {
+      "action": "assert",
+      "label": "Every Amulet cast cleared its client cooldown",
+      "actor": "v",
+      "metric": "client_cooldown_clears",
+      "spell": 800914,
+      "ratio_to": "amulet_go_count",
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

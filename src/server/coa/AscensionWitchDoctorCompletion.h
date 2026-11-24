@@ -244,6 +244,7 @@ enum DoctorSpells : uint32
     CursedField = 506820,
     Mimic = 707162,
     ChosenOne = 503742,
+    Seeker = 705880,
     MojoHigh = 706488,
     WarGolem = 800330,
     StasisWard = 801678,

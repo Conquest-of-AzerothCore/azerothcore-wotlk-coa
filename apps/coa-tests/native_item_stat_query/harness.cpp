@@ -132,11 +132,6 @@ std::atomic<bool> rebornArmor{false};
 bool PreviewOn() { return preview.load(); }
 uint32 AuthoredRebornArmor(ItemTemplate const& proto) { return proto.Armor * 2; }
 
-bool OwnsStoredKey(Player* player, uint32 itemId, uint32 key)
-{
-    return player->stored.contains({itemId, key});
-}
-
 class LadderStore
 {
 public:
@@ -227,14 +222,14 @@ void TestBaseLevelDefersOwnershipToWorldThread()
     player.stored.insert({Boots, BaseLevel});
     NativeItemScaling::AnswerPendingStatQueries(&player);
     bool helmStock = false;
-    bool bootsLadder = false;
+    bool bootsStock = false;
     for (WorldPacket const& reply : session.sent)
     {
         helmStock = helmStock || (reply.read<uint32>(0) == Helm && reply.stock);
-        bootsLadder = bootsLadder || (reply.read<uint32>(0) == Boots && !reply.stock);
+        bootsStock = bootsStock || (reply.read<uint32>(0) == Boots && reply.stock);
     }
     Check(session.sent.size() == 2 && helmStock, "an item the player does not own gets the stock row");
-    Check(bootsLadder, "an owned item at its stored base level gets the ladder row");
+    Check(bootsStock, "an owned item at its own item level is the authored item and gets the stock row too");
     Check(!NativeItemScaling::pendingStatQueries.Size(), "answering empties the deferred set");
 
     NativeItemScaling::AnswerPendingStatQueries(&player);

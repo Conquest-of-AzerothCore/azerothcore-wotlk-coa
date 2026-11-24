@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Tempest Sovereign's swaps are not announced again after a relog (#12701)",
+  "contract": "Issue #12701 reports that every login prints 'Restored 2 Ascension class abilities.' and shows the 'New Spell Learned' toast for Torrential Wrath. Tempest Sovereign 560020 (spec 14) turns Call Lightning 500040 into Torrential Wrath (804017 below level 16) and Shock 804020 into Brine 807105 through AscensionClassService::SynchronizeTalentReplacements, which learns the ranks without announcement as temporary spells, so they are not saved and are learned again at every login. SynchronizeProgression added that count to its 'Restored N Ascension class abilities' line, although nothing the player owns was missing; the line now counts only progression, purchased ranks and taught abilities. The swap itself reaches the client as SMSG_SUPERCEDED_SPELL, and the client announces the swapped-in spell when its SpellCustomAttr row carries the notable bit 0x400 (Extensions.dll OnSupersededSpell -> NOTABLE_SPELL_LEARNED). Torrential Wrath 804017 is notable in the client's table (patch-S row 26407, attributes 0x10400) but has no Book of Ascension row, so mod-spellbook's swap notice could not mute it; Mute and Unmute now fall back to the client table's own row when the server's copy is that table. Brine 807105 carries no notable bit. spellbook_loud_supersedes_for counts swaps the client would announce; the scenario needs the server's DataDir SpellCustomAttr.dbc to match the client's table (58652 rows), as mod-spellbook requires.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "storm", "race": 8, "class": 16, "level": 14 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000 },
+    { "action": "learn", "actor": "storm", "spell": 500040 },
+    { "action": "learn", "actor": "storm", "spell": 804020 },
+    { "action": "specialization", "actor": "storm", "id": 14 },
+    { "action": "assert", "label": "SETUP: the specialization grants Tempest Sovereign",
+      "actor": "storm", "metric": "knows_spell", "spell": 560020, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: Call Lightning turns into Torrential Wrath",
+      "actor": "storm", "metric": "temporary_spell_replacement", "spell": 500040, "equals": 804017, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: Shock turns into Brine",
+      "actor": "storm", "metric": "temporary_spell_replacement", "spell": 804020, "equals": 807105, "within_ms": 3000 },
+    { "action": "snapshot", "actor": "storm", "metric": "spellbook_superseded_for", "spell": 804017,
+      "save_as": "swaps_before" },
+    { "action": "snapshot", "actor": "storm", "metric": "spellbook_loud_supersedes_for", "spell": 804017,
+      "save_as": "loud_before" },
+    { "action": "snapshot", "actor": "storm", "metric": "system_message_contains", "text": "Ascension class abilities",
+      "save_as": "restored_before" },
+
+    { "action": "relog", "label": "Save and reload the character", "actor": "storm" },
+    { "action": "wait", "label": "Let the login synchronisation run", "ms": 3000 },
+    { "action": "assert", "label": "Call Lightning is still Torrential Wrath after the relog",
+      "actor": "storm", "metric": "temporary_spell_replacement", "spell": 500040, "equals": 804017, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: the login swap was sent to the client again",
+      "actor": "storm", "metric": "spellbook_superseded_for", "spell": 804017, "relative_to": "swaps_before",
+      "min": 1 },
+    { "action": "assert", "label": "FIX (#12701): the login swap draws no New Spell Learned toast",
+      "actor": "storm", "metric": "spellbook_loud_supersedes_for", "spell": 804017, "relative_to": "loud_before",
+      "equals": 0 },
+    { "action": "assert", "label": "Torrential Wrath is notable again, so a genuine learn is still announced",
+      "actor": "storm", "metric": "spellbook_client_notable", "spell": 804017, "equals": 1 },
+    { "action": "assert", "label": "FIX (#12701): the relog prints no 'Restored ... Ascension class abilities' line",
+      "actor": "storm", "metric": "system_message_contains", "text": "Ascension class abilities",
+      "relative_to": "restored_before", "equals": 0 }
+  ]
+}

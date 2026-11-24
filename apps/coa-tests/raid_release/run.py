@@ -9,7 +9,8 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 method = runpy.run_path(str(HERE.parent / 'client_compat/run.py'))['method']
 
-EXPECTED_STAGES = {309: 3, 880: 3, 881: 3, 409: 4, 889: 4, 890: 4, 249: 5, 469: 6, 509: 7, 531: 7, 533: 8, 532: 9}
+EXPECTED_STAGES = {309: 3, 880: 3, 881: 3, 409: 4, 882: 4, 883: 4, 889: 4, 890: 4,
+                   249: 5, 469: 6, 509: 7, 531: 7, 533: 8, 532: 9}
 DIFFICULTY_STAGES = {0: 0, 1: 1, 2: 2}
 UNGATED_MAPS = (0, 1, 36, 229, 230, 535, 603, 951)
 UNGATED_RAIDS = (535, 603)
@@ -255,10 +256,10 @@ def main():
         subprocess.run(command(cpp, exe), cwd=out, check=True, timeout=60)
         subprocess.run([str(exe)], cwd=out, check=True, timeout=15)
     print('PASS: Heroic and Mythic dungeon difficulties and the Classic raids open in release-stage order (Zul\'Gurub '
-          'before Molten Core, Setis with Zul\'Gurub and Korrim Snowgrave and '
-          'Atal\'zul with Molten Core), each stage keeps the earlier ones open, closed content refuses entry and '
-          'login with "Instance is closed", normal dungeons stay open, Naxxramas requires a Dread Citadel reward or bot exemption, the default opens up to '
-          'Molten Core, and the stage comes only from the config or .raidphase, never from raid kills')
+          'before Molten Core, Setis with Zul\'Gurub, and Lord Kazzak, The Will of Soggoth, Korrim Snowgrave and '
+          'Atal\'zul with Molten Core), earlier stages stay open, and closed content refuses entry and login. '
+          'Normal dungeons stay open. Naxxramas requires a Dread Citadel reward or bot exemption. The default opens '
+          'through Molten Core, and the stage comes only from the config or .raidphase, never from raid kills')
 
 
 if __name__ == '__main__':

@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "name": "Edrim Skysong sells the Mythic Blackrock Caverns items (#8177)",
+  "contract": "#8177: Edrim Skysong (416000) sells the Mythic Dungeon items by slot (lists 9416001-9416016, from the Exiles vendor dump). The Blackrock Caverns items (for example Steelbender's Masterpiece) were missing. The 31 Mythic versions of the Blackrock Caverns boss items (coa_dungeon_loot_variant mythic_item of the boss loot) are added to their slot lists at the price of each list.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "buyer",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "edrim",
+      "owner": "buyer",
+      "entry": 416000,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "buyer",
+      "target": "edrim",
+      "label": "Speak to Edrim Skysong"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "buyer",
+      "option": 3,
+      "label": "Purchase Items"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "buyer",
+      "option": 6,
+      "label": "Open the Main Hand list"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Steelbender's Masterpiece (Mythic, 218300) is on the Main Hand list at the one-hand price",
+      "actor": "buyer",
+      "metric": "vendor_extended_cost",
+      "item": 218300,
+      "equals": 11120,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "buyer",
+      "target": "edrim",
+      "label": "Speak to Edrim Skysong"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "buyer",
+      "option": 3,
+      "label": "Purchase Items"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "buyer",
+      "option": 15,
+      "label": "Open the Trinkets list"
+    },
+    {
+      "action": "assert",
+      "label": "Grace of the Herald (Mythic, 212715) is on the Trinkets list",
+      "actor": "buyer",
+      "metric": "vendor_extended_cost",
+      "item": 212715,
+      "equals": 11095,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "buyer",
+      "target": "edrim",
+      "label": "Speak to Edrim Skysong"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "buyer",
+      "option": 3,
+      "label": "Purchase Items"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "buyer",
+      "option": 0,
+      "label": "Open the Head list"
+    },
+    {
+      "action": "assert",
+      "label": "Willowy Crown (Mythic, 241749) is on the Head list",
+      "actor": "buyer",
+      "metric": "vendor_extended_cost",
+      "item": 241749,
+      "equals": 11105,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "the Head list keeps its other 62 items",
+      "actor": "buyer",
+      "metric": "vendor_items",
+      "equals": 64
+    }
+  ]
+}

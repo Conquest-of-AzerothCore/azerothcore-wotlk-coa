@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "Primordial Blast keeps its highest rank on the bar after an Elemental Mastery transform (#12691)",
+  "contract": [
+    "Report #12691: a level 24 Runemaster's Primordial Blast rank 3 (502824) on the bar 'reverts back to rank 1 after a",
+    "time'. The Elemental Mastery transforms (Ignis 713003 and the others) replace Primordial Blast with an elemental",
+    "blast (Ignis: 712668) through SynchronizeAscensionTalentReplacements. The lower ranks 800732 and 502823 stay active",
+    "beside rank 3, so every rank is replaced, and the sync applied and lifted those replacements in spell ID order:",
+    "800732 (rank 1) came last. When the transform ended, the last SMSG_SUPERCEDED_SPELL the client received turned the",
+    "blast button back into rank 1, and the replacement's saved origin was rank 1, so the next save and login kept rank 1.",
+    "The sync now walks the ranks from lowest to highest, so the highest rank is applied and restored last. The",
+    "Primordial Blast ranks are fixtures learned directly; a button holding rank 3 must be saved as rank 3 while the",
+    "transform is up, after it ends and after a relog."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 24
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login state settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 800732
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 502823
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 502824
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_active",
+      "label": "SETUP: rank 3 is active",
+      "spell": 502824,
+      "equals": 1
+    },
+    {
+      "action": "set_action_button",
+      "actor": "rm",
+      "button": 0,
+      "spell": 502824
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture: Ignis transform",
+      "actor": "rm",
+      "spell": 713003,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "temporary_spell_replacement",
+      "label": "SETUP: Ignis replaces rank 3 with its elemental blast",
+      "spell": 502824,
+      "equals": 712668,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "action_button",
+      "label": "SETUP: the bar shows the Ignis blast",
+      "button": 0,
+      "equals": 712668
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "persisted_action_button",
+      "label": "FIX: during the transform the button is saved as rank 3",
+      "button": 0,
+      "equals": 502824
+    },
+    {
+      "action": "set_aura",
+      "label": "The Ignis transform ends",
+      "actor": "rm",
+      "spell": 713003,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "temporary_spell_replacement",
+      "label": "SETUP: the replacement is lifted",
+      "spell": 502824,
+      "equals": 502824,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "persisted_action_button",
+      "label": "FIX: after the transform the button is saved as rank 3, not rank 1",
+      "button": 0,
+      "equals": 502824
+    },
+    {
+      "action": "relog",
+      "actor": "rm"
+    },
+    {
+      "action": "wait",
+      "label": "Let login state settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "action_button",
+      "label": "FIX: after a relog the button still holds rank 3",
+      "button": 0,
+      "equals": 502824
+    }
+  ]
+}

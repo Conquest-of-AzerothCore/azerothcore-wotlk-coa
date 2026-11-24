@@ -1,8 +1,8 @@
 diff --git a/src/Script/Playerbots.cpp b/src/Script/Playerbots.cpp
-index 06b3acb0..dc294174 100644
+index b3858962..6353768f 100644
 --- a/src/Script/Playerbots.cpp
 +++ b/src/Script/Playerbots.cpp
-@@ -53,6 +53,16 @@ public:
+@@ -54,6 +54,16 @@ public:
  
      bool OnDatabasesLoading() override
      {

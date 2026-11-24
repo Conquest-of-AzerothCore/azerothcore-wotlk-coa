@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Cultist: Embodiment of Y'Shaarj attack power covers only absorbs from the last 8 seconds (#12634)",
+  "contract": "Embodiment of Y'Shaarj 681088 tooltip: 'Absorbing damage grants you $s2% of the absorbed value as attack power for $681067d.' (effect1 aura 354, value 20, triggers 681067; 681067 is aura 99 MOD_ATTACK_POWER with an 8 s duration and no stacking). Each absorb is its own 8 s grant: AP equals 20% of everything absorbed in the last 8 s. Before #12634 every absorb re-cast 681067 with the previous amount plus the new grant and refreshed it to 8 s, so steady absorbs grew the AP without bound. The fixture 850002 (Twilight Guardian shield, SCHOOL_ABSORB all schools, bound to aura_ascension_cultist_lifecycle) holds 100000 absorb; Injure Self 19806 deals a fixed 70 physical damage to the caster, so two casts absorb the same amount (armor applies equally to both). The second grant lands about 3.5 s after the first. Pass: two equal grants give exactly twice the first grant's AP, the AP drops back to one grant once the first one's 8 s pass while the second is still running, and the aura is gone with attack power at its starting value once the second grant expires. The old accumulation kept twice the first grant until the refreshed aura expired and then dropped to nothing, never to one grant.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "cultist", "spell": 681088 },
+    { "action": "learn", "actor": "cultist", "spell": 19806 },
+    { "action": "assert", "actor": "cultist", "metric": "aura", "spell": 681088, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "actor": "cultist", "metric": "aura", "spell": 681067, "equals": 0 },
+    { "action": "snapshot", "actor": "cultist", "metric": "attack_power", "save_as": "ap_base" },
+    { "action": "set_aura", "actor": "cultist", "spell": 850002, "stacks": 1, "effect": 0, "amount": 100000 },
+    { "action": "cast", "label": "First absorb: Injure Self into the shield", "actor": "cultist", "spell": 19806 },
+    {
+      "action": "assert", "label": "The first absorb grants Embodiment attack power",
+      "actor": "cultist", "metric": "aura_amount", "spell": 681067, "effect": 0, "min": 1, "within_ms": 2000
+    },
+    { "action": "snapshot", "actor": "cultist", "metric": "aura_amount", "spell": 681067, "effect": 0, "save_as": "one_grant" },
+    { "action": "wait", "label": "Let the global cooldown clear and part of the first grant run", "ms": 3000 },
+    { "action": "cast", "label": "Second absorb of the same size", "actor": "cultist", "spell": 19806 },
+    {
+      "action": "assert", "label": "Two grants inside 8 s add up",
+      "actor": "cultist", "metric": "aura_amount", "spell": 681067, "effect": 0, "ratio_to": "one_grant",
+      "min": 1.99, "max": 2.01, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The first grant expires on its own 8 s while the second still holds (#12634)",
+      "actor": "cultist", "metric": "aura_amount", "spell": 681067, "effect": 0, "ratio_to": "one_grant",
+      "min": 0.99, "max": 1.01, "within_ms": 7000
+    },
+    {
+      "action": "assert", "label": "The aura ends once the second grant's 8 s pass",
+      "actor": "cultist", "metric": "aura", "spell": 681067, "equals": 0, "within_ms": 7000
+    },
+    {
+      "action": "assert", "label": "Attack power is back at its starting value",
+      "actor": "cultist", "metric": "attack_power", "ratio_to": "ap_base", "min": 0.999, "max": 1.001
+    }
+  ]
+}

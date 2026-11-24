@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Betrayer's Inclinations delivers Betrayer's Blow against Demons only (#13005)",
+  "contract": [
+    "Betrayer's Inclinations 804758 (Felsworn) tooltips: while active, your attacks against Demons have a $h%",
+    "(10%) chance to deliver Betrayer's Blow, dealing ${$804766m1+$AP*.25+$SP*.5} Physical damage and stunning",
+    "the target for $804766d (2 sec). Its Effect2 is PROC_TRIGGER_SPELL 804766 with ProcChance 10, but Spell.dbc",
+    "has no ProcFlags and there is no spell_proc row, so #13005 reports that the blow never happens. Betrayer's",
+    "Blow 804766 itself names 'a Demon' but has no TargetCreatureType. Expected: melee auto attacks and melee",
+    "abilities proc the blow at 10% against Demons only; it deals 25 to 26 base damage plus 25% of attack power",
+    "and 50% of spell power, and applies its stun. The felsworn swings at a Felguard (6115, Demon) until the",
+    "first blow, which is near certain within 120 swings (0.9^120 is about 3e-6). The control swings at a wolf",
+    "(299, Beast) for 120 seconds, about 60 swings, and must never deliver it (without the Demon restriction at",
+    "least one blow would follow with about 99.8% probability). The felsworn carries fixture bonuses of 2000",
+    "attack power and 1000 spell power on a naked level 80 character (444 base attack power, checked), so one",
+    "non-critical blow is 25.5 + 0.25 * 2444 + 0.5 * 1000, about 1137, before armor. The check accepts 850 to",
+    "1145: armor can take up to a quarter, while missing either coefficient (about 636 or 526), swapped",
+    "coefficients (about 1497) or doubled scaling (over 2200) fail. Critical blows are excluded."
+  ],
+  "timeout_ms": 600000,
+  "players": [
+    {
+      "id": "felsworn", "race": 1, "class": 14, "level": 80, "melee_hit_rating": 100000, "expertise_rating": 100000,
+      "attack_power": 2000, "spell_power": 1000
+    },
+    {"id": "control", "race": 1, "class": 14, "level": 80, "melee_hit_rating": 100000, "expertise_rating": 100000}
+  ],
+  "creatures": [
+    {
+      "id": "felguard", "owner": "felsworn", "entry": 6115, "level": 80, "health": 5000000, "distance": 3,
+      "reaction": 0, "stationary": true
+    },
+    {
+      "id": "wolf", "owner": "control", "entry": 299, "level": 80, "health": 5000000, "distance": 3, "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "set_health", "actor": "felsworn", "value": 1000000, "maximum": 1000000},
+    {"action": "set_health", "actor": "control", "value": 1000000, "maximum": 1000000},
+    {"action": "learn", "actor": "felsworn", "spell": 804758},
+    {"action": "learn", "actor": "control", "spell": 804758},
+    {"action": "cast", "label": "Activate Betrayer's Inclinations", "actor": "felsworn", "spell": 804758},
+    {"action": "cast", "label": "Activate Betrayer's Inclinations on the control", "actor": "control", "spell": 804758},
+    {
+      "action": "assert", "label": "SETUP: Betrayer's Inclinations is active", "actor": "felsworn", "metric": "aura",
+      "spell": 804758, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: Betrayer's Inclinations is active on the control", "actor": "control",
+      "metric": "aura", "spell": 804758, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: attack power is the 2000 fixture plus the naked level 80 base (444)",
+      "actor": "felsworn", "metric": "attack_power", "min": 2440, "max": 2450
+    },
+    {
+      "action": "assert", "label": "SETUP: Fire spell power is the 1000 fixture", "actor": "felsworn",
+      "metric": "spell_power", "school": 2, "min": 1000, "max": 1010
+    },
+    {
+      "action": "assert", "label": "SETUP: Shadow spell power is the 1000 fixture", "actor": "felsworn",
+      "metric": "spell_power", "school": 5, "min": 1000, "max": 1010
+    },
+    {"action": "attack", "actor": "felsworn", "target": "felguard"},
+    {"action": "attack", "actor": "control", "target": "wolf"},
+    {
+      "action": "assert", "label": "#13005: an attack against a Demon delivers a non-critical Betrayer's Blow",
+      "actor": "felsworn", "metric": "spell_damage_count", "spell": 804766, "target": "felguard", "critical": false,
+      "min": 1, "within_ms": 240000
+    },
+    {"action": "stop_attack", "actor": "felsworn"},
+    {
+      "action": "assert", "label": "SETUP: the damage check sees exactly one non-critical blow", "actor": "felsworn",
+      "metric": "spell_damage_count", "spell": 804766, "target": "felguard", "critical": false, "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "#13005: one non-critical blow deals 25.5 + 25% of AP + 50% of SP (about 1137), less armor",
+      "actor": "felsworn", "metric": "spell_damage_total", "spell": 804766, "target": "felguard", "critical": false,
+      "min": 850, "max": 1145
+    },
+    {
+      "action": "assert", "label": "#13005: the blow stuns the Demon", "actor": "felguard",
+      "metric": "aura_apply_count", "spell": 804766, "min": 1
+    },
+    {"action": "wait", "label": "Keep the control swinging at the Beast for about 60 swings", "ms": 120000},
+    {"action": "stop_attack", "actor": "control"},
+    {
+      "action": "assert", "label": "SETUP: the control kept attacking the Beast", "actor": "control",
+      "metric": "melee_attack_count", "min": 40
+    },
+    {
+      "action": "assert", "label": "#13005: attacks against a non-Demon never deliver Betrayer's Blow",
+      "actor": "control", "metric": "spell_damage_count", "spell": 804766, "equals": 0
+    },
+    {
+      "action": "assert", "label": "#13005: the non-Demon is never stunned by it", "actor": "wolf",
+      "metric": "aura_apply_count", "spell": 804766, "equals": 0
+    }
+  ]
+}

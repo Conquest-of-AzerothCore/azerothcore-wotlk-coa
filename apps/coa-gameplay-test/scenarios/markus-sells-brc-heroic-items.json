@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "Markus sells every Heroic Blackrock Caverns item",
+  "contract": "Markus (1414503) sells the Heroic Dungeon items by slot (9414501-9414516). Of the 31 Heroic versions of the Blackrock Caverns boss items (coa_dungeon_loot_variant heroic_item), 30 were already listed; Torturer's Mercy (232105, main hand) was missing because Ascension's item database did not flag it as sold by a vendor. It is added to the Main Hand list at 40 Marks.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "buyer",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "markus",
+      "owner": "buyer",
+      "entry": 1414503,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "buyer",
+      "target": "markus",
+      "label": "Speak to Markus"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "buyer",
+      "option": 1,
+      "label": "Open the Heroic Dungeon Items slot menu"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "buyer",
+      "option": 6,
+      "label": "Open the Main Hand list"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Torturer's Mercy (Heroic, 232105) is on the Main Hand list for 40 Marks",
+      "actor": "buyer",
+      "metric": "vendor_extended_cost",
+      "item": 232105,
+      "equals": 16040,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Steelbender's Masterpiece (Heroic, 218299) is there too",
+      "actor": "buyer",
+      "metric": "vendor_extended_cost",
+      "item": 218299,
+      "equals": 16040
+    }
+  ]
+}

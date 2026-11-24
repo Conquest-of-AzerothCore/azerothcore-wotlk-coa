@@ -249,9 +249,9 @@ instead of reimplementing the exchange.
 ## Coin icon and the client patch
 
 **Ship the client patch before, or together with, this change.** The world migration puts the coin on display
-990001 and adds that `itemdisplayinfo_dbc` row; the server registers 910001 with `Ascension::ClientItemPatches`
-and streams its `item_dbc` and display rows (`CoA.SendDisplayPatches`). It never sends textures, so a client
-without the patch shows the coin as a red question mark.
+990001 and adds that `itemdisplayinfo_dbc` row; the client MPQs carry the coin's `Item.dbc` and `ItemDisplayInfo.dbc`
+rows, and the server streams neither. It never sends textures, so a client without the patch shows the coin as a red
+question mark.
 
 The client patch is two files, built by `client-art/build_client_patch.sh`:
 

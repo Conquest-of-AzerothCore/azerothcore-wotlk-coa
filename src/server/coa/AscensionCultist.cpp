@@ -157,6 +157,47 @@ void SetAmount(Player* player, uint32 id, uint8 slot, int32 amount)
         if (effect->GetAmount() != amount)
             effect->ChangeAmount(amount);
 }
+namespace
+{
+constexpr uint32 EmbodimentPower = 681067;
+int32 EmbodimentTotal(std::vector<std::pair<int32, uint32>> const& grants)
+{
+    uint64 total = 0;
+    for (auto const& grant : grants)
+        total += grant.second;
+    return int32(std::min<uint64>(total, INT32_MAX));
+}
+}
+void GrantEmbodiment(Player* player, uint32 amount)
+{
+    SpellInfo const* info = sSpellMgr->GetSpellInfo(EmbodimentPower);
+    if (!info || !amount)
+        return;
+    auto& grants = State(player).embodimentGrants;
+    if (!player->HasAura(EmbodimentPower))
+        grants.clear();
+    grants.emplace_back(info->GetMaxDuration(), amount);
+    Copy(player, player, EmbodimentPower, uint32(EmbodimentTotal(grants)));
+}
+void ExpireEmbodiment(Player* player, uint32 diff)
+{
+    auto& grants = State(player).embodimentGrants;
+    if (grants.empty())
+        return;
+    if (!player->HasAura(EmbodimentPower))
+    {
+        grants.clear();
+        return;
+    }
+    for (auto& grant : grants)
+        grant.first -= int32(diff);
+    if (!std::erase_if(grants, [](auto const& grant) { return grant.first <= 0; }))
+        return;
+    if (grants.empty())
+        player->RemoveAurasDueToSpell(EmbodimentPower);
+    else
+        SetAmount(player, EmbodimentPower, EFFECT_0, EmbodimentTotal(grants));
+}
 bool Resource(Player* player, uint32 id, int32 delta, bool force)
 {
     if (!player || player->getClass() != CLASS_CULTIST || id != Insanity)
@@ -319,6 +360,7 @@ public:
         while (state.timers.ExecuteEvent()) { }
         state.scheduler.Update(diff);
         UpdateDash(player, diff);
+        ExpireEmbodiment(player, diff);
         if (!state.timers.HasTimeUntilEvent(Insanity))
         {
             state.timers.ScheduleEvent(Insanity, 500ms);

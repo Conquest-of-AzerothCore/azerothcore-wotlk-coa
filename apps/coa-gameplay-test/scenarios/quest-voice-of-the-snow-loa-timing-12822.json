@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Pale Reach: Anzuldin waits for each voiced line of 'Voice of the Snow Loa' before the next (#12822)",
+  "contract": [
+    "Accepting 'Voice of the Snow Loa' 175155 from Anzuldin 164806 starts seven voiced creature_text lines",
+    "(SoundEntries 215220-215226, client files sound\\scadeald\\loa1-7.wav in patch-O.MPQ, 8.72 / 9.92 / 3.92 / 10.20",
+    "/ 8.88 / 13.08 / 4.84 s long) chained by SMSG_TEXT_OVER timers, and the last line's end credits the objective.",
+    "rev_20261009_63 gave every line 7000 ms, so five clips were cut into by the next one (#12822) and the credit",
+    "came 49 s after the accept. rev_20261119_12822 sets each timer to the clip rounded up plus one second",
+    "(10/11/7/12/10/15/7 s), so the credit comes 72 s after the accept. This case walks onto his world spawn",
+    "9985064, rewards the prerequisite 175154, accepts 175155 through the questgiver handler (the path that fires",
+    "his SmartAI), checks the first line (SMSG_MESSAGECHAT 150, MONSTER_SAY 12) and that the objective is still",
+    "open 60 s after the accept, then that the last line is said and the credit follows. Audio playback itself is",
+    "client-side and not observed."
+  ],
+  "timeout_ms": 180000,
+  "location": {"map": 0, "x": -6431.71, "y": 1106.52, "z": 437.35, "o": 0.0},
+  "players": [
+    {"id": "p", "race": 1, "class": 1, "level": 30}
+  ],
+  "steps": [
+    {"action": "set_phase", "label": "Join world phase 1, the phase Anzuldin's world spawn lives in", "actor": "p",
+     "value": 1},
+    {"action": "wait", "label": "Let the grid activate", "ms": 2000},
+    {"action": "teleport_to_spawn", "label": "Walk to Anzuldin's world spawn 9985064", "actor": "p",
+     "guid": 9985064},
+    {"action": "assert", "label": "Anzuldin is there", "actor": "p", "metric": "nearby_creature_count",
+     "entry": 164806, "equals": 1, "within_ms": 10000},
+    {"action": "prepare_quest", "label": "SETUP: 'A Temple in Ruins' 175154, the previous quest, is ready",
+     "actor": "p", "quest": 175154},
+    {"action": "reward_quest", "label": "SETUP: turn in 175154 so 175155 can be taken", "actor": "p",
+     "quest": 175154},
+    {"action": "assert", "label": "SETUP: 175154 is rewarded", "actor": "p", "metric": "quest_rewarded",
+     "quest": 175154, "equals": 1, "within_ms": 4000},
+    {"action": "quest_accept", "label": "Accept 'Voice of the Snow Loa' from Anzuldin", "actor": "p",
+     "quest": 175155, "entry": 164806},
+    {"action": "assert", "label": "175155 is taken and not yet complete", "actor": "p", "metric": "quest_status",
+     "quest": 175155, "equals": 3, "within_ms": 4000},
+    {"action": "assert", "label": "Anzuldin opens with line 0", "actor": "p", "metric": "server_packet_contains",
+     "opcode": 150, "row": 12, "text": "What transpired in Gnomeregan was the gnomes' own doing",
+     "equals": 1, "within_ms": 4000},
+    {"action": "wait", "label": "About 57 s after the accept: past the old 49 s chain, short of the 72 s one",
+     "ms": 56000},
+    {"action": "assert",
+     "label": "DISCRIMINATING: the objective is still open, the voiced lines are not cut short",
+     "actor": "p", "metric": "quest_objective_count", "quest": 175155, "index": 0, "equals": 0},
+    {"action": "assert", "label": "Anzuldin says his last line", "actor": "p", "metric": "server_packet_contains",
+     "opcode": 150, "row": 12, "text": "And with every passing day, their numbers grow.", "equals": 1,
+     "within_ms": 12000},
+    {"action": "assert", "label": "the credit follows the last line", "actor": "p",
+     "metric": "quest_objective_count", "quest": 175155, "index": 0, "equals": 1, "within_ms": 12000}
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Worldforged items without a ladder, or skipping item level 60, climb the full upgrade ladder (#6677)",
+  "contract": [
+    "The Worldforged upgrade ladder is base -> item level 60 (always open) -> 64 (Hakkar) -> 70 -> 73 -> 77 -> 81 -> 88.",
+    "Highlands Kitchen Knife 650038 (item level 30) had no recipe at all: its variants carry no base item in ItemAddon.dbc.",
+    "It now upgrades into its item level 60 variant 1389941 (store key 4389941, always open, 14650 Runes of Ascension) and",
+    "that variant into the Zul'Gurub variant 1379941 (key 1379941, 21700 runes, open once the account has defeated Hakkar).",
+    "Ancient Wavepiercer 415029 (epic, item level 43) went straight to item level 64 1378621 through recipe 524. It now",
+    "upgrades into its item level 60 variant 1388349 (key 4388349, 29300 runes) and that variant into 1378621 (key 1378621,",
+    "43400 runes, Hakkar). Recipe 524 no longer exists."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 309, "x": -11787.4, "y": -1649.34, "z": 54.1017, "o": 4.76475, "ignore_access": true},
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "hakkar", "owner": "hero", "entry": 14834, "level": 63, "health": 20, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the instance settle", "ms": 3000 },
+    { "action": "add_item", "actor": "hero", "item": 650038 },
+    { "action": "add_item", "actor": "hero", "item": 375250, "count": 60000 },
+    { "action": "client_packet", "label": "Upgrade Highlands Kitchen Knife into its item level 60 variant", "actor": "hero", "opcode": 1723, "fields": [{"u32": 4389941}, {"u32": 1}] },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "DISCRIMINATING: the knife has a recipe and the item level 60 variant is sold", "actor": "hero", "metric": "item_count", "item": 1389941, "equals": 1 },
+    { "action": "assert", "label": "in place of the base", "actor": "hero", "metric": "item_count", "item": 650038, "equals": 0 },
+    { "action": "assert", "label": "for 14650 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 45350 },
+    { "action": "client_packet", "label": "Try the Zul'Gurub tier before Hakkar", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1379941}, {"u32": 1}] },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "The Zul'Gurub tier stays closed before Hakkar", "actor": "hero", "metric": "item_count", "item": 1379941, "equals": 0 },
+    { "action": "assert", "label": "and the item level 60 variant is kept", "actor": "hero", "metric": "item_count", "item": 1389941, "equals": 1 },
+    { "action": "learn", "label": "Death Touch Copy kills outright", "actor": "hero", "spell": 24080 },
+    { "action": "cast", "label": "Defeat Hakkar so the Zul'Gurub tier is open", "actor": "hero", "spell": 24080, "target": "hakkar" },
+    { "action": "assert", "label": "Hakkar falls", "actor": "hakkar", "metric": "alive", "equals": 0, "within_ms": 45000 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "client_packet", "label": "Upgrade the knife's item level 60 variant to the Zul'Gurub tier", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1379941}, {"u32": 1}] },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "The knife's Zul'Gurub tier is sold", "actor": "hero", "metric": "item_count", "item": 1379941, "equals": 1 },
+    { "action": "assert", "label": "in place of the item level 60 variant", "actor": "hero", "metric": "item_count", "item": 1389941, "equals": 0 },
+    { "action": "assert", "label": "for 21700 runes, on top of Hakkar's 2500", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 26150 },
+    { "action": "add_item", "actor": "hero", "item": 415029 },
+    { "action": "add_item", "actor": "hero", "item": 375250, "count": 60000 },
+    { "action": "client_packet", "label": "Try the old direct upgrade of Ancient Wavepiercer to item level 64", "actor": "hero", "opcode": 1723, "fields": [{"u32": 524}, {"u32": 1}] },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "DISCRIMINATING: the epic base cannot skip its item level 60 variant", "actor": "hero", "metric": "item_count", "item": 1378621, "equals": 0 },
+    { "action": "assert", "label": "and keeps its item", "actor": "hero", "metric": "item_count", "item": 415029, "equals": 1 },
+    { "action": "client_packet", "label": "Upgrade Ancient Wavepiercer into its item level 60 variant", "actor": "hero", "opcode": 1723, "fields": [{"u32": 4388349}, {"u32": 1}] },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "The item level 60 variant is sold", "actor": "hero", "metric": "item_count", "item": 1388349, "equals": 1 },
+    { "action": "assert", "label": "in place of the epic base", "actor": "hero", "metric": "item_count", "item": 415029, "equals": 0 },
+    { "action": "assert", "label": "for 29300 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 56850 },
+    { "action": "client_packet", "label": "Upgrade the item level 60 variant to the Zul'Gurub tier", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1378621}, {"u32": 1}] },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "The Zul'Gurub tier is sold", "actor": "hero", "metric": "item_count", "item": 1378621, "equals": 1 },
+    { "action": "assert", "label": "in place of the item level 60 variant", "actor": "hero", "metric": "item_count", "item": 1388349, "equals": 0 },
+    { "action": "assert", "label": "for another 43400 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 13450 }
+  ]
+}

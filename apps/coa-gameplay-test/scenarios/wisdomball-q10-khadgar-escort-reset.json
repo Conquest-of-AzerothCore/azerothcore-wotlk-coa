@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Wisdomball Q10 Hold the Anchors: abandoning and taking the quest again sends an escorting Khadgar back to the camp with his gossip (#12842, #12866)",
+  "contract": [
+    "Khadgar 9417004 (guid 9417100, map 4418, phase 4) starts escort path 94171000 from the camp gossip 9417006 and",
+    "clears his npcflags while escorting; the C++ wait helper stops him once no player is within 25 yd. Accepting",
+    "Hold the Anchors 9417110 while he escorts or channels, with no other Q10 holder within 25 yd of him, makes the",
+    "C++ wisdomball_anchors_escort_reset despawn his wave mobs and him; he respawns at the camp after his 30 s spawn",
+    "time with npcflag 1.",
+    "DISCRIMINATING: after start -> abandon -> accept again, he is back within 8 yd of the camp spot and offers the",
+    "escort gossip again; without the reset he stays where the escort stopped, with no gossip."
+  ],
+  "timeout_ms": 180000,
+  "location": { "map": 0, "x": -8996.0, "y": 853.5, "z": 29.62, "o": 3.8 },
+  "players": [ { "id": "p", "race": 1, "class": 1, "level": 30 } ],
+  "steps": [
+    { "action": "set_phase", "label": "Join world phase 1 (the crater phases come from the instance script)", "actor": "p", "value": 1 },
+    { "action": "prepare_quest", "label": "SETUP: The Guardian's Shortcut (9417105) complete (camp phase in the crater)", "actor": "p", "quest": 9417105 },
+    { "action": "reward_quest", "label": "SETUP: The Guardian's Shortcut turned in", "actor": "p", "quest": 9417105 },
+    { "action": "prepare_quest", "label": "SETUP: Q9 (9417109) complete (Q10 needs it)", "actor": "p", "quest": 9417109 },
+    { "action": "reward_quest", "label": "SETUP: Q9 turned in", "actor": "p", "quest": 9417109 },
+    { "action": "assert", "label": "Q9 is rewarded", "actor": "p", "metric": "quest_status", "quest": 9417109, "equals": 6, "within_ms": 3000 },
+
+    { "action": "teleport", "label": "into the Dalaran Crater next to Khadgar's camp spot", "actor": "p", "map": 4418, "x": 321.0, "y": 264.0, "z": 53.3, "o": 3.14, "ignore_access": true },
+    { "action": "assert", "label": "on map 4418", "actor": "p", "metric": "map_id", "equals": 4418, "within_ms": 15000 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "quest_accept", "label": "accept Hold the Anchors from Khadgar 9417003", "actor": "p", "quest": 9417110, "entry": 9417003 },
+    { "action": "assert", "label": "Q10 is in progress", "actor": "p", "metric": "quest_status", "quest": 9417110, "equals": 3, "within_ms": 3000 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "the escort Khadgar stands at the camp (a first accept does not send him away)", "actor": "p", "metric": "nearest_creature_distance", "entry": 9417004, "min": 0, "max": 8, "within_ms": 5000 },
+
+    { "action": "gossip_hello", "label": "talk to the escort Khadgar", "actor": "p", "entry": 9417004 },
+    { "action": "assert", "label": "he offers 'I am ready - lead the way.'", "actor": "p", "metric": "gossip_options", "equals": 1 },
+    { "action": "gossip_select", "label": "start the escort", "actor": "p", "option": 0 },
+    { "action": "assert", "label": "he has left the camp", "actor": "p", "metric": "nearest_creature_distance", "entry": 9417004, "radius": 200, "min": 10, "max": 200, "within_ms": 30000 },
+
+    { "action": "quest_abandon", "label": "abandon Q10", "actor": "p", "quest": 9417110 },
+    { "action": "assert", "label": "Q10 is gone from the log", "actor": "p", "metric": "quest_status", "quest": 9417110, "equals": 0, "within_ms": 3000 },
+    { "action": "teleport", "label": "back to the camp spot", "actor": "p", "map": 4418, "x": 321.0, "y": 264.0, "z": 53.3, "o": 3.14 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "quest_accept", "label": "accept Hold the Anchors again", "actor": "p", "quest": 9417110, "entry": 9417003 },
+    { "action": "assert", "label": "Q10 is in progress again", "actor": "p", "metric": "quest_status", "quest": 9417110, "equals": 3, "within_ms": 3000 },
+
+    { "action": "assert", "label": "DISCRIMINATING: the escort Khadgar is back at the camp", "actor": "p", "metric": "nearest_creature_distance", "entry": 9417004, "min": 0, "max": 8, "within_ms": 50000 },
+    { "action": "gossip_hello", "label": "talk to him again", "actor": "p", "entry": 9417004 },
+    { "action": "assert", "label": "DISCRIMINATING: he offers the escort gossip again", "actor": "p", "metric": "gossip_options", "equals": 1 }
+  ]
+}

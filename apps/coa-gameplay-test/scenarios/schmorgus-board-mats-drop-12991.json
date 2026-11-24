@@ -1,0 +1,230 @@
+{
+  "schema": 1,
+  "name": "Azerothian Schmorgus Board, Spicy Dino Jerky and Chilled Lava Eel materials and recipes have a source (COA-12991)",
+  "contract": "Devilsaur Meat 100596 dropped nowhere. Devilsaur 6498, Ironhide Devilsaur 6499, Tyrant Devilsaur 6500 and King Mosh 6584 now carry it on every kill, as in the Ascension export. Dino Meat 100589 drops from Young Diemetradon 9162, Diemetradon 9163, Elder Diemetradon 9164 and Subterranean Diemetradon 13323 on about 30% of kills. Lava Eel 100578 is a fishing catch at about 30% in Blackrock Mountain 25, Fire Plume Ridge 537 and Blackrock Depths 1584. Shard of Nevermelting Ice 100586 drops on 50% of Frostmaul Giant 7428 and Frostmaul Preserver 7429 kills. Recipe: Spicy Dino Jerky 100614 drops from the Un'Goro beasts and King Mosh (25%), and Plugger Spazzring 9499 sells Recipe: Chilled Lava Eel 100621. Before #12991 every one of these had no source, so every rate was 0 and the recipe was not on the shelves.",
+  "players": [
+    {
+      "id": "cook",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Devilsaur always drops Devilsaur Meat",
+      "actor": "cook",
+      "metric": "creature_loot_item_rate",
+      "entry": 6498,
+      "item": 100596,
+      "rolls": 1000,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Ironhide Devilsaur always drops Devilsaur Meat",
+      "actor": "cook",
+      "metric": "creature_loot_item_rate",
+      "entry": 6499,
+      "item": 100596,
+      "rolls": 1000,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Tyrant Devilsaur always drops Devilsaur Meat",
+      "actor": "cook",
+      "metric": "creature_loot_item_rate",
+      "entry": 6500,
+      "item": 100596,
+      "rolls": 1000,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "King Mosh always drops Devilsaur Meat",
+      "actor": "cook",
+      "metric": "creature_loot_item_rate",
+      "entry": 6584,
+      "item": 100596,
+      "rolls": 1000,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: about 30% of Young Diemetradon kills yield Dino Meat",
+      "actor": "cook",
+      "metric": "creature_loot_item_rate",
+      "entry": 9162,
+      "item": 100589,
+      "min": 25,
+      "max": 35
+    },
+    {
+      "action": "assert",
+      "label": "About 30% of Diemetradon kills yield Dino Meat",
+      "actor": "cook",
+      "metric": "creature_loot_item_rate",
+      "entry": 9163,
+      "item": 100589,
+      "min": 25,
+      "max": 35
+    },
+    {
+      "action": "assert",
+      "label": "About 30% of Elder Diemetradon kills yield Dino Meat",
+      "actor": "cook",
+      "metric": "creature_loot_item_rate",
+      "entry": 9164,
+      "item": 100589,
+      "min": 25,
+      "max": 35
+    },
+    {
+      "action": "assert",
+      "label": "About 30% of Subterranean Diemetradon kills yield Dino Meat",
+      "actor": "cook",
+      "metric": "creature_loot_item_rate",
+      "entry": 13323,
+      "item": 100589,
+      "min": 25,
+      "max": 35
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: about 30% of Blackrock Mountain catches are a Lava Eel",
+      "actor": "cook",
+      "metric": "fishing_loot_item_rate",
+      "entry": 25,
+      "item": 100578,
+      "min": 25,
+      "max": 35
+    },
+    {
+      "action": "assert",
+      "label": "About 30% of Fire Plume Ridge catches are a Lava Eel",
+      "actor": "cook",
+      "metric": "fishing_loot_item_rate",
+      "entry": 537,
+      "item": 100578,
+      "min": 25,
+      "max": 35
+    },
+    {
+      "action": "assert",
+      "label": "About 30% of Blackrock Depths catches are a Lava Eel",
+      "actor": "cook",
+      "metric": "fishing_loot_item_rate",
+      "entry": 1584,
+      "item": 100578,
+      "min": 25,
+      "max": 35
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Frostmaul Giant drops the Shard of Nevermelting Ice half the time",
+      "actor": "cook",
+      "metric": "creature_loot_item_rate",
+      "entry": 7428,
+      "item": 100586,
+      "min": 45,
+      "max": 55
+    },
+    {
+      "action": "assert",
+      "label": "Frostmaul Preserver drops the Shard of Nevermelting Ice half the time",
+      "actor": "cook",
+      "metric": "creature_loot_item_rate",
+      "entry": 7429,
+      "item": 100586,
+      "min": 45,
+      "max": 55
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: King Mosh drops Recipe: Spicy Dino Jerky on about 25% of kills",
+      "actor": "cook",
+      "metric": "creature_loot_item_rate",
+      "entry": 6584,
+      "item": 100614,
+      "min": 20,
+      "max": 30
+    },
+    {
+      "action": "assert",
+      "label": "Devilsaur drops Recipe: Spicy Dino Jerky on about 1.25% of kills",
+      "actor": "cook",
+      "metric": "creature_loot_item_rate",
+      "entry": 6498,
+      "item": 100614,
+      "rolls": 100000,
+      "min": 1.0,
+      "max": 1.5
+    },
+    {
+      "action": "assert",
+      "label": "A Stegodon drops Recipe: Spicy Dino Jerky on about 0.25% of kills",
+      "actor": "cook",
+      "metric": "creature_loot_item_rate",
+      "entry": 6501,
+      "item": 100614,
+      "rolls": 200000,
+      "min": 0.18,
+      "max": 0.32
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask Plugger Spazzring for his wares",
+      "actor": "cook",
+      "opcode": 414,
+      "fields": [
+        {
+          "actor_guid": "plugger"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "His shop opens",
+      "actor": "cook",
+      "metric": "vendor_list_packets",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Plugger Spazzring sells Recipe: Chilled Lava Eel",
+      "actor": "cook",
+      "metric": "vendor_price",
+      "item": 100621,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "He does not sell the Schmorgus Board recipe, which is Dirge Quikcleave's",
+      "actor": "cook",
+      "metric": "vendor_price",
+      "item": 100627,
+      "equals": -1
+    }
+  ],
+  "creatures": [
+    {
+      "id": "plugger",
+      "owner": "cook",
+      "entry": 9499,
+      "faction": 35,
+      "distance": 2
+    }
+  ]
+}

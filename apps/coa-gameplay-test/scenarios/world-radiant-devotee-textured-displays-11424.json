@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Radiance Town: Radiant Devotees use textured suit displays (#11424)",
+  "contract": "The installed client has no baked NPC texture for 32630, 47042 or 47043, so a Radiant Devotee 161786 with one of them renders green. Each index uses the approved #6747 stand-in of the same race, sex and suit whose texture the client has: index 0 the dwarf diving suit 25525, index 1 keeps 14656, index 2 the gnome male space suit 6981 and index 3 the gnome female space suit 6982. This checks server display selection, not client rendering.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "p", "race": 3, "class": 1, "level": 5 }
+  ],
+  "location": { "map": 0, "x": -5933.06, "y": 686.82, "z": 486.015, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let the player finish logging in", "ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: Devotee index 0 is the textured dwarf diving suit 25525, not 32630",
+      "actor": "p", "metric": "creature_model_display", "entry": 161786, "index": 0, "equals": 25525 },
+    { "action": "assert", "label": "Devotee index 1 keeps 14656",
+      "actor": "p", "metric": "creature_model_display", "entry": 161786, "index": 1, "equals": 14656 },
+    { "action": "assert", "label": "DISCRIMINATING: Devotee index 2 is the textured gnome male space suit 6981, not 47042",
+      "actor": "p", "metric": "creature_model_display", "entry": 161786, "index": 2, "equals": 6981 },
+    { "action": "assert", "label": "DISCRIMINATING: Devotee index 3 is the textured gnome female space suit 6982, not 47043",
+      "actor": "p", "metric": "creature_model_display", "entry": 161786, "index": 3, "equals": 6982 }
+  ]
+}

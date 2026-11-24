@@ -322,6 +322,12 @@ namespace
         return unit ? unit->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
     }
 
+    bool IsTrainingDummy(Creature const* creature)
+    {
+        static uint32 const script = sObjectMgr->GetScriptId("npc_advanced_training_dummy");
+        return script && creature->GetScriptId() == script;
+    }
+
     /// Whether a creature may be given a view at all, whoever is looking at it.
     ///
     /// These exclusions are not optional: a creature that belongs to a player - a pet, a guardian, a
@@ -462,7 +468,8 @@ namespace
             // The viewer's own rule, not the realm's: a level that is told to one client is bounded by
             // nothing, because there is nobody else for a high view to be wrong for.
             uint8 const offset = LocalLevelScaling::CreatureOffset.load(std::memory_order_relaxed);
-            level = LocalLevelScaling::ScaleCreatureLevelForViewer(own, viewer->GetLevel(), offset);
+            level = IsTrainingDummy(creature) ? std::max(own, viewer->GetLevel()) :
+                LocalLevelScaling::ScaleCreatureLevelForViewer(own, viewer->GetLevel(), offset);
         }
 
         if (level == own && !personalInstance)

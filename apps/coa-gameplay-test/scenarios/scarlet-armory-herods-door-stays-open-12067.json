@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Scarlet Monastery Armory: Herod's Door opens with a click and stays open (#12067)",
+  "contract": "#12067: Herod's Door (101854, spawn 32250) was spawned open (rev_20261002_20) and keyless (rev_20261003_10). A click closed it, and since the door has no auto-close time it was then stuck closed: the gameobject stays activated after its first use and ignores later clicks until it resets. Every other keyless dungeon door spawns closed and opens on the first click for good; Herod's Door now spawns closed too.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 189,
+      "x": 1929.1,
+      "y": -431.1,
+      "z": 18.0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the Armory is spawned",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "Herod's Door starts closed, like the other keyless dungeon doors",
+      "actor": "p",
+      "metric": "nearby_gameobject_state",
+      "entry": 101854,
+      "equals": 1
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "p",
+      "entry": 101854
+    },
+    {
+      "action": "assert",
+      "label": "One click opens it without the Scarlet Key",
+      "actor": "p",
+      "metric": "nearby_gameobject_state",
+      "entry": 101854,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "p",
+      "entry": 101854
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a second click does not close it again",
+      "actor": "p",
+      "metric": "nearby_gameobject_state",
+      "entry": 101854,
+      "equals": 0
+    }
+  ]
+}

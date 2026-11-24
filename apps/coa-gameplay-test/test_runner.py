@@ -1089,6 +1089,20 @@ class RunnerTests(unittest.TestCase):
                     with self.assertRaises(ValueError):
                         run.validate(scenario)
 
+    def test_pet_autocast_via(self):
+        for via, valid in ((None, True), ('autocast', True), ('set_action', True), ('opcode', False), (1, False)):
+            step = {'action': 'pet_autocast', 'actor': 'caster', 'spell': 806016, 'enabled': False}
+            if via is not None:
+                step['via'] = via
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append(step)
+            with self.subTest(via=via):
+                if valid:
+                    self.assertIs(run.validate(scenario), scenario)
+                else:
+                    with self.assertRaises(ValueError):
+                        run.validate(scenario)
+
     def with_role(self, **fields):
         scenario = copy.deepcopy(self.scenario)
         scenario['players'][0].update(fields)
