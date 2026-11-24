@@ -180,9 +180,17 @@ namespace
 
     void OpenDungeonSpoils(Player* player, Item* item)
     {
-        player->SendEquipError(EQUIP_ERR_NONE, item, nullptr);
-        if (!player->IsAlive() || player->IsInCombat())
+        if (!player->IsAlive())
+        {
+            player->SendEquipError(EQUIP_ERR_YOU_ARE_DEAD, item, nullptr);
             return;
+        }
+        if (player->IsInCombat())
+        {
+            player->SendEquipError(EQUIP_ERR_NOT_IN_COMBAT, item, nullptr);
+            return;
+        }
+        player->SendEquipError(EQUIP_ERR_NONE, item, nullptr);
 
         Loot loot;
         loot.containerGUID = item->GetGUID();

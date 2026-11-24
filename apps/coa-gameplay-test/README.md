@@ -982,7 +982,8 @@ GUID, then the SpellVisualKit at word 2), duel request (359), countdown (695) an
 speed and the negated vertical speed. These observations do not simulate client movement or keyboard input.
 Besides the Ascension extension opcodes (0x520 and above), the recorded packets include the learned, superseded
 and removed spell notices (299, 300 and 515) that the client prints to chat, and `SMSG_TOTEM_CREATED` (1043),
-whose leading byte is the zero-based totem bar slot.
+whose leading byte is the zero-based totem bar slot. `SMSG_INVENTORY_CHANGE_FAILURE` (274) is recorded too; its leading byte is the
+InventoryResult the client shows, for example 60 (not in combat) or 38 (you are dead).
 
 `relog` takes `actor`, commits the character through the native save path, logs it out, and reloads it
 through the native character-login handler. It preserves saved character state and the scenario phase.
