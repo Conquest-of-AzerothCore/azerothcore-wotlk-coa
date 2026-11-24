@@ -4011,7 +4011,7 @@
     "spell": 805243,
     "clause": "reducing their damage taken by $s1%",
     "labels": [
-      "805243 behaviour_taken_hit damage_taken"
+      "805243 behaviour_hit_ratio damage_taken"
     ],
     "kind": "claim"
   },
