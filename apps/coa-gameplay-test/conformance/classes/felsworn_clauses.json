@@ -2181,8 +2181,8 @@
     "spell": 705109,
     "clause": "and an additional $s2% against Demons.",
     "labels": [
-      "705109 behaviour_metric_delta crit_demon",
-      "705109 behaviour_metric_delta crit_other_type"
+      "705109 behaviour_hit_ratio crit_share_demon",
+      "705109 behaviour_hit_ratio crit_share_other_type"
     ],
     "kind": "claim"
   },
@@ -2523,17 +2523,14 @@
       },
       {
         "claim": "gains $706269s1% increased critical strike chance",
-        "labels": [
-          "706425 behaviour_metric_delta crit_amount"
-        ]
+        "labels": []
       },
       {
         "claim": "and damage.",
-        "labels": [
-          "706425 behaviour_metric_delta damage_amount"
-        ]
+        "labels": []
       }
-    ]
+    ],
+    "reason": "HELD claims 'gains ... critical strike chance' and 'and damage.' (review fw-rvb3 I-1, mentor D-67): the crit_share / damage_hit entries put 706269 (the mechanic buff) by set_aura and never learn 706425; the real grant works (ten_felfury ok); needs the learned route or a documented failure plus an equivalence arm."
   },
   {
     "spell": 707416,
@@ -3256,7 +3253,7 @@
       {
         "claim": "is instant cast.",
         "labels": [
-          "555277 behaviour_metric_delta instant"
+          "555277 behaviour_metric_delta instant_cast"
         ]
       }
     ]
@@ -3452,7 +3449,7 @@
       {
         "claim": "instant cast",
         "labels": [
-          "802058 behaviour_metric_delta instant"
+          "802058 behaviour_metric_delta instant_cast"
         ]
       },
       {
@@ -3536,7 +3533,7 @@
     "spell": 802076,
     "clause": "and your Physical damage dealt is now increased by $s2%.",
     "labels": [
-      "802076 behaviour_metric_delta physical_damage"
+      "802076 behaviour_hit_ratio physical_hit"
     ],
     "kind": "claim"
   },
@@ -3585,7 +3582,7 @@
     "spell": 802110,
     "clause": "and your Physical damage dealt is now increased by $s2%.",
     "labels": [
-      "802110 behaviour_metric_delta physical_damage"
+      "802110 behaviour_hit_ratio physical_hit"
     ],
     "kind": "claim"
   },
@@ -4109,7 +4106,7 @@
     "spell": 805243,
     "clause": "reducing their damage taken by $s1%",
     "labels": [
-      "805243 behaviour_metric_delta amount_e0"
+      "805243 behaviour_hit_ratio damage_taken"
     ],
     "kind": "claim"
   },
@@ -4295,7 +4292,7 @@
     "spell": 806103,
     "clause": "Increases your Magic damage dealt by $s1%",
     "labels": [
-      "806103 behaviour_metric_delta magic_damage"
+      "806103 behaviour_hit_ratio magic_damage_hit"
     ],
     "kind": "claim"
   },

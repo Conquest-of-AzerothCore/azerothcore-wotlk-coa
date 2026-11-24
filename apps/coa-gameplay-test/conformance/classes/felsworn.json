@@ -18106,6 +18106,409 @@
       },
       "observe_source": "Heal leg of 705124 (Spell.dbc Effect[0] SPELL_EFFECT_HEALTH_LEECH, EffectValueMultiplier 1.0): the caster's heal total of 705124 over the 705124 damage total of the same window (same_arm_ratio) is 1.0 within 0.02; 0 before the learn (control). The damage share of the same leech is the carve entry (0.20 of the strike). Reference search 2026-11-24: nothing found that decides a value; expected values come from the tooltip and the DBC.",
       "player_attack_power": 20000
+    },
+    {
+      "spell": 805243,
+      "name": "Infernal Whipcrack (damage taken)",
+      "kind": "taken_hit",
+      "variant": "damage_taken",
+      "label_suffix": "damage_taken",
+      "judge": "damage_ratio",
+      "expected": 0.85,
+      "quote": "reducing their damage taken by $s1%",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 18,
+      "arms": [
+        {
+          "name": "control",
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 805243,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "opening_casts": [
+            [
+              805243,
+              "caster"
+            ]
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 805243,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "805243 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127 (all schools), EffectBasePoints -16 + 1 (EffectDieSides 1) = -15 ($s1), Spell.dbc read with apps/coa-dbc/inspect_dbc.py; target TARGET_UNIT_CASTER_AREA_RAID, so the caster carries the aura. Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) strikes the caster six times in each arm; the control arm casts nothing and reads the aura absent, the treatment arm casts 805243 for real (opening cast) and reads it present. Expected damage ratio 0.85. Reference search 2026-11-23: coa-history spell 805243: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip; expected values come from the tooltip and Spell.dbc only.",
+      "strikes": 1,
+      "settle_ms": 50
+    },
+    {
+      "spell": 806103,
+      "name": "Wrath of Sargeras 806103 (Magic damage hit)",
+      "kind": "hit_ratio",
+      "variant": "magic_damage_hit",
+      "label_suffix": "magic_damage_hit",
+      "quote": "Increases your Magic damage dealt by $s1%",
+      "expected": 1.03,
+      "observe_spell": 802060,
+      "learn": [
+        802060
+      ],
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          806103
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "expected_source": "$s1 = 3 (806103 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 126 (the six magic schools), EffectBasePoints 2 + 1, read from Spell.dbc). Sargeron Smite 802060 (level 1 rank, the Smite the class code scales, AscensionFelswornContracts.cpp:143-149, school mask 36 Fire and Shadow, AP 0.19 and SP 0.6 in AscensionFelswornData.h) non-critical hits at the dummy without the passive (control) and with it learned (treatment); 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; spell power fixture 20000 in both arms. Reference search 2026-11-23: coa-history spell 806103: 0 events in 186 logs (a passive leaves no event; positive control 803715 has 1086 events); bindmysoul talents snapshot (fetched 2026-07-22): same figure as the tooltip. Sargeron Smite 802060 needs the caster aura 803468 and consumes 2 of the Felfury resource 800058 (AscensionCustomResourceData.h:533); both are set on the caster before every cast, in both arms (cast_unit_auras, precondition fixtures).",
+      "cast_unit_auras": [
+        [
+          803468,
+          1
+        ],
+        [
+          800058,
+          2
+        ]
+      ]
+    },
+    {
+      "spell": 802076,
+      "name": "Pit Lord's Strength 802076 (Physical damage hit)",
+      "kind": "hit_ratio",
+      "variant": "physical_hit",
+      "label_suffix": "physical_hit",
+      "quote": "and your Physical damage dealt is now increased by $s2%.",
+      "expected": 1.03,
+      "observe_spell": 803715,
+      "learn": [
+        803715
+      ],
+      "control": {},
+      "treatment": {
+        "learn": [
+          802076
+        ]
+      },
+      "critical": false,
+      "trials": 150,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "observe_source": "802076 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 1 (Physical), EffectBasePoints 2 + 1 = 3 ($s2), Spell.dbc read with apps/coa-dbc/inspect_dbc.py. Hit size: both arms carry attack power +20000 (fixture, a named precondition, the same in control and treatment), so a Carve strike 803715 is about 890 points and the integer truncation costs under 0.25%. Carve strikes (Physical weapon damage) are cast at the dummy trials times without the passive (control) and with 802076 learned by a real learn (treatment), non-critical hits only; the mean damage per hit must rise by 3 percent (band 1..5, G-19: the larger of 5% and 2 points). Reference search 2026-11-23: coa-history spell 802076: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip; expected values come from the tooltip and Spell.dbc only.",
+      "parts": 5,
+      "expected_source": ""
+    },
+    {
+      "spell": 802110,
+      "name": "Pit Lord's Strength 802110 (Physical damage hit)",
+      "kind": "hit_ratio",
+      "variant": "physical_hit",
+      "label_suffix": "physical_hit",
+      "quote": "and your Physical damage dealt is now increased by $s2%.",
+      "expected": 1.06,
+      "observe_spell": 803715,
+      "learn": [
+        803715
+      ],
+      "control": {},
+      "treatment": {
+        "learn": [
+          802110
+        ]
+      },
+      "critical": false,
+      "trials": 150,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "observe_source": "802110 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 1 (Physical), EffectBasePoints 5 + 1 = 6 ($s2), Spell.dbc read with apps/coa-dbc/inspect_dbc.py. Hit size: both arms carry attack power +20000 (fixture, a named precondition, the same in control and treatment), so a Carve strike 803715 is about 890 points and the integer truncation costs under 0.25%. Carve strikes (Physical weapon damage) are cast at the dummy trials times without the passive (control) and with 802110 learned by a real learn (treatment), non-critical hits only; the mean damage per hit must rise by 6 percent (band 1..8, G-19: the larger of 5% and 2 points). Reference search 2026-11-23: coa-history spell 802110: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip; expected values come from the tooltip and Spell.dbc only.",
+      "parts": 5,
+      "expected_source": ""
+    },
+    {
+      "spell": 705109,
+      "name": "Cruelty (critical share against a Demon)",
+      "kind": "hit_ratio",
+      "variant": "crit_share_demon",
+      "label_suffix": "crit_share_demon",
+      "quote": "and an additional $s2% against Demons.",
+      "observe_spell": 520262,
+      "cast_spell": 803475,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "control": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ],
+        "learn": [
+          705109
+        ]
+      },
+      "expected": 1.0,
+      "rate": "critical",
+      "expected_points": 5,
+      "trials": 80,
+      "parts": 140,
+      "target_entry": 416,
+      "expected_source": "705109 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 1 + 1 = 2 ($s1), Effect[1] aura 169 SPELL_AURA_MOD_CRIT_PERCENT_VERSUS MiscValue 4 (Demon), BasePoints 2 + 1 = 3 ($s2), moved by the Felsworn contract to aura 112 ASCENSION_CREATURE_GLOBAL_CRIT with MiscValueB 4 (AscensionFelswornContracts.cpp:97-102, Felsworn ADR 0005). The critical share of Azzinoth's Assault main-hand strikes 520262 is compared between a control arm without 705109 and a treatment arm with it learned: on an Imp 416 (creature type Demon) the gain is 2 + 3 = 5 points; expected 5 points inside the larger of 5% and 2 points, pooled over 140 parts of 80 casts per arm. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before each cast of Assault 803475 (it needs 803468), in both arms. Reference search 2026-11-23: coa-history spell 705109: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip; expected values come from the tooltip and Spell.dbc only.",
+      "observe_source": ""
+    },
+    {
+      "spell": 705109,
+      "name": "Cruelty (control: critical share against a non-Demon)",
+      "kind": "hit_ratio",
+      "variant": "crit_share_other_type",
+      "label_suffix": "crit_share_other_type",
+      "quote": "and an additional $s2% against Demons.",
+      "observe_spell": 520262,
+      "cast_spell": 803475,
+      "cast_wait_ms": 1600,
+      "cast_power": 100,
+      "control": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ],
+        "learn": [
+          705109
+        ]
+      },
+      "expected": 1.0,
+      "rate": "critical",
+      "expected_points": 2,
+      "trials": 80,
+      "parts": 140,
+      "expected_source": "705109 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 1 + 1 = 2 ($s1), Effect[1] aura 169 SPELL_AURA_MOD_CRIT_PERCENT_VERSUS MiscValue 4 (Demon), BasePoints 2 + 1 = 3 ($s2), moved by the Felsworn contract to aura 112 ASCENSION_CREATURE_GLOBAL_CRIT with MiscValueB 4 (AscensionFelswornContracts.cpp:97-102, Felsworn ADR 0005). The critical share of Azzinoth's Assault main-hand strikes 520262 is compared between a control arm without 705109 and a treatment arm with it learned: on the stock dummy (not a Demon) the gain is the 2 points of $s1 only, so the 3 additional points need the creature type; expected 2 points inside the larger of 5% and 2 points, pooled over 140 parts of 80 casts per arm. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before each cast of Assault 803475 (it needs 803468), in both arms. Reference search 2026-11-23: coa-history spell 705109: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip; expected values come from the tooltip and Spell.dbc only.",
+      "observe_source": ""
+    },
+    {
+      "spell": 706425,
+      "name": "Fury of Archimonde (critical share of Sargeron Smite)",
+      "kind": "hit_ratio",
+      "variant": "crit_share",
+      "label_suffix": "crit_share",
+      "quote": "gains $706269s1% increased critical strike chance",
+      "expected": 1.0,
+      "observe_spell": 802060,
+      "learn": [
+        802060
+      ],
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            706269,
+            1
+          ]
+        ]
+      },
+      "trials": 80,
+      "cast_unit_auras": [
+        [
+          803468,
+          1
+        ],
+        [
+          800058,
+          2
+        ]
+      ],
+      "rate": "critical",
+      "expected_points": 50,
+      "parts": 160,
+      "expected_source": "706269 Archimonde's Fury (granted by 706425 after 10 Felfury, AscensionFelsworn.cpp:199-206; the grant has its own entries) Effect[0] aura 107 SPELLMOD_CRITICAL_CHANCE BasePoints 49 + 1 = 50 ($706269s1) and Effect[1] aura 108 SPELLMOD_DAMAGE +50 on Sargeron Smite (class mask 2048), ProcCharges 1, read from Spell.dbc. Sargeron Smite 802060 is cast at the dummy trials times per arm without 706269 (control) and with it set on the caster before every cast (treatment; 706269 set by harness set_aura is a precondition fixture of the effect on the Smite, the claim's subject, not of its grant, which the consumed/grant entries prove with real Felfury); 823764 removes partial resists in both arms; 803468 and Felfury 800058 x2 are set before every Smite (precondition fixtures, Smite consumes 2 Felfury). Critical share of all hits, expected +50 points inside the larger of 5% and 2 points. Reference search 2026-11-23: coa-history spell 706425: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip; expected values come from the tooltip and Spell.dbc only.",
+      "observe_source": ""
+    },
+    {
+      "spell": 706425,
+      "name": "Fury of Archimonde (damage per hit of Sargeron Smite)",
+      "kind": "hit_ratio",
+      "variant": "damage_hit",
+      "label_suffix": "damage_hit",
+      "quote": "and damage.",
+      "expected": 1.5,
+      "observe_spell": 802060,
+      "learn": [
+        802060
+      ],
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            984954,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            706269,
+            1
+          ],
+          [
+            984954,
+            1
+          ]
+        ]
+      },
+      "trials": 30,
+      "cast_unit_auras": [
+        [
+          803468,
+          1
+        ],
+        [
+          800058,
+          2
+        ]
+      ],
+      "critical": false,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "expected_source": "706269 Archimonde's Fury (granted by 706425 after 10 Felfury, AscensionFelsworn.cpp:199-206; the grant has its own entries) Effect[0] aura 107 SPELLMOD_CRITICAL_CHANCE BasePoints 49 + 1 = 50 ($706269s1) and Effect[1] aura 108 SPELLMOD_DAMAGE +50 on Sargeron Smite (class mask 2048), ProcCharges 1, read from Spell.dbc. Sargeron Smite 802060 is cast at the dummy trials times per arm without 706269 (control) and with it set on the caster before every cast (treatment; 706269 set by harness set_aura is a precondition fixture of the effect on the Smite, the claim's subject, not of its grant, which the consumed/grant entries prove with real Felfury); 823764 removes partial resists in both arms; 803468 and Felfury 800058 x2 are set before every Smite (precondition fixtures, Smite consumes 2 Felfury). Non-critical hits only, spell power fixture 20000 in both arms, expected ratio 1.5 (+50% damage, band 47.5..52.5). Reference search 2026-11-23: coa-history spell 706425: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip; expected values come from the tooltip and Spell.dbc only. 984954 on the caster in both arms removes critical hits (precondition fixture, the Scars of Suffering entries' crit removal), so the non-critical hit count does not depend on the +50 critical chance.",
+      "observe_source": ""
+    },
+    {
+      "spell": 555277,
+      "kind": "metric_delta",
+      "gate_spell": 801235,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "quote": "Your next Ruin within $d is instant cast.",
+      "metric": "casting",
+      "fields": {},
+      "wait_ms": 300,
+      "expire_ms": 3000,
+      "void_on_cast_failure": true,
+      "name": "Sculptor of Doom (Ruin is instant cast, read of the live cast)",
+      "variant": "instant_cast",
+      "label_suffix": "instant_cast",
+      "trigger_spell": 501298,
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "observe_source": "801235 Effect[0] PROC_TRIGGER_SPELL 555276; AscensionFelswornAbilities.cpp:372-376 grants Sculptor of Doom 555277 at the third direct critical hit (the grant has its own entry); 555277 Effect[0] aura 108 SPELLMOD_CASTING_TIME BasePoints -101 + 1 = -100% on Ruin (class mask 2). Ruin 501298 (CastingTimeIndex 19 = 2500 ms) is cast at the dummy; `casting` on the caster is read 300 ms later: 1 before the learn (no grant, control, the cast is still running) and 0 after the real learn and the three forced-crit Fel Fireballs (the cast already went off). A refused cast voids the run. Reference search 2026-11-23: coa-history spell 555277: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip; expected values come from the tooltip and Spell.dbc only.",
+      "setup_casts": [
+        801312,
+        801312,
+        801312
+      ],
+      "setup_wait_ms": 2200,
+      "force_crit": "spell"
+    },
+    {
+      "spell": 802058,
+      "name": "Reckoning (Fel Fireball instant cast, read of the live cast)",
+      "kind": "metric_delta",
+      "variant": "instant_cast",
+      "label_suffix": "instant_cast",
+      "quote": "your Fel Fireball is free of cost, instant cast, and strikes up to $s2 targets.",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 300,
+      "expire_ms": 2000,
+      "observe_source": "802058 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -101 + 1 = -100%, on Fel Fireball 801312 (CastingTimeIndex 16 = 1500 ms). Fel Fireball is cast at the dummy and `casting` on the caster is read 300 ms later: 1 in the first phase (no Reckoning, the 1500 ms cast is running) and 0 in the second, after a real cast of 802058 (setup cast, own spell only: own_cast contrast). A refused cast voids the run. Reference search 2026-11-23: coa-history spell 802058: 78 casts, no value in a log event; bindmysoul talents snapshot: text 'instant cast' (same words); expected values come from the tooltip and the DBC only.",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "void_on_cast_failure": true,
+      "setup_casts": [
+        802058
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "setup_only_after": true
     }
   ],
   "player_observations": [],
