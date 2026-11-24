@@ -837,6 +837,11 @@ penetration modifiers. It applies no damage.
 periodic healing logs, counting positive heals, summing healing including overhealing, or summing effective
 healing. They accept the same caster/critical filters; `target_pet: true` selects the current pet of a player
 `target`. Absorbed healing is excluded. These metrics avoid confusing normal regeneration with spell healing.
+`spell_heal_absorb_total` sums the absorbed amount that native direct and periodic healing logs of `spell` report
+(the third field of `SMSG_SPELLHEALLOG` and of a periodic heal `SMSG_PERIODICAURALOG`), including a heal that a
+heal absorb (aura 301) took whole and that the other healing metrics therefore do not see. Unlike
+`spell_absorb_total` it reads periodic logs too. It takes the `caster` (a unit id, the player by default), `target`
+and `critical` filters, and refuses `pet`, `caster_entry` and `target_pet` (ADR 1286).
 The result's optional `cast_failures` array records native `SMSG_CAST_FAILED` spell IDs, cast counters and
 numeric `SpellCastResult` reasons. These diagnose a rejected submission; effect assertions still establish success.
 `distance` requires `target` and measures the native two-dimensional distance, in yards, between the actor and

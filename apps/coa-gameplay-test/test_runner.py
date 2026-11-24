@@ -1624,6 +1624,29 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(metric=metric, spell=None), self.assertRaises(ValueError):
                 run.validate(invalid)
 
+    def test_spell_heal_absorb_total_needs_a_spell_and_takes_the_caster_target_and_critical_filters(self):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'spell_heal_absorb_total',
+                                  'spell': 116, 'caster': 'target', 'target': 'target', 'critical': False, 'min': 0})
+        self.assertIs(run.validate(scenario), scenario)
+        invalid = copy.deepcopy(scenario)
+        del invalid['steps'][-1]['spell']
+        with self.subTest(spell=None), self.assertRaises(ValueError):
+            run.validate(invalid)
+        invalid = copy.deepcopy(scenario)
+        invalid['steps'][-1]['critical'] = 'yes'
+        with self.subTest(critical='yes'), self.assertRaises(ValueError):
+            run.validate(invalid)
+
+    def test_spell_heal_absorb_total_refuses_the_heal_event_filters_it_does_not_read(self):
+        for key, value in (('pet', False), ('caster_entry', 36), ('target_pet', True), ('resisted', True),
+                           ('blocked', False), ('target_entry', 36)):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'spell_heal_absorb_total',
+                                      'spell': 116, key: value, 'min': 0})
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                run.validate(scenario)
+
     def test_spell_damage_with_resist_total_refuses_the_spell_damage_event_filters(self):
         for key, value in (('pet', False), ('resisted', True), ('blocked', False), ('target_entry', 36),
                            ('caster_entry', 36)):

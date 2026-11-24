@@ -441,6 +441,16 @@ class EvidenceStatusTest(unittest.TestCase):
         unpromised = claim('Vault now also removes snares.', '1 behaviour_metric_delta vault')
         self.assertEqual(evidence_of([unpromised], verdicts)[0], [DATA])
 
+    def test_a_heal_absorb_read_is_an_event_that_proves_the_absorbed_healing(self):
+        label = '561201 behaviour_metric_delta heal_absorb'
+        self.assertEqual(METRIC_EVIDENCE['spell_heal_absorb_total'], EVENT)
+        clauses = [claim('Damage dealt by Ruin now absorbs the next 99 healing on the target based on rank,', label)]
+        learned = [judged(label, BEHAVIOUR_METRIC_DELTA, 'spell_heal_absorb_total', contrast=LEARNED_CONTRAST)]
+        self.assertEqual(evidence_of(clauses, learned)[0], [BEHAVIOUR])
+        alerted = [judged(label, BEHAVIOUR_METRIC_DELTA, 'spell_heal_absorb_total', contrast=LEARNED_CONTRAST,
+                          status='alert')]
+        self.assertEqual(evidence_of(clauses, alerted)[0], [UNPROVEN])
+
     def test_a_detection_read_is_a_state_that_seen_or_stealth_promises(self):
         label = '1 behaviour_metric_delta witchblood_seen'
         self.assertEqual(METRIC_EVIDENCE['can_detect'], STATE)
