@@ -2627,9 +2627,11 @@
   {
     "spell": 706266,
     "clause": "Reduces your chance to be hit by spells by $s1%",
-    "labels": [],
+    "labels": [
+      "706266 behaviour_metric_delta spell_hit_taken"
+    ],
     "kind": "claim",
-    "reason": "Status withheld, tool gap (see tool_gap): measured exactly 2 points, residual 0.16% per pair above 0.1%.",
+    "reason": "fw-bsc (2026-11-24): attacker_miss_share spell_clamp with casts 1100 per arm (ADR 1271, provisional) measured the reduction at exactly 2 points in both runs of the pair (clamp arms missless, edge misses control/treatment 12/15 and 13/11 of 1100; 1 and 3 excluded); residual 0.012% per pair at the 0.94% edge share, under 0.1%. Effect[0] aura 186 only, unchanged by owner ruling O-27 (Effect[2] dummied).",
     "tool_gap": {
       "reason": "Withheld (fw-vb4b, review I-1): the entry attacker_miss_share spell_clamp of 706266 measured the reduction at exactly 2 points in both runs of 20261123-233905 / -234132 (826 casts per arm, control arm, 1 and 3 points excluded), but the cast count is fixed by the tool (kinds/attacker_miss_share.py spell_clamp_casts: ceil(ln(0.001/4)/ln(0.99)) = 826, from an assumed 1% edge miss chance) and the entry has no cast-count option. The edge misses read in proveF2 average 0.94% of casts (4 to 11 per edge arm), which gives P(no miss in one edge arm) = e^-7.8 = 4.1e-4 and 0.16% per pair for four edge arms: above the 0.1% limit of rule 3, so no label is counted. The risk is a false alert, not a false pass. Reference search 2026-11-23: nothing found for the value beyond the tooltip and the DBC. The extension is a casts option on spell_clamp (about 1100 casts per edge arm for under 0.1%); the entry stays in the class file as evidence.",
       "attempts": [
@@ -2846,9 +2848,11 @@
   {
     "spell": 707844,
     "clause": "Reduces your chance to be hit by spells by $s1%",
-    "labels": [],
+    "labels": [
+      "707844 behaviour_metric_delta spell_hit_taken"
+    ],
     "kind": "claim",
-    "reason": "Status withheld, tool gap (see tool_gap): measured exactly 4 points, residual 0.16% per pair above 0.1%.",
+    "reason": "fw-bsc (2026-11-24): attacker_miss_share spell_clamp with casts 1100 per arm (ADR 1271, provisional) measured the reduction at exactly 4 points in both runs of the pair (clamp arms missless, edge misses control/treatment 9/10 and 7/8 of 1100; 3 and 5 excluded); residual 0.012% per pair at the 0.94% edge share, under 0.1%. Effect[0] aura 186 only, unchanged by owner ruling O-27 (Effect[2] dummied).",
     "tool_gap": {
       "reason": "Withheld (fw-vb4b, review I-1): the entry attacker_miss_share spell_clamp of 707844 measured the reduction at exactly 4 points in both runs of 20261123-233905 / -234132 (826 casts per arm, control arm, 1 and 3 points excluded), but the cast count is fixed by the tool (kinds/attacker_miss_share.py spell_clamp_casts: ceil(ln(0.001/4)/ln(0.99)) = 826, from an assumed 1% edge miss chance) and the entry has no cast-count option. The edge misses read in proveF2 average 0.94% of casts (4 to 11 per edge arm), which gives P(no miss in one edge arm) = e^-7.8 = 4.1e-4 and 0.16% per pair for four edge arms: above the 0.1% limit of rule 3, so no label is counted. The risk is a false alert, not a false pass. Reference search 2026-11-23: nothing found for the value beyond the tooltip and the DBC. The extension is a casts option on spell_clamp (about 1100 casts per edge arm for under 0.1%); the entry stays in the class file as evidence.",
       "attempts": [
