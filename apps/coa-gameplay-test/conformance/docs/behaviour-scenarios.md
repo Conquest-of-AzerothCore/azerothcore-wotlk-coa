@@ -2332,6 +2332,8 @@ Options with a module:
   after every feed cast, a trial without cap + 1 applications inside the duration void (ADR 1249, provisional)
 - [`after_gate_cast`](metric_delta_options/after_gate_cast.md): a real cast of the gate at the caster at the start of
   the after phase instead of an aura fixture, its aura read after it (ADR 1251, provisional)
+- [`shifted_control`](metric_delta_options/shifted_control.md): a resist chance with the gate learned judged equal to
+  the control at a resistance lowered by the gate's DBC points (ADR 1281, provisional)
 - [`corpse`](metric_delta_options/corpse.md): a creature corpse a real setup cast kills in the treatment phase (ADR
   0493)
 - [`player_spell_power`](metric_delta_options/player_spell_power.md): the caster's spell-power fixture (ADR 0364)

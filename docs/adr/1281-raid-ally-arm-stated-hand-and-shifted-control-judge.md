@@ -39,7 +39,13 @@ Three Felsworn parts were tool gaps (triage groups B-ALLY, B-SH, B-SP2):
   int((roll + int(flat x hand factor)) x percent / 100). `hand: "off"` states the tooltip's hand for that order only:
   the off-hand weapon of the entry's set and the off-hand factor 0.5 (`Unit.cpp:519`). The expectation follows the
   tooltip, so a server that strikes with the main hand alerts (controller go; the alert is a server lead, not a fix).
-- The 253.0 judge is recorded in the section below once built (mentor D-108).
+- `metric_delta` `shifted_control` (Felsworn D-108 and D-110, 2026-11-24): the resist chance against the dummy is read
+  in a control (fixture resistance R), a shifted control (R minus the shift, its resistance read) and the treatment (R,
+  the gate learned). The shift is the gate's DBC points at the caster level, stated in the entry and checked at
+  generation; R is at least twice the shift. `ok` needs control - treatment >= discrimination_share x span and
+  |shifted control - treatment| <= tolerance_share x span (span = control - shifted control); a span that does not move
+  or a fixture read off is `unmeasured`. `spell_resist_chance` is a readback with a `CONTRAST_PROOF` learned row and the
+  penetration words (the `spell_done_crit_chance` precedent, ADR 0691).
 
 ## Consequences
 
@@ -50,3 +56,8 @@ Three Felsworn parts were tool gaps (triage groups B-ALLY, B-SH, B-SP2):
 - 17.1 reads `300476 script_hit 804336 offhand_strike`. Code reading: the server casts 804336 with BASE_ATTACK
   (`Spell.cpp:597-603`, `AscensionFelswornEvents.cpp:227`), so the pair is expected to alert.
 - `hand` without `normalized_percent`, any other value, or on the other effect order is refused.
+- 253.0 reads `803645 behaviour_metric_delta spell_pen` (level 60, shift 60) and `spell_pen_level40` (level 40, shift
+  40), tolerance_share 0.05 (excludes a penetration 10% off the shift under a resist chance linear in resistance) and
+  discrimination_share 0.5 (excludes no penetration and half of it). It proves the caster's penetration as the engine
+  applies it to the resist chance, not observed resists. A new readback metric with promise words cannot move a finished
+  class: no finished class reads `spell_resist_chance`.

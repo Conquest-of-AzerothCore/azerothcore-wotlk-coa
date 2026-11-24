@@ -3969,23 +3969,12 @@
     "spell": 803645,
     "clause": "Increases your spell penetration by ${-($m1+0)}, scaling with your level.",
     "labels": [
-      "803645 effect_value e0 #0"
+      "803645 effect_value e0 #0",
+      "803645 behaviour_metric_delta spell_pen",
+      "803645 behaviour_metric_delta spell_pen_level40"
     ],
     "kind": "claim",
-    "reason": "Tool gap, uncounted (see tool_gap); the data label is the only label.",
-    "tool_gap": {
-      "reason": "Tool gap, uncounted (fw-vb4b, review I-3; guide G-25: a tool gap is not a final status): A route needs a ratio-or-equality judge between two arms (a Shadow-resistance fixture aura on the dummy, lowered in the control phase against the learned phase, with the engine formula of the resist chance). Two designs were written, none was run, so G-24 is not met: Design 1: metric_delta spell_resist_chance (Unit::GetEffectiveResistChance, the engine use-time function that adds the aura and clamps the victim resistance at 0) before and after a real learn: it needs a dummy with a positive Shadow resistance and an expected chance, which is an engine formula of that resistance, not a tooltip or DBC value; with the stock dummy at 0 resistance the read cannot move. Design 2: an equality of two reads, a MOD_RESISTANCE fixture aura on the dummy lowered by 60 in the control phase against the learned phase (before_auras, after_auras and phase_aura_amounts allow it): the expected gain is 0, which cannot be told from its control (Vampiric Tonic 802276, status 3 by ruling D-360) and no entry states a non-zero control gain without the engine formula. The nearest option and the extension: metric_delta with phase_aura_amounts; a ratio-or-equality judge between two arms is the extension. The scaling \"with your level\" is the data label. Reference search 2026-11-24: nothing found beyond the tooltip and the DBC (coa-history spell 803645: a passive leaves no event).",
-      "attempts": [
-        {
-          "agent": "fw-vb4",
-          "report": ".agents/plans/fw-vb4/report.md"
-        },
-        {
-          "agent": "fw-vb4b",
-          "report": ".agents/plans/fw-vb4b/report.md"
-        }
-      ]
-    }
+    "reason": "The penetration is read by the shifted-control judge (ADR 1281, Felsworn D-108 (2026-11-24)) at caster levels 60 and 40: the resist chance with 803645 learned equals the unlearned chance at a resistance lowered by -(803645 Effect[0]) at that level (60, 40). spell_resist_chance is a readback, behaviour in the learned contrast with the penetration words (Felsworn D-110 (2026-11-24)): it proves the caster's penetration as the engine applies it to the resist chance (Unit::GetEffectiveResistChance), not observed resists. The effect_value label stays the data label."
   },
   {
     "spell": 803645,
