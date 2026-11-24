@@ -2145,11 +2145,10 @@
     "spell": 704613,
     "clause": "Increases the amount of beneficial magic effects stolen by your Consume Magic by $s1.",
     "labels": [
-      "704613 behaviour_metric_delta stolen",
       "704613 behaviour_metric_delta stolen_effects"
     ],
     "kind": "claim",
-    "reason": "Third Magic buff added (Arcane Intellect 1459, fw-vb9): carried_aura_count of the three buffs on the caster reads 1 before the learn and 2 after, so an over-steal (3) fails; spellpen 823764 on the caster as precondition fixture."
+    "reason": "Third Magic buff added (Arcane Intellect 1459, fw-vb9): carried_aura_count of the three buffs on the caster reads 1 before the learn and 2 after, so an over-steal (3) fails; spellpen 823764 on the caster as precondition fixture. The data read 'stolen' (spell_effect_value 1 to 2) is dropped from the labels so the clause evidence is the behaviour read."
   },
   {
     "spell": 705102,
