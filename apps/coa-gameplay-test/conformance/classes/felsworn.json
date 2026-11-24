@@ -13531,6 +13531,128 @@
       "observe_source": "800220 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 6 (SPELLMOD_RADIUS), BasePoints 14 + 1 = +15 yd ($s2), on the Infernal Whipcrack effects with SpellRadius index 9 = 20 yd (805243 Effect[0] and Effect[1], TargetB 56) so the radius is 35 yd; AscensionFelswornAbilities.cpp:136-141 adds every friendly unit within the radius when 800220 is known. Infernal Whipcrack 805243 is cast by the caster; the aura 805243 is read on ally (38.7 yd) before the learn (the control: absent, the base radius is 20 yd) and after it; edge arithmetic: the stock party area search (TargetB 56, Spell.cpp:1396-1401 adds the leeway 2.66, Spell.cpp:9463-9464 adds the ally's object size 1.5) reaches 35 + 2.66 + 1.5 = 39.16 yd, the script search (AscensionFelswornAbilities.cpp:136-141, IsWithinDistInMap with both object sizes) 35 + 1.5 + 1.5 = 38 yd; a radius 10% low (+13.5 yd, edge 37.66) misses the ally at 38.7 yd, one 10% high (+16.5 yd, edge 40.66) reaches the ally2 at 39.7 yd; both sizes are read in the arms. The earlier text:  before the learn (the control: absent, the base radius is 20 yd) and after it, and on ally2 (39.7 yd): absent. Reference search 2026-11-23: coa-history spell 800220: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: nothing found; expected values come from the tooltip and the DBC only."
     },
     {
+      "spell": 805243,
+      "name": "Infernal Whipcrack (eight of ten raid players enraged, not seven or nine, without 800220)",
+      "kind": "metric_delta",
+      "variant": "whipcrack_cap",
+      "label_suffix": "whipcrack_cap",
+      "quote": "Enrage $?s800220[all][up to $i] allies within $a yds,",
+      "trigger_spell": 805243,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 805243
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "cast_power": 100,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 9,
+        "arms": [
+          {
+            "actors": [
+              "caster",
+              "ally",
+              "ally2",
+              "ally3",
+              "ally4",
+              "ally5",
+              "ally6",
+              "ally7",
+              "ally8",
+              "ally9"
+            ],
+            "metric": "cast_speed_multiplier",
+            "before_expected": 10,
+            "expected": 9.272727,
+            "tolerance": 0.02,
+            "source": "Effect[2] (aura 216 SPELL_AURA_HASTE_SPELLS, 9 + 1 = 10, $s2) is selected apart from Effects[0-1] (radius index 18, 15 yd against index 9, 20 yd), so it draws its own targets under the same cap: MaxAffectedTargets 8 ($i, Spell.dbc). The cast speed multiplier (UNIT_MOD_CAST_SPEED) of each of the ten raid players is 1 without the aura and 1 / 1.10 = 0.909091 with it; the sum over the ten is 10 before the cast (control, no aura) and 2 x 1 + 8 x 0.909091 = 9.272727 after it, whichever eight are drawn (the caster is one of the ten candidates, so its own hold of Effect[2] adds no random ninth). The tolerance 0.02 excludes a cap of 9 (9.181818), 7 (9.363636) and no cap (9.090909), each 0.09 or more away",
+            "reach_source": "805243 TargetB 56 TARGET_UNIT_CASTER_AREA_RAID: the TARGET_CHECK_RAID filter keeps every unit IsInRaidWith the caster (Spell.cpp:9385-9395), raid subgroup 2 included; the ten candidates are inside both radii (6 yd against edges 19.16 and 24.16 yd), so the cap alone leaves two of them out"
+          },
+          {
+            "actors": [
+              "caster",
+              "ally",
+              "ally2",
+              "ally3",
+              "ally4",
+              "ally5",
+              "ally6",
+              "ally7",
+              "ally8",
+              "ally9"
+            ],
+            "metric": "attack_time_ms",
+            "before_expected": 28000,
+            "expected": 25963.636,
+            "tolerance": 20,
+            "source": "Effects[0-1] are one selection (radius index 9, 20 yd) under the same cap 8 ($i, Spell.dbc). Effect[1] is aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 9 + 1 = 10 ($s2): the main-hand base attack time (UNIT_FIELD_BASEATTACKTIME) of a drawn player is divided by 1.10. Every one of the ten players carries a 2800 ms main-hand weapon: the caster the reference weapon 2529 Zweihander (class file weapon_sets; item_template delay 2800), each ally the class starter kit weapon Faded Glaive 629940 (playercreateinfo_item class 14, rev_1787754600000000000.sql lines 260 and 355; Player::Create equips the kit, Player.cpp:720-721; item_template delay 2800). The sum is 10 x 2800 = 28000 ms before the cast (control, no aura). After it each drawn player loses 2800 x (1 - 1 / 1.10) = 254.545 ms, so eight drawn give 28000 - 2036.364 = 25963.636 whichever eight are drawn; a cap of 9 gives 25709.091, a cap of 7 gives 26218.182, no cap 25454.545. The tolerance 20 excludes every other cap by 254 ms or more",
+            "reach_source": "805243 TargetB 56 TARGET_UNIT_CASTER_AREA_RAID: the TARGET_CHECK_RAID filter keeps every unit IsInRaidWith the caster (Spell.cpp:9385-9395), raid subgroup 2 included"
+          },
+          {
+            "actors": [
+              "ally",
+              "ally2",
+              "ally3",
+              "ally4",
+              "ally5",
+              "ally6",
+              "ally7",
+              "ally8",
+              "ally9"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 54,
+            "expected": 54,
+            "tolerance": 0.9,
+            "precondition": true,
+            "source": "ally_offsets moves each of the nine allies 6 yd along x from the shared spawn, dz 0, the caster stays: 54 yd summed, far inside Effect[2]'s 19.16 yd edge (15 + 2.66 party area leeway + 1.5 object size, Spell.cpp:1396-1401, Object.cpp:1787-1808) and Effects[0-1]'s 24.16 yd edge; a sum off 54 by more than 0.9 voids the trial, it is not judged",
+            "reach_source": "805243 TargetB 56 TARGET_UNIT_CASTER_AREA_RAID: the TARGET_CHECK_RAID filter keeps every unit IsInRaidWith the caster (Spell.cpp:9385-9395), raid subgroup 2 included"
+          },
+          {
+            "actors": [
+              "caster",
+              "ally",
+              "ally2",
+              "ally3",
+              "ally4",
+              "ally5",
+              "ally6",
+              "ally7",
+              "ally8",
+              "ally9"
+            ],
+            "metric": "alive",
+            "before_expected": 10,
+            "expected": 10,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "all ten raid players are alive, so each is a candidate of the area selection; fewer than ten voids the trial, it is not judged",
+            "reach_source": "805243 TargetB 56 TARGET_UNIT_CASTER_AREA_RAID: the TARGET_CHECK_RAID filter keeps every unit IsInRaidWith the caster (Spell.cpp:9385-9395), raid subgroup 2 included"
+          }
+        ]
+      },
+      "ally_offsets": {
+        "ally": 6,
+        "ally2": 6,
+        "ally3": 6,
+        "ally4": 6,
+        "ally5": 6,
+        "ally6": 6,
+        "ally7": 6,
+        "ally8": 6,
+        "ally9": 6
+      },
+      "observe_source": "805243 Infernal Whipcrack (server DBC): 'Enrage $?s800220[all][up to $i] allies within $a yds', MaxAffectedTargets 8 ($i), without 800220 learned (the aura of the cast is read right after a real cast; 800220's own SPELLMOD_MAX_TARGETS +17 does not reach 805243, mask (0,0,32) against family flags (32,0,0)). Area selection (Spell.cpp:1414-1420): each distinct target selection calls Containers::RandomResize on its candidates with the cap, and Effect[2] (15 yd) is selected apart from Effects[0-1] (20 yd). Second design, after the holder count of fw-bk6 (the caster always holds the aura through Effect[2], so a count of holders reads the cap 8 as 8 or 9): the ten raid players (the caster and nine grouped allies, all 6 yd away, inside both radii) are read by two per-unit state reads that each depend on one selection only, summed over all ten: cast_speed_multiplier for Effect[2] (the sum does not depend on which eight are drawn) and attack_time_ms of the main hand for Effect[1] (all ten carry a 2800 ms main-hand weapon, so the sum does not depend on which eight are drawn). With ten candidates and a cap of 8, exactly eight are drawn in each selection. The read before the cast is the control: no aura, 10 and 28000. The main read is the caster's spell_cast_count of 805243 (0 before, 1 after the real cast): it does not depend on which eight are drawn, so the check has no draw-dependent label (the first draft read the aura on the caster, which misses it 4% per run because the caster is one of ten candidates drawn with 8 of 10 in each of two selections). The proof of the cap is the per-effect sums of the arms, which hold for every draw; the residual failure probability of the draw is 0 per pair. Residual false-pass: a cap other than 8 passes only when two of the ten players silently fail to be candidates (not alive or out of range, both read as preconditions; raid membership is the grouping step of the scenario, not read) in both selections at once, since a cap of 9 or 7 or none moves the sum by 0.09 or 254 ms or more; the per-unit reads of the 9 archived runs (prove3 x2, prove4 x2, focus x5, fw-rd288 review) show every one of the ten players holding an effect in at least one run, with changing non-holder pairs, so no player is a persistent non-candidate. Reference search 2026-11-24: coa-history spell 805243: 0 events in 186 logs; sidekick, bindmysoul, ascension-data and coabuildhub snapshots list the talent and its 800220 tooltip only, no target count; expected values come from the tooltip and the DBC only."
+    },
+    {
       "spell": 705122,
       "name": "Bulwark of Azzinoth (aura amount, diagnostic)",
       "kind": "metric_delta",
