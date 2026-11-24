@@ -246,6 +246,38 @@ class ScriptCountSwingTests(unittest.TestCase):
             scenario, _ = generated(pit_lord(script_count={'noun': 'attack', 'swings': 4}))
             self.assertTrue(scenario['steps'])
 
+    def test_the_window_bound_counts_every_equipped_melee_hand(self):
+        class_file = load_fixture_class_file(19)
+        main, off = class_file['weapon'], class_file['off_hand_weapons'][0]
+        one_hand = [{'action': 'equip', 'actor': 'caster', 'item': main['item'], 'slot': 15}]
+        dual = one_hand + [{'action': 'equip', 'actor': 'caster', 'item': off['item'], 'slot': 16}]
+        window = 2 * main['speed_ms']
+        self.assertEqual(script_count.landed_bound(class_file, one_hand, window), 3)
+        self.assertEqual(script_count.landed_bound(class_file, dual, window),
+                         3 + window // off['speed_ms'] + 1)
+        spec = metric_delta_spec(pit_lord(script_count=SWUNG))
+        counted = script_count.Counted('attack', 2)
+        self.assertIsNone(script_count.swing_window(spec, counted, script_count.landed_bound(class_file, one_hand,
+                                                                                             window)))
+        self.assertRegex(script_count.swing_window(spec, counted, script_count.landed_bound(class_file, dual, window)),
+                         'equipped melee hands')
+        with self.assertRaisesRegex(ValueError, 'speed of equipped item'):
+            script_count.landed_bound(class_file, [{**one_hand[0], 'item': 1}], window)
+
+    def test_mutant_counting_the_main_hand_only_lets_a_dual_wield_window_pass(self):
+        class_file = load_fixture_class_file(19)
+        dual = [{'action': 'equip', 'actor': 'caster', 'item': class_file['weapon']['item'], 'slot': 15},
+                {'action': 'equip', 'actor': 'caster', 'item': class_file['off_hand_weapons'][0]['item'], 'slot': 16}]
+        spec = metric_delta_spec(pit_lord(script_count=SWUNG))
+        counted = script_count.Counted('attack', 2)
+        window = 2 * class_file['weapon']['speed_ms']
+        main_only = script_count.equipped_melee_speeds(class_file, dual)[:1]
+        with mock.patch.object(script_count, 'equipped_melee_speeds', lambda *args: main_only):
+            self.assertIsNone(script_count.swing_window(spec, counted,
+                                                        script_count.landed_bound(class_file, dual, window)))
+        self.assertIsNotNone(script_count.swing_window(spec, counted,
+                                                       script_count.landed_bound(class_file, dual, window)))
+
     def test_the_count_plus_landed_attacks_is_judged_against_the_stated_count(self):
         entry = pit_lord(script_count=SWUNG, expire_ms=12500)
         values = swung_values(entry, {'before': (5, 3, 0, 2), 'after': (6, 3, 2, 5)})

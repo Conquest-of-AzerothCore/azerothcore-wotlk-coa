@@ -76,22 +76,48 @@ def contrast_arm(spec, noun: str) -> str | None:
     return None
 
 
-def swing_window(spec, counted: Counted) -> str | None:
-    if not counted.swings:
-        return None
-    if counted.noun != SWING_NOUN:
+def swing_noun(spec, counted: Counted) -> str | None:
+    if counted.swings and counted.noun != SWING_NOUN:
         return f'counts swings only for the noun {SWING_NOUN!r}, not {counted.noun!r}'
+    return None
+
+
+def class_weapon_speeds(class_file: dict) -> dict[int, int]:
+    weapons = [class_file.get('weapon') or {}, *class_file.get('off_hand_weapons', []),
+               *(hand or {} for hands in class_file.get('weapon_sets', {}).values() for hand in hands.values())]
+    return {weapon['item']: weapon['speed_ms'] for weapon in weapons if 'item' in weapon and 'speed_ms' in weapon}
+
+
+def equipped_melee_speeds(class_file: dict, steps: list[dict]) -> list[int]:
+    from profile import CASTER, EQUIPMENT_SLOT_MAIN_HAND, EQUIPMENT_SLOT_OFF_HAND
+    speeds = class_weapon_speeds(class_file)
+    slots = {}
+    for step in steps:
+        if step.get('action') == 'equip' and step.get('actor') == CASTER \
+                and step.get('slot') in (EQUIPMENT_SLOT_MAIN_HAND, EQUIPMENT_SLOT_OFF_HAND):
+            if step['item'] not in speeds:
+                raise ValueError(f'{NAME} swings need the speed of equipped item {step["item"]} in the class file')
+            slots[step['slot']] = speeds[step['item']]
+    return [slots[slot] for slot in sorted(slots)]
+
+
+def landed_bound(class_file: dict, steps: list[dict], window: int) -> int:
+    return sum(window // speed + 1 for speed in equipped_melee_speeds(class_file, steps))
+
+
+def swing_window(spec, counted: Counted, bound: int) -> str | None:
     cast_arms = [spec.expected] + ([spec.before_expected] if driver(spec) != ABSENT else [])
-    if counted.swings + 1 >= min(cast_arms):
-        return (f'swings {counted.swings} intervals, up to {counted.swings + 1} landed attacks, which is not below '
-                f'the least counted reading {min(cast_arms):g} of a cast arm, so the aura may end inside the window')
+    if bound >= min(cast_arms):
+        return (f'swings {counted.swings} intervals, up to {bound} landed attacks over the equipped melee hands, which '
+                f'is not below the least counted reading {min(cast_arms):g} of a cast arm, so the aura may end inside '
+                f'the window')
     return None
 
 
 def spec_refusal(spec, counted: Counted) -> str | None:
     noun = counted.noun
     return (stated_count(spec, noun) or counted_read(spec, noun) or plain_layout(spec, noun)
-            or contrast_arm(spec, noun) or swing_window(spec, counted))
+            or contrast_arm(spec, noun) or swing_noun(spec, counted))
 
 
 def check(spec, counted):
@@ -186,6 +212,9 @@ def swing_fixtures(class_file: dict, spec, counted: Counted, scenario: dict):
     from profile import measurement
     judged = {metric_delta_label(spec, name) for name in counted_moments(spec)}
     window = counted.swings * swing_interval(class_file)
+    refusal = swing_window(spec, counted, landed_bound(class_file, scenario['steps'], window))
+    if refusal is not None:
+        raise ValueError(f'{spec.spell} {NAME} {refusal}')
     steps = []
     for step in scenario['steps']:
         if step.get('action') == 'wait' and step.get('label') == SWING_WAIT_LABEL:
