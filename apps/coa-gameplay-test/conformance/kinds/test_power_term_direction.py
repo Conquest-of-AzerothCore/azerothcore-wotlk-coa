@@ -188,7 +188,8 @@ class PowerTermDirectionTests(unittest.TestCase):
         self.assertNotIn('power_name', expectation.model)
         self.assertNotIn('sample', expectation.model)
         self.assertEqual(len(scenario['creatures']), 1)
-        self.assertFalse(any(step['action'] == 'set_power' for step in scenario['steps']))
+        self.assertEqual({(step['power'], step['value']) for step in scenario['steps'] if step['action'] == 'set_power'},
+                         {(0, 1363)})
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
