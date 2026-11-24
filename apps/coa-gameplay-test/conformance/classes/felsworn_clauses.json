@@ -3889,9 +3889,10 @@
   {
     "spell": 802110,
     "clause": "and your Physical damage dealt is now increased by $s2%.",
-    "labels": [],
-    "kind": "claim",
-    "reason": " HELD (review fw-rbswb I-1): with swings 1 every window lands one attack, and the pre-fix server (2 native charges, ADR 0030) also reads 6+1=7, so this entry cannot fail on the fixed defect; needs >= 3 landed attacks per window within the bound."
+    "labels": [
+      "802110 behaviour_hit_ratio physical_hit"
+    ],
+    "kind": "claim"
   },
   {
     "spell": 802180,
