@@ -520,8 +520,9 @@
       {
         "claim": "an additional ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage",
         "labels": [
-          "520693 behaviour_metric_delta inner_tick",
-          "520693 behaviour_metric_delta inner_tick_sp"
+          "520693 behaviour_metric_delta inner_total",
+          "520693 behaviour_metric_delta inner_total_sp",
+          "520693 behaviour_metric_delta inner_total_bare"
         ]
       },
       {
@@ -3334,7 +3335,9 @@
     "clause": "Unleash a devastating attack, dealing $s2% Weapon Damage to your target with both weapons.",
     "labels": [
       "572804 behaviour_metric_delta hit",
-      "572804 behaviour_metric_delta hit_ap"
+      "572804 behaviour_metric_delta hit_ap",
+      "572804 behaviour_metric_delta hit_off",
+      "572804 behaviour_metric_delta hit_ap_off"
     ],
     "kind": "claim"
   },
@@ -3366,7 +3369,9 @@
     "clause": "Strike an enemy for Weapon Damage plus ${$m1+0+$AP*.145} with both weapons, additionally scaling with your attack power.",
     "labels": [
       "803475 behaviour_metric_delta hit",
-      "803475 behaviour_metric_delta hit_ap"
+      "803475 behaviour_metric_delta hit_ap",
+      "803475 behaviour_metric_delta hit_off",
+      "803475 behaviour_metric_delta hit_ap_off"
     ],
     "kind": "claim"
   },
