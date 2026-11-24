@@ -1410,7 +1410,8 @@
     "labels": [
       "561201 effect_value 801895e1 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fw-vb2 (2026-11-23): the absorb is Ruin's Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target (TargetA 6, DBC), so a heal that it absorbs needs a heal landing on a hostile unit. No route found: (1) a grouped ally or the caster cannot heal a hostile dummy (assist rules); (2) the dummy's own heal (target_casts) is read only through the dummy's health, which also carries Ruin's random damage (die 21 x spell power term), so the 99 absorbed cannot be separated inside the 5% band, and every dummy-castable heal in Spell.dbc (439-441, 2024, 4042, 8812, 9163, 10577, 11642, 12039, 14053, 15586) carries a die. The value read stays data; part uncounted, needs a gross-minus-effective heal read on a unit."
   },
   {
     "spell": 561201,
@@ -1418,7 +1419,8 @@
     "labels": [
       "561201 effect_value 501297e1 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fw-vb2 (2026-11-23): the absorb is Ruin rank 7 501297 Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target (TargetA 6, DBC), so a heal that it absorbs needs a heal landing on a hostile unit. No route found: (1) a grouped ally or the caster cannot heal a hostile dummy (assist rules); (2) the dummy's own heal (target_casts) is read only through the dummy's health, which also carries Ruin's random damage (die 21 x spell power term), so the 99 absorbed cannot be separated inside the 5% band, and every dummy-castable heal in Spell.dbc (439-441, 2024, 4042, 8812, 9163, 10577, 11642, 12039, 14053, 15586) carries a die. The value read stays data; part uncounted, needs a gross-minus-effective heal read on a unit."
   },
   {
     "spell": 561201,
@@ -1897,7 +1899,8 @@
       "706420 behaviour_metric_delta inner_interval_b",
       "706420 behaviour_metric_delta inner_none"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fw-vb2 (2026-11-23): the damage half is proven in game (Chaos 802676 hit with Inner Demon: 598.3 per hit against the tooltip's 551 x 0.98743 x 1.10 = 598.5 to 600.6; +10000 spell power: 5879 against 5879.6). The interval half alerts: the tooltip and EffectAmplitude[1] say every $t2 = 6 sec, the server hits every 2 s (3 hits by 6.6 s, 2 by 5.4 s, 6 by 12.6 s; AscensionFelswornContracts.cpp:276-279 sets the Bane's periodic dummy to 2000 ms). Fix note in the fw-vb2 report; no server change."
   },
   {
     "spell": 706420,
@@ -2099,7 +2102,8 @@
       "704612 behaviour_metric_delta pact_resist",
       "704612 behaviour_metric_delta pact_resist_hunter"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fw-vb2 (2026-11-23): Pact Hunter +50% on Vengeful Pact's Shadow resistance reads 65 then 97 (97.5 truncated, inside the 5% band), but the audit counts a resistance read as data because the claim carries no 'resistance' promise word. A second design (Vengeful Pact's damage shield hit after a real Damage 100 (TEST) 2653 cast by the dummy at the holder) read no shield hit. Demonfire Pact's +3 crit chance reads +4 with Pact Hunter (4.5 truncated). Status 3 candidate: needs a second design."
   },
   {
     "spell": 704613,
@@ -2545,7 +2549,8 @@
           "report": ".agents/plans/fw-ea5/report.md"
         }
       ]
-    }
+    },
+    "reason": "fw-vb2 (2026-11-23): 195.1 ('strike 1 additional enemy ... based on how long you channeled') waits for the L2 Felfury/wait fixture, which is not merged at this head; not authored in batch B2."
   },
   {
     "spell": 707444,
