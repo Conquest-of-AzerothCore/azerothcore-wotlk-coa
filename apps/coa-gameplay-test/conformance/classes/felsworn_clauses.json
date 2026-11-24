@@ -338,6 +338,7 @@
       }
     ],
     "kind": "claim",
+    "reason": "fw-bab (2026-11-24): avoided_swing_reads (ADR 1273, provisional, mentor D-91). party_crit opts in to baseline_read: the ally's melee_crit_chance_refreshed read 4.32 before the dodges and 4.32 after the not-learned control windows (zero delta), 6.32 after the dodges with 300476 learned (gain 2.00 in [1.99, 2.01]); the tool derives contrast learned from the step list. party_crit_duration reads the expiry edge: the ally held 520256 9000 ms after the quieting relocation and no longer held it at 11000 ms, with 8 and 9 dodges in the last window and none after the relocation. Counted pair: both runs ok on build 2d78de5092 (server f7b1214fe2).",
     "tool_gap": {
       "reason": "Both behaviour labels resolve to data under coverage.py. party_crit is a stat_delta read of melee_crit_chance_refreshed, a state metric whose verdict carries no contrast stamp (coverage.py:711-712, 741-742, 792), although the windows are in substance a learned contrast; stamping it is an evidence decision for the mentor. party_crit_duration reads aura_duration_ms, a readback metric (coverage.py:423), not an observed expiry. The nearest kind is avoided_swing_reads with a learned contrast stamp on the crit read and an expiry edge after the last dodge (held at 9 s, gone by 11 s).",
       "attempts": [
