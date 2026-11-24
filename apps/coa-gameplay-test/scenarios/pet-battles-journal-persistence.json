@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Pet journal: pets, ability picks and teams survive reloading the journal from the database",
+  "contract": [
+    "Phase 3 of the pet battle port. Every journal change is written to the characters database; dropping the",
+    "account's cached journal and loading it again (.petbattle reload, standing in for a relog) shows the same pets,",
+    "ability picks, teams and active team. Invalid team edits are refused."
+  ],
+  "timeout_ms": 60000,
+  "vanity_ownership": { "unlock_all": false },
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "gm", "race": 1, "class": 1, "level": 60, "security": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "command", "actor": "gm", "command": ".petbattle grant 299 7 2" },
+    { "action": "command", "actor": "gm", "command": ".petbattle grant 69 3" },
+    { "action": "command", "actor": "gm", "command": ".petbattle picks 299 2 1 2" },
+    { "action": "command", "actor": "gm", "command": ".petbattle team 2 299 69 0" },
+    { "action": "command", "actor": "gm", "command": ".petbattle team active 2" },
+    { "action": "command", "actor": "gm", "command": ".petbattle team 2 299 299 0", "rejected": true },
+    { "action": "command", "actor": "gm", "command": ".petbattle team 3 7380 0 0", "rejected": true },
+    { "action": "command", "actor": "gm", "command": ".petbattle team 4 299 0 0", "rejected": true },
+    { "action": "command", "actor": "gm", "command": ".petbattle picks 299 3 1 1", "rejected": true },
+    { "action": "wait", "ms": 1500 },
+    { "action": "command", "actor": "gm", "command": ".petbattle reload" },
+    { "action": "wait", "ms": 300 },
+    { "action": "assert", "label": "the reload reads both pets back", "actor": "gm",
+      "metric": "system_message_contains", "text": "Reloaded 2 pets", "equals": 1 },
+    { "action": "command", "actor": "gm", "command": ".petbattle journal" },
+    { "action": "wait", "ms": 300 },
+    { "action": "assert", "label": "the active team survived", "actor": "gm",
+      "metric": "system_message_contains", "text": "[Pet journal] 2 pets, active team 2", "equals": 1 },
+    { "action": "assert", "label": "the pet, its quality and its 2, 1, 2 ability picks survived", "actor": "gm",
+      "metric": "system_message_contains", "text": "299 Young Wolf L7 q2 xp 0/560 picks 212 hp ", "equals": 1 },
+    { "action": "assert", "label": "the second pet survived", "actor": "gm",
+      "metric": "system_message_contains", "text": "69 Timber Wolf L3 q1 xp 0/", "equals": 1 },
+    { "action": "assert", "label": "team 2 survived (only the journal prints this form)", "actor": "gm",
+      "metric": "system_message_contains", "text": "Team 2: 299 69 0", "equals": 1 }
+  ]
+}

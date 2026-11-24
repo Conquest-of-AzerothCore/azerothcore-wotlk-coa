@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Pet journal: bot sessions get no pet journal",
+  "contract": [
+    "Phase 3 of the pet battle port. Like upstream, playerbots never get pet features: a bot session has no",
+    "journal, so even a GM-level bot's journal command is refused, while a player's works."
+  ],
+  "timeout_ms": 60000,
+  "vanity_ownership": { "unlock_all": false },
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "gm", "race": 1, "class": 1, "level": 60, "security": 2 },
+    { "id": "bot", "race": 1, "class": 1, "level": 60, "security": 2, "bot": true }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "command", "actor": "bot", "command": ".petbattle journal", "rejected": true },
+    { "action": "command", "actor": "gm", "command": ".petbattle journal" },
+    { "action": "wait", "ms": 300 },
+    { "action": "assert", "label": "a player's journal answers", "actor": "gm",
+      "metric": "system_message_contains", "text": "[Pet journal] 0 pets, active team 1", "equals": 1 }
+  ]
+}

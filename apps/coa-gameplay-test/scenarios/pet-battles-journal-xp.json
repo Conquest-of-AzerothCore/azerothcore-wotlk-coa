@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Pet journal: XP from a win levels a pet up, carries the rest over and heals it",
+  "contract": [
+    "Phase 3 of the pet battle port, upstream's XP rule. A level-1 Timber Wolf (69) that beats a level-5 enemy gains",
+    "that level's 70 XP (coa_pet_xp); level 1 needs 1 x 50, so it reaches level 2 with 20 of the 2 x 55 = 110 XP",
+    "level 2 needs. A level-up restores full health. Granting an owned species again is refused."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "gm", "race": 1, "class": 1, "level": 60, "security": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "command", "actor": "gm", "command": ".petbattle grant 69" },
+    { "action": "command", "actor": "gm", "command": ".petbattle grant 69", "rejected": true },
+    { "action": "command", "actor": "gm", "command": ".petbattle health 69 5" },
+    { "action": "command", "actor": "gm", "command": ".petbattle xp 69 5" },
+    { "action": "wait", "ms": 300 },
+    { "action": "assert", "label": "the grant names the pet and its level", "actor": "gm",
+      "metric": "system_message_contains", "text": "Added Timber Wolf L1", "equals": 1 },
+    { "action": "assert", "label": "a level-5 win is worth 70 XP and levels the pet", "actor": "gm",
+      "metric": "system_message_contains", "text": "Timber Wolf gains 70 xp, now L2", "equals": 1 },
+    { "action": "command", "actor": "gm", "command": ".petbattle journal" },
+    { "action": "wait", "ms": 300 },
+    { "action": "assert", "label": "20 XP carries over toward level 3", "actor": "gm",
+      "metric": "system_message_contains", "text": "69 Timber Wolf L2 q1 xp 20/110 picks 111 hp ", "equals": 1 },
+    { "action": "assert", "label": "the level-up healed the pet from 5 health", "actor": "gm",
+      "metric": "system_message_contains", "text": "hp 5/", "equals": 0 }
+  ]
+}

@@ -106,9 +106,16 @@ namespace CoAPetBattles::Store
     {
         std::vector<uint32_t> const added = journal.SyncCompanions(CompanionSpecies(),
             [player](uint32_t spell) { return player->HasSpell(spell); });
-        if (!added.empty())
-            LOG_INFO("module", "Pet journal of account {}: {} companion pet(s) added", journal.Account(),
-                added.size());
+        if (added.empty())
+        {
+            Flush(journal);
+            return;
+        }
+        std::string species;
+        for (uint32_t entry : added)
+            species += (species.empty() ? "" : " ") + std::to_string(entry);
+        LOG_INFO("module", "Pet journal of account {}: {} companion pet(s) added for {}: {}", journal.Account(),
+            added.size(), player->GetName(), species);
         Flush(journal);
     }
 

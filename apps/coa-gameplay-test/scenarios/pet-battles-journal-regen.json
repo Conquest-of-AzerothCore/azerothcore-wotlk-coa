@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Pet journal: a hurt pet regenerates health over time",
+  "contract": [
+    "Phase 3 of the pet battle port, upstream's health rule: a hurt pet regains 1% of its maximum health",
+    "(at least 1) every 10 seconds, computed from the stored snapshot, so it also heals while nobody looks."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "gm", "race": 1, "class": 1, "level": 60, "security": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "command", "actor": "gm", "command": ".petbattle grant 299 25 4" },
+    { "action": "command", "actor": "gm", "command": ".petbattle health 299 10" },
+    { "action": "wait", "ms": 300 },
+    { "action": "assert", "label": "the snapshot is 10 health", "actor": "gm",
+      "metric": "system_message_contains", "text": "Young Wolf health 10/", "equals": 1 },
+    { "action": "wait", "ms": 25000 },
+    { "action": "command", "actor": "gm", "command": ".petbattle journal" },
+    { "action": "wait", "ms": 300 },
+    { "action": "assert", "label": "the journal lists the level-25 rare wolf", "actor": "gm",
+      "metric": "system_message_contains", "text": "299 Young Wolf L25 q4", "equals": 1 },
+    { "action": "assert", "label": "after two ticks it is no longer at 10 health", "actor": "gm",
+      "metric": "system_message_contains", "text": "hp 10/", "equals": 0 }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Pet journal: a companion the character learns joins the account's pet journal at level 1",
+  "contract": [
+    "Phase 3 of the pet battle port. A companion spell whose creature is a pet species (Siamese Cat, spell 10677,",
+    "species 7380) becomes a level-1, quality-1 battle pet in the account's journal as soon as the character learns",
+    "it. The journal starts empty for a new account."
+  ],
+  "timeout_ms": 60000,
+  "vanity_ownership": { "unlock_all": false },
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "gm", "race": 1, "class": 1, "level": 60, "security": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "command", "actor": "gm", "command": ".petbattle journal" },
+    { "action": "wait", "ms": 300 },
+    { "action": "assert", "label": "a new account starts with an empty journal", "actor": "gm",
+      "metric": "system_message_contains", "text": "[Pet journal] 0 pets, active team 1", "equals": 1 },
+    { "action": "command", "actor": "gm", "command": ".learn 10677" },
+    { "action": "wait", "ms": 500 },
+    { "action": "command", "actor": "gm", "command": ".petbattle journal" },
+    { "action": "wait", "ms": 300 },
+    { "action": "assert", "label": "the journal now lists one pet", "actor": "gm",
+      "metric": "system_message_contains", "text": "[Pet journal] 1 pets, active team 1", "equals": 1 },
+    { "action": "assert", "label": "Siamese Cat arrives at level 1, quality 1", "actor": "gm",
+      "metric": "system_message_contains", "text": "7380 Siamese Cat L1 q1 xp 0/50 picks 111", "equals": 1 }
+  ]
+}

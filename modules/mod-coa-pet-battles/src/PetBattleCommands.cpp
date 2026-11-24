@@ -236,7 +236,8 @@ namespace
                     break;
             }
             sPetJournals->Flush(*target->journal);
-            handler->SendSysMessage(TeamLine(*target->journal, team));
+            handler->SendSysMessage("Team " + std::to_string(team) + " set: " + std::to_string(first) + " " +
+                std::to_string(second) + " " + std::to_string(third));
             return true;
         }
 

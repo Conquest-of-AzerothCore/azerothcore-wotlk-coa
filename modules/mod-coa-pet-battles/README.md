@@ -2,8 +2,8 @@
 
 Open-world, turn-based pet battles for Conquest of Azeroth, ported from the ALE (Lua) pet battle system of
 [azerothcore-linux-server](https://github.com/catastrophic-impact/azerothcore-linux-server) (GPL-3.0, commit
-`22bb7f3`). The port is staged; this module currently holds **phase 1: the data** and **phase 2: the battle
-engine** with a GM command to try it.
+`22bb7f3`). The port is staged; this module currently holds **phase 1: the data**, **phase 2: the battle
+engine** with a GM command to try it, and **phase 3: per-account pet journals**.
 
 ## What it does now
 
@@ -37,6 +37,32 @@ Nevermore and its ability lockout, Beaver Dam's wall, Refuge, Spiny Carapace, Da
 the XE-321 Boombot bomb. Two library branches are recorded from upstream like the rest: six battles give a pet
 Cyclone (190), Void Cyclone (2102) or Photosynthesis (268, in Sunny Day weather) in place of its first ability
 (`LIB` and `WEATHER` lines), covering team-wide damage auras and Photosynthesis's weather bonus.
+
+## Pet journals (phase 3)
+
+Each **account** owns one pet journal, shared by all its characters on this realm: up to one pet per species with
+level (1–`MaxLevel`), XP, quality (1–4), an ability pick (1 or 2) per slot, health and skin, plus three teams of three
+and the active team. Playerbot sessions get no journal.
+
+- **Rules** follow upstream: a win is worth the `coa_pet_xp` XP of the enemy's level, reduced by `XpStep` (20%) per
+  level the enemy is below the pet and nothing at 5+ below; level-ups carry XP over and heal fully; a hurt pet
+  regains `RegenPercent` (1%) of its maximum health every `RegenSeconds` (10 s), also while offline; a capture
+  replaces an owned pet only with a higher quality, or the same quality and a higher level; a battle with no team
+  set up uses the three highest-level pets.
+- **Companions**: a companion spell the character knows becomes a level-1 pet of its species (at login and when it is
+  learned). Upstream's mapping covers 248 of the 252 stock companion spells; seven CoA companion spells are mapped
+  too (158 of CoA's 1,857 companion spells in all). `data/companion_review.tsv`, written by
+  `tools/pet_data/companion_census.py`, lists every companion spell with its status and a suggestion; the
+  unmapped ones need new species, and the stand-in range only fits species entries up to 49999.
+- **Storage**: `characters.coa_pet_journal`, `coa_pet_team` and `coa_pet_account`. An account's journal is loaded at
+  its first character's login and dropped after the last logout; each change is one async write that only applies
+  when its revision is newer than the stored row. A stored pet that no longer fits the data stays in the database,
+  still counts as owned and is hidden until the data fits again. Deleting the account deletes its rows.
+- **GM commands** (selected player or self): `.petbattle journal`, `grant <species> [level] [quality]`,
+  `xp <species> <enemyLevel>`, `health <species> <hp>`, `heal`, `picks <species> <a1> <a2> <a3>`,
+  `team <n> <s1> <s2> <s3>`, `team active <n>` and `reload` (reads the journal back from the database).
+- Two characters of one account online at once share one journal; the gameplay harness gives every actor its own
+  account, so that rule is covered by a unit test only.
 
 ## Trying it: `.petbattle sim`
 
