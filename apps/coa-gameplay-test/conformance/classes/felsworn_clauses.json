@@ -4524,7 +4524,7 @@
         ]
       }
     ],
-    "reason": "Held/gone reads of Inner Demon 804216 around its stated end, one pair per spender (Sargeron Smite, Ruin, Felwrath: 5000 ms at application, 6000 ms with one critical strike, present at about 5934 ms, absent at about 6059 ms; Azzinoth's Assault: 8000 ms including its own 3000 ms, 10000 ms with two critical strikes, present at 9844 ms, absent at 10154 ms; Carve and Sunder, the two other scripted spenders of AscensionFelsworn.cpp:56-60 with their impact ids 803715 and 712399, one critical hit each: 6000 ms with one critical strike, present at 5925 ms, absent at 6050 ms); the control phase (806235 not learned) is gone at both reads."
+    "reason": "Held/gone reads of Inner Demon 804216 around its stated end, one pair per spender (Sargeron Smite, Ruin, Felwrath: 5000 ms at application, 6000 ms with one critical strike, present at about 5934 ms, absent at about 6059 ms; Azzinoth's Assault: 8000 ms including its own 3000 ms, 10000 ms with two critical strikes, present at 9844 ms, absent at 10154 ms; Carve 800206 (impact 803715, a strike per weapon hand: 7000 ms with two critical strikes, present at 6925 ms, absent at 7050 ms) and Sunder 705121 (impact 712399 of the first explosion only, dummy 1 yd in front: 6000 ms with one critical strike, present at 5925 ms, absent at 6050 ms), the two other scripted spenders of AscensionFelsworn.cpp:56-60; every scripted spender is tested); the control phase (806235 not learned) is gone at both reads."
   },
   {
     "spell": 806235,

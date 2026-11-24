@@ -17630,7 +17630,7 @@
     },
     {
       "spell": 806235,
-      "name": "Hellfire Command (Inner Demon present at 5925 ms after Carve 800206)",
+      "name": "Hellfire Command (Inner Demon present at 6925 ms after Carve 800206)",
       "kind": "metric_delta",
       "variant": "duration_carve_held",
       "label_suffix": "duration_carve_held",
@@ -17651,7 +17651,7 @@
         ],
         [
           800058,
-          6,
+          2,
           "caster",
           "caster"
         ],
@@ -17667,20 +17667,20 @@
       "before_expected": 0,
       "expected": 1,
       "tolerance": 0,
-      "wait_ms": 5925,
+      "wait_ms": 6925,
       "expire_ms": 10500,
       "game_time": {
         "after": [
-          5915,
-          5950
+          6915,
+          6950
         ]
       },
-      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a SpenderImpact spell extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Carve 800206 (a 2500 ms channel, DurationIndex 66) casts 803715 (SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, a direct hit) once per weapon hand at each enemy within 8 yd when the channel ends (AscensionFelswornAuras.cpp:225-244), one hand here (no off-hand weapon on the reference character); 803715 is a SpenderImpact id (AscensionFelsworn.cpp:71-74), so a critical strike extends Inner Demon. The strike is forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 5925 ms after the cast: present (5915 to 5950 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 961 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found.",
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a SpenderImpact spell extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Carve 800206 (a 2500 ms channel, DurationIndex 66) casts 803715 (SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, a direct hit, a SpenderImpact id) once per weapon hand at each enemy within 8 yd when the channel ends (AscensionFelswornAuras.cpp:225-244); its tooltip says 'with both weapons', so two critical strikes (both forced critical) give 2000 ms. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture), with 2 Felfury, the cost of Carve; its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 7000 ms with two critical strikes. The aura is read in game time 6925 ms after the cast: present (6915 to 6950 ms): the pair of reads (present at 6925 ms, absent at 7050 ms) puts the extension between 1.9 s and 2.1 s against the stated 2000 ms, excluding a value 10% off (1800 or 2200 ms). Observation, not a claim: with 6 Felfury before the cast (4 left after Carve) a probe read Inner Demon present until about 22000 ms with the talent, 5000 x 4 + 2000 (plan fw-vb6b probe3/probe4), a Felfury-dependent refresh not explained by the tooltip. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found.",
       "void_on_cast_failure": true
     },
     {
       "spell": 806235,
-      "name": "Hellfire Command (Inner Demon absent at 6050 ms after Carve 800206)",
+      "name": "Hellfire Command (Inner Demon absent at 7050 ms after Carve 800206)",
       "kind": "metric_delta",
       "variant": "duration_carve_gone",
       "label_suffix": "duration_carve_gone",
@@ -17701,7 +17701,7 @@
         ],
         [
           800058,
-          6,
+          2,
           "caster",
           "caster"
         ],
@@ -17717,15 +17717,15 @@
       "before_expected": 0,
       "expected": 0,
       "tolerance": 0,
-      "wait_ms": 6050,
+      "wait_ms": 7050,
       "expire_ms": 10500,
       "game_time": {
         "after": [
-          6040,
-          6075
+          7040,
+          7075
         ]
       },
-      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a SpenderImpact spell extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Carve 800206 (a 2500 ms channel, DurationIndex 66) casts 803715 (SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, a direct hit) once per weapon hand at each enemy within 8 yd when the channel ends (AscensionFelswornAuras.cpp:225-244), one hand here (no off-hand weapon on the reference character); 803715 is a SpenderImpact id (AscensionFelsworn.cpp:71-74), so a critical strike extends Inner Demon. The strike is forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 6050 ms after the cast: absent (6040 to 6075 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 1086 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found.",
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a SpenderImpact spell extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Carve 800206 (a 2500 ms channel, DurationIndex 66) casts 803715 (SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, a direct hit, a SpenderImpact id) once per weapon hand at each enemy within 8 yd when the channel ends (AscensionFelswornAuras.cpp:225-244); its tooltip says 'with both weapons', so two critical strikes (both forced critical) give 2000 ms. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture), with 2 Felfury, the cost of Carve; its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 7000 ms with two critical strikes. The aura is read in game time 7050 ms after the cast: absent (7040 to 7075 ms): the pair of reads (present at 6925 ms, absent at 7050 ms) puts the extension between 1.9 s and 2.1 s against the stated 2000 ms, excluding a value 10% off (1800 or 2200 ms). Observation, not a claim: with 6 Felfury before the cast (4 left after Carve) a probe read Inner Demon present until about 22000 ms with the talent, 5000 x 4 + 2000 (plan fw-vb6b probe3/probe4), a Felfury-dependent refresh not explained by the tooltip. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found.",
       "void_on_cast_failure": true
     },
     {
@@ -17769,9 +17769,9 @@
           5950
         ]
       },
-      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a SpenderImpact spell extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Sunder 705121 schedules three explosions of 712399 (SPELL_EFFECT_SCHOOL_DAMAGE, a direct hit, a SpenderImpact id) 300 ms apart, centred 4, 11 and 18 yd in front of the caster (AscensionFelswornAbilities.cpp:429-458) with a 5 yd radius (EffectRadiusIndex 14, the 5 yd of the tooltip); the dummy is placed 3 yd in front of the caster, inside the first explosion only (distance 1 yd from its centre, 8 yd from the second), so one critical hit. The strike is forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 5925 ms after the cast: present (5915 to 5950 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 961 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found.",
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a SpenderImpact spell extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Sunder 705121 schedules three explosions of 712399 (SPELL_EFFECT_SCHOOL_DAMAGE, a direct hit, a SpenderImpact id) 300 ms apart, centred 4, 11 and 18 yd in front of the caster (AscensionFelswornAbilities.cpp:429-458) with a 5 yd radius (EffectRadiusIndex 14, the 5 yd of the tooltip); the dummy is placed 1 yd in front of the caster (dummy_distance 1), inside the first explosion only, so one critical hit (placed 3 yd in front it was struck by two explosions: Inner Demon present until about 7000 ms, plan fw-vb6b probe1). The strike is forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 5925 ms after the cast: present (5915 to 5950 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 961 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found.",
       "void_on_cast_failure": true,
-      "dummy_distance": 3
+      "dummy_distance": 1
     },
     {
       "spell": 806235,
@@ -17814,9 +17814,9 @@
           6075
         ]
       },
-      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a SpenderImpact spell extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Sunder 705121 schedules three explosions of 712399 (SPELL_EFFECT_SCHOOL_DAMAGE, a direct hit, a SpenderImpact id) 300 ms apart, centred 4, 11 and 18 yd in front of the caster (AscensionFelswornAbilities.cpp:429-458) with a 5 yd radius (EffectRadiusIndex 14, the 5 yd of the tooltip); the dummy is placed 3 yd in front of the caster, inside the first explosion only (distance 1 yd from its centre, 8 yd from the second), so one critical hit. The strike is forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 6050 ms after the cast: absent (6040 to 6075 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 1086 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found.",
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a SpenderImpact spell extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Sunder 705121 schedules three explosions of 712399 (SPELL_EFFECT_SCHOOL_DAMAGE, a direct hit, a SpenderImpact id) 300 ms apart, centred 4, 11 and 18 yd in front of the caster (AscensionFelswornAbilities.cpp:429-458) with a 5 yd radius (EffectRadiusIndex 14, the 5 yd of the tooltip); the dummy is placed 1 yd in front of the caster (dummy_distance 1), inside the first explosion only, so one critical hit (placed 3 yd in front it was struck by two explosions: Inner Demon present until about 7000 ms, plan fw-vb6b probe1). The strike is forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 6050 ms after the cast: absent (6040 to 6075 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 1086 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found.",
       "void_on_cast_failure": true,
-      "dummy_distance": 3
+      "dummy_distance": 1
     },
     {
       "spell": 806235,
