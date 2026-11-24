@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Sunsworn's auto attack mana is logged as Energize 3% 504619, threat-free, 3% of maximum mana",
+  "contract": [
+    "Sunsworn 802935 reads 'auto attacks now have a $h% chance to restore $504619s1% of your maximum mana'; 802935",
+    "EffectTriggerSpell[1] is 504619 'Energize 3%' (Effect 137, BasePoints 2 + DieSides 1 = 3, AttributesEx 1024",
+    "SPELL_ATTR1_NO_THREAT), its only DBC incoming link. Live combat logs credit 2922 player energize events to 504619",
+    "(12 logs, 2026-07-12..2026-08-23). The script gave the right amount but sent it through Mana()'s default source",
+    "504877 'Vow of Grace' (AttributesEx 0), so the log named Vow of Grace and Unit::EnergizeBySpell forwarded 0.5",
+    "threat per point to every creature the cleric threatens. Both clerics swing one Scimitar 2027 (the class file",
+    "weapon) at their own dummy at level 60; only the treatment knows Sunsworn. The 10% roll is per swing: three",
+    "procs within 300 s of 2300 ms swings (about 130 trials) fail to arrive with probability about 1.3e-4. Each event",
+    "must be 3% of maximum",
+    "mana (floored), none may be logged as 504877, the control logs none, and the treatment's threat per melee damage",
+    "must equal the control's within 0.5%; 504877's threat would add at least 1% (checked by the SETUP bound)."
+  ],
+  "timeout_ms": 420000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 },
+    { "id": "control", "race": 1, "class": 27, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "cleric", "entry": 36, "level": 60, "health": 1000000, "distance": 3 },
+    { "id": "control_dummy", "owner": "control", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "add_item", "actor": "cleric", "item": 2027 },
+    {
+      "action": "equip", "label": "Scimitar 2027 in the treatment's main hand",
+      "actor": "cleric", "item": 2027, "slot": 15
+    },
+    { "action": "add_item", "actor": "control", "item": 2027 },
+    {
+      "action": "equip", "label": "Scimitar 2027 in the control's main hand",
+      "actor": "control", "item": 2027, "slot": 15
+    },
+    { "action": "learn", "actor": "cleric", "spell": 802935 },
+    {
+      "action": "assert", "label": "SETUP: Sunsworn is active on the treatment",
+      "actor": "cleric", "metric": "aura", "spell": 802935, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the control has no Sunsworn",
+      "actor": "control", "metric": "aura", "spell": 802935, "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: the maximum mana bounds the per-event flooring below 3.5%",
+      "actor": "cleric", "metric": "max_power", "power": 0, "min": 1000
+    },
+    { "action": "attack", "actor": "cleric", "target": "dummy" },
+    { "action": "attack", "actor": "control", "target": "control_dummy" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Sunsworn's mana is logged as Energize 3% 504619",
+      "actor": "cleric", "metric": "spell_energize_count", "spell": 504619, "power": 0, "min": 3, "within_ms": 300000
+    },
+    { "action": "stop_attack", "actor": "cleric" },
+    { "action": "stop_attack", "actor": "control" },
+    { "action": "wait", "label": "Let the last swing and energize packets arrive", "ms": 1500 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: no Sunsworn mana is logged as Vow of Grace 504877",
+      "actor": "cleric", "metric": "spell_energize_count", "spell": 504877, "power": 0, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: without Sunsworn no 504619 energize is logged",
+      "actor": "control", "metric": "spell_energize_count", "spell": 504619, "power": 0, "equals": 0
+    },
+    {
+      "action": "snapshot", "actor": "cleric", "metric": "spell_energize_count", "spell": 504619, "power": 0,
+      "save_as": "sunsworn_events"
+    },
+    {
+      "action": "snapshot", "actor": "cleric", "metric": "spell_energize_total", "spell": 504619, "power": 0,
+      "ratio_to": "sunsworn_events", "save_as": "sunsworn_mana_per_event"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: each event restores 3% of maximum mana, floored",
+      "actor": "cleric", "metric": "max_power", "power": 0, "ratio_to": "sunsworn_mana_per_event",
+      "min": 33.33, "max": 34.49
+    },
+    {
+      "action": "snapshot", "actor": "control_dummy", "metric": "threat", "target": "control",
+      "save_as": "control_threat"
+    },
+    {
+      "action": "snapshot", "actor": "control", "metric": "melee_damage_total", "ratio_to": "control_threat",
+      "save_as": "control_damage_per_threat"
+    },
+    {
+      "action": "snapshot", "label": "Treatment melee damage at the control's threat rate",
+      "actor": "cleric", "metric": "melee_damage_total", "ratio_to": "control_damage_per_threat",
+      "save_as": "expected_threat"
+    },
+    {
+      "action": "assert", "label": "SETUP: 504877's 0.5 threat per point would raise the threat ratio by at least 1%",
+      "actor": "cleric", "metric": "spell_energize_total", "spell": 504619, "power": 0, "ratio_to": "expected_threat",
+      "min": 0.02
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Sunsworn's mana adds no threat (threat per damage = control's)",
+      "actor": "dummy", "metric": "threat", "target": "cleric", "ratio_to": "expected_threat",
+      "min": 0.995, "max": 1.005
+    }
+  ]
+}

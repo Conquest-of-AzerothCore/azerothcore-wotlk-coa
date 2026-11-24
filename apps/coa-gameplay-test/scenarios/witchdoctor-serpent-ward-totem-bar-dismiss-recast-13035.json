@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "name": "Serpent Ward is announced on the totem bar after a bar dismissal and a relog (#13035)",
+  "contract": [
+    "#13035 reports that the Witch Doctor's totem bar shows Serpent Ward 500960 and its timer only for the first",
+    "ward: after the ward is dismissed from the bar, later wards of the same spell no longer appear there, even",
+    "after a relog. SMSG_TOTEM_CREATED (opcode 1043) carries the zero-based bar slot (byte 0), the summon GUID",
+    "(bytes 1 to 8), the duration in milliseconds (byte 9) and the spell (byte 13). This scenario records what",
+    "the server sends for a ward summoned after a bar dismissal (CMSG_TOTEM_DESTROYED, opcode 1044) and after a",
+    "relog: each new ward must be announced again for slot 0 with spell 500960 and a non-zero duration. Native",
+    "totems send this packet from Totem::InitStats, before the summon is added to the world, because the client",
+    "links a bar slot only to a unit it has not created yet; the class summon script sent it after the ward was",
+    "already visible, so a fresh character never saw the bar. The ward is now announced while it is added to the",
+    "world, before its creation reaches the client. The packet order relative to SMSG_UPDATE_OBJECT and whether",
+    "the client draws the bar are not observed."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0},
+  "players": [
+    {"id": "doctor", "race": 2, "class": 13, "level": 21, "allow_regeneration": false}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000},
+    {"action": "learn", "actor": "doctor", "spell": 500960},
+    {"action": "cast", "actor": "doctor", "spell": 500960},
+    {
+      "action": "assert", "label": "SETUP: the first ward is out", "actor": "doctor", "metric": "owned_creature_count",
+      "entry": 50105, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the first ward is announced on the totem bar", "actor": "doctor",
+      "metric": "server_packets", "opcode": 1043, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "client_packet", "label": "#13035: right-click the Fire totem bar bubble", "actor": "doctor",
+      "opcode": 1044, "fields": [{"u8": 0}], "early": false, "consumed": true
+    },
+    {
+      "action": "assert", "label": "SETUP: dismissing the bar slot removes the ward", "actor": "doctor",
+      "metric": "owned_creature_count", "entry": 50105, "equals": 0, "within_ms": 2000
+    },
+    {"action": "wait", "label": "Let the global cooldown expire", "ms": 1600},
+    {"action": "reset_cooldown", "actor": "doctor", "spell": 500960},
+    {"action": "cast", "label": "Summon a new ward after the dismissal", "actor": "doctor", "spell": 500960},
+    {
+      "action": "assert", "label": "The new ward is out", "actor": "doctor", "metric": "owned_creature_count",
+      "entry": 50105, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "#13035: the ward summoned after a dismissal is announced on the totem bar",
+      "actor": "doctor", "metric": "server_packets", "opcode": 1043, "equals": 2, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "#13035: the announcement uses bar slot 0", "actor": "doctor",
+      "metric": "server_packet_u8", "opcode": 1043, "index": 0, "equals": 0
+    },
+    {
+      "action": "assert", "label": "#13035: the announcement carries a duration", "actor": "doctor",
+      "metric": "server_packet_u32", "opcode": 1043, "offset": 9, "min": 1000
+    },
+    {
+      "action": "assert", "label": "#13035: the announcement names Serpent Ward 500960", "actor": "doctor",
+      "metric": "server_packet_u32", "opcode": 1043, "offset": 13, "equals": 500960
+    },
+    {
+      "action": "client_packet", "label": "Dismiss the second ward from the bar", "actor": "doctor", "opcode": 1044,
+      "fields": [{"u8": 0}], "early": false, "consumed": true
+    },
+    {
+      "action": "assert", "label": "SETUP: the second ward is gone", "actor": "doctor",
+      "metric": "owned_creature_count", "entry": 50105, "equals": 0, "within_ms": 2000
+    },
+    {"action": "relog", "actor": "doctor"},
+    {"action": "wait", "label": "Let the reloaded character settle", "ms": 2000},
+    {"action": "reset_cooldown", "actor": "doctor", "spell": 500960},
+    {
+      "action": "snapshot", "actor": "doctor", "metric": "server_packets", "opcode": 1043,
+      "save_as": "bar_before_relog_cast"
+    },
+    {"action": "cast", "label": "Summon a ward after the relog", "actor": "doctor", "spell": 500960},
+    {
+      "action": "assert", "label": "The ward summoned after the relog is out", "actor": "doctor",
+      "metric": "owned_creature_count", "entry": 50105, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "#13035: the ward summoned after the relog is announced on the totem bar",
+      "actor": "doctor", "metric": "server_packets", "opcode": 1043, "relative_to": "bar_before_relog_cast",
+      "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "#13035: the post-relog announcement names Serpent Ward 500960", "actor": "doctor",
+      "metric": "server_packet_u32", "opcode": 1043, "offset": 13, "equals": 500960
+    },
+    {
+      "action": "assert", "label": "#13035: the post-relog announcement carries a duration", "actor": "doctor",
+      "metric": "server_packet_u32", "opcode": 1043, "offset": 9, "min": 1000
+    }
+  ]
+}

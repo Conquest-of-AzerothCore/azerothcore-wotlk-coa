@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "name": "Road to De Other Side: the venom statues on the stairs breathe to the middle of the stairs for 15% of max health",
+  "contract": "Issues #11375 and #10285: the venom statues along the stairs to the Chimeric Embryo (162975, placed in pairs facing each other about 17 to 21 yd apart) hit nobody in the middle of the stairs, and only for about 130 per tick at level 60. On Ascension they dealt about a third of a player's health. Expected (project owner decision, checked in game): the traps sit in the statue mouths, the wall check looks from 5.5 yd in front of the mouth so the statue itself does not block it, the breath reaches 11 yd ahead of the mouth, which covers the middle of every stair flight and overlaps the facing statue's breath there, 3 yd to either side, and each 0.5 s tick takes 15% of the target's maximum health; the fel flame visual stays, the breath keeps ticking for 1.5 s after the last flame is spat so the damage lasts as long as the fire is visible (1.5 s is an estimate of how long the last flame stays visible), and each statue up the flight starts 1 s after the previous one has finished.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the statues are spawned",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "label": "p stands in the middle of the first stair flight, 9 yd in front of statue 9370601",
+      "actor": "p",
+      "map": 937,
+      "x": 423.4,
+      "y": 50.78,
+      "z": 269.15,
+      "ignore_access": true
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: p is in Road to De Other Side",
+      "actor": "p",
+      "metric": "map_id",
+      "equals": 937,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "assert",
+      "label": "within one breathing cycle the breath reaches the middle of the stairs and a tick takes 15% of max health",
+      "actor": "p",
+      "metric": "health",
+      "min": 1,
+      "max": 86500,
+      "within_ms": 15000
+    },
+    {
+      "action": "wait",
+      "label": "let that breath end (a breath burns at most 3 s)",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "assert",
+      "label": "the next breath of the statue starts",
+      "actor": "p",
+      "metric": "health",
+      "max": 9999999,
+      "within_ms": 20000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "health",
+      "save_as": "after_first_tick"
+    },
+    {
+      "action": "wait",
+      "label": "the rest of that breath, 1.5 s of flames and 1.5 s of fading fire",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the breath keeps ticking while the fire fades, five more ticks of 15% (only two more before)",
+      "actor": "p",
+      "metric": "health",
+      "relative_to": "after_first_tick",
+      "min": -8000000,
+      "max": -6000000
+    },
+    {
+      "action": "teleport",
+      "label": "p steps 4.5 yd aside, out of the breath",
+      "actor": "p",
+      "map": 937,
+      "x": 423.49,
+      "y": 55.71,
+      "z": 269.15,
+      "ignore_access": true
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "wait",
+      "label": "a full breathing cycle passes",
+      "ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "beside the breath no tick lands (other damage nearby stays far below 15%)",
+      "actor": "p",
+      "metric": "health",
+      "min": 90000
+    }
+  ]
+}

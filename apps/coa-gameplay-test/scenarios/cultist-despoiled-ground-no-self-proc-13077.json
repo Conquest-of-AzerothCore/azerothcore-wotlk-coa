@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "name": "Despoiled Ground's ticks do not create more Despoiled Ground (#13077)",
+  "contract": [
+    "Presence of Y'Shaarj 803035 (Cultist) tooltips: giving damage dealt a $h% (20%) chance to curse the ground",
+    "for $807632d. aura_ascension_cultist_event implements the curse as Despoiled Ground 805180, a persistent",
+    "area aura that deals Shadow damage every 3 sec. Its proc check accepted any damage the Cultist dealt except",
+    "Thoughtseize, so each Despoiled Ground tick rolled to curse more ground and the patches fed themselves;",
+    "#13077 reports that it procs off itself. Expected (ruled by the PR author from Ascension experience):",
+    "Despoiled Ground's own ticks never create another patch. One patch is cast directly over twelve stationary",
+    "enemies with Presence of Y'Shaarj active and no other damage source, so in 11 sec its ticks give about 36",
+    "rolls at 20%, and before the fix a second patch was near certain (0.8^36 is about 0.03%). Exactly one",
+    "Despoiled Ground may have been cast (spell_cast_count counts triggered casts too; the dynamic_object metric",
+    "only reports whether one exists)."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "cultist", "race": 1, "class": 25, "level": 80}
+  ],
+  "creatures": [
+    {
+      "id": "mob1", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3, "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "mob2", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3, "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "mob3", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3, "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "mob4", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3, "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "mob5", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3, "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "mob6", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3, "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "mob7", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3, "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "mob8", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3, "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "mob9", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3, "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "mob10", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3, "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "mob11", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3, "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "mob12", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3, "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {
+      "action": "set_health", "label": "Keep the Cultist alive", "actor": "cultist", "value": 1000000,
+      "maximum": 1000000
+    },
+    {"action": "learn", "actor": "cultist", "spell": 803035},
+    {"action": "learn", "actor": "cultist", "spell": 805180},
+    {"action": "cast", "actor": "cultist", "spell": 803035},
+    {
+      "action": "assert", "label": "SETUP: Presence of Y'Shaarj is active", "actor": "cultist", "metric": "aura",
+      "spell": 803035, "equals": 1, "within_ms": 2000
+    },
+    {"action": "wait", "label": "Let Presence's global cooldown expire", "ms": 1700},
+    {
+      "action": "assert", "label": "SETUP: no cursed ground exists yet", "actor": "cultist",
+      "metric": "dynamic_object", "spell": 805180, "equals": 0
+    },
+    {
+      "action": "cast", "label": "Curse the ground under the enemies once", "actor": "cultist", "spell": 805180,
+      "destination": {"x": -8914.41, "y": -115.853, "z": 82.3711}
+    },
+    {
+      "action": "assert", "label": "SETUP: one patch of cursed ground", "actor": "cultist", "metric": "dynamic_object",
+      "spell": 805180, "equals": 1, "within_ms": 2000
+    },
+    {"action": "wait", "label": "Let the patch tick about three times on every enemy", "ms": 11000},
+    {
+      "action": "assert", "label": "SETUP: the patch dealt its ticks", "actor": "cultist",
+      "metric": "spell_damage_count", "spell": 805180, "periodic": true, "min": 12
+    },
+    {
+      "action": "assert", "label": "#13077: Despoiled Ground's own ticks never curse more ground (only the one cast)",
+      "actor": "cultist", "metric": "spell_cast_count", "spell": 805180, "equals": 1
+    }
+  ]
+}

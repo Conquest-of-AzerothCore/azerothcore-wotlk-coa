@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "name": "Sandfury Ritual Mace pickup uses its own model (#12860)",
+  "contract": "#12860 reported the Worldforged Sandfury Ritual Mace pickup with the wrong model. Its spot (guid 6970030, map 1) spawned placeholder entry 9900029 (Shiny Hammer) instead of the realm template 515840. Expected: the Sandfury Ritual Mace pickup stands there, the placeholder does not, and it opens with loot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -7208.61,
+    "y": -2967.19,
+    "z": 9.295,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the Sandfury Ritual Mace pickup is at the spot",
+      "metric": "nearby_gameobject_count",
+      "entry": 515840,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the placeholder pickup is gone",
+      "metric": "nearby_gameobject_count",
+      "entry": 9900029,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 515840
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is within reach and opens",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "its loot is shown",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

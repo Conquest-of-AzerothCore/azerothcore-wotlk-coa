@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Annihilan Rituals refunds 1 Felfury on a full Carve (#11846, #13223)",
+  "contract": [
+    "Carve 800206: 'Consumes 2 Felfury'. Annihilan Rituals 520831: 'Fully channeling Carve now refunds 1 Felfury.'",
+    "Both players start at 4 Felfury (800058) and channel Carve to its end with no enemy in front of them, so no hit adds Felfury.",
+    "Control: without the talent the channel leaves 2, which proves the harness sees the consumption. With the talent it must leave 3, not 4."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 14, "level": 80 },
+    { "id": "rituals", "race": 1, "class": 14, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "control", "spell": 800206 },
+    { "action": "learn", "actor": "rituals", "spell": 800206 },
+    { "action": "learn", "actor": "rituals", "spell": 520831 },
+    { "action": "set_power", "actor": "control", "power": 3, "value": 100 },
+    { "action": "set_power", "actor": "rituals", "power": 3, "value": 100 },
+    { "action": "set_aura", "actor": "control", "spell": 800058, "stacks": 4 },
+    { "action": "set_aura", "actor": "rituals", "spell": 800058, "stacks": 4 },
+    { "action": "cast", "label": "Control: channel Carve", "actor": "control", "spell": 800206 },
+    { "action": "cast", "label": "Annihilan Rituals: channel Carve", "actor": "rituals", "spell": 800206 },
+    { "action": "assert", "actor": "control", "metric": "cast_failure", "spell": 800206, "equals": 0 },
+    { "action": "assert", "actor": "rituals", "metric": "cast_failure", "spell": 800206, "equals": 0 },
+    { "action": "wait", "label": "Let both channels run to their end", "ms": 4000 },
+    { "action": "assert", "label": "Control: the channel has ended", "actor": "control", "metric": "aura_stacks",
+      "spell": 800206, "equals": 0 },
+    { "action": "assert", "label": "Annihilan Rituals: the channel has ended", "actor": "rituals",
+      "metric": "aura_stacks", "spell": 800206, "equals": 0 },
+    { "action": "assert", "label": "Control: Carve consumes its two Felfury", "actor": "control",
+      "metric": "aura_stacks", "spell": 800058, "equals": 2 },
+    { "action": "assert", "label": "Annihilan Rituals: a full channel refunds one Felfury", "actor": "rituals",
+      "metric": "aura_stacks", "spell": 800058, "equals": 3 }
+  ]
+}

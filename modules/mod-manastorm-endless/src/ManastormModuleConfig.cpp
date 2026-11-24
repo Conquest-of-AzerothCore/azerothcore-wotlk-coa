@@ -21,7 +21,6 @@ namespace ManastormModuleConfig
         bool coaFirstClearEnabled = true;
         bool coaRepeatEnabled = true;
         bool coaFirstClearResetsWithWindow = true;
-        uint32 coaTokenCap = 1000;
         uint32 coaTokenWindowSeconds = 86400;
         ManastormClientMode clientMode = ManastormClientMode::Ascension;
         bool followReleaseStage = false;
@@ -42,7 +41,6 @@ namespace ManastormModuleConfig
         coaRepeatEnabled = sConfigMgr->GetOption<bool>("Manastorm.CoALootMode.Repeat.Enabled", true);
         coaFirstClearResetsWithWindow =
             sConfigMgr->GetOption<bool>("Manastorm.CoALootMode.FirstClear.ResetWithWindow", true);
-        coaTokenCap = std::clamp(sConfigMgr->GetOption<int32>("Manastorm.CoALootMode.TokenCap", 1000), 0, 1000000);
         coaTokenWindowSeconds = uint32(std::clamp(
             sConfigMgr->GetOption<int32>("Manastorm.CoALootMode.WindowHours", 24), 1, 168)) * 3600;
         weeklyCacheLockoutEnabled = sConfigMgr->GetOption<bool>("Manastorm.WeeklyCacheLockout.Enabled", true);
@@ -87,7 +85,6 @@ namespace ManastormModuleConfig
     bool CoAFirstClearEnabled() { return coaFirstClearEnabled; }
     bool CoARepeatEnabled() { return coaRepeatEnabled; }
     bool CoAFirstClearResetsWithWindow() { return coaFirstClearResetsWithWindow; }
-    uint32 CoATokenCap() { return coaTokenCap; }
     uint32 CoATokenWindowSeconds() { return coaTokenWindowSeconds; }
 
     uint32 WeeklyCacheLockoutLimit()

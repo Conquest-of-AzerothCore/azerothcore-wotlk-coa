@@ -24,7 +24,7 @@ def main():
             flags = ['-std=c++20', '-I' + str(include), str(HERE / 'harness.cpp'), '-o', str(binary)]
         subprocess.run([compiler, *flags], cwd=output, check=True, timeout=60)
         subprocess.run([str(binary)], cwd=output, check=True, timeout=10)
-    print('PASS: actual policy expiry, clock rollback, allowance, partial awards and overflow controls')
+    print('PASS: actual policy window expiry, clock rollback and client cache item')
 
 
 if __name__ == '__main__':

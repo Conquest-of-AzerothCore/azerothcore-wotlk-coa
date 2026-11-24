@@ -1811,6 +1811,7 @@ public:
     // Transient action replacements; never written to character spell ownership.
     void SetTemporarySpellReplacement(uint32 original, uint32 replacement, bool redirect = true);
     [[nodiscard]] uint32 GetTemporarySpellReplacement(uint32 original) const;
+    [[nodiscard]] uint32 GetClientShownSupersededSpell(uint32 superseded) const;
     // Replacement the server casts in place of a client request. Aliases published with `redirect = false`
     // keep the client-side swap but leave a request for the original spell alone (#6972).
     [[nodiscard]] uint32 GetCastReplacement(uint32 original) const;
@@ -1837,6 +1838,8 @@ public:
     void RestoreSpellMods(Spell* spell, uint32 ownerAuraId = 0, Aura* aura = nullptr);
     void RestoreAllSpellMods(uint32 ownerAuraId = 0, Aura* aura = nullptr);
     static void ApplyModToSpell(SpellModifier* mod, Spell* spell);
+    // Ascension's school-change modifier: the school of the aura carrying it, or SPELL_SCHOOL_MASK_NONE
+    SpellSchoolMask GetAscensionSchoolOverride(SpellInfo const* spellInfo, Spell* spell);
     [[nodiscard]] static bool HasSpellModApplied(SpellModifier* mod, Spell* spell);
     void SetSpellModTakingSpell(Spell* spell, bool apply);
 

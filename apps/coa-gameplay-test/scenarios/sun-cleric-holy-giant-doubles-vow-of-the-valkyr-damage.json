@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Holy Giant doubles Vow of the Valkyr's auto attack damage bonus, from 10% to 20%",
+  "contract": [
+    "Holy Giant 681337 reads 'Doubles the effectiveness of Vow of the Valkyr and Vow of Light.' Its effect 0 is",
+    "SPELL_AURA_ADD_PCT_MODIFIER, SPELLMOD_ALL_EFFECTS, BasePoints 99 (+100%), on class mask word A 2 / word C 0x20100000;",
+    "Vow of the Valkyr 807749 carries SpellFamilyFlags word A 3. 807749 effect 1 (BasePoints 9 + 1 = 10) is the auto",
+    "attack damage bonus that the Sun Cleric melee hook adds as Amount(807749, 1, caster) percent; without the caster",
+    "argument SpellEffectInfo::CalcValue skips the spell modifiers and the bonus stayed 10% with Holy Giant (batch 5a,",
+    "ratio 1.0021 and 0.9999 against 1.0909). The script_melee_damage_dealt metric runs the melee damage hooks on a",
+    "1000 base for each level-60 Sun Cleric against its own dummy. Control: Holy Giant without the Vow leaves the base",
+    "unchanged (ratio 1.0). Discriminating: with the Vow, learning Holy Giant raises 1100 to 1200, ratio 1.20 / 1.10 =",
+    "1.0909 (Sun Cleric ADR 0011)."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 60 },
+    { "id": "giant", "race": 1, "class": 27, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "control_dummy", "owner": "control", "entry": 36, "level": 60, "health": 500000, "distance": 5, "stationary": true },
+    { "id": "giant_dummy", "owner": "giant", "entry": 36, "level": 60, "health": 500000, "distance": 5, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 5000 },
+    { "action": "assert", "label": "CONTROL: the control caster has no Vow of the Valkyr", "actor": "control", "metric": "aura", "spell": 807749, "equals": 0 },
+    { "action": "snapshot", "actor": "control", "metric": "script_melee_damage_dealt", "target": "control_dummy", "save_as": "control_before" },
+    { "action": "assert", "label": "SETUP: without Vow or Holy Giant the hooks keep the base", "actor": "control", "metric": "script_melee_damage_dealt", "target": "control_dummy", "equals": 1000 },
+    { "action": "learn", "actor": "control", "spell": 681337 },
+    { "action": "assert", "label": "SETUP: the control caster has Holy Giant", "actor": "control", "metric": "aura", "spell": 681337, "equals": 1, "within_ms": 2000 },
+    {
+      "action": "assert", "label": "CONTROL: Holy Giant without Vow of the Valkyr leaves auto attack damage unchanged",
+      "actor": "control", "metric": "script_melee_damage_dealt", "target": "control_dummy",
+      "ratio_to": "control_before", "equals": 1
+    },
+    { "action": "set_aura", "actor": "giant", "spell": 807749, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: Vow of the Valkyr is active", "actor": "giant", "metric": "aura", "spell": 807749, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: the caster has no Holy Giant before the learn", "actor": "giant", "metric": "aura", "spell": 681337, "equals": 0 },
+    { "action": "snapshot", "actor": "giant", "metric": "script_melee_damage_dealt", "target": "giant_dummy", "save_as": "vow_before" },
+    { "action": "assert", "label": "SETUP: Vow of the Valkyr alone adds 10%", "actor": "giant", "metric": "script_melee_damage_dealt", "target": "giant_dummy", "equals": 1100 },
+    { "action": "learn", "actor": "giant", "spell": 681337 },
+    { "action": "assert", "label": "SETUP: Holy Giant is active", "actor": "giant", "metric": "aura", "spell": 681337, "equals": 1, "within_ms": 2000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Holy Giant doubles Vow of the Valkyr's bonus, ratio 1.20 / 1.10",
+      "actor": "giant", "metric": "script_melee_damage_dealt", "target": "giant_dummy",
+      "ratio_to": "vow_before", "min": 1.0905, "max": 1.0913
+    },
+    { "action": "assert", "label": "DISCRIMINATING: Vow of the Valkyr with Holy Giant adds 20%", "actor": "giant", "metric": "script_melee_damage_dealt", "target": "giant_dummy", "equals": 1200 }
+  ]
+}

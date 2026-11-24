@@ -1,0 +1,257 @@
+{
+  "schema": 1,
+  "name": "Sakari's cure continues in the Barrens with The Last Piece and Reversion (#13170)",
+  "contract": "The player first completes the Durotar chain 254008-254013 as a fixture. The chain stopped at Avianna's Rose 254013: its RewardNextQuest was 0, and quests 254014/254015, Barrens Sakari 254014, Queen Erethina 254016 and the Ouru'gai Crystal 254002 did not exist. rev_20261122_72 restores them from the CoA captures. After 254013 is rewarded, Orgrimmar Sakari offers The Last Piece; the crystal yields Ouru'Gai Crystal 254008 to a player on the quest, Barrens Sakari takes it in and offers Reversion, and accepting Reversion gives the Reversion process observed credit (254016) through Sakari's SmartAI. Before the fix the 254014 accept fails, so every later assertion fails too. The spawns of Sakari, Erethina and the crystal stand on the ground.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 1,
+    "x": 918.5,
+    "y": -3706.5,
+    "z": 27.3,
+    "o": 0.6
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 12
+    }
+  ],
+  "creatures": [
+    {
+      "id": "orgrimmar_sakari",
+      "owner": "p",
+      "entry": 254013,
+      "distance": 3,
+      "faction": 35,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "label": "Barrens Sakari stands on the ground",
+      "action": "assert",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9012570,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "label": "Queen Erethina stands on the ground",
+      "action": "assert",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 9012571,
+      "spawn_type": "creature",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "label": "the Ouru'gai Crystal rests on the ground",
+      "action": "assert",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 7917228,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 254008
+    },
+    {
+      "action": "reward_quest",
+      "actor": "p",
+      "quest": 254008
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 254009
+    },
+    {
+      "action": "reward_quest",
+      "actor": "p",
+      "quest": 254009
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 254010
+    },
+    {
+      "action": "reward_quest",
+      "actor": "p",
+      "quest": 254010
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 254011
+    },
+    {
+      "action": "reward_quest",
+      "actor": "p",
+      "quest": 254011
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 254012
+    },
+    {
+      "action": "reward_quest",
+      "actor": "p",
+      "quest": 254012
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 254013
+    },
+    {
+      "action": "reward_quest",
+      "actor": "p",
+      "quest": 254013
+    },
+    {
+      "label": "DISCRIMINATING: Orgrimmar Sakari offers The Last Piece after Avianna's Rose",
+      "action": "quest_accept",
+      "actor": "p",
+      "quest": 254014,
+      "entry": 254013
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 254014,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "p",
+      "entry": 254002
+    },
+    {
+      "action": "wait",
+      "label": "let the crystal become ready",
+      "ms": 1000
+    },
+    {
+      "action": "loot_gameobject",
+      "actor": "p",
+      "entry": 254002
+    },
+    {
+      "action": "loot_slot",
+      "actor": "p",
+      "item": 254008
+    },
+    {
+      "action": "close_loot",
+      "actor": "p"
+    },
+    {
+      "label": "the crystal yields the Ouru'Gai Crystal",
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 254008,
+      "equals": 1
+    },
+    {
+      "label": "The Last Piece is complete",
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 254014,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "join the world phase of the Barrens Sakari spawn",
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "label": "Barrens Sakari takes The Last Piece in",
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 254014,
+      "entry": 254014
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 254014,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "Barrens Sakari offers Reversion",
+      "action": "quest_accept",
+      "actor": "p",
+      "quest": 254015,
+      "entry": 254014
+    },
+    {
+      "label": "DISCRIMINATING: starting the cure gives the Reversion process observed credit",
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 254015,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 254015,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "Barrens Sakari takes Reversion in",
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 254015,
+      "entry": 254014
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 254015,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "Reversion grants the Wind-Blessed Cloak",
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 254010,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

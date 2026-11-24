@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: buying Flames of Xoroth rank 2 keeps one Warbringer row in the client spellbook (#12823)",
+  "contract": [
+    "Warbringer 570727 (War specialization 18) transforms Flames of Xoroth: the server shows Flames rank 1 801059",
+    "to the client as Warbringer rank 1 802581 (SMSG_SUPERCEDED_SPELL), so the client spellbook holds 802581 and",
+    "not 801059. Warbringer rank 2 802582 is level 18, so a level-16 knight that buys Flames rank 2 802411",
+    "(trainer 900017, Spi'ro 50278, level 16, requires 801059) still sees Warbringer rank 1. #12823 reports a second",
+    "Warbringer row instead: the rank supersede told the client 801059 -> 802411, which the client does not hold,",
+    "so it appended 802411, and the replacement 802411 -> 802581 then appended a second 802581. After the",
+    "purchase the client must hold exactly one 802581 row and neither Flames rank."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "k",
+      "race": 1,
+      "class": 17,
+      "level": 16
+    }
+  ],
+  "creatures": [
+    {
+      "id": "trainer",
+      "owner": "k",
+      "entry": 50278,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "money", "actor": "k", "copper": 100000, "label": "fixture: enough copper for the lesson" },
+    { "action": "learn", "actor": "k", "spell": 801059 },
+    { "action": "specialization", "actor": "k", "id": 18 },
+    { "action": "assert", "actor": "k", "metric": "aura", "spell": 570727, "equals": 1, "within_ms": 2000, "label": "SETUP: the War specialization grants Warbringer" },
+    { "action": "assert", "actor": "k", "metric": "knows_spell", "spell": 802581, "equals": 1, "within_ms": 3000, "label": "SETUP: Warbringer rank 1 is known" },
+    { "action": "assert", "actor": "k", "metric": "temporary_spell_replacement", "spell": 801059, "equals": 802581, "within_ms": 3000, "label": "SETUP: Flames rank 1 is shown as Warbringer rank 1" },
+    { "action": "assert", "actor": "k", "metric": "client_spellbook_copies", "spell": 802581, "equals": 1, "label": "SETUP: the client holds one Warbringer row" },
+    { "action": "assert", "actor": "k", "metric": "client_knows_spell", "spell": 801059, "equals": 0, "label": "SETUP: the client does not hold Flames rank 1" },
+
+    { "action": "gossip_hello", "actor": "k", "target": "trainer", "label": "right-click the Knight of Xoroth trainer" },
+    { "action": "gossip_select", "actor": "k", "option": 0, "label": "open the class training window" },
+    { "action": "trainer_buy", "actor": "k", "target": "trainer", "spell": 802411, "label": "buy Flames of Xoroth rank 2" },
+    { "action": "assert", "actor": "k", "metric": "spellbook_buy_succeeded", "spell": 802411, "equals": 1, "label": "Flames rank 2 was granted" },
+    { "action": "assert", "actor": "k", "metric": "knows_spell", "spell": 802411, "equals": 1, "label": "Flames rank 2 was learned" },
+    { "action": "assert", "actor": "k", "metric": "knows_spell", "spell": 802582, "equals": 0, "label": "Warbringer rank 2 is not granted below level 18" },
+    { "action": "assert", "actor": "k", "metric": "temporary_spell_replacement", "spell": 802411, "equals": 802581, "within_ms": 3000, "label": "Flames rank 2 is shown as Warbringer rank 1" },
+    { "action": "assert", "actor": "k", "metric": "client_spellbook_copies", "spell": 802581, "equals": 1, "label": "CONTRACT: the client still holds exactly one Warbringer row" },
+    { "action": "assert", "actor": "k", "metric": "client_knows_spell", "spell": 802411, "equals": 0, "label": "CONTRACT: the client does not hold Flames rank 2" },
+    { "action": "assert", "actor": "k", "metric": "client_knows_spell", "spell": 801059, "equals": 0, "label": "CONTRACT: the client does not hold Flames rank 1" }
+  ]
+}

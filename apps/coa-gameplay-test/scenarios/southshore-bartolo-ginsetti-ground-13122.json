@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "Southshore: Bartolo Ginsetti stands on the ground, not under it (#13122)",
+  "contract": "#13122: Bartolo Ginsetti (2438, guid 15937) stood about 2.1 yd under Southshore. rev_20261027_84_coa_hillsbrad_restore.sql set his position_z to 15.5; the stock base row, the SUB creature_spawn (2026-10-04) and Descension all keep 17.7243, and the client ADT terrain and the reporter both read 17.64 there. The fix restores 17.7243, so the spawn must sit at the stock point and within half a yard of the server's ground.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "auditor",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bartolo Ginsetti stands at the fixed spot",
+      "actor": "auditor",
+      "metric": "spawn_distance",
+      "guid": 15937,
+      "spawn_type": "creature",
+      "x": -784.662,
+      "y": -515.103,
+      "z": 17.7243,
+      "max": 0.1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bartolo Ginsetti stands on the ground",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 15937,
+      "spawn_type": "creature",
+      "min": -0.3,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Bartolo Ginsetti is not under water",
+      "actor": "auditor",
+      "metric": "spawn_submerged",
+      "guid": 15937,
+      "spawn_type": "creature",
+      "equals": 0
+    }
+  ]
+}

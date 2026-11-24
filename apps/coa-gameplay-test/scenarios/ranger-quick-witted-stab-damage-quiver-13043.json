@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "name": "Quick-Witted's stab scales with attack power and applies quiver effects (#13043)",
+  "contract": [
+    "Quick-Witted 704311 (Ranger, Brigand) tooltips: avoiding an attack makes you stab an enemy with an arrow",
+    "from your quiver, dealing ${$704314m2+$704314ppl2+$AP*1} Physical damage and reducing their attack speed by",
+    "$704314s1%. Its spell_proc row fires 704314 on a dodged or parried melee hit taken. 704314 Effect1 is",
+    "SCHOOL_DAMAGE with EffectBasePoints 0, DieSides 1 and no RealPointsPerLevel, and it has no spell_bonus_data,",
+    "so #13043 reports that the stab dealt 1 damage. It is also a triggered spell, which the Ranger quiver hit",
+    "handler skipped, so the quiver's on-hit effect never followed. Expected: the stab adds 100% of melee attack",
+    "power to its 1 base damage and an active Poison Quiver (800260) applies its poison (500104) to the stabbed",
+    "enemy. Evasion (5277, +50% dodge) and 40 seconds of melee from a hostile mob make at least one avoided",
+    "attack near certain (about 20 swings at over 50% dodge). The ranger never attacks, so the poison can only",
+    "come from the stab. The ranger carries a 2000 attack power fixture, and the check reads one non-critical",
+    "stab: 1 + 100% of attack power before armor, so it must land between 50% and 101% of the ranger's attack",
+    "power. A missing coefficient (about 0.04%) or a doubled one (about 200% before armor) fails."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "ranger", "race": 1, "class": 21, "level": 80, "allow_regeneration": false, "attack_power": 2000}
+  ],
+  "creatures": [
+    {"id": "mob", "owner": "ranger", "entry": 36, "level": 80, "health": 1000000, "distance": 3, "reaction": 2}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000},
+    {
+      "action": "set_health", "label": "Keep the ranger alive while the mob swings", "actor": "ranger",
+      "value": 1000000, "maximum": 1000000
+    },
+    {"action": "learn", "actor": "ranger", "spell": 704311},
+    {
+      "action": "set_aura", "label": "SETUP: Poison Quiver is the active quiver", "actor": "ranger", "spell": 800260,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura", "label": "SETUP: Evasion makes avoided attacks frequent", "actor": "ranger", "spell": 5277,
+      "stacks": 1
+    },
+    {"action": "snapshot", "actor": "ranger", "metric": "attack_power", "save_as": "ranger_ap"},
+    {
+      "action": "assert", "label": "SETUP: the mob is attacking the ranger", "actor": "ranger",
+      "metric": "melee_attacks_taken", "target": "mob", "min": 1, "within_ms": 15000
+    },
+    {
+      "action": "assert", "label": "SETUP: Quick-Witted is active", "actor": "ranger", "metric": "aura",
+      "spell": 704311, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: Evasion raises the ranger's dodge chance", "actor": "ranger",
+      "metric": "dodge_chance", "min": 40
+    },
+    {
+      "action": "assert", "label": "SETUP: the ranger dodges one of the mob's swings", "actor": "ranger",
+      "metric": "melee_attacks_taken", "target": "mob", "victim_state": 2, "min": 1, "within_ms": 40000
+    },
+    {
+      "action": "assert", "label": "SETUP: an avoided attack fires a non-critical Quick-Witted stab",
+      "actor": "ranger", "metric": "spell_damage_count", "spell": 704314, "target": "mob", "critical": false, "min": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "assert", "label": "SETUP: the damage check sees exactly one non-critical stab", "actor": "ranger",
+      "metric": "spell_damage_count", "spell": 704314, "target": "mob", "critical": false, "equals": 1
+    },
+    {
+      "action": "assert", "label": "#13043: one non-critical stab deals 1 + 100% of attack power, less armor",
+      "actor": "ranger", "metric": "spell_damage_total", "spell": 704314, "target": "mob", "critical": false,
+      "ratio_to": "ranger_ap", "min": 0.5, "max": 1.01
+    },
+    {
+      "action": "assert", "label": "#13043: the stab applies the Poison Quiver poison", "actor": "mob",
+      "metric": "aura", "spell": 500104, "caster": "ranger", "equals": 1, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "The stab still slows the enemy's attack speed", "actor": "mob", "metric": "aura",
+      "spell": 704314, "caster": "ranger", "equals": 1
+    }
+  ]
+}

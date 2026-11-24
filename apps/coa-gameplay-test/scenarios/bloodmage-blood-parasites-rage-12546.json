@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Blood Parasites adds 3 Rage to every Taldaram's Torment tick (#12546)",
+  "contract": [
+    "Taldaram's Torment (802580) generates 582765 Energize Rage s1 (EffectBasePoints 29 + 1 = 30 internal, 3 Rage) per tick.",
+    "Blood Parasites 802315 effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER SPELLMOD_EFFECT1 +30 on SpellFamilyFlags[1] 0x80, which is",
+    "582765's family flag, so its tooltip 'generates $/10;s1 additional Rage per tick' means 6 Rage (60 internal) per tick.",
+    "The tick handler energized a hardcoded 30 and never evaluated 582765, so the talent added nothing (#12546).",
+    "Two periodic ticks (3000 ms amplitude) must add exactly 120 internal Rage with the talent, against 60 before the fix."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 20, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "caster", "entry": 36, "level": 80, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "caster", "spell": 802315 },
+    { "action": "learn", "actor": "caster", "spell": 802580 },
+    { "action": "set_power", "actor": "caster", "power": 1, "value": 0 },
+    { "action": "cast", "actor": "caster", "spell": 802580, "target": "enemy" },
+    {
+      "action": "assert", "label": "SETUP: Taldaram's Torment lands on the enemy", "actor": "enemy", "metric": "aura",
+      "spell": 802580, "caster": "caster", "equals": 1, "within_ms": 3000
+    },
+    { "action": "snapshot", "actor": "caster", "metric": "power", "power": 1, "save_as": "rage_after_land" },
+    { "action": "wait", "label": "Two periodic ticks", "ms": 6600 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: two ticks add exactly 120 internal Rage (60 per tick)", "actor": "caster",
+      "metric": "power", "power": 1, "relative_to": "rage_after_land", "equals": 120
+    }
+  ]
+}

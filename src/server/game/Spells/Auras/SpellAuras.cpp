@@ -627,6 +627,16 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
             // Allow only 1 persistent area aura to affect our targets if a custom flag is set.
             if (itr->first->HasAura(GetId()) && GetSpellInfo()->HasAttribute(SPELL_ATTR0_CU_ONLY_ONE_AREA_AURA))
                 addUnit = false;
+
+            // CoA: keep the application an overlapping same caster ground effect already holds instead of swapping it.
+            Unit::AuraApplicationMapBounds same = itr->first->GetAppliedAuras().equal_range(GetId());
+            for (Unit::AuraApplicationMap::const_iterator iter = same.first; addUnit && iter != same.second; ++iter)
+            {
+                Aura const* other = iter->second->GetBase();
+                if (other != this && other->GetType() == DYNOBJ_AURA_TYPE &&
+                    other->GetCasterGUID() == GetCasterGUID() && !CanStackWith(other))
+                    addUnit = false;
+            }
             }
             // unit auras can not stack with each other
             else // (GetType() == UNIT_AURA_TYPE)
@@ -1638,7 +1648,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             case SPELLFAMILY_WARLOCK:
                 if (!caster)
                     break;
-                if (GetSpellInfo()->SpellFamilyFlags[1] & 0x00000400)
+                // Improved Fear: the Nightmare follows the end of the Fear ("when the fear effect ends"), so a refresh of
+                // a Fear still on the target (SetStackAmount re-runs these mods with onReapply) does not apply it
+                if (!onReapply && GetSpellInfo()->SpellFamilyFlags[1] & 0x00000400)
                 {
                     if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 98, 0))
                     {
@@ -3026,14 +3038,15 @@ void DynObjAura::FillTargetMap(std::map<Unit*, uint8>& targets, Unit* /*caster*/
         SpellInfo const* spellInfo = GetSpellInfo();
         SpellEffectInfo const& effect = spellInfo->Effects[effIndex];
         UnitList targetList;
-        // CoA: Eldritch Obelisk (560322), Harvesting Grounds (707591), Shadra's Lair (804978, effect 2) and
-        // Deathwind's Spirit Realm trigger (effect 1, 582526) encode their ally selectors in EffectImplicitTargetA
-        // with TargetB unset.
+        // CoA: Eldritch Obelisk (560322), Harvesting Grounds (707591), Shadra's Lair (804978, effect 2), Tiki Splash
+        // (500478) and Deathwind's Spirit Realm trigger (effect 1, 582526) encode their ally selectors in
+        // EffectImplicitTargetA with TargetB unset.
         // Other spells also use this selector, so keep the exception scoped to these effects.
         bool const deathwindRank = spellInfo->Id == 800174 || (spellInfo->Id >= 502989 && spellInfo->Id <= 503000);
         bool const deathwindSpiritRealm = deathwindRank && effIndex == 1 && effect.TriggerSpell == 582526;
         bool const coaTargetAAlly = (spellInfo->Id == 560322 || spellInfo->Id == 707591 || spellInfo->Id == 804978 ||
-            deathwindSpiritRealm) && effect.TargetA.GetTarget() == TARGET_UNIT_DEST_AREA_ALLY;
+            spellInfo->Id == 500478 || deathwindSpiritRealm) &&
+            effect.TargetA.GetTarget() == TARGET_UNIT_DEST_AREA_ALLY;
         bool const targetBAlly = effect.TargetB.GetTarget() == TARGET_DEST_DYNOBJ_ALLY ||
             effect.TargetB.GetTarget() == TARGET_UNIT_DEST_AREA_ALLY;
         if (targetBAlly || coaTargetAAlly)

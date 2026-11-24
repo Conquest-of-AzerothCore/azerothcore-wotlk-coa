@@ -1,7 +1,9 @@
+import os
 from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 
 import check_comments
 from comment_policy import comments, language, violations
@@ -82,6 +84,9 @@ class CommentDiffTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
+        environment = mock.patch.dict(os.environ, {'GIT_CONFIG_GLOBAL': os.devnull, 'GIT_CONFIG_NOSYSTEM': '1'})
+        environment.start()
+        self.addCleanup(environment.stop)
         self.git('init', '-q')
         self.git('config', 'user.name', 'Comment policy fixture')
         self.git('config', 'user.email', 'fixture@example.invalid')
@@ -105,6 +110,11 @@ class CommentDiffTests(unittest.TestCase):
             if staged:
                 self.git('add', '.')
             self.assertEqual(check_comments.check(root=self.root)['issues'][0]['line'], 3)
+
+    def test_mnemonic_diff_prefixes_still_find_new_comments(self):
+        self.git('config', 'diff.mnemonicPrefix', 'true')
+        (self.root / 'tools/example.py').write_text('# existing\nvalue = 2\n# new\n')
+        self.assertEqual(check_comments.check(root=self.root)['issues'][0]['line'], 3)
 
     def test_new_file_with_spaces_and_docstrings_fails(self):
         (self.root / 'tools/new file.py').write_text('"""explanation"""\nvalue = 1\n')

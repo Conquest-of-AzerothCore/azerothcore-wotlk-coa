@@ -1,7 +1,6 @@
 #ifndef MANASTORM_COA_LOOT_POLICY_H
 #define MANASTORM_COA_LOOT_POLICY_H
 
-#include <algorithm>
 #include <cstdint>
 
 namespace ManastormCoALoot
@@ -22,14 +21,17 @@ namespace ManastormCoALoot
         return {};
     }
 
-    inline std::uint32_t Remaining(std::uint32_t earned, std::uint32_t cap)
+    struct ClientCache
     {
-        return earned < cap ? cap - earned : 0;
-    }
+        std::uint32_t Item = 0;
+        float ChancePct = 0.0f;
+    };
 
-    inline std::uint32_t Award(std::uint32_t amount, std::uint32_t earned, std::uint32_t cap)
+    inline ClientCache ClientCacheState(ClientCache cache, bool coaLootMode)
     {
-        return std::min(amount, Remaining(earned, cap));
+        if (coaLootMode)
+            cache.ChancePct = 0.0f;
+        return cache;
     }
 }
 

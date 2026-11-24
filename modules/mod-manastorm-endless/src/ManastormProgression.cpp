@@ -502,11 +502,13 @@ bool ManastormProgression::RecordStageCompletion(
     // published to the online player until the whole transaction commits.
     std::vector<std::shared_ptr<ManastormRewardPublication>>
         rewardPublications;
+    ManastormCoATokenClaims coaTokenClaims;
 
     if (!ManastormRewards::Instance()
         .PrepareStageCompletion(
             run,
             transaction,
+            coaTokenClaims,
             rewardPublications,
             error))
     {
@@ -798,6 +800,8 @@ bool ManastormProgression::RecordStageCompletion(
             "Unable to commit shared Manastorm progression and rewards.";
         return false;
     }
+
+    coaTokenClaims.Keep();
 
     ManastormRewards::Instance()
         .PublishCommitted(

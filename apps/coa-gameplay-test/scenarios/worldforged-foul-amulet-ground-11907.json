@@ -1,0 +1,113 @@
+{
+    "schema":  1,
+    "name":  "Worldforged Balgaras\u0027s Foul Amulet rests on the Dustwallow ground (#11907)",
+    "contract":  "#11907 reported Balgaras\u0027s Foul Amulet (entry 254234, guid 6940102) hidden. The model is 0.11 yd tall and stood 0.67 yd below the ground the server measures. It now rests on the measured ground at z 31.218. Expected: the pickup is grounded and opens.",
+    "timeout_ms":  60000,
+    "location":  {
+                     "map":  0,
+                     "x":  -2932.8,
+                     "y":  -2961.2,
+                     "z":  31.6,
+                     "o":  0
+                 },
+    "players":  [
+                    {
+                        "id":  "p",
+                        "race":  1,
+                        "class":  12,
+                        "level":  60
+                    }
+                ],
+    "steps":  [
+                  {
+                      "action":  "set_phase",
+                      "actor":  "p",
+                      "value":  1
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  3000
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "SETUP: the pickup is in the area",
+                      "metric":  "nearby_gameobject_count",
+                      "entry":  254234,
+                      "equals":  1
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the amulet stays at its spot, raised to the ground",
+                      "metric":  "spawn_distance",
+                      "x":  -2933.8,
+                      "y":  -2961.2,
+                      "z":  31.218,
+                      "max":  0.3,
+                      "guid":  6940102,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "DISCRIMINATING: the amulet rests on the ground instead of 0.67 yd under it",
+                      "metric":  "spawn_ground_gap",
+                      "min":  -0.3,
+                      "max":  0.3,
+                      "guid":  6940102,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is grounded within 0.8 yd",
+                      "metric":  "spawn_placement",
+                      "tolerance":  0.8,
+                      "equals":  0,
+                      "guid":  6940102,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is not under water",
+                      "metric":  "spawn_submerged",
+                      "equals":  0,
+                      "guid":  6940102,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "set_aura",
+                      "actor":  "p",
+                      "spell":  642,
+                      "stacks":  1
+                  },
+                  {
+                      "action":  "cast",
+                      "actor":  "p",
+                      "spell":  3365,
+                      "target_gameobject":  254234
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  5500
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the pickup is within reach and opens",
+                      "metric":  "cast_failure",
+                      "spell":  3365,
+                      "equals":  0
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "its loot is shown",
+                      "metric":  "loot_count",
+                      "min":  1,
+                      "within_ms":  3000
+                  }
+              ]
+}

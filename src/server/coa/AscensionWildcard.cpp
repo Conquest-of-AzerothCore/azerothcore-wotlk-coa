@@ -124,7 +124,7 @@ struct EntrySpells
     std::array<uint32, 6> Spells;
 };
 
-constexpr std::array<EntrySpells, 31> ENTRY_SPELLS = { {
+constexpr std::array<EntrySpells, 86> ENTRY_SPELLS = { {
     { 84864, { 986202, 986203 } },
     { 84865, { 986200, 986201 } },
     { 84866, { 92839, 92840 } },
@@ -151,6 +151,61 @@ constexpr std::array<EntrySpells, 31> ENTRY_SPELLS = { {
     { 939307, { 939327, 939347 } },
     { 939308, { 939328, 939348 } },
     { 939309, { 939329, 939349 } },
+    { 850068, { 939000 } },
+    { 939000, { 939020, 939040 } },
+    { 939001, { 939021, 939041 } },
+    { 939002, { 939022, 939042 } },
+    { 939003, { 939023, 939043 } },
+    { 939004, { 939024, 939044 } },
+    { 939005, { 939025, 939045 } },
+    { 939006, { 939026, 939046 } },
+    { 939007, { 939027, 939047 } },
+    { 939008, { 939028, 939048 } },
+    { 939009, { 939029, 939049 } },
+    { 850069, { 939060 } },
+    { 939060, { 939080, 939100 } },
+    { 939061, { 939081, 939101 } },
+    { 939062, { 939082, 939102 } },
+    { 939063, { 939083, 939103 } },
+    { 939064, { 939084, 939104 } },
+    { 939065, { 939085, 939105 } },
+    { 939066, { 939086, 939106 } },
+    { 939067, { 939087, 939107 } },
+    { 939068, { 939088, 939108 } },
+    { 939069, { 939089, 939109 } },
+    { 850070, { 939120 } },
+    { 939120, { 939140, 939160 } },
+    { 939121, { 939141, 939161 } },
+    { 939122, { 939142, 939162 } },
+    { 939123, { 939143, 939163 } },
+    { 939124, { 939144, 939164 } },
+    { 939125, { 939145, 939165 } },
+    { 939126, { 939146, 939166 } },
+    { 939127, { 939147, 939167 } },
+    { 939128, { 939148, 939168 } },
+    { 939129, { 939149, 939169 } },
+    { 850071, { 939180 } },
+    { 939180, { 939200, 939220 } },
+    { 939181, { 939201, 939221 } },
+    { 939182, { 939202, 939222 } },
+    { 939183, { 939203, 939223 } },
+    { 939184, { 939204, 939224 } },
+    { 939185, { 939205, 939225 } },
+    { 939186, { 939206, 939226 } },
+    { 939187, { 939207, 939227 } },
+    { 939188, { 939208, 939228 } },
+    { 939189, { 939209, 939229 } },
+    { 850072, { 939240 } },
+    { 939240, { 939260, 939280 } },
+    { 939241, { 939261, 939281 } },
+    { 939242, { 939262, 939282 } },
+    { 939243, { 939263, 939283 } },
+    { 939244, { 939264, 939284 } },
+    { 939245, { 939265, 939285 } },
+    { 939246, { 939266, 939286 } },
+    { 939247, { 939267, 939287 } },
+    { 939248, { 939268, 939288 } },
+    { 939249, { 939269, 939289 } },
     { 48263, { 56222 } },
     { 25780, { 277422 } },
     { 71, { 277421 } },
@@ -197,6 +252,7 @@ constexpr char ACTIVE_SPEC_SETTING[] = "core.wildcard.spec";
 constexpr char ACTION_BARS_SETTING[] = "core.wildcard.bars";
 constexpr char TRAINED_RANKS_SETTING[] = "core.wildcard.trainedranks";
 constexpr char REPURCHASE_SETTING[] = "core.wildcard.repurchase";
+constexpr std::array<uint32, 2> FORTUNE_CASES = { 1278048, 1278049 };
 constexpr std::array<uint32, 8> PRESTIGE_DELETED_ITEMS = { 1278048, 1278049, 98453, 98454, 98465, 98466, 1478051,
     1478052 };
 constexpr std::array<std::uint32_t, 7> SCHOOL_TAGS = { 17, 18, 19, 20, 21, 22, 126 };
@@ -2421,6 +2477,37 @@ public:
     }
 };
 
+class AscensionWildcardFortuneCase final : public PlayerScript
+{
+public:
+    AscensionWildcardFortuneCase() : PlayerScript("AscensionWildcardFortuneCase", { PLAYERHOOK_ON_BEFORE_OPEN_ITEM }) { }
+
+    bool OnPlayerBeforeOpenItem(Player* player, Item* item) override
+    {
+        if (!item || std::find(FORTUNE_CASES.begin(), FORTUNE_CASES.end(), item->GetEntry()) == FORTUNE_CASES.end())
+            return true;
+
+        ObjectGuid const guid = item->GetGUID();
+        WorldSession* session = player->GetSession();
+        player->SendLoot(guid, LOOT_CORPSE);
+        uint8 const slots = uint8(item->loot.items.size());
+        for (uint8 slot = 0; slot < slots && player->GetLootGUID() == guid; ++slot)
+        {
+            WorldPacket take(CMSG_AUTOSTORE_LOOT_ITEM, 1);
+            take << slot;
+            session->HandleAutostoreLootItemOpcode(take);
+        }
+
+        if (player->GetLootGUID() == guid)
+        {
+            WorldPacket release(CMSG_LOOT_RELEASE, 8);
+            release << guid;
+            session->HandleLootReleaseOpcode(release);
+        }
+        return false;
+    }
+};
+
 class AscensionWildcardSpecializationCache final : public ItemScript
 {
 public:
@@ -3638,6 +3725,7 @@ void AddAscensionWildcardScripts()
     new AscensionWildcard::AscensionWildcardPlayer();
     new AscensionWildcard::AscensionWildcardItemSpells();
     new AscensionWildcard::AscensionWildcardItems();
+    new AscensionWildcard::AscensionWildcardFortuneCase();
     new AscensionWildcard::AscensionWildcardSpecializationCache();
     new AscensionWildcard::AscensionWildcardPeteArr();
     new AscensionWildcard::AscensionWildcardPeteArrSale();

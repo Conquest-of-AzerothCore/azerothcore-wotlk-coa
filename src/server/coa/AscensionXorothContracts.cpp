@@ -35,7 +35,10 @@ void ApplyContracts(SpellInfo* info)
         info->RangeEntry = sSpellRangeStore.LookupEntry(SPELL_RANGE_THIRTY_YARDS);
     }
     if (id == SPELL_DRAG_THROUGH_HELL)
+    {
         info->RangeEntry = sSpellRangeStore.LookupEntry(SPELL_RANGE_ANYWHERE);
+        info->AttributesEx2 |= SPELL_ATTR2_IGNORE_LINE_OF_SIGHT;
+    }
     if (id == 520440 || id == 520441)
         for (auto& effect : info->Effects)
             effect.Effect = 0;

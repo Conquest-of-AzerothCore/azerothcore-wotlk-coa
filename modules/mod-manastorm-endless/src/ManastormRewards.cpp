@@ -2,6 +2,7 @@
 #include "ScriptMgr.h"
 #include "ManastormExperience.h"
 
+#include "CharacterCache.h"
 #include "Creature.h"
 #include "Field.h"
 #include "GameTime.h"
@@ -82,9 +83,30 @@ struct ManastormRewardPublication
     bool HasWeeklyAllowance = false;
     ManastormWeeklyCacheAllowance WeeklyAllowance;
     bool HasCoATokens = false;
-    ManastormCoALoot::Window CoAWindow;
     uint32 CoATokens = 0;
 };
+
+ManastormCoATokenClaims::~ManastormCoATokenClaims()
+{
+    for (auto const& [accountId, count] : _claims)
+        AscensionBazaarTokenCap::Refund(accountId, count);
+}
+
+uint32 ManastormCoATokenClaims::Claim(ObjectGuid::LowType characterGuid, uint32 requested)
+{
+    ObjectGuid const guid = ObjectGuid::Create<HighGuid::Player>(characterGuid);
+    uint32 const accountId = sCharacterCache->GetCharacterAccountIdByGuid(guid);
+    uint32 const granted = AscensionBazaarTokenCap::ClaimForAccount(
+        accountId, ObjectAccessor::FindConnectedPlayer(guid), requested);
+    if (accountId && granted)
+        _claims.emplace_back(accountId, granted);
+    return granted;
+}
+
+void ManastormCoATokenClaims::Keep()
+{
+    _claims.clear();
+}
 
 ManastormRewards& ManastormRewards::Instance()
 {
@@ -1022,6 +1044,13 @@ bool ManastormRewards::IsCoALootMode(ObjectGuid::LowType characterGuid) const
         !(GetActiveGameModeMask(characterGuid) & GAME_MODE_WILDCARD);
 }
 
+AscensionBazaarTokenCap::Allowance ManastormRewards::CoAAccountAllowance(ObjectGuid::LowType characterGuid) const
+{
+    uint32 const accountId =
+        sCharacterCache->GetCharacterAccountIdByGuid(ObjectGuid::Create<HighGuid::Player>(characterGuid));
+    return accountId ? AscensionBazaarTokenCap::GetAllowance(accountId) : AscensionBazaarTokenCap::Allowance{};
+}
+
 bool ManastormRewards::LoadCoATokenState(ObjectGuid::LowType characterGuid, ManastormCoATokenState& state) const
 {
     state = {};
@@ -1077,8 +1106,8 @@ uint32 ManastormRewards::CoATokenReward(ManastormMode mode, bool endgame, uint32
 }
 
 bool ManastormRewards::PrepareCoATokenReward(ObjectGuid::LowType characterGuid, ManastormRun const& run,
-    CharacterDatabaseTransaction const& transaction, uint32& quantity, ManastormCoATokenState& state,
-    std::string& error, uint32 extraTokens) const
+    CharacterDatabaseTransaction const& transaction, ManastormCoATokenClaims& claims, uint32& quantity,
+    ManastormCoATokenState& state, std::string& error, uint32 extraTokens) const
 {
     if (!LoadCoATokenState(characterGuid, state))
     {
@@ -1088,7 +1117,7 @@ bool ManastormRewards::PrepareCoATokenReward(ObjectGuid::LowType characterGuid, 
     bool const first = IsCoAFirstClear(state, run.GetMode(), run.IsEndgame(), run.GetDepth());
     AppendCoAAllowance(characterGuid, SaturatingAdd(
         CoATokenReward(run.GetMode(), run.IsEndgame(), run.GetDepth(), first), extraTokens),
-        transaction, state, quantity);
+        transaction, claims, state, quantity);
     auto* clear = CharacterDatabase.GetPreparedStatement(CHAR_SAVE_MANASTORM_COA_TOKEN_CLEAR);
     clear->SetData(0, characterGuid);
     clear->SetData(1, uint8(run.GetMode()));
@@ -1100,7 +1129,8 @@ bool ManastormRewards::PrepareCoATokenReward(ObjectGuid::LowType characterGuid, 
 }
 
 void ManastormRewards::AppendCoAAllowance(ObjectGuid::LowType guid, uint32 requested,
-    CharacterDatabaseTransaction const& transaction, ManastormCoATokenState& state, uint32& quantity) const
+    CharacterDatabaseTransaction const& transaction, ManastormCoATokenClaims& claims,
+    ManastormCoATokenState& state, uint32& quantity) const
 {
     if (!state.Window.Start)
     {
@@ -1108,9 +1138,8 @@ void ManastormRewards::AppendCoAAllowance(ObjectGuid::LowType guid, uint32 reque
         state.Window.End = uint32(std::min<uint64>(std::numeric_limits<uint32>::max(),
             uint64(state.Window.Start) + ManastormModuleConfig::CoATokenWindowSeconds()));
     }
-    quantity = ManastormCoALoot::Award(requested,
-        state.Window.Earned, ManastormModuleConfig::CoATokenCap());
-    state.Window.Earned += quantity;
+    quantity = claims.Claim(guid, requested);
+    state.Window.Earned = SaturatingAdd(state.Window.Earned, quantity);
     auto* save = CharacterDatabase.GetPreparedStatement(CHAR_SAVE_MANASTORM_COA_TOKEN_WINDOW);
     save->SetData(0, guid);
     save->SetData(1, state.Window.Start);
@@ -1153,7 +1182,8 @@ bool ManastormRewards::AwardCoAGreedyReward(Player* player, ManastormRun const& 
     receipt->SetData(1, guid);
     transaction->Append(receipt);
     uint32 quantity = 0;
-    AppendCoAAllowance(guid, CoAEncounterTokens(1, quality), transaction, state, quantity);
+    ManastormCoATokenClaims claims;
+    AppendCoAAllowance(guid, CoAEncounterTokens(1, quality), transaction, claims, state, quantity);
     std::vector<std::shared_ptr<ManastormRewardPublication>> publications;
     if (quantity && !PrepareItemDelivery(guid, {{ManastormCoALoot::TokenItem, quantity}}, transaction,
         publications, error, "Manastorm: Greedy Demon rewards"))
@@ -1168,6 +1198,7 @@ bool ManastormRewards::AwardCoAGreedyReward(Player* player, ManastormRun const& 
         error = "Greedy Demon reward claim failed or was already claimed.";
         return false;
     }
+    claims.Keep();
     PublishCommitted(publications);
     player->SendSystemMessage(Acore::StringFormat("Greedy Demon: +{} Bazaar Tokens.", quantity));
     return true;
@@ -1195,8 +1226,10 @@ std::string ManastormRewards::CoATokenClientState(ObjectGuid::LowType characterG
             uint64(run->GetBonusCacheCount()) * CoAEncounterTokens(2, cache ? uint8(cache->Quality) : 0)));
         bonusItem = 0;
     }
-    lua << "{enabled=true,earned=" << state.Window.Earned << ",cap=" << ManastormModuleConfig::CoATokenCap()
-        << ",start=" << state.Window.Start << ",finish=" << state.Window.End;
+    AscensionBazaarTokenCap::Allowance const allowance = CoAAccountAllowance(characterGuid);
+    lua << "{enabled=true,earned=" << allowance.earned << ",cap=" << allowance.cap
+        << ",start=" << allowance.start << ",finish=" << allowance.end
+        << ",clearFinish=" << state.Window.End;
     if (includeClock)
         lua << ",now=" << uint32(GameTime::GetGameTime().count());
     lua << ",first=" << (ManastormModuleConfig::CoAFirstClearEnabled() ? "true" : "false")
@@ -1536,6 +1569,7 @@ double ManastormRewards::GetGroupRewardMultiplier(
 bool ManastormRewards::PrepareStageCompletion(
     ManastormRun const& run,
     CharacterDatabaseTransaction const& transaction,
+    ManastormCoATokenClaims& claims,
     std::vector<std::shared_ptr<ManastormRewardPublication>>& publications,
     std::string& error) const
 {
@@ -1741,31 +1775,22 @@ bool ManastormRewards::PrepareStageCompletion(
 
         if (cacheCount)
         {
-            uint32 playerLevel =
-                player
-                ? uint32(
-                    player->GetLevel())
-                : 0;
-
-            if (!run.IsEndgame() &&
-                !playerLevel)
+            uint32 playerLevel = player ? player->GetLevel() : 0;
+            if (!run.IsEndgame() && !player)
             {
-                QueryResult levelResult =
-                    CharacterDatabase.Query(
-                        "SELECT level "
-                        "FROM characters "
-                        "WHERE guid = {} "
-                        "LIMIT 1",
-                        characterGuid);
-
-                if (levelResult)
+                CharacterDatabasePreparedStatement* statement =
+                    CharacterDatabase.GetPreparedStatement(CHAR_SEL_MANASTORM_XP_LEVEL);
+                statement->SetData(0, characterGuid);
+                PreparedQueryResult levelResult = CharacterDatabase.Query(statement);
+                if (!levelResult)
                 {
-                    playerLevel =
-                        uint32(
-                            levelResult->
-                                Fetch()[0]
-                                .Get<uint8>());
+                    error = "Unable to read offline Manastorm member level for cache rewards: character=" +
+                        std::to_string(characterGuid) + ".";
+                    publications.clear();
+                    return false;
                 }
+
+                playerLevel = levelResult->Fetch()[0].Get<uint8>();
             }
 
             if (!ResolveCacheItemEntry(
@@ -1777,30 +1802,30 @@ bool ManastormRewards::PrepareStageCompletion(
                     uint8(run.GetMode()),
                     run.GetDepth()))
             {
-                error =
-                    "No enabled Manastorm cache bracket matches "
-                    "track=" +
-                    std::to_string(
-                        uint32(track)) +
-                    " depth=" +
-                    std::to_string(
-                        run.GetDepth()) +
-                    " level=" +
-                    std::to_string(
-                        playerLevel) +
-                    ".";
+                if (run.IsEndgame())
+                {
+                    error = "No enabled Manastorm cache bracket matches track=" + std::to_string(uint32(track)) +
+                        " depth=" + std::to_string(run.GetDepth()) + ".";
+                    LOG_ERROR(LOG_FILTER, "Cannot resolve physical Manastorm cache for character {}: track={} depth={}.",
+                        characterGuid, uint32(track), run.GetDepth());
+                    publications.clear();
+                    return false;
+                }
 
-                LOG_ERROR(
+                LOG_WARN(
                     LOG_FILTER,
-                    "Cannot resolve physical Manastorm cache for "
-                    "character {}: track={} depth={} level={}.",
+                    "No Manastorm cache bracket matches character {}: track={} depth={} level={}. "
+                    "The stage completes without a cache for this character.",
                     characterGuid,
                     uint32(track),
                     run.GetDepth(),
                     playerLevel);
 
-                publications.clear();
-                return false;
+                if (wonNormalCache)
+                    nextCacheChance = state.CacheChancePct;
+
+                wonNormalCache = false;
+                cacheCount = 0;
             }
         }
 
@@ -1815,7 +1840,7 @@ bool ManastormRewards::PrepareStageCompletion(
                 cacheCount = 0;
             }
         }
-        if (coaLoot && !PrepareCoATokenReward(characterGuid, run, transaction, coaTokens, coaState,
+        if (coaLoot && !PrepareCoATokenReward(characterGuid, run, transaction, claims, coaTokens, coaState,
             error, encounterTokens))
         {
             publications.clear();
@@ -2027,7 +2052,6 @@ bool ManastormRewards::PrepareStageCompletion(
                 publications.push_back(std::move(notice));
             }
             publications[firstPublication]->HasCoATokens = true;
-            publications[firstPublication]->CoAWindow = coaState.Window;
             publications[firstPublication]->CoATokens = coaTokens;
         }
 
@@ -2342,11 +2366,15 @@ void ManastormRewards::PublishCommitted(
 
         if (player && publication->HasCoATokens)
         {
-            player->SendSystemMessage(Acore::StringFormat(
-                "Manastorm Bazaar Tokens: +{}. {}/{} earned in your personal window; {} remaining. Reset: {}.",
-                publication->CoATokens, publication->CoAWindow.Earned, ManastormModuleConfig::CoATokenCap(),
-                ManastormCoALoot::Remaining(publication->CoAWindow.Earned, ManastormModuleConfig::CoATokenCap()),
-                Acore::Time::TimeToTimestampStr(Seconds(publication->CoAWindow.End))).c_str());
+            AscensionBazaarTokenCap::Allowance const allowance = CoAAccountAllowance(publication->CharacterGuid);
+            if (allowance.cap)
+                player->SendSystemMessage(Acore::StringFormat(
+                    "Manastorm Bazaar Tokens: +{}. {}/{} Bazaar Tokens earned on your account; {} remaining. Reset: {}.",
+                    publication->CoATokens, allowance.earned, allowance.cap, allowance.cap - allowance.earned,
+                    Acore::Time::TimeToTimestampStr(Seconds(allowance.end))).c_str());
+            else
+                player->SendSystemMessage(Acore::StringFormat(
+                    "Manastorm Bazaar Tokens: +{}.", publication->CoATokens).c_str());
         }
         if (player && publication->HasWeeklyAllowance)
         {
@@ -2723,16 +2751,16 @@ ManastormRewards::BuildVisibilityRecords(ObjectGuid::LowType characterGuid, bool
         token.ItemEntry = ManastormCoALoot::TokenItem;
         ManastormCoATokenState state;
         bool const available = LoadCoATokenState(characterGuid, state);
-        token.MaxQuantity = ManastormModuleConfig::CoATokenCap();
-        token.EarnedQuantity = state.Window.Earned;
-        token.RemainingQuantity = available
-            ? ManastormCoALoot::Remaining(state.Window.Earned, token.MaxQuantity) : 0;
-        token.Action = token.RemainingQuantity ? 0 : 2;
-        token.WindowStart = state.Window.Start;
-        token.WindowEnd = state.Window.End;
-        token.LockEndTimestamp = token.Action == 2 ? state.Window.End : 0;
+        AscensionBazaarTokenCap::Allowance const allowance = CoAAccountAllowance(characterGuid);
+        token.MaxQuantity = allowance.cap;
+        token.EarnedQuantity = allowance.earned;
+        token.RemainingQuantity = available ? allowance.cap - allowance.earned : 0;
+        token.Action = available && (!allowance.cap || token.RemainingQuantity) ? 0 : 2;
+        token.WindowStart = allowance.start;
+        token.WindowEnd = allowance.end;
+        token.LockEndTimestamp = token.Action == 2 ? allowance.end : 0;
         uint32 const now = uint32(GameTime::GetGameTime().count());
-        token.SecondsRemaining = state.Window.End > now ? state.Window.End - now : 0;
+        token.SecondsRemaining = allowance.end > now ? allowance.end - now : 0;
         records.push_back(token);
     }
 

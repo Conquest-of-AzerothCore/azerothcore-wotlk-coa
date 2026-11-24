@@ -2917,6 +2917,34 @@ namespace
             player->GetExactDist(entrance.position_x, entrance.position_y, entrance.position_z) > 8.0f;
     }
 
+    bool IsShelteredAtStageEntrance(Player const* player, GameTele const* entrance, bool bubbleStands)
+    {
+        return bubbleStands && entrance && player->IsAlive() && !player->IsInFlight() &&
+            !HasPlayerLeftStageEntrance(player, player->FindMap(), *entrance);
+    }
+
+    void ShelterUnitAtStageEntrance(Unit* unit)
+    {
+        if (!unit || !unit->IsAlive() || !unit->IsInWorld())
+            return;
+
+        if (Aura* aura = unit->GetAura(SPELL_SAFETY_BUBBLE_HELPER))
+            aura->RefreshDuration();
+        else
+            unit->CastSpell(unit, SPELL_SAFETY_BUBBLE_HELPER, true);
+    }
+
+    void ShelterAtStageEntrance(Player* player)
+    {
+        if (!player->HasAura(SPELL_SAFETY_BUBBLE_HELPER))
+            player->CombatStopWithPets();
+
+        ShelterUnitAtStageEntrance(player);
+        for (Unit* companion : player->m_Controlled)
+            if (companion && companion->GetOwnerGUID() == player->GetGUID())
+                ShelterUnitAtStageEntrance(companion);
+    }
+
     void ApplySafetyBubbleProtection(Unit* unit, ManastormRun const& run)
     {
         if (!unit || !unit->IsAlive() || !unit->IsInWorld() ||
@@ -3078,6 +3106,7 @@ namespace
             saved.Stacks = aura->GetStackAmount();
             saved.Charges = aura->GetCharges();
             saved.MaxDuration = aura->GetMaxDuration();
+            saved.Duration = aura->GetDuration();
             for (uint8 index = 0; index < MAX_SPELL_EFFECTS; ++index)
                 if (AuraEffect const* effect = aura->GetEffect(index))
                 {
@@ -3118,24 +3147,84 @@ namespace
             if (Aura* aura = Aura::TryCreate(info, saved.EffectMask, player, nullptr,
                 saved.BaseAmounts.data(), nullptr, saved.Caster, saved.CastItem))
             {
-                aura->SetLoadedState(saved.MaxDuration, saved.MaxDuration, saved.Charges, saved.Stacks,
+                aura->SetLoadedState(saved.MaxDuration, saved.Duration, saved.Charges, saved.Stacks,
                     saved.RecalculateMask, saved.Amounts.data());
                 aura->ApplyForTargets();
             }
         }
-        for (auto const& [spellId, application] : player->GetAppliedAuras())
-            if (IsRecoverableStageBuff(application, player))
-            {
-                Aura* aura = application->GetBase();
-                aura->SetDuration(aura->GetMaxDuration());
-            }
         player->SetFullHealth();
         player->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
+    }
+
+    bool IsRunMemberGuid(ManastormRun const& run, ObjectGuid guid)
+    {
+        auto const& members = run.GetMembers();
+        return guid.IsPlayer() && std::find(members.begin(), members.end(), guid.GetCounter()) != members.end();
+    }
+
+    void CaptureStageLink(Aura const* aura, ManastormRun& run)
+    {
+        if (aura->GetType() != UNIT_AURA_TYPE || !aura->IsSingleTarget() || aura->IsPassive())
+            return;
+        Unit const* target = aura->GetUnitOwner();
+        AuraApplication const* application = aura->GetApplicationOfTarget(target->GetGUID());
+        if (!application || !application->IsPositive() || aura->GetCasterGUID() == target->GetGUID() ||
+            !IsRunMemberGuid(run, aura->GetCasterGUID()) || !IsRunMemberGuid(run, target->GetGUID()))
+            return;
+        bool const known = std::any_of(run.StageLinks.begin(), run.StageLinks.end(),
+            [aura, target](ManastormRun::StageLink const& link)
+            {
+                return link.Spell == aura->GetId() && link.Caster == aura->GetCasterGUID() &&
+                    link.Target == target->GetGUID();
+            });
+        if (!known)
+            run.StageLinks.push_back({aura->GetId(), aura->GetCasterGUID(), target->GetGUID(), run.GetInstanceId(),
+                aura->GetDuration(), aura->GetCharges()});
+    }
+
+    void CaptureStageLinks(Player* player, ManastormRun& run)
+    {
+        if (!run.HasPreviousStage() || !run.IsPendingStageTransfer(player->GetGUID().GetCounter()) ||
+            player->GetMapId() != run.GetPreviousSegment().MapId ||
+            player->GetInstanceId() != run.GetPreviousInstanceId())
+            return;
+        std::erase_if(run.StageLinks, [&run](ManastormRun::StageLink const& link)
+        {
+            return link.DestinationInstanceId != run.GetInstanceId();
+        });
+        for (auto const& [spellId, application] : player->GetAppliedAuras())
+            CaptureStageLink(application->GetBase(), run);
+        for (Aura const* aura : player->GetSingleCastAuras())
+            CaptureStageLink(aura, run);
+    }
+
+    void RestoreStageLinks(Player* player, ManastormRun& run)
+    {
+        std::erase_if(run.StageLinks, [player, &run](ManastormRun::StageLink const& link)
+        {
+            if (link.DestinationInstanceId != run.GetInstanceId() ||
+                (link.Caster != player->GetGUID() && link.Target != player->GetGUID()))
+                return false;
+            Player* caster = ObjectAccessor::GetPlayer(*player, link.Caster);
+            Player* target = ObjectAccessor::GetPlayer(*player, link.Target);
+            if (!caster || !target || !caster->IsAlive() || !target->IsAlive() ||
+                caster->GetInstanceId() != run.GetInstanceId() || target->GetInstanceId() != run.GetInstanceId())
+                return false;
+            if (!target->GetAura(link.Spell, link.Caster))
+                if (Aura* aura = caster->AddAura(link.Spell, target))
+                {
+                    aura->SetDuration(link.Duration);
+                    if (link.Charges)
+                        aura->SetCharges(link.Charges);
+                }
+            return true;
+        });
     }
 
     bool PrepareStageMemberTransfer(Player* player, ManastormRun& run)
     {
         CaptureStageCompanions(player, run);
+        CaptureStageLinks(player, run);
         CaptureStageRecovery(player, run);
         if (run.HasPreviousStage() && !player->IsAlive())
         {
@@ -3275,6 +3364,7 @@ namespace
     constexpr uint32 HEART_PICKUP_ARM_DELAY_MS = 1000;
     constexpr uint32 HEART_PICKUP_CHECK_INTERVAL_MS = 500;
     constexpr float HEART_PICKUP_DISTANCE = 1.0f;
+    constexpr float HEART_LANDING_DEPTH = 1.0f;
 
     constexpr float HEART_MIN_LANDING_DISTANCE = 10.0f;
     constexpr float HEART_MAX_LANDING_DISTANCE = 20.0f;
@@ -3284,11 +3374,18 @@ namespace
         return (uint64(mapId) << 32) | instanceId;
     }
 
+    bool IsHostileToPlayerSummoner(Creature const* creature)
+    {
+        TempSummon const* summon = creature->ToTempSummon();
+        Unit const* summoner = summon ? summon->GetSummonerUnit() : nullptr;
+        return summoner && creature->IsHostileTo(summoner);
+    }
+
     bool IsPlayerControlledCreature(Creature const* creature)
     {
         return creature &&
             (creature->IsControlledByPlayer() ||
-                creature->IsCreatedByPlayer() ||
+                (creature->IsCreatedByPlayer() && !IsHostileToPlayerSummoner(creature)) ||
                 creature->IsCharmedOwnedByPlayerOrPlayer());
     }
 
@@ -3664,12 +3761,11 @@ void ManastormMgr::SendClientState(
                 rewardError);
         }
 
-        if (ManastormRewards::Instance().IsCoALootMode(player->GetGUID().GetCounter()))
-        {
-            cacheChancePct = 0;
-            if (!guaranteedCaches)
-                cacheItemId = 0;
-        }
+        ManastormCoALoot::ClientCache const clientCache = ManastormCoALoot::ClientCacheState(
+            { cacheItemId, float(cacheChancePct) },
+            ManastormRewards::Instance().IsCoALootMode(player->GetGUID().GetCounter()));
+        cacheItemId = clientCache.Item;
+        cacheChancePct = int32(clientCache.ChancePct);
 
         message
             << "1|"
@@ -3704,18 +3800,21 @@ void ManastormMgr::SendClientState(
     {
         ManastormCoATokenState tokens;
         bool const available = ManastormRewards::Instance().LoadCoATokenState(player->GetGUID().GetCounter(), tokens);
+        AscensionBazaarTokenCap::Allowance const allowance =
+            ManastormRewards::Instance().CoAAccountAllowance(player->GetGUID().GetCounter());
         uint32 quantity = 0;
         if (available && active)
         {
             bool const first = ManastormRewards::Instance().IsCoAFirstClear(
                 tokens, run->GetMode(), run->IsEndgame(), run->GetDepth());
-            uint32 const amount = ManastormRewards::Instance().CoATokenReward(
+            quantity = ManastormRewards::Instance().CoATokenReward(
                 run->GetMode(), run->IsEndgame(), run->GetDepth(), first);
-            quantity = ManastormCoALoot::Award(amount, tokens.Window.Earned, ManastormModuleConfig::CoATokenCap());
+            if (allowance.cap)
+                quantity = std::min(quantity, allowance.cap - allowance.earned);
         }
         message << "|COA_TOKENS|" << ManastormCoALoot::TokenItem << '|' << quantity << '|'
-            << tokens.Window.Earned << '|' << ManastormModuleConfig::CoATokenCap() << '|'
-            << tokens.Window.Start << '|' << tokens.Window.End << '|' << (available ? 1 : 0);
+            << allowance.earned << '|' << allowance.cap << '|'
+            << allowance.start << '|' << allowance.end << '|' << (available ? 1 : 0);
     }
 
     WorldPacket packet;
@@ -6352,6 +6451,7 @@ bool ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
     {
         RestoreStageRecovery(player, *run);
         RestoreStageCompanions(player, *run);
+        RestoreStageLinks(player, *run);
     }
 
     if (run->GetState() == ManastormRunState::Preparing)
@@ -6465,7 +6565,11 @@ bool ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
         }
         for (auto guid : run->GetMembers())
             if (Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid)))
-            ClearSafetyBubble(member, true);
+            {
+                ClearSafetyBubble(member, true);
+                if (DynamicObject* bubble = member->GetDynObject(SPELL_SAFETY_BUBBLE))
+                    bubble->SetDuration(-1);
+            }
         run->SetState(ManastormRunState::Active);
 
         //
@@ -7330,7 +7434,7 @@ bool ManastormMgr::SpawnHeartProjectile(
     projectileCaster->CastSpell(
         destination.GetPositionX(),
         destination.GetPositionY(),
-        destination.GetPositionZ(),
+        destination.GetPositionZ() - HEART_LANDING_DEPTH,
         SPELL_MANASTORM_HEART_PROJECTILE,
         true);
 
@@ -9924,7 +10028,8 @@ void ManastormMgr::UpdateHeartPickups(uint32 diff)
             {
                 Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid));
                 if (member && member->IsInWorld() && member->IsAlive() && !member->IsBeingTeleported() &&
-                    member->FindMap() == map && member->GetExactDist(heart) <= HEART_PICKUP_DISTANCE)
+                    member->FindMap() == map && member->GetExactDist(heart->GetPositionX(), heart->GetPositionY(),
+                        heart->GetPositionZ() + HEART_LANDING_DEPTH) <= HEART_PICKUP_DISTANCE)
                 {
                     player = member;
                     break;
@@ -10082,30 +10187,29 @@ void ManastormMgr::Update(uint32 diff)
                 run.GetInstanceId())
             {
                 //
-                // Safety Bubble protection belongs only to PREPARING.
-                // Remove any stale/re-applied controller or combat-preventer
-                // aura while the authoritative stage is already active.
+                // An active stage keeps the entrance Safety Bubble standing:
+                // members who step back inside it drop combat and stay
+                // sheltered while inside; everyone else loses the protection.
                 //
-                for (auto guid :
-                    run.GetMembers())
+                std::vector<Player*> stageMembers;
+                for (auto guid : run.GetMembers())
                 {
-                    Player* member =
-                        ObjectAccessor::FindConnectedPlayer(
-                            ObjectGuid::Create<
-                                HighGuid::Player>(
-                                    guid));
+                    Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid));
+                    if (member && member->IsInWorld() && !member->IsBeingTeleported() &&
+                        member->GetMapId() == run.GetSegment().MapId &&
+                        member->GetInstanceId() == run.GetInstanceId())
+                        stageMembers.push_back(member);
+                }
 
-                    if (member &&
-                        member->IsInWorld() &&
-                        !member->IsBeingTeleported() &&
-                        member->GetMapId() ==
-                            run.GetSegment().MapId &&
-                        member->GetInstanceId() ==
-                            run.GetInstanceId())
-                    {
-                        ClearSafetyBubble(
-                            member, true);
-                    }
+                bool const bubbleStands = std::any_of(stageMembers.begin(), stageMembers.end(),
+                    [](Player* member) { return member->GetDynObject(SPELL_SAFETY_BUBBLE) != nullptr; });
+                GameTele const* entrance = sObjectMgr->GetGameTele(run.GetSegment().StartGameTeleId);
+                for (Player* member : stageMembers)
+                {
+                    if (IsShelteredAtStageEntrance(member, entrance, bubbleStands))
+                        ShelterAtStageEntrance(member);
+                    else
+                        ClearSafetyBubble(member, true);
                 }
             }
         }

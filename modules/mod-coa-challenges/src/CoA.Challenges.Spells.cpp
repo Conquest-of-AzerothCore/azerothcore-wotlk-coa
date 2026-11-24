@@ -237,6 +237,7 @@ namespace CoAChallenges
             && !AscensionRulesets::HighRiskSuspended(player))
             AscensionRulesets::Apply(player, AscensionRulesets::Ruleset::HighRisk, true);
         std::vector<Creature*> summons = GetPlayerSummons(player);
+        std::erase_if(summons, [player](Creature* summon) { return !player->IsFriendlyTo(summon); });
         for (uint32 spell : GetChallengeSpells(challengeID, level))
         {
             if (!spell)

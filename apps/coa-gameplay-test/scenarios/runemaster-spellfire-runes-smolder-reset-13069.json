@@ -1,0 +1,456 @@
+{
+  "schema": 1,
+  "name": "Spellfire Runes resets Smolder from Warpdagger and Runeblade (#13069)",
+  "contract": [
+    "Spellfire Runes 801511 (Runemaster) tooltips: Runeblade has a $802661h% (20%) chance and Warpdagger a $h%",
+    "(100%) chance to reset the cooldown of Smolder and increase the damage of your next Smolder within $801512d",
+    "(10 sec) by $801512s1% (20%). #13069 reports that Warpdagger applies the damage buff but leaves Smolder on",
+    "cooldown, and that Runeblade never seemed to proc it. Smolder's ranks share category 2688 with a 6 second",
+    "category cooldown; the Runemaster cast hook clears the cooldown of the Smolder rank the player owns and adds",
+    "801512. This scenario reproduces the report on the highest rank (502630): after Smolder goes on cooldown, a",
+    "Warpdagger cast must add the buff, clear the server cooldown and the cooldown the client shows, and let",
+    "Smolder be cast again at once. Thirty Runeblade casts at 20% make at least one more buff near certain",
+    "(0.8^30 is about 0.1%). Each Runeblade is cast 1.6 sec after a Smolder attempt, inside Smolder's 6 sec",
+    "cooldown, so a Runeblade proc must also send the client an SMSG_CLEAR_COOLDOWN that ends a Smolder cooldown",
+    "it is still showing; natural expiry sends none."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {"id": "rune", "race": 1, "class": 32, "level": 80}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rune", "entry": 36, "level": 80, "health": 5000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "rune", "spell": 801511},
+    {"action": "learn", "actor": "rune", "spell": 801087},
+    {"action": "learn", "actor": "rune", "spell": 502630},
+    {"action": "learn", "actor": "rune", "spell": 500287},
+    {"action": "learn", "actor": "rune", "spell": 707141},
+    {
+      "action": "assert", "label": "SETUP: the highest Smolder rank is the active one", "actor": "rune",
+      "metric": "spell_active", "spell": 502630, "equals": 1
+    },
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {"action": "cast", "label": "Smolder the dummy", "actor": "rune", "spell": 502630, "target": "dummy"},
+    {
+      "action": "assert", "label": "SETUP: Smolder is accepted", "actor": "rune", "metric": "cast_failure",
+      "spell": 502630, "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: Smolder is on cooldown", "actor": "rune", "metric": "cooldown_ms",
+      "spell": 502630, "min": 3000
+    },
+    {"action": "wait", "label": "Let the global cooldown finish", "ms": 1600},
+    {"action": "cast", "label": "Throw Warpdagger", "actor": "rune", "spell": 500287},
+    {
+      "action": "assert", "label": "SETUP: Warpdagger is accepted", "actor": "rune", "metric": "cast_failure",
+      "spell": 500287, "equals": 0
+    },
+    {
+      "action": "assert", "label": "#13069: Warpdagger adds the Spellfire Runes damage buff", "actor": "rune",
+      "metric": "aura", "spell": 801512, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "#13069: Warpdagger resets Smolder's cooldown on the server", "actor": "rune",
+      "metric": "cooldown_ms", "spell": 502630, "equals": 0
+    },
+    {
+      "action": "assert", "label": "#13069: the client no longer shows Smolder cooling down", "actor": "rune",
+      "metric": "client_cooldown_ready", "spell": 502630, "equals": 1
+    },
+    {"action": "wait", "label": "Let the global cooldown finish", "ms": 1600},
+    {"action": "cast", "label": "Smolder again at once", "actor": "rune", "spell": 502630, "target": "dummy"},
+    {
+      "action": "assert", "label": "#13069: the reset Smolder casts", "actor": "rune", "metric": "cast_failure",
+      "spell": 502630, "equals": 0
+    },
+    {
+      "action": "assert", "label": "#13069: the client button did not refuse the reset Smolder", "actor": "rune",
+      "metric": "client_cooldown_blocked_casts", "spell": 502630, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The Smolder cast spends the buff", "actor": "rune", "metric": "aura",
+      "spell": 801512, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "snapshot", "actor": "rune", "metric": "aura_apply_count", "spell": 801512,
+      "save_as": "buffs_before_runeblade"
+    },
+    {
+      "action": "snapshot", "actor": "rune", "metric": "client_cooldown_clears", "spell": 502630,
+      "save_as": "clears_before_runeblade"
+    },
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 1 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 1 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 2 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 2 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 3 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 3 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 4 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 4 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 5 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 5 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 6 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 6 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 7 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 7 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 8 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 8 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 9 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 9 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 10 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 10 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 11 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 11 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 12 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 12 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 13 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 13 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 14 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 14 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 15 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 15 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 16 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 16 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 17 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 17 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 18 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 18 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 19 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 19 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 20 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 20 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 21 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 21 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 22 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 22 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 23 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 23 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 24 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 24 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 25 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 25 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 26 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 26 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 27 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 27 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 28 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 28 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 29 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 29 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rune", "power": 0, "value": 2500},
+    {
+      "action": "cast", "label": "Smolder 30 puts it on cooldown unless the last Runeblade reset it", "actor": "rune",
+      "spell": 502630, "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "restore_charges", "actor": "rune", "spell": 707141},
+    {
+      "action": "cast", "label": "Runeblade 30 while Smolder cools down", "actor": "rune", "spell": 707141,
+      "target": "dummy"
+    },
+    {"action": "wait", "ms": 1600},
+    {
+      "action": "assert", "label": "#13069: Runeblade adds the Spellfire Runes buff at its 20% chance",
+      "actor": "rune", "metric": "aura_apply_count", "spell": 801512, "relative_to": "buffs_before_runeblade",
+      "min": 1
+    },
+    {
+      "action": "assert", "label": "#13069: a Runeblade proc clears the Smolder cooldown the client shows",
+      "actor": "rune", "metric": "client_cooldown_clears", "spell": 502630, "relative_to": "clears_before_runeblade",
+      "min": 1
+    }
+  ]
+}

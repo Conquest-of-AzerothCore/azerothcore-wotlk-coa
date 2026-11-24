@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Guardian: an equipped thrown weapon stays equipped after a relog",
+  "contract": [
+    "Issue #13221: Guardians are granted Thrown (skill 176, spell 2567) by the CoA proficiency data, but",
+    "SkillRaceClassInfo 233, the only row for skill 176, allowed classes 4, 10 and 12 only. At login _LoadSkills",
+    "dropped the skill as invalid for the class, so _LoadInventory could not re-equip the thrown weapon and mailed",
+    "it before the login hook granted Thrown again. Expected: a level 24 Guardian equips Ascended Throwing Knives",
+    "(28979) in the ranged slot (17), and after a relog the knives are still in slot 17 and were not mailed."
+  ],
+  "timeout_ms": 60000,
+  "players": [ { "id": "guardian", "race": 1, "class": 18, "level": 24 } ],
+  "steps": [
+    { "action": "add_item", "actor": "guardian", "item": 28979 },
+    { "action": "equip", "actor": "guardian", "item": 28979, "slot": 17 },
+    { "action": "assert", "label": "SETUP: the Guardian has Thrown", "actor": "guardian", "metric": "skill_value", "skill": 176, "min": 1 },
+    { "action": "assert", "label": "SETUP: the thrown weapon is equipped in the ranged slot", "actor": "guardian", "metric": "equipped_item", "slot": 17, "equals": 28979, "within_ms": 3000 },
+    { "action": "relog", "actor": "guardian" },
+    { "action": "assert", "label": "DISCRIMINATING: the thrown weapon is still equipped after the relog", "actor": "guardian", "metric": "equipped_item", "slot": 17, "equals": 28979, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the thrown weapon was not mailed back", "actor": "guardian", "metric": "mail_has_item", "item": 28979, "equals": 0 },
+    { "action": "assert", "label": "Thrown is still known after the relog", "actor": "guardian", "metric": "skill_value", "skill": 176, "min": 1 }
+  ]
+}

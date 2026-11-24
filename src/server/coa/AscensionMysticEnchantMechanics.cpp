@@ -564,6 +564,8 @@ class spell_ascension_mystic_shadow_of_death : public AuraScript
     }
 };
 
+constexpr std::array<uint32, 2> SHOCKWAVE_CASTS = { 46968, 1146968 };
+
 class spell_ascension_mystic_thundering_blow : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_thundering_blow);
@@ -615,7 +617,12 @@ class spell_ascension_mystic_thundering_blow : public AuraScript
         if (_reduced >= THUNDERING_BLOW_MAX_CDR_MS)
             return;
         _reduced += THUNDERING_BLOW_CDR_MS;
-        player->ModifySpellCooldown(shockwave->GetSpellInfo()->Id, -THUNDERING_BLOW_CDR_MS);
+        uint32 cooldownSpell = shockwave->GetSpellInfo()->Id;
+        if (!player->HasSpellCooldown(cooldownSpell))
+            for (uint32 id : SHOCKWAVE_CASTS)
+                if (player->HasSpellCooldown(id))
+                    cooldownSpell = id;
+        player->ModifySpellCooldown(cooldownSpell, -THUNDERING_BLOW_CDR_MS);
     }
 
     void Register() override

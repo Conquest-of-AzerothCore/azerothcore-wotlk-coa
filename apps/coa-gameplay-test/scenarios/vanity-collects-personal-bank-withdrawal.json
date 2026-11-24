@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "A Vanity item withdrawn from the Personal Bank is collected at once",
+  "contract": [
+    "A Personal or Realm Bank withdrawal moves the item into the bags with MoveItemToInventory, which runs no",
+    "collection hook, so a bound copy nothing had collected yet came out of the bank without entering the Vanity",
+    "collection.",
+    "Expected: withdrawing Icy Ebon Warsword 141376 from the Personal Bank adds it to the account's Vanity collection",
+    "without a relog. forget_vanity removes the row while the sword is in the bank, as for copies bound there before",
+    "anything collected them."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -9465, "y": 64, "z": 56, "o": 0},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 2000},
+    {"action": "add_item", "label": "Acquire the Personal Bank", "actor": "hero", "item": 134985},
+    {"action": "use_item", "label": "Place the Personal Bank vault", "actor": "hero", "item": 134985, "spell": 100702},
+    {"action": "wait", "label": "Let the vault summon land in the world", "ms": 3000},
+    {"action": "personal_bank_open", "label": "Open the Personal Bank", "actor": "hero", "entry": 475001},
+    {"action": "add_item", "label": "Carry Icy Ebon Warsword", "actor": "hero", "item": 141376},
+    {"action": "assert", "label": "SETUP: the warsword is soulbound", "actor": "hero", "metric": "item_soulbound",
+     "item": 141376, "equals": 1},
+    {"action": "personal_bank_swap", "label": "Deposit the warsword", "actor": "hero", "entry": 475001,
+     "direction": "deposit", "item": 141376, "slot": 0},
+    {"action": "assert", "label": "The warsword leaves the bags", "actor": "hero", "metric": "item_count",
+     "item": 141376, "equals": 0, "within_ms": 2000},
+    {"action": "forget_vanity", "label": "Forget the banked warsword", "actor": "hero", "item": 141376},
+    {"action": "assert", "label": "SETUP: the warsword is not collected", "actor": "hero", "metric": "vanity_owned",
+     "item": 141376, "equals": 0},
+    {"action": "personal_bank_swap", "label": "Withdraw the warsword", "actor": "hero", "entry": 475001,
+     "direction": "withdraw", "slot": 0},
+    {"action": "assert", "label": "The warsword is back in the bags", "actor": "hero", "metric": "item_count",
+     "item": 141376, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "DISCRIMINATING: the withdrawn warsword is in the Vanity collection",
+     "actor": "hero", "metric": "vanity_owned", "item": 141376, "equals": 1}
+  ]
+}

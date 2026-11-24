@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "A Vanity item that opens as loot is collected when it is opened",
+  "contract": [
+    "Fel Enchanted Warchest 657112 has no use spell and ITEM_FLAG_HAS_LOOT, so the client opens it with CMSG_OPEN_ITEM.",
+    "That handler never reached a collection hook: a bound copy nothing had collected yet was opened and spent without",
+    "entering the Vanity collection.",
+    "Expected: opening the warchest adds it to the account's Vanity collection. forget_vanity removes the row first, as",
+    "for copies bound before anything collected them."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8824.3, "y": 626.4, "z": 94.4, "o": 0},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 2000},
+    {"action": "add_item", "label": "Carry Fel Enchanted Warchest", "actor": "hero", "item": 657112},
+    {"action": "assert", "label": "SETUP: the warchest is soulbound", "actor": "hero", "metric": "item_soulbound",
+     "item": 657112, "equals": 1},
+    {"action": "forget_vanity", "label": "Forget the warchest", "actor": "hero", "item": 657112},
+    {"action": "assert", "label": "SETUP: the warchest is not collected", "actor": "hero", "metric": "vanity_owned",
+     "item": 657112, "equals": 0},
+    {"action": "client_packet", "label": "Open the warchest as loot (CMSG_OPEN_ITEM)", "actor": "hero", "opcode": 172,
+     "fields": [{"item_bag": 657112}, {"item_slot": 657112}], "consumed": false},
+    {"action": "assert", "label": "DISCRIMINATING: the opened warchest is in the Vanity collection", "actor": "hero",
+     "metric": "vanity_owned", "item": 657112, "equals": 1, "within_ms": 2000}
+  ]
+}

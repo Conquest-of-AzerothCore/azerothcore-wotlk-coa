@@ -47,7 +47,9 @@
 #include "AscensionAmmunitionData.h"
 #include "AscensionAverageItemLevel.h"
 #include "AscensionPersonalBank.h"
+#include "AscensionRealmLevelPurchase.h"
 #include "AscensionVanityOwnership.h"
+#include "AscensionIncarnation.h"
 #include "AscensionCosmeticPetTokens.h"
 #include "AscensionCollectibleSpellData.h"
 #include "AscensionCustomClassData.h"
@@ -433,6 +435,8 @@ constexpr uint32 APPEARANCE_CATEGORY_AMMUNITION = 32;
 constexpr uint32 APPEARANCE_CATEGORY_ITEM_SET = 55;
 constexpr uint32 APPEARANCE_CATEGORY_SHADOWHOUND = 68;
 constexpr uint32 APPEARANCE_CATEGORY_NECROMANCER_LICH_FORM = 67;
+constexpr uint32 APPEARANCE_CATEGORY_AQUATIC_FORM = 20;
+constexpr uint32 SPELL_VENOMANCER_SEA_SERPENT_FORM = 803212;
 
 AscensionCollectionModels::Entry const* FindCollectionModel(uint32 creatureId);
 constexpr std::size_t MAX_APPEARANCE_SNAPSHOT_ENTRIES = 65536;
@@ -4252,6 +4256,9 @@ public:
 
     for (QuestSuperTrackPatch const &patch : rows.QuestSuperTracks)
       SendQuestSuperTrackRow(player, QuestSuperTrackRowFor(patch, player->getRaceMask()));
+
+    for (VanityCollectionPatchRow const &row : rows.VanityCollections)
+      SendVanityCollectionRow(player, row);
   }
 
 private:
@@ -4342,10 +4349,23 @@ private:
     bool RequiresRegistration = false;
   };
 
+  static constexpr uint32 VANITY_COLLECTION_DBC_FIELD_COUNT = 77;
+  static constexpr uint32 VANITY_COLLECTION_DESCRIPTION_FIELD = 42;
+  static constexpr uint32 VANITY_COLLECTION_ADDITIONAL_TEXT_FIELD = 59;
+  static constexpr uint32 VANITY_COLLECTION_LEARNED_SPELL_FIELD = 76;
+
+  struct VanityCollectionPatchRow {
+    std::array<uint32, VANITY_COLLECTION_DBC_FIELD_COUNT> Values{};
+    std::string Artwork;
+    std::string Description;
+    std::string AdditionalText;
+  };
+
   struct PreparedPatchRows {
     std::vector<SpellPatchRow> Spells;
     std::unordered_map<uint32, std::size_t> SpellRowIndexById;
     std::vector<QuestSuperTrackPatch> QuestSuperTracks;
+    std::vector<VanityCollectionPatchRow> VanityCollections;
   };
 
   static constexpr uint32 SPELL_ATTRIBUTES_FIELD = 4;
@@ -4595,6 +4615,58 @@ private:
       packet.append(reinterpret_cast<uint8 const *>(text.data()), text.size());
   }
 
+  static std::size_t SendVanityCollectionRow(Player *player, VanityCollectionPatchRow const &row) {
+    WorldPacket packet(SMSG_PATCH_VANITY_COLLECTION, VANITY_COLLECTION_DBC_FIELD_COUNT * sizeof(uint32) + 256);
+    for (uint32 field = 0; field < 3; ++field)
+      packet << row.Values[field];
+    packet << row.Artwork;
+    for (uint32 field = 4; field < VANITY_COLLECTION_DESCRIPTION_FIELD; ++field)
+      packet << row.Values[field];
+    packet << row.Description << row.AdditionalText;
+    packet << row.Values[VANITY_COLLECTION_LEARNED_SPELL_FIELD];
+    packet << "" << "" << "";
+    return SendRowPacket(player, packet);
+  }
+
+  static std::vector<VanityCollectionPatchRow> LoadVanityCollectionPatchRows() {
+    std::vector<VanityCollectionPatchRow> rows;
+    std::map<uint32, VanityPrice> prices = LoadVanityPrices();
+    if (prices.empty())
+      return rows;
+
+    ClientDBC vanity;
+    if (!vanity.Load(GetClientDBCPath("VanityCollection.dbc"), VANITY_COLLECTION_DBC_FIELD_COUNT))
+    {
+      LOG_ERROR("coa", "Cannot read the client VanityCollection.dbc; coa_client_vanity_collection prices are not "
+                       "streamed");
+      return rows;
+    }
+
+    for (uint32 index = 0; index < vanity.GetRecordCount(); ++index)
+    {
+      ClientDBC::Record const record = vanity.GetRecord(index);
+      auto const price = prices.find(record.GetUInt32(1));
+      if (price == prices.end())
+        continue;
+
+      VanityCollectionPatchRow &row = rows.emplace_back();
+      for (uint32 field = 0; field < VANITY_COLLECTION_DBC_FIELD_COUNT; ++field)
+        row.Values[field] = record.GetUInt32(field);
+      row.Values[4] = price->second.DonationPoints;
+      row.Values[5] = price->second.SeasonalPoints;
+      row.Values[6] = price->second.BazaarTokens;
+      row.Artwork = std::string(record.GetString(3));
+      row.Description = std::string(record.GetString(VANITY_COLLECTION_DESCRIPTION_FIELD));
+      row.AdditionalText = std::string(record.GetString(VANITY_COLLECTION_ADDITIONAL_TEXT_FIELD));
+      prices.erase(price);
+    }
+
+    for (auto const &[itemId, price] : prices)
+      LOG_ERROR("coa", "coa_client_vanity_collection {} has no VanityCollection.dbc row", itemId);
+    LOG_INFO("coa", "{} VanityCollection price rows stream at login", rows.size());
+    return rows;
+  }
+
   static WorldPacket BuildSpellRow(SpellPatchRow const &row) {
     WorldPacket packet(SMSG_PATCH_SPELL,
                        row.Values.size() * sizeof(uint32) + 1024);
@@ -4671,6 +4743,7 @@ private:
       for (std::size_t index = 0; index < _rows.Spells.size(); ++index)
         _rows.SpellRowIndexById.emplace(_rows.Spells[index].Values[0], index);
       _rows.QuestSuperTracks = LoadQuestSuperTrackPatchRows();
+      _rows.VanityCollections = LoadVanityCollectionPatchRows();
       _rowsPrepared = true;
     }
     return _rows;
@@ -5053,6 +5126,11 @@ public:
 
     auto vanity = _vanityItems.find(itemId);
     return vanity == _vanityItems.end() || IsVanityItemForPlayer(player, vanity->second);
+  }
+
+  [[nodiscard]] uint32 VanityLearnedSpell(uint32 itemId) const {
+    auto const vanity = _vanityItems.find(itemId);
+    return vanity == _vanityItems.end() ? 0 : vanity->second.LearnedSpell;
   }
 
   bool LoadClientData() {
@@ -5742,13 +5820,36 @@ public:
         }
     }
 
-    void OnMailItemObtained(Player* player, uint32 itemId)
+    void OnCarriedItemObtained(Player* player, uint32 itemId)
     {
         if (auto state = GetState(player))
         {
             Item const* stored = player->GetItemByEntry(itemId);
             CollectItem(player, *state, itemId, true, stored && stored->IsSoulBound());
         }
+    }
+
+    [[nodiscard]] bool IsCollectibleVanityItem(uint32 itemId) const
+    {
+        return _vanityItems.contains(itemId) || IsBankVanityItem(itemId);
+    }
+
+    void CollectVanityCopy(Player* player, Item* item)
+    {
+        if (item && IsCollectibleVanityItem(item->GetEntry()))
+            OnItemObtained(player, item);
+    }
+
+    void ForgetVanityItem(Player* player, uint32 itemId)
+    {
+        auto state = GetState(player);
+        if (!state || !state->OwnedVanityItems.erase(itemId))
+            return;
+
+        CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ACCOUNT_VANITY_COLLECTION);
+        stmt->SetData(0, state->AccountId);
+        stmt->SetData(1, itemId);
+        CharacterDatabase.DirectExecute(stmt);
     }
 
   void OnItemObtained(Player *player, Item *item) {
@@ -5965,6 +6066,12 @@ public:
         return category ? GetActiveIncarnation(player, category) : nullptr;
     }
 
+    uint32 GetIncarnationCategoryDisplay(Player* player, uint32 category)
+    {
+        AppearanceInfo const* appearance = GetActiveIncarnation(player, category);
+        return appearance ? appearance->CreatureDisplay : 0;
+    }
+
     uint32 GetIncarnationFormDisplay(Player* player, ShapeshiftForm form)
     {
         AppearanceInfo const* appearance = GetActiveFormIncarnation(player, form);
@@ -6026,7 +6133,7 @@ public:
         if (!player || !player->IsInWorld())
             return;
 
-        if (player->GetShapeshiftForm() != FORM_NONE)
+        if (player->GetShapeshiftForm() != FORM_NONE || player->HasAura(SPELL_VENOMANCER_SEA_SERPENT_FORM))
             player->RestoreDisplayId();
         if (Pet* pet = player->GetPet())
             RefreshIncarnationGuardian(player, pet);
@@ -6804,23 +6911,42 @@ private:
   }
 
   void ScanPlayerInventory(Player *player, PlayerCollectionState &state) {
-    for (uint8 slot = EQUIPMENT_SLOT_START; slot < INVENTORY_SLOT_ITEM_END;
-         ++slot) {
-      if (Item *item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+    for (uint8 slot = EQUIPMENT_SLOT_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
+      if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
         CollectItem(player, state, item->GetEntry(), false, item->IsSoulBound());
-    }
 
-    for (uint8 bagSlot = INVENTORY_SLOT_BAG_START;
-         bagSlot < INVENTORY_SLOT_BAG_END; ++bagSlot) {
-      Bag *bag = player->GetBagByPos(bagSlot);
-      if (!bag)
-        continue;
+    ForEachItemInBags(player, INVENTORY_SLOT_BAG_START, INVENTORY_SLOT_BAG_END, [&](Item* item)
+    {
+      CollectItem(player, state, item->GetEntry(), false, item->IsSoulBound());
+    });
 
-      for (uint32 slot = 0; slot < bag->GetBagSize(); ++slot) {
-        if (Item *item = bag->GetItemByPos(slot))
-          CollectItem(player, state, item->GetEntry(), false, item->IsSoulBound());
-      }
-    }
+    auto const collectBanked = [&](uint32 itemId, bool bound)
+    {
+      if (IsCollectibleVanityItem(itemId))
+        CollectItem(player, state, itemId, false, bound);
+    };
+
+    for (uint8 slot = BANK_SLOT_ITEM_START; slot < BANK_SLOT_ITEM_END; ++slot)
+      if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+        collectBanked(item->GetEntry(), item->IsSoulBound());
+
+    ForEachItemInBags(player, BANK_SLOT_BAG_START, BANK_SLOT_BAG_END, [&](Item* item)
+    {
+      collectBanked(item->GetEntry(), item->IsSoulBound());
+    });
+
+    for (AscensionPersonalBank::StoredItem const& stored : AscensionPersonalBank::StoredItems(player))
+      collectBanked(stored.Entry, stored.SoulBound);
+  }
+
+  template <typename Visit>
+  static void ForEachItemInBags(Player* player, uint8 firstBagSlot, uint8 endBagSlot, Visit&& visit)
+  {
+    for (uint8 bagSlot = firstBagSlot; bagSlot < endBagSlot; ++bagSlot)
+      if (Bag* bag = player->GetBagByPos(bagSlot))
+        for (uint32 slot = 0; slot < bag->GetBagSize(); ++slot)
+          if (Item* item = bag->GetItemByPos(slot))
+            visit(item);
   }
 
   static bool IsEquipmentAppearance(AppearanceInfo const& appearance)
@@ -7239,6 +7365,9 @@ private:
             handler.SendSysMessage("That item cannot be bought with Bazaar Tokens.");
             return;
         }
+
+        if (AscensionRealmLevelPurchase::Refuse(player, itemId))
+            return;
 
         if (IsConsumableVanityItem(vanityItr->second))
         {
@@ -8709,8 +8838,8 @@ public:
             "AscensionCompatPlayerScript",
             {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_SAVE,
              PLAYERHOOK_ON_AFTER_SET_VISIBLE_ITEM_SLOT, PLAYERHOOK_ON_EQUIP, PLAYERHOOK_ON_DELETE,
-             PLAYERHOOK_ON_TAKE_MAIL_ITEM, PLAYERHOOK_CAN_CAST_ITEM_USE_SPELL, PLAYERHOOK_CAN_EQUIP_ITEM,
-             PLAYERHOOK_ON_STORE_NEW_ITEM, PLAYERHOOK_ON_CREATE_ITEM,
+             PLAYERHOOK_ON_TAKE_MAIL_ITEM, PLAYERHOOK_ON_BEFORE_OPEN_ITEM, PLAYERHOOK_CAN_CAST_ITEM_USE_SPELL,
+             PLAYERHOOK_CAN_EQUIP_ITEM, PLAYERHOOK_ON_STORE_NEW_ITEM, PLAYERHOOK_ON_CREATE_ITEM,
              PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST,
              PLAYERHOOK_ON_PLAYER_IS_CLASS, PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_MAP_CHANGED,
              PLAYERHOOK_ON_LEARN_SPELL, PLAYERHOOK_ON_LEARN_TRAINER_SPELL, PLAYERHOOK_ON_FORGOT_SPELL,
@@ -9075,7 +9204,13 @@ public:
 
     void OnPlayerTakeMailItem(Player* player, Mail const*, uint32 itemEntry) override
     {
-        AscensionCollectionService::Instance().OnMailItemObtained(player, itemEntry);
+        AscensionCollectionService::Instance().OnCarriedItemObtained(player, itemEntry);
+    }
+
+    bool OnPlayerBeforeOpenItem(Player* player, Item* item) override
+    {
+        AscensionCollectionService::Instance().CollectVanityCopy(player, item);
+        return true;
     }
 
   void OnPlayerStoreNewItem(Player *player, Item *item,
@@ -9655,6 +9790,43 @@ enum StoreTitleContract : uint32
     ITEM_FOUNDERS_CHARTER_ACCOUNT = 977020,
     TITLE_THE_BLOODY = 230,
     TITLE_FOUNDER = 210
+};
+
+class AscensionVanityItemUseScript : public AllItemScript
+{
+public:
+    AscensionVanityItemUseScript() : AllItemScript("AscensionVanityItemUseScript") { }
+
+    bool CanItemUse(Player* player, Item* item, SpellCastTargets const&) override
+    {
+        if (player)
+            AscensionCollectionService::Instance().CollectVanityCopy(player, item);
+        return false;
+    }
+};
+
+class item_ascension_vanity_mount_cache : public ItemScript
+{
+public:
+    item_ascension_vanity_mount_cache() : ItemScript("item_ascension_vanity_mount_cache") { }
+
+    bool OnUse(Player* player, Item* item, SpellCastTargets const&) override
+    {
+        uint32 const mountSpell = AscensionCollectionService::Instance().VanityLearnedSpell(item->GetEntry());
+        if (!mountSpell || !sSpellMgr->GetSpellInfo(mountSpell))
+            return false;
+
+        player->SendEquipError(EQUIP_ERR_NONE, item, nullptr);
+        if (player->HasSpell(mountSpell))
+        {
+            ChatHandler(player->GetSession()).SendNotification("You already know this mount.");
+            return true;
+        }
+
+        player->learnSpell(mountSpell);
+        player->DestroyItemCount(item->GetEntry(), 1, true);
+        return true;
+    }
 };
 
 class item_coa_title_contract : public AllItemScript
@@ -10404,6 +10576,35 @@ class spell_ascension_enchant_strider : public AuraScript
     }
 };
 
+class aura_ascension_venomancer_sea_serpent_incarnation : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_venomancer_sea_serpent_incarnation);
+
+    void ShowIncarnation(AuraEffect const*, AuraEffectHandleModes)
+    {
+        Player* player = GetTarget()->ToPlayer();
+        if (!player || player->getTransForm() != GetId() ||
+            player->GetModelForForm(player->GetShapeshiftForm(), GetId()))
+            return;
+
+        if (uint32 const display = AscensionCollectionService::Instance().GetIncarnationCategoryDisplay(player,
+                APPEARANCE_CATEGORY_AQUATIC_FORM))
+            player->SetDisplayId(display);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_venomancer_sea_serpent_incarnation::ShowIncarnation,
+            EFFECT_1, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK);
+    }
+};
+
+}
+
+bool AscensionIncarnation::HasActiveFormIncarnation(Player* player)
+{
+    return player &&
+        AscensionCollectionService::Instance().GetActiveFormIncarnation(player, player->GetShapeshiftForm());
 }
 
 std::vector<WorldPacket> AscensionClientFileSpellRows()
@@ -10428,6 +10629,16 @@ AscensionVanityOwnership::TestOverride::~TestOverride()
 bool AscensionVanityOwnership::OwnsItem(Player const* player, uint32 itemId)
 {
     return AscensionCollectionService::Instance().OwnsVanityItem(player, itemId);
+}
+
+void AscensionVanityOwnership::CollectItem(Player* player, Item* item)
+{
+    AscensionCollectionService::Instance().CollectVanityCopy(player, item);
+}
+
+void AscensionVanityOwnership::ForgetItemForTest(Player* player, uint32 itemId)
+{
+    AscensionCollectionService::Instance().ForgetVanityItem(player, itemId);
 }
 
 bool AscensionCosmeticPetTokens::AvailableOnRealm(uint32 itemId)
@@ -10742,6 +10953,7 @@ void AddAscensionCompatScripts() {
   RegisterSpellScript(spell_ascension_experience_potion);
   RegisterSpellScript(spell_ascension_vanity_use_restriction);
   RegisterSpellScript(spell_ascension_stick_on_a_carrot);
+  RegisterSpellScript(aura_ascension_venomancer_sea_serpent_incarnation);
   RegisterSpellScript(spell_ascension_enchant_strider);
   RegisterSpellScript(spell_ascension_local_mount);
   RegisterSpellScript(spell_ascension_specialization_slot);
@@ -10753,7 +10965,9 @@ void AddAscensionCompatScripts() {
   RegisterSpellScript(spell_ascension_reaper_redshade);
   RegisterSpellScript(spell_ascension_wildcard_mount);
   RegisterSpellScript(spell_ascension_legacy_quest_reward);
+  new AscensionVanityItemUseScript();
   new AscensionTradesmanScroll();
+  new item_ascension_vanity_mount_cache();
   new item_coa_title_contract();
   new AscensionCompatServerScript();
   new AscensionCompatCommandScript();

@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "name": "Stratholme: Timmy the Cruel appears once King's Square is cleared (#10634)",
+  "contract": "#10634: #7012 made Timmy the Cruel (10808, spawn 9950289) stand in King's Square from the start. As in vanilla he now hides (invisible, friendly) until no Crimson Guardsman, Conjuror or Gallant (10418/10419/10424) is alive near him, then shows up hostile (SmartAI rows 3-6 and conditions, project owner decision; the hiding row checks every second while a guard lives, because a one-time hide on spawn or reset does not hold). His spawn moved in #7012, so the radius is 75 yd from it instead of the stock 40 yd from the old spot: that covers the same 11 guards in front of the cathedral.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 329,
+      "x": 3640.0,
+      "y": -3189.0,
+      "z": 127.0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where Stratholme is spawned",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Crimson guards of King's Square are there",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 10418,
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Timmy the Cruel hides while they live",
+      "actor": "p",
+      "metric": "nearby_creature_at_client",
+      "entry": 10808,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "p",
+      "entry": 10418,
+      "kill": true,
+      "all": true,
+      "radius": 90
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "p",
+      "entry": 10419,
+      "kill": true,
+      "all": true,
+      "radius": 90
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "p",
+      "entry": 10424,
+      "kill": true,
+      "all": true,
+      "radius": 90
+    },
+    {
+      "action": "assert",
+      "label": "Timmy the Cruel appears once the courtyard is clear",
+      "actor": "p",
+      "metric": "nearby_creature_at_client",
+      "entry": 10808,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "and hostile",
+      "actor": "p",
+      "metric": "nearby_creature_can_attack",
+      "entry": 10808,
+      "equals": 1
+    },
+    {
+      "action": "summon",
+      "label": "A Crimson Guardsman returns to the courtyard",
+      "actor": "p",
+      "as": "guard",
+      "entry": 10418,
+      "distance": 5,
+      "unowned": true
+    },
+    {
+      "action": "assert",
+      "label": "Timmy hides again while the guard lives",
+      "actor": "p",
+      "metric": "nearby_creature_at_client",
+      "entry": 10808,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Clear the returning guard",
+      "actor": "p",
+      "entry": 10418,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Timmy appears again once the guard is dead",
+      "actor": "p",
+      "metric": "nearby_creature_at_client",
+      "entry": 10808,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Timmy is hostile again",
+      "actor": "p",
+      "metric": "nearby_creature_can_attack",
+      "entry": 10808,
+      "equals": 1
+    }
+  ]
+}

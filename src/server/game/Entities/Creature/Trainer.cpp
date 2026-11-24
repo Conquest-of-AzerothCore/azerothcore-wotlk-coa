@@ -252,8 +252,9 @@ namespace Trainer
     }
 
     // A rank trainer's next rank turns trainable once the rank below it is bought, so its list is sent again.
-    // So is a list holding a spell the client knows only as its temporary replacement: on the next spell
-    // learned the client redraws rows from its own spellbook and would offer that held spell again.
+    // So is a list holding a spell the client knows only as its temporary replacement, or a held rank that a
+    // higher rank superseded: on the next spell learned the client redraws rows from its own spellbook and
+    // would offer that held spell again.
     bool Trainer::RepublishesAfterPurchase(Player const* player) const
     {
         if (_trainerId == WILDCARD_RANK_TRAINER_ID)
@@ -261,7 +262,9 @@ namespace Trainer
 
         return std::any_of(_spells.begin(), _spells.end(), [player](Spell const& trainerSpell)
         {
-            return player->GetTemporarySpellReplacement(trainerSpell.SpellId) != trainerSpell.SpellId;
+            uint32 const spellId = trainerSpell.SpellId;
+            return player->GetTemporarySpellReplacement(spellId) != spellId ||
+                (player->HasSpell(spellId) && !player->HasActiveSpell(spellId));
         });
     }
 

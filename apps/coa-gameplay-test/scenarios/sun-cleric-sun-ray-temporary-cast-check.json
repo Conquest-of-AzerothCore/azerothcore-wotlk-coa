@@ -1,0 +1,124 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric temporary Sun Ray: kept with Scorch Marks, refused without its marker, gone with the aura",
+  "contract": [
+    "Sun Cleric ADR 0006 (mentor decisions D-43 and D-46). Burning Heat 704908 streams the Sun Ray 504764 text",
+    "\"... and granting you Scorch Marks.\" A player learns Sun Ray temporarily while the marker 803238 is up and the",
+    "Sunflare 800231 button turns into Sun Ray. Refresh keeps that temporary Sun Ray while Scorch Marks 807059 is on",
+    "the player, because Player::removeSpell strips the aura of every TriggerSpell of the removed spell. The Sun",
+    "Cleric cast check refuses a non-triggered Sun Ray from that temporary entry once the marker is gone",
+    "(SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW, 173), and the removal of 807059 runs Refresh, so the temporary Sun Ray",
+    "ends with the aura, by removal and by expiry (DurationIndex 1, 10000 ms). Control: the same direct Sun Ray cast",
+    "with the marker up is accepted."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "cleric", "race": 1, "class": 27, "level": 60, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "cleric", "entry": 36, "level": 60, "health": 50000000, "distance": 3, "stationary": true}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login state and spawn settle", "ms": 5000},
+    {"action": "learn", "actor": "cleric", "spell": 800231},
+    {"action": "set_aura", "label": "Gain the Sun Ray marker", "actor": "cleric", "spell": 803238, "stacks": 1},
+    {
+      "action": "assert", "label": "SETUP: the marker replaces Sunflare with Sun Ray",
+      "actor": "cleric", "metric": "temporary_spell_replacement", "spell": 800231, "equals": 504764, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: Sun Ray is learned for the replacement",
+      "actor": "cleric", "metric": "knows_spell", "spell": 504764, "equals": 1
+    },
+    {"action": "cast", "label": "Cast Sunflare, sent as Sun Ray", "actor": "cleric", "spell": 800231,
+     "target": "dummy"},
+    {
+      "action": "assert", "label": "The replacement Sun Ray grants Scorch Marks",
+      "actor": "cleric", "metric": "aura", "spell": 807059, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: the cast consumed the marker",
+      "actor": "cleric", "metric": "aura", "spell": 803238, "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: the Sunflare button is restored",
+      "actor": "cleric", "metric": "temporary_spell_replacement", "spell": 800231, "equals": 800231, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Sun Ray stays learned while Scorch Marks is up",
+      "actor": "cleric", "metric": "knows_spell", "spell": 504764, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: one Sun Ray so far",
+      "actor": "cleric", "metric": "spell_cast_count", "spell": 504764, "equals": 1
+    },
+    {"action": "cast", "label": "Direct Sun Ray cast without the marker", "actor": "cleric", "spell": 504764,
+     "target": "dummy"},
+    {
+      "action": "assert", "label": "THE FIX: the direct Sun Ray without the marker is refused",
+      "actor": "cleric", "metric": "cast_failure", "spell": 504764, "equals": 173, "within_ms": 3000
+    },
+    {"action": "wait", "label": "Wait through the cast window before asserting absence", "ms": 1000},
+    {
+      "action": "assert", "label": "THE FIX: no second Sun Ray completed",
+      "actor": "cleric", "metric": "spell_cast_count", "spell": 504764, "equals": 1
+    },
+    {"action": "set_aura", "label": "Control: the marker is up again", "actor": "cleric", "spell": 803238, "stacks": 1},
+    {
+      "action": "assert", "label": "SETUP: the marker replaces Sunflare again",
+      "actor": "cleric", "metric": "temporary_spell_replacement", "spell": 800231, "equals": 504764, "within_ms": 3000
+    },
+    {"action": "cast", "label": "Control: direct Sun Ray cast with the marker", "actor": "cleric", "spell": 504764,
+     "target": "dummy"},
+    {
+      "action": "assert", "label": "Control: the direct Sun Ray with the marker completes",
+      "actor": "cleric", "metric": "spell_cast_count", "spell": 504764, "equals": 2, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Control: the cast with the marker is not refused",
+      "actor": "cleric", "metric": "cast_failure", "spell": 504764, "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: Scorch Marks is up after the control cast",
+      "actor": "cleric", "metric": "aura", "spell": 807059, "equals": 1, "within_ms": 3000
+    },
+    {"action": "set_aura", "label": "Scorch Marks is removed", "actor": "cleric", "spell": 807059, "stacks": 0},
+    {
+      "action": "assert", "label": "SETUP: Scorch Marks is gone",
+      "actor": "cleric", "metric": "aura", "spell": 807059, "equals": 0
+    },
+    {
+      "action": "assert", "label": "THE FIX: the removal of Scorch Marks unlearns Sun Ray",
+      "actor": "cleric", "metric": "knows_spell", "spell": 504764, "equals": 0
+    },
+    {"action": "set_aura", "label": "Expiry: gain the marker", "actor": "cleric", "spell": 803238, "stacks": 1},
+    {
+      "action": "assert", "label": "SETUP: the marker replaces Sunflare for the expiry phase",
+      "actor": "cleric", "metric": "temporary_spell_replacement", "spell": 800231, "equals": 504764, "within_ms": 3000
+    },
+    {"action": "reset_cooldown", "actor": "cleric", "spell": 800231},
+    {"action": "cast", "label": "Expiry: cast Sunflare, sent as Sun Ray", "actor": "cleric", "spell": 800231,
+     "target": "dummy"},
+    {
+      "action": "assert", "label": "Expiry: Scorch Marks is granted",
+      "actor": "cleric", "metric": "aura", "spell": 807059, "equals": 1, "within_ms": 3000
+    },
+    {"action": "wait", "label": "Most of the 10 s Scorch Marks duration", "ms": 8000},
+    {
+      "action": "assert", "label": "Expiry: Scorch Marks is still up",
+      "actor": "cleric", "metric": "aura", "spell": 807059, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Expiry: Sun Ray is still learned with it",
+      "actor": "cleric", "metric": "knows_spell", "spell": 504764, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Expiry: Scorch Marks expires",
+      "actor": "cleric", "metric": "aura", "spell": 807059, "equals": 0, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "THE FIX: Sun Ray does not outlive the expired Scorch Marks",
+      "actor": "cleric", "metric": "knows_spell", "spell": 504764, "equals": 0
+    }
+  ]
+}

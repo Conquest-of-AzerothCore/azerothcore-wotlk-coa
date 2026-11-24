@@ -509,6 +509,17 @@ Ascension.PvPVendors.ReleaseStage = 1
 
 HighRisk.FelCommutation.Enable = 0
 
+#    HighRisk.FelCommutation.InsureAllSlotsByDefault
+#        Description: Fel Commutation is always on and every character starts with all equipment slots
+#                     insured (all but shirt and tabard). Players remove or re-add slots in the Fel
+#                     Commutation window; using the portal only opens the window. Each character gets all
+#                     slots once. When Fel Commutation or this setting is turned off, those characters are
+#                     reset to no slots.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+HighRisk.FelCommutation.InsureAllSlotsByDefault = 1
+
 #    HighRisk.FelCommutation.FeeMultiplier
 #        Description: Multiplier applied to the fee. The fee is one amount per death, as the client shows it:
 #                     the whole average equipped item level times the client's rate band for that level, plus
@@ -541,6 +552,7 @@ HighRisk.FelCommutation.ToggleAnywhere = 0
 #                     Fel Commutation for all equipped gear. Using the portal only opens or closes the
 #                     window. The original client still sends the switch itself when the portal is used
 #                     (its Extensions.dll raises GAMEOBJECT_USED and its Lua sends the switch packet).
+#                     Not shown while HighRisk.FelCommutation.InsureAllSlotsByDefault = 1.
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
@@ -631,9 +643,9 @@ Bloodforged.EliteHeroicUpgradePercent = 2.5
 #                     High-Risk release stage 0-8 (HighRisk.ReleaseStage). The lowest allowed
 #                     value is 57, the lowest item level of the level 60 blue items: a lower value is
 #                     raised to 57 and logged. Raid gear of released raids is not limited by it.
-#        Default:     "57 57 57 57 57 57 57 57 57"
+#        Default:     "60 60 60 60 60 60 60 60 60"
 
-Bloodforged.BlueMaxItemLevelByStage = "57 57 57 57 57 57 57 57 57"
+Bloodforged.BlueMaxItemLevelByStage = "60 60 60 60 60 60 60 60 60"
 
 #    Bloodforged.EpicMaxItemLevelByStage
 #        Description: Highest item level of an epic Bloodforged item that drops, one value per
@@ -738,16 +750,25 @@ Bloodforged.EndgameRareMinRequiredLevel = 60
 #    Bloodforged.RareHiddenCachePercent
 #    Bloodforged.EpicHiddenCachePercent
 #        Description: High-Risk Hidden Caches (loot 9670 / 9671 / 9672, opened with an Ephemeral Key) add
-#                     Bloodforged items that require level 60 within the stage cap. A Hidden Cache always
-#                     gives one rare (blue) item. A Rare Hidden Cache always gives one epic and has the
-#                     two percent chances for a Heroic Bloodforged item and for raid gear of a released
-#                     raid. An Epic Hidden Cache always gives one raid item of a released raid (an epic
-#                     before any raid is released) and one epic; the two percent chances are for the raid
-#                     item to be its Heroic copy and for the epic to be a Heroic Bloodforged item.
+#                     Bloodforged items within the stage cap. A Hidden Cache always gives one rare (blue)
+#                     item that requires level Bloodforged.HiddenCacheBlueMinRequiredLevel to 60; the other
+#                     caches give items that require level 60. A Rare Hidden Cache always gives one epic
+#                     and has the two percent chances for a Heroic Bloodforged item and for raid gear of a
+#                     released raid. An Epic Hidden Cache always gives one raid item of a released raid (an
+#                     epic before any raid is released) and one epic; the two percent chances are for the
+#                     raid item to be its Heroic copy and for the epic to be a Heroic Bloodforged item.
 #        Default:     "15 5", "5 15"
 
 Bloodforged.RareHiddenCachePercent = "15 5"
 Bloodforged.EpicHiddenCachePercent = "5 15"
+
+#    Bloodforged.HiddenCacheBlueMinRequiredLevel
+#        Description: Lowest required level of the rare (blue) Bloodforged item a Hidden Cache (loot 9670)
+#                     gives; the item requires this level up to 60 and stays within
+#                     Bloodforged.BlueMaxItemLevelByStage. Values above 60 count as 60.
+#        Default:     55
+
+Bloodforged.HiddenCacheBlueMinRequiredLevel = 55
 
 #    Bloodforged.EphemeralKeyPercent
 #        Description: Percent chance for an Ephemeral Key (967680, opens a Hidden Cache) from a creature
@@ -1166,3 +1187,10 @@ XPHotspots.Brand = ""
 
 CoA.ChatLog.Enable = 0
 CoA.ChatLog.KeepDays = 30
+# Most rows held in memory while the character database writes earlier ones. Rows beyond it are not logged,
+# and the worldserver log reports how many once a minute; chat itself is never held back.
+CoA.ChatLog.MaxPendingRows = 20000
+# Channel names, and starts of channel messages in any channel, the chat log skips (separated by spaces).
+# The defaults are the data channels and messages of addons such as LootCollector, Questie and pfQuest.
+CoA.ChatLog.IgnoreChannels = "BBLC25C KLCE25C questiecomm FSK FSK-EVT xtensionxtooltip2 ConquestFinder JohnnysAddons CoARUru ALCSync K_LFGForwarder2IIll"
+CoA.ChatLog.IgnoreChannelMessagesStartingWith = "LC1: LCPOI1: LCR1 LCRD1 LCS3; PFQ6: DCOAS3; DCOAL31; DCOAR2"

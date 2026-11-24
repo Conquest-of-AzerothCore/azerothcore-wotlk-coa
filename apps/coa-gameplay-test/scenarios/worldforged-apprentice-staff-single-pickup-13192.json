@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Apprentice Staff has a single pickup (#13192)",
+  "contract": "#13192 reported the Worldforged Apprentice Staff pickup (entry 9900023) had two spawns 19 yd apart in the Barrens; the second (6970022) is the nearest realm sighting. Expected: guid 6970021 at -2120.24, -1090.58, 27.001 on map 1 is not spawned and guid 6970022 still is.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -2119.24,
+    "y": -1090.58,
+    "z": 27.501,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the stray copy is not spawned",
+      "metric": "spawn_active",
+      "spawn": 6970021,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the kept pickup is still spawned",
+      "metric": "spawn_active",
+      "spawn": 6970022,
+      "equals": 1
+    }
+  ]
+}
