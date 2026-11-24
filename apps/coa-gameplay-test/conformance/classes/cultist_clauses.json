@@ -623,14 +623,18 @@
   {
     "spell": 301182,
     "clause": "While above 80 Insanity,",
-    "labels": [],
+    "labels": [
+      "301182 behaviour_metric_delta above_80",
+      "301182 behaviour_metric_delta at_80"
+    ],
     "kind": "claim"
   },
   {
     "spell": 301182,
     "clause": "your Void Shield has $572758s2% increased value.",
     "labels": [
-      "301182 effect_value 572758e1 #0"
+      "301182 behaviour_metric_delta above_80",
+      "301182 behaviour_metric_delta control"
     ],
     "kind": "claim"
   },
@@ -2261,7 +2265,15 @@
   {
     "spell": 680607,
     "clause": "Your Twilight Shieldtoss now hits an additional enemy for every 20 Insanity you have.",
-    "labels": [],
+    "labels": [
+      "680607 behaviour_metric_delta control",
+      "680607 behaviour_metric_delta insanity_19",
+      "680607 behaviour_metric_delta insanity_20",
+      "680607 behaviour_metric_delta insanity_40",
+      "680607 behaviour_metric_delta insanity_60",
+      "680607 behaviour_metric_delta insanity_80",
+      "680607 behaviour_metric_delta insanity_100"
+    ],
     "kind": "claim"
   },
   {
@@ -3657,14 +3669,18 @@
   {
     "spell": 806897,
     "clause": "Generates 10 Insanity",
-    "labels": [],
+    "labels": [
+      "806897 behaviour_metric_delta insanity"
+    ],
     "kind": "claim"
   },
   {
     "spell": 806897,
     "clause": "Unleash a beam of eldritch energy, dealing ${$m1+0+$sps*.65} Shadow damage to an enemy and all nearby enemies.",
     "labels": [
-      "806897 effect_value e0 #0"
+      "806897 behaviour_metric_delta damage_base",
+      "806897 behaviour_metric_delta damage_sp",
+      "806897 behaviour_metric_delta area_nearby"
     ],
     "kind": "claim"
   },
