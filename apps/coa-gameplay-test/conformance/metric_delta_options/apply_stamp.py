@@ -6,15 +6,21 @@ ORDER = 30
 KEYS = {'aura', 'window', 'source'}
 APPLIED = 'applied'
 AFTER_TRIGGER = 'after_trigger'
+ANCHOR = 'anchor'
 STAMPS = ('cast_count', 'cast_upper', 'read_upper', 'count', 'clock', 'first')
-OPEN_STAMPS = ('open_lower', 'open_upper')
+OPEN_STAMPS = ('open_lower', 'open_upper', 'anchor', 'anchor_count')
 
 
 def parse(raw) -> dict:
-    if not isinstance(raw, dict) or set(raw) - {APPLIED} != KEYS:
-        raise ValueError(f'apply_stamp is {{"aura", "window", "source"}} with an optional "{APPLIED}", not {raw!r}')
+    if not isinstance(raw, dict) or set(raw) - {APPLIED, ANCHOR} != KEYS:
+        raise ValueError(f'apply_stamp is {{"aura", "window", "source"}} with an optional "{APPLIED}" and its '
+                         f'"{ANCHOR}", not {raw!r}')
     if APPLIED in raw and raw[APPLIED] != AFTER_TRIGGER:
         raise ValueError(f'apply_stamp {APPLIED} is {AFTER_TRIGGER!r} or absent, not {raw[APPLIED]!r}')
+    if (APPLIED in raw) != (ANCHOR in raw):
+        raise ValueError(f'apply_stamp {APPLIED} {AFTER_TRIGGER!r} and its {ANCHOR} come together')
+    if ANCHOR in raw and (isinstance(raw[ANCHOR], bool) or not isinstance(raw[ANCHOR], int) or raw[ANCHOR] <= 0):
+        raise ValueError(f'apply_stamp {ANCHOR} is the spell id of a phase aura, not {raw[ANCHOR]!r}')
     aura = raw['aura']
     if isinstance(aura, bool) or not isinstance(aura, int) or aura <= 0:
         raise ValueError(f'apply_stamp aura is a spell id, not {aura!r}')
@@ -26,7 +32,7 @@ def parse(raw) -> dict:
     if not isinstance(raw['source'], str) or not raw['source'].strip():
         raise ValueError('apply_stamp source cites the duration and the bound the window excludes')
     parsed = {'aura': aura, 'window': list(window), 'source': raw['source']}
-    return {**parsed, APPLIED: AFTER_TRIGGER} if APPLIED in raw else parsed
+    return {**parsed, APPLIED: AFTER_TRIGGER, ANCHOR: raw[ANCHOR]} if APPLIED in raw else parsed
 
 
 def after_trigger(value: dict) -> bool:
@@ -39,6 +45,7 @@ def check(spec, value):
     if spec.game_time is None:
         raise ValueError(f'{spec.spell} apply_stamp brackets the after reading from the game_time stamps')
     if after_trigger(value):
+        anchor_aura(spec, value)
         return
     if spec.strike is None or spec.strike.after_trigger_ms is not None:
         raise ValueError(f'{spec.spell} apply_stamp opens its timeline before strikes that land before the trigger')
@@ -53,6 +60,18 @@ def applied(spec, value: dict) -> dict:
     return {'event': 'aura_applied', 'spell': value['aura'], 'target_actors': [spec.measure_actor]}
 
 
+def anchor_aura(spec, value: dict) -> tuple[int, int, str, str]:
+    found = [aura for aura in spec.phase_auras if aura[0] == value[ANCHOR]]
+    if len(found) != 1 or found[0][1] < 1 or found[0][0] == value['aura']:
+        raise ValueError(f'{spec.spell} apply_stamp anchor {value[ANCHOR]} is one phase aura of the entry, set with '
+                         f'stacks, other than the stamped aura')
+    return found[0]
+
+
+def anchor_applied(spec, value: dict) -> dict:
+    return {'event': 'aura_applied', 'spell': value[ANCHOR], 'target_actors': [anchor_aura(spec, value)[2]]}
+
+
 def phase_steps(spec, value: dict, after: bool) -> list[dict]:
     from behaviours import CASTER, TAKEN_HIT_STRIKER_ENTRY
     from profile import measurement
@@ -63,8 +82,11 @@ def phase_steps(spec, value: dict, after: bool) -> list[dict]:
               'boss_entry': TAKEN_HIT_STRIKER_ENTRY if entry is None else entry}
     if not after_trigger(value):
         return [opened]
+    from behaviours import phase_aura_step
     names = labels(spec, value)
+    spell, stacks, on, by = anchor_aura(spec, value)
     return [measurement(names['open_lower'], CASTER, 'game_time_ms'), opened,
+            phase_aura_step((spell, 0, on, by)), phase_aura_step((spell, stacks, on, by)),
             measurement(names['open_upper'], CASTER, 'game_time_ms')]
 
 
@@ -86,19 +108,25 @@ def fixtures(class_file: dict, spec, value: dict, scenario: dict):
              measurement(names['count'], CASTER, 'timeline_count', **applied(spec, value)),
              measurement(names['clock'], CASTER, 'timeline_first_ms', event='cast', spell=spec.trigger_spell),
              measurement(names['first'], CASTER, 'timeline_first_ms', **applied(spec, value))]
+    if after_trigger(value):
+        reads += [measurement(names['anchor'], CASTER, 'timeline_first_ms', **anchor_applied(spec, value)),
+                  measurement(names['anchor_count'], CASTER, 'timeline_count', **anchor_applied(spec, value))]
     after_label = metric_delta_label(spec, AFTER)
     scenario['steps'] = [step for original in scenario['steps']
                          for step in (original, *(reads if original.get('label') == after_label else ()))]
     low, high = value['window']
     if after_trigger(value):
         scenario['contract'] += (f' Apply stamp (after the trigger): an encounter timeline opened in the after phase, '
-                                 f'with the game time read just before and just after it opens, stamps every apply '
-                                 f'of {value["aura"]} on the {spec.measure_actor} and the trigger cast '
-                                 f'{spec.trigger_spell} in the game-time base of the readings; exactly one apply, '
-                                 f'none before the trigger cast and none before the cast completes, else the trial '
-                                 f'is void; the after reading is bracketed from that apply, at least the game time '
-                                 f'just before the reading minus the opening upper bound and the apply, and at most '
-                                 f'the game time just after the reading minus the opening lower bound and the apply; '
+                                 f'with the game time read just before it opens and just after the phase aura '
+                                 f'{value[ANCHOR]} is removed and set again right after the opening (the anchor), '
+                                 f'stamps every apply of {value["aura"]} on the {spec.measure_actor}, the trigger '
+                                 f'cast {spec.trigger_spell} and the anchor apply; timeline stamps are compared only '
+                                 f'with each other; exactly one apply, none before the trigger cast, none before the '
+                                 f'cast completes and exactly one anchor apply before it, else the trial is void; the '
+                                 f'after reading is bracketed from that apply, at least the game time just before the '
+                                 f'reading minus the upper anchor read and the apply\'s offset from the anchor, and at '
+                                 f'most the game time just after the reading minus the lower anchor read and that '
+                                 f'offset; '
                                  f'the bracket must lie in {low}..{high} ms ({value["source"]}).')
         return
     scenario['contract'] += (f' Apply stamp: an encounter timeline opened before the after phase\'s strikes stamps '
@@ -161,12 +189,17 @@ def after_trigger_verdict(verdict, read: dict, recorded: dict):
         void = f'{read["count"]:g} applies of {recorded["aura"]} after the trigger cast, not exactly one'
     elif read['first'] < read['clock']:
         void = f'the apply lies {read["clock"] - read["first"]:g} ms before the trigger cast completes'
+    elif read['anchor_count'] != 1:
+        void = f'{read["anchor_count"]:g} applies of the anchor {recorded[ANCHOR]}, not exactly one'
+    elif read['first'] < read['anchor']:
+        void = f'the apply lies {read["anchor"] - read["first"]:g} ms before the anchor'
     if void is not None:
         return replace(verdict, status='unmeasured',
                        explanation=f'{verdict.explanation}; apply stamp after the trigger: {void}, so the apply is '
-                                   f'not the trigger\'s')
-    low = read['read_lower'] - read['open_upper'] - read['first']
-    high = read['read_upper'] - read['open_lower'] - read['first']
+                                   f'not bounded')
+    offset = read['first'] - read['anchor']
+    low = read['read_lower'] - read['open_upper'] - offset
+    high = read['read_upper'] - read['open_lower'] - offset
     window_low, window_high = recorded['window']
     text = (f'{verdict.explanation}; apply stamp after the trigger: the apply {read["first"] - read["clock"]:g} ms '
             f'after the trigger cast completes, the after reading {low:g}..{high:g} ms after it (window '

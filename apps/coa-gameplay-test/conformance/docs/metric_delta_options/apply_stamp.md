@@ -22,19 +22,24 @@ The encounter timeline makes the scenario exclusive in a simulated-clock batch (
 global). Python only, opt-in: harness metrics `encounter_start`, `timeline_count`, `timeline_first_ms` and
 `game_time_ms` already exist.
 
-**After the trigger** (ADR 1284, provisional). `"applied": "after_trigger"` stamps an aura that the trigger itself
-applies after its cast completes (a cast-time spell's hit, a projectile). It needs `game_time` but no `strike`. The
-timeline stamps a cast when it goes off (`ALLSPELLHOOK_ON_CAST`), so the game-time reads around the cast command do not
-bound it; instead the game time is read just before and just after `encounter_start` (`open_lower`, `open_upper`).
-The timeline and `game_time_ms` share one clock (`GameNowMs`; timeline times are offsets from the opening), so the
-apply lies at the opening plus `first`, and the after reading is bracketed:
+**After the trigger** (ADR 1284, provisional). `"applied": "after_trigger"` with `"anchor": P` stamps an aura that
+the trigger itself applies after its cast completes (a cast-time spell's hit, a projectile). It needs `game_time` but
+no `strike`. The timeline stamps a cast when it goes off (`ALLSPELLHOOK_ON_CAST`), so the game-time reads around the
+cast command do not bound it; and `timeline_first_ms` is an offset from the boss engage time
+(`CoAGameplayTimeline.cpp:104`), not from the opening, so timeline stamps are compared only with each other. `P` is one
+phase aura of the entry (a fixture set with stacks, not the stamped aura): right after `encounter_start` the option
+removes it and sets it again, between two game-time reads (`open_lower` before the opening, `open_upper` after the
+re-set), and stamps that apply (`anchor`, `anchor_count`). The apply lies `first - anchor` after the anchor, so the
+after reading is bracketed:
 
-- at least `game_time after - open_upper - first`;
-- at most `read_upper - open_lower - first`.
+- at least `game_time after - open_upper - (first - anchor)`;
+- at most `read_upper - open_lower - (first - anchor)`.
 
 The trial is void (`unmeasured`) when an apply precedes the trigger cast (`cast_count != 0`), when the apply count is
-not exactly one (`count != 1`), or when the apply precedes the completed cast (`first < clock`). Without `applied`
-the option is unchanged.
+not exactly one (`count != 1`), when the apply precedes the completed cast (`first < clock`), when the anchor was not
+applied exactly once (`anchor_count != 1`), or when the apply precedes the anchor. The anchor must leave the claim
+unchanged: a fixture unrelated to the stamped aura, present again before the trigger cast. Without `applied` the
+option is unchanged.
 
 Named points: `phase_steps` (the timeline), `after_trigger_steps` (the reads after the cast), `fixtures` (the reads
 after the reading and the contract), `model`, `verdict`.

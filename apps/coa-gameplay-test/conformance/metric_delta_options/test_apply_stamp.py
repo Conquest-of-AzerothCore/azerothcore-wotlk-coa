@@ -126,13 +126,14 @@ class ApplyStampTests(unittest.TestCase):
 
 
 AFTER_WINDOW = [2710, 2990]
+VULNERABLE = 213
 
 
 def after_trigger_entry(**changes) -> dict:
     return {**class_entry('immunity_held'), 'strike': None, 'caster_avoidance': None,
             'game_time': {'after': [2000, 4000]},
             'apply_stamp': {'aura': IMMUNITY, 'window': AFTER_WINDOW, 'source': 'test duration 3000 ms',
-                            'applied': 'after_trigger'}, **changes}
+                            'applied': 'after_trigger', 'anchor': VULNERABLE}, **changes}
 
 
 @cache
@@ -144,17 +145,25 @@ def after_stamped():
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
 class ApplyStampAfterTriggerTests(unittest.TestCase):
     OPEN = 20000.0
-    CLOCK = 300.0
-    FIRST = 666.0
+    ANCHOR = -400.0
+    CLOCK = -100.0
+    FIRST = 266.0
 
-    def test_the_timeline_opening_is_bracketed_by_game_time_reads(self):
+    def test_the_timeline_opening_and_the_anchor_are_bracketed_by_game_time_reads(self):
         scenario, [expectation] = behaviour_scenario(load_class_file(27), after_trigger_entry())
         run.validate(scenario)
         steps = scenario['steps']
         opened = [step['action'] for step in steps].index('encounter_start')
-        self.assertEqual([steps[opened - 1]['label'], steps[opened + 1]['label']],
+        self.assertEqual([steps[opened - 1]['label'], steps[opened + 3]['label']],
                          [f'{STALWART} apply_stamp open_lower', f'{STALWART} apply_stamp open_upper'])
-        self.assertEqual({steps[opened - 1]['metric'], steps[opened + 1]['metric']}, {'game_time_ms'})
+        self.assertEqual({steps[opened - 1]['metric'], steps[opened + 3]['metric']}, {'game_time_ms'})
+        self.assertEqual([(step['action'], step['spell'], step['stacks']) for step in steps[opened + 1:opened + 3]],
+                         [('set_aura', VULNERABLE, 0), ('set_aura', VULNERABLE, 1)])
+        labels = [step.get('label') for step in steps]
+        anchor = labels.index(f'{STALWART} apply_stamp anchor')
+        self.assertEqual(steps[anchor]['spell'], VULNERABLE)
+        self.assertEqual(steps[anchor]['target_actors'], ['caster'])
+        self.assertEqual(labels[anchor + 1], f'{STALWART} apply_stamp anchor_count')
         self.assertEqual(steps[opened]['boss_entry'], 36)
         self.assertEqual(expectation.model['apply_stamp']['applied'], 'after_trigger')
         self.assertIn('Apply stamp (after the trigger)', scenario['contract'])
@@ -167,16 +176,18 @@ class ApplyStampAfterTriggerTests(unittest.TestCase):
     def built_default(self):
         return behaviour_scenario(load_class_file(27), class_entry('immunity_gone'))
 
-    def judged(self, age=2800.0, first=FIRST, count=1, cast_count=0, drop=None):
+    def judged(self, age=2800.0, first=FIRST, count=1, cast_count=0, anchor_count=1, drop=None, shift=0.0):
         expectation = after_stamped()
         model = expectation.model
         stamps = model['apply_stamp']['stamps']
-        read = self.OPEN + first + age
+        read = self.OPEN + first - self.ANCHOR + age
         found = {model['before_label']: 0.0, model['after_label']: 1.0,
                  model['game_time']['cast_label']: self.OPEN + 50.0, model['game_time']['after_label']: read,
                  stamps['open_lower']: self.OPEN, stamps['open_upper']: self.OPEN, stamps['cast_count']: cast_count,
                  stamps['cast_upper']: self.OPEN + 54.0, stamps['read_upper']: read + 4.0, stamps['count']: count,
-                 stamps['clock']: self.CLOCK, stamps['first']: first}
+                 stamps['clock']: self.CLOCK + shift, stamps['first']: first + shift,
+                 stamps['anchor']: self.ANCHOR + shift,
+                 stamps['anchor_count']: anchor_count}
         if drop:
             found.pop(stamps[drop])
         return judge_behaviour(base_verdict(expectation), FakeRun(found), expectation)
@@ -194,6 +205,13 @@ class ApplyStampAfterTriggerTests(unittest.TestCase):
     def test_the_apply_is_measured_from_its_own_stamp_not_from_the_cast(self):
         self.assertEqual(self.judged(age=2800.0, first=self.FIRST + 400.0).detail['apply_bracket'], [2800.0, 2804.0])
 
+    def test_an_engage_offset_shared_by_the_timeline_stamps_leaves_the_bracket_unchanged(self):
+        for shift in (-2500.0, 900.0):
+            with self.subTest(shift=shift):
+                verdict = self.judged(shift=shift)
+                self.assertEqual(verdict.status, 'ok')
+                self.assertEqual(verdict.detail['apply_bracket'], [2800.0, 2804.0])
+
     def test_an_apply_before_the_trigger_voids_the_trial(self):
         for reads in ({'cast_count': 1}, {'cast_count': 1, 'count': 2}):
             with self.subTest(reads=reads):
@@ -201,17 +219,24 @@ class ApplyStampAfterTriggerTests(unittest.TestCase):
 
     def test_a_count_jump_or_an_apply_before_the_cast_completes_voids_the_trial(self):
         for reads in ({'count': 2}, {'count': 0}, {'first': self.CLOCK - 1.0}, {'drop': 'open_lower'},
-                      {'drop': 'open_upper'}):
+                      {'drop': 'open_upper'}, {'drop': 'anchor'}, {'anchor_count': 2}, {'anchor_count': 0},
+                      {'first': self.ANCHOR - 1.0}):
             with self.subTest(reads=reads):
                 self.assertEqual(self.judged(**reads).status, 'unmeasured')
 
     def test_refused_modes(self):
         good = {'aura': IMMUNITY, 'window': [2710, 2990], 'source': 'duration'}
-        self.assertEqual(parse({**good, 'applied': 'after_trigger'})['applied'], 'after_trigger')
+        self.assertEqual(parse({**good, 'applied': 'after_trigger', 'anchor': VULNERABLE})['anchor'], VULNERABLE)
         self.assertNotIn('applied', parse(good))
-        for raw in ({**good, 'applied': 'before_trigger'}, {**good, 'applied': True}):
+        for raw in ({**good, 'applied': 'before_trigger', 'anchor': VULNERABLE}, {**good, 'applied': True},
+                    {**good, 'applied': 'after_trigger'}, {**good, 'anchor': VULNERABLE},
+                    {**good, 'applied': 'after_trigger', 'anchor': True}):
             with self.subTest(raw=raw), self.assertRaises(ValueError):
                 parse(raw)
+        for anchor in (IMMUNITY, 12345):
+            stamp = {**after_trigger_entry()['apply_stamp'], 'anchor': anchor}
+            with self.subTest(anchor=anchor), self.assertRaisesRegex(ValueError, 'apply_stamp anchor'):
+                behaviour_scenario(load_class_file(27), after_trigger_entry(apply_stamp=stamp))
 
 
 if __name__ == '__main__':

@@ -25,8 +25,10 @@ Three Felsworn claims stayed open on tool gaps (fw-fa3, fw-rfa3, fw-rfa4):
 
 - 305.1: an opt-in field naming the evidence class per entry; read `coverage.metric_evidence()` in the contrast.
 - 231.1: plain game-time reads (cannot exclude 10% with 84 ms of margin); a harness clock read in the timeline base
-  (harness C++); read the game time around `encounter_start`, since the timeline and `game_time_ms` share
-  `GameNowMs` and timeline times are offsets from the opening.
+  (harness C++); read the game time around `encounter_start` and take the apply stamp as an offset from the opening
+  (built first: both pair runs alerted with a bracket of about 5500 ms, because `timeline_first_ms` subtracts the boss
+  engage time, `CoAGameplayTimeline.cpp:104`); an anchor apply stamped between two game-time reads, compared with
+  the apply stamp so that the engage offset cancels.
 - 4.1: `monotone` (phase power only); an `after_at_least` from the read baseline (a bound taken from a reading);
   two arms read again at a higher attack power in one scenario, judged on the direction only.
 
@@ -35,11 +37,13 @@ Three Felsworn claims stayed open on tool gaps (fw-fa3, fw-rfa3, fw-rfa4):
 - `metric_delta_contrast` reads `coverage.metric_evidence()`. At 21ce665ad0 only Felsworn 806109 `dash_range` and
   `dash_range_torpedo` change contrast (condition to own_cast); a test keeps the two lookups from diverging and no
   module outside `coverage.py` imports the static table.
-- `apply_stamp` takes an optional `"applied": "after_trigger"`. The game time is read just before and just after
-  `encounter_start`; the after reading's age is bracketed as `[game_time after - open_upper - first,
-  read_upper - open_lower - first]` and judged against the same window. The trial is void when an apply precedes the
-  trigger cast, when the apply count is not exactly one, or when the apply precedes the completed cast. No `strike`
-  is needed in this mode.
+- `apply_stamp` takes an optional `"applied": "after_trigger"` with an `"anchor"`, a phase aura of the entry. Right
+  after `encounter_start` the anchor is removed and set again between two game-time reads; with `d = first - anchor`
+  the after reading's age is bracketed as `[game_time after - open_upper - d, read_upper - open_lower - d]` and judged
+  against the same window. The trial is void when an apply precedes the trigger cast, when the apply count is not
+  exactly one, when the apply precedes the completed cast, when the anchor apply count is not one, or when the apply
+  precedes the anchor. No `strike` is needed in this mode. The anchor must be a fixture unrelated to the claim
+  (Felsworn: Blessed Resilience 33143 on the dummy).
 - `attack_power_arms` `{aura, wait_ms, source}` adds a control arm (before learning) and a learned arm (after), each
   reading attack power, taking the fixture aura, waiting, reading attack power and the metric again. The attack power
   gain is read: not positive, or different between the arms by more than 0.5, voids the trial. `ok` when the low
