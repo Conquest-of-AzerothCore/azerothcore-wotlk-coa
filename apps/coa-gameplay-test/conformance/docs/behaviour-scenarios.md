@@ -2245,6 +2245,8 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 - [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)
 - [`extra_strikes`](kinds/extra_strikes.md): the strikes an off-hand proc adds, counted per proc against a control
   without the talent (ADR 0693, provisional)
+- [`fed_charge_casts`](kinds/fed_charge_casts.md): a proc-granted cast-time aura earned for real, then its charged
+  casts timed by stamped polls: the stated cut on the charged casts and none on the next (ADR 1272)
 - [`heal_sum`](kinds/heal_sum.md): one heal's counts summed over the caster, ally players and assistable friendly
   creatures against a stated target cap, or one heal's amount paired with another unit's healing (ADR 1118,
   provisional)
