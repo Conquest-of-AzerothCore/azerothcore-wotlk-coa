@@ -115,6 +115,48 @@
       "metric": "nearby_creature_can_attack",
       "entry": 10808,
       "equals": 1
+    },
+    {
+      "action": "summon",
+      "label": "A Crimson Guardsman returns to the courtyard",
+      "actor": "p",
+      "as": "guard",
+      "entry": 10418,
+      "distance": 5,
+      "unowned": true
+    },
+    {
+      "action": "assert",
+      "label": "Timmy hides again while the guard lives",
+      "actor": "p",
+      "metric": "nearby_creature_at_client",
+      "entry": 10808,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Clear the returning guard",
+      "actor": "p",
+      "entry": 10418,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Timmy appears again once the guard is dead",
+      "actor": "p",
+      "metric": "nearby_creature_at_client",
+      "entry": 10808,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Timmy is hostile again",
+      "actor": "p",
+      "metric": "nearby_creature_can_attack",
+      "entry": 10808,
+      "equals": 1
     }
   ]
 }
