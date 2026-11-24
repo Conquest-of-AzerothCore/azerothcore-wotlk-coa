@@ -3843,15 +3843,6 @@
       "802076 behaviour_metric_delta charges",
       "802076 behaviour_metric_delta consumed"
     ],
-    "tool_gap": {
-      "reason": "The charges read gives the count the aura stores right after the cast (data: a stored modifier read back), not the attacks it affects or lasts: consumption per auto-attack and per direct hit (AscensionFelswornEvents.cpp case 803904, AscensionFelswornAbilities.cpp OnSpellCalculatedTarget) is not read. A consumption arm needs the script_count option to allow swings and a count of the swings that landed (plain_layout refuses attack_swings today); a shared option change that waits for the controller's go.",
-      "attempts": [
-        {
-          "agent": "fw-tg3b",
-          "report": ".agents/plans/fw-tg3b/report.md"
-        }
-      ]
-    },
     "kind": "claim",
     "reason": "Not counted: the consumed entry alerts in both runs of the fw-bsw pair (.agents/plans/fw-bsw/prove1): with 802076 learned the count reads 6 at the cast and 0 after 3 landed auto attacks, while the control arm without the talent reads 5 then 2 (one count per landed attack). Hypothesis from code reading only, cause unproven: the contract sets Annihilation 803904 ProcCharges to 0 (AscensionFelswornContracts.cpp:52-62), Aura::CalcMaxCharges then applies the talent's SPELLMOD_CHARGES (SpellAuras.cpp:926-936), so the aura holds 1 native charges and the native charge drop removes it after 1 proc. Queued by the controller as a server-fix task (cause first). Expiry edge untested; missed or avoided swings untested (the rule counts landed swings only)."
   },
@@ -3896,15 +3887,6 @@
       "802110 behaviour_metric_delta charges",
       "802110 behaviour_metric_delta consumed"
     ],
-    "tool_gap": {
-      "reason": "The charges read gives the count the aura stores right after the cast (data: a stored modifier read back), not the attacks it affects or lasts: consumption per auto-attack and per direct hit (AscensionFelswornEvents.cpp case 803904, AscensionFelswornAbilities.cpp OnSpellCalculatedTarget) is not read. A consumption arm needs the script_count option to allow swings and a count of the swings that landed (plain_layout refuses attack_swings today); a shared option change that waits for the controller's go.",
-      "attempts": [
-        {
-          "agent": "fw-tg3b",
-          "report": ".agents/plans/fw-tg3b/report.md"
-        }
-      ]
-    },
     "kind": "claim",
     "reason": "Not counted: the consumed entry alerts in both runs of the fw-bsw pair (.agents/plans/fw-bsw/prove1): with 802110 learned the count reads 7 at the cast and 0 after 3 landed auto attacks, while the control arm without the talent reads 5 then 2 (one count per landed attack). Hypothesis from code reading only, cause unproven: the contract sets Annihilation 803904 ProcCharges to 0 (AscensionFelswornContracts.cpp:52-62), Aura::CalcMaxCharges then applies the talent's SPELLMOD_CHARGES (SpellAuras.cpp:926-936), so the aura holds 2 native charges and the native charge drop removes it after 2 procs. Queued by the controller as a server-fix task (cause first). Expiry edge untested; missed or avoided swings untested (the rule counts landed swings only)."
   },
@@ -4082,15 +4064,6 @@
         ]
       }
     ],
-    "tool_gap": {
-      "reason": "The charges read gives the count the aura stores right after the cast (data: a stored modifier read back), not the attacks it affects or lasts: consumption per auto-attack and per direct hit (AscensionFelswornEvents.cpp case 803904, AscensionFelswornAbilities.cpp OnSpellCalculatedTarget) is not read. A consumption arm needs the script_count option to allow swings and a count of the swings that landed (plain_layout refuses attack_swings today); a shared option change that waits for the controller's go.",
-      "attempts": [
-        {
-          "agent": "fw-tg3b",
-          "report": ".agents/plans/fw-tg3b/report.md"
-        }
-      ]
-    },
     "kind": "claim",
     "reason": "The value label 803904 effect_value #1 is unreadable ($n) and is dropped: the $n part is the charges and consumed claim and the $d part the held and gone claims. The consumption part counts on mentor D-95 condition 1 (script_count swings, the consumed entry): after a real cast, the stored count plus the auto attacks landed since the cast equals the stated count, with at least one landed attack and the count strictly lower than at the cast. Expiry edge untested (the aura ending at the last count: seven attacks of the 2300 ms main hand do not fit in the 12000 ms duration). Missed or avoided swings untested (the rule counts landed swings only)."
   },
