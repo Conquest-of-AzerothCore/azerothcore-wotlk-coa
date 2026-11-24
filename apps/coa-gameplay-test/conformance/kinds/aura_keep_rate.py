@@ -35,6 +35,8 @@ class AuraKeepRateSpec:
     off_hand_item: int | None = None
     parts: int = 1
     label_suffix: str = 'keep_rate'
+    aura_stacks: int = 1
+    treatment_auras: tuple[tuple[int, int], ...] = ()
 
 
 def aura_keep_rate_spec(entry: dict) -> AuraKeepRateSpec:
@@ -44,7 +46,11 @@ def aura_keep_rate_spec(entry: dict) -> AuraKeepRateSpec:
                             tuple((int(spell), int(stacks)) for spell, stacks in entry.get('control_auras', ())),
                             tuple(int(spell) for spell in entry.get('learn', ())),
                             None if entry.get('off_hand_item') is None else int(entry['off_hand_item']),
-                            int(entry.get('parts', 1)), entry.get('label_suffix', 'keep_rate'))
+                            int(entry.get('parts', 1)), entry.get('label_suffix', 'keep_rate'),
+                            int(entry.get('aura_stacks', 1)),
+                            tuple((int(spell), int(stacks)) for spell, stacks in entry.get('treatment_auras', ())))
+    if spec.aura_stacks < 1 or any(stacks < 1 for _, stacks in spec.treatment_auras):
+        raise ValueError(f'{spec.spell} {KIND} sets aura_stacks and treatment_auras stacks of at least 1')
     if not 0 < spec.chance_pct < 100 or spec.trials < 1 or spec.control_trials < 1:
         raise ValueError(f'{spec.spell} {KIND} needs a keep chance below 100%, trials and control trials')
     if spec.control_spell == spec.consumer:
@@ -69,6 +75,15 @@ def sizing_sentence(spec: AuraKeepRateSpec) -> str:
             f'conformant server leaves the band with probability {residual:.1e} per run (normal approximation).')
 
 
+def fixture_sentence(spec: AuraKeepRateSpec) -> str:
+    sentence = (f' {spec.aura} is set at {spec.aura_stacks} stacks, the consumer\'s cost.'
+                if spec.aura_stacks != 1 else '')
+    if spec.treatment_auras:
+        held = ', '.join(f'{aura} at {stacks}' for aura, stacks in spec.treatment_auras)
+        sentence += f' Before every treatment cast the consumer\'s caster auras are set too (harness set_aura): {held}.'
+    return sentence
+
+
 def label_prefix(spell: int, suffix: str) -> str:
     return f'{spell} {BEHAVIOUR_METRIC_DELTA} {suffix}'
 
@@ -79,10 +94,10 @@ def keep_label(prefix: str, arm: str, trial: int, read: str) -> str:
 
 def trial_steps(records: Records, spec: AuraKeepRateSpec, arm: str, trial: int) -> list[dict]:
     spell = spec.consumer if arm == TREATMENT else spec.control_spell
-    fixtures = [] if arm == TREATMENT else [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': stacks}
-                                            for aura, stacks in spec.control_auras]
+    fixtures = [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': stacks}
+                for aura, stacks in (spec.treatment_auras if arm == TREATMENT else spec.control_auras)]
     prefix = label_prefix(spec.spell, spec.label_suffix)
-    return (fixtures + [{'action': 'set_aura', 'actor': CASTER, 'spell': spec.aura, 'stacks': 1}]
+    return (fixtures + [{'action': 'set_aura', 'actor': CASTER, 'spell': spec.aura, 'stacks': spec.aura_stacks}]
              + hit_ratio_cast(records, spell)
              + [measurement(keep_label(prefix, arm, trial, 'aura'), CASTER, KEEP_METRIC, spell=spec.aura),
                 measurement(keep_label(prefix, arm, trial, 'cast'), CASTER, 'cast_failure', spell=spell)])
@@ -115,7 +130,7 @@ def aura_keep_rate_scenario(class_file: dict, spec: AuraKeepRateSpec) -> tuple[d
                      f'{spec.control_spell} at the dummy keep it every time. Treatment: {spec.trials} casts of '
                      f'{spec.consumer} at the dummy keep it with {spec.chance_pct:g}% chance. A cast that failed is '
                      f'no trial. Pooled over the parts, the kept share must hold {spec.chance_pct:g}% in a Wilson '
-                     f'99% interval inside the G-20 band.' + sizing_sentence(spec)),
+                     f'99% interval inside the G-20 band.' + fixture_sentence(spec) + sizing_sentence(spec)),
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}

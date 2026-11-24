@@ -54,6 +54,40 @@ class PushbackReductionTests(unittest.TestCase):
         self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2790}), 'alert')
         self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2760}), 'alert')
 
+    def conditioned(self, **changes):
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                     if entry['kind'] == 'pushback_reduction')
+        single = {**entry, 'repeats': 1, 'windows': [[2440, 2560], [2930, 3050], [2680, 2800]],
+                  'caster_auras': [[48263, 1]], **changes}
+        return behaviour_scenario(load_fixture_class_file(23), single)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_caster_auras_are_set_afresh_before_every_cast_of_every_phase(self):
+        scenario, [expectation] = self.conditioned()
+        run.validate(scenario)
+        steps = scenario['steps']
+        casts = cast_indices(steps, 501978)
+        self.assertEqual(len(casts), 3)
+        for index in casts:
+            self.assertEqual(steps[index - 3:index - 1],
+                             [{'action': 'set_aura', 'actor': 'caster', 'spell': 48263, 'stacks': 0},
+                              {'action': 'set_aura', 'actor': 'caster', 'spell': 48263, 'stacks': 1}])
+        self.assertEqual(sum(step['action'] == 'set_aura' for step in steps), 6)
+        self.assertIn('the same in every phase', scenario['contract'])
+        _, [plain] = self.built()
+        self.assertEqual(expectation.model, plain.model)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_without_caster_auras_no_condition_is_set(self):
+        scenario, _ = self.built()
+        self.assertFalse(any(step['action'] == 'set_aura' for step in scenario['steps']))
+        self.assertNotIn('the same in every phase', scenario['contract'])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_condition_aura_below_one_stack_is_refused(self):
+        with self.assertRaises(ValueError):
+            self.conditioned(caster_auras=[[48263, 0]])
+
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_strikes_at_different_offsets_are_invalid(self):
         self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2739},
