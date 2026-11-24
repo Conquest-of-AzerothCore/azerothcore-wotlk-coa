@@ -26448,7 +26448,7 @@
     },
     {
       "spell": 800220,
-      "name": "Taskmaster's Army (Infernal Whipcrack enrages all ten raid players, 8 or 9 without it)",
+      "name": "Taskmaster's Army (Infernal Whipcrack enrages all ten raid players at 34.6 yd, the caster alone without it)",
       "kind": "metric_delta",
       "variant": "whipcrack_all",
       "label_suffix": "whipcrack_all",
@@ -26486,10 +26486,10 @@
             "fields": {
               "spell": 805243
             },
-            "before_expected": 8.5,
+            "before_expected": 1,
             "expected": 10,
             "tolerance": 0.5,
-            "source": "the number of the ten raid players holding 805243 after a real cast. Without 800220 the cap $i = MaxAffectedTargets 8 (Spell.dbc) keeps 8 random units of the ten for Effects[0-1] (RandomResize, Spell.cpp:1414-1420); Effect[2] has radius index 18 (15 yd) against 9 (20 yd), so the engine selects it apart (Spell.cpp:1003-1004 groups effects only at an equal radius) and, with every ally beyond its edge, it reaches the caster alone: the count is 8 when the caster is among the 8 and 9 when it is not, both the cap of 8; 8.5 +- 0.5 excludes 10 (no cap) and 7 (a cap of 7). With 800220 every friendly unit within the radius is added: 10, and +- 0.5 on an integer count is exactly 10",
+            "source": "the number of the ten raid players holding 805243 after a real cast, every ally 34.6 yd from the caster. Without 800220 Effects[0-1] (radius index 9, 20 yd) reach 20 + 2.66 (party area leeway, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, IsWithinDist3d, Spell.cpp:9465, Object.cpp:1355-1358) = 24.16 yd and Effect[2] (index 18, 15 yd) 19.16 yd: the caster alone, 1. With 800220 its SPELLMOD_RADIUS +15 (Effect[1], aura 107, MiscValue 6, class mask 32 = 805243's family flag) widens every effect of 805243 (CalcRadius, SpellInfo.cpp:624-639): Effects[0-1] to 35 yd (edge 39.16 yd) with the cap 8 (RandomResize, Spell.cpp:1414-1420; 800220's Effect[0] SPELLMOD_MAX_TARGETS has class mask (0,0,32), which misses 805243's flags (32,0,0)), Effect[2] to 30 yd, edge 30 + 2.66 + 1.5 = 34.16 yd, short of the allies by 0.44 yd, so it still reaches the caster alone. Without the script's 'all' lines the count is the cap's 8 plus the caster when Effect[2] adds it: 8 or 9, never 10. AscensionFelswornAbilities.cpp:162-167 adds every friendly unit that Nearby(player, 35) finds (AscensionFelsworn.cpp:174-188: a cell visit over x and y +- 35 around the caster, CellImpl.h:165-178, 42-54, then IsWithinDistInMap 35 + 1.5 + 1.5 = 38 yd): the allies at 34.6 yd lie 0.4 yd inside the visited square; 10, and +- 0.5 on an integer count is exactly 10",
             "reach_source": "805243 TargetB 56 TARGET_UNIT_CASTER_AREA_RAID: the TARGET_CHECK_RAID filter keeps every unit IsInRaidWith the caster (Spell.cpp:9385-9395), raid subgroup 2 included; with 800220 known AscensionFelswornAbilities.cpp:162-167 adds every friendly unit within the radius"
           },
           {
@@ -26500,10 +26500,10 @@
             "fields": {
               "target": "caster"
             },
-            "before_expected": 20.0,
-            "expected": 20.0,
-            "tolerance": 0.25,
-            "source": "ally_offsets moves ally 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond the Effect[2] edge 15 + 2.66 (party area leeway while moving, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9463-9464) = 19.16 yd and inside the Effects[0-1] edge 20 + 1.5 = 21.5 yd without the leeway"
+            "before_expected": 34.6,
+            "expected": 34.6,
+            "tolerance": 0.1,
+            "source": "ally_offsets moves ally 34.6 yd along x from the shared spawn, dz 0, the caster stays: beyond Effect[2]'s edge with 800220, 30 + 2.66 (party area leeway, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9465, Object.cpp:1355-1358) = 34.16 yd (0.44 yd margin), and inside the 35 yd square of the script's cell visit (AscensionFelsworn.cpp:181, CellImpl.h:42-54; 0.4 yd margin); the read is the server's own float distance (GetExactDist2d), its tolerance 0.1 keeps both margins above 0.3 yd"
           },
           {
             "actors": [
@@ -26513,10 +26513,10 @@
             "fields": {
               "target": "caster"
             },
-            "before_expected": 20.0,
-            "expected": 20.0,
-            "tolerance": 0.25,
-            "source": "ally_offsets moves ally2 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond the Effect[2] edge 15 + 2.66 (party area leeway while moving, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9463-9464) = 19.16 yd and inside the Effects[0-1] edge 20 + 1.5 = 21.5 yd without the leeway"
+            "before_expected": 34.6,
+            "expected": 34.6,
+            "tolerance": 0.1,
+            "source": "ally_offsets moves ally2 34.6 yd along x from the shared spawn, dz 0, the caster stays: beyond Effect[2]'s edge with 800220, 30 + 2.66 (party area leeway, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9465, Object.cpp:1355-1358) = 34.16 yd (0.44 yd margin), and inside the 35 yd square of the script's cell visit (AscensionFelsworn.cpp:181, CellImpl.h:42-54; 0.4 yd margin); the read is the server's own float distance (GetExactDist2d), its tolerance 0.1 keeps both margins above 0.3 yd"
           },
           {
             "actors": [
@@ -26526,10 +26526,10 @@
             "fields": {
               "target": "caster"
             },
-            "before_expected": 20.0,
-            "expected": 20.0,
-            "tolerance": 0.25,
-            "source": "ally_offsets moves ally3 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond the Effect[2] edge 15 + 2.66 (party area leeway while moving, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9463-9464) = 19.16 yd and inside the Effects[0-1] edge 20 + 1.5 = 21.5 yd without the leeway"
+            "before_expected": 34.6,
+            "expected": 34.6,
+            "tolerance": 0.1,
+            "source": "ally_offsets moves ally3 34.6 yd along x from the shared spawn, dz 0, the caster stays: beyond Effect[2]'s edge with 800220, 30 + 2.66 (party area leeway, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9465, Object.cpp:1355-1358) = 34.16 yd (0.44 yd margin), and inside the 35 yd square of the script's cell visit (AscensionFelsworn.cpp:181, CellImpl.h:42-54; 0.4 yd margin); the read is the server's own float distance (GetExactDist2d), its tolerance 0.1 keeps both margins above 0.3 yd"
           },
           {
             "actors": [
@@ -26539,10 +26539,10 @@
             "fields": {
               "target": "caster"
             },
-            "before_expected": 20.0,
-            "expected": 20.0,
-            "tolerance": 0.25,
-            "source": "ally_offsets moves ally4 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond the Effect[2] edge 15 + 2.66 (party area leeway while moving, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9463-9464) = 19.16 yd and inside the Effects[0-1] edge 20 + 1.5 = 21.5 yd without the leeway"
+            "before_expected": 34.6,
+            "expected": 34.6,
+            "tolerance": 0.1,
+            "source": "ally_offsets moves ally4 34.6 yd along x from the shared spawn, dz 0, the caster stays: beyond Effect[2]'s edge with 800220, 30 + 2.66 (party area leeway, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9465, Object.cpp:1355-1358) = 34.16 yd (0.44 yd margin), and inside the 35 yd square of the script's cell visit (AscensionFelsworn.cpp:181, CellImpl.h:42-54; 0.4 yd margin); the read is the server's own float distance (GetExactDist2d), its tolerance 0.1 keeps both margins above 0.3 yd"
           },
           {
             "actors": [
@@ -26552,10 +26552,10 @@
             "fields": {
               "target": "caster"
             },
-            "before_expected": 20.0,
-            "expected": 20.0,
-            "tolerance": 0.25,
-            "source": "ally_offsets moves ally5 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond the Effect[2] edge 15 + 2.66 (party area leeway while moving, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9463-9464) = 19.16 yd and inside the Effects[0-1] edge 20 + 1.5 = 21.5 yd without the leeway",
+            "before_expected": 34.6,
+            "expected": 34.6,
+            "tolerance": 0.1,
+            "source": "ally_offsets moves ally5 34.6 yd along x from the shared spawn, dz 0, the caster stays: beyond Effect[2]'s edge with 800220, 30 + 2.66 (party area leeway, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9465, Object.cpp:1355-1358) = 34.16 yd (0.44 yd margin), and inside the 35 yd square of the script's cell visit (AscensionFelsworn.cpp:181, CellImpl.h:42-54; 0.4 yd margin); the read is the server's own float distance (GetExactDist2d), its tolerance 0.1 keeps both margins above 0.3 yd",
             "reach_source": "805243 TargetB 56 TARGET_UNIT_CASTER_AREA_RAID: the TARGET_CHECK_RAID filter keeps every unit IsInRaidWith the caster (Spell.cpp:9385-9395), raid subgroup 2 included; with 800220 known AscensionFelswornAbilities.cpp:162-167 adds every friendly unit within the radius"
           },
           {
@@ -26566,10 +26566,10 @@
             "fields": {
               "target": "caster"
             },
-            "before_expected": 20.0,
-            "expected": 20.0,
-            "tolerance": 0.25,
-            "source": "ally_offsets moves ally6 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond the Effect[2] edge 15 + 2.66 (party area leeway while moving, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9463-9464) = 19.16 yd and inside the Effects[0-1] edge 20 + 1.5 = 21.5 yd without the leeway",
+            "before_expected": 34.6,
+            "expected": 34.6,
+            "tolerance": 0.1,
+            "source": "ally_offsets moves ally6 34.6 yd along x from the shared spawn, dz 0, the caster stays: beyond Effect[2]'s edge with 800220, 30 + 2.66 (party area leeway, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9465, Object.cpp:1355-1358) = 34.16 yd (0.44 yd margin), and inside the 35 yd square of the script's cell visit (AscensionFelsworn.cpp:181, CellImpl.h:42-54; 0.4 yd margin); the read is the server's own float distance (GetExactDist2d), its tolerance 0.1 keeps both margins above 0.3 yd",
             "reach_source": "805243 TargetB 56 TARGET_UNIT_CASTER_AREA_RAID: the TARGET_CHECK_RAID filter keeps every unit IsInRaidWith the caster (Spell.cpp:9385-9395), raid subgroup 2 included; with 800220 known AscensionFelswornAbilities.cpp:162-167 adds every friendly unit within the radius"
           },
           {
@@ -26580,10 +26580,10 @@
             "fields": {
               "target": "caster"
             },
-            "before_expected": 20.0,
-            "expected": 20.0,
-            "tolerance": 0.25,
-            "source": "ally_offsets moves ally7 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond the Effect[2] edge 15 + 2.66 (party area leeway while moving, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9463-9464) = 19.16 yd and inside the Effects[0-1] edge 20 + 1.5 = 21.5 yd without the leeway",
+            "before_expected": 34.6,
+            "expected": 34.6,
+            "tolerance": 0.1,
+            "source": "ally_offsets moves ally7 34.6 yd along x from the shared spawn, dz 0, the caster stays: beyond Effect[2]'s edge with 800220, 30 + 2.66 (party area leeway, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9465, Object.cpp:1355-1358) = 34.16 yd (0.44 yd margin), and inside the 35 yd square of the script's cell visit (AscensionFelsworn.cpp:181, CellImpl.h:42-54; 0.4 yd margin); the read is the server's own float distance (GetExactDist2d), its tolerance 0.1 keeps both margins above 0.3 yd",
             "reach_source": "805243 TargetB 56 TARGET_UNIT_CASTER_AREA_RAID: the TARGET_CHECK_RAID filter keeps every unit IsInRaidWith the caster (Spell.cpp:9385-9395), raid subgroup 2 included; with 800220 known AscensionFelswornAbilities.cpp:162-167 adds every friendly unit within the radius"
           },
           {
@@ -26594,10 +26594,10 @@
             "fields": {
               "target": "caster"
             },
-            "before_expected": 20.0,
-            "expected": 20.0,
-            "tolerance": 0.25,
-            "source": "ally_offsets moves ally8 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond the Effect[2] edge 15 + 2.66 (party area leeway while moving, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9463-9464) = 19.16 yd and inside the Effects[0-1] edge 20 + 1.5 = 21.5 yd without the leeway",
+            "before_expected": 34.6,
+            "expected": 34.6,
+            "tolerance": 0.1,
+            "source": "ally_offsets moves ally8 34.6 yd along x from the shared spawn, dz 0, the caster stays: beyond Effect[2]'s edge with 800220, 30 + 2.66 (party area leeway, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9465, Object.cpp:1355-1358) = 34.16 yd (0.44 yd margin), and inside the 35 yd square of the script's cell visit (AscensionFelsworn.cpp:181, CellImpl.h:42-54; 0.4 yd margin); the read is the server's own float distance (GetExactDist2d), its tolerance 0.1 keeps both margins above 0.3 yd",
             "reach_source": "805243 TargetB 56 TARGET_UNIT_CASTER_AREA_RAID: the TARGET_CHECK_RAID filter keeps every unit IsInRaidWith the caster (Spell.cpp:9385-9395), raid subgroup 2 included; with 800220 known AscensionFelswornAbilities.cpp:162-167 adds every friendly unit within the radius"
           },
           {
@@ -26608,10 +26608,10 @@
             "fields": {
               "target": "caster"
             },
-            "before_expected": 20.0,
-            "expected": 20.0,
-            "tolerance": 0.25,
-            "source": "ally_offsets moves ally9 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond the Effect[2] edge 15 + 2.66 (party area leeway while moving, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9463-9464) = 19.16 yd and inside the Effects[0-1] edge 20 + 1.5 = 21.5 yd without the leeway",
+            "before_expected": 34.6,
+            "expected": 34.6,
+            "tolerance": 0.1,
+            "source": "ally_offsets moves ally9 34.6 yd along x from the shared spawn, dz 0, the caster stays: beyond Effect[2]'s edge with 800220, 30 + 2.66 (party area leeway, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, Spell.cpp:9465, Object.cpp:1355-1358) = 34.16 yd (0.44 yd margin), and inside the 35 yd square of the script's cell visit (AscensionFelsworn.cpp:181, CellImpl.h:42-54; 0.4 yd margin); the read is the server's own float distance (GetExactDist2d), its tolerance 0.1 keeps both margins above 0.3 yd",
             "reach_source": "805243 TargetB 56 TARGET_UNIT_CASTER_AREA_RAID: the TARGET_CHECK_RAID filter keeps every unit IsInRaidWith the caster (Spell.cpp:9385-9395), raid subgroup 2 included; with 800220 known AscensionFelswornAbilities.cpp:162-167 adds every friendly unit within the radius"
           },
           {
@@ -26637,17 +26637,112 @@
         ]
       },
       "ally_offsets": {
-        "ally": 20.0,
-        "ally2": 20.0,
-        "ally3": 20.0,
-        "ally4": 20.0,
-        "ally5": 20.0,
-        "ally6": 20.0,
-        "ally7": 20.0,
-        "ally8": 20.0,
-        "ally9": 20.0
+        "ally": 34.6,
+        "ally2": 34.6,
+        "ally3": 34.6,
+        "ally4": 34.6,
+        "ally5": 34.6,
+        "ally6": 34.6,
+        "ally7": 34.6,
+        "ally8": 34.6,
+        "ally9": 34.6
       },
-      "observe_source": "805243 Infernal Whipcrack (server DBC): 'Enrage $?s800220[all][up to $i] allies within $a yds', MaxAffectedTargets 8 ($i), Effects[0-1] TargetB 56 TARGET_UNIT_CASTER_AREA_RAID radius index 9 (20 yd), Effect[2] the same target with radius index 18 (15 yd, SpellRadius.dbc), AttributesEx3 SPELL_ATTR3_ONLY_ON_PLAYER, so the allies are players: the caster and nine grouped players (a raid of ten, scenario schema 2), every ally 20.0 yd from the caster. Infernal Whipcrack is cast for real in both phases (cooldown reset before each cast; 10600 ms between phases let the 10000 ms aura expire); 800220 is learned between them. The radius-index split: the engine groups effects into one target selection only when their radius is equal (Spell.cpp:1003-1004), so Effect[2] is selected apart with its own cap; the allies stand beyond its 15 yd edge, so it reaches the caster alone, and the caster holds the aura in both phases (main reading 1 and 1). The count over the ten players is 8 or 9 without 800220 (8 when the caster is one of the 8 Effects[0-1] targets, 9 when Effect[2] adds it outside them): both mean the cap of 8. With 800220 AscensionFelswornAbilities.cpp:162-167 adds every friendly unit within Effects[0]'s radius (35 yd with 800220's +15) with all three effects: 10. Reference search 2026-11-24: coa-history spell 805243: 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+      "observe_source": "805243 Infernal Whipcrack (server DBC): 'Enrage $?s800220[all][up to $i] allies within $a yds', MaxAffectedTargets 8 ($i), Effects[0-1] TargetB 56 TARGET_UNIT_CASTER_AREA_RAID radius index 9 (20 yd), Effect[2] the same target with radius index 18 (15 yd, SpellRadius.dbc), AttributesEx3 SPELL_ATTR3_ONLY_ON_PLAYER, so the allies are players: the caster and nine grouped players (a raid of ten, scenario schema 2), every ally 34.6 yd from the caster. Infernal Whipcrack is cast for real in both phases (cooldown reset before each cast; 10600 ms between phases let the 10000 ms aura expire); 800220 is learned between them. 800220 (server DBC): Effect[1] SPELLMOD_RADIUS +15 with class mask (32,0,0) = 805243's SpellFamilyFlags, applied to every effect of 805243 (SpellEffectInfo::CalcRadius, SpellInfo.cpp:624-639; no effect index in the mod match): Effects[0-1] 35 yd and Effect[2] 30 yd. The engine selects Effect[2] apart (its radius differs, Spell.cpp:997-1004) with its own cap. The distance is chosen so that only the script can enrage all ten: before the learn the allies stand beyond Effects[0-1]'s 24.16 yd edge (caster alone, 1); after it, beyond Effect[2]'s widened 34.16 yd edge (it still reaches the caster alone) and inside Effects[0-1]'s 39.16 yd edge, where the cap keeps 8 of the ten, so a server without AscensionFelswornAbilities.cpp:162-167 reads 8 or 9 (review fw-rbk3 I-1: at 20 yd the widened Effect[2] reached the allies and two independent cap-8 picks made 10 in about 0.62 of runs). The script adds every friendly unit found by Nearby(player, Effects[0] radius 35) (a cell visit of +- 35 yd, then 38 yd with both object sizes) with all three effects: 10. No random path gives 10 without the script (code reading; no server mutant run). The cap is not this entry's subject: the before reading is 1 here. Reference search 2026-11-24: coa-history spell 805243: 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 805243,
+      "name": "Infernal Whipcrack (radius: an ally at 20.0 yd enraged, one at 25.5 yd not, without 800220)",
+      "kind": "metric_delta",
+      "variant": "whipcrack_radius",
+      "label_suffix": "whipcrack_radius",
+      "quote": "Enrage $?s800220[all][up to $i] allies within $a yds,",
+      "trigger_spell": 805243,
+      "gate_spell": 800220,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 805243
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "cast_power": 100,
+      "wait_ms": 500,
+      "expire_ms": 10600,
+      "ally_arm": {
+        "allies": 2,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 805243
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0.5,
+            "source": "the ally at 20.0 yd: inside Effects[0-1]'s edge in both phases (1), beyond Effect[2]'s 19.16 yd edge before the learn, so only the 20 yd radius reaches it"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 805243
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0.5,
+            "source": "the ally at 25.5 yd: beyond Effects[0-1]'s 24.16 yd edge before the learn (0, 1.34 yd margin); with 800220 inside the 35 yd radius (1)"
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 20.0,
+            "expected": 20.0,
+            "tolerance": 0.1,
+            "source": "ally_offsets moves ally 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond Effect[2]'s 19.16 yd edge (0.84 yd margin) and inside Effects[0-1]'s 21.5 yd edge without the leeway (1.5 yd margin); the read is the server's own float distance (GetExactDist2d)"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 25.5,
+            "expected": 25.5,
+            "tolerance": 0.1,
+            "source": "ally_offsets moves ally2 25.5 yd along x from the shared spawn, dz 0, the caster stays: beyond Effects[0-1]'s 24.16 yd edge with the leeway (1.34 yd margin); the read is the server's own float distance (GetExactDist2d)"
+          },
+          {
+            "actors": [
+              "ally",
+              "ally2"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 3.0,
+            "expected": 3.0,
+            "tolerance": 0.09,
+            "precondition": true,
+            "source": "the two allies' combat reach, the object size term of both edges (GetObjectSize = UNIT_FIELD_COMBATREACH, Object.cpp:2898-2901): 1.5 each for the class file player (Player.h:1110); a sum off 3.0 voids the trial (mentor D-169), it is not judged"
+          }
+        ]
+      },
+      "ally_offsets": {
+        "ally": 20.0,
+        "ally2": 25.5
+      },
+      "observe_source": "805243 Infernal Whipcrack (server DBC): 'Enrage $?s800220[all][up to $i] allies within $a yds', Effects[0-1] TargetB 56 TARGET_UNIT_CASTER_AREA_RAID radius index 9 (20 yd, $a), Effect[2] radius index 18 (15 yd), MaxAffectedTargets 8. The caster and two grouped players: ally 20.0 yd and ally2 25.5 yd from the caster along x. Infernal Whipcrack is cast for real in both phases (cooldown reset before each cast; 10600 ms between phases let the 10000 ms aura expire); 800220 is learned between them (it widens every radius by 15 yd and adds the script's 'all' targets, AscensionFelswornAbilities.cpp:162-167). The radius read is the before phase: Effects[0-1] (radius index 9, $a = 20 yd) reach 20 + 2.66 (party area leeway, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, IsWithinDist3d, Spell.cpp:9465, Object.cpp:1355-1358) = 24.16 yd (21.5 yd without the leeway); Effect[2] (index 18, 15 yd) reaches 19.16 yd (16.5 yd), so the ally at 20.0 yd holds the aura through Effects[0-1] alone and the ally at 25.5 yd does not; three candidates stay below the cap 8, so the pick is not random. The after phase reads both allies enraged. The caster holds the aura in both phases (main reading 1 and 1). The target cap $i is not read here (a deterministic cap read needs a per-effect aura holder read, a tool idea). Reference search 2026-11-24: coa-history spell 805243: 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 300476,

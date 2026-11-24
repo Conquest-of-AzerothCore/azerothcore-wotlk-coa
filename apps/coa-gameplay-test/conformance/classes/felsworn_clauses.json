@@ -4431,9 +4431,11 @@
     "clause": "Enrage $?s800220[all][up to $i] allies within $a yds,",
     "labels": [
       "805243 effect_value #0",
-      "805243 effect_value #4"
+      "805243 effect_value #4",
+      "805243 behaviour_metric_delta whipcrack_radius"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Mentor D-91 item 5: status 2 only with an ok radius read and an ok target-cap read. Radius read: 805243 behaviour_metric_delta whipcrack_radius (an ally at 20.0 yd enraged and one at 25.5 yd not, without 800220; three candidates below the cap). Target-cap read open: the caster always holds the aura through Effect[2] (15 yd, selected apart), so a count of holders reads the cap 8 as 8 or 9 at random; a deterministic read needs a per-effect aura holder metric (tool idea 'aura_effect', fw-bk6 2026-11-24), not built (no harness change now, t5)."
   },
   {
     "spell": 805243,
