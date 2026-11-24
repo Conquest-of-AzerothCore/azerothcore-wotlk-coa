@@ -19146,10 +19146,10 @@
       "variant": "no_enemy",
       "label_suffix": "no_enemy",
       "relocate_before_trigger": {
-        "dx": -40
+        "dx": -20
       },
       "expected": 12,
-      "observe_source": "Fury of the Illidari 561216 Description: 'Requires a nearby enemy to cast.' (@ext). Spell.dbc carries no target requirement for it (Effect[0] and Effect[2] TargetA 1 self), the server refuses a cast with no valid, visible attack target within 15 yd in line of sight with SPELL_FAILED_BAD_TARGETS (12, SharedDefines.h:1062; AscensionFelswornAbilities.cpp:90-97). The cast_failure of 561216 is read 500 ms after one real cast: 0 before the learn (no cast, control) and, after it, the refusal code with the caster moved away, 0 with the dummy beside it. Reference search 2026-11-24: coa-history spell 561216: see the felfury entry; nothing found that decides a distance; the tooltip gives no distance, so only 'no enemy at all' against 'an enemy beside the caster' is claimed. Arm: the caster is moved 40 yd away from the only dummy right before the cast (relocate_before_trigger), so no enemy is within 15 yd; expected the refusal 12."
+      "observe_source": "Fury of the Illidari 561216 Description: 'Requires a nearby enemy to cast.' (@ext). Spell.dbc carries no target requirement for it (Effect[0] and Effect[2] TargetA 1 self), the server refuses a cast with no valid, visible attack target within 15 yd in line of sight with SPELL_FAILED_BAD_TARGETS (12, SharedDefines.h:1062; AscensionFelswornAbilities.cpp:90-97). The cast_failure of 561216 is read 500 ms after one real cast: 0 before the learn (no cast, control) and, after it, the refusal code with the caster moved away, 0 with the dummy beside it. Reference search 2026-11-24: coa-history spell 561216: see the felfury entry; nothing found that decides a distance; the tooltip gives no distance, so only 'no enemy at all' against 'an enemy beside the caster' is claimed. Arm: the caster is moved 20 yd away from the only dummy (the step takes at most 20 yd; the dummy stands on +x, so it is then more than 15 yd away) right before the cast (relocate_before_trigger), so no enemy is within 15 yd; expected the refusal 12."
     },
     {
       "spell": 561216,
