@@ -460,11 +460,13 @@
       },
       {
         "claim": "for every 10 points of Energy you have at the time of casting.",
-        "labels": [],
-        "reason": "Withheld (fw-vb2c, review I-4b): the label '300489 behaviour_hit_ratio crit_energy_half' (50 Energy, stated +5, band 3 to 7) reads +7.25 alert, +6.93 ok, +7.37 alert, every 99% interval excluding 5; the clause must not count in a pair where it lands inside the band. Lead kept for a mentor reading of 'Energy you have at the time of casting'; the arm stays in the class file."
+        "labels": [
+          "300489 behaviour_hit_ratio crit_energy_half"
+        ],
+        "reason": "Counted by the 50 Energy arm on Azzinoth's Assault 803475, an instant Felfury spender (CastingTimeIndex 1, 0 ms): Energy set to 50 before the cast gives 50 / 10 x 1 = 5 points (band 3 to 7), control arm without 300489 in the same pair. The earlier arm on Ruin 801895 (2.5 s cast) read +7: Energy regenerates about 10 per second during the cast (probe 20261124-034318: 50, 62 at 1.2 s, 47 after the cast and its 30 cost; 50, 50, 20 with regeneration off), so the hook sees about 75 at completion, not 50 and not 'after the cost'. Not tested: whether the Energy counts at the start or at the completion of a cast on a spender with a cast time."
       }
     ],
-    "reason": "fw-vb2b (2026-11-24): the 100 Energy arm (crit_energy) reads +9.67 / +9.85 / +9.82 points against the stated +10 in three runs (all ok). The 50 Energy arm (crit_energy_half, stated +5, band 3 to 7, which excludes a flat +10) reads +7.25 (alert), +6.93 (ok, interval 6.16 to 7.71), +7.37 (alert): the dependence on Energy is real (0 without the passive, about +7 at 50, about +10 at 100) but the value at 50 Energy is not the stated 5 and the arm flips between runs, so the half arm's label is withheld from every claim (its claim has no labels), a lead and not a fix case. The Energy plus spell cost hypothesis (AscensionFelswornAbilities.cpp:158, energy = GetPower + max(0, GetPowerCost), Ruin 801895 ManaCost 30) does not fit both arms: a read before the cost deduction would give 13 at 100 Energy, not 9.7 to 9.8, and a read after it would give 5 at 50 Energy, not 7; it is dropped as an explanation. No server change on this check: needs a mentor reading of 'Energy you have at the time of casting' (before or after the cost)."
+    "reason": "fw-vb2b (2026-11-24): the 100 Energy arm (crit_energy) on Ruin reads +9.67 / +9.85 / +9.82 points against the stated +10 (all ok). The 50 Energy arm on Ruin read +7 because Energy regenerates about 10 per second during the 2.5 s cast (probe 20261124-034318), so the hook sees about 75 at completion; the earlier explanation that a read after the cost would give 5 at 50 Energy is refuted by that probe. D-89: the half arm is measured on Azzinoth's Assault 803475, an instant Felfury spender, so the Energy at the start and at the completion of the cast are the same (crit_energy_half, stated +5, band 3 to 7). No server change."
   },
   {
     "spell": 300490,

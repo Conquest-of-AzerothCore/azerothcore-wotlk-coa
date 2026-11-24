@@ -2187,6 +2187,12 @@
           1,
           "caster",
           "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "metric": "spell_damage_total",
@@ -2202,7 +2208,7 @@
       "expected": 190.0,
       "after_at_least": 189,
       "after_at_most": 191,
-      "observe_source": "560284 Effect[1] SPELL_EFFECT_SCHOOL_DAMAGE, Fire (SchoolMask 4), BasePoints 101 + 1 (DieSides 1 adds 1) = 102, RealPointsPerLevel 2.85 x (60 - BaseLevel 29) = 88.35 truncated to 88, so m2 = 190 at level 60 (tooltip 190.35); the tooltip adds fire spell power x 1.05 ($spfi*1.05). The dummy's magic resistance is removed (823764), criticals are made impossible by 64481, the cast at the dummy lands the area at its position. Expected 190. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+      "observe_source": "560284 Effect[1] SPELL_EFFECT_SCHOOL_DAMAGE, Fire (SchoolMask 4), BasePoints 101 + 1 (DieSides 1 adds 1) = 102, RealPointsPerLevel 2.85 x (60 - BaseLevel 29) = 88.35 truncated to 88, so m2 = 190 at level 60 (tooltip 190.35); the tooltip adds fire spell power x 1.05 ($spfi*1.05). The dummy's magic resistance is removed (823764), spell criticals are made impossible by Reg's Test Aura 984954 (64481 is a weapon crit aura, aura 52, and does not stop a spell critical), the cast at the dummy lands the area at its position. Expected 190. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
     },
     {
       "spell": 560284,
@@ -16422,30 +16428,27 @@
       "rate": "critical",
       "expected_points": 10,
       "trials": 60,
-      "parts": 140,
+      "parts": 200,
       "cast_power": 100,
-      "observe_source": "Archimonde's Wrath 300489 Description: 'Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.' Effect[1] BasePoints 0 + 1 = 1 ($s2 = 1). With 100 Energy at the time of casting the stated bonus is 10 x 1 = 10 critical strike points on Ruin 801895, a Felfury spender (it consumes 2 Felfury). Behaviour read: critical over all hits of the observed Ruin, control arm (300489 not learned) against treatment arm (300489 learned), the difference of the two rates judged in percent points inside the G-19 band of the stated 10 (2 points), pooled over parts of 300 casts per arm (ADR 0195); Energy is set to 100 before every cast; Felfury x2 and spell penetration 823764 are named precondition fixtures. Reference search 2026-11-23: coa-history spell 300489: 0 events in 186 logs (a passive leaves no event); nothing found beyond the tooltip and Spell.dbc. "
+      "observe_source": "Archimonde's Wrath 300489 Description: 'Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.' Effect[1] BasePoints 0 + 1 = 1 ($s2 = 1). With 100 Energy at the time of casting the stated bonus is 10 x 1 = 10 critical strike points on Ruin 801895, a Felfury spender (it consumes 2 Felfury). Behaviour read: critical over all hits of the observed Ruin, control arm (300489 not learned) against treatment arm (300489 learned), the difference of the two rates judged in percent points inside the G-19 band of the stated 10 (2 points), pooled over parts of 300 casts per arm (ADR 0195); Energy is set to 100 before every cast; Felfury x2 and spell penetration 823764 are named precondition fixtures. Reference search 2026-11-23: coa-history spell 300489: 0 events in 186 logs (a passive leaves no event); nothing found beyond the tooltip and Spell.dbc. Sizing 2026-11-24: the 99% half-width of the difference must stay under 1 point (half of the 2-point band). One scenario holds at most 65 casts (the pilot caps them there), so only the number of parts can lower it. At 140 parts the half-width read 0.856, 0.884, 0.853, 0.961, 0.875, 1.01, 0.948 and 0.934 over 8 runs (mean 0.915, sd 0.057, relative 6.2%), so one run in eight was not judged; the half-width falls as 1/sqrt(parts), so 200 parts give about 0.77 and the limit lies 5 standard deviations away (a 30% margin over a 6.2% spread): residual failure probability below 1e-5 per run, 2e-5 per pair, under the 0.1% per pair target."
     },
     {
       "spell": 300489,
-      "name": "Archimonde's Wrath (Ruin critical strike share rises by 5 points at 50 Energy)",
+      "name": "Archimonde's Wrath (Assault critical strike share rises by 5 points at 50 Energy)",
       "kind": "hit_ratio",
       "variant": "crit_energy_half",
       "label_suffix": "crit_energy_half",
       "quote": "Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.",
       "expected": 1.05,
-      "observe_spell": 801895,
-      "learn": [
-        801895
-      ],
+      "observe_spell": 520262,
       "control": {
         "auras": [
           [
             800058,
-            2
+            6
           ],
           [
-            823764,
+            803468,
             1
           ]
         ]
@@ -16454,10 +16457,10 @@
         "auras": [
           [
             800058,
-            2
+            6
           ],
           [
-            823764,
+            803468,
             1
           ]
         ],
@@ -16467,10 +16470,12 @@
       },
       "rate": "critical",
       "expected_points": 5,
-      "trials": 60,
+      "trials": 80,
       "parts": 140,
       "cast_power": 50,
-      "observe_source": "The 'for every 10 points of Energy' scaling arm of the crit_energy entry: Energy is set to 50 before every cast, so the stated bonus is 5 x 1 = 5 critical strike points ($s2 = 1, Effect[1] BasePoints 0 + 1), judged inside the G-19 band of 2 points (3 to 7), which excludes the flat +10 that a script ignoring the Energy would give. Same Ruin 801895 reads, control arm (300489 not learned) against treatment arm (300489 learned), Felfury x2 and spell penetration 823764 as named precondition fixtures. Reference search 2026-11-23: coa-history spell 300489: 0 events in 186 logs (a passive leaves no event); nothing found beyond the tooltip and Spell.dbc."
+      "observe_source": "Archimonde's Wrath 300489 Description: 'Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.' Effect[1] BasePoints 0 + 1 = 1 ($s2 = 1). Azzinoth's Assault 803475 is a Felfury spender with an instant cast (CastingTimeIndex 1 = SpellCastTimes 1 = 0 ms, Spell.dbc /srv/coa/server-data/dbc), so the Energy at the start of the cast and at its completion are the same and no regeneration runs between them. Energy is set to 50 before every cast; the tooltip then gives 50 / 10 x 1 = 5 critical strike points on the main-hand strike 520262 of Assault, judged inside the G-19 band of 2 points (3 to 7), which excludes the flat +10 that a script ignoring the Energy would give and the +0 of a passive that does nothing. Regeneration between the Energy step and the cast would only add to the 50 and leaves 5 for any value from 50 to 59. Behaviour read: critical over all hits of 520262, control arm (300489 not learned, same Felfury 800058 x6 and 803468 fixtures) against treatment arm (300489 learned), the difference of the two rates in percent points, pooled over parts of 80 casts per arm. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before each cast of Assault 803475 (it needs 803468), in both arms. Reference search 2026-11-23: coa-history spell 300489: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); ~/CoaServer/reference holds only talent listings, no behaviour text; nothing found on the moment the Energy is read. Untested, by design: whether 'at the time of casting' means the start or the completion of a cast on a spender with a cast time (Ruin 801895, 2.5 s); the 100 Energy arm on Ruin cannot tell, since Energy is capped at 100 at both moments.",
+      "cast_spell": 803475,
+      "cast_wait_ms": 1600
     },
     {
       "spell": 802058,
