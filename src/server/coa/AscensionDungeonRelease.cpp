@@ -1,15 +1,19 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionDungeonRelease.h"
+#include "Chat.h"
+#include "DataMap.h"
 #include "DBCStores.h"
 #include "Group.h"
 #include "InstanceScript.h"
 #include "LFGMgr.h"
 #include "Map.h"
+#include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 
+#include <algorithm>
 #include <mutex>
 #include <unordered_map>
 #include <vector>
@@ -19,8 +23,38 @@ namespace
 constexpr char const* PENDING_DUNGEON_RELEASE = "ascension_dungeon_release";
 constexpr float RELEASE_RESTORE_PERCENT = 0.5f;
 constexpr uint32 SPELL_CORPSE_RUNNER = 84015;
+constexpr char const* RAID_RELEASE_HOLD = "ascension_raid_release_hold";
+constexpr char const* RAID_RELEASE_REFUSED = "You cannot release your spirit during a boss fight.";
 
 struct PendingDungeonRelease : DataMap::Base { };
+
+struct RaidReleaseHold : DataMap::Base
+{
+    std::unordered_map<ObjectGuid, std::vector<uint32>> held;
+};
+
+bool InRaidFight(Map* map)
+{
+    if (!map->IsRaid())
+        return false;
+    InstanceMap* instanceMap = map->ToInstanceMap();
+    InstanceScript* instance = instanceMap ? instanceMap->GetInstanceScript() : nullptr;
+    return instance && instance->IsEncounterInProgress();
+}
+
+void Hold(Player* player)
+{
+    RaidReleaseHold* hold = player->GetMap()->CustomData.GetDefault<RaidReleaseHold>(RAID_RELEASE_HOLD);
+    if (hold->held.count(player->GetGUID()))
+        return;
+
+    std::vector<uint32> fighting;
+    InstanceScript* instance = player->GetMap()->ToInstanceMap()->GetInstanceScript();
+    for (uint32 bossId = 0; bossId < instance->GetEncounterCount(); ++bossId)
+        if (instance->GetBossState(bossId) == IN_PROGRESS)
+            fighting.push_back(bossId);
+    hold->held.emplace(player->GetGUID(), std::move(fighting));
+}
 
 std::mutex g_runStartsLock;
 std::unordered_map<uint32, std::pair<uint32, Position>> g_runStarts;
@@ -122,7 +156,29 @@ class ascension_dungeon_release_player : public PlayerScript
 public:
     ascension_dungeon_release_player()
         : PlayerScript("ascension_dungeon_release_player",
-            {PLAYERHOOK_ON_PLAYER_RELEASED_GHOST, PLAYERHOOK_CAN_REPOP_AT_GRAVEYARD, PLAYERHOOK_ON_PLAYER_ENTER_COMBAT}) { }
+            {PLAYERHOOK_ON_PLAYER_RELEASED_GHOST, PLAYERHOOK_CAN_REPOP_AT_GRAVEYARD, PLAYERHOOK_ON_PLAYER_ENTER_COMBAT,
+                PLAYERHOOK_ON_PLAYER_JUST_DIED, PLAYERHOOK_CAN_RELEASE_SPIRIT}) { }
+
+    bool OnPlayerCanReleaseSpirit(Player* player) override
+    {
+        if (!InRaidFight(player->GetMap()))
+            return true;
+
+        Hold(player);
+        ChatHandler(player->GetSession()).SendNotification(RAID_RELEASE_REFUSED);
+        return false;
+    }
+
+    void OnPlayerJustDied(Player* player) override
+    {
+        Map* map = player->GetMap();
+        if (!InRaidFight(map))
+            return;
+
+        if (RaidReleaseHold* hold = map->CustomData.Get<RaidReleaseHold>(RAID_RELEASE_HOLD))
+            hold->held.erase(player->GetGUID());
+        Hold(player);
+    }
 
     void OnPlayerReleasedGhost(Player* player) override
     {
@@ -135,7 +191,8 @@ public:
         if (!player->CustomData.Erase(PENDING_DUNGEON_RELEASE))
             return true;
 
-        if (player->IsAlive() || !player->GetMap()->IsDungeon() || !player->m_InstanceValid)
+        if (player->IsAlive() || !player->GetMap()->IsDungeon() || !player->m_InstanceValid
+            || InRaidFight(player->GetMap()))
             return true;
 
         Position start;
@@ -159,10 +216,59 @@ public:
     }
 };
 
+bool AnyoneFighting(Map* map)
+{
+    bool fighting = false;
+    map->DoForAllPlayers([&fighting](Player* player)
+    {
+        if (player->IsAlive() && !player->IsGameMaster() && player->IsInCombat())
+            fighting = true;
+    });
+    return fighting;
+}
+
+void ResolveHeld(Player* player, std::vector<uint32> const& fighting)
+{
+    InstanceScript* instance = player->GetInstanceScript();
+    bool const killed = instance && std::any_of(fighting.begin(), fighting.end(),
+        [instance](uint32 bossId) { return instance->GetBossState(bossId) == DONE; });
+
+    Position start;
+    bool const moved = !killed && InstanceStart(player, start);
+
+    player->ResurrectPlayer(RELEASE_RESTORE_PERCENT);
+    if (!player->IsAlive())
+        return;
+
+    player->SpawnCorpseBones();
+    if (moved)
+        player->NearTeleportTo(start.GetPositionX(), start.GetPositionY(), start.GetPositionZ(), start.GetOrientation());
+}
+
 class ascension_dungeon_release_map : public AllMapScript
 {
 public:
-    ascension_dungeon_release_map() : AllMapScript("ascension_dungeon_release_map", {ALLMAPHOOK_ON_CREATE_MAP}) { }
+    ascension_dungeon_release_map()
+        : AllMapScript("ascension_dungeon_release_map", {ALLMAPHOOK_ON_CREATE_MAP, ALLMAPHOOK_ON_MAP_UPDATE}) { }
+
+    void OnMapUpdate(Map* map, uint32) override
+    {
+        if (!map->IsRaid())
+            return;
+
+        RaidReleaseHold* hold = map->CustomData.Get<RaidReleaseHold>(RAID_RELEASE_HOLD);
+        if (!hold || (InRaidFight(map) && AnyoneFighting(map)))
+            return;
+
+        std::unordered_map<ObjectGuid, std::vector<uint32>> held = std::move(hold->held);
+        map->CustomData.Erase(RAID_RELEASE_HOLD);
+        for (auto const& [guid, fighting] : held)
+        {
+            Player* player = ObjectAccessor::GetPlayer(map, guid);
+            if (player && !player->IsAlive() && !player->HasPlayerFlag(PLAYER_FLAGS_GHOST))
+                ResolveHeld(player, fighting);
+        }
+    }
 
     void OnCreateMap(Map* map) override
     {

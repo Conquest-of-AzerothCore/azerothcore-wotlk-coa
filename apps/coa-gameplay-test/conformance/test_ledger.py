@@ -2,12 +2,13 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
 from coverage import clause_coverage, load_clauses
 from ledger import (ACQUISITION_REASON, EMPTY_CLAUSE, EMPTY_REASON, LEVEL_REASON, clause_words, differs_text, ledger,
                     no_claim_reason, parse_text_bases, pulled_clauses, raw_clauses, write_ledger)
 from profile import DBC_DIR, FIXTURE_CLASSES_DIR, load_fixture_class_file
-from streamed import streamed_texts
+from streamed import streamed_field, streamed_texts
 from tooltip import Records
 from values import dataset
 
@@ -134,6 +135,32 @@ class ClassLedgerTests(unittest.TestCase):
         depravity = [entry for entry in self.necromancer.entries if entry['spell'] == DEPRAVITY]
         self.assertTrue(depravity)
         self.assertEqual({entry['text_source']['basis'] for entry in depravity}, {'text_correction'})
+        self.assertFalse(any('dbc_clause' in entry for entry in depravity))
+        self.assertEqual({entry['text_source']['dbc_differs'] for entry in depravity},
+                         {'no field differs from Spell.dbc'})
+
+    def test_a_streamed_description_differing_from_dbc_records_dbc_clause(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            sql = root / 'pending_db_world' / 'depravity.sql'
+            sql.parent.mkdir(parents=True)
+            sql.write_text(
+                "INSERT INTO `coa_client_spell_description` (`ID`, `Description`, `ToolTip`) VALUES "
+                f"({DEPRAVITY}, 'Increases the melee haste of your Undead minions by $s1% and gives their critical "
+                "melee auto attacks an $h% chance to trigger |cFFFFFFFFBone Club|r, dealing $s2% of the damage dealt "
+                "as Shadow Damage.', '');\n",
+                encoding='utf-8')
+
+            def override(spell, name):
+                return streamed_field(spell, name, root)
+
+            with mock.patch('tooltip.streamed_field', side_effect=override):
+                generated = ledger(load_fixture_class_file(NECROMANCER), DBC_DIR, {DEPRAVITY: 'text_correction'},
+                                   updates=root)
+        depravity = [entry for entry in generated.entries if entry['spell'] == DEPRAVITY]
+        self.assertTrue(depravity)
+        self.assertEqual({entry['text_source']['dbc_differs'] for entry in depravity},
+                         {'Description differs from Spell.dbc'})
         self.assertTrue(any('dbc_clause' in entry for entry in depravity))
 
     def test_a_streamed_spell_without_a_basis_is_refused(self):

@@ -41,6 +41,7 @@ from bonus import (RELATIVE_BAND, Bonus, band_excluded_text, band_status, bonus_
                    bonus_status, bonus_text, delta_of, delta_text,
                    per_event_sample, sized_trials)
 import control_excluded
+import hit_ratio_avoided
 import hit_ratio_versus
 import hit_ratio_void
 from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readings, fixture_note
@@ -53,6 +54,9 @@ from observations import player_observations
 from tooltip_readings import player_tooltip_readings, reading_band, reading_for
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE, cleaned_tooltip, family_spells, literal_token
 from proc_avoided import attack_imbalance
+from proc_critical import control_verdict as critical_control_verdict
+from proc_stacks import (STACK_EVENTS, baseline_held as stack_baseline_held, capped as stack_capped,
+                         part_offset as stack_part_offset)
 from procs import (AMBIGUOUS_TOOLTIP, CAST, CHANCE_KIND, DELTA_CHECK, DELTA_SANITY_FACTOR, PER_TRIGGER, PERCENT_KIND,
                    PROC_CHECK, PROC_ENERGIZE_CHECK, chance_of, rate_band, residual_note, wilson_interval)
 from profile import (DBC_DIR, WEAPON_REQUIREMENT_FIELDS, armed, caster_stats_from, known_aura_label, probe_aura_label,
@@ -67,7 +71,8 @@ from triggers import (COOLDOWN_CHECK, COOLDOWN_GATE_CHECK, DURATION_CHECK, EVENT
                       MAGNITUDE_CHECK, MINION, MINION_COOLDOWN_BAND, PERIODIC, SELF_TRIGGER_CHECK, TRIGGER_CHECK,
                       cooldown_trial_label, duration_trial_label, minion_cooldown_event_label)
 from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECT_MODIFIER_BASE, EFFECTS, FIXED_DIE_SIDES,
-                    GAP_CLOSER_DISTANCE, GAP_CLOSER_MARGIN_YD, GENERIC, UNMEASURABLE, UNREADABLE, Expectation,
+                    GAP_CLOSER_DISTANCE, GAP_CLOSER_MARGIN_YD, GENERIC, PER_TICK_TICKS, UNMEASURABLE, UNREADABLE,
+                    Expectation,
                     calc_amount_hooks_label, dataset, effect_modifier_label, mean_samples, roll_range, sample_labels,
                     sizing_stats)
 
@@ -229,6 +234,7 @@ class Run:
     server_commit: str | None = None
     build: str | None = None
     run_id: str | None = None
+    timeline: tuple[dict, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -429,7 +435,7 @@ def load_run(results_dir: Path, entry: dict, by_hash: Mapping[str, Path]) -> Run
     return Run(entry['key'], result.get('status', ''), result.get('message') or '', measured_values(result),
                result.get('steps', []), None if max_step is None else number(max_step, 'max_step_ms'),
                cast_failures(result), recorded_clock(directory), server_commit(result.get('server_version')),
-               recorded_build(directory), result.get('run_id'))
+               recorded_build(directory), result.get('run_id'), tuple(result.get('timeline') or ()))
 
 
 def cast_failures(result: dict) -> dict[int, list[int]]:
@@ -518,12 +524,15 @@ def banded_status(value: float, low: float, high: float, expected: float) -> str
     return 'alert'
 
 
-def deterministic(base: Verdict, measured: float, judged: float, expected: float, why: str) -> Verdict:
-    margin = margin_of(expected)
+def deterministic(base: Verdict, measured: float, judged: float, expected: float, why: str,
+                  ticks: float = 1) -> Verdict:
+    margin = margin_of(expected * ticks) / ticks
     low, high = expected - margin, expected + margin
     status = banded_status(judged, low, high, expected)
     explanation = (f'{why}; |measured - expected| <= max({ABSOLUTE_TOLERANCE:g}, '
-                   f'{RELATIVE_TOLERANCE:.1%} of expected)')
+                   f'{RELATIVE_TOLERANCE:.1%} of expected)' if ticks == 1 else
+                   f'{why}; |measured x {ticks:g} - total| <= max({ABSOLUTE_TOLERANCE:g}, '
+                   f'{RELATIVE_TOLERANCE:.1%} of total), {margin:g} per tick')
     if status == 'tolerated':
         explanation += (f'; outside that band but within {TOLERATED_RELATIVE:.0%} of expected, deviation '
                         f'{(judged - expected) / expected if expected else judged - expected:+.1%}: tolerated')
@@ -800,7 +809,8 @@ def per_level_model_gap(label: str, run: Run, tooltips: TooltipSource, expectati
     unscaled = tooltips.read(expectation.rank_id, tokens.caster, forced, unscaled=True).values
     if index >= len(scaled) or index >= len(unscaled):
         return 'the tooltip term cannot be read without its per-level part'
-    continuous = undivided(scaled[index]) - undivided(unscaled[index])
+    continuous = (undivided(scaled[index]) - undivided(unscaled[index])) / ((expectation.model or {}).get(
+        PER_TICK_TICKS) or 1)
     if abs(continuous - per_level.term) > PER_LEVEL_TERM_TOLERANCE:
         return (f'the tooltip adds {continuous:g} per level where stock CalcValue adds {per_level.term:g} '
                 f'({per_level.levels} levels after its level clamp)')
@@ -929,11 +939,12 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
                                 f'{token.text} read from SpellDuration against the {SPELL_DURATION_SCOPE}')
         return replace(verdict, detail={**(verdict.detail or {}), 'scope': SPELL_DURATION_SCOPE})
     effect = token_effect(expectation)
-    base_roll = base_roll_entry(tooltips, *effect) if effect is not None and expectation.check == 'effect_value' \
-        else None
+    ticks = (expectation.model or {}).get(PER_TICK_TICKS)
+    base_roll = base_roll_entry(tooltips, *effect) \
+        if effect is not None and expectation.check == 'effect_value' and not ticks else None
     if base_roll is not None:
         return judge_base_roll(base, expectation, measured, tokens, tooltips, index, base_roll)
-    if effect is not None:
+    if effect is not None and not ticks:
         base_points, die_sides = tooltips.effect_points(*effect)
         if die_sides not in FIXED_DIE_SIDES:
             return judge_roll(base, expectation, run, measured, tokens, tooltips, index,
@@ -941,22 +952,24 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
         carried = judge_trigger_with_value(base, expectation, measured, tokens, tooltips, index, effect)
         if carried is not None:
             return carried
-    expected = undivided(token)
+    expected = undivided(token) / ticks if ticks else undivided(token)
+    per_tick = (f', divided by its {ticks:g} ticks: {undivided(token):g} over the application, {expected:g} per '
+                'tick' if ticks else '')
     plain = PLAIN_TOKEN.fullmatch(token.text)
     if plain:
         points = displayed_points(tooltips, plain, token.spell_id or expectation.rank_id)
         why = (f'{token.text} is shown unsigned; the expected value takes the sign of its Spell.dbc points '
-               f'{points}')
+               f'{points}{per_tick}')
         signed = expected * plain_sign(points)
         return (judge_fixed_per_level(base, expectation, run, measured, tokens, tooltips, index, signed, why)
-                or deterministic(base, measured, measured, signed, why))
+                or deterministic(base, measured, measured, signed, why, ticks or 1))
     if measured * expected < 0:
         return replace(base, status='ambiguous_tooltip', measured=measured, expected=expected,
                        explanation=f'{token.text} evaluates to {expected:g}, the measured value has the opposite sign',
                        detail={'question': sign_question(base, name, token.text, measured, expected)})
-    why = f'{token.text} read with the measured stats'
+    why = f'{token.text} read with the measured stats{per_tick}'
     return (judge_fixed_per_level(base, expectation, run, measured, tokens, tooltips, index, expected, why)
-            or deterministic(base, measured, measured, expected, why))
+            or deterministic(base, measured, measured, expected, why, ticks or 1))
 
 
 def base_roll_entry(tooltips: TooltipSource, spell_id: int, effect: int) -> dict | None:
@@ -1483,6 +1496,7 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
     readings = proc_readings(model)
     event_labels = model.get('event_labels') or [labels['events']]
     refunds = [model['charge_pool'], labels['attempts']] if model.get('charge_pool') else []
+    refunds += [labels['attempts']] if model.get(STACK_EVENTS) else []
     heal_guards = model.get('heal_guards', {})
     balance = model.get('attack_balance')
     wanted = [labels['aura']] + list(dict.fromkeys(
@@ -1507,6 +1521,8 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
         values = [run.values.get(label) for label in wanted]
         part_baseline = part.model.get('baseline')
         held = [run.values.get(part_baseline[name]) for name in ('trials', 'events')] if part_baseline else [0.0, 0.0]
+        if part_baseline and STACK_EVENTS in part_baseline:
+            held = stack_baseline_held(part_baseline, run.values)
         added_held = {label: run.values.get(held_label)
                       for label, held_label in (part_baseline or {}).get('added_trials', {}).items()}
         excluded = [run.values.get(label) for label in part.model.get('trial_exclusions', [])]
@@ -1517,6 +1533,9 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
             unmeasured.append(f'{run.key} ({run.status}: {run.message})')
         elif any(read <= 0 for _, read in grant_reads):
             ungranted.append(f'{run.key} ({ungranted_text(grant_reads)})')
+        elif stack_capped(part.model, run.values):
+            unmeasured.append(f'{run.key} (stacks at the cap in {", ".join(stack_capped(part.model, run.values))}, '
+                              f'so a capped gain was not read)')
         elif heal_guards and heal_spoiled(heal_guards, run):
             spoiled.append(f'{run.key} ({heal_spoiled(heal_guards, run)})')
         elif balance and attack_imbalance(balance, run.values):
@@ -1534,7 +1553,8 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
                 control = part_baseline if part_baseline.get('control_weapon') else None
                 baseline_trials, baseline_events = held
                 part_totals[labels['trials']] -= baseline_trials
-                part_totals[event_labels[0]] -= baseline_events
+                if STACK_EVENTS not in part.model:
+                    part_totals[event_labels[0]] -= baseline_events
                 baseline_casts = baseline_player_casts(part.model, run, trigger)
                 baseline_events -= baseline_casts
                 for label, value in added_held.items():
@@ -1545,7 +1565,8 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
             part_totals[event_labels[0]] -= own_summons * part_totals[labels['trials']]
             for label, value in part_totals.items():
                 totals[label] += value
-            offset = refund_offset(model, run) - player_casts(model, run, trigger)
+            offset = refund_offset(model, run) - player_casts(model, run, trigger) \
+                + stack_part_offset(part.model, run.values)
             events += offset
             per_part.append((part_totals, offset))
     if imbalanced:
@@ -1579,6 +1600,10 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
                        explanation=f'{baseline_trials:g} control hits with the {control["control_weapon"]} one-handed '
                                    f'main hand {control["control_item"]}, fewer than the {control["minimum_trials"]} '
                                    f'the control arm needs')
+    if model.get(STACK_EVENTS) and not baseline_trials:
+        return replace(base, status='insufficient_trials', expected=0.0,
+                       explanation='the baseline arm of the aura stack events was not counted or read no trial, so '
+                                   'its required no-event control is not judged')
     if own_summons:
         unexplained = own_summons_judgement(base, model, own_summons, baseline_trials, baseline_events, per_part)
         if unexplained:
@@ -4789,6 +4814,10 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
         if refused:
             return replace(base, status='unmeasured',
                            explanation=hit_ratio_void.explanation(refused, describe_failures))
+    if model.get(hit_ratio_avoided.NAME):
+        absent = hit_ratio_avoided.void(runs, model[hit_ratio_avoided.NAME])
+        if absent:
+            return replace(base, status='unmeasured', explanation=f'not judged: the run is void, {absent}')
     scale = 100.0 if model.get('rate') else 1.0
     between_parts = len(runs) >= MINIMUM_BETWEEN_PARTS and bool(model.get('rate'))
     series = {}
@@ -5283,7 +5312,7 @@ def taken_hit_trial_fault(arm: dict, trial: dict, expected_absorb: int | None, d
     absorbed, damage = trial['absorb'], trial['damage']
     if arm['absorb'] == 'none' and absorbed:
         return f'absorbed {absorbed:g} with no absorb stated'
-    if arm['absorb'] == 'formula' and absorbed != expected_absorb:
+    if arm['absorb'] in ('formula', 'capped_share') and absorbed != expected_absorb:
         return f'absorbed {absorbed:g} against {expected_absorb}'
     if arm['absorb'] == 'share':
         share = math.floor((absorbed + damage) * arm['share_pct'] / 100)
@@ -5431,9 +5460,69 @@ def behaviour_taken_rate_verdict(base: Verdict, run: Run | list[Run], model: dic
                                f'{delta_text(bonus)} points; {reason}{pooled}')
 
 
+def taken_counts_arm(run: Run, arm: dict, model: dict) -> tuple[list[dict] | str, list[str]]:
+    values = {}
+    for mark, labels in arm['marks'].items():
+        for name, label in labels.items():
+            value = run.values.get(label)
+            if value is None:
+                return missing_measurement(run, label), []
+            values[(mark, name)] = value
+    judged, faults = [], []
+    previous = 'start'
+    for trial in range(1, model['trials'] + 1):
+        mark = str(trial)
+        delta = {name: values[(mark, name)] if name in model.get('states', ()) else
+                 values[(mark, name)] - values[(previous, name)] for name in arm['marks'][mark]}
+        previous = mark
+        if sum(delta[name] for name in model['total']) < arm['strikes'] or any(
+                delta[name] != value for name, value in arm.get('require', {}).items()):
+            continue
+        judged.append(delta)
+        wrong = [f'{name} {delta[name]:g} (must be {count})' for name, count in arm['counts'].items()
+                 if delta[name] != count]
+        wrong += [f'{name} {delta[name]:g} (must be {low:g} to {high:g})'
+                  for name, (low, high) in arm.get('bands', {}).items() if not low <= delta[name] <= high]
+        wrong += [f'{a} {delta[a]:g} against {b} {delta[b]:g} (must be equal)' for a, b in model['equal']
+                  if delta[a] != delta[b]]
+        if wrong:
+            faults.append(f'{arm["name"]} trial {trial}: {", ".join(wrong)}')
+    return judged, faults
+
+
+def behaviour_taken_counts_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    faults, short, summaries, judged_by_arm = [], [], [], {}
+    for arm in model['arms']:
+        judged, arm_faults = taken_counts_arm(run, arm, model)
+        if isinstance(judged, str):
+            return replace(base, explanation=judged)
+        faults += arm_faults
+        judged_by_arm[arm['name']] = judged
+        if len(judged) < model['minimum_trials']:
+            short.append(f'{arm["name"]} judged {len(judged)} of {model["trials"]} trials, below the '
+                         f'{model["minimum_trials"]} required')
+        summaries.append(f'{arm["name"]}: {len(judged)} judged trials, '
+                         + ', '.join(f'{name} {sorted({delta[name] for delta in judged})}'
+                                     for name in arm['marks']['start']))
+    for name in model['rising']:
+        for earlier, later in zip(model['arms'], model['arms'][1:]):
+            low = [delta[name] for delta in judged_by_arm[earlier['name']]]
+            high = [delta[name] for delta in judged_by_arm[later['name']]]
+            if low and high and min(high) <= max(low):
+                faults.append(f'{name} does not rise from {earlier["name"]} (up to {max(low):g}) to '
+                              f'{later["name"]} (from {min(high):g})')
+    status = 'alert' if faults else 'unmeasured' if short else 'ok'
+    reason = '; '.join(faults[:6]) if faults else '; '.join(short) if short else 'every judged trial matches'
+    return replace(base, status=status, measured=float(len(faults)), expected=0.0, low=0.0, high=0.0,
+                   explanation=f'{"; ".join(summaries)}; {reason}; each count, band, rise and equality is compared '
+                               f'exactly')
+
+
 def behaviour_taken_hit_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     if model.get('kind') == 'taken_rate':
         return behaviour_taken_rate_verdict(base, run, model)
+    if model.get('kind') == 'taken_counts':
+        return behaviour_taken_counts_verdict(base, run, model)
     faults, summaries, short = [], [], []
     judged = 0
     landed_damage, reductions = {}, {}
@@ -5462,6 +5551,7 @@ def behaviour_taken_hit_verdict(base: Verdict, run: Run, model: dict) -> Verdict
         absorbs, damages = [], []
         returned = 0
         previous = 'start'
+        spent, bound = 0.0, set()
         for trial in range(1, model['trials'] + 1):
             mark = str(trial)
             delta = {key: values[(mark, key)] - values[(previous, key)]
@@ -5473,12 +5563,20 @@ def behaviour_taken_hit_verdict(base: Verdict, run: Run, model: dict) -> Verdict
                     delta[f'paid {moment}'] = values[(mark, f'paid {moment}')] - values[(previous, 'paid')]
                     delta[f'debt {moment}'] = values[(mark, f'debt {moment}')]
             previous = mark
+            capped_absorb = None
+            if arm['absorb'] == 'capped_share':
+                share = math.floor((delta['absorb'] + delta['damage']) * arm['share_pct'] / 100)
+                capped_absorb = min(share, max(0, int(arm['cap'] - spent)))
+                spent += delta['absorb']
             if delta['logs'] < arm['strikes']:
                 continue
+            if capped_absorb is not None:
+                bound.add('cap' if capped_absorb < share else 'share')
             landed += 1
             absorbs.append(delta['absorb'])
             damages.append(delta['damage'])
-            fault = taken_hit_trial_fault(arm, delta, expected_absorb, model.get('debt_ends', False))
+            fault = taken_hit_trial_fault(arm, delta, expected_absorb if capped_absorb is None else capped_absorb,
+                                          model.get('debt_ends', False))
             returned_fault, judged_return = taken_hit_returned_fault(arm, delta)
             returned += judged_return
             for found in (fault, returned_fault, taken_hit_transfer_fault(arm, delta)):
@@ -5487,11 +5585,15 @@ def behaviour_taken_hit_verdict(base: Verdict, run: Run, model: dict) -> Verdict
         landed_damage[arm['name']] = damages
         if landed < model['minimum_trials']:
             short.append(f'{arm["name"]} landed {landed} of {model["trials"]} trials')
+        if arm['absorb'] == 'capped_share' and bound != {'cap', 'share'}:
+            short.append(f'{arm["name"]} judged no trial ' + ('below' if 'share' not in bound else 'held by')
+                         + f' its cap {arm["cap"]}')
         if arm.get('returned_pct') and returned < model['minimum_trials']:
             short.append(f'{arm["name"]} returned a non-critical hit in {returned} of {model["trials"]} trials')
         judged += landed
         stated = {'none': 'no absorb', 'formula': f'{expected_absorb} absorbed',
-                  'share': f'{arm["share_pct"]}% absorbed'}[arm['absorb']]
+                  'share': f'{arm["share_pct"]}% absorbed',
+                  'capped_share': f'{arm["share_pct"]}% absorbed up to {arm.get("cap")} in all'}[arm['absorb']]
         debt = ('' if arm['debt_removed_pct'] is None else
                 f', debt paid by its end less {arm["debt_removed_pct"]}% removed'
                 + (', part of it still unpaid just before its end' if model.get('debt_ends') else ''))
@@ -6055,7 +6157,8 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
                        expectation.rank_id, expectation.check)
         verdicts[hit_slots[label]] = per_level_unmodelled(judge_hit(base, manifest['class_file'], parts, hit_model),
                                                           tooltips, hit_spell_of(parts[0][2]), manifest['level'])
-    verdicts += [server_question(manifest, parts[0][2], judge_proc(manifest, parts, tooltips), tooltips)
+    verdicts += [server_question(manifest, parts[0][2], critical_control_verdict(judge_proc(manifest, parts, tooltips),
+                                                                                parts), tooltips)
                  for parts in proc_parts.values()]
     verdicts += [server_question(manifest, parts[0][2], judge_proc_delta(manifest, parts, tooltips), tooltips)
                  for parts in delta_parts.values()]

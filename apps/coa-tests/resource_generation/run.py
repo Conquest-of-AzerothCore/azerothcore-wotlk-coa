@@ -58,7 +58,7 @@ def main():
                  if msvc else ['-std=c++20', '-Wall', '-Wextra', '-Werror', str(cpp), '-o', str(exe)])
         subprocess.run([compiler, *flags], cwd=out, check=True, timeout=60)
         subprocess.run([str(exe)], cwd=out, check=True, timeout=15)
-    print('PASS: resource-gain event loops, ranks, hostile/miss/trigger gates, per-cast/per-target grants,\n      ward/caps and mitigated-to-zero damaging hits')
+    print('PASS: resource-gain event loops, ranks, hostile/miss/trigger gates, per-cast/per-target grants,\n      ward/caps, each-damaging-hit grants (zero damage and misses give nothing) and Reap mitigated-to-zero hits')
 
 
 if __name__ == '__main__':

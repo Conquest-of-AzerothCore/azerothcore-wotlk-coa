@@ -22,3 +22,6 @@ two where the clause promises it (`coverage.promised_state`, as ADR 0553 for `me
 The verdict names the kind's own state metric `pushback_casting` (ADR 0600), declared in the module with the
 `casting` promise words plus `pushback`, so a clause that names only the spell pushback ("reduces your spell
 pushback suffered from taking damage") is promised the casting state the kind reads.
+`caster_auras` (`[[spell, stacks]]`, ADR 1278) hold a condition on the caster in every phase: right before each cast
+every aura is removed and set again (harness `set_aura`), so the cast starts under a fresh application and the contrast
+stays the reducer. Unphased 803645 ("while Inner Demon is active"): Inner Demon 804216 held, the talent learned.

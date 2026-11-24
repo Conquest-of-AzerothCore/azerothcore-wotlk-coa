@@ -1,0 +1,221 @@
+{
+  "schema": 1,
+  "name": "Raid release: a wipe resurrects the held dead at the nearest checkpoint",
+  "contract": [
+    "Tester (ZG, 2026-11-24) and the user's decision: a player who dies during a raid boss fight cannot release",
+    "until the fight ends. When the boss fight fails (a wipe), every player still dead is resurrected by the server",
+    "where Release would have put them: the nearest checkpoint of a killed boss or the instance start, at 50% health.",
+    "Jeklik (0) is set dead so her checkpoint (-11940.951, -1549.5022) is the only one unlocked, about 490 yards from",
+    "Jin'do's arena where the player dies. The player is revived after dying during Gahz'ranka's encounter (8),",
+    "then dies again during Jin'do's encounter (7). Gahz'ranka's kill must not make the second death resolve in place."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "watcher",
+      "race": 4,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    },
+    {
+      "id": "fallen",
+      "race": 4,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "group",
+      "label": "Group the players so both enter the same instance",
+      "actor": "watcher",
+      "target": "fallen"
+    },
+    {
+      "action": "teleport",
+      "actor": "watcher",
+      "map": 309,
+      "x": -11518.0,
+      "y": -1275.5,
+      "z": 79.66,
+      "o": 0.0,
+      "ignore_access": true,
+      "label": "Jin'do's arena in Zul'Gurub"
+    },
+    {
+      "action": "wait",
+      "label": "Let the watcher create the instance first",
+      "ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "fallen",
+      "map": 309,
+      "x": -11518.0,
+      "y": -1275.5,
+      "z": 79.66,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: both players share the instance",
+      "actor": "fallen",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "set_health",
+      "actor": "watcher",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "summon",
+      "actor": "watcher",
+      "entry": 11373,
+      "as": "cobra",
+      "distance": 6
+    },
+    {
+      "action": "attack",
+      "label": "Pull a cobra to keep the watcher in combat",
+      "actor": "watcher",
+      "target": "cobra"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the watcher fights",
+      "actor": "watcher",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "label": "Keep the cobra alive so the watcher stays in combat",
+      "actor": "watcher"
+    },
+    {
+      "action": "command",
+      "label": "Jeklik is dead, so her checkpoint is unlocked",
+      "actor": "watcher",
+      "command": ".instance setbossstate 0 3"
+    },
+    {
+      "action": "command",
+      "actor": "watcher",
+      "command": ".instance setbossstate 8 1"
+    },
+    {
+      "action": "die",
+      "actor": "fallen"
+    },
+    {
+      "action": "console",
+      "label": "Resurrect the player during the first fight",
+      "command": "revive Harnessb"
+    },
+    {
+      "action": "assert",
+      "actor": "fallen",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "command",
+      "actor": "watcher",
+      "command": ".instance setbossstate 7 1"
+    },
+    {
+      "action": "command",
+      "label": "The first boss dies while the second fight keeps the hold active",
+      "actor": "watcher",
+      "command": ".instance setbossstate 8 3"
+    },
+    {
+      "action": "die",
+      "actor": "fallen"
+    },
+    {
+      "action": "release_spirit",
+      "label": "Release during the fight is refused",
+      "actor": "fallen",
+      "refused": true
+    },
+    {
+      "action": "assert",
+      "actor": "fallen",
+      "metric": "notification_contains",
+      "text": "You cannot release your spirit during a boss fight.",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: held while the fight goes on",
+      "actor": "fallen",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "The fight is lost",
+      "actor": "watcher",
+      "command": ".instance setbossstate 7 2"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the wipe resurrects the held player",
+      "actor": "fallen",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The player stays in Zul'Gurub",
+      "actor": "fallen",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: at Jeklik's checkpoint, not on the corpse",
+      "actor": "fallen",
+      "metric": "point_distance_2d",
+      "x": -11940.951,
+      "y": -1549.5022,
+      "max": 3
+    },
+    {
+      "action": "assert",
+      "label": "At half health, as a release gives",
+      "actor": "fallen",
+      "metric": "health_pct",
+      "min": 49,
+      "max": 51
+    }
+  ]
+}

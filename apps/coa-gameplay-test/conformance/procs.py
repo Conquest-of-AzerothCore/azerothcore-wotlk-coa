@@ -7,6 +7,11 @@ from typing import Sequence
 from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, PART_BUDGET_MS, UNMODELLED, Z_99, Unmodelled,
                   base_mana_steps, cast_steps, creature_fixture, records_of, reference_caster, scenario_shell, timed,
                   weapon_profile)
+from proc_stacks import (STACK_EVENTS, baseline_casts_step, baseline_model as stack_baseline_model, counts_stacks,
+                         drain_steps as stack_drain_steps, drained_label, read_label, read_step, rule as stack_rule,
+                         stack_model)
+from proc_critical import (KEY as CRITICAL_KEY, control_model, control_steps, critical_fields, critical_rating,
+                           forced_player, rule as critical_rule)
 from profile import (CASTER, EQUIPMENT_SLOT_MAIN_HAND, INVTYPE_WEAPON, INVTYPE_WEAPON_MAIN_HAND, SETTLE_MS,
                      measurement, player_fixture, weapon_set_spells)
 from tooltip import read_tooltip
@@ -71,6 +76,7 @@ DUMMY_DISTANCE_FIELD = 'dummy_distance'
 MAX_DUMMY_DISTANCE_YD = 100
 RESIDUAL_TARGET = 'residual_target'
 MIN_DETECTABLE = 'min_detectable'
+SIZED_ATTEMPTS = 'sized_attempts'
 EVENTS_BASELINE = 'events_baseline_per_attempt'
 TRIAL_FIELD = 'trial'
 EFFECTIVE_HEAL = 'effective_heal'
@@ -268,21 +274,25 @@ def cast_baseline_steps(class_file: dict, entry: dict, plan: ProcPlan) -> list[d
     labels = baseline_labels(entry['aura'])
     spell, target = trigger_spell(entry), trigger_target(entry)
     facts = facts_of(records_of(class_file), spell)
-    events = event_steps(entry)[0]
-    casts = [aimed(step, target) for _ in range(stream_baseline_attempts(entry, plan.chance_pct))
+    stacks = counts_stacks(entry)
+    events = [baseline_casts_step(entry)] if stacks else [{**event_steps(entry)[0], 'label': labels['events']}]
+    casts = [aimed(step, target) for attempt in range(1, stream_baseline_attempts(entry, plan.chance_pct) + 1)
              for step in attempt_power_steps(class_file, entry, facts)
-             + cast_steps(facts, spell, target, plan.attempt_ms, 1, attempt_fixtures(entry))]
+             + cast_steps(facts, spell, target, plan.attempt_ms, 1, attempt_fixtures(entry))
+             + ([read_step(entry, read_label(entry['aura'], attempt, True))] if stacks else [])]
+    drain = {'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS}
     return ([{'action': 'learn', 'actor': CASTER, 'spell': spell}] + casts
-            + [{'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS}, {**trials_step(entry, labels['trials'])},
-               {**events, 'label': labels['events']}]
+            + (stack_drain_steps(entry, drain, True) if stacks else [drain])
+            + [{**trials_step(entry, labels['trials'])}]
+            + events
             + [spell_count_step(baseline_trigger_label(entry['aura'], term['spell']), term['metric'], term['spell'])
                for term in trigger_spell_terms(entry)])
 
 
 def same_roll(entry: dict, other: dict) -> bool:
-    from proc_avoided import is_avoided
+    from proc_avoided import is_avoided, learned
     return other['aura'] == entry['aura'] and chance_modifiers(other) == chance_modifiers(entry) \
-        and is_avoided(other) == is_avoided(entry)
+        and is_avoided(other) == is_avoided(entry) and (not is_avoided(entry) or learned(other) == learned(entry))
 
 
 def shares_aura(class_file: dict, entry: dict) -> bool:
@@ -306,9 +316,10 @@ def chance_modifiers(entry: dict) -> tuple[tuple[int, str], ...]:
 
 
 def modifier_key(entry: dict) -> tuple:
-    from proc_avoided import AVOIDED, is_avoided
+    from proc_avoided import AVOIDED, is_avoided, learned
     return tuple(part for spell, _ in chance_modifiers(entry) for part in ('with', spell)) \
-        + ((AVOIDED,) if is_avoided(entry) else ())
+        + ((AVOIDED,) if is_avoided(entry) else ()) \
+        + (tuple(part for spell in learned(entry) for part in ('learn', spell)) if is_avoided(entry) else ())
 
 
 def entry_proc_label(class_file: dict, entry: dict) -> str:
@@ -586,6 +597,16 @@ def attempt_interval(class_file: dict, entry: dict) -> int:
     return max(cast_interval(class_file, trigger['spell'], cooldown), tick_spacing(class_file, facts, trigger['spell']))
 
 
+def sized_attempts(entry: dict, default: int) -> int:
+    sized = entry[SIZED_ATTEMPTS]
+    if isinstance(sized, bool) or not isinstance(sized, int) or sized < default:
+        raise ValueError(f'Proc {entry["aura"]} {SIZED_ATTEMPTS} {sized!r} is a whole number of attempts at least the '
+                         f'{default} the band sizing schedules')
+    if RESIDUAL_TARGET not in entry:
+        raise ValueError(f'Proc {entry["aura"]} sets {SIZED_ATTEMPTS} without the {RESIDUAL_TARGET} it is sized for')
+    return sized
+
+
 def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> ProcPlan:
     if entry.get('status'):
         raise ValueError(f'Proc {entry["aura"]} is {entry["status"]}: {entry.get("reason", "")}')
@@ -593,7 +614,8 @@ def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> Pro
     events_baseline(entry)
     if counts_summons(entry):
         checked_summon_entry(entry)
-    elif entry['event_metric'] not in EVENT_METRICS and not counts_charges(entry) and not minion_cast_events:
+    elif entry['event_metric'] not in EVENT_METRICS and not counts_charges(entry) and not minion_cast_events \
+            and not counts_stacks(entry):
         raise ValueError(f'Unknown event metric {entry["event_metric"]!r} of proc {entry["aura"]}')
     if entry['event_metric'] == MINION_PROC_COUNT and entry.get('event_actor') != MINION:
         raise ValueError(f'Proc {entry["aura"]} counts minion procs without a minion event actor')
@@ -613,6 +635,8 @@ def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> Pro
     if not isinstance(per_attempt, int) or per_attempt < 1:
         raise ValueError(f'Proc {entry["aura"]} needs a positive integer trials_per_attempt')
     scheduled = math.ceil(needed * EXCLUDED_OUTCOME_MARGIN / per_attempt) if attempts is None else attempts
+    if attempts is None and SIZED_ATTEMPTS in entry:
+        scheduled = sized_attempts(entry, scheduled)
     if scheduled * per_attempt < needed:
         raise ValueError(f'{scheduled} attempts are fewer than the {needed} trials a {chance:g}% proc needs')
     interval = attempt_interval(class_file, entry)
@@ -726,13 +750,16 @@ def trials_step(entry: dict, label: str) -> dict:
         return measurement(label, CASTER, HEAL_COUNT, spell=spell, target=ALLY)
     if trigger_target(entry) == ALLY or entry.get('trial_casts'):
         return measurement(label, CASTER, CAST_COUNT, spell=spell)
-    return measurement(label, CASTER, 'spell_damage_count', spell=spell, target=TARGET)
+    return measurement(label, CASTER, 'spell_damage_count', spell=spell, target=TARGET, **critical_fields(entry))
 
 
 def attempt_auras(entry: dict) -> list[dict]:
     auras = entry.get('attempt_auras', [])
-    if auras and entry['trigger']['action'] != CAST:
-        raise ValueError(f'Proc {entry["aura"]} sets attempt_auras without a cast trigger')
+    from proc_avoided import AVOIDED
+    stacked_taken_hit = entry['trigger']['action'] == TAKEN_HIT and entry.get('event_metric') == 'aura_stacks'
+    if auras and entry['trigger']['action'] not in (CAST, AVOIDED) and not stacked_taken_hit:
+        raise ValueError(f'Proc {entry["aura"]} sets attempt_auras without a cast, an avoided trigger or a taken_hit '
+                         f'trigger with aura_stacks events')
     for aura in auras:
         if set(aura) - {'target'} != {'spell', 'stacks', 'source'} or not isinstance(aura['stacks'], int) \
                 or aura['stacks'] < 0:
@@ -779,6 +806,8 @@ def cast_attempts(class_file: dict, entry: dict, plan: ProcPlan) -> list[dict]:
                                                              attempt_fixtures(entry))]
         if counts_charges(entry):
             steps.append(measurement(charge_label(entry['aura'], attempt), CASTER, CHARGES, spell=spell))
+        if counts_stacks(entry):
+            steps.append(read_step(entry, read_label(entry['aura'], attempt)))
     return steps
 
 
@@ -836,26 +865,34 @@ def attempt_steps(class_file: dict, entry: dict, plan: ProcPlan, labels: dict[st
                 measurement(labels['attempts'], CASTER, 'melee_attack_count', **hand_fields(entry))]
     from proc_avoided import attempt_steps as avoided_attempts, counts_misses, guard_steps, is_avoided, trial_steps
     if is_avoided(entry):
-        return (avoided_attempts(entry, plan.per_part, plan.attempt_ms)
-                + [{'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}] + guard_steps(entry)
-                + trial_steps(labels['trials'], labels['attempts'], counts_misses(entry)))
+        drain = {'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}
+        if counts_stacks(entry):
+            from proc_stacks import avoided_attempt_steps
+            swings = avoided_attempt_steps(entry, plan.per_part, plan.attempt_ms) + stack_drain_steps(entry, drain)
+        else:
+            swings = avoided_attempts(entry, plan.per_part, plan.attempt_ms) + [drain]
+        return swings + guard_steps(entry) + trial_steps(labels['trials'], labels['attempts'], counts_misses(entry))
     if entry['trigger']['action'] == TAKEN_HIT:
+        drain = {'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}
         return (taken_hit_attempts(entry, plan, plan.per_part)
-                + [{'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}, taken_hit_trials(entry, labels['trials']),
-                   taken_hit_trials(entry, labels['attempts'])])
+                + (stack_drain_steps(entry, drain) if counts_stacks(entry) else [drain])
+                + [taken_hit_trials(entry, labels['trials']), taken_hit_trials(entry, labels['attempts'])])
     spell = trigger_spell(entry)
+    drain = {'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}
     return ([{'action': 'learn', 'actor': CASTER, 'spell': spell}] + charge_pool_steps(entry)
             + cast_attempts(class_file, entry, plan)
-            + [{'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}, trials_step(entry, labels['trials']),
-               measurement(labels['attempts'], CASTER, CAST_COUNT, spell=spell)])
+            + (stack_drain_steps(entry, drain) if counts_stacks(entry) else [drain])
+            + [trials_step(entry, labels['trials']), measurement(labels['attempts'], CASTER, CAST_COUNT, spell=spell)])
 
 
-def taken_hit_attempts(entry: dict, plan: ProcPlan, attempts: int) -> list[dict]:
+def taken_hit_attempts(entry: dict, plan: ProcPlan, attempts: int, baseline: bool = False) -> list[dict]:
     from values import fixture_health_step
-    return [step for _ in range(attempts) for step in (
-        fixture_health_step(CASTER, 100),
-        {'action': 'cast', 'actor': TAKEN_HIT_STRIKER, 'spell': entry['trigger']['spell'], 'target': CASTER},
-        {'action': 'wait', 'ms': plan.attempt_ms})]
+    stacks = counts_stacks(entry)
+    return [step for attempt in range(1, attempts + 1) for step in (
+        [fixture_health_step(CASTER, 100)] + attempt_auras(entry)
+        + [{'action': 'cast', 'actor': TAKEN_HIT_STRIKER, 'spell': entry['trigger']['spell'], 'target': CASTER},
+           {'action': 'wait', 'ms': plan.attempt_ms}]
+        + ([read_step(entry, read_label(entry['aura'], attempt, baseline))] if stacks else []))]
 
 
 def taken_hit_trials(entry: dict, label: str) -> dict:
@@ -865,6 +902,10 @@ def taken_hit_trials(entry: dict, label: str) -> dict:
 
 def taken_hit_baseline_steps(entry: dict, plan: ProcPlan) -> list[dict]:
     labels = baseline_labels(entry['aura'])
+    if counts_stacks(entry):
+        drain = {'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS}
+        return (taken_hit_attempts(entry, plan, baseline_attempts(plan.chance_pct), True)
+                + stack_drain_steps(entry, drain, True) + [taken_hit_trials(entry, labels['trials'])])
     return (taken_hit_attempts(entry, plan, baseline_attempts(plan.chance_pct))
             + [{'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS},
                taken_hit_trials(entry, labels['trials']), {**event_steps(entry)[0], 'label': labels['events']}])
@@ -889,6 +930,9 @@ def spell_count_step(label: str, metric: str, spell: int) -> dict:
 def event_labels(entry: dict, plan: ProcPlan) -> list[str]:
     if counts_charges(entry):
         return [charge_label(entry['aura'], attempt) for attempt in range(1, plan.per_part + 1)]
+    if counts_stacks(entry):
+        return [read_label(entry['aura'], attempt) for attempt in range(1, plan.per_part + 1)] + [
+            drained_label(entry['aura'])]
     return [label for label, _ in event_terms(entry)]
 
 
@@ -933,7 +977,7 @@ def events_baseline_rule(entry: dict, plan: 'ProcPlan') -> str:
 
 
 def event_steps(entry: dict) -> list[dict]:
-    if counts_charges(entry):
+    if counts_charges(entry) or counts_stacks(entry):
         return []
     if counts_summons(entry):
         return [measurement(proc_measurements(entry['aura'])['events'], CASTER, SUMMON_EVENTS,
@@ -984,7 +1028,8 @@ def trial_readings(entry: dict) -> list[dict]:
 def added_trial_steps(entry: dict) -> list[dict]:
     terms = {added_trials_label(entry['aura'], term): term
              for reading in trial_readings(entry) for term in reading['adds']}
-    return [spell_count_step(label, term['metric'], term['spell']) for label, term in terms.items()]
+    return [{**spell_count_step(label, term['metric'], term['spell']),
+             **(critical_fields(entry) if term['metric'] == LANDED_HIT_METRIC else {})} for label, term in terms.items()]
 
 
 STREAMS_FIELD = 'streams'
@@ -1090,6 +1135,9 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
         steps = (cast_baseline_steps(class_file, entry, plan) if cast_baseline else []) + aura_steps(entry)
         steps += control_weapon_steps(class_file, entry, plan) if control else []
     limit = per_trigger_limit(entry)
+    critical = critical_rating(entry) is not None
+    hit_spells = [trigger_spell(entry)] + trigger_spells(entry)[1:] if critical else []
+    steps += control_steps(class_file, entry, plan, hit_spells, event_steps(entry)) if critical and part == 0 else []
     steps += attempt_steps(class_file, entry, plan, labels)
     if limit is None:
         steps += added_trial_steps(entry) + event_steps(entry) + energize_steps(entry) + excluded_trial_steps(entry)
@@ -1121,6 +1169,8 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
                                                                                                          entry)
         if entry.get(DUMMY_DISTANCE_FIELD) is not None:
             scenario['contract'] += f' The dummy stands {proc_dummy_distance(entry):g} yd from the caster.'
+    if critical:
+        scenario['players'][0] = forced_player(scenario['players'][0], entry)
     model = {'part': part, 'parts': plan.parts, 'chance_pct': plan.chance_pct, 'minimum_trials': plan.needed,
              'scheduled_attempts': plan.scheduled, 'part_attempts': plan.per_part * streams,
              'attempt_ms': plan.attempt_ms,
@@ -1136,6 +1186,8 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
                           for reading in trial_readings(entry)]}
     if counts_charges(entry):
         model['charge_pool'] = charge_pool_label(aura)
+    if counts_stacks(entry):
+        model[STACK_EVENTS] = stack_model(entry, labels['attempts'])
     if minion:
         from triggers import minion_grants
         reads = [step.get('label', '') for step in steps if step['action'] == 'assert']
@@ -1148,6 +1200,9 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
     if baseline:
         model['baseline'] = {**baseline_labels(aura),
                              'attempts': stream_baseline_attempts(entry, plan.chance_pct) * streams}
+        if counts_stacks(entry):
+            model['baseline'][STACK_EVENTS] = stack_baseline_model(
+                entry, model['baseline']['attempts'], baseline_labels(aura)['trials'] if taken_baseline else None)
         if cast_baseline and trigger_spells(entry):
             model['baseline']['added_trials'] = {
                 added_trials_label(aura, term): baseline_trigger_label(aura, term['spell'])
@@ -1167,6 +1222,8 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
                              'minimum_trials': baseline_attempts(plan.chance_pct)}
     if entry.get('band'):
         model['band'] = rate_band(plan.chance_pct / 100)
+    if critical and part == 0:
+        model[CRITICAL_KEY] = control_model(entry, plan, hit_spells, event_steps(entry))
     residual = residual_sizing(entry, plan.chance_pct)
     if residual:
         model['residual'] = residual
@@ -1183,12 +1240,16 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
         rule += (f'; {RESIDUAL_TARGET} {residual["target"]:g} per pair: Wilson confidence {residual["confidence"]:g} '
                  f'per run instead of 99%, at least {residual["trials"]} trials so that a deviation of '
                  f'{residual["min_detectable"] * 100:g} points is outside the band')
+    if critical:
+        rule += critical_rule(entry, plan)
     if entry.get('trial_excluded_spells'):
         rule += (f'; the minion hits of {entry["trial_excluded_spells"]} are left out of the trials '
                  f'({entry["trial_excluded_reason"]})')
     if entry.get('extra_dummies'):
         rule += (f'; {len(entry["extra_dummies"])} more dummies at {entry["extra_dummies"]} yd from the caster, the '
                  f'events counted on every dummy')
+    if counts_stacks(entry):
+        rule += stack_rule(entry, baseline_attempts(plan.chance_pct))
     if events_baseline(entry):
         rule += events_baseline_rule(entry, plan)
     elif entry.get('baseline') and entry['trigger']['action'] in (MINION, CAST):

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Outland Slaver lowers Felrend and Fel Fireball cost and raises their damage (#809)",
-  "contract": "Outland Slaver 705123 effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (misc=14, SPELLMOD_COST) with EffectBasePoints=-4, DieSides=1 (real -3), and effect 1 is SPELL_AURA_ADD_PCT_MODIFIER (misc=0, SPELLMOD_DAMAGE) with EffectBasePoints=9, DieSides=1 (real +10%). Both share a classmask (family 20, dword1 bits 0+2) matching Fel Fireball (e.g. 801312) and Felrend (e.g. 800210) by SpellFamilyFlags. SpellInfo::CalcPowerCost and Unit::SpellDamageBonusDone apply SPELLMOD_COST/SPELLMOD_DAMAGE generically, so both spells' cost drops by 3 and damage rises by 10%.",
+  "contract": "Outland Slaver 705123 effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (misc=14, SPELLMOD_COST) with EffectBasePoints=-4, DieSides=1 (real -3), and effect 1 is SPELL_AURA_ADD_PCT_MODIFIER (misc=0, SPELLMOD_DAMAGE) with EffectBasePoints=9, DieSides=1 (real +10%). Both share a classmask (family 20, dword1 bits 0+2) matching Fel Fireball (e.g. 801312) and Felrend (e.g. 800210) by SpellFamilyFlags. SpellInfo::CalcPowerCost and Unit::SpellDamageBonusDone apply SPELLMOD_COST/SPELLMOD_DAMAGE generically, so both spells' cost drops by 3 and damage rises by 10%. Effect 2 (SPELL_AURA_ADD_PCT_MODIFIER, misc=8 SPELLMOD_ALL_EFFECTS, +10%) named Fel Fireball (dword1 bit 0) and Twin Slice (dword1 bit 24) in the DBC, so Fel Fireball took the stated bonus twice; owner ruling O-27 keeps one bonus and the Felsworn contract drops the Fel Fireball bit from effect 2 (Felsworn ADR 0025): Fel Fireball keeps no SPELLMOD_ALL_EFFECTS modifier. Twin Slice is not in the tooltip, so its Effect[2] modifier is not asserted here (an observation in Felsworn ADR 0025).",
   "timeout_ms": 90000,
   "players": [
     {
@@ -107,6 +107,36 @@
       "op": 0,
       "base": 100,
       "equals": 110
+    },
+    {
+      "action": "assert",
+      "label": "Fel Fireball all-effects modifier with Outland Slaver stays 100 (owner ruling O-27: one bonus, Effect[2] no longer names Fel Fireball)",
+      "actor": "slaver",
+      "metric": "spell_modifier",
+      "spell": 801312,
+      "op": 8,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Twin Slice 547211 all-effects modifier without Outland Slaver stays 100 (Felsworn O-39 (2026-11-24): Effect[2] is a dummy, Twin Slice takes no bonus)",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 547211,
+      "op": 8,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Twin Slice 547211 all-effects modifier with Outland Slaver stays 100 (Felsworn O-39 (2026-11-24): Effect[2] is a dummy, Twin Slice takes no bonus)",
+      "actor": "slaver",
+      "metric": "spell_modifier",
+      "spell": 547211,
+      "op": 8,
+      "base": 100,
+      "equals": 100
     }
   ]
 }

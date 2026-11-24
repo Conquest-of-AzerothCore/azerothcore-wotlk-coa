@@ -1,8 +1,9 @@
 # Area dummies (`metric_delta` `area_dummies`, ADR 0995)
 
-`area_dummies` (a list of 1 to 9 distances in yd) adds creatures `area1`, `area2`, ... beside the entry's dummy:
-copies of the dummy fixture, each at its distance from the caster. Setup casts keep the dummy as their target, so an
-area spell can strike a marked dummy and unmarked ones in the same cast; the entry reads one of them through
+`area_dummies` (a list of 1 to 11 distances in yd, ADR 1265: the dummy and 11 fill the 12 creatures `run.py` admits)
+adds creatures `area1`, `area2`, ... beside the entry's dummy: copies of the dummy fixture, each at its distance from
+the caster. Setup casts keep the dummy as their target, so an area spell can strike a marked dummy and unmarked ones
+in the same cast; the entry reads one of them through
 `fields.target` (`dummy`, `area1`, ...). An entry needs the dummy in its scenario.
 
 Named point: `fixtures` (the extra creatures).

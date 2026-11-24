@@ -10,10 +10,12 @@
 class Player;
 class Unit;
 class Spell;
+struct TargetInfo;
 namespace AscensionFelsworn
 {
 enum FelswornSpells : uint32
 {
+    BloodOfMannoroth = 802075,
     BurningCommander = 92089,
     MannorothFelfury = 801043,
     Unphased = 803645
@@ -35,12 +37,15 @@ struct FelswornState
     TaskScheduler scheduler;
     std::vector<ObjectGuid> infernals;
     std::vector<Debt> debt;
+    std::vector<ObjectGuid> torpedoed;
     uint64 sequence = 0;
     uint32 fury = 0;
     uint32 ruin = 0;
     uint32 carveSteps = 0;
     uint32 spenderCrit = 0;
+    uint32 resolvePct = 0;
     bool event = false;
+    bool assaultRoll = false;
     bool refreshing = false;
 };
 Player* Owner(Unit const* unit);
@@ -49,7 +54,7 @@ bool Named(SpellInfo const* info, uint32 root);
 bool CanLearnRift(Player const* player, uint32 spellId);
 bool Spender(SpellInfo const* info);
 bool SpenderImpact(SpellInfo const* info);
-bool ResistDebuff(Player* player, SpellInfo const* info);
+bool ResistDebuff(Player* player, Unit* caster, Spell const* spell);
 void SettleDebt(Player* player);
 bool Direct(SpellInfo const* info);
 bool Derived(SpellInfo const* info);
@@ -60,6 +65,7 @@ bool Twin(SpellInfo const* info);
 bool Inner(Unit const* player);
 bool Triggered(Spell const* spell);
 int32 Amount(uint32 spell, uint8 effect = 0, Unit* caster = nullptr);
+void AddVictimAttackPower(Spell* spell, Unit* target, TargetInfo& hit);
 uint32 Fury(Unit const* player);
 void Gain(Player* player, uint32 amount);
 void Generated(Player* player, uint32 amount);
