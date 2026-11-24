@@ -2325,7 +2325,7 @@
       "704613 behaviour_metric_delta stolen_effects"
     ],
     "kind": "claim",
-    "reason": "Third Magic buff added (Arcane Intellect 1459, fw-vb9): carried_aura_count of the three buffs on the caster reads 1 before the learn and 2 after, so an over-steal (3) fails; spellpen 823764 on the caster as precondition fixture. The audit classes carried_aura_count as data (coverage.py state metric, promise word 'empower'), so this read does not count: the clause stays uncounted until a behaviour read exists on an existing kind. The data read 'stolen' is dropped from the labels."
+    "reason": "Third Magic buff added (Arcane Intellect 1459, fw-vb9): carried_aura_count of the three buffs on the caster reads 1 before the learn and 2 after, so an over-steal (3) fails; spellpen 823764 on the caster as precondition fixture. The real Consume Magic 800353 cast with the no-talent control reading one fewer is a behaviour read since carried_aura_count is promised by steal words (mentor D-91 item 2, ADR 1274 provisional)."
   },
   {
     "spell": 705102,
