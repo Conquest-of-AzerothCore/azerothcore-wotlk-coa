@@ -714,6 +714,141 @@
         "source": "Psychic Suppression 800432 has single-target EffectImplicitTargetA 6/1 with EffectRadiusIndex 0 and EffectChainTarget 0 on all effects; triggered 803296 (EffectImplicitTargetA 1, EffectRadiusIndex 0) and lifecycle-cast 802789 / 803746 (AscensionCultistAuras.cpp:66-70,155-159; EffectImplicitTargetA 6, EffectRadiusIndex 0) have zero radius and target only the stream's own dummy; cast at dummy_distance 10 yd (outside 5 yd melee range, inside 30 yd RangeIndex 4); 823764 is caster-only; Mind Rot 560943 has EffectImplicitTargetA 6, EffectRadiusIndex 0; aura_ascension_cultist_event only accepts the caster's own outgoing damage (AscensionCultistEvents.cpp:71,82,165); streams are ungrouped."
       },
       "observe_source": "Mind Rot 300300 (passive, ProcChance 25 = $h; AscensionCultistEvents.cpp:82 checks dealt && (periodic || (info && info->IsChanneled())) && Chance(player, id) and :165 casts 560943). Trigger: Psychic Suppression 800432 (channeled AttributesEx 0x4, GCD 1500 ms, RecoveryTime 90000 ms reset before each cast by flat_chance_rate, 17% of 1512 BaseMana = 257 mana, cast_power 2000 <= 2297 MaxMana; Duration 5000 ms, Effect[0] aura 3 periodic Shadow damage, EffectAmplitude 500 ms, no START_PERIODIC_AT_APPLY -> 10 ticks per cast inside 5500 ms). Unlearned control: 2 cycles x 10 ticks x 5 parts x 8 streams = 800 trials (>= 50), expects 0 procs. Treatment: 47 cycles x 10 ticks x 5 parts x 8 streams = 18800 trials (>= 18576 flip-proof trials for 25% with G-19 +-2 pt band over 5 parts, residual edge-crossing failure <= 0.1% per pair). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 300300 matches verbatim; ~/Projects/coa-log-history/coa-history not present."
+    },
+    {
+      "spell": 301241,
+      "name": "Ungodly Blessing (curse duration)",
+      "kind": "duration_ratio",
+      "quote": "Reduces the duration of curse effects on you by $s1%.",
+      "expected_ratio": 0.6,
+      "vehicle_spell": 51340,
+      "striker_entry": 36,
+      "attempts": 1,
+      "margin_ms": 50,
+      "observe_source": "301241 Effect[0] aura 245 SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL, EffectMiscValue[0] 2 (DISPEL_CURSE), EffectBasePoints[0] -41 + EffectDieSides[0] 1 = -40 ($s1 = 40): curse durations on the caster x0.6 via native Unit::ModSpellDuration (Unit.cpp:12243; Spell.dbc). Vehicle Curse of Impotence 51340 (stock SpellFamilyName 0, Dispel 2 DISPEL_CURSE, Mechanic 0, DmgClass 1 Magic, Effect[0] aura 79, DurationIndex 8 = 15000 ms, SpellDuration.dbc) is cast once per phase by striker entry 36 (spell_hit_bonus 100) at the caster, before (control: 301241 not learned, 15000 ms) and after a real learn of 301241 (9000 ms); duration_ratio_expiry proves actual aura expiry at both 15000 ms and 9000 ms (excluding 10% off on both sides). Reference search 2026-11-24: coa-history spell 301241: 0 events in 186 logs (passive; positive control 502182 Horrorbolt: 27 casts); coabuildhub spells_master_index.json entry 301241 says 'Reduces the duration of curse effects on you by -40%.' matching installed Spell.dbc."
+    },
+    {
+      "spell": 520810,
+      "name": "Corrupt Fate (Dark Veil cooldown)",
+      "kind": "cost_gate",
+      "quote": "Reduces the cooldown of Dark Veil by $/1000;s1 sec.",
+      "gated_spell": 520345,
+      "resource": "cooldown",
+      "reduction": 60000,
+      "target": "ally",
+      "cast_power": 2000,
+      "margin_ms": 500,
+      "observe_source": "520810 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -60001 + EffectDieSides[0] 1 = -60000 ms ($/1000;s1 = 60 s), EffectSpellClassMask[2] 16384 = SpellFamilyFlags[2] 16384 of Dark Veil 520345 (SpellFamilyName 31, RecoveryTime 120000 ms, CategoryRecoveryTime 120000 ms, ManaCostPercentage 30, DurationIndex 28 = 5000 ms channeled; Spell.dbc). Dark Veil rejects self-cast (AscensionCultistAbilities.cpp:56), so it is cast at the friendly ally with cast_power 2000 (<= 2297 MaxMana). Arms timed from a priming cast: 60500 ms without 520810 (refused, SPELL_FAILED_NOT_READY 67, 120000 ms stock cooldown), 60500 ms with 520810 learned (goes through, 0), and 59500 ms with 520810 (refused, 67): the reduced cooldown lies in [59500, 60500] ms, excluding 54000 and 66000 ms (10% off on both sides). Reference search 2026-11-24: coa-history spell 520810: 0 events in 186 logs (passive; positive control 520345 Dark Veil: 2 casts in 2 logs); coabuildhub spells_master_index.json entry 520810 says 'Reduces the cooldown of Dark Veil by -60 sec.' matching installed Spell.dbc."
+    },
+    {
+      "spell": 582589,
+      "name": "Mind Games (Hallucination cooldown)",
+      "kind": "cost_gate",
+      "variant": "cooldown",
+      "label_suffix": "cooldown",
+      "quote": "Reduces the cooldown of Hallucination by $/1000;s1 sec",
+      "gated_spell": 560301,
+      "resource": "cooldown",
+      "reduction": 5000,
+      "target": "caster",
+      "cast_power": 2000,
+      "margin_ms": 250,
+      "observe_source": "582589 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -5001 + EffectDieSides[0] 1 = -5000 ms ($/1000;s1 = 5 s), EffectSpellClassMask[1] 4 = SpellFamilyFlags[1] 4 of Hallucination 560301 (SpellFamilyName 31, RecoveryTime 30000 ms, StartRecoveryTime 0, ManaCostPercentage 15; Spell.dbc). Self-cast with cast_power 2000 (<= 2297 MaxMana). Arms timed from a priming cast: 25250 ms without 582589 (refused, SPELL_FAILED_NOT_READY 67, 30000 ms stock), 25250 ms with 582589 learned (goes through, 0), and 24750 ms with 582589 (refused, 67): the reduced cooldown lies in [24750, 25250] ms, excluding 24500 and 25500 ms (10% off the 5 s cut) as well as 22500 and 27500 ms (10% off the 25 s reduced cooldown). Reference search 2026-11-24: coa-history spell 582589: 0 events in 186 logs (passive; positive control 560301 Hallucination: 36 casts in 11 logs); coabuildhub spells_master_index.json entry 582589 says 'Reduces the cooldown of Hallucination by -5 sec and reduces its mana cost by -20%.' matching installed Spell.dbc."
+    },
+    {
+      "spell": 582589,
+      "name": "Mind Games (Hallucination mana cost)",
+      "kind": "metric_delta",
+      "variant": "mana_cost",
+      "label_suffix": "mana_cost",
+      "quote": "and reduces its mana cost by $s2%.",
+      "trigger_spell": 560301,
+      "gate_spell": 582589,
+      "target": "caster",
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "disable_regeneration": true,
+      "cast_power": 2000,
+      "before_expected": 1774,
+      "expected": 1820,
+      "expected_gain": 46,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1500,
+      "void_on_cast_failure": true,
+      "observe_source": "582589 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[1] 14 (SPELLMOD_COST), EffectBasePoints[1] -21 + EffectDieSides[1] 1 = -20% ($s2 = 20), EffectSpellClassMask[4] 4 (effect 1 word 1 = 4) = SpellFamilyFlags[1] 4 of Hallucination 560301 (SpellFamilyName 31, ManaCostPercentage 15; Spell.dbc). Level 60 Cultist BaseMana = 1512 (player_class_stats class 25 level 60; MaxMana = 2297): SpellInfo::CalcPowerCost (SpellInfo.cpp:3216) computes base cost int32(CalculatePct(1512, 15)) = int32(226.8) = 226 mana; Player::ApplySpellMod (Player.cpp:10687) applies -20% -> int32(226 * 0.8f) = int32(180.8) = 180 mana (saving 46 mana, 46/226 = 20.35%). Both phases set mana to cast_power 2000 with regeneration disabled and cast Hallucination 560301 for real, reading remaining mana 500 ms later: 2000 - 226 = 1774 before learning 582589 (control) and 2000 - 180 = 1820 after learning 582589 (gain +46, exact tolerance 0). Reference search 2026-11-24: coa-history spell 582589: 0 events in 186 logs (passive; positive control 560301 Hallucination: 36 casts in 11 logs); coabuildhub spells_master_index.json entry 582589 says 'reduces its mana cost by -20%' matching installed Spell.dbc."
+    },
+    {
+      "spell": 805114,
+      "name": "Mass Nightmare (up to 5 nearby enemies)",
+      "kind": "fixed_count",
+      "variant": "targets",
+      "label_suffix": "targets",
+      "quote": "Spread nightmares of the black empire to up to $i nearby enemies,",
+      "expected": 5,
+      "radius": 8,
+      "headroom": 1,
+      "metric": "aura",
+      "cast_spell": 805114,
+      "target_rank": 805114,
+      "cast_target": "caster",
+      "layout": "caster",
+      "count_primary": true,
+      "repeats": 1,
+      "dummy_entry": 6,
+      "radius_reason": "Mass Nightmare 805114 Effect[0] TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 14 (8 yd), MaxAffectedTargets 5 ($i); dummy_entry 6 (Kobold Vermin, Humanoid) because stock dummy 36 (Harvest Golem, Mechanical) is immune to MECHANIC_HORROR 24; 7 dummies inside 8 yd (1..7 yd) prove the 5-target cap (count_primary) and the far dummy at 13 yd stays unhit",
+      "observe_source": "805114 MaxAffectedTargets = 5 ($i = 5), Effect[0] aura 12 SPELL_AURA_MOD_STUN (EffectMechanic 24 MECHANIC_HORROR), TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 14 (8 yd), CasterAuraSpell 680601 (set by required_aura_steps, 20 Insanity marker; Spell.dbc). Dummy entry 6 (Kobold Vermin, Humanoid) is used because stock dummy 36 (Harvest Golem, Mechanical) is immune to horror. One cast at the caster with 7 dummies inside 8 yd and 1 far dummy at 13 yd (control) must horrify exactly 5 of the 7 nearby dummies and 0 at 13 yd. Reference search 2026-11-24: coa-history spell 805114: 10 casts in 6 logs, 19 aura applied/removed in 4 logs; coabuildhub spells_master_index.json entry 805114 matches verbatim ('Spread nightmares of the black empire to up to 5 nearby enemies, horrifying them for 5 sec and interrupting non-player spellcasting for 3 sec.')."
+    },
+    {
+      "spell": 805114,
+      "name": "Mass Nightmare (horrifying them for 5 sec)",
+      "kind": "metric_delta",
+      "variant": "horrify_duration",
+      "label_suffix": "horrify_duration",
+      "quote": "horrifying them for $d",
+      "trigger_spell": 805114,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "target_entry": 6,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 805114,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 4600,
+      "expiry_wait_ms": 800,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4550,
+          4800
+        ],
+        "expired": [
+          5200,
+          5450
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "805114 DurationIndex 28 = 5000 ms ($d = 5 sec, SpellDuration.dbc), Effect[0] aura 12 SPELL_AURA_MOD_STUN (EffectMechanic 24 MECHANIC_HORROR), CasterAuraSpell 680601 (set by required_aura_steps; Spell.dbc). Target is creature entry 6 (Kobold Vermin, Humanoid) at 3 yd (inside 8 yd radius) because stock dummy 36 (Harvest Golem, Mechanical) is immune to horror. Reads aura 805114 absent before the cast (control = 0), present (1) at 4600 ms (game_time [4550, 4800], above 4500 = 0.9 * 5000), and gone (0) at 5400 ms (game_time [5200, 5450], below 5500 = 1.1 * 5000), excluding durations 10% off on both sides. Reference search 2026-11-24: coa-history spell 805114: 10 casts in 6 logs, 19 aura applied/removed in 4 logs; coabuildhub spells_master_index.json entry 805114 matches verbatim ('horrifying them for 5 sec')."
+    },
+    {
+      "spell": 805114,
+      "name": "Mass Nightmare (non-player interrupt 3 sec)",
+      "kind": "school_lockout",
+      "variant": "lockout",
+      "label_suffix": "lockout",
+      "quote": "and interrupting non-player spellcasting for $32747d.",
+      "interrupt_spell": 32747,
+      "cast_spell": 805114,
+      "channel_spell": 12051,
+      "observe_source": "805114 carries SPELL_ATTR7_CAN_CAUSE_INTERRUPT (AttributesEx7 33556480) and spell_ascension_cultist_ability::EffectHitTarget (AscensionCultistAbilities.cpp:435-436) casts Interrupt 32747 at non-player targets before EffectApplyAura (Spell.cpp:5802-5809). 32747 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 = 3000 ms ($32747d, SpellDuration.dbc); Spell::EffectInterruptCast stops a channel whose ChannelInterruptFlags hold CHANNEL_INTERRUPT_FLAG_INTERRUPT and PreventionType is silence, locking that school for 3000 ms (Creature::ProhibitSpellSchool). CasterAuraSpell 680601 is set by required_aura_steps. The dummy channels Evocation 12051 (Arcane, PreventionType 1, ChannelInterruptFlags 31756, 8 s) on itself: Arcane is unlocked before the cast (control = 0), locked before 3000 ms and free after 3000 ms. Reference search 2026-11-24: coa-history spell 805114: 10 casts in 6 logs; coabuildhub spells_master_index.json entry 805114 matches verbatim ('interrupting non-player spellcasting for 3 sec')."
     }
   ],
   "player_observations": [],

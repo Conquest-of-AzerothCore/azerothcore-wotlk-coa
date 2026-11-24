@@ -673,7 +673,8 @@
     "spell": 301241,
     "clause": "Reduces the duration of curse effects on you by $s1%.",
     "labels": [
-      "301241 effect_value e0 #0"
+      "301241 behaviour_duration_ratio",
+      "301241 behaviour_expiry"
     ],
     "kind": "claim"
   },
@@ -1275,7 +1276,9 @@
     "spell": 520810,
     "clause": "Reduces the cooldown of Dark Veil by $/1000;s1 sec.",
     "labels": [
-      "520810 effect_value e0 #0"
+      "520810 cost_gate 520345 without",
+      "520810 cost_gate 520345 with",
+      "520810 cost_gate 520345 beyond"
     ],
     "kind": "claim"
   },
@@ -1937,7 +1940,9 @@
     "spell": 582589,
     "clause": "Reduces the cooldown of Hallucination by $/1000;s1 sec",
     "labels": [
-      "582589 effect_value e0 #0"
+      "582589 cost_gate 560301 cooldown without",
+      "582589 cost_gate 560301 cooldown with",
+      "582589 cost_gate 560301 cooldown beyond"
     ],
     "kind": "claim"
   },
@@ -1945,7 +1950,7 @@
     "spell": 582589,
     "clause": "and reduces its mana cost by $s2%.",
     "labels": [
-      "582589 effect_value e1 #1"
+      "582589 behaviour_metric_delta mana_cost"
     ],
     "kind": "claim"
   },
@@ -3521,7 +3526,7 @@
     "spell": 805114,
     "clause": "Spread nightmares of the black empire to up to $i nearby enemies,",
     "labels": [
-      "805114 effect_value #0"
+      "805114 targets behaviour_fixed_count"
     ],
     "kind": "claim"
   },
@@ -3529,7 +3534,7 @@
     "spell": 805114,
     "clause": "horrifying them for $d",
     "labels": [
-      "805114 aura_duration_ms #1"
+      "805114 behaviour_metric_delta horrify_duration"
     ],
     "kind": "claim"
   },
@@ -3537,7 +3542,7 @@
     "spell": 805114,
     "clause": "and interrupting non-player spellcasting for $32747d.",
     "labels": [
-      "805114 spell_duration 32747 #2"
+      "805114 behaviour_expiry lockout"
     ],
     "kind": "claim"
   },
