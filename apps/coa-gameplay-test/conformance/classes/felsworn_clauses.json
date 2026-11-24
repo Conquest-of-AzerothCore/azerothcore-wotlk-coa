@@ -4487,7 +4487,7 @@
         }
       ]
     },
-    "reason": "Data label '805245 effect_value #0' dropped (mentor D-115, as D-112): it reads Effect[0] of 805245, a value this clause names no token for ($h% is the proc chance, read by proc_rate), and the generator marks it unmodelled in both runs of fw-pair4, so it proves no claim of the clause. The damage-taken leg is counted (taken_hit, ADR 1279); the avoided leg is the tool gap below."
+    "reason": "Data label '805245 effect_value #0' dropped (mentor D-115, as D-112): it stands for the $h chance token, which the generator marks unmeasurable (a chance_pct token with no out-of-combat metric) and unmodelled in both runs of fw-pair4; the chance itself is measured by the trial-based 805245 proc_rate verdict, so the label proves no claim of the clause. The damage-taken leg is counted (taken_hit, ADR 1279); the avoided leg is the tool gap below."
   },
   {
     "spell": 805246,
