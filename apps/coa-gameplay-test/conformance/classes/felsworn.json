@@ -26224,6 +26224,42 @@
       "repeats": 10
     },
     {
+      "spell": 803645,
+      "name": "Unphased (no pushback reduction without Inner Demon, condition arm, game time)",
+      "kind": "pushback_reduction",
+      "label_suffix": "pushback_no_inner_demon",
+      "quote": "In addition, reduces spell pushback suffered from damaging attacks by $s2% while Inner Demon is active.",
+      "cast_spell": 801312,
+      "cast_power": 100,
+      "reducer_spell": 803645,
+      "reducer_learn": true,
+      "reducer_wait_ms": 500,
+      "strike_spell": 41394,
+      "strike_at_ms": 700,
+      "windows": [
+        [
+          1450,
+          1490
+        ],
+        [
+          1940,
+          1980
+        ],
+        [
+          1450,
+          1490
+        ],
+        [
+          1940,
+          1980
+        ]
+      ],
+      "expected_pct": 0,
+      "observe_source": "Condition arm of 803645 'reduces spell pushback suffered from damaging attacks by $s2% while Inner Demon is active' (review fw-rbk1 I-1): the same layout as the pushback_inner_demon entry, 803645 learned for real, but Inner Demon 804216 is never cast or set (no caster_auras), so the clause's condition is false in every phase and the expected reduction is 0 (G-19 band -2..2 points). RefreshUnphased sets the reduce-pushback amount to 0 without Inner Demon (AscensionFelsworn.cpp:285-293, code reading), so a conformant reduced hit cast ends with the hit cast near 2000 ms and its window repeats the hit window; a server that reduces pushback whether or not Inner Demon is up reads about 50% and alerts. Precedent: Day Cycles 300361 control arms with expected_pct 0 (Sun Cleric). Reference search 2026-11-24 (fw-vb6, fw-vb4b): coa-history spell 803645: 0 events in 186 logs (a passive leaves no event); bindmysoul snapshot: tooltip words only; nothing else found.",
+      "repeats": 10,
+      "variant": "pushback_no_inner_demon"
+    },
+    {
       "spell": 705135,
       "name": "Reachwalker (Felhoof Charge cooldown after Chaos Rush, without arm)",
       "kind": "cost_gate",

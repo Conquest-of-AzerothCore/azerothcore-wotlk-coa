@@ -151,14 +151,15 @@ class PushbackLearnedReducerTests(unittest.TestCase):
 
 
 class PushbackSampledTests(unittest.TestCase):
-    def built(self):
+    def built(self, **changes):
         entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
                      if entry['kind'] == 'pushback_reduction' and entry.get('repeats', 1) > 1
                      and entry.get('reducer_learn'))
+        entry = {**entry, **changes}
         return entry, behaviour_scenario(load_fixture_class_file(23), entry)
 
-    def judged(self, ends: dict) -> str:
-        entry, (_, [expectation]) = self.built()
+    def judged(self, ends: dict, **changes) -> str:
+        entry, (_, [expectation]) = self.built(**changes)
         lows = dict(zip(('unhit', 'hit', 'reduced_unhit', 'reduced'), (low for low, _ in entry['windows'])))
         values = {}
         for kind, samples in expectation.model['samples'].items():
@@ -181,3 +182,11 @@ class PushbackSampledTests(unittest.TestCase):
         self.assertEqual(len(expectation.model['samples']['hit']), entry['repeats'])
         self.assertEqual(self.judged({'unhit': 2505, 'hit': 3005, 'reduced_unhit': 2125, 'reduced': 2375}), 'ok')
         self.assertEqual(self.judged({'unhit': 2505, 'hit': 3005, 'reduced_unhit': 2125, 'reduced': 2475}), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_condition_arm_expecting_no_reduction_alerts_on_an_unconditional_one(self):
+        unreduced = {'unhit': 2505, 'hit': 3005, 'reduced_unhit': 2125, 'reduced': 2625}
+        halved = {**unreduced, 'reduced': 2375}
+        self.assertEqual(self.judged(unreduced, expected_pct=0), 'ok')
+        self.assertEqual(self.judged(halved, expected_pct=0), 'alert')
+        self.assertEqual(self.judged(halved), 'ok')
