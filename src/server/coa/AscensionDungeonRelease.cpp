@@ -171,8 +171,13 @@ public:
 
     void OnPlayerJustDied(Player* player) override
     {
-        if (InRaidFight(player->GetMap()))
-            Hold(player);
+        Map* map = player->GetMap();
+        if (!InRaidFight(map))
+            return;
+
+        if (RaidReleaseHold* hold = map->CustomData.Get<RaidReleaseHold>(RAID_RELEASE_HOLD))
+            hold->held.erase(player->GetGUID());
+        Hold(player);
     }
 
     void OnPlayerReleasedGhost(Player* player) override

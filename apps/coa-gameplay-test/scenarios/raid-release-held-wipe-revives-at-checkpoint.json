@@ -6,7 +6,8 @@
     "until the fight ends. When the boss fight fails (a wipe), every player still dead is resurrected by the server",
     "where Release would have put them: the nearest checkpoint of a killed boss or the instance start, at 50% health.",
     "Jeklik (0) is set dead so her checkpoint (-11940.951, -1549.5022) is the only one unlocked, about 490 yards from",
-    "Jin'do's arena where the player dies; Gahz'ranka's encounter (8) stands in for the fight."
+    "Jin'do's arena where the player dies. The player is revived after dying during Gahz'ranka's encounter (8),",
+    "then dies again during Jin'do's encounter (7). Gahz'ranka's kill must not make the second death resolve in place."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -127,6 +128,33 @@
       "actor": "fallen"
     },
     {
+      "action": "console",
+      "label": "Resurrect the player during the first fight",
+      "command": "revive Harnessb"
+    },
+    {
+      "action": "assert",
+      "actor": "fallen",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "command",
+      "actor": "watcher",
+      "command": ".instance setbossstate 7 1"
+    },
+    {
+      "action": "command",
+      "label": "The first boss dies while the second fight keeps the hold active",
+      "actor": "watcher",
+      "command": ".instance setbossstate 8 3"
+    },
+    {
+      "action": "die",
+      "actor": "fallen"
+    },
+    {
       "action": "release_spirit",
       "label": "Release during the fight is refused",
       "actor": "fallen",
@@ -155,7 +183,7 @@
       "action": "command",
       "label": "The fight is lost",
       "actor": "watcher",
-      "command": ".instance setbossstate 8 2"
+      "command": ".instance setbossstate 7 2"
     },
     {
       "action": "assert",
