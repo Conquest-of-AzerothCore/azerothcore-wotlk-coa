@@ -24,9 +24,9 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 UPDATE `creature` SET `position_x` = 4523.6, `position_y` = 254.8, `position_z` = 74.54, `orientation` = 3.1416
 WHERE `guid` = 9780102 AND `id` = 64605;
 
--- His health is per player in his map (10 to 40). The CoA logs of Normal kills end at 20.14M with 38 players and
--- 20.91M with 40, about 523,000 a player; only Normal is open, so the heroic row stays as it is.
-UPDATE `coa_world_boss_level` SET `health` = 523000, `note` = 'per player; Normal kill logs, 40 players 20.91M'
+-- His health follows the player count in his map (10 to 40): 387,000 x (players + 14). The CoA logs of Normal kills
+-- fit that line (13.17M at 20 players, 20.14M at 38, 20.91M at 40); only Normal is open, so the heroic row stays.
+UPDATE `coa_world_boss_level` SET `health` = 387000, `note` = 'x (players + 14); Normal kill logs, 20-40 players'
 WHERE `entry` = 64605 AND `difficulty` = 0;
 -- His model, as Creature.dbc gives it (FacelessOne, green).
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 228465, `DisplayScale` = 1 WHERE `CreatureID` = 64605;
@@ -106,7 +106,9 @@ INSERT INTO `graveyard_zone` (`ID`, `GhostZone`, `Faction`, `Comment`) VALUES
 
 -- The Treasures of Azeroth chest every world boss gives (1615011) has a 5% roll at any world boss item (978060):
 -- his items join that pool.
-INSERT IGNORE INTO `reference_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`,
+DELETE FROM `reference_loot_template` WHERE `Entry` = 978060 AND `Item` IN (11271, 11272, 11273, 11274, 11275,
+  11276, 11277, 11326, 11327, 11328, 11431);
+INSERT INTO `reference_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`,
   `GroupId`, `MinCount`, `MaxCount`, `Comment`)
 SELECT 978060, l.`Item`, 0, 0, 0, 1, 1, 1, 1, CONCAT('Treasures of Azeroth - World Boss - ', i.`name`)
 FROM `creature_loot_template` l JOIN `item_template` i ON i.`entry` = l.`Item`
@@ -121,3 +123,8 @@ INSERT INTO `item_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Quest
 (1615011, 978060, 978060, 5, 0, 1, 0, 1, 1, 'Treasures of Azeroth - 5% a world boss item'),
 (1615011, 400750, 0, 100, 0, 1, 0, 15, 15, 'Treasures of Azeroth - 15 Raider''s Commendations'),
 (1615011, 978061, 978061, 100, 0, 1, 0, 4, 4, 'Treasures of Azeroth - 1000 Runes of Descension (250 x 4)');
+
+-- GM teleport into his map, like the other world boss maps (SetisPVE, FrostgiantnPVE).
+DELETE FROM `game_tele` WHERE `id` = 10288;
+INSERT INTO `game_tele` (`id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, `name`) VALUES
+(10288, 4410.54, 269.28, 78.02, 0, 883, 'SoggothPVE');

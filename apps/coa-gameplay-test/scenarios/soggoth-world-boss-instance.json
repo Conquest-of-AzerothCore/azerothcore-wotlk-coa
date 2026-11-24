@@ -3,8 +3,8 @@
   "name": "The Will of Soggoth: the shrine takes the raid to his map (Normal only), he pays every player and leaves a portal back",
   "contract": [
     "The shrine of The Will of Soggoth (280144) in Darkshore refuses a heroic raid difficulty and on a Normal one",
-    "takes the player to his map (883). His health is per player in his map, counted from 10 to 40,",
-    "so 5230000 for one player. Every player gets 250 Runes of Ascension (375250), 100 to 150 Bazaar Tokens (975001) and a",
+    "takes the player to his map (883). His health is 387,000 x (players + 14), players counted from 10 to 40,",
+    "so 9288000 for one player. Every player gets 250 Runes of Ascension (375250), 100 to 150 Bazaar Tokens (975001) and a",
     "Treasures of Azeroth chest (978059). The portal out (978078) opens where he falls and takes the player back.",
     "While Corla (64606), Azil (64607) and Drahga (64608) live he stands shielded and bound by their",
     "beams and cannot be attacked; a wipe brings fallen heralds back."
@@ -140,6 +140,11 @@
       "metric": "nearest_creature_distance",
       "entry": 64607,
       "max": 15
+    },
+    {
+      "action": "encounter_start",
+      "actor": "raider",
+      "boss_entry": 64605
     },
     {
       "action": "assert",
@@ -342,10 +347,12 @@
     },
     {
       "action": "assert",
-      "actor": "raider",
       "label": "He engages on his own, without a pull",
-      "metric": "health",
-      "max": 49999999,
+      "actor": "raider",
+      "metric": "timeline_count",
+      "event": "enter_combat",
+      "source_entry": 64605,
+      "min": 1,
       "within_ms": 15000
     },
     {
@@ -489,11 +496,11 @@
     },
     {
       "action": "assert",
-      "label": "His health is ten players' worth for a lone player",
+      "label": "His health is 387,000 x (10 + 14) for a lone player",
       "actor": "raider",
       "metric": "nearby_creature_max_health",
       "entry": 64605,
-      "equals": 5230000,
+      "equals": 9288000,
       "within_ms": 3000
     },
     {

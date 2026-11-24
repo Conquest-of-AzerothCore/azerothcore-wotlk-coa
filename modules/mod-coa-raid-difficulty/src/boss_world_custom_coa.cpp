@@ -180,7 +180,7 @@ namespace
     constexpr uint32 FLEX_MIN_PLAYERS = 10;
     constexpr uint32 FLEX_MAX_PLAYERS = 40;
 
-    void ApplyFlexHealth(Creature* me)
+    void ApplyFlexHealth(Creature* me, uint32 offset = 0)
     {
         Level const* lv = LevelOf(me);
         if (!lv || !lv->health)
@@ -188,7 +188,7 @@ namespace
         uint32 const players = std::clamp<uint32>(me->GetMap()->GetPlayersCountExceptGMs(), FLEX_MIN_PLAYERS,
             FLEX_MAX_PLAYERS);
         float const pct = me->GetHealthPct();
-        uint32 const health = lv->health * players;
+        uint32 const health = lv->health * (players + offset);
         me->SetCreateHealth(health);
         me->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(health));
         me->UpdateMaxHealth();
@@ -1076,9 +1076,19 @@ namespace
     constexpr std::array<uint32, 3> SoggothHeralds = { NPC_CORLA, NPC_AZIL, NPC_DRAHGA };
     constexpr float HERALD_RANGE = 200.0f;
     constexpr float VOID_REND_RADIUS = 5.0f;
+    constexpr uint32 SOGGOTH_HEALTH_OFFSET = 14;
 
     void RespawnHeralds(Creature* me)
     {
+        std::array<uint32, 4> const encounter = { NPC_SOGGOTH, NPC_CORLA, NPC_AZIL, NPC_DRAHGA };
+        for (uint32 entry : encounter)
+        {
+            std::list<Creature*> members;
+            me->GetCreatureListWithEntryInGrid(members, entry, HERALD_RANGE);
+            for (Creature* member : members)
+                if (member != me && member->IsAlive() && member->IsInCombat())
+                    return;
+        }
         for (uint32 entry : SoggothHeralds)
         {
             std::list<Creature*> heralds;
@@ -1107,14 +1117,14 @@ namespace
             custom_world_boss_coa::Reset();
             _summons.DespawnAll();
             _tears.clear();
-            ApplyFlexHealth(me);
+            ApplyFlexHealth(me, SOGGOTH_HEALTH_OFFSET);
             Shield(HeraldsAlive());
         }
 
         void EnterEvadeMode(EvadeReason why) override
         {
-            RespawnHeralds(me);
             custom_world_boss_coa::EnterEvadeMode(why);
+            RespawnHeralds(me);
         }
 
         bool HeraldsAlive()
@@ -1168,7 +1178,7 @@ namespace
 
         void JustEngagedWith(Unit* who) override
         {
-            ApplyFlexHealth(me);
+            ApplyFlexHealth(me, SOGGOTH_HEALTH_OFFSET);
             custom_world_boss_coa::JustEngagedWith(who);
         }
 
@@ -1245,7 +1255,7 @@ namespace
                     for (auto it = _tears.begin(); it != _tears.end();)
                     {
                         for (Player* p : Players(me, [&](Player* x) { return x->IsWithinDist3d(&it->first, TEAR_RADIUS); }))
-                            SpellDamage(me, p, SPELL_TEAR_HIT, uint32(Info(me, SPELL_TEAR_HIT) * _damage),
+                            SpellDamage(me, p, SPELL_TEAR_HIT, uint32(Info(me, SPELL_TEAR_HIT)),
                                 SPELL_SCHOOL_MASK_SHADOW);
                         it = --it->second ? std::next(it) : _tears.erase(it);
                     }
@@ -1270,12 +1280,12 @@ namespace
                         if (!marked->HasAura(SPELL_VISIONS_MARK))
                             continue;
                         me->CastSpell(marked, SPELL_VOID_REND, true);
-                        SpellDamage(me, marked, SPELL_VISIONS_HIT, uint32(Info(me, SPELL_VISIONS_HIT) * _damage),
+                        SpellDamage(me, marked, SPELL_VISIONS_HIT, uint32(Info(me, SPELL_VISIONS_HIT)),
                             SPELL_SCHOOL_MASK_SHADOW);
                         for (Player* p : players)
                             if (p->IsWithinDist3d(marked, VOID_REND_RADIUS))
                                 SpellDamage(me, p, SPELL_VOID_REND,
-                                    uint32(Info(me, SPELL_VOID_REND, 1) * _damage), SPELL_SCHOOL_MASK_SHADOW);
+                                    uint32(Info(me, SPELL_VOID_REND, 1)), SPELL_SCHOOL_MASK_SHADOW);
                     }
                     break;
                 }
@@ -1339,8 +1349,8 @@ namespace
 
         void EnterEvadeMode(EvadeReason why) override
         {
-            RespawnHeralds(me);
             custom_world_boss_coa::EnterEvadeMode(why);
+            RespawnHeralds(me);
         }
 
         void UpdateAI(uint32 diff) override
@@ -1452,7 +1462,7 @@ namespace
                         Position const& spot = it->first;
                         for (Player* p : Players(me, [&](Player* x) { return x->IsWithinDist3d(&spot, TEAR_RADIUS); }))
                             SpellDamage(me, p, SPELL_HERALD_TEAR_HIT,
-                                uint32(Info(me, SPELL_HERALD_TEAR_HIT) * _damage), SPELL_SCHOOL_MASK_SHADOW);
+                                uint32(Info(me, SPELL_HERALD_TEAR_HIT)), SPELL_SCHOOL_MASK_SHADOW);
                         it = --it->second ? std::next(it) : _tears.erase(it);
                     }
                     _clock.ScheduleEvent(TH_TEAR, 1s);
