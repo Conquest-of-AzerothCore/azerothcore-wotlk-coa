@@ -532,7 +532,8 @@
     "spell": 520693,
     "clause": "Blast an enemy and all enemies near them with fel magic, dealing ${$m1+0+$SP*0.4} Shadowflame Damage.",
     "labels": [
-      "520693 effect_value e0 #0"
+      "520693 behaviour_metric_delta damage",
+      "520693 behaviour_metric_delta damage_sp"
     ],
     "kind": "claim"
   },
@@ -544,7 +545,9 @@
       {
         "claim": "an additional ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage",
         "labels": [
-          "520693 effect_value 520832e0 #1"
+          "520693 behaviour_metric_delta inner_total",
+          "520693 behaviour_metric_delta inner_total_sp",
+          "520693 behaviour_metric_delta inner_total_bare"
         ]
       },
       {
@@ -1007,7 +1010,7 @@
       {
         "claim": "dealing $806095s1% Weapon Damage",
         "labels": [
-          "555738 effect_value 806095e0 #2"
+          "555738 behaviour_metric_delta hit_ap"
         ]
       },
       {
@@ -1253,7 +1256,7 @@
       {
         "claim": "Increases the damage dealt",
         "labels": [
-          "560578 effect_value e0 #0"
+          "560578 behaviour_hit_ratio damage"
         ]
       },
       {
@@ -1633,8 +1636,9 @@
     "spell": 572889,
     "clause": "Critically striking now increases your damage dealt by $705148s1% for $705148d,",
     "labels": [
-      "572889 effect_value 705148e0 #0",
-      "572889 spell_duration 705148 #1"
+      "572889 behaviour_hit_ratio stack_damage",
+      "572889 behaviour_metric_delta duration_held",
+      "572889 behaviour_metric_delta duration_gone"
     ],
     "kind": "claim"
   },
@@ -1722,7 +1726,7 @@
     "spell": 574145,
     "clause": "In addition, your critical auto attacks now deal $s2% additional damage as Chaos damage.",
     "labels": [
-      "574145 effect_value e1 #0"
+      "574145 behaviour_metric_delta chaos_copy"
     ],
     "kind": "claim"
   },
@@ -1800,7 +1804,7 @@
       {
         "claim": "increase your damage by $572782s1%",
         "labels": [
-          "681376 effect_value 572782e0 #1"
+          "681376 behaviour_hit_ratio stack_damage"
         ]
       },
       {
@@ -3005,7 +3009,8 @@
     "spell": 563268,
     "clause": "dealing Weapon Damage plus $s1.",
     "labels": [
-      "563268 effect_value e0 #1"
+      "563268 behaviour_metric_delta hit",
+      "563268 behaviour_metric_delta hit_ap"
     ],
     "kind": "claim"
   },
@@ -3423,7 +3428,10 @@
     "spell": 572804,
     "clause": "Unleash a devastating attack, dealing $s2% Weapon Damage to your target with both weapons.",
     "labels": [
-      "572804 effect_value e1 #0"
+      "572804 behaviour_metric_delta hit",
+      "572804 behaviour_metric_delta hit_ap",
+      "572804 behaviour_metric_delta hit_off",
+      "572804 behaviour_metric_delta hit_ap_off"
     ],
     "kind": "claim"
   },
@@ -3454,7 +3462,10 @@
     "spell": 803475,
     "clause": "Strike an enemy for Weapon Damage plus ${$m1+0+$AP*.145} with both weapons, additionally scaling with your attack power.",
     "labels": [
-      "803475 effect_value e0 #0"
+      "803475 behaviour_metric_delta hit",
+      "803475 behaviour_metric_delta hit_ap",
+      "803475 behaviour_metric_delta hit_off",
+      "803475 behaviour_metric_delta hit_ap_off"
     ],
     "kind": "claim"
   },

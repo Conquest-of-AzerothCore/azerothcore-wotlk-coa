@@ -19398,6 +19398,1073 @@
       "expected": 1,
       "after_at_least": 300,
       "observe_source": "Carve 800206 is a channel (DurationIndex 66 = 2500 ms) whose ChannelInterruptFlags 4733956 (0x483C04) carry no movement bit in Spell.dbc, and the server adds none. The caster is moved by the harness relocate step (the native position update of a client movement packet, which interrupts a channel carrying AURA_INTERRUPT_FLAG_MOVE) 1.5 yd along y and back at 500 and 1000 ms; cast_remaining_ms of the caster's own cast is read 800 ms after the last move (about 1800 ms after the cast), the channel must still run (at least 300 of the 2500 ms). Before (control): no cast, 0. Felfury x6 and 803468 are set as precondition fixtures. Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 moving_channel (the precedent shape); nothing else found beyond the tooltip and Spell.dbc. "
+    },
+    {
+      "kind": "metric_delta",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "before_expected": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "spell": 520693,
+      "name": "Felwrath (damage at the reference spell power)",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "dealing ${$m1+0+$SP*0.4} Shadowflame Damage.",
+      "fields": {
+        "spell": 520693,
+        "target": "dummy",
+        "critical": false
+      },
+      "expected": 1291.0,
+      "after_at_least": 1231,
+      "after_at_most": 1351,
+      "observe_source": "520693 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE (2), Shadowflame (SchoolMask 36), BasePoints 1230, DieSides 121 so the roll is 1231 to 1351, RealPointsPerLevel 5.37 x (60 - BaseLevel 60) = 0, so $m1 reads 1231 to 1351 at level 60; the tooltip adds spell power x 0.4 ($SP*0.4); reference spell power 0 (class file reference_stats). Spell crit is removed by Reg's Test Aura 984954 and the dummy's magic resistance by the spell-penetration fixture 823764, both preconditions by harness set_aura, with Felfury 800058 x6 and At Least 2 Felfury 803468 (Felwrath consumes 2 Felfury and needs 803468). Expected range 1231 to 1351 (the tooltip's $m1 to $M1), mean 1291; one real cast at the dummy, the damage event of spell 520693 read 3000 ms after the cast starts (cast time 2000 ms); the control is the same read before any cast (0). Reference search 2026-11-24: coa-history spell 520693: 1993 SPELL_DAMAGE events in 6 logs (min 16, max 13826, mean 2686, 1268 crits), 365 casts; gear, spell power and resistances of the loggers are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "kind": "metric_delta",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "before_expected": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "spell": 520693,
+      "name": "Felwrath (damage at +10000 spell power)",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "dealing ${$m1+0+$SP*0.4} Shadowflame Damage.",
+      "fields": {
+        "spell": 520693,
+        "target": "dummy",
+        "critical": false
+      },
+      "expected": 5291.0,
+      "after_at_least": 5231,
+      "after_at_most": 5351,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "observe_source": "520693 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE (2), Shadowflame (SchoolMask 36), BasePoints 1230, DieSides 121 so the roll is 1231 to 1351, RealPointsPerLevel 5.37 x (60 - BaseLevel 60) = 0, so $m1 reads 1231 to 1351 at level 60; the tooltip adds spell power x 0.4 ($SP*0.4); reference spell power 0 (class file reference_stats). Spell crit is removed by Reg's Test Aura 984954 and the dummy's magic resistance by the spell-penetration fixture 823764, both preconditions by harness set_aura, with Felfury 800058 x6 and At Least 2 Felfury 803468 (Felwrath consumes 2 Felfury and needs 803468). Contrast arm of the spell power term: +10000 spell power (player_spell_power on the hit arm): 1231..1351 + 0.4 x 10000 = 5231..5351 against 1231..1351 at the reference. Reference search 2026-11-24: coa-history spell 520693: 1993 SPELL_DAMAGE events in 6 logs (min 16, max 13826, mean 2686, 1268 crits), 365 casts; gear, spell power and resistances of the loggers are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 520693,
+      "quote": "an additional ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d,",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 520832,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Felwrath (Inner Demon DoT total damage over its duration)",
+      "variant": "inner_total",
+      "label_suffix": "inner_total",
+      "expected": 118.8,
+      "after_at_least": 113,
+      "after_at_most": 125,
+      "wait_ms": 9000,
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): DurationIndex 32 = 6000 ms ($520832d); two periodic damage effects. Effect[0] aura 3, EffectAmplitude 1000, BasePoints 7 + DieSides 1 = 8, RealPointsPerLevel 2.0 x (60 - BaseLevel 10) = 100: 108 per tick, 6 ticks. Effect[1] aura 3, EffectAmplitude 2000, 6 + 1.2 x 50 = 66 per tick, 3 ticks. The tooltip states ONE total for the whole duration: ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d = 8 + 100 = 108 (+ 0.1 x spell power). The entry reads the summed applied damage of both effects (every event of spell 520832 on the dummy, 1 stack from one cast of five struck enemies) from the cast to 1000 ms after the last tick: 2000 ms cast + 6000 ms + margin = 9000 ms. Expected is the tooltip total, never a per-tick figure. Data sum for the reader (not an expected value): 6 x 108 + 3 x 66 = 846 at spell power 0. Setup as the inner_five entry: 4 extra dummies at 4 to 7 yd (five enemies struck), spell crit and resist removed (984954, 823764). Reference search 2026-11-24: coa-history spell 520832: 11712 SPELL_PERIODIC_DAMAGE events in 10 logs (min 4, max 3295, mean 524), no crit; the loggers' spell power, level and stacks are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc. Inner Demon 804216 by harness set_aura as the clause's own condition, named: its Effect[1] aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 127, BasePoints 9 + 1 = 10 ($s2 of 804216) multiplies the damage by 1.1, so the expected total is the tooltip total x 1.1. Total 108 x 1.1 = 118.8, band 5% (113 to 125)."
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 520693,
+      "quote": "an additional ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d,",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 520832,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Felwrath (Inner Demon DoT total damage over its duration at +10000 spell power)",
+      "variant": "inner_total_sp",
+      "label_suffix": "inner_total_sp",
+      "expected": 1218.8,
+      "after_at_least": 1158,
+      "after_at_most": 1280,
+      "wait_ms": 9000,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): DurationIndex 32 = 6000 ms ($520832d); two periodic damage effects. Effect[0] aura 3, EffectAmplitude 1000, BasePoints 7 + DieSides 1 = 8, RealPointsPerLevel 2.0 x (60 - BaseLevel 10) = 100: 108 per tick, 6 ticks. Effect[1] aura 3, EffectAmplitude 2000, 6 + 1.2 x 50 = 66 per tick, 3 ticks. The tooltip states ONE total for the whole duration: ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d = 8 + 100 = 108 (+ 0.1 x spell power). The entry reads the summed applied damage of both effects (every event of spell 520832 on the dummy, 1 stack from one cast of five struck enemies) from the cast to 1000 ms after the last tick: 2000 ms cast + 6000 ms + margin = 9000 ms. Expected is the tooltip total, never a per-tick figure. Data sum for the reader (not an expected value): 6 x 108 + 3 x 66 = 846 at spell power 0. Setup as the inner_five entry: 4 extra dummies at 4 to 7 yd (five enemies struck), spell crit and resist removed (984954, 823764). Reference search 2026-11-24: coa-history spell 520832: 11712 SPELL_PERIODIC_DAMAGE events in 10 logs (min 4, max 3295, mean 524), no crit; the loggers' spell power, level and stacks are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc. Inner Demon 804216 by harness set_aura as the clause's own condition, named: its Effect[1] aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 127, BasePoints 9 + 1 = 10 ($s2 of 804216) multiplies the damage by 1.1, so the expected total is the tooltip total x 1.1. The tooltip's SP term is $SP*.1 inside the one total: (108 + 0.1 x 10000) x 1.1 = 1218.8, band 5% (1158 to 1280). Contrast arm of inner_total (+10000 spell power)."
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 520693,
+      "quote": "an additional ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d,",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 520832,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Felwrath (control: no Inner Demon aura 804216, no Inner Demon damage)",
+      "variant": "inner_total_bare",
+      "label_suffix": "inner_total_bare",
+      "expected": 0,
+      "after_at_least": 0,
+      "after_at_most": 0,
+      "wait_ms": 9000,
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): DurationIndex 32 = 6000 ms ($520832d); two periodic damage effects. Effect[0] aura 3, EffectAmplitude 1000, BasePoints 7 + DieSides 1 = 8, RealPointsPerLevel 2.0 x (60 - BaseLevel 10) = 100: 108 per tick, 6 ticks. Effect[1] aura 3, EffectAmplitude 2000, 6 + 1.2 x 50 = 66 per tick, 3 ticks. The tooltip states ONE total for the whole duration: ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d = 8 + 100 = 108 (+ 0.1 x spell power). The entry reads the summed applied damage of both effects (every event of spell 520832 on the dummy, 1 stack from one cast of five struck enemies) from the cast to 1000 ms after the last tick: 2000 ms cast + 6000 ms + margin = 9000 ms. Expected is the tooltip total, never a per-tick figure. Data sum for the reader (not an expected value): 6 x 108 + 3 x 66 = 846 at spell power 0. Setup as the inner_five entry: 4 extra dummies at 4 to 7 yd (five enemies struck), spell crit and resist removed (984954, 823764). Reference search 2026-11-24: coa-history spell 520832: 11712 SPELL_PERIODIC_DAMAGE events in 10 logs (min 4, max 3295, mean 524), no crit; the loggers' spell power, level and stacks are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc. Control arm: the same cast without the Inner Demon aura 804216 on the caster, five enemies struck: the clause's own condition is absent, so no 520832 damage is expected (0); a 0 here with the aura present in inner_total shows the damage read is the clause's effect, not the cast's.",
+      "tolerance": 0
+    },
+    {
+      "kind": "hit_ratio",
+      "spell": 560578,
+      "name": "Glaiving (Fury Unleashed damage)",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "Increases the damage dealt and reduces the Energy cost of",
+      "expected": 1.5,
+      "observe_spell": 555739,
+      "cast_spell": 555738,
+      "cast_wait_ms": 5500,
+      "cast_power": 100,
+      "learn": [
+        555738
+      ],
+      "control": {},
+      "treatment": {
+        "learn": [
+          560578
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "560578 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 (SPELLMOD_DAMAGE), BasePoints 49 + DieSides 1 = 50 ($s1), EffectSpellClassMask[0..2] = 0/0/0x400000 of family 20 (the Fury Unleashed hit flag). The weapon hits 555739 (Effect[0] aura 23 trigger spell of 555738, EffectAmplitude 1000, 5000 ms) of a real Fury Unleashed 555738 cast are averaged non-critical in a control arm without 560578 and a treatment arm with it learned: ratio 1.50 within the band (5% of 50 = 2.5 points). Energy cost is the cost_gate claim of the same clause. Reference search 2026-11-24: coa-history spell 560578: 0 events in 186 logs (a passive leaves no event; 555738 Fury Unleashed: 2 casts); the hit 806095 has no logged event either; nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 574145,
+      "name": "Felcaked Blades (Chaos copy is 75% of the critical swing damage)",
+      "variant": "chaos_copy",
+      "label_suffix": "chaos_copy",
+      "quote": "your critical auto attacks now deal $s2% additional damage as Chaos damage.",
+      "trigger_spell": 574145,
+      "gate_spell": 574145,
+      "target": "dummy",
+      "attack_swings": 5,
+      "force_crit": "melee",
+      "measure_actor": "caster",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 574166,
+        "target": "dummy"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {},
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.75,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "574145 Effect[1] aura 354, BasePoints 74 + 1 = 75 ($s2). The Chaos damage of 574166 (Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, school mask 127) on the dummy over the caster's own swing damage (melee_damage_total, increase over the phase), as the Burning Hatred 805239 leech_damage entry reads its Chaos copy. Every swing is a forced critical (force_crit melee, ADR 0692) in both phases, so the control is the before phase: the same forced-critical swings without 574145 learned read 0 (no copy), and the after phase with it learned reads 0.75; misses, dodges and parries add nothing to either side. Expected 0.75 from $s2; tolerance 0.02 (0.73 to 0.77) excludes 70%, 80%, a full copy and no copy, and holds the integer division. Reference search 2026-11-24: coa-history spells 574145, 574150 and 574166: 0 events in 186 logs (a passive leaves no event, 574166 never logged); nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "kind": "hit_ratio",
+      "spell": 681376,
+      "name": "Chaotic (damage per stack at 3 stacks)",
+      "variant": "stack_damage",
+      "label_suffix": "stack_damage",
+      "quote": "increase your damage by $572782s1% for $572782d,",
+      "expected": 1.09,
+      "observe_spell": 805240,
+      "learn": [
+        805240
+      ],
+      "control": {},
+      "treatment": {
+        "casts": [
+          {
+            "spell": 572782,
+            "target": "caster"
+          },
+          {
+            "spell": 572782,
+            "target": "caster"
+          },
+          {
+            "spell": 572782,
+            "target": "caster"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "cast_wait_ms": 1500,
+      "observe_source": "572782 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127 (all schools), BasePoints 2 + DieSides 1 = 3 ($572782s1), StackAmount 3, DurationIndex 31 = 8000 ms. Tyrant's Gaze 805240 (Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, Shadowflame, BasePoints 219 + DieSides 1 = a fixed 220, so its hit has no dice: 344 + 0.35 x attack power at level 60, TargetAuraState 13 so the dummy is held at 30% health) is cast at the dummy in a control arm without the aura and a treatment arm with 3 stacks of 572782 on the caster: its non-critical hits must rise by 3 x 3 = 9% (ratio 1.09, band 7 to 11), which excludes a single stack (1.03) and no effect (1.0). No set_aura: the treatment arm casts 572782 itself three times on the caster before every Gaze, the cast the Chaotic handler makes (Cast(player, player, 572782), AscensionFelswornEvents.cpp:148-149), so the aura is applied by a real spell cast and stacks by the spell's own StackAmount 3. The proc roll (8% per outgoing damage event of a non-derived spell, the proc_rate claim) is another part: building the stacks through that roll would not give a known stack count at the read (P(fewer than 3 procs in 40 events) = 0.38 at 8%), so the cast of the aura is the route. Attack power +20000 fixture in both arms, the dummy's partial resists removed by the spell-penetration fixture 823764 on the caster before every cast (cast_unit_auras, both arms). Reference search 2026-11-24: coa-history spell 572782 (Chaotic): 541 SPELL_AURA_APPLIED, 766 SPELL_AURA_APPLIED_DOSE, 2055 SPELL_AURA_REFRESH events by players in 6 logs (the buff exists in play; the logs carry no damage figure per stack, so no value decides); spell 681376: 0 events (a passive leaves no event); nothing else found beyond the tooltip and Spell.dbc.",
+      "target_health_pct": 30,
+      "cast_power": 100,
+      "cast_unit_auras": [
+        [
+          823764,
+          1
+        ]
+      ]
+    },
+    {
+      "kind": "hit_ratio",
+      "spell": 572889,
+      "name": "Oblivion (damage at 10 stacks)",
+      "variant": "stack_damage",
+      "label_suffix": "stack_damage",
+      "quote": "increases your damage dealt by $705148s1%",
+      "expected": 1.1,
+      "observe_spell": 805240,
+      "learn": [
+        805240,
+        572804
+      ],
+      "control": {
+        "casts": [
+          {
+            "spell": 572804,
+            "power": 100
+          }
+        ]
+      },
+      "treatment": {
+        "learn": [
+          572889
+        ],
+        "casts": [
+          {
+            "spell": 572804,
+            "power": 100
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "cast_wait_ms": 1500,
+      "observe_source": "705148 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127, BasePoints 0 + DieSides 1 = 1 ($705148s1), StackAmount 10, DurationIndex 31 = 8000 ms. Tyrant's Gaze 805240 (a fixed hit, no dice, TargetAuraState 13 so the dummy is held at 30% health) is cast at the dummy in a control arm and a treatment arm; its non-critical hits must rise by 10 x 1 = 10% (ratio 1.10, band 8 to 12 points), which excludes a single stack (1.01) and no effect. The stacks are built for real, no set_aura of 705148: Oblivion 572889 is learned in the treatment arm only, and both arms cast Annihilan Strike 572804 (instant, 40 Energy, Slayer set; Energy set to 100 and the cooldown reset before each cast) twelve times in the warmup and once before every Gaze, with the melee crit rating fixture (force_crit melee) so each Annihilan Strike hit (801913 and 801914) is a critical outgoing damage event that is not Derived, on which the handler casts 705148 on the caster (AscensionFelswornEvents.cpp:48, :217-218). Twelve casts give at least ten stacks even if a cast produced one stack, the cap is 10 (the stack_cap entry proves one stack per critical and the cap), and one Annihilan Strike before each Gaze refreshes the 8000 ms duration; the control arm makes the same casts without the passive, so the contrast isolates 572889. Gaze is a spell-school hit, so the melee crit fixture does not make it critical (critical false filter). Attack power +20000 fixture in both arms. Reference search 2026-11-24: coa-history spells 572889 and 705148 (Oblivion): 0 events in 186 logs (a passive and its buff leave no event); nothing else found beyond the tooltip and Spell.dbc.",
+      "target_health_pct": 30,
+      "cast_power": 100,
+      "cast_unit_auras": [
+        [
+          823764,
+          1
+        ]
+      ],
+      "force_crit": "melee",
+      "warmup": [
+        572804,
+        572804,
+        572804,
+        572804,
+        572804,
+        572804,
+        572804,
+        572804,
+        572804,
+        572804,
+        572804,
+        572804
+      ],
+      "warmup_power": 100
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 572889,
+      "name": "Oblivion (aura present at 7400 ms)",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "for $705148d,",
+      "trigger_spell": 803475,
+      "gate_spell": 572889,
+      "target": "dummy",
+      "cast_power": 100,
+      "force_crit": "melee",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 705148,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 7400,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "cast_in_before": false,
+      "observe_source": "705148 DurationIndex 31 = 8000 ms ($705148d, SpellDuration.dbc). Oblivion applies 705148 on the caster for every outgoing critical damage event that is not Derived (AscensionFelswornEvents.cpp:48, :217-218). One instant Azzinoth's Assault 803475 cast at the dummy (forced melee crit, Felfury 800058 x6 and At Least 2 Felfury 803468 by harness set_aura as preconditions, in both phases) crits and applies the aura: read 7400 ms after the cast, absent before the learn (control, 0). The pair 7400 / 8640 ms excludes a duration 10% short (7200) and 10% long (8800). Reference search 2026-11-24: coa-history spells 572889 and 705148 (Oblivion): 0 events in 186 logs (a passive and its buff leave no event); nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 572889,
+      "name": "Oblivion (aura gone at 8640 ms)",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "quote": "for $705148d,",
+      "trigger_spell": 803475,
+      "gate_spell": 572889,
+      "target": "dummy",
+      "cast_power": 100,
+      "force_crit": "melee",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 705148,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 8640,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "cast_in_before": false,
+      "observe_source": "705148 DurationIndex 31 = 8000 ms ($705148d, SpellDuration.dbc). Oblivion applies 705148 on the caster for every outgoing critical damage event that is not Derived (AscensionFelswornEvents.cpp:48, :217-218). One instant Azzinoth's Assault 803475 cast at the dummy (forced melee crit, Felfury 800058 x6 and At Least 2 Felfury 803468 by harness set_aura as preconditions, in both phases) crits and applies the aura: read 8640 ms after the cast, absent before the learn (control, 0). The pair 7400 / 8640 ms excludes a duration 10% short (7200) and 10% long (8800). Reference search 2026-11-24: coa-history spells 572889 and 705148 (Oblivion): 0 events in 186 logs (a passive and its buff leave no event); nothing else found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 563268,
+      "name": "Felrend (main-hand hits of ten enemies at the reference attack power)",
+      "variant": "hit",
+      "label_suffix": "hit",
+      "quote": "dealing Weapon Damage plus $s1.",
+      "trigger_spell": 563268,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 563268,
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 4230,
+      "after_at_least": 4085,
+      "after_at_most": 4375,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "563268 Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG (121), BasePoints 49 + DieSides 1 = 50 ($s1, the flat after 'Weapon Damage plus'). Main-hand hit of Felrend with the Tyrant set the class file maps Felrend to (spell_weapon_sets 563268 = Tyrant; weapon_sets Tyrant: main hand item 2529, two-handed sword, damage 73.62 to 103.34, normalized speed 3.3): weapon roll 73.62 to 103.34 plus attack power / 14 x 3.3 (normalized weapon damage) plus 50. Fixtures by harness set_aura, named preconditions in both phases: Reg's Armor Pen 985345 (Effect[0] aura 280, 100% armor penetration: the dummy's armor does not reduce the hit) and Reg's Hit rating 984948 (no miss); forced melee crit (force_crit melee, rating fixture) so the hit is a critical and read as such: the physical critical hit is twice the hit (expected values below are 2 x). At the reference attack power 312: 2 x (73.62 + 73.54 + 50) to 2 x (103.34 + 73.54 + 50) = 394.3 to 453.8, so a flat of 0 (294.3 to 353.8) or 100 (494.3 to 553.8) is excluded. Reference search 2026-11-24: coa-history spell 563268: 0 events in 186 logs; spell 803476 (the off-hand hit of Felrend): 1580 SPELL_DAMAGE events by players in 5 logs (min 25, max 492, mean 141, 249 crits), gear, attack power and weapons of the loggers unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc. Ten hits per read: the dummy and 9 area dummies at 2 to 5.5 yd stand inside the 6 yd area of Felrend (EffectRadiusIndex 193), one cast hits all ten, each target gets its own weapon roll, and the read sums every critical hit of 563268. Ten targets, not twelve: an exploratory run with twelve enemies struck all twelve (12 critical hits) but summed to 10 hits' worth of damage in both arms (4222 and 98530), so an AoE reduction of 10 / targets applies above ten targets and ten targets avoid it. Per hit the expected critical is 2 x (mean of the integer rolls + 50): the Tyrant roll ints (min and max truncated, Unit.cpp:3626) at attack power 312 are 147 to 176 (mean 161.5, hit 423) and at 20312 are 4861 to 4890 (mean 4875.5, hit 9851), so the sums are 10 x 423 = 4230 and 10 x 9851 = 98510. The window is +-145 on the sum (+-14.5 per hit). A flat of 40 or 60 moves each hit by 20 (sum 200). The standard deviation of the sum of 10 critical hits is 2 x 8.6 x sqrt(10) = 54.4 (roll uniform over 29.7 points, doubled by the critical). One read accepts a flat of 40 or 60 only if the sum falls 55 or more toward the window from the wrong mean: z = (200 - 145) / 54.4 = 1.01, probability 0.156 per read. The pair holds 4 independent reads (2 runs x 2 attack power arms), so the residual failure probability of accepting a flat of 40 or 60 is 0.156^4 = 5.9e-4 (0.06%, under the 0.1% per pair limit). A true flat of 50 fails one read with probability 0.8% (z = 2.67). The earlier single-hit read was bounded only against 0 and 100.",
+      "area_dummies": [
+        2.0,
+        2.5,
+        3.0,
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5,
+        3.2
+      ]
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 563268,
+      "name": "Felrend (main-hand hits of ten enemies at +20000 attack power)",
+      "variant": "hit_ap",
+      "label_suffix": "hit_ap",
+      "quote": "dealing Weapon Damage plus $s1.",
+      "trigger_spell": 563268,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 563268,
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 98510,
+      "after_at_least": 98365,
+      "after_at_most": 98655,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "563268 Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG (121), BasePoints 49 + DieSides 1 = 50 ($s1, the flat after 'Weapon Damage plus'). Main-hand hit of Felrend with the Tyrant set the class file maps Felrend to (spell_weapon_sets 563268 = Tyrant; weapon_sets Tyrant: main hand item 2529, two-handed sword, damage 73.62 to 103.34, normalized speed 3.3): weapon roll 73.62 to 103.34 plus attack power / 14 x 3.3 (normalized weapon damage) plus 50. Fixtures by harness set_aura, named preconditions in both phases: Reg's Armor Pen 985345 (Effect[0] aura 280, 100% armor penetration: the dummy's armor does not reduce the hit) and Reg's Hit rating 984948 (no miss); forced melee crit (force_crit melee, rating fixture) so the hit is a critical and read as such: the physical critical hit is twice the hit (expected values below are 2 x). Contrast arm of the weapon-plus-attack-power structure: +20000 attack power (player_attack_power): attack power 20312, 2 x (73.62 + 4787.79 + 50) to 2 x (103.34 + 4787.79 + 50) = 9822.8 to 9882.3. Reference search 2026-11-24: coa-history spell 563268: 0 events in 186 logs; spell 803476 (the off-hand hit of Felrend): 1580 SPELL_DAMAGE events by players in 5 logs (min 25, max 492, mean 141, 249 crits), gear, attack power and weapons of the loggers unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc. Ten hits per read: the dummy and 9 area dummies at 2 to 5.5 yd stand inside the 6 yd area of Felrend (EffectRadiusIndex 193), one cast hits all ten, each target gets its own weapon roll, and the read sums every critical hit of 563268. Ten targets, not twelve: an exploratory run with twelve enemies struck all twelve (12 critical hits) but summed to 10 hits' worth of damage in both arms (4222 and 98530), so an AoE reduction of 10 / targets applies above ten targets and ten targets avoid it. Per hit the expected critical is 2 x (mean of the integer rolls + 50): the Tyrant roll ints (min and max truncated, Unit.cpp:3626) at attack power 312 are 147 to 176 (mean 161.5, hit 423) and at 20312 are 4861 to 4890 (mean 4875.5, hit 9851), so the sums are 10 x 423 = 4230 and 10 x 9851 = 98510. The window is +-145 on the sum (+-14.5 per hit). A flat of 40 or 60 moves each hit by 20 (sum 200). The standard deviation of the sum of 10 critical hits is 2 x 8.6 x sqrt(10) = 54.4 (roll uniform over 29.7 points, doubled by the critical). One read accepts a flat of 40 or 60 only if the sum falls 55 or more toward the window from the wrong mean: z = (200 - 145) / 54.4 = 1.01, probability 0.156 per read. The pair holds 4 independent reads (2 runs x 2 attack power arms), so the residual failure probability of accepting a flat of 40 or 60 is 0.156^4 = 5.9e-4 (0.06%, under the 0.1% per pair limit). A true flat of 50 fails one read with probability 0.8% (z = 2.67). The earlier single-hit read was bounded only against 0 and 100.",
+      "player_attack_power": 20000,
+      "area_dummies": [
+        2.0,
+        2.5,
+        3.0,
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5,
+        3.2
+      ]
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 803475,
+      "name": "Azzinoth's Assault (main-hand strike at the reference attack power)",
+      "variant": "hit",
+      "label_suffix": "hit",
+      "quote": "Strike an enemy for Weapon Damage plus ${$m1+0+$AP*.145}",
+      "trigger_spell": 803475,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 520262,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 559.45,
+      "after_at_least": 544,
+      "after_at_most": 572,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "803475 Effect[0] trigger spell 520262 (the main-hand strike), BasePoints 157 + DieSides 1 = 158 ($m1); the tooltip adds attack power x 0.145. Main-hand hit 520262 (Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG) with the reference Slayer set (item 2027, damage 17.25 to 28.75, normalized speed 2.4): weapon roll plus attack power / 14 x 2.4 plus 158 plus 0.145 x attack power. Felfury 800058 x6 and At Least 2 Felfury 803468 (Azzinoth's Assault needs 803468 and consumes 2 Felfury), Reg's Armor Pen 985345 (100% armor penetration) and Reg's Hit rating 984948 (no miss) by harness set_aura as named preconditions in both phases; forced melee crit so the hit is read as a critical, twice the hit. At attack power 312: 2 x (17.25 + 53.49 + 158 + 45.24) to 2 x (28.75 + 53.49 + 158 + 45.24) = 547.9 to 571.0, so a flat of 0 (about 130 to 153) or a missing attack power term (about 457 to 480) is excluded. Reference search 2026-11-24: coa-history spells 520262 (main-hand strike of Azzinoth's Assault) and 572585 (off hand): 124 and 115 SPELL_DAMAGE events by players in 6 logs (means 148 and 100; 42 and 32 crits); gear and attack power of the loggers unknown, so no figure decides; spell 803475 itself: 0 events; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 2 points under the minimum roll because each integer truncation of the weapon damage before the crit multiplier loses under 1 point, times that factor (2)."
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 803475,
+      "name": "Azzinoth's Assault (main-hand strike at +20000 attack power)",
+      "variant": "hit_ap",
+      "label_suffix": "hit_ap",
+      "quote": "Strike an enemy for Weapon Damage plus ${$m1+0+$AP*.145}",
+      "trigger_spell": 803475,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 520262,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 13216.59,
+      "after_at_least": 13202,
+      "after_at_most": 13230,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "803475 Effect[0] trigger spell 520262 (the main-hand strike), BasePoints 157 + DieSides 1 = 158 ($m1); the tooltip adds attack power x 0.145. Main-hand hit 520262 (Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG) with the reference Slayer set (item 2027, damage 17.25 to 28.75, normalized speed 2.4): weapon roll plus attack power / 14 x 2.4 plus 158 plus 0.145 x attack power. Felfury 800058 x6 and At Least 2 Felfury 803468 (Azzinoth's Assault needs 803468 and consumes 2 Felfury), Reg's Armor Pen 985345 (100% armor penetration) and Reg's Hit rating 984948 (no miss) by harness set_aura as named preconditions in both phases; forced melee crit so the hit is read as a critical, twice the hit. Contrast arm of the attack power term: +20000 attack power (player_attack_power), attack power 20312: 2 x (17.25 + 3482.29 + 158 + 2945.24) to 2 x (28.75 + 3482.29 + 158 + 2945.24) = 13205.6 to 13228.6; without the 0.145 term the same hit is 7.4 to 7.5 thousand lower. Reference search 2026-11-24: coa-history spells 520262 (main-hand strike of Azzinoth's Assault) and 572585 (off hand): 124 and 115 SPELL_DAMAGE events by players in 6 logs (means 148 and 100; 42 and 32 crits); gear and attack power of the loggers unknown, so no figure decides; spell 803475 itself: 0 events; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 2 points under the minimum roll because each integer truncation of the weapon damage before the crit multiplier loses under 1 point, times that factor (2).",
+      "player_attack_power": 20000
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 572804,
+      "name": "Annihilan Strike (main-hand hit at the reference attack power)",
+      "variant": "hit",
+      "label_suffix": "hit",
+      "quote": "dealing $s2% Weapon Damage to your target with both weapons.",
+      "trigger_spell": 572804,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 801913,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 386.14,
+      "after_at_least": 349,
+      "after_at_most": 418,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "572804 Effect[1] BasePoints 259 + DieSides 1 = 260 ($s2); Annihilan Strike's main-hand hit is 801913 (Effect[0] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE (31), trigger of 572804 Effect[0]), cast with the reference Slayer set (spell_weapon_sets 572804 = Slayer; item 2027, damage 17.25 to 28.75, speed 2300 ms): 260% x (weapon roll + attack power / 14 x 2.3 weapon speed). Fixtures by harness set_aura, named preconditions in both phases: Reg's Armor Pen 985345 (Effect[0] aura 280, 100% armor penetration: the dummy's armor does not reduce the hit) and Reg's Hit rating 984948 (no miss); forced melee crit (force_crit melee, rating fixture) so the hit is a critical and read as such: the physical critical hit is twice the hit (the 2 x below). At the reference attack power 312: 2 x 2.6 x (17.25 + 51.26) to 2 x 2.6 x (28.75 + 51.26) = 356.2 to 416.0, which excludes 100% (137 to 160) and 200% (274 to 320). Reference search 2026-11-24: coa-history spells 801913 (main hand) and 801914 (off hand) of Annihilan Strike: 70 and 69 SPELL_DAMAGE events by players in 4 logs (means 229 and 158, 34 and 31 crits); gear and attack power of the loggers unknown, so no figure decides; spell 572804 itself: 0 events; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 6 points under the minimum roll because each integer truncation of the weapon damage before the percent and the crit multiplier loses under 1 point, times that factor (5.2; SpellEffects.cpp weapon damage steps); a first pair read 352 against the untruncated minimum 356.2 for Annihilan Strike (2 x 2.6 x floor(68.51) = 352)."
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 572804,
+      "name": "Annihilan Strike (main-hand hit at +20000 attack power)",
+      "variant": "hit_ap",
+      "label_suffix": "hit_ap",
+      "quote": "dealing $s2% Weapon Damage to your target with both weapons.",
+      "trigger_spell": 572804,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 801913,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 17471.85,
+      "after_at_least": 17434,
+      "after_at_most": 17503,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "572804 Effect[1] BasePoints 259 + DieSides 1 = 260 ($s2); Annihilan Strike's main-hand hit is 801913 (Effect[0] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE (31), trigger of 572804 Effect[0]), cast with the reference Slayer set (spell_weapon_sets 572804 = Slayer; item 2027, damage 17.25 to 28.75, speed 2300 ms): 260% x (weapon roll + attack power / 14 x 2.3 weapon speed). Fixtures by harness set_aura, named preconditions in both phases: Reg's Armor Pen 985345 (Effect[0] aura 280, 100% armor penetration: the dummy's armor does not reduce the hit) and Reg's Hit rating 984948 (no miss); forced melee crit (force_crit melee, rating fixture) so the hit is a critical and read as such: the physical critical hit is twice the hit (the 2 x below). Contrast arm of the attack power slope: +20000 attack power (player_attack_power), attack power 20312: 2 x 2.6 x (17.25 + 3336.9) to 2 x 2.6 x (28.75 + 3336.9) = 17442.0 to 17501.8. Reference search 2026-11-24: coa-history spells 801913 (main hand) and 801914 (off hand) of Annihilan Strike: 70 and 69 SPELL_DAMAGE events by players in 4 logs (means 229 and 158, 34 and 31 crits); gear and attack power of the loggers unknown, so no figure decides; spell 572804 itself: 0 events; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 6 points under the minimum roll because each integer truncation of the weapon damage before the percent and the crit multiplier loses under 1 point, times that factor (5.2; SpellEffects.cpp weapon damage steps); a first pair read 352 against the untruncated minimum 356.2 for Annihilan Strike (2 x 2.6 x floor(68.51) = 352).",
+      "player_attack_power": 20000
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 555738,
+      "name": "Fury Unleashed (hit at +20000 attack power)",
+      "variant": "hit_ap",
+      "label_suffix": "hit_ap",
+      "quote": "dealing $806095s1% Weapon Damage every $t1 sec with both weapons to all nearby enemies.",
+      "trigger_spell": 555738,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 555739,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 14051.23,
+      "after_at_least": 13992,
+      "after_at_most": 14107,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "The tooltip states $806095s1% Weapon Damage = 200 (806095 Effect[0] BasePoints 199 + DieSides 1). The aura 555738 Effect[0] (aura 23, EffectAmplitude 1000) triggers 555739 (Effect[0] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE BasePoints 149 + 1 = 150, Effect[1] SPELL_EFFECT_NORMALIZED_WEAPON_DMG), so the hit that lands is 555739; the expectation is the tooltip's 200% on the normalized weapon damage with the reference Slayer set (spell_weapon_sets lists no set for 555739, the default Slayer applies; item 2027, damage 17.25 to 28.75, normalized speed 2.4): 2 x 2.0 x (weapon roll + attack power / 14 x 2.4), the small flat of Effect[1] left out of the band's upper edge (+62). Fixtures by harness set_aura, named preconditions in both phases: Reg's Armor Pen 985345 (Effect[0] aura 280, 100% armor penetration: the dummy's armor does not reduce the hit) and Reg's Hit rating 984948 (no miss); forced melee crit (force_crit melee, rating fixture) so the hit is a critical and read as such: the physical critical hit is twice the hit (the 2 x below). One real Fury Unleashed cast (self, instant), the periodic trigger fires its first tick at the apply (an exploratory read at 1500 ms held two ticks), so the read is taken 500 ms after the cast, one tick. Attack power 20312 (+20000, player_attack_power): 4 x (17.25 + 3482.29) to 4 x (28.75 + 3482.29) + 62 = 13997.2 to 14105.2; a 150% hit reads about 10.5 thousand and is excluded. Reference search 2026-11-24: coa-history spell 555739 (the Fury Unleashed hit): SPELL_DAMAGE events by players in the logs, gear and attack power unknown so no figure decides (the class map lists 48 events); spell 806095: 0 events; 555738: 2 casts; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 4 points under the minimum roll because each integer truncation of the weapon damage before the crit multiplier loses under 1 point, times that factor (4).",
+      "player_attack_power": 20000
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 572804,
+      "name": "Annihilan Strike (off-hand hit at the reference attack power)",
+      "variant": "hit_off",
+      "label_suffix": "hit_off",
+      "quote": "dealing $s2% Weapon Damage to your target with both weapons.",
+      "trigger_spell": 572804,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 801914,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 193.07,
+      "after_at_least": 174,
+      "after_at_most": 210,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "572804 Effect[1] BasePoints 259 + DieSides 1 = 260 ($s2); Annihilan Strike's main-hand hit is 801913 (Effect[0] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE (31), trigger of 572804 Effect[0]), cast with the reference Slayer set (spell_weapon_sets 572804 = Slayer; item 2027, damage 17.25 to 28.75, speed 2300 ms): 260% x (weapon roll + attack power / 14 x 2.3 weapon speed). Fixtures by harness set_aura, named preconditions in both phases: Reg's Armor Pen 985345 (Effect[0] aura 280, 100% armor penetration: the dummy's armor does not reduce the hit) and Reg's Hit rating 984948 (no miss); forced melee crit (force_crit melee, rating fixture) so the hit is a critical and read as such: the physical critical hit is twice the hit (the 2 x below). At the reference attack power 312: 2 x 2.6 x (17.25 + 51.26) to 2 x 2.6 x (28.75 + 51.26) = 356.2 to 416.0, which excludes 100% (137 to 160) and 200% (274 to 320). Reference search 2026-11-24: coa-history spells 801913 (main hand) and 801914 (off hand) of Annihilan Strike: 70 and 69 SPELL_DAMAGE events by players in 4 logs (means 229 and 158, 34 and 31 crits); gear and attack power of the loggers unknown, so no figure decides; spell 572804 itself: 0 events; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 6 points under the minimum roll because each integer truncation of the weapon damage before the percent and the crit multiplier loses under 1 point, times that factor (5.2; SpellEffects.cpp weapon damage steps); a first pair read 352 against the untruncated minimum 356.2 for Annihilan Strike (2 x 2.6 x floor(68.51) = 352). Off-hand strike: the engine halves the off-hand base damage (Unit.cpp:518 'implement 50% base damage from offhand', UNIT_MOD_DAMAGE_OFFHAND TOTAL_PCT 0.5, and the same factor on the fixed and spell bonus of a physical weapon spell, SpellEffects.cpp:4692-4709), the off hand is the same Slayer item 2027, so the expected value is half of the main-hand figure. Off-hand hit 801914 (Effect[0] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE): at attack power 312 the off-hand roll ints are 34 to 40 (0.5 x (17.25 + 51.26) and 0.5 x (28.75 + 51.26), truncated), so the critical reads 2 x int(2.6 x 34) = 176 to 2 x int(2.6 x 40) = 208; expected 193.07 = 0.5 x 386.14. The coa-history means 229 (801913) and 158 (801914) differ by about 0.69 with unknown gear: no figure decides."
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 572804,
+      "name": "Annihilan Strike (off-hand hit at +20000 attack power)",
+      "variant": "hit_ap_off",
+      "label_suffix": "hit_ap_off",
+      "quote": "dealing $s2% Weapon Damage to your target with both weapons.",
+      "trigger_spell": 572804,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 801914,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 8735.93,
+      "after_at_least": 8717,
+      "after_at_most": 8754,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "572804 Effect[1] BasePoints 259 + DieSides 1 = 260 ($s2); Annihilan Strike's main-hand hit is 801913 (Effect[0] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE (31), trigger of 572804 Effect[0]), cast with the reference Slayer set (spell_weapon_sets 572804 = Slayer; item 2027, damage 17.25 to 28.75, speed 2300 ms): 260% x (weapon roll + attack power / 14 x 2.3 weapon speed). Fixtures by harness set_aura, named preconditions in both phases: Reg's Armor Pen 985345 (Effect[0] aura 280, 100% armor penetration: the dummy's armor does not reduce the hit) and Reg's Hit rating 984948 (no miss); forced melee crit (force_crit melee, rating fixture) so the hit is a critical and read as such: the physical critical hit is twice the hit (the 2 x below). Contrast arm of the attack power slope: +20000 attack power (player_attack_power), attack power 20312: 2 x 2.6 x (17.25 + 3336.9) to 2 x 2.6 x (28.75 + 3336.9) = 17442.0 to 17501.8. Reference search 2026-11-24: coa-history spells 801913 (main hand) and 801914 (off hand) of Annihilan Strike: 70 and 69 SPELL_DAMAGE events by players in 4 logs (means 229 and 158, 34 and 31 crits); gear and attack power of the loggers unknown, so no figure decides; spell 572804 itself: 0 events; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 6 points under the minimum roll because each integer truncation of the weapon damage before the percent and the crit multiplier loses under 1 point, times that factor (5.2; SpellEffects.cpp weapon damage steps); a first pair read 352 against the untruncated minimum 356.2 for Annihilan Strike (2 x 2.6 x floor(68.51) = 352). Off-hand strike: the engine halves the off-hand base damage (Unit.cpp:518 'implement 50% base damage from offhand', UNIT_MOD_DAMAGE_OFFHAND TOTAL_PCT 0.5, and the same factor on the fixed and spell bonus of a physical weapon spell, SpellEffects.cpp:4692-4709), the off hand is the same Slayer item 2027, so the expected value is half of the main-hand figure. Off-hand hit 801914 at attack power 20312: expected 0.5 x 17471.85 = 8735.93, roll ints 1677 to 1683, critical 8720 to 8750.",
+      "player_attack_power": 20000
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 803475,
+      "name": "Azzinoth's Assault (off-hand strike at the reference attack power)",
+      "variant": "hit_off",
+      "label_suffix": "hit_off",
+      "quote": "Strike an enemy for Weapon Damage plus ${$m1+0+$AP*.145}",
+      "trigger_spell": 803475,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572585,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 279.72,
+      "after_at_least": 265.73,
+      "after_at_most": 293.71,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "803475 Effect[0] trigger spell 520262 (the main-hand strike), BasePoints 157 + DieSides 1 = 158 ($m1); the tooltip adds attack power x 0.145. Main-hand hit 520262 (Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG) with the reference Slayer set (item 2027, damage 17.25 to 28.75, normalized speed 2.4): weapon roll plus attack power / 14 x 2.4 plus 158 plus 0.145 x attack power. Felfury 800058 x6 and At Least 2 Felfury 803468 (Azzinoth's Assault needs 803468 and consumes 2 Felfury), Reg's Armor Pen 985345 (100% armor penetration) and Reg's Hit rating 984948 (no miss) by harness set_aura as named preconditions in both phases; forced melee crit so the hit is read as a critical, twice the hit. At attack power 312: 2 x (17.25 + 53.49 + 158 + 45.24) to 2 x (28.75 + 53.49 + 158 + 45.24) = 547.9 to 571.0, so a flat of 0 (about 130 to 153) or a missing attack power term (about 457 to 480) is excluded. Reference search 2026-11-24: coa-history spells 520262 (main-hand strike of Azzinoth's Assault) and 572585 (off hand): 124 and 115 SPELL_DAMAGE events by players in 6 logs (means 148 and 100; 42 and 32 crits); gear and attack power of the loggers unknown, so no figure decides; spell 803475 itself: 0 events; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 2 points under the minimum roll because each integer truncation of the weapon damage before the crit multiplier loses under 1 point, times that factor (2). Off-hand strike: the engine halves the off-hand base damage (Unit.cpp:518 'implement 50% base damage from offhand', UNIT_MOD_DAMAGE_OFFHAND TOTAL_PCT 0.5, and the same factor on the fixed and spell bonus of a physical weapon spell, SpellEffects.cpp:4692-4709), the off hand is the same Slayer item 2027, so the expected value is half of the main-hand figure. Off-hand strike 572585 carries its own 0.145 attack power row (AscensionFelswornData.h:53, beside 520262 at :38); with the factor applied to the whole hit (weapon roll, the 158 flat and the attack power term) the expected critical is 0.5 x 559.45 = 279.72, range 0.5 x (547.9 to 571.0) less truncation. The coa-history means 148 (520262) and 100 (572585) differ by about 0.68 with unknown gear: no figure decides. Band 5% of the expected value: the halving is an engine rule applied to the weapon roll, the flat and the attack power term together, and a tighter band would claim a rounding order the code does not state; 5% still excludes the unhalved strike (559.45 / 13216.59), the weapon part alone halved (about 483 / 9712) and a missing flat or attack power term."
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 803475,
+      "name": "Azzinoth's Assault (off-hand strike at +20000 attack power)",
+      "variant": "hit_ap_off",
+      "label_suffix": "hit_ap_off",
+      "quote": "Strike an enemy for Weapon Damage plus ${$m1+0+$AP*.145}",
+      "trigger_spell": 803475,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572585,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 6608.3,
+      "after_at_least": 6277.89,
+      "after_at_most": 6938.72,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "803475 Effect[0] trigger spell 520262 (the main-hand strike), BasePoints 157 + DieSides 1 = 158 ($m1); the tooltip adds attack power x 0.145. Main-hand hit 520262 (Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG) with the reference Slayer set (item 2027, damage 17.25 to 28.75, normalized speed 2.4): weapon roll plus attack power / 14 x 2.4 plus 158 plus 0.145 x attack power. Felfury 800058 x6 and At Least 2 Felfury 803468 (Azzinoth's Assault needs 803468 and consumes 2 Felfury), Reg's Armor Pen 985345 (100% armor penetration) and Reg's Hit rating 984948 (no miss) by harness set_aura as named preconditions in both phases; forced melee crit so the hit is read as a critical, twice the hit. Contrast arm of the attack power term: +20000 attack power (player_attack_power), attack power 20312: 2 x (17.25 + 3482.29 + 158 + 2945.24) to 2 x (28.75 + 3482.29 + 158 + 2945.24) = 13205.6 to 13228.6; without the 0.145 term the same hit is 7.4 to 7.5 thousand lower. Reference search 2026-11-24: coa-history spells 520262 (main-hand strike of Azzinoth's Assault) and 572585 (off hand): 124 and 115 SPELL_DAMAGE events by players in 6 logs (means 148 and 100; 42 and 32 crits); gear and attack power of the loggers unknown, so no figure decides; spell 803475 itself: 0 events; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 2 points under the minimum roll because each integer truncation of the weapon damage before the crit multiplier loses under 1 point, times that factor (2). Off-hand strike: the engine halves the off-hand base damage (Unit.cpp:518 'implement 50% base damage from offhand', UNIT_MOD_DAMAGE_OFFHAND TOTAL_PCT 0.5, and the same factor on the fixed and spell bonus of a physical weapon spell, SpellEffects.cpp:4692-4709), the off hand is the same Slayer item 2027, so the expected value is half of the main-hand figure. Off-hand strike 572585 at attack power 20312: expected 0.5 x 13216.59 = 6608.30. Band 5% of the expected value: the halving is an engine rule applied to the weapon roll, the flat and the attack power term together, and a tighter band would claim a rounding order the code does not state; 5% still excludes the unhalved strike (559.45 / 13216.59), the weapon part alone halved (about 483 / 9712) and a missing flat or attack power term.",
+      "player_attack_power": 20000
     }
   ],
   "player_observations": [],
