@@ -1158,10 +1158,23 @@
   {
     "spell": 504642,
     "clause": "Melee critical strikes now refresh a charge of Blade of the Empire and restore $505172s2% of your base mana.",
-    "labels": [
-      "504642 effect_value 505172e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "refresh a charge of Blade of the Empire",
+        "labels": [
+          "504642 behaviour_metric_delta charge_refresh",
+          "504642 behaviour_metric_delta charge_noncrit"
+        ]
+      },
+      {
+        "claim": "restore $505172s2% of your base mana",
+        "labels": [
+          "504642 behaviour_metric_delta mana_restore",
+          "504642 behaviour_metric_delta mana_noncrit"
+        ]
+      }
+    ]
   },
   {
     "spell": 520345,
@@ -3750,7 +3763,9 @@
   {
     "spell": 578263,
     "clause": "Generates 20 Insanity",
-    "labels": [],
+    "labels": [
+      "578263 behaviour_metric_delta insanity"
+    ],
     "kind": "claim"
   },
   {
@@ -3776,14 +3791,17 @@
     "spell": 578263,
     "clause": "purging $s3 beneficial magic effect from them.",
     "labels": [
-      "578263 effect_value e2 #2"
+      "578263 behaviour_metric_delta purge"
     ],
     "kind": "claim"
   },
   {
     "spell": 578263,
     "clause": "Only usable on enemies below 35% health.",
-    "labels": [],
+    "labels": [
+      "578263 cast_gate blocked",
+      "578263 cast_gate allowed"
+    ],
     "kind": "claim"
   },
   {

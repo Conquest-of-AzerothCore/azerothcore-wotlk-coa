@@ -2592,6 +2592,844 @@
       },
       "void_on_cast_failure": true,
       "observe_source": "$d = 15000 ms (805115 DurationIndex 8 = 15000 ms, SpellDuration.dbc). Reads 805115 absent before cast (control = 0), casts 805115 on caster, reads aura 805115 present (1) at 14200 ms (game_time [14100, 14500], > 13500 = 0.9 * 15000) and gone (0) at 15800 ms (game_time [15700, 16100], < 16500 = 1.1 * 15000), excluding 10% off on both sides. Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
+    },
+    {
+      "spell": 578263,
+      "kind": "metric_delta",
+      "variant": "insanity",
+      "label_suffix": "insanity",
+      "name": "Netherstrike (generates 20 Insanity)",
+      "quote": "Generates 20 Insanity",
+      "trigger_spell": 578263,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 2000,
+      "cast_in_before": false,
+      "phase_target_health_pct": [
+        30,
+        25
+      ],
+      "caster_health_from": 100,
+      "caster_health_pct": 99,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 0,
+      "expected": 20,
+      "tolerance": 0,
+      "expected_source": "Tooltip of Netherstrike 578263: 'Generates 20 Insanity'. Clears Insanity 500706 to 0 in each phase; unlearned cast does nothing (0 stacks), learned cast at dummy below 35% HP (30% before, 25% after with 1000 ms settle) must generate exactly 20 stacks of Insanity 500706 (tolerance 0 fails 0 no-effect, 10 half-value, and 40 double-effect). Reference search 2026-11-24: coa-history spell 578263 has 256 casts in 3 logs; coabuildhub spells_master_index.json has no entry for 578263; installed Spell.dbc governs."
+    },
+    {
+      "spell": 578263,
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "name": "Netherstrike (125% normalized weapon damage plus 441 Shadow damage at base AP)",
+      "quote": "Strike an enemy quickly for $s2% Weapon Damage plus ${$m1+0} Shadow damage,",
+      "trigger_spell": 578263,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 2000,
+      "cast_in_before": false,
+      "phase_target_health_pct": [
+        30,
+        25
+      ],
+      "caster_health_from": 100,
+      "caster_health_pct": 99,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 578263,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 770.5,
+      "tolerance": 26.5,
+      "expected_source": "Godblade weapon set (item 2531 Great Axe, 2H melee: 90.86-127.3 damage, speed 3600 ms, normalized_speed 3.3 s). 578263 Effect[0]=121 NORMALIZED_WEAPON_DMG (bp 440+1 = 441, normalized to 3.3 s), Effect[1]=31 WEAPON_PERCENT_DAMAGE (bp 124+1 = 125%), SchoolMask 32 (Shadow, bypasses armor), DmgClass 2. Reference AP 376.0 adds 376/14*3.3 = 88.6286 -> W_base = [179.4886, 215.9286]. Tooltip formula '(125% Weapon Damage plus 441)' times Cultist class tuning 887013 (+12%, aura 341): (1.25 * W_base + 441) * 1.12 = [745.2, 796.2] -> [745..796], midpoint 770.5 +- 26.5 ([744, 797]). Fails 0 flat ([251..302]), 2x flat ([1239..1290]), 100% weapon ([694..736]), and flat-before-percent bug 1.25*(W+441)*1.12 ([868..919]). 823764 prevents Shadow partial resists; 16255=-100 prevents crits. Reference search 2026-11-24: coa-history spell 578263 has 256 casts in 3 logs; coabuildhub spells_master_index.json has no entry for 578263; installed Spell.dbc governs."
+    },
+    {
+      "spell": 578263,
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "name": "Netherstrike (125% normalized weapon damage scaling at +20000 AP)",
+      "quote": "Strike an enemy quickly for $s2% Weapon Damage plus ${$m1+0} Shadow damage,",
+      "trigger_spell": 578263,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 2000,
+      "cast_in_before": false,
+      "player_attack_power": 20000,
+      "phase_target_health_pct": [
+        30,
+        25
+      ],
+      "caster_health_from": 100,
+      "caster_health_pct": 99,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 578263,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 7370.5,
+      "tolerance": 26.5,
+      "expected_source": "Godblade weapon set (item 2531 Great Axe, 90.86-127.3, normalized_speed 3.3 s) with +20000 AP (total AP = 20376.0). Normalized AP contribution 20376/14*3.3 = 4802.9143 -> W_ap = [4893.7743, 4930.2143]. Tooltip formula (1.25 * W_ap + 441) * 1.12 = [7345.2, 7396.2] -> [7345..7396], midpoint 7370.5 +- 26.5 ([7344, 7397]). Fails 100% weapon ([5974..6016]), 150% weapon ([8715..8777]), unnormalized 3.6 s ([7956..8007]), and flat-before-percent bug 1.25*(W+441)*1.12 ([7468..7519]). Reference search 2026-11-24: coa-history spell 578263 has 256 casts in 3 logs; coabuildhub spells_master_index.json has no entry for 578263; installed Spell.dbc governs."
+    },
+    {
+      "spell": 578263,
+      "kind": "metric_delta",
+      "variant": "purge",
+      "label_suffix": "purge",
+      "name": "Netherstrike (purges 1 beneficial magic effect from enemy)",
+      "quote": "purging $s3 beneficial magic effect from them.",
+      "trigger_spell": 578263,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 2000,
+      "cast_in_before": false,
+      "phase_target_health_pct": [
+        30,
+        25
+      ],
+      "caster_health_from": 100,
+      "caster_health_pct": 99,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          1243,
+          1,
+          "dummy",
+          "dummy"
+        ],
+        [
+          1459,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 1243
+      },
+      "fields_sum": {
+        "spell": 1459
+      },
+      "before_expected": 2,
+      "expected": 1,
+      "tolerance": 0,
+      "expected_source": "578263 Effect[2]=38 SPELL_EFFECT_DISPEL, EffectMiscValue[2]=1 (DISPEL_MAGIC), EffectBasePoints[2]=0 + EffectDieSides[2]=1 -> purges 1 beneficial magic aura ($s3=1). Dummy receives 2 beneficial magic buffs (1243 Power Word: Fortitude Dispel=1 and 1459 Arcane Intellect Dispel=1) in each phase; unlearned phase reads 2, learned phase casts 578263 and reads 1 remaining (tolerance 0 fails 2 no-effect and 0 double-purge). Reference search 2026-11-24: coa-history spell 578263 has 256 casts in 3 logs; coabuildhub spells_master_index.json has no entry for 578263; installed Spell.dbc governs."
+    },
+    {
+      "spell": 578263,
+      "kind": "cast_gate",
+      "name": "Netherstrike",
+      "quote": "Only usable on enemies below 35% health.",
+      "observe_source": "578263 Spell.dbc TargetAuraState=13 (AURA_STATE_HEALTHLESS_35_PERCENT): refused with SPELL_FAILED_TARGET_AURASTATE (111) at full dummy health, allowed once dummy health is lowered below 35%. Reference search 2026-11-24: coa-history spell 578263 has 256 casts in 3 logs; coabuildhub spells_master_index.json has no entry for 578263; installed Spell.dbc governs."
+    },
+    {
+      "spell": 504642,
+      "kind": "metric_delta",
+      "variant": "charge_refresh",
+      "label_suffix": "charge_refresh",
+      "name": "As The Prophecy Foretold (melee critical strike refreshes a charge of Blade of the Empire)",
+      "quote": "Melee critical strikes now refresh a charge of Blade of the Empire and restore $505172s2% of your base mana.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 2000,
+      "cast_in_before": true,
+      "force_crit": "melee",
+      "expire_ms": 18500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 502122,
+        "target": "dummy"
+      },
+      "before_expected": 3,
+      "expected": 7,
+      "tolerance": 0,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "cast_failure",
+            "fields": {
+              "spell": 502122
+            },
+            "before_expected": 67,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "4th cast of 502122 at 4800 ms (< 6000 ms recharge) fails SPELL_FAILED_NOT_READY (67) before learning 504642 and succeeds (0) after learning 504642 because melee crits refresh charges"
+          }
+        ]
+      },
+      "expected_source": "AscensionCultistEvents.cpp:79,155-159: dealt && melee && critical triggers RestoreBlade(player). Casts 502122 (3 charges, 6000 ms recharge, DmgClass 2 melee) 4 times at 0/1600/3200/4800 ms with force_crit='melee'. Unlearned: 3 hits land, 4th fails 67 (spell_damage_count=3). After 18500 ms (> 3*6000 ms full recharge) and learning 504642: all 4 casts succeed (cumulative spell_damage_count=7, delta +4 vs +3 no-effect, cast_failure 67->0). Reference search 2026-11-24: coa-history spell 504642 has 0 events (passive; 505172 has SPELL_ENERGIZE in 2 logs); coabuildhub spells_master_index.json matches 504642 verbatim ('Melee critical strikes now refresh a charge of Blade of the Empire and restore 5% of your base mana.')."
+    },
+    {
+      "spell": 504642,
+      "kind": "metric_delta",
+      "variant": "charge_noncrit",
+      "label_suffix": "charge_noncrit",
+      "name": "As The Prophecy Foretold (non-critical melee hit does not refresh a charge of Blade of the Empire)",
+      "quote": "Melee critical strikes now refresh a charge of Blade of the Empire and restore $505172s2% of your base mana.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 2000,
+      "cast_in_before": true,
+      "expire_ms": 18500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 502122,
+        "target": "dummy"
+      },
+      "before_expected": 3,
+      "expected": 6,
+      "tolerance": 0,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "cast_failure",
+            "fields": {
+              "spell": 502122
+            },
+            "before_expected": 67,
+            "expected": 67,
+            "tolerance": 0,
+            "source": "4th cast of 502122 at 4800 ms still fails SPELL_FAILED_NOT_READY (67) when 504642 is learned because 16255=-100 prevents melee critical strikes"
+          }
+        ]
+      },
+      "expected_source": "Non-crit control for 504642 charge refresh: identical 4-cast sequence with 16255=-100 (0% melee crit) yields 3 hits before and 3 hits after (cumulative 6, cast_failure 67->67), proving non-crits do not refresh charges. Reference search 2026-11-24: coa-history spell 504642 has 0 events (passive; 505172 has SPELL_ENERGIZE in 2 logs); coabuildhub spells_master_index.json matches 504642 verbatim ('Melee critical strikes now refresh a charge of Blade of the Empire and restore 5% of your base mana.')."
+    },
+    {
+      "spell": 504642,
+      "kind": "metric_delta",
+      "variant": "mana_restore",
+      "label_suffix": "mana_restore",
+      "name": "As The Prophecy Foretold (melee critical strike restores 5% base mana = 75)",
+      "quote": "Melee critical strikes now refresh a charge of Blade of the Empire and restore $505172s2% of your base mana.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 1000,
+      "cast_in_before": true,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 520773
+      },
+      "before_expected": 0,
+      "expected": 75,
+      "tolerance": 0,
+      "expected_source": "505172 EffectBasePoints[1]=4 + EffectDieSides[1]=1 = 5% ($505172s2) of level 60 Cultist BaseMana 1512 = floor(1512 * 5 / 100) = 75 mana, delivered via EnergizeBySpell(player, 520773, 75, POWER_MANA) (AscensionCultistEvents.cpp:159, AscensionCultist.cpp:36). Tolerance 0 fails 0 (no-effect) and 150 (double-effect). Reference search 2026-11-24: coa-history spell 504642 has 0 events (passive; 505172 has SPELL_ENERGIZE in 2 logs); coabuildhub spells_master_index.json matches 504642 verbatim ('Melee critical strikes now refresh a charge of Blade of the Empire and restore 5% of your base mana.')."
+    },
+    {
+      "spell": 504642,
+      "kind": "metric_delta",
+      "variant": "mana_noncrit",
+      "label_suffix": "mana_noncrit",
+      "name": "As The Prophecy Foretold (non-critical melee hit restores 0 mana)",
+      "quote": "Melee critical strikes now refresh a charge of Blade of the Empire and restore $505172s2% of your base mana.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 1000,
+      "cast_in_before": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 520773
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "expected_source": "Non-crit control for 504642 mana restore: 502122 with 16255=-100 (0% melee crit) produces 0 spell_energize_total on 520773 both before and after learning 504642. Reference search 2026-11-24: coa-history spell 504642 has 0 events (passive; 505172 has SPELL_ENERGIZE in 2 logs); coabuildhub spells_master_index.json matches 504642 verbatim ('Melee critical strikes now refresh a charge of Blade of the Empire and restore 5% of your base mana.')."
+    },
+    {
+      "spell": 524887,
+      "kind": "metric_delta",
+      "variant": "heal_base",
+      "label_suffix": "heal_base",
+      "name": "Blade of Yogg-Saron Rank 1 (heals lowest health ally for 35% of damage plus flat base)",
+      "quote": "Damage dealt by Blade of the Empire now heals the lowest health ally for $s1% of the damage dealt plus ${($500748m1+$500748ppl1+$BH*0.4+$AP*.1)*0.5}.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 2000,
+      "cast_in_before": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 500748,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 347,
+      "tolerance": 8,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 500748,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Caster is at 100% HP while ally is at 50% HP (5000/10000), so 500748 targets the lowest health ally (ally) and heals caster for 0"
+          }
+        ]
+      },
+      "expected_source": "524887 EffectBasePoints[0]=34+1 = 35% ($s1). 500748 level-60 base: bp 150+1 + floor((60-13)*5.21) = 395. Reference stats BH=0, AP=376 -> flat = floor((395 + 0.1*376)*0.5) = 216. 502122 non-crit damage = [357..396] (Heretic 2535 weapon set; 502122 does not use weapon damage). Total heal = floor([357..396]*0.35) + 216 = [340..354], midpoint 347 +- 8 ([339..355]). Fails 0% pct (216), 70% pct ([465..493]), 0 flat ([124..138]), and 2x flat ([556..570]). 500748 has IGNORE_CASTER_MODIFIERS and 887013 heal bonus 0; 16255=-100 prevents crits. Reference search 2026-11-24: coa-history spell 524887 has 0 events (passive; 500748 has SPELL_HEAL in 29 logs); coabuildhub spells_master_index.json matches 524887 verbatim."
+    },
+    {
+      "spell": 524887,
+      "kind": "metric_delta",
+      "variant": "heal_sp",
+      "label_suffix": "heal_sp",
+      "name": "Blade of Yogg-Saron Rank 1 (healing scaling at +20000 SP / BH)",
+      "quote": "Damage dealt by Blade of the Empire now heals the lowest health ally for $s1% of the damage dealt plus ${($500748m1+$500748ppl1+$BH*0.4+$AP*.1)*0.5}.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 2000,
+      "cast_in_before": true,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 500748,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 5523,
+      "tolerance": 8,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 500748,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Ally at 50% HP receives the heal while caster at 100% HP receives 0"
+          }
+        ]
+      },
+      "expected_source": "At +20000 SP (BH=20000, AP=376): 502122 damage = ([225..260]+3000+94)*1.12 = [3717..3756]; flat = floor((395 + 0.4*20000 + 0.1*376)*0.5) = 4216. Total heal = floor([3717..3756]*0.35) + 4216 = [5516..5530], midpoint 5523 +- 8 ([5515..5531]). Fails 0 BH coef ([1516..1530]) and 2x BH coef ([9516..9530]). Reference search 2026-11-24: coa-history spell 524887 has 0 events (passive; 500748 has SPELL_HEAL in 29 logs); coabuildhub spells_master_index.json matches 524887 verbatim."
+    },
+    {
+      "spell": 524887,
+      "kind": "metric_delta",
+      "variant": "heal_ap",
+      "label_suffix": "heal_ap",
+      "name": "Blade of Yogg-Saron Rank 1 (healing scaling at +20000 AP)",
+      "quote": "Damage dealt by Blade of the Empire now heals the lowest health ally for $s1% of the damage dealt plus ${($500748m1+$500748ppl1+$BH*0.4+$AP*.1)*0.5}.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 2000,
+      "cast_in_before": true,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 500748,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 3307,
+      "tolerance": 8,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 500748,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Ally at 50% HP receives the heal while caster at 100% HP receives 0"
+          }
+        ]
+      },
+      "expected_source": "At +20000 AP (BH=0, AP=20376): 502122 damage = ([225..260]+5094)*1.12 = [5957..5996]; flat = floor((395 + 0.1*20376)*0.5) = 1216. Total heal = floor([5957..5996]*0.35) + 1216 = [3300..3314], midpoint 3307 +- 8 ([3299..3315]). Fails 0 AP coef in flat ([2300..2314]) and 2x AP coef in flat ([4300..4314]). Reference search 2026-11-24: coa-history spell 524887 has 0 events (passive; 500748 has SPELL_HEAL in 29 logs); coabuildhub spells_master_index.json matches 524887 verbatim."
+    },
+    {
+      "spell": 525078,
+      "kind": "metric_delta",
+      "variant": "heal_base",
+      "label_suffix": "heal_base",
+      "name": "Blade of Yogg-Saron Rank 2 (heals lowest health ally for 70% of damage plus flat base)",
+      "quote": "Damage dealt by Blade of the Empire now heals the lowest health ally for $s1% of the damage dealt plus ${($500748m1+$500748ppl1+$BH*0.4+$AP*.1)*0.5}.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 2000,
+      "cast_in_before": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 500748,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 479,
+      "tolerance": 15,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 500748,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Caster is at 100% HP while ally is at 50% HP (5000/10000), so 500748 targets the lowest health ally (ally) and heals caster for 0"
+          }
+        ]
+      },
+      "expected_source": "525078 EffectBasePoints[0]=69+1 = 70% ($s1). Reference stats BH=0, AP=376 -> flat = 216, 502122 damage = [357..396]. Total heal = floor([357..396]*0.70) + 216 = [465..493], midpoint 479 +- 15 ([464..494]). Fails 0% pct (216), Rank 1 35% ([340..354]), 2x 140% ([714..770]), 0 flat ([249..277]), and 2x flat ([681..709]). Reference search 2026-11-24: coa-history spell 525078 has 0 events (passive; 500748 has SPELL_HEAL in 29 logs); coabuildhub spells_master_index.json has no entry for 525078; installed Spell.dbc governs."
+    },
+    {
+      "spell": 525078,
+      "kind": "metric_delta",
+      "variant": "heal_sp",
+      "label_suffix": "heal_sp",
+      "name": "Blade of Yogg-Saron Rank 2 (healing scaling at +20000 SP / BH)",
+      "quote": "Damage dealt by Blade of the Empire now heals the lowest health ally for $s1% of the damage dealt plus ${($500748m1+$500748ppl1+$BH*0.4+$AP*.1)*0.5}.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 2000,
+      "cast_in_before": true,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 500748,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 6831,
+      "tolerance": 15,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 500748,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Ally at 50% HP receives the heal while caster at 100% HP receives 0"
+          }
+        ]
+      },
+      "expected_source": "At +20000 SP (BH=20000, AP=376): 502122 damage = [3717..3756], flat = 4216. Total heal = floor([3717..3756]*0.70) + 4216 = [6817..6845], midpoint 6831 +- 15 ([6816..6846]). Fails 0 BH coef ([2817..2845]) and 2x BH coef ([10817..10845]). Reference search 2026-11-24: coa-history spell 525078 has 0 events (passive; 500748 has SPELL_HEAL in 29 logs); coabuildhub spells_master_index.json has no entry for 525078; installed Spell.dbc governs."
+    },
+    {
+      "spell": 525078,
+      "kind": "metric_delta",
+      "variant": "heal_ap",
+      "label_suffix": "heal_ap",
+      "name": "Blade of Yogg-Saron Rank 2 (healing scaling at +20000 AP)",
+      "quote": "Damage dealt by Blade of the Empire now heals the lowest health ally for $s1% of the damage dealt plus ${($500748m1+$500748ppl1+$BH*0.4+$AP*.1)*0.5}.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 2000,
+      "cast_in_before": true,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 500748,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 5399,
+      "tolerance": 15,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 500748,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Ally at 50% HP receives the heal while caster at 100% HP receives 0"
+          }
+        ]
+      },
+      "expected_source": "At +20000 AP (BH=0, AP=20376): 502122 damage = [5957..5996], flat = 1216. Total heal = floor([5957..5996]*0.70) + 1216 = [5385..5413], midpoint 5399 +- 15 ([5384..5414]). Fails 0 AP coef in flat ([4385..4413]) and 2x AP coef in flat ([6385..6413]). Reference search 2026-11-24: coa-history spell 525078 has 0 events (passive; 500748 has SPELL_HEAL in 29 logs); coabuildhub spells_master_index.json has no entry for 525078; installed Spell.dbc governs."
     }
   ],
   "player_observations": [],
