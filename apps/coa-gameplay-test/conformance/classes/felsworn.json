@@ -9996,16 +9996,17 @@
       "aura": 704397,
       "expected_ms": 4000,
       "control_window_ms": 500,
-      "window_ms": 8000,
+      "window_ms": 9000,
       "poll_ms": 25,
       "caster": false,
       "repeat": {
-        "count": 3,
+        "count": 4,
         "every_ms": 1300
       },
       "trigger_power": 90,
+      "forced_roll": 560641,
       "poll_before_cast": true,
-      "observe_source": "560641 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704397 (Crippling Pain, Effect[0] aura 290 MOD_CRIT_PCT -100000, DurationIndex 35 = 4000 ms); AscensionFelswornAbilities.cpp:321-322 casts 704397 on the target of a landed Cripple 704371 when 560641 is known. The aura on the dummy is polled with game-time stamps after a real Cripple cast. The no-critical part is a data readback only: no harness route makes an enemy attack and critically strike (not entered, see the report). Reference search 2026-11-23: coa-history spell 560641: 0 events in 186 logs (a passive leaves no event); 704397: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Warlock Training 560641 'Cripple now causes the enemy target to be unable to critically strike for 4 seconds.', same figure; expected values come from the tooltip and the DBC only. Design 2 (2026-11-24; design 1, one Cripple per arm, was unmeasured in 3 of 15 recorded runs with 'no application is seen after the cast'): a probe read the caster's Shadow resist chance against the dummy at 12% (spell_resist_chance) and 4 of 30 Cripples left neither Cripple nor Crippling Pain on it, so a binary resist of Cripple is the cause, not a cast refusal (no cast_failures). The treatment arm now casts Cripple 3 times 1300 ms apart (energy 90 set once; the caster's maximum is 100 and regeneration is off, so a fourth cast cannot be paid) with a read before the first cast, and the aura is timed from its last application (a refresh is counted): all three resisted is 0.12^3 = 0.17% per run, an unmeasured outcome only."
+      "observe_source": "560641 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704397 (Crippling Pain, Effect[0] aura 290 MOD_CRIT_PCT -100000, DurationIndex 35 = 4000 ms); AscensionFelswornAbilities.cpp:321-322 casts 704397 on the target of a landed Cripple 704371 when 560641 is known. The aura on the dummy is polled with game-time stamps after a real Cripple cast. The no-critical part is a data readback only: no harness route makes an enemy attack and critically strike (not entered, see the report). Reference search 2026-11-23: coa-history spell 560641: 0 events in 186 logs (a passive leaves no event); 704397: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Warlock Training 560641 'Cripple now causes the enemy target to be unable to critically strike for 4 seconds.', same figure; expected values come from the tooltip and the DBC only. Design 2 (2026-11-24; design 1, one Cripple per arm, was unmeasured in 3 of 15 recorded runs with 'no application is seen after the cast'): a probe read the caster's Shadow resist chance against the dummy at 12% (spell_resist_chance) and 4 of 30 Cripples left neither Cripple nor Crippling Pain on it, so a binary resist of Cripple is the cause, not a cast refusal (no cast_failures). The treatment arm now casts Cripple 3 times 1300 ms apart (energy 90 set once; the caster's maximum is 100 and regeneration is off, so a fourth cast cannot be paid) with a read before the first cast, and the aura is timed from its last application (a refresh is counted): all three resisted is 0.12^3 = 0.17% per run, an unmeasured outcome only. Design 3 (2026-11-24; design 2 left 0.12^3 = 0.17% per run of an unmeasured outcome, above the 0.1% per pair the rules allow): the treatment arm casts Cripple 4 times 1300 ms apart (the fourth at 3900 ms, inside the 4000 ms duration) and forced_roll 560641 refills the Energy to 90 before every recast (the existing option of this kind; the grant 704397 is cast by class code on a landed Cripple, so the roll mutant on 560641 changes no outcome and its removal is read gone). All four resisted is 0.12^4 = 0.021% per run, 0.041% per pair, an unmeasured outcome only (never a pass or an alert); the window is 9000 ms so a last cast at 3900 ms plus 4000 ms stays inside it."
     },
     {
       "spell": 704611,
@@ -17389,6 +17390,34 @@
       "observe_source": "Mentor D-67: 807163 is obtained by the real route: 804822 learned, dodged swings (dodge 100) until the Chance(player, 804822) roll procs (AscensionFelswornEvents.cpp:42-47, :157-158 casts 807163 on the caster). 807163's apply sets script value 807163 to 10 (AscensionFelswornAuras.cpp:84-85); every direct Twin Slice damage instance (Twin(info) && Direct(info)) while it is held gains 1 Felfury and decrements it, removing the aura at the last (AscensionFelswornAbilities.cpp:375-384). Twin Slice 801901 strikes with both weapons (EffectTriggerSpell 808303 and 808304) and gains 1 Felfury itself (EffectTriggerSpell[2] 800058), read as the control arm's own gain; ManaCost 45 Energy (PowerType 3), set before each cast; StartRecoveryTime 1000 ms, so casts 1100 ms apart. Felfury 800058 StackAmount 6, set to 0 before each cast (at most 3 gained per cast). Twin Fury 801892 is not learned, so a critical strike adds no Felfury. 807163 DurationIndex 1 (10 s): an expiry by duration voids the run. Reference search 2026-11-24: coa-history spell 804822 and 807163: 0 events in 186 logs; nothing found that decides the 10 instances or the Felfury gain."
     },
     {
+      "spell": 804822,
+      "name": "Vengeance Is Mine (Twin Slice damage with the aura held)",
+      "kind": "hit_ratio",
+      "variant": "twin_slice_damage",
+      "label_suffix": "twin_slice_damage",
+      "quote": "deal $807163s1% increased damage",
+      "expected": 1.3,
+      "observe_spell": 808303,
+      "cast_wait_ms": 1600,
+      "control": {
+        "auras": []
+      },
+      "treatment": {
+        "auras": [
+          [
+            807163,
+            1
+          ]
+        ]
+      },
+      "trials": 80,
+      "parts": 3,
+      "critical": false,
+      "cast_spell": 801901,
+      "cast_power": 100,
+      "expected_source": "807163 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 29 + 1 = 30 ($807163s1), the Twin Slice class mask patched on the server (AscensionFelswornContracts.cpp:223-224), 10 instances per application (AscensionFelswornAuras.cpp:84-85). The non-critical hits of the 808303 main-hand strike of Twin Slice 801901 (cast_power 100) are averaged in a control arm without 807163 and a treatment arm with 807163 on the caster before every cast: ratio 1.30, within the larger of 5% of the +30% (1.5) and 2 points. 807163 is set by the harness (set_aura), a precondition fixture of the effect on the hit, the claim's subject; its grant by real dodged swings, its 10 instances and its Felfury are the subject of the avoided_proc_instances entry. The real grant's amount is not read by any existing kind (the tool gap stated in the report), so the D-67 equivalence arm is missing. Reference search 2026-11-24: coa-history spell 804822 and 807163: 0 events in 186 logs; nothing found that decides the 30%; expected values come from the DBC only."
+    },
+    {
       "spell": 561216,
       "name": "Fury of the Illidari (charges and recharge)",
       "kind": "charge_recharge",
@@ -21551,55 +21580,6 @@
     },
     {
       "spell": 706425,
-      "name": "Fury of Archimonde (critical share of Sargeron Smite)",
-      "kind": "hit_ratio",
-      "variant": "crit_share",
-      "label_suffix": "crit_share",
-      "quote": "gains $706269s1% increased critical strike chance",
-      "expected": 1.0,
-      "observe_spell": 802060,
-      "learn": [
-        802060
-      ],
-      "control": {
-        "auras": [
-          [
-            823764,
-            1
-          ]
-        ]
-      },
-      "treatment": {
-        "auras": [
-          [
-            823764,
-            1
-          ],
-          [
-            706269,
-            1
-          ]
-        ]
-      },
-      "trials": 80,
-      "cast_unit_auras": [
-        [
-          803468,
-          1
-        ],
-        [
-          800058,
-          2
-        ]
-      ],
-      "rate": "critical",
-      "expected_points": 50,
-      "parts": 160,
-      "expected_source": "706269 Archimonde's Fury (granted by 706425 after 10 Felfury, AscensionFelsworn.cpp:199-206; the grant has its own entries) Effect[0] aura 107 SPELLMOD_CRITICAL_CHANCE BasePoints 49 + 1 = 50 ($706269s1) and Effect[1] aura 108 SPELLMOD_DAMAGE +50 on Sargeron Smite (class mask 2048), ProcCharges 1, read from Spell.dbc. Sargeron Smite 802060 is cast at the dummy trials times per arm without 706269 (control) and with it set on the caster before every cast (treatment; 706269 set by harness set_aura is a precondition fixture of the effect on the Smite, the claim's subject, not of its grant, which the consumed/grant entries prove with real Felfury); 823764 removes partial resists in both arms; 803468 and Felfury 800058 x2 are set before every Smite (precondition fixtures, Smite consumes 2 Felfury). Critical share of all hits, expected +50 points inside the larger of 5% and 2 points. Reference search 2026-11-23: coa-history spell 706425: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip; expected values come from the tooltip and Spell.dbc only.",
-      "observe_source": ""
-    },
-    {
-      "spell": 706425,
       "name": "Fury of Archimonde (damage per hit of Sargeron Smite)",
       "kind": "hit_ratio",
       "variant": "damage_hit",
@@ -21655,6 +21635,139 @@
       },
       "expected_source": "706269 Archimonde's Fury (granted by 706425 after 10 Felfury, AscensionFelsworn.cpp:199-206; the grant has its own entries) Effect[0] aura 107 SPELLMOD_CRITICAL_CHANCE BasePoints 49 + 1 = 50 ($706269s1) and Effect[1] aura 108 SPELLMOD_DAMAGE +50 on Sargeron Smite (class mask 2048), ProcCharges 1, read from Spell.dbc. Sargeron Smite 802060 is cast at the dummy trials times per arm without 706269 (control) and with it set on the caster before every cast (treatment; 706269 set by harness set_aura is a precondition fixture of the effect on the Smite, the claim's subject, not of its grant, which the consumed/grant entries prove with real Felfury); 823764 removes partial resists in both arms; 803468 and Felfury 800058 x2 are set before every Smite (precondition fixtures, Smite consumes 2 Felfury). Non-critical hits only, spell power fixture 20000 in both arms, expected ratio 1.5 (+50% damage, band 47.5..52.5). Reference search 2026-11-23: coa-history spell 706425: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip; expected values come from the tooltip and Spell.dbc only. 984954 on the caster in both arms removes critical hits (precondition fixture, the Scars of Suffering entries' crit removal), so the non-critical hit count does not depend on the +50 critical chance.",
       "observe_source": ""
+    },
+    {
+      "spell": 706425,
+      "name": "Fury of Archimonde (Sargeron Smite critical strike chance after the real grant)",
+      "kind": "metric_delta",
+      "gate_spell": 706425,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "variant": "crit_learned",
+      "label_suffix": "crit_learned",
+      "quote": "gains $706269s1% increased critical strike chance",
+      "trigger_spell": 706420,
+      "setup_casts": [
+        805239,
+        800209,
+        800204,
+        800209
+      ],
+      "setup_wait_ms": 1700,
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 802060,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 50,
+      "tolerance": 0.0001,
+      "expected_gain": 50,
+      "observe_source": "Learned route, no set_aura (mentor D-67). 706425 Effect[0] aura 4 DUMMY; AscensionFelsworn.cpp:199-206 (Generated) counts every Felfury generated and casts Archimonde's Fury 706269 on the caster at each 10. Real generators as the ten_felfury entry: Burning Hatred 805239 (generates 6), Demonic Will 800209 twice, Felhoof Charge 800204 and Bane of Chaos 706420 (1 each): 6 + 1 + 1 + 1 + 1 = 10, each cast with its cooldown reset and its power set before it. 706269 Effect[0] aura 107 SPELLMOD_CRITICAL_CHANCE, BasePoints 49 + 1 = 50 ($706269s1), Effect[1] aura 108 SPELLMOD_DAMAGE +50 on Sargeron Smite (class mask 2048), ProcCharges 1, read from Spell.dbc. The caster's critical strike chance of Sargeron Smite 802060 (Player::SpellDoneCritChance with spell mods, the metric of the Felfire Adept crit_gain entry) is read 500 ms after the tenth Felfury, in the control phase (706425 not learned, the same ten generated: no 706269) and after the real learn: gain 50 points. Reference search 2026-11-24: coa-history spell 706425: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip; expected values come from the tooltip and Spell.dbc only."
+    },
+    {
+      "spell": 706425,
+      "name": "Fury of Archimonde (damage per hit of Sargeron Smite after the real grant)",
+      "kind": "hit_ratio",
+      "variant": "damage_learned",
+      "label_suffix": "damage_learned",
+      "quote": "and damage.",
+      "expected": 1.5,
+      "observe_spell": 802060,
+      "learn": [
+        802060
+      ],
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            984954,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 805239,
+            "power": 100
+          },
+          {
+            "spell": 800209,
+            "power": 100
+          },
+          {
+            "spell": 800204,
+            "power": 100
+          },
+          {
+            "spell": 800209,
+            "power": 100
+          },
+          {
+            "spell": 706420,
+            "power": 100
+          }
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            984954,
+            1
+          ]
+        ],
+        "learn": [
+          706425
+        ],
+        "casts": [
+          {
+            "spell": 805239,
+            "power": 100
+          },
+          {
+            "spell": 800209,
+            "power": 100
+          },
+          {
+            "spell": 800204,
+            "power": 100
+          },
+          {
+            "spell": 800209,
+            "power": 100
+          },
+          {
+            "spell": 706420,
+            "power": 100
+          }
+        ]
+      },
+      "trials": 24,
+      "parts": 2,
+      "cast_unit_auras": [
+        [
+          803468,
+          1
+        ],
+        [
+          800058,
+          2
+        ]
+      ],
+      "critical": false,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "expected_source": "Learned route, no set_aura (mentor D-67). 706425 Effect[0] aura 4 DUMMY; AscensionFelsworn.cpp:199-206 (Generated) counts every Felfury generated and casts Archimonde's Fury 706269 on the caster at each 10. Real generators as the ten_felfury entry: Burning Hatred 805239 (generates 6), Demonic Will 800209 twice, Felhoof Charge 800204 and Bane of Chaos 706420 (1 each): 6 + 1 + 1 + 1 + 1 = 10, each cast with its cooldown reset and its power set before it. 706269 Effect[0] aura 107 SPELLMOD_CRITICAL_CHANCE, BasePoints 49 + 1 = 50 ($706269s1), Effect[1] aura 108 SPELLMOD_DAMAGE +50 on Sargeron Smite (class mask 2048), ProcCharges 1, read from Spell.dbc. Each trial of both arms casts the five generators at the dummy, then Sargeron Smite 802060 once; the treatment arm has learned 706425 (a real learn), so the tenth Felfury of the trial grants 706269 and the Smite is the +50% hit; the control arm makes the same casts with 706425 not learned and reads the plain hit. 823764 removes partial resists in both arms; 803468 and Felfury 800058 x2 are set right before every Smite (precondition fixtures, Smite consumes 2 Felfury); 984954 on the caster in both arms removes critical hits, so the non-critical hit count does not depend on the +50 critical chance. Non-critical hits only, spell power fixture 20000 in both arms, expected ratio 1.5 (+50% damage, band 47.5..52.5). Reference search 2026-11-24: coa-history spell 706425: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip; expected values come from the tooltip and Spell.dbc only."
     },
     {
       "spell": 555277,
