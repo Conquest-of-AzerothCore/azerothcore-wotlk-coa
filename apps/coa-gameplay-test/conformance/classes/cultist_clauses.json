@@ -1855,14 +1855,19 @@
   {
     "spell": 574318,
     "clause": "While above 40 Insanity, melee attacks and abilities trigger Shadow of the Void.",
-    "labels": [],
+    "labels": [
+      "574318 trigger_count",
+      "574318 behaviour_metric_delta ability_trigger",
+      "574318 behaviour_metric_delta insanity_gate_40"
+    ],
     "kind": "claim"
   },
   {
     "spell": 574318,
     "clause": "Restores $s2% of your maximum mana",
     "labels": [
-      "574318 effect_value 300277e1 #0"
+      "574318 behaviour_metric_delta mana_restore",
+      "574318 behaviour_metric_delta max_mana"
     ],
     "kind": "claim"
   },
@@ -1874,13 +1879,13 @@
       {
         "claim": "and increases your Shadow Damage dealt by $s1%",
         "labels": [
-          "574318 effect_value 300277e0 #1"
+          "574318 behaviour_hit_ratio shadow_damage"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "574318 spell_duration 300277 #2"
+          "574318 behaviour_metric_delta duration"
         ]
       }
     ]

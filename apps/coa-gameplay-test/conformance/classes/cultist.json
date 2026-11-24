@@ -61,7 +61,31 @@
   "effect_notes": [],
   "passive_targets": [],
   "procs": [],
-  "triggers": [],
+  "triggers": [
+    {
+      "aura": 574318,
+      "name": "Shadow of the Void (melee auto attacks)",
+      "tooltip": "|cFF66DDFFLevel 20 Passive|r\r\nWhile above 40 |cffcfa6ffInsanity|r, melee attacks and abilities trigger |cFFFFFFFFShadow of the Void|r.@s:300277:0@",
+      "trigger": {
+        "action": "attack",
+        "spell": 0
+      },
+      "trigger_text": "melee attacks",
+      "trial_metric": "melee_damage_count",
+      "observe_spell": 300277,
+      "observe_source": "EffectTriggerSpell[0] of 574318",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "melee attacks and abilities trigger Shadow of the Void",
+      "attempt_auras": [
+        {
+          "spell": 500706,
+          "stacks": 41,
+          "source": "While above 40 Insanity (574318 tooltip); 41 stacks of Insanity 500706 satisfies Count(player, Insanity) > 40 (AscensionCultistEvents.cpp:93)"
+        }
+      ]
+    }
+  ],
   "talent_modifiers": [],
   "rotation": [],
   "stack": [],
@@ -354,6 +378,227 @@
       "trials": 3,
       "wait_ms": 6000,
       "observe_source": "Tooltip states 'after $d' where 500712 DurationIndex 28 = 5000 ms (SpellDuration.dbc). 500712 Effect[2] 183 SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED has EffectBasePoints 4899 + EffectDieSides 1 = 4900 ms, TriggerSpell 354191 (SpellEffects.cpp:1061-1101 schedules 354191 damage ms later). event_delay stamps 354191's hit from 500712's cast and from 354191's own cast across 3 trials; tolerance is max(5% of 5000, 50) = 250 ms ([4750, 5250] ms), excluding 10% off on both sides (4500 and 5500 ms). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 500712 is an earlier patch state (10 sec); installed Spell.dbc governs (G-9); ~/Projects/coa-log-history/coa-history not present."
+    },
+    {
+      "spell": 574318,
+      "name": "Shadow of the Void (melee ability trigger above 40 Insanity)",
+      "kind": "metric_delta",
+      "variant": "ability_trigger",
+      "label_suffix": "ability_trigger",
+      "quote": "While above 40 Insanity, melee attacks and abilities trigger Shadow of the Void.",
+      "trigger_spell": 502241,
+      "target": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          41,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 300277
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "574318 Effect[0] EffectTriggerSpell 300277; AscensionCultistEvents.cpp:93,213 casts 300277 on dealt && melee && Count(player, Insanity) > 40. Malevolence 502241 (DmgClass 2 melee ability, Spell.dbc) cast at dummy with 41 stacks of Insanity 500706 (precondition fixture): 0 casts of 300277 before learning 574318 (control), 1 cast after (1600 ms between phases clears GCD). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 574318 matches the tooltip verbatim ('While above 40 Insanity, melee attacks and abilities trigger Shadow of the Void. Restores 5% of your maximum mana and increases your Shadow Damage dealt by 10% for 8 seconds.'); ~/Projects/coa-log-history/coa-history not present."
+    },
+    {
+      "spell": 574318,
+      "name": "Shadow of the Void (does not trigger at 40 Insanity)",
+      "kind": "metric_delta",
+      "variant": "insanity_gate_40",
+      "label_suffix": "insanity_gate_40",
+      "quote": "While above 40 Insanity, melee attacks and abilities trigger Shadow of the Void.",
+      "trigger_spell": 300277,
+      "target": "dummy",
+      "attack_swings": 3,
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 300277
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Threshold negative arm for 'While above 40 Insanity': sets Insanity 500706 to exactly 40 stacks (precondition fixture) and makes 3 melee auto-attacks before and after learning 574318; Count(player, Insanity) > 40 (AscensionCultistEvents.cpp:93) is false at 40, so spell_cast_count of 300277 must stay 0 even with 574318 learned (contrasting with the 41-stack trigger_count and ability_trigger entries). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 574318 matches verbatim; ~/Projects/coa-log-history/coa-history not present."
+    },
+    {
+      "spell": 574318,
+      "name": "Shadow of the Void (restores 5% of maximum mana)",
+      "kind": "metric_delta",
+      "variant": "mana_restore",
+      "label_suffix": "mana_restore",
+      "quote": "While above 40 Insanity, melee attacks and abilities trigger Shadow of the Void.",
+      "trigger_spell": 502241,
+      "target": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          41,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 300277
+      },
+      "before_expected": 0,
+      "expected": 114,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "300277 (embedded via @s:300277:0@ in 574318) Effect[1] SPELL_EFFECT_ENERGIZE_PCT, EffectBasePoints 4 + EffectDieSides 1 = 5% of max mana (Spell.dbc). Level 60 Cultist (player_class_stats Class 25 Level 60 BaseMana 1512, Intellect 71 -> 20 + 51*15 = 785 bonus mana, MaxMana = 2297): Spell::EffectEnergizePct (SpellEffects.cpp:3045) computes CalculatePct(2297, 5) = floor(114.85) = 114 mana. Casts Malevolence 502241 at 41 Insanity (precondition fixture) before (0) and after (114) a real learn of 574318 (1600 ms between phases clears GCD). Paired with max_mana reading 2297. Reference search 2026-11-24: coabuildhub spells_master_index.json entry 574318 matches verbatim ('Restores 5% of your maximum mana'); ~/Projects/coa-log-history/coa-history not present."
+    },
+    {
+      "spell": 574318,
+      "name": "Shadow of the Void (maximum mana of the caster)",
+      "kind": "metric_delta",
+      "variant": "max_mana",
+      "label_suffix": "max_mana",
+      "quote": "While above 40 Insanity, melee attacks and abilities trigger Shadow of the Void.",
+      "trigger_spell": 502241,
+      "target": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          41,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "max_power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 2297,
+      "expected": 2297,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Confirms level 60 Cultist MaxMana = 2297 (player_class_stats Class 25 Level 60 BaseMana 1512 + Intellect 71 mana bonus 785 = 2297), grounding 5% = floor(2297 * 0.05) = 114 in mana_restore (1600 ms between phases clears GCD). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 574318 matches verbatim; ~/Projects/coa-log-history/coa-history not present."
+    },
+    {
+      "spell": 574318,
+      "name": "Shadow of the Void (+10% Shadow damage dealt)",
+      "kind": "hit_ratio",
+      "variant": "shadow_damage",
+      "label_suffix": "shadow_damage",
+      "quote": "While above 40 Insanity, melee attacks and abilities trigger Shadow of the Void.",
+      "expected": 1.1,
+      "observe_spell": 502182,
+      "learn": [
+        502182,
+        502241
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            500706,
+            41
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 502241,
+            "target": "dummy",
+            "power": 2000
+          }
+        ]
+      },
+      "treatment": {
+        "learn": [
+          574318
+        ],
+        "auras": [
+          [
+            500706,
+            41
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 502241,
+            "target": "dummy",
+            "power": 2000
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "300277 (embedded via @s:300277:0@ in 574318) Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, EffectBasePoints 9 + EffectDieSides 1 = +10%, EffectMiscValue 32 = Shadow (Spell.dbc). Both arms set Insanity 500706 to 41 and 823764 (beeg spellpen, removes partial resist variance) as precondition fixtures, and cast Malevolence 502241 before each Horrorbolt 502182 (Shadow damage, DmgClass 1) cast at +20000 spell power (precondition fixture); control leaves 574318 unlearned, treatment learns 574318 by a real learn so 502241 triggers 300277 for real before 502182 lands. Mean non-critical Shadow hit must rise by +10% (G-19 band +8% to +12%). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 574318 matches verbatim ('increases your Shadow Damage dealt by 10% for 8 seconds'); ~/Projects/coa-log-history/coa-history not present."
+    },
+    {
+      "spell": 574318,
+      "name": "Shadow of the Void (300277 lasts $d = 8000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "While above 40 Insanity, melee attacks and abilities trigger Shadow of the Void.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "phase_auras": [
+        [
+          500706,
+          41,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 300277
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7500,
+      "expiry_wait_ms": 900,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7450,
+          7700
+        ],
+        "expired": [
+          8300,
+          8600
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Expected 8000 ms: Spell.dbc 300277 DurationIndex 31 = 8000 ms (SpellDuration.dbc). With 574318 learned (gate_timing start) and Insanity 500706 at 41 stacks (precondition fixture), reads 300277 absent before any cast (control = 0), then casts Blade of the Empire 502122 once (DmgClass 2 melee ability, Attributes 0x40010 without SPELL_ATTR0_MELEE_COMBAT_START so no follow-up auto-attack refreshes 300277) to trigger 300277 for real and reads aura 300277 on the caster present (1) at 7500 ms (game_time [7450, 7700], above 7200 = 0.9 * 8000) and gone (0) at 8400 ms (game_time [8300, 8600], below 8800 = 1.1 * 8000), excluding durations 10% off on both sides. Reference search 2026-11-24: coabuildhub spells_master_index.json entry 574318 matches verbatim ('for 8 seconds'); ~/Projects/coa-log-history/coa-history not present."
     }
   ],
   "player_observations": [],
