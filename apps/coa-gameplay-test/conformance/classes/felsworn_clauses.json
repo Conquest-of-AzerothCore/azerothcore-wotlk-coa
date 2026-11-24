@@ -66,7 +66,8 @@
       {
         "claim": "over $d",
         "labels": [
-          "92088 spell_duration 802678 #1"
+          "92088 behaviour_metric_delta held",
+          "92088 behaviour_metric_delta gone"
         ]
       }
     ],
@@ -263,7 +264,8 @@
       {
         "claim": "for $d",
         "labels": [
-          "300474 spell_duration 300475 #2"
+          "300474 behaviour_metric_delta held",
+          "300474 behaviour_metric_delta gone"
         ]
       }
     ]
@@ -375,7 +377,8 @@
     "spell": 300483,
     "clause": "Damage dealt by Felstrikes now extends the duration of Cripple on the target by $/1000;560643s1 sec",
     "labels": [
-      "300483 effect_value 560643e0 #0"
+      "300483 behaviour_metric_delta held",
+      "300483 behaviour_metric_delta gone"
     ],
     "kind": "claim"
   },
@@ -454,7 +457,7 @@
       {
         "claim": "grant you Felforged for $806104d",
         "labels": [
-          "300490 spell_duration 806104 #1"
+          "300490 behaviour_metric_delta felforged_duration"
         ]
       }
     ]
@@ -462,11 +465,31 @@
   {
     "spell": 300490,
     "clause": "Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.",
-    "labels": [
-      "300490 effect_value 806104e0 #2",
-      "300490 spell_duration 806104 #3"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.",
+        "labels": [],
+        "reason": "The words repeat the whole clause and overlap 'Your next 3 Fel Fireballs', which alerts (fourth_cast); the clause is judged by the three exact-word claims below (D-22, review I-1)."
+      },
+      {
+        "claim": "Your next 3 Fel Fireballs",
+        "labels": [
+          "300490 behaviour_metric_delta fourth_cast"
+        ]
+      },
+      {
+        "claim": "have a $s1% reduced cast time",
+        "labels": []
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "300490 behaviour_metric_delta felforged_duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "HELD 'have a $s1% reduced cast time' (review fw-rvb7b I-3a, mentor D-67): the cast-time reads put 806104 by set_aura; no attempt record of a real-feed cast-time route and no arm reading 806104's amount after the real feed."
   },
   {
     "spell": 301287,
@@ -553,7 +576,8 @@
       {
         "claim": "over $520832d",
         "labels": [
-          "520693 spell_duration 520832 #2"
+          "520693 behaviour_metric_delta held",
+          "520693 behaviour_metric_delta gone"
         ]
       },
       {
@@ -1416,8 +1440,14 @@
       },
       {
         "claim": "for $572163d (duration pending: a summon timed from its third cast, not entered)",
+        "labels": [],
+        "reason": "Superseded by the exact-words claim 'for $572163d' below (D-22, review M-1); its labels moved there."
+      },
+      {
+        "claim": "for $572163d",
         "labels": [
-          "560840 spell_duration 572163 #0"
+          "560840 behaviour_metric_delta held",
+          "560840 behaviour_metric_delta gone"
         ]
       }
     ]
@@ -1442,7 +1472,8 @@
     "spell": 561201,
     "clause": "for $/1000;s1 sec.",
     "labels": [
-      "561201 effect_value e0 #2"
+      "561201 behaviour_metric_delta held",
+      "561201 behaviour_metric_delta gone"
     ],
     "kind": "claim"
   },
@@ -1810,7 +1841,7 @@
       {
         "claim": "for $572782d",
         "labels": [
-          "681376 spell_duration 572782 #2"
+          "681376 behaviour_metric_delta chaotic_duration"
         ]
       }
     ]
@@ -1837,7 +1868,8 @@
     "spell": 685321,
     "clause": "and scars enemies for $563271d,",
     "labels": [
-      "685321 spell_duration 563271 #1"
+      "685321 behaviour_metric_delta held",
+      "685321 behaviour_metric_delta gone"
     ],
     "kind": "claim"
   },
