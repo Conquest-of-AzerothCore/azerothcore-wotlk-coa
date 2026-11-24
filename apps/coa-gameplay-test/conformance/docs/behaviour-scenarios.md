@@ -1137,7 +1137,7 @@ refusal code, as `without` does, and also reads `cast_failure` of the entry's sp
 `<spell> cost_gate <gated>[ <suffix>] with after_cast`, expected 0), so a refused after cast alerts instead of reading
 as a refused reset. Solar Concord 301266 under the other phase's aura uses it.
 
-`relocate_before_attempt` (`{"dx": yards}`, nonzero, at most 40, ADR 1278) adds a `relocate` step of the caster right
+`relocate_before_attempt` (`{"dx": yards}`, nonzero, at most 20, one harness `relocate` step, ADR 1278) adds a `relocate` step of the caster right
 before each judged attempt of the gated spell, facing unchanged. It is for a cooldown cut by an after cast that moves
 the caster (a dash past the dummy); with `only_arm` every arm starts from the fixture position, so one shift undoes the
 dash. Reachwalker 705135 (Chaos Rush before Felhoof Charge) uses it.

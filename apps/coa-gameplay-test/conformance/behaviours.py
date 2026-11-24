@@ -4702,10 +4702,14 @@ def cost_gate_spec(entry: dict) -> CostGateSpec:
 
 
 def cost_gate_relocate_before_attempt(entry: dict) -> float | None:
-    if entry.get('relocate_before_attempt') is None:
+    raw = entry.get('relocate_before_attempt')
+    if raw is None:
         return None
-    from metric_delta_options import relocate_before_trigger
-    return relocate_before_trigger.parse(entry['relocate_before_attempt'])
+    if not isinstance(raw, dict) or set(raw) != {'dx'} or isinstance(raw['dx'], bool) \
+            or not isinstance(raw['dx'], (int, float)) or not 0 < abs(raw['dx']) <= RELOCATE_STEP_LIMIT_YD:
+        raise ValueError(f'{entry["spell"]} cost_gate relocate_before_attempt is {{"dx": yards}}, nonzero and at most '
+                         f'{RELOCATE_STEP_LIMIT_YD:g} yd (one relocate step), not {raw!r}')
+    return float(raw['dx'])
 
 
 def cost_gate_area_dummies(entry: dict) -> tuple[float, ...]:

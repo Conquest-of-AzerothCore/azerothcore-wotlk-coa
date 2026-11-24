@@ -43,7 +43,7 @@ class CostGateRelocateBeforeAttemptTests(unittest.TestCase):
         self.assertEqual([step for step in moved['steps'] if step['action'] != 'relocate'], plain['steps'])
 
     def test_a_shift_is_nonzero_and_bounded(self):
-        for raw in ({'dx': 0}, {'dx': 41}, {'dx': True}, {'dy': 3}, -12):
+        for raw in ({'dx': 0}, {'dx': 21}, {'dx': -20.5}, {'dx': True}, {'dy': 3}, -12):
             with self.subTest(raw=raw), self.assertRaises(ValueError):
                 behaviour_scenario(load_fixture_class_file(19), libram_entry(relocate_before_attempt=raw))
 

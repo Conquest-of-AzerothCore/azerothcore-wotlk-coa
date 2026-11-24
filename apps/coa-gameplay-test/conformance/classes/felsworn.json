@@ -25915,6 +25915,140 @@
       "min_judged": 2,
       "poll_ms": 15,
       "observe_source": "Tooltip 806104 (embedded in 300490 by @s:806104:0@): 'Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.' Expected from the tooltip and Spell.dbc: 806104 Effect[0] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -31 + 1 (DieSides 1) = -30, so $s1 = 30 and the cut Fel Fireball 801312 (CastingTimes.dbc 16, 1500 ms) takes 1050 ms; the 3 charges come from the tooltip (806104 ProcCharges 0; the server counts them in AscensionFelswornAbilities.cpp UseSelected, FelforgedCharges 3). The aura is earned for real (mentor D-67, no set_aura): Bane of Chaos 704368 (periodic damage every 3000 ms) is cast at the dummy every 3200 ms until 806104 is on the caster; 300490 rolls Chance() on its raw ProcChance 15 only while the caster holds 300490 (AscensionFelsworn.cpp:233), so 300490 is unlearned at the stop: no later tick grants 806104 again or resets its used-charge count (AscensionFelswornEvents.cpp:206-209). 806104 must still be on after the unlearn, with amount -30. Each Fel Fireball is cast with ignore_gcd and bracketed by game_time stamps and spell_cast_count polls; casts 1-3 must lie in 1005-1095 ms (30% cut, 10% of the figure), cast 4 in 1350-1650 ms (no cut), all inside 0.9 of the 8000 ms aura (DurationIndex 31). A control Fel Fireball without the talent or the aura opens every trial and must lie in the full band. Reference search 2026-11-24 (fw-fa4, fw-baf): coa-history spell 300490/806104 and ~/CoaServer/reference: nothing beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 804219,
+      "name": "Infernal Doom (Felfury kept by Ruin)",
+      "kind": "aura_keep_rate",
+      "variant": "keep_rate",
+      "label_suffix": "keep_rate",
+      "quote": "Ruin now has a $s1% chance not to consume Felfury.",
+      "aura": 800058,
+      "aura_stacks": 2,
+      "consumer": 501298,
+      "control_spell": 801901,
+      "chance_pct": 25,
+      "trials": 125,
+      "control_trials": 4,
+      "learn": [
+        804219
+      ],
+      "observe_source": "804219 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 18, EffectBasePoints -26 + 1 = -25 ($s1 = 25) (server DBC set). Ruin 501292-501299 costs 2 Felfury 800058, 'Fixed' consumption, preserved with chance 25 while 804219 is up (AscensionCustomResourceData.h, ResourceCostRules; the roll is roll_chance_i in OnSpellCast, AscensionCompat.cpp:3474-3479); CheckCast refuses SPELL_FAILED_NO_POWER under 2 stacks (AscensionCompat.cpp:3402-3411) and Ruin 501298 needs CasterAuraSpell At Least 2 Felfury 803468 (set by the kind's cast step). Felfury 800058 is set at 2 stacks (aura_stacks, ADR 1278) by harness set_aura before every cast and read present after it; control Twin Slice 801901 (a generator, outside the cost table) keeps it every time; 804219 learned (a real learn). Reference search 2026-11-24 (fw-vb6, fw-vb4b): coa-history spell 804219: 0 events in 186 logs (a passive leaves no event); bindmysoul snapshot: tooltip words only; nothing else found."
+    },
+    {
+      "spell": 803645,
+      "name": "Unphased (pushback reduction under Inner Demon, game time)",
+      "kind": "pushback_reduction",
+      "label_suffix": "pushback_inner_demon",
+      "quote": "In addition, reduces spell pushback suffered from damaging attacks by $s2% while Inner Demon is active.",
+      "cast_spell": 801312,
+      "cast_power": 100,
+      "reducer_spell": 803645,
+      "reducer_learn": true,
+      "reducer_wait_ms": 500,
+      "strike_spell": 41394,
+      "strike_at_ms": 700,
+      "windows": [
+        [
+          1300,
+          1380
+        ],
+        [
+          1600,
+          1680
+        ],
+        [
+          1300,
+          1380
+        ],
+        [
+          1450,
+          1530
+        ]
+      ],
+      "expected_pct": 50,
+      "caster_auras": [
+        [
+          804216,
+          1
+        ]
+      ],
+      "observe_source": "803645 Effect[1] aura 107, EffectBasePoints 49 + 1 = 50 ($s2) (server DBC set); the Felsworn contract turns it into SPELL_AURA_REDUCE_PUSHBACK, MiscValue 0 (AscensionFelswornContracts.cpp:322-327), and RefreshUnphased sets its amount to the full 50 only while Inner Demon 804216 is on the caster, 0 otherwise (AscensionFelsworn.cpp:285-293; called on learn and on every Inner Demon apply and remove). Inner Demon 804216 is a CONDITION aura held in every phase (caster_auras, ADR 1278: removed and set again by harness set_aura right before each cast); the contrast is the learn of 803645 (Lich Essence 802988 layout, ADR 0543). Fel Fireball 801312 (1500 ms, 35 Energy, power set to 100) at the dummy; the passive striker's Light of the Naaru 41394 hits the caster 700 ms into the hit casts. Reduction = 1 - (reduced hit end - reduced unhit end) / (hit end - unhit end), G-19 band 47.5..52.5 around 50. Reference search 2026-11-24 (fw-vb6, fw-vb4b): coa-history spell 803645: 0 events in 186 logs (a passive leaves no event); bindmysoul snapshot: tooltip words only; nothing else found."
+    },
+    {
+      "spell": 705135,
+      "name": "Reachwalker (Felhoof Charge cooldown after Chaos Rush, without arm)",
+      "kind": "cost_gate",
+      "label_suffix": "cd",
+      "quote": "Casting Chaos Rush now reduces the cooldown of Felhoof Charge by $/1000;680318s1 sec.",
+      "gated_spell": 800204,
+      "resource": "cooldown",
+      "reduction": 2000,
+      "target": "dummy",
+      "after_casts": [
+        [
+          500028,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 500,
+      "margin_ms": 100,
+      "relocate_before_attempt": {
+        "dx": -20
+      },
+      "observe_source": "705135 Effect[0] aura 42 PROC_TRIGGER_SPELL of 680318; 680318 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -2001 + 1 = -2000 ms ($/1000;680318s1 = 2 sec), MiscValue 800204 = Felhoof Charge (CategoryRecoveryTime 20000 ms, range 0-20 yd) (server DBC set). Felhoof Charge is cast first (priming, it carries the caster to the dummy), then Chaos Rush 500028 is cast for real at the dummy 500 ms later; its Chaos Rush Jump 802028 (CHARGE_DEST, caster's front, EffectRadiusIndex 13) carries the caster about 10 yd forward past the dummy. Right before the judged attempt the caster is moved 20 yd back along x (relocate_before_attempt, ADR 1278, one harness relocate step), facing unchanged, so the dummy is in front and about 10 to 15 yd away, inside the 20 yd range. One scenario per arm (only_arm, Sun Cleric 805581 precedent). The attempt 17900 ms after the priming cast (2000 - 100 ms before the reduced end 18000) is refused and 18100 ms after it goes through; without the talent the 18100 ms attempt is refused. A cut 10% off (1800 or 2200 ms) moves the end by 200 ms, outside the 100 ms margin. Reference search 2026-11-24 (fw-vb6, fw-vb4b): coa-history spell 705135: 0 events in 186 logs (a passive leaves no event); bindmysoul snapshot: tooltip words only; nothing else found.",
+      "variant": "cd_without",
+      "only_arm": "without"
+    },
+    {
+      "spell": 705135,
+      "name": "Reachwalker (Felhoof Charge cooldown after Chaos Rush, with arm)",
+      "kind": "cost_gate",
+      "label_suffix": "cd",
+      "quote": "Casting Chaos Rush now reduces the cooldown of Felhoof Charge by $/1000;680318s1 sec.",
+      "gated_spell": 800204,
+      "resource": "cooldown",
+      "reduction": 2000,
+      "target": "dummy",
+      "after_casts": [
+        [
+          500028,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 500,
+      "margin_ms": 100,
+      "relocate_before_attempt": {
+        "dx": -20
+      },
+      "observe_source": "705135 Effect[0] aura 42 PROC_TRIGGER_SPELL of 680318; 680318 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -2001 + 1 = -2000 ms ($/1000;680318s1 = 2 sec), MiscValue 800204 = Felhoof Charge (CategoryRecoveryTime 20000 ms, range 0-20 yd) (server DBC set). Felhoof Charge is cast first (priming, it carries the caster to the dummy), then Chaos Rush 500028 is cast for real at the dummy 500 ms later; its Chaos Rush Jump 802028 (CHARGE_DEST, caster's front, EffectRadiusIndex 13) carries the caster about 10 yd forward past the dummy. Right before the judged attempt the caster is moved 20 yd back along x (relocate_before_attempt, ADR 1278, one harness relocate step), facing unchanged, so the dummy is in front and about 10 to 15 yd away, inside the 20 yd range. One scenario per arm (only_arm, Sun Cleric 805581 precedent). The attempt 17900 ms after the priming cast (2000 - 100 ms before the reduced end 18000) is refused and 18100 ms after it goes through; without the talent the 18100 ms attempt is refused. A cut 10% off (1800 or 2200 ms) moves the end by 200 ms, outside the 100 ms margin. Reference search 2026-11-24 (fw-vb6, fw-vb4b): coa-history spell 705135: 0 events in 186 logs (a passive leaves no event); bindmysoul snapshot: tooltip words only; nothing else found.",
+      "variant": "cd_with",
+      "only_arm": "with"
+    },
+    {
+      "spell": 705135,
+      "name": "Reachwalker (Felhoof Charge cooldown after Chaos Rush, beyond arm)",
+      "kind": "cost_gate",
+      "label_suffix": "cd",
+      "quote": "Casting Chaos Rush now reduces the cooldown of Felhoof Charge by $/1000;680318s1 sec.",
+      "gated_spell": 800204,
+      "resource": "cooldown",
+      "reduction": 2000,
+      "target": "dummy",
+      "after_casts": [
+        [
+          500028,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 500,
+      "margin_ms": 100,
+      "relocate_before_attempt": {
+        "dx": -20
+      },
+      "observe_source": "705135 Effect[0] aura 42 PROC_TRIGGER_SPELL of 680318; 680318 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165), EffectBasePoints -2001 + 1 = -2000 ms ($/1000;680318s1 = 2 sec), MiscValue 800204 = Felhoof Charge (CategoryRecoveryTime 20000 ms, range 0-20 yd) (server DBC set). Felhoof Charge is cast first (priming, it carries the caster to the dummy), then Chaos Rush 500028 is cast for real at the dummy 500 ms later; its Chaos Rush Jump 802028 (CHARGE_DEST, caster's front, EffectRadiusIndex 13) carries the caster about 10 yd forward past the dummy. Right before the judged attempt the caster is moved 20 yd back along x (relocate_before_attempt, ADR 1278, one harness relocate step), facing unchanged, so the dummy is in front and about 10 to 15 yd away, inside the 20 yd range. One scenario per arm (only_arm, Sun Cleric 805581 precedent). The attempt 17900 ms after the priming cast (2000 - 100 ms before the reduced end 18000) is refused and 18100 ms after it goes through; without the talent the 18100 ms attempt is refused. A cut 10% off (1800 or 2200 ms) moves the end by 200 ms, outside the 100 ms margin. Reference search 2026-11-24 (fw-vb6, fw-vb4b): coa-history spell 705135: 0 events in 186 logs (a passive leaves no event); bindmysoul snapshot: tooltip words only; nothing else found.",
+      "variant": "cd_beyond",
+      "only_arm": "beyond"
     }
   ],
   "player_observations": [],

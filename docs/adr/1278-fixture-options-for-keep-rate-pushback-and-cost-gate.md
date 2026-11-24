@@ -34,9 +34,9 @@ The third option, approved by the controller on 2026-11-24 within the mentor's d
 - `pushback_reduction` `caster_auras` (`[[spell, stacks]]`, stacks at least 1): before every cast of every phase each
   aura is removed and set again on the caster (two `set_aura` steps), so every cast starts under a fresh application
   and the contrast stays the reducer's cast or learn. The model is unchanged.
-- `cost_gate` `relocate_before_attempt` (`{"dx": yards}`, parsed as `relocate_before_trigger`: nonzero, at most 40):
-  a `relocate` step right before each judged attempt of the gated spell. Combined with `only_arm`, each arm starts from
-  the fixture position and the relative move undoes the dash.
+- `cost_gate` `relocate_before_attempt` (`{"dx": yards}`, nonzero, at most 20, the harness bound of one `relocate`
+  step): a `relocate` step right before each judged attempt of the gated spell. Combined with `only_arm`, each arm
+  starts from the fixture position and the relative move undoes the dash.
 
 ## Consequences
 
