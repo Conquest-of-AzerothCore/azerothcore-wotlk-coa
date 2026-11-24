@@ -1094,7 +1094,7 @@
       "wait_ms": 300,
       "expire_ms": 1500,
       "void_on_cast_failure": true,
-      "observe_source": "301010 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 10 (SPELLMOD_CASTING_TIME), EffectBasePoints[0] -101 + EffectDieSides[0] 1 = -100%, EffectSpellClassMask[0] 8388608 = SpellFamilyFlags[0] 8388608 of Devour Magic 520151 (CastingTimeIndex 14 = 1000 ms, StartRecoveryTime 1000 ms, ManaCostPercentage 25, TARGET_UNIT_TARGET_ALLY; Spell.dbc). Casts 520151 at caster with cast_power 2000 and reads casting 300 ms later: 1 before learning 301010 (control, still casting the 1000 ms spell) and 0 after learning 301010 (instant cast completed; 1500 ms between phases finishes the control cast and GCD). Reference search 2026-11-24: coa-history spell 301010: 0 events in 186 logs (passive); coabuildhub spells_master_index.json has no entry for 301010; installed Spell.dbc governs.",
+      "observe_source": "301010 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 10 (SPELLMOD_CASTING_TIME), EffectBasePoints[0] -101 + EffectDieSides[0] 1 = -100%, EffectSpellClassMask[0] 8388608 = SpellFamilyFlags[0] 8388608 of Devour Magic 520151 (CastingTimeIndex 14 = 1000 ms, StartRecoveryTime 1000 ms, ManaCostPercentage 25, TARGET_UNIT_TARGET_ALLY; Spell.dbc). Precondition fixture: phase_auras [[31589, 1, 'caster', 'caster']] (Slow, Dispel 1 Magic debuff so 520151 can be cast; 31589 Effect[2] aura 216 -30% spell haste lengthens the unbuffed control cast time from 1000 ms to 1300 ms, still < expire_ms 1500 ms and still casting at 300 ms). Casts 520151 at caster with cast_power 2000 and reads casting 300 ms later: 1 before learning 301010 (control, still casting the 1300 ms slowed spell) and 0 after learning 301010 (instant cast completed; 1500 ms between phases finishes the control cast and GCD). Reference search 2026-11-24: coa-history spell 301010: 0 events in 186 logs (passive); coabuildhub spells_master_index.json has no entry for 301010; installed Spell.dbc governs.",
       "phase_auras": [
         [
           31589,
@@ -1510,7 +1510,7 @@
       "wait_ms": 3000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "681104 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, EffectMiscValue[0] 127 (all schools), EffectBasePoints[0] 24 + EffectDieSides[0] 1 = +25% ($s1 = 25), DurationIndex 8 (15000 ms; Spell.dbc). Casts Horrorbolt 502182 (2500 ms cast + 120 ms travel, 3000 ms wait) at dummy with +20000 SP, 823764 (no partial resist) and 16255 amount -100 (no crit; precondition fixtures) before casting 681104 (control, single hit D ~ 16690) and right after a real cast of 681104 (setup_only_after: second hit 1.25 * D, cumulative spell_damage_total = 2.25 * D): ratio after / before = 2.25 within 0.01 (equivalent to +24%..+26% bonus, tighter than the G-19 +23%..+27% band; single Voidborne cast avoids ManaPerSecond 80 health-drain death). Reference search 2026-11-24: coa-history spell 681104: 10 casts; coabuildhub spells_master_index.json entry 681104 matches installed Spell.dbc for +25% damage."
+      "observe_source": "681104 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, EffectMiscValue[0] 127 (all schools), EffectBasePoints[0] 24 + EffectDieSides[0] 1 = +25% ($s1 = 25), DurationIndex 8 (15000 ms; Spell.dbc). Tested on Shadow spell Horrorbolt 502182; other schools and Physical are covered by the single stock DBC aura 79 with EffectMiscValue[0] 127 (all-schools mask). Casts Horrorbolt 502182 (2500 ms cast + 120 ms travel, 3000 ms wait) at dummy with +20000 SP, 823764 (no partial resist) and 16255 amount -100 (no crit; precondition fixtures) before casting 681104 (control, single hit D ~ 16690) and right after a real cast of 681104 (setup_only_after: second hit 1.25 * D, cumulative spell_damage_total = 2.25 * D): ratio after / before = 2.25 within 0.01 (equivalent to +24%..+26% bonus, tighter than the G-19 +23%..+27% band; single Voidborne cast avoids ManaPerSecond 80 health-drain death). Reference search 2026-11-24: coa-history spell 681104: 10 casts; coabuildhub spells_master_index.json entry 681104 matches installed Spell.dbc for +25% damage."
     },
     {
       "spell": 681104,
@@ -1532,7 +1532,7 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "681104 Effect[1] aura 290 SPELL_AURA_MOD_CRIT_PCT, EffectBasePoints[1] 24 + EffectDieSides[1] 1 = +25% ($s1 = 25; Spell.dbc). Reads live spell_crit_chance on caster before casting 681104 (control, uncast) and 500 ms after one real cast of 681104: expected gain +25.0 points within 0.01. Reference search 2026-11-24: coa-history spell 681104: 10 casts; coabuildhub spells_master_index.json entry 681104 matches installed Spell.dbc."
+      "observe_source": "681104 Effect[1] aura 290 SPELL_AURA_MOD_CRIT_PCT, EffectBasePoints[1] 24 + EffectDieSides[1] 1 = +25% ($s1 = 25; Spell.dbc). Reads live spell_crit_chance on caster before casting 681104 (control, uncast) and 500 ms after one real cast of 681104: expected gain +25.0 points within 0.01 (melee/ranged crit covered by the single stock DBC aura 290 SPELL_AURA_MOD_CRIT_PCT). Reference search 2026-11-24: coa-history spell 681104: 10 casts; coabuildhub spells_master_index.json entry 681104 matches installed Spell.dbc."
     },
     {
       "spell": 681104,
@@ -1872,6 +1872,42 @@
       "fixture": {
         "spell_power": 50000
       },
+      "control": {
+        "auras": [
+          [
+            500706,
+            40
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          300284
+        ],
+        "auras": [
+          [
+            500706,
+            40
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 10,
+      "void_on_cast_failure": true,
+      "observe_source": "300284 Effect[0] bp 24 + die 1 = +25% ($s1 = 25; Spell.dbc). AscensionCultistContracts.cpp:281-282 scales row.healing of Eldritch Shock heal 808050 (triggered by casting 808036 on friendly target, healing coef 0.416018f, AscensionCultistData.h:125) by 1.25 -> 0.5200225f. Both arms hold Insanity 500706=40 (precondition fixture keeping CasterAuraSpell 680601 present across trials). At +50000 SP, bonus healing grows from 20801 to 26001 while base is ~390 (ratio 26391 / 21191 = 1.2454, inside G-19 [1.2375, 1.2625]). Control has no 300284; treatment learns 300284. Paired with shock_sp0 (0 SP contrast, expected ratio 1.0) to separate bonus-healing-power scaling from a flat +25% healing increase. Reference search 2026-11-24: coa-history spell 808050: 1 heal event (514); installed Spell.dbc governs."
+    },
+    {
+      "spell": 300284,
+      "name": "Dark Reservoir (Eldritch Mending 0 SP contrast, unchanged)",
+      "kind": "hit_ratio",
+      "variant": "mending_sp0",
+      "label_suffix": "mending_sp0",
+      "quote": "Increases the bonus healing power scaling of Eldritch Mending and Eldritch Shock by $s1%.",
+      "metric": "spell_heal_total",
+      "expected": 1.0,
+      "observe_spell": 500711,
+      "target": "caster",
+      "cast_power": 2000,
       "control": {},
       "treatment": {
         "learn": [
@@ -1879,9 +1915,46 @@
         ]
       },
       "critical": false,
-      "trials": 10,
+      "trials": 70,
+      "parts": 2,
       "void_on_cast_failure": true,
-      "observe_source": "300284 Effect[0] bp 24 + die 1 = +25% ($s1 = 25; Spell.dbc). AscensionCultistContracts.cpp:281-282 scales row.healing of Eldritch Shock heal 808050 (triggered by casting 808036 on friendly target, healing coef 0.416018f, AscensionCultistData.h:125) by 1.25 -> 0.5200225f. At +50000 SP, bonus healing grows from 20801 to 26001 while base is ~390 (ratio 26391 / 21191 = 1.2454, inside G-19 [1.2375, 1.2625]). Control has no 300284; treatment learns 300284. Reference search 2026-11-24: coa-history spell 808050: 1 heal event (514); installed Spell.dbc governs."
+      "observe_source": "Zero-SP contrast arm paired with mending_sp for 300284 ('Increases the bonus healing power scaling of Eldritch Mending and Eldritch Shock by $s1%.', $s1 = 25; Spell.dbc). Reference character carries 0 bonus spell/healing power (reference_stats spell_power 1..6 = 0.0), so scaling row.healing of Eldritch Mending 500711 (0.56f -> 0.70f, AscensionCultistContracts.cpp:281-282, AscensionCultistData.h:8) adds 0 at 0 SP while base + 0.12*AP (~93) stays unchanged: expected ratio 1.0 (G-19 band [-2%, +2%], 2 parts x 70 = 140 trials/arm for tight 99% CI), separating healing-power scaling from a flat +25% healing increase (which would measure 1.25 and alert). Control has no 300284; treatment learns 300284. Reference search 2026-11-24: installed Spell.dbc governs."
+    },
+    {
+      "spell": 300284,
+      "name": "Dark Reservoir (Eldritch Shock 0 SP contrast, unchanged)",
+      "kind": "hit_ratio",
+      "variant": "shock_sp0",
+      "label_suffix": "shock_sp0",
+      "quote": "Increases the bonus healing power scaling of Eldritch Mending and Eldritch Shock by $s1%.",
+      "metric": "spell_heal_total",
+      "expected": 1.0,
+      "cast_spell": 808036,
+      "observe_spell": 808050,
+      "target": "caster",
+      "control": {
+        "auras": [
+          [
+            500706,
+            40
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          300284
+        ],
+        "auras": [
+          [
+            500706,
+            40
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 140,
+      "void_on_cast_failure": true,
+      "observe_source": "Zero-SP contrast arm paired with shock_sp for 300284 ('Increases the bonus healing power scaling of Eldritch Mending and Eldritch Shock by $s1%.', $s1 = 25; Spell.dbc). Both arms hold Insanity 500706=40 (precondition fixture keeping CasterAuraSpell 680601 present across trials). Reference character carries 0 bonus spell/healing power (reference_stats spell_power 1..6 = 0.0), so scaling row.healing of Eldritch Shock heal 808050 (0.416018f -> 0.5200225f, AscensionCultistContracts.cpp:281-282, AscensionCultistData.h:125) adds 0 at 0 SP while base heal (~390) stays unchanged: expected ratio 1.0 (G-19 band [-2%, +2%], 140 trials/arm for tight 99% CI), separating healing-power scaling from a flat +25% healing increase (which would measure 1.25 and alert). Control has no 300284; treatment learns 300284. Reference search 2026-11-24: installed Spell.dbc governs."
     },
     {
       "spell": 805607,
@@ -1934,41 +2007,6 @@
       "critical": false,
       "trials": 10,
       "observe_source": "807701 Effect[0] bp 99 + die 1 = +100% ($807701s1 = 100; Spell.dbc). aura_ascension_cultist_shadow_training (AscensionCultistAbilities.cpp:510-542) attaches a +100% SPELLMOD_PCT SPELLMOD_DAMAGE modifier to Gaze of C'Thun heal 520333 (triggered when casting 500110 on friendly target). Control casts 500110 at caster (+20000 SP, non-crit) without 805607; treatment learns 805607 (expected ratio 2.0). Reference search 2026-11-24: coa-history spell 520333: 2853 SPELL_HEAL events in 42 logs; coabuildhub spells_master_index.json entry 805607 matches installed Spell.dbc verbatim. void_on_cast_failure omitted because 500110 Effect[0] enemy damage sub-trigger 520334 always returns SPELL_FAILED_DONT_REPORT (27) on friendly casts while Effect[1] 520335 -> 520333 heals every trial."
-    },
-    {
-      "spell": 805607,
-      "name": "Shadow Training (melee attacks cannot miss, be parried or dodged)",
-      "kind": "metric_delta",
-      "variant": "melee_landed",
-      "label_suffix": "melee_landed",
-      "quote": "In addition, you are now unable to miss your attacks and you cannot be parried or dodged.",
-      "trigger_spell": 502122,
-      "gate_spell": 805607,
-      "target": "dummy",
-      "attack_swings": 72,
-      "player_ratings": {
-        "melee_hit_rating": 0,
-        "expertise_rating": 0
-      },
-      "metric": "melee_damage_count",
-      "fields": {
-        "hand": 0
-      },
-      "before_expected": 0,
-      "expected": 72,
-      "same_arm_ratio": {
-        "metric": "melee_attack_count",
-        "fields": {
-          "hand": 0
-        },
-        "ratio": 1.0,
-        "tolerance": 0.0,
-        "least": 70,
-        "source": "805607 Effect[0] aura 333 (+100% hit) and Effect[1] aura 240 (+100 expertise = -25% dodge/parry): 100% of main-hand auto attacks land (melee_damage_count / melee_attack_count = 1.0)"
-      },
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "805607 Effect[0] aura 333 (+100% hit chance) and Effect[1] aura 240 (+100 expertise = -25% target dodge and parry; Spell.dbc). With player_ratings melee_hit_rating 0 and expertise_rating 0 against a level 60 dummy from the front, base avoidance is 5% miss + 5% dodge + 5% parry = 15% (control phase before learning 805607). After learning 805607, 72 main-hand auto-attack swings must land 100% of attacks (melee_damage_count / melee_attack_count = 1.0, tolerance 0, least 70): even if a single 5% avoidance leg remained unmitigated, the probability of zero avoids across a counted pair (>= 140 swings) is <= 0.95^140 = 0.00076 (0.076% <= 0.1% per pair). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 805607 matches installed Spell.dbc verbatim."
     },
     {
       "spell": 802049,
@@ -2126,7 +2164,66 @@
       },
       "cast_power": 2000,
       "trials": 160,
-      "expected_source": "802049 Effect[1] aura 107 SPELLMOD_CRITICAL_CHANCE +1000% on Eldritch Mending 500711 and Malevolence 502241 (Spell.dbc). crit_rate treatment_share 100 over 160 Malevolence casts per arm: treatment casts 802049 (TARGET_UNIT_CASTER) before each Malevolence (99% Wilson lower bound 160 / (160 + 2.576^2) = 96.0% >= 95% G-19 floor); control casts Malevolence without 802049 (Wilson upper bound well below 95%). Reference search 2026-11-24: coa-history spell 802049: 253 casts; coabuildhub spells_master_index.json entry 802049 matches installed Spell.dbc verbatim."
+      "expected_source": "802049 Effect[1] aura 107 SPELLMOD_CRITICAL_CHANCE +1000% on Eldritch Mending 500711 and Malevolence 502241 (Spell.dbc). crit_rate treatment_share 100 over 160 Malevolence casts per arm: treatment casts 802049 (TARGET_UNIT_CASTER) before each Malevolence (99% Wilson lower bound 160 / (160 + 2.576^2) = 96.0% >= 95% G-19 floor); control casts Malevolence without 802049 (Wilson upper bound well below 95%). Paired with mending_crit for Eldritch Mending 500711 heal critical strikes. Reference search 2026-11-24: coa-history spell 802049: 253 casts; coabuildhub spells_master_index.json entry 802049 matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 802049,
+      "name": "Eldritch Eye (Eldritch Mending guaranteed critical strike)",
+      "kind": "hit_ratio",
+      "variant": "mending_crit",
+      "label_suffix": "mending_crit",
+      "quote": "removing the cast time of your next $n Eldritch Mendings or Malevolences and causing them to critically strike.",
+      "metric": "spell_heal_total",
+      "expected": 1.0,
+      "rate": "critical",
+      "expected_points": 100,
+      "observe_spell": 500711,
+      "target": "caster",
+      "learn": [
+        500711,
+        802049
+      ],
+      "cast_power": 2000,
+      "control": {
+        "auras": [
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 802049,
+            "target": "caster",
+            "power": 2000
+          }
+        ]
+      },
+      "trials": 40,
+      "void_on_cast_failure": true,
+      "expected_source": "802049 Effect[1] aura 107 SPELLMOD_CRITICAL_CHANCE +1000% covers Eldritch Mending 500711 (heal, SpellFamilyFlags[1] 4096) and Malevolence 502241 (Spell.dbc). hit_ratio metric spell_heal_total with rate 'critical' counts spell_heal_count(critical=True) / spell_heal_count over 40 Eldritch Mending casts at caster per arm. Both arms set aura 16255 Effect[0] (aura 290 SPELL_AURA_MOD_CRIT_PCT) amount -100 as a precondition fixture so the control arm without 802049 crits 0% deterministically, while treatment casts 802049 (TARGET_UNIT_CASTER, +1000% spellmod crit -> +900% net) before each 500711 and crits 100%: expected difference +100 points (G-19 band [95, 105]; zero random roll variance on a working server). Paired with malevolence_crit so both named spells (damage and heal) are proved directly. Reference search 2026-11-24: coa-history spell 802049: 253 casts; coabuildhub spells_master_index.json entry 802049 matches installed Spell.dbc verbatim."
     },
     {
       "spell": 806266,
@@ -2341,7 +2438,66 @@
     },
     {
       "spell": 704880,
-      "name": "Doomsayer (Eldritch Shock heal -> +100% next damage)",
+      "name": "Doomsayer (Eldritch Shock full-health heal -> +100% next damage)",
+      "kind": "hit_ratio",
+      "variant": "heal_to_dmg_overheal",
+      "label_suffix": "heal_to_dmg_overheal",
+      "quote": "Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.",
+      "metric": "spell_damage_total",
+      "expected": 2.0,
+      "cast_spell": 808036,
+      "observe_spell": 808043,
+      "target": "dummy",
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            500706,
+            40
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 808036,
+            "target": "caster"
+          }
+        ]
+      },
+      "treatment": {
+        "learn": [
+          704880
+        ],
+        "auras": [
+          [
+            500706,
+            40
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 808036,
+            "target": "caster"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 10,
+      "void_on_cast_failure": true,
+      "observe_source": "Tests Doomsayer 704880 as worded ('Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.', Spell.dbc — no effective-heal restriction) when the healing Eldritch Shock 808036 -> 808050 targets the full-health caster (pure overheal). Both arms hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present) and 823764 (no partial resist; precondition fixtures) at +20000 SP, cast 808036 at the full-health caster before each observed 808036 -> 808043 damage cast at dummy (non-crit): control has no 704880, treatment learns 704880 (expected ratio 2.0, +100% inside G-19 [95%, 105%]). Server defect note: AscensionCultistAbilities.cpp:228-233 gates granting 705107 on (damage || healing), where Spell.cpp:2868-2874,3069-3071 overwrites m_healing with effective gain (0 on full-health overheal, unlike Spell.h:634 GetScriptHealingIncludingOverheal()), so pure overheal fails to grant 705107 and alerts near +0%. Paired with heal_to_dmg (damaged target, supporting evidence only). Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
+    },
+    {
+      "spell": 704880,
+      "name": "Doomsayer (Eldritch Shock damaged-target heal -> +100% next damage, supporting evidence)",
       "kind": "metric_delta",
       "variant": "heal_to_dmg",
       "label_suffix": "heal_to_dmg",
@@ -2399,7 +2555,7 @@
       "wait_ms": 1000,
       "expire_ms": 9000,
       "void_on_cast_failure": true,
-      "observe_source": "AscensionCultistAbilities.cpp:228-233 grants 705107 (bp 99 + die 1 = +100%; Spell.dbc) on Eldritch Shock effective heal (808050 via 808036 at injured friendly target; Spell.cpp:2874 passes m_healing = gain > 0 when target is below max health, here caster_health_pct 50 of 10000 HP) when 704880 is held; AscensionCultistContracts.cpp:307-308 multiplies next Eldritch Shock damage 808043 by 2.0. Both phases hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present), 823764 (no resist) and 16255 -100 (no crit; precondition fixtures) at +20000 SP, cast 808036 at injured caster (5000 effective heal), wait 1600 ms, then cast 808036 at dummy (808043 damage): control deals D (~10790) before learning 704880 and 2*D (~21580) after learning 704880 (cumulative spell_damage_total = 3.0 * D, ratio after / before = 3.0 within 0.02, equivalent to +98%..+102% bonus, tighter than G-19 +95%..+105%). Note: full-health overheal passes gain 0 and does not trigger 705107. Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-9)."
+      "observe_source": "Supporting evidence arm only (damaged target, caster_health_pct 50 -> 5000 effective heal, gain > 0): paired with heal_to_dmg_overheal (full-health pure overheal), which tests the tooltip as worded and alerts on AscensionCultistAbilities.cpp:228-233 checking healing (Spell.cpp:2868-2874,3069-3071 effective gain) instead of Spell.h:634 GetScriptHealingIncludingOverheal(). When the heal is effective, AscensionCultistAbilities.cpp:228-233 grants 705107 (+100%) and AscensionCultistContracts.cpp:307-308 multiplies next Eldritch Shock damage 808043 by 2.0 (cumulative spell_damage_total = 3.0 * D within 0.02). Both phases hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present), 823764 (no resist) and 16255 -100 (no crit; precondition fixtures) at +20000 SP. Does not prove the claim as worded by itself. Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
     }
   ],
   "player_observations": [],
