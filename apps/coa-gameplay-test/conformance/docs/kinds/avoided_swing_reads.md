@@ -17,11 +17,26 @@ The expected value comes from the server DBC of `observe_spell`, never from the 
   (`Spell.cpp` `WorldObjectSpellAreaTargetCheck`).
 - `stat_delta`: the value of `observe_spell` effect `effect`. One grouped ally at `ally_yd` (at least 10 yd, out of
   the strikers' reach). `ok` when its `metric` (`melee_crit_chance`) after the treatment less the control read lies
-  within 0.01 of the value, and it holds the aura.
+  within 0.01 of the value, and it holds the aura. Opt-in `baseline_read: true` reads the stat once more after the
+  engage, before the control windows: the control read, taken after the dodges with the passive not yet learned, must
+  equal it within 0.01 or the check alerts. With it, the tool stamps the learned contrast (`contrast: learned`, ADR
+  1273, provisional) when the generated step list holds the baseline read, dodges, the control read, the single learn
+  of `spell`, dodges and the treatment read in that order; no entry field sets the stamp.
 - `duration_max`: the duration of `observe_spell`. One grouped ally at `ally_yd`; its remaining duration of
   `observe_spell` (`aura_duration_ms`) is read after every treatment window. `ok` when the largest read lies in
   `[duration - swing_ms - 100, duration]`: no read exceeds the full duration, and a read in the window after an
   application is at most one window and one 100 ms tick below it, so a duration 10% shorter or longer reads outside.
+- `expiry_edge`: the duration D of `observe_spell` (ADR 1273, provisional). One grouped ally at `ally_yd`. The
+  caster's dodged swings (`melee_attacks_taken`, dodged) are counted before the last treatment window, after the
+  quieting relocation and at the end. After the relocation the caster's `melee_attack_taken_last_ms` (dodged) stamps
+  the game time of the last dodge; `game_time_ms` is read before and after each of the ally's two `aura` reads of
+  `observe_spell`, set about 0.9 D and D after that dodge. With h the game time before the held read and g the game
+  time after the gone read, both less the dodge stamp, the run is void unless 0.9 D <= h, h + 100 < D <= g' (g' the
+  game time before the gone read less the stamp) and g + 100 < 1.1 D, where 100 ms covers the dodge packet's lag
+  behind the server's dodge. `ok` when the aura is held and then gone, which places D in (h, g + 100] ms of the last
+  dodge: a duration 10% shorter or longer fails. Also void when the last window holds no dodge or a dodge follows
+  the relocation. Requires `swing_ms + 200 < 0.1 D`. The ally's remaining duration at the stamp read gives a packet
+  lag estimate in the explanation, not judged.
 - `per_event`: the value of `observe_spell` effect `effect`. The caster's `spell_energize_total` and
   `spell_energize_count` of `observe_spell`; `ok` when the total equals the count times the value exactly over at
   least `min_events` (default 20) events after the learn. The energize log carries the uncapped amount

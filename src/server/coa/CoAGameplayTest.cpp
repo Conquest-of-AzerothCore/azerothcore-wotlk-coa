@@ -1174,6 +1174,8 @@ struct Actor
     std::map<ObjectGuid, uint32> meleeAttacksTakenFrom;
     std::map<std::pair<ObjectGuid, uint8>, uint32> meleeVictimStatesTakenFrom;
     std::map<ObjectGuid, uint32> meleeMissesTakenFrom;
+    std::map<uint8, uint64> meleeLastTakenMsByVictimState;
+    std::optional<uint64> meleeLastTakenMs;
     std::map<ObjectGuid, MeleeOutcomes> meleeOutcomesByAttacker;
     std::array<uint32, 2> meleeDamageByHand{};
     std::array<uint64, 2> meleeDamageTotalByHand{};
@@ -1798,6 +1800,8 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         {
             ++actor.meleeAttacksTakenFrom[attacker];
             ++actor.meleeVictimStatesTakenFrom[{ attacker, victimState }];
+            actor.meleeLastTakenMsByVictimState[victimState] = GameNowMs();
+            actor.meleeLastTakenMs = GameNowMs();
             if (hitInfo & HITINFO_MISS)
                 ++actor.meleeMissesTakenFrom[attacker];
         }
@@ -5216,6 +5220,18 @@ private:
             for (auto const& [attacker, count] : actor.meleeMissesTakenFrom)
                 total += count;
             return total;
+        }
+        if (metric == "melee_attack_taken_last_ms")
+        {
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            double const missing = std::numeric_limits<double>::quiet_NaN();
+            if (auto state = step.get_optional<uint32>("victim_state"))
+            {
+                Require(*state <= VICTIMSTATE_DEFLECTS, "Unknown melee victim state");
+                auto const found = actor.meleeLastTakenMsByVictimState.find(uint8(*state));
+                return found == actor.meleeLastTakenMsByVictimState.end() ? missing : double(found->second);
+            }
+            return actor.meleeLastTakenMs ? double(*actor.meleeLastTakenMs) : missing;
         }
         if (metric == "melee_attacks_taken")
         {
