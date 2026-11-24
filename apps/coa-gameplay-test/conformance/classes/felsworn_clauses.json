@@ -14,7 +14,10 @@
     "claims": [
       {
         "claim": "Critical strikes with melee abilities now trigger Dancing Blades",
-        "labels": []
+        "labels": [
+          "92087 behaviour_metric_delta trigger",
+          "92087 behaviour_metric_delta noncrit"
+        ]
       },
       {
         "claim": "dealing off-hand Weapon Damage",
@@ -30,7 +33,7 @@
         ]
       }
     ],
-    "reason": "HELD claim 1 (review fw-rl3b I-1): the noncrit arm (learned, 0 crits) has no read showing the Twin Slice strikes landed, so 0 triggers could mean no strike; needs a same-arm strike damage or hit-count read before 'Critical strikes ... trigger' counts."
+    "reason": "Claim 1 same-arm strike read (fw-vb9): the noncrit arm sums the damage events of the Twin Slice strike 808303 and of 800598 on the dummy, so the learned no-crit arm shows the strike landed (1 before, 2 after) while 800598 never fires; trigger arm reads casts of 800598 under forced crit."
   },
   {
     "spell": 92088,
@@ -195,9 +198,10 @@
     "spell": 300468,
     "clause": "@ext:Absorption shield scales with Stamina.:ext@",
     "labels": [
-      "300468 effect_value #3"
+      "300468 behaviour_taken_hit stamina"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fw-vb9: absorb 431 without and 443 with Stamina +12 (9119), each judged exactly against the formula with the Stamina read at the arm start (coefficient 1.0 of the tooltip); control arm without the shield absorbs 0."
   },
   {
     "spell": 300470,
@@ -1542,9 +1546,11 @@
     "spell": 561216,
     "clause": "@ext:Requires a nearby enemy to cast.:ext@",
     "labels": [
-      "561216 effect_value #1"
+      "561216 behaviour_metric_delta no_enemy",
+      "561216 behaviour_metric_delta enemy_near"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fw-vb9: cast_failure 12 (SPELL_FAILED_BAD_TARGETS) with the caster 20 yd from the only dummy, 0 with the dummy beside it. The tooltip gives no distance, so only no enemy at all against an enemy beside the caster is claimed."
   },
   {
     "spell": 561343,
@@ -1942,7 +1948,8 @@
     "labels": [
       "706420 effect_value #4"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "DEFECT LEAD (fw-vb9, not counted): under forced spell crit 706420 lands 7 of 7 ticks and 0 critical (periodic_crit, 0 of 7 in both runs; periodic_ticks 7; direct_crit_control: Fel Fireball 801312 lands 1 critical). Same shape as Necromancer 501861 before FN-c4-1 (ADR necromancer/0012). Fix note in .agents/plans/fw-vb9/report.md. Labels stay on the data read until the fix."
   },
   {
     "spell": 704370,
@@ -2138,10 +2145,11 @@
     "spell": 704613,
     "clause": "Increases the amount of beneficial magic effects stolen by your Consume Magic by $s1.",
     "labels": [
-      "704613 behaviour_metric_delta stolen"
+      "704613 behaviour_metric_delta stolen",
+      "704613 behaviour_metric_delta stolen_effects"
     ],
     "kind": "claim",
-    "reason": "HELD '704613 behaviour_metric_delta stolen_effects' (review fw-rvb5 I-2): only 2 buffs on the dummy, so the read saturates at the expected 2 and an over-steal would pass; needs a third Magic buff and a rerun."
+    "reason": "Third Magic buff added (Arcane Intellect 1459, fw-vb9): carried_aura_count of the three buffs on the caster reads 1 before the learn and 2 after, so an over-steal (3) fails; spellpen 823764 on the caster as precondition fixture."
   },
   {
     "spell": 705102,
@@ -2578,11 +2586,15 @@
       }
     ],
     "tool_gap": {
-      "reason": "'strike 1 additional enemy ... based on how long you channeled' needs the channel ended at a set time, so that the extra targets of a short and of a full channel can be compared. No metric_delta option ends a channel: hold_power_during_wait and relocate_during_wait only keep or move the caster, Carve 800206 carries no movement channel interrupt (it can channel while moving), and the harness action cancel_aura is not wired into any metric_delta option (needs a new option, tool group). The full channel is read by extras_full (nine offered, all struck); the growth with the length is not. The nearest kind is metric_delta with area_dummies and area_sum.",
+      "reason": "'strike 1 additional enemy ... based on how long you channeled' needs the channel ended at a set time, so that the extra targets of a short and of a full channel can be compared. No metric_delta option ends a channel: hold_power_during_wait and relocate_during_wait only keep or move the caster, Carve 800206 carries no movement channel interrupt (it can channel while moving), and the harness action cancel_aura is not wired into any metric_delta option (needs a new option, tool group). The full channel is read by extras_full (nine offered, all struck); the growth with the length is not. The nearest kind is metric_delta with area_dummies and area_sum. fw-vb9 (195.1, 2026-11-24): the L2 fixture covers the full channel only; no metric_delta option ends the channel at a set time (cancel_aura is wired only in clear_trigger_after_ms for a periodic hit count), by the docs, after_trigger_casts casts a spell during the channel without cancelling it (Witch Doctor Mojo Beam precedent, not run here), and relocation does not cut it (Carve carries no movement channel interrupt, moving_channel read 685 ms remaining after two moves).",
       "attempts": [
         {
           "agent": "fw-ea5",
           "report": ".agents/plans/fw-ea5/report.md"
+        },
+        {
+          "agent": "fw-vb9",
+          "report": ".agents/plans/fw-vb9/report.md"
         }
       ]
     }
@@ -2876,10 +2888,28 @@
   {
     "spell": 800206,
     "clause": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
-    "labels": [
-      "800206 effect_value #3"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Can dodge while channeling",
+        "labels": [
+          "800206 behaviour_metric_delta channel_dodge",
+          "800206 behaviour_metric_delta channel_dodge_control"
+        ]
+      },
+      {
+        "claim": "and parry while channeling",
+        "labels": []
+      },
+      {
+        "claim": "you can channel while moving",
+        "labels": [
+          "800206 behaviour_metric_delta moving_channel"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "fw-vb9. Dodge: three Speed Slash strikes with dodge 100% are all avoided during Carve (0 landed) while the same strikes land 3 of 3 during Sargeras Embrace 800355, a channel without the exemption (control). Moving: cast_remaining_ms 685 after two harness relocations; the uncast phase reads 0; the harness relocation cuts a channel that carries the move flag (Witch Hunter Witchbane moving_channel_witchbane_moved, same step). Parry: not proven, the striker fixture does not put the strike in the parry arc (two designs not yet tried; strikes at dx 0 landed with parry 100% and dx 10 gave 0 landed in the control too)."
   },
   {
     "spell": 572617,

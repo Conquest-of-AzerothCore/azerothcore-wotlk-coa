@@ -19320,57 +19320,6 @@
     },
     {
       "spell": 800206,
-      "name": "Carve (parry while channeling)",
-      "kind": "metric_delta",
-      "variant": "channel_parry",
-      "label_suffix": "channel_parry",
-      "quote": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
-      "trigger_spell": 800206,
-      "target": "dummy",
-      "cast_power": 100,
-      "cast_in_before": false,
-      "before_expected": 0,
-      "tolerance": 0,
-      "wait_ms": 1500,
-      "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "strike": {
-        "spell": 2118233,
-        "health": 100000,
-        "max_health": 100000,
-        "count": 3,
-        "wait_ms": 200,
-        "after_trigger_ms": 800,
-        "dx": 10
-      },
-      "caster_avoidance": {
-        "parry": 100
-      },
-      "metric": "spell_damage_count",
-      "fields": {
-        "spell": 2118233,
-        "caster": "striker",
-        "target": "caster"
-      },
-      "expected": 0,
-      "phase_auras": [
-        [
-          800058,
-          6,
-          "caster",
-          "caster"
-        ],
-        [
-          803468,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "observe_source": "Carve 800206 Description (@ext): 'Can dodge and parry while channeling and you can channel while moving.' The engine zeroes a melee swing's dodge and parry while the victim casts or channels (Unit::RollMeleeOutcomeAgainst, Unit.cpp:3395-3397, 3429-3431) unless Unit::CanDefendDuringChannel allows it (Unit.cpp:5120-5133, a Demon Hunter channelling 800206). A passive striker (creature 36) casts Speed Slash 2118233 (melee, cannot miss, SPELL_ATTR7_NO_ATTACK_MISS) at the caster three times 800 ms into the channel, 200 ms apart, with the caster's dodge or parry set to 100% right before (harness set_combat_avoidance, a named precondition fixture); the damage events of 2118233 on the caster are counted. Carve: every strike is dodged or parried, 0 events. Control of this arm: the _control entry with Sargeras Embrace 800355 reads 3 landed strikes under the same fixture. Felfury x6 and 803468 are set on the caster for Carve (precondition fixtures, as the consumes entry). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 channel_dodge / channel_parry (taken_outcome) is the precedent shape; coa-history spell 800206: casts exist, no avoidance figure decides; nothing else found beyond the tooltip, Spell.dbc and the engine code. "
-    },
-    {
-      "spell": 800206,
       "name": "Sargeras Embrace (control: a channel without the exemption does not dodge)",
       "kind": "metric_delta",
       "variant": "channel_dodge_control",
@@ -19395,43 +19344,6 @@
       },
       "caster_avoidance": {
         "dodge": 100
-      },
-      "metric": "spell_damage_count",
-      "fields": {
-        "spell": 2118233,
-        "caster": "striker",
-        "target": "caster"
-      },
-      "expected": 3,
-      "observe_source": "Carve 800206 Description (@ext): 'Can dodge and parry while channeling and you can channel while moving.' The engine zeroes a melee swing's dodge and parry while the victim casts or channels (Unit::RollMeleeOutcomeAgainst, Unit.cpp:3395-3397, 3429-3431) unless Unit::CanDefendDuringChannel allows it (Unit.cpp:5120-5133, a Demon Hunter channelling 800206). A passive striker (creature 36) casts Speed Slash 2118233 (melee, cannot miss, SPELL_ATTR7_NO_ATTACK_MISS) at the caster three times 800 ms into the channel, 200 ms apart, with the caster's dodge or parry set to 100% right before (harness set_combat_avoidance, a named precondition fixture); the damage events of 2118233 on the caster are counted. Carve: every strike is dodged or parried, 0 events. Control: Sargeras Embrace 800355, a Felsworn channel (ChannelInterruptFlags 0, no exemption), the same strikes land: 3 events, so the 0 of Carve is the exemption and not a failed strike. Felfury x6 and 803468 are set on the caster for Carve (precondition fixtures, as the consumes entry). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 channel_dodge / channel_parry (taken_outcome) is the precedent shape; coa-history spell 800206: casts exist, no avoidance figure decides; nothing else found beyond the tooltip, Spell.dbc and the engine code. "
-    },
-    {
-      "spell": 800206,
-      "name": "Sargeras Embrace (control: a channel without the exemption does not parry)",
-      "kind": "metric_delta",
-      "variant": "channel_parry_control",
-      "label_suffix": "channel_parry_control",
-      "quote": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
-      "trigger_spell": 800355,
-      "target": "dummy",
-      "cast_power": 100,
-      "cast_in_before": false,
-      "before_expected": 0,
-      "tolerance": 0,
-      "wait_ms": 1500,
-      "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "strike": {
-        "spell": 2118233,
-        "health": 100000,
-        "max_health": 100000,
-        "count": 3,
-        "wait_ms": 200,
-        "after_trigger_ms": 800,
-        "dx": 10
-      },
-      "caster_avoidance": {
-        "parry": 100
       },
       "metric": "spell_damage_count",
       "fields": {
