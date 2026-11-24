@@ -1,0 +1,190 @@
+#include "PetJournalStore.h"
+#include "DatabaseEnv.h"
+#include "Field.h"
+#include "JournalSql.h"
+#include "Log.h"
+#include "PetBattleDataStore.h"
+#include "Player.h"
+#include "QueryResult.h"
+#include "WorldSession.h"
+
+namespace CoAPetBattles::Store
+{
+    namespace
+    {
+        bool Eligible(Player* player)
+        {
+            return player && player->GetSession() && !player->GetSession()->IsBot();
+        }
+
+        std::multimap<uint32_t, uint32_t> CompanionSpecies()
+        {
+            std::multimap<uint32_t, uint32_t> species;
+            for (auto const& [spell, companion] : sPetBattleData->Data().companions)
+                species.emplace(companion.species, spell);
+            return species;
+        }
+    }
+
+    PetJournalStore* PetJournalStore::instance()
+    {
+        static PetJournalStore store;
+        return &store;
+    }
+
+    Journal* PetJournalStore::Get(uint32_t account)
+    {
+        auto const found = _journals.find(account);
+        return found == _journals.end() ? nullptr : found->second.journal.get();
+    }
+
+    Journal* PetJournalStore::For(Player* player)
+    {
+        return Eligible(player) ? Get(player->GetSession()->GetAccountId()) : nullptr;
+    }
+
+    bool PetJournalStore::Load(uint32_t account)
+    {
+        std::shared_ptr<Engine::Catalog const> catalog = sPetBattleData->Catalog();
+        if (!sPetBattleData->IsLoaded() || !catalog)
+            return false;
+
+        std::vector<OwnedPet> pets;
+        if (QueryResult result = CharacterDatabase.Query("SELECT `species`, `level`, `xp`, `ability1`, `ability2`, "
+            "`ability3`, `quality`, `display`, `health`, `health_at`, `revision` FROM `coa_pet_journal` "
+            "WHERE `account` = {}", account))
+        {
+            do
+            {
+                Field* fields = result->Fetch();
+                OwnedPet pet;
+                pet.species = fields[0].Get<uint32>();
+                pet.level = fields[1].Get<uint8>();
+                pet.xp = fields[2].Get<uint32>();
+                pet.picks = { fields[3].Get<uint8>(), fields[4].Get<uint8>(), fields[5].Get<uint8>() };
+                pet.quality = fields[6].Get<uint8>();
+                pet.display = fields[7].Get<uint32>();
+                pet.health = fields[8].Get<uint32>();
+                pet.healthAt = fields[9].Get<uint32>();
+                pet.revision = fields[10].Get<uint32>();
+                pets.push_back(pet);
+            } while (result->NextRow());
+        }
+
+        std::array<Team, TeamCount> teams {};
+        if (QueryResult result = CharacterDatabase.Query("SELECT `team`, `slot1`, `slot2`, `slot3`, `revision` "
+            "FROM `coa_pet_team` WHERE `account` = {}", account))
+        {
+            do
+            {
+                Field* fields = result->Fetch();
+                uint8 const team = fields[0].Get<uint8>();
+                if (team < 1 || team > TeamCount)
+                    continue;
+                teams[team - 1].slots = { fields[1].Get<uint32>(), fields[2].Get<uint32>(), fields[3].Get<uint32>() };
+                teams[team - 1].revision = fields[4].Get<uint32>();
+            } while (result->NextRow());
+        }
+
+        uint8 active = 1;
+        uint32 activeRevision = 0;
+        if (QueryResult result = CharacterDatabase.Query("SELECT `active_team`, `revision` FROM `coa_pet_account` "
+            "WHERE `account` = {}", account))
+        {
+            active = result->Fetch()[0].Get<uint8>();
+            activeRevision = result->Fetch()[1].Get<uint32>();
+        }
+
+        auto journal = std::make_unique<Journal>(account, *catalog, std::move(pets), teams, active, activeRevision);
+        for (std::string const& rejected : journal->Rejected())
+            LOG_WARN("module", "Pet journal row kept but unusable: {}", rejected);
+        _journals[account] = { std::move(catalog), std::move(journal) };
+        return true;
+    }
+
+    void PetJournalStore::Sync(Player* player, Journal& journal)
+    {
+        std::vector<uint32_t> const added = journal.SyncCompanions(CompanionSpecies(),
+            [player](uint32_t spell) { return player->HasSpell(spell); });
+        if (!added.empty())
+            LOG_INFO("module", "Pet journal of account {}: {} companion pet(s) added", journal.Account(),
+                added.size());
+        Flush(journal);
+    }
+
+    void PetJournalStore::Login(Player* player)
+    {
+        if (!Eligible(player))
+            return;
+        uint32 const account = player->GetSession()->GetAccountId();
+        _refs.Acquire(account, player->GetGUID().GetCounter());
+        if (!Get(account) && !Load(account))
+            return;
+        Sync(player, *Get(account));
+    }
+
+    void PetJournalStore::Logout(Player* player)
+    {
+        if (!Eligible(player))
+            return;
+        uint32 const account = player->GetSession()->GetAccountId();
+        if (_refs.Release(account, player->GetGUID().GetCounter()))
+            _journals.erase(account);
+    }
+
+    void PetJournalStore::LearnSpell(Player* player, uint32_t spell)
+    {
+        if (!Eligible(player) || !sPetBattleData->Data().companions.count(spell))
+            return;
+        if (Journal* journal = For(player))
+            Sync(player, *journal);
+    }
+
+    void PetJournalStore::Flush(Journal& journal)
+    {
+        for (RowWrite const& write : journal.TakeWrites())
+        {
+            std::string const sql = UpsertStatement(journal, write);
+            if (sql.empty())
+                continue;
+            CharacterDatabaseTransaction transaction = CharacterDatabase.BeginTransaction();
+            transaction->Append(std::string_view(sql));
+            uint32 const account = write.account;
+            ++_pending[account];
+            _callbacks.AddCallback(CharacterDatabase.AsyncCommitTransaction(transaction)).AfterComplete(
+                [this, account](bool success)
+                {
+                    auto const found = _pending.find(account);
+                    if (found != _pending.end() && found->second && --found->second == 0)
+                        _pending.erase(found);
+                    if (!success)
+                        LOG_ERROR("module", "Pet journal write for account {} failed", account);
+                });
+        }
+    }
+
+    size_t PetJournalStore::Pending(uint32_t account) const
+    {
+        auto const found = _pending.find(account);
+        return found == _pending.end() ? 0 : found->second;
+    }
+
+    bool PetJournalStore::Reload(uint32_t account)
+    {
+        if (Pending(account) || !Get(account))
+            return false;
+        return Load(account);
+    }
+
+    void PetJournalStore::DeleteAccount(uint32_t account)
+    {
+        _journals.erase(account);
+        for (char const* table : { "coa_pet_journal", "coa_pet_team", "coa_pet_account" })
+            CharacterDatabase.Execute("DELETE FROM `{}` WHERE `account` = {}", table, account);
+    }
+
+    void PetJournalStore::Update()
+    {
+        _callbacks.ProcessReadyCallbacks();
+    }
+}
