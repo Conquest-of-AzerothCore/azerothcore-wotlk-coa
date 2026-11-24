@@ -18686,7 +18686,7 @@
     },
     {
       "spell": 300483,
-      "name": "Chaotic Intuition (Cripple still on 16660 ms after its cast)",
+      "name": "Chaotic Intuition (Cripple still on 17500 ms after its cast)",
       "kind": "metric_delta",
       "variant": "held",
       "label_suffix": "held",
@@ -18712,16 +18712,16 @@
       "cast_in_before": true,
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 14830,
+      "wait_ms": 15700,
       "expire_ms": 500,
       "game_time": {
         "after": [
-          14780,
-          14980
+          15650,
+          15850
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Tooltip 300483: 'Damage dealt by Felstrikes now extends the duration of Cripple on the target by $/1000;560643s1 sec' (560643 Effect[0] BasePoints 999 + 1 die side = 1000 ms = 1 sec). Cripple 704371 lasts 12000 ms (DurationIndex 29) and Felstrike 802678 ticks every 1000 ms for 6000 ms (Effect[0] amplitude 1000, DurationIndex 32): six ticks while Cripple is up extend it to 12000 + 6 x 1000 = 18000 ms. Nothing is set by fixture except Inner Demon 804216 (the named precondition of Fel Apprentice 92088, learned in every arm): Cripple is cast for real, 1800 ms later a real Fel Fireball 801312 unleashes the real Felstrike. Cripple's age at the read is the setup wait (1800 ms, stamped by the cast) plus the wait after the trigger stamp: 16660 ms, at least 16560 = 0.92 x 18000 (excludes a duration 10% short); the control read before the learn of 300483 (same casts) must show Cripple already gone at 12000 ms. Reference search 2026-11-24: coa-history spell 704371: aura applied and refreshed events exist in the logs but no duration in the aggregates; nothing found beyond the tooltip and Spell.dbc.",
+      "observe_source": "Tooltip 300483: 'Damage dealt by Felstrikes now extends the duration of Cripple on the target by $/1000;560643s1 sec' (560643 Effect[0] BasePoints 999 + 1 die side = 1000 ms = 1 sec). Cripple 704371 lasts 12000 ms (DurationIndex 29) and Felstrike 802678 ticks every 1000 ms for 6000 ms (Effect[0] amplitude 1000, DurationIndex 32): six ticks while Cripple is up extend it to 12000 + 6 x 1000 = 18000 ms, that is 1000 ms per Felstrike damage. Nothing is set by fixture except Inner Demon 804216 (the named precondition of Fel Apprentice 92088, learned in every arm): Cripple is cast for real, 1800 ms later a real Fel Fireball 801312 unleashes the real Felstrike. Cripple's age at the read is the setup wait (1800 ms, stamped by the cast) plus the wait after the trigger stamp: 17500 ms, at least 17450 over the game-time window, above 17400 = 12000 + 6 x 900 (an extension of 0.9 sec per hit, 10% short, would already be gone); the control read before the learn of 300483 (same casts) must show Cripple already gone at 12000 ms. Reference search 2026-11-24: coa-history spell 704371: aura applied and refreshed events exist in the logs but no duration in the aggregates; nothing found beyond the tooltip and Spell.dbc.",
       "setup_casts": [
         704371
       ],
@@ -18732,7 +18732,7 @@
     },
     {
       "spell": 300483,
-      "name": "Chaotic Intuition (Cripple gone 19340 ms after its cast)",
+      "name": "Chaotic Intuition (Cripple gone 18500 ms after its cast)",
       "kind": "metric_delta",
       "variant": "gone",
       "label_suffix": "gone",
@@ -18758,16 +18758,16 @@
       "cast_in_before": false,
       "before_expected": 0,
       "expected": 0,
-      "wait_ms": 17510,
+      "wait_ms": 16700,
       "expire_ms": 500,
       "game_time": {
         "after": [
-          17460,
-          17660
+          16650,
+          16800
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Tooltip 300483: 'Damage dealt by Felstrikes now extends the duration of Cripple on the target by $/1000;560643s1 sec' (560643 Effect[0] BasePoints 999 + 1 die side = 1000 ms = 1 sec). Cripple 704371 lasts 12000 ms (DurationIndex 29) and Felstrike 802678 ticks every 1000 ms for 6000 ms (Effect[0] amplitude 1000, DurationIndex 32): six ticks while Cripple is up extend it to 12000 + 6 x 1000 = 18000 ms. Nothing is set by fixture except Inner Demon 804216 (the named precondition of Fel Apprentice 92088, learned in every arm): Cripple is cast for real, 1800 ms later a real Fel Fireball 801312 unleashes the real Felstrike. Cripple's age at the read is the setup wait (1800 ms, stamped by the cast) plus the wait after the trigger stamp: 19340 ms, at most 19440 = 1.08 x 18000 (excludes a duration 10% long). Reference search 2026-11-24: coa-history spell 704371: aura applied and refreshed events exist in the logs but no duration in the aggregates; nothing found beyond the tooltip and Spell.dbc.",
+      "observe_source": "Tooltip 300483: 'Damage dealt by Felstrikes now extends the duration of Cripple on the target by $/1000;560643s1 sec' (560643 Effect[0] BasePoints 999 + 1 die side = 1000 ms = 1 sec). Cripple 704371 lasts 12000 ms (DurationIndex 29) and Felstrike 802678 ticks every 1000 ms for 6000 ms (Effect[0] amplitude 1000, DurationIndex 32): six ticks while Cripple is up extend it to 12000 + 6 x 1000 = 18000 ms, that is 1000 ms per Felstrike damage. Nothing is set by fixture except Inner Demon 804216 (the named precondition of Fel Apprentice 92088, learned in every arm): Cripple is cast for real, 1800 ms later a real Fel Fireball 801312 unleashes the real Felstrike. Cripple's age at the read is the setup wait (1800 ms, stamped by the cast) plus the wait after the trigger stamp: 18500 ms, at most 18600 over the game-time window, = 12000 + 6 x 1100 (an extension of 1.1 sec per hit, 10% long, would still be on). Reference search 2026-11-24: coa-history spell 704371: aura applied and refreshed events exist in the logs but no duration in the aggregates; nothing found beyond the tooltip and Spell.dbc.",
       "setup_casts": [
         704371
       ],
@@ -18802,14 +18802,14 @@
       "variant": "cast_landed",
       "label_suffix": "cast_landed",
       "expected": 1,
-      "wait_ms": 1090,
+      "wait_ms": 1060,
       "game_time": {
         "after": [
           1040,
-          1190
+          1080
         ]
       },
-      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster, after the learn-free control read): the subject here is the cast time, not the grant (the grant and its 8000 ms are timed for real by felforged_duration). Completed casts of 801312 (spell_cast_count) read 1090 ms after the cast start: 1 with Felforged (a cast time of at most 1090 ms excludes less than a 27% reduction), 0 without it (the control read before the fixture, a 1500 ms cast not yet completed). Reference search 2026-11-24: coa-history spell 806104: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc.",
+      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster, after the learn-free control read): the subject here is the cast time, not the grant (the grant and its 8000 ms are timed for real by felforged_duration). Completed casts of 801312 (spell_cast_count) read at most 1080 ms after the cast start: 1 with Felforged (a cast time of at most 1080 ms is a reduction of at least 28%, which excludes the 27.9% of a -31% off by 10%), 0 without it (the control read before the fixture, a 1500 ms cast not yet completed). Reference search 2026-11-24: nothing found beyond the tooltip and Spell.dbc.",
       "cast_in_before": false
     },
     {
@@ -18839,14 +18839,14 @@
       "label_suffix": "cast_early",
       "cast_in_before": false,
       "expected": 0,
-      "wait_ms": 985,
+      "wait_ms": 990,
       "game_time": {
         "after": [
-          935,
-          1085
+          990,
+          1030
         ]
       },
-      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster, after the learn-free control read): the subject here is the cast time, not the grant (the grant and its 8000 ms are timed for real by felforged_duration). The same cast read 985 ms after its start must not be completed (a cast time above 985 ms excludes more than a 34% reduction); with cast_landed this brackets the 31% reduction within 5%. Reference search 2026-11-24: coa-history spell 806104: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster, after the learn-free control read): the subject here is the cast time, not the grant (the grant and its 8000 ms are timed for real by felforged_duration). The same cast read between 990 and 1030 ms after its start must not be completed (a cast time above 990 ms is a reduction below 34%): that excludes a reduction of 34.1% (-31% off by 10%); with cast_landed this brackets the stated 31% inside 28%..34%. Reference search 2026-11-24: nothing found beyond the tooltip and Spell.dbc."
     },
     {
       "kind": "metric_delta",
