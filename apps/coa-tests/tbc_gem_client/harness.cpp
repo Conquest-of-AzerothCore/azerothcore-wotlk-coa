@@ -99,4 +99,27 @@ int main()
     }
     assert(changed == 165);
     assert(sSpellItemEnchantmentStore.rows[999999].requiredLevel == 80);
+
+    constexpr Fixture Spheres[] = {{22459, 342, 2948, 70}, {22460, 341, 2947, 70}};
+    for (auto const& sphere : Spheres)
+    {
+        objects.items[sphere.gem] = {sphere.property, sphere.minimum};
+        sGemPropertiesStore.rows[sphere.property] = {sphere.enchantment};
+        sSpellItemEnchantmentStore.rows[sphere.enchantment] = {sphere.gem, sphere.minimum};
+    }
+    LoadRequirements();
+    assert(Gems.size() == 231);
+    for (auto const& sphere : Spheres)
+    {
+        assert(sSpellItemEnchantmentStore.rows[sphere.enchantment].requiredLevel == 70);
+        objects.items[sphere.gem].RequiredLevel = 60;
+    }
+    LoadRequirements();
+    assert(Gems.size() == 233);
+    for (auto const& sphere : Spheres)
+    {
+        auto const expected = SpellItemEnchantmentEntry{sphere.gem, 60};
+        assert(Gems.count(sphere.gem));
+        assert(sSpellItemEnchantmentStore.rows[sphere.enchantment] == expected);
+    }
 }

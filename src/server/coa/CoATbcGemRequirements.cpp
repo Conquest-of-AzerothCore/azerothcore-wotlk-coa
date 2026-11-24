@@ -16,23 +16,31 @@ std::set<uint32> Gems;
 void LoadRequirements()
 {
     Gems.clear();
-    for (TbcGemRequirements::Mapping const& row : TbcGemRequirements::Mappings)
+    constexpr std::array<TbcGemRequirements::Mapping, 2> enchantingSpheres = {{
+        {22459, 342, 2948},
+        {22460, 341, 2947}
+    }};
+    auto loadRequirement = [](TbcGemRequirements::Mapping const& row)
     {
         ItemTemplate const* item = sObjectMgr->GetItemTemplate(row.gem);
         if (!item || item->RequiredLevel > 60)
-            continue;
+            return;
         GemPropertiesEntry const* property = sGemPropertiesStore.LookupEntry(item->GemProperties);
         SpellItemEnchantmentEntry const* enchantment = sSpellItemEnchantmentStore.LookupEntry(row.enchantment);
         if (item->GemProperties != row.property || !property ||
             property->spellitemenchantement != row.enchantment || !enchantment || enchantment->GemID != row.gem)
         {
             LOG_ERROR("server.loading", "Invalid TBC gem requirement mapping for item {}", row.gem);
-            continue;
+            return;
         }
         if (enchantment->requiredLevel > 60)
             const_cast<SpellItemEnchantmentEntry*>(enchantment)->requiredLevel = 60;
         Gems.insert(row.gem);
-    }
+    };
+    for (auto const& row : TbcGemRequirements::Mappings)
+        loadRequirement(row);
+    for (auto const& row : enchantingSpheres)
+        loadRequirement(row);
     LOG_INFO("server.loading", "Loaded {} level-60 TBC gem requirements", Gems.size());
 }
 

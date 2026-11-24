@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import sqlite3
 import subprocess
 import tempfile
 
@@ -25,6 +26,18 @@ def method(source, signature):
 parser = argparse.ArgumentParser()
 parser.add_argument('--dbc-dir', type=Path, required=True)
 args = parser.parse_args()
+enchanting_migration = ROOT / 'data/sql/updates/pending_db_world/rev_20261124_01_coa_tbc_enchanting_level60.sql'
+with sqlite3.connect(':memory:') as database:
+    database.execute('CREATE TABLE item_template (entry INTEGER PRIMARY KEY, RequiredLevel INTEGER)')
+    database.executemany('INSERT INTO item_template VALUES (?, ?)', [(22459, 70), (22460, 70), (40111, 80)])
+    for _ in range(2):
+        database.executescript(enchanting_migration.read_text())
+        assert database.execute('SELECT RequiredLevel FROM item_template ORDER BY entry').fetchall() == [
+            (60,), (60,), (80,)]
+    database.execute('UPDATE item_template SET RequiredLevel = 55 WHERE entry = 22460')
+    database.executescript(enchanting_migration.read_text())
+    assert database.execute('SELECT RequiredLevel FROM item_template WHERE entry = 22460').fetchone() == (55,)
+
 spec = importlib.util.spec_from_file_location('gem_build', ROOT / 'apps/coa-world-content/tbc_gems/build.py')
 generator = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(generator)

@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "CoAProfessionRescale.h"
 #include "CoAProfessionRescaleData.h"
+#include "CoAProfessionRescaleRemainingData.h"
 #include "DBCStores.h"
 #include "AuctionHouseMgr.h"
 #include "Item.h"
@@ -10,6 +11,7 @@
 #include "PlayerScript.h"
 #include "WorldSession.h"
 #include <map>
+#include <set>
 #include <utility>
 
 namespace
@@ -34,6 +36,8 @@ void RefreshTemplates(Player* player)
         return;
     for (std::uint32_t entry : ProfessionRescale::RefreshEntries)
         session->SendItemQuerySingleResponse(entry);
+    for (std::uint32_t entry : ProfessionRescale::RemainingTbc::RefreshEntries)
+        session->SendItemQuerySingleResponse(entry);
 }
 
 class ProfessionClientItems final : public PlayerScript
@@ -52,25 +56,40 @@ void ProfessionRescale::Load()
 {
     Items.clear();
     PropertyMappings.clear();
-    for (Budget const& row : Budgets)
+    auto loadBudgets = [](auto const& budgets)
     {
-        ItemTemplate const* item = sObjectMgr->GetItemTemplate(row.entry);
-        if (!item || item->ItemLevel != row.level || item->RequiredLevel > 60 ||
-            item->RandomProperty != row.propertyPool)
-            continue;
-        Items.emplace(row.entry, row);
-    }
-    for (Property const& row : ProfessionRescale::Properties)
-        if (Items.count(row.entry))
+        for (Budget const& row : budgets)
         {
-            ItemRandomPropertiesEntry const* target = sItemRandomPropertiesStore.LookupEntry(row.scaled);
-            if (!target)
-            {
-                LOG_ERROR("server.loading", "Missing profession item property {} for item {}", row.scaled, row.entry);
+            ItemTemplate const* item = sObjectMgr->GetItemTemplate(row.entry);
+            if (!item || item->ItemLevel != row.level || item->RequiredLevel > 60 ||
+                item->RandomProperty != row.propertyPool)
                 continue;
-            }
-            PropertyMappings.emplace(std::make_pair(row.entry, row.original), row.scaled);
+            Items.emplace(row.entry, row);
         }
+    };
+    loadBudgets(Budgets);
+    loadBudgets(RemainingTbc::Budgets);
+
+    std::set<std::uint32_t> activePools;
+    for (auto const& [entry, budget] : Items)
+        if (budget.propertyPool)
+            activePools.insert(budget.propertyPool);
+
+    auto loadProperty = [](std::uint32_t pool, Property const& row)
+    {
+        if (!sItemRandomPropertiesStore.LookupEntry(row.scaled))
+        {
+            LOG_ERROR("server.loading", "Missing profession item property {} for pool {}", row.scaled, pool);
+            return;
+        }
+        PropertyMappings.emplace(std::make_pair(pool, row.original), row.scaled);
+    };
+    for (Property const& row : ProfessionRescale::Properties)
+        if (auto const item = Items.find(row.entry); item != Items.end())
+            loadProperty(item->second.propertyPool, row);
+    for (Property const& row : RemainingTbc::Properties)
+        if (activePools.count(row.entry))
+            loadProperty(row.entry, row);
     NormalizeAuctions();
     LOG_INFO("server.loading", "Loaded {} fixed profession item budgets and {} affix mappings",
         Items.size(), PropertyMappings.size());
@@ -90,9 +109,12 @@ std::optional<std::uint32_t> ProfessionRescale::ItemPower(std::uint32_t entry, b
 
 void ProfessionRescale::NormalizeProperty(Item* item)
 {
-    if (!item || !OwnsItem(item->GetEntry()))
+    if (!item)
         return;
-    auto const property = PropertyMappings.find({item->GetEntry(), item->GetItemRandomPropertyId()});
+    auto const budget = Items.find(item->GetEntry());
+    if (budget == Items.end())
+        return;
+    auto const property = PropertyMappings.find({budget->second.propertyPool, item->GetItemRandomPropertyId()});
     if (property != PropertyMappings.end() && property->second != item->GetItemRandomPropertyId())
     {
         item->SetItemRandomProperties(property->second);

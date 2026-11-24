@@ -76,3 +76,33 @@ low/middle/high crafts; pre-existing equipped/bank/mail/auction items; a newly c
 headpiece armor; original proc/on-use magnitudes; Power, socket bonuses and preview item levels. Test both a
 normal gem and meta gem at 60 with the realm's existing client. Confirm their original bonuses, profession
 restrictions and activation conditions, and verify Wrath recipes/gems remain restricted as before.
+
+## Remaining TBC professions
+
+The remaining TBC conversion uses the same 60–77 equipment band and preserves proc and on-use effects.
+The five independent original ranges are Alchemy 90–159, Blacksmithing 88–159, Engineering 68–159,
+Leatherworking 70–159, and Tailoring 93–159. The corresponding equipment counts are 6, 113, 40, 106,
+and 71. Ammunition, consumables, bags, mounts, scopes, armor kits, and other non-equipment outputs
+use the character-level gate policy. Profession ranks, riding skill, reagents, reputation requirements,
+crafting quantities and specialization restrictions retain their existing values.
+
+The pinned cohort and before-and-after values are in `tbc_remaining_baseline.json`. It records equipment
+and recipe identities, permanent budget changes, and access changes for 56 recipe books, 19 other items,
+11 trainer rows and 15 quests. Cogspinner Goggles retain their native suffix pool and use the normal
+item-level-derived suffix factor. Positive random properties reuse client-known families and canonical
+mappings through shared per-budget pools. The approved socket exceptions use a +2 bonus to the original
+stat on Flamebane Bracers, Hyper-Vision Goggles, Gloves of Immortal Dusk, Unyielding Bracers, Bracers of
+Havok, and Vengeance Wrap. The Great Earthforged Hammer's armor stays at its original value because
+the matching armor benchmark would increase it.
+
+Regenerate the two fixed-band artifacts from the pinned inputs with:
+
+```sh
+python3 -B apps/coa-world-content/professions/build_remaining.py --output /path/to/output-directory
+```
+
+The generated runtime data lives in `CoAProfessionRescaleRemainingData.h` and the world updater uses
+`rev_20261124_00_coa_tbc_remaining_professions.sql`. Build from the same checkout as the migration.
+The focused harnesses `tbc_remaining_professions`, `profession_item_runtime` and `native_item_stat_query`
+exercise artifact equality, SQLite replay, runtime activation, existing-copy affixes and stat queries
+without starting a server. MySQL updater and rendered-client acceptance are separate checks.

@@ -1,5 +1,6 @@
 #include "CoAProfessionRescale.h"
 #include "CoAProfessionRescaleData.h"
+#include "CoAProfessionRescaleRemainingData.h"
 #include "DataMap.h"
 #include <cassert>
 #include <algorithm>
@@ -119,10 +120,16 @@ int main()
         objects.items[row.entry] = {row.level, 60, row.propertyPool};
     for (auto const& row : ProfessionRescale::Properties)
         sItemRandomPropertiesStore.rows[row.scaled] = {};
+    for (auto const& row : ProfessionRescale::RemainingTbc::Budgets)
+        objects.items[row.entry] = {row.level, 60, row.propertyPool};
+    for (auto const& row : ProfessionRescale::RemainingTbc::Properties)
+        sItemRandomPropertiesStore.rows[row.scaled] = {};
     ProfessionRescale::Load();
-    assert(Items.size() == 49 && PropertyMappings.size() == ProfessionRescale::Properties.size());
+    assert(Items.size() == 49 + ProfessionRescale::RemainingTbc::Budgets.size());
+    assert(PropertyMappings.size() ==
+        ProfessionRescale::Properties.size() + ProfessionRescale::RemainingTbc::Properties.size());
     RefreshTemplates(&visitor);
-    assert(session.queries.size() == 298);
+    assert(session.queries.size() == 298 + ProfessionRescale::RemainingTbc::RefreshEntries.size());
     session.queries.clear();
     session.bot = true;
     RefreshTemplates(&visitor);
@@ -174,6 +181,19 @@ int main()
         assert(item.writes == (row.original != row.scaled ? 1u : 0u));
         assert(item.saves == (row.original != row.scaled ? 1u : 0u));
     }
+    auto const remainingMapping = ProfessionRescale::RemainingTbc::Properties.front();
+    auto const remainingBudget = *std::find_if(ProfessionRescale::RemainingTbc::Budgets.begin(),
+        ProfessionRescale::RemainingTbc::Budgets.end(),
+        [&](auto const& row) { return row.propertyPool == remainingMapping.entry; });
+    Player remainingOwner;
+    remainingOwner.inWorld = true;
+    Item remaining{remainingBudget.entry, static_cast<std::int32_t>(remainingMapping.original),
+        0, 0, &remainingOwner, {}};
+    ProfessionRescale::NormalizeProperty(&remaining);
+    ProfessionRescale::NormalizeProperty(&remaining);
+    assert(remaining.property == static_cast<std::int32_t>(remainingMapping.scaled));
+    assert(remaining.writes == 1 && remaining.saves == 1);
+    assert(ProfessionRescale::ItemPower(remainingBudget.entry, false) == remainingBudget.pve);
     Item outside{40111, 123, 0, 0, nullptr, {}};
     ProfessionRescale::NormalizeProperty(&outside);
     assert(outside.property == 123 && outside.writes == 0);
