@@ -9996,17 +9996,90 @@
       "aura": 704397,
       "expected_ms": 4000,
       "control_window_ms": 500,
-      "window_ms": 9000,
+      "window_ms": 8000,
       "poll_ms": 25,
       "caster": false,
       "repeat": {
-        "count": 4,
+        "count": 3,
         "every_ms": 1300
       },
       "trigger_power": 90,
-      "forced_roll": 560641,
       "poll_before_cast": true,
-      "observe_source": "560641 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704397 (Crippling Pain, Effect[0] aura 290 MOD_CRIT_PCT -100000, DurationIndex 35 = 4000 ms); AscensionFelswornAbilities.cpp:321-322 casts 704397 on the target of a landed Cripple 704371 when 560641 is known. The aura on the dummy is polled with game-time stamps after a real Cripple cast. The no-critical part is a data readback only: no harness route makes an enemy attack and critically strike (not entered, see the report). Reference search 2026-11-23: coa-history spell 560641: 0 events in 186 logs (a passive leaves no event); 704397: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Warlock Training 560641 'Cripple now causes the enemy target to be unable to critically strike for 4 seconds.', same figure; expected values come from the tooltip and the DBC only. Design 2 (2026-11-24; design 1, one Cripple per arm, was unmeasured in 3 of 15 recorded runs with 'no application is seen after the cast'): a probe read the caster's Shadow resist chance against the dummy at 12% (spell_resist_chance) and 4 of 30 Cripples left neither Cripple nor Crippling Pain on it, so a binary resist of Cripple is the cause, not a cast refusal (no cast_failures). The treatment arm now casts Cripple 3 times 1300 ms apart (energy 90 set once; the caster's maximum is 100 and regeneration is off, so a fourth cast cannot be paid) with a read before the first cast, and the aura is timed from its last application (a refresh is counted): all three resisted is 0.12^3 = 0.17% per run, an unmeasured outcome only. Design 3 (2026-11-24; design 2 left 0.12^3 = 0.17% per run of an unmeasured outcome, above the 0.1% per pair the rules allow): the treatment arm casts Cripple 4 times 1300 ms apart (the fourth at 3900 ms, inside the 4000 ms duration) and forced_roll 560641 refills the Energy to 90 before every recast (the existing option of this kind; the grant 704397 is cast by class code on a landed Cripple, so the roll mutant on 560641 changes no outcome and its removal is read gone). All four resisted is 0.12^4 = 0.021% per run, 0.041% per pair, an unmeasured outcome only (never a pass or an alert); the window is 9000 ms so a last cast at 3900 ms plus 4000 ms stays inside it."
+      "observe_source": "560641 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704397 (Crippling Pain, Effect[0] aura 290 MOD_CRIT_PCT -100000, DurationIndex 35 = 4000 ms); AscensionFelswornAbilities.cpp:321-322 casts 704397 on the target of a landed Cripple 704371 when 560641 is known. The aura on the dummy is polled with game-time stamps after a real Cripple cast. The no-critical part is a data readback only: no harness route makes an enemy attack and critically strike (not entered, see the report). Reference search 2026-11-23: coa-history spell 560641: 0 events in 186 logs (a passive leaves no event); 704397: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Warlock Training 560641 'Cripple now causes the enemy target to be unable to critically strike for 4 seconds.', same figure; expected values come from the tooltip and the DBC only. Design 2 (2026-11-24; design 1, one Cripple per arm, was unmeasured in 3 of 15 recorded runs with 'no application is seen after the cast'): a probe read the caster's Shadow resist chance against the dummy at 12% (spell_resist_chance) and 4 of 30 Cripples left neither Cripple nor Crippling Pain on it, so a binary resist of Cripple is the cause, not a cast refusal (no cast_failures). The treatment arm now casts Cripple 3 times 1300 ms apart (energy 90 set once; the caster's maximum is 100 and regeneration is off, so a fourth cast cannot be paid) with a read before the first cast, and the aura is timed from its last application (a refresh is counted): all three resisted is 0.12^3 = 0.17% per run, an unmeasured outcome only."
+    },
+    {
+      "spell": 560641,
+      "name": "Warlock Training (Crippling Pain present at 3700 ms, excludes 3600 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_present",
+      "label_suffix": "duration_present",
+      "quote": "for $704397d.",
+      "trigger_spell": 704371,
+      "gate_spell": 560641,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 704397
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3700,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          3650,
+          3800
+        ]
+      },
+      "observe_source": "560641 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704397 (Crippling Pain, Effect[0] aura 290 MOD_CRIT_PCT -100000, DurationIndex 35 = 4000 ms, $704397d); AscensionFelswornAbilities.cpp:321-322 casts 704397 on the target of a landed Cripple 704371 when 560641 is known. The presence of 704397 on the dummy (metric aura) is read after a real Cripple 704371 cast, before (control: 560641 not learned, reads 0) and after the real learn. Present 3700 ms after the Cripple cast (read time between 3650 and 3800 ms). Together with the other entry (present at 3700 ms, absent at 4300 ms) the reads exclude a duration 10% off on both sides (3600 and 4400 ms). Resist sizing (2026-11-24; the stamped entry 'Crippling Pain lasts 4 seconds' was held at 0.12^3 = 0.17% per run for a resisted Cripple, 12% on the dummy): Spell penetration 823764 ('beeg spellpen', Effect[0] aura 123 MOD_TARGET_RESISTANCE -9999, school mask 126) is set on the caster in every phase (a precondition fixture, the resist is not the claim), so the effective resistance is clamped to 0 (Unit::GetEffectiveResistChance, Unit.cpp:2603-2614 and ClassicPlusCombat.h:142-146: resistance 0 gives chance 0 on both the stock and the classic path) and the binary resist of Cripple (Unit::MagicSpellHitResult, Unit.cpp:4080-4085) cannot roll; the miss roll is removed by the player fixture's spell hit rating. flips2 measured 160 of 160 phases without a resist on another binary spell (Bane of Fire 707901) with the same fixture. A resisted Cripple would read 0 here and alert, so the residual failure probability is 0 by the code path. Reference search 2026-11-24: coa-history spell 560641: 0 events in 186 logs (a passive leaves no event); 704397: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Warlock Training 560641 'Cripple now causes the enemy target to be unable to critically strike for 4 seconds.', same figure; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 560641,
+      "name": "Warlock Training (Crippling Pain absent at 4300 ms, excludes 4400 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_absent",
+      "label_suffix": "duration_absent",
+      "quote": "for $704397d.",
+      "trigger_spell": 704371,
+      "gate_spell": 560641,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 704397
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 4300,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4250,
+          4400
+        ]
+      },
+      "observe_source": "560641 Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704397 (Crippling Pain, Effect[0] aura 290 MOD_CRIT_PCT -100000, DurationIndex 35 = 4000 ms, $704397d); AscensionFelswornAbilities.cpp:321-322 casts 704397 on the target of a landed Cripple 704371 when 560641 is known. The presence of 704397 on the dummy (metric aura) is read after a real Cripple 704371 cast, before (control: 560641 not learned, reads 0) and after the real learn. Absent 4300 ms after the Cripple cast (read time between 4250 and 4400 ms). Together with the other entry (present at 3700 ms, absent at 4300 ms) the reads exclude a duration 10% off on both sides (3600 and 4400 ms). Resist sizing (2026-11-24; the stamped entry 'Crippling Pain lasts 4 seconds' was held at 0.12^3 = 0.17% per run for a resisted Cripple, 12% on the dummy): Spell penetration 823764 ('beeg spellpen', Effect[0] aura 123 MOD_TARGET_RESISTANCE -9999, school mask 126) is set on the caster in every phase (a precondition fixture, the resist is not the claim), so the effective resistance is clamped to 0 (Unit::GetEffectiveResistChance, Unit.cpp:2603-2614 and ClassicPlusCombat.h:142-146: resistance 0 gives chance 0 on both the stock and the classic path) and the binary resist of Cripple (Unit::MagicSpellHitResult, Unit.cpp:4080-4085) cannot roll; the miss roll is removed by the player fixture's spell hit rating. flips2 measured 160 of 160 phases without a resist on another binary spell (Bane of Fire 707901) with the same fixture. A resisted Cripple would read 0 here and alert, so the residual failure probability is 0 by the code path. Reference search 2026-11-24: coa-history spell 560641: 0 events in 186 logs (a passive leaves no event); 704397: 0 events; bindmysoul talents snapshot (fetched 2026-07-22): Warlock Training 560641 'Cripple now causes the enemy target to be unable to critically strike for 4 seconds.', same figure; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 704611,
@@ -17411,11 +17484,11 @@
         ]
       },
       "trials": 80,
-      "parts": 3,
+      "parts": 10,
       "critical": false,
       "cast_spell": 801901,
       "cast_power": 100,
-      "expected_source": "807163 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 29 + 1 = 30 ($807163s1), the Twin Slice class mask patched on the server (AscensionFelswornContracts.cpp:223-224), 10 instances per application (AscensionFelswornAuras.cpp:84-85). The non-critical hits of the 808303 main-hand strike of Twin Slice 801901 (cast_power 100) are averaged in a control arm without 807163 and a treatment arm with 807163 on the caster before every cast: ratio 1.30, within the larger of 5% of the +30% (1.5) and 2 points. 807163 is set by the harness (set_aura), a precondition fixture of the effect on the hit, the claim's subject; its grant by real dodged swings, its 10 instances and its Felfury are the subject of the avoided_proc_instances entry. The real grant's amount is not read by any existing kind (the tool gap stated in the report), so the D-67 equivalence arm is missing. Reference search 2026-11-24: coa-history spell 804822 and 807163: 0 events in 186 logs; nothing found that decides the 30%; expected values come from the DBC only."
+      "expected_source": "807163 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 29 + 1 = 30 ($807163s1), the Twin Slice class mask patched on the server (AscensionFelswornContracts.cpp:223-224), 10 instances per application (AscensionFelswornAuras.cpp:84-85). The non-critical hits of the 808303 main-hand strike of Twin Slice 801901 (cast_power 100) are averaged in a control arm without 807163 and a treatment arm with 807163 on the caster before every cast: ratio 1.30, within the larger of 5% of the +30% (1.5) and 2 points. 807163 is set by the harness (set_aura), a precondition fixture of the effect on the hit, the claim's subject; its grant by real dodged swings, its 10 instances and its Felfury are the subject of the avoided_proc_instances entry. The real grant's amount is not read by any existing kind (the tool gap stated in the report), so the D-67 equivalence arm is missing. Reference search 2026-11-24: coa-history spell 804822 and 807163: 0 events in 186 logs; nothing found that decides the 30%; expected values come from the DBC only. Sizing (2026-11-24): an exploratory run of 3 parts of 80 trials read a 99% half-width of 1.48 points against the 1 point the judge needs (528 trials per arm), so the entry runs 10 parts of 80 trials (800 per arm, half-width about 1.48 x sqrt(240/800) = 0.81 points); the judge states the interval it excludes and a flip between the two runs of a pair is not counted."
     },
     {
       "spell": 561216,
