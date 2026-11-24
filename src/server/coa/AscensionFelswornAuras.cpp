@@ -22,8 +22,7 @@ bool First(AuraEffect const* effect)
             return false;
     return true;
 }
-constexpr uint64 CrowdControlMechanics =
-    IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK & ~((1ULL << MECHANIC_SNARE) | (1ULL << MECHANIC_DAZE));
+constexpr uint64 CrowdControlMechanics = IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
 void CrowdControlImmunity(Unit* target, uint32 source, bool apply)
 {
     for (uint32 mechanic = 0; mechanic < MAX_MECHANIC; ++mechanic)

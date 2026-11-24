@@ -15756,7 +15756,7 @@
           "words": "crowd control"
         }
       ],
-      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK without snare and daze (SharedDefines.h:1469), the list of the CoA spell with the same tooltip wording, Vial of Moonwell Water 804652 'Immune to crowd control effects.' (SpellInfo.cpp:2788-2790, ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Stun 56 (Mechanic 12 stun, aura 12). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Stun 56 (Mechanic 12 stun, aura 12). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 561216,
@@ -15773,7 +15773,7 @@
           "words": "crowd control"
         }
       ],
-      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK without snare and daze (SharedDefines.h:1469), the list of the CoA spell with the same tooltip wording, Vial of Moonwell Water 804652 'Immune to crowd control effects.' (SpellInfo.cpp:2788-2790, ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Fear 12096 (Mechanic 5 fear, aura 7). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Fear 12096 (Mechanic 5 fear, aura 7). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 561216,
@@ -15790,7 +15790,7 @@
           "words": "crowd control"
         }
       ],
-      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK without snare and daze (SharedDefines.h:1469), the list of the CoA spell with the same tooltip wording, Vial of Moonwell Water 804652 'Immune to crowd control effects.' (SpellInfo.cpp:2788-2790, ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Net 47021 (Mechanic 7 root, aura 26). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Net 47021 (Mechanic 7 root, aura 26). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 806109,
@@ -16262,7 +16262,7 @@
           "words": "crowd control"
         }
       ],
-      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK without snare and daze (SharedDefines.h:1469), the list of the CoA spell with the same tooltip wording, Vial of Moonwell Water 804652 'Immune to crowd control effects.' (SpellInfo.cpp:2788-2790, ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Sleep 9159 (Mechanic 10 sleep, aura 12). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Sleep 9159 (Mechanic 10 sleep, aura 12). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 561216,
@@ -16279,7 +16279,7 @@
           "words": "crowd control"
         }
       ],
-      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK without snare and daze (SharedDefines.h:1469), the list of the CoA spell with the same tooltip wording, Vial of Moonwell Water 804652 'Immune to crowd control effects.' (SpellInfo.cpp:2788-2790, ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Psychic Horror 64044 (EffectMechanic 24 horror, aura 12). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Psychic Horror 64044 (EffectMechanic 24 horror, aura 12). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 561216,
@@ -16296,13 +16296,13 @@
           "words": "crowd control"
         }
       ],
-      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK without snare and daze (SharedDefines.h:1469), the list of the CoA spell with the same tooltip wording, Vial of Moonwell Water 804652 'Immune to crowd control effects.' (SpellInfo.cpp:2788-2790, ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Blind 2094 (Mechanic 2 disoriented, auras 33 and 5). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Blind 2094 (Mechanic 2 disoriented, auras 33 and 5). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 561216,
-      "name": "Fury of the Illidari (snare outside the clause lands)",
+      "name": "Fury of the Illidari (immune, snare)",
       "kind": "immunity",
-      "variant": "snare_lands",
+      "variant": "snare",
       "quote": "While active you are immune to crowd control effects.",
       "caster_auras": [
         804216
@@ -16310,11 +16310,64 @@
       "effects": [
         {
           "spell": 12323,
-          "words": "snare",
+          "words": "crowd control"
+        }
+      ],
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Piercing Howl 12323 (Mechanic 11 snare, aura 33, DurationIndex 32 = 6000 ms). Before O-29 this entry was the landing control snare_lands (the snare landed under the aura in the pair .cache/verify-all/20261123-213410 / -213446); since the ruling the snare is refused. The control arm of the kind casts the fixture again after the aura expired and reads it landed. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 561216,
+      "name": "Fury of the Illidari (immune, daze)",
+      "kind": "immunity",
+      "variant": "daze",
+      "quote": "While active you are immune to crowd control effects.",
+      "caster_auras": [
+        804216
+      ],
+      "effects": [
+        {
+          "spell": 1604,
+          "words": "crowd control"
+        }
+      ],
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Dazed 1604 (Mechanic 27 daze, Effect[0] aura 33 with EffectMechanic 27, Effect[1] SPELL_EFFECT_DISPEL_MECHANIC MiscValue 21, RangeIndex 1, which Spell::CheckRange accepts at any distance, DurationIndex 35 = 4000 ms). The control arm of the kind casts the fixture again after the aura expired and reads it landed. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 561216,
+      "name": "Fury of the Illidari (silence outside the ruling lands)",
+      "kind": "immunity",
+      "variant": "silence_lands",
+      "quote": "While active you are immune to crowd control effects.",
+      "caster_auras": [
+        804216
+      ],
+      "effects": [
+        {
+          "spell": 15487,
+          "words": "silence",
           "lands": true
         }
       ],
-      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK without snare and daze (SharedDefines.h:1469), the list of the CoA spell with the same tooltip wording, Vial of Moonwell Water 804652 'Immune to crowd control effects.' (SpellInfo.cpp:2788-2790, ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Piercing Howl 12323 (Mechanic 11 snare, aura 33), outside the list: snare and daze are not in the same-wording source, so the snare must land while the aura is on. Whether 'crowd control' covers snare is an open owner question; this entry reads the list as built, not that answer. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Silence 15487 (Mechanic 9 silence, aura 27 SPELL_AURA_MOD_SILENCE, DurationIndex 28 = 5000 ms), outside the list: owner ruling O-29 leaves silence, disarm and interrupt out of 'crowd control', so the silence must land while the aura is on. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 561216,
+      "name": "Fury of the Illidari (disarm outside the ruling lands)",
+      "kind": "immunity",
+      "variant": "disarm_lands",
+      "quote": "While active you are immune to crowd control effects.",
+      "caster_auras": [
+        804216
+      ],
+      "effects": [
+        {
+          "spell": 676,
+          "words": "disarm",
+          "lands": true
+        }
+      ],
+      "dummy_distance": 3,
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Disarm 676 (Mechanic 3 disarm, aura 67 SPELL_AURA_MOD_DISARM, RangeIndex 2 melee, DurationIndex 32 = 6000 ms; the dummy stands 3 yd away as in the Sun Cleric Sunstorm 760379 disarm entry), outside the list: owner ruling O-29 leaves silence, disarm and interrupt out of 'crowd control', so the disarm must land while the aura is on. Interrupt is not an aura and has no fixture of this kind. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 520853,

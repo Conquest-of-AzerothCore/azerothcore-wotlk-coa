@@ -66,3 +66,20 @@ active".
   and sapped have no creature cast at a player in the fixtures. They share the one loop, so they are covered by code,
   not measured.
 - Open owner question: whether "crowd control" also covers snare, daze, silence, disarm or interrupt.
+
+## Amendment: owner ruling O-29 (2026-11-24)
+
+The open question above is answered by the owner (O-29): "crowd control" on Fury of the Illidari 561216 also covers
+slows and daze, and does not cover silence, disarm or interrupt (option b of the night question fw-fix561216).
+
+- `CrowdControlMechanics` (`AscensionFelswornAuras.cpp`) is now the whole
+  `IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK` (`SharedDefines.h:1469`): the list above plus snare and daze.
+  Silence, disarm and interrupt are not in that constant and stay out. The Vial of Moonwell Water 804652 list no
+  longer sets the boundary; the constant is read, not copied, and no engine file changes.
+- Measured before (pair .cache/verify-all/20261123-213410 / -213446, review fix-561216/fw-rf561216/review.md lines
+  75-82): Piercing Howl 12323 (Mechanic 11 snare) landed with the aura on.
+- Regressions: the landing control `snare_lands` becomes the immune entry `snare` (12323) with its post-expiry control;
+  new `daze` (Dazed 1604, Mechanic 27) immune with its control; new landing controls `silence_lands` (Silence 15487,
+  Mechanic 9) and `disarm_lands` (Disarm 676, Mechanic 3) prove the excluded mechanics still land. Interrupt has no
+  aura and no fixture of the immunity kind.
+- Still keyed to 561216 Effect[2] only; `CrowdControlImmunity` has no other caller.
