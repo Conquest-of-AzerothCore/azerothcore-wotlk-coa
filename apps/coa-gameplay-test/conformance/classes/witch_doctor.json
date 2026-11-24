@@ -455,7 +455,7 @@
       "proc_spell": 504588,
       "proc_spell_source": "AscensionWitchDoctorEvents.cpp:157-158 (Proc case UmbralTalent: buff(UmbralReady) is Cast(owner, owner, 504588)); 504588 Umbral Glaive, DurationIndex 1 = 10000 ms, the tooltip token $504588d",
       "events_per_proc": 1,
-      "handler": "aura_ascension_witch_doctor_event (spell_script_names row of 681242, rev_20260909_00_witch_doctor_completion.sql:174-175): Check case UmbralTalent (AscensionWitchDoctorEvents.cpp:91-96) accepts an outgoing damage hit that is not Umbral Glaive 501134 itself and whose proc type mask holds PROC_FLAG_DONE_RANGED_AUTO_ATTACK or PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS, and rolls roll_chance_f(ProcChance 10 + player->GetRatingBonusValue(CR_CRIT_RANGED)) once; the engine roll is neutralised (spell_proc Chance 100 since rev_20261003_10_coa_script_rolled_proc_chance.sql, which fixed the P x P double roll of #4275 that made 10% into 1%), so the script roll is the only one. The reference character has no ranged critical strike rating (the class file ratings hold the three hit ratings only), so the chance is the 10% of the DBC. Trigger: Reclamation 806288 (DmgClass 3 ranged, SpellFamilyFlags[1] bit 4, RangeIndex 113, 8% of the base mana, CastingTimeIndex 23 = 1800 ms, StartRecoveryTime 1500, needs the bow 2000265 the harness equips through armed_for) at the dummy 15 yd away (a ranged cast at the melee default distance is refused as TOO_CLOSE, Spell.cpp:7352-7357; RangeIndex 113 is 0 to 30 yd; the missile of Speed 35 lands about 430 ms after the 1800 ms cast, inside the 2300 ms attempt spacing; the reference character carries ranged_hit_rating 10000). Each landed Reclamation is one trial: it grants a Spirit but Umbral Glaive does not read Spirit. The baseline phase (the passive unknown) casts the trigger and must read no ready buff cast. Residual failure probability (estimate, normal approximation, the tool states its own figure in the verdict row): the band is 2 points (the larger of 5% of 10 and 2); residual_target 0.001 judges the pooled Wilson interval at confidence 0.9995 (z 3.48), whose half-width at 16470 attempts (one trial each, 90 parts of 183) is 0.81 points, so band + 2 x half-width = 3.63 points, under min_detectable 4; a true rate of a server 4 points off (14% or 6%) is rejected with probability above 0.99999, and a correct 10% server is falsely alerted with probability at most 0.001 per pair. The attempts are 2300 ms of game time each, 10.5 h per run, 90 parts of about 7 game minutes; accelerated, the Witch Hunter proofs of this size took minutes of wall time.",
+      "handler": "aura_ascension_witch_doctor_event (spell_script_names row of 681242, rev_20260909_00_witch_doctor_completion.sql:174-175): Check case UmbralTalent (AscensionWitchDoctorEvents.cpp:91-96) accepts an outgoing damage hit that is not Umbral Glaive 501134 itself and whose proc type mask holds PROC_FLAG_DONE_RANGED_AUTO_ATTACK or PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS, and rolls roll_chance_f(ProcChance 10 + player->GetRatingBonusValue(CR_CRIT_RANGED)) once; the engine roll is neutralised (spell_proc Chance 100 since rev_20261003_10_coa_script_rolled_proc_chance.sql, which fixed the P x P double roll of #4275 that made 10% into 1%), so the script roll is the only one. The reference character has no ranged critical strike rating (the class file ratings hold the three hit ratings only), so the chance is the 10% of the DBC. Trigger: Reclamation 806288 (DmgClass 3 ranged, SpellFamilyFlags[1] bit 4, RangeIndex 113, 8% of the base mana, CastingTimeIndex 31 = 2300 ms, StartRecoveryTime 1500, needs the bow 2000265 the harness equips through armed_for) at the dummy 15 yd away (a ranged cast at the melee default distance is refused as TOO_CLOSE, Spell.cpp:7352-7357; RangeIndex 113 is 0 to 30 yd; the missile of Speed 35 lands about 430 ms after the 2300 ms cast, inside the 2800 ms attempt spacing; the reference character carries ranged_hit_rating 10000). Each landed Reclamation is one trial: it grants a Spirit but Umbral Glaive does not read Spirit. The baseline phase (the passive unknown) casts the trigger and must read no ready buff cast. Residual failure probability (estimate, normal approximation, the tool states its own figure in the verdict row): the band is 2 points (the larger of 5% of 10 and 2); residual_target 0.001 judges the pooled Wilson interval at confidence 0.9995 (z 3.48), whose half-width at 16445 scheduled attempts (115 parts of 143; 16560 actual across 8 streams of 18) is 0.81 points, so band + 2 x half-width = 3.63 points, under min_detectable 4; a true rate of a server 4 points off (14% or 6%) is rejected with probability above 0.99999, and a correct 10% server is falsely alerted with probability at most 0.001 per pair. The attempts are 2800 ms of game time each, 115 parts of 18 attempts per stream (about 1.3 game minutes per part with 8 streams); accelerated, the Witch Hunter proofs of this size took minutes of wall time.",
       "dbc": {
         "681242": {
           "ProcChance": 10,
@@ -476,7 +476,7 @@
       "dummy_distance": 15,
       "residual_target": 0.001,
       "min_detectable": 4,
-      "min_parts": 90,
+      "min_parts": 115,
       "attempt_auras": [
         {
           "spell": 680486,
@@ -2871,7 +2871,7 @@
         572383
       ],
       "setup_target": "dummy",
-      "setup_wait_ms": 2500,
+      "setup_wait_ms": 2900,
       "setup_in_before": true,
       "before_expected": 0,
       "expected": 5,
@@ -2881,7 +2881,7 @@
       },
       "wait_ms": 3000,
       "expire_ms": 500,
-      "observe_source": "AscensionWitchDoctorCompletion.cpp:137-150 (GainSpirit): with The True Spirit 802268 known each Spirit collected casts The True God 681233 (TrueSpiritReady) on the caster, one stack per Spirit; 681233 StackAmount 5 ($681233u), DurationIndex 1 = 10000 ms. Both phases cast five real Reclamation 572383 (1800 ms cast, GCD 1500 ms, 8% mana, 2500 ms apart, dummy 15 yd away for the ranged slot; cast_power 1000 sets the mana before the casts of the after phase, eleven casts in all at about 119 mana each): without 802268 (before phase, the control) the aura reads 0. The Spirits (561136, 12000 ms) of the first phase can still be on when the second starts; that does not matter, because the read aura 681233 is cast only through 802268 and is absent before it is learned, so expire_ms is short. With 802268 learned between the phases the five casts and the trigger (a sixth Reclamation, a sixth Spirit) leave exactly 5 stacks, not 6; true_casts counts the casts. The damage part of the clause (6% per stack on the next Spirit Glaive or Spirit Eclipse) has no entry (see the author report).",
+      "observe_source": "AscensionWitchDoctorCompletion.cpp:137-150 (GainSpirit): with The True Spirit 802268 known each Spirit collected casts The True God 681233 (TrueSpiritReady) on the caster, one stack per Spirit; 681233 StackAmount 5 ($681233u), DurationIndex 1 = 10000 ms. Both phases cast five real Reclamation 572383 (2300 ms cast + 500 ms ranged slot, GCD 1500 ms, 8% mana, 2900 ms apart, dummy 15 yd away for the ranged slot; cast_power 1000 sets the mana before the casts of the after phase, eleven casts in all at about 119 mana each): without 802268 (before phase, the control) the aura reads 0. The Spirits (561136, 12000 ms) of the first phase can still be on when the second starts; that does not matter, because the read aura 681233 is cast only through 802268 and is absent before it is learned, so expire_ms is short. With 802268 learned between the phases the five casts and the trigger (a sixth Reclamation, a sixth Spirit) leave exactly 5 stacks, not 6; true_casts counts the casts. The damage part of the clause (6% per stack on the next Spirit Glaive or Spirit Eclipse) has no entry (see the author report).",
       "cast_power": 1000
     },
     {
@@ -2905,7 +2905,7 @@
       ],
       "setup_target": "dummy",
       "setup_in_before": true,
-      "setup_wait_ms": 2500,
+      "setup_wait_ms": 2900,
       "before_expected": 5,
       "expected": 11,
       "metric": "spell_go_count",
