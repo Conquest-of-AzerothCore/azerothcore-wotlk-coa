@@ -198,19 +198,59 @@ class AvoidedSwingReadsTests(unittest.TestCase):
         self.assertEqual(verdict.measured, 2.0)
         self.assertEqual(self.judge(expectation, self.baseline_values(expectation, 5.25, 5.255, 7.255)).status, 'ok')
 
-    def expiry_values(self, expectation, held, gone, counts=(40, 42, 42)):
+    def expiry_values(self, expectation, held, gone, counts=(40, 42, 42), dodge_ms=500_000.0, held_ms=9300.0,
+                      gone_ms=10300.0):
         values = self.values(expectation, {'ally': 0}, {'held': held, 'gone': gone})
         values.update(zip(expectation.model['dodge_counts'].values(), counts))
+        expiry = expectation.model['expiry']
+        offsets = {'last dodge read': 400.0, 'held before': held_ms, 'held after': held_ms,
+                   'gone before': gone_ms, 'gone after': gone_ms}
+        values[expiry['last_dodge']] = dodge_ms
+        values.update({label: dodge_ms + offsets[moment] for moment, label in expiry['stamps'].items()})
         return values
+
+    def simulated_expiry(self, expectation, duration_ms: float, rng: Random) -> dict:
+        server_dodge = 500_000.0 + rng.uniform(0, 1000)
+        lag = rng.uniform(0, 100)
+        relocation = server_dodge + rng.uniform(0, 600)
+        held_at = relocation + 9150 + rng.uniform(0, 20)
+        gone_at = relocation + 10150 + rng.uniform(0, 20)
+        values = self.expiry_values(expectation, int(held_at - server_dodge < duration_ms),
+                                    int(gone_at - server_dodge < duration_ms), dodge_ms=server_dodge + lag,
+                                    held_ms=held_at - server_dodge - lag, gone_ms=gone_at - server_dodge - lag)
+        values[expectation.model['expiry']['lag_remaining']] = duration_ms - (relocation + 200 - server_dodge)
+        return values
+
+    def test_seeded_expiry_runs_keep_a_10_s_aura_and_alert_9_s_and_11_s_mutants(self):
+        _, expectation = self.generated(EXPIRY)
+        rng = Random(300476)
+        for duration, status in ((10000, 'ok'), (9000, 'alert'), (11000, 'alert')):
+            for trial in range(200):
+                with self.subTest(duration=duration, trial=trial):
+                    verdict = self.judge(expectation, self.simulated_expiry(expectation, duration, rng))
+                    self.assertEqual(verdict.status, status, verdict.explanation)
+                    if status == 'ok':
+                        self.assertTrue(9000 <= verdict.low < 10000 <= verdict.high < 11000, verdict)
+
+    def test_an_expiry_read_outside_its_window_after_the_last_dodge_is_void(self):
+        _, expectation = self.generated(EXPIRY)
+        for held_ms, gone_ms in ((8999, 10300), (9900, 10300), (9300, 9999), (9300, 10900)):
+            with self.subTest(held_ms=held_ms, gone_ms=gone_ms):
+                verdict = self.judge(expectation, self.expiry_values(expectation, 1, 0, held_ms=held_ms,
+                                                                     gone_ms=gone_ms))
+                self.assertEqual(verdict.status, 'unmeasured', verdict.explanation)
 
     def test_the_expiry_edge_reads_held_before_and_gone_after_the_duration(self):
         scenario, expectation = self.generated(EXPIRY)
         run.validate(scenario)
-        self.assertEqual(expectation.model['band'], [9600, 11000])
+        self.assertEqual(expectation.model['band'], [9000, 11000])
         self.assertEqual(expectation.model['metric'], 'aura')
         waits = {step['label']: step['ms'] for step in scenario['steps']
                  if step['action'] == 'wait' and step.get('label', '').startswith('expiry')}
-        self.assertEqual(waits, {'expiry held': 8800, 'expiry gone': 2000})
+        self.assertEqual(waits, {'expiry held': 8950, 'expiry gone': 1000})
+        metrics = [step.get('metric') for step in scenario['steps']]
+        self.assertEqual(metrics.count('melee_attack_taken_last_ms'), 1)
+        self.assertEqual(metrics.count('game_time_ms'), 5)
         verdict = self.judge(expectation, self.expiry_values(expectation, 1, 0))
         self.assertEqual(verdict.status, 'ok', verdict.explanation)
 
@@ -236,7 +276,7 @@ class AvoidedSwingReadsTests(unittest.TestCase):
     def test_entries_without_their_read_fields_are_refused(self):
         for entry in ({**CRIT, 'metric': None}, {**CRIT, 'ally_yd': 4}, {**RADIUS, 'ally_yd': 10},
                       {**ENERGY, 'learn': [805249]}, {**ENERGY, 'read': 'chance'},
-                      {**RADIUS, 'baseline_read': True}, {**EXPIRY, 'swing_ms': 950}):
+                      {**RADIUS, 'baseline_read': True}, {**EXPIRY, 'swing_ms': 950}, {**EXPIRY, 'swing_ms': 800}):
             with self.subTest(entry=entry), self.assertRaises(ValueError):
                 self.generated({key: value for key, value in entry.items() if value is not None})
 

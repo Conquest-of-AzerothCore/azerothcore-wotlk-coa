@@ -28,7 +28,9 @@ TICK_MS = 100
 MIN_EVENTS = 20
 QUIET_SHIFT_YD = 20
 QUIET_WAIT_MS = 200
-EXPIRY_MARGIN_MS = 1000
+EXPIRY_SHARE = 0.1
+PACKET_LAG_MS = 100
+EXPIRY_EDGES = ('held', 'gone')
 FIELDS = {'spell', 'name', 'kind', 'variant', 'label_suffix', 'quote', 'read', 'observe_spell', 'effect',
           'striker_entry', 'strikers', 'striker_auras', 'swing_ms', 'control_windows', 'windows', 'ally_yd',
           'margin_yd', 'metric', 'min_events', 'learn', 'observe_source', 'baseline_read'}
@@ -78,9 +80,6 @@ def avoided_swing_reads_spec(entry: dict) -> AvoidedSwingReadsSpec:
         raise ValueError(f'{spec.spell} {KIND} stat_delta and only it names a metric of {sorted(STAT_METRICS)}')
     if spec.baseline_read and spec.read != STAT_DELTA:
         raise ValueError(f'{spec.spell} {KIND} baseline_read reads the stat of a stat_delta read only')
-    if spec.read == EXPIRY_EDGE and spec.swing_ms + TICK_MS >= EXPIRY_MARGIN_MS:
-        raise ValueError(f'{spec.spell} {KIND} expiry_edge needs a window and a tick shorter than the '
-                         f'{EXPIRY_MARGIN_MS} ms margin')
     wants_ally = spec.read in (STAT_DELTA, DURATION_MAX, EXPIRY_EDGE)
     if (spec.ally_yd is not None) != wants_ally or (wants_ally and spec.ally_yd < ALLY_MIN_YD):
         raise ValueError(f'{spec.spell} {KIND} {spec.read} {"needs" if wants_ally else "takes no"} ally_yd'
@@ -132,7 +131,7 @@ def arm_reads(spec: AvoidedSwingReadsSpec, arm: str, offsets: dict[str, float]) 
                 'total': measurement(mark(spec, f'{arm} total'), CASTER, 'spell_energize_total', **aura)}
     if spec.read == EXPIRY_EDGE and arm == 'treatment':
         return {edge: measurement(mark(spec, f'treatment aura {INSIDE} {edge}'), INSIDE, 'aura', **aura)
-                for edge in ('held', 'gone')}
+                for edge in EXPIRY_EDGES}
     reads = {ally: measurement(mark(spec, f'{arm} aura {ally}'), ally, 'aura', **aura) for ally in offsets}
     if spec.read == STAT_DELTA:
         reads['stat'] = measurement(mark(spec, f'{arm} stat'), INSIDE, spec.metric)
@@ -174,12 +173,48 @@ def quiet_steps(spec: AvoidedSwingReadsSpec, avoided: dict) -> list[dict]:
                for striker in proc_avoided.striker_ids(avoided)])
 
 
+def stamp_label(spec: AvoidedSwingReadsSpec, moment: str) -> str:
+    return mark(spec, f'game time {moment}')
+
+
+def stamp(spec: AvoidedSwingReadsSpec, moment: str) -> dict:
+    return measurement(stamp_label(spec, moment), CASTER, 'game_time_ms')
+
+
+def last_dodge_label(spec: AvoidedSwingReadsSpec) -> str:
+    return mark(spec, 'last dodge game time')
+
+
+def lag_remaining_label(spec: AvoidedSwingReadsSpec) -> str:
+    return mark(spec, f'remaining {INSIDE} at last dodge read')
+
+
+def expiry_slack(spec: AvoidedSwingReadsSpec, expected: float) -> int:
+    return int(expected * EXPIRY_SHARE) - PACKET_LAG_MS - spec.swing_ms - TICK_MS
+
+
+def expiry_offsets(spec: AvoidedSwingReadsSpec, expected: float) -> dict[str, int]:
+    slack = expiry_slack(spec, expected)
+    if slack <= 0:
+        raise ValueError(f'{spec.spell} {KIND} expiry_edge needs a window, a tick and a {PACKET_LAG_MS} ms packet lag '
+                         f'shorter than {EXPIRY_SHARE:g} of the {expected:g} ms duration')
+    held = int(expected * (1 - EXPIRY_SHARE)) + slack // 2
+    return {'held': held, 'gone': held + int(expected * EXPIRY_SHARE)}
+
+
 def expiry_steps(spec: AvoidedSwingReadsSpec, expected: float, reads: dict[str, dict]) -> list[dict]:
-    return [dodge_count(spec, 'after quiet'),
-            {'action': 'wait', 'label': 'expiry held', 'ms': int(expected) - EXPIRY_MARGIN_MS - QUIET_WAIT_MS},
-            reads['held'],
-            {'action': 'wait', 'label': 'expiry gone', 'ms': 2 * EXPIRY_MARGIN_MS},
-            reads['gone'], dodge_count(spec, 'final')]
+    offsets = expiry_offsets(spec, expected)
+    steps = [dodge_count(spec, 'after quiet'),
+             measurement(last_dodge_label(spec), CASTER, 'melee_attack_taken_last_ms',
+                         victim_state=proc_avoided.TRIAL_STATES['dodged']),
+             stamp(spec, 'last dodge read'),
+             measurement(lag_remaining_label(spec), INSIDE, 'aura_duration_ms', spell=spec.observe_spell)]
+    waited = QUIET_WAIT_MS
+    for edge in EXPIRY_EDGES:
+        steps += [{'action': 'wait', 'label': f'expiry {edge}', 'ms': offsets[edge] - waited},
+                  stamp(spec, f'{edge} before'), reads[edge], stamp(spec, f'{edge} after')]
+        waited = offsets[edge]
+    return steps + [dodge_count(spec, 'final')]
 
 
 def learned_contrast(spec: AvoidedSwingReadsSpec, steps: list[dict], baseline: str,
@@ -208,7 +243,7 @@ def band(spec: AvoidedSwingReadsSpec, expected: float) -> tuple[float, float]:
     if spec.read == DURATION_MAX:
         return expected - spec.swing_ms - TICK_MS, expected
     if spec.read == EXPIRY_EDGE:
-        return expected - EXPIRY_MARGIN_MS + spec.swing_ms + TICK_MS, expected + EXPIRY_MARGIN_MS
+        return expected * (1 - EXPIRY_SHARE), expected * (1 + EXPIRY_SHARE)
     if spec.read == STAT_DELTA:
         return expected - STAT_TOLERANCE, expected + STAT_TOLERANCE
     return expected, expected
@@ -227,10 +262,12 @@ def rule_text(spec: AvoidedSwingReadsSpec, expected: float) -> str:
         return (f'the grouped ally\'s {spec.metric} after the dodges with {spec.spell} learned less the same read '
                 f'after the dodges before the learn lies in [{low:g}, {high:g}]{baseline}')
     if spec.read == EXPIRY_EDGE:
-        return (f'the grouped ally holds {spec.observe_spell} {expected - EXPIRY_MARGIN_MS:g} ms after the '
-                f'quieting relocation and no longer holds it {expected + EXPIRY_MARGIN_MS:g} ms after it; the last '
-                f'dodge falls in the last {spec.swing_ms} ms window before the relocation, so the aura lasts within '
-                f'[{low:g}, {high:g}] ms of the last dodge')
+        return (f'the grouped ally holds {spec.observe_spell} when read h ms after the game time stamp of the last '
+                f'dodge and no longer holds it when read g ms after it, with {low:g} <= h and h + {PACKET_LAG_MS} < '
+                f'{expected:g} <= g and g + {PACKET_LAG_MS} < {high:g} (h from the game time before the held read, g '
+                f'from the game time after the gone read, {PACKET_LAG_MS} ms for the dodge packet\'s lag behind the '
+                f'server\'s dodge), so the aura lasts within (h, g + {PACKET_LAG_MS}] ms of the last dodge and a '
+                f'duration {EXPIRY_SHARE:.0%} shorter or longer fails')
     if spec.read == DURATION_MAX:
         return (f'the largest remaining duration of {spec.observe_spell} on the grouped ally, read after each '
                 f'{spec.swing_ms} ms window, lies in [{low:g}, {high:g}] ms: every read is at most the full duration, '
@@ -292,6 +329,10 @@ def avoided_swing_reads_scenario(class_file: dict, spec: AvoidedSwingReadsSpec) 
     if spec.read == EXPIRY_EDGE:
         model['dodge_counts'] = {moment: dodge_count_label(spec, moment)
                                  for moment in ('before last window', 'after quiet', 'final')}
+        model['expiry'] = {'last_dodge': last_dodge_label(spec), 'lag_remaining': lag_remaining_label(spec),
+                           'lag_ms': PACKET_LAG_MS,
+                           'stamps': {moment: stamp_label(spec, moment) for moment in (
+                               'last dodge read', 'held before', 'held after', 'gone before', 'gone after')}}
     if baseline:
         model['baseline'] = baseline[0]['label']
         contrast = learned_contrast(spec, steps, model['baseline'], reads['control']['stat'],
@@ -316,7 +357,8 @@ def judged(base: Verdict, model: dict, measured: float, why: str) -> Verdict:
 
 def avoided_swing_reads_verdict(base: Verdict, run, model: dict) -> Verdict:
     labels = ([*model['distances'].values(), *model['quiet_distances'], *model['remaining'],
-               *model.get('dodge_counts', {}).values(), *([model['baseline']] if 'baseline' in model else [])]
+               *model.get('dodge_counts', {}).values(), *([model['baseline']] if 'baseline' in model else []),
+               *([model['expiry']['last_dodge'], *model['expiry']['stamps'].values()] if 'expiry' in model else [])]
               + [label for arm in model['reads'].values() for label in arm.values()])
     missing = next((label for label in labels if run.values.get(label) is None), None)
     if missing is not None:
@@ -380,13 +422,27 @@ def expiry_verdict(base: Verdict, run, model: dict, treatment: dict) -> Verdict:
         return void(base, 'no dodge in the last window before the relocation')
     if counts['final'] != counts['after quiet']:
         return void(base, f'{counts["final"] - counts["after quiet"]:g} dodges after the quieting relocation')
+    expiry, duration = model['expiry'], model['expected']
+    low, high = model['band']
+    dodge = run.values[expiry['last_dodge']]
+    stamps = {moment: run.values[label] - dodge for moment, label in expiry['stamps'].items()}
+    held_at, gone_at, lag = stamps['held before'], stamps['gone after'], expiry['lag_ms']
+    remaining = run.values.get(expiry['lag_remaining'])
+    measured_lag = ('' if remaining is None
+                    else f'; packet lag estimate {stamps["last dodge read"] - (duration - remaining):g} ms')
+    if not low <= held_at or not stamps['held after'] + lag < duration:
+        return void(base, f'the held read falls {held_at:g} to {stamps["held after"]:g} ms after the last dodge, '
+                          f'outside [{low:g}, {duration - lag:g}) ms{measured_lag}')
+    if not duration <= stamps['gone before'] or not gone_at + lag < high:
+        return void(base, f'the gone read falls {stamps["gone before"]:g} to {gone_at:g} ms after the last dodge, '
+                          f'outside [{duration:g}, {high - lag:g}) ms{measured_lag}')
     held, gone = bool(treatment['held']), bool(treatment['gone'])
     status = 'ok' if held and not gone else 'alert'
-    low, high = model['band']
-    return replace(base, status=status, measured=model['expected'] if status == 'ok' else None,
-                   expected=model['expected'], low=low, high=high,
-                   explanation=f'the grouped ally holds the aura {model["expected"] - EXPIRY_MARGIN_MS:g} ms after '
-                               f'the relocation: {held}; {model["expected"] + EXPIRY_MARGIN_MS:g} ms after it: {gone}')
+    return replace(base, status=status, measured=duration if status == 'ok' else None,
+                   expected=duration, low=held_at, high=gone_at + lag,
+                   explanation=f'the grouped ally holds the aura {held_at:g} ms after the last dodge: {held}; '
+                               f'{gone_at:g} ms after it: {gone}; proven band ({held_at:g}, {gone_at + lag:g}] '
+                               f'ms{measured_lag}')
 
 
 def scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
