@@ -2244,7 +2244,15 @@
   {
     "spell": 680607,
     "clause": "Your Twilight Shieldtoss now hits an additional enemy for every 20 Insanity you have.",
-    "labels": [],
+    "labels": [
+      "680607 behaviour_metric_delta control",
+      "680607 behaviour_metric_delta insanity_19",
+      "680607 behaviour_metric_delta insanity_20",
+      "680607 behaviour_metric_delta insanity_40",
+      "680607 behaviour_metric_delta insanity_60",
+      "680607 behaviour_metric_delta insanity_80",
+      "680607 behaviour_metric_delta insanity_100"
+    ],
     "kind": "claim"
   },
   {

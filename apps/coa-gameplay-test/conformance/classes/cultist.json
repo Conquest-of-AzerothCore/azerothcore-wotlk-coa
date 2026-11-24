@@ -996,6 +996,310 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "Triggered Obliteration Beam 805573 Effect[0] has TargetA 53 (TARGET_DEST_TARGET_ENEMY), TargetB 16 (TARGET_UNIT_DEST_AREA_ENEMY), EffectRadiusIndex 14 (SpellRadius.dbc 14 = 8.0 yd). Primary dummy stands at 3 yd; area_dummies places area1..area3 at 5, 7, 9 yd (2, 4, 6 yd from dummy, inside 8 yd) and area4 at 20 yd (17 yd from dummy, well outside 8 yd + 1.275 yd reach). area_sum sums spell_damage_count of 805573 across all 5 dummies: 0 in uncast control, 4 after one real cast of 806897 (primary + 3 nearby struck, far dummy untouched). Reference search 2026-11-24: coabuildhub 805572 matches verbatim; coa-history records 1879 hits across 159 casts (~11.8 hits/cast in AoE pulls)."
+    },
+    {
+      "spell": 680607,
+      "name": "Bouncing Thoughts (control without talent at 60 Insanity)",
+      "kind": "metric_delta",
+      "variant": "control",
+      "label_suffix": "control",
+      "quote": "Your Twilight Shieldtoss now hits an additional enemy for every 20 Insanity you have.",
+      "trigger_spell": 572141,
+      "gate_spell": 60235,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": [
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5,
+        6.0,
+        6.5,
+        7.0
+      ],
+      "area_sum": true,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 572141,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 800,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative control for Bouncing Thoughts 680607: Twilight Shieldtoss 572141 (EffectChainTarget[0] = 3, DmgClass 3 RANGED -> 7.5 yd chain jump radius in Spell.cpp:2215-2217, EquippedItemClass 4 SubClassMask 64 Shield -> Dreadnought weapon set 2534 Rondel + 2129 Large Round Shield) cast at primary dummy (3 yd) with 8 extra dummies at 3.5..7.0 yd (all within 4 yd <= 7.5 yd jump radius, 9 enemies total) and Insanity 500706 at 60 stacks (precondition fixture), WITHOUT 680607 learned (gate_spell 60235). area_sum reads 0 in uncast before and 3 after (base EffectChainTarget 3 only). Reference search 2026-11-24: coabuildhub spells_master_index.json 680607 matches verbatim; coa-history has 0 events for 680607 and 4 casts / 4 damage events for 572141."
+    },
+    {
+      "spell": 680607,
+      "name": "Bouncing Thoughts (19 Insanity adds 0 extra targets)",
+      "kind": "metric_delta",
+      "variant": "insanity_19",
+      "label_suffix": "insanity_19",
+      "quote": "Your Twilight Shieldtoss now hits an additional enemy for every 20 Insanity you have.",
+      "trigger_spell": 572141,
+      "gate_spell": 680607,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          19,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": [
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5,
+        6.0,
+        6.5,
+        7.0
+      ],
+      "area_sum": true,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 572141,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 800,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Step-boundary check for Bouncing Thoughts 680607 (Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 17 SPELLMOD_JUMP_TARGETS, EffectSpellClassMask[1] 16384 matching Twilight Shieldtoss 572141 SpellFamilyFlags[1] 16384; AscensionCultist.cpp:290 SetAmount(player, 680607, 0, stacks / 20)). With 680607 learned and Insanity 500706 at 19 stacks (precondition fixture; expire_ms 1000 lets Refresh run), 19 / 20 = 0 additional targets -> 3 + 0 = 3 enemies hit across 9 dummies within 7.5 yd jump radius (Dreadnought weapon set). Reference search 2026-11-24: coabuildhub 680607 matches verbatim; coa-history has 0 events for 680607."
+    },
+    {
+      "spell": 680607,
+      "name": "Bouncing Thoughts (20 Insanity adds +1 target)",
+      "kind": "metric_delta",
+      "variant": "insanity_20",
+      "label_suffix": "insanity_20",
+      "quote": "Your Twilight Shieldtoss now hits an additional enemy for every 20 Insanity you have.",
+      "trigger_spell": 572141,
+      "gate_spell": 680607,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": [
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5,
+        6.0,
+        6.5,
+        7.0
+      ],
+      "area_sum": true,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 572141,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "wait_ms": 800,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Bouncing Thoughts 680607 at 20 Insanity (precondition fixture 500706 x20; expire_ms 1000 lets Refresh set 680607 Effect[0] SPELLMOD_JUMP_TARGETS to 20 / 20 = 1): Twilight Shieldtoss 572141 (base EffectChainTarget 3, Dreadnought weapon set) hits 3 + 1 = 4 enemies out of 9 dummies within 7.5 yd jump radius (0 in uncast before). Reference search 2026-11-24: coabuildhub 680607 matches verbatim; coa-history has 0 events for 680607."
+    },
+    {
+      "spell": 680607,
+      "name": "Bouncing Thoughts (40 Insanity adds +2 targets)",
+      "kind": "metric_delta",
+      "variant": "insanity_40",
+      "label_suffix": "insanity_40",
+      "quote": "Your Twilight Shieldtoss now hits an additional enemy for every 20 Insanity you have.",
+      "trigger_spell": 572141,
+      "gate_spell": 680607,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": [
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5,
+        6.0,
+        6.5,
+        7.0
+      ],
+      "area_sum": true,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 572141,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 800,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Bouncing Thoughts 680607 at 40 Insanity (precondition fixture 500706 x40; expire_ms 1000 lets Refresh set 680607 Effect[0] SPELLMOD_JUMP_TARGETS to 40 / 20 = 2): Twilight Shieldtoss 572141 (base EffectChainTarget 3, Dreadnought weapon set) hits 3 + 2 = 5 enemies out of 9 dummies within 7.5 yd jump radius (0 in uncast before). Reference search 2026-11-24: coabuildhub 680607 matches verbatim; coa-history has 0 events for 680607."
+    },
+    {
+      "spell": 680607,
+      "name": "Bouncing Thoughts (60 Insanity adds +3 targets)",
+      "kind": "metric_delta",
+      "variant": "insanity_60",
+      "label_suffix": "insanity_60",
+      "quote": "Your Twilight Shieldtoss now hits an additional enemy for every 20 Insanity you have.",
+      "trigger_spell": 572141,
+      "gate_spell": 680607,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": [
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5,
+        6.0,
+        6.5,
+        7.0
+      ],
+      "area_sum": true,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 572141,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 6,
+      "wait_ms": 800,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Bouncing Thoughts 680607 at 60 Insanity (precondition fixture 500706 x60; expire_ms 1000 lets Refresh set 680607 Effect[0] SPELLMOD_JUMP_TARGETS to 60 / 20 = 3): Twilight Shieldtoss 572141 (base EffectChainTarget 3, Dreadnought weapon set) hits 3 + 3 = 6 enemies out of 9 dummies within 7.5 yd jump radius (0 in uncast before). Paired with control (no 680607 at 60 Insanity -> 3). Reference search 2026-11-24: coabuildhub 680607 matches verbatim; coa-history has 0 events for 680607."
+    },
+    {
+      "spell": 680607,
+      "name": "Bouncing Thoughts (80 Insanity adds +4 targets)",
+      "kind": "metric_delta",
+      "variant": "insanity_80",
+      "label_suffix": "insanity_80",
+      "quote": "Your Twilight Shieldtoss now hits an additional enemy for every 20 Insanity you have.",
+      "trigger_spell": 572141,
+      "gate_spell": 680607,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": [
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5,
+        6.0,
+        6.5,
+        7.0
+      ],
+      "area_sum": true,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 572141,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 7,
+      "wait_ms": 800,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Bouncing Thoughts 680607 at 80 Insanity (precondition fixture 500706 x80; expire_ms 1000 lets Refresh set 680607 Effect[0] SPELLMOD_JUMP_TARGETS to 80 / 20 = 4): Twilight Shieldtoss 572141 (base EffectChainTarget 3, Dreadnought weapon set) hits 3 + 4 = 7 enemies out of 9 dummies within 7.5 yd jump radius (0 in uncast before). Reference search 2026-11-24: coabuildhub 680607 matches verbatim; coa-history has 0 events for 680607."
+    },
+    {
+      "spell": 680607,
+      "name": "Bouncing Thoughts (100 Insanity with Dreadnought form adds +5 targets)",
+      "kind": "metric_delta",
+      "variant": "insanity_100",
+      "label_suffix": "insanity_100",
+      "quote": "Your Twilight Shieldtoss now hits an additional enemy for every 20 Insanity you have.",
+      "trigger_spell": 572141,
+      "gate_spell": 680607,
+      "learn": [
+        680750
+      ],
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          100,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": [
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5,
+        6.0,
+        6.5,
+        7.0
+      ],
+      "area_sum": true,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 572141,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 8,
+      "wait_ms": 800,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Bouncing Thoughts 680607 at 100 Insanity with Dreadnought form passive 680750 learned (suppresses Total Madness 803060 at 100 Insanity, AscensionCultist.cpp:218-220; precondition fixture 500706 x100; expire_ms 1000 lets Refresh set 680607 Effect[0] SPELLMOD_JUMP_TARGETS to 100 / 20 = 5): Twilight Shieldtoss 572141 (base EffectChainTarget 3, Dreadnought weapon set) hits 3 + 5 = 8 enemies out of 9 dummies within 7.5 yd jump radius, leaving the 9th dummy untouched (0 in uncast before). Reference search 2026-11-24: coabuildhub 680607 and 680750 match verbatim; coa-history has 0 events for 680607/680750."
     }
   ],
   "player_observations": [],
