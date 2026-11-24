@@ -15948,6 +15948,10 @@
           [
             823764,
             1
+          ],
+          [
+            984954,
+            1
           ]
         ]
       },
@@ -15960,10 +15964,14 @@
           [
             706269,
             1
+          ],
+          [
+            984954,
+            1
           ]
         ]
       },
-      "trials": 20,
+      "trials": 30,
       "cast_unit_auras": [
         [
           803468,
@@ -15978,7 +15986,7 @@
       "fixture": {
         "spell_power": 20000
       },
-      "expected_source": "706269 Archimonde's Fury (granted by 706425 after 10 Felfury, AscensionFelsworn.cpp:199-206; the grant has its own entries) Effect[0] aura 107 SPELLMOD_CRITICAL_CHANCE BasePoints 49 + 1 = 50 ($706269s1) and Effect[1] aura 108 SPELLMOD_DAMAGE +50 on Sargeron Smite (class mask 2048), ProcCharges 1, read from Spell.dbc. Sargeron Smite 802060 is cast at the dummy trials times per arm without 706269 (control) and with it set on the caster before every cast (treatment; 706269 set by harness set_aura is a precondition fixture of the effect on the Smite, the claim's subject, not of its grant, which the consumed/grant entries prove with real Felfury); 823764 removes partial resists in both arms; 803468 and Felfury 800058 x2 are set before every Smite (precondition fixtures, Smite consumes 2 Felfury). Non-critical hits only, spell power fixture 20000 in both arms, expected ratio 1.5 (+50% damage, band 47.5..52.5). Reference search 2026-11-23: coa-history spell 706425: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip; expected values come from the tooltip and Spell.dbc only.",
+      "expected_source": "706269 Archimonde's Fury (granted by 706425 after 10 Felfury, AscensionFelsworn.cpp:199-206; the grant has its own entries) Effect[0] aura 107 SPELLMOD_CRITICAL_CHANCE BasePoints 49 + 1 = 50 ($706269s1) and Effect[1] aura 108 SPELLMOD_DAMAGE +50 on Sargeron Smite (class mask 2048), ProcCharges 1, read from Spell.dbc. Sargeron Smite 802060 is cast at the dummy trials times per arm without 706269 (control) and with it set on the caster before every cast (treatment; 706269 set by harness set_aura is a precondition fixture of the effect on the Smite, the claim's subject, not of its grant, which the consumed/grant entries prove with real Felfury); 823764 removes partial resists in both arms; 803468 and Felfury 800058 x2 are set before every Smite (precondition fixtures, Smite consumes 2 Felfury). Non-critical hits only, spell power fixture 20000 in both arms, expected ratio 1.5 (+50% damage, band 47.5..52.5). Reference search 2026-11-23: coa-history spell 706425: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip; expected values come from the tooltip and Spell.dbc only. 984954 on the caster in both arms removes critical hits (precondition fixture, the Scars of Suffering entries' crit removal), so the non-critical hit count does not depend on the +50 critical chance.",
       "observe_source": ""
     },
     {
@@ -16025,7 +16033,7 @@
       "expected": 0,
       "tolerance": 0,
       "wait_ms": 300,
-      "expire_ms": 500,
+      "expire_ms": 2000,
       "observe_source": "802058 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -101 + 1 = -100%, on Fel Fireball 801312 (CastingTimeIndex 16 = 1500 ms). Fel Fireball is cast at the dummy and `casting` on the caster is read 300 ms later: 1 in the first phase (no Reckoning, the 1500 ms cast is running) and 0 in the second, after a real cast of 802058 (setup cast, own spell only: own_cast contrast). A refused cast voids the run. Reference search 2026-11-23: coa-history spell 802058: 78 casts, no value in a log event; bindmysoul talents snapshot: text 'instant cast' (same words); expected values come from the tooltip and the DBC only.",
       "measure_actor": "caster",
       "cast_power": 100,
