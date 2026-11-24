@@ -3,6 +3,7 @@
 #include "Field.h"
 #include "JournalSql.h"
 #include "Log.h"
+#include "ObjectAccessor.h"
 #include "PetBattleDataStore.h"
 #include "Player.h"
 #include "QueryResult.h"
@@ -143,8 +144,7 @@ namespace CoAPetBattles::Store
     {
         if (!Eligible(player) || !sPetBattleData->Data().companions.count(spell))
             return;
-        if (Journal* journal = For(player))
-            Sync(player, *journal);
+        _learned.Push({ player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), spell });
     }
 
     void PetJournalStore::Flush(Journal& journal)
@@ -157,23 +157,21 @@ namespace CoAPetBattles::Store
             CharacterDatabaseTransaction transaction = CharacterDatabase.BeginTransaction();
             transaction->Append(std::string_view(sql));
             uint32 const account = write.account;
-            ++_pending[account];
+            _refs.WriteStarted(account);
             _callbacks.AddCallback(CharacterDatabase.AsyncCommitTransaction(transaction)).AfterComplete(
                 [this, account](bool success)
                 {
-                    auto const found = _pending.find(account);
-                    if (found != _pending.end() && found->second && --found->second == 0)
-                        _pending.erase(found);
                     if (!success)
                         LOG_ERROR("module", "Pet journal write for account {} failed", account);
+                    if (_refs.WriteFinished(account))
+                        _journals.erase(account);
                 });
         }
     }
 
     size_t PetJournalStore::Pending(uint32_t account) const
     {
-        auto const found = _pending.find(account);
-        return found == _pending.end() ? 0 : found->second;
+        return _refs.Pending(account);
     }
 
     bool PetJournalStore::Reload(uint32_t account)
@@ -192,6 +190,15 @@ namespace CoAPetBattles::Store
 
     void PetJournalStore::Update()
     {
+        for (LearnedSpell const& learned : _learned.Drain())
+        {
+            Player* player = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(
+                static_cast<ObjectGuid::LowType>(learned.character)));
+            if (!Eligible(player) || player->GetSession()->GetAccountId() != learned.account)
+                continue;
+            if (Journal* journal = Get(learned.account))
+                Sync(player, *journal);
+        }
         _callbacks.ProcessReadyCallbacks();
     }
 }

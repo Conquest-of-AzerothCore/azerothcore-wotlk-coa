@@ -1,7 +1,10 @@
 #include "Store/AccountRefs.h"
 #include "Store/JournalSql.h"
+#include "Store/LearnQueue.h"
 #include <gtest/gtest.h>
 #include <string>
+#include <thread>
+#include <vector>
 
 using namespace CoAPetBattles;
 using namespace CoAPetBattles::Store;
@@ -95,4 +98,42 @@ TEST(CoAPetBattlesStore, LoginsOfOneAccountShareOneJournal)
     EXPECT_TRUE(refs.Acquire(1, 200));
     EXPECT_TRUE(refs.Acquire(2, 100));
     EXPECT_EQ(refs.Online(1), 1u);
+}
+
+TEST(CoAPetBattlesStore, JournalOutlivesLogoutUntilItsWritesFinish)
+{
+    AccountRefs refs;
+    EXPECT_TRUE(refs.Acquire(1, 100));
+    refs.WriteStarted(1);
+    refs.WriteStarted(1);
+    EXPECT_EQ(refs.Pending(1), 2u);
+    EXPECT_FALSE(refs.Release(1, 100));
+    EXPECT_FALSE(refs.Acquire(1, 200));
+    EXPECT_FALSE(refs.WriteFinished(1));
+    EXPECT_FALSE(refs.Release(1, 200));
+    EXPECT_TRUE(refs.WriteFinished(1));
+    EXPECT_EQ(refs.Pending(1), 0u);
+    EXPECT_TRUE(refs.Acquire(1, 100));
+    refs.WriteStarted(1);
+    EXPECT_FALSE(refs.WriteFinished(1));
+    EXPECT_TRUE(refs.Release(1, 100));
+    EXPECT_FALSE(refs.WriteFinished(1));
+}
+
+TEST(CoAPetBattlesStore, SpellsLearnedOnMapThreadsQueueForTheWorldThread)
+{
+    LearnQueue queue;
+    std::vector<std::thread> threads;
+    for (uint32_t thread = 0; thread < 4; ++thread)
+        threads.emplace_back([&queue, thread]
+        {
+            for (uint32_t i = 0; i < 1000; ++i)
+                queue.Push({ thread, uint64_t(thread) * 1000 + i, i });
+        });
+    for (std::thread& thread : threads)
+        thread.join();
+    std::vector<LearnedSpell> const drained = queue.Drain();
+    EXPECT_EQ(drained.size(), 4000u);
+    EXPECT_TRUE(queue.Drain().empty());
+    EXPECT_EQ(drained.front().spell, 0u);
 }

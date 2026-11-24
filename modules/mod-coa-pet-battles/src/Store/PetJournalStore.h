@@ -4,6 +4,7 @@
 #include "AccountRefs.h"
 #include "AsyncCallbackProcessor.h"
 #include "Journal.h"
+#include "LearnQueue.h"
 #include "Transaction.h"
 #include <map>
 #include <memory>
@@ -40,7 +41,7 @@ namespace CoAPetBattles::Store
 
         AccountRefs _refs;
         std::map<uint32_t, Entry> _journals;
-        std::map<uint32_t, size_t> _pending;
+        LearnQueue _learned;
         AsyncCallbackProcessor<TransactionCallback> _callbacks;
     };
 }
