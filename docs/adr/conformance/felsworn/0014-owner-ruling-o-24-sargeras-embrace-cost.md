@@ -1,6 +1,6 @@
 # 0014. Owner ruling Felsworn O-24: Sargeras Embrace's cost
 
-- Status: accepted (Felsworn owner ruling O-24, 2026-11-23)
+- Status: accepted (owner ruling Felsworn O-24 (2026-11-23, Felsworn ADR 0014))
 - Date: 2026-11-23
 
 ## Context

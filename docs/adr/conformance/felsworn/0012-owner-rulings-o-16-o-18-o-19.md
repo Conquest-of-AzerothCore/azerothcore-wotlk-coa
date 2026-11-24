@@ -17,8 +17,8 @@ Three Felsworn tooltip questions went to the owner.
 
 - Felsworn O-16 (2026-11-23): "intimidating them" is flavour text, not a claim. The damage and nearby-enemies claims of the clause keep
   their labels.
-- Felsworn O-18 (2026-11-23): the data governs. The stock engine applies the modifier to the amplitude, 3000 x 0.75 = 2250 ms. The Sun
-  Cleric ruling O-24 (2026-11-22) (ADR sun-cleric/0031, period P x 100 / (100 + X)) is not extended to this class.
+- Felsworn O-18 (2026-11-23): the data governs. The stock engine applies the modifier to the amplitude, 3000 x 0.75 = 2250 ms. The ruling
+  Sun Cleric O-24 (2026-11-22) (ADR sun-cleric/0031, period P x 100 / (100 + X)) is not extended to this class.
 - Felsworn O-19 (2026-11-23): the server keeps 34 per tick. The displayed text is to be corrected; a clause value is counted on the server
   formula (`SpellEffectInfo::CalcValue` from the DBC fields) with the reason "displayed text to be corrected (Felsworn O-19 (2026-11-23))".
   Entry `802678 tick_value` expects 34.

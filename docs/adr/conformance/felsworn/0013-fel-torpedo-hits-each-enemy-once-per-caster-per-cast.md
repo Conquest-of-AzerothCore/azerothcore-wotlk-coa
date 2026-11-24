@@ -1,6 +1,6 @@
 # 0013. Fel Torpedo hits each enemy once per caster per cast
 
-- Status: accepted (Felsworn owner ruling O-25, 2026-11-23)
+- Status: accepted (owner ruling Felsworn O-25 (2026-11-23, Felsworn ADR 0013))
 - Date: 2026-11-23
 
 ## Context

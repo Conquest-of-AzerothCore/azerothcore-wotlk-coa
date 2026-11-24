@@ -1,6 +1,6 @@
 # 0024. A Thousand Cuts rolls once per Azzinoth's Assault
 
-- Status: accepted (Felsworn owner ruling O-31, 2026-11-24)
+- Status: accepted (owner ruling Felsworn O-31 (2026-11-24, Felsworn ADR 0024))
 - Date: 2026-11-24
 
 ## Context

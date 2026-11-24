@@ -1,6 +1,6 @@
 # 0023. Azzinoth's Assault extends Inner Demon by three seconds flat
 
-- Status: accepted (Felsworn owner ruling O-30, 2026-11-24)
+- Status: accepted (owner ruling Felsworn O-30 (2026-11-24, Felsworn ADR 0023))
 - Date: 2026-11-24
 
 ## Context
