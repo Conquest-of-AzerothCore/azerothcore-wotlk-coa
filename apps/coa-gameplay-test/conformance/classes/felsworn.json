@@ -25915,6 +25915,58 @@
       "min_judged": 2,
       "poll_ms": 15,
       "observe_source": "Tooltip 806104 (embedded in 300490 by @s:806104:0@): 'Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.' Expected from the tooltip and Spell.dbc: 806104 Effect[0] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -31 + 1 (DieSides 1) = -30, so $s1 = 30 and the cut Fel Fireball 801312 (CastingTimes.dbc 16, 1500 ms) takes 1050 ms; the 3 charges come from the tooltip (806104 ProcCharges 0; the server counts them in AscensionFelswornAbilities.cpp UseSelected, FelforgedCharges 3). The aura is earned for real (mentor D-67, no set_aura): Bane of Chaos 704368 (periodic damage every 3000 ms) is cast at the dummy every 3200 ms until 806104 is on the caster; 300490 rolls Chance() on its raw ProcChance 15 only while the caster holds 300490 (AscensionFelsworn.cpp:233), so 300490 is unlearned at the stop: no later tick grants 806104 again or resets its used-charge count (AscensionFelswornEvents.cpp:206-209). 806104 must still be on after the unlearn, with amount -30. Each Fel Fireball is cast with ignore_gcd and bracketed by game_time stamps and spell_cast_count polls; casts 1-3 must lie in 1005-1095 ms (30% cut, 10% of the figure), cast 4 in 1350-1650 ms (no cut), all inside 0.9 of the 8000 ms aura (DurationIndex 31). A control Fel Fireball without the talent or the aura opens every trial and must lie in the full band. Reference search 2026-11-24 (fw-fa4, fw-baf): coa-history spell 300490/806104 and ~/CoaServer/reference: nothing beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 555738,
+      "name": "Fury Unleashed (a strike every second)",
+      "kind": "hit_period",
+      "variant": "strike_period",
+      "label_suffix": "strike_period",
+      "quote": "every $t1 sec with both weapons to all nearby enemies",
+      "trigger_spell": 555738,
+      "hit_spell": 555739,
+      "expected_ms": 1000,
+      "window": [
+        0,
+        2500
+      ],
+      "fixtures": [
+        [
+          984948,
+          "caster"
+        ]
+      ],
+      "poll_ms": 10,
+      "read_at_cast": true,
+      "observe_source": "555738 Effect[0] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 1000 ($t1 = 1 sec), triggers 555739 (Effect[0] SCHOOL_DAMAGE, Effect[1] NORMALIZED_WEAPON_DMG), DurationIndex 28 (5000 ms); AttributesEx5 33280 carries SPELL_ATTR5_EXTRA_INITIAL_PERIOD 0x200 (SharedDefines.h:651, a tick on apply), so the first 555739 hit lands at the cast (prove-a2, both runs: 1 hit at the first poll 10 ms after the cast). One real cast at the dummy; the dummy's 555739 hits are counted (main-hand only: the off-hand 806097 of Felsworn ADR 0029 has its own spell id and is not counted, mentor D-103) and read between the start stamp and the cast (read_at_cast, ADR 1276), then polled every 10 ms of wait with game-time stamps over 0 to 2500 ms after the cast: ticks at the cast, 1000 and 2000 ms give three hits and (last - first) / 2 must read 1000 ms inside the G-19 band (5%, 50 ms); a first tick one period late leaves two hits in the window (unmeasured), a hit before the cast alerts. Hit-rating fixture 984948 (Reg's Hit rating) on the caster so that no tick misses, named as a precondition; a missed or avoided tick leaves two hits (unmeasured), never a false ok. Reference search 2026-11-24 (fw-fa1): coa-history spell 555738 and 555739: 555738: 2 casts in 2 logs; 555739: 48 SPELL_DAMAGE events in 2 logs, 38 crits, amounts 170 to 445; the logs give no tick times used here; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 561216,
+      "name": "Fury of the Illidari (an assault every half second)",
+      "kind": "hit_period",
+      "variant": "assault_period",
+      "label_suffix": "assault_period",
+      "quote": "attacking them every $t1 sec with both weapons until 6 assaults are made,",
+      "trigger_spell": 561216,
+      "hit_spell": 808303,
+      "expected_ms": 500,
+      "window": [
+        0,
+        1250
+      ],
+      "fixtures": [
+        [
+          804216,
+          "caster"
+        ],
+        [
+          984948,
+          "caster"
+        ]
+      ],
+      "poll_ms": 10,
+      "read_at_cast": true,
+      "observe_source": "561216 Effect[0] aura 226 SPELL_AURA_PERIODIC_DUMMY, EffectAmplitude 500 ($t1 = 0.5 sec), DurationIndex 66 (2500 ms); AttributesEx5 512 is SPELL_ATTR5_EXTRA_INITIAL_PERIOD 0x200 (SharedDefines.h:651, a tick on apply), so the first assault lands at the cast (prove-a2, both runs: 1 hit at the first poll 10 ms after the cast); the strike is the main-hand Twin Slice 808303 (NORMALIZED_WEAPON_DMG), cast by the periodic handler (AscensionFelswornAuras.cpp:130-156). One real cast at the dummy; the dummy's 808303 hits are read between the start stamp and the cast (read_at_cast, ADR 1276), then polled every 10 ms of wait with game-time stamps over 0 to 1250 ms after the cast: assaults at the cast, 500 and 1000 ms give three hits and (last - first) / 2 must read 500 ms inside the G-19 band (5%, 25 ms); a first assault one period late leaves two hits (unmeasured), a hit before the cast alerts. Inner Demon 804216 (CasterAuraSpell of 561216) and the hit-rating fixture 984948 are set by harness set_aura as preconditions; a missed or avoided assault leaves two hits (unmeasured), never a false ok. The assault count (6) and the enemy-to-enemy move are judged by assaults_sum / assaults_first / assaults_off_hand. Reference search 2026-11-24 (fw-fa1): coa-history spell 561216 and 808303: 0 events in 186 logs for both (positive control 806109: 6 casts); expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],
